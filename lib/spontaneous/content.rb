@@ -4,7 +4,8 @@ module Spontaneous
     class << self
       alias_method :class_name, :name
 
-      def name
+      def name(custom_name=nil)
+        self.name = custom_name if custom_name
         @name or default_name
       end
 
