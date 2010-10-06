@@ -30,6 +30,7 @@ module Spontaneous
     end
 
     protected
+
     def store
       @store
     end
@@ -42,8 +43,8 @@ module Spontaneous
     end
 
     def meta
-      @_meta ||= class << self; self; end
+      @_meta ||= \
+        class << self; self; end
+    end
   end
-
-end
 end

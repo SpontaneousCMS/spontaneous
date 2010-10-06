@@ -27,9 +27,9 @@ module Spontaneous
         @name = name
       end
 
-      def field(name, options={})
+      def field(name, options={}, &block)
         local_field_order << name
-        field_prototypes[name] = FieldPrototype.new(name, options)
+        field_prototypes[name] = FieldPrototype.new(name, options, &block)
       end
 
       def field_prototypes

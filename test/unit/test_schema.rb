@@ -65,6 +65,7 @@ class SchemasTest < Test::Unit::TestCase
 
       should "default to basic string class" do
         @prototype.field_class.should == Spontaneous::FieldTypes::Text
+        # @prototype.field_class.superclass.should == Spontaneous::FieldTypes::Text
       end
 
       should "default to a value of ''" do

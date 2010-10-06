@@ -14,12 +14,49 @@ class FieldsTest < Test::Unit::TestCase
 
     should "have fields with values defined by prototypes" do
       f = @instance.fields[:title]
-      f.should be_instance_of Spontaneous::FieldTypes::Text
+      f.class.should == Spontaneous::FieldTypes::Text
       f.value.should == "Magic"
     end
 
     should "have shortcut access methods to fields" do
       @instance.fields.thumbnail.should == @instance.fields[:thumbnail]
+    end
+  end
+
+  context "Values" do
+    setup do
+      @field_class = Class.new(Field) do
+        def process(value)
+          "<#{value}>"
+        end
+      end
+      @field = @field_class.new()
+    end
+
+    should "be transformed by the update method" do
+      @field.value = "Hello"
+      @field.value.should == "<Hello>"
+      @field.raw_value.should == "Hello"
+    end
+  end
+
+  context "Passing blocks to prototypes" do
+    setup do
+      @content_class = Class.new(Content) do
+        field :title, :default_value => "Magic" do
+          def process(value)
+            "*#{value}*"
+          end
+        end
+      end
+      @instance = @content_class.new
+    end
+
+    should "be eval'd by the field class" do
+      f = @instance.fields.title
+      f.value = "Boo"
+      f.value.should == "*Boo*"
+      f.raw_value.should == "Boo"
     end
   end
 end
