@@ -14,12 +14,12 @@ module Spontaneous
       end
       prototype_names = []
       owner.field_prototypes.each do |field_name, field_prototype|
-        prototype_names << field_name # use this to look for orphaned fields in initial_values
+        # use this to look for orphaned fields in initial_values
+        prototype_names << field_name
         field = field_prototype.to_field(values[field_name] || {})
         add_field(field)
       end
     end
-
 
     def [](name)
       store[name.to_sym]
@@ -41,7 +41,7 @@ module Spontaneous
 
     def add_field(field)
       field.owner = owner
-      name = field.name
+      name = field.name.to_sym
       store[name] = field
       meta.class_eval { define_method(name) { field } }
     end

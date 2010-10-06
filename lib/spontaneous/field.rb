@@ -7,22 +7,9 @@ module Spontaneous
       update(attributes)
     end
 
-    def update(attributes={})
-      attributes.each do |property, value|
-        setter = "#{property}=".to_sym
-        if respond_to?(setter)
-          self.send(setter, value)
-        end
-      end
-    end
-
     def unprocessed_value=(v)
       self.raw_value = v
     end
-
-    alias_method :processed_value=, :value=
-    alias_method :value=, :unprocessed_value=
-
 
     def raw_value=(v)
       @raw_value = v
@@ -36,6 +23,15 @@ module Spontaneous
       value
     end
 
+    # this little dance is to enable you to do field.value = "..."
+    # rather than having to do field.raw_value = "..."
+    # although it's a bit weird when you set value="Something"
+    # and then read value and it's "Processed Something"
+    # this is better than having to remember to do field.raw_value = "..."
+    # every time
+    # (semi colons are just to help out the indenter)
+    alias_method :processed_value=, :value= ;
+    alias_method :value=, :unprocessed_value= ;
 
     def serialize
       {
@@ -43,6 +39,17 @@ module Spontaneous
         :raw_value => raw_value,
         :processed_value => value
       }
+    end
+
+    protected
+
+    def update(attributes={})
+      attributes.each do |property, value|
+        setter = "#{property}=".to_sym
+        if respond_to?(setter)
+          self.send(setter, value)
+        end
+      end
     end
   end
 end
