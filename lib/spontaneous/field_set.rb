@@ -10,7 +10,7 @@ module Spontaneous
 
     def initialize_from_prototypes(initial_values)
       values = (initial_values || []).inject({}) do |hash, value|
-        hash[value[:name]] = value; hash
+        hash[value[:name].to_sym] = value; hash
       end
       prototype_names = []
       owner.field_prototypes.each do |field_name, field_prototype|
@@ -27,6 +27,10 @@ module Spontaneous
 
     def owner
       @owner
+    end
+
+    def serialize
+      store.map { |name, field| field.serialize }
     end
 
     protected
@@ -46,5 +50,6 @@ module Spontaneous
       @_meta ||= \
         class << self; self; end
     end
+
   end
 end

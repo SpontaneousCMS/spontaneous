@@ -27,7 +27,7 @@ module Spontaneous
     def raw_value=(v)
       @raw_value = v
       self.processed_value = process(@raw_value)
-      # resource.field_modified!(self) if resource
+      owner.field_modified!(self) if owner
     end
 
     # should be overwritten in subclasses that actually do something
@@ -36,5 +36,13 @@ module Spontaneous
       value
     end
 
+
+    def serialize
+      {
+        :name => name,
+        :raw_value => raw_value,
+        :processed_value => value
+      }
+    end
   end
 end

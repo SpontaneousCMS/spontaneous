@@ -1,5 +1,5 @@
-
 require 'test_helper'
+
 class FieldsTest < Test::Unit::TestCase
   include Spontaneous
 
@@ -57,6 +57,22 @@ class FieldsTest < Test::Unit::TestCase
       f.value = "Boo"
       f.value.should == "*Boo*"
       f.raw_value.should == "Boo"
+    end
+  end
+
+  context "Field value persistence" do
+    setup do
+      @content_class = Class.new(Content) do
+        field :title, :default_value => "Magic"
+      end
+    end
+    should "work" do
+      instance = @content_class.new
+      instance.fields.title.value = "Changed"
+      instance.save
+      id = instance.id
+      instance = @content_class[id]
+      instance.fields.title.value.should == "Changed"
     end
   end
 end

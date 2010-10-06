@@ -1,6 +1,14 @@
 
+require File.expand_path("../../sequel/plugins/yajl_serialization", __FILE__)
+
 module Spontaneous
   class Content < Sequel::Model(:content)
+    class << self
+      alias_method :sequel_plugin, :plugin
+    end
+
+    sequel_plugin :yajl_serialization, :field_store
+
     class << self
       alias_method :class_name, :name
 
@@ -92,8 +100,13 @@ module Spontaneous
     def field_prototypes
       self.class.field_prototypes
     end
+
     def fields
       @field_set ||= FieldSet.new(self, field_store)
+    end
+
+    def field_modified!(modified_field)
+      self.field_store = @field_set.serialize
     end
   end
 end
