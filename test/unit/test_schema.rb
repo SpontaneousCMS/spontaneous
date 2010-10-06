@@ -1,7 +1,6 @@
 require 'test_helper'
 
 
-
 class SchemasTest < Test::Unit::TestCase
   include Spontaneous
 
@@ -38,6 +37,54 @@ class SchemasTest < Test::Unit::TestCase
     should "4. not inherit from superclass" do
       FunkyContent.name = "Custom Name"
       MoreFunkyContent.name.should == "More Funky Content"
+    end
+  end
+
+  context "Content fields" do
+    context "prototypes" do
+      setup do
+        class ContentClass < Content
+          field :title
+        end
+      end
+
+      should "work with just a field name" do
+        ContentClass.field_prototypes[:title].should be_instance_of Spontaneous::FieldPrototype
+        ContentClass.field_prototypes[:title].name.should == :title
+      end
+
+      context "default values" do
+        setup do
+          @prototype = ContentClass.field_prototypes[:title]
+        end
+
+        should "default to basic string class" do
+          @prototype.field_class.should == Spontaneous::FieldTypes::Text
+        end
+
+        should "default to a value of ''" do
+          @prototype.default_value.should == ""
+        end
+      end
+
+      context "option parsing" do
+        setup do
+          ContentClass.field :complex, :class => Image, :default_value => "My default", :comment => "Use this to"
+          @prototype = ContentClass.field_prototypes[:complex]
+        end
+
+        should "parse field class" do
+          @prototype.field_class.should == Spontaneous::FieldTypes::Image
+        end
+
+        should "parse default value" do
+          @prototype.default_value.should == "My default"
+        end
+
+        should "parse ui comment" do
+          @prototype.comment.should == "Use this to"
+        end
+      end
     end
   end
 end

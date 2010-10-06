@@ -18,6 +18,14 @@ module Spontaneous
       def name=(name)
         @name = name
       end
+
+      def field(name, options={})
+        field_prototypes[name] = FieldPrototype.new(name, options)
+      end
+
+      def field_prototypes
+        @field_prototypes ||= {}
+      end
     end
   end
 end
