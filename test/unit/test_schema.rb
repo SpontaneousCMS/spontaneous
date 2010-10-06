@@ -40,50 +40,76 @@ class SchemasTest < Test::Unit::TestCase
     end
   end
 
-  context "Content fields" do
-    context "prototypes" do
+  context "Field Prototypes" do
+    setup do
+      @content_class = Class.new(Content) do
+        field :title
+        field :synopsis
+      end
+      @content_class.field :complex, :class => Image, :default_value => "My default", :comment => "Use this to"
+    end
+
+    should "be creatable with just a field name" do
+      @content_class.field_prototypes[:title].should be_instance_of Spontaneous::FieldPrototype
+      @content_class.field_prototypes[:title].name.should == :title
+    end
+
+    should "be listable" do
+      @content_class.field_names.should == [:title, :synopsis, :complex]
+    end
+
+    context "default values" do
       setup do
-        class ContentClass < Content
-          field :title
+        @prototype = @content_class.field_prototypes[:title]
+      end
+
+      should "default to basic string class" do
+        @prototype.field_class.should == Spontaneous::FieldTypes::Text
+      end
+
+      should "default to a value of ''" do
+        @prototype.default_value.should == ""
+      end
+    end
+
+    context "option parsing" do
+      setup do
+        @prototype = @content_class.field_prototypes[:complex]
+      end
+
+      should "parse field class" do
+        @prototype.field_class.should == Spontaneous::FieldTypes::Image
+      end
+
+      should "parse default value" do
+        @prototype.default_value.should == "My default"
+      end
+
+      should "parse ui comment" do
+        @prototype.comment.should == "Use this to"
+      end
+    end
+
+    context "sub-classes" do
+      setup do
+        @subclass = Class.new(@content_class) do
+          field :child_field
+        end
+        @subsubclass = Class.new(@subclass) do
+          field :distant_relation
         end
       end
 
-      should "work with just a field name" do
-        ContentClass.field_prototypes[:title].should be_instance_of Spontaneous::FieldPrototype
-        ContentClass.field_prototypes[:title].name.should == :title
+      should "inherit super class's field prototypes" do
+        @subclass.field_names.should == [:title, :synopsis, :complex, :child_field]
+        @subsubclass.field_names.should == [:title, :synopsis, :complex, :child_field, :distant_relation]
       end
 
-      context "default values" do
-        setup do
-          @prototype = ContentClass.field_prototypes[:title]
+      should "deal intelligently with manual setting of field order" do
+        @reordered_class = Class.new(@subsubclass) do
+          field_order :child_field, :complex
         end
-
-        should "default to basic string class" do
-          @prototype.field_class.should == Spontaneous::FieldTypes::Text
-        end
-
-        should "default to a value of ''" do
-          @prototype.default_value.should == ""
-        end
-      end
-
-      context "option parsing" do
-        setup do
-          ContentClass.field :complex, :class => Image, :default_value => "My default", :comment => "Use this to"
-          @prototype = ContentClass.field_prototypes[:complex]
-        end
-
-        should "parse field class" do
-          @prototype.field_class.should == Spontaneous::FieldTypes::Image
-        end
-
-        should "parse default value" do
-          @prototype.default_value.should == "My default"
-        end
-
-        should "parse ui comment" do
-          @prototype.comment.should == "Use this to"
-        end
+        @reordered_class.field_names.should == [:child_field, :complex, :title, :synopsis, :distant_relation]
       end
     end
   end

@@ -20,11 +20,56 @@ module Spontaneous
       end
 
       def field(name, options={})
+        local_field_order << name
         field_prototypes[name] = FieldPrototype.new(name, options)
       end
 
       def field_prototypes
         @field_prototypes ||= {}
+      end
+
+      def field_names
+        if @field_order && @field_order.length > 0
+          remaining = default_field_order.reject { |n| @field_order.include?(n) }
+          @field_order + remaining
+        else
+          default_field_order
+        end
+      end
+
+      def default_field_order
+        (supertype ? supertype.field_names : []) + local_field_order
+      end
+
+      def field_order(*new_order)
+        @field_order = new_order
+      end
+
+      def local_field_order
+        @local_field_order ||= []
+      end
+
+      def subclasses
+        @subclasses ||= []
+      end
+
+      # supertype is like superclass but stops at the last instance of a Content class
+      def supertype=(supertype)
+        @supertype = supertype
+      end
+
+      def supertype
+        @supertype
+      end
+
+      def descendents
+        subclasses.map{ |x| [x] + x.descendents}.flatten
+      end
+
+      def inherited(subclass)
+        super
+        subclasses << subclass
+        subclass.supertype = self
       end
     end
   end
