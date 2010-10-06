@@ -6,4 +6,4 @@ module Spontaneous
   end
 end
 
-Spontaneous.const_set(:Image, Spontaneous::FieldTypes::Image)
+Spontaneous::Content.const_set(:Image, Spontaneous::FieldTypes::Image)

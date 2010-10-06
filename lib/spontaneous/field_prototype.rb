@@ -11,7 +11,7 @@ module Spontaneous
 
     def parse_options(options)
       @options = {
-        :class => Spontaneous::Text,
+        :class => Spontaneous::FieldTypes::Text,
         :default_value => '',
         :comment => false
       }.merge(options)
@@ -27,6 +27,14 @@ module Spontaneous
 
     def comment
       @options[:comment]
+    end
+
+    def to_field(values={})
+      v = {
+        :name => name,
+        :value => default_value
+      }.merge(values)
+      self.field_class.new(v)
     end
   end
 end

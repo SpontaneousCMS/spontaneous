@@ -6,4 +6,4 @@ module Spontaneous
   end
 end
 
-Spontaneous.const_set(:Date, Spontaneous::FieldTypes::Date)
+Spontaneous::Content.const_set(:Date, Spontaneous::FieldTypes::Date)

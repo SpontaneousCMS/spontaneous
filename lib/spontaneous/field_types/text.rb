@@ -6,4 +6,4 @@ module Spontaneous
   end
 end
 
-Spontaneous.const_set(:Text, Spontaneous::FieldTypes::Text)
+Spontaneous::Content.const_set(:Text, Spontaneous::FieldTypes::Text)

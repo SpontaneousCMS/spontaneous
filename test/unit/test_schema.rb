@@ -46,7 +46,7 @@ class SchemasTest < Test::Unit::TestCase
         field :title
         field :synopsis
       end
-      @content_class.field :complex, :class => Image, :default_value => "My default", :comment => "Use this to"
+      @content_class.field :complex, :class => Spontaneous::FieldTypes::Image, :default_value => "My default", :comment => "Use this to"
     end
 
     should "be creatable with just a field name" do
