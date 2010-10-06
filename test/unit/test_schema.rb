@@ -7,13 +7,15 @@ class SchemasTest < Test::Unit::TestCase
 
   context "Configurable names" do
     setup do
-      class FunkyContent < Content
-      end
-      class MoreFunkyContent < FunkyContent
-      end
-      class ABCDifficultName < Content
+      class FunkyContent < Content; end
+      class MoreFunkyContent < FunkyContent; end
+      class ABCDifficultName < Content; end
+
+      class CustomName < ABCDifficultName
+        name "Some Name"
       end
     end
+
     should "1. default to generated version" do
       FunkyContent.default_name.should == "Funky Content"
       FunkyContent.name.should == "Funky Content"
@@ -23,6 +25,7 @@ class SchemasTest < Test::Unit::TestCase
     end
 
     should "2. be settable" do
+      CustomName.name.should == "Some Name"
       FunkyContent.name "Content Class"
       FunkyContent.name.should == "Content Class"
     end
