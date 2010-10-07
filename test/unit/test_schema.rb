@@ -11,32 +11,32 @@ class SchemasTest < Test::Unit::TestCase
       class ABCDifficultName < Content; end
 
       class CustomName < ABCDifficultName
-        name "Some Name"
+        title "Some Name"
       end
     end
 
     should "1. default to generated version" do
-      FunkyContent.default_name.should == "Funky Content"
-      FunkyContent.name.should == "Funky Content"
-      MoreFunkyContent.name.should == "More Funky Content"
-      ABCDifficultName.default_name.should == "ABC Difficult Name"
-      ABCDifficultName.name.should == "ABC Difficult Name"
+      FunkyContent.default_title.should == "Funky Content"
+      FunkyContent.title.should == "Funky Content"
+      MoreFunkyContent.title.should == "More Funky Content"
+      ABCDifficultName.default_title.should == "ABC Difficult Name"
+      ABCDifficultName.title.should == "ABC Difficult Name"
     end
 
     should "2. be settable" do
-      CustomName.name.should == "Some Name"
-      FunkyContent.name "Content Class"
-      FunkyContent.name.should == "Content Class"
+      CustomName.title.should == "Some Name"
+      FunkyContent.title "Content Class"
+      FunkyContent.title.should == "Content Class"
     end
 
     should "3. be settable using =" do
-      FunkyContent.name = "Content Class"
-      FunkyContent.name.should == "Content Class"
+      FunkyContent.title = "Content Class"
+      FunkyContent.title.should == "Content Class"
     end
 
     should "4. not inherit from superclass" do
-      FunkyContent.name = "Custom Name"
-      MoreFunkyContent.name.should == "More Funky Content"
+      FunkyContent.title = "Custom Name"
+      MoreFunkyContent.title.should == "More Funky Content"
     end
   end
 

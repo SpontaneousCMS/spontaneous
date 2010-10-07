@@ -8,31 +8,32 @@ module Spontaneous
     end
 
     sequel_plugin :yajl_serialization, :field_store
+    sequel_plugin :single_table_inheritance, :type_id
 
     class << self
       alias_method :class_name, :name
 
       def class_name_with_fallback
-        n = class_name
+        n = name
         if n.nil? or n.empty?
           n = "ContentClass#{object_id}"
         end
         n
       end
 
-      def name(custom_name=nil)
-        self.name = custom_name if custom_name
-        @name or default_name
+      def title(custom_title=nil)
+        self.title = custom_title if custom_title
+        @title or default_title
       end
 
-      def default_name
+      def default_title
         n = class_name_with_fallback.split(/::/).last.gsub(/([A-Z]+)([A-Z][a-z])/,'\1 \2')
         n.gsub!(/([a-z\d])([A-Z])/,'\1 \2')
         n
       end
 
-      def name=(name)
-        @name = name
+      def title=(title)
+        @title = title
       end
 
       def field(name, options={}, &block)

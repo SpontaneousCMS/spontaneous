@@ -55,14 +55,14 @@ class FieldsTest < Test::Unit::TestCase
 
   context "Passing blocks to prototypes" do
     setup do
-      @content_class = Class.new(Content) do
+      CC = Class.new(Content) do
         field :title, :default_value => "Magic" do
           def process(value)
             "*#{value}*"
           end
         end
       end
-      @instance = @content_class.new
+      @instance = CC.new
     end
 
     should "be eval'd by the field class" do
