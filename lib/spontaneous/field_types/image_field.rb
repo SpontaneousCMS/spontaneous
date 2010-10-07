@@ -1,10 +1,10 @@
 
 module Spontaneous
   module FieldTypes
-    class Date < Field
+    class ImageField < Field
     end
 
-    Date.register
+    ImageField.register
   end
 end
 

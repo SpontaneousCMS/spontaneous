@@ -11,7 +11,7 @@ module Spontaneous
     end
 
     def self.labels
-      [underscore(demodulize(self.name))]
+      [underscore(demodulize(self.name).gsub(/Field$/, ''))]
     end
 
     attr_accessor :owner, :name, :unprocessed_value, :processed_value

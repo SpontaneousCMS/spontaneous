@@ -55,7 +55,7 @@ class SchemasTest < Test::Unit::TestCase
     end
 
     should "map :string type to FieldTypes::Text" do
-      @content_class.field_prototypes[:synopsis].field_class.should == Spontaneous::FieldTypes::Text
+      @content_class.field_prototypes[:synopsis].field_class.should == Spontaneous::FieldTypes::StringField
     end
 
     should "be listable" do
@@ -68,7 +68,7 @@ class SchemasTest < Test::Unit::TestCase
       end
 
       should "default to basic string class" do
-        @prototype.field_class.should == Spontaneous::FieldTypes::Text
+        @prototype.field_class.should == Spontaneous::FieldTypes::StringField
       end
 
       should "default to a value of ''" do
@@ -82,7 +82,7 @@ class SchemasTest < Test::Unit::TestCase
       end
 
       should "parse field class" do
-        @prototype.field_class.should == Spontaneous::FieldTypes::Image
+        @prototype.field_class.should == Spontaneous::FieldTypes::ImageField
       end
 
       should "parse default value" do

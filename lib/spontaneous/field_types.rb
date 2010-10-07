@@ -11,11 +11,11 @@ module Spontaneous
     end
 
     def self.[](label)
-      @@type_map[label.to_sym] || Text
+      @@type_map[label.to_sym] || StringField
     end
   end
 end
 
-require File.expand_path("../field_types/text", __FILE__)
-require File.expand_path("../field_types/image", __FILE__)
-require File.expand_path("../field_types/date", __FILE__)
+require File.expand_path("../field_types/string_field", __FILE__)
+require File.expand_path("../field_types/image_field", __FILE__)
+require File.expand_path("../field_types/date_field", __FILE__)

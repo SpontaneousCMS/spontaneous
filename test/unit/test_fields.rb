@@ -14,7 +14,7 @@ class FieldsTest < Test::Unit::TestCase
 
     should "have fields with values defined by prototypes" do
       f = @instance.fields[:title]
-      f.class.should == Spontaneous::FieldTypes::Text
+      f.class.should == Spontaneous::FieldTypes::StringField
       f.value.should == "Magic"
     end
 
