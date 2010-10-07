@@ -3,7 +3,8 @@ module Spontaneous
   module FieldTypes
     class Date < Field
     end
+
+    Date.register
   end
 end
 
-Spontaneous::Content.const_set(:Date, Spontaneous::FieldTypes::Date)

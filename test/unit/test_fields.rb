@@ -7,7 +7,7 @@ class FieldsTest < Test::Unit::TestCase
     setup do
       @content_class = Class.new(Content) do
         field :title, :default_value => "Magic"
-        field :thumbnail, :class => Spontaneous::FieldTypes::Image
+        field :thumbnail, :image
       end
       @instance = @content_class.new
     end
@@ -48,9 +48,13 @@ class FieldsTest < Test::Unit::TestCase
     should "be transformed by the update method" do
       @field.value = "Hello"
       @field.value.should == "<Hello>"
-      @field.raw_value.should == "Hello"
+      @field.unprocessed_value.should == "Hello"
     end
 
+    should "appear in the to_s method" do
+      @field.value = "String"
+      @field.to_s.should == "<String>"
+    end
   end
 
   context "Passing blocks to prototypes" do
@@ -69,7 +73,7 @@ class FieldsTest < Test::Unit::TestCase
       f = @instance.fields.title
       f.value = "Boo"
       f.value.should == "*Boo*"
-      f.raw_value.should == "Boo"
+      f.unprocessed_value.should == "Boo"
     end
   end
 

@@ -1,19 +1,29 @@
 
 module Spontaneous
   class Field
-    attr_accessor :owner, :name, :raw_value, :value
+    extend Sequel::Inflections
+
+
+    def self.register(*labels)
+      labels = self.labels if labels.empty?
+      FieldTypes.register(self, *labels)
+      self
+    end
+
+    def self.labels
+      [underscore(demodulize(self.name))]
+    end
+
+    attr_accessor :owner, :name, :unprocessed_value, :processed_value
 
     def initialize(attributes={})
       update(attributes)
     end
 
-    def unprocessed_value=(v)
-      self.raw_value = v
-    end
 
-    def raw_value=(v)
-      @raw_value = v
-      self.processed_value = process(@raw_value)
+    def unprocessed_value=(v)
+      @unprocessed_value = v
+      self.processed_value = process(@unprocessed_value)
       owner.field_modified!(self) if owner
     end
 
@@ -23,21 +33,25 @@ module Spontaneous
       value
     end
 
-    # this little dance is to enable you to do field.value = "..."
-    # rather than having to do field.raw_value = "..."
-    # although it's a bit weird when you set value="Something"
-    # and then read value and it's "Processed Something"
-    # this is better than having to remember to do field.raw_value = "..."
-    # every time
-    # (semi colons are just to help out the indenter)
-    alias_method :processed_value=, :value= ;
-    alias_method :value=, :unprocessed_value= ;
+    # override this to return custom values derived from (un)processed_value
+    def value
+      processed_value
+    end
+
+    def to_s
+      value.to_s
+    end
+
+    def value=(value)
+      self.unprocessed_value = value
+    end
+
 
     def serialize
       {
         :name => name,
-        :raw_value => raw_value,
-        :processed_value => value
+        :raw_value => unprocessed_value,
+        :processed_value => processed_value
       }
     end
 

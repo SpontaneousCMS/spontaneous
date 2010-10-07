@@ -44,14 +44,18 @@ class SchemasTest < Test::Unit::TestCase
     setup do
       @content_class = Class.new(Content) do
         field :title
-        field :synopsis
+        field :synopsis, :string
       end
-      @content_class.field :complex, :class => Spontaneous::FieldTypes::Image, :default_value => "My default", :comment => "Use this to"
+      @content_class.field :complex, :image, :default_value => "My default", :comment => "Use this to"
     end
 
     should "be creatable with just a field name" do
       @content_class.field_prototypes[:title].should be_instance_of Spontaneous::FieldPrototype
       @content_class.field_prototypes[:title].name.should == :title
+    end
+
+    should "map :string type to FieldTypes::Text" do
+      @content_class.field_prototypes[:synopsis].field_class.should == Spontaneous::FieldTypes::Text
     end
 
     should "be listable" do
@@ -65,7 +69,6 @@ class SchemasTest < Test::Unit::TestCase
 
       should "default to basic string class" do
         @prototype.field_class.should == Spontaneous::FieldTypes::Text
-        # @prototype.field_class.superclass.should == Spontaneous::FieldTypes::Text
       end
 
       should "default to a value of ''" do

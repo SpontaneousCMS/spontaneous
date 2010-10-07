@@ -36,9 +36,14 @@ module Spontaneous
         @title = title
       end
 
-      def field(name, options={}, &block)
+      def field(name, type=:string, options={}, &block)
+        if type.is_a?(Hash)
+          options = type
+          type = :string
+        end
+
         local_field_order << name
-        field_prototypes[name] = FieldPrototype.new(name, options, &block)
+        field_prototypes[name] = FieldPrototype.new(name, type, options, &block)
         unless method_defined?(name)
           define_method(name) { fields[name] }
         else

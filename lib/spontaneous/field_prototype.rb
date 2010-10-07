@@ -3,9 +3,12 @@ module Spontaneous
   class FieldPrototype
     attr_reader :name
 
-    def initialize(name, options={}, &block)
+    def initialize(name, type, options={}, &block)
       @name = name
-      @block = block
+      @field_class = Spontaneous::FieldTypes[type]
+      if block
+        @field_class = Class.new(@field_class, &block)
+      end
       parse_options(options)
     end
 
@@ -19,11 +22,7 @@ module Spontaneous
     end
 
     def field_class
-      if @block
-        @field_class ||= Class.new(@options[:class], &@block)
-      else
-        @options[:class]
-      end
+      @field_class
     end
 
     def default_value
