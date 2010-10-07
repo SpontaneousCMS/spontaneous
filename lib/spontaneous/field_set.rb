@@ -41,9 +41,17 @@ module Spontaneous
 
     def add_field(field)
       field.owner = owner
-      name = field.name.to_sym
-      store[name] = field
-      meta.class_eval { define_method(name) { field } }
+      getter_name = field.name
+      setter_name = "#{field.name}="
+      store[getter_name.to_sym] = field
+      meta.class_eval do
+        define_method(getter_name) { field }
+        define_method(setter_name) { |value| field.value = value }
+      end
+      # owner.meta.class_eval do
+      #   define_method(getter_name) { field }
+      #   define_method(setter_name) { |value| field.value = value }
+      # end
     end
 
     def meta

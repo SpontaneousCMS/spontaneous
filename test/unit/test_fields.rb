@@ -21,6 +21,18 @@ class FieldsTest < Test::Unit::TestCase
     should "have shortcut access methods to fields" do
       @instance.fields.thumbnail.should == @instance.fields[:thumbnail]
     end
+    should "have a shortcut setter on the Content fields" do
+      @instance.fields.title = "New Title"
+    end
+
+    should "have a shortcut getter on the Content instance itself" do
+      @instance.title.should == @instance.fields[:title]
+    end
+
+    should "have a shortcut setter on the Content instance itself" do
+      @instance.title = "Boing!"
+      @instance.fields[:title].value.should == "Boing!"
+    end
   end
 
   context "Values" do
@@ -38,6 +50,7 @@ class FieldsTest < Test::Unit::TestCase
       @field.value.should == "<Hello>"
       @field.raw_value.should == "Hello"
     end
+
   end
 
   context "Passing blocks to prototypes" do
@@ -74,5 +87,6 @@ class FieldsTest < Test::Unit::TestCase
       instance = @content_class[id]
       instance.fields.title.value.should == "Changed"
     end
+
   end
 end

@@ -38,6 +38,18 @@ module Spontaneous
       def field(name, options={}, &block)
         local_field_order << name
         field_prototypes[name] = FieldPrototype.new(name, options, &block)
+        unless method_defined?(name)
+          define_method(name) { fields[name] }
+        else
+          raise "Must give warning when field name clashes with method name"
+        end
+
+        setter = "#{name}=".to_sym
+        unless method_defined?(setter)
+          define_method(setter) { |value| fields[name].value = value  }
+        else
+          raise "Must give warning when field name clashes with method name"
+        end
       end
 
       def field_prototypes
@@ -87,6 +99,11 @@ module Spontaneous
         subclasses << subclass
         subclass.supertype = self
       end
+    end
+
+    def meta
+      @_meta ||= \
+        class << self; self; end
     end
 
     def field_prototypes
