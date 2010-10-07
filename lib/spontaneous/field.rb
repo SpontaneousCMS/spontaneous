@@ -1,7 +1,6 @@
 
 module Spontaneous
   class Field
-    extend Sequel::Inflections
 
 
     def self.register(*labels)
@@ -11,7 +10,7 @@ module Spontaneous
     end
 
     def self.labels
-      [underscore(demodulize(self.name).gsub(/Field$/, ''))]
+      [self.name.demodulize.gsub(/Field$/, '').underscore]
     end
 
     attr_accessor :owner, :name, :unprocessed_value, :processed_value
