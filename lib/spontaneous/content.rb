@@ -87,14 +87,6 @@ module Spontaneous
         subclasses << subclass
         subclass.supertype = self
       end
-
-      def new(*params)
-        instance = super
-        if instance.new?
-          # create fields using default values
-        end
-        instance
-      end
     end
 
     def field_prototypes
