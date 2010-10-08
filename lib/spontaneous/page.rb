@@ -12,13 +12,18 @@ module Spontaneous
     one_to_many :children, :class => self, :key => :parent_id, :reciprocal => :parent
 
     def after_initialize
-      self.slug = default_slug if slug.nil?
       super
+      self.slug = default_slug if slug.nil?
     end
 
     def before_create
       place_in_page_tree
       super
+    end
+
+    def after_save
+      super
+      check_for_path_changes
     end
 
     def ancestors
@@ -73,12 +78,34 @@ module Spontaneous
       else
         File.join(parent.path, slug)
       end
+
     end
 
     def slug=(s)
-      new_slug = s.to_s.to_url
-      self[:slug] = new_slug
+      if (new_slug = s.to_url) != self.slug
+        @__slug_changed = true
+        self[:slug] = new_slug
+        self.update_path
+      end
     end
+
+    def check_for_path_changes
+      if @__slug_changed
+        @__slug_changed = false
+        children.each do |child|
+          child.propagate_path_changes
+        end
+      end
+    end
+
+    def propagate_path_changes
+      self.update_path
+      self.save
+      children.each do |child|
+        child.propagate_path_changes
+      end
+    end
+
 
     def page?
       true
