@@ -31,6 +31,17 @@ class ContentTest < Test::Unit::TestCase
       @instance.entries.first.container.should == @instance
     end
 
+    should "accept addition of multiple children" do
+      e = Content.new
+      f = Content.new
+      @instance << e
+      @instance << f
+      @instance.entries.length.should == 2
+      @instance.entries.first.should == e
+      @instance.entries.last.should == f
+      @instance.entries.first.container.should == @instance
+      @instance.entries.last.container.should == @instance
+    end
     should "allow for a deep hierarchy" do
       e = Content.new
       f = Content.new
@@ -51,7 +62,6 @@ class ContentTest < Test::Unit::TestCase
       e.save
       f.save
 
-      # p [@instance, e, f]
       i = Content[@instance.id]
       e = Content[e.id]
       f = Content[f.id]
@@ -65,6 +75,7 @@ class ContentTest < Test::Unit::TestCase
       f.entry.should == e.entries.first
       e.entries.first.should == f
     end
+
     should "have a list of child nodes" do
       e = Content.new
       f = Content.new
@@ -79,6 +90,22 @@ class ContentTest < Test::Unit::TestCase
       f = Content[f.id]
       i.nodes.should == [e]
       e.nodes.should == [f]
+    end
+
+    should "record the depth of the nodes" do
+      a = Content.new
+      b = Content.new
+      c = Content.new
+
+      a.depth.should == 0
+      b.depth.should == 0
+      c.depth.should == 0
+
+      a << b
+      b << c
+
+      b.depth.should == 1
+      c.depth.should == 2
     end
   end
 end

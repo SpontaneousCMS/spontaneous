@@ -112,6 +112,7 @@ module Spontaneous
 
     def after_initialize
       mixin_instance_code
+      self.depth = 0
       super
     end
 
@@ -145,6 +146,7 @@ module Spontaneous
       entry_style = nil
       entry = Entry.create(Entry, self, content, entry_style)
       content.container = self
+      content.depth = depth + 1
       entries.insert(-1, entry)
       entry
     end
@@ -160,5 +162,6 @@ module Spontaneous
     def resolve_entry
       container.entries.find { |e| e.target_id == self.id }
     end
+
   end
 end
