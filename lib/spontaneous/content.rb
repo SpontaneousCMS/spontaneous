@@ -113,6 +113,7 @@ module Spontaneous
     def after_initialize
       mixin_instance_code
       self.depth = 0
+      self.path = ""
       super
     end
 
@@ -141,13 +142,44 @@ module Spontaneous
       @entries ||= EntrySet.new(self, :entry_store)
     end
 
-    def <<(content)
+    def page?
+      false
+    end
+
+    def push(page_or_facet)
+      insert(-1, page_or_facet)
+    end
+
+    def insert(index, page_or_facet)
       save if new?
+      if page_or_facet.page?
+        insert_page(index, page_or_facet)
+      else
+        insert_facet(index, page_or_facet)
+      end
+    end
+
+    alias_method :<<, :push
+
+    def insert_page(index, child_page)
+      if page
+        child_page.depth = page.depth + 1
+        page.children << child_page
+        child_page.parent = page
+        child_page.update_path
+      end
       entry_style = nil
-      entry = Entry.create(Entry, self, content, entry_style)
-      content.container = self
-      content.depth = depth + 1
-      entries.insert(-1, entry)
+      entry = Entry.page(self, child_page, entry_style)
+      entries.insert(index, entry)
+      entry
+    end
+
+    def insert_facet(index, facet)
+      facet.container = self
+      facet.depth = depth + 1
+      entry_style = nil
+      entry = Entry.facet(self, facet, entry_style)
+      entries.insert(index, entry)
       entry
     end
 

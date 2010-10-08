@@ -42,15 +42,16 @@ class ContentTest < Test::Unit::TestCase
       @instance.entries.first.container.should == @instance
       @instance.entries.last.container.should == @instance
     end
+
     should "allow for a deep hierarchy" do
       e = Content.new
       f = Content.new
-      e << f
       @instance << e
+      e << f
       @instance.entries.length.should == 1
       @instance.entries.first.should == e
       e.container.should == @instance
-      f.container.should == e
+      f.container.id.should == e.id
     end
 
     should "persist hierarchy" do

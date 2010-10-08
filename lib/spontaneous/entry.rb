@@ -10,6 +10,13 @@ module Spontaneous
     #   container.page.facets.find { |f| f.id == id }
     # end
 
+    def self.page(container, page, entry_style)
+      create(PageEntry, container, page, entry_style)
+    end
+
+    def self.facet(container, facet, entry_style)
+      create(Entry, container, facet, entry_style)
+    end
 
     def self.create(entry_class, container, content, entry_style)
       content.save if content.new?

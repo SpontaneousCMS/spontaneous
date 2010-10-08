@@ -6,7 +6,9 @@ Sequel.migration do
       text    :instance_code
       integer :depth, :default => 0
 
+      # used for page hierarchy
       integer :parent_id, :index => true
+      # used for facet hierarchy
       integer :container_id, :index => true
 
       text    :entry_store
