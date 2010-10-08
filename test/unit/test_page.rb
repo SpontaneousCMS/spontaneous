@@ -121,7 +121,7 @@ class PageTest < Test::Unit::TestCase
       @s.ancestors.should == [@q, @p]
       @t.ancestors.should === [@s, @q, @p]
     end
-    
+
     should "know their generation" do
       @r.generation.should == [@r, @s]
       @s.generation.should == [@r, @s]
@@ -131,7 +131,7 @@ class PageTest < Test::Unit::TestCase
       @r.siblings.should == [@s]
       @s.siblings.should == [@r]
     end
-    
+
     should "always have the right path" do
       @q.slug = "changed"
       @q.save
