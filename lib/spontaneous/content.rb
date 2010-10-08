@@ -7,7 +7,7 @@ module Spontaneous
       alias_method :sequel_plugin, :plugin
     end
 
-    sequel_plugin :yajl_serialization, :field_store
+    sequel_plugin :yajl_serialization, :field_store, :entry_store
     sequel_plugin :single_table_inheritance, :type_id
 
     class << self
@@ -107,6 +107,18 @@ module Spontaneous
       end
     end
 
+    many_to_one :container, :class => self, :reciprocal => :nodes
+    one_to_many :nodes, :key => :container_id, :class => self, :reciprocal => :container
+
+    def after_initialize
+      mixin_instance_code
+      super
+    end
+
+    def mixin_instance_code
+      self.instance_eval(self.instance_code) unless self.instance_code.nil?
+    end
+
     def meta
       @_meta ||= \
         class << self; self; end
@@ -122,6 +134,31 @@ module Spontaneous
 
     def field_modified!(modified_field)
       self.field_store = @field_set.serialize
+    end
+
+    def entries
+      @entries ||= EntrySet.new(self, :entry_store)
+    end
+
+    def <<(content)
+      save if new?
+      entry_style = nil
+      entry = Entry.create(Entry, self, content, entry_style)
+      content.container = self
+      entries.insert(-1, entry)
+      entry
+    end
+
+    def entry=(entry)
+      @entry = entry
+    end
+
+    def entry
+      @entry ||= resolve_entry
+    end
+
+    def resolve_entry
+      container.entries.find { |e| e.target_id == self.id }
     end
   end
 end

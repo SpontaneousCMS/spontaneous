@@ -49,7 +49,7 @@ module Spontaneous
     def serialize
       {
         :name => name,
-        :raw_value => unprocessed_value,
+        :unprocessed_value => unprocessed_value,
         :processed_value => processed_value
       }
     end
