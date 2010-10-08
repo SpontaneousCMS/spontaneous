@@ -8,7 +8,7 @@ module Spontaneous
       end
     end
 
-    many_to_one :parent, :class => self, :reciprocal => :children 
+    many_to_one :parent, :class => self, :reciprocal => :children
     one_to_many :children, :class => self, :key => :parent_id, :reciprocal => :parent
 
     def after_initialize
@@ -30,13 +30,13 @@ module Spontaneous
     def generation
       parent ? parent.children : root
     end
-    
+
     def siblings
       generation.reject { |p| p === self }
     end
-    
+
     def default_slug
-      "page-#{Time.now.strftime('%Y%m%d-%H%M%S')}" 
+      "page-#{Time.now.strftime('%Y%m%d-%H%M%S')}"
     end
 
     def root?
