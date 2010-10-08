@@ -61,6 +61,7 @@ class PageTest < Test::Unit::TestCase
       @r.save
       @s.save
       @t.save
+      # doing this means that the == tests work below
       @p = Page[@p.id]
       @q = Page[@q.id]
       @r = Page[@r.id]
