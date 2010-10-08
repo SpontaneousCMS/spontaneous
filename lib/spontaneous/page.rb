@@ -16,6 +16,25 @@ module Spontaneous
       super
     end
 
+    def before_create
+      place_in_page_tree
+      super
+    end
+
+    def ancestors
+      node, nodes = self, []
+      nodes << node = node.parent while node.parent
+      nodes
+    end
+
+    def generation
+      parent ? parent.children : root
+    end
+    
+    def siblings
+      generation.reject { |p| p === self }
+    end
+    
     def default_slug
       "page-#{Time.now.strftime('%Y%m%d-%H%M%S')}" 
     end
@@ -26,10 +45,6 @@ module Spontaneous
 
     def root
       Page.root
-    end
-    def before_create
-      place_in_page_tree
-      super
     end
 
     def place_in_page_tree
@@ -42,9 +57,15 @@ module Spontaneous
       end
     end
 
+    def make_root
+      self[:path] = "/"
+      self[:slug] = ""
+    end
+
     def update_path
       self.path = calculate_path
     end
+
 
     def calculate_path
       if parent.nil?
@@ -52,11 +73,6 @@ module Spontaneous
       else
         File.join(parent.path, slug)
       end
-    end
-
-    def make_root
-      self.path = "/"
-      self[:slug] = ""
     end
 
     def slug=(s)

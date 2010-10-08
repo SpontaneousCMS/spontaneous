@@ -112,8 +112,8 @@ module Spontaneous
 
     def after_initialize
       mixin_instance_code
-      self.depth = 0
-      self.path = ""
+      self.depth = 0 if depth.nil?
+      self.path = "" if path.nil?
       super
     end
 
