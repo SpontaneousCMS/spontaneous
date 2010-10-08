@@ -135,7 +135,7 @@ class PageTest < Test::Unit::TestCase
     should "always have the right path" do
       @q.slug = "changed"
       @q.save
-      @p.path.should == "/"
+      @p.reload.path.should == "/"
       @q.reload.path.should == "/changed"
       @r.reload.path.should == "/changed/#{@r.slug}"
       @s.reload.path.should == "/changed/#{@s.slug}"
