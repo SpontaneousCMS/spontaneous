@@ -24,6 +24,9 @@ module Spontaneous
       path == SLASH
     end
 
+    def root
+      Page.root
+    end
     def before_create
       place_in_page_tree
       super

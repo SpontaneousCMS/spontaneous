@@ -43,28 +43,51 @@ class PageTest < Test::Unit::TestCase
     end
   end
 
-  context "Tree" do
+  context "Pages in tree" do
     setup do
       Content.delete
+      @p = Page.create
+      @q = Page.new
+      @r = Page.new
+      @p << @q
+      @q << @r
+      @p.save
+      @q.save
+      @r.save
     end
-    should "be constructed for children" do
-      p = Page.create
-      q = Page.new
-      p.root?.should be_true
-      p << q
-      p.entries.first.proxy_class.should == Spontaneous::PageEntry
-      p.save
-      q.save
-      p.children.should == [q]
-      q.parent.id.should == p.id
-      q.path.should == "/#{q.slug}"
-      r = Page.new
-      q << r
-      q.save
-      r.save
-      q.children.should == [r]
-      r.parent.id.should == q.id
-      r.path.should == "/#{q.slug}/#{r.slug}"
+
+    should "have the right entry classes" do
+      @p.entries.first.proxy_class.should == Spontaneous::PageEntry
+      @q.entries.first.proxy_class.should == Spontaneous::PageEntry
+    end
+
+    should "have a reference to their parent" do
+      @p.parent.should be_nil
+      @q.parent.should === @p
+      @r.parent.should === @q
+    end
+    should "have a list of their children" do
+      @p.children.should == [@q]
+      @q.children.should == [@r]
+      @r.children.should == []
+    end
+    should "keep track of their depth" do
+      @p.depth.should == 0
+      @q.depth.should == 1
+      @r.depth.should == 2
+    end
+
+    should "have correct paths" do
+      @p.path.should == "/"
+      @q.path.should == "/#{@q.slug}"
+      @r.path.should == "/#{@q.slug}/#{@r.slug}"
+    end
+
+    should "all have a reference to the root node" do
+      @p.root?.should be_true
+      @p.root.should === @p
+      @q.root.should === @p
+      @r.root.should === @p
     end
   end
 end
