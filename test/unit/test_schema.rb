@@ -6,16 +6,22 @@ class SchemasTest < Test::Unit::TestCase
 
   context "Configurable names" do
     setup do
-      class FunkyContent < Content; end
-      class MoreFunkyContent < FunkyContent; end
-      class ABCDifficultName < Content; end
+      class ::FunkyContent < Content; end
+      class ::MoreFunkyContent < FunkyContent; end
+      class ::ABCDifficultName < Content; end
 
-      class CustomName < ABCDifficultName
+      class ::CustomName < ABCDifficultName
         title "Some Name"
       end
     end
 
-    should "1. default to generated version" do
+    teardown do
+      [:FunkyContent, :MoreFunkyContent, :ABCDifficultName, :CustomName].each do |klass|
+        Object.send(:remove_const, klass)
+      end
+    end
+
+    should "default to generated version" do
       FunkyContent.default_title.should == "Funky Content"
       FunkyContent.title.should == "Funky Content"
       MoreFunkyContent.title.should == "More Funky Content"
@@ -23,18 +29,18 @@ class SchemasTest < Test::Unit::TestCase
       ABCDifficultName.title.should == "ABC Difficult Name"
     end
 
-    should "2. be settable" do
+    should "be settable" do
       CustomName.title.should == "Some Name"
       FunkyContent.title "Content Class"
       FunkyContent.title.should == "Content Class"
     end
 
-    should "3. be settable using =" do
+    should "be settable using =" do
       FunkyContent.title = "Content Class"
       FunkyContent.title.should == "Content Class"
     end
 
-    should "4. not inherit from superclass" do
+    should "not inherit from superclass" do
       FunkyContent.title = "Custom Name"
       MoreFunkyContent.title.should == "More Funky Content"
     end

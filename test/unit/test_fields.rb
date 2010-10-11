@@ -191,6 +191,7 @@ class FieldsTest < Test::Unit::TestCase
         field :title, :default_value => "Magic"
       end
     end
+
     should "work" do
       instance = @content_class.new
       instance.fields.title.value = "Changed"
