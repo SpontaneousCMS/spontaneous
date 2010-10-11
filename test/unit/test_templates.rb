@@ -61,11 +61,13 @@ class TemplatesTest < Test::Unit::TestCase
         t = @class.inline_styles.first
         t.filename.should == "funky.html.erb"
       end
+
       should "have sane default titles" do
         @class.inline_style :simple_style
         t = @class.inline_styles.first
         t.title.should == "Simple Style"
       end
+
       should "have configurable titles" do
         @class.inline_style :simple, :title => "A Simple Style"
         t = @class.inline_styles.first
@@ -78,9 +80,21 @@ class TemplatesTest < Test::Unit::TestCase
         @class.inline_styles[:simple].should == @class.inline_styles.first
       end
 
-      should "have #style as a shortcut for #inliine_styles" do
+      should "have #styles as a shortcut for #inliine_styles" do
         @class.inline_style :simple
         @class.inline_styles.should == @class.styles
+      end
+
+      should "take the first style as the default" do
+        @class.inline_style :simple
+        @class.inline_style :complex
+        @class.styles.default.should == @class.styles[:simple]
+      end
+
+      should "honour the :default flag" do
+        @class.inline_style :simple
+        @class.inline_style :complex, :default => true
+        @class.styles.default.should == @class.styles[:complex]
       end
     end
   end

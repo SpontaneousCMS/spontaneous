@@ -19,6 +19,10 @@ module Spontaneous
       @name.to_s.titleize
     end
 
+    def default?
+      @options[:default]
+    end
+
     def directory
       File.join(Spontaneous.template_root, owner_directory_name)
     end
