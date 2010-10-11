@@ -142,4 +142,22 @@ class PageTest < Test::Unit::TestCase
       @t.reload.path.should == "/changed/#{@s.slug}/#{@t.slug}"
     end
   end
+  context "page entries" do
+    setup do
+      @parent = Page.create
+      @facet = Facet.new
+      @child = Page.new
+      @parent << @facet
+      @facet << @child
+      @parent.save
+      @facet.save
+      @child.save
+    end
+
+    should "report their depth according to their position in the facet tree" do
+      @parent.depth.should == 0
+      @parent.entries.first.depth.should == 1
+      @parent.entries.first.entries.first.depth.should == 2
+    end
+  end
 end
