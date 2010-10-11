@@ -8,8 +8,9 @@ module Spontaneous
       end
     end
 
-    many_to_one :parent, :class => self, :reciprocal => :children
-    one_to_many :children, :class => self, :key => :parent_id, :reciprocal => :parent
+    many_to_one :parent, :class => Content, :reciprocal => :children
+    one_to_many :children, :class => Content, :key => :parent_id, :reciprocal => :parent
+    one_to_many :facets, :class => Content, :key => :page_id, :reciprocal => :page 
 
     def after_initialize
       super

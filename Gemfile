@@ -1,6 +1,6 @@
 source :rubygems
 
-gem "sequel", "~>3.12"
+gem "sequel", "~>3.16"
 gem 'mysql2', '~>0.2'
 gem "yajl-ruby", "~>0.7", :require => 'yajl'
 gem "erubis", "~>2.6"

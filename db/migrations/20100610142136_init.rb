@@ -6,10 +6,14 @@ Sequel.migration do
       text    :instance_code
       integer :depth, :default => 0
 
-      # used for page hierarchy
+      # used for Page tree structure
       integer :parent_id, :index => true
-      # used for facet hierarchy
+
+      # used to get the parent Content item (Page or Facet)
       integer :container_id, :index => true
+
+      # used to find all content for a Page
+      integer :page_id, :index => true
 
       text    :entry_store
       column  :field_store, 'mediumtext' # actually stores all the values, so needs some breathing room

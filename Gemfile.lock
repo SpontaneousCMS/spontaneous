@@ -56,7 +56,7 @@ DEPENDENCIES
   mysql2 (~> 0.2)
   rack (~> 1.2)
   rack-test (~> 0.5)
-  sequel (~> 3.12)
+  sequel (~> 3.16)
   shoulda (~> 2.10)
   sinatra (~> 1.0)
   stackdeck (~> 0.2)

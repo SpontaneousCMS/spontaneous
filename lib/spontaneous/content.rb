@@ -176,11 +176,16 @@ module Spontaneous
 
     def insert_facet(index, facet)
       facet.container = self
+      facet.page = page if page
       facet.depth = depth + 1
       entry_style = nil
       entry = Entry.facet(self, facet, entry_style)
       entries.insert(index, entry)
       entry
+    end
+
+    def page
+      nil
     end
 
     def entry=(entry)

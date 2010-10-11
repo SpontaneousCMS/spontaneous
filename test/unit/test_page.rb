@@ -38,8 +38,7 @@ class PageTest < Test::Unit::TestCase
       p.slug = " something's illegal and ugly!!"
       p.slug.should == "somethings-illegal-and-ugly"
       p.save
-      p.reload
-      p.slug.should == "somethings-illegal-and-ugly"
+      p.reload.slug.should == "somethings-illegal-and-ugly"
     end
   end
 

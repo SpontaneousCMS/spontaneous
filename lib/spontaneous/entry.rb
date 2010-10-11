@@ -5,10 +5,13 @@ module Spontaneous
     instance_methods.each { |m| undef_method m unless m =~ /^__|instance_eval|object_id|proxy_class/ }
 
 
-    # def self.find_target(container, id)
-    #   # Facet.get(id)
-    #   container.page.facets.find { |f| f.id == id }
-    # end
+    def self.find_target(container, id)
+      if container.page
+        container.page.facets.find { |f| f.id == id }
+      else
+        Content[id]
+      end
+    end
 
     def self.page(container, page, entry_style)
       create(PageEntry, container, page, entry_style)
@@ -46,8 +49,8 @@ module Spontaneous
     end
 
     def load_target
-      # target = proxy_class.find_target(@container, @target_id)
-      Content[target_id].tap do |t|
+      # Content[target_id].tap do |t|
+      proxy_class.find_target(@container, @target_id).tap do |t|
         t.entry = self
       end
     end
