@@ -13,7 +13,14 @@ module Spontaneous
       [self.name.demodulize.gsub(/Field$/, '').underscore]
     end
 
+    def self.prototype=(prototype)
+      @prototype = prototype
+    end
+    def self.prototype
+      @prototype
+    end
     attr_accessor :owner, :name, :unprocessed_value, :processed_value
+
 
     def initialize(attributes={})
       update(attributes)
@@ -45,6 +52,9 @@ module Spontaneous
       self.unprocessed_value = value
     end
 
+    def prototype
+      self.class.prototype
+    end
 
     def serialize
       {

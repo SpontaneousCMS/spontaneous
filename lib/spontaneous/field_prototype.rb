@@ -9,9 +9,22 @@ module Spontaneous
       if block
         @field_class = Class.new(@field_class, &block)
       end
+      @field_class.prototype = self
       parse_options(options)
     end
 
+    def title(new_title=nil)
+      self.title = new_title if new_title
+      @title || @options[:title] || default_title
+    end
+
+    def title=(new_title)
+      @title = new_title
+    end
+
+    def default_title
+      @name.to_s.titleize
+    end
 
     def parse_options(options)
       @options = {
