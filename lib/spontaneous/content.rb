@@ -106,13 +106,15 @@ module Spontaneous
         subclass.supertype = self
       end
 
-      def inline_template(name)
-        inline_templates << Template.new(self, name)
+      def inline_style(name, options={})
+        inline_styles << Template.new(self, name, options)
       end
 
-      def inline_templates
-        @inline_templates ||= []
+      def inline_styles
+        @inline_styles ||= StyleSet.new
       end
+
+      alias_method :styles, :inline_styles
     end
 
     many_to_one :container, :class => self, :reciprocal => :nodes

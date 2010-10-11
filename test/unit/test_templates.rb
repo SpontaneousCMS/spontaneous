@@ -28,7 +28,6 @@ class TemplatesTest < Test::Unit::TestCase
       Object.send(:remove_const, :TemplateClass)
     end
 
-
     should "derive path from owning class and name" do
       @template.directory.should == "#{template_root}/template_class"
     end
@@ -47,13 +46,41 @@ class TemplatesTest < Test::Unit::TestCase
     end
 
     context "inline templates" do
-
       setup do
         @class = Class.new(Content)
       end
       should "be definiable" do
-        @class.inline_template :simple
-        @class.inline_templates.length.should == 1
+        @class.inline_style :simple
+        @class.inline_styles.length.should == 1
+        t = @class.inline_styles.first
+        t.name.should == :simple
+      end
+
+      should "have configurable filenames" do
+        @class.inline_style :simple, :filename => "funky"
+        t = @class.inline_styles.first
+        t.filename.should == "funky.html.erb"
+      end
+      should "have sane default titles" do
+        @class.inline_style :simple_style
+        t = @class.inline_styles.first
+        t.title.should == "Simple Style"
+      end
+      should "have configurable titles" do
+        @class.inline_style :simple, :title => "A Simple Style"
+        t = @class.inline_styles.first
+        t.title.should == "A Simple Style"
+      end
+
+      should "be accessable by name" do
+        @class.inline_style :simple
+        @class.inline_style :complex
+        @class.inline_styles[:simple].should == @class.inline_styles.first
+      end
+
+      should "have #style as a shortcut for #inliine_styles" do
+        @class.inline_style :simple
+        @class.inline_styles.should == @class.styles
       end
     end
   end

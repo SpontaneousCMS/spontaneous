@@ -1,15 +1,23 @@
 
 module Spontaneous
   class Template
-    def initialize(owner, name)
+    def initialize(owner, name, options={})
       @owner = owner
-      @name = name
+      @name = name.to_sym
+      @options = options
     end
 
     def name
       @name
     end
 
+    def title
+      @options[:title] || default_title
+    end
+
+    def default_title
+      @name.to_s.titleize
+    end
 
     def directory
       File.join(Spontaneous.template_root, owner_directory_name)
@@ -20,7 +28,11 @@ module Spontaneous
     end
 
     def filename(format=:html)
-      "#{name}.#{format}.#{Spontaneous.template_ext}"
+      "#{basename}.#{format}.#{Spontaneous.template_ext}"
+    end
+
+    def basename
+      @options[:filename] || name
     end
 
     def path(format=:html)
