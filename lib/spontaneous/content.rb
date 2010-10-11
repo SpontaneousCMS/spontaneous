@@ -105,6 +105,14 @@ module Spontaneous
         subclasses << subclass
         subclass.supertype = self
       end
+
+      def inline_template(name)
+        inline_templates << Template.new(self, name)
+      end
+
+      def inline_templates
+        @inline_templates ||= []
+      end
     end
 
     many_to_one :container, :class => self, :reciprocal => :nodes

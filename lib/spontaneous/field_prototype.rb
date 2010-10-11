@@ -48,7 +48,7 @@ module Spontaneous
     def to_field(values={})
       v = {
         :name => name,
-        :value => default_value
+        :unprocessed_value => default_value
       }.merge(values)
       self.field_class.new(v)
     end

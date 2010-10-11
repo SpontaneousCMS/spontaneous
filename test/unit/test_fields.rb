@@ -187,17 +187,20 @@ class FieldsTest < Test::Unit::TestCase
 
   context "Field value persistence" do
     setup do
-      @content_class = Class.new(Content) do
+      class ::PersistedField < Content
         field :title, :default_value => "Magic"
       end
     end
+    teardown do
+      Object.send(:remove_const, :PersistedField)
+    end
 
     should "work" do
-      instance = @content_class.new
+      instance = ::PersistedField.new
       instance.fields.title.value = "Changed"
       instance.save
       id = instance.id
-      instance = @content_class[id]
+      instance = ::PersistedField[id]
       instance.fields.title.value.should == "Changed"
     end
 
