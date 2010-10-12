@@ -147,9 +147,16 @@ module Spontaneous
     def field_modified!(modified_field)
       self.field_store = @field_set.serialize
     end
+    def entry_modified!(modified_entry)
+      self.entries.update!
+    end
 
     def entries
       @entries ||= EntrySet.new(self, :entry_store)
+    end
+
+    def styles
+      self.class.styles
     end
 
     def page?
@@ -178,7 +185,7 @@ module Spontaneous
         child_page.parent = page
         child_page.update_path
       end
-      entry_style = nil
+      entry_style = child_page.styles.default
       entry = Entry.page(self, child_page, entry_style)
       entries.insert(index, entry)
       entry
@@ -188,7 +195,7 @@ module Spontaneous
       facet.container = self
       facet.page = page if page
       facet.depth = depth + 1
-      entry_style = nil
+      entry_style = facet.styles.default
       entry = Entry.facet(self, facet, entry_style)
       entries.insert(index, entry)
       entry

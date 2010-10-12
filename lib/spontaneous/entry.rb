@@ -23,7 +23,7 @@ module Spontaneous
 
     def self.create(entry_class, container, content, entry_style)
       content.save if content.new?
-      entry = entry_class.new(container, content.id, nil)
+      entry = entry_class.new(container, content.id, entry_style ? entry_style.name : nil)
       entry.target = content
       entry
     end
@@ -33,7 +33,7 @@ module Spontaneous
     def initialize(container, target_id, style_name)
       @container = container
       @target_id = target_id
-      @entry_style_name = style_name
+      @entry_style_name = style_name.to_sym if style_name
     end
 
     def target_id
@@ -46,6 +46,15 @@ module Spontaneous
 
     def target
       @target ||= load_target
+    end
+
+    def style
+      target.styles[@entry_style_name]
+    end
+
+    def style=(style)
+      @entry_style_name = style.name
+      @container.entry_modified!(self)
     end
 
     def load_target
@@ -66,7 +75,8 @@ module Spontaneous
     def serialize
       {
         :class => self.proxy_class.name.demodulize,
-        :id => target.id
+        :id => target.id,
+        :style => @entry_style_name
       }
     end
 

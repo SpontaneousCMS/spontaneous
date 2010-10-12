@@ -108,5 +108,7 @@ class ContentTest < Test::Unit::TestCase
       b.depth.should == 1
       c.depth.should == 2
     end
+
+
   end
 end

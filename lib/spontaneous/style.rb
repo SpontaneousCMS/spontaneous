@@ -17,6 +17,10 @@ module Spontaneous
       @name
     end
 
+    def owner
+      @owner
+    end
+
     def title
       @options[:title] || default_title
     end
@@ -34,7 +38,7 @@ module Spontaneous
     end
 
     def owner_directory_name
-      @owner.class.name.underscore
+      @owner.name.underscore
     end
 
     def filename(format=:html)
@@ -64,7 +68,7 @@ module Spontaneous
 
     def template(format=:html)
       format = format.to_sym
-      raise UnsupportedFormatException.new(self, format) unless formats.include?(format)
+      # raise UnsupportedFormatException.new(self, format) unless formats.include?(format)
       template_cache[format]
     end
 

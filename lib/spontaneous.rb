@@ -9,7 +9,7 @@ module Spontaneous
     end
 
     def template_root
-      @template_root
+      @template_root ||= File.expand_path(File.join(File.dirname(__FILE__), "../templates"))
     end
 
     def template_ext
