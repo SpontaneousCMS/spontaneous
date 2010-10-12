@@ -154,6 +154,27 @@ class FieldsTest < Test::Unit::TestCase
       @field.value = "String"
       @field.to_s.should == "<String>"
     end
+
+    should "not process values coming from db" do
+      content_class = Class.new(Content)
+      content_class.field :title do
+        def process(value)
+          "<#{value}>"
+        end
+      end
+      instance = content_class.new
+      instance.fields.title = "Monkey"
+      instance.save
+
+      new_content_class = Class.new(Content)
+      new_content_class.field :title do
+        def process(value)
+          "*#{value}*"
+        end
+      end
+      instance = new_content_class[instance.id]
+      instance.fields.title.value.should == "<Monkey>"
+    end
   end
 
   context "field instances" do

@@ -45,12 +45,13 @@ module Spontaneous
       @options[:comment]
     end
 
-    def to_field(values={})
-      v = {
+    def to_field(values=nil)
+      from_db = !values.nil?
+      values ||= {
         :name => name,
         :unprocessed_value => default_value
-      }.merge(values)
-      self.field_class.new(v)
+      }
+      self.field_class.new(values, from_db)
     end
   end
 end
