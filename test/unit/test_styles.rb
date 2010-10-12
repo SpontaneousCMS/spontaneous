@@ -59,6 +59,7 @@ class StylesTest < Test::Unit::TestCase
 
     should "raise an error if we try to initialize with an unsupported format" do
       # disabled because it makes testing styles more difficult
+      # perhaps raise this instead at the template level when rendering?
       # lambda { @style.template(:monkey) }.should raise_error(UnsupportedFormatException)
     end
 

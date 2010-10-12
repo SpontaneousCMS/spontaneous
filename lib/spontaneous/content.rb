@@ -144,6 +144,7 @@ module Spontaneous
       @field_set ||= FieldSet.new(self, field_store)
     end
 
+    # TODO: unify the update mechanism for these two stores
     def field_modified!(modified_field)
       self.field_store = @field_set.serialize
     end
