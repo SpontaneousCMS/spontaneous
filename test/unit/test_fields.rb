@@ -134,6 +134,7 @@ class FieldsTest < Test::Unit::TestCase
       end
     end
   end
+
   context "Values" do
     setup do
       @field_class = Class.new(Field) do

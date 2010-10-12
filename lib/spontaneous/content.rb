@@ -107,7 +107,7 @@ module Spontaneous
       end
 
       def inline_style(name, options={})
-        inline_styles << Template.new(self, name, options)
+        inline_styles << Style.new(self, name, options)
       end
 
       def inline_styles

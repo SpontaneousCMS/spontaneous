@@ -74,18 +74,25 @@ module Spontaneous
     protected
 
     def update(attributes={}, from_db=false)
-      @preprocessed = from_db
-      attributes.each do |property, value|
-        setter = "#{property}=".to_sym
-        if respond_to?(setter)
-          self.send(setter, value)
+      with_preprocessed_values(from_db) do
+        attributes.each do |property, value|
+          setter = "#{property}=".to_sym
+          if respond_to?(setter)
+            self.send(setter, value)
+          end
         end
       end
-      @preprocessed = nil
     end
 
     def processed_value=(value)
       @processed_value = value
+    end
+
+    def with_preprocessed_values(state)
+      @preprocessed = state
+      yield
+    ensure
+      @preprocessed = nil
     end
   end
 end
