@@ -48,7 +48,7 @@ module Spontaneous
           content.entries.each do |entry|
             unless entry.slug.nil? or entry.slug.empty?
               # this entry was defined by a slot
-              slot = @content_class.slots.find { |s| s.name.to_s == entry.slug }
+              slot = @content_class.slots.find { |s| s.name.to_s == entry.slot_id }
               unless slot
                 puts "deleting entry #{entry.inspect}"
               end

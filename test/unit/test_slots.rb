@@ -114,7 +114,7 @@ class SlotsTest < Test::Unit::TestCase
       should "have a #slots method for accessing slots" do
         @instance.slots.length.should == 1
         @instance.slots.first.label.should == "images"
-        @instance.slots.first.slug.should == "images"
+        @instance.slots.first.slot_id.should == "images"
         @instance.slots[:images].should == @instance.slots.first
       end
 

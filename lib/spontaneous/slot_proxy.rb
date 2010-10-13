@@ -19,7 +19,7 @@ module Spontaneous
     end
 
     def push(slot)
-      facet = slot.instance_class.new(:label => slot.name, :slot_name => slot.title, :slug => slot.name )
+      facet = slot.instance_class.new(:label => slot.name, :slot_name => slot.title, :slot_id => slot.name )
       entry = owner.push(facet)
       @map[slot.name] = entry
     end
