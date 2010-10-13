@@ -12,7 +12,7 @@ module Spontaneous
     end
 
     def render(binding)
-      # template.result(binding)
+      #should be over-ridden by implementations
     end
 
   end
