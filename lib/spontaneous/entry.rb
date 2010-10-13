@@ -1,9 +1,6 @@
 
 module Spontaneous
-  class Entry
-    alias_method :proxy_class, :class
-    instance_methods.each { |m| undef_method m unless m =~ /^__|instance_eval|object_id|proxy_class/ }
-
+  class Entry < ProxyObject
 
     def self.find_target(container, id)
       if container.page

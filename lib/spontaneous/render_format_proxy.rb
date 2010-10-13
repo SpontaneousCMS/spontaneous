@@ -1,7 +1,6 @@
 
 module Spontaneous
-  class RenderFormatProxy
-    instance_methods.each { |m| undef_method m unless m =~ /^__|instance_eval|object_id/ }
+  class RenderFormatProxy < ProxyObject
 
     attr_reader :format
     attr_reader :target
