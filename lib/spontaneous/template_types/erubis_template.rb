@@ -2,7 +2,7 @@ module Spontaneous
   module TemplateTypes
     class ErubisTemplate < Template
       def render(binding)
-        template.result(binding)
+        template.result(binding).chomp
       end
 
       def template

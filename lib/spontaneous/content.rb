@@ -133,6 +133,11 @@ module Spontaneous
       def slots
         @slots ||= SlotSet.new(self)
       end
+
+      def slot?(slot_name)
+        !slots.detect {|s| s.name == slot_name }.nil? || (supertype ? supertype.slot?(slot_name) : false )
+      end
+
     end
 
     many_to_one :container, :class => self, :reciprocal => :nodes
@@ -188,6 +193,10 @@ module Spontaneous
       @entries ||= EntrySet.new(self, :entry_store)
     end
 
+    def slot?(slot_name)
+      self.class.slot?(slot_name.to_sym)
+    end
+
     def visible_entries
       entries
     end
@@ -196,6 +205,7 @@ module Spontaneous
     def first
       entries.first
     end
+
     def last
       entries.last
     end

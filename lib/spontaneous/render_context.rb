@@ -33,6 +33,8 @@ module Spontaneous
       key = method.to_sym
       if target.field?(key)
         target.fields[key].send(output_method)
+      elsif target.slot?(key)
+        target.slots[key].visible_entries
       else
         target.send(method, *args, &block)
       end

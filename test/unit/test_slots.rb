@@ -52,12 +52,18 @@ class SlotsTest < Test::Unit::TestCase
       @instance.slots.group('main').map {|e| e.label.to_sym }.should == [:images, :posts, :last]
     end
 
+    should "inherit slots from its superclass"
+
     context "" do
       setup do
         SlotClass.slot :images
         @instance = SlotClass.new
       end
 
+      should "provide a test for existance of named slot" do
+        @instance.slot?(:images).should be_true
+        @instance.slot?(:none).should be_false
+      end
       should "instantiate a corresponding facet in new instances" do
         @instance.entries.length.should == 1
         @instance.entries.first.class.should == Facet
