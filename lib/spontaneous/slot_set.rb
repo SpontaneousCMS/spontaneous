@@ -3,7 +3,11 @@ module Spontaneous
   class SlotSet < Array
     def initialize(klass)
       @content_class = klass
+      if @content_class.superclass.respond_to?(:slots)
+        self.concat(@content_class.superclass.slots)
+      end
     end
+
     def instantiate(content)
       self.each do |slot|
         content.slots << slot

@@ -54,7 +54,19 @@ class SlotsTest < Test::Unit::TestCase
       @instance.slots.group('main').map {|e| e.label.to_sym }.should == [:images, :posts, :last]
     end
 
-    should "inherit slots from its superclass"
+    should "inherit slots from its superclass" do
+      SlotClass.slot :images, :group => :main
+
+      @subclass1 = Class.new(SlotClass) do
+        slot :monkeys, :group => :main
+        slot :apes
+      end
+      @subclass2 = Class.new(@subclass1) do
+        slot :peanuts
+      end
+      @subclass2.slots.length.should == 4
+      @subclass2.slots.map { |s| s.name }.should == [:images, :monkeys, :apes, :peanuts]
+    end
 
     should "default to the name of the slot for the style name" do
       SlotClass.slot :images
