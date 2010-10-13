@@ -121,15 +121,36 @@ module Spontaneous
       end
 
       alias_method :styles, :inline_styles
+
+      def slot(name, options={})
+        slot = Slot.new(name, options)
+        unless method_defined?(name)
+          define_method(name) { slots[slot.name] }
+        end
+        slots << slot
+      end
+
+      def slots
+        @slots ||= SlotSet.new(self)
+      end
     end
 
     many_to_one :container, :class => self, :reciprocal => :nodes
     one_to_many :nodes, :key => :container_id, :class => self, :reciprocal => :container
 
     def after_initialize
+      if new?
+        self.depth = 0
+        self.path = ""
+        self.class.slots.instantiate(self)
+      else
+        self.class.slots.verify(self)
+      end
       mixin_instance_code
-      self.depth = 0 if depth.nil?
-      self.path = "" if path.nil?
+      super
+    end
+
+    def before_create
       super
     end
 
@@ -158,6 +179,7 @@ module Spontaneous
     def field_modified!(modified_field)
       self.field_store = @field_set.serialize
     end
+
     def entry_modified!(modified_entry)
       self.entries.update!
     end
@@ -168,6 +190,18 @@ module Spontaneous
 
     def visible_entries
       entries
+    end
+
+
+    def first
+      entries.first
+    end
+    def last
+      entries.last
+    end
+
+    def slots
+      @slots ||= SlotProxy.new(self)
     end
 
     def styles

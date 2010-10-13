@@ -26,6 +26,7 @@ Sequel.migration do
       varchar :style_id
 
       varchar :label
+      varchar :slot_name
 
       # URL path fields
       # #pageonly

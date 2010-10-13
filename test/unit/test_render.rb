@@ -83,6 +83,24 @@ The Title
         PDF
       end
     end
+
+    context "slots" do
+      setup do
+        TemplateClass.inline_style :slots_template, :default => true
+        TemplateClass.slot :images#, :class => :TemplateClass 
+        @content = TemplateClass.new
+        @content.title = "The Title"
+        @content.description = "The Description"
+        @child = TemplateClass.new
+        @child.title = "Child Title"
+        @child.description = "Child Description"
+        @content.images << @child
+        @content.images.first.style = TemplateClass.styles[:this_template]
+      end
+      should "render slots" do
+        # puts @content.render
+      end
+    end
   end
 end
 
