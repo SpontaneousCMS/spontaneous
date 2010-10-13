@@ -66,13 +66,19 @@ class SlotsTest < Test::Unit::TestCase
       end
       @subclass2.slots.length.should == 4
       @subclass2.slots.map { |s| s.name }.should == [:images, :monkeys, :apes, :peanuts]
+      @subclass2.slots.group(:main).length.should == 2
+      instance = @subclass2.new
+      instance.slots.length.should == 4
     end
+
+    should "allow customisation of the slot order"
 
     should "default to the name of the slot for the style name" do
       SlotClass.slot :images
       instance = SlotClass.new
       instance.images.style.filename.should == "images.html.erb"
     end
+
     should "accept a custom template name" do
       SlotClass.slot :images, :style => :anonymous_slot
       instance = SlotClass.new
