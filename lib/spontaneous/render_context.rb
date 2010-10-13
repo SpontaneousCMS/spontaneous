@@ -19,9 +19,14 @@ module Spontaneous
     def output_method
       @output_method ||= "to_#{format}".to_sym
     end
+
     def render
       template = target.style.template(format)
       template.render(binding)
+    end
+
+    def content
+      target.visible_entries.map { |e| RenderFormatProxy.new(e, format) }
     end
 
     def method_missing(method, *args, &block)

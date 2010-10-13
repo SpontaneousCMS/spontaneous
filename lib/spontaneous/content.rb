@@ -166,6 +166,10 @@ module Spontaneous
       @entries ||= EntrySet.new(self, :entry_store)
     end
 
+    def visible_entries
+      entries
+    end
+
     def styles
       self.class.inline_styles
     end

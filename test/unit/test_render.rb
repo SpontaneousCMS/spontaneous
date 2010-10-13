@@ -50,5 +50,38 @@ class RenderTest < Test::Unit::TestCase
     should "be able to render themselves to EPUB" do
       @content.render(:epub).should == "<EPUB><title>The Title</title><body>The Description</body></EPUB>\n"
     end
+
+    context "facet trees" do
+      setup do
+        TemplateClass.inline_style :complex_template, :default => true
+        @content = TemplateClass.new
+        @content.title = "The Title"
+        @content.description = "The Description"
+        @child = TemplateClass.new
+        @child.title = "Child Title"
+        @child.description = "Child Description"
+        @content << @child
+        @content.entries.first.style = TemplateClass.styles[:this_template]
+      end
+
+      should "be accessible through #content method" do
+        @content.render.should == <<-HTML
+<complex>
+The Title
+<facet><html><title>Child Title</title><body>Child Description</body></html>
+</facet>
+</complex>
+        HTML
+      end
+      should "cascade the chosen format to all subsequent #render calls" do
+        @content.render(:pdf).should == <<-PDF
+<pdf>
+The Title
+<facet><PDF><title>Child Title</title><body>{Child Description}</body></PDF>
+</facet>
+</pdf>
+        PDF
+      end
+    end
   end
 end
