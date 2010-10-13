@@ -12,11 +12,8 @@ module Spontaneous
     end
 
     def render(binding)
-      template.result(binding)
+      # template.result(binding)
     end
 
-    def template
-      @template ||= Erubis::Eruby.new(File.read(path))
-    end
   end
 end
