@@ -3,17 +3,10 @@ GEM
   specs:
     abstract (1.0.0)
     daemons (1.1.0)
-    envjs (0.1.2)
-      johnson (>= 2.0.0.pre1)
     erubis (2.6.6)
       abstract (>= 1.0.0)
     eventmachine (0.12.10)
-    harmony (0.5.2)
-      envjs (= 0.1.2)
-      johnson (= 2.0.0.pre1)
     jnunemaker-matchy (0.4.0)
-    johnson (2.0.0.pre1)
-      stackdeck (~> 0.1)
     leftright (0.9.0)
     less (1.2.21)
       mutter (>= 0.4.2)
@@ -47,9 +40,7 @@ PLATFORMS
 
 DEPENDENCIES
   erubis (~> 2.6)
-  harmony (~> 0.5)
   jnunemaker-matchy (~> 0.4)
-  johnson (= 2.0.0.pre1)
   leftright (~> 0.9)
   less (~> 1.2)
   mocha (~> 0.9)

@@ -20,7 +20,7 @@ group :development do
   gem 'rack-test',  '~>0.5'
   gem 'leftright',  '~>0.9'
   gem 'stackdeck',  '~>0.2'
-  gem 'johnson',    '2.0.0.pre1'
-  gem 'harmony',    '~>0.5'
+  # gem 'johnson',    '2.0.0.pre1'
+  # gem 'harmony',    '~>0.5'
 end
 

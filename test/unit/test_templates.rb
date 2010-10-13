@@ -15,9 +15,13 @@ class TemplatesTest < Test::Unit::TestCase
         def title
           "THE TITLE"
         end
+
+        def binding
+          super
+        end
       end
       instance = klass.new
-      output = @template.render(instance.send(:binding))
+      output = @template.render(instance.binding)
       output.should == "<html><title>THE TITLE</title></html>\n"
     end
   end
