@@ -57,6 +57,16 @@ class FieldsTest < Test::Unit::TestCase
       @content_class.field_names.should == [:title, :synopsis, :complex]
     end
 
+    should "be testable for existance" do
+      @content_class.field?(:title).should be_true
+      @content_class.field?(:synopsis).should be_true
+      @content_class.field?(:non_existant).should be_false
+      i = @content_class.new
+      i.field?(:title).should be_true
+      i.field?(:non_existant).should be_false
+    end
+
+
     context "default values" do
       setup do
         @prototype = @content_class.field_prototypes[:title]
@@ -226,5 +236,14 @@ class FieldsTest < Test::Unit::TestCase
       instance.fields.title.value.should == "Changed"
     end
 
+  end
+
+  context "Available output formats" do
+    should "include HTML & PDF and default to default value" do
+      f = Field.new
+      f.value = "Value"
+      f.to_html.should == "Value"
+      f.to_pdf.should == "Value"
+    end
   end
 end

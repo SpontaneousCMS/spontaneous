@@ -84,6 +84,11 @@ module Spontaneous
         @local_field_order ||= []
       end
 
+      def field?(field_name)
+        field_name = field_name.to_sym
+        field_prototypes.key?(field_name) || (supertype ? supertype.field?(field_name) : false)
+      end
+
       def subclasses
         @subclasses ||= []
       end
@@ -145,6 +150,10 @@ module Spontaneous
       @field_set ||= FieldSet.new(self, field_store)
     end
 
+    def field?(field_name)
+      self.class.field?(field_name)
+    end
+
     # TODO: unify the update mechanism for these two stores
     def field_modified!(modified_field)
       self.field_store = @field_set.serialize
@@ -158,7 +167,7 @@ module Spontaneous
     end
 
     def styles
-      self.class.styles
+      self.class.inline_styles
     end
 
     def style
@@ -223,5 +232,9 @@ module Spontaneous
       container.entries.find { |e| e.target_id == self.id }
     end
 
+    def render(format=:html)
+      context = RenderContext.new(self, format)
+      context.render
+    end
   end
 end

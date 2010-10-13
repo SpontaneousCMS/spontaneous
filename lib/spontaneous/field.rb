@@ -55,6 +55,14 @@ module Spontaneous
       value.to_s
     end
 
+    def to_html
+      value
+    end
+
+    def to_pdf
+      value
+    end
+
     def value=(value)
       self.unprocessed_value = value
     end
