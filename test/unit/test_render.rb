@@ -39,7 +39,6 @@ class RenderTest < Test::Unit::TestCase
       Object.send(:remove_const, :TemplateClass)
     end
 
-
     should "be able to render themselves to HTML" do
       @content.render.should == "<html><title>The Title</title><body>The Description</body></html>"
     end
@@ -47,6 +46,7 @@ class RenderTest < Test::Unit::TestCase
     should "be able to render themselves to PDF" do
       @content.render(:pdf).should == "<PDF><title>The Title</title><body>{The Description}</body></PDF>"
     end
+
     should "be able to render themselves to EPUB" do
       @content.render(:epub).should == "<EPUB><title>The Title</title><body>The Description</body></EPUB>"
     end
@@ -67,6 +67,7 @@ class RenderTest < Test::Unit::TestCase
       should "be accessible through #content method" do
         @content.render.should == "<complex>\nThe Title\n<facet><html><title>Child Title</title><body>Child Description</body></html></facet>\n</complex>"
       end
+
       should "cascade the chosen format to all subsequent #render calls" do
         @content.render(:pdf).should == "<pdf>\nThe Title\n<facet><PDF><title>Child Title</title><body>{Child Description}</body></PDF></facet>\n</pdf>"
       end
@@ -85,6 +86,7 @@ class RenderTest < Test::Unit::TestCase
         @content.images << @child
         @content.images.first.style = TemplateClass.styles[:this_template]
       end
+
       should "render slots" do
         @content.render.should == "<slots>\n  <img><html><title>Child Title</title><body>Child Description</body></html></img>\n</slots>"
       end

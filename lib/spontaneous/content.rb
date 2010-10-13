@@ -123,7 +123,7 @@ module Spontaneous
       alias_method :styles, :inline_styles
 
       def slot(name, options={})
-        slot = Slot.new(name, options)
+        slot = Slot.new(self, name, options)
         unless method_defined?(name)
           define_method(name) { slots[slot.name] }
         end

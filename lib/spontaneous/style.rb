@@ -38,7 +38,11 @@ module Spontaneous
     end
 
     def owner_directory_name
-      @owner.name.underscore
+      if class_name = @options[:class_name]
+        class_name.underscore
+      else
+        @owner.name.underscore
+      end
     end
 
     def filename(format=:html)

@@ -4,7 +4,7 @@ require 'test_helper'
 class SlotsTest < Test::Unit::TestCase
   include Spontaneous
 
-  context "Slot definitions" do
+  context "Slot containers" do
     setup do
       class ::SlotClass < Content; end
     end
@@ -27,10 +27,12 @@ class SlotsTest < Test::Unit::TestCase
       SlotClass.slot :images, :class => SlotClass
       SlotClass.slots.first.instance_class.should == SlotClass
     end
+
     should "accept a custom instance class as a string" do
       SlotClass.slot :images, :class => 'SlotClass'
       SlotClass.slots.first.instance_class.should == SlotClass
     end
+
     should "accept a custom instance class as a symbol" do
       SlotClass.slot :images, :class => :SlotClass
       SlotClass.slots.first.instance_class.should == SlotClass
@@ -54,6 +56,25 @@ class SlotsTest < Test::Unit::TestCase
 
     should "inherit slots from its superclass"
 
+    should "default to the name of the slot for the style name" do
+      SlotClass.slot :images
+      instance = SlotClass.new
+      instance.images.style.filename.should == "images.html.erb"
+    end
+    should "accept a custom template name" do
+      SlotClass.slot :images, :style => :anonymous_slot
+      instance = SlotClass.new
+      instance.images.style.filename.should == "anonymous_slot.html.erb"
+    end
+
+    should "take template path from slot's parent for anonymous slots" do
+      SlotClass.slot :images, :style => :anonymous_slot
+      SlotClass.slot :posts
+      instance = SlotClass.new
+      instance.images.style.path.should == "#{Spontaneous.template_root}/slot_class/anonymous_slot.html.erb"
+      instance.posts.style.path.should == "#{Spontaneous.template_root}/slot_class/posts.html.erb"
+    end
+
     context "" do
       setup do
         SlotClass.slot :images
@@ -64,9 +85,10 @@ class SlotsTest < Test::Unit::TestCase
         @instance.slot?(:images).should be_true
         @instance.slot?(:none).should be_false
       end
+
       should "instantiate a corresponding facet in new instances" do
         @instance.entries.length.should == 1
-        @instance.entries.first.class.should == Facet
+        # @instance.entries.first.class.should == Facet
         @instance.entries.first.label.should == "images"
         @instance.entries.first.slot_name.should == "Images"
       end

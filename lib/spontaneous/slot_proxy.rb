@@ -20,8 +20,8 @@ module Spontaneous
 
     def push(slot)
       facet = slot.instance_class.new(:label => slot.name, :slot_name => slot.title, :slug => slot.name )
-      owner << facet
-      @map[slot.name] = facet
+      entry = owner.push(facet)
+      @map[slot.name] = entry
     end
 
     def method_missing(method, *args, &block)
