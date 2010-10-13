@@ -142,6 +142,7 @@ class PageTest < Test::Unit::TestCase
       @t.reload.path.should == "/changed/#{@s.slug}/#{@t.slug}"
     end
   end
+
   context "page entries" do
     setup do
       @parent = Page.create
@@ -160,4 +161,105 @@ class PageTest < Test::Unit::TestCase
       @parent.entries.first.entries.first.depth.should == 2
     end
   end
+
+  context "page templates" do
+    setup do
+      class ::PageClass < Page; end
+      PageClass.page_style :standard_style
+      PageClass.page_style :other, :title => "Custom Title"
+    end
+    teardown do
+      Object.send(:remove_const, :PageClass)
+    end
+
+    should "be definable" do
+      PageClass.page_styles.length.should == 2
+    end
+
+    should "be an instance of Style" do
+      PageClass.page_styles.first.class.should == Style
+    end
+    should "have a name" do
+      PageClass.page_styles.first.name.should == :standard_style
+    end
+
+    should "be accessible by name" do
+      PageClass.page_styles[:other].name.should == :other
+    end
+
+    should "choose the first defined template as the default unless told otherwise" do
+      PageClass.page_styles.default.name.should == :standard_style
+    end
+
+    should "use defined default style if existant" do
+      PageClass.page_style :new_default, :default => true
+      PageClass.page_styles.default.name.should == :new_default
+    end
+
+    should "take filename from name by default" do
+      PageClass.page_styles[:other].filename.should == "other.html.erb"
+    end
+
+    should "have configurable filenames" do
+      PageClass.page_style :custom, :filename => "funky"
+      PageClass.page_styles[:custom].filename.should == "funky.html.erb"
+    end
+
+    should "have sane default titles" do
+      PageClass.page_styles[:standard_style].title.should == "Standard Style"
+    end
+
+    should "have configurable titles" do
+      PageClass.page_styles[:other].title.should == "Custom Title"
+    end
+
+    should "automatically set the Page#style_id attribute to the default style on creation" do
+      p = PageClass.new
+      p.style.should == PageClass.page_styles.default
+    end
+
+    should "persist the chosen page style" do
+      p = PageClass.new
+      p.style = PageClass.page_styles[:other]
+      p.save
+      p = PageClass[p.id]
+      p.style.should == PageClass.page_styles[:other]
+    end
+  end
+
+  context "pages as inline content" do
+
+    setup do
+      class ::PageClass < Page; end
+      class ::FacetClass < Facet; end
+      PageClass.page_style :page_style
+      PageClass.inline_style :inline_style
+      @parent = Page.new
+      @facet = Facet.new
+      @page = PageClass.new
+      @parent << @facet
+      @facet << @page
+      @parent.save
+      @facet.save
+      @page.save
+    end
+    teardown do
+      Object.send(:remove_const, :PageClass)
+      Object.send(:remove_const, :FacetClass)
+    end
+    should "use style assigned by entry" do
+      @parent.entries.first.entries.first.style.should == PageClass.inline_styles.default
+    end
+
+    should "use their default page style when accessed directly" do
+      @page = PageClass[@page.id]
+      @page.style.should == PageClass.page_styles.default
+    end
+
+    should "persist sub-page style settings" do
+      @parent = Page[@parent.id]
+      @parent.entries.first.entries.first.style.should == PageClass.inline_styles.default
+    end
+  end
+  # context ""
 end

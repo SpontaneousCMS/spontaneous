@@ -54,7 +54,18 @@ module Spontaneous
 
     def style=(style)
       @entry_style_name = style.name
+      target[:style_id] = style.name
+      # because it's not obvious that a change to an entry
+      # will affect the fields of the target facet
+      # make sure that the target is saved using an instance hook
+      @container.after_save_hook do
+        target.save
+      end
       @container.entry_modified!(self)
+    end
+
+    def style_name
+      @entry_style_name
     end
 
     def load_target

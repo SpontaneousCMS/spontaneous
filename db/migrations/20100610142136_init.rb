@@ -7,7 +7,9 @@ Sequel.migration do
       integer :depth, :default => 0
 
       # used for Page tree structure
+      # #pageonly
       integer :parent_id, :index => true
+      varchar :ancestor_path, :index => true # materialised path
 
       # used to get the parent Content item (Page or Facet)
       integer :container_id, :index => true
@@ -15,17 +17,25 @@ Sequel.migration do
       # used to find all content for a Page
       integer :page_id, :index => true
 
+      # content stores
       text    :entry_store
       column  :field_store, 'mediumtext' # actually stores all the values, so needs some breathing room
-      varchar :template_id
+
+      # used to store the template assigned to a page
+      # #pageonly
+      varchar :style_id
 
       varchar :label
-      varchar :uid, :index => true
 
+      # URL path fields
+      # #pageonly
       varchar :slug
       varchar :path, :index => true # url path
 
-      varchar :ancestor_path, :index => true # materialised path
+      # For quick path-independent page lookups
+      # #pageonly
+      varchar :uid, :index => true
+
 
     end
   end

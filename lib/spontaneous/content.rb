@@ -9,6 +9,7 @@ module Spontaneous
 
     sequel_plugin :yajl_serialization, :field_store, :entry_store
     sequel_plugin :single_table_inheritance, :type_id
+    sequel_plugin :instance_hooks
 
     class << self
       alias_method :class_name, :name
@@ -158,6 +159,10 @@ module Spontaneous
 
     def styles
       self.class.styles
+    end
+
+    def style
+      self.class.inline_styles[style_id]
     end
 
     def page?

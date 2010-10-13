@@ -10,8 +10,10 @@ module Spontaneous
 
     def [](index)
       case index
-      when Symbol
-        inject({}) { |h, s| h[s.name] = s; h }[index]
+      when nil
+        default
+      when Symbol, String
+        inject({}) { |h, s| h[s.name] = s; h }[index.to_sym]
       else
         super
       end

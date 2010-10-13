@@ -6,6 +6,14 @@ module Spontaneous
       def root
         Page.first(:path => SLASH)
       end
+
+      def page_style(name, options={})
+        page_styles << Style.new(self, name, options)
+      end
+
+      def page_styles
+        @page_styles ||= StyleSet.new
+      end
     end
 
     many_to_one :parent, :class => Content, :reciprocal => :children
@@ -26,6 +34,15 @@ module Spontaneous
       super
       check_for_path_changes
     end
+
+    def style
+      self.class.page_styles[self.style_id]
+    end
+
+    def style=(page_style)
+      self.style_id = page_style.name
+    end
+
 
     def ancestors
       node, nodes = self, []

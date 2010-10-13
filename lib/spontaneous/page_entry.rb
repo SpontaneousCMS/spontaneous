@@ -8,5 +8,9 @@ module Spontaneous
     def depth
       container.depth + 1
     end
+
+    def style
+      target.class.inline_styles[style_name]
+    end
   end
 end
