@@ -20,20 +20,24 @@ module Spontaneous
   autoload :ProxyObject, "spontaneous/proxy_object"
   autoload :Plugins, "spontaneous/plugins"
   autoload :Content, "spontaneous/content"
+  autoload :Page, "spontaneous/page"
+  autoload :Facet, "spontaneous/facet"
+
   autoload :FieldPrototype, "spontaneous/field_prototype"
   autoload :Field, "spontaneous/field"
   autoload :FieldTypes, "spontaneous/field_types"
   autoload :FieldSet, "spontaneous/field_set"
+
   autoload :Entry, "spontaneous/entry"
   autoload :PageEntry, "spontaneous/page_entry"
   autoload :EntrySet, "spontaneous/entry_set"
-  autoload :Page, "spontaneous/page"
-  autoload :Facet, "spontaneous/facet"
-  autoload :Style, "spontaneous/style"
-  autoload :StyleDefinitions, "spontaneous/style_definitions"
+
   autoload :Slot, "spontaneous/slot"
   autoload :SlotDefinitions, "spontaneous/slot_definitions"
   autoload :SlotProxy, "spontaneous/slot_proxy"
+
+  autoload :Style, "spontaneous/style"
+  autoload :StyleDefinitions, "spontaneous/style_definitions"
   autoload :Template, "spontaneous/template"
   autoload :RenderContext, "spontaneous/render_context"
   autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
@@ -44,6 +48,13 @@ module Spontaneous
 
   module Plugins
     autoload :Slots, "spontaneous/plugins/slots"
+    autoload :Fields, "spontaneous/plugins/fields"
+    autoload :Entries, "spontaneous/plugins/entries"
+    autoload :Styles, "spontaneous/plugins/styles"
+    autoload :SchemaTitle, "spontaneous/plugins/schema_title"
+    autoload :Render, "spontaneous/plugins/render"
+    autoload :SchemaHierarchy, "spontaneous/plugins/schema_hierarchy"
+    autoload :InstanceCode, "spontaneous/plugins/instance_code"
   end
 end
 
