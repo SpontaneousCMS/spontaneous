@@ -58,6 +58,18 @@ module Spontaneous
     autoload :PageStyles, "spontaneous/plugins/page_styles"
     autoload :Paths, "spontaneous/plugins/paths"
     autoload :PageTree, "spontaneous/plugins/page_tree"
+    autoload :AllowedTypes, "spontaneous/plugins/allowed_types"
   end
+  class UnknownTypeException < Exception
+    def initialize(parent, type)
+      super("Unknown content type '#{type}' requested in class #{parent}")
+    end
+  end
+  class UnknownStyleException < Exception
+    def initialize(style_name, klass)
+      super("Unknown style '#{style_name}' for class #{klass}")
+    end
+  end
+
 end
 

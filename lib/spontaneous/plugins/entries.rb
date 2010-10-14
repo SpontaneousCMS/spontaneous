@@ -48,7 +48,7 @@ module Spontaneous::Plugins
           child_page.parent = page
           child_page.update_path
         end
-        entry_style = child_page.styles.default
+        entry_style = style_for_content(child_page)
         entry = Spontaneous::Entry.page(self, child_page, entry_style)
         entries.insert(index, entry)
         entry
@@ -58,10 +58,14 @@ module Spontaneous::Plugins
         facet.container = self
         facet.page = page if page
         facet.depth = depth + 1
-        entry_style = facet.styles.default
+        entry_style = style_for_content(facet)
         entry = Spontaneous::Entry.facet(self, facet, entry_style)
         entries.insert(index, entry)
         entry
+      end
+
+      def style_for_content(content)
+        content.styles.default
       end
 
       def entry=(entry)

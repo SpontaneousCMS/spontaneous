@@ -108,25 +108,66 @@ class ContentTest < Test::Unit::TestCase
       b.depth.should == 1
       c.depth.should == 2
     end
-
-
   end
-  context "Sanity Check" do
+
+  context "Content" do
     setup do
-      class ::CC < Content; end
-      ::CC.slot :images
-      ::CC.field :title
+      class ::Allowed1 < Content
+        inline_style :frank
+        inline_style :freddy
+      end
+      class ::Allowed2 < Content
+        inline_style :john
+        inline_style :paul
+        inline_style :ringo
+        inline_style :george
+      end
+      class ::Allowed3 < Content
+        inline_style :arthur
+        inline_style :lancelot
+      end
+      class ::Parent < Content
+        allow :Allowed1
+        allow Allowed2, :styles => [:ringo, :george]
+        allow 'Allowed3'
+      end
     end
 
     teardown do
-      Object.send(:remove_const, :CC)
+      [:Parent, :Allowed1, :Allowed2, :Allowed3].each { |k| Object.send(:remove_const, k) } rescue nil
+    end
+    should "have a list of allowed types" do
+      Parent.allowed.length.should == 3
     end
 
-    should "work" do
-      i = CC.new
-      i.entries.length.should == 1
-      i = CC[i.id]
-      i.should be_instance_of(CC)
+    should "have understood the type parameter" do
+      Parent.allowed[0].instance_class.should == Allowed1
+      Parent.allowed[1].instance_class.should == Allowed2
+      Parent.allowed[2].instance_class.should == Allowed3
+    end
+
+    should "raise an error when given an invalid type name" do
+      lambda { Parent.allow :WhatTheHellIsThis }.should raise_error(UnknownTypeException)
+    end
+
+    should "allow all styles by default" do
+      Parent.allowed[2].styles.should == Allowed3.inline_styles
+    end
+
+    should "have a list of allowable styles" do
+      Parent.allowed[1].styles.length.should == 2
+      Parent.allowed[1].styles.map { |s| s.name }.should == [:ringo, :george]
+    end
+
+    should "raise an error if we try to use an unknown style" do
+      lambda { Parent.allow :Allowed3, :styles => [:merlin, :arthur]  }.should raise_error(Spontaneous::UnknownStyleException)
+    end
+
+    should "use a configured style when adding a defined allowed type" do
+      a = Parent.new
+      b = Allowed2.new
+      a << b
+      a.entries.first.style.should == Allowed2.inline_styles[:ringo]
     end
   end
 end
