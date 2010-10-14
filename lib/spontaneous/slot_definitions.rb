@@ -1,10 +1,38 @@
 
 module Spontaneous
-  class SlotDefinitions < Array
+  class SlotDefinitions < ProxyObject
     def initialize(klass)
       @content_class = klass
+      @store = []
       if @content_class.superclass.respond_to?(:slots)
-        self.concat(@content_class.superclass.slots)
+        @store.concat(@content_class.superclass.slots)
+      end
+    end
+
+    def map(&block)
+      in_order(:map, &block)
+    end
+
+    alias_method :collect, :map
+
+    def each(&block)
+      in_order(:each, &block)
+    end
+
+    def in_order(method, &block)
+      ordered_slots.send(method) do |slot, *args|
+        block.call(slot, *args)
+      end
+    end
+
+    def ordered_slots
+      fo = @content_class.custom_slot_order
+      if fo.nil? or fo.empty?
+        @store
+      else
+        fo.map do |name|
+          @store.detect { |slot| slot.name == name }
+        end
       end
     end
 
@@ -58,5 +86,9 @@ module Spontaneous
         content.save
       end
     end
-  end
-end
+
+    def method_missing(method, *args, &block)
+      @store.send(method, *args, &block)
+    end
+  end # SlotDefinitions
+end # Spontaneous

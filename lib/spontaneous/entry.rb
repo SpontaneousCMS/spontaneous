@@ -84,7 +84,8 @@ module Spontaneous
       {
         :class => self.proxy_class.name.demodulize,
         :id => target.id,
-        :style => @entry_style_name
+        :style => @entry_style_name,
+        :slot => target.slot_id
       }
     end
 

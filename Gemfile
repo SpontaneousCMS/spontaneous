@@ -6,7 +6,9 @@ gem "yajl-ruby", "~>0.7", :require => 'yajl'
 gem "erubis", "~>2.6"
 gem "sinatra", "~>1.0"
 # gem "shotgun", "0.6"
-gem 'rack', '~>1.2'
+# use specific commit with fixes for 1.8.6 until new version is released
+gem "rack", :git => "git://github.com/rack/rack.git", :ref => "1598f873c891288954981435e707de26cf49395d" #"~>1.2"
+# gem 'rack', '~>1.2'
 gem "thin", "~>1.2"
 gem "less", "~>1.2"
 gem "stringex", "~>1.1"

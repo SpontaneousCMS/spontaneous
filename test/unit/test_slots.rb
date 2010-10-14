@@ -17,10 +17,15 @@ class SlotsTest < Test::Unit::TestCase
       SlotClass.slots.length.should == 0
     end
 
+    should "have a flag showing there are no defined slots" do
+      SlotClass.has_slots?.should be_false
+    end
+
     should "be definable with a name" do
       SlotClass.slot :images
       SlotClass.slots.length.should == 1
       SlotClass.slots.first.name.should == :images
+      SlotClass.has_slots?.should be_true
     end
 
     should "accept a custom instance class" do
@@ -54,24 +59,40 @@ class SlotsTest < Test::Unit::TestCase
       @instance.slots.group('main').map {|e| e.label.to_sym }.should == [:images, :posts, :last]
     end
 
-    should "inherit slots from its superclass" do
-      SlotClass.slot :images, :group => :main
+    context "with superclasses" do
+      setup do
+        SlotClass.slot :images, :group => :main
 
-      @subclass1 = Class.new(SlotClass) do
-        slot :monkeys, :group => :main
-        slot :apes
+        @subclass1 = Class.new(SlotClass) do
+          slot :monkeys, :group => :main
+          slot :apes
+        end
+        @subclass2 = Class.new(@subclass1) do
+          slot :peanuts
+        end
       end
-      @subclass2 = Class.new(@subclass1) do
-        slot :peanuts
+      should "inherit slots from its superclass" do
+        @subclass2.slots.length.should == 4
+        @subclass2.slots.map { |s| s.name }.should == [:images, :monkeys, :apes, :peanuts]
+        @subclass2.slots.group(:main).length.should == 2
+        instance = @subclass2.new
+        instance.slots.length.should == 4
       end
-      @subclass2.slots.length.should == 4
-      @subclass2.slots.map { |s| s.name }.should == [:images, :monkeys, :apes, :peanuts]
-      @subclass2.slots.group(:main).length.should == 2
-      instance = @subclass2.new
-      instance.slots.length.should == 4
+
+      should "allow customisation of the slot order" do
+        new_order = [:peanuts, :apes, :images, :monkeys]
+        @subclass2.slot_order *new_order
+        @subclass2.slots.map { |s| s.name }.should == new_order
+      end
+
+      should "take order of instance slots from class defn" do
+        new_order = [:peanuts, :apes, :images, :monkeys]
+        instance = @subclass2.create
+        @subclass2.slot_order *new_order
+        instance = @subclass2[instance.id]
+        instance.slots.map { |e| e.label.to_sym }.should == new_order
+      end
     end
-
-    should "allow customisation of the slot order"
 
     should "default to the name of the slot for the style name" do
       SlotClass.slot :images
@@ -147,7 +168,7 @@ class SlotsTest < Test::Unit::TestCase
         @instance.images.should == @instance.slots.first
         @instance.posts.should == @instance.slots.last
       end
-      
+
       ## waiting on entry deletion routines
       should "update list of slots on instance if slot removed after creation"
       # should "update list of slots on instance if slot removed after creation" do

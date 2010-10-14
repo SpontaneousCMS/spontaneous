@@ -22,7 +22,10 @@ module Spontaneous
       facet = slot.instance_class.new(:label => slot.name, :slot_name => slot.title, :slot_id => slot.name )
       entry = owner.push(facet)
       @map[slot.name] = entry
+      @ordered_entries = nil
     end
+
+    alias_method :<<, :push
 
     def method_missing(method, *args, &block)
       slot_name = method.to_sym
@@ -32,8 +35,6 @@ module Spontaneous
         owner.entries.send(method, *args, &block)
       end
     end
-
-    alias_method :<<, :push
 
     def load_slots
       owner.entries.each do |e|
