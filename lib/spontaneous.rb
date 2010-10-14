@@ -23,10 +23,8 @@ module Spontaneous
   autoload :Page, "spontaneous/page"
   autoload :Facet, "spontaneous/facet"
 
-  autoload :FieldPrototype, "spontaneous/field_prototype"
   autoload :Field, "spontaneous/field"
   autoload :FieldTypes, "spontaneous/field_types"
-  autoload :FieldSet, "spontaneous/field_set"
 
   autoload :Entry, "spontaneous/entry"
   autoload :PageEntry, "spontaneous/page_entry"
@@ -61,6 +59,11 @@ module Spontaneous
       autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"
       autoload :SlotProxy, "spontaneous/plugins/slots/slot_proxy"
       autoload :Slot, "spontaneous/plugins/slots/slot"
+    end
+
+    module Fields
+      autoload :FieldPrototype, "spontaneous/plugins/fields/field_prototype"
+      autoload :FieldSet, "spontaneous/plugins/fields/field_set"
     end
   end
 

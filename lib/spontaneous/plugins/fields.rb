@@ -8,7 +8,7 @@ module Spontaneous::Plugins
         end
 
         local_field_order << name
-        field_prototypes[name] = Spontaneous::FieldPrototype.new(name, type, options, &block)
+        field_prototypes[name] = FieldPrototype.new(name, type, options, &block)
         unless method_defined?(name)
           define_method(name) { fields[name] }
         else
@@ -61,7 +61,7 @@ module Spontaneous::Plugins
       end
 
       def fields
-        @field_set ||= Spontaneous::FieldSet.new(self, field_store)
+        @field_set ||= FieldSet.new(self, field_store)
       end
 
       def field?(field_name)
