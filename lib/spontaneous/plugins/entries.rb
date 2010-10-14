@@ -68,6 +68,10 @@ module Spontaneous::Plugins
         content.styles.default
       end
 
+      def available_styles(content)
+        content.styles
+      end
+
       def entry=(entry)
         @entry = entry
       end

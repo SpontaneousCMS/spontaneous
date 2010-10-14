@@ -70,9 +70,21 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+      def allowed_type(content)
+        self.class.allowed.find { |a| a.instance_class == content.class }
+      end
+
       def style_for_content(content)
-        if allowed = self.class.allowed.find { |a| a.instance_class == content.class }
+        if allowed = allowed_type(content)
           allowed.default_style
+        else
+          super
+        end
+      end
+
+      def available_styles(content)
+        if allowed = allowed_type(content)
+          allowed.styles
         else
           super
         end

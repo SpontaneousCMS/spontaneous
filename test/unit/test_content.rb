@@ -169,5 +169,15 @@ class ContentTest < Test::Unit::TestCase
       a << b
       a.entries.first.style.should == Allowed2.inline_styles[:ringo]
     end
+
+    should "know what the available styles are for an entry" do
+      a = Parent.new
+      b = Allowed2.new
+      c = Allowed3.new
+      a << b
+      a << c
+      a.available_styles(b).map { |s| s.name }.should == [:ringo, :george]
+      a.available_styles(c).map { |s| s.name }.should == [:arthur, :lancelot]
+    end
   end
 end
