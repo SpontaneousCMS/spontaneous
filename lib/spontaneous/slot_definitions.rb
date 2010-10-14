@@ -1,6 +1,6 @@
 
 module Spontaneous
-  class SlotSet < Array
+  class SlotDefinitions < Array
     def initialize(klass)
       @content_class = klass
       if @content_class.superclass.respond_to?(:slots)

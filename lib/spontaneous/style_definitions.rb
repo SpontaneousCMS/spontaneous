@@ -1,6 +1,6 @@
 
 module Spontaneous
-  class StyleSet < Array
+  class StyleDefinitions < Array
     # attr_reader :owner
 
     # def initialize(owner)

@@ -117,7 +117,7 @@ module Spontaneous
       end
 
       def inline_styles
-        @inline_styles ||= StyleSet.new
+        @inline_styles ||= StyleDefinitions.new
       end
 
       alias_method :styles, :inline_styles
@@ -131,7 +131,7 @@ module Spontaneous
       end
 
       def slots
-        @slots ||= SlotSet.new(self)
+        @slots ||= SlotDefinitions.new(self)
       end
 
       def slot?(slot_name)

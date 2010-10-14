@@ -12,7 +12,7 @@ module Spontaneous
       end
 
       def page_styles
-        @page_styles ||= StyleSet.new
+        @page_styles ||= StyleDefinitions.new
       end
     end
 
