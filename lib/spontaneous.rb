@@ -55,6 +55,9 @@ module Spontaneous
     autoload :Render, "spontaneous/plugins/render"
     autoload :SchemaHierarchy, "spontaneous/plugins/schema_hierarchy"
     autoload :InstanceCode, "spontaneous/plugins/instance_code"
+    autoload :PageStyles, "spontaneous/plugins/page_styles"
+    autoload :Paths, "spontaneous/plugins/paths"
+    autoload :PageTree, "spontaneous/plugins/page_tree"
   end
 end
 
