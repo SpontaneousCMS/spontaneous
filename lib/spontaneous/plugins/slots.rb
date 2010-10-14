@@ -4,7 +4,7 @@ module Spontaneous::Plugins
 
     module ClassMethods
       def slot(name, options={})
-        slot = Spontaneous::Slot.new(self, name, options)
+        slot = Slot.new(self, name, options)
         unless method_defined?(name)
           define_method(name) { slots[slot.name] }
         end
@@ -12,7 +12,7 @@ module Spontaneous::Plugins
       end
 
       def slots
-        @slots ||= Spontaneous::SlotDefinitions.new(self)
+        @slots ||= SlotDefinitions.new(self)
       end
 
       def slot?(slot_name)
@@ -30,7 +30,7 @@ module Spontaneous::Plugins
       def has_slots?
         !slots.empty?
       end
-    end
+    end # ClassMethods
 
     module InstanceMethods
       def after_initialize
@@ -43,12 +43,12 @@ module Spontaneous::Plugins
       end
 
       def slots
-        @slots ||= Spontaneous::SlotProxy.new(self)
+        @slots ||= SlotProxy.new(self)
       end
 
       def slot?(slot_name)
         self.class.slot?(slot_name.to_sym)
       end
-    end
-  end
-end
+    end # InstanceMethods
+  end # Slots
+end # Spontaneous::Plugins

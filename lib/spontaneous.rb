@@ -32,9 +32,6 @@ module Spontaneous
   autoload :PageEntry, "spontaneous/page_entry"
   autoload :EntrySet, "spontaneous/entry_set"
 
-  autoload :Slot, "spontaneous/slot"
-  autoload :SlotDefinitions, "spontaneous/slot_definitions"
-  autoload :SlotProxy, "spontaneous/slot_proxy"
 
   autoload :Style, "spontaneous/style"
   autoload :StyleDefinitions, "spontaneous/style_definitions"
@@ -59,7 +56,14 @@ module Spontaneous
     autoload :Paths, "spontaneous/plugins/paths"
     autoload :PageTree, "spontaneous/plugins/page_tree"
     autoload :AllowedTypes, "spontaneous/plugins/allowed_types"
+
+    module Slots
+      autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"
+      autoload :SlotProxy, "spontaneous/plugins/slots/slot_proxy"
+      autoload :Slot, "spontaneous/plugins/slots/slot"
+    end
   end
+
   class UnknownTypeException < Exception
     def initialize(parent, type)
       super("Unknown content type '#{type}' requested in class #{parent}")
