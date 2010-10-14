@@ -56,6 +56,11 @@ class FacetTest < Test::Unit::TestCase
         @page.facets.should == [@f1, @f2, @f3]
         @page.facets.last.class.should == Fridge
       end
+
+      should "have a link to their entries" do
+        @f1.entry.should == @page.entries.first
+        @f2.entry.should == @page.entries.first.entries.first
+      end
     end
   end
 end
