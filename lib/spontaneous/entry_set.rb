@@ -8,11 +8,6 @@ module Spontaneous
       @owner = owner
       @property_name = property_name
 
-      # entry_store.each do |data|
-      #   klass = Spontaneous.const_get(data[:class])
-      #   store_push( klass.new(@owner, data[:id], data[:style]) )
-      # end
-
       slot_map = {}
       unmapped = []
 
@@ -27,7 +22,9 @@ module Spontaneous
       end
 
       @owner.class.slots.ordered_slots.each do |slot|
-        store_push(slot_map[slot.name]) if slot_map[slot.name]
+        if e = slot_map[slot.name]
+          store_push(e)
+        end
       end
 
       # append entries without corresponding slots to end
