@@ -33,6 +33,15 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+      def after_initialize
+        super
+        if new?
+          self.class.slots.instantiate(self)
+        else
+          self.class.slots.verify(self)
+        end
+      end
+
       def slots
         @slots ||= Spontaneous::SlotProxy.new(self)
       end

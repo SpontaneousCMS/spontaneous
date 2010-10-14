@@ -111,4 +111,22 @@ class ContentTest < Test::Unit::TestCase
 
 
   end
+  context "Sanity Check" do
+    setup do
+      class ::CC < Content; end
+      ::CC.slot :images
+      ::CC.field :title
+    end
+
+    teardown do
+      Object.send(:remove_const, :CC)
+    end
+
+    should "work" do
+      i = CC.new
+      i.entries.length.should == 1
+      i = CC[i.id]
+      i.should be_instance_of(CC)
+    end
+  end
 end

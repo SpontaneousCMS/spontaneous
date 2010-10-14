@@ -20,9 +20,7 @@ module Spontaneous
     end
 
     def in_order(method, &block)
-      ordered_slots.send(method) do |slot, *args|
-        block.call(slot, *args)
-      end
+      ordered_slots.send(method, &block)
     end
 
     def ordered_slots

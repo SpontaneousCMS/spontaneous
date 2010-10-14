@@ -7,11 +7,12 @@ module Spontaneous
       alias_method :sequel_plugin, :plugin
     end
 
-    extend Plugins
-
-    sequel_plugin :yajl_serialization, :field_store, :entry_store
     sequel_plugin :single_table_inheritance, :type_id
+    sequel_plugin :yajl_serialization, :field_store, :entry_store
     sequel_plugin :instance_hooks
+    sequel_plugin :skip_create_refresh
+
+    extend Plugins
 
     plugin Plugins::Slots
     plugin Plugins::Fields
@@ -26,11 +27,11 @@ module Spontaneous
     one_to_many :nodes, :key => :container_id, :class => self, :reciprocal => :container
 
     def after_initialize
-      super
       if new?
         self.depth = 0
         self.path = ""
       end
+      super
     end
 
 
