@@ -16,26 +16,34 @@ module Spontaneous
       "erb"
     end
   end
+
+  autoload :ProxyObject, "spontaneous/proxy_object"
+  autoload :Plugins, "spontaneous/plugins"
+  autoload :Content, "spontaneous/content"
+  autoload :FieldPrototype, "spontaneous/field_prototype"
+  autoload :Field, "spontaneous/field"
+  autoload :FieldTypes, "spontaneous/field_types"
+  autoload :FieldSet, "spontaneous/field_set"
+  autoload :Entry, "spontaneous/entry"
+  autoload :PageEntry, "spontaneous/page_entry"
+  autoload :EntrySet, "spontaneous/entry_set"
+  autoload :Page, "spontaneous/page"
+  autoload :Facet, "spontaneous/facet"
+  autoload :Style, "spontaneous/style"
+  autoload :StyleDefinitions, "spontaneous/style_definitions"
+  autoload :Slot, "spontaneous/slot"
+  autoload :SlotDefinitions, "spontaneous/slot_definitions"
+  autoload :SlotProxy, "spontaneous/slot_proxy"
+  autoload :Template, "spontaneous/template"
+  autoload :RenderContext, "spontaneous/render_context"
+  autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
+
+  module TemplateTypes
+    autoload :ErubisTemplate, "spontaneous/template_types/erubis_template"
+  end
+
+  module Plugins
+    autoload :Slots, "spontaneous/plugins/slots"
+  end
 end
 
-
-require File.expand_path("../spontaneous/proxy_object", __FILE__)
-require File.expand_path("../spontaneous/content", __FILE__)
-require File.expand_path("../spontaneous/field_prototype", __FILE__)
-require File.expand_path("../spontaneous/field", __FILE__)
-require File.expand_path("../spontaneous/field_types", __FILE__)
-require File.expand_path("../spontaneous/field_set", __FILE__)
-require File.expand_path("../spontaneous/entry", __FILE__)
-require File.expand_path("../spontaneous/page_entry", __FILE__)
-require File.expand_path("../spontaneous/entry_set", __FILE__)
-require File.expand_path("../spontaneous/page", __FILE__)
-require File.expand_path("../spontaneous/facet", __FILE__)
-require File.expand_path("../spontaneous/style", __FILE__)
-require File.expand_path("../spontaneous/style_definitions", __FILE__)
-require File.expand_path("../spontaneous/slot", __FILE__)
-require File.expand_path("../spontaneous/slot_definitions", __FILE__)
-require File.expand_path("../spontaneous/slot_proxy", __FILE__)
-require File.expand_path("../spontaneous/template", __FILE__)
-require File.expand_path("../spontaneous/template_types/erubis_template", __FILE__)
-require File.expand_path("../spontaneous/render_context", __FILE__)
-require File.expand_path("../spontaneous/render_format_proxy", __FILE__)

@@ -6,10 +6,13 @@ module Spontaneous
     class << self
       alias_method :sequel_plugin, :plugin
     end
+    extend Plugins
 
     sequel_plugin :yajl_serialization, :field_store, :entry_store
     sequel_plugin :single_table_inheritance, :type_id
     sequel_plugin :instance_hooks
+
+    plugin Plugins::Slots
 
     class << self
       alias_method :class_name, :name
@@ -122,21 +125,6 @@ module Spontaneous
 
       alias_method :styles, :inline_styles
 
-      def slot(name, options={})
-        slot = Slot.new(self, name, options)
-        unless method_defined?(name)
-          define_method(name) { slots[slot.name] }
-        end
-        slots << slot
-      end
-
-      def slots
-        @slots ||= SlotDefinitions.new(self)
-      end
-
-      def slot?(slot_name)
-        !slots.detect {|s| s.name == slot_name }.nil? || (supertype ? supertype.slot?(slot_name) : false )
-      end
 
     end
 
@@ -193,10 +181,6 @@ module Spontaneous
       @entries ||= EntrySet.new(self, :entry_store)
     end
 
-    def slot?(slot_name)
-      self.class.slot?(slot_name.to_sym)
-    end
-
     def visible_entries
       entries
     end
@@ -210,9 +194,6 @@ module Spontaneous
       entries.last
     end
 
-    def slots
-      @slots ||= SlotProxy.new(self)
-    end
 
     def styles
       self.class.inline_styles
