@@ -39,7 +39,19 @@ module Spontaneous
       @name_map[entry.name.to_sym] = entry unless (entry.name.nil? or entry.name.empty?)
     end
 
+    alias_method :<<, :push
+
+    def [](index)
+      case index
+      when Symbol, String
+        labelled(index.to_sym)
+      else
+        super
+      end
+    end
+
     def labelled(label)
+      label = label.to_sym
       find { |e| e.label == label }
     end
 
@@ -60,6 +72,13 @@ module Spontaneous
     end
 
 
+    def method_missing(method, *args, &block)
+      if entry = labelled(method)
+        entry
+      else
+        super
+      end
+    end
     # def set_position(content, position)
     #   entry = self.detect {|e| e.target == content }
     #   self.delete(entry)

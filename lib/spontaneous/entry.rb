@@ -100,7 +100,7 @@ module Spontaneous
     end
 
     def inspect
-      "#<#{self.proxy_class.name.demodulize}:#{self.object_id.to_s(16)} content=#{target} entry_style=\"#{@entry_style_name}\" slot_id=\"#{slot_id}\">"
+      "#<#{self.proxy_class.name.demodulize}:#{self.object_id.to_s(16)} content=#{target} entry_style=\"#{@entry_style_name}\" label=\"#{label}\" slot_id=\"#{slot_id}\">"
     end
   end
 end

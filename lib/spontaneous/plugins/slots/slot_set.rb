@@ -6,12 +6,6 @@ module Spontaneous::Plugins
 
       def initialize(owner)
         @owner = owner
-        @map = {}
-        load_slots
-      end
-
-      def [](slot_name)
-        @map[slot_name.to_sym]
       end
 
       def group(group_name)
@@ -22,26 +16,18 @@ module Spontaneous::Plugins
       def push(slot)
         facet = slot.instance_class.new(:type_id => Spontaneous::Facet, :label => slot.name, :slot_name => slot.title, :slot_id => slot.name )
         entry = owner.push(facet)
-        @map[slot.name] = entry
-        @ordered_entries = nil
       end
 
       alias_method :<<, :push
 
-      def method_missing(method, *args, &block)
-        slot_name = method.to_sym
-        if @map.key?(slot_name)
-          self[slot_name]
-        else
-          owner.entries.send(method, *args, &block)
-        end
+      def target
+        owner.entries
       end
 
-      def load_slots
-        owner.entries.each do |e|
-          @map[e.label.to_sym] = e unless e.label.nil?
-        end
+      def method_missing(method, *args, &block)
+        target.send(method, *args, &block)
       end
+
     end # Slot Proxy
   end
 end

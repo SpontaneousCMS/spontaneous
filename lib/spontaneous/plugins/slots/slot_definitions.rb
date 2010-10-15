@@ -37,7 +37,7 @@ module Spontaneous::Plugins
 
       def instantiate(content)
         self.each do |slot|
-          content.slots << slot
+          content.slots.push(slot)
         end
       end
 
