@@ -14,8 +14,8 @@ module Spontaneous::Plugins
         @options[:title] || default_title
       end
 
-      def group
-        @options[:group]
+      def tag
+        @options[:tag]
       end
 
       def default_title

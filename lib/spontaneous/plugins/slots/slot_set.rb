@@ -8,8 +8,8 @@ module Spontaneous::Plugins
         @owner = owner
       end
 
-      def group(group_name)
-        slots = owner.class.slots.group(group_name.to_sym)
+      def tagged(tag)
+        slots = owner.class.slots.tagged(tag.to_sym)
         slots.map { |s| self[s.name] }
       end
 

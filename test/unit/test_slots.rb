@@ -50,21 +50,21 @@ class SlotsTest < Test::Unit::TestCase
     end
 
     should "allow access to groups of slots" do
-      SlotClass.slot :images, :group => :main
-      SlotClass.slot :posts, :group => :main
+      SlotClass.slot :images, :tag => :main
+      SlotClass.slot :posts, :tag => :main
       SlotClass.slot :comments
-      SlotClass.slot :last, :group => :main
+      SlotClass.slot :last, :tag => :main
       @instance = SlotClass.new
-      @instance.slots.group(:main).length.should == 3
-      @instance.slots.group('main').map {|e| e.label.to_sym }.should == [:images, :posts, :last]
+      @instance.slots.tagged(:main).length.should == 3
+      @instance.slots.tagged('main').map {|e| e.label.to_sym }.should == [:images, :posts, :last]
     end
 
     context "with superclasses" do
       setup do
-        SlotClass.slot :images, :group => :main
+        SlotClass.slot :images, :tag => :main
 
         @subclass1 = Class.new(SlotClass) do
-          slot :monkeys, :group => :main
+          slot :monkeys, :tag => :main
           slot :apes
         end
         @subclass2 = Class.new(@subclass1) do
@@ -74,7 +74,7 @@ class SlotsTest < Test::Unit::TestCase
       should "inherit slots from its superclass" do
         @subclass2.slots.length.should == 4
         @subclass2.slots.map { |s| s.name }.should == [:images, :monkeys, :apes, :peanuts]
-        @subclass2.slots.group(:main).length.should == 2
+        @subclass2.slots.tagged(:main).length.should == 2
         instance = @subclass2.new
         instance.slots.length.should == 4
       end

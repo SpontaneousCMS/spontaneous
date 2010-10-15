@@ -41,8 +41,8 @@ module Spontaneous::Plugins
         end
       end
 
-      def group(group_name)
-        self.select { |s| s.group == group_name }
+      def tagged(tag)
+        self.select { |s| s.tag == tag }
       end
 
       def verify(content)
