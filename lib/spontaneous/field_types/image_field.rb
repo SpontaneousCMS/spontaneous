@@ -1,7 +1,7 @@
 
 module Spontaneous
   module FieldTypes
-    class ImageField < Field
+    class ImageField < Base
     end
 
     ImageField.register

@@ -1,7 +1,7 @@
 
 module Spontaneous
   module FieldTypes
-    class DateField < Field
+    class DateField < Base
     end
 
     DateField.register

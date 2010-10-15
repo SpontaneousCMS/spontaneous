@@ -147,7 +147,7 @@ class FieldsTest < Test::Unit::TestCase
 
   context "Values" do
     setup do
-      @field_class = Class.new(Field) do
+      @field_class = Class.new(FieldTypes::Base) do
         def process(value)
           "<#{value}>"
         end
@@ -240,7 +240,7 @@ class FieldsTest < Test::Unit::TestCase
 
   context "Available output formats" do
     should "include HTML & PDF and default to default value" do
-      f = Field.new
+      f = FieldTypes::Base.new
       f.value = "Value"
       f.to_html.should == "Value"
       f.to_pdf.should == "Value"

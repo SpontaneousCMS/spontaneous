@@ -1,7 +1,7 @@
 
 module Spontaneous
   module FieldTypes
-    class StringField < Field
+    class StringField < Base
     end
     StringField.register
   end

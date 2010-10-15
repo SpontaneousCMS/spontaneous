@@ -2,6 +2,9 @@
 
 module Spontaneous
   module FieldTypes
+
+    autoload :Base, "spontaneous/field_types/base"
+
     @@type_map = {}
 
     def self.register(klass, *labels)
@@ -13,9 +16,10 @@ module Spontaneous
     def self.[](label)
       @@type_map[label.to_sym] || StringField
     end
+
   end
 end
 
-require File.expand_path("../field_types/string_field", __FILE__)
-require File.expand_path("../field_types/image_field", __FILE__)
-require File.expand_path("../field_types/date_field", __FILE__)
+[:string, :image, :date].each do |type|
+  require "spontaneous/field_types/#{type}_field"
+end

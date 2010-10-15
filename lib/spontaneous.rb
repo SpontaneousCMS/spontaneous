@@ -23,7 +23,6 @@ module Spontaneous
   autoload :Page, "spontaneous/page"
   autoload :Facet, "spontaneous/facet"
 
-  autoload :Field, "spontaneous/field"
   autoload :FieldTypes, "spontaneous/field_types"
 
   autoload :Entry, "spontaneous/entry"
@@ -66,6 +65,7 @@ module Spontaneous
       autoload :FieldSet, "spontaneous/plugins/fields/field_set"
     end
   end
+
 
   class UnknownTypeException < Exception
     def initialize(parent, type)
