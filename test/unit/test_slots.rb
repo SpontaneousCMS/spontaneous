@@ -155,6 +155,7 @@ class SlotsTest < Test::Unit::TestCase
       teardown do
         Object.send(:remove_const, :AllowedType)
       end
+
       should "allow per-slot definitions" do
         SlotClass.slots.first.instance_class.allowed.length.should == 1
         instance = SlotClass.new
