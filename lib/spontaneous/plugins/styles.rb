@@ -1,14 +1,6 @@
 module Spontaneous::Plugins
   module Styles
 
-    class InlineTemplate < Spontaneous::TemplateTypes::ErubisTemplate
-      attr_reader :source
-
-      def initialize(source)
-        @source = source
-      end
-    end
-
     def self.configure(base)
       base.instance_eval do
         class << self
@@ -37,7 +29,7 @@ module Spontaneous::Plugins
       def inline_templates
         @inline_templates ||= {}
       end
-    end
+    end # ClassMethods
 
     module InstanceMethods
       def styles
@@ -49,21 +41,18 @@ module Spontaneous::Plugins
       end
 
       def template(format=:html)
-        # if style.nil?
-        #   self.class.inline_templates[format.to_sym]
-        # else
         style.template(format)
-        # end
       end
 
       def anonymous_style
-        @anonymous_style ||= unless self.class.inline_templates.empty?
-                               InlineStyle.new(self)
-                             else
-                               AnonymousStyle.new
-                             end
+        @anonymous_style ||= \
+          unless self.class.inline_templates.empty?
+            InlineStyle.new(self)
+          else
+            AnonymousStyle.new
+          end
       end
-    end
+    end # InstanceMethods
 
     class InlineStyle
       def initialize(target)
@@ -72,12 +61,21 @@ module Spontaneous::Plugins
       def template(format=:html)
         @target.class.inline_templates[format.to_sym]
       end
-    end
+    end # InlineStyle
+
+    class InlineTemplate < Spontaneous::TemplateTypes::ErubisTemplate
+      attr_reader :source
+
+      def initialize(source)
+        @source = source
+      end
+    end # InlineTemplate
+
     class AnonymousStyle
       def template(format=:html)
         @template ||= AnonymousTemplate.new
       end
-    end
+    end # AnonymousStyle
 
     class AnonymousTemplate
       def render(binding)
