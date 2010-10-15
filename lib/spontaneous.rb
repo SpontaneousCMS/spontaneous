@@ -57,7 +57,7 @@ module Spontaneous
 
     module Slots
       autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"
-      autoload :SlotProxy, "spontaneous/plugins/slots/slot_proxy"
+      autoload :SlotSet, "spontaneous/plugins/slots/slot_set"
       autoload :Slot, "spontaneous/plugins/slots/slot"
     end
 

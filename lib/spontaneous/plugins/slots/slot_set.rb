@@ -1,7 +1,7 @@
 
 module Spontaneous::Plugins
   module Slots
-    class SlotProxy < Spontaneous::ProxyObject
+    class SlotSet < Spontaneous::ProxyObject
       attr_reader :owner
 
       def initialize(owner)

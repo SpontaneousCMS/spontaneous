@@ -43,7 +43,7 @@ module Spontaneous::Plugins
       end
 
       def slots
-        @slots ||= SlotProxy.new(self)
+        @slots ||= SlotSet.new(self)
       end
 
       def slot?(slot_name)
