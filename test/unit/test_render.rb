@@ -104,7 +104,7 @@ class RenderTest < Test::Unit::TestCase
 
         class ::AnImage < Content; end
         AnImage.field :title
-        AnImage.template "<img><%= title %></img>"
+        AnImage.template '<img>#{title}</img>'
 
         @root = TemplateClass.new
         @root.images.introduction = "Images below:"

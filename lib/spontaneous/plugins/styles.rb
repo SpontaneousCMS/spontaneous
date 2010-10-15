@@ -64,13 +64,22 @@ module Spontaneous::Plugins
       end
     end # InlineStyle
 
-    class InlineTemplate < Spontaneous::TemplateTypes::ErubisTemplate
-      attr_reader :source
-
+    class InlineTemplate
       def initialize(source)
         @source = source
       end
-    end # InlineTemplate
+
+      def render(binding)
+        eval("\""+@source+"\"", binding)
+      end
+    end
+    # class InlineTemplate < Spontaneous::TemplateTypes::ErubisTemplate
+    #   attr_reader :source
+
+    #   def initialize(source)
+    #     @source = source
+    #   end
+    # end # InlineTemplate
 
     class AnonymousStyle
       def template(format=:html)

@@ -173,7 +173,7 @@ class StylesTest < Test::Unit::TestCase
         class ::InlineTemplateClass < Content
           field :title
 
-          template "title: <%= title %>"
+          template 'title: #{title}'
         end
 
         @a = InlineTemplateClass.new
