@@ -58,6 +58,7 @@ module Spontaneous::Plugins
       def initialize(target)
         @target = target
       end
+
       def template(format=:html)
         @target.class.inline_templates[format.to_sym]
       end
@@ -73,15 +74,13 @@ module Spontaneous::Plugins
 
     class AnonymousStyle
       def template(format=:html)
-        @template ||= AnonymousTemplate.new
+        self
       end
-    end # AnonymousStyle
 
-    class AnonymousTemplate
       def render(binding)
         eval('render_content', binding)
       end
-    end
+    end # AnonymousStyle
   end
 end
 
