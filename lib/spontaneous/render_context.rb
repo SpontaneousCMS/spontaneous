@@ -48,7 +48,6 @@ module Spontaneous
         target.fields[key].send(output_method)
       elsif target.slot?(key)
         context_cache[target.slots[key]]
-        # RenderContext.new(target.slots[key], format)
       else
         target.send(method, *args, &block)
       end
