@@ -19,6 +19,7 @@ module Spontaneous
 
   autoload :ProxyObject, "spontaneous/proxy_object"
   autoload :Plugins, "spontaneous/plugins"
+
   autoload :Content, "spontaneous/content"
   autoload :Page, "spontaneous/page"
   autoload :Facet, "spontaneous/facet"
