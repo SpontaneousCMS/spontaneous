@@ -6,7 +6,9 @@ module Spontaneous::Plugins
 
       def initialize(name, type, options={}, &block)
         @name = name
-        @field_class = Spontaneous::FieldTypes[type]
+        # if the type is nil then try the name, this will assign sensible defaults
+        # to fields like 'image' or 'date'
+        @field_class = Spontaneous::FieldTypes[type || name]
         if block
           @field_class = Class.new(@field_class, &block)
         end

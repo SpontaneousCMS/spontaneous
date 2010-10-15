@@ -1,10 +1,10 @@
 module Spontaneous::Plugins
   module Fields
     module ClassMethods
-      def field(name, type=:string, options={}, &block)
+      def field(name, type=nil, options={}, &block)
         if type.is_a?(Hash)
           options = type
-          type = :string
+          type = nil
         end
 
         local_field_order << name

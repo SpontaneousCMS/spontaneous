@@ -76,7 +76,7 @@ class RenderTest < Test::Unit::TestCase
     context "slots" do
       setup do
         TemplateClass.inline_style :slots_template, :default => true
-        TemplateClass.slot :images#, :class => :TemplateClass 
+        TemplateClass.slot :images
         @content = TemplateClass.new
         @content.title = "The Title"
         @content.description = "The Description"
@@ -89,6 +89,39 @@ class RenderTest < Test::Unit::TestCase
 
       should "render slots" do
         @content.render.should == "<slots>\n  <img><html><title>Child Title</title><body>Child Description</body></html></img>\n</slots>"
+      end
+      should "render slots to alternate formats" do
+        @content.render(:pdf).should == "<slots-pdf>\n  <img><PDF><title>Child Title</title><body>{Child Description}</body></PDF></img>\n</slots-pdf>"
+      end
+    end
+
+    context "anonymous slots" do
+      setup do
+        TemplateClass.inline_style :anonymous_style, :default => true
+        TemplateClass.slot :images do
+          field :introduction
+        end
+
+        class ::AnImage < Content; end
+        AnImage.field :title
+        AnImage.template "<img><%= title %></img>"
+
+        @root = TemplateClass.new
+        @root.images.introduction = "Images below:"
+        @image1 = AnImage.new
+        @image1.title = "Image 1"
+        @image2 = AnImage.new
+        @image2.title = "Image 2"
+        @root.images << @image1
+        @root.images << @image2
+      end
+
+      teardown do
+        Object.send(:remove_const, :AnImage)
+      end
+
+      should "render using anonymous style" do
+        @root.render.should == "<root>\nImages below:\n<img>Image 1</img>\n<img>Image 2</img>\n</root>"
       end
     end
   end

@@ -167,5 +167,26 @@ class StylesTest < Test::Unit::TestCase
         end
       end
     end
+
+    context "inline templates" do
+      setup do
+        class ::InlineTemplateClass < Content
+          field :title
+
+          template "title: <%= title %>"
+        end
+
+        @a = InlineTemplateClass.new
+        @a.title = "Total Title"
+      end
+
+      teardown do
+        Object.send(:remove_const, :InlineTemplateClass)
+      end
+
+      should "be used to render the content" do
+        @a.render.should ==  "title: Total Title"
+      end
+    end
   end
 end

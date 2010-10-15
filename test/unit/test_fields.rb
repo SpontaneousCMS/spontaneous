@@ -49,6 +49,11 @@ class FieldsTest < Test::Unit::TestCase
       @content_class.field_prototypes[:title].name.should == :title
     end
 
+    should "work with just a name & options" do
+      @content_class.field :minimal, :default_value => "Small"
+      @content_class.field_prototypes[:minimal].name.should == :minimal
+      @content_class.field_prototypes[:minimal].default_value.should == "Small"
+    end
     should "map :string type to FieldTypes::Text" do
       @content_class.field_prototypes[:synopsis].field_class.should == Spontaneous::FieldTypes::StringField
     end
@@ -80,6 +85,17 @@ class FieldsTest < Test::Unit::TestCase
         @prototype.default_value.should == ""
       end
 
+      should "match name to type if sensible" do
+        content_class = Class.new(Content) do
+          field :image
+          field :date
+          field :chunky
+        end
+
+        content_class.field_prototypes[:image].field_class.should == Spontaneous::FieldTypes::ImageField
+        content_class.field_prototypes[:date].field_class.should == Spontaneous::FieldTypes::DateField
+        content_class.field_prototypes[:chunky].field_class.should == Spontaneous::FieldTypes::StringField
+      end
     end
 
     context "Field titles" do

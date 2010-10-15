@@ -56,7 +56,15 @@ module Spontaneous
     end
 
     def style
-      target.styles[@entry_style_name]
+      if @entry_style_name
+        target.styles[@entry_style_name]
+      else
+        target.anonymous_style
+      end
+    end
+
+    def template(format=:html)
+      style.template(format)
     end
 
     def style=(style)

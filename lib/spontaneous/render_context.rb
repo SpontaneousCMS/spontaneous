@@ -20,24 +20,42 @@ module Spontaneous
     end
 
     def render
-      template = target.style.template(format)
+      template = target.template(format)
       template.render(binding)
     end
 
     def content
-      target.visible_entries.map { |e| RenderFormatProxy.new(e, format) }
+      target.visible_entries.map { |e| context_cache[e] }
+    end
+
+    def entries
+      content
+    end
+
+    def facets
+      content
+    end
+
+    def render_content
+      content.map do |c|
+        c.render
+      end.join("\n")
     end
 
     def method_missing(method, *args, &block)
-      # key = method.to_s.gsub(/\\?$/,'').to_sym
       key = method.to_sym
       if target.field?(key)
         target.fields[key].send(output_method)
       elsif target.slot?(key)
-        target.slots[key].visible_entries
+        context_cache[target.slots[key]]
+        # RenderContext.new(target.slots[key], format)
       else
         target.send(method, *args, &block)
       end
+    end
+
+    def context_cache
+      @context_cache ||= Hash.new { |hash, obj| hash[obj] = RenderContext.new(obj, format) }
     end
   end
 end

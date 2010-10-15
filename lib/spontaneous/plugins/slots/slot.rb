@@ -24,7 +24,7 @@ module Spontaneous::Plugins
       end
 
       def style
-        @options[:style] || name
+        @options[:style]# || name
       end
 
       def instance_class
@@ -54,7 +54,9 @@ module Spontaneous::Plugins
       def anonymous_class
         @anonymous_class ||= Class.new(Spontaneous::Facet).tap do |klass|
           klass.class_eval(&@extend) if @extend
-          klass.inline_style style, :class_name => template_class_name
+          if style
+            klass.inline_style style, :class_name => template_class_name
+          end
         end
 
       end
