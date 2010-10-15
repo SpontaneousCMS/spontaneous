@@ -52,7 +52,7 @@ module Spontaneous::Plugins
         # if style.nil?
         #   self.class.inline_templates[format.to_sym]
         # else
-          style.template(format)
+        style.template(format)
         # end
       end
 
@@ -60,7 +60,7 @@ module Spontaneous::Plugins
         @anonymous_style ||= unless self.class.inline_templates.empty?
                                InlineStyle.new(self)
                              else
-                               Spontaneous::AnonymousStyle.new
+                               AnonymousStyle.new
                              end
       end
     end
@@ -71,6 +71,17 @@ module Spontaneous::Plugins
       end
       def template(format=:html)
         @target.class.inline_templates[format.to_sym]
+      end
+    end
+    class AnonymousStyle
+      def template(format=:html)
+        @template ||= AnonymousTemplate.new
+      end
+    end
+
+    class AnonymousTemplate
+      def render(binding)
+        eval('render_content', binding)
       end
     end
   end

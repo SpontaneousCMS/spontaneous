@@ -36,7 +36,6 @@ module Spontaneous
   autoload :Template, "spontaneous/template"
   autoload :RenderContext, "spontaneous/render_context"
   autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
-  autoload :AnonymousStyle, "spontaneous/anonymous_style"
 
   module TemplateTypes
     autoload :ErubisTemplate, "spontaneous/template_types/erubis_template"

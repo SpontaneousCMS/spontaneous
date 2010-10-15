@@ -102,7 +102,7 @@ class SlotsTest < Test::Unit::TestCase
     should "default to a template-less style for slots without a style" do
       SlotClass.slot :images
       instance = SlotClass.new
-      instance.images.style.class.should == Spontaneous::AnonymousStyle
+      instance.images.style.class.should == Spontaneous::Plugins::Styles::AnonymousStyle
     end
 
     should "accept a custom template name" do
