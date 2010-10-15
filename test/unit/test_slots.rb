@@ -114,6 +114,55 @@ class SlotsTest < Test::Unit::TestCase
       instance.posts.style.path.should == "#{Spontaneous.template_root}/slot_class/posts.html.erb"
     end
 
+    context "anonymous slots" do
+      setup do
+        class ::AllowedType < Content; end
+        SlotClass.slot :images do
+          allow AllowedType
+
+          def monkey
+            "magic"
+          end
+        end
+      end
+
+      teardown do
+        Object.send(:remove_const, :AllowedType)
+      end
+
+      should "allow configuration of allowed types for anonymous slots" do
+        SlotClass.slots.first.instance_class.allowed.length.should == 1
+      end
+
+      should "allow methods in slot definitions" do
+        instance = SlotClass.new
+        instance.images.monkey.should == "magic"
+      end
+    end
+
+    context "slots with definied classes" do
+      setup do
+        class ::AllowedType < Content; end
+        SlotClass.slot :images, :class => AllowedType do
+          allow AllowedType
+
+          def monkey
+            "magic"
+          end
+        end
+      end
+
+      teardown do
+        Object.send(:remove_const, :AllowedType)
+      end
+      should "allow per-slot definitions" do
+        SlotClass.slots.first.instance_class.allowed.length.should == 1
+        instance = SlotClass.new
+        instance.images.monkey.should == "magic"
+        instance = SlotClass[instance.id]
+        instance.images.monkey.should == "magic"
+      end
+    end
     context "" do
       setup do
         SlotClass.slot :images

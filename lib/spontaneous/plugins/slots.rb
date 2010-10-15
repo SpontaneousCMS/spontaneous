@@ -3,8 +3,8 @@ module Spontaneous::Plugins
   module Slots
 
     module ClassMethods
-      def slot(name, options={})
-        slot = Slot.new(self, name, options)
+      def slot(name, options={}, &block)
+        slot = Slot.new(self, name, options, &block)
         unless method_defined?(name)
           define_method(name) { slots[slot.name] }
         end

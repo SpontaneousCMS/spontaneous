@@ -62,7 +62,6 @@ module Spontaneous::Plugins
         else
           File.join(parent.path, slug)
         end
-
       end
 
       def slug=(s)

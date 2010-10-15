@@ -4,10 +4,11 @@ module Spontaneous::Plugins
     class Slot
       attr_reader :name
 
-      def initialize(owning_class, name, options={})
+      def initialize(owning_class, name, options={}, &block)
         @owning_class = owning_class
         @name = name.to_sym
         @options = options
+        @extend = block
       end
 
       def title
@@ -30,9 +31,9 @@ module Spontaneous::Plugins
         @instance_class ||= \
           case klass = @options[:class]
           when Class
-            klass
+            extended_class(klass)
           when String, Symbol
-            klass.to_s.constantize
+            extended_class(klass.to_s.constantize)
           else
             anonymous_class
           end
@@ -42,10 +43,20 @@ module Spontaneous::Plugins
         @options[:class].nil?
       end
 
+      def extended_class(klass)
+        if @extend
+          klass = Class.new(klass)
+          klass.class_eval(&@extend)
+        end
+        klass
+      end
+
       def anonymous_class
         @anonymous_class ||= Class.new(Spontaneous::Facet).tap do |klass|
+          klass.class_eval(&@extend) if @extend
           klass.inline_style style, :class_name => template_class_name
         end
+
       end
 
       def template_class_name
