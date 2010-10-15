@@ -83,6 +83,14 @@ module Spontaneous::Plugins
       def resolve_entry
         container.entries.find { |e| e.target_id == self.id }
       end
+
+      def method_missing(method, *args, &block)
+        if entry = entries.labelled(method)
+          entry
+        else
+          super
+        end
+      end
     end
   end
 end

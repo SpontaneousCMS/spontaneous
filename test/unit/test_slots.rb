@@ -128,13 +128,13 @@ class SlotsTest < Test::Unit::TestCase
       should "instantiate a corresponding facet in new instances" do
         @instance.entries.length.should == 1
         # @instance.entries.first.class.should == Facet
-        @instance.entries.first.label.should == "images"
+        @instance.entries.first.label.should == :images
         @instance.entries.first.slot_name.should == "Images"
       end
 
       should "have a #slots method for accessing slots" do
         @instance.slots.length.should == 1
-        @instance.slots.first.label.should == "images"
+        @instance.slots.first.label.should == :images
         @instance.slots.first.slot_id.should == "images"
         @instance.slots[:images].should == @instance.slots.first
       end
@@ -148,7 +148,7 @@ class SlotsTest < Test::Unit::TestCase
         @instance.save
         @instance = SlotClass[@instance.id]
         @instance.slots.length.should == 1
-        @instance.slots.first.label.should == "images"
+        @instance.slots.first.label.should == :images
         @instance.slots[:images].should == @instance.slots.first
         @instance.slots.images.should == @instance.slots.first
         @instance.images.should == @instance.slots.first
@@ -159,8 +159,8 @@ class SlotsTest < Test::Unit::TestCase
         SlotClass.slot :posts
         @instance = SlotClass[@instance.id]
         @instance.slots.length.should == 2
-        @instance.slots.first.label.should == "images"
-        @instance.slots.last.label.should == "posts"
+        @instance.slots.first.label.should == :images
+        @instance.slots.last.label.should == :posts
         @instance.slots[:images].should == @instance.slots.first
         @instance.slots[:posts].should == @instance.slots.last
         @instance.slots.images.should == @instance.slots.first

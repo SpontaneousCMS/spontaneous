@@ -45,6 +45,16 @@ module Spontaneous
       @target ||= load_target
     end
 
+    def label
+      @label ||= read_label
+    end
+
+    def read_label
+      l = target.label
+      return nil if l.nil? or l.empty?
+      target.label.to_sym
+    end
+
     def style
       target.styles[@entry_style_name]
     end

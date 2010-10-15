@@ -7,6 +7,7 @@ module Spontaneous
     def initialize(owner, property_name)
       @owner = owner
       @property_name = property_name
+      @name_map = {}
 
       slot_map = {}
       unmapped = []
@@ -31,6 +32,15 @@ module Spontaneous
       unmapped.each do |entry|
         store_push(entry)
       end
+    end
+
+    def push(entry)
+      super(entry)
+      @name_map[entry.name.to_sym] = entry unless (entry.name.nil? or entry.name.empty?)
+    end
+
+    def labelled(label)
+      find { |e| e.label == label }
     end
 
     def entry_store
