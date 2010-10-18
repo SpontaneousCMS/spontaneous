@@ -2,27 +2,6 @@
 module Spontaneous
   module FieldTypes
 
-    class ImageAttributes
-      attr_reader  :src, :width, :height, :filesize
-
-      def self.from_file(path)
-
-      end
-
-      def initialize(params={})
-        @src, @width, @height, @filesize = params[:src], params[:width], params[:height], params[:filesize]
-      end
-
-      def serialize
-        {
-          :src => src,
-          :width => width,
-          :height => height,
-          :filesize => filesize
-        }
-      end
-    end
-
     class ImageField < Base
 
 
@@ -76,7 +55,7 @@ module Spontaneous
         unprocessed_value
       end
 
-      # takes a path to a newly uploade image in Spontaneous.media_dir
+      # takes a path to a newly uploaded image in Spontaneous.media_dir
       def process(image_path)
         return image_path unless File.exist?(image_path)
         image = ImageProcessor.new(image_path)
@@ -91,81 +70,99 @@ module Spontaneous
     end
 
     ImageField.register
-  end
 
-  class ImageProcessor
-    attr_reader :path
+    class ImageAttributes
+      attr_reader  :src, :width, :height, :filesize
 
-    def initialize(path)
-      @path = File.expand_path(path)
+      def initialize(params={})
+        @src, @width, @height, @filesize = params[:src], params[:width], params[:height], params[:filesize]
+      end
+
+      def serialize
+        {
+          :src => src,
+          :width => width,
+          :height => height,
+          :filesize => filesize
+        }
+      end
     end
 
-    def src
-      @src ||= \
-        begin
-          media_dir = Spontaneous.media_dir
-          src = path.sub(%r{^#{media_dir}}, '')
-          File.join("/#{File.basename(media_dir)}", src)
+    class ImageProcessor
+      attr_reader :path
+
+      def initialize(path)
+        @path = File.expand_path(path)
+      end
+
+      def src
+        @src ||= \
+          begin
+            media_dir = Spontaneous.media_dir
+            src = path.sub(%r{^#{media_dir}}, '')
+            File.join("/#{File.basename(media_dir)}", src)
+          end
+      end
+
+      def filesize
+        File.size(path)
+      end
+
+      def width
+        dimensions[0]
+      end
+
+      def height
+        dimensions[1]
+      end
+
+      def dimensions
+        @dimensions ||= read_image_dimension
+      end
+
+      def read_image_dimension
+        Spontaneous::ImageSize.read(path)
+      end
+
+      def serialize
+        {
+          :src => src,
+          :width => width,
+          :height => height,
+          :filesize => filesize
+        }
+      end
+
+      def resize(name, size)
+        image = Miso::Image.new(path)
+        [:crop, :fit].each do |method|
+          if size.key?(method)
+            image.send(method, *size[method])
+          end
         end
-    end
-
-    def filesize
-      File.size(path)
-    end
-
-    def width
-      dimensions[0]
-    end
-
-    def height
-      dimensions[1]
-    end
-
-    def dimensions
-      @dimensions ||= read_image_dimension
-    end
-
-    def read_image_dimension
-      Spontaneous::ImageSize.read(path)
-    end
-
-    def serialize
-      {
-        :src => src,
-        :width => width,
-        :height => height,
-        :filesize => filesize
-      }
-    end
-
-    def resize(name, size)
-      image = Miso::Image.new(path)
-      [:crop, :fit].each do |method|
-        if size.key?(method)
-          image.send(method, *size[method])
+        if size.key?(:width)
+          image.send(:fit, size[:width], nil)
         end
-      end
-      if size.key?(:width)
-        image.send(:fit, size[:width], nil)
-      end
-      if size.key?(:height)
-        image.send(:fit, nil, size[:height])
-      end
-      file_path = filename_for_size(name)
-      image.write(file_path)
+        if size.key?(:height)
+          image.send(:fit, nil, size[:height])
+        end
+        file_path = filename_for_size(name)
+        image.write(file_path)
 
-      ImageProcessor.new(file_path)
+        ImageProcessor.new(file_path)
+      end
+
+      def filename_for_size(name)
+        directory = File.dirname(path)
+        original_filename = File.basename(path)
+        parts = original_filename.split('.')
+        ext = parts[-1]
+        base = parts[0..-2].join('.')
+        filename = [base, name, ext].join('.')
+        File.join(directory, filename)
+      end
     end
 
-    def filename_for_size(name)
-      directory = File.dirname(path)
-      original_filename = File.basename(path)
-      parts = original_filename.split('.')
-      ext = parts[-1]
-      base = parts[0..-2].join('.')
-      filename = [base, name, ext].join('.')
-      File.join(directory, filename)
-    end
   end
 end
 
