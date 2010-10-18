@@ -15,6 +15,14 @@ module Spontaneous
     def template_ext
       "erb"
     end
+
+    def media_dir=(dir)
+      @media_dir = File.expand_path(dir)
+    end
+
+    def media_dir
+      @media_dir ||= File.expand_path(File.join(File.dirname(__FILE__), "../public/media"))
+    end
   end
 
   autoload :ProxyObject, "spontaneous/proxy_object"
@@ -36,6 +44,8 @@ module Spontaneous
   autoload :Template, "spontaneous/template"
   autoload :RenderContext, "spontaneous/render_context"
   autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
+
+  autoload :ImageSize, "spontaneous/image_size"
 
   module TemplateTypes
     autoload :ErubisTemplate, "spontaneous/template_types/erubis_template"

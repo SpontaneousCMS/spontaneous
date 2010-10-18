@@ -13,11 +13,14 @@ GEM
     erubis (2.6.6)
       abstract (>= 1.0.0)
     eventmachine (0.12.10)
+    executioner (0.3.0)
     jnunemaker-matchy (0.4.0)
     leftright (0.9.0)
     less (1.2.21)
       mutter (>= 0.4.2)
       treetop (>= 1.4.2)
+    miso (0.3.3)
+      executioner (>= 0.3.0)
     mocha (0.9.8)
       rake
     mutter (0.5.3)
@@ -49,6 +52,7 @@ DEPENDENCIES
   jnunemaker-matchy (~> 0.4)
   leftright (~> 0.9)
   less (~> 1.2)
+  miso (~> 0.3.3)
   mocha (~> 0.9)
   mysql2 (~> 0.2)
   rack!

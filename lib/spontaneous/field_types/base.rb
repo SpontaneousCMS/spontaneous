@@ -17,9 +17,24 @@ module Spontaneous
       def self.prototype=(prototype)
         @prototype = prototype
       end
+
       def self.prototype
         @prototype
       end
+
+      def self.define_attribute(name)
+        attribute_names.push(name.to_sym)
+      end
+
+      def self.attribute_names
+        @attribute_names ||= []
+      end
+
+      def self.has_attribute?(name)
+        name = name.to_s.gsub(/=$/, '').to_sym
+        attribute_names.include?(name)
+      end
+
       attr_accessor :owner, :name, :unprocessed_value
 
 
@@ -73,11 +88,29 @@ module Spontaneous
       end
 
       def serialize
-        {
+        # p self.class.attribute_names
+        # p serialized_attributes
+        serialized_attributes.merge({
           :name => name,
           :unprocessed_value => unprocessed_value,
           :processed_value => processed_value
-        }
+        })
+      end
+
+
+      def serialized_attributes
+        self.class.attribute_names.inject({}) do |hash, attribute|
+          hash[attribute] = attributes[attribute]
+          hash
+        end
+      end
+
+      def attributes
+        @attributes ||= {}
+      end
+
+      def attribute_set(attribute, value)
+        attributes[attribute.to_sym] = value
       end
 
       protected
@@ -85,6 +118,9 @@ module Spontaneous
       def update(attributes={}, from_db=false)
         with_preprocessed_values(from_db) do
           attributes.each do |property, value|
+            if self.class.has_attribute?(property)
+              attribute_set(property, value)
+            end
             setter = "#{property}=".to_sym
             if respond_to?(setter)
               self.send(setter, value)
@@ -102,6 +138,14 @@ module Spontaneous
         yield
       ensure
         @preprocessed = nil
+      end
+
+      def method_missing(method_name, *args, &block)
+        if self.class.has_attribute?(method_name)
+          attribute_get(method_name)
+        else
+          super
+        end
       end
     end
   end

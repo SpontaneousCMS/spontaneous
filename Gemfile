@@ -12,6 +12,7 @@ gem "rack", :git => "git://github.com/rack/rack.git", :ref => "1598f873c89128895
 gem "thin", "~>1.2"
 gem "less", "~>1.2"
 gem "stringex", "~>1.1"
+gem 'miso', '~> 0.3.3'
 
 
 group :development do
