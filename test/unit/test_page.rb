@@ -120,13 +120,20 @@ class PageTest < Test::Unit::TestCase
       @t.root.should === @p
     end
 
+    should "have correct ancestor paths" do
+      @p.ancestor_path.should == []
+      @q.ancestor_path.should == [@p.id]
+      @r.ancestor_path.should == [@p.id, @q.id]
+      @s.ancestor_path.should == [@p.id, @q.id]
+      @t.ancestor_path.should == [@p.id, @q.id, @s.id]
+    end
     should "know their ancestors" do
       # must be a better way to test these arrays
       @p.ancestors.should === []
       @q.ancestors.should === [@p]
-      @r.ancestors.should == [@q, @p]
-      @s.ancestors.should == [@q, @p]
-      @t.ancestors.should === [@s, @q, @p]
+      @r.ancestors.should == [@p, @q]
+      @s.ancestors.should == [@p, @q]
+      @t.ancestors.should === [@p, @q, @s]
     end
 
     should "know their generation" do
@@ -147,6 +154,17 @@ class PageTest < Test::Unit::TestCase
       @r.reload.path.should == "/changed/#{@r.slug}"
       @s.reload.path.should == "/changed/#{@s.slug}"
       @t.reload.path.should == "/changed/#{@s.slug}/#{@t.slug}"
+    end
+
+    should "have direct access to ancestors at any depth" do
+      @q.ancestor(0).should == @p
+      @r.ancestor(0).should == @p
+      @r.ancestor(1).should == @q
+      @s.ancestor(1).should == @q
+      @t.ancestor(1).should == @q
+      @t.ancestor(2).should == @s
+      @t.ancestor(-1).should == @s
+      @t.ancestor(-2).should == @q
     end
   end
 

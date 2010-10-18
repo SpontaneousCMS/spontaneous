@@ -9,6 +9,8 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+      ANCESTOR_SEP = "."
+
       def after_initialize
         super
         self.slug = default_slug if slug.nil?
@@ -35,12 +37,18 @@ module Spontaneous::Plugins
           end
         else
           update_path
+          self[:ancestor_path] = parent.ancestor_path.push(parent.id).join(ANCESTOR_SEP)
         end
       end
 
       def make_root
         self[:path] = "/"
         self[:slug] = ""
+        self[:ancestor_path] = ""
+      end
+
+      def ancestor_path
+        (self[:ancestor_path] || "").split(ANCESTOR_SEP).map { |id| id.to_i }
       end
 
       def root?

@@ -3,9 +3,11 @@ module Spontaneous::Plugins
 
     module InstanceMethods
       def ancestors
-        node, nodes = self, []
-        nodes << node = node.parent while node.parent
-        nodes
+        ancestor_path.map { |id| Spontaneous::Content[id] }
+      end
+
+      def ancestor(depth)
+        ancestors[depth]
       end
 
       def generation
