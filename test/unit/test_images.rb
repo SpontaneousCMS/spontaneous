@@ -17,19 +17,19 @@ class FieldsTest < Test::Unit::TestCase
       @origin_image = @image_dir + "rose.jpg"
       @origin_image.make_link(@src_image.to_s) unless @origin_image.exist?
 
-      class ::ImageField < FieldTypes::ImageField
+      class ::ResizingImageField < FieldTypes::ImageField
         sizes :preview => { :width => 200 },
           :tall => { :height => 200 },
           :thumbnail => { :fit => [50, 50] },
           :icon => { :crop => [50, 50] }
       end
 
-      @image = ImageField.new(:name => "photo")
+      @image = ResizingImageField.new(:name => "photo")
       @image.value = @origin_image.to_s
     end
 
     teardown do
-      Object.send(:remove_const, :ImageField)
+      Object.send(:remove_const, :ResizingImageField)
       (@tmp_dir + "..").rmtree
     end
 
@@ -45,14 +45,15 @@ class FieldsTest < Test::Unit::TestCase
       @image.original.width.should == @image.width
       @image.original.height.should == @image.height
       @image.original.filesize.should == @image.filesize
+      @image.filepath.should == @origin_image.realpath.to_s
     end
 
 
     should "have a 'sizes' config option that generates resized versions" do
-      assert_same_elements ImageField.size_definitions.keys, [:preview, :thumbnail, :icon, :tall]
+      assert_same_elements ResizingImageField.size_definitions.keys, [:preview, :thumbnail, :icon, :tall]
     end
 
-    should "persist attributes" do
+    should "serialise attributes" do
       serialised = @image.serialize
       [:preview, :thumbnail, :icon, :tall].each do |size|
         serialised.key?(size).should be_true
@@ -64,15 +65,28 @@ class FieldsTest < Test::Unit::TestCase
       serialised[:thumbnail][:height].should == 50
       serialised[:icon][:width].should == 50
       serialised[:icon][:height].should == 50
+      # pp serialised
     end
 
-    context "resizing" do
-      should "save the resized versions to the same directory" do
-      end
-      should "create new re-sized images when updated" do
+    context "attached to content" do
+      setup do
+        ResizingImageField.register
+        class ::ContentWithImage < Content
+          field :image, :resizing_image
+        end
+        @instance = ContentWithImage.new
+        @instance.image = @origin_image.to_s
       end
 
-      should "honor the 'method' flag" do
+      teardown do
+        Object.send(:remove_const, :ContentWithImage)
+      end
+
+      should "persist attributes" do
+        @instance.save
+        @instance = ContentWithImage[@instance.id]
+        @instance.image.thumbnail.url.should == "/media/images/rose.thumbnail.jpg"
+        @instance.image.original.url.should == "/media/images/rose.jpg"
       end
     end
   end

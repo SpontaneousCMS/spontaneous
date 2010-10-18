@@ -45,10 +45,11 @@ module Spontaneous
 
       def attribute_get(attribute)
         @sizes ||= Hash.new { |hash, key| hash[key] = ImageAttributes.new(attributes[key]) }
+        @sizes[attribute]
       end
 
       def original
-        @original ||= ImageAttributes.new(attributes[:original])
+        attribute_get(:original)
       end
 
       def url
@@ -71,6 +72,10 @@ module Spontaneous
         original.url
       end
 
+      def filepath
+        unprocessed_value
+      end
+
       # takes a path to a newly uploade image in Spontaneous.media_dir
       def process(image_path)
         return image_path unless File.exist?(image_path)
@@ -79,6 +84,7 @@ module Spontaneous
         self.class.size_definitions.each do |name, size|
           attribute_set(name, image.resize(name, size).serialize)
         end
+        set_unprocessed_value(File.expand_path(image_path))
         image.url
       end
 
@@ -122,7 +128,6 @@ module Spontaneous
     def read_image_dimension
       Spontaneous::ImageSize.read(path)
     end
-
 
     def serialize
       {

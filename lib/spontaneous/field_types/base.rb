@@ -44,12 +44,11 @@ module Spontaneous
 
 
       def unprocessed_value=(v)
-        @unprocessed_value = v
+        set_unprocessed_value(v)
         unless @preprocessed
           self.processed_value = process(@unprocessed_value)
           owner.field_modified!(self) if owner
         end
-
       end
 
       # should be overwritten in subclasses that actually do something
@@ -133,7 +132,7 @@ module Spontaneous
         @processed_value = value
       end
 
-      def with_preprocessed_values(state)
+      def with_preprocessed_values(state=true)
         @preprocessed = state
         yield
       ensure
@@ -146,6 +145,10 @@ module Spontaneous
         else
           super
         end
+      end
+
+      def set_unprocessed_value(value)
+        @unprocessed_value = value
       end
     end
   end
