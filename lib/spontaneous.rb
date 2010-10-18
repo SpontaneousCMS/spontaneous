@@ -4,12 +4,105 @@ Sequel.extension :inflector
 module Spontaneous
   SLASH = "/".freeze
   class << self
+    def init(options={})
+      self.environment = options.delete(:environment) || :development
+      self.mode = options.delete(:mode) || :back
+      self.config = options
+      # DataMapper::Logger.new(log_dir / "#{mode}.log", :debug)
+      # DataMapper.setup(:default, db_settings)
+      self.database = Sequel.connect(db_settings)
+    end
+
+    def database=(database)
+      @database = database
+    end
+
+    def database
+      @database
+    end
+
+    def config=(config={})
+      config.delete(:db)
+      @config = {
+        :template_root => root / "templates",
+        :template_extension => "erb",
+        :db => db_settings
+      }
+      @config[mode] = mode_settings
+      @config.merge(config)
+    end
+
+    def config
+      @config
+    end
+
+    def log_dir
+      root / "log"
+    end
+
+    def config_dir
+      root / "config"
+    end
+
+    def mode_settings
+      config_file = root / "config" / "#{mode}.yml"
+      config = YAML.load_file(config_file)
+      config[environment]
+    end
+
+    def db_settings
+      @db_settings = YAML.load_file(File.join(config_dir, "database.yml"))
+      @db_settings[environment]
+    end
+
+    def mode=(mode)
+      @mode = mode
+    end
+
+    def mode
+      @mode
+    end
+
+    def front?
+      mode == :front
+    end
+
+    def back?
+      mode == :back
+    end
+
+    def environment=(env)
+      @environment = env
+    end
+
+    def environment
+      @environment
+    end
+
+    alias_method :env, :environment
+
+    def development?
+      environment == :development
+    end
+
+    def production?
+      environment == :production
+    end
+
     def template_root=(template_root)
       @template_root = template_root
     end
 
     def template_root
-      @template_root ||= File.expand_path(File.join(File.dirname(__FILE__), "../templates"))
+      @template_root ||= root / "templates"
+    end
+
+    def schema_root=(schema_root)
+      @schema_root = schema_root
+    end
+
+    def schema_root
+      @schema_root ||= root / "schema"
     end
 
     def template_ext
@@ -21,8 +114,17 @@ module Spontaneous
     end
 
     def media_dir
-      @media_dir ||= File.expand_path(File.join(File.dirname(__FILE__), "../public/media"))
+      @media_dir ||= File.expand_path(root / "../media")
     end
+
+    def root
+      @root ||= File.expand_path(Dir.pwd)
+    end
+
+    def root=(root)
+      @root = File.expand_path(root)
+    end
+
   end
 
   autoload :ProxyObject, "spontaneous/proxy_object"
@@ -46,6 +148,8 @@ module Spontaneous
   autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
 
   autoload :ImageSize, "spontaneous/image_size"
+
+  autoload :Rack, "spontaneous/rack"
 
   module TemplateTypes
     autoload :ErubisTemplate, "spontaneous/template_types/erubis_template"
@@ -89,5 +193,9 @@ module Spontaneous
     end
   end
 
+end
+
+Dir[File.join(File.dirname(__FILE__), 'spontaneous', 'extensions', '*.rb')].each do |extension|
+  require extension
 end
 

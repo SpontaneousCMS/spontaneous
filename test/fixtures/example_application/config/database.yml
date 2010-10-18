@@ -1,0 +1,21 @@
+---
+:development: &defaults
+  :adapter:    mysql2
+  :database:   spontaneous_example
+  :user:       spontaneous
+  :password:   password
+  :host:       localhost
+
+:test:
+  <<:         *defaults
+  :database:   spontaneous_example_test
+
+:production:
+  <<:         *defaults
+  :database:  spontaneous_example_production
+  :user:  spontaneous
+  :password:  Passw0rd
+
+:rake:
+  <<:         *defaults
+
