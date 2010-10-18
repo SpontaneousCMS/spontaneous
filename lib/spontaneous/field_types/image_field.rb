@@ -3,19 +3,19 @@ module Spontaneous
   module FieldTypes
 
     class ImageAttributes
-      attr_reader  :url, :width, :height, :filesize
+      attr_reader  :src, :width, :height, :filesize
 
       def self.from_file(path)
 
       end
 
       def initialize(params={})
-        @url, @width, @height, @filesize = params[:url], params[:width], params[:height], params[:filesize]
+        @src, @width, @height, @filesize = params[:src], params[:width], params[:height], params[:filesize]
       end
 
       def serialize
         {
-          :url => url,
+          :src => src,
           :width => width,
           :height => height,
           :filesize => filesize
@@ -52,7 +52,7 @@ module Spontaneous
         attribute_get(:original)
       end
 
-      def url
+      def src
         value
       end
 
@@ -68,8 +68,8 @@ module Spontaneous
         original.filesize
       end
 
-      def url
-        original.url
+      def src
+        original.src
       end
 
       def filepath
@@ -85,7 +85,7 @@ module Spontaneous
           attribute_set(name, image.resize(name, size).serialize)
         end
         set_unprocessed_value(File.expand_path(image_path))
-        image.url
+        image.src
       end
 
     end
@@ -100,12 +100,12 @@ module Spontaneous
       @path = File.expand_path(path)
     end
 
-    def url
-      @url ||= \
+    def src
+      @src ||= \
         begin
           media_dir = Spontaneous.media_dir
-          url = path.sub(%r{^#{media_dir}}, '')
-          File.join("/#{File.basename(media_dir)}", url)
+          src = path.sub(%r{^#{media_dir}}, '')
+          File.join("/#{File.basename(media_dir)}", src)
         end
     end
 
@@ -131,7 +131,7 @@ module Spontaneous
 
     def serialize
       {
-        :url => url,
+        :src => src,
         :width => width,
         :height => height,
         :filesize => filesize
