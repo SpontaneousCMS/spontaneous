@@ -49,9 +49,10 @@ module Spontaneous::Plugins
           unless self.class.inline_templates.empty?
             InlineStyle.new(self)
           else
-            AnonymousStyle.new
+            AnonymousStyle.new(container, label)
           end
       end
+
     end # InstanceMethods
 
     class InlineStyle
@@ -73,17 +74,32 @@ module Spontaneous::Plugins
         eval("\"#{@source}\"", binding)
       end
     end
-    # class InlineTemplate < Spontaneous::TemplateTypes::ErubisTemplate
-    #   attr_reader :source
 
-    #   def initialize(source)
-    #     @source = source
-    #   end
-    # end # InlineTemplate
-
+    # Used by slots to check for the existance of a template named
+    # SlotsOwningClass.template_directory/slot_name.{format}.erb
+    # and use it if it exists
+    # if not it falls back to a default template that just renders the 
+    # Facet's content
     class AnonymousStyle
+      def initialize(container, label)
+        @container = container
+        @label = label
+      end
+
       def template(format=:html)
-        self
+        if has_default_template?(format)
+          style.template(format)
+        else
+          self
+        end
+      end
+
+      def has_default_template?(format)
+        File.exists?(style.path(format))
+      end
+
+      def style
+        @style ||= Spontaneous::Style.new(@container.class, @label)
       end
 
       def render(binding)

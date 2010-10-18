@@ -124,6 +124,35 @@ class RenderTest < Test::Unit::TestCase
         @root.render.should == "<root>\nImages below:\n<img>Image 1</img>\n<img>Image 2</img>\n</root>"
       end
     end
+
+    context "default templates" do
+      setup do
+        TemplateClass.inline_style :default_template_style, :default => true
+        TemplateClass.slot :images_with_template do
+          field :introduction
+        end
+
+        class ::AnImage < Content; end
+        AnImage.field :title
+        AnImage.template '<img>#{title}</img>'
+
+        @root = TemplateClass.new
+        @root.images_with_template.introduction = "Images below:"
+        @image1 = AnImage.new
+        @image1.title = "Image 1"
+        @image2 = AnImage.new
+        @image2.title = "Image 2"
+        @root.images_with_template << @image1
+        @root.images_with_template << @image2
+      end
+      teardown do
+        Object.send(:remove_const, :AnImage)
+      end
+
+      should "render using default style if present" do
+        @root.render.should == "<root>\nImages below:\n<images>\n  <img>Image 1</img>\n  <img>Image 2</img>\n</images>\n</root>"
+      end
+    end
   end
 end
 
