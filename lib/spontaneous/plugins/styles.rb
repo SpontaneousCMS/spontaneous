@@ -70,7 +70,7 @@ module Spontaneous::Plugins
       end
 
       def render(binding)
-        eval("\""+@source+"\"", binding)
+        eval("\"#{@source}\"", binding)
       end
     end
     # class InlineTemplate < Spontaneous::TemplateTypes::ErubisTemplate
