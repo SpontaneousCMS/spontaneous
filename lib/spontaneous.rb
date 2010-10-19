@@ -130,7 +130,18 @@ module Spontaneous
     def application_dir
       File.expand_path("../../application", __FILE__)
     end
-    
+
+    def static_dir
+      application_dir / "static"
+    end
+
+    def js_dir
+      application_dir / "js"
+    end
+
+    def css_dir
+      application_dir / "css"
+    end
   end
 
   autoload :ProxyObject, "spontaneous/proxy_object"
