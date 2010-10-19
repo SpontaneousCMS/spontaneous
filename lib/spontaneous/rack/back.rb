@@ -77,7 +77,6 @@ module Spontaneous
 
         post '/page/:id/save' do
           page = Content[params[:id]]
-          p page
           update_fields(page, params[:field])
         end
 

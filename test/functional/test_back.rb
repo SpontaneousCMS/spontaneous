@@ -135,8 +135,6 @@ class BackTest < Test::Unit::TestCase
         @page.in_progress << @facet
         @page.save
         @facet.save
-        pp @page.to_hash
-        puts "_"*30
       end
       should "update facet field values" do
         params = {
