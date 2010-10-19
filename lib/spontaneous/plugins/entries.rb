@@ -65,6 +65,11 @@ module Spontaneous::Plugins
         entry
       end
 
+      def update_position(position)
+        container.entries.set_position(self, position)
+        container.save
+      end
+      
       def style_for_content(content)
         content.styles.default
       end

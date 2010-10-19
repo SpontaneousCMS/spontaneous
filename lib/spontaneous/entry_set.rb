@@ -72,12 +72,13 @@ module Spontaneous
     end
 
 
-    # def set_position(content, position)
-    #   entry = self.detect {|e| e.target == content }
-    #   self.delete(entry)
-    #   self.insert(position, entry)
-    #   @owner.entry_modified!(entry)
-    # end
+    def set_position(content, position)
+      entry = self.detect {|e| e.target == content }
+      self.delete(entry)
+      self.insert(position, entry)
+      # @owner.entry_modified!(entry)
+      update!
+    end
 
     def to_hash
       map do | entry |
