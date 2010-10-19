@@ -7,11 +7,11 @@ module Spontaneous::Plugins
 
     module InstanceMethods
       def entry_modified!(modified_entry)
-        self.entries.update!
+        self.entry_store = entries.serialize
       end
 
       def entries
-        @entries ||= Spontaneous::EntrySet.new(self, :entry_store)
+        @entries ||= Spontaneous::EntrySet.new(self, entry_store)
       end
 
       def visible_entries
@@ -66,10 +66,11 @@ module Spontaneous::Plugins
       end
 
       def update_position(position)
+        p container
         container.entries.set_position(self, position)
         container.save
       end
-      
+
       def style_for_content(content)
         content.styles.default
       end

@@ -4,15 +4,16 @@ module Spontaneous
     alias_method :store_insert, :insert
     alias_method :store_push, :push
 
-    def initialize(owner, property_name)
+    attr_reader :owner
+
+    def initialize(owner, entry_store)
       @owner = owner
-      @property_name = property_name
       @name_map = {}
 
       slot_map = {}
       unmapped = []
 
-      entry_store.each do |data|
+      (entry_store || []).each do |data|
         klass = Spontaneous.const_get(data[:class])
         entry = klass.new(@owner, data[:id], data[:style])
         if data[:slot]
@@ -55,20 +56,15 @@ module Spontaneous
       find { |e| e.label == label }
     end
 
-    def entry_store
-      @owner.send(@property_name) || []
-    end
-
-
     def insert(index, entry)
       entry.entry_store = self
       store_insert(index, entry)
-      update!
+      @owner.entry_modified!(entry)
     end
 
-    def update!
-      # p self.map { |e| e.serialize }
-      @owner.set_all(@property_name => self.map { |e| e.serialize })
+
+    def serialize
+      self.map { |e| e.serialize }
     end
 
 
@@ -76,8 +72,7 @@ module Spontaneous
       entry = self.detect {|e| e.target == content }
       self.delete(entry)
       self.insert(position, entry)
-      # @owner.entry_modified!(entry)
-      update!
+      @owner.entry_modified!(entry)
     end
 
     def to_hash

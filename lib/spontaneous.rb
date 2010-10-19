@@ -1,6 +1,7 @@
 
 Sequel.extension :inflector
 
+require 'logger'
 module Spontaneous
   SLASH = "/".freeze
   class << self
@@ -10,7 +11,7 @@ module Spontaneous
       self.config = options
       # DataMapper::Logger.new(log_dir / "#{mode}.log", :debug)
       # DataMapper.setup(:default, db_settings)
-      self.database = Sequel.connect(db_settings)
+      self.database = Sequel.connect(db_settings.merge(:logger => [Logger.new($stdout)] ))
       Schema.load
     end
 

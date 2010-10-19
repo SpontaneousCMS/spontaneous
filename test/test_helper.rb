@@ -5,6 +5,7 @@ Bundler.setup(:default, :development)
 Bundler.require
 
 require 'rack'
+require 'logger'
 
 begin
   require 'leftright'
@@ -15,6 +16,7 @@ end
 Sequel.extension :migration
 
 DB = Sequel.connect('mysql2://root@localhost/spontaneous2_test') unless defined?(DB)
+# DB.logger = Logger.new($stdout)
 Sequel::Migrator.apply(DB, 'db/migrations')
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spontaneous')

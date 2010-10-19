@@ -43,29 +43,44 @@ module Spontaneous::Plugins
         @options[:class].nil?
       end
 
-      def extended_class(klass)
-        if @extend
-          klass = Class.new(klass)
-          klass.class_eval(&@extend)
+      def extended_class(extend_klass)
+        define_slot_class(extend_klass).tap do |klass|
+          klass.class_eval(&@extend) if @extend
         end
-        klass
+      end
+
+      def define_slot_class(superclass)
+        Object.class_eval "class #{slot_class_name} < #{superclass.name}; end"
+        Object.const_get(slot_class_name)
+      end
+
+      def slot_class_name
+        "#{owning_class_name}__#{name.to_s.camelize}Slot"
+      end
+
+      def owning_class_name
+        name = @owning_class.name
+        if name.nil? or name.empty?
+          "Content"
+        else
+          name
+        end
       end
 
       def anonymous_class
-        @anonymous_class ||= Class.new(Spontaneous::Facet).tap do |klass|
+        @anonymous_class ||= define_slot_class(Spontaneous::Facet).tap do |klass|
           klass.class_eval(&@extend) if @extend
           if style
             klass.inline_style style, :class_name => template_class_name
           end
         end
-
       end
 
       def template_class_name
         if anonymous?
           @owning_class.name
         else
-          instance_class.name
+          instance_class.superclass.name
         end
       end
     end

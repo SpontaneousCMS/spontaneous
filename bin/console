@@ -6,7 +6,11 @@ require "bundler"
 Bundler.setup(:default)
 Bundler.require
 
+require 'logger'
+
 DB = Sequel.connect('mysql2://root@localhost/spontaneous2_test') unless defined?(DB)
+DB.logger = Logger.new($stdout)
+
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 
 require 'irb'

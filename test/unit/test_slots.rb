@@ -22,46 +22,46 @@ class SlotsTest < Test::Unit::TestCase
     end
 
     should "be definable with a name" do
-      SlotClass.slot :images
+      SlotClass.slot :images0
       SlotClass.slots.length.should == 1
-      SlotClass.slots.first.name.should == :images
+      SlotClass.slots.first.name.should == :images0
       SlotClass.has_slots?.should be_true
     end
 
     should "accept a custom instance class" do
-      SlotClass.slot :images, :class => SlotClass
-      SlotClass.slots.first.instance_class.should == SlotClass
+      SlotClass.slot :images1, :class => SlotClass
+      SlotClass.slots.first.instance_class.superclass.should == SlotClass
     end
 
     should "accept a custom instance class as a string" do
-      SlotClass.slot :images, :class => 'SlotClass'
-      SlotClass.slots.first.instance_class.should == SlotClass
+      SlotClass.slot :images2, :class => 'SlotClass'
+      SlotClass.slots.first.instance_class.superclass.should == SlotClass
     end
 
     should "accept a custom instance class as a symbol" do
-      SlotClass.slot :images, :class => :SlotClass
-      SlotClass.slots.first.instance_class.should == SlotClass
+      SlotClass.slot :images3, :class => :SlotClass
+      SlotClass.slots.first.instance_class.superclass.should == SlotClass
     end
 
     should "have 'title' option" do
-      SlotClass.slot :images, :title => "Custom Title"
+      SlotClass.slot :images4, :title => "Custom Title"
       @instance = SlotClass.new
       @instance.entries.first.slot_name.should == "Custom Title"
     end
 
     should "allow access to groups of slots" do
-      SlotClass.slot :images, :tag => :main
+      SlotClass.slot :images5, :tag => :main
       SlotClass.slot :posts, :tag => :main
       SlotClass.slot :comments
       SlotClass.slot :last, :tag => :main
       @instance = SlotClass.new
       @instance.slots.tagged(:main).length.should == 3
-      @instance.slots.tagged('main').map {|e| e.label.to_sym }.should == [:images, :posts, :last]
+      @instance.slots.tagged('main').map {|e| e.label.to_sym }.should == [:images5, :posts, :last]
     end
 
     context "with superclasses" do
       setup do
-        SlotClass.slot :images, :tag => :main
+        SlotClass.slot :images6, :tag => :main
 
         @subclass1 = Class.new(SlotClass) do
           slot :monkeys, :tag => :main
@@ -73,20 +73,20 @@ class SlotsTest < Test::Unit::TestCase
       end
       should "inherit slots from its superclass" do
         @subclass2.slots.length.should == 4
-        @subclass2.slots.map { |s| s.name }.should == [:images, :monkeys, :apes, :peanuts]
+        @subclass2.slots.map { |s| s.name }.should == [:images6, :monkeys, :apes, :peanuts]
         @subclass2.slots.tagged(:main).length.should == 2
         instance = @subclass2.new
         instance.slots.length.should == 4
       end
 
       should "allow customisation of the slot order" do
-        new_order = [:peanuts, :apes, :images, :monkeys]
+        new_order = [:peanuts, :apes, :images6, :monkeys]
         @subclass2.slot_order *new_order
         @subclass2.slots.map { |s| s.name }.should == new_order
       end
 
       should "take order of instance slots from class defn" do
-        new_order = [:peanuts, :apes, :images, :monkeys]
+        new_order = [:peanuts, :apes, :images6, :monkeys]
         instance = @subclass2.create
         @subclass2.slot_order *new_order
         instance = @subclass2[instance.id]
@@ -100,29 +100,29 @@ class SlotsTest < Test::Unit::TestCase
     #   instance.images.style.filename.should == "images.html.erb"
     # end
     should "default to a template-less style for slots without a style" do
-      SlotClass.slot :images
+      SlotClass.slot :images7
       instance = SlotClass.new
-      instance.images.style.class.should == Spontaneous::Plugins::Styles::AnonymousStyle
+      instance.images7.style.class.should == Spontaneous::Plugins::Styles::AnonymousStyle
     end
 
     should "accept a custom template name" do
-      SlotClass.slot :images, :style => :anonymous_slot
+      SlotClass.slot :images8, :style => :anonymous_slot
       instance = SlotClass.new
-      instance.images.style.filename.should == "anonymous_slot.html.erb"
+      instance.images8.style.filename.should == "anonymous_slot.html.erb"
     end
 
     should "take template path from slot's parent for anonymous slots" do
-      SlotClass.slot :images, :style => :anonymous_slot
+      SlotClass.slot :images9, :style => :anonymous_slot
       SlotClass.slot :posts
       instance = SlotClass.new
-      instance.images.style.path.should == "#{Spontaneous.template_root}/slot_class/anonymous_slot.html.erb"
+      instance.images9.style.path.should == "#{Spontaneous.template_root}/slot_class/anonymous_slot.html.erb"
       # instance.posts.style.path.should #== "#{Spontaneous.template_root}/slot_class/posts.html.erb"
     end
 
     context "anonymous slots" do
       setup do
         class ::AllowedType < Content; end
-        SlotClass.slot :images do
+        SlotClass.slot :images10 do
           allow AllowedType
 
           def monkey
@@ -141,14 +141,33 @@ class SlotsTest < Test::Unit::TestCase
 
       should "allow methods in slot definitions" do
         instance = SlotClass.new
-        instance.images.monkey.should == "magic"
+        instance.images10.monkey.should == "magic"
+      end
+
+      should "correctly save entries" do
+        instance = SlotClass.new
+        c1 = AllowedType.new
+        c2 = AllowedType.new
+        c3 = AllowedType.new
+        instance.images10 << c1
+        instance.images10 << c2
+        instance.images10 << c3
+
+        instance.save
+        instance.images10.save
+        c1.save
+        c2.save
+        c3.save
+
+        instance = SlotClass[instance.id]
+        instance.images10.entries.length.should == 3
       end
     end
 
     context "slots with definied classes" do
       setup do
         class ::AllowedType < Content; end
-        SlotClass.slot :images, :class => AllowedType do
+        SlotClass.slot :images11, :class => AllowedType do
           allow AllowedType
 
           def monkey
@@ -164,49 +183,49 @@ class SlotsTest < Test::Unit::TestCase
       should "allow per-slot definitions" do
         SlotClass.slots.first.instance_class.allowed.length.should == 1
         instance = SlotClass.new
-        instance.images.monkey.should == "magic"
+        instance.images11.monkey.should == "magic"
         instance = SlotClass[instance.id]
-        instance.images.monkey.should == "magic"
+        instance.images11.monkey.should == "magic"
       end
     end
     context "" do
       setup do
-        SlotClass.slot :images
+        SlotClass.slot :images12
         @instance = SlotClass.new
       end
 
       should "provide a test for existance of named slot" do
-        @instance.slot?(:images).should be_true
+        @instance.slot?(:images12).should be_true
         @instance.slot?(:none).should be_false
       end
 
       should "instantiate a corresponding facet in new instances" do
         @instance.entries.length.should == 1
         # @instance.entries.first.class.should == Facet
-        @instance.entries.first.label.should == :images
-        @instance.entries.first.slot_name.should == "Images"
+        @instance.entries.first.label.should == :images12
+        @instance.entries.first.slot_name.should == "Images12"
       end
 
       should "have a #slots method for accessing slots" do
         @instance.slots.length.should == 1
-        @instance.slots.first.label.should == :images
-        @instance.slots.first.slot_id.should == "images"
-        @instance.slots[:images].should == @instance.slots.first
+        @instance.slots.first.label.should == :images12
+        @instance.slots.first.slot_id.should == "images12"
+        @instance.slots[:images12].should == @instance.slots.first
       end
 
       should "have shortcut methods for accessing slots by name" do
-        @instance.slots.images.should == @instance.slots.first
-        @instance.images.should == @instance.slots.first
+        @instance.slots.images12.should == @instance.slots.first
+        @instance.images12.should == @instance.slots.first
       end
 
       should "persist slots" do
         @instance.save
         @instance = SlotClass[@instance.id]
         @instance.slots.length.should == 1
-        @instance.slots.first.label.should == :images
-        @instance.slots[:images].should == @instance.slots.first
-        @instance.slots.images.should == @instance.slots.first
-        @instance.images.should == @instance.slots.first
+        @instance.slots.first.label.should == :images12
+        @instance.slots[:images12].should == @instance.slots.first
+        @instance.slots.images12.should == @instance.slots.first
+        @instance.images12.should == @instance.slots.first
       end
 
       should "update list of slots on instance if slot added after creation" do
@@ -214,13 +233,13 @@ class SlotsTest < Test::Unit::TestCase
         SlotClass.slot :posts
         @instance = SlotClass[@instance.id]
         @instance.slots.length.should == 2
-        @instance.slots.first.label.should == :images
+        @instance.slots.first.label.should == :images12
         @instance.slots.last.label.should == :posts
-        @instance.slots[:images].should == @instance.slots.first
+        @instance.slots[:images12].should == @instance.slots.first
         @instance.slots[:posts].should == @instance.slots.last
-        @instance.slots.images.should == @instance.slots.first
+        @instance.slots.images12.should == @instance.slots.first
         @instance.slots.posts.should == @instance.slots.last
-        @instance.images.should == @instance.slots.first
+        @instance.images12.should == @instance.slots.first
         @instance.posts.should == @instance.slots.last
       end
 
