@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "bundler"
+Bundler.setup(:default)
+Bundler.require
+
+$:.unshift(File.dirname(__FILE__) + '/../lib')
+require 'spontaneous'
+require 'thin'
+
+env = (ENV['SPON_ENV'] || 'development').to_sym
+
+Spontaneous.init(:mode => :back, :environment => env)
+
+server = Rack::Handler.get('thin')
+
+puts "Spontaneous::Back running on port #{Spontaneous::Rack.port}"
+server.run Spontaneous::Rack::Back.application.to_app, :Host => '0.0.0.0', :Port => Spontaneous::Rack.port
+

@@ -9,6 +9,10 @@ module Spontaneous
           Content[root_id].map_children
         end
       end
+
+      def root
+        Page.root
+      end
     end
   end
 end

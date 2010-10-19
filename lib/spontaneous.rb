@@ -127,6 +127,10 @@ module Spontaneous
       @root = File.expand_path(root)
     end
 
+    def application_dir
+      File.expand_path("../../application", __FILE__)
+    end
+    
   end
 
   autoload :ProxyObject, "spontaneous/proxy_object"

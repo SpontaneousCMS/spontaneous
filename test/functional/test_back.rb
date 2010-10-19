@@ -16,7 +16,7 @@ class BackTest < Test::Unit::TestCase
     Spontaneous.schema_root = @saved_schema_root
   end
   def setup
-    @app_dir = File.expand_path("../../fixtures/example_application", __FILE__)
+    @app_dir = File.expand_path("../../fixtures/application", __FILE__)
     File.exists?(@app_dir).should be_true
     Spontaneous.stubs(:application_dir).returns(@app_dir)
     @saved_schema_root = Spontaneous.schema_root
@@ -80,7 +80,7 @@ class BackTest < Test::Unit::TestCase
       get '/@spontaneous/root'
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
-      assert_equal @page.to_json, last_response.body
+      assert_equal Site.root.to_json, last_response.body
     end
 
     should "return json for individual pages" do
@@ -99,8 +99,8 @@ class BackTest < Test::Unit::TestCase
     end
 
     should "return json for a specific type" do
-      type = Schema.load :my_node_type
-      get "/@spontaneous/type/#{type.id}"
+      type = InfoPage
+      get "/@spontaneous/type/#{type.json_name}"
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
       assert_equal type.to_json, last_response.body
@@ -120,11 +120,18 @@ class BackTest < Test::Unit::TestCase
       assert_equal "h1 { color: #4d926f; }\n", last_response.body
     end
 
-    should "return a site map" do
+    should "return a site map for root by default" do
       get '/@spontaneous/map'
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
       assert_equal Site.map.to_json, last_response.body
+    end
+
+    should "return a site map for any page" do
+      get "/@spontaneous/map/#{@page.id}"
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      assert_equal Site.map(@page.id).to_json, last_response.body
     end
 
     should "reorder facets" do

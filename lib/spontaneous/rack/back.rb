@@ -25,6 +25,20 @@ module Spontaneous
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
+        def json(response)
+          content_type 'application/json', :charset => 'utf-8'
+          response.to_json
+        end
+
+        def update_fields(model, field_data)
+          field_data.each do | name, values |
+            model.fields[name].update(values)
+          end
+          if model.save
+            json(model)
+          end
+        end
+
         helpers do
           def scripts(*scripts)
             if Spontaneous.development?
@@ -33,20 +47,6 @@ module Spontaneous
               end.join("\n")
             else
               # script bundling + compression
-            end
-          end
-
-          def json(response)
-            content_type 'application/json', :charset => 'utf-8'
-            response.to_json
-          end
-
-          def update_fields(model, field_data)
-            field_data.each do | name, values | 
-              model.fields[name].update(values)
-            end
-            if model.save
-              json(model)
             end
           end
         end
@@ -64,15 +64,20 @@ module Spontaneous
         end
 
         get '/types' do
-          json Schema.to_hash
+          json Schema
         end
 
-        get '/type/:id' do
-          json Schema.find(params[:id])
+        get '/type/:type' do
+          klass = params[:type].gsub(/\./, "::").constantize
+          json klass
         end
 
         get '/map' do
           json Site.map
+        end
+
+        get '/map/:id' do
+          json Site.map(params[:id])
         end
 
         post '/page/:id/save' do
