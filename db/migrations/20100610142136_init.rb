@@ -40,10 +40,17 @@ Sequel.migration do
 
 
     end
+
+    create_table!(:sites) do
+      primary_key :id
+      integer :revision, :default => 1
+      integer :published_revision, :default => 0
+    end
   end
 
   down do
     drop_table :content
+    drop_table :sites
   end
 end
 

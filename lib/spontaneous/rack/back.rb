@@ -85,15 +85,9 @@ module Spontaneous
           update_fields(facet, params[:field])
         end
 
-        post '/facet/:id/position/:position' do
+        post '/content/:id/position/:position' do
           facet = Content[params[:id]]
           facet.update_position(params[:position].to_i)
-          json( {:message => 'OK'} )
-        end
-
-        post '/page/:id/position/:position' do
-          page = Content[params[:id]]
-          page.update_position(params[:position].to_i)
           json( {:message => 'OK'} )
         end
 

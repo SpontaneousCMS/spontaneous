@@ -11,7 +11,7 @@ module Spontaneous
       self.config = options
       # DataMapper::Logger.new(log_dir / "#{mode}.log", :debug)
       # DataMapper.setup(:default, db_settings)
-      self.database = Sequel.connect(db_settings.merge(:logger => [Logger.new($stdout)] ))
+      self.database = Sequel.connect(db_settings)
       Schema.load
     end
 
@@ -132,6 +132,7 @@ module Spontaneous
   autoload :ProxyObject, "spontaneous/proxy_object"
   autoload :Plugins, "spontaneous/plugins"
 
+
   autoload :Content, "spontaneous/content"
   autoload :Page, "spontaneous/page"
   autoload :Facet, "spontaneous/facet"
@@ -149,6 +150,7 @@ module Spontaneous
   autoload :RenderContext, "spontaneous/render_context"
   autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
 
+  autoload :Site, "spontaneous/site"
   autoload :Schema, "spontaneous/schema"
 
   autoload :ImageSize, "spontaneous/image_size"
@@ -173,6 +175,7 @@ module Spontaneous
     autoload :PageTree, "spontaneous/plugins/page_tree"
     autoload :AllowedTypes, "spontaneous/plugins/allowed_types"
     autoload :JSON, "spontaneous/plugins/json"
+    autoload :SiteMap, "spontaneous/plugins/site_map"
 
     module Slots
       autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"

@@ -5,6 +5,7 @@ module Spontaneous
     plugin Plugins::PageStyles
     plugin Plugins::Paths
     plugin Plugins::PageTree
+    plugin Plugins::SiteMap
 
     many_to_one :parent,   :class => Content, :reciprocal => :children
     one_to_many :children, :class => Content, :key => :parent_id, :reciprocal => :parent

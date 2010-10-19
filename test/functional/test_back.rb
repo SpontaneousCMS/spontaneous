@@ -53,18 +53,12 @@ class BackTest < Test::Unit::TestCase
     @page2.text << @facet2_3
     @page2.text << @facet2_4
     @page2.text << @facet2_5
-    puts "_"* 30
-    p @page2.text.entries
-    p @page2[:entry_store]
     @page2.text.save
     @page2.save
     @page.save
     [@project1, @project2, @project3, @facet2_1, @facet2_2, @facet2_3, @facet2_4, @facet2_5].each { |p| p.save }
 
-    # p @page2.text.target
-    p @page2.text.entries
     @page2 = Content[@page2.id]
-    p @page2.text.entries
     @page.root?.should be_true
     Object.const_get(:HomePage).should be_instance_of(Class)
   end
@@ -103,6 +97,7 @@ class BackTest < Test::Unit::TestCase
       last_response.content_type.should == "application/json;charset=utf-8"
       assert_equal Schema.to_hash.to_json, last_response.body
     end
+
     should "return json for a specific type" do
       type = Schema.load :my_node_type
       get "/@spontaneous/type/#{type.id}"
@@ -110,6 +105,7 @@ class BackTest < Test::Unit::TestCase
       last_response.content_type.should == "application/json;charset=utf-8"
       assert_equal type.to_json, last_response.body
     end
+
     should "return scripts from js dir" do
       get '/@spontaneous/js/test.js'
       assert last_response.ok?
@@ -123,6 +119,7 @@ class BackTest < Test::Unit::TestCase
       last_response.content_type.should == "text/css; charset=utf-8"
       assert_equal "h1 { color: #4d926f; }\n", last_response.body
     end
+
     should "return a site map" do
       get '/@spontaneous/map'
       assert last_response.ok?
@@ -131,20 +128,21 @@ class BackTest < Test::Unit::TestCase
     end
 
     should "reorder facets" do
-      puts "**"
-      p @page2.text.entries
-      post "/@spontaneous/facet/#{@facet2_5.id}/position/0"
+      post "/@spontaneous/content/#{@facet2_5.id}/position/0"
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
-      @facet2_2.reload.entries.first.target.id.should == @facet2_5.id
+      @page2.text.entries.first.id.should == @facet2_5.id
+
+      p = Content[@page2.id]
+      p.text.entries.first.id.should == @facet2_5.id
     end
-    should "reorder pages" do
-      post "/@spontaneous/page/#{@page2.id}/position/0"
-      assert last_response.ok?
-      last_response.content_type.should == "application/json;charset=utf-8"
-      # can't actually be bothered to set this test up
-      # @facet2_2.reload.entries.first.target.id.should == @facet2_5.id
-    end
+    # should "reorder pages" do
+    #   post "/@spontaneous/page/#{@page2.id}/position/0"
+    #   assert last_response.ok?
+    #   last_response.content_type.should == "application/json;charset=utf-8"
+    #   # can't actually be bothered to set this test up
+    #   # @facet2_2.reload.entries.first.target.id.should == @facet2_5.id
+    # end
 
     context "saving" do
       setup do

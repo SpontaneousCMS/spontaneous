@@ -14,6 +14,11 @@ module Spontaneous::Plugins
         @entries ||= Spontaneous::EntrySet.new(self, entry_store)
       end
 
+      def reload
+        @entries = nil
+        super
+      end
+
       def visible_entries
         entries
       end
@@ -66,7 +71,6 @@ module Spontaneous::Plugins
       end
 
       def update_position(position)
-        p container
         container.entries.set_position(self, position)
         container.save
       end
