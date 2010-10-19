@@ -130,11 +130,13 @@ class BackTest < Test::Unit::TestCase
 
     context "saving" do
       setup do
-        @page = InfoPage.new
+        @page = HomePage.new
         @facet = Text.new
-        @page.text << @facet
+        @page.in_progress << @facet
         @page.save
         @facet.save
+        pp @page.to_hash
+        puts "_"*30
       end
       should "update facet field values" do
         params = {
@@ -143,29 +145,22 @@ class BackTest < Test::Unit::TestCase
         post "/@spontaneous/facet/#{@facet.id}/save", params
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        @facet = Facet.get(@facet.id)
+        @facet = Content[@facet.id]
         last_response.body.should == @facet.to_json
         @facet.fields.text.value.should ==  "Updated field_name_1"
-        # @facet.fields.field_name_2.value.should ==  "Updated field_name_2"
-        # @facet.fields.field_name_3.value.should ==  "Updated field_name_3"
-        # @facet.fields.field_name_4.value.should ==  "Updated field_name_4"
       end
       should "update page field values" do
         params = {
-          "field[title][raw_value]" => "Updated title",
-          "field[intro][raw_value]" => "Updated intro",
-          "field[image][raw_value]" => "Updated image",
-          "field[text][raw_value]" => "Updated text"
+          "field[title][value]" => "Updated title",
+          "field[introduction][value]" => "Updated intro"
         }
         post "/@spontaneous/page/#{@page.id}/save", params
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        @page = Page.get(@page.id)
+        @page = Content[@page.id]
         last_response.body.should == @page.to_json
-        @page.fields.title.value.should ==  "*Updated title*"
-        @page.fields.intro.value.should ==  "Updated intro"
-        @page.fields.image.value.should ==  "Updated image"
-        @page.fields.text.value.should ==  "Updated text"
+        @page.fields.title.value.should ==  "Updated title"
+        @page.fields.introduction.value.should ==  "Updated intro"
       end
     end
   end # context @spontaneous
