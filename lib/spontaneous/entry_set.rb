@@ -72,13 +72,6 @@ module Spontaneous
     end
 
 
-    def method_missing(method, *args, &block)
-      if entry = labelled(method)
-        entry
-      else
-        super
-      end
-    end
     # def set_position(content, position)
     #   entry = self.detect {|e| e.target == content }
     #   self.delete(entry)
@@ -86,5 +79,20 @@ module Spontaneous
     #   @owner.entry_modified!(entry)
     # end
 
+    def to_hash
+      map do | entry |
+        entry.to_hash
+      end
+    end
+
+    protected
+
+    def method_missing(method, *args, &block)
+      if entry = labelled(method)
+        entry
+      else
+        super
+      end
+    end
   end
 end

@@ -68,6 +68,7 @@ module Spontaneous
     end
 
     def style=(style)
+      style = target.styles[style] unless style.is_a?(Style)
       @entry_style_name = style.name
       target[:style_id] = style.name
       # because it's not obvious that a change to an entry
@@ -109,6 +110,17 @@ module Spontaneous
 
     def inspect
       "#<#{self.proxy_class.name.demodulize}:#{self.object_id.to_s(16)} content=#{target} entry_style=\"#{@entry_style_name}\" label=\"#{label}\" slot_id=\"#{slot_id}\">"
+    end
+
+    def to_hash
+      target.to_hash.merge(styles_to_hash)
+    end
+
+    def styles_to_hash
+      {
+        :style => @entry_style_name.to_s,
+        :styles => container.available_styles(target).map { |s| s.name.to_s },
+      }
     end
   end
 end

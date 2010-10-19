@@ -28,13 +28,14 @@ module Spontaneous
       before do
         content_type 'text/html', :charset => 'utf-8'
         if Spontaneous.development?
-          Template.clear_cache!
+          # Template.clear_cache!
         end
       end
     end
 
     autoload :Back, 'spontaneous/rack/back'
     autoload :Front, 'spontaneous/rack/front'
+    autoload :Public, 'spontaneous/rack/public'
   end
 end
 

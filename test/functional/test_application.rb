@@ -18,10 +18,21 @@ class ApplicationTest < Test::Unit::TestCase
     Spontaneous.schema_root = @saved_schema_root
   end
 
+  context "schema" do
+    setup do
+      Spontaneous.init(:mode => :back, :environment => :development)
+    end
+
+    should "load" do
+      Object.const_get(:HomePage).should be_instance_of(Class)
+    end
+  end
+
   context "back, development" do
 
     setup do
       Spontaneous.init(:mode => :back, :environment => :development)
+      Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
     end
 
     should "have the right mode setting" do
@@ -53,7 +64,6 @@ class ApplicationTest < Test::Unit::TestCase
     end
 
     should "configure the datamapper connection" do
-      p Spontaneous.database
       db = Spontaneous.database
       db.adapter_scheme.should == :mysql2
       # opts.should == {"username"=>"spontaneous", "adapter"=>"mysql", "database"=>"spontaneous_example", "host"=>"localhost", "password"=>"password"}

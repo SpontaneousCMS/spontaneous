@@ -23,6 +23,7 @@ module Spontaneous
     plugin Plugins::SchemaHierarchy
     plugin Plugins::InstanceCode
     plugin Plugins::AllowedTypes
+    plugin Plugins::JSON
 
     many_to_one :container, :class => self, :reciprocal => :nodes
     one_to_many :nodes, :key => :container_id, :class => self, :reciprocal => :container

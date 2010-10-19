@@ -1,8 +1,25 @@
 
 require 'test_helper'
 
-class FieldsTest < Test::Unit::TestCase
+class ImagesTest < Test::Unit::TestCase
   include Spontaneous
+
+  context "Image fields" do
+    setup do
+      @field = FieldTypes::ImageField.new(:name => "image")
+    end
+    should "accept and not alter URL values" do
+      url =  "http://example.com/image.png"
+      @field.value = url
+      @field.processed_value.should == url
+    end
+
+    should "accept and not alter absolute paths" do
+      path = "/images/house.jpg"
+      @field.value = path
+      @field.processed_value.should == path
+    end
+  end
 
   context "image fields" do
 

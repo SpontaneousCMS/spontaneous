@@ -34,6 +34,12 @@ module Spontaneous::Plugins
         store.map { |name, field| field.serialize }
       end
 
+      def to_hash
+        owner.class.field_names.map do |name|
+          self[name].to_hash
+        end
+      end
+
       protected
 
       def store

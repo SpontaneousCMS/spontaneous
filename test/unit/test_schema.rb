@@ -1,7 +1,7 @@
 require 'test_helper'
 
 
-class SchemasTest < Test::Unit::TestCase
+class SchemaTest < Test::Unit::TestCase
   include Spontaneous
 
   context "Configurable names" do

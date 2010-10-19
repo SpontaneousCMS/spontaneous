@@ -39,7 +39,7 @@ module Spontaneous
 
 
       def initialize(attributes={}, from_db=false)
-        update(attributes, from_db)
+        load(attributes, from_db)
       end
 
 
@@ -112,9 +112,26 @@ module Spontaneous
         attributes[attribute.to_sym] = value
       end
 
+      def update(attributes={})
+        attributes.each do |property, value|
+          setter = "#{property}=".to_sym
+          if respond_to?(setter)
+            self.send(setter, value)
+          end
+        end
+      end
+
+      def to_hash
+        {
+        :name => name.to_s,
+        :unprocessed_value => unprocessed_value,
+        :processed_value => processed_value
+        }
+      end
+
       protected
 
-      def update(attributes={}, from_db=false)
+      def load(attributes={}, from_db=false)
         with_preprocessed_values(from_db) do
           attributes.each do |property, value|
             if self.class.has_attribute?(property)

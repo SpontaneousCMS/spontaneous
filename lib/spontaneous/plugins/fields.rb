@@ -24,7 +24,7 @@ module Spontaneous::Plugins
       end
 
       def field_prototypes
-        @field_prototypes ||= {}
+        @field_prototypes ||= (supertype ? supertype.field_prototypes.dup : {})
       end
 
       def field_names

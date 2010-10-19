@@ -56,6 +56,15 @@ module Spontaneous::Plugins
         }
         self.field_class.new(values, from_db)
       end
+
+      def to_hash
+        {
+          :name => name.to_s,
+          :type => field_class.json_name, 
+          :title => title,
+          :comment => comment || ""
+        }
+      end
     end
   end
 end
