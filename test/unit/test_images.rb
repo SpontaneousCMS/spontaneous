@@ -52,9 +52,9 @@ class ImagesTest < Test::Unit::TestCase
 
     should "have image dimension and filesize information" do
       @image.src.should == "/media/images/rose.jpg"
-      @image.filesize.should == 102290
-      @image.width.should == 600
-      @image.height.should == 800
+      @image.filesize.should == 54746
+      @image.width.should == 400
+      @image.height.should == 533
     end
 
     should "have access to the original uploaded file through field.original" do
