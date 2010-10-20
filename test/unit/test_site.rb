@@ -17,7 +17,7 @@ class SiteTest < Test::Unit::TestCase
     @page3_1.title = "Page 3 1"
     @page3_2 = Page.new(:slug => "page3-2")
     @page3_2.title = "Page 3 2"
-    @page3_2.uid = "Page3-2"
+    @page3_2.uid = "page3_2"
 
     @root << @page1_1
     @root << @page1_2
@@ -53,7 +53,11 @@ class SiteTest < Test::Unit::TestCase
     end
 
     should "work with UIDs" do
-      Site["Page3-2"].should == @page3_2.reload
+      Site["page3_2"].should == @page3_2.reload
+    end
+
+    should "have a shortcut direct method on Site" do
+      Site.page3_2.should == @page3_2.reload
     end
   end
 end

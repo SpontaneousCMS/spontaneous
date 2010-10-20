@@ -32,6 +32,14 @@ module Spontaneous
       def by_uid(uid)
         Page.uid(uid)
       end
+
+      def method_missing(method, *args, &block)
+        if p = self[method.to_s]
+          p
+        else
+          super
+        end
+      end
    end
   end
 end

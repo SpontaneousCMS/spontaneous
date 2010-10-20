@@ -8,10 +8,8 @@ Bundler.require
 
 require 'logger'
 
-# DB = Sequel.connect('mysql2://root@localhost/spontaneous2_test') unless defined?(DB)
 
 $:.unshift(File.expand_path(File.dirname(__FILE__) + '/../lib'))
-p $:
 require 'irb'
 require 'spontaneous'
 
@@ -29,7 +27,7 @@ IRB.conf[:MAIN_CONTEXT] = irb.context
 irb.context.evaluate("require 'irb/completion'", 0)
 irb.context.evaluate(
   %@
-HISTFILE = ".irb_history"
+HISTFILE = "../.irb_history"
 MAXHISTSIZE = 100
 begin
   histfile = File::expand_path(HISTFILE)
