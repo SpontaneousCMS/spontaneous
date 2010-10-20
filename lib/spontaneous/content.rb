@@ -26,7 +26,8 @@ module Spontaneous
     plugin Plugins::JSON
 
     many_to_one :container, :class => self, :reciprocal => :nodes
-    one_to_many :nodes, :key => :container_id, :class => self, :reciprocal => :container
+    one_to_many :nodes,    :key => :container_id, :class => self, :reciprocal => :container
+
 
     def after_initialize
       if new?
@@ -45,8 +46,15 @@ module Spontaneous
       nil
     end
 
+    def page=(page)
+    end
+
     def meta
       class << self; self; end
+    end
+
+    def to_s
+      %(#<#{self.class.name} id=#{id}>)
     end
   end
 end

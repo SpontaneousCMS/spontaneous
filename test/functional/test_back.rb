@@ -4,7 +4,6 @@ require 'test_helper'
 
 
 class BackTest < Test::Unit::TestCase
-  include Spontaneous
   include ::Rack::Test::Methods
 
   def app
@@ -12,55 +11,11 @@ class BackTest < Test::Unit::TestCase
   end
 
   def teardown
-    # to keep other tests working
-    Spontaneous.schema_root = @saved_schema_root
+    teardown_site_fixture
   end
+
   def setup
-    @app_dir = File.expand_path("../../fixtures/application", __FILE__)
-    File.exists?(@app_dir).should be_true
-    Spontaneous.stubs(:application_dir).returns(@app_dir)
-    @saved_schema_root = Spontaneous.schema_root
-    Spontaneous.schema_root = nil
-    Spontaneous.root = File.expand_path("../../fixtures/example_application", __FILE__)
-    File.exists?(Spontaneous.root).should be_true
-    Spontaneous.init(:mode => :back, :environment => :development)
-    # Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
-    Content.delete
-
-    @project1 = Project.new
-    @project2 = Project.new
-    @project3 = Project.new
-
-    @page = HomePage.new
-    @page.in_progress << @project1
-    @page.completed << @project2
-    @page.archived << @project3
-    @page.save
-
-    @page2 = InfoPage.new({
-      :slug => "about"
-    })
-
-    @page.pages << @page2
-
-    @facet2_1 = Text.new
-    @facet2_2 = Text.new
-    @facet2_3 = Text.new
-    @facet2_4 = Text.new
-    @facet2_5 = Text.new
-    @page2.text << @facet2_1
-    @page2.text << @facet2_2
-    @page2.text << @facet2_3
-    @page2.text << @facet2_4
-    @page2.text << @facet2_5
-    @page2.text.save
-    @page2.save
-    @page.save
-    [@project1, @project2, @project3, @facet2_1, @facet2_2, @facet2_3, @facet2_4, @facet2_5].each { |p| p.save }
-
-    @page2 = Content[@page2.id]
-    @page.root?.should be_true
-    Object.const_get(:HomePage).should be_instance_of(Class)
+    setup_site_fixture
   end
 
   context "@spontaneous" do
@@ -159,6 +114,7 @@ class BackTest < Test::Unit::TestCase
         @page.save
         @facet.save
       end
+
       should "update facet field values" do
         params = {
           "field[text][value]" => "Updated field_name_1"
@@ -193,8 +149,9 @@ class BackTest < Test::Unit::TestCase
       last_response.content_type.should == "text/html;charset=utf-8"
       assert_equal @page.render, last_response.body
     end
+
     should "return rendered child-page" do
-      get "/child"
+      get "/about"
       assert last_response.ok?
       last_response.content_type.should == "text/html;charset=utf-8"
       assert_equal @page2.render, last_response.body

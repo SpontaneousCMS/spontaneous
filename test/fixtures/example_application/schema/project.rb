@@ -9,4 +9,6 @@ class Project < Spontaneous::Facet
   slot :images do
     allow :ProjectImage
   end
+  
+  inline_style :project
 end

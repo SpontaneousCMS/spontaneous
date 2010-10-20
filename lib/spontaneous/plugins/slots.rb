@@ -42,6 +42,13 @@ module Spontaneous::Plugins
         end
       end
 
+      def after_save
+        slots.each do |slot|
+          slot.save if slot.modified?
+        end
+        super
+      end
+
       def slots
         @slots ||= SlotSet.new(self)
       end
@@ -49,6 +56,7 @@ module Spontaneous::Plugins
       def slot?(slot_name)
         self.class.slot?(slot_name.to_sym)
       end
+
     end # InstanceMethods
   end # Slots
 end # Spontaneous::Plugins

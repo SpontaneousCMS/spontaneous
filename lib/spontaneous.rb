@@ -191,6 +191,7 @@ module Spontaneous
     autoload :AllowedTypes, "spontaneous/plugins/allowed_types"
     autoload :JSON, "spontaneous/plugins/json"
     autoload :SiteMap, "spontaneous/plugins/site_map"
+    autoload :PageSearch, "spontaneous/plugins/page_search"
 
     module Slots
       autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"

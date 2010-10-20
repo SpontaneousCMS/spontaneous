@@ -12,8 +12,17 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+      def page_styles
+        self.class.page_styles
+      end
+
       def style
-        self.class.page_styles[self.style_id]
+        style = page_styles[self.style_id] || default_page_style
+        style
+      end
+
+      def default_page_style
+        page_styles.first
       end
 
       def style=(page_style)

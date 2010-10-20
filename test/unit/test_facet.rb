@@ -53,6 +53,7 @@ class FacetTest < Test::Unit::TestCase
       end
 
       should "be available from their containing page" do
+        @page.facets.length.should == 3
         @page.facets.should == [@f1, @f2, @f3]
         @page.facets.last.class.should == Fridge
       end

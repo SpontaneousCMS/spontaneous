@@ -73,6 +73,9 @@ module Spontaneous::Plugins
       def render(binding)
         eval("\"#{@source}\"", binding)
       end
+      def path
+        "<InlineTemplate>"
+      end
     end
 
     # Used by slots to check for the existance of a template named
@@ -104,6 +107,10 @@ module Spontaneous::Plugins
 
       def render(binding)
         eval('render_content', binding)
+      end
+
+      def path
+        "<Anonymous>"
       end
     end # AnonymousStyle
   end

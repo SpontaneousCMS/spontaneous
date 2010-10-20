@@ -6,6 +6,7 @@ module Spontaneous
     plugin Plugins::Paths
     plugin Plugins::PageTree
     plugin Plugins::SiteMap
+    plugin Plugins::PageSearch
 
     many_to_one :parent,   :class => Content, :reciprocal => :children
     one_to_many :children, :class => Content, :key => :parent_id, :reciprocal => :parent
@@ -20,6 +21,7 @@ module Spontaneous
     def page
       self
     end
+
     def to_shallow_hash
       hash = super.merge({
         :path => path,

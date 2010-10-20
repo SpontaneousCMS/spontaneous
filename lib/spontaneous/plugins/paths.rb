@@ -2,12 +2,6 @@
 module Spontaneous::Plugins
   module Paths
 
-    module ClassMethods
-      def root
-        Spontaneous::Page.first(:path => Spontaneous::SLASH)
-      end
-    end
-
     module InstanceMethods
       ANCESTOR_SEP = "."
 

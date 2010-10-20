@@ -1,3 +1,4 @@
 .bundle
 .irb_history
 *.rbc
+.rake_tasks

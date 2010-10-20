@@ -6,6 +6,14 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+
+      def before_save
+        if container and page.nil?
+          self.page = container.page
+        end
+        super
+      end
+
       def entry_modified!(modified_entry)
         self.entry_store = entries.serialize
       end

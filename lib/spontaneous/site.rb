@@ -13,6 +13,25 @@ module Spontaneous
       def root
         Page.root
       end
-    end
+
+      def [](path_or_uid)
+        case path_or_uid
+        when /^\//
+          by_path(path_or_uid)
+        when /^#/
+          by_uid(path_or_uid[1..-1])
+        else
+          by_uid(path_or_uid)
+        end
+      end
+
+      def by_path(path)
+        Page.path(path)
+      end
+
+      def by_uid(uid)
+        Page.uid(uid)
+      end
+   end
   end
 end

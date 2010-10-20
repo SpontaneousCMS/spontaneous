@@ -14,9 +14,11 @@ class SiteTest < Test::Unit::TestCase
     @page2_1 = Page.new(:slug => "page2-1")
     @page2_1.title = "Page 2 1"
     @page3_1 = Page.new(:slug => "page3-1")
-    @page3_1 .title = "Page 3 1"
+    @page3_1.title = "Page 3 1"
     @page3_2 = Page.new(:slug => "page3-2")
-    @page3_2 .title = "Page 3 2"
+    @page3_2.title = "Page 3 2"
+    @page3_2.uid = "Page3-2"
+
     @root << @page1_1
     @root << @page1_2
     @page1_1 << @page2_1
@@ -43,6 +45,15 @@ class SiteTest < Test::Unit::TestCase
     end
     should "retrieve the details of the children of any page" do
       Site.map(@root.id).should == Page.root.map_children
+    end
+  end
+  context "page retrieval" do
+    should "work with paths" do
+      Site['/page1-1/page2-1'].should == @page2_1.reload
+    end
+
+    should "work with UIDs" do
+      Site["Page3-2"].should == @page3_2.reload
     end
   end
 end
