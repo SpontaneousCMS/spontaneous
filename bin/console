@@ -8,14 +8,17 @@ Bundler.require
 
 require 'logger'
 
-DB = Sequel.connect('mysql2://root@localhost/spontaneous2_test') unless defined?(DB)
-DB.logger = Logger.new($stdout)
+# DB = Sequel.connect('mysql2://root@localhost/spontaneous2_test') unless defined?(DB)
 
-$:.unshift(File.dirname(__FILE__) + '/../lib')
-
+$:.unshift(File.expand_path(File.dirname(__FILE__) + '/../lib'))
+p $:
 require 'irb'
 require 'spontaneous'
 
+Dir.chdir('test/fixtures/example_application')
+
+Spontaneous.init(:mode => :back, :environment => :development)
+Spontaneous.database.logger = Logger.new($stdout)
 
 
 IRB.setup(nil)

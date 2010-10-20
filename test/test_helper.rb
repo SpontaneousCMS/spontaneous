@@ -86,8 +86,6 @@ class Test::Unit::TestCase
     @page.root?.should be_true
     Object.const_get(:HomePage).should be_instance_of(Class)
 
-    @page.title = "Changed"
-    @page.save
   end
 
   def teardown_site_fixture
