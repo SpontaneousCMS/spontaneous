@@ -40,7 +40,8 @@ class SerialisationTest < Test::Unit::TestCase
           {:name => "title", :type => "Spontaneous.FieldTypes.StringField", :title => "Title",  :comment => "" },
           {:name => "location", :type => "Spontaneous.FieldTypes.StringField", :title => "Where",  :comment => "Fill in the address" },
           {:name => "date", :type => "Spontaneous.FieldTypes.DateField", :title => "Date",  :comment => "" }
-      ]
+      ],
+        :allowed_types => ["SerialisedPage"] 
       }
     end
 
@@ -108,48 +109,6 @@ class SerialisationTest < Test::Unit::TestCase
         @child.path.should == "/about"
 
         [@root, @facet1, @facet2, @facet3, @child].each { |c| c.save }
-        # @root_hash = {
-        #   :id => @root.id,
-        #   :uid => "home",
-        #   :type => "SerialisedPage",
-        #   :slug => "",
-        #   :path => "/",
-        #   :depth => 0,
-        #   :is_page => true,
-        #   :fields => [
-        #     {:name => "title", :unprocessed_value => "Home", :processed_value => "Home" },
-        #     {:name => "direction", :unprocessed_value => "S", :processed_value => "South" },
-        #     {:name => "thumbnail", :unprocessed_value => "/images/home.jpg", :processed_value => "/images/home.jpg" }
-        # ],
-        #   :entries => [
-        #     {:type => "SerialisedFacet", :style => 'freezing', :styles => ['freezing', 'boiling'], :label => "label1", :name => "The Pages", :is_page => false, :depth=>1, :fields => [
-        #       {:name => "title", :unprocessed_value => "Facet 1", :processed_value => "Facet 1" },
-        #       {:name => "location", :unprocessed_value => "Facet 1 Location", :processed_value => "Facet 1 Location" },
-        #       {:name => "date", :unprocessed_value => date, :processed_value =>  date} ], # /fields
-        #       :entries => [
-        #         { :id => @child.id,
-        #           :uid => "about",
-        #           :type => "SerialisedPage",
-        #           :is_page => true,
-        #           :slug => "about",
-        #           :path => "/about",
-        #           :depth=> 2,
-        #           :fields => [
-        #             {:name => "title", :unprocessed_value => "Child Page", :processed_value => "Child Page" },
-        #             {:name => "direction", :unprocessed_value => "N", :processed_value => "North" },
-        #             {:name => "thumbnail", :unprocessed_value => "/images/thumb.jpg", :processed_value => "/images/thumb.jpg" }
-        # ] } # /@child
-
-        # ] # /@facet1.entries
-        # },
-        # {:type => "SerialisedFacet", :style => 'freezing', :styles => ['freezing', 'boiling'], :label => "label2", :name => "The Doors", :is_page => false, :depth=>1, :fields => [
-        #       {:name => "title", :unprocessed_value => "Facet 2", :processed_value => "Facet 2" },
-        #       {:name => "location", :unprocessed_value => "Facet 2 Location", :processed_value => "Facet 2 Location" },
-        #       {:name => "date", :unprocessed_value => date, :processed_value =>  date} ], # /fields
-        #       :entries => [], 
-        # }
-        # ] # /@root.entries
-        # }
         @root_hash = {:type=>"SerialisedPage",
           :depth=>0,
           :path=>"/",
