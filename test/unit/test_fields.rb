@@ -262,4 +262,36 @@ class FieldsTest < Test::Unit::TestCase
       f.to_pdf.should == "Value"
     end
   end
+
+  context "Discount fields" do
+    setup do
+      class ::DiscountContent < Content
+        field :text1, :markdown
+        field :text2, :discount
+      end
+      @instance = DiscountContent.new
+    end
+    teardown do
+      Object.send(:remove_const, :DiscountContent)
+    end
+
+    should "be abvailable as the :markdown type" do
+      DiscountContent.field_prototypes[:text1].field_class.should == Spontaneous::FieldTypes::DiscountField
+    end
+    should "be abvailable as the :discount type" do
+      DiscountContent.field_prototypes[:text2].field_class.should == Spontaneous::FieldTypes::DiscountField
+    end
+
+    should "process input into HTML" do
+      @instance.text1 = "*Hello* **World**"
+      @instance.text1.value.should == "<p><em>Hello</em> <strong>World</strong></p>\n"
+    end
+
+    should "use more sensible linebreaks" do
+      @instance.text1 = "With\nLinebreak"
+      @instance.text1.value.should == "<p>With<br/>\nLinebreak</p>\n"
+      @instance.text2 = "With  \nLinebreak"
+      @instance.text2.value.should == "<p>With<br/>\nLinebreak</p>\n"
+    end
+  end
 end
