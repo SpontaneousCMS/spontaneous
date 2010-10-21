@@ -14,8 +14,7 @@ module Spontaneous::Plugins
       end
 
       def push(slot)
-        facet = slot.instance_class.new(:label => slot.name, :slot_name => slot.title, :slot_id => slot.name )
-        entry = owner.push(facet)
+        owner.push(slot.get_instance)
       end
 
       alias_method :<<, :push

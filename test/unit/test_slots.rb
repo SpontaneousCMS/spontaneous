@@ -7,10 +7,13 @@ class SlotsTest < Test::Unit::TestCase
   context "Slot containers" do
     setup do
       class ::SlotClass < Content; end
+      class ::ContentClass < Content; end
+      ContentClass.field :description
     end
 
     teardown do
       Object.send(:remove_const, :SlotClass)
+      Object.send(:remove_const, :ContentClass)
     end
 
     should "start empty" do
@@ -47,6 +50,13 @@ class SlotsTest < Test::Unit::TestCase
       SlotClass.slot :images4, :title => "Custom Title"
       @instance = SlotClass.new
       @instance.entries.first.slot_name.should == "Custom Title"
+    end
+
+    should "accept values for the slot's fields" do
+      SlotClass.slot :images4, :class => :ContentClass, :fields => { :description => "Neato" }
+
+      @instance = SlotClass.new
+      @instance.images4.fields.description.value.should == "Neato"
     end
 
     should "allow access to groups of slots" do

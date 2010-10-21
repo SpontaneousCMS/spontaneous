@@ -15,6 +15,14 @@ module Spontaneous::Plugins
         instance_class
       end
 
+      def get_instance
+        values = {:label => self.name, :slot_name => self.title, :slot_id => self.name }
+        if @options[:fields] && @options[:fields].is_a?(Hash)
+          values.merge!(@options[:fields])
+        end
+        instance_class.new(values)
+      end
+
       def title
         @options[:title] || default_title
       end
