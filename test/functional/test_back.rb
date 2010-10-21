@@ -147,6 +147,7 @@ class BackTest < Test::Unit::TestCase
       get "/"
       assert last_response.ok?
       last_response.content_type.should == "text/html;charset=utf-8"
+      puts @page.render
       assert_equal @page.render, last_response.body
     end
 

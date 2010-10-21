@@ -188,5 +188,40 @@ class StylesTest < Test::Unit::TestCase
         @a.render.should ==  "title: Total Title"
       end
     end
+
+    context "default styles" do
+      setup do
+        class ::DefaultStyleClass < Content
+          field :title
+        end
+        class ::WithoutDefaultStyleClass < Content
+          field :title
+          slot :with_style, :class => :DefaultStyleClass
+        end
+
+        @with_default_style = DefaultStyleClass.new
+        @with_default_style.title = "Total Title"
+        @without_default_style = WithoutDefaultStyleClass.new
+        @without_default_style.title = "No Title"
+        @without_default_style.with_style.title = "Slot Title"
+      end
+
+      teardown do
+        Object.send(:remove_const, :DefaultStyleClass)
+        Object.send(:remove_const, :WithoutDefaultStyleClass)
+      end
+
+      should "be used when available" do
+        @with_default_style.render.should == "Title: Total Title"
+      end
+
+      should "be used by slots too" do
+        @without_default_style.with_style.render.should == "Title: Slot Title"
+      end
+
+      should "fallback to anonymous style when default style template doesn't exist" do
+        @without_default_style.render.should == "Title: Slot Title"
+      end
+    end
   end
 end

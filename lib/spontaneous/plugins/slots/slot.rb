@@ -11,6 +11,10 @@ module Spontaneous::Plugins
         @extend = block
       end
 
+      def schema_validate
+        instance_class
+      end
+
       def title
         @options[:title] || default_title
       end
@@ -50,7 +54,17 @@ module Spontaneous::Plugins
       end
 
       def define_slot_class(superclass)
-        Object.class_eval "class #{slot_class_name} < #{superclass.name}; end"
+        p @options
+        puts "#{self.class} defining slot class for superclass #{superclass}"
+        unless Object.const_defined?(slot_class_name)
+          Object.class_eval <<-RUBY
+            class #{slot_class_name} < #{superclass.name}
+              def template_class
+                #{superclass}
+              end
+            end
+          RUBY
+        end
         Object.const_get(slot_class_name)
       end
 

@@ -10,5 +10,4 @@ class Project < Spontaneous::Facet
     allow :ProjectImage
   end
   
-  inline_style :project
 end

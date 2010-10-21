@@ -6,17 +6,20 @@
 </head>
 <body>
 	<h3>In Progress</h3>
-	<div class="projects">
-	<%= in_progress.entries.length %>
-		<%= in_progress.render %>
-	</div>
-	<h3>Completed</h3>
-	<div class="projects">
-		<%= completed.render %>
-	</div>
+	<%- 
+	puts "+++"
+	p in_progress
+	puts "---"
+	p Site.root.in_progress
+	puts "xxx"
+	-%>
+	<%= in_progress.render %>
+	
+	<h3>!Completed</h3>
+	<%= completed.render %>
+	
 	<h3>Archived</h3>
-	<div class="projects">
-		<%= archived.render %>
-	</div>
+	<%= archived.render %>
+	
 </body>
 </html>

@@ -59,7 +59,7 @@ module Spontaneous
       if @entry_style_name
         target.styles[@entry_style_name]
       else
-        target.anonymous_style
+        target.style
       end
     end
 

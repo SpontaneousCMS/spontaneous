@@ -29,15 +29,20 @@ module Spontaneous::Plugins
       def inline_templates
         @inline_templates ||= {}
       end
+
     end # ClassMethods
 
     module InstanceMethods
+      def template_class
+        self.class
+      end
+
       def styles
         self.class.inline_styles
       end
 
       def style
-        self.class.inline_styles[style_id] or anonymous_style
+        self.class.inline_styles[style_id] || default_style || anonymous_style
       end
 
       def template(format=:html)
@@ -53,6 +58,15 @@ module Spontaneous::Plugins
           end
       end
 
+      def default_style
+        @default_style ||= DefaultStyle.new(self.template_class)
+        p self
+        p self.template_class
+        p @default_style.formats
+        puts "returning default style #{@default_style.path}"
+        return nil if @default_style.formats.empty?
+        @default_style
+      end
     end # InstanceMethods
 
     class InlineStyle
@@ -98,6 +112,7 @@ module Spontaneous::Plugins
       end
 
       def has_default_template?(format)
+        return false if @label.nil? or @label.empty?
         File.exists?(style.path(format))
       end
 
@@ -113,6 +128,37 @@ module Spontaneous::Plugins
         "<Anonymous>"
       end
     end # AnonymousStyle
+  end
+
+  class DefaultStyle < Spontaneous::Style
+    def initialize(owner)
+      @owner = owner
+      p "DefaultStyle#init #{owner}"
+    end
+
+    def name
+      owner_directory_name
+    end
+
+    def directory
+      Spontaneous.template_root
+    end
+
+    def default?
+      true
+    end
+
+    def basename
+      owner_directory_name
+    end
+
+    def owner_directory_name
+      @owner.name.underscore
+    end
+
+    def title
+      "#{owner.name} Default"
+    end
   end
 end
 

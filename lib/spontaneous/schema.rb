@@ -5,6 +5,14 @@ module Spontaneous
       def load(root=nil)
         schema_files = (root || Spontaneous.schema_root) / "**/*.rb"
         load_classes(schema_files)
+        validate_schema
+      end
+
+      def validate_schema
+        self.classes.each do | schema_class |
+          puts "validating #{schema_class}"
+          schema_class.schema_validate
+        end
       end
 
       def load_file(file)

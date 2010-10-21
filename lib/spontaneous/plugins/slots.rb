@@ -30,6 +30,12 @@ module Spontaneous::Plugins
       def has_slots?
         !slots.empty?
       end
+
+      def schema_validate
+        puts "schema_validate #{self}"
+        slots.each { |slot| slot.schema_validate }
+        super rescue nil
+      end
     end # ClassMethods
 
     module InstanceMethods
