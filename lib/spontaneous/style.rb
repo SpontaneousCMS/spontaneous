@@ -78,7 +78,7 @@ module Spontaneous
 
     def template_cache
       @template_cache ||= Hash.new do |hash, format|
-        hash[format] = TemplateTypes::ErubisTemplate.new(path(format))
+        hash[format] = Templates::ErubisTemplate.new(path(format))
       end
     end
   end

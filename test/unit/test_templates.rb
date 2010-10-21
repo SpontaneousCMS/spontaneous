@@ -2,12 +2,11 @@ require 'test_helper'
 
 
 class TemplatesTest < Test::Unit::TestCase
-  include Spontaneous
 
   context "erubis templates" do
     setup do
       @path ||= File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/template.html.erb"))
-      @template = TemplateTypes::ErubisTemplate.new(@path)
+      @template = Templates::ErubisTemplate.new(@path)
     end
 
     should "render" do

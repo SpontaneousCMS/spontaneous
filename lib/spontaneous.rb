@@ -161,7 +161,6 @@ module Spontaneous
 
   autoload :Style, "spontaneous/style"
   autoload :StyleDefinitions, "spontaneous/style_definitions"
-  autoload :Template, "spontaneous/template"
   autoload :RenderContext, "spontaneous/render_context"
   autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
 
@@ -172,8 +171,9 @@ module Spontaneous
 
   autoload :Rack, "spontaneous/rack"
 
-  module TemplateTypes
-    autoload :ErubisTemplate, "spontaneous/template_types/erubis_template"
+  module Templates
+    autoload :TemplateBase, "spontaneous/templates/template_base"
+    autoload :ErubisTemplate, "spontaneous/templates/erubis_template"
   end
 
   module Plugins
