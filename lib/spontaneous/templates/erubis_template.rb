@@ -2,11 +2,11 @@ module Spontaneous
   module Templates
     class ErubisTemplate < TemplateBase
       def render(binding)
-        template.result(binding).chomp
+        compiled_template.result(binding).chomp
       end
 
-      def template
-        @template ||= Erubis::Eruby.new(source)
+      def compile
+        Erubis::Eruby.new(source)
       end
 
       def source

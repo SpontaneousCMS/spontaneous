@@ -8,6 +8,12 @@ module Spontaneous
         @path = path
       end
 
+      def compiled_template
+        Templates.cached(path) do
+          self.compile
+        end
+      end
+
       def filename
         File.basename(@path)
       end
@@ -16,6 +22,9 @@ module Spontaneous
         #should be over-ridden by implementations
       end
 
+      def compile
+        #should be over-ridden by implementations
+      end
     end
   end
 end

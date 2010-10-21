@@ -28,7 +28,7 @@ module Spontaneous
       before do
         content_type 'text/html', :charset => 'utf-8'
         if Spontaneous.development?
-          # Template.clear_cache!
+          Templates.clear_cache!
         end
       end
     end

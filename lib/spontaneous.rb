@@ -171,6 +171,7 @@ module Spontaneous
 
   autoload :Rack, "spontaneous/rack"
 
+  autoload :Templates, "spontaneous/templates"
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"
     autoload :ErubisTemplate, "spontaneous/templates/erubis_template"
