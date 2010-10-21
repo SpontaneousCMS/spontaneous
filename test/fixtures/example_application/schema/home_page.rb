@@ -1,7 +1,7 @@
 
 class HomePage < Spontaneous::Page
 	field :welcome_title
-  field :introduction
+  field :introduction, :markdown
   
   slot :in_progress, :class => :Projects, :fields => { :title => "In Progress" }
   slot :completed, :class => :Projects, :fields => { :title => "Completed" }

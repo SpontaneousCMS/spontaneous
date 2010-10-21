@@ -20,6 +20,6 @@ module Spontaneous
   end
 end
 
-[:string, :image, :date].each do |type|
+[:string, :image, :date, :discount].each do |type|
   require "spontaneous/field_types/#{type}_field"
 end

@@ -14,6 +14,8 @@ gem "less", "~>1.2"
 gem "stringex", "~>1.1"
 gem 'miso', '~> 0.3.3'
 
+gem 'rdiscount', '~> 1.6.5'
+
 
 group :development do
   gem 'jnunemaker-matchy', '~>0.4'
