@@ -21,7 +21,7 @@ module Spontaneous
 
     def render
       template = target.template(format)
-      template.render(binding)
+      template.render(self)
     end
 
     def content

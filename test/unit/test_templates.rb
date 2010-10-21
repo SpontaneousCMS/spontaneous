@@ -20,7 +20,7 @@ class TemplatesTest < Test::Unit::TestCase
         end
       end
       instance = klass.new
-      output = @template.render(instance.binding)
+      output = @template.render(instance)
       output.should == "<html><title>THE TITLE</title></html>"
     end
   end

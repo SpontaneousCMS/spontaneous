@@ -1,8 +1,8 @@
 module Spontaneous
   module Templates
     class ErubisTemplate < TemplateBase
-      def render(binding)
-        compiled_template.result(binding).chomp
+      def render(context)
+        compiled_template.evaluate(context).chomp
       end
 
       def compile

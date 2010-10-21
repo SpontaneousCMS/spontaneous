@@ -80,8 +80,8 @@ module Spontaneous::Plugins
         @source = source
       end
 
-      def render(binding)
-        eval("\"#{@source}\"", binding)
+      def render(context)
+        context.instance_eval("\"#{@source}\"")
       end
       def path
         "<InlineTemplate>"
@@ -116,8 +116,8 @@ module Spontaneous::Plugins
         @style ||= Spontaneous::Style.new(@container.class, @label)
       end
 
-      def render(binding)
-        eval('render_content', binding)
+      def render(context)
+        context.instance_eval('render_content')
       end
 
       def path

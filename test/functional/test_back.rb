@@ -137,7 +137,7 @@ class BackTest < Test::Unit::TestCase
         @page = Content[@page.id]
         last_response.body.should == @page.to_json
         @page.fields.title.value.should ==  "Updated title"
-        @page.fields.introduction.value.should ==  "Updated intro"
+        @page.fields.introduction.value.should ==  "<p>Updated intro</p>\n"
       end
     end
   end # context @spontaneous
