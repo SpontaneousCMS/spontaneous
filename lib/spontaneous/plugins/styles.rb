@@ -60,10 +60,6 @@ module Spontaneous::Plugins
 
       def default_style
         @default_style ||= DefaultStyle.new(self.template_class)
-        p self
-        p self.template_class
-        p @default_style.formats
-        puts "returning default style #{@default_style.path}"
         return nil if @default_style.formats.empty?
         @default_style
       end
@@ -133,7 +129,6 @@ module Spontaneous::Plugins
   class DefaultStyle < Spontaneous::Style
     def initialize(owner)
       @owner = owner
-      p "DefaultStyle#init #{owner}"
     end
 
     def name

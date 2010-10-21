@@ -54,9 +54,12 @@ module Spontaneous::Plugins
       end
 
       def define_slot_class(superclass)
-        p @options
-        puts "#{self.class} defining slot class for superclass #{superclass}"
         unless Object.const_defined?(slot_class_name)
+          # #template_class is used to over-write the class
+          # that is used to create the default template names
+          # if i don't over-write it here then the templates
+          # being looked for will be the name of the (anonymous)
+          # slot class
           Object.class_eval <<-RUBY
             class #{slot_class_name} < #{superclass.name}
               def template_class

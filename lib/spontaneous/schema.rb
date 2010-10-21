@@ -10,7 +10,6 @@ module Spontaneous
 
       def validate_schema
         self.classes.each do | schema_class |
-          puts "validating #{schema_class}"
           schema_class.schema_validate
         end
       end

@@ -6,16 +6,9 @@
 </head>
 <body>
 	<h3>In Progress</h3>
-	<%- 
-	puts "+++"
-	p in_progress
-	puts "---"
-	p Site.root.in_progress
-	puts "xxx"
-	-%>
 	<%= in_progress.render %>
 	
-	<h3>!Completed</h3>
+	<h3>Completed</h3>
 	<%= completed.render %>
 	
 	<h3>Archived</h3>

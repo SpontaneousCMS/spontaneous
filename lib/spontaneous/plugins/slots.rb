@@ -32,9 +32,7 @@ module Spontaneous::Plugins
       end
 
       def schema_validate
-        puts "schema_validate #{self}"
         slots.each { |slot| slot.schema_validate }
-        super rescue nil
       end
     end # ClassMethods
 
