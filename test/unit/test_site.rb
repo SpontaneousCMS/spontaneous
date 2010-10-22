@@ -34,18 +34,40 @@ class SiteTest < Test::Unit::TestCase
   context 'Site mapping' do
     should "include the necessary details in the map" do
       @page3_2.map_entry.should == {
-          :parent_id => @page2_1.id, 
           :id => @page3_2.id,
           :title => "Page 3 2",
           :path => '/page1-1/page2-1/page3-2',
           :type => 'Spontaneous.Page',
+          :ancestors => [
+            { :id => @root.id, :title => "Homepage", :path => '/', :type => 'Spontaneous.Page' },
+            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :type => 'Spontaneous.Page' },
+            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :type => 'Spontaneous.Page' }
+          ],
+          :children => []
+      }
+
+      @page2_1.map_entry.should == {
+          :id => @page2_1.id,
+          :title => "Page 2 1",
+          :path => '/page1-1/page2-1',
+          :type => 'Spontaneous.Page',
+          :ancestors => [
+            { :id => @root.id, :title => "Homepage", :path => '/', :type => 'Spontaneous.Page' },
+            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :type => 'Spontaneous.Page' }
+          ],
+          :children => [
+            { :id => @page3_1.id, :title => "Page 3 1", :path => '/page1-1/page2-1/page3-1', :type => 'Spontaneous.Page' },
+            { :id => @page3_2.id, :title => "Page 3 2", :path => '/page1-1/page2-1/page3-2', :type => 'Spontaneous.Page' }
+          ]
       }
     end
 
     should ""
+
     should "retrieve details of the root by default" do
       Site.map.should == Page.root.map_entry
     end
+
     should "retrieve the details of the children of any page" do
       Site.map(@root.id).should == Page.root.map_children
       Site.map(@page3_2.id).should == @page3_2.map_children
