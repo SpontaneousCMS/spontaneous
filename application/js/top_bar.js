@@ -3,8 +3,7 @@ console.log("Loading TopBar...")
 Spontaneous.TopBar = (function($, S) {
 	var dom = S.Dom;
 
-	var RootNode = function(data) {
-		var page = data.pages[data.selected];
+	var RootNode = function(page) {
 		this.page = page;
 		this.id = page.id;
 		this.url = page.url;
@@ -14,7 +13,8 @@ Spontaneous.TopBar = (function($, S) {
 		element: function() {
 			var link = $(dom.a, {'href': this.url}).text(this.title).data('page', this.page);
 			link.click(function() {
-				S.TopBar.set('location', $(this).data('page'));
+				var page = $(this).data('page');
+				S.Location.load_id(page.id);
 				return false;
 			});
 			return link;
@@ -139,12 +139,22 @@ Spontaneous.TopBar = (function($, S) {
 			var nodes = [];
 			var location = this.get('location');
 			var ancestors = location.ancestors;
+			var root, is_root = false;
+			if (ancestors.length === 0) {
+				root = location;
+				is_root = true;
+			} else {
+				root = ancestors.shift();
+			}
+			nodes.push(new RootNode(root));
 			for (var i=0, ii=ancestors.length; i < ii; i++) {
 				var page = ancestors[i];
 				var node = new AncestorNode(page)
 				nodes.push(node);
 			};
-			nodes.push(new CurrentNode(location));
+			if (!is_root) {
+				nodes.push(new CurrentNode(location));
+			}
 			if (location.children.length > 0) {
 				nodes.push(new ChildrenNode(location.children));
 			}
