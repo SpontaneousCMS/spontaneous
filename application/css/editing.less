@@ -1,0 +1,240 @@
+@import "variables";
+
+#editing {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+
+	#url-panel {
+		.bar;
+		background-color: @level1;
+		padding-left: @padding;
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+	}
+	#function-panel {
+		position: absolute;
+		top: @bar-height;
+		left: 0;
+		right: 0;
+		height: 34px;
+	}
+	#content-panel {
+		position: absolute;
+		top: @bar-height * 2.5;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		overflow: auto;
+		padding: 0 @padding;
+		padding-bottom: 100px;
+		.tabs {
+			.rounded-top;
+			background-color: @level2;
+			list-style: none;
+			height: @bar-height;
+			.clearfix;
+			.tab:first-child {
+				.rounded-top-left;
+			}
+			.tab {
+				.bar;
+				display: block;
+				float: left;
+				padding-left: @padding;
+				min-width: 130px;
+				border-right: solid 1px @level4;
+				cursor: pointer;
+				:hover {
+					background-color: @blue;
+				}
+			}
+			.tab.active {
+				background-color: @level4;
+				font-weight: bold;
+			}
+		}
+		#content-wrapper {
+			border-top: solid 1px @level3;
+			background-color: @level1;
+			.field-wrap {
+				.edit, .preview {
+					padding: @padding;
+					background-color: @level3;
+				}
+				.field {
+					.rounded;
+					width: 100%;
+					.name, .value {
+						/*.bar;*/
+						/*padding-bottom: @bar-padding;*/
+						/*height: @bar-height - 2 * @bar-padding;*/
+						display: table-cell;
+					}
+					.name {
+						.rounded-left;
+						vertical-align: top;
+						/*background-color: @level1;*/
+						font-weight: bold;
+						width: 150px;
+						padding-right: @padding;
+						text-align: right;
+					}
+					.value {
+						.rounded-right;
+						padding-left: @padding;
+						/*background-color: @white;*/
+					}
+				}
+				.field.edit {
+					.name {
+						.bar;
+					}
+					.name {
+						background-color: @level7;
+					}
+					.name.active {
+						background-color: @blue;
+						color: @white;
+					}
+					.value {
+						padding-top: 0;
+						padding-bottom: 0;
+						padding-right: 0;
+						padding-left: 0px;
+						position: relative;
+						input.input {
+							.bar;
+							.rounded-right;
+							.border-box;
+							display: block;
+							position: relative;
+							left: 0;
+							width: 100%;
+							height: @bar-height;
+							border: solid 2px @blue;
+							outline: none;
+							padding-left: @padding;
+							vertical-align: top;
+							
+							//padding-left: @padding;
+							:focus {
+								border-color: @blue;
+							}
+						}
+					}
+				}
+				.field + .field {
+					margin-top: @padding;
+				}
+			}
+			.facet-contents-wrap .facet-contents-wrap .facet-drag-bar {
+				display: none;
+			}
+			.facet-contents-wrap .editing .facet-contents-wrap .facet-drag-bar {
+				display: block;
+			}
+			.facet.depth-1 .facet-contents-wrap {
+				background-color: @level2;
+			}
+			.facet.depth-2 {
+				background-color: @level1;
+				.field-wrap .preview {
+					background-color: @white;
+				}
+				.field-wrap .edit {
+					background-color: @level1;
+				}
+				.facet-contents-wrap {
+					background-color: @level1;
+				}
+			}
+			.facet.depth-1 > .facet-bottom-bar {
+				.rounded-bottom;
+				background-color: @level1;
+			}
+			.field-wrap + .facet-allowed {
+				//margin-top: @padding;
+			}
+			.facet-allowed {
+				background-color: @level3;
+				padding: 0;
+				.type-list {
+					.rounded-top;
+					.clearfix;
+					//background-color: @level1;
+					padding-left: @padding;
+					padding-right: @padding;
+					padding-bottom: 6px;
+					@a-height: @bar-height - 6;
+					@a-pad: ((@a-height - @line-height)/2) - 1;
+					a {
+						.rounded;
+						display: block;
+						float: left;
+						min-width: 95px;
+						padding: @a-pad 6px 0 6px;
+						height: @a-height - @a-pad ;
+						background-color: @level2;
+						margin-top: 6px;
+
+						:hover {
+							background-color: @blue;
+							color: @white;
+						}
+					}
+					a + a {
+						margin-left: 6px;
+					}
+				}
+			}
+			.page-entry-link {
+				h3 {
+					.bar;
+					.rounded;
+					background-color: @level1;
+					margin-bottom: @padding;
+					font-size: 150%;
+					padding-left: @padding;
+					a {
+						font-weight: normal;
+					}
+				}
+			}
+			.facet-contents-wrap {
+				padding: @padding;
+				.facet-drag-bar {
+					.rounded-top;
+					height: @bar-height - @padding;
+					background-color: @level4;
+				}
+				.facet {
+					margin-top: 2 * @padding;
+				}
+				.field-wrap {
+					//padding-bottom: 0;
+				}
+				.page {
+					.field-wrap {
+						padding-bottom: @padding;
+					}
+				}
+			}
+
+			.depth-2 {
+				.facet-contents-wrap {
+					background-color: @level3;
+				}
+			}
+			.facet-bottom-bar {
+				.rounded-bottom;
+				height: @padding;
+				background-color: @level2;
+			}
+		}
+	}
+}

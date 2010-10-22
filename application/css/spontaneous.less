@@ -1,0 +1,133 @@
+/**
+ * Spontaneous CSS
+ */
+@import "variables";
+@import "editing";
+
+body, html {
+padding: 0;
+margin: 0;
+width: 100%;
+height: 100%;
+font-size: @font-size;
+line-height: @line-height;
+ font-family: "Lucida Grande";
+}
+input, textarea {
+font-size: @font-size;
+line-height: @line-height;
+	}
+// reset
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,p,blockquote,th,td,img {
+	margin: 0; padding: 0; border: 0;
+}
+table { 
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+address,caption,cite,code,dfn,em,strong,th,var {
+	font-style: normal;
+	font-weight: normal;
+}
+ol,ul {
+	list-style: none;
+}
+
+caption,th {
+	text-align: left;
+}
+
+h1,h2,h3,h4,h5,h6 {
+	font-size: 100%;
+}
+// end reset
+
+#spontaneous {
+	a {
+		font-weight: bold;
+color: @blue;
+cursor: pointer;
+	}
+
+#side-bar {
+position: fixed;
+left: 0;
+top: 0;
+bottom: 0;
+width: @side_bar_width;
+	background-color: @chrome_color;
+#logo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 120px;
+border-bottom: solid 1px (@chrome_color - #050505);
+background-color: (@chrome_color - #030303);
+}
+
+#user {
+border-top: solid 1px (@chrome_color - #050505);
+background-color: (@chrome_color - #030303);
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 120px;
+}
+
+.page-info {
+	position: absolute;
+	top: 150px;
+	left: 0;
+	right: 0;
+	height: 30px;
+background-color: (@chrome_color - #020202);
+font-size: 10px;
+color:#ccc;
+	}
+}
+#top_bar {
+	background-color: @chrome_color;
+position: fixed;
+left: @side_bar_width;
+right: 0;
+top: 0;
+height: @top_bar_height;
+color: @white;
+.location {
+	width: 800px;	
+}
+			 .switch-mode {
+position: absolute;
+right: 10px;
+top: 10px;
+		 background-color: #666;
+padding: 3px 10px;
+width: 80px;
+			 text-align: center;
+			 .rounded;
+			 }
+}
+
+#content_area_wrap {
+display: block;
+position: absolute;
+left: @side_bar_width;
+right: 0;
+top: @top_bar_height;
+bottom: 0;
+}
+#preview_pane {
+border: none;
+display: block;
+position: absolute;
+left: 0;
+right: 0;
+top: 0;
+bottom: 0;
+width: 100%;
+height: 100%;
+}
+
+}
