@@ -12,6 +12,7 @@ module Spontaneous::Plugins
       def map_entry
         {
           :id => id,
+          :parent_id => parent_id, 
           :title => fields.title.value,
           :path => path,
           :type => self.class.json_name

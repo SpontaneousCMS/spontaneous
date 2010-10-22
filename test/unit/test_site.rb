@@ -33,18 +33,22 @@ class SiteTest < Test::Unit::TestCase
   end
   context 'Site mapping' do
     should "include the necessary details in the map" do
-      Page.root.map_entry.should == {
-          :id => @root.id,
-          :title => "Homepage",
-          :path => '/',
-          :type => 'Spontaneous.Page'
+      @page3_2.map_entry.should == {
+          :parent_id => @page2_1.id, 
+          :id => @page3_2.id,
+          :title => "Page 3 2",
+          :path => '/page1-1/page2-1/page3-2',
+          :type => 'Spontaneous.Page',
       }
     end
+
+    should ""
     should "retrieve details of the root by default" do
       Site.map.should == Page.root.map_entry
     end
     should "retrieve the details of the children of any page" do
       Site.map(@root.id).should == Page.root.map_children
+      Site.map(@page3_2.id).should == @page3_2.map_children
     end
   end
   context "page retrieval" do

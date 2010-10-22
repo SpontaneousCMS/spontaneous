@@ -48,19 +48,21 @@ class Test::Unit::TestCase
     Spontaneous.init(:mode => :back, :environment => :development)
     # Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
     Spontaneous::Content.delete
+    #########
 
     @project1 = Project.new(:title => "Spontaneous CMS 1", :url => "http://spontaneouscms.com", :description => "Description 1")
     @project2 = Project.new(:title => "Spontaneous CMS 2", :url => "http://spontaneouscms.com", :description => "Description 2")
     @project3 = Project.new(:title => "Spontaneous CMS 3", :url => "http://spontaneouscms.com", :description => "Description 3")
 
-    @page = HomePage.new(:title => "magnetised", :introduction => "Welcome to magnetised...")
+    @page = HomePage.new(:title => "magnetised", :introduction => "Welcome to magnetised...", :uid => "home", :welcome_title => "magnetised")
     @page.in_progress << @project1
     @page.completed << @project2
     @page.archived << @project3
     @page.save
 
     @page2 = InfoPage.new({
-      :slug => "about"
+      :slug => "about",
+      :uid => "about"
     })
 
     @page.pages << @page2
@@ -80,6 +82,7 @@ class Test::Unit::TestCase
     @page.save
     [@project1, @project2, @project3, @facet2_1, @facet2_2, @facet2_3, @facet2_4, @facet2_5].each { |p| p.save }
 
+    ############
     @page = Content[@page.id]
     @page2 = Content[@page2.id]
 
