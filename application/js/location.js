@@ -9,12 +9,16 @@ Spontaneous.Location = (function($, S) {
 		load_map: function() {
 		},
 		location_loaded: function(location) {
-			this.set('location', location);
 			console.log("Location#location_loaded", location);
+			this.set('location', location);
+		},
+		load_id: function(id) {
+			console.log("Loading id", id);
+			this.find_id(id);
 		},
 		load_path: function(path) {
 			console.log("Loading path", path);
-			this.find(path);
+			this.find_path(path);
 		},
 		url: function() {
 			var l = this.location();
@@ -30,11 +34,17 @@ Spontaneous.Location = (function($, S) {
 		current_path: function() {
 			return this.path_from_url(this.url());
 		},
-		find: function(path) {
+		find_path: function(path) {
 			if (this.location() && path === this.location().path) {
 				return this.location();
 			}
 			ajax.get('/location'+path, this, this.location_loaded);
+		},
+		find_id: function(id) {
+			if (this.location() && id === this.location().id) {
+				return this.location();
+			}
+			ajax.get('/map/'+id, this, this.location_loaded);
 		},
 		path_from_url: function(url) {
 			var map = this.get('map'),

@@ -21,28 +21,85 @@ Spontaneous.TopBar = (function($, S) {
 		}
 	}
 
-	var ChildNode = function(data) {
-		var page = data.pages[data.selected];
+	var AncestorNode = function(page) {
+		this.page = page;
 		this.id = page.id;
-		this.url = page.url;
 		this.title = page.title;
-		this.pages = data.pages;
-		this.selected = data.selected;
+		this.path = page.path;
+	};
+	AncestorNode.prototype = {
+		element: function() {
+			var link = $('<a/>').data('page', this.page).click(function() {
+				var page = $(this).data('page');
+				S.Location.load_id(page.id);
+			}).text(this.title);
+			
+			return link;
+		}
+	};
+	var CurrentNode = function(page) {
+		this.page = page;
+		this.id = page.id;
+		this.path = page.path;
+		this.title = page.title;
+		this.pages = page.generation.sort(function(p1, p2) {
+			var a = p1.title, b = p2.title;
+			if (a == b) return 0;
+			return (a < b ? -1 : 1);
+		});
+		for (var i = 0, ii = this.pages.length; i < ii; i++) {
+			var p = this.pages[i];
+			if (p.id === this.id) {
+				this.selected = i;
+				break;
+			}
+		}
 	}
-	ChildNode.prototype = {
+
+	CurrentNode.prototype = {
 		element: function() {
 			var select = $(dom.select);
 			select.change(function() {
-				S.TopBar.set('location', $(this.options[this.selectedIndex]).data('page'));
+				var page = $(this.options[this.selectedIndex]).data('page');
+				S.Location.load_id(page.id);
 				return false;
 			});
 			for (var i = 0, ii = this.pages.length; i < ii; i++) {
 				var p = this.pages[i];
-				select.append($(dom.option, {'value': p.url, 'selected':(i == this.selected) }).text(p.title).data('page', p))
+				select.append($(dom.option, {'value': p.id, 'selected':(i == this.selected) }).text(p.title).data('page', p))
 			};
 			return select;
 		}
 	}
+
+	var ChildrenNode = function(children) {
+		this.children = children.sort(function(p1, p2) {
+			var a = p1.title, b = p2.title;
+			if (a == b) return 0;
+			return (a < b ? -1 : 1);
+		});
+	}
+
+	ChildrenNode.prototype = {
+		element: function() {
+			var select = $(dom.select);
+			select.append($(dom.option));
+			select.change(function() {
+				var p = $(this.options[this.selectedIndex]).data('page');
+				console.log(p, p.id)
+				if (p) {
+					S.Location.load_id(p.id);
+				}
+				return false;
+			});
+			for (var i = 0, ii = this.children.length; i < ii; i++) {
+				var p = this.children[i];
+				select.append($(dom.option, {'value': p.id}).text(p.title).data('page', p))
+			};
+			return select;
+		}
+	}
+
 	var top_bar = $.extend({}, S.Properties(), {
 		location: "/",
 		panel: function() {
@@ -76,40 +133,25 @@ Spontaneous.TopBar = (function($, S) {
 			document.title = "Editing: '{title}'".replace("{title}", S.Preview.title());
 			console.log("TopBar#location_changed", new_location);
 			this.set('location', new_location);
-			// this.update_navigation();
-		},
-		map_changed: function(new_map) {
-			this.map = new_map;
 			this.update_navigation();
 		},
 		update_navigation: function() {
-			if (this.map) {
-				var loc = this.location;
-				var path = S.Location.current_path();
-				loc.empty();
-				for (var i = 0, ii = path.length; i < ii; i++) {
-					var p = path[i], node;
-					if (p.root) {
-						node = new RootNode(p);
-					} else {
-						node = new ChildNode(p);
-					}
-					loc.append(node.element());
-				}
-				var last = path[path.length - 1], next_level = last.pages[last.selected].children;
-				if (next_level.length > 0) {
-					var select = $(dom.select);
-					select.change(function() {
-						S.TopBar.set('location', $(this.options[this.selectedIndex]).data('page'));
-						return false;
-					});
-					select.append($(dom.option, {'value': ''}).text(''));
-					for (var i = 0, ii = next_level.length; i < ii; i++) {
-						var p = next_level[i];
-						select.append($(dom.option, {'value': p.url}).text(p.title).data('page', p))
-					};
-					loc.append(select);
-				}
+			var nodes = [];
+			var location = this.get('location');
+			var ancestors = location.ancestors;
+			for (var i=0, ii=ancestors.length; i < ii; i++) {
+				var page = ancestors[i];
+				var node = new AncestorNode(page)
+				nodes.push(node);
+			};
+			nodes.push(new CurrentNode(location));
+			if (location.children.length > 0) {
+				nodes.push(new ChildrenNode(location.children));
+			}
+			this.location.empty();
+			for (var i = 0, ii = nodes.length; i < ii; i++) {
+				var node = nodes[i];
+				this.location.append(node.element())
 			}
 		}
 	});
