@@ -11,7 +11,7 @@ module Spontaneous::Plugins
       end
 
       def generation
-        parent ? parent.children : root
+        parent ? parent.children : [root]
       end
 
       def siblings

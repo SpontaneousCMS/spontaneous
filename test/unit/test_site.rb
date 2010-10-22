@@ -43,6 +43,10 @@ class SiteTest < Test::Unit::TestCase
             { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :type => 'Spontaneous.Page' },
             { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :type => 'Spontaneous.Page' }
           ],
+          :generation => [
+            { :id => @page3_1.id, :title => "Page 3 1", :path => '/page1-1/page2-1/page3-1', :type => 'Spontaneous.Page' },
+            { :id => @page3_2.id, :title => "Page 3 2", :path => '/page1-1/page2-1/page3-2', :type => 'Spontaneous.Page' }
+          ],
           :children => []
       }
 
@@ -54,6 +58,9 @@ class SiteTest < Test::Unit::TestCase
           :ancestors => [
             { :id => @root.id, :title => "Homepage", :path => '/', :type => 'Spontaneous.Page' },
             { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :type => 'Spontaneous.Page' }
+          ],
+          :generation => [
+            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :type => 'Spontaneous.Page' }
           ],
           :children => [
             { :id => @page3_1.id, :title => "Page 3 1", :path => '/page1-1/page2-1/page3-1', :type => 'Spontaneous.Page' },
