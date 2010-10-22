@@ -6,7 +6,7 @@ module Spontaneous
         if root_id.nil?
           Page.root.map_entry
         else
-          Content[root_id].map_children
+          Content[root_id].map_entry
         end
       end
 

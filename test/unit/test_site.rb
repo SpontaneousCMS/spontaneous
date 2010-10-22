@@ -69,8 +69,8 @@ class SiteTest < Test::Unit::TestCase
     end
 
     should "retrieve the details of the children of any page" do
-      Site.map(@root.id).should == Page.root.map_children
-      Site.map(@page3_2.id).should == @page3_2.map_children
+      Site.map(@root.id).should == Page.root.map_entry
+      Site.map(@page3_2.id).should == @page3_2.map_entry
     end
   end
   context "page retrieval" do
