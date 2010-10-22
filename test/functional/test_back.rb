@@ -82,11 +82,19 @@ class BackTest < Test::Unit::TestCase
       assert_equal Site.map.to_json, last_response.body
     end
 
-    should "return a site map for any page" do
+    should "return a site map for any page id" do
       get "/@spontaneous/map/#{@page.id}"
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
       assert_equal Site.map(@page.id).to_json, last_response.body
+    end
+
+    should "return a site map for any url" do
+      page = @page2
+      get "/@spontaneous/location#{@page2.path}"
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      assert_equal Site.map(@page2.id).to_json, last_response.body
     end
 
     should "reorder facets" do

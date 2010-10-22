@@ -80,6 +80,12 @@ module Spontaneous
           json Site.map(params[:id])
         end
 
+        get '/location*' do
+          path = params[:splat].first
+          page = Site[path]
+          json Site.map(page.id)
+        end
+
         post '/page/:id/save' do
           page = Content[params[:id]]
           update_fields(page, params[:field])
