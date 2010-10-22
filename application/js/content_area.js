@@ -21,7 +21,7 @@ Spontaneous.ContentArea = (function($, S) {
 		display: function(mode) {
 			this.mode = mode;
 			// this.wrap.find('> visible').hide();
-			this.current().display(this.get('location'));
+			this.current().display(S.Location.location());
 		},
 		current: function() {
 			if (this.mode === 'preview') {

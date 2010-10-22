@@ -6,7 +6,7 @@ Spontaneous.FacetEntry = (function($, S) {
 	var FacetEntry = function(container, entry) {
 		this.entry = entry;
 		this.id = entry.id;
-		this.type_id = entry.type_id;
+		this.type = entry.type;
 		this.entries = entry.entries;
 		this.is_page = entry.is_page;
 		console.log('facet', entry);
@@ -53,21 +53,26 @@ Spontaneous.FacetEntry = (function($, S) {
 			if (!this._fields) {
 				this._fields = [], this._field_map = {};
 				for (var i = 0, fields = this.entry.fields, ii = fields.length; i < ii; i++) {
-					var field_class, field_data = fields[i];
+					var field_class, field_data = fields[i], field_name = field_data.name;
+				 	var facet_class = S.Types.type(this.entry.type);
+					var field_prototype = facet_class.field_prototypes[field_name];
 					try {
-						field_class = eval(field_data['class']);
+
+						field_class = eval(field_prototype.type);
 					} catch (e) {
-						console.log('unknown class', field_data['class']);
-						field_class = Spontaneous.Field;
+						console.log('unknown class', field_prototype.type);
+						field_class = Spontaneous.FieldTypes.StringField;
 					}
-					var f = new field_class(field_data);
+					if (!field_class) {
+						field_class = Spontaneous.FieldTypes.StringField;
+					}
+					var f = new field_class(this, field_data);
 					this._field_map[f.name] = f;
 					this._fields.push(f);
 				}
 			}
 			return this._fields;
 		},
-
 		entry_wrap: function() {
 			if (!this._entry_wrap) {
 				this._entry_wrap = $(dom.div, {'id':'entry-wrap_'+this.entry.id, 'class':'entry-container'});
@@ -325,7 +330,7 @@ Spontaneous.FacetEntry = (function($, S) {
 			return new FacetEntry.FacetFieldPanel(this.entry);
 		},
 		type: function() {
-			return S.Types.type(this.entry.type_id);
+			return S.Types.type(this.entry.type);
 		},
 		add_list: function() {
 		},
@@ -337,9 +342,9 @@ Spontaneous.FacetEntry = (function($, S) {
 					var klass = Spontaneous.FacetEntry;
 
 					try {
-						klass = eval(entry['class'] + "Entry");
+						klass = eval(entry.type + "Entry");
 					} catch (e) {
-						console.error("unknown entry class", entry['class'] + "Entry")
+						console.error("unknown entry class", entry.type + "Entry")
 					};
 					this._contents.push(new klass(null, entry));
 				}

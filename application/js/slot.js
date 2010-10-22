@@ -8,7 +8,7 @@ Spontaneous.Slot = (function($, S) {
 		this.container = container;
 		this.entry = entry;
 		this.id = entry.id;
-		this.type_id = entry.type_id;
+		this.type = entry.type;
 		this.entries = entry.entries;
 		this.is_page = entry.is_page;
 		console.log('slot', this);

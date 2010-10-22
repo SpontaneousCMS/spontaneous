@@ -6,18 +6,24 @@ Spontaneous.Types = (function($, S) {
 		this.data = type_data;
 		this.id = type_data.type;
 		this.title = type_data.title;
+		this.field_prototypes = {};
+		var fields = this.data.fields;
+		for (var i = 0, ii = fields.length; i < ii; i++) {
+			var f = fields[i];
+			this.field_prototypes[f.name] = f;
+		}
 	};
 	Type.prototype = {
 		allowed_types: function() {
 			var types = [];
 			if (this.data.allowed_types.length > 0) {
 				for (var i = 0, ii = this.data.allowed_types.length; i < ii; i++) {
-					types.push(Spontaneous.Types.type(this.data.allowed_types[i].id));
+					types.push(Spontaneous.Types.type(this.data.allowed_types[i]));
 				}
 
 			}
 			return types;
-		}
+		},
 	};
 	return $.extend({}, Spontaneous.Properties(), {
 		init: function(callback) {

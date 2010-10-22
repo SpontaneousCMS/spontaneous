@@ -119,6 +119,7 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		switch_modes: function() {
 			var m = this.get('mode');
+			console.log('switching mode from', m)
 			this.set('mode', this.opposite_mode(m));
 			this.mode_switch.text(m);
 		},

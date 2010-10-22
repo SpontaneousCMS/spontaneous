@@ -63,13 +63,17 @@ Spontaneous.Page = (function($, S) {
 		this.data = data;
 		this.url = data.url;
 		this.entries = data.entries;
+		this.type = this.data.type;
 		this.fields = {};
 		for (var i = 0; i < this.data.fields.length; i++) {
 			var f = this.data.fields[i];
-			this.fields[f.name] = new Spontaneous.Field(f);
+			this.fields[f.name] = new Spontaneous.FieldTypes.StringField(this, f);
 		};
 	};
 	Page.prototype = {
+		type: function() {
+			return S.Types.type(this.data.type);
+		},
 		title: function() {
 			return this.fields.title.value;
 		},

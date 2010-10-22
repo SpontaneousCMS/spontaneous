@@ -5,7 +5,7 @@ Spontaneous.Init = (function($, S) {
 		Location.add_listener('location', TopBar, 'location_changed');
 		Location.add_listener('location', ContentArea, 'location_changed');
 
-		// TopBar.add_listener('mode',       ContentArea, 'mode_changed');
+		TopBar.add_listener('mode',       ContentArea, 'display');
 
 		//
 		// Preview.add_listener('location', Location, 'update');
@@ -25,7 +25,7 @@ Spontaneous.Init = (function($, S) {
 			Dom.body().append(ContentArea.init());
 			
 			Spontaneous.Spin = SideBar.spinner();
-			// TopBar.init();
+			TopBar.init();
 		};
 	}
 })(jQuery, Spontaneous);

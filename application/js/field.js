@@ -1,13 +1,14 @@
-console.log('Loading Field...')
+console.log('Loading FieldTypes...')
 
-Spontaneous.Field = (function($, S) {
+Spontaneous.FieldTypes = {};
+Spontaneous.FieldTypes.StringField = (function($, S) {
 	var dom = S.Dom;
-	var Field = function(data) {
+	var StringField = function(owner, data) {
 		this.name = data.name;
-		this.title = data.title;
+		this.title = S.Types.type(owner.type).field_prototypes[this.name].title;
 		this.update(data);
 	};
-	Field.prototype = $.extend({}, Spontaneous.Properties(), {
+	StringField.prototype = $.extend({}, Spontaneous.Properties(), {
 		set_value: function(new_value) {
 		},
 		preview: function() {
@@ -31,7 +32,7 @@ Spontaneous.Field = (function($, S) {
 			var row = $(dom.tr);
 			var label = $(dom.td, {'class': 'name'}).text(this.title);
 			row.append(label);
-			this.input = $(dom.input, {'class': 'input', 'name':'field['+this.name+'][raw_value]', 'value': this.get('value')})
+			this.input = $(dom.input, {'class': 'input', 'name':'field['+this.name+'][unprocessed_value]', 'value': this.get('value')})
 			var hi = (function(field, label) {
 				return function() {
 					label.addClass('active');
@@ -54,10 +55,10 @@ Spontaneous.Field = (function($, S) {
 		update: function(values) {
 			this.data = values;
 			this.set('value', values.processed_value);
-			this.set('raw_value', values.raw_value);
+			this.set('unprocessed_value', values.unprocessed_value);
 		}
 	});
 
-	return Field;
+	return StringField;
 })(jQuery, Spontaneous);
 
