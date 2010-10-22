@@ -244,11 +244,11 @@ class PageTest < Test::Unit::TestCase
     end
 
     should "persist the chosen page style" do
-      p = PageClass.new
-      p.style = PageClass.page_styles[:other]
-      p.save
-      p = PageClass[p.id]
-      p.style.should == PageClass.page_styles[:other]
+      page = PageClass.new
+      page.style = PageClass.page_styles[:other]
+      page.save
+      page = PageClass[page.id]
+      page.style.should == PageClass.page_styles[:other]
     end
   end
 
