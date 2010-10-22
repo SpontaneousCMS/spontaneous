@@ -24,6 +24,11 @@ module Spontaneous::Plugins
         "page-#{Time.now.strftime('%Y%m%d-%H%M%S')}"
       end
 
+      def parent=(parent)
+        puts "Paths#parent=(#{parent})"
+        super
+      end
+
       def place_in_page_tree
         if self.parent_id.nil?
           if Spontaneous::Page.root.nil?
@@ -31,7 +36,6 @@ module Spontaneous::Plugins
           end
         else
           update_path
-          self[:ancestor_path] = parent.ancestor_path.push(parent.id).join(ANCESTOR_SEP)
         end
       end
 
@@ -55,6 +59,9 @@ module Spontaneous::Plugins
 
       def update_path
         self.path = calculate_path
+        if parent
+          self[:ancestor_path] = parent.ancestor_path.push(parent.id).join(ANCESTOR_SEP)
+        end
       end
 
 

@@ -54,7 +54,7 @@ class Test::Unit::TestCase
     @project2 = Project.new(:title => "Spontaneous CMS 2", :url => "http://spontaneouscms.com", :description => "Description 2")
     @project3 = Project.new(:title => "Spontaneous CMS 3", :url => "http://spontaneouscms.com", :description => "Description 3")
 
-    @page = HomePage.new(:title => "magnetised", :introduction => "Welcome to magnetised...", :uid => "home", :welcome_title => "magnetised")
+    @page = HomePage.new(:title => "magnetised", :introduction => "Welcome to magnetised. Read more in the [about page](/about).", :uid => "home", :welcome_title => "magnetised")
     @page.in_progress << @project1
     @page.completed << @project2
     @page.archived << @project3

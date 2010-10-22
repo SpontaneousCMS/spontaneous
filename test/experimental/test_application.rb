@@ -30,6 +30,10 @@ class ApplicationTest < Test::Unit::TestCase
       should "have links to their children" do
         @page.children.should == [@page2]
       end
+
+      should "have a correct ancestor list" do
+        @page2.ancestors.should == [@page]
+      end
     end
   end
 end
