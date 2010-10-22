@@ -24,6 +24,7 @@ class SerialisationTest < Test::Unit::TestCase
         inline_style :kneeling
       end
       class ::SerialisedFacet < Facet
+        title "Type Title"
         field :title, :string
         field :location, :string, :title => "Where", :comment => "Fill in the address"
         field :date, :date
@@ -36,6 +37,7 @@ class SerialisationTest < Test::Unit::TestCase
 
       @class_hash = {
         :type => "SerialisedFacet",
+        :title => "Type Title",
         :fields => [
           {:name => "title", :type => "Spontaneous.FieldTypes.StringField", :title => "Title",  :comment => "" },
           {:name => "location", :type => "Spontaneous.FieldTypes.StringField", :title => "Where",  :comment => "Fill in the address" },
