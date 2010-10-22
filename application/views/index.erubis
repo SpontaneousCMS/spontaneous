@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <title>Spontaneous: Loading...</title>
-<script type="text/javascript" charset="utf-8" src="/@spontaneous/js/vendor/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="/@spontaneous/js/vendor/jquery-1.4.3.min.js"></script>
 <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/vendor/jquery-ui-1.8.custom.min.js"></script>
 <script type="text/javascript" charset="utf-8">
 	jQuery.noConflict();
