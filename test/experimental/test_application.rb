@@ -28,7 +28,7 @@ class ApplicationTest < Test::Unit::TestCase
       end
 
       should "have links to their children" do
-        @home.children.should == [@about]
+        @home.children.should == [@about, @projects, @products]
       end
 
       should "have a correct ancestor list" do

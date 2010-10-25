@@ -110,6 +110,8 @@ class Test::Unit::TestCase
     ############
     @home = Content[@home.id]
     @about = Content[@about.id]
+    @projects = Content[@projects.id]
+    @products = Content[@products.id]
 
     @home.root?.should be_true
 
