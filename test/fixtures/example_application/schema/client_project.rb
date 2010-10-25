@@ -3,7 +3,7 @@ class ClientProject < Spontaneous::Facet
   field :title
   field :url
   field :image
-  field :description
+  field :description, :markdown
   field :completed, :date
 
   slot :images do

@@ -2,6 +2,7 @@
 class InfoPage < Spontaneous::Page
   slot :text do
     allow :Text
+    allow :InlineImage
   end
   
   page_style :info_page

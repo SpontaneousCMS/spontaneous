@@ -83,31 +83,31 @@ class BackTest < Test::Unit::TestCase
     end
 
     should "return a site map for any page id" do
-      get "/@spontaneous/map/#{@page.id}"
+      get "/@spontaneous/map/#{@home.id}"
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
-      assert_equal Site.map(@page.id).to_json, last_response.body
+      assert_equal Site.map(@home.id).to_json, last_response.body
     end
 
     should "return a site map for any url" do
-      page = @page2
-      get "/@spontaneous/location#{@page2.path}"
+      page = @about
+      get "/@spontaneous/location#{@about.path}"
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
-      assert_equal Site.map(@page2.id).to_json, last_response.body
+      assert_equal Site.map(@about.id).to_json, last_response.body
     end
 
     should "reorder facets" do
       post "/@spontaneous/content/#{@facet2_5.id}/position/0"
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
-      @page2.text.entries.first.id.should == @facet2_5.id
+      @about.text.entries.first.id.should == @facet2_5.id
 
-      p = Content[@page2.id]
+      p = Content[@about.id]
       p.text.entries.first.id.should == @facet2_5.id
     end
     # should "reorder pages" do
-    #   post "/@spontaneous/page/#{@page2.id}/position/0"
+    #   post "/@spontaneous/page/#{@about.id}/position/0"
     #   assert last_response.ok?
     #   last_response.content_type.should == "application/json;charset=utf-8"
     #   # can't actually be bothered to set this test up
@@ -116,10 +116,10 @@ class BackTest < Test::Unit::TestCase
 
     context "saving" do
       setup do
-        @page = HomePage.new
+        @home = HomePage.new
         @facet = Text.new
-        @page.in_progress << @facet
-        @page.save
+        @home.in_progress << @facet
+        @home.save
         @facet.save
       end
 
@@ -139,13 +139,13 @@ class BackTest < Test::Unit::TestCase
           "field[title][value]" => "Updated title",
           "field[introduction][value]" => "Updated intro"
         }
-        post "/@spontaneous/page/#{@page.id}/save", params
+        post "/@spontaneous/page/#{@home.id}/save", params
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        @page = Content[@page.id]
-        last_response.body.should == @page.to_json
-        @page.fields.title.value.should ==  "Updated title"
-        @page.fields.introduction.value.should ==  "<p>Updated intro</p>\n"
+        @home = Content[@home.id]
+        last_response.body.should == @home.to_json
+        @home.fields.title.value.should ==  "Updated title"
+        @home.fields.introduction.value.should ==  "<p>Updated intro</p>\n"
       end
     end
   end # context @spontaneous
@@ -155,14 +155,14 @@ class BackTest < Test::Unit::TestCase
       get "/"
       assert last_response.ok?
       last_response.content_type.should == "text/html;charset=utf-8"
-      assert_equal @page.render, last_response.body
+      assert_equal @home.render, last_response.body
     end
 
     should "return rendered child-page" do
       get "/about"
       assert last_response.ok?
       last_response.content_type.should == "text/html;charset=utf-8"
-      assert_equal @page2.render, last_response.body
+      assert_equal @about.render, last_response.body
     end
 
   end

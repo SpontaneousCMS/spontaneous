@@ -13,26 +13,26 @@ class ApplicationTest < Test::Unit::TestCase
 
     context "site content" do
       should "contain references to their owning page" do
-        @page.in_progress.page.should == @page
-        @page.completed.page.should == @page
-        @page.archived.page.should == @page
+        @home.in_progress.page.should == @home
+        @home.completed.page.should == @home
+        @home.archived.page.should == @home
 
-        @page.in_progress.entries.first.page.should == @page
-        @page.in_progress.entries.first.images.page.should == @page
+        @home.in_progress.entries.first.page.should == @home
+        @home.in_progress.entries.first.images.page.should == @home
       end
     end
 
     context "pages" do
       should "have references back to their parent" do
-        @page2.parent.should == @page
+        @about.parent.should == @home
       end
 
       should "have links to their children" do
-        @page.children.should == [@page2]
+        @home.children.should == [@about]
       end
 
       should "have a correct ancestor list" do
-        @page2.ancestors.should == [@page]
+        @about.ancestors.should == [@home]
       end
     end
   end
