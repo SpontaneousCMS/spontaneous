@@ -196,7 +196,7 @@ class StylesTest < Test::Unit::TestCase
         end
         class ::WithoutDefaultStyleClass < Content
           field :title
-          slot :with_style, :class => :DefaultStyleClass
+          slot :with_style, :type => :DefaultStyleClass
         end
 
         @with_default_style = DefaultStyleClass.new

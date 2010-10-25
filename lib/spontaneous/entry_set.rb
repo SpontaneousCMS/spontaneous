@@ -14,7 +14,7 @@ module Spontaneous
       unmapped = []
 
       (entry_store || []).each do |data|
-        klass = Spontaneous.const_get(data[:class])
+        klass = Spontaneous.const_get(data[:type])
         entry = klass.new(@owner, data[:id], data[:style])
         if data[:slot]
           slot_map[data[:slot].to_sym] = entry

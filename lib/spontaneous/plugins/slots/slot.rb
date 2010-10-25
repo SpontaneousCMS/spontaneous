@@ -41,7 +41,7 @@ module Spontaneous::Plugins
 
       def instance_class
         @instance_class ||= \
-          case klass = @options[:class]
+          case klass = @options[:type]
           when Class
             extended_class(klass)
           when String, Symbol
@@ -52,7 +52,7 @@ module Spontaneous::Plugins
       end
 
       def anonymous?
-        @options[:class].nil?
+        @options[:type].nil?
       end
 
       def extended_class(extend_klass)

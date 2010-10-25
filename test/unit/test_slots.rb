@@ -32,17 +32,17 @@ class SlotsTest < Test::Unit::TestCase
     end
 
     should "accept a custom instance class" do
-      SlotClass.slot :images1, :class => SlotClass
+      SlotClass.slot :images1, :type => SlotClass
       SlotClass.slots.first.instance_class.superclass.should == SlotClass
     end
 
     should "accept a custom instance class as a string" do
-      SlotClass.slot :images2, :class => 'SlotClass'
+      SlotClass.slot :images2, :type => 'SlotClass'
       SlotClass.slots.first.instance_class.superclass.should == SlotClass
     end
 
     should "accept a custom instance class as a symbol" do
-      SlotClass.slot :images3, :class => :SlotClass
+      SlotClass.slot :images3, :type => :SlotClass
       SlotClass.slots.first.instance_class.superclass.should == SlotClass
     end
 
@@ -53,7 +53,7 @@ class SlotsTest < Test::Unit::TestCase
     end
 
     should "accept values for the slot's fields" do
-      SlotClass.slot :images4, :class => :ContentClass, :fields => { :description => "Neato" }
+      SlotClass.slot :images4, :type => :ContentClass, :fields => { :description => "Neato" }
 
       @instance = SlotClass.new
       @instance.images4.fields.description.value.should == "Neato"
@@ -177,7 +177,7 @@ class SlotsTest < Test::Unit::TestCase
     context "slots with definied classes" do
       setup do
         class ::AllowedType < Content; end
-        SlotClass.slot :images11, :class => AllowedType do
+        SlotClass.slot :images11, :type => AllowedType do
           allow AllowedType
 
           def monkey

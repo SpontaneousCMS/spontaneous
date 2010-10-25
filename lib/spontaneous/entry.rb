@@ -101,7 +101,7 @@ module Spontaneous
 
     def serialize
       {
-        :class => self.proxy_class.name.demodulize,
+        :type => self.proxy_class.name.demodulize,
         :id => target.id,
         :style => @entry_style_name,
         :slot => target.slot_id
