@@ -11,5 +11,5 @@ class HomePage < Spontaneous::Page
   	allow :InfoPage
   end
   
-  page_style :homepage
+  page_style :page
 end

@@ -5,5 +5,6 @@ class InfoPage < Spontaneous::Page
     allow :InlineImage
   end
   
-  page_style :info_page
+  page_style :page
+  inline_style :inline
 end
