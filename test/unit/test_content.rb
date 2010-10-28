@@ -2,7 +2,6 @@ require 'test_helper'
 
 
 class ContentTest < Test::Unit::TestCase
-  include Spontaneous
   context "Content instances" do
     should "evaluate instance code" do
       @instance = Content.create({
