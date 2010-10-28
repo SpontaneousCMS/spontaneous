@@ -14,6 +14,8 @@ module Spontaneous
 
     field :title, :string, :default_value => "New Page"
 
+    set_inheritance_root
+
     def page?
       true
     end

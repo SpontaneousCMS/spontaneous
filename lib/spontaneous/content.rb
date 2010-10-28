@@ -1,5 +1,6 @@
 
 require File.expand_path("../../sequel/plugins/yajl_serialization", __FILE__)
+require File.expand_path("../../sequel/plugins/content_table_inheritance", __FILE__)
 
 module Spontaneous
   class Content < Sequel::Model(:content)
@@ -7,7 +8,7 @@ module Spontaneous
       alias_method :sequel_plugin, :plugin
     end
 
-    sequel_plugin :single_table_inheritance, :type_id
+    sequel_plugin :content_table_inheritance, :type_id
     sequel_plugin :yajl_serialization, :field_store, :entry_store
     sequel_plugin :instance_hooks
     sequel_plugin :skip_create_refresh
