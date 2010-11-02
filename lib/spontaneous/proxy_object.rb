@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Spontaneous
   class ProxyObject
     alias_method :proxy_class, :class

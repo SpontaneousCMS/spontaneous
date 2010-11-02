@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 
 class InfoPage < Spontaneous::Page
   slot :text do

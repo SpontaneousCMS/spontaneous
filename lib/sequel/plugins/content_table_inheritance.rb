@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Sequel
   module Plugins
     # The single_table_inheritance plugin allows storing all objects

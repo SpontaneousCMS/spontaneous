@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module CustomMatchers
   custom_matcher :be_nil do |receiver, matcher, args|
     matcher.positive_failure_message = "Expected #{receiver} to be nil but it wasn't"

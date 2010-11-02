@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 
 require File.expand_path("../../sequel/plugins/yajl_serialization", __FILE__)
 require File.expand_path("../../sequel/plugins/content_table_inheritance", __FILE__)

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 Sequel.migration do
   up do
     create_table!(:content) do

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 
 class ProjectsPage < Spontaneous::Page
   field :introduction, :markdown

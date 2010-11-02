@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Sequel
   module Plugins
     # Sequel's built in Serialization plugin allows you to keep serialized

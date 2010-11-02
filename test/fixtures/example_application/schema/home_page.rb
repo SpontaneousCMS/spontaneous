@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 
 class HomePage < Spontaneous::Page
 	field :welcome_title

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 
 # thanks to @jnunemaker
 # http://github.com/jnunemaker/mongomapper/blob/master/lib/mongo_mapper/plugins.rb

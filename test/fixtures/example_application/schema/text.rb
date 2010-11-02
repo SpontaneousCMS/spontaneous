@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 
 class Text < Spontaneous::Facet
   field :text

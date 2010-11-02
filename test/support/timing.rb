@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class Test::Unit::TestCase
   def run_with_test_timing(*args, &block)    
     begin_time = Time.now

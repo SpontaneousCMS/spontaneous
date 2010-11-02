@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 
 module Spontaneous
   class Site <  Sequel::Model(:sites)

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 
 class ClientProject < Spontaneous::Facet
   field :title

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Spontaneous
   module ImageSize
     def self.read(file)

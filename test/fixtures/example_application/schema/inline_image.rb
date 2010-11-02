@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 
 class InlineImage < Spontaneous::Facet
   field :title

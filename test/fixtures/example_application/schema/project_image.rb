@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 
 class ProjectImage < Spontaneous::Facet
   field :title
