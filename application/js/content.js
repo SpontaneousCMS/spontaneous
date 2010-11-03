@@ -23,6 +23,22 @@ Spontaneous.Content = (function($, S) {
 		has_fields: function() {
 			return (this.content.fields.length > 0)
 		},
+		entries: function() {
+			if (!this._entries) {
+				var _entries = [];
+				for (var i = 0, ee = this.content.entries, ii = ee.length; i < ii; i++) {
+					var entry = ee[i];//new Entry(ee[i]);
+					console.log("Content#entries", entry);
+					var entry_class = Spontaneous.Entry;
+					if (entry.is_page) { 
+						entry_class = Spontaneous.PageEntry;
+					}
+					_entries.push(new entry_class(entry, this));
+				}
+				this._entries = _entries;
+			}
+			return this._entries;
+		},
 		allowed_types: function() {
 			return this.type().allowed_types();
 		}

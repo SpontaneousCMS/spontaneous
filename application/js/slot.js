@@ -1,4 +1,3 @@
-
 console.log('Loading Slot...')
 
 Spontaneous.Slot = (function($, S) {
@@ -8,7 +7,6 @@ Spontaneous.Slot = (function($, S) {
 		this.content = content;
 		this.dom_container = dom_container;
 		this.id = content.id;
-		this.entries = content.entries;
 	};
 
 	Slot.prototype = $.extend({}, Spontaneous.Content, {
@@ -20,6 +18,7 @@ Spontaneous.Slot = (function($, S) {
 			$('> .slot-content', this.dom_container).hide();
 			this.panel().show();
 		},
+
 		panel: function() {
 			if (!this._panel) {
 				var panel = $(dom.div, {'class': 'slot-content'});
@@ -31,7 +30,6 @@ Spontaneous.Slot = (function($, S) {
 				var allowed_bar = $(dom.div, {'class':'slot-addable'});
 				var _slot = this;
 				$.each(allowed, function(i, type) {
-
 					var add_allowed = function(type) {
 						this.add_content(type);
 					}.bind(_slot, type);
@@ -40,6 +38,13 @@ Spontaneous.Slot = (function($, S) {
 				});
 				allowed_bar.append($(dom.span, {'class':'down'}));
 				panel.append(allowed_bar);
+				var entries = $(dom.div, {'class':'slot-entries'});
+				panel.append();
+				for (var i = 0, ee = this.entries(), ii = ee.length;i < ii; i++) {
+					var entry = ee[i];
+					entries.append(entry.panel());
+				}
+				panel.append(entries);
 				panel.hide();
 				this.dom_container.append(panel)
 				this._panel = panel;
