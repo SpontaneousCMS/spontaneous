@@ -5,7 +5,7 @@ Spontaneous.Editing = (function($, S) {
 
 	var editing = $.extend({}, Spontaneous.Properties(), {
 		init: function(container) {
-			this.container = $(dom.div, {'id' : 'editing'});
+			this.container = $(dom.div, {'id' : 'data_pane'});
 			this.container.hide();
 			container.append(this.container);
 			return this;

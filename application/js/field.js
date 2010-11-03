@@ -5,7 +5,9 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 	var dom = S.Dom;
 	var StringField = function(owner, data) {
 		this.name = data.name;
-		this.title = S.Types.type(owner.type).field_prototypes[this.name].title;
+		var content_type = owner.type();
+		this.type = content_type.field_prototypes[this.name];
+		this.title = this.type.title;
 		this.update(data);
 	};
 	StringField.prototype = $.extend({}, Spontaneous.Properties(), {
@@ -56,6 +58,9 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			this.data = values;
 			this.set('value', values.processed_value);
 			this.set('unprocessed_value', values.unprocessed_value);
+		},
+		value: function() {
+			return this.get('value');
 		}
 	});
 

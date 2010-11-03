@@ -3,8 +3,15 @@ console.log("Loading Location...")
 Spontaneous.Location = (function($, S) {
 	var ajax = S.Ajax;
 	var location = $.extend({}, Spontaneous.Properties(), {
-		init: function() {
-			ajax.get('/map', this, this.location_loaded);
+
+		init: function(callback) {
+			var complete = (function(location) {
+				return function() {
+					callback();
+					location.location_loaded();
+				};
+			})(this);
+			ajax.get('/map', this, complete);
 		},
 		load_map: function() {
 		},

@@ -4,46 +4,53 @@ console.log('Loading Slot...')
 Spontaneous.Slot = (function($, S) {
 	var dom = S.Dom;
 
-	var Slot = function(container, entry) {
-		this.container = container;
-		this.entry = entry;
-		this.id = entry.id;
-		this.type = entry.type;
-		this.entries = entry.entries;
-		this.is_page = entry.is_page;
-		console.log('slot', this);
+	var Slot = function(content, dom_container) {
+		this.content = content;
+		this.dom_container = dom_container;
+		this.id = content.id;
+		this.entries = content.entries;
 	};
-	Slot.prototype = $.extend({}, S.FacetEntry.prototype, {
-		// preview_elements: ['title_bar', 'field_list', 'contents_list', 'bottom'],
-		// slot only
-		tab: function() {
-			var load = (function(slot) {
-				return function() {
-					slot.container.show(slot);
-				};
-			})(this);
-			this.tab_element = $(dom.li, {'class':'tab', 'id':'content-' + this.id}).click(load);
-			this.tab_element.text(this.entry.name);
-			return this.tab_element;
+
+	Slot.prototype = $.extend({}, Spontaneous.Content, {
+		name: function() {
+			return this.content.name;
 		},
-		activate_tab: function() {
-			this.tab_element.addClass('active');
+		activate: function() {
+			console.log('Slot#activate', this.name());
+			$('> .slot-content', this.dom_container).hide();
+			this.panel().show();
 		},
-		title_bar: function() {
-			return '';
+		panel: function() {
+			if (!this._panel) {
+				var panel = $(dom.div, {'class': 'slot-content'});
+				if (this.has_fields()) {
+					var fields = new Spontaneous.FieldPreview(this, '');
+					panel.append(fields.panel())
+				}
+				var allowed = this.allowed_types();
+				var allowed_bar = $(dom.div, {'class':'slot-addable'});
+				var _slot = this;
+				$.each(allowed, function(i, type) {
+
+					var add_allowed = function(type) {
+						this.add_content(type);
+					}.bind(_slot, type);
+					var a = $(dom.a).click(add_allowed).text(type.title);
+					allowed_bar.append(a)
+				});
+				allowed_bar.append($(dom.span, {'class':'down'}));
+				panel.append(allowed_bar);
+				panel.hide();
+				this.dom_container.append(panel)
+				this._panel = panel;
+			}
+			return this._panel;
 		},
-		make_draggable: function() {
-			this._preview_panel.make_draggable();
-		},
-		make_preview_draggable: function() {
-			// alert("slot#make_preview_draggable")
-			// this.parts['content_list'].make_draggable();
-			console.log('preview panel', this.preview_panel());
-			this.preview_panel().make_preview_draggable();
-		},
-		show_entry_add: function() {
-			return true;
+		add_content: function(content_type) {
+			console.log("Slot#add_content", content_type)
 		}
 	});
+
 	return Slot;
+
 })(jQuery, Spontaneous);

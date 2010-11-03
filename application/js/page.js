@@ -17,14 +17,16 @@ Spontaneous.Page = (function($, S) {
 	};
 	FunctionBar.prototype = {
 		panel: function() {
-			this.panel = $(dom.div, {'id': 'function-panel'}).text("")
+			this.panel = $(dom.div, {'id': 'page-info'});
+			this.panel.append($('<h1/>').text(this.page.title()))
+			this.panel.append($('<h3/>').text(this.page.path))
 			return this.panel;
 		}
 	};
 	var ContentPanel = function(page) {
 		this.page = page;
 	};
-	ContentPanel.prototype = {
+	ContentPanel.prototype = $.extend({}, {
 		slot_panels: {},
 		panel: function() {
 			this.panel = $(dom.div, {'id': 'content-panel'});
@@ -58,33 +60,26 @@ Spontaneous.Page = (function($, S) {
 			this.slot_panels[slot.id].show();
 			slot.activate_tab();
 		}
+	});
+	var Page = function(content) {
+		this.content = content;
+		this.path = content.path;
+		this.entries = content.entries;
 	};
-	var Page = function(data) {
-		this.data = data;
-		this.url = data.url;
-		this.entries = data.entries;
-		this.type = this.data.type;
-		this.fields = {};
-		for (var i = 0; i < this.data.fields.length; i++) {
-			var f = this.data.fields[i];
-			this.fields[f.name] = new Spontaneous.FieldTypes.StringField(this, f);
-		};
-	};
-	Page.prototype = {
-		type: function() {
-			return S.Types.type(this.data.type);
-		},
+	Page.prototype = $.extend({}, Spontaneous.Content, {
 		title: function() {
-			return this.fields.title.value;
+			return this.fields().title.value();
 		},
 		panel: function() {
-			this.panel = $(dom.div);
-			this.panel.append(new URLBar(this).panel());
+			this.panel = $(dom.div, {'id':'page-content'});
+			// this.panel.append(new URLBar(this).panel());
 			this.panel.append(new FunctionBar(this).panel());
-			this.panel.append(new ContentPanel(this).panel());
+			this.panel.append(new Spontaneous.FieldPreview(this, 'page-fields').panel());
+			this.panel.append(new Spontaneous.SlotContainer(this, 'page-slots').panel());
+			// this.panel.append(new ContentPanel(this).panel());
 			return this.panel;
 		}
-	};
+	});
 
 	return Page;
 })(jQuery, Spontaneous);

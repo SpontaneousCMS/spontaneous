@@ -262,13 +262,13 @@ Spontaneous.FacetEntry = (function($, S) {
 			console.log('<<<< draggagle', '#'+this.contents_wrap.attr('id'))
 			for (var i = 0, ii = this.type_buttons.length; i < ii; i++) {
 				var button = this.type_buttons[i];
-				button.draggable({
-					connectToSortable: '#'+this.contents_wrap.attr('id'),
-					helper: function() {
-						return $(dom.div, {'class':'entry-container', 'style':'height: 100px;width: 100px;background-color: red'})[0];
-					},
-					revert: 'invalid'
-				});
+				// button.draggable({
+				// 	connectToSortable: '#'+this.contents_wrap.attr('id'),
+				// 	helper: function() {
+				// 		return $(dom.div, {'class':'entry-container', 'style':'height: 100px;width: 100px;background-color: red'})[0];
+				// 	},
+				// 	revert: 'invalid'
+				// });
 			}
 		}
 	};

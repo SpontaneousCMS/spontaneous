@@ -6,10 +6,10 @@ Spontaneous.ContentArea = (function($, S) {
 		wrap: null,
 		preview: null,
 		editing: null,
-		mode: 'preview',
+		mode: 'edit',
 
 		init: function() {
-			this.wrap = $(dom.div, {'id': 'content_area_wrap'})
+			this.wrap = $(dom.div, {'id': 'content'})
 			this.preview = S.Preview.init(this.wrap);
 			this.editing = S.Editing.init(this.wrap);
 			return this.wrap;

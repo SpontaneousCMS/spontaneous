@@ -11,13 +11,15 @@ Spontaneous.TopBar = (function($, S) {
 	}
 	RootNode.prototype = {
 		element: function() {
+			var li = $(dom.li, {'class':'root'});
 			var link = $(dom.a, {'href': this.url}).text(this.title).data('page', this.page);
 			link.click(function() {
 				var page = $(this).data('page');
 				S.Location.load_id(page.id);
 				return false;
 			});
-			return link;
+			li.append(link);
+			return li;
 		}
 	}
 
@@ -29,10 +31,10 @@ Spontaneous.TopBar = (function($, S) {
 	};
 	AncestorNode.prototype = {
 		element: function() {
-			var link = $('<a/>').data('page', this.page).click(function() {
+			var link = $(dom.li).append($('<a/>').data('page', this.page).click(function() {
 				var page = $(this).data('page');
 				S.Location.load_id(page.id);
-			}).text(this.title);
+			}).text(this.title));
 			
 			return link;
 		}
@@ -58,6 +60,7 @@ Spontaneous.TopBar = (function($, S) {
 
 	CurrentNode.prototype = {
 		element: function() {
+			var li = $(dom.li);
 			var select = $(dom.select);
 			select.change(function() {
 				var page = $(this.options[this.selectedIndex]).data('page');
@@ -68,7 +71,8 @@ Spontaneous.TopBar = (function($, S) {
 				var p = this.pages[i];
 				select.append($(dom.option, {'value': p.id, 'selected':(i == this.selected) }).text(p.title).data('page', p))
 			};
-			return select;
+			li.append(select);
+			return li;
 		}
 	}
 
@@ -82,6 +86,7 @@ Spontaneous.TopBar = (function($, S) {
 
 	ChildrenNode.prototype = {
 		element: function() {
+			var li = $(dom.li);
 			var select = $(dom.select);
 			select.append($(dom.option));
 			select.change(function() {
@@ -96,15 +101,17 @@ Spontaneous.TopBar = (function($, S) {
 				var p = this.children[i];
 				select.append($(dom.option, {'value': p.id}).text(p.title).data('page', p))
 			};
-			return select;
+			li.append(select);
+			return li;
 		}
 	}
 
 	var top_bar = $.extend({}, S.Properties(), {
 		location: "/",
 		panel: function() {
-			this.wrap = $(dom.div, {'id':'top_bar'});
-			this.location = $(dom.div, {'class': 'location'});
+			this.wrap = $(dom.div, {'id':'top'});
+			this.location = $(dom.ul, {'id': 'navigation'});
+			this.location.append($(dom.li).append($(dom.a)))
 			this.mode_switch = $(dom.a, {'class': 'switch-mode'}).
 				text(this.opposite_mode(S.ContentArea.mode)).
 				click(function() {
@@ -159,7 +166,8 @@ Spontaneous.TopBar = (function($, S) {
 			if (location.children.length > 0) {
 				nodes.push(new ChildrenNode(location.children));
 			}
-			this.location.empty();
+			$('li:gt(0)', this.location).remove();
+			// this.location.empty();
 			for (var i = 0, ii = nodes.length; i < ii; i++) {
 				var node = nodes[i];
 				this.location.append(node.element())
