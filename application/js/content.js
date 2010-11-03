@@ -24,6 +24,9 @@ Spontaneous.Content = (function($, S) {
 			return (this.content.fields.length > 0)
 		},
 		entries: function() {
+			if (!this.content.entries) {
+				return [];
+			}
 			if (!this._entries) {
 				var _entries = [];
 				for (var i = 0, ee = this.content.entries, ii = ee.length; i < ii; i++) {

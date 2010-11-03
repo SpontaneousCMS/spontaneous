@@ -21,7 +21,10 @@ Spontaneous.Entry = (function($, S) {
 			var entry = $(dom.div, {'class':'entry level2'});
 			var fields = new Spontaneous.FieldPreview(this, '');
 			entry.append(fields.panel());
+			console.log("Entry#panel", this.entries())
+			var slot_container = new Spontaneous.SlotContainer(this.content);
 			wrapper.append(entry);
+			wrapper.append(slot_container.panel());
 			return wrapper;
 		}
 	});

@@ -45,7 +45,11 @@ Spontaneous.SlotContainer = (function($, S) {
 			this._active_slot = slot;
 		},
 		slots: function() {
+			if (!this.content.entries) {
+				return [];
+			}
 			if (!this._slots) {
+				console.log("SlotContainer#slots", this.content.entries);
 				var _slots = [], container = this.slot_content_container;
 				var f = function(i, slot) {
 					_slots.push(new Spontaneous.Slot(slot, container))
