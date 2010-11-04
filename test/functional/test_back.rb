@@ -188,6 +188,17 @@ class BackTest < Test::Unit::TestCase
       assert_equal File.read(@app_dir / 'static/favicon.ico'), last_response.body
     end
   end
+  context "media files" do
+    setup do
+      @media_dir = File.join(File.dirname(__FILE__), "../fixtures/media")
+      Spontaneous.media_dir = @media_dir
+    end
+    should "be available under /media" do
+      get "/media/101/003/rose.jpg"
+      assert last_response.ok?
+      last_response.content_type.should == "image/jpeg"
+    end
+  end
   context "file uploads" do
     setup do
       @media_dir = File.join(File.dirname(__FILE__), "../../tmp/media")

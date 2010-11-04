@@ -113,6 +113,7 @@ module Spontaneous
           send_file(Spontaneous.static_dir / params[:splat].first)
         end
 
+
         get '/js/*' do
           content_type :js
           File.read(Spontaneous.js_dir / params[:splat].first)
