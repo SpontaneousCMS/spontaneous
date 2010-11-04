@@ -21,7 +21,7 @@ module Spontaneous
 
 
       def self.size_definitions
-        @size_definitions
+        @size_definitions ||= {}
       end
 
       def attribute_get(attribute)

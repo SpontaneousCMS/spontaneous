@@ -42,6 +42,10 @@ module Spontaneous
           super
         end
       end
-   end
+      def working_revision
+        1
+      end
+
+    end
   end
 end

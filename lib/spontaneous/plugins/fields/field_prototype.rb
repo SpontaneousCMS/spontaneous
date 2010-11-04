@@ -10,10 +10,16 @@ module Spontaneous::Plugins
         @name = name
         # if the type is nil then try the name, this will assign sensible defaults
         # to fields like 'image' or 'date'
-        @field_class = Spontaneous::FieldTypes[type || name]
+        base_class = Spontaneous::FieldTypes[type || name]
         if block
-          @field_class = Class.new(@field_class, &block)
+          @field_class = Class.new(base_class, &block)
+          @field_class.meta.send(:define_method, :name) do
+            base_class.name
+          end
+        else
+          @field_class = base_class
         end
+
         @field_class.prototype = self
         parse_options(options)
       end

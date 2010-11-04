@@ -9,9 +9,12 @@ module Spontaneous::Plugins
 
     module InstanceMethods
 
+      # because it's possible to build content out of order
+      # some relations don't necessarily get created straight away
       def before_save
-        if container and page.nil?
-          self.page = container.page
+        if container 
+          self.page = container.page if page.nil?
+          self.depth = (container.depth || 0) + 1
         end
         super
       end
@@ -69,7 +72,7 @@ module Spontaneous::Plugins
       def insert_facet(index, facet)
         facet.container = self
         facet.page = page if page
-        facet.depth = depth + 1
+        facet.depth = (depth || 0) + 1
         insert_with_style(:facet, index, facet)
       end
 

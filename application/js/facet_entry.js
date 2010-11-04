@@ -6,7 +6,7 @@ Spontaneous.Entry = (function($, S) {
 	var Entry = function(content, container) {
 		this.content = content;
 		this.container = container;
-		console.log('FacetEntry#new', content);
+		console.log('FacetEntry#new', content, content.depth);
 	};
 	Entry.prototype = $.extend({}, Spontaneous.Content, {
 		save: function(form) {
@@ -16,9 +16,12 @@ Spontaneous.Entry = (function($, S) {
 			return false;
 		},
 		panel: function() {
-			var wrapper = $(dom.div, {'class':'entry-wrap'});
-			wrapper.append($(dom.div, {'class':'white-bg'})).append($(dom.div, {'class':'grey-bg'}));
-			var entry = $(dom.div, {'class':'entry level2'});
+			var wrapper = $(dom.div, {'class':'entry-wrap ' + this.depth_class()});
+			wrapper.append($(dom.div, {'class':'white-bg'}))
+			if (this.depth() < 4) {
+				wrapper.append($(dom.div, {'class':'grey-bg'}));
+			}
+			var entry = $(dom.div, {'class':'entry'});
 			var fields = new Spontaneous.FieldPreview(this, '');
 			entry.append(fields.panel());
 			console.log("Entry#panel", this.entries())

@@ -30,6 +30,9 @@ class SerialisationTest < Test::Unit::TestCase
         field :title, :string
         field :location, :string, :title => "Where", :comment => "Fill in the address"
         field :date, :date
+        field :image do
+          sizes :thumbnail => { :width => 50 }
+        end
 
         inline_style :freezing
         inline_style :boiling
@@ -43,7 +46,8 @@ class SerialisationTest < Test::Unit::TestCase
         :fields => [
           {:name => "title", :type => "Spontaneous.FieldTypes.StringField", :title => "Title",  :comment => "" },
           {:name => "location", :type => "Spontaneous.FieldTypes.StringField", :title => "Where",  :comment => "Fill in the address" },
-          {:name => "date", :type => "Spontaneous.FieldTypes.DateField", :title => "Date",  :comment => "" }
+          {:name => "date", :type => "Spontaneous.FieldTypes.DateField", :title => "Date",  :comment => "" },
+          {:name => "image", :type => "Spontaneous.FieldTypes.ImageField", :title => "Image",  :comment => "" }
       ],
         :allowed_types => ["SerialisedPage"] 
       }
@@ -129,16 +133,20 @@ class SerialisationTest < Test::Unit::TestCase
           :depth=>1,
           :styles=>["freezing", "boiling"],
           :fields=>
-        [{:unprocessed_value=>"Facet 1",
-          :processed_value=>"Facet 1",
-          :name=>"title"},
+        [
+          {:unprocessed_value=>"Facet 1",
+            :processed_value=>"Facet 1",
+            :name=>"title"},
           {:unprocessed_value=>"Facet 1 Location",
             :processed_value=>"Facet 1 Location",
             :name=>"location"},
-            {:unprocessed_value=>date,
-              :processed_value=>date,
-              :name=>"date"}],
-              :style=>"freezing",
+          {:unprocessed_value=>date,
+            :processed_value=>date,
+            :name=>"date"},
+          {:unprocessed_value=>"",
+            :processed_value=>"",
+            :name=>"image"} ],
+                :style=>"freezing",
               :entries=>
         [{:type=>"SerialisedPage",
           :path=>"/about",
@@ -175,7 +183,10 @@ class SerialisationTest < Test::Unit::TestCase
             :name=>"location"},
             {:unprocessed_value=>date,
               :processed_value=>date,
-              :name=>"date"}],
+              :name=>"date"},
+            {:unprocessed_value=>"",
+              :processed_value=>"",
+              :name=>"image"} ],
               :style=>"boiling",
               :entries=>[],
               :is_page=>false,

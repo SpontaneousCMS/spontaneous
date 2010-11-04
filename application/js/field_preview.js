@@ -11,7 +11,6 @@ Spontaneous.FieldPreview = (function($, S) {
 
 	FieldPreview.prototype = {
 		depth_class: function() {
-			console.log('FieldPreview#depth_class', this.content.depth())
 			return 'depth-'+this.content.depth();
 		},
 		panel: function() {
@@ -33,10 +32,23 @@ Spontaneous.FieldPreview = (function($, S) {
 			return wrapper;
 		},
 		text_fields: function() {
-			return this.fields();
+			var tf = [], ff = this.fields();
+			$.each(ff, function(i, f) {
+				console.log("FieldPreview#text_fields", f, f.is_image)
+				if (!f.is_image()) {
+					tf.push(f);
+				}
+			});
+			return tf;
 		},
 		image_fields: function() {
-			return []
+			var imf = [], ff = this.fields();
+			$.each(ff, function(i, f) {
+				if (f.is_image()) {
+					imf.push(f);
+				}
+			});
+			return imf;
 		},
 		fields: function() {
 			return this.content.fields();

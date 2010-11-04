@@ -72,18 +72,18 @@ class ImagesTest < Test::Unit::TestCase
     end
 
     should "have image dimension and filesize information" do
-      @image.src.should == "/media/234/10/rose.jpg"
+      @image.src.should == "/media/00234/0010/rose.jpg"
       @image.filesize.should == 54746
       @image.width.should == 400
       @image.height.should == 533
     end
 
     should "have access to the original uploaded file through field.original" do
-      @image.src.should == "/media/234/10/rose.jpg"
+      @image.src.should == "/media/00234/0010/rose.jpg"
       @image.original.width.should == @image.width
       @image.original.height.should == @image.height
       @image.original.filesize.should == @image.filesize
-      @image.filepath.should == File.expand_path(File.join(Spontaneous.media_dir, "234/10/rose.jpg"))
+      @image.filepath.should == File.expand_path(File.join(Spontaneous.media_dir, "00234/0010/rose.jpg"))
     end
 
 
@@ -95,7 +95,7 @@ class ImagesTest < Test::Unit::TestCase
       serialised = @image.serialize
       [:preview, :thumbnail, :icon, :tall].each do |size|
         serialised.key?(size).should be_true
-        serialised[size][:src].should == "/media/234/10/rose.#{size}.jpg"
+        serialised[size][:src].should == "/media/00234/0010/rose.#{size}.jpg"
       end
       serialised[:preview][:width].should == 200
       serialised[:tall][:height].should == 200
@@ -109,8 +109,8 @@ class ImagesTest < Test::Unit::TestCase
       should "persist attributes" do
         @instance.save
         @instance = ContentWithImage[@instance[:id]]
-        @instance.photo.thumbnail.src.should == "/media/234/10/rose.thumbnail.jpg"
-        @instance.photo.original.src.should == "/media/234/10/rose.jpg"
+        @instance.photo.thumbnail.src.should == "/media/00234/0010/rose.thumbnail.jpg"
+        @instance.photo.original.src.should == "/media/00234/0010/rose.jpg"
       end
   end
 end

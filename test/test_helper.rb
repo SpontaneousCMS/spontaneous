@@ -52,9 +52,8 @@ class Test::Unit::TestCase
     Object.const_get(:HomePage).should be_instance_of(Class)
 
     # Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
-    Spontaneous::Content.delete
     #########
-
+    Spontaneous::Content.delete
 
     @carbon_quilt = ClientProject.new(:title => "The Carbon Quilt", :url => "http://carbonquilt.org/", :description => "In partnership with GovEd and CarbonSense magnetised was given the opportunity to transform their ground-breaking ideas for carbon visualisation into a working prototype. The result is both useful and compelling, turning abstract ideas of \"carbon footprints\" into intuitively understandable forms and volumes.\nThis is just an early prototype of what we hope will become one of the de-facto mechanisms for carbon visualisation online.")
     @barakapoint = ClientProject.new(:title => "Baraka Point", :url => "http://barakapoint.com/", :description => "Time has not stood still and the original [barakapoint.com](http://barakapoint.com/), produced in early 2003, is in need of a facelift. The new site will take full advantage of this brave new broadband-enabled world to deliver stunning images of this gorgeous luxury villa to a public desperately in need of some luxury.")
@@ -71,6 +70,7 @@ class Test::Unit::TestCase
     @home.completed << @ef
     @home.archived << @dm
     @home.save
+
 
     @about = InfoPage.new({
       :slug => "about",
@@ -96,7 +96,7 @@ class Test::Unit::TestCase
     @projects = ProjectsPage.new(:slug => "projects", :title => "Projects", :introduction => "Welcome to projects page")
     @home.pages << @projects
     @projects.projects << Project.new(:slug => "tiffl", :title => "TIFFL", :url => "http://tiffl.org", :description => "TIFFL gives you personalised access to the Transport for London Journey Planner.")
-    @projects.projects << Project.new(:slug => "on-the-bbc", :title => "On the BBC", :url => "", :description => "TIFFL gives you personalised access to the Transport for London Journey Planner.")
+    @projects.projects << Project.new(:slug => "on-the-bbc", :title => "On the BBC", :url => "", :description => "On the BBC is an experiment that provides up-to-date twitter alerts for BBC radio and TV channels.")
     @projects.projects << Project.new(:slug => "human-remains", :title => "Human Remains", :url => "http://remains.magnetised.info/", :description => "A project exploring our relationship to our own detritus.")
     # [@carbon_quilt, @project2, @project3, @facet2_1, @facet2_2, @facet2_3, @facet2_4, @facet2_5].each { |p| p.save }
 
@@ -109,6 +109,12 @@ class Test::Unit::TestCase
     @products.projects << @spon
     @products.save
     @home.save
+
+
+    @barakapoint.images << ProjectImage.new(:image => "/Users/garry/Dropbox/Profession/magnetised.info/content/i/work/ef/001.jpg")
+    @barakapoint.images << ProjectImage.new(:image => "/Users/garry/Dropbox/Profession/magnetised.info/content/i/work/ef/002.jpg")
+    @barakapoint.images << ProjectImage.new(:image => "/Users/garry/Dropbox/Profession/magnetised.info/content/i/work/ef/003.jpg")
+    @barakapoint.save
     ############
     @home = Content[@home.id]
     @about = Content[@about.id]

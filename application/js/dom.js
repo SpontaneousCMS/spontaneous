@@ -6,7 +6,7 @@ Spontaneous.Dom = (function($, S) {
 			return $(document.body);
 		},
 		div: "<div/>", p: "<p/>", iframe: "<iframe/>",
-		a: "<a/>", span: "<span/>",
+		a: "<a/>", span: "<span/>", img: '<img/>',
 		select:'<select/>', option:'<option/>',
 		ul: '<ul/>', li: '<li/>',
 		dl: '<dl/>', dt: '<dt/>', dd: '<dd/>',

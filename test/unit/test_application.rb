@@ -22,6 +22,11 @@ class ApplicationTest < Test::Unit::TestCase
         @home.in_progress.entries.first.page.should == @home
         @home.in_progress.entries.first.images.page.should == @home
       end
+      should "have the right depth" do
+        @home.in_progress.depth.should == 1
+        @home.in_progress.last.depth.should == 2
+        @home.in_progress.last.images.depth.should == 3
+      end
     end
 
     context "pages" do
