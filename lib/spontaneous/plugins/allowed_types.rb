@@ -56,22 +56,26 @@ module Spontaneous::Plugins
     module ClassMethods
       def allow(type, options={})
         begin
-          allowed_types << AllowedType.new(type, options)
+          allowed_types_config << AllowedType.new(type, options)
         rescue NameError => e
           raise Spontaneous::UnknownTypeException.new(self, type)
         end
       end
 
-      def allowed_types
-        @allowed_types ||= []
+      def allowed_types_config
+        @_allowed_types ||= []
       end
 
       def allowed
-        (supertype ? supertype.allowed : []).concat(allowed_types)
+        (supertype ? supertype.allowed : []).concat(allowed_types_config)
       end
+      alias_method :allowed_types, :allowed
     end
 
     module InstanceMethods
+      def allowed_types
+        self.class.allowed_types
+      end
       def allowed_type(content)
         self.class.allowed.find { |a| a.instance_class == content.class }
       end

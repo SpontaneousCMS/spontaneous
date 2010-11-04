@@ -149,7 +149,9 @@ class ContentTest < Test::Unit::TestCase
         allow 'Allowed3'
       end
 
-      class ::ChildClass < ::Parent; end
+      class ::ChildClass < ::Parent
+        slot :parents, :type => :Parent
+      end
     end
 
     teardown do
@@ -206,6 +208,11 @@ class ContentTest < Test::Unit::TestCase
     should "include a subtype's allowed list as well as the supertype's" do
       ChildClass.allow :Allowed4
       ChildClass.allowed.map {|a| a.instance_class }.should == (Parent.allowed.map {|a| a.instance_class } + [Allowed4])
+    end
+
+    should "propagate allowed types to slots" do
+      instance = ChildClass.new
+      instance.parents.allowed_types.should == Parent.allowed_types
     end
   end
 end
