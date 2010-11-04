@@ -222,6 +222,10 @@ class FieldsTest < Test::Unit::TestCase
       Object.send(:remove_const, :CC)
     end
 
+    should "have a link back to their owner" do
+      @instance.fields.title.owner.should == @instance
+    end
+
     should "eval blocks from prototype defn" do
       f = @instance.fields.title
       f.value = "Boo"

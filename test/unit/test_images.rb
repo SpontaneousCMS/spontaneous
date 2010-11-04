@@ -2,6 +2,7 @@
 
 
 require 'test_helper'
+# require 'openssl'
 
 class ImagesTest < Test::Unit::TestCase
   include Spontaneous
@@ -29,12 +30,19 @@ class ImagesTest < Test::Unit::TestCase
       tmp = File.join(File.dirname(__FILE__), "../../tmp/media")
       Spontaneous.media_dir = tmp
       @tmp_dir = Pathname.new(tmp)
-      @image_dir = @tmp_dir + "images"
-      @image_dir.mkpath
+      @upload_dir = @tmp_dir + "tmp/1234"
+      @upload_dir.mkpath
 
-      @src_image =  Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg"))
-      @origin_image = @image_dir + "rose.jpg"
-      @origin_image.make_link(@src_image.to_s) unless @origin_image.exist?
+      @revision = 10
+      Site.stubs(:working_revision).returns(@revision)
+
+      @src_image =  Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg")).realpath
+      @origin_image = @upload_dir + "rose.jpg"
+      # @origin_image.make_link(@src_image.to_s) unless @origin_image.exist?
+      FileUtils.cp(@src_image.to_s, @origin_image.to_s)
+      @origin_image = @origin_image.realpath.to_s
+      # @digest = OpenSSL::Digest::MD5.new.file(@origin_image).hexdigest
+      # p @digest
 
       class ::ResizingImageField < FieldTypes::ImageField
         sizes :preview => { :width => 200 },
@@ -43,28 +51,39 @@ class ImagesTest < Test::Unit::TestCase
           :icon => { :crop => [50, 50] }
       end
 
-      @image = ResizingImageField.new(:name => "photo")
+      ResizingImageField.register
+
+      class ::ContentWithImage < Content
+        field :photo, :resizing_image
+      end
+      @instance = ContentWithImage.new
+
+      @content_id = 234
+      @instance.stubs(:id).returns(@content_id)
+      @image = @instance.photo
+      @image.owner.should == @instance
       @image.value = @origin_image.to_s
     end
 
     teardown do
+      Object.send(:remove_const, :ContentWithImage)
       Object.send(:remove_const, :ResizingImageField)
       (@tmp_dir + "..").rmtree
     end
 
     should "have image dimension and filesize information" do
-      @image.src.should == "/media/images/rose.jpg"
+      @image.src.should == "/media/234/10/rose.jpg"
       @image.filesize.should == 54746
       @image.width.should == 400
       @image.height.should == 533
     end
 
     should "have access to the original uploaded file through field.original" do
-      @image.src.should == "/media/images/rose.jpg"
+      @image.src.should == "/media/234/10/rose.jpg"
       @image.original.width.should == @image.width
       @image.original.height.should == @image.height
       @image.original.filesize.should == @image.filesize
-      @image.filepath.should == @origin_image.realpath.to_s
+      @image.filepath.should == File.expand_path(File.join(Spontaneous.media_dir, "234/10/rose.jpg"))
     end
 
 
@@ -76,7 +95,7 @@ class ImagesTest < Test::Unit::TestCase
       serialised = @image.serialize
       [:preview, :thumbnail, :icon, :tall].each do |size|
         serialised.key?(size).should be_true
-        serialised[size][:src].should == "/media/images/rose.#{size}.jpg"
+        serialised[size][:src].should == "/media/234/10/rose.#{size}.jpg"
       end
       serialised[:preview][:width].should == 200
       serialised[:tall][:height].should == 200
@@ -87,26 +106,11 @@ class ImagesTest < Test::Unit::TestCase
       # pp serialised
     end
 
-    context "attached to content" do
-      setup do
-        ResizingImageField.register
-        class ::ContentWithImage < Content
-          field :image, :resizing_image
-        end
-        @instance = ContentWithImage.new
-        @instance.image = @origin_image.to_s
-      end
-
-      teardown do
-        Object.send(:remove_const, :ContentWithImage)
-      end
-
       should "persist attributes" do
         @instance.save
-        @instance = ContentWithImage[@instance.id]
-        @instance.image.thumbnail.src.should == "/media/images/rose.thumbnail.jpg"
-        @instance.image.original.src.should == "/media/images/rose.jpg"
+        @instance = ContentWithImage[@instance[:id]]
+        @instance.photo.thumbnail.src.should == "/media/234/10/rose.thumbnail.jpg"
+        @instance.photo.original.src.should == "/media/234/10/rose.jpg"
       end
-    end
   end
 end

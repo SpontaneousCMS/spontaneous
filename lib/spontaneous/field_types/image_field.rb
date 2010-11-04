@@ -60,6 +60,7 @@ module Spontaneous
       # takes a path to a newly uploaded image in Spontaneous.media_dir
       def process(image_path)
         return image_path unless File.exist?(image_path)
+        image_path = owner.make_media_file(image_path)
         image = ImageProcessor.new(image_path)
         attribute_set(:original, image.serialize)
         self.class.size_definitions.each do |name, size|
@@ -68,7 +69,6 @@ module Spontaneous
         set_unprocessed_value(File.expand_path(image_path))
         image.src
       end
-
     end
 
     ImageField.register

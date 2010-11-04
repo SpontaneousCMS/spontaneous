@@ -4,6 +4,8 @@
 Sequel.extension :inflector
 
 require 'logger'
+require 'fileutils'
+
 module Spontaneous
   SLASH = "/".freeze
   class << self
@@ -195,6 +197,7 @@ module Spontaneous
     autoload :JSON, "spontaneous/plugins/json"
     autoload :SiteMap, "spontaneous/plugins/site_map"
     autoload :PageSearch, "spontaneous/plugins/page_search"
+    autoload :Media, "spontaneous/plugins/media"
 
     module Slots
       autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"
