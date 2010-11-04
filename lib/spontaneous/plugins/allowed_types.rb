@@ -67,7 +67,7 @@ module Spontaneous::Plugins
       end
 
       def allowed
-        allowed_types
+        (supertype ? supertype.allowed : []).concat(allowed_types)
       end
     end
 

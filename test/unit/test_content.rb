@@ -142,15 +142,18 @@ class ContentTest < Test::Unit::TestCase
         inline_style :arthur
         inline_style :lancelot
       end
+      class ::Allowed4 < Content; end
       class ::Parent < Content
         allow :Allowed1
         allow Allowed2, :styles => [:ringo, :george]
         allow 'Allowed3'
       end
+
+      class ::ChildClass < ::Parent; end
     end
 
     teardown do
-      [:Parent, :Allowed1, :Allowed2, :Allowed3].each { |k| Object.send(:remove_const, k) } rescue nil
+      [:Parent, :Allowed1, :Allowed2, :Allowed3, :Allowed4, :ChildClass].each { |k| Object.send(:remove_const, k) } rescue nil
     end
     should "have a list of allowed types" do
       Parent.allowed.length.should == 3
@@ -194,6 +197,15 @@ class ContentTest < Test::Unit::TestCase
       a << c
       a.available_styles(b).map { |s| s.name }.should == [:ringo, :george]
       a.available_styles(c).map { |s| s.name }.should == [:arthur, :lancelot]
+    end
+
+    should "inherit allowed types from superclass" do
+      ChildClass.allowed.should == Parent.allowed
+    end
+
+    should "include a subtype's allowed list as well as the supertype's" do
+      ChildClass.allow :Allowed4
+      ChildClass.allowed.map {|a| a.instance_class }.should == (Parent.allowed.map {|a| a.instance_class } + [Allowed4])
     end
   end
 end
