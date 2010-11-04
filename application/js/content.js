@@ -44,6 +44,9 @@ Spontaneous.Content = (function($, S) {
 		},
 		allowed_types: function() {
 			return this.type().allowed_types();
+		},
+		depth: function() {
+			return this.content.depth;
 		}
 	};
 })(jQuery, Spontaneous);

@@ -10,8 +10,12 @@ Spontaneous.FieldPreview = (function($, S) {
 	};
 
 	FieldPreview.prototype = {
+		depth_class: function() {
+			console.log('FieldPreview#depth_class', this.content.depth())
+			return 'depth-'+this.content.depth();
+		},
 		panel: function() {
-			var wrapper = $(dom.div, {'id':this.wrap_id, 'class':'fields-preview'});
+			var wrapper = $(dom.div, {'id':this.wrap_id, 'class':'fields-preview ' + this.depth_class()});
 			console.log('FieldPreview#panel', this.text_fields(), this.image_fields());
 			wrapper.append(this.fields_panel(this.text_fields(), 'text'));
 			wrapper.append(this.fields_panel(this.image_fields(), 'image'));

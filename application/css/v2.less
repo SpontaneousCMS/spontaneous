@@ -212,6 +212,13 @@ a {
 			}
 		}
 	}
+	.switch-mode {
+		.button;
+		position: absolute;
+		right: 0;
+		margin: 4px @container-padding 0 0;
+		width: 128px;
+	}
 }
 
 #content {
@@ -436,6 +443,7 @@ a {
 		}
 		li:hover,
 		li.active {
+			.vertical-gradient(@highlight + #111, @highlight);
 			background-color: @highlight;
 			color: #fff;
 			border-right-color: @highlight;
@@ -448,10 +456,10 @@ a {
 			border-left-color: @highlight - #151515;
 		}
 	}
-	.fields-preview {
+	.fields-preview.depth-1 {
 		.container-padding;
 		padding-top: 12px;
-		padding-bottom: 16px;
+		padding-bottom: 5px;
 		/*background-color: #efefef;*/
 		/*background-color: #e6e6e6;*/
 		.vertical-gradient(#eee, #ddd);
@@ -461,6 +469,9 @@ a {
 			border-top-color: @action;
 			border-bottom-color: @action;
 
+		}
+		.value {
+			color: #555;
 		}
 	}
 	.slot-addable {
@@ -538,6 +549,7 @@ a {
 			/*background-color: #fff;*/
 			.fields-preview {
 				.rounded;
+				margin-right: 3px;
 				padding: 4px;
 				background: none;
 				border-color: #fff;
@@ -607,7 +619,7 @@ a {
 				}
 				li.active:hover,
 				li.active {
-					background-color: #565656;
+					background: #565656 none;
 					border-right: solid 1px #565656;
 					color: #fff;
 				}
