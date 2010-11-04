@@ -125,11 +125,11 @@ class BackTest < Test::Unit::TestCase
         @facet.save
       end
 
-      should "update facet field values" do
+      should "update content field values" do
         params = {
           "field[text][value]" => "Updated field_name_1"
         }
-        post "/@spontaneous/facet/#{@facet.id}/save", params
+        post "/@spontaneous/save/#{@facet.id}", params
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @facet = Content[@facet.id]
@@ -141,7 +141,7 @@ class BackTest < Test::Unit::TestCase
           "field[title][value]" => "Updated title",
           "field[introduction][value]" => "Updated intro"
         }
-        post "/@spontaneous/page/#{@home.id}/save", params
+        post "/@spontaneous/save/#{@home.id}", params
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @home = Content[@home.id]
@@ -166,7 +166,6 @@ class BackTest < Test::Unit::TestCase
       last_response.content_type.should == "text/html;charset=utf-8"
       assert_equal @about.render, last_response.body
     end
-
   end
   context "static files" do
     should "work for site" do
@@ -187,6 +186,25 @@ class BackTest < Test::Unit::TestCase
       get "favicon.ico"
       assert last_response.ok?
       assert_equal File.read(@app_dir / 'static/favicon.ico'), last_response.body
+    end
+  end
+  context "file uploads" do
+    setup do
+      @media_dir = File.join(File.dirname(__FILE__), "../../tmp/media")
+      Spontaneous.media_dir = @media_dir
+      @src_file = Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg")).realpath.to_s
+      @upload_id = 9723
+      Time.stubs(:now).returns(Time.at(1288882153))
+      Spontaneous::Media.stubs(:upload_index).returns(23)
+    end
+    should "create a file in a safe subdirectory of media/tmp" do
+      post "@spontaneous/upload/9723", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      assert_equal({
+        :id => '9723',
+        :path => "/media/tmp/1288882153.23/rose.jpg"
+      }.to_json, last_response.body)
     end
   end
 end

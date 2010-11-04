@@ -88,20 +88,25 @@ module Spontaneous
           json Site.map(page.id)
         end
 
-        post '/page/:id/save' do
-          page = Content[params[:id]]
-          update_fields(page, params[:field])
+        post '/save/:id' do
+          content = Content[params[:id]]
+          update_fields(content, params[:field])
         end
 
-        post '/facet/:id/save' do
-          facet = Content[params[:id]]
-          update_fields(facet, params[:field])
-        end
 
         post '/content/:id/position/:position' do
           facet = Content[params[:id]]
           facet.update_position(params[:position].to_i)
           json( {:message => 'OK'} )
+        end
+
+
+        post '/upload/:id' do
+          file = params['file']
+          media_file = Spontaneous::Media.upload_path(file[:filename])
+          FileUtils.mkdir_p(File.dirname(media_file))
+          FileUtils.mv(file[:tempfile].path, media_file)
+          json({ :id => params[:id], :path => Spontaneous::Media.to_urlpath(media_file)})
         end
 
         get '/static/*' do

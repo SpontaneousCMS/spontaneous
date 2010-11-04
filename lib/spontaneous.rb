@@ -123,6 +123,10 @@ module Spontaneous
       @media_dir ||= File.expand_path(root / "../media")
     end
 
+    def media_path(*args)
+      Media.media_path(*args)
+    end
+
     def root
       @root ||= File.expand_path(Dir.pwd)
     end
@@ -176,6 +180,8 @@ module Spontaneous
   autoload :Rack, "spontaneous/rack"
 
   autoload :Templates, "spontaneous/templates"
+  autoload :Media, "spontaneous/media"
+
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"
     autoload :ErubisTemplate, "spontaneous/templates/erubis_template"
