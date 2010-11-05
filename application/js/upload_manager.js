@@ -10,6 +10,7 @@ Spontaneous.UploadManager = (function($, S) {
 		this.id = upload_id++;
 		this.position = 0;
 		this.total = this.file.fileSize;
+		this.failure_count = 0;
 	};
 
 	Upload.prototype = {
@@ -22,6 +23,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.upload.onprogress = this.onprogress.bind(this);
 			this.upload.onload = this.onload.bind(this);
 			this.upload.onloadend = this.onloadend.bind(this);
+			this.upload.onerror = this.onerror.bind(this);
 			this.xhr.onreadystatechange = this.onreadystatechange.bind(this);
 			this.xhr.send(this.file);
 		},
@@ -44,12 +46,16 @@ Spontaneous.UploadManager = (function($, S) {
 			this.manager.upload_failed(this);
 		},
 		onreadystatechange: function(event) {
+			console.log("Upload#onreadystatechange", event);
 			var xhr = event.currentTarget;
 			if (xhr.readyState == 4 && xhr.status === 200) {
 				var result = JSON.parse(xhr.responseText);
 				this.manager.upload_complete(this, result);
 			}
-			console.log("Upload#onreadystatechange", event);
+		},
+		onerror: function(event) {
+			this.failure_count++;
+			this.manager.upload_failed(this);
 		}
 	}
 	var UploadManager = {
@@ -73,7 +79,17 @@ Spontaneous.UploadManager = (function($, S) {
 			if (this.current) { return; }
 			if (this.pending.length === 0) {
 				// the download queue is complete
-				this.finished();
+				if (this.failed.length === 0) {
+					this.finished();
+				} else {
+					var upload = this.failed.pop(), delay = Math.pow(2, upload.failure_count);
+					console.log("UploadManager.next", "scheduling re-try of failed upload after", delay, "seconds");
+					this.pending.push(upload);
+					window.setTimeout(function() {
+						console.log("UploadManager.next", "re-trying failed upload");
+						this.next();
+					}.bind(this),  delay * 1000);
+				}
 				return;
 			}
 			this.init_progress_bar();
@@ -111,7 +127,7 @@ Spontaneous.UploadManager = (function($, S) {
 				total += this.current.total;
 				completed += this.current.position;
 			}
-			
+
 			console.log("UploadManager#update_progress_bars", completed, total)
 			this.set_bar_length('total', completed, total);
 			if (this.current) {

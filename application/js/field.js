@@ -82,16 +82,13 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				img = $(dom.img, {'src':value});
 			}
 			img.load(function() {
-				var r = this.width/this.height, $this = $(this), h = $this.height();
-				$this.css('top', '0px');
-				console.log(this.width, this.height, r, h)
+				var r = this.width/this.height, $this = $(this), h = $this.height(), dh = 0;
 				if (r >= 1) { // landscape -- fit image vertically
 					if (h < dim) {
 						var dh = (dim - h)/2;
-						console.log('fitting', dh)
-						$this.css('top', (dh) + 'px');
 					}
-				} else {} // portrait (centering handled by CSS)
+				}
+				$this.css('top', (dh) + 'px');
 			});
 			this.image = img;
 
@@ -107,7 +104,6 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				progress_outer.append(progress_inner);
 				dropper.append(progress_outer);
 				this.progress_bar = progress_inner;
-				console.log('drop', event, event.dataTransfer.files)
 				event.stopPropagation();
 				event.preventDefault();
 				var files = event.dataTransfer.files;
@@ -153,7 +149,6 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			}
 		},
 		upload_progress: function(position, total) {
-			console.log("ImageField#upload_progress", position, total, this.progress_bar)
 			this.progress_bar.css('width', ((position/total)*100) + '%');
 			if (position === total) {
 				this.drop_target.removeClass('uploading')
