@@ -48,6 +48,9 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			this.set('value', values.processed_value);
 			this.set('unprocessed_value', values.unprocessed_value);
 		},
+		preview: function() {
+			return this.get('value');
+		},
 		value: function() {
 			return this.get('value');
 		},
@@ -71,52 +74,74 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		console.log("ImageField#new", this.name, this.get('value'));
 	};
 	ImageField.prototype = $.extend({}, Spontaneous.FieldTypes.StringField.prototype, {
-		value: function() {
-			var value = this.get('value'), el;
+		preview: function() {
+			var value = this.get('value'), img = null, dim = 45;
 			if (value === "") {
-				el = $(dom.img, {'src':'/@spontaneous/static/px.gif','class':'missing-image'});
+				img = $(dom.img, {'src':'/@spontaneous/static/px.gif','class':'missing-image'});
 			} else {
-				el = $(dom.img, {'src':value});
+				img = $(dom.img, {'src':value});
 			}
+			img.load(function() {
+				var r = this.width/this.height, $this = $(this), h = $this.height();
+				if (r >= 1) {
+					// landscape
+					// fit image vertically
+					if (h < dim) {
+						var dh = (dim - h)/2;
+						$this.css('top', (dh) + 'px');
+					}
+				} else {
+					// portrait (centering handled by CSS)
+				}
+			});
+			this.image = img;
+			var outer = $(dom.div);
+			var dropper = $(dom.div, {'class':'image-drop'});
+			outer.append(img);
+			outer.append(dropper);
 			var drop = function(event) {
+				dropper.removeClass('drop-active');
 				console.log('drop', event, event.dataTransfer.files)
 				event.stopPropagation();
 				event.preventDefault();
 				var files = event.dataTransfer.files;
 				if (files.length > 0) {
 					var file = files[0];
-					var xhr = new XMLHttpRequest();
-					var upload = xhr.upload;
-					xhr.open("PUT", "/@spontaneous/upload/1", true);
-					xhr.setRequestHeader('X-Filename', file.fileName);
-					xhr.send(file);
+					S.UploadManager.add(this, file);
 				}
 				return false;
 			}.bind(this);
 
 			var drag_enter = function(event) {
-				console.log('drag_enter', event, event.dataTransfer)
+				$(this).addClass('drop-active');
 				event.stopPropagation();
 				event.preventDefault();
 				return false;
-			}.bind(this);
+			}.bind(dropper);
 			var drag_over = function(event) {
 				event.stopPropagation();
 				event.preventDefault();
 				return false;
-			}.bind(this);
+			}.bind(dropper);
 			var drag_leave = function(event) {
+				$(this).removeClass('drop-active');
 				event.stopPropagation();
 				event.preventDefault();
 				return false;
-			}.bind(this);
+			}.bind(dropper);
 
-			el.get(0).addEventListener('drop', drop, true);
-			el.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
-			return el;
+			dropper.get(0).addEventListener('drop', drop, true);
+			dropper.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
+			return outer;
 		},
 		is_image: function() {
 			return true;
+		},
+		set_value: function(path) {
+			this.set('value', path);
+			if (this.image) {
+				this.image.attr('src', path);
+			}
 		}
 	});
 

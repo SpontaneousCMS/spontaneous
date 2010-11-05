@@ -34,11 +34,25 @@ Spontaneous.Content = (function($, S) {
 						);
 						type_class = Spontaneous.FieldTypes.StringField;
 					}
-					fields[f.name] = new type_class(this, f);
+					var field = new type_class(this, f);
+					field.add_listener('value', this.field_updated.bind(this, field));
+					fields[f.name] = field;
 				};
 				this._fields = fields;
 			}
 			return this._fields;
+		},
+		field_updated: function(field, value) {
+			console.log("Content#field_updated", field, value);
+			this.save_field(field);
+		},
+		save_field: function(field) {
+			var params = { field: {} };
+			params.field[field.name] = {value: field.value()};
+			console.log(params)
+			Spontaneous.Ajax.post('/save/'+this.content.id, params, this, this.save_complete);
+		},
+		save_complete: function() {
 		},
 		has_fields: function() {
 			return (this.content.fields.length > 0)

@@ -21,17 +21,15 @@ Spontaneous.Init = (function($, S) {
 
 
 		return function() {
-			if (__init_loaded) { return; }
-			console.log('Spontaneous.Init', __init_loaded);
 			Types.init();
 			Location.init(function() {
 				Dom.body().append(TopBar.panel());
 				Dom.body().append(ContentArea.init());
+				Dom.body().append(StatusBar.init());
+				TopBar.init();
 			});
 			
 			// Spontaneous.Spin = SideBar.spinner();
-			TopBar.init();
-			__init_loaded = true;
 		};
 	}
 })(jQuery, Spontaneous);

@@ -226,7 +226,7 @@ a {
 	overflow: auto;
 	top: 31px;
 	right: 0;
-	bottom: 0;
+	bottom: 32px;
 	left: 0;
 	#data_pane,
 	#preview_pane {
@@ -392,18 +392,37 @@ a {
 			padding-left: 4px;
 			padding-top: 2px;
 			background-color: #efefef;
+			z-index: 1;
 		}
 		.value {
 			.rounded;
+			//border: solid 2px #efefef;
+			background-color: #efefef;
 			max-height: 90px;
+			min-height: 45px;
+			min-width: 90px;
 			cursor: pointer;
+			text-align: center;
+			position: relative;
+			.image-drop {
+				.rounded;
+				z-index: 2;
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+			}
+			.image-drop.drop-active {
+				border: solid 2px @action;
+			}
 			img {
 				.rounded;
 				.no-select;
+				position: relative;
 				max-height: 90px;
 			}
 			img:hover {
-				outline: solid 2px @action;
 			}
 		}
 	}
@@ -548,7 +567,8 @@ a {
 			/*background-color: #fff;*/
 			.fields-preview {
 				.rounded;
-				margin-right: 2px;
+				// why 3px??
+				margin-right: 3px;
 				padding: 4px;
 				background: none;
 				border-color: #fff;
@@ -915,4 +935,14 @@ a {
 			}
 		}
 	}
+}
+
+#status-bar {
+	position: fixed;
+	height: 32px;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #ccc;
+	z-index: 100;
 }

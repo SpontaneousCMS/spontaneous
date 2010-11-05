@@ -25,7 +25,7 @@ Spontaneous.FieldPreview = (function($, S) {
 			$.each(fields, function(i, field) {
 				var li = $(dom.li);
 				var name = $(dom.div, {'class':'name'}).text(field.title);
-				var value = $(dom.div, {'class':'value'}).html(field.value());
+				var value = $(dom.div, {'class':'value'}).html(field.preview());
 				li.append(name).append(value);
 				wrapper.append(li);
 			});
