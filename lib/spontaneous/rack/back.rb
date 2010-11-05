@@ -109,6 +109,15 @@ module Spontaneous
           json({ :id => params[:id], :path => Spontaneous::Media.to_urlpath(media_file)})
         end
 
+        put '/upload/:id' do
+          filename = env['HTTP_X_FILENAME']
+          media_file = Spontaneous::Media.upload_path(filename)
+          FileUtils.mkdir_p(File.dirname(media_file))
+          File.open(media_file, 'wb') { |file| file.write(request.body.read) }
+          puts "uploaded #{filename} -> #{media_file}"
+          json({ :id => params[:id], :path => Spontaneous::Media.to_urlpath(media_file)})
+        end
+
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)
         end

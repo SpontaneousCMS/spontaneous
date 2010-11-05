@@ -72,12 +72,48 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 	};
 	ImageField.prototype = $.extend({}, Spontaneous.FieldTypes.StringField.prototype, {
 		value: function() {
-			var value = this.get('value');
+			var value = this.get('value'), el;
 			if (value === "") {
-				return $(dom.img, {'src':'/@spontaneous/static/px.gif','class':'missing-image'});
+				el = $(dom.img, {'src':'/@spontaneous/static/px.gif','class':'missing-image'});
 			} else {
-				return $(dom.img, {'src':value});
+				el = $(dom.img, {'src':value});
 			}
+			var drop = function(event) {
+				console.log('drop', event, event.dataTransfer.files)
+				event.stopPropagation();
+				event.preventDefault();
+				var files = event.dataTransfer.files;
+				if (files.length > 0) {
+					var file = files[0];
+					var xhr = new XMLHttpRequest();
+					var upload = xhr.upload;
+					xhr.open("PUT", "/@spontaneous/upload/1", true);
+					xhr.setRequestHeader('X-Filename', file.fileName);
+					xhr.send(file);
+				}
+				return false;
+			}.bind(this);
+
+			var drag_enter = function(event) {
+				console.log('drag_enter', event, event.dataTransfer)
+				event.stopPropagation();
+				event.preventDefault();
+				return false;
+			}.bind(this);
+			var drag_over = function(event) {
+				event.stopPropagation();
+				event.preventDefault();
+				return false;
+			}.bind(this);
+			var drag_leave = function(event) {
+				event.stopPropagation();
+				event.preventDefault();
+				return false;
+			}.bind(this);
+
+			el.get(0).addEventListener('drop', drop, true);
+			el.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
+			return el;
 		},
 		is_image: function() {
 			return true;
