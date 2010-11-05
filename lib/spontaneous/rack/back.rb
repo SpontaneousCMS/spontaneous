@@ -118,6 +118,16 @@ module Spontaneous
           json({ :id => params[:id], :src => Spontaneous::Media.to_urlpath(media_file), :path => media_file})
         end
 
+
+        post '/add/:id/:type_name' do
+          content = Content[params[:id]]
+          type = params[:type_name].constantize
+          instance = type.new
+          content.insert(0, instance)
+          content.save
+          json(instance)
+        end
+
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)
         end

@@ -9,6 +9,7 @@ Spontaneous.Content = (function($, S) {
 			}
 			return this._type;
 		},
+
 		constantize: function(type) {
 			var parts = type.split(/\./), obj = window;
 			for (var i = 0, ii = parts.length; i < ii; i++) {
@@ -16,6 +17,7 @@ Spontaneous.Content = (function($, S) {
 			}
 			return obj;
 		},
+
 		fields: function() {
 			if (!this._fields) {
 				var fields = {}, type = this.type(), prototypes = type.field_prototypes;
@@ -41,19 +43,24 @@ Spontaneous.Content = (function($, S) {
 			}
 			return this._fields;
 		},
+
 		field_updated: function(field, value) {
 			this.save_field(field);
 		},
+
 		save_field: function(field) {
 			var params = { field: {} };
 			params.field[field.name] = {value: field.value()};
 			Spontaneous.Ajax.post('/save/'+this.content.id, params, this, this.save_complete);
 		},
+
 		save_complete: function() {
 		},
+
 		has_fields: function() {
 			return (this.content.fields.length > 0)
 		},
+
 		entries: function() {
 			if (!this.content.entries) {
 				return [];
@@ -73,14 +80,21 @@ Spontaneous.Content = (function($, S) {
 			}
 			return this._entries;
 		},
+
 		allowed_types: function() {
 			return this.type().allowed_types();
 		},
+
 		depth: function() {
 			return this.content.depth;
 		},
+
 		depth_class: function() {
 			return 'depth-'+this.depth();
+		},
+
+		add_entry: function(type) {
+			console.log('Content.add_entry', this.content, type.type);
 		}
 	};
 })(jQuery, Spontaneous);

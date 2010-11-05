@@ -218,6 +218,21 @@ class BackTest < Test::Unit::TestCase
       }.to_json, last_response.body)
     end
   end
+  context "adding entries" do
+    should "work" do
+      current_count = @home.in_progress.entries.length
+      first_id = @home.in_progress.entries.first.id
+      @home.in_progress.entries.first.class.name.should_not == "ProjectImage"
+      post "/@spontaneous/add/#{@home.in_progress.id}/ProjectImage"
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      @home.reload
+      @home.in_progress.entries.length.should == current_count+1
+      @home.in_progress.entries.first.id.should_not == first_id
+      @home.in_progress.entries.first.class.name.should == "ProjectImage"
+      last_response.body.should == @home.in_progress.entries.first.to_json
+    end
+  end
 end
 
 

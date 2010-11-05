@@ -53,6 +53,7 @@ Spontaneous.Slot = (function($, S) {
 		},
 		add_content: function(content_type) {
 			console.log("Slot#add_content", content_type)
+			this.add_entry(content_type);
 		}
 	});
 

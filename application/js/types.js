@@ -4,7 +4,7 @@ Spontaneous.Types = (function($, S) {
 	var ajax = S.Ajax, type_map = {};
 	var Type = function(type_data) {
 		this.data = type_data;
-		this.id = type_data.type;
+		this.type = type_data.type;
 		this.title = type_data.title;
 		this.field_prototypes = {};
 		var fields = this.data.fields;
