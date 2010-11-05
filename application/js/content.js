@@ -24,7 +24,6 @@ Spontaneous.Content = (function($, S) {
 					var f = this.content.fields[i],
 						prototype = prototypes[f.name],
 						type_class = this.constantize(prototype.type)
-					console.log(">>>>>>", "Content#fields", prototype.type, this.constantize(prototype.type))
 					if (!type_class) {
 						console.warn(
 							"Content#fields:", "Field has invalid type",
@@ -43,13 +42,11 @@ Spontaneous.Content = (function($, S) {
 			return this._fields;
 		},
 		field_updated: function(field, value) {
-			console.log("Content#field_updated", field, value);
 			this.save_field(field);
 		},
 		save_field: function(field) {
 			var params = { field: {} };
 			params.field[field.name] = {value: field.value()};
-			console.log(params)
 			Spontaneous.Ajax.post('/save/'+this.content.id, params, this, this.save_complete);
 		},
 		save_complete: function() {

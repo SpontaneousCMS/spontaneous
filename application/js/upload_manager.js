@@ -8,6 +8,8 @@ Spontaneous.UploadManager = (function($, S) {
 		this.field = field;
 		this.file = file;
 		this.id = upload_id++;
+		this.position = 0;
+		this.total = this.file.fileSize;
 	};
 
 	Upload.prototype = {
@@ -26,6 +28,9 @@ Spontaneous.UploadManager = (function($, S) {
 		// While loading and sending data.
 		onprogress: function(event) {
 			console.log("Upload#onprogress", event);
+			var position = event.position, total = event.total;
+			this.position = position;
+			this.manager.upload_progress(this);
 		},
 		// When the request has successfully completed.
 		onload: function(event) {
@@ -54,6 +59,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.failed = [];
 			this.current = null;
 			this.updater = null;
+			// this.init_progress_bar();
 		},
 		add: function(field, file) {
 			this.pending.push(new Upload(field, file));
@@ -63,9 +69,66 @@ Spontaneous.UploadManager = (function($, S) {
 			}
 		},
 		next: function() {
-			if (this.current || this.pending.length === 0) { return; }
+			if (this.current) { return; }
+			if (this.pending.length === 0) {
+				// the download queue is complete
+				this.finished();
+				return;
+			}
+			this.init_progress_bar();
 			this.current = this.pending.pop();
 			this.current.start(this);
+		},
+		finished: function() {
+			this.completed = [];
+			window.setTimeout(this.status_bar.hide.bind(this.status_bar), 1000);
+		},
+		init_progress_bar: function() {
+			if (this.progress_showing) { return; }
+			this.status_bar.show();
+			var c = this.status_bar.progress_container();
+			var total = $(dom.div, {"id":"progress-total", 'class':'bar'});
+			var individual = $(dom.div, {"id":"progress-individual", 'class':'bar'});
+			c.append(total).append(individual);
+			this.bars = {
+				total: total,
+				individual: individual
+			};
+			this.progress_showing = true;
+		},
+		update_progress_bars: function() {
+			var total = 0, completed = 0;
+			for (var i = 0, ii = this.completed.length; i < ii; i++) {
+				total += this.completed[i].total;
+				completed += this.completed[i].total;
+			}
+			for (var i = 0, ii = this.pending.length; i < ii; i++) {
+				total += this.pending[i].total;
+			}
+
+			if (this.current) {
+				total += this.current.total;
+				completed += this.current.position;
+			}
+			
+			console.log("UploadManager#update_progress_bars", completed, total)
+			this.set_bar_length('total', completed, total);
+			if (this.current) {
+				this.set_bar_length('individual', this.current.position, this.current.total);
+			} else {
+				this.set_bar_length('individual', 0, 0);
+			}
+		},
+		set_bar_length: function(bar_name, position, total) {
+			var bar = this.bars[bar_name], percent = (position/total) * 100;
+			bar.css('width', percent+"%");
+		},
+		upload_progress: function(upload) {
+			if (upload !== this.current) {
+				console.warn("UploadManager#upload_complete", "completed upload does not match current")
+			}
+			// console.log("UploadManager#upload_progress", upload.file.fileName, position, total, (position/total))
+			this.update_progress_bars();
 		},
 		upload_complete: function(upload, result) {
 			if (upload !== this.current) {

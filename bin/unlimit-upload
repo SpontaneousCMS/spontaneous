@@ -1,0 +1,3 @@
+#!/bin/sh
+
+sudo ipfw delete 1
