@@ -84,8 +84,8 @@ Spontaneous.UploadManager = (function($, S) {
 			window.setTimeout(this.status_bar.hide.bind(this.status_bar), 1000);
 		},
 		init_progress_bar: function() {
-			if (this.progress_showing) { return; }
 			this.status_bar.show();
+			if (this.progress_showing) { return; }
 			var c = this.status_bar.progress_container();
 			var total = $(dom.div, {"id":"progress-total", 'class':'bar'});
 			var individual = $(dom.div, {"id":"progress-individual", 'class':'bar'});
@@ -135,7 +135,7 @@ Spontaneous.UploadManager = (function($, S) {
 				console.warn("UploadManager#upload_complete", "completed upload does not match current")
 			}
 			this.completed.push(this.current);
-			this.current.field.set_value(result.path);
+			this.current.field.set_value(result);
 			this.current = null;
 			console.log("UploadManager#upload_complete", result, this.pending, this.completed)
 			this.next();

@@ -26,6 +26,10 @@ module Spontaneous
       self
     end
 
+    def content_depth
+      0
+    end
+
     def to_shallow_hash
       hash = super.merge({
         :path => path,

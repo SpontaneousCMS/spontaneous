@@ -83,11 +83,14 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			}
 			img.load(function() {
 				var r = this.width/this.height, $this = $(this), h = $this.height();
+				$this.css('top', '0px');
+				console.log(this.width, this.height, r, h)
 				if (r >= 1) {
 					// landscape
 					// fit image vertically
 					if (h < dim) {
 						var dh = (dim - h)/2;
+						console.log('fitting', dh)
 						$this.css('top', (dh) + 'px');
 					}
 				} else {
@@ -99,6 +102,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			var dropper = $(dom.div, {'class':'image-drop'});
 			outer.append(img);
 			outer.append(dropper);
+
 			var drop = function(event) {
 				dropper.removeClass('drop-active');
 				console.log('drop', event, event.dataTransfer.files)
@@ -118,11 +122,13 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				event.preventDefault();
 				return false;
 			}.bind(dropper);
+
 			var drag_over = function(event) {
 				event.stopPropagation();
 				event.preventDefault();
 				return false;
 			}.bind(dropper);
+
 			var drag_leave = function(event) {
 				$(this).removeClass('drop-active');
 				event.stopPropagation();
@@ -137,10 +143,10 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		is_image: function() {
 			return true;
 		},
-		set_value: function(path) {
-			this.set('value', path);
+		set_value: function(values) {
+			this.set('value', values.path);
 			if (this.image) {
-				this.image.attr('src', path);
+				this.image.attr('src', values.src);
 			}
 		}
 	});
