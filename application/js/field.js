@@ -85,26 +85,28 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				var r = this.width/this.height, $this = $(this), h = $this.height();
 				$this.css('top', '0px');
 				console.log(this.width, this.height, r, h)
-				if (r >= 1) {
-					// landscape
-					// fit image vertically
+				if (r >= 1) { // landscape -- fit image vertically
 					if (h < dim) {
 						var dh = (dim - h)/2;
 						console.log('fitting', dh)
 						$this.css('top', (dh) + 'px');
 					}
-				} else {
-					// portrait (centering handled by CSS)
-				}
+				} else {} // portrait (centering handled by CSS)
 			});
 			this.image = img;
+
 			var outer = $(dom.div);
 			var dropper = $(dom.div, {'class':'image-drop'});
 			outer.append(img);
 			outer.append(dropper);
 
 			var drop = function(event) {
-				dropper.removeClass('drop-active');
+				dropper.removeClass('drop-active').addClass('uploading');
+				var progress_outer = $(dom.div, {'class':'drop-upload-outer'});
+				var progress_inner = $(dom.div, {'class':'drop-upload-inner'}).css('width', 0);
+				progress_outer.append(progress_inner);
+				dropper.append(progress_outer);
+				this.progress_bar = progress_inner;
 				console.log('drop', event, event.dataTransfer.files)
 				event.stopPropagation();
 				event.preventDefault();
@@ -138,6 +140,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 
 			dropper.get(0).addEventListener('drop', drop, true);
 			dropper.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
+			this.drop_target = dropper;
 			return outer;
 		},
 		is_image: function() {
@@ -147,6 +150,14 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			this.set('value', values.path);
 			if (this.image) {
 				this.image.attr('src', values.src);
+			}
+		},
+		upload_progress: function(position, total) {
+			console.log("ImageField#upload_progress", position, total, this.progress_bar)
+			this.progress_bar.css('width', ((position/total)*100) + '%');
+			if (position === total) {
+				this.drop_target.removeClass('uploading')
+				this.progress_bar.parent().remove();
 			}
 		}
 	});

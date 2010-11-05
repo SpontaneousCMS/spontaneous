@@ -30,6 +30,7 @@ Spontaneous.UploadManager = (function($, S) {
 			console.log("Upload#onprogress", event);
 			var position = event.position, total = event.total;
 			this.position = position;
+			this.field.upload_progress(position, total);
 			this.manager.upload_progress(this);
 		},
 		// When the request has successfully completed.
