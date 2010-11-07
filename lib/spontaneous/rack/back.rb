@@ -106,17 +106,9 @@ module Spontaneous
           media_file = Spontaneous::Media.upload_path(file[:filename])
           FileUtils.mkdir_p(File.dirname(media_file))
           FileUtils.mv(file[:tempfile].path, media_file)
-          json({ :id => params[:id], :path => Spontaneous::Media.to_urlpath(media_file)})
-        end
-
-        put '/upload/:id' do
-          filename = env['HTTP_X_FILENAME']
-          media_file = Spontaneous::Media.upload_path(filename)
-          FileUtils.mkdir_p(File.dirname(media_file))
-          File.open(media_file, 'wb') { |file| file.write(request.body.read) }
-          puts "uploaded #{filename} -> #{media_file}"
           json({ :id => params[:id], :src => Spontaneous::Media.to_urlpath(media_file), :path => media_file})
         end
+
 
 
         post '/add/:id/:type_name' do

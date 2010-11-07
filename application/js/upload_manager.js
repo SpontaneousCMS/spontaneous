@@ -16,16 +16,17 @@ Spontaneous.UploadManager = (function($, S) {
 	Upload.prototype = {
 		start: function(manager) {
 			this.manager = manager;
+			var form = new FormData();
+			form.append('file', this.file);
 			this.xhr = new XMLHttpRequest();
 			this.upload = this.xhr.upload;
-			this.xhr.open("PUT", "/@spontaneous/upload/"+this.id, true);
-			this.xhr.setRequestHeader('X-Filename', this.file.fileName);
+			this.xhr.open("POST", "/@spontaneous/upload/"+this.id, true);
 			this.upload.onprogress = this.onprogress.bind(this);
 			this.upload.onload = this.onload.bind(this);
 			this.upload.onloadend = this.onloadend.bind(this);
 			this.upload.onerror = this.onerror.bind(this);
 			this.xhr.onreadystatechange = this.onreadystatechange.bind(this);
-			this.xhr.send(this.file);
+			this.xhr.send(form);
 		},
 		// While loading and sending data.
 		onprogress: function(event) {
