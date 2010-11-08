@@ -24,6 +24,15 @@ module Spontaneous
         @prototype
       end
 
+      def self.accepts
+        %w(text/.+)
+      end
+
+      def self.accepts?(mime_type)
+        accepts.find do |pattern|
+          Regexp.new(pattern).match(mime_type)
+        end
+      end
 
       attr_accessor :owner, :name, :unprocessed_value
 

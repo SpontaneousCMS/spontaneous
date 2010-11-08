@@ -39,6 +39,10 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 
 		is_image: function() {
 			return false;
+		},
+
+		id: function() {
+			return this.content.id();
 		}
 	});
 
@@ -117,7 +121,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		is_image: function() {
 			return true;
 		},
-		set_value: function(values) {
+		upload_complete: function(values) {
 			this.set('value', values.src);
 			if (this.image) {
 				this.image.attr('src', values.src);

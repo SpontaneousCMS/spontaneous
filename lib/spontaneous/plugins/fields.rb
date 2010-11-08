@@ -38,6 +38,9 @@ module Spontaneous::Plugins
         end
       end
 
+      def fields
+        field_names.map { |n| field_prototypes[n] }
+      end
       def default_field_order
         (supertype ? supertype.field_names : []) + local_field_order
       end
@@ -55,6 +58,11 @@ module Spontaneous::Plugins
         field_prototypes.key?(field_name) || (supertype ? supertype.field?(field_name) : false)
       end
 
+      def field_for_mime_type(mime_type)
+        fields.find do |prototype|
+          prototype.field_class.accepts?(mime_type)
+        end
+      end
     end
 
     module InstanceMethods
@@ -80,6 +88,16 @@ module Spontaneous::Plugins
         self.field_store = @field_set.serialize
       end
 
+      def type_for_mime_type(mime_type)
+        self.class.allowed_types.find do |t|
+          t.instance_class.field_for_mime_type(mime_type)
+        end.instance_class
+      end
+
+      def field_for_mime_type(mime_type)
+        prototype = self.class.field_for_mime_type(mime_type)
+        self.fields[prototype.name]
+      end
     end
   end
 end

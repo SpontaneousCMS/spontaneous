@@ -28,6 +28,48 @@ Spontaneous.Slot = (function($, S) {
 				}
 				var allowed = this.allowed_types();
 				var allowed_bar = $(dom.div, {'class':'slot-addable'});
+				var dropper = allowed_bar;
+				var drop = function(event) {
+					dropper.removeClass('drop-active').addClass('uploading');
+					// var progress_outer = $(dom.div, {'class':'drop-upload-outer'});
+					// var progress_inner = $(dom.div, {'class':'drop-upload-inner'}).css('width', 0);
+					// progress_outer.append(progress_inner);
+					// dropper.append(progress_outer);
+					// this.progress_bar = progress_inner;
+					event.stopPropagation();
+					event.preventDefault();
+					var files = event.dataTransfer.files;
+					if (files.length > 0) {
+						S.UploadManager.wrap(this, files);
+					}
+					return false;
+				}.bind(this);
+
+				var drag_enter = function(event) {
+					// var files = event.originalEvent.dataTransfer.files;
+					// console.log(event.originalEvent.dataTransfer, files)
+					$(this).addClass('drop-active');
+					event.stopPropagation();
+					event.preventDefault();
+					return false;
+				}.bind(dropper);
+
+				var drag_over = function(event) {
+					event.stopPropagation();
+					event.preventDefault();
+					return false;
+				}.bind(dropper);
+
+				var drag_leave = function(event) {
+					$(this).removeClass('drop-active');
+					event.stopPropagation();
+					event.preventDefault();
+					return false;
+				}.bind(dropper);
+
+				dropper.get(0).addEventListener('drop', drop, true);
+				dropper.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
+
 				var _slot = this;
 				$.each(allowed, function(i, type) {
 					var add_allowed = function(type) {
@@ -53,6 +95,13 @@ Spontaneous.Slot = (function($, S) {
 			return this._panel;
 		},
 
+		upload_complete: function(values) {
+			console.log('Slot.upload_complete', values);
+			this.insert_entry(this.wrap_entry(values.entry), values.position);
+		},
+		upload_progress: function(position, total) {
+			console.log('Slot.upload_progress', position, total);
+		},
 		claim_entry: function(entry) {
 			return entry.addClass(this.entry_class());
 		},
@@ -62,17 +111,17 @@ Spontaneous.Slot = (function($, S) {
 		},
 
 		add_content: function(content_type, position) {
-			this.add_entry(content_type, position, function(entry, position) {
-				var w = this.entry_wrappers(), e = this.claim_entry(entry.panel()), h;
-				if (w.length > 0) {
-					this.entry_wrappers().slice(position, position+1).before(e);
-				} else {
-					this._entry_container.append(e);
-				}
-				e.hide().slideDown(300);
-			}.bind(this));
+			this.add_entry(content_type, position, this.insert_entry.bind(this));
 		},
-
+		insert_entry: function(entry, position) {
+			var w = this.entry_wrappers(), e = this.claim_entry(entry.panel()), h;
+			if (w.length > 0) {
+				this.entry_wrappers().slice(position, position+1).before(e);
+			} else {
+				this._entry_container.append(e);
+			}
+			e.hide().slideDown(300);
+		},
 		entry_wrappers: function() {
 			return this._entry_container.find('> .'+this.entry_class())
 		}

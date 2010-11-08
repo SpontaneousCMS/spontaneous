@@ -13,6 +13,7 @@ Spontaneous.SlotContainer = (function($, S) {
 
 		panel: function() {
 			var wrapper = $(dom.div, {'id':this.wrap_id, 'class':'slots'});
+
 			wrapper.append(this.tab_bar());
 			wrapper.append(this.slot_content_container);
 			this.activate(0);

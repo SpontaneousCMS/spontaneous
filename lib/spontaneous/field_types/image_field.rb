@@ -8,6 +8,10 @@ module Spontaneous
 
 
 
+      def self.accepts
+        %w{image/(png|jpeg|gif)}
+      end
+
       def self.sizes(sizes={})
         @size_definitions = validate_sizes(sizes)
       end

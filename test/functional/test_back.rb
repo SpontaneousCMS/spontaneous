@@ -208,6 +208,7 @@ class BackTest < Test::Unit::TestCase
       Time.stubs(:now).returns(Time.at(1288882153))
       Spontaneous::Media.stubs(:upload_index).returns(23)
     end
+
     should "create a file in a safe subdirectory of media/tmp" do
       post "@spontaneous/file/upload/9723", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
       assert last_response.ok?
@@ -234,6 +235,25 @@ class BackTest < Test::Unit::TestCase
       File.exist?(Media.to_filepath(src)).should be_true
       get src
       assert last_response.ok?
+    end
+
+    should "be able to wrap entries around files using default addable class" do
+      slot = @home.in_progress
+      current_count = slot.entries.length
+      first_id = slot.entries.first.id
+
+      post "/@spontaneous/file/wrap/#{slot.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      slot = @home.reload.in_progress
+      first = slot.entries.first
+      slot.entries.length.should == current_count+1
+      first.image.src.should =~ /^\/media(.+)\/#{File.basename(@src_file)}$/
+      required_response = {
+        :position => 0,
+        :entry => first.to_hash
+      }
+      last_response.body.json.should == required_response
     end
   end
   context "adding entries" do

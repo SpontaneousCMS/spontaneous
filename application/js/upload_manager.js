@@ -4,38 +4,41 @@ console.log("Loading UploadManager...");
 Spontaneous.UploadManager = (function($, S) {
 	var dom = S.Dom;
 	var upload_id = (new Date()).valueOf();
-	var Upload = function(field, file) {
-		this.field = field;
-		this.file = file;
-		this.id = upload_id++;
-		this.position = 0;
-		this.total = this.file.fileSize;
-		this.failure_count = 0;
-	};
-
-	Upload.prototype = {
-		// only for direct image replacement
-		start: function(manager) {
+	var Upload = new JS.Class({
+		initialize: function(manager, target, file) {
 			this.manager = manager;
+			this.target = target;
+			this.file = file;
+			this.id = upload_id++;
+			this.position = 0;
+			this.total = this.file.fileSize;
+			this.failure_count = 0;
+		},
+
+		// only for direct image replacement
+		start: function() {
 			var form = new FormData();
 			form.append('file', this.file);
-			form.append('field', this.field.name);
+			form.append('field', this.target.name);
+			this.post("/@spontaneous/file/replace/"+this.target.id(), form);
+		},
+		post: function(url, form_data) {
 			this.xhr = new XMLHttpRequest();
 			this.upload = this.xhr.upload;
-			this.xhr.open("POST", "/@spontaneous/file/replace/"+this.field.content.id(), true);
+			this.xhr.open("POST", url, true);
 			this.upload.onprogress = this.onprogress.bind(this);
 			this.upload.onload = this.onload.bind(this);
 			this.upload.onloadend = this.onloadend.bind(this);
 			this.upload.onerror = this.onerror.bind(this);
 			this.xhr.onreadystatechange = this.onreadystatechange.bind(this);
-			this.xhr.send(form);
+			this.xhr.send(form_data);
 		},
 		// While loading and sending data.
 		onprogress: function(event) {
 			console.log("Upload#onprogress", event);
 			var position = event.position, total = event.total;
 			this.position = position;
-			this.field.upload_progress(position, total);
+			this.target.upload_progress(position, total);
 			this.manager.upload_progress(this);
 		},
 		// When the request has successfully completed.
@@ -60,7 +63,14 @@ Spontaneous.UploadManager = (function($, S) {
 			this.failure_count++;
 			this.manager.upload_failed(this);
 		}
-	}
+	});
+	var WrapUpload = new JS.Class(Upload, {
+		start: function() {
+			var form = new FormData();
+			form.append('file', this.file);
+			this.post("/@spontaneous/file/wrap/"+this.target.id(), form);
+		}
+	});
 	var UploadManager = {
 		init: function(status_bar) {
 			this.status_bar = status_bar;
@@ -73,8 +83,19 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		// call to append call for image replacement to queue
 		replace: function(field, file) {
-			this.pending.push(new Upload(field, file));
+			this.pending.push(new Upload(this, field, file));
 			console.log("UploadManager#add", field, file, this.pending);
+			if (!this.current) {
+				this.next();
+			}
+		},
+		// call to wrap files
+		wrap: function(slot, files) {
+			for (var i = 0, ii = files.length; i < ii; i++) {
+				var file = files[i];
+				var upload = new WrapUpload(this, slot, file);
+				this.pending.push(upload);
+			}
 			if (!this.current) {
 				this.next();
 			}
@@ -98,7 +119,7 @@ Spontaneous.UploadManager = (function($, S) {
 			}
 			this.init_progress_bar();
 			this.current = this.pending.pop();
-			this.current.start(this);
+			this.current.start();
 		},
 		finished: function() {
 			this.completed = [];
@@ -155,7 +176,7 @@ Spontaneous.UploadManager = (function($, S) {
 				console.warn("UploadManager#upload_complete", "completed upload does not match current")
 			}
 			this.completed.push(this.current);
-			this.current.field.set_value(result);
+			this.current.target.upload_complete(result);
 			this.current = null;
 			console.log("UploadManager#upload_complete", result, this.pending, this.completed)
 			this.next();
