@@ -3,6 +3,9 @@ console.log('Loading Content...')
 Spontaneous.Content = (function($, S) {
 
 	return {
+		id: function() {
+			return this.content.id;
+		},
 		type: function() {
 			if (!this._type) {
 				this._type = S.Types.type(this.content.type);
@@ -36,7 +39,7 @@ Spontaneous.Content = (function($, S) {
 						type_class = Spontaneous.FieldTypes.StringField;
 					}
 					var field = new type_class(this, f);
-					field.add_listener('value', this.field_updated.bind(this, field));
+					// field.add_listener('value', this.field_updated.bind(this, field));
 					fields[f.name] = field;
 				};
 				this._fields = fields;

@@ -1,4 +1,4 @@
 #!/bin/sh
 
-sudo ipfw pipe 1 config bw 16KByte/s
+sudo ipfw pipe 1 config bw ${1}KByte/s
 sudo ipfw add 1 pipe 1 dst-port 9001

@@ -14,13 +14,15 @@ Spontaneous.UploadManager = (function($, S) {
 	};
 
 	Upload.prototype = {
+		// only for direct image replacement
 		start: function(manager) {
 			this.manager = manager;
 			var form = new FormData();
 			form.append('file', this.file);
+			form.append('field', this.field.name);
 			this.xhr = new XMLHttpRequest();
 			this.upload = this.xhr.upload;
-			this.xhr.open("POST", "/@spontaneous/upload/"+this.id, true);
+			this.xhr.open("POST", "/@spontaneous/file/replace/"+this.field.content.id(), true);
 			this.upload.onprogress = this.onprogress.bind(this);
 			this.upload.onload = this.onload.bind(this);
 			this.upload.onloadend = this.onloadend.bind(this);
@@ -143,9 +145,8 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		upload_progress: function(upload) {
 			if (upload !== this.current) {
-				console.warn("UploadManager#upload_complete", "completed upload does not match current")
+				console.warn("UploadManager#upload_progress", "completed upload does not match current")
 			}
-			// console.log("UploadManager#upload_progress", upload.file.fileName, position, total, (position/total))
 			this.update_progress_bars();
 		},
 		upload_complete: function(upload, result) {

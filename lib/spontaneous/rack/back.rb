@@ -114,6 +114,8 @@ module Spontaneous
           file = params['file']
           field = content.fields[params['field']]
           media_file = Spontaneous::Media.upload_path(file[:filename])
+          FileUtils.mkdir_p(File.dirname(media_file))
+          FileUtils.mv(file[:tempfile].path, media_file)
           field.unprocessed_value = media_file
           content.save
           json({ :id => content.id, :src => field.src})

@@ -5,6 +5,7 @@ Spontaneous.FieldTypes = {};
 Spontaneous.FieldTypes.StringField = (function($, S) {
 	var dom = S.Dom;
 	var StringField = function(owner, data) {
+		this.content = owner;
 		this.name = data.name;
 		var content_type = owner.type();
 		this.type = content_type.field_prototypes[this.name];
@@ -66,6 +67,7 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 Spontaneous.FieldTypes.ImageField = (function($, S) {
 	var dom = S.Dom;
 	var ImageField = function(owner, data) {
+		this.content = owner;
 		this.name = data.name;
 		var content_type = owner.type();
 		this.type = content_type.field_prototypes[this.name];
@@ -143,7 +145,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return true;
 		},
 		set_value: function(values) {
-			this.set('value', values.path);
+			this.set('value', values.src);
 			if (this.image) {
 				this.image.attr('src', values.src);
 			}
