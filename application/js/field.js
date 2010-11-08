@@ -85,10 +85,8 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			}
 			img.load(function() {
 				var r = this.width/this.height, $this = $(this), h = $this.height(), dh = 0;
-				if (r >= 1) { // landscape -- fit image vertically
-					if (h < dim) {
-						var dh = (dim - h)/2;
-					}
+				if (r >= 1 && h < dim) { // landscape -- fit image vertically
+					var dh = (dim - h)/2;
 				}
 				$this.css('top', (dh) + 'px');
 			});
