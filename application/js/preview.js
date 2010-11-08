@@ -5,7 +5,9 @@ Spontaneous.Preview = (function($, S) {
 	var click_param = function() {
 		return "?__click="+(++goto_id);
 	};
-	var preview = $.extend({}, Spontaneous.Properties(), {
+	var Preview = new JS.Singleton({
+		include: Spontaneous.Properties,
+
 		element: function() {
 			return wrap;
 		},
@@ -41,7 +43,7 @@ Spontaneous.Preview = (function($, S) {
 			this.iframe.show();
 		}
 	});
-	return preview;
+	return Preview;
 })(jQuery, Spontaneous);
 
 

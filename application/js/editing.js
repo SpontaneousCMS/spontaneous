@@ -3,7 +3,9 @@ console.log('Loading Editing Interface...')
 Spontaneous.Editing = (function($, S) {
 	var dom = S.Dom, Page = S.Page;
 
-	var editing = $.extend({}, Spontaneous.Properties(), {
+	var Editing = new JS.Singleton({
+		include: Spontaneous.Properties,
+
 		init: function(container) {
 			this.container = $(dom.div, {'id' : 'data_pane'});
 			this.container.hide();
@@ -30,5 +32,5 @@ Spontaneous.Editing = (function($, S) {
 			this.container.show();
 		}
 	});
-	return editing;
+	return Editing;
 })(jQuery, Spontaneous);

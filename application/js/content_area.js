@@ -2,7 +2,9 @@ console.log('Loading Content Area...')
 
 Spontaneous.ContentArea = (function($, S) {
 	var dom = S.Dom;
-	var content_area = $.extend({}, Spontaneous.Properties(), {
+	var ContentArea = new JS.Singleton({
+		include: Spontaneous.Properties,
+
 		wrap: null,
 		preview: null,
 		editing: null,
@@ -16,11 +18,11 @@ Spontaneous.ContentArea = (function($, S) {
 		},
 
 		location_changed: function(location) {
+			console.log('>>>>>>>>>>> Location Changed', location)
 			this.goto(location);
 		},
 		display: function(mode) {
 			this.mode = mode;
-			// this.wrap.find('> visible').hide();
 			this.current().display(S.Location.location());
 		},
 		current: function() {
@@ -35,10 +37,9 @@ Spontaneous.ContentArea = (function($, S) {
 			}
 		},
 		goto: function(page) {
-			// this.set('location', page);
 			this.current().goto(page);
 		}
 	});
-	return content_area;
+	return ContentArea;
 })(jQuery, Spontaneous);
 

@@ -2,8 +2,8 @@ console.log("Loading Location...")
 
 Spontaneous.Location = (function($, S) {
 	var ajax = S.Ajax;
-	var location = $.extend({}, Spontaneous.Properties(), {
-
+	var Location = new JS.Singleton({
+		include: Spontaneous.Properties,
 		init: function(callback) {
 			var complete = (function(location) {
 				return function() {
@@ -74,7 +74,7 @@ Spontaneous.Location = (function($, S) {
 			return path;
 		}
 	});
-	return location;
+	return Location;
 })(jQuery, Spontaneous);
 
 

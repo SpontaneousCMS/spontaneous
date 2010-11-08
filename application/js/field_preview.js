@@ -35,7 +35,7 @@ Spontaneous.FieldPreview = (function($, S) {
 		text_fields: function() {
 			var tf = [], ff = this.fields();
 			$.each(ff, function(i, f) {
-				// console.log("FieldPreview#text_fields", f, f.is_image)
+				console.log("FieldPreview#text_fields", f, f.is_image)
 				if (!f.is_image()) {
 					tf.push(f);
 				}

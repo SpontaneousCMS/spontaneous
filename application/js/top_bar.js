@@ -106,7 +106,8 @@ Spontaneous.TopBar = (function($, S) {
 		}
 	}
 
-	var top_bar = $.extend({}, S.Properties(), {
+	var TopBar = new JS.Singleton({
+		include: Spontaneous.Properties,
 		location: "/",
 		panel: function() {
 			this.wrap = $(dom.div, {'id':'top'});
@@ -174,7 +175,7 @@ Spontaneous.TopBar = (function($, S) {
 			}
 		}
 	});
-	return top_bar;
+	return TopBar;
 })(jQuery, Spontaneous);
 
 

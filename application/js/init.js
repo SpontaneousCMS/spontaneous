@@ -1,6 +1,5 @@
 console.log("Loading Init...");
 
-var __init_loaded = false;
 
 Spontaneous.Init = (function($, S) {
 	with (Spontaneous) {
