@@ -6,7 +6,7 @@ Spontaneous.FieldPreview = (function($, S) {
 	var FieldPreview = function(content, wrap_id) {
 		this.content = content;
 		this.wrap_id = wrap_id;
-		console.log('FieldPreview#new', content)
+		// console.log('FieldPreview#new', content)
 	};
 
 	FieldPreview.prototype = {
@@ -15,7 +15,7 @@ Spontaneous.FieldPreview = (function($, S) {
 		},
 		panel: function() {
 			var wrapper = $(dom.div, {'id':this.wrap_id, 'class':'fields-preview ' + this.depth_class()});
-			console.log('FieldPreview#panel', this.text_fields(), this.image_fields());
+			// console.log('FieldPreview#panel', this.text_fields(), this.image_fields());
 			wrapper.append(this.fields_panel(this.text_fields(), 'text'));
 			wrapper.append(this.fields_panel(this.image_fields(), 'image'));
 			return wrapper;
@@ -26,6 +26,7 @@ Spontaneous.FieldPreview = (function($, S) {
 				var li = $(dom.li);
 				var name = $(dom.div, {'class':'name'}).text(field.title);
 				var value = $(dom.div, {'class':'value'}).html(field.preview());
+				field.activate(value);
 				li.append(name).append(value);
 				wrapper.append(li);
 			});
@@ -34,7 +35,7 @@ Spontaneous.FieldPreview = (function($, S) {
 		text_fields: function() {
 			var tf = [], ff = this.fields();
 			$.each(ff, function(i, f) {
-				console.log("FieldPreview#text_fields", f, f.is_image)
+				// console.log("FieldPreview#text_fields", f, f.is_image)
 				if (!f.is_image()) {
 					tf.push(f);
 				}

@@ -124,12 +124,17 @@ module Spontaneous
 
 
         post '/add/:id/:type_name' do
+          position = 0
           content = Content[params[:id]]
           type = params[:type_name].constantize
           instance = type.new
-          content.insert(0, instance)
+          content.insert(position, instance)
+          p instance.container
           content.save
-          json(instance)
+          json({
+            :position => position,
+            :entry => instance.entry.to_hash
+          })
         end
 
         get '/static/*' do

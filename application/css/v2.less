@@ -1,7 +1,15 @@
 
 @action: #10b2fe;
+@action_r: 16;
+@action_g: 178;
+@action_b: 254;
+
 @editing: #42AB06;
+
 @highlight: #FF6C03;
+@highlight_r: 255;
+@highlight_g: 108;
+@highlight_b: 3;
 
 @content-font-family:  "HelveticaNeue", "Helvetica Neue";
 @headline-font-family:  "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue";
@@ -440,7 +448,7 @@ a {
 				border: solid 2px @action;
 			}
 			.image-drop.uploading {
-				background-color: rgba(100, 100, 100, .7);
+				background-color: rgba(@highlight_r, @highlight_g, @highlight_b, .7);
 			}
 			img {
 				//.rounded;

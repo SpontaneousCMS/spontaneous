@@ -7,7 +7,7 @@ Spontaneous.SlotContainer = (function($, S) {
 		this.content = content;
 		this.wrap_id = wrap_id;
 		this.slot_content_container = $(dom.div);
-		console.log('SlotContainer#new', content);
+		// console.log('SlotContainer#new', content);
 	};
 
 	SlotContainer.prototype = {
@@ -38,7 +38,7 @@ Spontaneous.SlotContainer = (function($, S) {
 		activate: function(slot_index) {
 			var slot = this.slots()[slot_index];
 			if (slot === this._active_slot) { return; }
-			console.log("SlotContainer#activate", slot_index);
+			// console.log("SlotContainer#activate", slot_index);
 			$('li', this.tab_bar()).removeClass('active');
 			$('li:nth-child('+(slot_index+1)+')', this.tab_bar()).addClass('active')
 			slot.activate();
@@ -49,7 +49,7 @@ Spontaneous.SlotContainer = (function($, S) {
 				return [];
 			}
 			if (!this._slots) {
-				console.log("SlotContainer#slots", this.content.entries);
+				// console.log("SlotContainer#slots", this.content.entries);
 				var _slots = [], container = this.slot_content_container;
 				var f = function(i, slot) {
 					_slots.push(new Spontaneous.Slot(slot, container))

@@ -71,19 +71,20 @@ Spontaneous.Content = (function($, S) {
 			if (!this._entries) {
 				var _entries = [];
 				for (var i = 0, ee = this.content.entries, ii = ee.length; i < ii; i++) {
-					var entry = ee[i];//new Entry(ee[i]);
-					// console.log("Content#entries", entry);
-					var entry_class = Spontaneous.Entry;
-					if (entry.is_page) { 
-						entry_class = Spontaneous.PageEntry;
-					}
-					_entries.push(new entry_class(entry, this));
+					_entries.push(this.wrap_entry(ee[i]));
 				}
 				this._entries = _entries;
 			}
 			return this._entries;
 		},
 
+		wrap_entry: function(entry) {
+			var entry_class = Spontaneous.Entry;
+			if (entry.is_page) { 
+				entry_class = Spontaneous.PageEntry;
+			}
+			return new entry_class(entry, this);
+		},
 		allowed_types: function() {
 			return this.type().allowed_types();
 		},
@@ -96,8 +97,20 @@ Spontaneous.Content = (function($, S) {
 			return 'depth-'+this.depth();
 		},
 
-		add_entry: function(type) {
-			console.log('Content.add_entry', this.content, type.type);
+		add_entry: function(type, position, callback) {
+			console.log('Content.add_entry', this.content, type.type, position);
+			Spontaneous.Ajax.post(['/add', this.content.id, type.type].join('/'), {}, this, function(result) {
+				this.entry_added(result, callback);
+			});
+		}, 
+
+		entry_added: function(result, callback) {
+			console.log("Content.entry_added", result)
+			var position = result.position, e = result.entry, entry = this.wrap_entry(e);
+			this.content.entries.splice(position, 0, e);
+			this._entries.splice(position, 0, entry);
+			callback(entry, position);
 		}
+
 	};
 })(jQuery, Spontaneous);

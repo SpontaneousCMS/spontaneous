@@ -6,7 +6,6 @@ Spontaneous.Slot = (function($, S) {
 	var Slot = function(content, dom_container) {
 		this.content = content;
 		this.dom_container = dom_container;
-		this.id = content.id;
 	};
 
 	Slot.prototype = $.extend({}, Spontaneous.Content, {
@@ -31,7 +30,7 @@ Spontaneous.Slot = (function($, S) {
 				var _slot = this;
 				$.each(allowed, function(i, type) {
 					var add_allowed = function(type) {
-						this.add_content(type);
+						this.add_content(type, 0);
 					}.bind(_slot, type);
 					var a = $(dom.a).click(add_allowed).text(type.title);
 					allowed_bar.append(a)
@@ -39,21 +38,43 @@ Spontaneous.Slot = (function($, S) {
 				allowed_bar.append($(dom.span, {'class':'down'}));
 				panel.append(allowed_bar);
 				var entries = $(dom.div, {'class':'slot-entries'});
-				panel.append();
+				// panel.append();
 				for (var i = 0, ee = this.entries(), ii = ee.length;i < ii; i++) {
 					var entry = ee[i];
-					entries.append(entry.panel());
+					entries.append(this.claim_entry(entry.panel()));
 				}
 				panel.append(entries);
 				panel.hide();
 				this.dom_container.append(panel)
 				this._panel = panel;
+				this._entry_container = entries;
 			}
 			return this._panel;
 		},
-		add_content: function(content_type) {
-			console.log("Slot#add_content", content_type)
-			this.add_entry(content_type);
+
+		claim_entry: function(entry) {
+			return entry.addClass(this.entry_class());
+		},
+
+		entry_class: function() {
+			return 'entry-'+this.id();
+		},
+
+		add_content: function(content_type, position) {
+			// this.entry_wrappers().fadeTo(100, 0.5);
+			this.add_entry(content_type, position, function(entry, position) {
+				var w = this.entry_wrappers(), e = this.claim_entry(entry.panel()), h;
+				if (w.length > 0) {
+					this.entry_wrappers().slice(position, position+1).before(e);
+				} else {
+					this._entry_container.append(e);
+				}
+				e.hide().slideDown(300);
+			}.bind(this));
+		},
+
+		entry_wrappers: function() {
+			return this._entry_container.find('> .'+this.entry_class())
 		}
 	});
 

@@ -64,6 +64,7 @@ module Spontaneous::Plugins
 
 
       def insert_page(index, child_page)
+        child_page.container = self
         if page
           child_page.depth = page.depth + 1
           page.children << child_page

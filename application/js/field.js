@@ -9,7 +9,7 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		this.name = data.name;
 		var content_type = owner.type();
 		this.type = content_type.field_prototypes[this.name];
-		console.log("StringField#new", this.type);
+		// console.log("StringField#new", this.type);
 		this.title = this.type.title;
 		this.update(data);
 	};
@@ -50,11 +50,18 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			this.set('unprocessed_value', values.unprocessed_value);
 		},
 		preview: function() {
-			return this.get('value');
+			return this.get('value')
+		},
+		activate: function(el) {
+			el.find('a[href^="/"]').click(function() { 
+				S.Location.load_path($(this).attr('href'));
+				return false;
+			});
 		},
 		value: function() {
 			return this.get('value');
 		},
+
 		is_image: function() {
 			return false;
 		}
@@ -73,7 +80,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		this.type = content_type.field_prototypes[this.name];
 		this.title = this.type.title;
 		this.update(data);
-		console.log("ImageField#new", this.name, this.get('value'));
+		// console.log("ImageField#new", this.name, this.get('value'));
 	};
 	ImageField.prototype = $.extend({}, Spontaneous.FieldTypes.StringField.prototype, {
 		preview: function() {

@@ -248,7 +248,11 @@ class BackTest < Test::Unit::TestCase
       @home.in_progress.entries.length.should == current_count+1
       @home.in_progress.entries.first.id.should_not == first_id
       @home.in_progress.entries.first.class.name.should == "ProjectImage"
-      last_response.body.should == @home.in_progress.entries.first.to_json
+      required_response = {
+        :position => 0,
+        :entry => @home.in_progress.entries.first.to_hash
+      }
+      last_response.body.json.should == required_response.to_hash
     end
   end
 end

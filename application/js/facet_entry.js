@@ -6,12 +6,12 @@ Spontaneous.Entry = (function($, S) {
 	var Entry = function(content, container) {
 		this.content = content;
 		this.container = container;
-		console.log('FacetEntry#new', content, content.depth);
+		// console.log('FacetEntry#new', content, content.depth);
 	};
 	Entry.prototype = $.extend({}, Spontaneous.Content, {
 		save: function(form) {
 			Spontaneous.Spin.start();
-			console.log('saving', this.id, $(form).serialize())
+			// console.log('saving', this.id, $(form).serialize())
 			Spontaneous.Ajax.post('/'+this.model_name+'/'+this.id + '/save', $(form).serialize(), this, this.saved);
 			return false;
 		},
@@ -24,7 +24,7 @@ Spontaneous.Entry = (function($, S) {
 			var entry = $(dom.div, {'class':'entry'});
 			var fields = new Spontaneous.FieldPreview(this, '');
 			entry.append(fields.panel());
-			console.log("Entry#panel", this.entries())
+			// console.log("Entry#panel", this.entries())
 			var slot_container = new Spontaneous.SlotContainer(this.content);
 			wrapper.append(entry);
 			wrapper.append(slot_container.panel());
