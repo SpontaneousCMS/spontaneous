@@ -71,7 +71,8 @@ Spontaneous.UploadManager = (function($, S) {
 			this.updater = null;
 			// this.init_progress_bar();
 		},
-		add: function(field, file) {
+		// call to append call for image replacement to queue
+		replace: function(field, file) {
 			this.pending.push(new Upload(field, file));
 			console.log("UploadManager#add", field, file, this.pending);
 			if (!this.current) {

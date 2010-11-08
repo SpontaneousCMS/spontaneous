@@ -116,12 +116,14 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				var files = event.dataTransfer.files;
 				if (files.length > 0) {
 					var file = files[0];
-					S.UploadManager.add(this, file);
+					S.UploadManager.replace(this, file);
 				}
 				return false;
 			}.bind(this);
 
 			var drag_enter = function(event) {
+				// var files = event.originalEvent.dataTransfer.files;
+				// console.log(event.originalEvent.dataTransfer, files)
 				$(this).addClass('drop-active');
 				event.stopPropagation();
 				event.preventDefault();

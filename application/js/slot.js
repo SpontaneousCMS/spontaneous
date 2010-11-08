@@ -61,7 +61,6 @@ Spontaneous.Slot = (function($, S) {
 		},
 
 		add_content: function(content_type, position) {
-			// this.entry_wrappers().fadeTo(100, 0.5);
 			this.add_entry(content_type, position, function(entry, position) {
 				var w = this.entry_wrappers(), e = this.claim_entry(entry.panel()), h;
 				if (w.length > 0) {
