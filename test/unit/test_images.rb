@@ -92,7 +92,7 @@ class ImagesTest < Test::Unit::TestCase
     end
 
     should "serialise attributes" do
-      serialised = @image.serialize
+      serialised = @image.serialize[:attributes]
       [:preview, :thumbnail, :icon, :tall].each do |size|
         serialised.key?(size).should be_true
         serialised[size][:src].should == "/media/00234/0010/rose.#{size}.jpg"

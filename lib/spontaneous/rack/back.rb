@@ -101,12 +101,22 @@ module Spontaneous
         end
 
 
-        post '/upload/:id' do
+        post '/file/upload/:id' do
           file = params['file']
           media_file = Spontaneous::Media.upload_path(file[:filename])
           FileUtils.mkdir_p(File.dirname(media_file))
           FileUtils.mv(file[:tempfile].path, media_file)
           json({ :id => params[:id], :src => Spontaneous::Media.to_urlpath(media_file), :path => media_file})
+        end
+
+        post '/file/replace/:id' do
+          content = Content[params[:id]]
+          file = params['file']
+          field = content.fields[params['field']]
+          media_file = Spontaneous::Media.upload_path(file[:filename])
+          field.unprocessed_value = media_file
+          content.save
+          json({ :id => content.id, :src => field.src})
         end
 
 

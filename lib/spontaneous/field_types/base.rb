@@ -24,18 +24,6 @@ module Spontaneous
         @prototype
       end
 
-      def self.define_attribute(name)
-        attribute_names.push(name.to_sym)
-      end
-
-      def self.attribute_names
-        @attribute_names ||= []
-      end
-
-      def self.has_attribute?(name)
-        name = name.to_s.gsub(/=$/, '').to_sym
-        attribute_names.include?(name)
-      end
 
       attr_accessor :owner, :name, :unprocessed_value
 
@@ -89,18 +77,17 @@ module Spontaneous
       end
 
       def serialize
-        # p self.class.attribute_names
-        # p serialized_attributes
-        serialized_attributes.merge({
+        {
           :name => name,
           :unprocessed_value => unprocessed_value,
-          :processed_value => processed_value
-        })
+          :processed_value => processed_value,
+          :attributes => serialized_attributes
+        }
       end
 
 
       def serialized_attributes
-        self.class.attribute_names.inject({}) do |hash, attribute|
+        self.attributes.keys.inject({}) do |hash, attribute|
           hash[attribute] = attributes[attribute]
           hash
         end
@@ -110,8 +97,16 @@ module Spontaneous
         @attributes ||= {}
       end
 
+      def attributes=(attr)
+        @attributes = attr
+      end
+
       def attribute_set(attribute, value)
         attributes[attribute.to_sym] = value
+      end
+
+      def has_attribute?(attribute_name)
+        attributes.key?(attribute_name.to_sym)
       end
 
       def update(attributes={})
@@ -136,9 +131,6 @@ module Spontaneous
       def load(attributes={}, from_db=false)
         with_preprocessed_values(from_db) do
           attributes.each do |property, value|
-            if self.class.has_attribute?(property)
-              attribute_set(property, value)
-            end
             setter = "#{property}=".to_sym
             if respond_to?(setter)
               self.send(setter, value)
@@ -159,7 +151,7 @@ module Spontaneous
       end
 
       def method_missing(method_name, *args, &block)
-        if self.class.has_attribute?(method_name)
+        if self.has_attribute?(method_name)
           attribute_get(method_name)
         else
           super
@@ -168,6 +160,10 @@ module Spontaneous
 
       def set_unprocessed_value(value)
         @unprocessed_value = value
+      end
+
+      def inspect
+        %(#<#{self.class.name}:#{self.object_id} #{self.serialize.inspect}>)
       end
     end
   end

@@ -58,6 +58,11 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+      def reload
+        @field_set = nil
+        super
+      end
+
       def field_prototypes
         self.class.field_prototypes
       end

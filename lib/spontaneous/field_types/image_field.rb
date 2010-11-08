@@ -7,15 +7,12 @@ module Spontaneous
     class ImageField < Base
 
 
+
       def self.sizes(sizes={})
         @size_definitions = validate_sizes(sizes)
       end
 
       def self.validate_sizes(sizes)
-        define_attribute :original
-        sizes.keys.each do |key|
-          define_attribute(key)
-        end
         sizes
       end
 
@@ -77,6 +74,7 @@ module Spontaneous
       attr_reader  :src, :width, :height, :filesize
 
       def initialize(params={})
+        params ||= {}
         @src, @width, @height, @filesize = params[:src], params[:width], params[:height], params[:filesize]
       end
 

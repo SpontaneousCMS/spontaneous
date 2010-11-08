@@ -209,13 +209,31 @@ class BackTest < Test::Unit::TestCase
       Spontaneous::Media.stubs(:upload_index).returns(23)
     end
     should "create a file in a safe subdirectory of media/tmp" do
-      post "@spontaneous/upload/9723", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
+      post "@spontaneous/file/upload/9723", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
       assert_equal({
         :id => '9723',
-        :path => "/media/tmp/1288882153.23/rose.jpg"
+        :src => "/media/tmp/1288882153.23/rose.jpg",
+        :path => "#{Spontaneous.media_dir}/tmp/1288882153.23/rose.jpg"
       }.to_json, last_response.body)
+    end
+
+    should "replace values of fields immediately when required" do
+      @barakapoint.image.processed_value.should == ""
+      post "@spontaneous/file/replace/#{@barakapoint.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => 'image'
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      @barakapoint.reload
+      src = @barakapoint.image.src
+      src.should =~ /^\/media(.+)\/rose\.jpg$/
+      last_response.body.should == {
+        :id => @barakapoint.id,
+        :src => src
+      }.to_json
+      File.exist?(Media.to_filepath(src)).should be_true
+      get src
+      assert last_response.ok?
     end
   end
   context "adding entries" do
