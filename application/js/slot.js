@@ -3,17 +3,18 @@ console.log('Loading Slot...')
 Spontaneous.Slot = (function($, S) {
 	var dom = S.Dom;
 
-	var Slot = function(content, dom_container) {
-		this.content = content;
-		this.dom_container = dom_container;
-	};
+	var Slot = new JS.Class(Spontaneous.Content, {
 
-	Slot.prototype = $.extend({}, Spontaneous.Content, {
+		initialize: function(content, dom_container) {
+			this.callSuper(content);
+			this.dom_container = dom_container;
+		},
+
 		name: function() {
 			return this.content.name;
 		},
 		activate: function() {
-			console.log('Slot#activate', this.name());
+			// console.log('Slot#activate', this.name());
 			$('> .slot-content', this.dom_container).hide();
 			this.panel().show();
 		},

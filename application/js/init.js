@@ -3,10 +3,6 @@ console.log("Loading Init...");
 
 Spontaneous.Init = (function($, S) {
 	with (Spontaneous) {
-		Location.add_listener('location', TopBar, 'location_changed');
-		Location.add_listener('location', ContentArea, 'location_changed');
-
-		TopBar.add_listener('mode',       ContentArea, 'display');
 
 		//
 		// Preview.add_listener('location', Location, 'update');
@@ -21,13 +17,20 @@ Spontaneous.Init = (function($, S) {
 
 		return function() {
 			Types.init();
+
+			Location.add_listener('location', TopBar, 'location_changed');
+			Location.add_listener('location', ContentArea, 'location_changed');
+
+			TopBar.add_listener('mode',       ContentArea, 'display');
+
+			Dom.body().append(TopBar.panel());
+			Dom.body().append(ContentArea.init());
+			Dom.body().append(StatusBar.init());
+
 			Location.init(function() {
-				Dom.body().append(TopBar.panel());
-				Dom.body().append(ContentArea.init());
-				Dom.body().append(StatusBar.init());
 				TopBar.init();
 			});
-			
+
 			// Spontaneous.Spin = SideBar.spinner();
 		};
 	}

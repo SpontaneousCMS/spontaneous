@@ -3,12 +3,13 @@ console.log('Loading Entry...')
 Spontaneous.Entry = (function($, S) {
 	var dom = S.Dom;
 
-	var Entry = function(content, container) {
-		this.content = content;
-		this.container = container;
-		// console.log('FacetEntry#new', content, content.depth);
-	};
-	Entry.prototype = $.extend({}, Spontaneous.Content, {
+	var Entry = new JS.Class(Spontaneous.Content, {
+		initialize: function(content, container) {
+			this.callSuper(content);
+			// this.content = content;
+			this.container = container;
+			// console.log('FacetEntry#new', content, content.depth);
+		},
 		save: function(form) {
 			Spontaneous.Spin.start();
 			// console.log('saving', this.id, $(form).serialize())

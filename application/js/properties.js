@@ -1,6 +1,6 @@
 Spontaneous.Properties = (function($, S) {
 	return new JS.Module({
-		_props_debug: true,
+		_props_debug: false,
 		_props_properties: function() {
 			if (!this._props_property_store) { this._props_property_store = {}; }
 			return this._props_property_store;
@@ -10,7 +10,6 @@ Spontaneous.Properties = (function($, S) {
 			return this._props_listener_store;
 		},
 		_props_notify_changed: function(property_names) {
-			console.log('Properties.notify_changed', property_names)
 			for (var c = 0, cc = property_names.length; c < cc; c++) {
 				var property_name = property_names[c], property_value = this._props_properties()[property_name];
 				if (this._props_debug) { console.log("Properties: notify change:", property_name, property_value) }

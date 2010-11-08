@@ -3,15 +3,6 @@ console.log('Loading Page...')
 Spontaneous.Page = (function($, S) {
 	var dom = S.Dom, Slot = S.Slot;
 
-	var URLBar = function(page) {
-		this.page = page;
-	};
-	URLBar.prototype = {
-		panel: function() {
-			this.panel = $(dom.div, {'id': 'url-panel'}).text("url edit: " + this.page.url)
-			return this.panel;
-		}
-	};
 	var FunctionBar = function(page) {
 		this.page = page;
 	};
@@ -23,12 +14,12 @@ Spontaneous.Page = (function($, S) {
 			return this.panel;
 		}
 	};
-	var Page = function(content) {
-		this.content = content;
-		this.path = content.path;
-		this.entries = content.entries;
-	};
-	Page.prototype = $.extend({}, Spontaneous.Content, {
+	var Page = new JS.Class(Spontaneous.Content, {
+		initialize: function(content) {
+			this.callSuper(content);
+			this.path = content.path;
+			this.entries = content.entries;
+		},
 		title: function() {
 			return this.fields().title.value();
 		},

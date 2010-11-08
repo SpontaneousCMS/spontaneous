@@ -2,7 +2,10 @@ console.log('Loading Content...')
 
 Spontaneous.Content = (function($, S) {
 
-	return {
+	var Content = new JS.Class({
+		initialize: function(content) {
+			this.content = content;
+		},
 		id: function() {
 			return this.content.id;
 		},
@@ -112,5 +115,7 @@ Spontaneous.Content = (function($, S) {
 			callback(entry, position);
 		}
 
-	};
+	});
+
+	return Content;
 })(jQuery, Spontaneous);

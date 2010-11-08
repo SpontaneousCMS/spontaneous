@@ -18,7 +18,6 @@ Spontaneous.ContentArea = (function($, S) {
 		},
 
 		location_changed: function(location) {
-			console.log('>>>>>>>>>>> Location Changed', location)
 			this.goto(location);
 		},
 		display: function(mode) {

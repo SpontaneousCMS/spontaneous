@@ -3,13 +3,13 @@ console.log('Loading FieldPreview...')
 Spontaneous.FieldPreview = (function($, S) {
 	var dom = S.Dom;
 
-	var FieldPreview = function(content, wrap_id) {
-		this.content = content;
-		this.wrap_id = wrap_id;
-		// console.log('FieldPreview#new', content)
-	};
+	var FieldPreview = new JS.Class({
+		initialize: function(content, wrap_id) {
+			this.content = content;
+			this.wrap_id = wrap_id;
+			// console.log('FieldPreview#new', content)
+		},
 
-	FieldPreview.prototype = {
 		depth_class: function() {
 			return 'depth-'+this.content.depth();
 		},
@@ -35,7 +35,7 @@ Spontaneous.FieldPreview = (function($, S) {
 		text_fields: function() {
 			var tf = [], ff = this.fields();
 			$.each(ff, function(i, f) {
-				console.log("FieldPreview#text_fields", f, f.is_image)
+				// console.log("FieldPreview#text_fields", f, f.is_image)
 				if (!f.is_image()) {
 					tf.push(f);
 				}
@@ -54,6 +54,6 @@ Spontaneous.FieldPreview = (function($, S) {
 		fields: function() {
 			return this.content.fields();
 		}
-	};
+	});
 	return FieldPreview;
 })(jQuery, Spontaneous);

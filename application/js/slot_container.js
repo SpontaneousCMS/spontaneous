@@ -3,14 +3,14 @@ console.log('Loading SlotContainer...')
 Spontaneous.SlotContainer = (function($, S) {
 	var dom = S.Dom;
 
-	var SlotContainer = function(content, wrap_id) {
-		this.content = content;
-		this.wrap_id = wrap_id;
-		this.slot_content_container = $(dom.div);
-		// console.log('SlotContainer#new', content);
-	};
+	var SlotContainer = new JS.Class({
 
-	SlotContainer.prototype = {
+		initialize: function(content, wrap_id) {
+			this.content = content;
+			this.wrap_id = wrap_id;
+			this.slot_content_container = $(dom.div);
+		},
+
 		panel: function() {
 			var wrapper = $(dom.div, {'id':this.wrap_id, 'class':'slots'});
 			wrapper.append(this.tab_bar());
@@ -59,7 +59,7 @@ Spontaneous.SlotContainer = (function($, S) {
 			} 
 			return this._slots;
 		}
-	};
+	});
 	return SlotContainer;
 })(jQuery, Spontaneous);
 

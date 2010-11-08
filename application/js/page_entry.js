@@ -3,11 +3,8 @@ console.log('Loading PageEntry...')
 Spontaneous.PageEntry = (function($, S) {
 	var dom = S.Dom;
 
-	var PageEntry = function(content, container) {
-		this.content = content;
-		this.container = container;
-	};
-	PageEntry.prototype = $.extend({}, S.Entry.prototype, {
+	var PageEntry = new JS.Class(Spontaneous.Entry, {
+		// will eventually overwrite panel()
 	});
 	return PageEntry;
 })(jQuery, Spontaneous);

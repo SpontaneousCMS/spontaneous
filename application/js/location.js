@@ -5,12 +5,10 @@ Spontaneous.Location = (function($, S) {
 	var Location = new JS.Singleton({
 		include: Spontaneous.Properties,
 		init: function(callback) {
-			var complete = (function(location) {
-				return function() {
-					callback();
-					location.location_loaded();
-				};
-			})(this);
+			var complete = function() {
+				callback();
+				this.location_loaded();
+			}.bind(this);
 			ajax.get('/map', this, complete);
 		},
 		load_map: function() {
