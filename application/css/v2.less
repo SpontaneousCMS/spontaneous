@@ -618,11 +618,11 @@ a {
 			.rounded-bottom;
 			.shadow;
 			position: absolute;
-			top: @title-bar-height;
-			left: 0px;
-			right: 0px;
+			top: @title-bar-height + 4;
+			left: 4px;
+			right: 4px;
 			// background-color: rgba(255, 255, 255, 0.8);
-			background-color: rgba(0, 0, 0, 0.8);
+			background-color: rgba(0, 0, 0, 0.9);
 			z-index: 10;
 			padding: @container-padding/2;
 			color: #fff;
@@ -630,6 +630,11 @@ a {
 				a {
 					.button;
 					background-color: #ccc;
+					padding-left: 16px;
+					padding-right: 16px;
+				}
+				a + a {
+					margin-left: 8px;
 				}
 				a.default {
 					background-color: @action;
