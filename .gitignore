@@ -3,3 +3,4 @@
 *.rbc
 .rake_tasks
 test/fixtures/example_application/public/media/*
+test/fixtures/media/*
