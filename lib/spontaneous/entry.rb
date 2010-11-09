@@ -35,6 +35,10 @@ module Spontaneous
       @entry_style_name = style_name.to_sym if style_name
     end
 
+    def destroy(root=true)
+      target.destroy(root)
+    end
+
     def target_id
       @target_id
     end

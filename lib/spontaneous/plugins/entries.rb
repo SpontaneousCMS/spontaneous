@@ -19,6 +19,31 @@ module Spontaneous::Plugins
         super
       end
 
+      def destroy(root=true)
+        @_destroy_root = root
+        super()
+      end
+
+      def before_destroy
+        if container && @_destroy_root
+          container.destroy_entry!(self.entry)
+        end
+        recursive_destroy
+        super
+      end
+
+      def recursive_destroy
+        entries.destroy
+      end
+
+      def destroy_entry!(entry)
+        entries.remove(entry)
+        # save the container because it won't be obvious to the caller
+        # that content other than the destroyed object will have been
+        # modified
+        self.save
+      end
+
       def content_depth
         depth
       end

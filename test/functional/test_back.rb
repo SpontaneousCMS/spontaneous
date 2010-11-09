@@ -256,8 +256,8 @@ class BackTest < Test::Unit::TestCase
       last_response.body.json.should == required_response
     end
   end
-  context "adding entries" do
-    should "work" do
+  context "Entries" do
+    should "be addable" do
       current_count = @home.in_progress.entries.length
       first_id = @home.in_progress.entries.first.id
       @home.in_progress.entries.first.class.name.should_not == "ProjectImage"
@@ -273,6 +273,14 @@ class BackTest < Test::Unit::TestCase
         :entry => @home.in_progress.entries.first.to_hash
       }
       last_response.body.json.should == required_response.to_hash
+    end
+    should "be removable" do
+      target = @home.in_progress.first
+      post "/@spontaneous/destroy/#{target.id}"
+      puts last_response.body
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      Content[target.id].should be_nil
     end
   end
 end

@@ -560,6 +560,8 @@ a {
 }
 
 
+@title-bar-height: 16px;
+
 #page-slots.slots .slot-entries {
 	padding-top: 32px;
 	
@@ -579,12 +581,67 @@ a {
 		margin-bottom: @container-padding;
 		background-color: #808080;
 		padding: 4px;
+		padding-top: @title-bar-height + 4px;
+		.title-bar {
+			.vertical-gradient(#808080+#111, #808080);
+			.rounded-top;
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 0;
+			height: @title-bar-height;
+			.actions {
+				.rounded-bottom;
+				background-color: rgba(0, 0, 0, 0.2);
+				position: absolute;
+				top: 0;
+				right: 8px;
+				a {
+					background: url('/@spontaneous/static/item-buttons.png') 0 0 no-repeat;
+					display: inline-block;
+					width: 15px;
+					height: 15px;
+					position: relative;
+					top: 4px;
+					cursor: pointer;
+					padding: 0 10px;
+				}
+				.delete {
+					background-position: -54px 0;
+				}
+				.delete:hover {
+					background-position: -54px -20px;
+				}
+			}
+		}
+		.dialogue {
+			.rounded-bottom;
+			.shadow;
+			position: absolute;
+			top: @title-bar-height;
+			left: 0px;
+			right: 0px;
+			// background-color: rgba(255, 255, 255, 0.8);
+			background-color: rgba(0, 0, 0, 0.8);
+			z-index: 10;
+			padding: @container-padding/2;
+			color: #fff;
+			.buttons {
+				a {
+					.button;
+					background-color: #ccc;
+				}
+				a.default {
+					background-color: @action;
+				}
+			}
+		}
 		.white-bg, .grey-bg {
 			.rounded;
 			position: absolute;
 			left: 0px;
 			right: 40%;
-			top: 0px;
+			top: @title-bar-height;
 			bottom: 0px;
 			margin: 4px;
 			background-color: #fff;
@@ -709,6 +766,7 @@ a {
 			}
 			.entry-wrap.depth-4 {
 				padding: 4px 4px;
+        padding-top: @title-bar-height + 4;
 				margin-left: 8px;
 				margin-right: 8px;
 				margin-bottom: 8px;

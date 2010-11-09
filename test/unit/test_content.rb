@@ -124,7 +124,46 @@ class ContentTest < Test::Unit::TestCase
       a.fishes.should == b
       b.cows.should == c
     end
+
   end
+  context "Deletion" do
+    setup do
+      Content.delete
+      @a = Content.new(:label => 'a')
+      @b = Content.new(:label => 'b')
+      @c = Content.new(:label => 'c')
+      @d = Content.new(:label => 'd')
+      @a << @b
+      @a << @d
+      @b << @c
+      @a.save
+      @b.save
+      @c.save
+      @d.save
+      @a = Content[@a.id]
+      @b = Content[@b.id]
+      @c = Content[@c.id]
+      @d = Content[@d.id]
+      Content.count.should == 4
+      @ids = [@a, @b, @c, @d].map {|c| c.id }
+    end
+    should "recurse all the way" do
+      @a.destroy
+      Content.count.should == 0
+    end
+
+    should "recurse" do
+      @b.destroy
+      Content.count.should == 2
+      @a.reload
+      @a.entries.length.should == 1
+      @a.entries.first.should == @d.reload
+      Content.all.map { |c| c.id }.should == [@a, @d].map { |c| c.id }
+    end
+
+
+  end
+
 
   context "Content" do
     setup do

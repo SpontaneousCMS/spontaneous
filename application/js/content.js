@@ -113,8 +113,15 @@ Spontaneous.Content = (function($, S) {
 			this.content.entries.splice(position, 0, e);
 			this._entries.splice(position, 0, entry);
 			callback(entry, position);
-		}
+		},
 
+		destroy: function() {
+			console.log('Content.destroy', this.content.id);
+			Spontaneous.Ajax.post(['/destroy', this.content.id].join('/'), {}, this, this.destroyed);
+		},
+		destroyed: function() {
+
+		}
 	});
 
 	return Content;

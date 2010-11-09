@@ -65,6 +65,21 @@ module Spontaneous
     end
 
 
+    def destroy!
+      self.destroy
+      @owner.entry_modified!(nil)
+    end
+
+    def destroy
+      self.dup.each { |e| e.destroy(false) }
+    end
+
+    def remove(entry)
+      # entry.recursive_destroy
+      e = self.delete(entry)
+      @owner.entry_modified!(nil)
+    end
+
     def serialize
       self.map { |e| e.serialize }
     end

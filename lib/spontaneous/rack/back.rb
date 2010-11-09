@@ -156,6 +156,13 @@ module Spontaneous
           })
         end
 
+        post '/destroy/:id' do
+          content = Content[params[:id]]
+          p content
+          content.destroy
+          json({})
+        end
+
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)
         end
