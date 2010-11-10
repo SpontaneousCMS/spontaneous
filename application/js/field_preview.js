@@ -28,7 +28,7 @@ Spontaneous.FieldPreview = (function($, S) {
 				var name = $(dom.div, {'class':'name'}).text(field.title);
 				var value = $(dom.div, {'class':'value'}).html(field.preview());
 				field.activate(value);
-				field.add_listener('value', function(v) {$(this).html(v)}.bind(value));
+				field.add_listener('value', function(field, v) { $(this).html(field.preview()) }.bind(value, field));
 				li.append(name).append(value);
 				wrapper.append(li);
 			});

@@ -18,10 +18,25 @@ Spontaneous.EditDialogue = (function($, S) {
 		},
 		save: function() {
 			var values = this.form.serializeArray();
-			var data = new FormData()
+			var data = new FormData();
+			var size = 0;
 			$.each(values, function(i, v) {
+				console.log(v.name, v)
 				data.append(v.name, v.value);
+				// the size will only ever be approximate
+				size += (v.value.length + v.name.length);
 			});
+			$('input[type="file"]', this.form).each(function() {
+				var files = this.files;
+				if (files.length > 0) {
+					var file = files[0];
+					size += file.fileSize;
+					console.log($(this).attr('name'), file)
+					data.append($(this).attr('name'), file);
+				}
+			});
+			console.log('size', size);
+			data.fileSize = size;
 			Spontaneous.UploadManager.form(this, data);
 			return false;
 		},
@@ -58,11 +73,9 @@ Spontaneous.EditDialogue = (function($, S) {
 				var field = image_fields[i];
 				image_field_wrap.append(this.field_edit(field));
 			}
-
 			editing.append(image_field_wrap);
 			// activate the highlighting
 			$('input, textarea', editing).focus(function() {
-				console.log('focus', this)
 				$(this).parents('.field').first().addClass('focus');
 			}).blur(function() {
 				$(this).parents('.field').first().removeClass('focus');

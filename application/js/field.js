@@ -165,11 +165,26 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			if (this.width() > this.height()) {
 				wrap.addClass('landscape');
 			}
-			var img = $(dom.img, {'src':this.value()})
+			var onclick = function() {
+				input.trigger('click');
+				return false;
+			};
+			var img = $(dom.img, {'src':this.value()}).click(onclick);
+			var onchange = function() {
+				var files = this.files;
+				console.log('ImageField.onchange', this, files);
+
+				if (files.length > 0) {
+					var file = files[0], url = window.createBlobURL(file);
+					console.log(url)
+					img.attr('src', url);
+				}
+			}
+			var input = $(dom.input, {'type':'file', 'name':this.form_name(), 'accept':'image/*'}).change(onchange);
 			var actions = $(dom.div, {'class':'actions'});
-			var change = $(dom.a, {'class':'button change'}).text('Change');
+			var change = $(dom.a, {'class':'button change'}).text('Change').click(onclick);
 			var clear = $(dom.a, {'class':'button clear'}).text('Clear');
-			actions.append(change).append(clear);
+			actions.append(input).append(change).append(clear);
 			wrap.append(img).append(actions);
 			return wrap;
 		}

@@ -60,8 +60,16 @@ module Spontaneous
 
       # takes a path to a newly uploaded image in Spontaneous.media_dir
       def process(image_path)
-        return image_path unless File.exist?(image_path)
-        image_path = owner.make_media_file(image_path)
+        filename = nil
+        case image_path
+        when Hash
+          filename = image_path[:filename]
+          image_path = image_path[:tempfile].path
+        when String
+          return image_path unless File.exist?(image_path)
+        else
+        end
+        image_path = owner.make_media_file(image_path, filename)
         image = ImageProcessor.new(image_path)
         attribute_set(:original, image.serialize)
         self.class.size_definitions.each do |name, size|

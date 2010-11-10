@@ -23,8 +23,9 @@ module Spontaneous::Plugins
         Spontaneous::Site.working_revision.to_s.rjust(4, "0")
       end
 
-      def make_media_file(src_file)
-        media_filepath = media_filepath(File.basename(src_file))
+      def make_media_file(src_file, filename = nil)
+        filename ||= File.basename(src_file)
+        media_filepath = media_filepath(filename)
         FileUtils.mkdir_p(File.dirname(media_filepath))
         FileUtils.cp(src_file, media_filepath)
         media_filepath

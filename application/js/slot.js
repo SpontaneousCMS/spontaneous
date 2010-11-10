@@ -95,7 +95,6 @@ Spontaneous.Slot = (function($, S) {
 					scrollSpeed: 40,
 					containment: 'parent',
 					stop: function(event, ui) {
-						console.log("Sortable.stop", event, ui, this._entry_container.sortable('toArray'))
 						this.re_sort(ui.item);
 					}.bind(this)
 				})
@@ -109,7 +108,7 @@ Spontaneous.Slot = (function($, S) {
 		},
 		re_sort: function(item) {
 			var order = this._entry_container.sortable('toArray'), css_id = item.attr('id'), position = 0;
-			console.log('Slot.resort', item, order, id);
+			// console.log('Slot.resort', item, order, id);
 			for (var i = 0, ii = order.length; i < ii; i++) {
 				if (order[i] === css_id) { position = i; break; } 
 			}
@@ -118,13 +117,13 @@ Spontaneous.Slot = (function($, S) {
 			for (var i = 0, entries = this.entries(), ii = entries.length; i < ii; i++) {
 				if (entries[i].id() == id) { entry = entries[i]; break; }
 			}
-			console.log(position, id, entry);
+			// console.log(position, id, entry);
 			entry.reposition(position, function(entry) {
 				this.sorted(entry)
 			}.bind(this));
 		},
 		sorted: function(entry) {
-			console.log('Slot.sorted', entry);
+			// console.log('Slot.sorted', entry);
 		},
 		upload_complete: function(values) {
 			console.log('Slot.upload_complete', values);
