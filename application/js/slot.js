@@ -92,6 +92,8 @@ Spontaneous.Slot = (function($, S) {
 					axis:'y',
 					distance: 5,
 					tolerance: 'pointer',
+					scrollSpeed: 40,
+					containment: 'parent',
 					stop: function(event, ui) {
 						console.log("Sortable.stop", event, ui, this._entry_container.sortable('toArray'))
 						this.re_sort(ui.item);
