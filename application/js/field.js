@@ -169,7 +169,9 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				input.trigger('click');
 				return false;
 			};
-			var img = $(dom.img, {'src':this.value()}).click(onclick);
+			var src = this.value();
+			var img = $(dom.img, {'src':src}).click(onclick);
+			if (src == '') { img.addClass('empty'); }
 			var onchange = function() {
 				var files = this.files;
 				console.log('ImageField.onchange', this, files);
