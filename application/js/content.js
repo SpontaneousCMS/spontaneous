@@ -121,6 +121,16 @@ Spontaneous.Content = (function($, S) {
 		},
 		destroyed: function() {
 
+		},
+		reposition: function(position, callback) {
+			Spontaneous.Ajax.post(['/content', this.content.id, 'position', position].join('/'), {}, this, function() {
+				this.repositioned(callback);
+			}.bind(this));
+		},
+		repositioned: function(callback) {
+			if (typeof callback === 'function') {
+				callback(this);
+			}
 		}
 	});
 

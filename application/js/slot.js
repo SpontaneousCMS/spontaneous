@@ -84,8 +84,19 @@ Spontaneous.Slot = (function($, S) {
 				// panel.append();
 				for (var i = 0, ee = this.entries(), ii = ee.length;i < ii; i++) {
 					var entry = ee[i];
-					entries.append(this.claim_entry(entry.panel()));
+					entries.append(this.claim_entry(entry));
 				}
+				entries.sortable({
+					items:'> .'+this.entry_class(),
+					handle: '.title-bar',
+					axis:'y',
+					distance: 5,
+					tolerance: 'pointer',
+					stop: function(event, ui) {
+						console.log("Sortable.stop", event, ui, this._entry_container.sortable('toArray'))
+						this.re_sort(ui.item);
+					}.bind(this)
+				})
 				panel.append(entries);
 				panel.hide();
 				this.dom_container.append(panel)
@@ -94,7 +105,25 @@ Spontaneous.Slot = (function($, S) {
 			}
 			return this._panel;
 		},
+		re_sort: function(item) {
+			var order = this._entry_container.sortable('toArray'), css_id = item.attr('id'), position = 0;
+			console.log('Slot.resort', item, order, id);
+			for (var i = 0, ii = order.length; i < ii; i++) {
+				if (order[i] === css_id) { position = i; break; } 
+			}
+			var id = css_id.split('-')[1], entry;
 
+			for (var i = 0, entries = this.entries(), ii = entries.length; i < ii; i++) {
+				if (entries[i].id() == id) { entry = entries[i]; break; }
+			}
+			console.log(position, id, entry);
+			entry.reposition(position, function(entry) {
+				this.sorted(entry)
+			}.bind(this));
+		},
+		sorted: function(entry) {
+			console.log('Slot.sorted', entry);
+		},
 		upload_complete: function(values) {
 			console.log('Slot.upload_complete', values);
 			this.insert_entry(this.wrap_entry(values.entry), values.position);
@@ -103,18 +132,21 @@ Spontaneous.Slot = (function($, S) {
 			console.log('Slot.upload_progress', position, total);
 		},
 		claim_entry: function(entry) {
-			return entry.addClass(this.entry_class());
+			var div = entry.panel();
+			return div.attr('id', this.entry_id(entry)).addClass(this.entry_class());
 		},
-
+		entry_id: function(entry) {
+			return "entry-" + entry.id();
+		},
 		entry_class: function() {
-			return 'entry-'+this.id();
+			return 'container-'+this.id();
 		},
 
 		add_content: function(content_type, position) {
 			this.add_entry(content_type, position, this.insert_entry.bind(this));
 		},
 		insert_entry: function(entry, position) {
-			var w = this.entry_wrappers(), e = this.claim_entry(entry.panel()), h;
+			var w = this.entry_wrappers(), e = this.claim_entry(entry), h;
 			if (w.length > 0) {
 				this.entry_wrappers().slice(position, position+1).before(e);
 			} else {

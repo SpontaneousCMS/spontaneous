@@ -446,6 +446,10 @@ a {
 			}
 			.image-drop.drop-active {
 				border: solid 2px @action;
+				cursor: copy;
+			}
+			.image-drop.drop-invalid {
+				cursor: no-drop;
 			}
 			.image-drop.uploading {
 				background-color: rgba(@highlight_r, @highlight_g, @highlight_b, .7);
@@ -585,6 +589,7 @@ a {
 		.title-bar {
 			.vertical-gradient(#808080+#111, #808080);
 			.rounded-top;
+			cursor: ns-resize;
 			position: absolute;
 			left: 0;
 			right: 0;
@@ -803,6 +808,9 @@ a {
 				}
 			}
 		}
+	}
+	.entry-wrap.ui-sortable-helper {
+		.shadow;
 	}
 	.entry-wrap.depth-2 {
 		.entry {
