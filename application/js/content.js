@@ -31,7 +31,6 @@ Spontaneous.Content = (function($, S) {
 				for (var i = 0, ii = names.length; i < ii; i++) {
 					list.push(fields[names[i]]);
 				}
-				console.log(names, prototypes, list);
 				this._field_list = list;
 			}
 			return this._field_list;
@@ -82,7 +81,9 @@ Spontaneous.Content = (function($, S) {
 			}
 			return this._fields;
 		},
-
+		field: function(name) {
+			return this.fields()[name];
+		},
 		field_updated: function(field, value) {
 			this.save_field(field);
 		},

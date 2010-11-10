@@ -31,6 +31,12 @@ Spontaneous.EditDialogue = (function($, S) {
 		},
 		upload_complete: function(response) {
 			console.log('EditDialogue.upload_complete', response);
+			var fields = response.fields;
+			for (var i = 0, ii = fields.length; i < ii; i++) {
+				var values = fields[i], field = this.content.field(values.name);
+				console.log(values, field)
+				field.update(values);
+			}
 			this.close();
 		},
 		body: function() {
