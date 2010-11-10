@@ -18,6 +18,9 @@ Spontaneous.FieldPreview = (function($, S) {
 			// console.log('FieldPreview#panel', this.text_fields(), this.image_fields());
 			wrapper.append(this.fields_panel(this.text_fields(), 'text'));
 			wrapper.append(this.fields_panel(this.image_fields(), 'image'));
+			wrapper.click(function() {
+				this.content.edit();
+			}.bind(this))
 			return wrapper;
 		},
 		fields_panel: function(fields, type) {

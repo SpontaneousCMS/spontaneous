@@ -8,11 +8,11 @@ Spontaneous.UploadManager = (function($, S) {
 		initialize: function(manager, target, file) {
 			this.manager = manager;
 			this.target = target;
-			this.file = file;
 			this.id = upload_id++;
 			this.position = 0;
-			this.total = this.file.fileSize;
 			this.failure_count = 0;
+			this.file = file;
+			this.total = this.file.fileSize;
 		},
 
 		// only for direct image replacement
@@ -71,6 +71,16 @@ Spontaneous.UploadManager = (function($, S) {
 			this.post("/@spontaneous/file/wrap/"+this.target.id(), form);
 		}
 	});
+	var FormUpload = new JS.Class(Upload, {
+		initialize: function(manager, target, form_data) {
+			this.callSuper(manager, target, form_data)
+			this.form_data = this.file;
+		},
+		start: function() {
+			console.log(this.form_data)
+			this.post(['/@spontaneous/save', this.target.id()].join('/'), this.form_data);
+		}
+	});
 	var UploadManager = {
 		init: function(status_bar) {
 			this.status_bar = status_bar;
@@ -96,6 +106,13 @@ Spontaneous.UploadManager = (function($, S) {
 				var upload = new WrapUpload(this, slot, file);
 				this.pending.push(upload);
 			}
+			if (!this.current) {
+				this.next();
+			}
+		},
+		form: function(content, form_data) {
+			var upload = new FormUpload(this, content, form_data);
+			this.pending.push(upload);
 			if (!this.current) {
 				this.next();
 			}

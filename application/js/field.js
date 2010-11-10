@@ -36,13 +36,27 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		value: function() {
 			return this.get('value');
 		},
-
+		unprocessed_value: function() {
+			return this.data.unprocessed_value;
+		},
 		is_image: function() {
 			return false;
 		},
 
 		id: function() {
 			return this.content.id();
+		},
+		css_id: function() {
+			return 'field-'+this.name+'-'+this.id();
+		},
+		form_name: function() {
+			return 'field['+this.name+'][unprocessed_value]';
+		},
+		label: function() {
+			return this.title;
+		},
+		edit: function() {
+			return $(dom.input, {'type':'text', 'id':this.css_id(), 'name':this.form_name(), 'value':this.unprocessed_value()})
 		}
 	});
 
@@ -133,8 +147,39 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				this.drop_target.removeClass('uploading')
 				this.progress_bar.parent().remove();
 			}
+		},
+		width: function() {
+			return this.data.attributes.original.width;
+		},
+		height: function() {
+			return this.data.attributes.original.height;
+		},
+		edit: function() {
+			var wrap = $(dom.div);
+			if (this.width() > this.height()) {
+				wrap.addClass('landscape');
+			}
+			var img = $(dom.img, {'src':this.value()})
+			var actions = $(dom.div, {'class':'actions'});
+			var change = $(dom.a, {'class':'button change'}).text('Change');
+			var clear = $(dom.a, {'class':'button clear'}).text('Clear');
+			actions.append(change).append(clear);
+			wrap.append(img).append(actions);
+			return wrap;
 		}
 	});
 
 	return ImageField;
+})(jQuery, Spontaneous);
+
+
+Spontaneous.FieldTypes.DiscountField = (function($, S) {
+	var dom = S.Dom;
+	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+		edit: function() {
+			return $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
+		}
+	});
+
+	return DiscountField;
 })(jQuery, Spontaneous);

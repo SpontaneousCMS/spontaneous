@@ -10,12 +10,6 @@ Spontaneous.Entry = (function($, S) {
 			this.container = container;
 			// console.log('FacetEntry#new', content, content.depth);
 		},
-		save: function(form) {
-			Spontaneous.Spin.start();
-			// console.log('saving', this.id, $(form).serialize())
-			Spontaneous.Ajax.post('/'+this.model_name+'/'+this.id + '/save', $(form).serialize(), this, this.saved);
-			return false;
-		},
 		panel: function() {
 			var wrapper = $(dom.div, {'class':'entry-wrap ' + this.depth_class()});
 			wrapper.append($(dom.div, {'class':'white-bg'}))

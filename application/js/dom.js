@@ -7,12 +7,13 @@ Spontaneous.Dom = (function($, S) {
 		},
 		div: "<div/>", p: "<p/>", iframe: "<iframe/>",
 		a: "<a/>", span: "<span/>", img: '<img/>',
-		select:'<select/>', option:'<option/>',
+		select:'<select/>', option:'<option/>', label:'<label/>',
 		ul: '<ul/>', li: '<li/>',
 		dl: '<dl/>', dt: '<dt/>', dd: '<dd/>',
 		table: '<table/>', tr: '<tr/>', td:'<td/>',
 		h3: '<h3/>',
-		input:'<input/>', button: '<button/>', form: '<form/>'
+		input:'<input/>', button: '<button/>', form: '<form/>',
+		textarea:'<textarea/>'
 	};
 })(jQuery, Spontaneous);
 

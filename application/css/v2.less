@@ -840,14 +840,13 @@ a {
 
 }
 
-#overlay {
+#dialogue-overlay {
 	position: fixed;
 	left: 0;
 	right: 0;
 	top: 0;
 	bottom: 0;
-	background-color: #fff;
-	opacity: 0.95;
+	background-color: rgba(255, 255, 255, 0.75);
 	z-index: 1000;
 }
 
@@ -861,13 +860,13 @@ a {
 	top: 0;
 	overflow: auto;
 	z-index: 1001;
-	#control-wrap {
+	#dialogue-control-wrap {
 		position: fixed;
 		top: 0;
 		right: 0;
 		left: 0;
 		z-index: 1002;
-		#controls {
+		#dialogue-controls {
 			.rounded-bottom;
 			.controls-gradient;
 			.shadow;
@@ -876,7 +875,7 @@ a {
 			margin: 0 auto;
 			display: block;
 			height: 46px;
-			.actions {
+			.dialogue-actions {
 				/*padding: 6px;*/
 				/*position: absolute;*/
 				.button {
@@ -1015,29 +1014,27 @@ a {
 						width: 100%;
 					}
 				}
-			}
-		}
-		.field.landscape {
-			.value {
-				img {
-					max-width: 100%;
-					max-height: 50%;
-				}
-				.actions {
-					width: auto;
-					display: block;
-					margin: 8px 0 0 0;
-					position: relative;
-					.button {
-						display: inline-block;
-						width: 109px;
+				.landscape {
+					img {
+						max-width: 100%;
+						max-height: 50%;
 					}
-					.button.clear {
-						position: static;
-					}
-					.button.change {
-						position: absolute;
-						right: 0;
+					.actions {
+						width: auto;
+						display: block;
+						margin: 8px 0 0 0;
+						position: relative;
+						.button {
+							display: inline-block;
+							width: 109px;
+						}
+						.button.clear {
+							position: static;
+						}
+						.button.change {
+							position: absolute;
+							right: 0;
+						}
 					}
 				}
 			}

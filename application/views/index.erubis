@@ -11,7 +11,7 @@
 	Spontaneous = {};
 </script>
 <%# list of scripts to append, in order %>
-<%= scripts :extensions, :properties, :dom, :ajax, :types, :'content', :facet_entry, :page_entry, :slot, :page, :field, :content_area, :preview, :editing, :location, :top_bar, :field_preview, :slot_container, :progress, :status_bar, :upload_manager, :init, :load %>
+<%= scripts :extensions, :properties, :dom, :ajax, :types, :'content', :facet_entry, :page_entry, :slot, :page, :field, :content_area, :preview, :editing, :location, :top_bar, :field_preview, :slot_container, :progress, :status_bar, :upload_manager, :dialogue, :edit_dialogue, :init, :load %>
 <link rel="stylesheet" href="/@spontaneous/css/v2.css" type="text/css" media="screen" charset="utf-8" />
 </head>
 <body id="spontaneous"></body>

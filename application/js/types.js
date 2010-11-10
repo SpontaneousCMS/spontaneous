@@ -8,9 +8,11 @@ Spontaneous.Types = (function($, S) {
 			this.type = type_data.type;
 			this.title = type_data.title;
 			this.field_prototypes = {};
+			this.field_names = [];
 			var fields = this.data.fields;
 			for (var i = 0, ii = fields.length; i < ii; i++) {
 				var f = fields[i];
+				this.field_names.push(f.name);
 				this.field_prototypes[f.name] = f;
 			}
 		},

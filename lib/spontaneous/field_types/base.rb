@@ -131,7 +131,8 @@ module Spontaneous
         {
         :name => name.to_s,
         :unprocessed_value => unprocessed_value,
-        :processed_value => processed_value
+        :processed_value => processed_value,
+        :attributes => attributes
         }
       end
 

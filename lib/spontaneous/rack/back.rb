@@ -9,7 +9,7 @@ module Spontaneous
 
       def self.application
         app = ::Rack::Builder.new {
-          use ::Rack::CommonLogger, STDERR  if Spontaneous.development?
+          # use ::Rack::CommonLogger, STDERR  if Spontaneous.development?
           use ::Rack::Lint
           use ::Rack::ShowExceptions if Spontaneous.development?
 
@@ -89,6 +89,7 @@ module Spontaneous
         end
 
         post '/save/:id' do
+          p params
           content = Content[params[:id]]
           update_fields(content, params[:field])
         end

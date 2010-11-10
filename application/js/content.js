@@ -23,7 +23,39 @@ Spontaneous.Content = (function($, S) {
 			}
 			return obj;
 		},
+		field_list: function() {
+			if (!this._field_list) {
 
+			var type = this.type(), prototypes = type.field_prototypes, names = type.field_names;
+			var fields = this.fields(), list = [];
+				for (var i = 0, ii = names.length; i < ii; i++) {
+					list.push(fields[names[i]]);
+				}
+				console.log(names, prototypes, list);
+				this._field_list = list;
+			}
+			return this._field_list;
+		},
+		text_fields: function() {
+			var fields = [], all_fields = this.field_list();
+			for (var i = 0, ii = all_fields.length; i < ii; i++) {
+				var f = all_fields[i];
+				if (!f.is_image()) {
+					fields.push(f);
+				}
+			}
+			return fields;
+		},
+		image_fields: function() {
+			var fields = [], all_fields = this.field_list();
+			for (var i = 0, ii = all_fields.length; i < ii; i++) {
+				var f = all_fields[i];
+				if (f.is_image()) {
+					fields.push(f);
+				}
+			}
+			return fields;
+		},
 		fields: function() {
 			if (!this._fields) {
 				var fields = {}, type = this.type(), prototypes = type.field_prototypes;
@@ -34,7 +66,8 @@ Spontaneous.Content = (function($, S) {
 						type_class = this.constantize(prototype.type)
 					if (!type_class) {
 						console.warn(
-							"Content#fields:", "Field has invalid type",
+							"Content#fields:",
+							"Field has invalid type", prototype.type,
 							"content_id:", this.content.id,
 							"type:", "'"+type.title+"'",
 							"field_name:", f.name
@@ -131,6 +164,14 @@ Spontaneous.Content = (function($, S) {
 			if (typeof callback === 'function') {
 				callback(this);
 			}
+		},
+		edit: function() {
+			console.log('Content.edit', this.content);
+			(new Spontaneous.EditDialogue(this)).open();
+		},
+		save: function(dialogue, form_data) {
+			// Spontaneous.Ajax.post('/'+this.model_name+'/'+this.id + '/save', $(form).serialize(), this, this.saved);
+			console.log(form_data);
 		}
 	});
 
