@@ -158,7 +158,6 @@ module Spontaneous
 
         post '/destroy/:id' do
           content = Content[params[:id]]
-          p content
           content.destroy
           json({})
         end

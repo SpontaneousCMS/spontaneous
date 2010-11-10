@@ -18,6 +18,13 @@ module Spontaneous
 
     set_inheritance_root
 
+    def before_save
+      if parent 
+        self.depth = parent.depth+1
+      end
+      super
+    end
+
     def page?
       true
     end

@@ -17,7 +17,7 @@ module Spontaneous
       end
 
       def load_file(file)
-        puts "-- Loaded #{file}" if require file
+        puts "-- Loaded #{File.basename(file, '.rb')}" if require file
       end
 
       def load_classes(*paths)

@@ -14,7 +14,11 @@ module Spontaneous::Plugins
       def before_save
         if container 
           self.page = container.page if page.nil?
-          self.depth = (container.content_depth || 0) + 1
+          if page?
+            self.depth = (parent.depth || 0) + 1
+          else
+            self.depth = (container.content_depth || 0) + 1
+          end
         end
         super
       end

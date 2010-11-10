@@ -90,12 +90,22 @@ class PageTest < Test::Unit::TestCase
       @s.parent.should === @q
       @t.parent.should === @s
     end
+
+
     should "have a list of their children" do
       @p.children.should == [@q]
       @q.children.should == [@r, @s]
       @r.children.should == []
       @s.children.should == [@t]
       @t.children.should == []
+    end
+
+    should "have a reference to themselves as page" do
+      @p.page.should == @p
+      @q.page.should == @q
+      @r.page.should == @r
+      @s.page.should == @s
+      @t.page.should == @t
     end
     should "keep track of their depth" do
       @p.depth.should == 0
