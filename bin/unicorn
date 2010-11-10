@@ -1,0 +1,3 @@
+#!/bin/sh
+
+bundle exec unicorn --port 9001 test/fixtures/example_application/config/back.ru

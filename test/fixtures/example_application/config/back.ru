@@ -17,6 +17,6 @@ Spontaneous.database.logger = Logger.new($stdout)
 # server = Rack::Handler.get('thin')
 
 puts "Spontaneous::Back running on port #{Spontaneous::Rack.port}"
-Unicorn.run Spontaneous::Rack::Back.application.to_app
+run Spontaneous::Rack::Back.application.to_app
 
 

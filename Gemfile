@@ -11,6 +11,7 @@ gem "sinatra", "~>1.0"
 gem "rack", :git => "git://github.com/rack/rack.git", :ref => "1598f873c891288954981435e707de26cf49395d" #"~>1.2"
 # gem 'rack', '~>1.2'
 gem "thin", "~>1.2"
+gem "unicorn", "~>2.0.0"
 gem "less", "~>1.2"
 gem "stringex", "~>1.1"
 gem 'miso', '~> 0.3.3'
