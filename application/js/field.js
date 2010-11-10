@@ -149,10 +149,16 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			}
 		},
 		width: function() {
-			return this.data.attributes.original.width;
+			if (this.data.attributes && this.data.attributes.original) {
+				return this.data.attributes.original.width;
+			}
+			return 0;
 		},
 		height: function() {
-			return this.data.attributes.original.height;
+			if (this.data.attributes && this.data.attributes.original) {
+				return this.data.attributes.original.height;
+			}
+			return 0;
 		},
 		edit: function() {
 			var wrap = $(dom.div);
