@@ -89,7 +89,6 @@ module Spontaneous
         end
 
         post '/save/:id' do
-          p params
           content = Content[params[:id]]
           update_fields(content, params[:field])
         end

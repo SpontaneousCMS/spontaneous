@@ -277,7 +277,6 @@ class BackTest < Test::Unit::TestCase
     should "be removable" do
       target = @home.in_progress.first
       post "/@spontaneous/destroy/#{target.id}"
-      puts last_response.body
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
       Content[target.id].should be_nil
