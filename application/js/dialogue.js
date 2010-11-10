@@ -119,7 +119,7 @@ Spontaneous.Dialogue = (function($, S) {
 				cw.append(c);
 				w.append(cw);
 				w.append(b);
-				$('body').append(w);
+				$('#content').append(w);
 				this._actions = a;
 				this._container = w;
 				this._body = b;
@@ -129,7 +129,7 @@ Spontaneous.Dialogue = (function($, S) {
 		overlay: function() {
 			if (!this._overlay) {
 				var o = $(dom.div, {'id':'dialogue-overlay'}).css('z-index', this.z_index()).hide();
-				$('body').append(o)
+				$('#content').append(o)
 				this._overlay = o;
 			}
 			return this._overlay;

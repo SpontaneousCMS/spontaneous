@@ -34,4 +34,3 @@ module Spontaneous::Plugins
   end
 end
 
-
