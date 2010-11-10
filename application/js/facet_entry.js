@@ -36,10 +36,12 @@ Spontaneous.Entry = (function($, S) {
 				var destroy = $(dom.a, {'class':'delete'});
 				actions.append(destroy);
 				title_bar.append(actions);
+				var _hide_pause;
 				wrapper.mouseenter(function() {
-					actions.slideDown(100);
+					if (_hide_pause) { window.clearTimeout(_hide_pause); }
+					actions.slideDown(50);
 				}).mouseleave(function() {
-					actions.slideUp(100);
+					_hide_pause = window.setTimeout(function() { actions.slideUp(100) }, 200);
 				});
 				destroy.click(this.confirm_destroy.bind(this));
 				this._title_bar = title_bar;
