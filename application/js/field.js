@@ -179,7 +179,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				if (files.length > 0) {
 					var file = files[0], url = window.createBlobURL(file);
 					console.log(url)
-					img.attr('src', url);
+					img.attr('src', url).removeClass('empty');
 				}
 			}
 			var input = $(dom.input, {'type':'file', 'name':this.form_name(), 'accept':'image/*'}).change(onchange);
