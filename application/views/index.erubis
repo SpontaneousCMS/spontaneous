@@ -8,7 +8,9 @@
 <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/vendor/jquery-ui-1.8.6.custom.min.js"></script>
 <script type="text/javascript" charset="utf-8">
 	jQuery.noConflict();
-	Spontaneous = {};
+  Spontaneous = {
+    debug: <%= Spontaneous.development? %>
+  };
 </script>
 <%# list of scripts to append, in order %>
 <%= scripts :extensions, :properties, :dom, :ajax, :types, :'content', :entry, :page_entry, :slot, :page, :field, :content_area, :preview, :editing, :location, :top_bar, :field_preview, :slot_container, :progress, :status_bar, :upload_manager, :dialogue, :edit_dialogue, :init, :load %>

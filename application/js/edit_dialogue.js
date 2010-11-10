@@ -21,7 +21,6 @@ Spontaneous.EditDialogue = (function($, S) {
 			var data = new FormData();
 			var size = 0;
 			$.each(values, function(i, v) {
-				console.log(v.name, v)
 				data.append(v.name, v.value);
 				// the size will only ever be approximate
 				size += (v.value.length + v.name.length);
@@ -31,11 +30,9 @@ Spontaneous.EditDialogue = (function($, S) {
 				if (files.length > 0) {
 					var file = files[0];
 					size += file.fileSize;
-					console.log($(this).attr('name'), file)
 					data.append($(this).attr('name'), file);
 				}
 			});
-			console.log('size', size);
 			data.fileSize = size;
 			Spontaneous.UploadManager.form(this, data);
 			return false;
@@ -61,6 +58,7 @@ Spontaneous.EditDialogue = (function($, S) {
 			var text_field_wrap = $(dom.div, {'class':'field-group text'});
 			var image_field_wrap = $(dom.div, {'class':'field-group image'});
 			var text_fields = this.content.text_fields();
+			var submit = $(dom.input, {'type':'submit'});
 
 			for (var i = 0, ii = text_fields.length; i < ii; i++) {
 				var field = text_fields[i];
@@ -74,6 +72,7 @@ Spontaneous.EditDialogue = (function($, S) {
 				image_field_wrap.append(this.field_edit(field));
 			}
 			editing.append(image_field_wrap);
+			editing.append(submit);
 			// activate the highlighting
 			$('input, textarea', editing).focus(function() {
 				$(this).parents('.field').first().addClass('focus');
