@@ -87,8 +87,16 @@ Spontaneous.Require = {
 			var script = document.createElement('script');
 			script.type = 'text/javascript';
 			script.src = this.current[0];
+			var onload = (function(req) {
+				return function() {
+					req._completed.push(req.current);
+					req.current = false;
+					req.next();
+				};
+			})(this);
+			script.onload = onload;
 			body.appendChild(script);
-			this.current = false;
+			// this.current = false;
 		}
 	},
 	onprogress: function(event) {
