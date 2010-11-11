@@ -1,0 +1,27 @@
+UI:
+- Loading progress
+- Browser feature detection
+- Uploads continue even when moving away from page
+- Return to page restores individual progress bars
+- Save item doesn't block
+
+- Saving does text then queues images (through same progress mechanism as D&D image replacement)
+  - 'Format' switch in preview view
+  - Show URL in preview view
+  - Back & forward buttons in preview view?
+  - Save state with # parts
+  - UI reflects all changes to page title
+  - Page entries have toggle to show & hide fields
+  - Lightweight config system, requirable independently
+  - Paging of entries
+  - Fix image insertion on creation using after_save instance hook?
+  - URL editing
+  - Separate treatment of title field in page?
+  - Estimated time for Uploads
+  - Dual progress bar or have unified one only in status bar and rely in re-linking of individual progress indicators?
+
+- Only accepting certain formats for d&d (link field formats to UI)
+
+  Backend:
+
+  - Config DSL without fixed keys
