@@ -18,23 +18,28 @@ Spontaneous.EditDialogue = (function($, S) {
 		},
 		save: function() {
 			var values = this.form.serializeArray();
-			var data = new FormData();
+			var field_data = new FormData();
 			var size = 0;
 			$.each(values, function(i, v) {
-				data.append(v.name, v.value);
-				// the size will only ever be approximate
-				size += (v.value.length + v.name.length);
+				field_data.append(v.name, v.value);
+				size += (v.name.length + v.value.length);
 			});
-			$('input[type="file"]', this.form).each(function() {
-				var files = this.files;
-				if (files.length > 0) {
-					var file = files[0];
-					size += file.fileSize;
-					data.append($(this).attr('name'), file);
-				}
+
+			Spontaneous.UploadManager.form(this, field_data, size);
+
+			$.each(this.content.file_fields(), function() {
+				this.upload();
 			});
-			data.fileSize = size;
-			Spontaneous.UploadManager.form(this, data);
+			// $('input[type="file"]', this.form).each(function() {
+			// 	var files = this.files;
+			// 	if (files.length > 0) {
+			// 		var file = files[0];
+			// 		size += file.fileSize;
+			// 		file_data.append($(this).attr('name'), file);
+			// 	}
+			// });
+			// file_data.fileSize = size;
+			// Spontaneous.UploadManager.form(this, file_data);
 			return false;
 		},
 
@@ -42,11 +47,9 @@ Spontaneous.EditDialogue = (function($, S) {
 			console.log('EditDialogue.upload_progress', position, total)
 		},
 		upload_complete: function(response) {
-			console.log('EditDialogue.upload_complete', response);
 			var fields = response.fields;
 			for (var i = 0, ii = fields.length; i < ii; i++) {
 				var values = fields[i], field = this.content.field(values.name);
-				console.log(values, field)
 				field.update(values);
 			}
 			this.close();

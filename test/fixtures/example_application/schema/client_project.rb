@@ -5,6 +5,7 @@ class ClientProject < Spontaneous::Facet
   field :title
   field :url
   field :image
+  field :second_image, :image
   field :description, :markdown
   field :completed, :date
 

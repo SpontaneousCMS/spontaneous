@@ -55,6 +55,16 @@ Spontaneous.Content = (function($, S) {
 			}
 			return fields;
 		},
+		file_fields: function() {
+			var fields = [], all_fields = this.field_list();
+			for (var i = 0, ii = all_fields.length; i < ii; i++) {
+				var f = all_fields[i];
+				if (f.is_file()) {
+					fields.push(f);
+				}
+			}
+			return fields;
+		},
 		fields: function() {
 			if (!this._fields) {
 				var fields = {}, type = this.type(), prototypes = type.field_prototypes;

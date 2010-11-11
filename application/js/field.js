@@ -42,6 +42,9 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		is_image: function() {
 			return false;
 		},
+		is_file: function() {
+			return false;
+		},
 
 		id: function() {
 			return this.content.id();
@@ -55,8 +58,12 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		label: function() {
 			return this.title;
 		},
+		get_input: function() {
+			this.input = $(dom.input, {'type':'text', 'id':this.css_id(), 'name':this.form_name(), 'value':this.unprocessed_value()})
+			return this.input;
+		},
 		edit: function() {
-			return $(dom.input, {'type':'text', 'id':this.css_id(), 'name':this.form_name(), 'value':this.unprocessed_value()})
+			return this.get_input();
 		}
 	});
 
@@ -64,9 +71,51 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 })(jQuery, Spontaneous);
 
 
+Spontaneous.FieldTypes.FileField = (function($, S) {
+	var dom = S.Dom;
+	var FileField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+		upload_complete: function(values) {
+			this.progress_bar().parent().hide();
+			this.drop_target.removeClass('uploading')
+		},
+		upload_progress: function(position, total) {
+			this.progress_bar().parent().show();
+			this.progress_bar().css('width', ((position/total)*100) + '%');
+		},
+		is_file: function() {
+			return true;
+		},
+		get_input: function() {
+			this.input = $(dom.input, {'type':'file', 'name':this.form_name(), 'accept':'image/*'});
+			return this.input;
+		},
+		// called by edit dialogue in order to begin the async upload of files
+		upload: function() {
+			if (!this.input) { return; }
+			var files = this.input[0].files;
+			if (files.length > 0) {
+				this.drop_target.addClass('uploading');
+				this.progress_bar().parent().show();
+				var file_data = new FormData();
+				var file = files[0];
+				S.UploadManager.replace(this, file);
+			}
+		}
+	});
+	return FileField;
+})(jQuery, Spontaneous);
 Spontaneous.FieldTypes.ImageField = (function($, S) {
 	var dom = S.Dom;
-	var ImageField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+	var ImageField = new JS.Class(Spontaneous.FieldTypes.FileField, {
+		progress_bar: function() {
+			if (!this._progress_bar) {
+				var progress_outer = $(dom.div, {'class':'drop-upload-outer'}).hide();
+				var progress_inner = $(dom.div, {'class':'drop-upload-inner'}).css('width', 0);
+				progress_outer.append(progress_inner);
+				this._progress_bar = progress_inner;
+			}
+			return this._progress_bar;
+		},
 		preview: function() {
 			var value = this.get('value'), img = null, dim = 45;
 			if (value === "") {
@@ -87,30 +136,25 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			var dropper = $(dom.div, {'class':'image-drop'});
 			outer.append(img);
 			outer.append(dropper);
+			dropper.append(this.progress_bar().parent());
 
 			var drop = function(event) {
-				dropper.removeClass('drop-active').addClass('uploading');
-				var progress_outer = $(dom.div, {'class':'drop-upload-outer'});
-				var progress_inner = $(dom.div, {'class':'drop-upload-inner'}).css('width', 0);
-				progress_outer.append(progress_inner);
-				dropper.append(progress_outer);
-				this.progress_bar = progress_inner;
 				event.stopPropagation();
 				event.preventDefault();
+				dropper.removeClass('drop-active').addClass('uploading');
 				var files = event.dataTransfer.files;
 				if (files.length > 0) {
-					var file = files[0];
+					var file = files[0], url = window.createBlobURL(file);
+					this.image.attr('src', url)
 					S.UploadManager.replace(this, file);
 				}
 				return false;
 			}.bind(this);
 
 			var drag_enter = function(event) {
-				// var files = event.originalEvent.dataTransfer.files;
-				// console.log(event.originalEvent.dataTransfer, files)
-				$(this).addClass('drop-active');
 				event.stopPropagation();
 				event.preventDefault();
+				$(this).addClass('drop-active');
 				return false;
 			}.bind(dropper);
 
@@ -121,9 +165,9 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			}.bind(dropper);
 
 			var drag_leave = function(event) {
-				$(this).removeClass('drop-active');
 				event.stopPropagation();
 				event.preventDefault();
+				$(this).removeClass('drop-active');
 				return false;
 			}.bind(dropper);
 
@@ -136,18 +180,19 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return true;
 		},
 		upload_complete: function(values) {
+			this.callSuper(values)
 			this.set('value', values.src);
 			if (this.image) {
 				this.image.attr('src', values.src);
 			}
 		},
-		upload_progress: function(position, total) {
-			this.progress_bar.css('width', ((position/total)*100) + '%');
-			if (position === total) {
-				this.drop_target.removeClass('uploading')
-				this.progress_bar.parent().remove();
-			}
-		},
+		// upload_progress: function(position, total) {
+		// 	this.progress_bar.css('width', ((position/total)*100) + '%');
+		// 	if (position === total) {
+		// 		this.drop_target.removeClass('uploading')
+		// 		this.progress_bar.parent().remove();
+		// 	}
+		// },
 		width: function() {
 			if (this.data.attributes && this.data.attributes.original) {
 				return this.data.attributes.original.width;
@@ -162,27 +207,28 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		},
 		edit: function() {
 			var wrap = $(dom.div);
-			if (this.width() > this.height()) {
-				wrap.addClass('landscape');
-			}
 			var onclick = function() {
 				input.trigger('click');
 				return false;
 			};
 			var src = this.value();
-			var img = $(dom.img, {'src':src}).click(onclick);
+			var img = $(dom.img, {'src':src}).click(onclick).load(function() {
+				if (this.width > this.height) {
+					wrap.addClass('landscape');
+				} else {
+					wrap.removeClass('landscape');
+				}
+			});
 			if (src == '') { img.addClass('empty'); }
 			var onchange = function() {
-				var files = this.files;
-				console.log('ImageField.onchange', this, files);
-
+				var files = this.input[0].files;
 				if (files.length > 0) {
 					var file = files[0], url = window.createBlobURL(file);
-					console.log(url)
 					img.attr('src', url).removeClass('empty');
+					this.image.attr('src', url)
 				}
-			}
-			var input = $(dom.input, {'type':'file', 'name':this.form_name(), 'accept':'image/*'}).change(onchange);
+			}.bind(this);
+			var input = this.get_input().change(onchange);
 			var actions = $(dom.div, {'class':'actions'});
 			var change = $(dom.a, {'class':'button change'}).text('Change').click(onclick);
 			var clear = $(dom.a, {'class':'button clear'}).text('Clear');
@@ -199,8 +245,12 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 Spontaneous.FieldTypes.DiscountField = (function($, S) {
 	var dom = S.Dom;
 	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+		get_input: function() {
+			this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
+			return this.input;
+		},
 		edit: function() {
-			return $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
+			return this.get_input();
 		}
 	});
 

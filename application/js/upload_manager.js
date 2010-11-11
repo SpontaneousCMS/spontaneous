@@ -36,7 +36,7 @@ Spontaneous.UploadManager = (function($, S) {
 		// While loading and sending data.
 		onprogress: function(event) {
 			console.log("Upload#onprogress", event);
-			var position = event.position, total = event.total;
+			var position = event.position;
 			this.position = position;
 			this.target.upload_progress(position, this.total);
 			this.manager.upload_progress(this);
@@ -72,9 +72,10 @@ Spontaneous.UploadManager = (function($, S) {
 		}
 	});
 	var FormUpload = new JS.Class(Upload, {
-		initialize: function(manager, target, form_data) {
+		initialize: function(manager, target, form_data, size) {
 			this.callSuper(manager, target, form_data)
 			this.form_data = this.file;
+			this.total = size;
 		},
 		start: function() {
 			console.log(this.form_data)
@@ -110,8 +111,8 @@ Spontaneous.UploadManager = (function($, S) {
 				this.next();
 			}
 		},
-		form: function(content, form_data) {
-			var upload = new FormUpload(this, content, form_data);
+		form: function(content, form_data, file_size) {
+			var upload = new FormUpload(this, content, form_data, file_size);
 			this.pending.push(upload);
 			if (!this.current) {
 				this.next();
