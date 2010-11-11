@@ -12,6 +12,8 @@ Spontaneous.UploadManager = (function($, S) {
 			this.position = 0;
 			this.failure_count = 0;
 			this.file = file;
+			this.name = this.file.fileName;
+			console.log(this.name)
 			this.total = this.file.fileSize;
 		},
 
@@ -31,6 +33,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.upload.onloadend = this.onloadend.bind(this);
 			this.upload.onerror = this.onerror.bind(this);
 			this.xhr.onreadystatechange = this.onreadystatechange.bind(this);
+			this.started = (new Date()).valueOf();
 			this.xhr.send(form_data);
 		},
 		// While loading and sending data.
@@ -38,6 +41,7 @@ Spontaneous.UploadManager = (function($, S) {
 			console.log("Upload#onprogress", event);
 			var position = event.position;
 			this.position = position;
+			this.time = (new Date()).valueOf() - this.started;
 			this.target.upload_progress(position, this.total);
 			this.manager.upload_progress(this);
 		},
@@ -76,6 +80,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.callSuper(manager, target, form_data)
 			this.form_data = this.file;
 			this.total = size;
+			this.name = "Saving...";
 		},
 		start: function() {
 			console.log(this.form_data)
@@ -90,7 +95,13 @@ Spontaneous.UploadManager = (function($, S) {
 			this.failed = [];
 			this.current = null;
 			this.updater = null;
-			// this.init_progress_bar();
+			this.total_time = 0;
+			this.total_data = 0;
+			this.init_progress_bar();
+			this.set_bar_length('individual', 1000, 2000)
+			this.set_bar_length('total', 500, 2000)
+			this.bars.name.text('Mobile Photo 3 Dec 2009 16 22 33.jpg');
+			this.bars.stats.text('33Kb/s 3 mins remaining');
 		},
 		// call to append call for image replacement to queue
 		replace: function(field, file) {
@@ -136,10 +147,12 @@ Spontaneous.UploadManager = (function($, S) {
 				return;
 			}
 			this.init_progress_bar();
-			this.current = this.pending.pop();
+			this.current = this.pending.shift();
+			this.bars.name.text(this.current.name);
 			this.current.start();
 		},
 		finished: function() {
+			console.log('UploadManager.finished', this.pending);
 			this.completed = [];
 			window.setTimeout(this.status_bar.hide.bind(this.status_bar), 1000);
 		},
@@ -147,37 +160,70 @@ Spontaneous.UploadManager = (function($, S) {
 			this.status_bar.show();
 			if (this.progress_showing) { return; }
 			var c = this.status_bar.progress_container();
+			var outer = $(dom.div, {'id':'progress-bars'});
 			var total = $(dom.div, {"id":"progress-total", 'class':'bar'});
 			var individual = $(dom.div, {"id":"progress-individual", 'class':'bar'});
-			c.append(total).append(individual);
+			var name = $(dom.div, {'id': 'progress-name'});
+			var stats = $(dom.div, {'id': 'progress-stats'});
+			outer.append(individual);
+			outer.append(total);
+			c.append(outer);
+			c.append(name).append(stats);
 			this.bars = {
 				total: total,
-				individual: individual
+				individual: individual,
+				name: name,
+				stats: stats
 			};
 			this.progress_showing = true;
 		},
-		update_progress_bars: function() {
-			var total = 0, completed = 0;
+		data_total: function() {
+			var total = 0;
 			for (var i = 0, ii = this.completed.length; i < ii; i++) {
 				total += this.completed[i].total;
-				completed += this.completed[i].total;
 			}
 			for (var i = 0, ii = this.pending.length; i < ii; i++) {
 				total += this.pending[i].total;
 			}
-
 			if (this.current) {
 				total += this.current.total;
+			}
+			return total;
+		},
+		data_completed: function() {
+			var completed = 0;
+			for (var i = 0, ii = this.completed.length; i < ii; i++) {
+				completed += this.completed[i].total;
+			}
+			if (this.current) {
 				completed += this.current.position;
 			}
+			return completed;
+		},
+		update_progress_bars: function() {
+			var total = this.data_total(), completed = this.data_completed();
 
 			console.log("UploadManager#update_progress_bars", completed, total)
 			this.set_bar_length('total', completed, total);
 			if (this.current) {
 				this.set_bar_length('individual', this.current.position, this.current.total);
+				this.bars.stats.text([this.rate(), 'Kb\/s', this.time_estimate()].join(' '));
 			} else {
 				this.set_bar_length('individual', 0, 0);
 			}
+		},
+		rate: function() {
+			var t = this.total_time, d = this.total_data;
+			if (this.current) {
+				t += this.current.time;
+				d += this.current.position;
+			}
+			return Math.round(((d/1024)/(t/1000)*10)/10);
+		},
+		time_estimate: function() {
+			var remaining = this.data_total() - this.data_completed();
+			var time = (remaining/1024) / this.rate();
+			return (Math.round(time*10)/10) + 's';
 		},
 		set_bar_length: function(bar_name, position, total) {
 			var bar = this.bars[bar_name], percent = (position/total) * 100;
@@ -194,6 +240,8 @@ Spontaneous.UploadManager = (function($, S) {
 				console.warn("UploadManager#upload_complete", "completed upload does not match current")
 			}
 			this.completed.push(this.current);
+			this.total_time += this.current.time;
+			this.total_data += this.current.position;
 			this.current.target.upload_complete(result);
 			this.current = null;
 			console.log("UploadManager#upload_complete", result, this.pending, this.completed)

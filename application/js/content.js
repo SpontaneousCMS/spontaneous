@@ -6,6 +6,9 @@ Spontaneous.Content = (function($, S) {
 		initialize: function(content) {
 			this.content = content;
 		},
+		uid: function() {
+			return (this.container ? this.container.uid() : '') + '/' + this.content.id;
+		},
 		id: function() {
 			return this.content.id;
 		},

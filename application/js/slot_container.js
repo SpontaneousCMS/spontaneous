@@ -25,7 +25,9 @@ Spontaneous.SlotContainer = (function($, S) {
 				var bar = $(dom.ul, {'class':'slot-tabs'});
 				for (var i = 0, slots = this.slots(), ii = slots.length; i < ii; i++) {
 					var slot = slots[i];
-					var li = $(dom.li).text(slot.name()).append($(dom.span, {'class':'down'}));
+					var li = $(dom.li)
+					li.text(slot.name())
+					li.append($(dom.span, {'class':'down'}));
 					var click = function(index) {
 						this.activate(index);
 					}.bind(this, i);
@@ -46,16 +48,13 @@ Spontaneous.SlotContainer = (function($, S) {
 			this._active_slot = slot;
 		},
 		slots: function() {
-			if (!this.content.entries) {
-				return [];
-			}
 			if (!this._slots) {
 				// console.log("SlotContainer#slots", this.content.entries);
-				var _slots = [], container = this.slot_content_container;
+				var _slots = [], content_container = this.slot_content_container;
 				var f = function(i, slot) {
-					_slots.push(new Spontaneous.Slot(slot, container))
+					_slots.push(new Spontaneous.Slot(slot.content, this.content, content_container))
 				}.bind(this);
-				$.each(this.content.entries, f);
+				$.each(this.content.entries(), f);
 				this._slots = _slots;
 			} 
 			return this._slots;

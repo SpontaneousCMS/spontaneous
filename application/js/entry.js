@@ -5,9 +5,9 @@ Spontaneous.Entry = (function($, S) {
 
 	var Entry = new JS.Class(Spontaneous.Content, {
 		initialize: function(content, container) {
+			this.container = container;
 			this.callSuper(content);
 			// this.content = content;
-			this.container = container;
 			// console.log('FacetEntry#new', content, content.depth);
 		},
 		panel: function() {
@@ -23,7 +23,7 @@ Spontaneous.Entry = (function($, S) {
 			var fields = new Spontaneous.FieldPreview(this, '');
 			entry.append(fields.panel());
 			// console.log("Entry#panel", this.entries())
-			var slot_container = new Spontaneous.SlotContainer(this.content);
+			var slot_container = new Spontaneous.SlotContainer(this);
 			wrapper.append(entry);
 			wrapper.append(slot_container.panel());
 			this.wrapper = wrapper;

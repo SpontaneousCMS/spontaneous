@@ -1,12 +1,12 @@
 UI:
-- Loading progress @done
 - Browser feature detection
+- Loading progress @done
 - Uploads continue even when moving away from page
 - Return to page restores individual progress bars
-- Saving does text then queues images (through same progress mechanism as D&D image replacement)
-- Save item doesn't block
-- Estimated time for Uploads
-- Dual progress bar or have unified one only in status bar and rely in re-linking of individual progress indicators?
+- Saving does text then queues images (through same progress mechanism as D&D image replacement) @done
+- Save item doesn't block @done
+- Estimated time for Uploads @done
+- Dual progress bar or have unified one only in status bar and rely in re-linking of individual progress indicators? @done
 
 - 'Format' switch in preview view
 - Show URL in preview view

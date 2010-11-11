@@ -5,7 +5,8 @@ Spontaneous.Slot = (function($, S) {
 
 	var Slot = new JS.Class(Spontaneous.Content, {
 
-		initialize: function(content, dom_container) {
+		initialize: function(content, container, dom_container) {
+			this.container = container;
 			this.callSuper(content);
 			this.dom_container = dom_container;
 		},

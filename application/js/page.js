@@ -18,7 +18,6 @@ Spontaneous.Page = (function($, S) {
 		initialize: function(content) {
 			this.callSuper(content);
 			this.path = content.path;
-			this.entries = content.entries;
 		},
 		title: function() {
 			return this.fields().title.value();

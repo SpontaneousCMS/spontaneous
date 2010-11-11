@@ -15,7 +15,9 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			this.title = this.type.title;
 			this.update(data);
 		},
-
+		uid: function() {
+			return this.content.uid() + '['+this.name+']';
+		},
 		set_value: function(new_value) {
 		},
 
