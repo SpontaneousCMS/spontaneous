@@ -136,7 +136,11 @@ module Spontaneous
     end
 
     def application_dir
-      File.expand_path("../../application", __FILE__)
+      @application_dir ||= File.expand_path("../../application", __FILE__)
+    end
+
+    def application_file(*args)
+      File.join(application_dir, *args)
     end
 
     def static_dir

@@ -1,20 +1,30 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8" />
-<title>Spontaneous: Loading...</title>
-<script type="text/javascript" charset="utf-8" src="/@spontaneous/js/vendor/jquery-1.4.3.min.js"></script>
-<script type="text/javascript" charset="utf-8" src="/@spontaneous/js/vendor/JS.Class-2.1.5/min/core.js"></script>
-<script type="text/javascript" charset="utf-8" src="/@spontaneous/js/vendor/jquery-ui-1.8.6.custom.min.js"></script>
-<script type="text/javascript" charset="utf-8">
-	jQuery.noConflict();
-  Spontaneous = {
-    debug: <%= Spontaneous.development? %>
-  };
-</script>
-<%# list of scripts to append, in order %>
-<%= scripts :extensions, :properties, :dom, :ajax, :types, :'content', :entry, :page_entry, :slot, :page, :field, :content_area, :preview, :editing, :location, :top_bar, :field_preview, :slot_container, :progress, :status_bar, :upload_manager, :dialogue, :edit_dialogue, :init, :load %>
-<link rel="stylesheet" href="/@spontaneous/css/v2.css" type="text/css" media="screen" charset="utf-8" />
-</head>
-<body id="spontaneous"></body>
+  <head>
+    <meta charset="utf-8" />
+    <title>Spontaneous: Loading...</title>
+    <link rel="stylesheet" href="/@spontaneous/css/v2.css" type="text/css" media="screen" charset="utf-8" />
+    <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/compatibility.js"></script>
+    <script type="text/javascript" charset="utf-8">
+      Spontaneous = {
+        debug: <%= Spontaneous.development? %>,
+        development: <%= Spontaneous.development? %>,
+        asynchronous: false,
+        onload: function() {
+          jQuery.noConflict();
+        }
+      };
+    </script>
+    <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/require.js"></script>
+  </head>
+  <body id="spontaneous">
+    <script type="text/javascript" charset="utf-8">
+      Spontaneous.Require.init(Spontaneous.asynchronous);
+      <%# list of scripts to append, in order %>
+      var sources = <%= scripts :'vendor/jquery-1.4.3.min', :'vendor/jquery-ui-1.8.6.custom.min', :'vendor/JS.Class-2.1.5/min/core', :extensions, :properties, :dom, :ajax, :types, :'content', :entry, :page_entry, :slot, :page, :field, :content_area, :preview, :editing, :location, :top_bar, :field_preview, :slot_container, :progress, :status_bar, :upload_manager, :dialogue, :edit_dialogue, :init, :load %>;
+      for (var i = 0, ii = sources.length; i < ii; i++) {
+        Spontaneous.require(sources[i]);
+      }
+    </script>
+  </body>
 </html>

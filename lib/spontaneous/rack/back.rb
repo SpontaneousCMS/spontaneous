@@ -45,8 +45,12 @@ module Spontaneous
           def scripts(*scripts)
             if Spontaneous.development?
               scripts.map do |script|
-                %(<script src="#{NAMESPACE}/js/#{script}.js" type="text/javascript"></script>)
-              end.join("\n")
+                src = "/js/#{script}.js"
+                path = Spontaneous.application_file(src)
+                size = File.size(path)
+                ["#{NAMESPACE}#{src}", size]
+                # %(<script src="#{NAMESPACE}/js/#{script}.js" type="text/javascript"></script>)
+              end.to_json
             else
               # script bundling + compression
             end

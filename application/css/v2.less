@@ -1099,3 +1099,32 @@ a {
 		}
 	}
 }
+#script-load-splash {
+	@progress-color: #ddd;
+	background: url('/@spontaneous/static/splash.png') 0 0 no-repeat;
+	padding-left: 88px;
+	width: 472px;
+	height: 87px;
+	position: relative;
+	margin: 0 auto;
+	top: 200px;
+	#script-load-progress {
+		.rounded(8px);
+		position: relative;
+		top: 64px;
+		border: solid 1px @progress-color;
+		padding: 1px;
+		width: 380px;
+		height: 4px;
+		div {
+			.rounded(6px);
+			background-color: @progress-color;
+			height: 4px;
+		}
+	}
+	#script-load-progress.synchronous {
+		border: none;
+		color: @progress-color;
+		top: 58px;
+	}
+}
