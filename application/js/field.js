@@ -90,7 +90,7 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 			return this.input;
 		},
 		// called by edit dialogue in order to begin the async upload of files
-		upload: function() {
+		save: function() {
 			if (!this.input) { return; }
 			var files = this.input[0].files;
 			if (files.length > 0) {
