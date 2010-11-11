@@ -1,13 +1,18 @@
 UI:
 - Browser feature detection
 - Loading progress @done
+
+// the following are difficult to do without something in front of the dev server that can
+// handle the file uploads.
 - Uploads continue even when moving away from page
 - Return to page restores individual progress bars
+
 - Saving does text then queues images (through same progress mechanism as D&D image replacement) @done
 - Save item doesn't block @done
 - Estimated time for Uploads @done
 - Dual progress bar or have unified one only in status bar and rely in re-linking of individual progress indicators? @done
-
+- Should be able to drop images onto image preview in editing dialogue
+- 'Escape' should close/cancel dialogue
 - 'Format' switch in preview view
 - Show URL in preview view
 - Back & forward buttons in preview view?

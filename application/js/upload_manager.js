@@ -13,7 +13,6 @@ Spontaneous.UploadManager = (function($, S) {
 			this.failure_count = 0;
 			this.file = file;
 			this.name = this.file.fileName;
-			console.log(this.name)
 			this.total = this.file.fileSize;
 		},
 
@@ -97,11 +96,12 @@ Spontaneous.UploadManager = (function($, S) {
 			this.updater = null;
 			this.total_time = 0;
 			this.total_data = 0;
-			this.init_progress_bar();
-			this.set_bar_length('individual', 1000, 2000)
-			this.set_bar_length('total', 500, 2000)
-			this.bars.name.text('Mobile Photo 3 Dec 2009 16 22 33.jpg');
-			this.bars.stats.text('33Kb/s 3 mins remaining');
+			//// show progress bar to make styling easier
+			// this.init_progress_bar();
+			// this.set_bar_length('individual', 1000, 2000)
+			// this.set_bar_length('total', 500, 2000)
+			// this.bars.name.text('Mobile Photo 3 Dec 2009 16 22 33.jpg');
+			// this.bars.stats.text('33Kb/s 3 mins remaining');
 		},
 		// call to append call for image replacement to queue
 		replace: function(field, file) {

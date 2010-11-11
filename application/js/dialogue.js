@@ -92,6 +92,11 @@ Spontaneous.Dialogue = (function($, S) {
 			}
 			this._body.empty().append(instance.body());
 			c.fadeIn(200);
+			$(document).bind('keydown.dialogue', function(event) {
+				if (event.keyCode === 27) { // escape key
+					this.cancel();
+				}
+			}.bind(this));
 			this._open = true;
 		},
 
@@ -103,6 +108,7 @@ Spontaneous.Dialogue = (function($, S) {
 				$('body').css("overflow", "auto");
 			});
 			this._instance = this._open = false;
+			$(document).unbind('keydown.dialogue');
 		},
 		cancel: function() {
 			return this.close();

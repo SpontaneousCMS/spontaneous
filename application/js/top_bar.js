@@ -139,7 +139,7 @@ Spontaneous.TopBar = (function($, S) {
 			}
 		},
 		location_changed: function(new_location) {
-			document.title = "Editing: '{title}'".replace("{title}", S.Preview.title());
+			document.title = "Editing: '{title}'".replace("{title}", new_location.title);
 			console.log("TopBar#location_changed", new_location);
 			this.set('location', new_location);
 			this.update_navigation();

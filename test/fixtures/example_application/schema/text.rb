@@ -2,7 +2,7 @@
 
 
 class Text < Spontaneous::Facet
-  field :text
+  field :text, :markdown
   #inline_style :text
   #template '<p>#{text}</p>'
 end
