@@ -23,15 +23,14 @@ module Spontaneous::Plugins
         super
       end
 
-      def destroy(root=true)
-        @_destroy_root = root
+      def destroy(remove_container_entry=true)
+        if container && remove_container_entry
+          container.destroy_entry!(self.entry)
+        end
         super()
       end
 
       def before_destroy
-        if container && @_destroy_root
-          container.destroy_entry!(self.entry)
-        end
         recursive_destroy
         super
       end
