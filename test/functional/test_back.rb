@@ -134,7 +134,7 @@ class BackTest < Test::Unit::TestCase
         last_response.content_type.should == "application/json;charset=utf-8"
         @facet = Content[@facet.id]
         last_response.body.should == @facet.to_json
-        @facet.fields.text.value.should ==  "Updated field_name_1"
+        @facet.fields.text.value.should ==  "<p>Updated field_name_1</p>\n"
       end
       should "update page field values" do
         params = {
@@ -280,6 +280,17 @@ class BackTest < Test::Unit::TestCase
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
       Content[target.id].should be_nil
+    end
+  end
+  context "Page paths" do
+    should "be editable" do
+      @about.path.should == '/about'
+      post "/@spontaneous/slug/#{@about.id}", 'slug' => 'howabout'
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      @about.reload
+      @about.path.should == "/howabout"
+      last_response.body.json.should == {:path => '/howabout' }
     end
   end
 end

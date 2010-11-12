@@ -163,6 +163,12 @@ module Spontaneous
           json({})
         end
 
+        post '/slug/:id' do
+          content = Content[params[:id]]
+          content.slug = params[:slug]
+          content.save
+          json({:path => content.path })
+        end
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)
         end
