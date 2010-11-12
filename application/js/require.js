@@ -60,6 +60,7 @@ Spontaneous.Require = {
 	},
 	next: function() {
 		if (this.pending.length === 0) {
+			this.container.className = 'loaded';
 			this.remove();
 			Spontaneous.onload();
 			return;
