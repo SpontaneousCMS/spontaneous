@@ -19,7 +19,6 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		},
 
 		unload: function() {
-			console.log('Field.unload', this.uid());
 		},
 		update: function(values) {
 			this.data = values;
