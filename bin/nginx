@@ -1,5 +1,6 @@
 #!/bin/bash
 
+mkdir tmp
 env bundle exec unicorn --port 9001 test/fixtures/example_application/config/back.ru &
 unicornPID="${!}"
 env nginx -p . -c bin/config/nginx.conf &

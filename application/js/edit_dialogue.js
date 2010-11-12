@@ -16,6 +16,9 @@ Spontaneous.EditDialogue = (function($, S) {
 		id: function() {
 			return this.content.id();
 		},
+		uid: function() {
+			return this.content.uid() + '!editing';
+		},
 		save: function() {
 			var values = this.form.serializeArray();
 			var field_data = new FormData();
