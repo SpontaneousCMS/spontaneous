@@ -258,7 +258,7 @@ a {
 		.container-padding;
 		.vertical-gradient(#3a3a3a, #222222);
 		height: 64px - 14px;
-		padding-top: 14px;
+		padding-top: 10px;
 		position: relative;
 		h1, h3 {
 			position: relative;
@@ -282,6 +282,39 @@ a {
 			padding-top: 6px;
 		}
 
+		.path {
+			.edit {
+				input[type="text"] {
+					.rounded;
+					width: 300px;
+					border: none;
+					outline: none;
+					padding: 4px 4px;
+					height: 16px;
+					vertical-align: top;
+					margin-left: 8px;
+				}
+				.button {
+					padding-left: 20px;
+					padding-right: 20px;
+					margin-left: 8px;
+					height: 24px;
+					vertical-align: top;
+				}
+				span, a.path {
+					position: relative;
+					top: 4px;
+				}
+				a.path {
+					color: #c1c1c1;
+					margin-right: 2px;
+				}
+				span {
+					color: #bbb;
+					margin-right: 2px;
+				}
+			}
+		}
 		.path h3:hover {
 			color: #fff;
 		}

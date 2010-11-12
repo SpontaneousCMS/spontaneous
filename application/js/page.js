@@ -23,6 +23,8 @@ Spontaneous.Page = (function($, S) {
 			return this.panel;
 		},
 		open_url_editor: function() {
+			this.panel.animate({'padding-bottom': 20}, 200)
+			$('h1', this.panel).animate({'margin-bottom':10}, 200)
 			var view = $('h3', this.panel), edit = $('.edit', this.panel);
 			view.hide();
 			edit.empty();
@@ -34,7 +36,7 @@ Spontaneous.Page = (function($, S) {
 			for (var i = 0, ii = parts.length; i < ii; i++) {
 				var p = parts[i];
 				path.push(p)
-				edit.append($(dom.a).text(p).attr('href', path.join('/')))
+				edit.append($(dom.a, {'class':'path'}).text(p).attr('href', path.join('/')))
 				edit.append($(dom.span).text('/'))
 			}
 			var input = $(dom.input, {'type':'text'}).val(slug);
@@ -53,11 +55,19 @@ Spontaneous.Page = (function($, S) {
 					submit();
 				}
 			});
+			edit.show();
 		},
 		save: function(slug) {
 			Spontaneous.Ajax.post('/slug/'+this.page.id(), {'slug':slug}, this, this.save_complete);
 		},
 		save_complete: function(response) {
+			var view = $('h3', this.panel), edit = $('.edit', this.panel);
+			this.page.path = response.path;
+			view.text(response.path).show();
+			edit.hide();
+			this.panel.animate({'padding-bottom': 0}, 200);
+			$('h1', this.panel).animate({'margin-bottom':0}, 200)
+
 			console.log('FunctionBar.save_complete', response)
 		}
 	};
