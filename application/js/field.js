@@ -76,11 +76,16 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 Spontaneous.FieldTypes.FileField = (function($, S) {
 	var dom = S.Dom;
 	var FileField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+		preview: function() {
+			Spontaneous.UploadManager.register(this);
+			return this.callSuper();
+		},
 		upload_complete: function(values) {
 			this.progress_bar().parent().hide();
 			this.drop_target.removeClass('uploading')
 		},
 		upload_progress: function(position, total) {
+			if (!this.drop_target.hasClass('uploading')) { this.drop_target.addClass('uploading'); }
 			this.progress_bar().parent().show();
 			this.progress_bar().css('width', ((position/total)*100) + '%');
 		},
@@ -119,6 +124,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return this._progress_bar;
 		},
 		preview: function() {
+			Spontaneous.UploadManager.register(this);
 			var value = this.get('value'), img = null, dim = 45;
 			if (value === "") {
 				img = $(dom.img, {'src':'/@spontaneous/static/px.gif','class':'missing-image'});

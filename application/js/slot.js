@@ -18,6 +18,9 @@ Spontaneous.Slot = (function($, S) {
 			// console.log('Slot#activate', this.name());
 			$('> .slot-content', this.dom_container).hide();
 			this.panel().show();
+			if (this.depth() === 1) {
+			window.location.hash = this.uid()
+			}
 		},
 
 		panel: function() {

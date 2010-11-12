@@ -58,6 +58,13 @@ Spontaneous.Require = {
 		this.pending.push(script)
 		if (!this.current) { this.next(); }
 	},
+	script_url: function(src) {
+		var url = src;
+		if (Spontaneous.development) {
+			url += "?"+(new Date()).valueOf();
+		}
+		return url;
+	},
 	next: function() {
 		if (this.pending.length === 0) {
 			this.container.className = 'loaded';
@@ -69,7 +76,7 @@ Spontaneous.Require = {
 		this.current = s;
 		if (this.async) {
 			var xhr = new XMLHttpRequest();
-			xhr.open("GET", s[0], true);
+			xhr.open("GET", this.script_url(s[0]), true);
 			var onprogress = (function(req) {
 				return function(event) {
 					req.onprogress(event);
@@ -87,7 +94,7 @@ Spontaneous.Require = {
 			var body = document.body;
 			var script = document.createElement('script');
 			script.type = 'text/javascript';
-			script.src = this.current[0];
+			script.src = this.script_url(this.current[0]);
 			var onload = (function(req) {
 				return function() {
 					req._completed.push(req.current);

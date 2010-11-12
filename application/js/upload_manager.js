@@ -7,21 +7,21 @@ Spontaneous.UploadManager = (function($, S) {
 	var Upload = new JS.Class({
 		initialize: function(manager, target, file) {
 			this.manager = manager;
-			this.target = target;
-			this.id = upload_id++;
+			this.field_name = target.name
+			this.uid = target.uid();
+			this.target_id = target.id();
 			this.position = 0;
 			this.failure_count = 0;
 			this.file = file;
 			this.name = this.file.fileName;
 			this.total = this.file.fileSize;
 		},
-
 		// only for direct image replacement
 		start: function() {
 			var form = new FormData();
 			form.append('file', this.file);
-			form.append('field', this.target.name);
-			this.post("/@spontaneous/file/replace/"+this.target.id(), form);
+			form.append('field', this.field_name);
+			this.post("/@spontaneous/file/replace/"+this.target_id, form);
 		},
 		post: function(url, form_data) {
 			this.xhr = new XMLHttpRequest();
@@ -41,7 +41,7 @@ Spontaneous.UploadManager = (function($, S) {
 			var position = event.position;
 			this.position = position;
 			this.time = (new Date()).valueOf() - this.started;
-			this.target.upload_progress(position, this.total);
+			// this.target.upload_progress(position, this.total);
 			this.manager.upload_progress(this);
 		},
 		// When the request has successfully completed.
@@ -71,7 +71,7 @@ Spontaneous.UploadManager = (function($, S) {
 		start: function() {
 			var form = new FormData();
 			form.append('file', this.file);
-			this.post("/@spontaneous/file/wrap/"+this.target.id(), form);
+			this.post("/@spontaneous/file/wrap/"+this.target_id, form);
 		}
 	});
 	var FormUpload = new JS.Class(Upload, {
@@ -82,8 +82,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.name = "Saving...";
 		},
 		start: function() {
-			console.log(this.form_data)
-			this.post(['/@spontaneous/save', this.target.id()].join('/'), this.form_data);
+			this.post(['/@spontaneous/save', this.target_id].join('/'), this.form_data);
 		}
 	});
 	var UploadManager = {
@@ -96,6 +95,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.updater = null;
 			this.total_time = 0;
 			this.total_data = 0;
+			this.targets = {};
 			//// show progress bar to make styling easier
 			// this.init_progress_bar();
 			// this.set_bar_length('individual', 1000, 2000)
@@ -104,9 +104,20 @@ Spontaneous.UploadManager = (function($, S) {
 			// this.bars.stats.text('33Kb/s 3 mins remaining');
 		},
 		// call to append call for image replacement to queue
+		add: function(target, upload) {
+			this.pending.push(upload);
+			this.register(target);
+		},
+		register: function(target) {
+			this.targets[target.uid()] = target;
+			console.log('UploadManger.register', target.uid(), target);
+		},
+		unregister: function(target) {
+			delete this.targets[target.uid()];
+		},
 		replace: function(field, file) {
-			this.pending.push(new Upload(this, field, file));
-			console.log("UploadManager#add", field, file, this.pending);
+			this.add(field, new Upload(this, field, file))
+			console.log("UploadManager#replace", field, file, this.pending);
 			if (!this.current) {
 				this.next();
 			}
@@ -116,7 +127,7 @@ Spontaneous.UploadManager = (function($, S) {
 			for (var i = 0, ii = files.length; i < ii; i++) {
 				var file = files[i];
 				var upload = new WrapUpload(this, slot, file);
-				this.pending.push(upload);
+				this.add(slot, upload)
 			}
 			if (!this.current) {
 				this.next();
@@ -124,7 +135,7 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		form: function(content, form_data, file_size) {
 			var upload = new FormUpload(this, content, form_data, file_size);
-			this.pending.push(upload);
+			this.add(content, upload)
 			if (!this.current) {
 				this.next();
 			}
@@ -223,7 +234,7 @@ Spontaneous.UploadManager = (function($, S) {
 		time_estimate: function() {
 			var remaining = this.data_total() - this.data_completed();
 			var time = (remaining/1024) / this.rate();
-			return (Math.round(time*10)/10) + 's';
+			return (Math.round(time)) + 's';
 		},
 		set_bar_length: function(bar_name, position, total) {
 			var bar = this.bars[bar_name], percent = (position/total) * 100;
@@ -232,6 +243,10 @@ Spontaneous.UploadManager = (function($, S) {
 		upload_progress: function(upload) {
 			if (upload !== this.current) {
 				console.warn("UploadManager#upload_progress", "completed upload does not match current")
+			}
+			var target = this.targets[upload.uid];
+			if (target) {
+				target.upload_progress(upload.position, upload.total);
 			}
 			this.update_progress_bars();
 		},
@@ -242,7 +257,10 @@ Spontaneous.UploadManager = (function($, S) {
 			this.completed.push(this.current);
 			this.total_time += this.current.time;
 			this.total_data += this.current.position;
-			this.current.target.upload_complete(result);
+			var target = this.targets[upload.uid];
+			if (target) {
+				target.upload_complete(result);
+			}
 			this.current = null;
 			console.log("UploadManager#upload_complete", result, this.pending, this.completed)
 			this.next();

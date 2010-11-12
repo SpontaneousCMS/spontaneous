@@ -12,7 +12,7 @@ UI:
 - Estimated time for Uploads @done
 - Dual progress bar or have unified one only in status bar and rely in re-linking of individual progress indicators? @done
 - Should be able to drop images onto image preview in editing dialogue
-- 'Escape' should close/cancel dialogue
+- 'Escape' should close/cancel dialogue @done
 - 'Format' switch in preview view
 - Show URL in preview view
 - Back & forward buttons in preview view?
