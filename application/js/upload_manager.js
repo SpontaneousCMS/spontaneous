@@ -110,7 +110,7 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		register: function(target) {
 			this.targets[target.uid()] = target;
-			console.log('UploadManger.register', target.uid(), target);
+			// console.log('UploadManger.register', target.uid(), target);
 		},
 		unregister: function(target) {
 			delete this.targets[target.uid()];

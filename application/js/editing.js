@@ -9,6 +9,7 @@ Spontaneous.Editing = (function($, S) {
 		init: function(container) {
 			this.container = $(dom.div, {'id' : 'data_pane'});
 			this.container.hide();
+			this.page = false;
 			container.append(this.container);
 			return this;
 		},
@@ -22,9 +23,11 @@ Spontaneous.Editing = (function($, S) {
 			this.set('location', page);
 		},
 		page_loaded: function(page_data) {
+			if (this.page) { this.page.unload(); }
 			var page = new Page(page_data);
 			this.container.empty();
 			this.container.append(page.panel());
+			this.page = page;
 		},
 		hide: function() {
 			this.container.hide();

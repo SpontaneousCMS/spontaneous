@@ -6,6 +6,7 @@ Spontaneous.Content = (function($, S) {
 		initialize: function(content) {
 			this.content = content;
 		},
+
 		uid: function() {
 			return (this.container ? this.container.uid() : '') + '/' + this.content.id;
 		},
@@ -25,6 +26,12 @@ Spontaneous.Content = (function($, S) {
 				obj = obj[parts[i]];
 			}
 			return obj;
+		},
+
+		unload: function() {
+			// console.log('Content.unload', this.uid());
+			$.each(this.field_list(), function(i, f) { f.unload(); });
+			$.each(this.entries(), function(i, e) { e.unload(); });
 		},
 		field_list: function() {
 			if (!this._field_list) {

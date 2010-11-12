@@ -21,6 +21,9 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		set_value: function(new_value) {
 		},
 
+		unload: function() {
+			console.log('Field.unload', this.uid());
+		},
 		update: function(values) {
 			this.data = values;
 			this.set('value', values.processed_value);
@@ -80,6 +83,12 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 			Spontaneous.UploadManager.register(this);
 			return this.callSuper();
 		},
+		unload: function() {
+			this.callSuper();
+			this.input = null;
+			this._progress_bar = null;
+			Spontaneous.UploadManager.unregister(this);
+		},
 		upload_complete: function(values) {
 			this.progress_bar().parent().hide();
 			this.drop_target.removeClass('uploading')
@@ -114,6 +123,11 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 Spontaneous.FieldTypes.ImageField = (function($, S) {
 	var dom = S.Dom;
 	var ImageField = new JS.Class(Spontaneous.FieldTypes.FileField, {
+		unload: function() {
+			this.callSuper();
+			this.image = null;
+			this._progress_bar = null;
+		},
 		progress_bar: function() {
 			if (!this._progress_bar) {
 				var progress_outer = $(dom.div, {'class':'drop-upload-outer'}).hide();
@@ -263,4 +277,19 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 	});
 
 	return DiscountField;
+})(jQuery, Spontaneous);
+
+Spontaneous.FieldTypes.DateField = (function($, S) {
+	var dom = S.Dom;
+	var DateField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+		// get_input: function() {
+		// 	this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
+		// 	return this.input;
+		// },
+		// edit: function() {
+		// 	return this.get_input();
+		// }
+	});
+
+	return DateField;
 })(jQuery, Spontaneous);
