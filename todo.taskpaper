@@ -27,6 +27,6 @@ UI:
 
 Backend:
 
-- Lightweight config system, requirable independently
-- Config DSL without fixed keys
+- Lightweight config system, requirable independently @done
+- Config DSL without fixed keys @done
 - Fix image insertion on creation using after_save instance hook?
