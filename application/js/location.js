@@ -2,6 +2,47 @@ console.log("Loading Location...")
 
 Spontaneous.Location = (function($, S) {
 	var ajax = S.Ajax;
+
+	var State = new JS.Class({
+		initialize: function(hash) {
+			this.page_id = false;
+			if (hash) {
+				this.hash = hash.substr(1);
+				this.parse_hash();
+			}
+		},
+		// make this more sophisticated to deal with more complex state
+		parse_hash: function() {
+			var parts = this.hash.split('/')
+			parts.shift();
+			if (parts.length > 0) {
+				this.page_id = parts[0];
+			}
+		},
+		restore: function() {
+			if (this.page_id) {
+				Spontaneous.Location.load_id(this.page_id);
+			} else {
+				Spontaneous.Location.load_path('/');
+			}
+		},
+		to_hash: function() {
+			return '#/'+(this.page_id || '');
+		}
+	});
+
+	State.extend({
+		restore: function() {
+			var state = new State(window.location.hash)
+			state.restore();
+		},
+		page: function(location) {
+			var s = new State
+			s.page_id = location.id;
+			window.location.hash = s.to_hash();
+		}
+	});
+
 	var Location = new JS.Singleton({
 		include: Spontaneous.Properties,
 		init: function(callback) {
@@ -9,25 +50,28 @@ Spontaneous.Location = (function($, S) {
 				callback();
 				this.location_loaded();
 			}.bind(this);
-			ajax.get('/map', this, complete);
+			callback();
+			State.restore();
+			$(window).bind('hashchange', State.restore);
 		},
 		load_map: function() {
 		},
 		location_loaded: function(location) {
-			console.log("Location#location_loaded", location);
 			this.set('location', location);
+			State.page(location);
 		},
 		load_id: function(id) {
-			console.log("Loading id", id);
-			this.find_id(id);
+			var l = this.location();
+			if (!l || id != l.id) {
+				this.find_id(id);
+			}
 		},
 		load_path: function(path) {
-			console.log("Loading path", path);
 			this.find_path(path);
 		},
 		url: function() {
 			var l = this.location();
-			return (l ? l.url : "/");
+			return (l ? l.url : "/about");
 		},
 		location: function() {
 			return this.get('location');

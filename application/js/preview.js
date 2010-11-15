@@ -17,19 +17,19 @@ Spontaneous.Preview = (function($, S) {
 		},
 		init: function(container) {
 			this.iframe = $(dom.iframe, {"id":"preview_pane", src:S.Location.url()})
-			this.iframe.load(function() {
-				S.Preview.set({
-					'title': this.contentWindow.document.title,
-					'path': this.contentWindow.location.pathname
-				});
-				S.Location.load_path(this.contentWindow.location.pathname)
-			});
 			this.iframe.hide();
 			container.append(this.iframe);
 			return this;
 		},
 		display: function(page) {
 			this.iframe.fadeIn();
+			this.iframe.bind('load.preview', function() {
+				S.Preview.set({
+					'title': this.contentWindow.document.title,
+					'path': this.contentWindow.location.pathname
+				});
+				S.Location.load_path(this.contentWindow.location.pathname)
+			});
 			this.goto(page);
 		},
 		goto: function(page) {
@@ -37,7 +37,7 @@ Spontaneous.Preview = (function($, S) {
 			this.iframe[0].contentWindow.location.href = page.path + click_param();
 		},
 		hide: function() {
-			this.iframe.hide();
+			this.iframe.unbind('load.preview').hide();
 		},
 		show: function() {
 			this.iframe.show();
