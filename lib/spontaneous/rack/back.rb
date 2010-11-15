@@ -165,12 +165,16 @@ module Spontaneous
 
         post '/slug/:id' do
           content = Content[params[:id]]
-          content.slug = params[:slug]
-          if content.siblings.detect { |s| s.slug == content.slug }
-            409
+          if params[:slug].nil? or params[:slug].empty?
+            406 # Not Acceptable
           else
-            content.save
-            json({:path => content.path })
+            content.slug = params[:slug]
+            if content.siblings.detect { |s| s.slug == content.slug }
+              409 # Conflict
+            else
+              content.save
+              json({:path => content.path })
+            end
           end
         end
 

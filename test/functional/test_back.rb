@@ -297,6 +297,14 @@ class BackTest < Test::Unit::TestCase
       last_response.status.should == 409
       @about.reload.path.should == '/about'
     end
+    should "raise error when trying to save empty slug" do
+      post "/@spontaneous/slug/#{@about.id}", 'slug' => ''
+      last_response.status.should == 406
+      @about.reload.path.should == '/about'
+      post "/@spontaneous/slug/#{@about.id}"
+      last_response.status.should == 406
+      @about.reload.path.should == '/about'
+    end
     should "provide a list of unavailable slugs for a page" do
       get "/@spontaneous/slug/#{@about.id}/unavailable"
       assert last_response.ok?

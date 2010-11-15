@@ -96,6 +96,7 @@ Spontaneous.Page = (function($, S) {
 		save: function(slug) {
 			Spontaneous.Ajax.post('/slug/'+this.page.id(), {'slug':slug}, this, this.save_complete);
 		},
+
 		save_complete: function(response, status, xhr) {
 			if (status === 'success') {
 				this.hide_path_error();
@@ -106,6 +107,9 @@ Spontaneous.Page = (function($, S) {
 			} else {
 				if (xhr.status === 409) { // duplicate path
 					this.show_path_error();
+				}
+				if (xhr.status === 406) { // empty path
+					this.show_path_error('Invalid URL');
 				}
 			}
 		},
