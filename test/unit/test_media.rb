@@ -3,7 +3,12 @@
 require 'test_helper'
 
 class MediaTest < Test::Unit::TestCase
-
+  context "Utilitity methods" do
+    should "be able to sanitise filenames" do
+      filename = "Something with-dodgy 'characters'.many.jpg"
+      Media.to_filename(filename).should == "Something-with-dodgy-characters.many.jpg"
+    end
+  end
   context "Content items" do
     setup do
       @media_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/media"))
@@ -35,6 +40,28 @@ class MediaTest < Test::Unit::TestCase
         @instance.make_media_file(@origin_image)
         @origin_image.exist?.should be_true
         dest_image = @tmp_dir + "00101/0074/rose.jpg"
+        dest_image.exist?.should be_true
+      end
+
+      should "take honour the filename parameter when creating media files" do
+        @instance.make_media_file(@origin_image, 'crysanthemum.jpg')
+        @origin_image.exist?.should be_true
+        dest_image = @tmp_dir + "00101/0074/crysanthemum.jpg"
+        dest_image.exist?.should be_true
+      end
+
+      should "sanitise filenames" do
+        origin_image = @upload_dir + "illegal filename!.jpg"
+        FileUtils.cp(@src_image.to_s, origin_image.to_s)
+        @instance.make_media_file(origin_image)
+        dest_image = @tmp_dir + "00101/0074/illegal-filename.jpg"
+        dest_image.exist?.should be_true
+      end
+      should "sanitise custom filenames" do
+        origin_image = @upload_dir + "rose.jpg"
+        FileUtils.cp(@src_image.to_s, origin_image.to_s)
+        @instance.make_media_file(origin_image,  "other, 'illegal' filename!.jpg")
+        dest_image = @tmp_dir + "00101/0074/other-illegal-filename.jpg"
         dest_image.exist?.should be_true
       end
     end

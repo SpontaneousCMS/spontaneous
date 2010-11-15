@@ -25,6 +25,7 @@ module Spontaneous::Plugins
 
       def make_media_file(src_file, filename = nil)
         filename ||= File.basename(src_file)
+        filename = Spontaneous::Media.to_filename(filename)
         media_filepath = media_filepath(filename)
         FileUtils.mkdir_p(File.dirname(media_filepath))
         FileUtils.cp(src_file, media_filepath)

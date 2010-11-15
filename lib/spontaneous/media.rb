@@ -3,6 +3,8 @@ module Spontaneous
   class Media
     class << self
 
+      include Spontaneous::Constants
+
       def media_path(*args)
         File.join(Spontaneous.media_dir, *args)
       end
@@ -28,6 +30,14 @@ module Spontaneous
 
       def to_filepath(urlpath)
         urlpath.gsub(%r{^/media}, Spontaneous.media_dir)
+      end
+
+      def to_filename(input)
+        p = input.strip.split(/\./)
+        ext = p.last
+        n = p[0..-2].join(DOT)
+        n = n.gsub(RE_QUOTES, EMPTY).gsub(/[^\.A-Za-z0-9_-]+/, DASH).gsub(RE_FLATTEN_REPEAT, DASH).gsub(RE_FLATTEN_TRAILING, EMPTY)
+        [n, ext].join(DOT)
       end
     end
   end

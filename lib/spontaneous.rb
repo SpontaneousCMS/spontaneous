@@ -159,6 +159,8 @@ module Spontaneous
   autoload :ProxyObject, "spontaneous/proxy_object"
   autoload :Plugins, "spontaneous/plugins"
 
+  autoload :Constants, "spontaneous/constants"
+
 
   autoload :Content, "spontaneous/content"
   autoload :Page, "spontaneous/page"
