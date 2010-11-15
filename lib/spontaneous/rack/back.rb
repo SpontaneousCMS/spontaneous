@@ -166,9 +166,19 @@ module Spontaneous
         post '/slug/:id' do
           content = Content[params[:id]]
           content.slug = params[:slug]
-          content.save
-          json({:path => content.path })
+          if content.siblings.detect { |s| s.slug == content.slug }
+            409
+          else
+            content.save
+            json({:path => content.path })
+          end
         end
+
+        get '/slug/:id/unavailable' do
+          content = Content[params[:id]]
+          json(content.siblings.map { |c| c.slug })
+        end
+
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)
         end

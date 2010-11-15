@@ -11,6 +11,8 @@
 @highlight_g: 108;
 @highlight_b: 3;
 
+@error: #f00;
+
 @content-font-family:  "HelveticaNeue", "Helvetica Neue";
 @headline-font-family:  "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue";
 @interface-font-family: "HelveticaNeue", "Helvetica Neue";
@@ -58,6 +60,11 @@
 	border-top-right-radius: @radius;
 }
 
+.rounded-right (@radius: 4px) {
+	-webkit-border-radius: 0 @radius @radius 0;
+	-moz-border-radius: 0 @radius @radius 0;
+	border-radius: 0 @radius @radius 0;
+}
 .shadow {
   -webkit-box-shadow: 0px 3px 30px #ccc;
   -moz-box-shadow: 0px 3px 30px #ccc;
@@ -180,6 +187,7 @@ a {
 	right: 0;
 	left: 0;
 	display: block;
+	border-bottom: solid 1px #000;
 	#navigation {
 		font-size: 11px;
 		font-weight: bold;
@@ -258,7 +266,7 @@ a {
 		.container-padding;
 		.vertical-gradient(#3a3a3a, #222222);
 		height: 64px - 14px;
-		padding-top: 10px;
+		padding-top: 14px;
 		position: relative;
 		h1, h3 {
 			position: relative;
@@ -279,20 +287,43 @@ a {
 			text-transform: none;
 		}
 		.path {
-			padding-top: 6px;
+			/*padding-top: 6px;*/
+			position: absolute;
+			bottom: 10px;
 		}
 
 		.path {
 			.edit {
-				input[type="text"] {
-					.rounded;
-					width: 300px;
-					border: none;
-					outline: none;
-					padding: 4px 4px;
-					height: 16px;
+				.input-error {
+					position: relative;
+					top: 0;
 					vertical-align: top;
 					margin-left: 8px;
+					input[type="text"], span {
+						height: 16px;
+						padding: 4px;
+					}
+					input[type="text"] {
+						.rounded;
+						font-weight: bold;
+						width: 400px;
+						border: none;
+						outline: none;
+						vertical-align: top;
+					}
+					span {
+						.rounded-right;
+						padding-left: 8px;
+						padding-right: 8px;
+						background-color: @error;
+						position: absolute;
+						right: -1px;
+						top: 0;
+						color: #fff;
+					}
+				}
+				input[type="text"].error {
+					color: @error;
 				}
 				.button {
 					padding-left: 20px;
@@ -307,11 +338,15 @@ a {
 				}
 				a.path {
 					color: #c1c1c1;
-					margin-right: 2px;
+					margin-right: 1px;
+					:hover {
+						color: #fff;
+					}
 				}
+				
 				span {
 					color: #bbb;
-					margin-right: 2px;
+					margin-right: 1px;
 				}
 			}
 		}
@@ -543,6 +578,7 @@ a {
 		}
 		li:hover,
 		li.active {
+			/*.vertical-gradient(#3a3a3a, #222222);*/
 			.vertical-gradient(@highlight + #111, @highlight);
 			background-color: @highlight;
 			color: #fff;

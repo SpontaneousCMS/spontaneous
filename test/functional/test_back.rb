@@ -292,6 +292,17 @@ class BackTest < Test::Unit::TestCase
       @about.path.should == "/howabout"
       last_response.body.json.should == {:path => '/howabout' }
     end
+    should "raise error when trying to save duplicate path" do
+      post "/@spontaneous/slug/#{@about.id}", 'slug' => 'projects'
+      last_response.status.should == 409
+      @about.reload.path.should == '/about'
+    end
+    should "provide a list of unavailable slugs for a page" do
+      get "/@spontaneous/slug/#{@about.id}/unavailable"
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      last_response.body.json.should == %w(projects products)
+    end
   end
 end
 
