@@ -136,6 +136,10 @@ module Spontaneous
         }
       end
 
+      def inspect
+        %(#<#{self.class.name}:#{self.object_id} #{self.serialize.inspect}>)
+      end
+
       protected
 
       def load(attributes={}, from_db=false)
@@ -172,9 +176,6 @@ module Spontaneous
         @unprocessed_value = value
       end
 
-      def inspect
-        %(#<#{self.class.name}:#{self.object_id} #{self.serialize.inspect}>)
-      end
     end
   end
 end

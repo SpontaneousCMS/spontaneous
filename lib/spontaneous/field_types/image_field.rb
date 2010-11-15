@@ -12,8 +12,12 @@ module Spontaneous
         %w{image/(png|jpeg|gif)}
       end
 
-      def self.sizes(sizes={})
-        @size_definitions = validate_sizes(sizes)
+      def self.sizes(sizes=nil)
+        if sizes
+          @size_definitions = validate_sizes(sizes)
+        else
+          size_definitions
+        end
       end
 
       def self.validate_sizes(sizes)
@@ -23,6 +27,10 @@ module Spontaneous
 
       def self.size_definitions
         @size_definitions ||= {}
+      end
+
+      def has_attribute?(attribute_name)
+        super || self.class.size_definitions.key?(attribute_name)
       end
 
       def attribute_get(attribute)
@@ -58,7 +66,6 @@ module Spontaneous
         unprocessed_value
       end
 
-      # takes a path to a newly uploaded image in Spontaneous.media_dir
       def process(image_path)
         filename = nil
         case image_path
