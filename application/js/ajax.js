@@ -37,4 +37,4 @@ Spontaneous.Ajax = (function($, S) {
 			return this.namespace + url;
 		}
 	};
-})(jQuery, Spontaneous);
+}(jQuery, Spontaneous));

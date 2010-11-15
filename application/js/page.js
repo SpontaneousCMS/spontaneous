@@ -55,8 +55,6 @@ Spontaneous.Page = (function($, S) {
 				input_and_error.append(error);
 				edit.append(input_and_error);
 				var submit = function() {
-					// TODO: test url for uniqueness
-					// if it's safe then save it
 					this.save(input.val());
 				}.bind(this);
 				edit.append($(dom.a, {'class':'button'}).text('Save').click(submit));
@@ -99,7 +97,6 @@ Spontaneous.Page = (function($, S) {
 			Spontaneous.Ajax.post('/slug/'+this.page.id(), {'slug':slug}, this, this.save_complete);
 		},
 		save_complete: function(response, status, xhr) {
-			console.warn('FunctionBar.save_complete', response, status, xhr)
 			if (status === 'success') {
 				this.hide_path_error();
 				var view = $('h3', this.panel), edit = $('.edit', this.panel);
@@ -108,7 +105,6 @@ Spontaneous.Page = (function($, S) {
 				this.close();
 			} else {
 				if (xhr.status === 409) { // duplicate path
-					console.warn('FunctionBar.save_complete', 'duplicate', status)
 					this.show_path_error();
 				}
 			}
