@@ -5,19 +5,19 @@ if (!window.console) {
 		error: function() {},
 	};
 } else {
-	var debug = Spontaneous.debug;
-	window.__console = window.console;
-	window.console = {
-		log: function() {
-			if (debug) { window.__console.log.apply(window.__console, arguments); }
-		},
-		warn: function() {
-			if (debug) { window.__console.warn.apply(window.__console, arguments); }
-		},
-		error: function() {
-			if (debug) { window.__console.error.apply(window.__console, arguments); }
-		}
-	};
+	// var debug = Spontaneous.debug;
+	// window.__console = window.console;
+	// window.console = {
+	// 	log: function() {
+	// 		if (debug) { window.__console.log.apply(window.__console, arguments); }
+	// 	},
+	// 	warn: function() {
+	// 		if (debug) { window.__console.warn.apply(window.__console, arguments); }
+	// 	},
+	// 	error: function() {
+	// 		if (debug) { window.__console.error.apply(window.__console, arguments); }
+	// 	}
+	// };
 }
 
 console.log('Loading Extensions...')
