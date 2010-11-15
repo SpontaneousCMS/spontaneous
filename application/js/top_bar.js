@@ -72,6 +72,15 @@ Spontaneous.TopBar = (function($, S) {
 				select.append($(dom.option, {'value': p.id, 'selected':(i == this.selected) }).text(p.title).data('page', p))
 			};
 			li.append(select);
+			// select.hide();
+			// var link = $(dom.li).append($('<a/>').data('page', this.page).click(function() {
+			// 	// var page = $(this).data('page');
+			// 	// S.Location.load_id(page.id);
+			// 	select.toggle().trigger('click');
+			// }).text(this.title));
+			// 
+			// link.append(select);
+			// return link;
 			return li;
 		}
 	}
@@ -87,8 +96,8 @@ Spontaneous.TopBar = (function($, S) {
 	ChildrenNode.prototype = {
 		element: function() {
 			var li = $(dom.li);
-			var select = $(dom.select);
-			select.append($(dom.option));
+			var select = $(dom.select, {'class':'unselected'});
+			select.append($(dom.option).text('('+(this.children.length)+' pages)'));
 			select.change(function() {
 				var p = $(this.options[this.selectedIndex]).data('page');
 				console.log(p, p.id)

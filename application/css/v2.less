@@ -202,6 +202,31 @@ a {
 			float: left;
 			display: block;
 			font-weight: bold;
+			select {
+				.box-sizing;
+				.interface;
+				text-transform: none;
+				font-size: 11px;
+				-webkit-appearance: none;
+				cursor: pointer;
+				display: block;
+				background: transparent url('/@spontaneous/static/select-arrow.png') 95% 50% no-repeat;
+				border: none;
+				outline: none;
+				position: relative;
+				padding-top: 0px;
+				padding-right: 25px;
+				height: 31px;
+				color: #888;
+				font-weight: bold;
+				width: 100%;
+			}
+			select.unselected {
+				color: #555;
+				font-weight: normal;
+				font-style: italic;
+				max-width: 80px;
+			}
 			a {
 				.box-sizing;
 				cursor: pointer;
@@ -212,7 +237,8 @@ a {
 				background: url('/@spontaneous/static/select-arrow.png') right 50% no-repeat;
 				padding-right: 16px;
 			}
-			a:hover {
+
+			a:hover, select:hover {
 				color: #fff;
 			}
 		}
