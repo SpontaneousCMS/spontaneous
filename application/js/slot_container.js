@@ -29,7 +29,7 @@ Spontaneous.SlotContainer = (function($, S) {
 					li.text(slot.name())
 					li.append($(dom.span, {'class':'down'}));
 					var click = function(index) {
-						this.activate(index);
+						this.activate(index, true);
 					}.bind(this, i);
 					li.click(click);
 					bar.append(li);
@@ -38,7 +38,7 @@ Spontaneous.SlotContainer = (function($, S) {
 			}
 			return this._tab_bar;
 		},
-		activate: function(slot_index) {
+		activate: function(slot_index, manually) {
 			var slot = this.slots()[slot_index];
 			if (slot === this._active_slot) { return; }
 			// console.log("SlotContainer#activate", slot_index);
@@ -46,6 +46,9 @@ Spontaneous.SlotContainer = (function($, S) {
 			$('li:nth-child('+(slot_index+1)+')', this.tab_bar()).addClass('active')
 			slot.activate();
 			this._active_slot = slot;
+			if (manually) {
+				this.content.set('slot', slot);
+			}
 		},
 		slots: function() {
 			if (!this._slots) {

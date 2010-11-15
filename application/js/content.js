@@ -3,6 +3,8 @@ console.log('Loading Content...')
 Spontaneous.Content = (function($, S) {
 
 	var Content = new JS.Class({
+		include: Spontaneous.Properties,
+
 		initialize: function(content) {
 			this.content = content;
 		},

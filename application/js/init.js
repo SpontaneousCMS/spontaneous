@@ -23,6 +23,8 @@ Spontaneous.Init = (function($, S) {
 
 			TopBar.add_listener('mode',       ContentArea, 'display');
 
+			Editing.add_listener('page', Location, 'page_loaded');
+
 			Dom.body().append(TopBar.panel());
 			Dom.body().append(ContentArea.init());
 			Dom.body().append(StatusBar.init());

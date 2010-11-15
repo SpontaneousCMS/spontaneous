@@ -29,6 +29,7 @@ Spontaneous.Editing = (function($, S) {
 			this.container.empty();
 			this.container.append(page.panel());
 			this.page = page;
+			this.set('page', page);
 		},
 		hide: function() {
 			this.container.hide();
