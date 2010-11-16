@@ -272,5 +272,16 @@ class SlotsTest < Test::Unit::TestCase
       #   @instance.posts.should == @instance.slots.first
       # end
     end
+
+    context "addition of slots" do
+      should "be possible after creation" do
+        SlotClass.slot :posts
+        instance = SlotClass.new
+        instance.save
+        SlotClass.slot :images
+        instance = SlotClass[instance.id]
+        instance.images.should_not be_nil
+      end
+    end
   end
 end
