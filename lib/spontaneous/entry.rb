@@ -5,11 +5,13 @@ module Spontaneous
   class Entry < ProxyObject
 
     def self.find_target(container, id)
-      if container.page
-        container.page.facets.find { |f| f.id == id }
-      else
-        Content[id]
-      end
+      Content[id]
+      ## the following results in infinite loops in some circumstances
+      # if container.page
+      #   container.page.facets.find { |f| f.id == id }
+      # else
+      #   Content[id]
+      # end
     end
 
     def self.page(container, page, entry_style)
