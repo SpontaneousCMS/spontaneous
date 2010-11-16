@@ -16,7 +16,8 @@ Spontaneous.SlotContainer = (function($, S) {
 
 			wrapper.append(this.tab_bar());
 			wrapper.append(this.slot_content_container);
-			this.activate(0);
+			var s = Spontaneous.State.active_slot(this.content);
+			this.activate_id(s);
 			return wrapper;
 		},
 		tab_bar: function() {
@@ -41,14 +42,27 @@ Spontaneous.SlotContainer = (function($, S) {
 		activate: function(slot_index, manually) {
 			var slot = this.slots()[slot_index];
 			if (slot === this._active_slot) { return; }
-			// console.log("SlotContainer#activate", slot_index);
 			$('li', this.tab_bar()).removeClass('active');
 			$('li:nth-child('+(slot_index+1)+')', this.tab_bar()).addClass('active')
 			slot.activate();
 			this._active_slot = slot;
 			if (manually) {
+				Spontaneous.State.activate_slot(this.content, slot);
 				this.content.set('slot', slot);
 			}
+		},
+		activate_id: function(id) {
+			if (id) {
+				for (var i = 0, ss = this.slots(), ii = ss.length; i < ii; i++) {
+					var s = ss[i];
+					if (ss[i].id() === id) {
+						this.activate(i);
+						return;
+					}
+				}
+			}
+			// just in case
+			this.activate(0);
 		},
 		slots: function() {
 			if (!this._slots) {
