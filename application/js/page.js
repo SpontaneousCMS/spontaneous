@@ -64,7 +64,7 @@ Spontaneous.Page = (function($, S) {
 					} else {
 						var v = this.input.val();
 						// do some basic cleanup -- proper cleanup is done on the server-side
-						v = v.toLowerCase().replace(/['"]/g, '');
+						v = v.toLowerCase().replace(/['"]/g, '').replace(/\&/, 'and');
 						v = v.replace(/[^\w0-9+]/g, '-').replace(/(\-+|\s+)/g, '-').replace(/(^\-)/, '');
 						this.input.val(v);
 						if (v === '') {
@@ -77,7 +77,8 @@ Spontaneous.Page = (function($, S) {
 							}
 						}
 					}
-					// if (event.keyCode === 27) { this.close(); }
+				}.bind(this)).keydown(function(event) {
+					if (event.keyCode === 27) { this.close(); }
 				}.bind(this));
 				this.input = input;
 				this.error = error;

@@ -37,7 +37,6 @@ Spontaneous.Types = (function($, S) {
 							types[id] = new Type(data[id]);
 						}
 					}
-					console.log(types)
 					Spontaneous.Types.set('types', types);
 					if (callback) { callback.call(type_map); };
 				};

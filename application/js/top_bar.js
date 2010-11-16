@@ -100,7 +100,6 @@ Spontaneous.TopBar = (function($, S) {
 			select.append($(dom.option).text('('+(this.children.length)+' pages)'));
 			select.change(function() {
 				var p = $(this.options[this.selectedIndex]).data('page');
-				console.log(p, p.id)
 				if (p) {
 					S.Location.load_id(p.id);
 				}
@@ -136,7 +135,6 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		switch_modes: function() {
 			var m = this.get('mode');
-			console.log('switching mode from', m)
 			this.set('mode', this.opposite_mode(m));
 			this.mode_switch.text(m);
 		},
@@ -149,7 +147,6 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		location_changed: function(new_location) {
 			document.title = "Editing: '{title}'".replace("{title}", new_location.title);
-			console.log("TopBar#location_changed", new_location);
 			this.set('location', new_location);
 			this.update_navigation();
 		},
