@@ -4,7 +4,7 @@ gem "sequel", "~>3.16"
 gem 'mysql2', '~>0.2'
 gem "yajl-ruby", "~>0.7", :require => 'yajl'
 gem "erubis", "~>2.6"
-# gem "tenjin", "~> 0.6.1"
+gem "tenjin", "~> 0.6.1"
 gem "sinatra", "~>1.0"
 # gem "shotgun", "0.6"
 # use specific commit with fixes for 1.8.6 until new version is released
