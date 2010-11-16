@@ -1,5 +1,7 @@
 module Spontaneous::Cutaneous
   class Preprocessor < Tenjin::Preprocessor
+    include TemplateCore
+
     ## {% ruby_code %}
     STMT_PATTERN = /\{%( |\t|\r?\n)(.*?) *%\}([ \t]*\r?\n)?/m
 

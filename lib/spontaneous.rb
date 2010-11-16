@@ -96,11 +96,15 @@ module Spontaneous
     end
 
     def template_root=(template_root)
-      @template_root = template_root
+      @template_root = File.expand_path(template_root)
     end
 
     def template_root
       @template_root ||= root / "templates"
+    end
+
+    def template_path(*args)
+      File.join(template_root, *args)
     end
 
     def schema_root=(schema_root)

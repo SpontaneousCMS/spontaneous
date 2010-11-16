@@ -1,5 +1,7 @@
 module Spontaneous::Cutaneous
   class Template < Tenjin::Template
+    include TemplateCore
+
     ## %{ ruby_code }
     STMT_PATTERN = /%\{( |\t|\r?\n)(.*?) *\}(?:[ \t]*\r?\n)?/m
 
