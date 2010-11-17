@@ -16,30 +16,26 @@ module Spontaneous::Cutaneous
       _block_positions[block_name] = self._buf.length
       _block_level << block_name
 
-      if _block_content.key?(block_name) 
-        puts "using saved block :#{block_name} #{_block_content[block_name].inspect}"
-        @_buf << _block_content[block_name]
+      # if _block_content.key?(block_name) 
+        # puts "using saved block :#{block_name} #{_block_content[block_name].inspect}"
         # _block_positions[block_name] = self._buf.length
         # _block_level << block_name
         # _block_content[block_name] = ''
         nil
-      else
+      # else
         if block_given?
           yield
           output = endblock
-          if _layout.nil?
-            @_buf << output
-          end
           nil
         else
           nil
         end
-      end
+      # end
     end
 
     def endblock(_block_name=nil)
-      # the _block_name param is ignored though could throw warning
-      block_name = _block_level.pop || _block_name
+      # the _block_name param is ignored though could throw warning if the two are different
+      block_name = _block_level.pop
       puts "endblock #{block_name}"
       return unless block_name
       p @_buf
@@ -49,9 +45,17 @@ module Spontaneous::Cutaneous
         p self._buf
       start_position = _block_positions[block_name]
       p start_position
-      output = self._buf[start_position..-1]
-      self._buf[start_position..-1] = ''
-      _block_content[block_name] = output
+      output = @_buf[start_position..-1]
+      @_buf[start_position..-1] = ''
+      if _block_content.key?(block_name)
+        @_buf << _block_content[block_name]
+      else
+        if _layout.nil?
+          @_buf << output
+        else
+          _block_content[block_name] = output
+        end
+      end
       p _block_content
       puts "-"*10
       output

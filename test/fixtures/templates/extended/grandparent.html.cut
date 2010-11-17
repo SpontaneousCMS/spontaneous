@@ -1,10 +1,10 @@
-{% block :title do %}Grandparent Title{% end %}
-{% block :navigation do %}
+{% block :title %}Grandparent Title{% endblock %}
+{% block :navigation  %}
 Grandparent Nav
-{% end %}
-{% block :body do %}
+{% endblock %}
+{% block :body  %}
 Grandparent Body
-{% end %}
-{% block :footer do %}
+{% endblock %}
+{% block :footer %}
 Grandparent Footer
-{% end %}
+{% endblock %}

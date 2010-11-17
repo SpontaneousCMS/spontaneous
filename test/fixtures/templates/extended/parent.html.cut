@@ -1,8 +1,8 @@
 {% extends 'grandparent' %}
-{% block :title do %}Parent Title{% end %}
-{% block :body do %}
+{% block :title  %}Parent Title{% endblock %}
+{% block :body  %}
 Parent Body
-{% end %}
-{% block :footer do %}
+{% endblock %}
+{% block :footer  %}
 Parent Footer
-{% end %}
+{% endblock %}

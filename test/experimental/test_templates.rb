@@ -160,7 +160,7 @@ class TemplatesTest < Test::Unit::TestCase
     end
     should "work" do
       output = first_pass('main')
-      p output
+      puts output
       output.should == "Main Title\nGrandparent Nav\nMain Body\nParent Footer\n"
     end
   end
