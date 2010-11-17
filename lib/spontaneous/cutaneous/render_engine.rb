@@ -1,12 +1,15 @@
 module Spontaneous::Cutaneous
   class RenderEngine
 
+    def initialize(template_root)
+      @template_root = File.expand_path(template_root)
+    end
     def template_class
       # override in subclasses
     end
 
     def find_template_file(filename, format)
-      Spontaneous::Cutaneous.template_path(filename, format)
+      File.join(@template_root, Spontaneous::Cutaneous.template_name(filename, format))
     end
 
     def create_template(filepath, format)
@@ -28,7 +31,6 @@ module Spontaneous::Cutaneous
         context._buf = _buf
         unless context._layout.nil?
           layout = context._layout
-          puts layout
           context._layout = nil
         end
         break unless layout

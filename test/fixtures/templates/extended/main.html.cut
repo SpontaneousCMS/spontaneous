@@ -1,5 +1,5 @@
 {% extends 'parent' %}
-{% block :title %}Main Title{% endblock %}
+{% block :title %}Main Title #{page.title}{% endblock %}
 {% block :body do %}
 Main Body
 {% end %}

@@ -2,7 +2,10 @@
 module Spontaneous
   module Cutaneous
     def self.template_path(filename, format)
-      Spontaneous.template_path("#{filename}.#{format}.#{self.extension}")
+      Spontaneous.template_path(template_name(filename, format))
+    end
+    def self.template_name(filename, format)
+      "#{filename}.#{format}.#{self.extension}"
     end
     def self.extension
       'cut'

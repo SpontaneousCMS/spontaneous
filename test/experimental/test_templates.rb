@@ -5,28 +5,23 @@ require 'test_helper'
 
 class TemplatesTest < Test::Unit::TestCase
 
-  def first_pass(filename, context=nil)
+  def first_pass(base_dir, filename, context=nil)
     context ||= @context
-    Cutaneous::FirstRenderEngine.new.render(filename, context)
+    Cutaneous::FirstRenderEngine.new(template_root(base_dir)).render(filename, context)
   end
 
-  def second_pass(filename, context=nil)
+  def second_pass(base_dir, filename, context=nil)
     context ||= @context
-    Cutaneous::SecondRenderEngine.new.render(filename, context)
+    Cutaneous::SecondRenderEngine.new(template_root(base_dir)).render(filename, context)
   end
 
+  def template_root(base_dir)
+    @template_root ||= File.join(File.dirname(__FILE__), '../fixtures/templates', base_dir)
+  end
 
   def setup
     @klass = Class.new(Object) do
       include Cutaneous::ContextHelper
-
-      def initialize(format)
-        @format = format
-      end
-
-      def format
-        @format
-      end
 
       def escape(val)
         CGI.escapeHTML(val)
@@ -105,44 +100,44 @@ class TemplatesTest < Test::Unit::TestCase
   end
 
   context "Content rendering" do
-    setup do
-      @saved_template_root = Spontaneous.template_root
-      Spontaneous.template_root = File.join(File.dirname(__FILE__), '../fixtures/templates/content')
-    end
+    # setup do
+    #   @saved_template_root = Spontaneous.template_root
+    #   Spontaneous.template_root = File.join(File.dirname(__FILE__), '../fixtures/templates/content')
+    # end
 
-    teardown do
-      Spontaneous.template_root = @saved_template_root
-    end
+    # teardown do
+    #   Spontaneous.template_root = @saved_template_root
+    # end
 
     should "render" do
-      output = first_pass('template')
+      output = first_pass('content', 'template')
       output.should == "<html><title>THE TITLE</title></html>\n"
     end
 
     should "preprocess" do
-      output = first_pass('preprocess')
+      output = first_pass('content', 'preprocess')
       output.should == "<html><title>THE TITLE</title>\#{bell}</html>\n"
     end
 
     should "include imports" do
-      output = first_pass('include')
+      output = first_pass('content', 'include')
       output.should == "<html>\#{bell}ding\n</html>\n"
     end
 
     should "include imports in sub-directories" do
-      output = first_pass('include_dir')
+      output = first_pass('content', 'include_dir')
       output.should == "<html>\#{bell}ding\n</html>\n"
     end
 
     should "preserve the format across includes" do
       context = @klass.new(:epub)
       context.format.should == :epub
-      output = first_pass('template', context)
+      output = first_pass('content', 'template', context)
       output.should == "<epub><epub>\#{bell}ding</epub>\n</epub>\n"
     end
 
     should "render a second pass" do
-      output = second_pass('second')
+      output = second_pass('content', 'second')
       output.should == "<html><title>THE TITLE</title>ding</html>\n"
     end
 
@@ -151,17 +146,57 @@ class TemplatesTest < Test::Unit::TestCase
   context "Template hierarchy" do
 
     setup do
-      @saved_template_root = Spontaneous.template_root
-      Spontaneous.template_root = File.join(File.dirname(__FILE__), '../fixtures/templates/extended')
     end
 
-    teardown do
-      Spontaneous.template_root = @saved_template_root
-    end
     should "work" do
-      output = first_pass('main')
-      puts output
-      output.should == "Main Title\nGrandparent Nav\nMain Body\nParent Footer\n"
+      output = first_pass('extended', 'main')
+      output.should == "Main Title \#{page.title}\nGrandparent Nav\nMain Body\nParent Footer\n"
+    end
+  end
+
+  context "Output conversion" do
+    setup do
+
+      @context_class = Class.new(Object) do
+        include Cutaneous::ContextHelper
+
+        def escape(val)
+          CGI.escapeHTML(val)
+        end
+
+        def monkey
+          "magic"
+        end
+
+        def field
+          @klass ||= Class.new(Object) do
+            attr_accessor :format
+            def to_html
+              "(#{format})"
+            end
+
+            def to_s
+              "'#{format}'"
+            end
+          end
+          @klass.new.tap { |i| i.format = format }
+        end
+      end
+      @template = Cutaneous::Preprocessor.new
+    end
+
+    should "call render(format) on non-strings" do
+      context = @context_class.new(:html)
+      @template.convert('{{field}} {{ monkey }}')
+      output = @template.render(context)
+      output.should == "(html) magic"
+    end
+
+    should "call render(format) on non-strings" do
+      context = @context_class.new(:weird)
+      @template.convert('{{field}} {{ monkey }}')
+      output = @template.render(context)
+      output.should == "'weird' magic"
     end
   end
 end
