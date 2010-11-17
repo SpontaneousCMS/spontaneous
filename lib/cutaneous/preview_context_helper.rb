@@ -1,4 +1,4 @@
-module Spontaneous::Cutaneous
+module Cutaneous
   module PreviewContextHelper
     include ContextHelper
 

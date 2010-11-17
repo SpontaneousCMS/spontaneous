@@ -4,7 +4,6 @@ require 'test_helper'
 
 
 class TemplatesTest < Test::Unit::TestCase
-
   def first_pass(base_dir, filename, context=nil)
     context ||= @context
     Cutaneous::FirstRenderEngine.new(template_root(base_dir)).render(filename, context)

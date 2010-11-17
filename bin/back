@@ -7,6 +7,7 @@ Bundler.require
 
 $:.unshift(File.expand_path(File.dirname(__FILE__) + '/../lib'))
 require 'spontaneous'
+require 'cutaneous'
 require 'thin'
 
 env = (ENV['SPON_ENV'] || 'development').to_sym

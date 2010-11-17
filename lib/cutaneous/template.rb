@@ -1,4 +1,4 @@
-module Spontaneous::Cutaneous
+module Cutaneous
   class Template < Tenjin::Template
     include TemplateCore
 

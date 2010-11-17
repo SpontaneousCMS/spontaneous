@@ -1,4 +1,4 @@
-module Spontaneous::Cutaneous
+module Cutaneous
   class RenderEngine
 
     def initialize(template_root)
@@ -6,7 +6,7 @@ module Spontaneous::Cutaneous
     end
 
     def extension
-      Spontaneous::Cutaneous.extension
+      Cutaneous.extension
     end
 
     def template_class
@@ -14,7 +14,7 @@ module Spontaneous::Cutaneous
     end
 
     def template_file(filename, format)
-      File.join(@template_root, Spontaneous::Cutaneous.template_name(filename, format))
+      File.join(@template_root, Cutaneous.template_name(filename, format))
     end
 
     def template_path(filename)

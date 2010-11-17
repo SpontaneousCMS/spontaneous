@@ -192,7 +192,6 @@ module Spontaneous
   autoload :Rack, "spontaneous/rack"
 
   autoload :Render, "spontaneous/render"
-  autoload :Cutaneous, "spontaneous/cutaneous"
   autoload :Templates, "spontaneous/templates"
   autoload :Media, "spontaneous/media"
 

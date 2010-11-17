@@ -1,4 +1,4 @@
-module Spontaneous::Cutaneous
+module Cutaneous
   class Preprocessor < Tenjin::Preprocessor
     include TemplateCore
 

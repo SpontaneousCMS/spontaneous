@@ -22,6 +22,7 @@ DB = Sequel.connect('mysql2://root@localhost/spontaneous2_test') unless defined?
 Sequel::Migrator.apply(DB, 'db/migrations')
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spontaneous')
+require File.expand_path(File.dirname(__FILE__) + '/../lib/cutaneous')
 
 require 'test/unit'
 require 'rack/test'

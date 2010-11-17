@@ -1,5 +1,5 @@
 
-module Spontaneous::Cutaneous
+module Cutaneous
   module ContextHelper
     include Tenjin::ContextHelper
     ## override this in implementations

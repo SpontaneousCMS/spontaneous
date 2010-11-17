@@ -5,7 +5,7 @@ module Spontaneous
   module Render
     class << self
       def engine_class
-        @engine_class ||= Spontaneous::Cutaneous::FirstRenderEngine
+        @engine_class ||= Cutaneous::FirstRenderEngine
       end
 
       def engine_class=(klass)
@@ -27,7 +27,7 @@ module Spontaneous
       end
 
       def context_helper_module
-        @context_helper_module ||= Spontaneous::Cutaneous::ContextHelper
+        @context_helper_module ||= Cutaneous::ContextHelper
       end
 
       def context_helper_module=(helper_module)

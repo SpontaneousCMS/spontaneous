@@ -1,4 +1,4 @@
-module Spontaneous::Cutaneous
+module Cutaneous
   module TemplateCore
     def self.included(base)
       base.extend(ClassMethods)

@@ -1,5 +1,5 @@
 
-<h3><a href="<%= path %>"><%= title %></a></h3>
+<h3><a href="{{ path }}">{{ title }}</a></h3>
 
-<%= description %>
+{{ description }}
 <hr />

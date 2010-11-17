@@ -1,8 +1,8 @@
-module Spontaneous::Cutaneous
+module Cutaneous
   class FirstRenderEngine < RenderEngine
 
     def template_class
-      Spontaneous::Cutaneous::Preprocessor
+      Cutaneous::Preprocessor
     end
 
   end

@@ -1,6 +1,6 @@
 <hr />
-<h3><%= title %></h3>
+<h3>{{ title }}</h3>
 <div class="projects">
-	<%= render_content %>
+	{{ render_content }}
 </div>
 
