@@ -192,7 +192,7 @@ class TemplatesTest < Test::Unit::TestCase
       output.should == "(html) magic"
     end
 
-    should "call render(format) on non-strings" do
+    should "call to_s on non-strings that have no specific handler" do
       context = @context_class.new(:weird)
       @template.convert('{{field}} {{ monkey }}')
       output = @template.render(context)

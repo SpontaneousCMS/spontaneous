@@ -31,15 +31,16 @@ class ConfigTest < Test::Unit::TestCase
       @pwd = Dir.pwd
       Dir.chdir(File.expand_path("../../fixtures/example_application", __FILE__))
       @lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../../../../lib'))
-      defined?(Spontaneous).should be_nil
+      # defined?(Spontaneous).should be_nil
+      # Object.send(:remove_const, :Spontaneous) rescue nil
+      # defined?(Spontaneous).should be_nil
       load @lib_dir + '/spontaneous/config.rb'
       Config = ::Spontaneous::Config
+      Config.environment = :development
     end
 
     teardown do
-      Object.send(:remove_const, :Spontaneous) rescue nil
       self.class.send(:remove_const, :Config)
-      defined?(Spontaneous).should be_nil
     end
 
     should "be run from application dir" do
