@@ -11,6 +11,15 @@ module Spontaneous::Cutaneous
       @format = format
       super(filepath)
     end
+
+    def convert_file(filename)
+      if filename.is_a?(Proc)
+        convert(filename.call, filename.to_s)
+      else
+        convert(File.read(filename), filename)
+      end
+    end
+    
   end
 end
 

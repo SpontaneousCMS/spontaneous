@@ -31,33 +31,28 @@ class StylesTest < Test::Unit::TestCase
     end
 
     should "derive path from owning class and name" do
-      @style.directory.should == "#{template_root}/template_class"
+      @style.directory.should == "template_class"
     end
 
     should "derive template filename from given name & format" do
-      @style.filename.should == "this_template.html.erb"
-      @style.filename(:pdf).should == "this_template.pdf.erb"
+      @style.filename.should == "this_template.html.cut"
+      @style.filename(:pdf).should == "this_template.pdf.cut"
     end
 
     should "have correct path for template file" do
-      @style.path(:html).should == "#{template_root}/template_class/this_template.html.erb"
+      @style.path(:html).should == "template_class/this_template"
     end
 
     should "be able to give a list of available formats" do
       @style.formats.should == [:epub, :html, :pdf]
     end
 
-    should "return a template for a given format" do
-      template = @style.template(:pdf)
-      template.filename.should == "this_template.pdf.erb"
-      template.path.should == "#{template_root}/template_class/this_template.pdf.erb"
-    end
+    # should "return a template for a given format" do
+    #   template = @style.template(:pdf)
+    #   template.filename.should == "this_template.pdf.cut"
+    #   template.path.should == "#{template_root}/template_class/this_template.pdf.cut"
+    # end
 
-    should "always return the same template object for a particular format" do
-      template1 = @style.template(:pdf)
-      template2 = @style.template(:pdf)
-      template1.object_id.should == template2.object_id
-    end
 
     should "raise an error if we try to initialize with an unsupported format" do
       # disabled because it makes testing styles more difficult
@@ -79,7 +74,7 @@ class StylesTest < Test::Unit::TestCase
       should "have configurable filenames" do
         @class.inline_style :simple, :filename => "funky"
         t = @class.inline_styles.first
-        t.filename.should == "funky.html.erb"
+        t.filename.should == "funky.html.cut"
       end
 
       should "have sane default titles" do
@@ -175,7 +170,7 @@ class StylesTest < Test::Unit::TestCase
         class ::InlineTemplateClass < Content
           field :title
 
-          template 'title: #{title}'
+          template 'title: {{title}}'
         end
 
         @a = InlineTemplateClass.new
@@ -214,15 +209,15 @@ class StylesTest < Test::Unit::TestCase
       end
 
       should "be used when available" do
-        @with_default_style.render.should == "Title: Total Title"
+        @with_default_style.render.should == "Title: Total Title\n"
       end
 
       should "be used by slots too" do
-        @without_default_style.with_style.render.should == "Title: Slot Title"
+        @without_default_style.with_style.render.should == "Title: Slot Title\n"
       end
 
       should "fallback to anonymous style when default style template doesn't exist" do
-        @without_default_style.render.should == "Title: Slot Title"
+        @without_default_style.render.should == "Title: Slot Title\n"
       end
     end
   end

@@ -12,7 +12,9 @@ class RenderTest < Test::Unit::TestCase
 
   context "Content objects" do
     setup do
-      Spontaneous.template_root = template_root
+      Spontaneous::Render.template_root = template_root
+      Spontaneous::Render.engine_class = Cutaneous::FirstRenderEngine
+
       class ::TemplateClass < Content
         field :title do
           def to_epub
@@ -42,15 +44,15 @@ class RenderTest < Test::Unit::TestCase
     end
 
     should "be able to render themselves to HTML" do
-      @content.render.should == "<html><title>The Title</title><body>The Description</body></html>"
+      @content.render.should == "<html><title>The Title</title><body>The Description</body></html>\n"
     end
 
     should "be able to render themselves to PDF" do
-      @content.render(:pdf).should == "<PDF><title>The Title</title><body>{The Description}</body></PDF>"
+      @content.render(:pdf).should == "<PDF><title>The Title</title><body>{The Description}</body></PDF>\n"
     end
 
     should "be able to render themselves to EPUB" do
-      @content.render(:epub).should == "<EPUB><title>The Title</title><body>The Description</body></EPUB>"
+      @content.render(:epub).should == "<EPUB><title>The Title</title><body>The Description</body></EPUB>\n"
     end
 
     context "facet trees" do
@@ -67,11 +69,11 @@ class RenderTest < Test::Unit::TestCase
       end
 
       should "be accessible through #content method" do
-        @content.render.should == "<complex>\nThe Title\n<facet><html><title>Child Title</title><body>Child Description</body></html></facet>\n</complex>"
+        @content.render.should == "<complex>\nThe Title\n<facet><html><title>Child Title</title><body>Child Description</body></html>\n</facet>\n</complex>\n"
       end
 
       should "cascade the chosen format to all subsequent #render calls" do
-        @content.render(:pdf).should == "<pdf>\nThe Title\n<facet><PDF><title>Child Title</title><body>{Child Description}</body></PDF></facet>\n</pdf>"
+        @content.render(:pdf).should == "<pdf>\nThe Title\n<facet><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</facet>\n</pdf>\n"
       end
     end
 
@@ -90,10 +92,10 @@ class RenderTest < Test::Unit::TestCase
       end
 
       should "render slots" do
-        @content.render.should == "<slots>\n  <img><html><title>Child Title</title><body>Child Description</body></html></img>\n</slots>"
+        @content.render.should == "<slots>\n  <img><html><title>Child Title</title><body>Child Description</body></html>\n</img>\n</slots>\n"
       end
       should "render slots to alternate formats" do
-        @content.render(:pdf).should == "<slots-pdf>\n  <img><PDF><title>Child Title</title><body>{Child Description}</body></PDF></img>\n</slots-pdf>"
+        @content.render(:pdf).should == "<slots-pdf>\n  <img><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</img>\n</slots-pdf>\n"
       end
     end
 
@@ -106,7 +108,7 @@ class RenderTest < Test::Unit::TestCase
 
         class ::AnImage < Content; end
         AnImage.field :title
-        AnImage.template '<img>#{title}</img>'
+        AnImage.template '<img>{{title}}</img>'
 
         @root = TemplateClass.new
         @root.images.introduction = "Images below:"
@@ -123,7 +125,7 @@ class RenderTest < Test::Unit::TestCase
       end
 
       should "render using anonymous style" do
-        @root.render.should == "<root>\nImages below:\n<img>Image 1</img>\n<img>Image 2</img>\n</root>"
+        @root.render.should == "<root>\nImages below:\n<img>Image 1</img>\n<img>Image 2</img>\n</root>\n"
       end
     end
 
@@ -136,7 +138,7 @@ class RenderTest < Test::Unit::TestCase
 
         class ::AnImage < Content; end
         AnImage.field :title
-        AnImage.template '<img>#{title}</img>'
+        AnImage.template '<img>{{title}}</img>'
 
         @root = TemplateClass.new
         @root.images_with_template.introduction = "Images below:"
@@ -147,12 +149,13 @@ class RenderTest < Test::Unit::TestCase
         @root.images_with_template << @image1
         @root.images_with_template << @image2
       end
+
       teardown do
         Object.send(:remove_const, :AnImage)
       end
 
       should "render using default style if present" do
-        @root.render.should == "<root>\nImages below:\n<images>\n  <img>Image 1</img>\n  <img>Image 2</img>\n</images>\n</root>"
+        @root.render.should == "<root>\nImages below:\n<images>\n  <img>Image 1</img>\n  <img>Image 2</img>\n</images>\n\n</root>\n"
       end
     end
   end

@@ -2,8 +2,7 @@
 module Spontaneous::Cutaneous
   module ContextHelper
     include Tenjin::ContextHelper
-    ## over-ride this in implementations
-    #
+    ## override this in implementations
     def initialize(format=:html)
       @format = format
     end
@@ -57,6 +56,9 @@ module Spontaneous::Cutaneous
         @_render_method ||= "to_#{format}".to_sym
         if param.respond_to?(@_render_method)
           param = param.send(@_render_method)
+        end
+        if param.respond_to?(:render)
+          param = param.render(format)
         end
       end
       super(param)

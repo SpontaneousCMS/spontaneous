@@ -109,7 +109,7 @@ class SlotsTest < Test::Unit::TestCase
     # should "default to the name of the slot for the style name" do
     #   SlotClass.slot :images
     #   instance = SlotClass.new
-    #   instance.images.style.filename.should == "images.html.erb"
+    #   instance.images.style.filename.should == "images.html.cut"
     # end
     should "default to a template-less style for slots without a style" do
       SlotClass.slot :images7
@@ -120,15 +120,15 @@ class SlotsTest < Test::Unit::TestCase
     should "accept a custom template name" do
       SlotClass.slot :images8, :style => :anonymous_slot
       instance = SlotClass.new
-      instance.images8.style.filename.should == "anonymous_slot.html.erb"
+      instance.images8.style.filename.should == "anonymous_slot.html.cut"
     end
 
     should "take template path from slot's parent for anonymous slots" do
       SlotClass.slot :images9, :style => :anonymous_slot
       SlotClass.slot :posts
       instance = SlotClass.new
-      instance.images9.style.path.should == "#{Spontaneous.template_root}/slot_class/anonymous_slot.html.erb"
-      # instance.posts.style.path.should #== "#{Spontaneous.template_root}/slot_class/posts.html.erb"
+      instance.images9.style.path.should == "slot_class/anonymous_slot"
+      # instance.posts.style.path.should #== "#{Spontaneous.template_root}/slot_class/posts.html.cut"
     end
 
     context "anonymous slots" do

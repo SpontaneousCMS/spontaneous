@@ -1,0 +1,5 @@
+<slots-pdf>
+{% images.entries.each do |image| %}
+  <img>{{ image }}</img>
+{% end %}
+</slots-pdf>

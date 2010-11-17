@@ -4,12 +4,21 @@ module Spontaneous::Cutaneous
     def initialize(template_root)
       @template_root = File.expand_path(template_root)
     end
+
+    def extension
+      Spontaneous::Cutaneous.extension
+    end
+
     def template_class
       # override in subclasses
     end
 
-    def find_template_file(filename, format)
+    def template_file(filename, format)
       File.join(@template_root, Spontaneous::Cutaneous.template_name(filename, format))
+    end
+
+    def template_path(filename)
+      File.join(@template_root, filename)
     end
 
     def create_template(filepath, format)
@@ -17,9 +26,13 @@ module Spontaneous::Cutaneous
     end
 
     def get_template(filename, format)
-      # insert caching here
-      filepath = find_template_file(filename, format)
-      template = create_template(filepath, format)
+      if filename.is_a?(Proc)
+        template = create_template(filename, format)
+      else
+        # insert caching here
+        filepath = template_file(filename, format)
+        template = create_template(filepath, format)
+      end
     end
 
     def render(filename, context, _layout=true)

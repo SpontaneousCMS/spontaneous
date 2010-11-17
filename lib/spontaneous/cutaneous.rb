@@ -12,6 +12,7 @@ module Spontaneous
     end
 
     autoload :ContextHelper, "spontaneous/cutaneous/context_helper"
+    autoload :PreviewContextHelper, "spontaneous/cutaneous/preview_context_helper"
     autoload :TemplateCore, "spontaneous/cutaneous/template_core"
     autoload :Template, "spontaneous/cutaneous/template"
     autoload :Preprocessor, "spontaneous/cutaneous/preprocessor"

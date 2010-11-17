@@ -181,11 +181,27 @@ class TemplatesTest < Test::Unit::TestCase
           end
           @klass.new.tap { |i| i.format = format }
         end
+
+        def slot
+          @klass ||= Class.new(Object) do
+            def render(format)
+              "(#{format})"
+            end
+          end
+          @klass.new
+        end
       end
       @template = Cutaneous::Preprocessor.new
     end
 
-    should "call render(format) on non-strings" do
+    should "call #render(format) if context responds to it" do
+      context = @context_class.new(:html)
+      @template.convert('{{slot}} {{ monkey }}')
+      output = @template.render(context)
+      output.should == "(html) magic"
+    end
+
+    should "call to_format on non-strings" do
       context = @context_class.new(:html)
       @template.convert('{{field}} {{ monkey }}')
       output = @template.render(context)

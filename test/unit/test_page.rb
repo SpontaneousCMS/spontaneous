@@ -234,12 +234,12 @@ class PageTest < Test::Unit::TestCase
     end
 
     should "take filename from name by default" do
-      PageClass.page_styles[:other].filename.should == "other.html.erb"
+      PageClass.page_styles[:other].filename.should == "other.html.cut"
     end
 
     should "have configurable filenames" do
       PageClass.page_style :custom, :filename => "funky"
-      PageClass.page_styles[:custom].filename.should == "funky.html.erb"
+      PageClass.page_styles[:custom].filename.should == "funky.html.cut"
     end
 
     should "have sane default titles" do

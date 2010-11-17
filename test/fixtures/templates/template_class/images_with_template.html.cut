@@ -1,0 +1,5 @@
+<images>
+{% content.each do |image| %}
+  {{ image }}
+{% end %}
+</images>

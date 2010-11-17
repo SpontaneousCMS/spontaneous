@@ -36,7 +36,7 @@ module Spontaneous
     end
 
     def directory
-      File.join(Spontaneous.template_root, owner_directory_name)
+      owner_directory_name
     end
 
     def owner_directory_name
@@ -56,26 +56,19 @@ module Spontaneous
     end
 
     def path(format=:html)
-      File.join(directory, filename(format))
+      File.join(directory, basename.to_s)
     end
 
     def formats
-      @formats ||= \
-        begin
-        path = Pathname.new(directory)
-        matcher = %r(^#{name}\.(\w+).#{Spontaneous.template_ext}$)
-        path.children(false).select do |file|
-          file.to_s =~ matcher
-        end.map do |file|
-          matcher.match(file.to_s)[1].to_sym
-        end
-      end
+      Spontaneous::Render.formats(self)
     end
 
     def template(format=:html)
       format = format.to_sym
       # raise UnsupportedFormatException.new(self, format) unless formats.include?(format)
-      template_cache[format]
+      # template_cache[format]
+      # Render.engine.get_template(basename, format)
+      path(format)
     end
 
     def template_cache

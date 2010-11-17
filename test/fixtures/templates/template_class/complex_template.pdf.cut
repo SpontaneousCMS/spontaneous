@@ -1,0 +1,6 @@
+<pdf>
+{{ title }}
+{% content.each do |facet| %}
+<facet>{{ facet }}</facet>
+{% end %}
+</pdf>

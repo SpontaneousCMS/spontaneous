@@ -25,7 +25,7 @@ module Spontaneous::Plugins
           erb_code = format
           format = :html
         end
-        inline_templates[format.to_sym] = InlineTemplate.new(erb_code)
+        inline_templates[format.to_sym] = eval(%(Proc.new { #{erb_code.inspect} }))
       end
 
       def inline_templates
@@ -62,7 +62,7 @@ module Spontaneous::Plugins
 
       def default_style
         @default_style ||= DefaultStyle.new(self.template_class)
-        return nil if @default_style.formats.empty?
+        return nil if Spontaneous::Render.formats(@default_style).empty?
         @default_style
       end
     end # InstanceMethods
@@ -77,18 +77,6 @@ module Spontaneous::Plugins
       end
     end # InlineStyle
 
-    class InlineTemplate
-      def initialize(source)
-        @source = source
-      end
-
-      def render(context)
-        context.instance_eval("\"#{@source}\"")
-      end
-      def path
-        "<InlineTemplate>"
-      end
-    end
 
     # Used by slots to check for the existance of a template named
     # SlotsOwningClass.template_directory/slot_name.{format}.erb
@@ -105,13 +93,13 @@ module Spontaneous::Plugins
         if has_default_template?(format)
           style.template(format)
         else
-          self
+          lambda { '{{ render_content }}' }
         end
       end
 
       def has_default_template?(format)
         return false if @label.nil? or @label.empty?
-        File.exists?(style.path(format))
+        Spontaneous::Render.exists?(style.path, format)
       end
 
       def style
@@ -133,13 +121,14 @@ module Spontaneous::Plugins
       @owner = owner
     end
 
+    def path(format=:html)
+      owner_directory_name
+    end
+
     def name
       owner_directory_name
     end
 
-    def directory
-      Spontaneous.template_root
-    end
 
     def default?
       true
