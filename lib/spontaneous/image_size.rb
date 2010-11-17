@@ -24,7 +24,7 @@ module Spontaneous
       end
 
       def image_type(file)
-        img_top = file.read(128)
+        img_top = file.read(16)
         bytes = img_top.unpack("C*")
         file.seek(0,0)
         if img_top =~ /^GIF8[7,9]a/
