@@ -12,4 +12,7 @@ class ClientProject < Spontaneous::Facet
   slot :images do
     allow :ProjectImage
   end
+  slot :other_stuff do
+    allow :ProjectImage
+  end
 end
