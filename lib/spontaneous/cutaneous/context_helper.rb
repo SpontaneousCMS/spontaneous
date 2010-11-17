@@ -15,29 +15,32 @@ module Spontaneous::Cutaneous
     end
 
     def block(block_name)
+      @_block_positions ||= {}
+      @_block_content ||= {}
+      @_block_level ||= []
       block_name = block_name.to_sym
-      _block_positions[block_name] = self._buf.length
-      _block_level << block_name
+      @_block_positions[block_name] = self._buf.length
+      @_block_level << block_name
       if block_given?
         yield
         output = endblock
       end
     end
 
+    # the _block_name param is ignored though could throw warning if the two are different
     def endblock(_block_name=nil)
-      # the _block_name param is ignored though could throw warning if the two are different
-      block_name = _block_level.pop
+      block_name = @_block_level.pop
       return unless block_name
-      start_position = _block_positions[block_name]
+      start_position = @_block_positions[block_name]
       output = @_buf[start_position..-1]
       @_buf[start_position..-1] = ''
-      if _block_content.key?(block_name)
-        @_buf << _block_content[block_name]
+      if @_block_content.key?(block_name)
+        @_buf << @_block_content[block_name]
       else
         if _layout.nil?
           @_buf << output
         else
-          _block_content[block_name] = output
+          @_block_content[block_name] = output
         end
       end
       output
@@ -57,19 +60,6 @@ module Spontaneous::Cutaneous
         end
       end
       super(param)
-    end
-
-
-    def _block_positions
-      @_block_positions ||= {}
-    end
-
-    def _block_content
-      @_block_content ||= {}
-    end
-
-    def _block_level
-      @_block_level ||= []
     end
   end
 end
