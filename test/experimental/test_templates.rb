@@ -145,5 +145,23 @@ class TemplatesTest < Test::Unit::TestCase
       output = second_pass('second')
       output.should == "<html><title>THE TITLE</title>ding</html>\n"
     end
+
+  end
+
+  context "Template hierarchy" do
+
+    setup do
+      @saved_template_root = Spontaneous.template_root
+      Spontaneous.template_root = File.join(File.dirname(__FILE__), '../fixtures/templates/extended')
+    end
+
+    teardown do
+      Spontaneous.template_root = @saved_template_root
+    end
+    should "work" do
+      output = first_pass('main')
+      p output
+      output.should == "Main Title\nGrandparent Nav\nMain Body\nParent Footer\n"
+    end
   end
 end

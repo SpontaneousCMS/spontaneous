@@ -1,0 +1,5 @@
+{% extends 'parent' %}
+{% block :title do %}Main Title{% end %}
+{% block :body do %}
+Main Body
+{% end %}

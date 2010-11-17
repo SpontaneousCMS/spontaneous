@@ -21,8 +21,21 @@ module Spontaneous::Cutaneous
 
     def render(filename, context, _layout=true)
       hook_context(context)
-      template = get_template(filename, context.format)
-      output = template.render(context)
+      while true
+        template = get_template(filename, context.format)
+        _buf = context._buf
+        output = template.render(context)
+        context._buf = _buf
+        unless context._layout.nil?
+          layout = context._layout
+          puts layout
+          context._layout = nil
+        end
+        break unless layout
+        filename = layout
+        layout = false
+      end
+      output
     end
 
     def hook_context(context)
