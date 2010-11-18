@@ -1,1 +1,1 @@
-<li><a href="{{ original.src }}"><img src="{{ thumbnail.src }}" alt="{{ title }}" /></a></li>
+<li><a href="{{ image.original.src }}">{{ image.thumbnail(:alt => title, :title => title) }}</a></li>

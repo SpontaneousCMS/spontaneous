@@ -4,7 +4,45 @@
 module Spontaneous
   module FieldTypes
 
+    module ImageFieldUtilities
+      attr_accessor :template_params
+
+      def to_html(attr={})
+        default_attr = {
+          :src => src,
+          :width => width,
+          :height => height,
+          :alt => ""
+        }
+        default_attr.delete(:width) if width.nil?
+        default_attr.delete(:height) if height.nil?
+        if template_params && template_params.length > 0 && template_params[0].is_a?(Hash)
+          attr = template_params[0].merge(attr)
+        end
+        if attr.key?(:width) || attr.key?(:height)
+          default_attr.delete(:width)
+          default_attr.delete(:height)
+          if (attr.key?(:width) && !attr[:width]) || (attr.key?(:height) && !attr[:height])
+            attr.delete(:width)
+            attr.delete(:height)
+          end
+        end
+        attr = default_attr.merge(attr)
+        params = []
+        attr.each do |name, value|
+          params << %(#{name}="#{value.to_s.escape_html}")
+        end
+        %(<img #{params.join(' ')} />)
+      end
+
+      def to_s
+        src
+      end
+    end
+
     class ImageField < Base
+      include ImageFieldUtilities
+
       def self.accepts
         %w{image/(png|jpeg|gif)}
       end
@@ -29,11 +67,14 @@ module Spontaneous
         super || self.class.size_definitions.key?(attribute_name)
       end
 
-      def attribute_get(attribute)
+      def attribute_get(attribute, *args)
         @sizes ||= Hash.new { |hash, key| hash[key] = ImageAttributes.new(attributes[key]) }
-        @sizes[attribute]
+        @sizes[attribute].tap do |size|
+          size.template_params = args
+        end
       end
 
+      # original is special and should always be defined
       def original
         @original ||= (attributes.key?(:original) ? attribute_get(:original) : ImageAttributes.new(:src => value))
       end
@@ -54,30 +95,6 @@ module Spontaneous
         original.src
       end
 
-      def to_html(attr={})
-        default_attr = {
-          :src => src,
-          :width => width,
-          :height => height,
-          :alt => ""
-        }
-        default_attr.delete(:width) if width.nil?
-        default_attr.delete(:height) if height.nil?
-        if attr.key?(:width) || attr.key?(:height)
-          default_attr.delete(:width)
-          default_attr.delete(:height)
-          if (attr.key?(:width) && !attr[:width]) || (attr.key?(:height) && !attr[:height])
-            attr.delete(:width)
-            attr.delete(:height)
-          end
-        end
-        attr = default_attr.merge(attr)
-        params = []
-        attr.each do |name, value|
-          params << %(#{name}="#{value.to_s.escape_html}")
-        end
-        %(<img #{params.join(' ')} />)
-      end
 
       def filepath
         unprocessed_value
@@ -108,13 +125,13 @@ module Spontaneous
     ImageField.register
 
     class ImageAttributes
+      include ImageFieldUtilities
       attr_reader  :src, :width, :height, :filesize
 
       def initialize(params={})
         params ||= {}
         @src, @width, @height, @filesize = params[:src], params[:width], params[:height], params[:filesize]
       end
-
       def serialize
         {
           :src => src,
@@ -126,6 +143,8 @@ module Spontaneous
     end
 
     class ImageProcessor
+      include ImageFieldUtilities
+
       attr_reader :path
 
       def initialize(path)
@@ -154,20 +173,7 @@ module Spontaneous
       end
 
       def dimensions
-        @dimensions ||= read_image_dimension
-      end
-
-      def read_image_dimension
-        Spontaneous::ImageSize.read(path)
-      end
-
-      def serialize
-        {
-          :src => src,
-          :width => width,
-          :height => height,
-          :filesize => filesize
-        }
+        @dimensions ||= Spontaneous::ImageSize.read(path)
       end
 
       def resize(name, size)
@@ -197,6 +203,15 @@ module Spontaneous
         base = parts[0..-2].join('.')
         filename = [base, name, ext].join('.')
         File.join(directory, filename)
+      end
+
+      def serialize
+        {
+          :src => src,
+          :width => width,
+          :height => height,
+          :filesize => filesize
+        }
       end
     end
 

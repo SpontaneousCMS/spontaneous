@@ -9,22 +9,22 @@ class ImagesTest < Test::Unit::TestCase
 
   context "Image fields set using absolute values" do
     setup do
-      @field = FieldTypes::ImageField.new(:name => "image")
+      @image = FieldTypes::ImageField.new(:name => "image")
     end
     should "accept and not alter URL values" do
       url =  "http://example.com/image.png"
-      @field.value = url
-      @field.processed_value.should == url
-      @field.src.should == url
-      @field.original.src.should == url
+      @image.value = url
+      @image.processed_value.should == url
+      @image.src.should == url
+      @image.original.src.should == url
     end
 
     should "accept and not alter absolute paths" do
       path = "/images/house.jpg"
-      @field.value = path
-      @field.processed_value.should == path
-      @field.src.should == path
-      @field.original.src.should == path
+      @image.value = path
+      @image.processed_value.should == path
+      @image.src.should == path
+      @image.original.src.should == path
     end
   end
 
@@ -46,20 +46,38 @@ class ImagesTest < Test::Unit::TestCase
       @origin_image = @origin_image.realpath.to_s
       # @digest = OpenSSL::Digest::MD5.new.file(@origin_image).hexdigest
       # p @digest
-    end
-    context "in templates" do
-      setup do
-        @field = FieldTypes::ImageField.new(:name => "image")
-        @instance = Content.new
-        @content_id = 234
-        @instance.stubs(:id).returns(@content_id)
-        @instance.stubs(:field_modified!)
-        @field.stubs(:owner).returns(@instance)
-        @field.value = @origin_image
+
+      class ::ResizingImageField < FieldTypes::ImageField
+        sizes :preview => { :width => 200 },
+          :tall => { :height => 200 },
+          :thumbnail => { :fit => [50, 50] },
+          :icon => { :crop => [50, 50] }
       end
 
+      ResizingImageField.register
+      class ::ContentWithImage < Content
+        field :photo, :resizing_image
+      end
+
+      @instance = ContentWithImage.new
+
+      @content_id = 234
+      @instance.stubs(:id).returns(@content_id)
+      @image = @instance.photo
+      @image.owner.should == @instance
+      @image.value = @origin_image.to_s
+    end
+
+    teardown do
+      Object.send(:remove_const, :ContentWithImage)
+      Object.send(:remove_const, :ResizingImageField)
+      (@tmp_dir + "..").rmtree
+    end
+
+    context "in templates" do
+
       should "render an <img/> tag in HTML format" do
-        assert_same_elements @field.to_html.split(' '), %(<img src="#{@field.src}" width="400" height="533" alt="" />).split(" ")
+        assert_same_elements @image.to_html.split(' '), %(<img src="#{@image.src}" width="400" height="533" alt="" />).split(" ")
       end
 
       should "use passed hash to overwrite tag attributes" do
@@ -69,57 +87,40 @@ class ImagesTest < Test::Unit::TestCase
           :rel => "lightbox",
           :random => "present"
         }
-        assert_same_elements @field.to_html(attr).split(" "), %(<img src="#{@field.src}" width="400" height="533" alt="Magic" class="magic" rel="lightbox" random="present" />).split(" ")
+        assert_same_elements @image.to_html(attr).split(" "), %(<img src="#{@image.src}" width="400" height="533" alt="Magic" class="magic" rel="lightbox" random="present" />).split(" ")
       end
 
       should "be intelligent about setting width & height" do
-        assert_same_elements @field.to_html({ :width => 100 }).split(" "), %(<img src="#{@field.src}" width="100" alt="" />).split(" ")
-        assert_same_elements @field.to_html({ :height => 100 }).split(" "), %(<img src="#{@field.src}" height="100" alt="" />).split(" ")
-        assert_same_elements @field.to_html({ :width => 100, :height => 100 }).split(" "), %(<img src="#{@field.src}" width="100" height="100" alt="" />).split(" ")
+        assert_same_elements @image.to_html({ :width => 100 }).split(" "), %(<img src="#{@image.src}" width="100" alt="" />).split(" ")
+        assert_same_elements @image.to_html({ :height => 100 }).split(" "), %(<img src="#{@image.src}" height="100" alt="" />).split(" ")
+        assert_same_elements @image.to_html({ :width => 100, :height => 100 }).split(" "), %(<img src="#{@image.src}" width="100" height="100" alt="" />).split(" ")
       end
 
       should "turn off setting with & height if either is passed as false" do
-        @field.to_html({ :width => false }).should == %(<img src="#{@field.src}" alt="" />)
+        @image.to_html({ :width => false }).should == %(<img src="#{@image.src}" alt="" />)
       end
 
       should "escape values in params" do
-        assert_same_elements @field.to_html({ :alt => "<danger\">" }).split(" "), %(<img src="#{@field.src}" width="400" height="533" alt="&lt;danger&quot;&gt;" />).split(" ")
+        assert_same_elements @image.to_html({ :alt => "<danger\">" }).split(" "), %(<img src="#{@image.src}" width="400" height="533" alt="&lt;danger&quot;&gt;" />).split(" ")
       end
 
       should "not include size parameters unless known" do
-        @field.value = "/somethingunknown.gif"
-        @field.src.should ==  "/somethingunknown.gif"
-        assert_same_elements @field.to_html.split(" "), %(<img src="#{@field.src}" alt="" />).split(" ")
+        @image.value = "/somethingunknown.gif"
+        @image.src.should ==  "/somethingunknown.gif"
+        assert_same_elements @image.to_html.split(" "), %(<img src="#{@image.src}" alt="" />).split(" ")
+      end
+
+      should "output image tags for its sizes too" do
+        assert_same_elements @image.thumbnail.to_html(:alt => "Thumb").split(' '), %(<img src="#{@image.thumbnail.src}" width="38" height="50" alt="Thumb" />).split(" ")
       end
     end
     context "defined by classes" do
       setup do
 
-        class ::ResizingImageField < FieldTypes::ImageField
-          sizes :preview => { :width => 200 },
-            :tall => { :height => 200 },
-            :thumbnail => { :fit => [50, 50] },
-            :icon => { :crop => [50, 50] }
-        end
 
-        ResizingImageField.register
-
-        class ::ContentWithImage < Content
-          field :photo, :resizing_image
-        end
-        @instance = ContentWithImage.new
-
-        @content_id = 234
-        @instance.stubs(:id).returns(@content_id)
-        @image = @instance.photo
-        @image.owner.should == @instance
-        @image.value = @origin_image.to_s
       end
 
       teardown do
-        Object.send(:remove_const, :ContentWithImage)
-        Object.send(:remove_const, :ResizingImageField)
-        (@tmp_dir + "..").rmtree
       end
 
       should "have image dimension and filesize information" do
@@ -173,26 +174,26 @@ class ImagesTest < Test::Unit::TestCase
 
     context "defined anonymously" do
       setup do
-        class ::ContentWithImage < Content
-          field :photo, :image do
-            sizes :preview => { :width => 200 },
-              :tall => { :height => 200 },
-              :thumbnail => { :fit => [50, 50] },
-              :icon => { :crop => [50, 50] }
-          end
-        end
-        @instance = ContentWithImage.new
+        # class ::ContentWithImage < Content
+        #   field :photo, :image do
+        #     sizes :preview => { :width => 200 },
+        #       :tall => { :height => 200 },
+        #       :thumbnail => { :fit => [50, 50] },
+        #       :icon => { :crop => [50, 50] }
+        #   end
+        # end
+        # @instance = ContentWithImage.new
 
-        @content_id = 234
-        @instance.stubs(:id).returns(@content_id)
-        @image = @instance.photo
-        @image.owner.should == @instance
-        @image.value = @origin_image.to_s
+        # @content_id = 234
+        # @instance.stubs(:id).returns(@content_id)
+        # @image = @instance.photo
+        # @image.owner.should == @instance
+        # @image.value = @origin_image.to_s
       end
 
       teardown do
-        Object.send(:remove_const, :ContentWithImage)
-        (@tmp_dir + "..").rmtree
+        # Object.send(:remove_const, :ContentWithImage)
+        # (@tmp_dir + "..").rmtree
       end
 
       should "have image dimension and filesize information" do

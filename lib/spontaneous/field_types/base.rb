@@ -5,6 +5,7 @@ module Spontaneous
   module FieldTypes
     class Base
 
+      attr_accessor :template_params
 
       def self.register(*labels)
         labels = self.labels if labels.empty?
@@ -110,6 +111,10 @@ module Spontaneous
         @attributes = attr
       end
 
+      def attribute_get(attribute, *args)
+        attributes[attribute.to_sym]
+      end
+
       def attribute_set(attribute, value)
         attributes[attribute.to_sym] = value
       end
@@ -166,7 +171,7 @@ module Spontaneous
 
       def method_missing(method_name, *args, &block)
         if self.has_attribute?(method_name)
-          attribute_get(method_name)
+          attribute_get(method_name, *args)
         else
           super
         end

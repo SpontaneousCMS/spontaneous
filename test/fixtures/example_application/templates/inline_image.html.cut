@@ -1,1 +1,1 @@
-<p><img src="{{ image }}" /></p>
+<p>{{ image }}</p>

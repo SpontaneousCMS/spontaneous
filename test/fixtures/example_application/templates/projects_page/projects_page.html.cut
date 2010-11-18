@@ -6,6 +6,6 @@
 </head>
 <body>
   {{ title }}
-  {{ projects.render }}
+  {{ projects }}
 </body>
 </html>

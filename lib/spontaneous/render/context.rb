@@ -42,8 +42,7 @@ module Spontaneous::Render
     def method_missing(method, *args, &block)
       key = method.to_sym
       if target.field?(key)
-        @_output_method ||= "to_#{format}".to_sym
-        target.fields[key].send(@_output_method, *args)
+        target.send(key, *args)
       elsif target.slot?(key)
         target.slots[key]
       else

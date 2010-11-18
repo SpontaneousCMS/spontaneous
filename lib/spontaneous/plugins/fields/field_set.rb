@@ -54,7 +54,7 @@ module Spontaneous::Plugins
         setter_name = "#{field.name}="
         store[getter_name.to_sym] = field
         meta.class_eval do
-          define_method(getter_name) { field }
+          define_method(getter_name) { |*args| field.tap { |f| f.template_params = args } }
           define_method(setter_name) { |value| field.value = value }
         end
         # owner.meta.class_eval do

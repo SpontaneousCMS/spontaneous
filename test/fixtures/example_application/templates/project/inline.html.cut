@@ -1,5 +1,5 @@
 <h3><a href="{{ path }}">{{ title }}</a></h3>
-<img src="{{ fields.image.thumbnail.src }}" alt="" />
+{{ fields.image.thumbnail }}
 {{ description }}
 <hr />
 

@@ -12,7 +12,9 @@ module Spontaneous::Plugins
         local_field_order << name
         field_prototypes[name] = FieldPrototype.new(name, type, options, &block)
         unless method_defined?(name)
-          define_method(name) { fields[name] }
+          define_method(name) do |*args|
+            fields[name].tap { |f| f.template_params = args }
+          end
         else
           raise "Must give warning when field name clashes with method name"
         end
