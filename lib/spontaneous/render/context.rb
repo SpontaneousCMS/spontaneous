@@ -13,10 +13,6 @@ module Spontaneous::Render
       @target
     end
 
-    def output_method
-      @output_method ||= "to_#{format}".to_sym
-    end
-
     def template
       target.template(format)
     end
@@ -46,7 +42,8 @@ module Spontaneous::Render
     def method_missing(method, *args, &block)
       key = method.to_sym
       if target.field?(key)
-        target.fields[key].send(output_method)
+        @_output_method ||= "to_#{format}".to_sym
+        target.fields[key].send(@_output_method, *args)
       elsif target.slot?(key)
         target.slots[key]
       else

@@ -65,7 +65,7 @@ module Spontaneous
 
     # intercept the render call in order to use this entry proxy as the source for 
     # Content#template calls. 
-    def render(format=:html)
+    def render(format=:html, *args)
       Spontaneous::Render.render(self, format)
     end
 

@@ -69,11 +69,11 @@ module Spontaneous
         value.to_s
       end
 
-      def to_html
+      def to_html(*args)
         value
       end
 
-      def to_pdf
+      def to_pdf(*args)
         value
       end
 

@@ -15,12 +15,16 @@ class ImagesTest < Test::Unit::TestCase
       url =  "http://example.com/image.png"
       @field.value = url
       @field.processed_value.should == url
+      @field.src.should == url
+      @field.original.src.should == url
     end
 
     should "accept and not alter absolute paths" do
       path = "/images/house.jpg"
       @field.value = path
       @field.processed_value.should == path
+      @field.src.should == path
+      @field.original.src.should == path
     end
   end
 
@@ -80,6 +84,12 @@ class ImagesTest < Test::Unit::TestCase
 
       should "escape values in params" do
         assert_same_elements @field.to_html({ :alt => "<danger\">" }).split(" "), %(<img src="#{@field.src}" width="400" height="533" alt="&lt;danger&quot;&gt;" />).split(" ")
+      end
+
+      should "not include size parameters unless known" do
+        @field.value = "/somethingunknown.gif"
+        @field.src.should ==  "/somethingunknown.gif"
+        assert_same_elements @field.to_html.split(" "), %(<img src="#{@field.src}" alt="" />).split(" ")
       end
     end
     context "defined by classes" do

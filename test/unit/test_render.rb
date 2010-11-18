@@ -205,6 +205,23 @@ class RenderTest < Test::Unit::TestCase
         @parent.render.should == "<html>Child\n</html>\n"
       end
     end
+
+    context "params in templates" do
+      setup do
+        class ::TemplateParams < Page; end
+        TemplateParams.field :image, :default_value => "/images/fromage.jpg"
+        TemplateParams.page_style :page_style
+        @page = TemplateParams.new
+      end
+      teardown do
+        Object.send(:remove_const, :TemplateParams)
+      end
+      should "be passed to the render call" do
+        @page.image.value.should == "/images/fromage.jpg"
+        @page.image.src.should == "/images/fromage.jpg"
+        @page.render.should =~ /alt="Smelly"/
+      end
+    end
   end
 end
 

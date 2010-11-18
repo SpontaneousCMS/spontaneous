@@ -35,7 +35,7 @@ module Spontaneous
       end
 
       def original
-        attribute_get(:original)
+        @original ||= (attributes.key?(:original) ? attribute_get(:original) : ImageAttributes.new(:src => value))
       end
 
       def width
@@ -61,7 +61,8 @@ module Spontaneous
           :height => height,
           :alt => ""
         }
-
+        default_attr.delete(:width) if width.nil?
+        default_attr.delete(:height) if height.nil?
         if attr.key?(:width) || attr.key?(:height)
           default_attr.delete(:width)
           default_attr.delete(:height)
@@ -89,6 +90,7 @@ module Spontaneous
           filename = image_path[:filename]
           image_path = image_path[:tempfile].path
         when String
+          attributes.clear
           return image_path unless File.exist?(image_path)
         else
         end
