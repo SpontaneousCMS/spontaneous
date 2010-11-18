@@ -13,12 +13,18 @@ module Cutaneous
       self._layout = parent
     end
 
+    def block_super
+      block_name = @_block_level.last
+      @_block_super_calls[block_name].push(@_buf.length - @_block_positions[block_name])
+    end
+
     def block(block_name)
+      @_block_super_calls ||= Hash.new { |h, k| h[k] = [] }
       @_block_positions ||= {}
       @_block_content ||= {}
       @_block_level ||= []
       block_name = block_name.to_sym
-      @_block_positions[block_name] = self._buf.length
+      @_block_positions[block_name] = @_buf.length
       @_block_level << block_name
       if block_given?
         yield
@@ -34,7 +40,17 @@ module Cutaneous
       output = @_buf[start_position..-1]
       @_buf[start_position..-1] = ''
       if @_block_content.key?(block_name)
-        @_buf << @_block_content[block_name]
+        super_calls = @_block_super_calls[block_name]
+        result = @_block_content[block_name]
+        if !super_calls.empty?
+          position = super_calls.pop
+          result = result[0...position] << output << (result[(position)..-1] || "")
+          if _layout
+            @_block_super_calls[block_name][-1] = @_block_super_calls[block_name].last + position
+            @_block_content[block_name] = result
+          end
+        end
+        @_buf << result
       else
         if _layout.nil?
           @_buf << output

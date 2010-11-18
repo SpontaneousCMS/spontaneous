@@ -2,7 +2,9 @@
 {% block :title  %}Parent Title{% endblock %}
 {% block :body  %}
 Parent Body
+{% block_super %}
 {% endblock %}
 {% block :footer  %}
+{% block_super %}
 Parent Footer
 {% endblock %}

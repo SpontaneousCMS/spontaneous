@@ -149,7 +149,7 @@ class TemplatesTest < Test::Unit::TestCase
 
     should "work" do
       output = first_pass('extended', 'main')
-      output.should == "Main Title \#{page.title}\nGrandparent Nav\nMain Body\nParent Footer\n"
+      output.should == "Main Title \#{page.title}\nGrandparent Nav\nMain Body\nParent Body\nGrandparent Body\nGrandparent Footer\nParent Footer\n"
     end
   end
 
