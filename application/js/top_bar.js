@@ -136,7 +136,6 @@ Spontaneous.TopBar = (function($, S) {
 			}
 		},
 		set_mode: function(mode) {
-			console.log('TopBar.set_mode', mode)
 			this.set('mode', mode);
 			this.mode_switch.text(this.opposite_mode(mode));
 		},

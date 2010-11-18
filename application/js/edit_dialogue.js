@@ -6,7 +6,6 @@ Spontaneous.EditDialogue = (function($, S) {
 	var EditDialogue = new JS.Class(Dialogue, {
 		initialize: function(content) {
 			this.content = content;
-			console.log('EditDialogue.new', content);
 		},
 		buttons: function() {
 			var save_label = "Save (" + ((window.navigator.platform.indexOf("Mac") === 0) ? "Cmd" : "Ctrl") + "+s)", btns = {};

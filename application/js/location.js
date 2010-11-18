@@ -26,7 +26,6 @@ Spontaneous.Location = (function($, S) {
 		},
 		restore: function() {
 			if (this.mode) {
-				console.log('State.restore', this.mode)
 				Spontaneous.Location.view_mode_changed(this.mode)
 				Spontaneous.TopBar.set_mode(this.mode)
 			}
@@ -76,12 +75,10 @@ Spontaneous.Location = (function($, S) {
 			if (this.get('location')) {
 				this.update_state(this.get('location'), mode);
 			}
-			console.log(">>>", mode)
 		},
 		load_map: function() {
 		},
 		location_loaded: function(location) {
-			console.log('###', location)
 			this.set('location', location);
 			this.update_state(location, this.get('view_mode'));
 		},
