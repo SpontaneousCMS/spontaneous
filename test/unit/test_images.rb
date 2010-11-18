@@ -7,7 +7,7 @@ require 'test_helper'
 class ImagesTest < Test::Unit::TestCase
   include Spontaneous
 
-  context "Image fields" do
+  context "Image fields set using absolute values" do
     setup do
       @field = FieldTypes::ImageField.new(:name => "image")
     end
@@ -42,6 +42,45 @@ class ImagesTest < Test::Unit::TestCase
       @origin_image = @origin_image.realpath.to_s
       # @digest = OpenSSL::Digest::MD5.new.file(@origin_image).hexdigest
       # p @digest
+    end
+    context "in templates" do
+      setup do
+        @field = FieldTypes::ImageField.new(:name => "image")
+        @instance = Content.new
+        @content_id = 234
+        @instance.stubs(:id).returns(@content_id)
+        @instance.stubs(:field_modified!)
+        @field.stubs(:owner).returns(@instance)
+        @field.value = @origin_image
+      end
+
+      should "render an <img/> tag in HTML format" do
+        assert_same_elements @field.to_html.split(' '), %(<img src="#{@field.src}" width="400" height="533" alt="" />).split(" ")
+      end
+
+      should "use passed hash to overwrite tag attributes" do
+        attr = {
+          :alt => "Magic",
+          :class => "magic",
+          :rel => "lightbox",
+          :random => "present"
+        }
+        assert_same_elements @field.to_html(attr).split(" "), %(<img src="#{@field.src}" width="400" height="533" alt="Magic" class="magic" rel="lightbox" random="present" />).split(" ")
+      end
+
+      should "be intelligent about setting width & height" do
+        assert_same_elements @field.to_html({ :width => 100 }).split(" "), %(<img src="#{@field.src}" width="100" alt="" />).split(" ")
+        assert_same_elements @field.to_html({ :height => 100 }).split(" "), %(<img src="#{@field.src}" height="100" alt="" />).split(" ")
+        assert_same_elements @field.to_html({ :width => 100, :height => 100 }).split(" "), %(<img src="#{@field.src}" width="100" height="100" alt="" />).split(" ")
+      end
+
+      should "turn off setting with & height if either is passed as false" do
+        @field.to_html({ :width => false }).should == %(<img src="#{@field.src}" alt="" />)
+      end
+
+      should "escape values in params" do
+        assert_same_elements @field.to_html({ :alt => "<danger\">" }).split(" "), %(<img src="#{@field.src}" width="400" height="533" alt="&lt;danger&quot;&gt;" />).split(" ")
+      end
     end
     context "defined by classes" do
       setup do

@@ -47,7 +47,7 @@ class FieldsTest < Test::Unit::TestCase
     end
 
     should "be creatable with just a field name" do
-      @content_class.field_prototypes[:title].should be_instance_of Spontaneous::Plugins::Fields::FieldPrototype
+      @content_class.field_prototypes[:title].should be_instance_of(Spontaneous::Plugins::Fields::FieldPrototype)
       @content_class.field_prototypes[:title].name.should == :title
     end
 

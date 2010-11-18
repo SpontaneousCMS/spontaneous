@@ -5,9 +5,6 @@ module Spontaneous
   module FieldTypes
 
     class ImageField < Base
-
-
-
       def self.accepts
         %w{image/(png|jpeg|gif)}
       end
@@ -23,7 +20,6 @@ module Spontaneous
       def self.validate_sizes(sizes)
         sizes
       end
-
 
       def self.size_definitions
         @size_definitions ||= {}
@@ -42,10 +38,6 @@ module Spontaneous
         attribute_get(:original)
       end
 
-      def src
-        value
-      end
-
       def width
         original.width
       end
@@ -60,6 +52,30 @@ module Spontaneous
 
       def src
         original.src
+      end
+
+      def to_html(attr={})
+        default_attr = {
+          :src => src,
+          :width => width,
+          :height => height,
+          :alt => ""
+        }
+
+        if attr.key?(:width) || attr.key?(:height)
+          default_attr.delete(:width)
+          default_attr.delete(:height)
+          if (attr.key?(:width) && !attr[:width]) || (attr.key?(:height) && !attr[:height])
+            attr.delete(:width)
+            attr.delete(:height)
+          end
+        end
+        attr = default_attr.merge(attr)
+        params = []
+        attr.each do |name, value|
+          params << %(#{name}="#{value.to_s.escape_html}")
+        end
+        %(<img #{params.join(' ')} />)
       end
 
       def filepath
