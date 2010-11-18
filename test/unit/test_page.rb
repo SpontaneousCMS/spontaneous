@@ -264,39 +264,5 @@ class PageTest < Test::Unit::TestCase
     end
   end
 
-  context "pages as inline content" do
-
-    setup do
-      class ::PageClass < Page; end
-      class ::FacetClass < Facet; end
-      PageClass.page_style :page_style
-      PageClass.inline_style :inline_style
-      @parent = Page.new
-      @facet = Facet.new
-      @page = PageClass.new
-      @parent << @facet
-      @facet << @page
-      @parent.save
-      @facet.save
-      @page.save
-    end
-    teardown do
-      Object.send(:remove_const, :PageClass)
-      Object.send(:remove_const, :FacetClass)
-    end
-    should "use style assigned by entry" do
-      @parent.entries.first.entries.first.style.should == PageClass.inline_styles.default
-    end
-
-    should "use their default page style when accessed directly" do
-      @page = PageClass[@page.id]
-      @page.style.should == PageClass.page_styles.default
-    end
-
-    should "persist sub-page style settings" do
-      @parent = Page[@parent.id]
-      @parent.entries.first.entries.first.style.should == PageClass.inline_styles.default
-    end
-  end
   # context ""
 end

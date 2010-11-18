@@ -63,6 +63,12 @@ module Spontaneous
       target.label.to_sym
     end
 
+    # intercept the render call in order to use this entry proxy as the source for 
+    # Content#template calls. 
+    def render(format=:html)
+      Spontaneous::Render.render(self, format)
+    end
+
     def style
       if @entry_style_name
         target.styles[@entry_style_name]

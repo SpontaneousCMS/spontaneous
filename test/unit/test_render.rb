@@ -158,6 +158,53 @@ class RenderTest < Test::Unit::TestCase
         @root.render.should == "<root>\nImages below:\n<images>\n  <img>Image 1</img>\n  <img>Image 2</img>\n</images>\n\n</root>\n"
       end
     end
+
+    context "pages as inline content" do
+
+      setup do
+        class ::PageClass < Page; end
+        class ::FacetClass < Facet; end
+        PageClass.page_style :page_style
+        PageClass.inline_style :inline_style
+        @parent = PageClass.new
+        @parent.title = "Parent"
+        @facet = Facet.new
+        @page = PageClass.new
+        @page.title = "Child"
+        @parent << @facet
+        @facet << @page
+        @parent.save
+        @facet.save
+        @page.save
+      end
+
+      teardown do
+        Object.send(:remove_const, :PageClass)
+        Object.send(:remove_const, :FacetClass)
+      end
+
+      should "use style assigned by entry" do
+        @parent.entries.first.entries.first.style.should == PageClass.inline_styles.default
+      end
+
+      should "use their default page style when accessed directly" do
+        @page = PageClass[@page.id]
+        @page.style.should == PageClass.page_styles.default
+        @parent.template.should == 'page_class/page_style'
+        @page.render.should == "<html></html>\n"
+      end
+
+      should "persist sub-page style settings" do
+        @parent = Page[@parent.id]
+        @parent.entries.first.entries.first.style.should == PageClass.inline_styles.default
+      end
+
+      should "render using the inline style" do
+        @parent.entries.first.first.template.should == 'page_class/inline_style'
+        @parent.entries.first.first.render.should == "Child\n"
+        @parent.render.should == "<html>Child\n</html>\n"
+      end
+    end
   end
 end
 
