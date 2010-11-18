@@ -23,12 +23,12 @@ Spontaneous.Dialogue = (function($, S) {
 			return el;
 		},
 		css_class: function() {
-			return ['button', (this.is_default ? 'default' : ''), this.label.toLowerCase().replace(' ', '-')].join(' ');
+			return ['button', (this.is_default ? 'default' : ''), this.label.toLowerCase().split(' ')[0]].join(' ');
 		}
 	});
 	var CancelButton = new JS.Class(Button, {
 		initialize: function(label, is_default) {
-			this.callSuper(label, function() { 
+			this.callSuper(label + " (Esc)", function() { 
 				Dialogue.cancel();
 			}, is_default);
 		},

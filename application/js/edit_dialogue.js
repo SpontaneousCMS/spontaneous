@@ -9,9 +9,9 @@ Spontaneous.EditDialogue = (function($, S) {
 			console.log('EditDialogue.new', content);
 		},
 		buttons: function() {
-			return {
-				'Save': this.save.bind(this)
-			};
+			var save_label = "Save (" + ((window.navigator.platform.indexOf("Mac") === 0) ? "Cmd" : "Ctrl") + "+s)", btns = {};
+			btns[save_label] = this.save.bind(this);
+			return btns;
 		},
 		id: function() {
 			return this.content.id();
@@ -47,6 +47,9 @@ Spontaneous.EditDialogue = (function($, S) {
 			}
 			this.close();
 		},
+		cleanup: function() {
+			$(':input', this.form).add(document).unbind('keydown.savedialog');
+		},
 		body: function() {
 			var editing = $(dom.form, {'id':'editing', 'enctype':'multipart/form-data', 'method':'post'});
 			var outer = $(dom.div);
@@ -79,6 +82,13 @@ Spontaneous.EditDialogue = (function($, S) {
 			});
 			editing.submit(this.save.bind(this));
 			this.form = editing;
+			$(':input', this.form).add(document).bind('keydown.savedialog', function(event) {
+				var s_key = 83;
+				if ((event.ctrlKey || event.metaKey) && event.keyCode === s_key) {
+					this.save();
+					return false;
+				}
+			}.bind(this));
 			return this.form;
 		},
 		field_edit: function(field) {
