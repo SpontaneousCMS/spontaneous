@@ -37,7 +37,7 @@ class TemplatesTest < Test::Unit::TestCase
         'ding'
       end
     end
-    @context = @klass.new(:html)
+    @context = @klass.new(nil, :html)
   end
 
   context "First render" do
@@ -129,7 +129,7 @@ class TemplatesTest < Test::Unit::TestCase
     end
 
     should "preserve the format across includes" do
-      context = @klass.new(:epub)
+      context = @klass.new(nil, :epub)
       context.format.should == :epub
       output = first_pass('content', 'template', context)
       output.should == "<epub><epub>\#{bell}ding</epub>\n</epub>\n"
@@ -194,21 +194,21 @@ class TemplatesTest < Test::Unit::TestCase
     end
 
     should "call #render(format) if context responds to it" do
-      context = @context_class.new(:html)
+      context = @context_class.new(nil, :html)
       @template.convert('{{slot}} {{ monkey }}')
       output = @template.render(context)
       output.should == "(html) magic"
     end
 
     should "call to_format on non-strings" do
-      context = @context_class.new(:html)
+      context = @context_class.new(nil, :html)
       @template.convert('{{field}} {{ monkey }}')
       output = @template.render(context)
       output.should == "(html) magic"
     end
 
     should "call to_s on non-strings that have no specific handler" do
-      context = @context_class.new(:weird)
+      context = @context_class.new(nil, :weird)
       @template.convert('{{field}} {{ monkey }}')
       output = @template.render(context)
       output.should == "'weird' magic"

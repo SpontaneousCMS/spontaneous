@@ -1,17 +1,11 @@
 module Cutaneous
-  class RenderEngine
+  class RenderEngine < Spontaneous::Render::Engine
 
-    def initialize(template_root)
-      @template_root = File.expand_path(template_root)
-    end
 
     def extension
       Cutaneous.extension
     end
 
-    def template_class
-      # override in subclasses
-    end
 
     def template_file(filename, format)
       File.join(@template_root, Cutaneous.template_name(filename, format))
@@ -33,6 +27,11 @@ module Cutaneous
         filepath = template_file(filename, format)
         template = create_template(filepath, format)
       end
+    end
+
+    def render_content(content, format)
+      context = context_class.new(content, format)
+      render(context.template, context)
     end
 
     def render(filename, context, _layout=true)

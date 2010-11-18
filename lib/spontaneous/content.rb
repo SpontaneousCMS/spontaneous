@@ -57,6 +57,13 @@ module Spontaneous
       class << self; self; end
     end
 
+    def start_inline_edit_marker
+      "spontaneous:previewedit:start:content id:#{id}"
+    end
+    def end_inline_edit_marker
+      "spontaneous:previewedit:end:content id:#{id}"
+    end
+
     def to_s
       %(#<#{self.class.name} id=#{id}>)
     end

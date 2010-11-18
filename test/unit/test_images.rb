@@ -97,7 +97,7 @@ class ImagesTest < Test::Unit::TestCase
       end
 
       should "turn off setting with & height if either is passed as false" do
-        @image.to_html({ :width => false }).should == %(<img src="#{@image.src}" alt="" />)
+        assert_same_elements @image.to_html({ :width => false }).split(" "), %(<img src="#{@image.src}" alt="" />).split(" ")
       end
 
       should "escape values in params" do

@@ -2,12 +2,8 @@
 module Cutaneous
   module ContextHelper
     include Tenjin::ContextHelper
-    ## override this in implementations
-    def initialize(format=:html)
-      @format = format
-    end
+    include Spontaneous::Render::Context
 
-    attr_reader :format
 
     def extends(parent)
       self._layout = parent

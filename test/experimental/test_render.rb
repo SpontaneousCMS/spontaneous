@@ -6,11 +6,18 @@ require 'test_helper'
 class RenderTest < Test::Unit::TestCase
   include Spontaneous
 
+  def setup
+    @saved_engine_class = Spontaneous::Render.engine_class
+  end
+  def teardown
+    Spontaneous::Render.engine_class = @saved_engine_class
+  end
+
   def template_root
     @style_root ||= File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates"))
   end
 
-  context "Content objects" do
+  context "First render step" do
     setup do
       Spontaneous::Render.template_root = template_root
       Spontaneous::Render.engine_class = Cutaneous::FirstRenderEngine
@@ -221,6 +228,37 @@ class RenderTest < Test::Unit::TestCase
         @page.image.src.should == "/images/fromage.jpg"
         @page.render.should =~ /alt="Smelly"/
       end
+    end
+  end
+  context "Preview render" do
+    setup do
+      Spontaneous::Render.template_root = template_root
+      Spontaneous::Render.engine_class = Cutaneous::PreviewRenderEngine
+
+      class ::PreviewRender < Page; end
+      PreviewRender.page_style :page
+      PreviewRender.inline_style :inline
+      PreviewRender.slot :images
+      PreviewRender.field :description, :markdown
+      @page = PreviewRender.new(:title => "PAGE", :description => "DESCRIPTION")
+      @page.stubs(:id).returns(24)
+      @session = ::Rack::MockSession.new(Sinatra::Application)
+    end
+
+    teardown do
+      Object.send(:remove_const, :PreviewRender)
+    end
+
+    should "render all tags & include preview edit markers" do
+      @page.render.should == <<-HTML
+<!-- spontaneous:previewedit:start:field id:24 name:title -->
+PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
+ <p>DESCRIPTION</p>
+
+<!-- spontaneous:previewedit:start:content id:#{@page.images.id} -->
+<!-- spontaneous:previewedit:end:content id:#{@page.images.id} -->
+
+      HTML
     end
   end
 end

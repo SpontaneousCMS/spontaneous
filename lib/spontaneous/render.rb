@@ -26,22 +26,6 @@ module Spontaneous
         @engine = nil
       end
 
-      def context_helper_module
-        @context_helper_module ||= Cutaneous::ContextHelper
-      end
-
-      def context_helper_module=(helper_module)
-        @context_helper_module = helper_module
-        @context_class = nil
-      end
-
-      def context_class
-        @context_class ||= Class.new.tap do |klass|
-          klass.send(:include, context_helper_module)
-          klass.send(:include, Context)
-        end
-      end
-
       def extension
         engine.extension
       end
@@ -61,13 +45,12 @@ module Spontaneous
         end
       end
 
-
-      def render(content, format)
-        context = context_class.new(content, format)
-        engine.render(context.template, context)
+      def render(content, format=:html)
+        engine.render_content(content, format)
       end
     end
 
     autoload :Context, "spontaneous/render/context"
+    autoload :Engine, "spontaneous/render/engine"
   end
 end

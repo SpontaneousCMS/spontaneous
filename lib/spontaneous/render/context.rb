@@ -4,13 +4,10 @@
 module Spontaneous::Render
   module Context
 
-    def initialize(target, format)
-      @target = target
-      super(format)
-    end
+    attr_reader :format, :target
 
-    def target
-      @target
+    def initialize(target, format)
+      @target, @format = target, format
     end
 
     def template
