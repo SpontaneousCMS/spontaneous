@@ -32,6 +32,7 @@ Backend:
 - Config DSL without fixed keys @done
 - Fix image insertion on creation using after_save instance hook?
 - Look into Text not rendering on Project pages @done
+- Figure out a sensible default naming practice for Pages
 
 Preview:
 
