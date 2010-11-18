@@ -22,6 +22,7 @@ Spontaneous.Init = (function($, S) {
 			Location.add_listener('location', ContentArea, 'location_changed');
 
 			TopBar.add_listener('mode',       ContentArea, 'display');
+			TopBar.add_listener('mode',       Location, 'view_mode_changed');
 
 			Editing.add_listener('page', Location, 'page_loaded');
 

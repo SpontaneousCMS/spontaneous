@@ -124,19 +124,24 @@ Spontaneous.TopBar = (function($, S) {
 			this.mode_switch = $(dom.a, {'class': 'switch-mode'}).
 				text(this.opposite_mode(S.ContentArea.mode)).
 				click(function() {
-					S.TopBar.switch_modes();
+					S.TopBar.toggle_modes();
 			});
 			this.wrap.append(this.location);
 			this.wrap.append(this.mode_switch);
 			return this.wrap;
 		},
 		init: function() {
-			this.set('mode', S.ContentArea.mode);
+			if (!this.get('mode')) {
+				this.set('mode', S.ContentArea.mode);
+			}
 		},
-		switch_modes: function() {
-			var m = this.get('mode');
-			this.set('mode', this.opposite_mode(m));
-			this.mode_switch.text(m);
+		set_mode: function(mode) {
+			console.log('TopBar.set_mode', mode)
+			this.set('mode', mode);
+			this.mode_switch.text(this.opposite_mode(mode));
+		},
+		toggle_modes: function() {
+			this.set_mode(this.opposite_mode(this.get('mode')));
 		},
 		opposite_mode: function(to_mode) {
 			if (to_mode === 'preview') {

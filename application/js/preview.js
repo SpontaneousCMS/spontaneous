@@ -33,6 +33,8 @@ Spontaneous.Preview = (function($, S) {
 			this.goto(page);
 		},
 		goto: function(page) {
+			console.log('Preview.goto', page)
+			if (!page) { return; }
 			// if (!page || page.path == this.get('path')) { return; }
 			this.iframe[0].contentWindow.location.href = page.path + click_param();
 		},

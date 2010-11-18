@@ -6,20 +6,30 @@ Spontaneous.Location = (function($, S) {
 	var State = new JS.Class({
 		initialize: function(hash) {
 			this.page_id = false;
+			this.mode = null;
 			if (hash) {
 				this.hash = hash.substr(1);
 				this.parse_hash();
 			}
 		},
 		// make this more sophisticated to deal with more complex state
+		// currently:
+		// #/page_id@view_mode
 		parse_hash: function() {
-			var parts = this.hash.split('/')
+			var areas = this.hash.split('@'), path = areas[0], mode = areas[1];
+			var parts = path.split('/')
 			parts.shift();
 			if (parts.length > 0) {
 				this.page_id = parts[0];
 			}
+			this.mode = mode;
 		},
 		restore: function() {
+			if (this.mode) {
+				console.log('State.restore', this.mode)
+				Spontaneous.Location.view_mode_changed(this.mode)
+				Spontaneous.TopBar.set_mode(this.mode)
+			}
 			if (this.page_id) {
 				Spontaneous.Location.load_id(this.page_id);
 			} else {
@@ -27,7 +37,7 @@ Spontaneous.Location = (function($, S) {
 			}
 		},
 		to_hash: function() {
-			return '#/'+(this.page_id || '');
+			return '#/'+(this.page_id || '') + (this.mode ? ('@' + this.mode) : '');
 		}
 	});
 
@@ -36,9 +46,10 @@ Spontaneous.Location = (function($, S) {
 			var state = new State(window.location.hash)
 			state.restore();
 		},
-		page: function(location) {
+		page: function(location, mode) {
 			var s = new State
 			s.page_id = location.id;
+			s.mode = mode;
 			window.location.hash = s.to_hash();
 		}
 	});
@@ -60,11 +71,22 @@ Spontaneous.Location = (function($, S) {
 		slot_changed: function(slot) {
 			// console.log('Location.slot_changed', slot, slot.uid(), slot.container.id());
 		},
+		view_mode_changed: function(mode) {
+			this.set('view_mode', mode);
+			if (this.get('location')) {
+				this.update_state(this.get('location'), mode);
+			}
+			console.log(">>>", mode)
+		},
 		load_map: function() {
 		},
 		location_loaded: function(location) {
+			console.log('###', location)
 			this.set('location', location);
-			State.page(location);
+			this.update_state(location, this.get('view_mode'));
+		},
+		update_state: function(location, mode) {
+			State.page(location, mode);
 		},
 		load_id: function(id) {
 			var l = this.location();
