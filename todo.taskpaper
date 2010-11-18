@@ -15,18 +15,16 @@ UI:
 - 'Format' switch in preview view
 - Show URL in preview view
 - Back & forward buttons in preview view?
-- Save state with # parts @done
+- Save state with # parts
 - UI reflects all changes to page title
 - Page entries have toggle to show & hide fields
 - Paging of entries
-- URL editing @done
-- Cancel by ESC & button for URL editing @done
+- URL editing
 - Separate treatment of title field in page?
 
 - Only accepting certain formats for d&d (link field formats to UI)
 
-- Attach URL editing/displaying box to bottom of page-info and then animate #page-info {height:'+10'} to expand for editing... @done
-- Preview mode is not using the edited URL of current page
+- Attach URL editing/displaying box to bottom of page-info and then animate #page-info {height:'+10'} to expand for editing...
 
 Backend:
 
@@ -34,21 +32,7 @@ Backend:
 - Config DSL without fixed keys @done
 - Fix image insertion on creation using after_save instance hook?
 - Look into Text not rendering on Project pages @done
-- Look into inline image size definitions not working (see Project in example application) @done
-- Files should have their names sanitised @done
-- Move ALT text into image attributes?
 
-Templates:
-- {{ }}, {$ $}, {% %} ==> #{ }, ${ }, %{ } @done
-- Context is clever about what is rendered render(format) called on objects or to_s if #render not found @done
-- Cutaneous, "Of the skin" (.cut)? @done
-- Instantaneous, "Occurring, arising, or functioning without any delay" (.ins)? @done
+Preview:
 
-Version 1.0:
-
-- Publishing
-- Templates
-- Hiding
-- Aliasing
-- Users & permissions
-- 
+- Track modification and provide instant re-render of page preview
