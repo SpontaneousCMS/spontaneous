@@ -3,6 +3,8 @@
 
 module Spontaneous
   class Entry < ProxyObject
+    extend Plugins
+    plugin Plugins::Render
 
     def self.find_target(container, id)
       Content[id]
@@ -63,11 +65,6 @@ module Spontaneous
       target.label.to_sym
     end
 
-    # intercept the render call in order to use this entry proxy as the source for 
-    # Content#template calls. 
-    def render(format=:html, *args)
-      Spontaneous::Render.render(self, format)
-    end
 
     def style
       if @entry_style_name

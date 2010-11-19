@@ -45,8 +45,8 @@ module Spontaneous
         end
       end
 
-      def render(content, format=:html)
-        engine.render_content(content, format)
+      def render(content, format=:html, params={})
+        engine.render_content(content, format, params)
       end
     end
 

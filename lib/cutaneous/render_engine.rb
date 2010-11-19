@@ -29,8 +29,8 @@ module Cutaneous
       end
     end
 
-    def render_content(content, format)
-      context = context_class.new(content, format)
+    def render_content(content, format, params={})
+      context = context_class.new(content, format, params)
       render(context.template, context)
     end
 

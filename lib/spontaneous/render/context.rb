@@ -6,8 +6,9 @@ module Spontaneous::Render
 
     attr_reader :format, :target
 
-    def initialize(target, format)
+    def initialize(target, format, params={})
       @target, @format = target, format
+      _update(params) if params.is_a?(Hash)
     end
 
     def template
@@ -36,6 +37,8 @@ module Spontaneous::Render
       end.join("\n")
     end
 
+    protected
+
     def method_missing(method, *args, &block)
       key = method.to_sym
       if target.field?(key)
@@ -47,8 +50,11 @@ module Spontaneous::Render
       end
     end
 
-    def context_cache
-      @context_cache ||= Hash.new { |hash, obj| hash[obj] = RenderContext.new(obj, format) }
+    # make each key of the params hash into a method call for speed
+    def _update(params)
+      params.each do |key, val|
+        meta.send(:define_method, key) { val }
+      end
     end
   end
 end

@@ -230,13 +230,11 @@ class RenderTest < Test::Unit::TestCase
       end
     end
   end
-  context "Preview render" do
+  context "Request rendering" do
     setup do
       Spontaneous::Render.template_root = template_root
-      Spontaneous::Render.engine_class = Cutaneous::PreviewRenderEngine
 
       class ::PreviewRender < Page; end
-      PreviewRender.page_style :page
       PreviewRender.inline_style :inline
       PreviewRender.slot :images
       PreviewRender.field :description, :markdown
@@ -249,8 +247,14 @@ class RenderTest < Test::Unit::TestCase
       Object.send(:remove_const, :PreviewRender)
     end
 
-    should "render all tags & include preview edit markers" do
-      @page.render.should == <<-HTML
+    context "Preview render" do
+      setup do
+        Spontaneous::Render.engine_class = Cutaneous::PreviewRenderEngine
+      PreviewRender.page_style :page
+      end
+
+      should "render all tags & include preview edit markers" do
+        @page.render.should == <<-HTML
 <!-- spontaneous:previewedit:start:field id:24 name:title -->
 PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
  <p>DESCRIPTION</p>
@@ -258,7 +262,21 @@ PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
 <!-- spontaneous:previewedit:start:content id:#{@page.images.id} -->
 <!-- spontaneous:previewedit:end:content id:#{@page.images.id} -->
 
-      HTML
+        HTML
+      end
+    end
+    context "Request rendering" do
+      setup do
+        Spontaneous::Render.engine_class = Cutaneous::PreviewRenderEngine
+        PreviewRender.page_style :params
+      end
+
+      should "pass on passed params" do
+        result = @page.render({
+          :welcome => "hello"
+        })
+        result.should == "<!-- spontaneous:previewedit:start:field id:24 name:title -->\nPAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->\nhello\n"
+      end
     end
   end
 end
