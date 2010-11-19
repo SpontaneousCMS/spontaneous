@@ -24,6 +24,7 @@ module Spontaneous
       create(Entry, container, facet, entry_style)
     end
 
+
     def self.create(entry_class, container, content, entry_style)
       content.save if content.new?
       entry = entry_class.new(container, content.id, entry_style ? entry_style.name : nil)
@@ -65,7 +66,29 @@ module Spontaneous
       target.label.to_sym
     end
 
+    def entries
+      target.entries
+    end
 
+    def first
+      entries.first
+    end
+
+    def first?
+      container.entries.first == self
+    end
+
+    def last
+      entries.last
+    end
+
+    def last?
+      container.entries.last == self
+    end
+
+    def position
+      container.entries.index(self)
+    end
     def style
       if @entry_style_name
         target.styles[@entry_style_name]
@@ -132,6 +155,13 @@ module Spontaneous
         :style => @entry_style_name.to_s,
         :styles => container.available_styles(target).map { |s| s.name.to_s },
       }
+    end
+
+    # oops, optimisation. sorry
+    Content.instance_methods.sort.each do |method|
+      unless method_defined?(method)
+        define_method(method) { |*args| target.send(method, *args) }
+      end
     end
   end
 end
