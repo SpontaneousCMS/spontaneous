@@ -250,7 +250,7 @@ class RenderTest < Test::Unit::TestCase
     context "Preview render" do
       setup do
         Spontaneous::Render.engine_class = Cutaneous::PreviewRenderEngine
-      PreviewRender.page_style :page
+        PreviewRender.page_style :page
       end
 
       should "render all tags & include preview edit markers" do
@@ -276,6 +276,22 @@ PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
           :welcome => "hello"
         })
         result.should == "<!-- spontaneous:previewedit:start:field id:24 name:title -->\nPAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->\nhello\n"
+      end
+    end
+
+    context "entry parameters" do
+      setup do
+        Spontaneous::Render.engine_class = Cutaneous::FirstRenderEngine
+        PreviewRender.page_style :entries
+        @first = PreviewRender.new(:title => "first")
+        @second = PreviewRender.new(:title => "second")
+        @third = PreviewRender.new(:title => "third")
+        @page.images << @first
+        @page.images << @second
+        @page.images << @third
+      end
+      should "be available to templates" do
+        @page.render.should == ">first\nsecond\n<third\n0:first\n1:second\n2:third\nfirst.second.third\n"
       end
     end
   end

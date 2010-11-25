@@ -40,6 +40,10 @@ module Spontaneous
       @entry_style_name = style_name.to_sym if style_name
     end
 
+    def each
+      entries.each { |c| yield(c) } if block_given?
+    end
+
     def destroy(root=true)
       target.destroy(root)
     end
@@ -89,6 +93,7 @@ module Spontaneous
     def position
       container.entries.index(self)
     end
+
     def style
       if @entry_style_name
         target.styles[@entry_style_name]
