@@ -1,5 +1,5 @@
 {% images.each do |image| %}
-{% if image.first? %}>{% end %}{% if image.last? %}<{% end %}{{ image.title }}
+{{image.position}}{% if image.first? %}>{% end %}{% if image.last? %}<{% end %}{{ image.title }}
 {% end %}
 {% images.each_with_index do |image, i| %}
 {{ i }}:{{ image.title }}

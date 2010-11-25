@@ -39,6 +39,26 @@ module Spontaneous::Render
       content
     end
 
+    def first
+      content.first
+    end
+
+    def last
+      content.last
+    end
+
+    def first?
+      target.container.visible_entries.first == self
+    end
+
+    def last?
+      target.container.visible_entries.last == self
+    end
+
+    def position
+      target.container.visible_entries.index(self) if target.container
+    end
+
     def render_content
       content.map do |c|
         c.render

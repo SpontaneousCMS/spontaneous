@@ -291,7 +291,7 @@ PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
         @page.images << @third
       end
       should "be available to templates" do
-        @page.render.should == ">first\nsecond\n<third\n0:first\n1:second\n2:third\nfirst.second.third\n"
+        @page.render.should == "0>first\n1second\n2<third\n0:first\n1:second\n2:third\nfirst.second.third\n"
       end
     end
   end
