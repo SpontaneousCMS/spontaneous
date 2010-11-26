@@ -1,7 +1,9 @@
 source :rubygems
 
+gem "home_run", "~>0.9.4"
 gem "sequel", "~>3.16"
 gem 'mysql2', '~>0.2'
+gem 'pg', '~>0.9.0'
 gem "yajl-ruby", "~>0.7", :require => 'yajl'
 gem "erubis", "~>2.6"
 gem "tenjin", "~> 0.6.1"

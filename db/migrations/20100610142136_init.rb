@@ -2,7 +2,8 @@
 
 Sequel.migration do
   up do
-    create_table!(:content) do
+    adapter_scheme =  self.adapter_scheme
+    create_table(:content) do
       primary_key :id
       varchar :type_id, :index => true
       text    :instance_code
@@ -20,8 +21,14 @@ Sequel.migration do
       integer :page_id, :index => true
 
       # content stores
-      text    :entry_store
-      column  :field_store, 'mediumtext' # actually stores all the values, so needs some breathing room
+      case adapter_scheme
+      when :mysql, :mysql2
+        column  :field_store, 'mediumtext'
+        column  :entry_store, 'mediumtext'
+      else
+        text    :field_store
+        text    :entry_store
+      end
 
       # used to store the template assigned to a page
       # #pageonly
@@ -43,7 +50,7 @@ Sequel.migration do
 
     end
 
-    create_table!(:sites) do
+    create_table(:sites) do
       primary_key :id
       integer :revision, :default => 1
       integer :published_revision, :default => 0

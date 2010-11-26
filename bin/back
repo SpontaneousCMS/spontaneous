@@ -3,7 +3,6 @@
 require "rubygems"
 require "bundler"
 Bundler.setup(:default)
-Bundler.require
 
 $:.unshift(File.expand_path(File.dirname(__FILE__) + '/../lib'))
 require 'spontaneous'

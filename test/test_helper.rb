@@ -18,6 +18,7 @@ end
 Sequel.extension :migration
 
 DB = Sequel.connect('mysql2://root@localhost/spontaneous2_test') unless defined?(DB)
+# DB = Sequel.connect('postgres://postgres@localhost/spontaneous2_test') unless defined?(DB)
 # DB.logger = Logger.new($stdout)
 Sequel::Migrator.apply(DB, 'db/migrations')
 
@@ -49,6 +50,7 @@ class Test::Unit::TestCase
     Spontaneous.root = File.expand_path("../fixtures/example_application", __FILE__)
     File.exists?(Spontaneous.root).should be_true
     Spontaneous.init(:mode => :back, :environment => :development)
+    # Schema.load
 
     Object.const_get(:HomePage).should be_instance_of(Class)
 
@@ -94,7 +96,7 @@ class Test::Unit::TestCase
     @about.save
     @home.save
 
-    @projects = ProjectsPage.new(:slug => "projects", :title => "Projects", :introduction => "Welcome to projects page")
+    @projects = ProjectsPage.new(:slug => "projects", :title => "Projects", :introduction => "Welcome to projects page", :uid => "projects")
     @home.pages << @projects
     @projects.projects << Project.new(:slug => "tiffl", :title => "TIFFL", :url => "http://tiffl.org", :description => "TIFFL gives you personalised access to the Transport for London Journey Planner.")
     @projects.projects << Project.new(:slug => "on-the-bbc", :title => "On the BBC", :url => "", :description => "On the BBC is an experiment that provides up-to-date twitter alerts for BBC radio and TV channels.")
@@ -103,7 +105,7 @@ class Test::Unit::TestCase
 
     @projects.save
 
-    @products = ProjectsPage.new(:slug => "products", :title => "Products",  :introduction => "Magnetised's commercial offerings.")
+    @products = ProjectsPage.new(:slug => "products", :title => "Products",  :introduction => "Magnetised's commercial offerings.", :uid => "products")
     @home.pages << @products
 
     @spon = Project.new(:slug => "spontaneous", :title => "Spontaneous CMS",  :url => "http://spontaneouscms.com", :description => "Spontaneous is magnetised's world-class Content Management System, designed around an elegant, intuitive and powerful editing interface.")
@@ -129,6 +131,9 @@ class Test::Unit::TestCase
   def teardown_site_fixture
     # to keep other tests working
     Spontaneous.schema_root = @saved_schema_root
+    # Schema.classes.each do |klass|
+    #   Object.send(:remove_const, klass.name.to_sym) rescue nil
+    # end
   end
 end
 

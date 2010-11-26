@@ -59,18 +59,19 @@ module CustomMatchers
     revision = args[0]
     types = args[1]
     table = "`#{Spontaneous::Content.revision_table(revision)}`"
-    sql = "SELECT * FROM #{table}"
+    sql = "SELECT \\* FROM #{table}"
     if types
       if types.is_a?(Array)
         types = types.map { |t| "'#{t}'" }.join(', ')
       else
         types = "'#{types}'"
       end
-      sql << " WHERE (#{table}.`type_id` IN (#{types}))"
+      sql << " WHERE \\(#{table}.`type_id` IN \\(#{types}"
     end
-    matcher.positive_failure_message = "Expected #{receiver.sql} to == #{sql}"
-    matcher.negative_failure_message = "Expected #{receiver.sql} to != #{sql}"
-    receiver.sql == sql
+    regexp = %r{^#{sql}}
+    matcher.positive_failure_message = "Expected #{receiver.sql} to =~ #{regexp}"
+    matcher.negative_failure_message = "Expected #{receiver.sql} to !~ #{regexp}"
+    regexp === receiver.sql
   end
 end
 

@@ -1,3 +1,4 @@
+require "tenjin"
 
 module Cutaneous
   def self.template_path(filename, format)

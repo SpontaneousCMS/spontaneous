@@ -33,6 +33,15 @@ class ContentTest < Test::Unit::TestCase
       @facet22 = FacetClass22.create.reload
     end
 
+    teardown do
+      [
+        :PageClass1, :PageClass11, :PageClass111, :PageClass2, :PageClass22,
+        :FacetClass1, :FacetClass11, :FacetClass111, :FacetClass2, :FacetClass22
+      ].each do |klass|
+        Object.send(:remove_const, klass)
+      end
+    end
+
     should "correctly type subclasses found via Content" do
       Content.all.map { |c| c.class }.should == \
         [PageClass1, PageClass11, PageClass111, PageClass2, PageClass22,

@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'miso'
 
 module Spontaneous
   module FieldTypes

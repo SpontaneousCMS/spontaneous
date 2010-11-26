@@ -1,10 +1,19 @@
 # encoding: UTF-8
 
 
-Sequel.extension :inflector
+require "home_run"
+require "stringex"
+require "sequel"
+require "yajl"
+
+# need to be clever about requiring these
+require 'mysql2'
+require 'pg'
 
 require 'logger'
 require 'fileutils'
+
+Sequel.extension :inflector
 
 module Spontaneous
   SLASH = "/".freeze
@@ -139,6 +148,10 @@ module Spontaneous
 
     def root=(root)
       @root = File.expand_path(root)
+    end
+
+    def gem_dir
+      @gem_dir ||= File.expand_path(File.dirname(__FILE__) / '..')
     end
 
     def application_dir

@@ -29,18 +29,20 @@ class ConfigTest < Test::Unit::TestCase
   context "Independent configuration loading" do
     setup do
       @pwd = Dir.pwd
+      Config = ::Spontaneous::Config
       Dir.chdir(File.expand_path("../../fixtures/example_application", __FILE__))
       @lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../../../../lib'))
       # defined?(Spontaneous).should be_nil
       # Object.send(:remove_const, :Spontaneous) rescue nil
       # defined?(Spontaneous).should be_nil
-      load @lib_dir + '/spontaneous/config.rb'
-      Config = ::Spontaneous::Config
+      # require @lib_dir + '/spontaneous/config.rb'
+      Config.load
       Config.environment = :development
     end
 
     teardown do
-      self.class.send(:remove_const, :Config)
+      self.class.send(:remove_const, :Config) rescue nil
+      Dir.chdir(@pwd)
     end
 
     should "be run from application dir" do

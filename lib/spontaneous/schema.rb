@@ -4,6 +4,7 @@
 module Spontaneous
   module Schema
     class << self
+
       def load(root=nil)
         schema_files = (root || Spontaneous.schema_root) / "**/*.rb"
         load_classes(schema_files)
@@ -17,7 +18,8 @@ module Spontaneous
       end
 
       def load_file(file)
-        puts "-- Loaded #{File.basename(file, '.rb')}" if require file
+        # puts "-- Loaded #{File.basename(file, '.rb')}" 
+        require(file)
       end
 
       def load_classes(*paths)
