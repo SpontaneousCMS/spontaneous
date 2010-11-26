@@ -4,13 +4,13 @@
 # i think it's kinda neat, if a tad fragile (to columns named 'content'...)
 module Sequel
   class Dataset
-    alias_method :_quote_identifier, :quote_identifier
+    alias_method :sequel_quote_identifier, :quote_identifier
 
     def quote_identifier(name)
       if name == "content"
         name = Spontaneous::Content.current_revision_table
       end
-      _quote_identifier(name)
+      sequel_quote_identifier(name)
     end
   end
 end

@@ -6,10 +6,6 @@ require "stringex"
 require "sequel"
 require "yajl"
 
-# need to be clever about requiring these
-require 'mysql2'
-require 'pg'
-
 require 'logger'
 require 'fileutils'
 
