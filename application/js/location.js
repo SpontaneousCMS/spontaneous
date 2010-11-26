@@ -109,6 +109,7 @@ Spontaneous.Location = (function($, S) {
 			return this.path_from_url(this.url());
 		},
 		find_path: function(path) {
+			console.log('find_path', this.location(), path)
 			if (this.location() && path === this.location().path) {
 				return this.location();
 			}

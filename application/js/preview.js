@@ -22,8 +22,10 @@ Spontaneous.Preview = (function($, S) {
 			return this;
 		},
 		display: function(page) {
+			console.log('display', page)
 			this.iframe.fadeIn();
 			this.iframe.bind('load.preview', function() {
+				console.log('iframe.load', this.contentWindow.location.pathname);
 				S.Preview.set({
 					'title': this.contentWindow.document.title,
 					'path': this.contentWindow.location.pathname
@@ -33,8 +35,7 @@ Spontaneous.Preview = (function($, S) {
 			this.goto(page);
 		},
 		goto: function(page) {
-			if (!page) { return; }
-			// if (!page || page.path == this.get('path')) { return; }
+			if (!page || page.path == this.get('path')) { return; }
 			this.iframe[0].contentWindow.location.href = page.path + click_param();
 		},
 		hide: function() {
