@@ -166,6 +166,7 @@ module Spontaneous
   autoload :Plugins, "spontaneous/plugins"
 
   autoload :Constants, "spontaneous/constants"
+  autoload :Config, "spontaneous/config"
 
 
   autoload :Content, "spontaneous/content"
