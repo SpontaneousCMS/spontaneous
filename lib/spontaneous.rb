@@ -217,6 +217,7 @@ module Spontaneous
     autoload :SiteMap, "spontaneous/plugins/site_map"
     autoload :PageSearch, "spontaneous/plugins/page_search"
     autoload :Media, "spontaneous/plugins/media"
+    autoload :Publishing, "spontaneous/plugins/publishing"
 
     module Slots
       autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"

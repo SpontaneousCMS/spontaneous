@@ -16,7 +16,11 @@ module Spontaneous
       end
 
       get "*" do
-        Site[params[:splat].first].render
+        if page = Site[params[:splat].first]
+          page.render
+        else
+          404
+        end
       end
     end
   end

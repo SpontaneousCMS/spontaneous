@@ -28,6 +28,7 @@ module Spontaneous
     plugin Plugins::AllowedTypes
     plugin Plugins::JSON
     plugin Plugins::Media
+    plugin Plugins::Publishing
 
     many_to_one :container, :class => self, :reciprocal => :nodes
     one_to_many :nodes,    :key => :container_id, :class => self, :reciprocal => :container

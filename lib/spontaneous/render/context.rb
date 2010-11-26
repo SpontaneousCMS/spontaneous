@@ -11,6 +11,10 @@ module Spontaneous::Render
       _update(params) if params.is_a?(Hash)
     end
 
+    def page
+      target.page
+    end
+
     def template
       target.template(format)
     end
@@ -55,9 +59,9 @@ module Spontaneous::Render
       target.container.visible_entries.last == self
     end
 
-    def position
-      target.container.visible_entries.index(self) if target.container
-    end
+    # def position
+    #   target.container.visible_entries.index(self) if target.container
+    # end
 
     def render_content
       content.map do |c|
