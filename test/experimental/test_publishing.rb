@@ -18,9 +18,11 @@ class PublishingTest < Test::Unit::TestCase
     should "be switchable within blocks" do
       Content.dataset.should be_content_revision
       Content.with_revision(23) do
+        Content.revision.should ==23
         Content.dataset.should be_content_revision(23)
       end
       Content.dataset.should  be_content_revision
+      Content.revision.should be_nil
     end
 
     should "know which revision is active" do
@@ -94,9 +96,11 @@ class PublishingTest < Test::Unit::TestCase
 
       should "set all subclasses to use the same dataset" do
         Content.with_revision(23) do
+          Subclass.revision.should ==23
           Subclass.dataset.should be_content_revision(23, 'Subclass')
           # facet wasn't loaded until this point
           Facet.dataset.should  be_content_revision(23, 'Spontaneous::Facet')
+          Facet.revision.should == 23
         end
         Subclass.dataset.should  be_content_revision(nil, 'Subclass')
         Facet.dataset.should  be_content_revision(nil, 'Spontaneous::Facet')

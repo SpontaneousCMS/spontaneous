@@ -26,9 +26,6 @@ module Spontaneous::Plugins
       def inherited(subclass)
         super
         add_publishable_class(subclass)
-        # if @@dataset
-          # activate_dataset(@@dataset)
-        # end
       end
 
 
@@ -51,8 +48,6 @@ module Spontaneous::Plugins
 
       def reset_revision
         @@revision, @@dataset = revision_stack.first
-        @@revision = nil
-        activate_dataset(@@dataset)
         revision_stack.clear
       end
 
@@ -77,7 +72,6 @@ module Spontaneous::Plugins
         revision_stack.push([@@revision, (@@dataset || self.dataset)])
         @@dataset = revision_dataset(revision)
         @@revision = revision
-        # activate_dataset(@@dataset)
       end
 
       def activate_dataset(dataset)
@@ -88,7 +82,6 @@ module Spontaneous::Plugins
 
       def revision_pop
         @@revision, @@dataset = revision_stack.pop
-        # activate_dataset(@@dataset)
       end
 
       def revision_stack
