@@ -37,9 +37,17 @@ module Spontaneous::Plugins
         revision_table(@@revision)
       end
 
+      def base_table
+        'content'
+      end
+
       def revision_table(revision=nil)
-        return 'content' if revision.nil?
+        return base_table if revision.nil?
         "__r#{revision.to_s.rjust(5, '0')}_content"
+      end
+
+      def revision_table?(table_name)
+        /^__r\d{5}_content$/ === table_name.to_s
       end
 
       def revision
@@ -72,6 +80,28 @@ module Spontaneous::Plugins
         revision_stack.push([@@revision, (@@dataset || self.dataset)])
         @@dataset = revision_dataset(revision)
         @@revision = revision
+      end
+
+      def database
+        Spontaneous.database
+      end
+
+      def create_revision(revision, from_revision=nil)
+        dest_table = revision_table(revision)
+        src_table = revision_table(from_revision)
+        sql = "CREATE TABLE #{dataset.quote_identifier(dest_table)} AS SELECT * FROM #{dataset.quote_identifier(src_table)}"
+        database.run(sql)
+        indexes = database.indexes(base_table)
+        indexes.each do |name, options|
+          columns = options.delete(:columns)
+          database.add_index(dest_table, columns, options)
+        end
+      end
+
+      def delete_all_revisions!
+        database.tables.each do |table|
+          database.drop_table(table) if revision_table?(table)
+        end
       end
 
       def activate_dataset(dataset)
