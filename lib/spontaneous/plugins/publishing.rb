@@ -41,6 +41,11 @@ module Spontaneous::Plugins
         'content'
       end
 
+      # make sure that the table name is always the correct revision
+      def simple_table
+        current_revision_table
+      end
+
       def revision_table(revision=nil)
         return base_table if revision.nil?
         "__r#{revision.to_s.rjust(5, '0')}_content"
@@ -84,6 +89,32 @@ module Spontaneous::Plugins
 
       def database
         Spontaneous.database
+      end
+
+      def publish(revision, from_revision=nil, content=nil)
+        if content.nil? or (content.is_a?(Array) and content.empty?)
+          publish_all(revision, from_revision)
+        else
+          with_editable do
+            content = content.map {|c| c.is_a?(Spontaneous::Content) ? c : Spontaneous::Content[c] }
+          end
+          if !from_revision.nil?
+            create_revision(revision, from_revision)
+            with_revision(revision) do
+              content.each do |c|
+                r = Spontaneous::Content[c.id]
+                c.each_attribute do |k, v|
+                  r[k] = v
+                end
+                r.save
+              end
+            end
+          end
+        end
+      end
+
+      def publish_all(revision, from_revision=nil)
+        create_revision(revision, from_revision)
       end
 
       def create_revision(revision, from_revision=nil)

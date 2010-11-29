@@ -7,7 +7,7 @@ class PublishingTest < Test::Unit::TestCase
 
   context "data sources" do
     setup do
-      Spontaneous.stubs(:database).returns(DB)
+      Spontaneous.database = DB
     end
 
     should "have the right names" do
@@ -117,7 +117,7 @@ class PublishingTest < Test::Unit::TestCase
 
   context "content revisions" do
     setup do
-      Spontaneous.stubs(:database).returns(DB)
+      Spontaneous.database = DB
 
       # DB.logger = Logger.new($stdout)
       Content.delete
@@ -138,19 +138,20 @@ class PublishingTest < Test::Unit::TestCase
 
     teardown do
       Content.delete_all_revisions!
+      DB.logger = nil
     end
 
     should "be deletable en masse" do
-      tables = (1..10).map { |i| Content.revision_table(i) }
+      tables = (1..10).map { |i| Content.revision_table(i).to_sym }
       tables.each do |t|
         DB.create_table(t){Integer :id}
       end
       tables.each do |t|
-        DB.tables.include?(t.to_sym).should be_true
+        DB.tables.include?(t).should be_true
       end
       Content.delete_all_revisions!
       tables.each do |t|
-        DB.tables.include?(t.to_sym).should be_false
+        DB.tables.include?(t).should be_false
       end
     end
 
@@ -209,5 +210,31 @@ class PublishingTest < Test::Unit::TestCase
       # (which are different)
       assert_same_elements published_indexes.values, content_indexes.values
     end
+
+
+    should "be creatable from a single content item" do
+      initial_revision = 1
+      final_revision = 2
+      Content.create_revision(initial_revision)
+      c = Content.first(:uid => '1.0')
+      c.label.should be_nil
+      c.label = "published"
+      c.save
+      published_id = c.id
+      c = Content.first(:uid => '1.1')
+      c.label = "unpublished"
+      c.save
+      unpublished_id = c.id
+      Content.publish(final_revision, initial_revision, [published_id])
+
+      Content.with_revision(final_revision) do
+        published = Content[published_id]
+        unpublished = Content[unpublished_id]
+        published.label.should == "published"
+        unpublished.label.should be_nil
+      end
+    end
+
+
   end
 end

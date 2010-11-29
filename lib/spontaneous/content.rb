@@ -10,6 +10,8 @@ module Spontaneous
       alias_method :sequel_plugin, :plugin
     end
 
+    alias_method :each_attribute, :each
+
     sequel_plugin :content_table_inheritance, :type_id
     sequel_plugin :yajl_serialization, :field_store, :entry_store
     sequel_plugin :instance_hooks
