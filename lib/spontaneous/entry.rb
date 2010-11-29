@@ -48,13 +48,14 @@ module Spontaneous
       target.destroy(remove_container_entry)
     end
 
-    def target_id
-      @target_id
-    end
+    # def target_id
+    #   @target_id
+    # end
 
-    def container
-      @container
-    end
+    attr_reader :container, :target_id
+    # def container
+    #   @container
+    # end
 
     def target
       @target ||= load_target

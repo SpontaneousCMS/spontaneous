@@ -158,50 +158,57 @@ module Spontaneous::Plugins
         self.class.with_editable(&block)
       end
 
-      def sync_to_revision(revision)
+      def sync_to_revision(revision, origin=true)
         with_revision(revision) do
+          do_publish = origin || !self.page?
+          puts "do_publish? #{do_publish}"
           r = Spontaneous::Content[self.id]
           p self.entry_store
           if r
             puts ">> existing #{self.id}"
-            if r.entry_store
-              entries_to_delete = r.entry_store - self.entry_store
-              # puts "deleting:"
-              # p entries_to_delete
-              entries_to_delete.each { |e| e.destroy(false) }
+            if do_publish
+              if r.entry_store
+                entries_to_delete = r.entry_store - self.entry_store
+                entries_to_delete.each { |e| Spontaneous::Content[e[:id]].destroy(false) }
+              end
             end
           else
             puts "<< missing #{self.id}"
             r = self.class.new
+            do_publish = true
           end
           puts "*"*50
           puts "** #{Spontaneous::Content.revision}"
+          with_editable do
+            self.entries.each do |entry|
+              # unless entry.page?
+                puts "sync_to_revision #{entry.target_id}"
+                entry.target.sync_to_revision(revision, false)
+              # end
+            end
+          end
           excluded = [:entry_store, :field_store]
           # r[:id] = self.id
           # update_values = self.values.dup
           # update_values.delete(:id)
           # r.update_all(update_values)
-          self.each_attribute do |k, v|
-            unless excluded.include?(k)
-              puts "#{k.inspect} = #{v.inspect}"
-              r[k] = v
+          if do_publish
+            self.each_attribute do |k, v|
+              unless excluded.include?(k)
+                puts "#{k.inspect} = #{v.inspect}"
+                r[k] = v
+              end
             end
+            vals = excluded.inject({}) { |h, k| h[k] = self.send(k); h}
+            p vals
+            r.set_all(vals)
           end
-          vals = excluded.inject({}) { |h, k| h[k] = self.send(k); h}
-          p vals
-          r.set_all(vals)
+          r.save
           # r.instance_variable_set("@values", self.values)
           puts ">"* 50
           p self.entry_store
           p r.entry_store
           puts "<"* 50
-          with_editable do
-            self.entries.each do |entry|
-              puts "sync_to_revision #{entry.target_id}"
-              entry.target.sync_to_revision(revision)
-            end
-          end
-          r.save
         end
       end
     end

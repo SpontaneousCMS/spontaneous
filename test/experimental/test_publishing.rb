@@ -217,6 +217,7 @@ class PublishingTest < Test::Unit::TestCase
         @initial_revision = 1
         @final_revision = 2
         Content.create_revision(@initial_revision)
+        # DB.logger = Logger.new($stdout)
       end
 
       teardown do
@@ -243,7 +244,7 @@ class PublishingTest < Test::Unit::TestCase
         end
       end
 
-      should "publish changes to contents of a page" do
+      should "publish additions to contents of a page" do
         editable1 = Content.first(:uid => '0')
         new_content = Content.new(:uid => "new")
 
@@ -251,23 +252,75 @@ class PublishingTest < Test::Unit::TestCase
         editable1.save
         new_content.reload
         editable1.reload
-        puts "============= #{new_content.id}"
-        DB.logger = Logger.new($stdout)
         Content.publish(@final_revision, @initial_revision, [editable1.id])
         Content.with_revision(@final_revision) do
           published1 = Content[editable1.id]
           published2 = Content[new_content.id]
-          puts "^"* 40
-          p editable1
-          p published1
-          puts "^"* 40
-          p editable1.entries
-          p published1.entries
-          puts "00"
-          p published2.values
-          p new_content.values
           published2.should == new_content
           published1.should == editable1
+        end
+      end
+
+      should "publish deletions to contents of page" do
+        editable1 = Content.first(:uid => '0')
+        deleted = editable1.entries.first.target
+        editable1.entries.first.destroy
+        editable1.reload
+        Content.publish(@final_revision, @initial_revision, [editable1.id])
+        Content.with_revision(@final_revision) do
+          published1 = Content[editable1.id]
+          published1.should == editable1
+          Content[deleted.id].should be_nil
+        end
+      end
+      should "publish additions to child pages" do
+        editable1 = Content.first(:uid => '0')
+        new_page = Page.new(:uid => "new")
+        slot = editable1.entries.first
+        slot << new_page
+        editable1.save
+        slot.save
+        new_page.save
+        new_page.reload
+        editable1.reload
+        slot.reload
+        Content.publish(@final_revision, @initial_revision, [editable1.id])
+        Content.with_revision(@final_revision) do
+          published1 = Content[editable1.id]
+          published2 = Content[new_page.id]
+          published3 = Content[slot.id]
+          published1.should == editable1
+          published2.should == new_page
+          published3.should == slot
+        end
+      end
+
+      should "not publish changes to existing pages unless explicitly asked" do
+        editable1 = Content.first(:uid => '0')
+        editable1 << Content.new(:uid => "added")
+        editable1.save
+        editable1.reload
+        editable2 = Content.first(:uid => '0.0.0')
+        new_content = Content.new(:uid => "new")
+        editable2 << new_content
+        editable2.save
+        editable2.reload
+        new_content.reload
+        puts "@" * 160
+        p editable2
+        Content.publish(@final_revision, @initial_revision, [editable1.id])
+        Content.with_revision(@final_revision) do
+          published1 = Content[editable1.id]
+          Content.first(:uid => "added").should_not be_nil
+          published3 = Content[editable2.id]
+          published1.should == editable1
+          published3.should_not == editable2
+          published3.uid.should_not == "new"
+        end
+        Content.publish(@final_revision+1, @final_revision, [editable2.id])
+        Content.with_revision(@final_revision+1) do
+          published3 = Content[editable2.id]
+          published3.should == editable2
         end
       end
     end

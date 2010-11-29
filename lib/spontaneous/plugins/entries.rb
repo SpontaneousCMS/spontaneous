@@ -25,6 +25,7 @@ module Spontaneous::Plugins
 
       def destroy(remove_container_entry=true)
         if container && remove_container_entry
+          puts ">>> destroying entry"
           container.destroy_entry!(self.entry)
         end
         super()
