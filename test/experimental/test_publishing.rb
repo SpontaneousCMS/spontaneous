@@ -121,17 +121,18 @@ class PublishingTest < Test::Unit::TestCase
 
       # DB.logger = Logger.new($stdout)
       Content.delete
-      10.times do |i|
-        c = Content.create(:uid => i)
+
+      2.times do |i|
+        c = Page.new(:uid => i)
         2.times do |j|
-          d = Content.create(:uid => "#{i}.#{j}")
+          d = Content.new(:uid => "#{i}.#{j}")
           c << d
           2.times do |k|
-            d << Content.create(:uid => "#{i}.#{j}.#{k}")
+            d << Page.new(:uid => "#{i}.#{j}.#{k}")
             d.save
           end
-          c.save
         end
+        c.save
       end
     end
 
@@ -178,13 +179,13 @@ class PublishingTest < Test::Unit::TestCase
       Content.create_revision(source_revision)
 
       Content.with_revision(source_revision) do
-        Content.filter(:depth => 0).limit(2).each do |c|
+        Content.filter(:depth => 0).limit(1).each do |c|
           c.destroy
         end
         source_revision_count = Content.count
       end
 
-      Content.count.should == source_revision_count + 14
+      Content.count.should == source_revision_count + 7
 
       Content.create_revision(revision, source_revision)
 
