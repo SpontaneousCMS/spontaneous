@@ -274,7 +274,7 @@ class PublishingTest < Test::Unit::TestCase
         end
       end
 
-      should "publish additions to child pages" do
+      should "publish page additions" do
         editable1 = Content.first(:uid => '0')
         new_page = Page.new(:uid => "new")
         slot = editable1.entries.first
