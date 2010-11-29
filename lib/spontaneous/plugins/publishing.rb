@@ -180,15 +180,17 @@ module Spontaneous::Plugins
                 entry.target.sync_to_revision(revision, false)
               end
             end
+
             # setting these serialised values fails unless i use the proper
             # setter call
             excluded = [:entry_store, :field_store]
+
             self.each_attribute do |k, v|
               published_copy[k] = v unless excluded.include?(k)
             end
             excluded.each { |f| published_copy.send("#{f}=", self.send(f)) }
           end
-          published_copy.save
+          published_copy.save if published_copy.modified?
         end
       end
     end
