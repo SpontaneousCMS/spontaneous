@@ -95,18 +95,14 @@ module Spontaneous::Plugins
         if content.nil? or (content.is_a?(Array) and content.empty?)
           publish_all(revision, from_revision)
         else
-          with_editable do
-            content = content.map {|c| c.is_a?(Spontaneous::Content) ? c : Spontaneous::Content[c] }
-          end
           if !from_revision.nil?
             create_revision(revision, from_revision)
-            with_revision(revision) do
+            with_editable do
               content.each do |c|
-                r = Spontaneous::Content[c.id]
-                c.each_attribute do |k, v|
-                  r[k] = v
-                end
-                r.save
+                c = c.is_a?(Spontaneous::Content) ? c : Spontaneous::Content[c]
+                puts "========= sync_start #{c.id}"
+                p c
+                c.sync_to_revision(revision)
               end
             end
           end
@@ -155,6 +151,59 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+      def with_revision(revision, &block)
+        self.class.with_revision(revision, &block)
+      end
+      def with_editable(&block)
+        self.class.with_editable(&block)
+      end
+
+      def sync_to_revision(revision)
+        with_revision(revision) do
+          r = Spontaneous::Content[self.id]
+          p self.entry_store
+          if r
+            puts ">> existing #{self.id}"
+            if r.entry_store
+              entries_to_delete = r.entry_store - self.entry_store
+              # puts "deleting:"
+              # p entries_to_delete
+              entries_to_delete.each { |e| e.destroy(false) }
+            end
+          else
+            puts "<< missing #{self.id}"
+            r = self.class.new
+          end
+          puts "*"*50
+          puts "** #{Spontaneous::Content.revision}"
+          excluded = [:entry_store, :field_store]
+          # r[:id] = self.id
+          # update_values = self.values.dup
+          # update_values.delete(:id)
+          # r.update_all(update_values)
+          self.each_attribute do |k, v|
+            unless excluded.include?(k)
+              puts "#{k.inspect} = #{v.inspect}"
+              r[k] = v
+            end
+          end
+          vals = excluded.inject({}) { |h, k| h[k] = self.send(k); h}
+          p vals
+          r.set_all(vals)
+          # r.instance_variable_set("@values", self.values)
+          puts ">"* 50
+          p self.entry_store
+          p r.entry_store
+          puts "<"* 50
+          with_editable do
+            self.entries.each do |entry|
+              puts "sync_to_revision #{entry.target_id}"
+              entry.target.sync_to_revision(revision)
+            end
+          end
+          r.save
+        end
+      end
     end
   end
 end

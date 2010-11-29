@@ -44,8 +44,8 @@ module Spontaneous
       entries.each { |c| yield(c) } if block_given?
     end
 
-    def destroy(root=true)
-      target.destroy(root)
+    def destroy(remove_container_entry=true)
+      target.destroy(remove_container_entry)
     end
 
     def target_id

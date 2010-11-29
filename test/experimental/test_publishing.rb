@@ -212,26 +212,63 @@ class PublishingTest < Test::Unit::TestCase
     end
 
 
-    should "be creatable from a single content item" do
-      initial_revision = 1
-      final_revision = 2
-      Content.create_revision(initial_revision)
-      c = Content.first(:uid => '1.0')
-      c.label.should be_nil
-      c.label = "published"
-      c.save
-      published_id = c.id
-      c = Content.first(:uid => '1.1')
-      c.label = "unpublished"
-      c.save
-      unpublished_id = c.id
-      Content.publish(final_revision, initial_revision, [published_id])
+    context "incremental publishing" do
+      setup do
+        @initial_revision = 1
+        @final_revision = 2
+        Content.create_revision(@initial_revision)
+      end
 
-      Content.with_revision(final_revision) do
-        published = Content[published_id]
-        unpublished = Content[unpublished_id]
-        published.label.should == "published"
-        unpublished.label.should be_nil
+      teardown do
+        DB.logger = nil
+      end
+
+      should "duplicate changes to only a single item" do
+        editable1 = Content.first(:uid => '1.0')
+        editable1.label.should be_nil
+        editable1.label = "published"
+        editable1.save
+        # editable1.reload
+        editable2 = Content.first(:uid => '1.1')
+        editable2.label = "unpublished"
+        editable2.save
+        # editable2.reload
+        Content.publish(@final_revision, @initial_revision, [editable1.id])
+
+        Content.with_revision(@final_revision) do
+          published = Content[editable1.id]
+          unpublished = Content[editable2.id]
+          published.should == editable1
+          unpublished.should_not == editable2
+        end
+      end
+
+      should "publish changes to contents of a page" do
+        editable1 = Content.first(:uid => '0')
+        new_content = Content.new(:uid => "new")
+
+        editable1 << new_content
+        editable1.save
+        new_content.reload
+        editable1.reload
+        puts "============= #{new_content.id}"
+        DB.logger = Logger.new($stdout)
+        Content.publish(@final_revision, @initial_revision, [editable1.id])
+        Content.with_revision(@final_revision) do
+          published1 = Content[editable1.id]
+          published2 = Content[new_content.id]
+          puts "^"* 40
+          p editable1
+          p published1
+          puts "^"* 40
+          p editable1.entries
+          p published1.entries
+          puts "00"
+          p published2.values
+          p new_content.values
+          published2.should == new_content
+          published1.should == editable1
+        end
       end
     end
 
