@@ -100,8 +100,6 @@ module Spontaneous::Plugins
             with_editable do
               content.each do |c|
                 c = c.is_a?(Spontaneous::Content) ? c : Spontaneous::Content[c]
-                puts "========= sync_start #{c.id}"
-                p c
                 c.sync_to_revision(revision)
               end
             end
@@ -159,56 +157,38 @@ module Spontaneous::Plugins
       end
 
       def sync_to_revision(revision, origin=true)
+        # publish is a lock to make sure the duplication doesn't cross
+        # page boundaries unless that's necessary (such as in the case
+        # of a page addition)
+        publish = origin || !self.page?
+
         with_revision(revision) do
-          do_publish = origin || !self.page?
-          puts "do_publish? #{do_publish}"
-          r = Spontaneous::Content[self.id]
-          p self.entry_store
-          if r
-            puts ">> existing #{self.id}"
-            if do_publish
-              if r.entry_store
-                entries_to_delete = r.entry_store - self.entry_store
-                entries_to_delete.each { |e| Spontaneous::Content[e[:id]].destroy(false) }
-              end
+          published_copy = Spontaneous::Content[self.id]
+          if published_copy
+            if publish and published_copy.entry_store
+              entries_to_delete = published_copy.entry_store - self.entry_store
+              entries_to_delete.each { |e| Spontaneous::Content[e[:id]].destroy(false) }
             end
-          else
-            puts "<< missing #{self.id}"
-            r = self.class.new
-            do_publish = true
+          else # missing content (so force a publish)
+            published_copy = self.class.new
+            publish = true
           end
-          puts "*"*50
-          puts "** #{Spontaneous::Content.revision}"
-          with_editable do
-            self.entries.each do |entry|
-              # unless entry.page?
-                puts "sync_to_revision #{entry.target_id}"
+
+          if publish
+            with_editable do
+              self.entries.each do |entry|
                 entry.target.sync_to_revision(revision, false)
-              # end
-            end
-          end
-          excluded = [:entry_store, :field_store]
-          # r[:id] = self.id
-          # update_values = self.values.dup
-          # update_values.delete(:id)
-          # r.update_all(update_values)
-          if do_publish
-            self.each_attribute do |k, v|
-              unless excluded.include?(k)
-                puts "#{k.inspect} = #{v.inspect}"
-                r[k] = v
               end
             end
-            vals = excluded.inject({}) { |h, k| h[k] = self.send(k); h}
-            p vals
-            r.set_all(vals)
+            # setting these serialised values fails unless i use the proper
+            # setter call
+            excluded = [:entry_store, :field_store]
+            self.each_attribute do |k, v|
+              published_copy[k] = v unless excluded.include?(k)
+            end
+            excluded.each { |f| published_copy.send("#{f}=", self.send(f)) }
           end
-          r.save
-          # r.instance_variable_set("@values", self.values)
-          puts ">"* 50
-          p self.entry_store
-          p r.entry_store
-          puts "<"* 50
+          published_copy.save
         end
       end
     end

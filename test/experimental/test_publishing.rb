@@ -273,6 +273,7 @@ class PublishingTest < Test::Unit::TestCase
           Content[deleted.id].should be_nil
         end
       end
+
       should "publish additions to child pages" do
         editable1 = Content.first(:uid => '0')
         new_page = Page.new(:uid => "new")
@@ -306,8 +307,6 @@ class PublishingTest < Test::Unit::TestCase
         editable2.save
         editable2.reload
         new_content.reload
-        puts "@" * 160
-        p editable2
         Content.publish(@final_revision, @initial_revision, [editable1.id])
         Content.with_revision(@final_revision) do
           published1 = Content[editable1.id]
@@ -319,8 +318,12 @@ class PublishingTest < Test::Unit::TestCase
         end
         Content.publish(@final_revision+1, @final_revision, [editable2.id])
         Content.with_revision(@final_revision+1) do
+          published1 = Content[editable1.id]
+          published1.should == editable1
           published3 = Content[editable2.id]
           published3.should == editable2
+          published4 = Content[editable2.entries.first.id]
+          published4.should == editable2.entries.first
         end
       end
     end
