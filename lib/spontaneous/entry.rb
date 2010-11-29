@@ -44,18 +44,11 @@ module Spontaneous
       entries.each { |c| yield(c) } if block_given?
     end
 
-    def destroy(remove_container_entry=true)
-      target.destroy(remove_container_entry)
+    def destroy(remove_container_entry=true, _container=nil)
+      target.destroy(remove_container_entry, self.container)
     end
 
-    # def target_id
-    #   @target_id
-    # end
-
     attr_reader :container, :target_id
-    # def container
-    #   @container
-    # end
 
     def target
       @target ||= load_target

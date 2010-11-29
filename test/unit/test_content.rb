@@ -161,7 +161,12 @@ class ContentTest < Test::Unit::TestCase
       Content.all.map { |c| c.id }.should == [@a, @d].map { |c| c.id }
     end
 
-
+    ## doesn't work due to 
+    should "work through entries" do
+      @a.entries.first.destroy
+      Content.count.should == 2
+      @a.entries.length.should == 1
+    end
   end
 
 

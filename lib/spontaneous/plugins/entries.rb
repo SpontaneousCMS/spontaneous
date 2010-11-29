@@ -23,7 +23,8 @@ module Spontaneous::Plugins
         super
       end
 
-      def destroy(remove_container_entry=true)
+      def destroy(remove_container_entry=true, container=nil)
+        container ||= self.container
         if container && remove_container_entry
           container.destroy_entry!(self.entry)
         end

@@ -75,7 +75,6 @@ module Spontaneous
     end
 
     def remove(entry)
-      # entry.recursive_destroy
       e = self.delete(entry)
       @owner.entry_modified!(nil)
     end
