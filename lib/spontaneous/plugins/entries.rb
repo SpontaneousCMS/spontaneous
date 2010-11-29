@@ -15,7 +15,7 @@ module Spontaneous::Plugins
         if container 
           self.page = container.page if page.nil?
           if page?
-            self.depth = (parent.depth || 0) + 1
+            self.depth = parent ? ((parent.depth || 0) + 1) : 0
           else
             self.depth = (container.content_depth || 0) + 1
           end
