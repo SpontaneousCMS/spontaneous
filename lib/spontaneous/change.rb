@@ -15,9 +15,15 @@ module Spontaneous
         entry_point = @@instance.nil?
         @@instance ||= self.new(:modified_list => [])
         yield if block_given?
-        @@instance.save if entry_point
       ensure
+        if entry_point and !@@instance.modified_list.empty?
+          @@instance.save
+        end
         @@instance = nil if entry_point
+      end
+
+      def recording?
+        !@@instance.nil?
       end
 
       def push(page)

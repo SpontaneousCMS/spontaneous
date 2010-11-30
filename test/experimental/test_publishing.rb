@@ -415,6 +415,13 @@ class PublishingTest < Test::Unit::TestCase
       setup do
         Change.delete
       end
+      should "have a testable state" do
+        Change.recording?.should be_false
+        Change.record do
+          Change.recording?.should be_true
+        end
+        Change.recording?.should be_false
+      end
       should "be created on updating a page's attributes" do
         page = Page.first
         Change.record do
@@ -483,6 +490,27 @@ class PublishingTest < Test::Unit::TestCase
         change.modified_list.should == [page.id, p2.id]
         change.modified.should == [page, p2]
       end
+      should "not create a change if nothing actually happens" do
+        Change.record do
+        end
+        Change.count.should == 0
+      end
+
+      should "reset state despite exceptions" do
+        page = Page.first
+        begin
+          Change.record do
+            page.label = "caught"
+            page.save
+            Change.recording?.should be_true
+            raise Exception.new
+          end
+        rescue Exception
+        end
+        Change.recording?.should be_false
+        Change.count.should == 1
+      end
+
     end
 
     context "publication timestamps" do
