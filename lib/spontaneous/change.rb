@@ -33,7 +33,7 @@ module Spontaneous
       end
 
       def publish_sets
-        grouped_changes = self.all.map { |c| [c]}
+        grouped_changes = self.all.map { |c| [c] }
         begin
           modified = false
           grouped_changes.each_with_index do |inner, i|
