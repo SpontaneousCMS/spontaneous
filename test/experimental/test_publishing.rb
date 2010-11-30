@@ -389,29 +389,45 @@ class PublishingTest < Test::Unit::TestCase
         Sequel.datetime_class.stubs(:now).returns(@now)
       end
 
-      should "first_published_at should be set on first publish" do
+      should "set correct timestamps on first publish" do
         Content.first.first_published_at.should be_nil
+        Content.first.last_published_at.should be_nil
         Content.publish(@revision)
         Content.first.first_published_at.to_i.should == @now.to_i
+        Content.first.last_published_at.to_i.should == @now.to_i
         Content.first.first_published_revision.should == @revision
         Content.with_revision(@revision) do
           Content.first.first_published_at.to_i.should == @now.to_i
+          Content.first.last_published_at.to_i.should == @now.to_i
           Content.first.first_published_revision.should == @revision
         end
       end
 
-      should "first_published_at should only be set once" do
+      should "set correct timestamps on later publishes" do
         Content.first.first_published_at.should be_nil
         Content.publish(@revision)
         Content.first.first_published_at.to_i.should == @now.to_i
         c = Content.create
         c.first_published_at.should be_nil
+        Sequel.datetime_class.stubs(:now).returns(@now+100)
         Content.publish(@revision+1)
         Content.first.first_published_at.to_i.should == @now.to_i
+        Content.first.last_published_at.to_i.should == @now.to_i + 100
         c = Content[c.id]
-        c.first_published_at.to_i.should == @now.to_i
+        c.first_published_at.to_i.should == @now.to_i + 100
       end
 
+      should "not set publishing date for items not published" do
+        Content.publish(@revision)
+        page = Content.first
+        page.uid = "fish"
+        page.save
+        added = Content.create
+        added.first_published_at.should be_nil
+        Content.publish(@revision+1, [page])
+        added.first_published_at.should be_nil
+        added.last_published_at.should be_nil
+      end
     end
   end
 end

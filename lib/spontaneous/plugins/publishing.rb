@@ -97,20 +97,30 @@ module Spontaneous::Plugins
 
       def publish(revision, content=nil)
         with_editable do
-          published = self.filter(:first_published_at => nil)
-          mark_published = Proc.new do |dataset|
+          first_published = self.filter(:first_published_at => nil)
+          published = self.filter
+          mark_first_published = Proc.new do |dataset|
             dataset.update(:first_published_at => Sequel.datetime_class.now, :first_published_revision => revision)
           end
+          mark_published = Proc.new do |dataset|
+            dataset.update(:last_published_at => Sequel.datetime_class.now)
+          end
           if content.nil? or (!revision_exists?(revision-1)) or \
-            (content.is_a?(Array) and content.empty?)
+              (content.is_a?(Array) and content.empty?)
+            mark_first_published[first_published]
             mark_published[published]
+
             create_revision(revision)
           else
             content = content.map do |c|
               c.is_a?(Spontaneous::Content) ? c : Spontaneous::Content[c]
             end
+            first_published = first_published.filter(:id => content.map { |c| c.id })
             published = published.filter(:id => content.map { |c| c.id })
+
+            mark_first_published[first_published]
             mark_published[published]
+
             create_revision(revision, revision-1)
             content.each do |c|
               c.sync_to_revision(revision)
