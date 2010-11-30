@@ -386,10 +386,11 @@ class PublishingTest < Test::Unit::TestCase
         c.save
         c.modified_at.should == now
       end
+
       should "update page timestamps on modification of a facet" do
         Sequel.datetime_class.stubs(:now).returns(@now+3600)
         page = Page.first
-        page.modified_at.should_not == @now
+        page.modified_at.to_i.should == @now.to_i
         content = page.entries.first
         content.page.should == page
         content.label = "changed"
@@ -397,7 +398,93 @@ class PublishingTest < Test::Unit::TestCase
         page.reload
         page.modified_at.to_i.should == @now.to_i + 3600
       end
+
+      should "update page timestamp on addition of facet" do
+        Sequel.datetime_class.stubs(:now).returns(@now+3600)
+        page = Page.first
+        content = Content[page.entries.first.id]
+        content << Content.new
+        content.save
+        content.modified_at.to_i.should == @now.to_i + 3600
+        page.reload
+        page.modified_at.to_i.should == @now.to_i + 3600
+      end
     end
+
+    context "change sets" do
+      setup do
+        Change.delete
+      end
+      should "be created on updating a page's attributes" do
+        page = Page.first
+        Change.record do
+          page.label = "changed"
+          page.save
+        end
+        page.reload
+        Change.count.should == 1
+        change = Change.first
+        change.modified_list.should be_instance_of(Array)
+        change.modified_list.length.should == 1
+        change.modified_list.should == [page.id]
+        change.modified.should == [page]
+      end
+
+      should "be created on updating a page's content" do
+        page = Page.first
+        content = Content[page.entries.first.target.id]
+        Change.record do
+          content.label = "changed"
+          content.save
+        end
+        page.reload
+        Change.count.should == 1
+        change = Change.first
+        change.modified_list.should be_instance_of(Array)
+        change.modified_list.length.should == 1
+        change.modified_list.should == [page.id]
+        change.modified.should == [page]
+      end
+      should "include all modified pages" do
+        page = Page.first
+        content = Content[page.entries.first.target.id]
+        new_page = nil
+        Change.record do
+          new_page = Page.new
+          content << new_page
+          content.save
+        end
+        new_page.reload
+        page.reload
+        Change.count.should == 1
+        change = Change.first
+        change.modified_list.should be_instance_of(Array)
+        change.modified_list.length.should == 2
+        change.modified_list.should == [page.id, new_page.id]
+        change.modified.should == [page, new_page]
+      end
+      should "handle being called twice" do
+        page = Page.first
+        p2 = Page.filter(~{:id => page.id}).first
+        Change.record do
+          page.label = "changed"
+          page.save
+          Change.record do
+            p2.label = "another change"
+            p2.save
+          end
+        end
+        page.reload
+        p2.reload
+        Change.count.should == 1
+        change = Change.first
+        change.modified_list.should be_instance_of(Array)
+        change.modified_list.length.should == 2
+        change.modified_list.should == [page.id, p2.id]
+        change.modified.should == [page, p2]
+      end
+    end
+
     context "publication timestamps" do
       setup do
         @revision = 1

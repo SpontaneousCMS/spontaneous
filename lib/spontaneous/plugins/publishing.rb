@@ -171,13 +171,16 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
-      def before_update
-        page.modified! if page
+      def after_update
         super
+        page.modified!(page?) if page
       end
 
-      def modified!
-        self.model.where(:id => self.id).update(:modified_at => Sequel.datetime_class.now)
+      def modified!(caller_is_page)
+        unless caller_is_page
+          self.model.where(:id => self.id).update(:modified_at => Sequel.datetime_class.now)
+        end
+        Spontaneous::Change.push(self) if page?
       end
 
 

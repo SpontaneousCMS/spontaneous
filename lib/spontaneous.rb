@@ -205,6 +205,8 @@ module Spontaneous
   autoload :Templates, "spontaneous/templates"
   autoload :Media, "spontaneous/media"
 
+  autoload :Change, "spontaneous/change"
+
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"
     autoload :ErubisTemplate, "spontaneous/templates/erubis_template"
