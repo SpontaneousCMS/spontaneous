@@ -28,6 +28,8 @@ UI:
 - Attach URL editing/displaying box to bottom of page-info and then animate #page-info {height:'+10'} to expand for editing... @done
 - Preview mode is not using the edited URL of current page
 
+- Editing of page UID
+
 Backend:
 
 - Lightweight config system, requirable independently @done
@@ -43,7 +45,9 @@ Templates:
 - Context is clever about what is rendered render(format) called on objects or to_s if #render not found @done
 - Cutaneous, "Of the skin" (.cut)? @done
 - Instantaneous, "Occurring, arising, or functioning without any delay" (.ins)? @done
-
+- Some useful handling of invalid tags in template
+- Look at fix for Spontaneous:: namespace (i.e. can't just use 'Site' have to use Spontaneous:Site)
+- Switch to kramdown for markdown processing http://kramdown.rubyforge.org/index.html
 Preview:
 
 - Track modification and provide instant re-render of page preview
