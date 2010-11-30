@@ -55,6 +55,10 @@ module Spontaneous::Plugins
         /^__r\d{5}_content$/ === table_name.to_s
       end
 
+      def revision_exists?(revision)
+        database.tables.include?(revision_table(revision).to_sym)
+      end
+
       def revision
         @@revision
       end
@@ -91,24 +95,32 @@ module Spontaneous::Plugins
         Spontaneous.database
       end
 
-      def publish(revision, from_revision=nil, content=nil)
-        if content.nil? or (content.is_a?(Array) and content.empty?)
-          publish_all(revision, from_revision)
-        else
-          if !from_revision.nil?
-            create_revision(revision, from_revision)
-            with_editable do
-              content.each do |c|
-                c = c.is_a?(Spontaneous::Content) ? c : Spontaneous::Content[c]
-                c.sync_to_revision(revision)
-              end
+      def publish(revision, content=nil)
+        with_editable do
+          published = self.filter(:first_published_at => nil)
+          mark_published = Proc.new do |dataset|
+            dataset.update(:first_published_at => Sequel.datetime_class.now, :first_published_revision => revision)
+          end
+          if content.nil? or (!revision_exists?(revision-1)) or \
+            (content.is_a?(Array) and content.empty?)
+            mark_published[published]
+            create_revision(revision)
+          else
+            content = content.map do |c|
+              c.is_a?(Spontaneous::Content) ? c : Spontaneous::Content[c]
+            end
+            published = published.filter(:id => content.map { |c| c.id })
+            mark_published[published]
+            create_revision(revision, revision-1)
+            content.each do |c|
+              c.sync_to_revision(revision)
             end
           end
         end
       end
 
-      def publish_all(revision, from_revision=nil)
-        create_revision(revision, from_revision)
+      def publish_all(revision)
+        publish(revision, nil)
       end
 
       def create_revision(revision, from_revision=nil)
@@ -149,6 +161,12 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+      # stop timestamp changes on published content
+      def set_update_timestamp(time=nil)
+        super unless self.class.revision
+      end
+
+
       def with_revision(revision, &block)
         self.class.with_revision(revision, &block)
       end

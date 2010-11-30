@@ -16,6 +16,7 @@ module Spontaneous
     sequel_plugin :yajl_serialization, :field_store, :entry_store
     sequel_plugin :instance_hooks
     sequel_plugin :skip_create_refresh
+    sequel_plugin :timestamps, :create=>:created_at, :update=>:modified_at
 
     extend Plugins
 
