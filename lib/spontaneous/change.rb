@@ -31,6 +31,26 @@ module Spontaneous
           @@instance.modified_list << page.id
         end
       end
+
+      def publish_sets
+        grouped_changes = self.all.map { |c| [c]}
+        begin
+          modified = false
+          grouped_changes.each_with_index do |inner, i|
+            inner_ids = inner.map { |c| c.modified_list }.flatten
+            grouped_changes[(i+1)..-1].each_with_index do |outer, j|
+              outer_ids = outer.map { |c| c.modified_list }.flatten
+              if !(inner_ids & outer_ids).empty?
+                modified = true
+                group = grouped_changes.delete(outer)
+                grouped_changes[i] += group
+              end
+            end
+          end
+        end while modified
+
+        grouped_changes
+      end
     end
 
     def before_update
@@ -39,6 +59,10 @@ module Spontaneous
 
     def modified
       @modified ||= modified_list.map { |id| Content[id] }
+    end
+
+    def &(change)
+      self.modified_list & change.modified_list
     end
   end
 end

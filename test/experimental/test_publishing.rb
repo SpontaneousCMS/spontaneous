@@ -414,7 +414,11 @@ class PublishingTest < Test::Unit::TestCase
     context "change sets" do
       setup do
         Change.delete
+        @now = Sequel.datetime_class.now
+        Sequel.datetime_class.stubs(:now).returns(@now)
+        Time.stubs(:now).returns(@now)
       end
+
       should "have a testable state" do
         Change.recording?.should be_false
         Change.record do
@@ -435,6 +439,7 @@ class PublishingTest < Test::Unit::TestCase
         change.modified_list.length.should == 1
         change.modified_list.should == [page.id]
         change.modified.should == [page]
+        change.created_at.to_i.should == @now.to_i
       end
 
       should "be created on updating a page's content" do
@@ -452,6 +457,7 @@ class PublishingTest < Test::Unit::TestCase
         change.modified_list.should == [page.id]
         change.modified.should == [page]
       end
+
       should "include all modified pages" do
         page = Page.first
         content = Content[page.entries.first.target.id]
@@ -490,6 +496,7 @@ class PublishingTest < Test::Unit::TestCase
         change.modified_list.should == [page.id, p2.id]
         change.modified.should == [page, p2]
       end
+
       should "not create a change if nothing actually happens" do
         Change.record do
         end
@@ -511,6 +518,38 @@ class PublishingTest < Test::Unit::TestCase
         Change.count.should == 1
       end
 
+      should "correctly calculate dependencies" do
+        Change.delete
+        changes = [
+          [201, 202],
+          [104, 105, 106],
+          [100, 101],
+          [100],
+          [101],
+          [100],
+          [101, 102],
+          [102],
+          [101],
+          [102, 103],
+          [103, 104],
+          [200],
+          [200, 201],
+          [201]
+        ]
+        publish_sets = [
+          [1, 13, 14, 12],
+          [2, 11, 8, 10, 3, 4, 5, 6, 7, 9]
+        ]
+        changes.each_with_index do |ids, i|
+          Change.insert(:id => (i+1), :modified_list => ids.to_json)
+        end
+        result = Change.publish_sets
+        result.should be_instance_of(Array)
+        result.length.should == 2
+        result.each_with_index do |set, i|
+          set.should == publish_sets[i].map { |id| Change[id] }
+        end
+      end
     end
 
     context "publication timestamps" do
