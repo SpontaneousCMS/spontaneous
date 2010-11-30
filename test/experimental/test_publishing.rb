@@ -429,6 +429,12 @@ class PublishingTest < Test::Unit::TestCase
         added.first_published_at.should be_nil
         added.last_published_at.should be_nil
       end
+      should "always publish all if no previous revisions exist" do
+        page = Content.first
+        Content.filter(:first_published_at => nil).count.should == Content.count
+        Content.publish(@revision, [page])
+        Content.filter(:first_published_at => nil).count.should == 0
+      end
     end
   end
 end
