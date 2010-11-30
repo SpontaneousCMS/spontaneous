@@ -425,7 +425,7 @@ class PublishingTest < Test::Unit::TestCase
         added = Content.create
         added.first_published_at.should be_nil
         Content.publish(@revision+1, [page])
-        page.first_published_at.should == @now
+        page.first_published_at.to_i.should == @now.to_i
         added.first_published_at.should be_nil
         added.last_published_at.should be_nil
       end
