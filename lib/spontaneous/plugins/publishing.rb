@@ -113,7 +113,7 @@ module Spontaneous::Plugins
             create_revision(revision)
           else
             content = content.map do |c|
-              c.is_a?(Spontaneous::Content) ? c : Spontaneous::Content[c]
+              c.is_a?(Spontaneous::Content) ? c.reload : Spontaneous::Content[c]
             end
             first_published = first_published.filter(:id => content.map { |c| c.id })
             published = published.filter(:id => content.map { |c| c.id })
@@ -171,10 +171,15 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
-      # stop timestamp changes on published content
-      def set_update_timestamp(time=nil)
-        super unless self.class.revision
+      def before_update
+        page.modified! if page
+        super
       end
+
+      def modified!
+        self.model.where(:id => self.id).update(:modified_at => Sequel.datetime_class.now)
+      end
+
 
 
       def with_revision(revision, &block)
@@ -185,7 +190,7 @@ module Spontaneous::Plugins
       end
 
       def sync_to_revision(revision, origin=true)
-        # publish is a lock to make sure the duplication doesn't cross
+        # 'publish' is a lock to make sure the duplication doesn't cross
         # page boundaries unless that's necessary (such as in the case
         # of a page addition)
         publish = origin || !self.page?
@@ -195,10 +200,14 @@ module Spontaneous::Plugins
           if published_copy
             if publish and published_copy.entry_store
               entries_to_delete = published_copy.entry_store - self.entry_store
-              entries_to_delete.each { |e| Spontaneous::Content[e[:id]].destroy(false) }
+              entries_to_delete.each do |entry|
+                if c = Spontaneous::Content[entry[:id]]
+                  c.destroy(false)
+                end
+              end
             end
           else # missing content (so force a publish)
-            published_copy = self.class.new
+            Spontaneous::Content.insert({:id => self.id})
             publish = true
           end
 
@@ -208,17 +217,8 @@ module Spontaneous::Plugins
                 entry.target.sync_to_revision(revision, false)
               end
             end
-
-            # setting these serialised values fails unless i use the proper
-            # setter call
-            excluded = [:entry_store, :field_store]
-
-            self.each_attribute do |k, v|
-              published_copy[k] = v unless excluded.include?(k)
-            end
-            excluded.each { |f| published_copy.send("#{f}=", self.send(f)) }
+            Spontaneous::Content.where(:id => self.id).update(self.values)
           end
-          published_copy.save if published_copy.modified?
         end
       end
     end

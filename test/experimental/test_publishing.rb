@@ -9,7 +9,8 @@ class PublishingTest < Test::Unit::TestCase
     serialised_columns = [:field_store, :entry_store]
     columns = Content.columns - serialised_columns
     columns.each do |col|
-      result[col].should == compare[col]
+      # result[col].should == compare[col]
+      assert_equal(result[col], compare[col], "Column '#{col}' should be equal")
     end
     serialised_columns.each do |col|
       result.send(col).should == compare.send(col)
@@ -152,7 +153,10 @@ class PublishingTest < Test::Unit::TestCase
     end
 
     context "content revisions" do
-
+      setup do
+        @now = Sequel.datetime_class.now
+        Sequel.datetime_class.stubs(:now).returns(@now)
+      end
       should "be testable for existance" do
         revision = 1
         Content.revision_exists?(revision).should be_false
@@ -275,7 +279,8 @@ class PublishingTest < Test::Unit::TestCase
           Content.with_revision(@final_revision) do
             published1 = Content[editable1.id]
             published2 = Content[new_content.id]
-            published2.should == new_content
+            # published2.should == new_content
+            assert_content_equal(published2, new_content)
             # published1.should == editable1
             assert_content_equal(published1, editable1)
           end
@@ -380,6 +385,17 @@ class PublishingTest < Test::Unit::TestCase
         c.label = "changed"
         c.save
         c.modified_at.should == now
+      end
+      should "update page timestamps on modification of a facet" do
+        Sequel.datetime_class.stubs(:now).returns(@now+3600)
+        page = Page.first
+        page.modified_at.should_not == @now
+        content = page.entries.first
+        content.page.should == page
+        content.label = "changed"
+        content.save
+        page.reload
+        page.modified_at.to_i.should == @now.to_i + 3600
       end
     end
     context "publication timestamps" do

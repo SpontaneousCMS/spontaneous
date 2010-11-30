@@ -33,6 +33,9 @@ module Spontaneous
       self
     end
 
+    def page=(page)
+    end
+
     def content_depth
       0
     end

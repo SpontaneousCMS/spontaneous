@@ -35,6 +35,7 @@ module Spontaneous
 
     many_to_one :container, :class => self, :reciprocal => :nodes
     one_to_many :nodes,    :key => :container_id, :class => self, :reciprocal => :container
+    many_to_one :page, :class => Content, :key => :page_id, :reciprocal => :facets
 
 
     def after_initialize
@@ -50,12 +51,7 @@ module Spontaneous
       false
     end
 
-    def page
-      nil
-    end
 
-    def page=(page)
-    end
 
     def meta
       class << self; self; end
