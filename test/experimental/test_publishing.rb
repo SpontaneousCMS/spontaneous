@@ -367,7 +367,8 @@ class PublishingTest < Test::Unit::TestCase
 
     context "modification timestamps" do
       setup do
-        @now = Sequel.datetime_class.now
+        k = Sequel.datetime_class
+        @now = k.at(k.now.to_i)
         Sequel.datetime_class.stubs(:now).returns(@now)
       end
       should "register creation date of all content" do
@@ -646,7 +647,9 @@ class PublishingTest < Test::Unit::TestCase
         @revision = 3
         @now = Time.at(Time.now.to_i)
         Time.stubs(:now).returns(@now)
-        Site.stubs(:revision).returns(@revision)
+        Site.delete
+        Site.create(:revision => @revision, :published_revision => 2)
+        Site.revision.should == @revision
         Change.delete
       end
       teardown do
@@ -680,6 +683,11 @@ class PublishingTest < Test::Unit::TestCase
         Content.expects(:publish).with(@revision, nil)
         Revision.expects(:create).with(:revision => @revision, :published_at => @now)
         Site.publish_all
+      end
+      should "bump revision after a publish" do
+        Site.publish_all
+        Site.revision.should == @revision + 1
+        Site.published_revision.should == @revision
       end
     end
   end

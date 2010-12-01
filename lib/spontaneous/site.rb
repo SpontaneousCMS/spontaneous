@@ -11,7 +11,26 @@ module Spontaneous
 
     plugin Plugins::Site::Publishing
 
+    @@instance = nil
+
     class << self
+
+      def instance
+        return @@instance if @@instance
+        unless instance = self.first
+          instance = Site.create(:revision => 1, :published_revision => 0)
+        end
+        instance
+      end
+
+      def with_cache(&block)
+        yield if @@instance
+        @@instance = self.instance
+        yield
+      ensure
+        @@instance = nil
+      end
+
       def map(root_id=nil)
         if root_id.nil?
           Page.root.map_entry
@@ -51,9 +70,16 @@ module Spontaneous
         end
       end
       def working_revision
-        1
+        instance.revision
       end
 
+      def revision
+        instance.revision
+      end
+
+      def published_revision
+        instance.published_revision
+      end
     end
   end
 end

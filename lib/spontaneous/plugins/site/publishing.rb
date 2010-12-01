@@ -21,6 +21,7 @@ module Spontaneous::Plugins
 
         def self.after_publish(revision)
           Spontaneous::Revision.create(:revision => revision, :published_at => Time.now)
+          Spontaneous::Site.send(:set_published_revision, revision)
         end
       end
 
@@ -53,14 +54,19 @@ module Spontaneous::Plugins
 
         protected
 
+        def set_published_revision(revision)
+          instance = Spontaneous::Site.instance
+          instance.published_revision = revision
+          instance.revision = revision + 1
+          instance.save
+        end
+
         def publish(pages=nil)
           publishing_method.publish(self.revision, pages)
         end
 
       end # ClassMethods
 
-      module InstanceMethods
-      end # InstanceMethods
     end # Publishing
   end # Site
 end # Spontaneous::Plugins
