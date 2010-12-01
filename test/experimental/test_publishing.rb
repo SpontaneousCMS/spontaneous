@@ -426,6 +426,7 @@ class PublishingTest < Test::Unit::TestCase
         end
         Change.recording?.should be_false
       end
+
       should "be created on updating a page's attributes" do
         page = Page.first
         Change.record do
@@ -476,6 +477,7 @@ class PublishingTest < Test::Unit::TestCase
         change.modified_list.should == [page.id, new_page.id]
         change.modified.should == [page, new_page]
       end
+
       should "handle being called twice" do
         page = Page.first
         p2 = Page.filter(~{:id => page.id}).first
@@ -559,6 +561,7 @@ class PublishingTest < Test::Unit::TestCase
           set.pages.should == pages
         end
       end
+
       should "serialize changes to json" do
         Change.delete
         @page1 = Page.new(:title => "Page \"1\"", :path => "/page-1")
@@ -636,6 +639,42 @@ class PublishingTest < Test::Unit::TestCase
         Content.filter(:first_published_at => nil).count.should == Content.count
         Content.publish(@revision, [page])
         Content.filter(:first_published_at => nil).count.should == 0
+      end
+    end
+    context "site publishing" do
+      setup do
+        @revision = 3
+        @now = Time.at(Time.now.to_i)
+        Time.stubs(:now).returns(@now)
+        Site.stubs(:revision).returns(@revision)
+        Change.delete
+      end
+      should "work with lists of change sets" do
+        change1 = Change.new
+        change1.modified_list = [1, 2, 3]
+        change1.save
+        change2 = Change.new
+        change2.modified_list = [3, 4, 5]
+        change2.save
+        Content.expects(:publish).with(@revision, [1, 2, 3, 4, 5])
+        Site.publish_changes([change1.id, change2.id])
+      end
+
+      should "publish all" do
+        Content.expects(:publish).with(@revision, nil)
+        Site.publish_all
+      end
+
+      should "publish individual pages" do
+        page = Page.new
+        Content.expects(:publish).with(@revision, [page])
+        Site.publish_page(page)
+      end
+
+      should "record date and time of publish" do
+        Content.expects(:publish).with(@revision, nil)
+        Revision.expects(:create).with(:revision => @revision, :published_at => @now)
+        Site.publish_all
       end
     end
   end

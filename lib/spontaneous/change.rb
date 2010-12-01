@@ -1,35 +1,6 @@
 # encoding: UTF-8
 
 module Spontaneous
-  class ChangeSet
-    attr_reader :changes
-
-    def initialize(changes)
-      @changes = changes
-    end
-    def pages
-      @pages ||= build_page_list
-    end
-    def build_page_list
-      changes.inject([]) { |a, c| a += c.modified_list; a }.uniq.sort.map do |id|
-        Content[id]
-      end
-    end
-    def to_hash
-      h = {
-        :changes => changes.map { |c| c.to_hash },
-      }
-      h[:pages] = pages.map  do |page|
-        {
-          :id => page.id,
-          :title => page.title.to_s.escape_js,
-          :path => page.path
-        }
-      end
-      h
-    end
-  end
-
   class Change < Sequel::Model(:changes)
     class << self
       alias_method :sequel_plugin, :plugin
@@ -109,7 +80,7 @@ module Spontaneous
     def &(change)
       self.modified_list & change.modified_list
     end
-    
+
     def to_hash
       {
         :id => self.id,

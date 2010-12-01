@@ -4,6 +4,14 @@
 module Spontaneous
   class Site <  Sequel::Model(:sites)
     class << self
+      alias_method :sequel_plugin, :plugin
+    end
+
+    extend Plugins
+
+    plugin Plugins::Site::Publishing
+
+    class << self
       def map(root_id=nil)
         if root_id.nil?
           Page.root.map_entry

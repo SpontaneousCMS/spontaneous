@@ -206,6 +206,8 @@ module Spontaneous
   autoload :Media, "spontaneous/media"
 
   autoload :Change, "spontaneous/change"
+  autoload :ChangeSet, "spontaneous/change_set"
+  autoload :Revision, "spontaneous/revision"
 
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"
@@ -240,6 +242,10 @@ module Spontaneous
     module Fields
       autoload :FieldPrototype, "spontaneous/plugins/fields/field_prototype"
       autoload :FieldSet, "spontaneous/plugins/fields/field_set"
+    end
+
+    module Site
+      autoload :Publishing, "spontaneous/plugins/site/publishing"
     end
   end
 
