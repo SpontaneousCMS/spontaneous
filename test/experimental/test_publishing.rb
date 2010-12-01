@@ -649,6 +649,11 @@ class PublishingTest < Test::Unit::TestCase
         Site.stubs(:revision).returns(@revision)
         Change.delete
       end
+      teardown do
+        Revision.delete
+        Change.delete
+      end
+
       should "work with lists of change sets" do
         change1 = Change.new
         change1.modified_list = [1, 2, 3]
