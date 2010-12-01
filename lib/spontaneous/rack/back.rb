@@ -25,6 +25,8 @@ module Spontaneous
 
       class EditingInterface < ServerBase
 
+        use UpdateCache
+
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
         def json(response)

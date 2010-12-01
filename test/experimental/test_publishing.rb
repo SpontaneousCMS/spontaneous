@@ -542,13 +542,45 @@ class PublishingTest < Test::Unit::TestCase
         ]
         changes.each_with_index do |ids, i|
           Change.insert(:id => (i+1), :modified_list => ids.to_json)
+          ids.each { |id| Content.insert(:id => id) rescue nil }
         end
-        result = Change.publish_sets
+        result = Change.outstanding
         result.should be_instance_of(Array)
         result.length.should == 2
+        page_ids = [
+          [200, 201, 202],
+          [100, 101, 102, 103, 104, 105, 106]
+        ]
         result.each_with_index do |set, i|
-          set.should == publish_sets[i].map { |id| Change[id] }
+          changes = publish_sets[i].map { |id| Change[id] }
+          pages = page_ids[i].map { |id| Content[id] }
+          set.should be_instance_of(ChangeSet)
+          set.changes.should == changes
+          set.pages.should == pages
         end
+      end
+      should "serialize changes to json" do
+        Change.delete
+        @page1 = Page.new(:title => "Page \"1\"", :path => "/page-1")
+        @page2 = Page.new(:title => "Page 2", :path => "/page-2")
+        @page1[:id] = 1
+        @page2[:id] = 2
+        @page1.stubs(:path).returns("/page-1")
+        @page2.stubs(:path).returns("/page-2")
+        Content.stubs(:[]).with(1).returns(@page1)
+        Content.stubs(:[]).with(2).returns(@page2)
+        change = Change.new
+        change.push(@page1)
+        change.push(@page2)
+        change.save
+        result = Change.outstanding
+        result.first.to_hash.should == {
+          :changes => [{:id => change.id, :created_at => change.created_at.to_s}],
+          :pages => [
+            {:id => 1, :title => "Page \\\"1\\\"", :path => "/page-1"},
+            {:id => 2, :title => "Page 2", :path => "/page-2"}
+          ]
+        }
       end
     end
 

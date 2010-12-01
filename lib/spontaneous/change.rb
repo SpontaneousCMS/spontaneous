@@ -1,6 +1,35 @@
 # encoding: UTF-8
 
 module Spontaneous
+  class ChangeSet
+    attr_reader :changes
+
+    def initialize(changes)
+      @changes = changes
+    end
+    def pages
+      @pages ||= build_page_list
+    end
+    def build_page_list
+      changes.inject([]) { |a, c| a += c.modified_list; a }.uniq.sort.map do |id|
+        Content[id]
+      end
+    end
+    def to_hash
+      h = {
+        :changes => changes.map { |c| c.to_hash },
+      }
+      h[:pages] = pages.map  do |page|
+        {
+          :id => page.id,
+          :title => page.title.to_s.escape_js,
+          :path => page.path
+        }
+      end
+      h
+    end
+  end
+
   class Change < Sequel::Model(:changes)
     class << self
       alias_method :sequel_plugin, :plugin
@@ -28,11 +57,16 @@ module Spontaneous
 
       def push(page)
         if @@instance
-          @@instance.modified_list << page.id
+          @@instance.push(page)
         end
       end
 
-      def publish_sets
+      def outstanding
+        dependencies = dependency_map
+        dependencies.map { |d| ChangeSet.new(d) }
+      end
+
+      def dependency_map
         grouped_changes = self.all.map { |c| [c] }
         begin
           modified = false
@@ -53,6 +87,15 @@ module Spontaneous
       end
     end
 
+    def after_initialize
+      super
+      self.modified_list ||= []
+    end
+
+    def push(page)
+      self.modified_list << page.id
+    end
+
     def before_update
       self.modified_list.uniq!
     end
@@ -61,8 +104,17 @@ module Spontaneous
       @modified ||= modified_list.map { |id| Content[id] }
     end
 
+    alias_method :pages, :modified
+
     def &(change)
       self.modified_list & change.modified_list
+    end
+    
+    def to_hash
+      {
+        :id => self.id,
+        :created_at => self.created_at.to_s
+      }
     end
   end
 end

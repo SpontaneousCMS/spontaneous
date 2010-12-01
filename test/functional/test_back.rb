@@ -312,6 +312,26 @@ class BackTest < Test::Unit::TestCase
       last_response.body.json.should == %w(projects products)
     end
   end
+  context "aaa Request cache" do
+      setup do
+        @home = HomePage.new
+        @facet = Text.new
+        @home.in_progress << @facet
+        @home.save
+        @facet.save
+        Change.delete
+      end
+    should "wrap all updates in a Change.record" do
+      params = {
+        "field[text][value]" => "Updated field_name_1"
+      }
+      Change.count.should == 0
+      post "/@spontaneous/save/#{@facet.id}", params
+      Change.count.should == 1
+      Change.first.modified_list.should == [@home.id]
+    end
+
+  end
 end
 
 
