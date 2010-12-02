@@ -11,8 +11,10 @@ module Spontaneous
 
       def call(env)
         response = nil
-        Change.record do
-          response = @app.call(env)
+        Content.with_identity_map do
+          Change.record do
+            response = @app.call(env)
+          end
         end
         response
       end

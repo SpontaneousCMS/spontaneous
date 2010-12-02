@@ -259,4 +259,45 @@ class ContentTest < Test::Unit::TestCase
       instance.parents.allowed_types.should == Parent.allowed_types
     end
   end
+  context "identity map" do
+    setup do 
+      Spontaneous.database = DB
+      Content.delete
+      Content.delete_all_revisions!
+      class ::IdentitySubclass < Content; end
+      @c1 = Content.create
+      @c2 = Content.create
+      @i1 = IdentitySubclass.create
+      @i2 = IdentitySubclass.create
+    end
+    teardown do
+      Object.send(:remove_const, :IdentitySubclass)
+      Content.delete
+      Content.delete_all_revisions!
+    end
+    should "work for Content" do
+      Content.with_identity_map do
+        Content[@c1.id].object_id.should == Content[@c1.id].object_id
+      end
+    end
+
+    should "work for Content" do
+      Content.with_identity_map do
+        IdentitySubclass[@i1.id].object_id.should == IdentitySubclass[@i1.id].object_id
+      end
+    end
+
+    should "return different objects for different revisions" do
+      revision = 2
+      a = b = nil
+      Content.publish(revision)
+      Content.with_identity_map do
+        a = Content[@c1.id]
+        Content.with_revision(revision) do
+          b = Content[@c1.id]
+        end
+        a.object_id.should_not == b.object_id
+      end
+    end
+  end
 end

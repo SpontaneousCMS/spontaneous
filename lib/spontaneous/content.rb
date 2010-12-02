@@ -17,6 +17,13 @@ module Spontaneous
     sequel_plugin :instance_hooks
     sequel_plugin :skip_create_refresh
     sequel_plugin :timestamps, :create=>:created_at, :update=>:modified_at
+    sequel_plugin :identity_map
+
+    # overwrite the sequel version defined in IdentityMap to support
+    # revisions
+    def self.identity_map_key(pk)
+      "#{super}:#{revision}"
+    end
 
     extend Plugins
 
@@ -60,6 +67,7 @@ module Spontaneous
     def start_inline_edit_marker
       "spontaneous:previewedit:start:content id:#{id}"
     end
+
     def end_inline_edit_marker
       "spontaneous:previewedit:end:content id:#{id}"
     end

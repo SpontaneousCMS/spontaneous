@@ -17,6 +17,8 @@ module Spontaneous::Plugins
         end
       end
 
+      # TODO: perhaps move this into the Site class itself rather than use this
+      # external module (keeping background publishing as an external module)
       module ImmediatePublishing
         def self.publish_changes(revision, change_list)
           changes = change_list.flatten.map { |c|

@@ -389,7 +389,7 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       should "update page timestamps on modification of a facet" do
-        Sequel.datetime_class.stubs(:now).returns(@now+3600)
+        Time.stubs(:now).returns(@now+3600)
         page = Page.first
         page.modified_at.to_i.should == @now.to_i
         content = page.entries.first
@@ -648,9 +648,9 @@ class PublishingTest < Test::Unit::TestCase
         @now = Time.at(Time.now.to_i)
         Time.stubs(:now).returns(@now)
         Site.delete
+        Change.delete
         Site.create(:revision => @revision, :published_revision => 2)
         Site.revision.should == @revision
-        Change.delete
       end
       teardown do
         Revision.delete
@@ -733,6 +733,7 @@ class PublishingTest < Test::Unit::TestCase
         rescue Exception; end
         Change.count.should == 2
       end
+
       should "set Site.pending_revision before publishing" do
         Content.expects(:publish).with() { Site.pending_revision == @revision }
         Site.publish_all
