@@ -32,7 +32,7 @@ module Cutaneous
       ext = ".#{format}"
       ext += ".#{Cutaneous.extension}" if is_dynamic?(output)
 
-      dir = self.class.render_root / page.path
+      dir = self.class.render_root / 'site' / page.path
       path = dir / "/index#{ext}"
       FileUtils.mkdir_p(dir) unless File.exist?(dir)
       File.open(path, 'w') do |f|

@@ -60,6 +60,22 @@ module Spontaneous::Plugins
               end
             end
           end
+          copy_static_files(revision)
+        end
+
+        def self.copy_static_files(revision)
+          public_dest = Pathname.new(S::Site.revision_dir(revision) / 'public')
+          public_src = Pathname.new(Spontaneous.root / 'public')
+          FileUtils.mkdir_p(public_dest) unless File.exists?(public_dest)
+          Dir[public_src.to_s / "**/*"].each do |src|
+            src = Pathname.new(src)
+            dest = (public_dest + src.relative_path_from(public_src))
+            if src.directory?
+              dest.mkpath
+            else
+              FileUtils.ln(src, dest, :force => true)
+            end
+          end
         end
 
         def self.after_publish(revision)

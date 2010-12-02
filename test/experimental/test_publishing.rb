@@ -766,6 +766,8 @@ class PublishingTest < Test::Unit::TestCase
         Site.delete
         Site.create(:revision => @revision, :published_revision => 2)
         Site.revision.should == @revision
+        Spontaneous.root = File.expand_path(File.dirname(__FILE__) / "../fixtures/example_application")
+
         @revision_dir = File.expand_path(File.dirname(__FILE__) / "../../tmp/revisions")
         @template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")
         FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
@@ -804,7 +806,7 @@ class PublishingTest < Test::Unit::TestCase
       end
       should "produce rendered versions of each page" do
         Site.publish_all
-        revision_dir = @revision_dir / "00002"
+        revision_dir = @revision_dir / "00002/site"
         file = result = nil
         @pages.each do |page|
           if page.root?
@@ -817,7 +819,12 @@ class PublishingTest < Test::Unit::TestCase
           File.exists?(file).should be_true
           File.read(file).should == result
         end
-
+        revision_dir = @revision_dir / "00002"
+        Dir[S.root / "public/**/*"].each do |public_file|
+          site_file = public_file.gsub(%r(^#{S.root}/), '')
+          publish_file = revision_dir / site_file
+          File.exists?(publish_file).should be_true
+        end
       end
     end
   end

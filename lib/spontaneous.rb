@@ -131,7 +131,7 @@ module Spontaneous
     end
 
     def media_dir
-      @media_dir ||= File.expand_path(root / "public/media")
+      @media_dir ||= File.expand_path(root / "../media")
     end
 
     def media_path(*args)
