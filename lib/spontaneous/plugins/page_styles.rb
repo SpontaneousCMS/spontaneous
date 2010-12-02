@@ -33,7 +33,7 @@ module Spontaneous::Plugins
           if page_styles[page_style]
             self.style_id = page_style
           end
-        when Style
+        when S::Style
           self.style_id = page_style.name
         end
       end
