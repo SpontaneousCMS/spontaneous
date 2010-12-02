@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Cutaneous
   module TemplateCore
     def self.included(base)

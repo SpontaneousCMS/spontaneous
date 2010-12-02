@@ -644,6 +644,7 @@ class PublishingTest < Test::Unit::TestCase
     end
     context "site publishing" do
       setup do
+        Content.delete
         @revision = 3
         @now = Time.at(Time.now.to_i)
         Time.stubs(:now).returns(@now)
@@ -756,6 +757,67 @@ class PublishingTest < Test::Unit::TestCase
         rescue Exception; end
         Site.pending_revision.should be_nil
         Content.revision_exists?(@revision).should be_false
+      end
+    end
+    context "rendering" do
+      setup do
+        @revision = 2
+        Content.delete
+        Site.delete
+        Site.create(:revision => @revision, :published_revision => 2)
+        Site.revision.should == @revision
+        @revision_dir = File.expand_path(File.dirname(__FILE__) / "../../tmp/revisions")
+        @template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")
+        FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
+        class ::PublishablePage < Page; end
+        PublishablePage.page_style "static"
+        PublishablePage.page_style "dynamic"
+        Spontaneous.revision_root = @revision_dir
+        Spontaneous.template_root = @template_root
+        # Cutaneous::PreviewRenderEngine.context_class = Cutaneous::PublishContext
+        Spontaneous::Render.engine_class = Cutaneous::FirstRenderEngine
+
+        @home = PublishablePage.create(:title => 'Home')
+        @home.style = "dynamic"
+        @about = PublishablePage.create(:title => "About", :slug => "about")
+        @blog = PublishablePage.create(:title => "Blog", :slug => "blog")
+        @post1 = PublishablePage.create(:title => "Post 1", :slug => "post-1")
+        @post2 = PublishablePage.create(:title => "Post 2", :slug => "post-2")
+        @post3 = PublishablePage.create(:title => "Post 3", :slug => "post-3")
+        @home << @about
+        @home << @blog
+        @blog << @post1
+        @blog << @post2
+        @blog << @post3
+        @pages = [@home, @about, @blog, @post1, @post2, @post3]
+        @pages.each { |p| p.save }
+      end
+      teardown do
+        FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
+        Content.delete
+        Site.delete
+        Object.send(:remove_const, :PublishablePage)
+      end
+
+      should "put its files into a numbered revision directory" do
+        Site.revision_dir(2).should == @revision_dir / "00002"
+      end
+      should "produce rendered versions of each page" do
+        Site.publish_all
+        revision_dir = @revision_dir / "00002"
+        file = result = nil
+        @pages.each do |page|
+          if page.root?
+            file = revision_dir / "index.html.cut"
+            result = "Page: '#{page.title}' \#{Time.now.to_i}\n"
+          else
+            file = revision_dir / "#{page.path}/index.html"
+            result = "Page: '#{page.title}'\n"
+          end
+          File.exists?(file).should be_true
+          File.read(file).should == result
+        end
+
       end
     end
   end

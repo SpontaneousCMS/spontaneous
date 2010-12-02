@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Cutaneous
   class RerenderEngine < SecondRenderEngine
     def render_result(template_string, content, format, params={})
@@ -10,8 +12,15 @@ module Cutaneous
   end
 
   class PreviewRenderEngine < RenderEngine
+    def self.context_class
+      @context_class ||= PreviewContext
+    end
+    def self.context_class=(context_class)
+      @context_class = context_class
+    end
+
     def first_render_engine
-      @first_render_engine ||= FirstRenderEngine.new(@template_root, PreviewContext)
+      @first_render_engine ||= FirstRenderEngine.new(@template_root, self.class.context_class)
     end
 
     def second_render_engine

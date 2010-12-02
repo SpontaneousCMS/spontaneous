@@ -28,7 +28,14 @@ module Spontaneous::Plugins
       end
 
       def style=(page_style)
-        self.style_id = page_style.name
+        case page_style
+        when String, Symbol
+          if page_styles[page_style]
+            self.style_id = page_style
+          end
+        when Style
+          self.style_id = page_style.name
+        end
       end
     end
   end

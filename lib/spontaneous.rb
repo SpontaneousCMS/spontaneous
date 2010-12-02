@@ -101,11 +101,11 @@ module Spontaneous
     end
 
     def template_root=(template_root)
-      @template_root = File.expand_path(template_root)
+      Render.template_root = File.expand_path(template_root)
     end
 
     def template_root
-      @template_root ||= root / "templates"
+      Render.template_root
     end
 
     def template_path(*args)
@@ -144,6 +144,14 @@ module Spontaneous
 
     def root=(root)
       @root = File.expand_path(root)
+    end
+
+    def revision_root
+      @revision_dir ||= File.expand_path(root / '../revisions')
+    end
+
+    def revision_root=(revision_dir)
+      @revision_dir = File.expand_path(revision_dir)
     end
 
     def gem_dir

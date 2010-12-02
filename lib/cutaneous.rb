@@ -22,4 +22,5 @@ module Cutaneous
   autoload :FirstRenderEngine, "cutaneous/first_render_engine"
   autoload :SecondRenderEngine, "cutaneous/second_render_engine"
   autoload :PreviewRenderEngine, "cutaneous/preview_render_engine"
+  autoload :PublishRenderEngine, "cutaneous/publish_render_engine"
 end

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Cutaneous
   class Preprocessor < Tenjin::Preprocessor
     include TemplateCore

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Cutaneous
   class Template < Tenjin::Template
     include TemplateCore
@@ -6,7 +8,7 @@ module Cutaneous
     STMT_PATTERN = /%\{( |\t|\r?\n)(.*?) *\}(?:[ \t]*\r?\n)?/m
 
     ##  #{ statement } or ${ statement }
-    EXPR_PATTERN = /(\$)\{(.*?)\}/m
+    EXPR_PATTERN = /([\$#])\{(.*?)\}/m
 
     def stmt_pattern
       STMT_PATTERN

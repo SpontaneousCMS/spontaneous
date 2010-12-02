@@ -17,8 +17,19 @@ module Spontaneous
         @engine ||= engine_class.new(template_root)
       end
 
+      @@engine_stack = []
+
+      def with_engine(new_engine_class, &block)
+        @@engine_stack.push(self.engine_class)
+        self.engine_class = new_engine_class
+        yield if block_given?
+      ensure
+        self.engine_class = @@engine_stack.pop
+      end
+
+
       def template_root
-        @template_root ||= Spontaneous.template_root
+        @template_root ||= Spontaneous.root / "templates"
       end
 
       def template_root=(root)
