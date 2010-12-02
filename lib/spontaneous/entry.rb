@@ -159,7 +159,7 @@ module Spontaneous
     # oops, optimisation. sorry
     Content.instance_methods.sort.each do |method|
       unless method_defined?(method)
-        define_method(method) { |*args| target.send(method, *args) }
+        define_method(method) { |*args, &block| target.send(method, *args, &block) }
       end
     end
   end
