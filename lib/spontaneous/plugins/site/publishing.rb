@@ -81,6 +81,7 @@ module Spontaneous::Plugins
         def self.after_publish(revision)
           S::Revision.create(:revision => revision, :published_at => Time.now)
           S::Site.send(:set_published_revision, revision)
+          FileUtils.ln_sf(S::Site.revision_dir(revision), S::Site.revision_dir)
         end
 
         def self.before_publish(revision)
@@ -94,9 +95,11 @@ module Spontaneous::Plugins
       end
 
       module ClassMethods
-        def revision_dir(revision)
+        def revision_dir(revision=nil)
+          return S.revision_root / 'current' if revision.nil?
           S.revision_root / revision.to_s.rjust(5, "0")
         end
+
         def publishing_method
           @publishing_method ||= ImmediatePublishing
         end

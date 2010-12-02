@@ -804,6 +804,16 @@ class PublishingTest < Test::Unit::TestCase
       should "put its files into a numbered revision directory" do
         Site.revision_dir(2).should == @revision_dir / "00002"
       end
+
+      should "symlink the latest revision to 'current'" do
+        Site.publish_all
+        revision_dir = @revision_dir / "00002"
+        current_dir = @revision_dir / "current"
+        File.exists?(current_dir).should be_true
+        File.symlink?(current_dir).should be_true
+        File.readlink(current_dir).should == revision_dir
+      end
+
       should "produce rendered versions of each page" do
         Site.publish_all
         revision_dir = @revision_dir / "00002/site"
