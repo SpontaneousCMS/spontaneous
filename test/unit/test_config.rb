@@ -1,28 +1,6 @@
 # encoding: UTF-8
 
-# require 'test_helper'
-require "rubygems"
-require "bundler"
-Bundler.setup(:default, :development)
-
-require 'logger'
-
-begin
-  require 'leftright'
-rescue LoadError
-  # fails for ruby 1.9
-end
-
-require 'test/unit'
-require 'rack/test'
-require 'matchy'
-require 'shoulda'
-require 'timecop'
-require 'mocha'
-require 'pp'
-
-require 'support/custom_matchers'
-require 'support/timing'
+require 'test_helper'
 
 class ConfigTest < Test::Unit::TestCase
   include CustomMatchers
@@ -101,7 +79,13 @@ class ConfigTest < Test::Unit::TestCase
       Config.new_setting.should == "new setting"
     end
 
-    should "accept blocks/procs/lambdas as values"
+    should "accept blocks/procs/lambdas as values" do
+      fish = "flying"
+      Config.useful_feature = Proc.new { fish }
+      Config.useful_feature.should == "flying"
+      Config.defaults[:new_dynamic_setting] = Proc.new { fish }
+      Config.new_dynamic_setting.should == "flying"
+    end
 
     teardown do
       Dir.chdir(@pwd)

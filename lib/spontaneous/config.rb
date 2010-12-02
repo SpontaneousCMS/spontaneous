@@ -1,12 +1,6 @@
 
 module Spontaneous
   module Config
-    @@local = {}
-    @@environments = Hash.new { |hash, key| hash[key] = {} }
-    @@base = {}
-    @@defaults = {
-
-    }
 
     class Loader
       def self.read(settings, file)
@@ -16,9 +10,11 @@ module Spontaneous
       def initialize(settings, file)
         @settings, @file = settings, file
       end
+
       def load
         instance_eval(File.read(@file))
       end
+
       def method_missing(parameter, *args, &block)
         if args.length == 1
           args = args[0]
@@ -29,6 +25,7 @@ module Spontaneous
 
     class Configuration
       extend Forwardable
+
       def initialize(name, settings)
         @name, @settings = name, settings
 
@@ -45,21 +42,41 @@ module Spontaneous
         end
       end
 
+      def get_setting(key)
+        v = @settings[key]
+        if v.is_a?(Proc)
+          v.call
+        else
+          v
+        end
+      end
+
+      def [](key)
+        get_setting(key)
+      end
+
       def method_missing(key, *args, &block)
         if key.to_s =~ /=$/
           key = key.to_s.gsub(/=$/, '').to_sym
           @settings[key] = args[0]
         else
           if @settings.key?(key)
-            @settings[key]
+            get_setting(key)
           else
             Config.base[key]
           end
         end
       end
 
-      def_delegators :@settings, :key?, :[], :[]=
+      def_delegators :@settings, :key?, :[]=
     end
+
+    @@local = Configuration.new(:local, {})
+    @@environments = Hash.new { |hash, key| hash[key] = {} }
+    @@base = Configuration.new(:base, {})
+    @@defaults = Configuration.new(:defaults, {
+      #TODO: add in sensible default configuration
+    })
 
     class << self
       def load(pwd=Dir.pwd)
