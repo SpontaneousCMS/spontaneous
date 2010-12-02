@@ -267,3 +267,4 @@ Dir[File.join(File.dirname(__FILE__), 'spontaneous', 'extensions', '*.rb')].each
   require extension
 end
 
+S = Spontaneous

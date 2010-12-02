@@ -80,6 +80,10 @@ module Spontaneous
       def published_revision
         instance.published_revision
       end
+
+      def pending_revision
+        instance.pending_revision
+      end
     end
   end
 end

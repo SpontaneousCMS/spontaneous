@@ -673,11 +673,14 @@ class PublishingTest < Test::Unit::TestCase
         Site.publish_all
       end
 
-      should "publish individual pages" do
-        page = Page.new
-        Content.expects(:publish).with(@revision, [page])
-        Site.publish_page(page)
-      end
+      ## publishing individual pages without dependencies is a bad idea
+      ## if this were to be an option we would have to do it properly 
+      ## and calculate the full revision set involved
+      # should "publish individual pages" do
+      #   page = Page.new
+      #   Content.expects(:publish).with(@revision, [page])
+      #   Site.publish_page(page)
+      # end
 
       should "record date and time of publish" do
         Content.expects(:publish).with(@revision, nil)
@@ -688,6 +691,70 @@ class PublishingTest < Test::Unit::TestCase
         Site.publish_all
         Site.revision.should == @revision + 1
         Site.published_revision.should == @revision
+      end
+      should "delete included changes after partial publish" do
+        change1 = Change.new
+        change1.modified_list = [1, 2, 3]
+        change1.save
+        change2 = Change.new
+        change2.modified_list = [3, 4, 5]
+        change2.save
+        Change.count.should == 2
+        Site.publish_changes([change1.id])
+        Change.count.should == 1
+        Change[change1.id].should be_nil
+      end
+      should "delete all changes after full publish" do
+        change1 = Change.new
+        change1.modified_list = [1, 2, 3]
+        change1.save
+        change2 = Change.new
+        change2.modified_list = [3, 4, 5]
+        change2.save
+        Change.count.should == 2
+        Site.publish_all
+        Change.count.should == 0
+      end
+      should "not delete changes after an exception during publish" do
+        change1 = Change.new
+        change1.modified_list = [1, 2, 3]
+        change1.save
+        change2 = Change.new
+        change2.modified_list = [3, 4, 5]
+        change2.save
+        Content.expects(:publish).raises(Exception)
+        Change.count.should == 2
+        begin
+          Site.publish_all
+        rescue Exception; end
+        Change.count.should == 2
+        begin
+          Site.publish_changes([change1])
+        rescue Exception; end
+        Change.count.should == 2
+      end
+      should "set Site.pending_revision before publishing" do
+        Content.expects(:publish).with() { Site.pending_revision == @revision }
+        Site.publish_all
+      end
+
+      should "clean up state on publishing failure" do
+        Content.delete_all_revisions!
+        Site.pending_revision.should be_nil
+        Content.revision_exists?(@revision).should be_false
+        # don't like peeking into implementation here but don't know how else
+        # to simulate the right error
+        Plugins::Site::Publishing::ImmediatePublishing.expects(:render_revision).raises(Exception)
+        begin
+          Site.publish_all
+        rescue Exception; end
+        Site.pending_revision.should be_nil
+        Content.revision_exists?(@revision).should be_false
+        begin
+          Site.publish_changes([change1])
+        rescue Exception; end
+        Site.pending_revision.should be_nil
+        Content.revision_exists?(@revision).should be_false
       end
     end
   end
