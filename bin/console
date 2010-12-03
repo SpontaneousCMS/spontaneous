@@ -18,6 +18,7 @@ Dir.chdir('test/fixtures/example_application')
 
 Spontaneous.init(:mode => :back, :environment => :development)
 Spontaneous.database.logger = Logger.new($stdout)
+Spontaneous.revision_root = "../../../../magnetised_info"
 
 
 IRB.setup(nil)
