@@ -61,6 +61,18 @@ module Spontaneous::Plugins
             end
           end
           copy_static_files(revision)
+          generate_rackup_file(revision)
+        end
+
+        def self.generate_rackup_file(revsion)
+          path = Pathname.new(Spontaneous.root)
+          template = <<-RACKUP
+Dir.chdir('#{path.realpath}')
+require 'config/front'
+run Spontaneous::Rack::Back.application.to_app
+          RACKUP
+          rack_file = S::Site.revision_dir(revision) / 'config.ru'
+          File.open(rack_file, 'w') { |f| f.write(template) }
         end
 
         def self.copy_static_files(revision)
@@ -143,4 +155,6 @@ module Spontaneous::Plugins
   end # Site
 end # Spontaneous::Plugins
 
+
+__END__
 

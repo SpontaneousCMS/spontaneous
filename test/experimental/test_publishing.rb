@@ -770,7 +770,7 @@ class PublishingTest < Test::Unit::TestCase
 
         @revision_dir = File.expand_path(File.dirname(__FILE__) / "../../tmp/revisions")
         @template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")
-        FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
+        # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
         class ::PublishablePage < Page; end
         PublishablePage.page_style "static"
         PublishablePage.page_style "dynamic"
@@ -795,7 +795,7 @@ class PublishingTest < Test::Unit::TestCase
         @pages.each { |p| p.save }
       end
       teardown do
-        FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
+        # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
         Content.delete
         Site.delete
         Object.send(:remove_const, :PublishablePage)

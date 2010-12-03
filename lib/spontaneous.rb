@@ -271,8 +271,10 @@ module Spontaneous
 
 end
 
+require 'spontaneous/version'
+
 Dir[File.join(File.dirname(__FILE__), 'spontaneous', 'extensions', '*.rb')].each do |extension|
   require extension
 end
 
-S = Spontaneous
+S = Spot = Spontaneous
