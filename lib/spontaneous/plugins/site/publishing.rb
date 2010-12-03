@@ -69,7 +69,7 @@ module Spontaneous::Plugins
           template = <<-RACKUP
 Dir.chdir('#{path.realpath}')
 require 'config/front'
-run Spontaneous::Rack::Back.application.to_app
+run Spontaneous::Rack::Front.application.to_app
           RACKUP
           rack_file = S::Site.revision_dir(revision) / 'config.ru'
           File.open(rack_file, 'w') { |f| f.write(template) }
