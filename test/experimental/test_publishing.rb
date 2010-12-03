@@ -759,6 +759,7 @@ class PublishingTest < Test::Unit::TestCase
         Content.revision_exists?(@revision).should be_false
       end
     end
+
     context "rendering" do
       setup do
         @revision = 2
@@ -795,8 +796,9 @@ class PublishingTest < Test::Unit::TestCase
         @pages.each { |p| p.save }
         Site.publish_all
       end
+
       teardown do
-        # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
+        FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
         Content.delete
         Site.delete
         Object.send(:remove_const, :PublishablePage)
@@ -835,6 +837,7 @@ class PublishingTest < Test::Unit::TestCase
           File.exists?(publish_file).should be_true
         end
       end
+
       should "generate a config.ru file pointing to the current root" do
         config_file = @revision_dir / "00002/config.ru"
         File.exists?(config_file).should be_true

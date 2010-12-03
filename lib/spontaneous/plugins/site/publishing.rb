@@ -101,6 +101,7 @@ run Spontaneous::Rack::Front.application.to_app
         end
 
         def self.abort_publish(revision)
+          FileUtils.rm_r(S::Site.revision_dir(revision))
           S::Site.send(:pending_revision=, nil)
           S::Content.delete_revision(revision)
         end
