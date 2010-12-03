@@ -7,7 +7,7 @@ module Spontaneous::Plugins
 
       module BackgroundPublishing
         def self.publish_changes(revision, change_list)
-          # launch background publish to call 
+          # launch background publish to call
           # ImmediatePublishing.publish with the same args
           # catch any exceptions and pass them onto some notification
           # system
@@ -22,7 +22,7 @@ module Spontaneous::Plugins
       module ImmediatePublishing
         def self.publish_changes(revision, change_list)
           changes = change_list.flatten.map { |c|
-             c.is_a?(S::Change) ? c : S::Change[c]
+            c.is_a?(S::Change) ? c : S::Change[c]
           }
           change_set = S::ChangeSet.new(changes)
 
@@ -64,7 +64,7 @@ module Spontaneous::Plugins
           generate_rackup_file(revision)
         end
 
-        def self.generate_rackup_file(revsion)
+        def self.generate_rackup_file(revision)
           path = Pathname.new(Spontaneous.root)
           template = <<-RACKUP
 Dir.chdir('#{path.realpath}')
@@ -157,4 +157,3 @@ end # Spontaneous::Plugins
 
 
 __END__
-

@@ -675,7 +675,7 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       ## publishing individual pages without dependencies is a bad idea
-      ## if this were to be an option we would have to do it properly 
+      ## if this were to be an option we would have to do it properly
       ## and calculate the full revision set involved
       # should "publish individual pages" do
       #   page = Page.new
@@ -770,7 +770,7 @@ class PublishingTest < Test::Unit::TestCase
 
         @revision_dir = File.expand_path(File.dirname(__FILE__) / "../../tmp/revisions")
         @template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")
-        # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
+        FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
         class ::PublishablePage < Page; end
         PublishablePage.page_style "static"
         PublishablePage.page_style "dynamic"
@@ -793,6 +793,7 @@ class PublishingTest < Test::Unit::TestCase
         @blog << @post3
         @pages = [@home, @about, @blog, @post1, @post2, @post3]
         @pages.each { |p| p.save }
+        Site.publish_all
       end
       teardown do
         # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
@@ -806,7 +807,6 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       should "symlink the latest revision to 'current'" do
-        Site.publish_all
         revision_dir = @revision_dir / "00002"
         current_dir = @revision_dir / "current"
         File.exists?(current_dir).should be_true
@@ -815,7 +815,6 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       should "produce rendered versions of each page" do
-        Site.publish_all
         revision_dir = @revision_dir / "00002/site"
         file = result = nil
         @pages.each do |page|
@@ -835,6 +834,11 @@ class PublishingTest < Test::Unit::TestCase
           publish_file = revision_dir / site_file
           File.exists?(publish_file).should be_true
         end
+      end
+      should "generate a config.ru file pointing to the current root" do
+        config_file = @revision_dir / "00002/config.ru"
+        File.exists?(config_file).should be_true
+        File.read(config_file).should =~ %r(#{Spontaneous.root})
       end
     end
   end

@@ -13,4 +13,3 @@ Spontaneous.database.logger = Logger.new($stdout)
 
 
 puts "Spontaneous::Front running on port #{Spontaneous::Rack.port}"
-
