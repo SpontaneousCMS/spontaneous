@@ -18,11 +18,15 @@ module Spontaneous
     sequel_plugin :skip_create_refresh
     sequel_plugin :timestamps, :create=>:created_at, :update=>:modified_at
     sequel_plugin :identity_map
+    sequel_plugin :association_dependencies
 
     # overwrite the sequel version defined in IdentityMap to support
     # revisions
     def self.identity_map_key(pk)
       "#{super}:#{revision}"
+    end
+    def self.page?
+      false
     end
 
     extend Plugins
@@ -39,6 +43,7 @@ module Spontaneous
     plugin Plugins::JSON
     plugin Plugins::Media
     plugin Plugins::Publishing
+    plugin Plugins::Aliases
 
     many_to_one :container, :class => self, :reciprocal => :nodes
     one_to_many :nodes,    :key => :container_id, :class => self, :reciprocal => :container
@@ -53,6 +58,9 @@ module Spontaneous
       super
     end
 
+    def alias?
+      false
+    end
 
     def page?
       false

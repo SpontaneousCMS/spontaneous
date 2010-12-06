@@ -240,6 +240,7 @@ module Spontaneous
     autoload :PageSearch, "spontaneous/plugins/page_search"
     autoload :Media, "spontaneous/plugins/media"
     autoload :Publishing, "spontaneous/plugins/publishing"
+    autoload :Aliases, "spontaneous/plugins/aliases"
 
     module Slots
       autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"

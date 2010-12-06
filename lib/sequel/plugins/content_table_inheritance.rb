@@ -54,6 +54,7 @@ module Sequel
       def self.configure(model, key, opts={})
         model.instance_eval do
           @sti_key_array = nil
+          @sti_subclasses_array = [model.name]
           @sti_key = key
           @sti_dataset = dataset
           @is_content_inheritance_root = false
@@ -100,6 +101,8 @@ module Sequel
         # the value of the sti_key column to the appropriate class to use.
         attr_reader :sti_model_map
 
+        attr_reader :sti_subclasses_array
+
         # Copy the necessary attributes to the subclasses, and filter the
         # subclass's dataset based on the sti_kep_map entry for the class.
         def inherited(subclass)
@@ -115,6 +118,7 @@ module Sequel
           subclass.instance_eval do
             @sti_key = sk
             @sti_key_array = ska
+            @sti_subclasses_array = [subclass.name]
             @sti_dataset = sd
             @sti_key_map = skm
             @sti_model_map = smm
@@ -140,6 +144,7 @@ module Sequel
         def sti_subclass_added(key)
           if sti_key_array
             sti_key_array << key if @is_content_inheritance_root
+            sti_subclasses_array << key
             superclass.sti_subclass_added(key)
           end
         end

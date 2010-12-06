@@ -44,7 +44,7 @@ module Spontaneous::Plugins
       end
 
       def style
-        self.class.inline_styles[style_id] || default_style || anonymous_style
+        styles[style_id] || default_style || anonymous_style
       end
 
       def template(format=:html)
@@ -81,7 +81,7 @@ module Spontaneous::Plugins
     # Used by slots to check for the existance of a template named
     # SlotsOwningClass.template_directory/slot_name.{format}.erb
     # and use it if it exists
-    # if not it falls back to a default template that just renders the 
+    # if not it falls back to a default template that just renders the
     # Facet's content
     class AnonymousStyle
       def initialize(container, label)
