@@ -9,7 +9,7 @@ module Spontaneous::Plugins
       end
 
       def page_styles
-        @page_styles ||= Spontaneous::StyleDefinitions.new
+        @page_styles ||= Spontaneous::StyleDefinitions.new([supertype, :page_styles])
       end
     end
 
@@ -24,7 +24,7 @@ module Spontaneous::Plugins
       end
 
       def default_page_style
-        page_styles.first
+        page_styles.default
       end
 
       def style=(page_style)

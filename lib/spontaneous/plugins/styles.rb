@@ -17,7 +17,7 @@ module Spontaneous::Plugins
       end
 
       def inline_styles
-        @inline_styles ||= Spontaneous::StyleDefinitions.new
+        @inline_styles ||= Spontaneous::StyleDefinitions.new([supertype, :inline_styles])
       end
 
       def template(format=:html, erb_code=nil)

@@ -39,6 +39,7 @@ class AliasTest < Test::Unit::TestCase
 
       class ::B < Page
         field :b_field1
+        page_style :page
       end
 
       class ::BB < ::B
@@ -77,7 +78,7 @@ class AliasTest < Test::Unit::TestCase
       @root << @aliases
       @a = A.create.reload
       @aa = AA.create.reload
-      @aaa1 = AAA.create.reload
+      @aaa1 = AAA.create(:aaa_field1 => "aaa1").reload
       @aaa2 = AAA.create.reload
       @b = B.new(:slug => "b")
       @root << @b
@@ -175,7 +176,15 @@ class AliasTest < Test::Unit::TestCase
     end
 
     context "Page aliases" do
-      should "be allowed to have facet classes as targets"
+      should "be allowed to have facet classes as targets" do
+        class ::CAlias < Page
+          alias_of :AAA
+          page_style :page
+        end
+
+        c = CAlias.new(:target => @aaa1)
+        c.render.should == "aaa1\n"
+      end
       should "be discoverable via their compound path" do
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases << a
@@ -187,9 +196,33 @@ class AliasTest < Test::Unit::TestCase
         Site["/aliases/b"].should == a
       end
 
-      should "render the page when accessed via the path"
-      should "have access to their target's page styles"
-      should "be able to set the page style seen"
+      should "render the using targets style when accessed via the path and no local page styles defined" do
+        a = BAlias.create(:target => @b, :slug => "balias")
+        @aliases << a
+        @aliases.save
+        a.reload
+        a.render.should == @b.render
+      end
+
+      should "render with locally defined style when available" do
+        BAlias.page_style :alternate
+        a = BAlias.create(:target => @b, :slug => "balias")
+        @aliases << a
+        @aliases.save
+        a.reload
+        a.render.should == "alternate\n"
+      end
+
+      should "have access to their target's page styles" do
+        BAlias.page_style :alternate
+        a = BAlias.create(:target => @b, :slug => "balias")
+        @aliases << a
+        @aliases.save
+        a.reload
+        a.style = :page
+        a.render.should == @b.render
+      end
     end
   end
 end
+

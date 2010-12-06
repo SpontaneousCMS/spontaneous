@@ -49,17 +49,7 @@ module Spontaneous::Plugins
       end
 
       def styles
-        @styles ||= \
-          begin
-            d = S::StyleDefinitions.new
-            self.class.inline_styles.each do |s|
-              d << s
-            end
-            self.target.class.inline_styles.each do |s|
-              d << s
-            end
-            d
-          end
+        @styles ||= S::StyleDefinitions.new(self.class.inline_styles, [target, :styles])
       end
     end
 
@@ -67,10 +57,14 @@ module Spontaneous::Plugins
       def path
         @_path ||= [parent.path, target.slug].join(S::SLASH)
       end
+
       def calculate_path
         ""
       end
 
+      def page_styles
+        @page_styles ||= S::StyleDefinitions.new(self.class.page_styles, [target, :page_styles])
+      end
     end
   end
 end

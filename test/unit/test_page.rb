@@ -262,6 +262,13 @@ class PageTest < Test::Unit::TestCase
       page = PageClass[page.id]
       page.style.should == PageClass.page_styles[:other]
     end
+
+    should "be available to subclasses" do
+      class PageClass2 < PageClass; end
+      page = PageClass2.new
+      puts ">>>>>>>>>>"
+      PageClass2.page_styles.first.name.should == :standard_style
+    end
   end
 
   # context ""
