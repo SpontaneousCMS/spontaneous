@@ -46,7 +46,9 @@ class Test::Unit::TestCase
     File.exists?(@app_dir).should be_true
     Spontaneous.stubs(:application_dir).returns(@app_dir)
     @saved_schema_root = Spontaneous.schema_root
+    @saved_template_root = Spontaneous.template_root
     Spontaneous.schema_root = nil
+    Spontaneous.template_root = nil
     Spontaneous.root = File.expand_path("../fixtures/example_application", __FILE__)
     File.exists?(Spontaneous.root).should be_true
     Spontaneous.init(:mode => :back, :environment => :development)
@@ -131,6 +133,7 @@ class Test::Unit::TestCase
   def teardown_site_fixture
     # to keep other tests working
     Spontaneous.schema_root = @saved_schema_root
+    Spontaneous.template_root = @saved_template_root
     # Schema.classes.each do |klass|
     #   Object.send(:remove_const, klass.name.to_sym) rescue nil
     # end

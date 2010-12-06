@@ -101,7 +101,7 @@ module Spontaneous
     end
 
     def template_root=(template_root)
-      Render.template_root = File.expand_path(template_root)
+      Render.template_root = template_root.nil? ? nil : File.expand_path(template_root)
     end
 
     def template_root

@@ -6,8 +6,9 @@ module Sequel
   class Dataset
     alias_method :sequel_quote_identifier, :quote_identifier
 
+
     def quote_identifier(name)
-      if name == "content"
+      if name == :content or name == "content"
         name = Spontaneous::Content.current_revision_table
       end
       sequel_quote_identifier(name)
@@ -71,7 +72,7 @@ module Spontaneous::Plugins
       def with_revision(revision=nil, &block)
         revision_push(revision)
         begin
-          yield 
+          yield
         ensure
           revision_pop
         end if block_given?

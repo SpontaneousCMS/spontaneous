@@ -93,6 +93,7 @@ run Spontaneous::Rack::Front.application.to_app
         def self.after_publish(revision)
           S::Revision.create(:revision => revision, :published_at => Time.now)
           S::Site.send(:set_published_revision, revision)
+          S::Site.send(:pending_revision=, nil)
           system("ln -nsf #{S::Site.revision_dir(revision)} #{S::Site.revision_dir}")
         end
 

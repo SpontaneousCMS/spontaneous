@@ -736,8 +736,13 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       should "set Site.pending_revision before publishing" do
-        Content.expects(:publish).with() { Site.pending_revision == @revision }
+        Content.expects(:publish).with(@revision, nil) { Site.pending_revision == @revision }
         Site.publish_all
+      end
+
+      should "reset Site.pending_revision after publishing" do
+        Site.publish_all
+        Site.pending_revision.should be_nil
       end
 
       should "clean up state on publishing failure" do
