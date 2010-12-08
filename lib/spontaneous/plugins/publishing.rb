@@ -100,14 +100,19 @@ module Spontaneous::Plugins
         with_editable do
           first_published = self.filter(:first_published_at => nil)
           published = self.filter
+
+          must_publish_all = (content.nil? || (!revision_exists?(revision-1)) || \
+            (content.is_a?(Array) && content.empty?))
+
           mark_first_published = Proc.new do |dataset|
             dataset.update(:first_published_at => Sequel.datetime_class.now, :first_published_revision => revision)
           end
+
           mark_published = Proc.new do |dataset|
             dataset.update(:last_published_at => Sequel.datetime_class.now)
           end
-          if content.nil? or (!revision_exists?(revision-1)) or \
-              (content.is_a?(Array) and content.empty?)
+
+          if must_publish_all
             mark_first_published[first_published]
             mark_published[published]
 
