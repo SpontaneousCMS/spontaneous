@@ -803,7 +803,7 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       teardown do
-        FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
+        # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
         Content.delete
         Site.delete
         Object.send(:remove_const, :PublishablePage)
@@ -822,7 +822,7 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       should "produce rendered versions of each page" do
-        revision_dir = @revision_dir / "00002/site"
+        revision_dir = @revision_dir / "00002/html"
         file = result = nil
         @pages.each do |page|
           if page.root?

@@ -4,6 +4,12 @@
 module Spontaneous
   module Render
     class << self
+      def render_pages(revision, pages, format)
+        klass = Format.const_get("#{format.to_s.camelize}")
+        renderer = klass.new(revision, pages)
+        renderer.render
+      end
+
       def engine_class
         @engine_class ||= Cutaneous::FirstRenderEngine
       end
@@ -63,5 +69,6 @@ module Spontaneous
 
     autoload :Context, "spontaneous/render/context"
     autoload :Engine, "spontaneous/render/engine"
+    autoload :Format, "spontaneous/render/format"
   end
 end

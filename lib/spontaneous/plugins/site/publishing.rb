@@ -53,10 +53,12 @@ module Spontaneous::Plugins
         end
 
         def self.render_revision(revision)
+
           S::Content.with_identity_map do
-            S::Render.with_engine(Cutaneous::PublishRenderEngine[revision]) do
-              S::Page.order(:depth).each do |page|
-                page.render
+            S::Render.with_engine(Cutaneous::PublishRenderEngine) do
+              pages = S::Page.order(:depth)
+              [:html].each do |format|
+                S::Render.render_pages(revision, pages, format)
               end
             end
           end
@@ -102,7 +104,7 @@ run Spontaneous::Rack::Front.application.to_app
         end
 
         def self.abort_publish(revision)
-          FileUtils.rm_r(S::Site.revision_dir(revision))
+          FileUtils.rm_r(S::Site.revision_dir(revision)) if File.exists?(S::Site.revision_dir(revision))
           S::Site.send(:pending_revision=, nil)
           S::Content.delete_revision(revision)
         end

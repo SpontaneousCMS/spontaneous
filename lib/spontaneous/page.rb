@@ -29,6 +29,11 @@ module Spontaneous
       super
     end
 
+    # TODO: configure outputs for each page
+    def formats
+      [:html]
+    end
+
     def page?
       true
     end
