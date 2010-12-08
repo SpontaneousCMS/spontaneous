@@ -116,7 +116,7 @@ class Test::Unit::TestCase
     @home.save
 
 
-    @barakapoint.images << ProjectImage.new(:image => "/Users/garry/Dropbox/Profession/magnetised.info/content/i/work/ef/001.jpg")
+    # @barakapoint.images << ProjectImage.new(:image => "/Users/garry/Dropbox/Profession/magnetised.info/content/i/work/ef/001.jpg")
     # @barakapoint.images << ProjectImage.new(:image => "/Users/garry/Dropbox/Profession/magnetised.info/content/i/work/ef/002.jpg")
     # @barakapoint.images << ProjectImage.new(:image => "/Users/garry/Dropbox/Profession/magnetised.info/content/i/work/ef/003.jpg")
     @barakapoint.save
