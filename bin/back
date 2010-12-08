@@ -14,6 +14,7 @@ env = (ENV['SPON_ENV'] || 'development').to_sym
 Dir.chdir('test/fixtures/example_application')
 
 Spontaneous.init(:mode => :back, :environment => :development)
+Spontaneous.media_dir = "../../../../media"
 Spontaneous.database.logger = Logger.new($stdout)
 
 server = Rack::Handler.get('thin')
