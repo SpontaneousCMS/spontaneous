@@ -216,6 +216,8 @@ module Spontaneous
   autoload :Change, "spontaneous/change"
   autoload :ChangeSet, "spontaneous/change_set"
   autoload :Revision, "spontaneous/revision"
+  puts "here"
+  autoload :Publishing, "spontaneous/publishing"
 
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"
