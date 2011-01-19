@@ -15,6 +15,7 @@ module Spontaneous
       attr_reader :revision
 
       def initialize(revision)
+        puts "rendering revision #{revision}"
         @revision = revision
       end
 
@@ -36,6 +37,12 @@ module Spontaneous
         S::Change.delete
       end
 
+      # Called from the Format#render method to provide progress reports
+      def page_rendered(n)
+        @pages_rendered += 1
+        set_status("rendering", percent_complete)
+      end
+
       protected
 
       def pages
@@ -55,7 +62,7 @@ module Spontaneous
       def publish(pages)
         before_publish
         begin
-          S::Content.publish(pages)
+          S::Content.publish(revision, pages)
           render_revision
           after_publish
         rescue Exception => e
@@ -86,12 +93,6 @@ module Spontaneous
         @total_pages ||= formats.inject(0) do |total, format|
           total += pages.find_all { |page| page.formats.include?(format) }.count
         end
-      end
-
-      # Called from the Format#render method to provide progress reports
-      def page_rendered(n)
-        @pages_rendered += 1
-        set_status("rendering", percent_complete)
       end
 
       def percent_complete

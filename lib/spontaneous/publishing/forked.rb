@@ -3,15 +3,20 @@
 module Spontaneous
   module Publishing
     class Forked < Immediate
-      def self.publish_changes(revision, change_list)
-        fork do
-          super
+
+      alias_method :immediate_publish_changes, :publish_changes
+
+      def publish_changes(change_list)
+        Thread.new do
+          immediate_publish_changes
         end
       end
 
-      def self.publish_all(revision)
-        fork do
-          super
+      alias_method :immediate_publish_all, :publish_all
+
+      def publish_all
+        Thread.new do
+          immediate_publish_all
         end
       end
     end # Forked
