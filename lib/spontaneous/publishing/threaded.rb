@@ -2,7 +2,7 @@
 
 module Spontaneous
   module Publishing
-    class Forked < Immediate
+    class Threaded < Immediate
 
       alias_method :immediate_publish_changes, :publish_changes
 
