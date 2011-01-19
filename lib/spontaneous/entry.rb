@@ -129,7 +129,7 @@ module Spontaneous
     end
 
     def method_missing(method, *args, &block)
-      self.target.send(method, *args, &block)
+      self.target.__send__(method, *args, &block)
     end
 
     def serialize
@@ -159,7 +159,7 @@ module Spontaneous
     # oops, optimisation. sorry
     Content.instance_methods.sort.each do |method|
       unless method_defined?(method)
-        define_method(method) { |*args, &block| target.send(method, *args, &block) }
+        define_method(method) { |*args, &block| target.__send__(method, *args, &block) }
       end
     end
   end

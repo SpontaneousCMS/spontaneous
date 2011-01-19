@@ -42,7 +42,7 @@ module Spontaneous::Plugins
 
       def method_missing(method, *args, &block)
         if target && target.respond_to?(method)
-          target.send(method, *args, &block)
+          target.__send__(method, *args, &block)
         else
           super
         end

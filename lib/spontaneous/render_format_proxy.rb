@@ -17,7 +17,7 @@ module Spontaneous
     end
 
     def method_missing(method, *args, &block)
-      target.send(method, *args, &block)
+      target.__send__(method, *args, &block)
     end
   end
 end

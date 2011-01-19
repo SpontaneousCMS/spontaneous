@@ -47,11 +47,11 @@ module Spontaneous
     def method_missing(method, *args, &block)
       key = method.to_sym
       if target.field?(key)
-        target.fields[key].send(output_method)
+        target.fields[key].__send__(output_method)
       elsif target.slot?(key)
         context_cache[target.slots[key]]
       else
-        target.send(method, *args, &block)
+        target.__send__(method, *args, &block)
       end
     end
 

@@ -4,7 +4,7 @@ module Spontaneous::Plugins
   module Entries
 
     def self.configure(base)
-      base.send(:alias_method,  :<<, :push)
+      base.__send__(:alias_method,  :<<, :push)
     end
 
     module InstanceMethods
@@ -12,7 +12,7 @@ module Spontaneous::Plugins
       # because it's possible to build content out of order
       # some relations don't necessarily get created straight away
       def before_save
-        if container 
+        if container
           self.page = container.page if page.nil?
           if page?
             self.depth = parent ? ((parent.depth || 0) + 1) : 0

@@ -26,7 +26,7 @@ module Spontaneous
     class Configuration
       extend Forwardable
 
-      def initialize(name, settings)
+      def initialize(name, settings={})
         @name, @settings = name, settings
 
         @settings.each do |key, value|
@@ -71,9 +71,9 @@ module Spontaneous
       def_delegators :@settings, :key?, :[]=
     end
 
-    @@local = Configuration.new(:local, {})
+    @@local = Configuration.new(:local)
     @@environments = Hash.new { |hash, key| hash[key] = {} }
-    @@base = Configuration.new(:base, {})
+    @@base = Configuration.new(:base)
     @@defaults = Configuration.new(:defaults, {
       #TODO: add in sensible default configuration
     })

@@ -82,11 +82,11 @@ module Spontaneous::Render
     def method_missing(method, *args, &block)
       key = method.to_sym
       if target.field?(key)
-        target.send(key, *args)
+        target.__send__(key, *args)
       elsif target.slot?(key)
         self.class.new(target.slots[key], format, @params)
       else
-        target.send(method, *args, &block)
+        target.__send__(method, *args, &block)
       end
     rescue
       # TODO: sensible, configurable fallback for when template calls non-existant method
@@ -99,7 +99,7 @@ module Spontaneous::Render
     # make each key of the params hash into a method call for speed
     def _update(params)
       params.each do |key, val|
-        meta.send(:define_method, key) { val }
+        meta.__send__(:define_method, key) { val }
       end
     end
   end
