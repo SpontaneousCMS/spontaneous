@@ -28,11 +28,19 @@ module Spontaneous::Plugins
         end
 
         def publish_changes(change_list=nil)
-          publishing_method.publish_changes(self.revision, change_list)
+          publishing_method.new(self.revision).publish_changes(change_list)
         end
 
         def publish_all
-          publishing_method.publish_all(self.revision)
+          publishing_method.new(self.revision).publish_all
+        end
+
+        def publishing_status
+          publishing_method.status
+        end
+
+        def publishing_status=(status)
+          publishing_method.status = status
         end
 
         protected

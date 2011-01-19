@@ -2,15 +2,17 @@
 
 module Spontaneous
   module Publishing
-    class Forked
+    class Forked < Immediate
       def self.publish_changes(revision, change_list)
-        # launch background publish to call
-        # ImmediatePublishing.publish with the same args
-        # catch any exceptions and pass them onto some notification
-        # system
+        fork do
+          super
+        end
       end
 
       def self.publish_all(revision)
+        fork do
+          super
+        end
       end
     end # Forked
   end # Publishing

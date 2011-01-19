@@ -7,8 +7,10 @@ module Spontaneous::Render
       @format ||= self.name.demodulize.downcase.to_sym
     end
 
-    def initialize(revision, pages)
-      @revision, @pages = revision, pages
+    attr_reader :progress
+
+    def initialize(revision, pages, progress=nil)
+      @revision, @pages, @progress = revision, pages.find_all { |page| page.formats.include?(format) }, progress
     end
 
     def format
@@ -17,8 +19,9 @@ module Spontaneous::Render
 
     def render
       before_render
-      @pages.each do |page|
+      @pages.each_with_index do |page, n|
         render_page(page) if page.formats.include?(format)
+        progress.page_rendered(n)
       end
       after_render
     end

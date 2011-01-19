@@ -4,9 +4,9 @@
 module Spontaneous
   module Render
     class << self
-      def render_pages(revision, pages, format)
+      def render_pages(revision, pages, format, progress=nil)
         klass = Format.const_get("#{format.to_s.camelize}")
-        renderer = klass.new(revision, pages)
+        renderer = klass.new(revision, pages, progress)
         renderer.render
       end
 
