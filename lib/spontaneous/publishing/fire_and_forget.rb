@@ -13,8 +13,8 @@ module Spontaneous
       end
 
       def self.register_task
-        publish_binary = (Pathname.new(Spontaneous.gem_dir) + "/bin/spot publish").to_s
-        site_root = Pathname.new(Spontaneous.root).to_s
+        publish_binary = (Pathname.new(Spontaneous.gem_dir) + "bin/spot publish").expand_path.to_s
+        site_root = Pathname.new(Spontaneous.root).expand_path.to_s
         # TODO: make nice value configurable
         FAF.add_task(task_name, publish_binary, 15, {
           "site" => site_root,
@@ -23,6 +23,20 @@ module Spontaneous
       end
 
       register_task
+
+      def self.status
+        FAF.get_status(task_name)
+      end
+
+      def self.status=(status)
+        FAF.set_status(task_name, status)
+      end
+
+      attr_reader :revision
+
+      def initialize(revision)
+        @revision = revision
+      end
 
       def task_name
         self.class.task_name
