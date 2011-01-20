@@ -9,10 +9,10 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Garry Hill"]
-  s.date = %q{2010-12-03}
+  s.date = %q{2011-01-20}
   s.description = %q{TODO: longer description of your gem}
   s.email = %q{garry@magnetised.info}
-  s.executables = ["unlimit-upload", "nginx", "unicorn", "limit-upload", "console", "back"]
+  s.executables = ["unlimit-upload", "nginx", "spot", "unicorn", "limit-upload", "console", "back"]
   s.files = [
     "Gemfile",
     "Gemfile.lock",
@@ -102,6 +102,7 @@ Gem::Specification.new do |s|
     "application/js/vendor/jquery-ui-1.8.custom.min.js",
     "application/js/vendor/jquery.hotkeys-0.7.9.js",
     "application/js/vendor/jquery.hotkeys-0.7.9.min.js",
+    "application/static/favicon.ico",
     "application/static/item-buttons.png",
     "application/static/location-arrow.png",
     "application/static/orange-down-arrow.png",
@@ -116,11 +117,14 @@ Gem::Specification.new do |s|
     "bin/console",
     "bin/limit-upload",
     "bin/nginx",
+    "bin/spot",
     "bin/unicorn",
     "bin/unlimit-upload",
+    "config/nginx.conf",
     "db/migrations/20100610142136_init.rb",
     "db/migrations/20101130104334_timestamps.rb",
     "db/migrations/20101202113205_site_publishing_flags.rb",
+    "db/migrations/20101206124543_aliases.rb",
     "lib/cutaneous.rb",
     "lib/cutaneous/context_helper.rb",
     "lib/cutaneous/first_render_engine.rb",
@@ -140,6 +144,8 @@ Gem::Specification.new do |s|
     "lib/spontaneous.rb",
     "lib/spontaneous/change.rb",
     "lib/spontaneous/change_set.rb",
+    "lib/spontaneous/cli/base.rb",
+    "lib/spontaneous/cli/console.rb",
     "lib/spontaneous/config.rb",
     "lib/spontaneous/constants.rb",
     "lib/spontaneous/content.rb",
@@ -163,6 +169,7 @@ Gem::Specification.new do |s|
     "lib/spontaneous/page.rb",
     "lib/spontaneous/page_entry.rb",
     "lib/spontaneous/plugins.rb",
+    "lib/spontaneous/plugins/aliases.rb",
     "lib/spontaneous/plugins/allowed_types.rb",
     "lib/spontaneous/plugins/entries.rb",
     "lib/spontaneous/plugins/fields.rb",
@@ -187,6 +194,10 @@ Gem::Specification.new do |s|
     "lib/spontaneous/plugins/slots/slot_set.rb",
     "lib/spontaneous/plugins/styles.rb",
     "lib/spontaneous/proxy_object.rb",
+    "lib/spontaneous/publishing.rb",
+    "lib/spontaneous/publishing/fire_and_forget.rb",
+    "lib/spontaneous/publishing/immediate.rb",
+    "lib/spontaneous/publishing/threaded.rb",
     "lib/spontaneous/rack.rb",
     "lib/spontaneous/rack/back.rb",
     "lib/spontaneous/rack/front.rb",
@@ -195,6 +206,8 @@ Gem::Specification.new do |s|
     "lib/spontaneous/render.rb",
     "lib/spontaneous/render/context.rb",
     "lib/spontaneous/render/engine.rb",
+    "lib/spontaneous/render/format.rb",
+    "lib/spontaneous/render/format/html.rb",
     "lib/spontaneous/render_context.rb",
     "lib/spontaneous/render_format_proxy.rb",
     "lib/spontaneous/revision.rb",
@@ -207,20 +220,23 @@ Gem::Specification.new do |s|
     "lib/spontaneous/templates/template_base.rb",
     "lib/spontaneous/version.rb",
     "spontaneous.gemspec",
-    "test/experimental/test_publishing.rb",
-    "test/experimental/test_site.rb",
+    "test/experimental/test_alias.rb",
     "test/fixtures/application/css/test.less",
     "test/fixtures/application/js/test.js",
     "test/fixtures/application/static/favicon.ico",
     "test/fixtures/application/static/test.html",
     "test/fixtures/application/views/index.erubis",
-    "test/fixtures/example_application/config/back.ru",
+    "test/fixtures/example_application/Gemfile",
+    "test/fixtures/example_application/Gemfile.lock",
+    "test/fixtures/example_application/config/back.rb",
     "test/fixtures/example_application/config/back.yml",
+    "test/fixtures/example_application/config/boot.rb",
     "test/fixtures/example_application/config/database.yml",
     "test/fixtures/example_application/config/environment.rb",
     "test/fixtures/example_application/config/environments/development.rb",
     "test/fixtures/example_application/config/environments/production.rb",
     "test/fixtures/example_application/config/environments/staging.rb",
+    "test/fixtures/example_application/config/front.rb",
     "test/fixtures/example_application/config/front.yml",
     "test/fixtures/example_application/config/unicorn.rb",
     "test/fixtures/example_application/public/css/test.css",
@@ -255,6 +271,11 @@ Gem::Specification.new do |s|
     "test/fixtures/images/size.png24",
     "test/fixtures/images/size.png8",
     "test/fixtures/media/101/003/rose.jpg",
+    "test/fixtures/templates/aliases/a/a_style.html.cut",
+    "test/fixtures/templates/aliases/a/page.html.cut",
+    "test/fixtures/templates/aliases/b/page.html.cut",
+    "test/fixtures/templates/aliases/b_alias/alternate.html.cut",
+    "test/fixtures/templates/aliases/c_alias/page.html.cut",
     "test/fixtures/templates/content/include.html.cut",
     "test/fixtures/templates/content/include_dir.html.cut",
     "test/fixtures/templates/content/included.epub.cut",
@@ -305,9 +326,11 @@ Gem::Specification.new do |s|
     "test/unit/test_images.rb",
     "test/unit/test_media.rb",
     "test/unit/test_page.rb",
+    "test/unit/test_publishing.rb",
     "test/unit/test_render.rb",
     "test/unit/test_schema.rb",
     "test/unit/test_serialisation.rb",
+    "test/unit/test_site.rb",
     "test/unit/test_slots.rb",
     "test/unit/test_styles.rb",
     "test/unit/test_templates.rb",
@@ -316,15 +339,17 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://spontaneouscms.org}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
+  s.rubygems_version = %q{1.3.6}
   s.summary = %q{TODO: one-line summary of your gem}
   s.test_files = [
-    "test/experimental/test_publishing.rb",
-    "test/experimental/test_site.rb",
+    "test/experimental/test_alias.rb",
+    "test/fixtures/example_application/config/back.rb",
+    "test/fixtures/example_application/config/boot.rb",
     "test/fixtures/example_application/config/environment.rb",
     "test/fixtures/example_application/config/environments/development.rb",
     "test/fixtures/example_application/config/environments/production.rb",
     "test/fixtures/example_application/config/environments/staging.rb",
+    "test/fixtures/example_application/config/front.rb",
     "test/fixtures/example_application/config/unicorn.rb",
     "test/fixtures/example_application/schema/client_project.rb",
     "test/fixtures/example_application/schema/client_projects.rb",
@@ -352,9 +377,11 @@ Gem::Specification.new do |s|
     "test/unit/test_images.rb",
     "test/unit/test_media.rb",
     "test/unit/test_page.rb",
+    "test/unit/test_publishing.rb",
     "test/unit/test_render.rb",
     "test/unit/test_schema.rb",
     "test/unit/test_serialisation.rb",
+    "test/unit/test_site.rb",
     "test/unit/test_slots.rb",
     "test/unit/test_styles.rb",
     "test/unit/test_templates.rb"
@@ -364,7 +391,7 @@ Gem::Specification.new do |s|
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
-    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<home_run>, ["~> 0.9.4"])
       s.add_runtime_dependency(%q<sequel>, ["~> 3.16"])
       s.add_runtime_dependency(%q<mysql2>, ["~> 0.2"])
@@ -378,28 +405,10 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<less>, ["~> 1.2"])
       s.add_runtime_dependency(%q<stringex>, ["~> 1.1"])
       s.add_runtime_dependency(%q<miso>, ["~> 0.3.3"])
+      s.add_runtime_dependency(%q<fire_and_forget>, ["~> 0.3.1"])
+      s.add_runtime_dependency(%q<thor>, ["~> 0.14.6"])
       s.add_runtime_dependency(%q<rdiscount>, ["~> 1.6.5"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5"])
-      s.add_development_dependency(%q<jnunemaker-matchy>, ["~> 0.4"])
-      s.add_development_dependency(%q<shoulda>, ["~> 2.10"])
-      s.add_development_dependency(%q<timecop>, ["~> 0.3"])
-      s.add_development_dependency(%q<mocha>, ["~> 0.9"])
-      s.add_development_dependency(%q<rack-test>, ["~> 0.5"])
-      s.add_development_dependency(%q<leftright>, ["~> 0.9"])
-      s.add_development_dependency(%q<stackdeck>, ["~> 0.2"])
-      s.add_runtime_dependency(%q<home_run>, ["~> 0.9.4"])
-      s.add_runtime_dependency(%q<sequel>, ["~> 3.16"])
-      s.add_runtime_dependency(%q<yajl-ruby>, ["~> 0.7"])
-      s.add_runtime_dependency(%q<erubis>, ["~> 2.6"])
-      s.add_runtime_dependency(%q<tenjin>, ["~> 0.6.1"])
-      s.add_runtime_dependency(%q<rack>, ["~> 1.2"])
-      s.add_runtime_dependency(%q<sinatra>, ["~> 1.0"])
-      s.add_runtime_dependency(%q<unicorn>, ["~> 2.0.0"])
-      s.add_runtime_dependency(%q<less>, ["~> 1.2"])
-      s.add_runtime_dependency(%q<stringex>, ["~> 1.1"])
-      s.add_runtime_dependency(%q<miso>, ["~> 0.3.3"])
-      s.add_runtime_dependency(%q<rdiscount>, ["~> 1.6.5"])
-      s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jnunemaker-matchy>, ["~> 0.4"])
       s.add_development_dependency(%q<shoulda>, ["~> 2.10"])
       s.add_development_dependency(%q<timecop>, ["~> 0.3"])
@@ -421,28 +430,10 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<less>, ["~> 1.2"])
       s.add_dependency(%q<stringex>, ["~> 1.1"])
       s.add_dependency(%q<miso>, ["~> 0.3.3"])
+      s.add_dependency(%q<fire_and_forget>, ["~> 0.3.1"])
+      s.add_dependency(%q<thor>, ["~> 0.14.6"])
       s.add_dependency(%q<rdiscount>, ["~> 1.6.5"])
       s.add_dependency(%q<jeweler>, ["~> 1.5"])
-      s.add_dependency(%q<jnunemaker-matchy>, ["~> 0.4"])
-      s.add_dependency(%q<shoulda>, ["~> 2.10"])
-      s.add_dependency(%q<timecop>, ["~> 0.3"])
-      s.add_dependency(%q<mocha>, ["~> 0.9"])
-      s.add_dependency(%q<rack-test>, ["~> 0.5"])
-      s.add_dependency(%q<leftright>, ["~> 0.9"])
-      s.add_dependency(%q<stackdeck>, ["~> 0.2"])
-      s.add_dependency(%q<home_run>, ["~> 0.9.4"])
-      s.add_dependency(%q<sequel>, ["~> 3.16"])
-      s.add_dependency(%q<yajl-ruby>, ["~> 0.7"])
-      s.add_dependency(%q<erubis>, ["~> 2.6"])
-      s.add_dependency(%q<tenjin>, ["~> 0.6.1"])
-      s.add_dependency(%q<rack>, ["~> 1.2"])
-      s.add_dependency(%q<sinatra>, ["~> 1.0"])
-      s.add_dependency(%q<unicorn>, ["~> 2.0.0"])
-      s.add_dependency(%q<less>, ["~> 1.2"])
-      s.add_dependency(%q<stringex>, ["~> 1.1"])
-      s.add_dependency(%q<miso>, ["~> 0.3.3"])
-      s.add_dependency(%q<rdiscount>, ["~> 1.6.5"])
-      s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jnunemaker-matchy>, ["~> 0.4"])
       s.add_dependency(%q<shoulda>, ["~> 2.10"])
       s.add_dependency(%q<timecop>, ["~> 0.3"])
@@ -465,28 +456,10 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<less>, ["~> 1.2"])
     s.add_dependency(%q<stringex>, ["~> 1.1"])
     s.add_dependency(%q<miso>, ["~> 0.3.3"])
+    s.add_dependency(%q<fire_and_forget>, ["~> 0.3.1"])
+    s.add_dependency(%q<thor>, ["~> 0.14.6"])
     s.add_dependency(%q<rdiscount>, ["~> 1.6.5"])
     s.add_dependency(%q<jeweler>, ["~> 1.5"])
-    s.add_dependency(%q<jnunemaker-matchy>, ["~> 0.4"])
-    s.add_dependency(%q<shoulda>, ["~> 2.10"])
-    s.add_dependency(%q<timecop>, ["~> 0.3"])
-    s.add_dependency(%q<mocha>, ["~> 0.9"])
-    s.add_dependency(%q<rack-test>, ["~> 0.5"])
-    s.add_dependency(%q<leftright>, ["~> 0.9"])
-    s.add_dependency(%q<stackdeck>, ["~> 0.2"])
-    s.add_dependency(%q<home_run>, ["~> 0.9.4"])
-    s.add_dependency(%q<sequel>, ["~> 3.16"])
-    s.add_dependency(%q<yajl-ruby>, ["~> 0.7"])
-    s.add_dependency(%q<erubis>, ["~> 2.6"])
-    s.add_dependency(%q<tenjin>, ["~> 0.6.1"])
-    s.add_dependency(%q<rack>, ["~> 1.2"])
-    s.add_dependency(%q<sinatra>, ["~> 1.0"])
-    s.add_dependency(%q<unicorn>, ["~> 2.0.0"])
-    s.add_dependency(%q<less>, ["~> 1.2"])
-    s.add_dependency(%q<stringex>, ["~> 1.1"])
-    s.add_dependency(%q<miso>, ["~> 0.3.3"])
-    s.add_dependency(%q<rdiscount>, ["~> 1.6.5"])
-    s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jnunemaker-matchy>, ["~> 0.4"])
     s.add_dependency(%q<shoulda>, ["~> 2.10"])
     s.add_dependency(%q<timecop>, ["~> 0.3"])

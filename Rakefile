@@ -27,28 +27,6 @@ Jeweler::Tasks.new do |gem|
   gem.email = "garry@magnetised.info"
   gem.authors = ["Garry Hill"]
   gem.version = Spontaneous::VERSION
-
-  gem.add_dependency "home_run", "~>0.9.4"
-  gem.add_dependency "sequel", "~>3.16"
-  gem.add_dependency "yajl-ruby", "~>0.7"
-  gem.add_dependency "erubis", "~>2.6"
-  gem.add_dependency "tenjin", "~> 0.6.1"
-  gem.add_dependency 'rack', '~>1.2'
-  gem.add_dependency "sinatra", "~>1.0"
-  gem.add_dependency "unicorn", "~>2.0.0"
-  gem.add_dependency "less", "~>1.2"
-  gem.add_dependency "stringex", "~>1.1"
-  gem.add_dependency 'miso', '~> 0.3.3'
-  gem.add_dependency 'rdiscount', '~> 1.6.5'
-
-  gem.add_development_dependency "bundler", "~> 1.0.0"
-  gem.add_development_dependency 'jnunemaker-matchy', '~> 0.4'
-  gem.add_development_dependency 'shoulda',    '~> 2.10'
-  gem.add_development_dependency 'timecop',    '~> 0.3'
-  gem.add_development_dependency 'mocha',      '~> 0.9'
-  gem.add_development_dependency 'rack-test',  '~> 0.5'
-  gem.add_development_dependency 'leftright',  '~> 0.9'
-  gem.add_development_dependency 'stackdeck',  '~> 0.2'
 end
 Jeweler::RubygemsDotOrgTasks.new
 
@@ -75,7 +53,7 @@ namespace :test do
     test.pattern = 'test/unit/**/test_*.rb'
     test.verbose = true
   end
-  
+
   Rake::TestTask.new(:functionals) do |test|
     test.libs << 'test'
     test.ruby_opts << '-rubygems'

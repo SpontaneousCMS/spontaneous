@@ -14,7 +14,7 @@ GEM
       abstract (>= 1.0.0)
     eventmachine (0.12.10)
     executioner (0.3.0)
-    fire_and_forget (0.3.0)
+    fire_and_forget (0.3.1)
       daemons (~> 1.1.0)
     git (1.2.5)
     home_run (0.9.4)
@@ -64,7 +64,7 @@ PLATFORMS
 
 DEPENDENCIES
   erubis (~> 2.6)
-  fire_and_forget (~> 0.3.0)
+  fire_and_forget (~> 0.3.1)
   home_run (~> 0.9.4)
   jeweler (~> 1.5)
   jnunemaker-matchy (~> 0.4)
