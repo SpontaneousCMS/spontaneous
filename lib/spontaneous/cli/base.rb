@@ -17,8 +17,10 @@ module Spontaneous
 
       desc "publish", "Publishes the site"
       method_option :changes, :type => :array, :desc => "List of changesets to include"
+      method_option :logfile, :type => :string, :desc => "Location of logfile"
       def publish
         prepare :publish
+        # TODO: set up logging
         require File.expand_path('config/boot.rb')
         puts "publishing revision #{Site.revision} of site #{options.site}"
 
