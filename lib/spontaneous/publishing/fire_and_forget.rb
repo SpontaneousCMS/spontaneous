@@ -1,16 +1,38 @@
 # encoding: UTF-8
 
+require 'fire_and_forget'
+
 module Spontaneous
   module Publishing
     class FireAndForget
-      def self.publish_changes(revision, change_list)
-        # launch background publish to call
-        # ImmediatePublishing.publish with the same args
-        # catch any exceptions and pass them onto some notification
-        # system
+      FAF = ::FireAndForget
+
+      def self.task_name
+        # TODO: add site name to this to make it unique on a server
+        :publish
       end
 
-      def self.publish_all(revision)
+      def self.register_task
+        publish_binary = (Pathname.new(Spontaneous.gem_dir) + "/bin/spot publish").to_s
+        site_root = Pathname.new(Spontaneous.root).to_s
+        FAF.add_task(task_name, publish_binary, 15, {
+          "site" => site_root,
+          "environment" => Spontaneous.env
+        }, {})
+      end
+
+      register_task
+
+      def task_name
+        self.class.task_name
+      end
+
+      def publish_changes(change_list)
+        FAF.fire(task_name, {"revision" => revision, "changes" => change_list})
+      end
+
+      def publish_all
+        FAF.fire(task_name, {"revision" => revision})
       end
     end # FireAndForget
   end # Publishing

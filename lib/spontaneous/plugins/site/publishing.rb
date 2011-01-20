@@ -10,12 +10,12 @@ module Spontaneous::Plugins
           S.revision_root / revision.to_s.rjust(5, "0")
         end
 
-        def publishing_method
-          @publishing_method ||= default_publishing_method
-        end
-
         def default_publishing_method
           S::Publishing::Immediate
+        end
+
+        def publishing_method
+          @publishing_method ||= default_publishing_method
         end
 
         def publishing_method=(method)
@@ -23,6 +23,7 @@ module Spontaneous::Plugins
           begin
             @publishing_method = S::Publishing.const_get(klass_name)
           rescue NameError => e
+            puts "Unknown method #{method} (#{klass_name})"
             @publishing_method = default_publishing_method
           end
         end

@@ -38,9 +38,10 @@ module Spontaneous
       end
 
       # Called from the Format#render method to provide progress reports
-      def page_rendered(n)
+      def page_rendered(page)
         @pages_rendered += 1
         set_status("rendering", percent_complete)
+        puts "Rendered page #{page.path}"
       end
 
       protected

@@ -15,7 +15,7 @@ module Spontaneous
   SLASH = "/".freeze
   class << self
     def init(options={})
-      self.environment = options.delete(:environment) || :development
+      self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
       self.mode = options.delete(:mode) || :back
       self.config = options
       # DataMapper::Logger.new(log_dir / "#{mode}.log", :debug)
@@ -83,11 +83,11 @@ module Spontaneous
     end
 
     def environment=(env)
-      @environment = env
+      @environment = env.to_sym rescue environment
     end
 
     def environment
-      @environment
+      @environment ||= (ENV["SPOT_ENV"] || :development).to_sym
     end
 
     alias_method :env, :environment
@@ -177,6 +177,10 @@ module Spontaneous
     def css_dir
       application_dir / "css"
     end
+
+    def load!(environment=:development, mode=:back)
+      Spontaneous.init(:mode => mode, :environment => environment)
+    end
   end
 
   autoload :ProxyObject, "spontaneous/proxy_object"
@@ -216,7 +220,6 @@ module Spontaneous
   autoload :Change, "spontaneous/change"
   autoload :ChangeSet, "spontaneous/change_set"
   autoload :Revision, "spontaneous/revision"
-  puts "here"
   autoload :Publishing, "spontaneous/publishing"
 
   module Templates

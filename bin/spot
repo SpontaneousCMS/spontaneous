@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+require 'rubygems' unless defined?(Gem) # Useful only on --dev mode
+
+spot_path = File.expand_path('../../lib', __FILE__)
+$:.unshift(spot_path) if File.directory?(spot_path) && !$:.include?(spot_path)
+
+require 'spontaneous/cli/base'
+Spontaneous::Cli::Base.start(ARGV)
+

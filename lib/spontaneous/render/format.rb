@@ -21,9 +21,13 @@ module Spontaneous::Render
       before_render
       @pages.each_with_index do |page, n|
         render_page(page) if page.formats.include?(format)
-        progress.page_rendered(n)
+        after_page_rendered(page)
       end
       after_render
+    end
+
+    def after_page_rendered(page)
+      progress.page_rendered(page)
     end
 
     def before_render; end

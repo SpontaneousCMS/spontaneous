@@ -45,7 +45,7 @@ module Spontaneous
             inner_ids = inner.map { |c| c.modified_list }.flatten
             grouped_changes[(i+1)..-1].each_with_index do |outer, j|
               outer_ids = outer.map { |c| c.modified_list }.flatten
-              if !(inner_ids & outer_ids).empty?
+              unless (inner_ids & outer_ids).empty?
                 modified = true
                 grouped_changes.delete(outer)
                 grouped_changes[i] += outer
