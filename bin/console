@@ -27,8 +27,7 @@ irb = IRB::Irb.new
 IRB.conf[:MAIN_CONTEXT] = irb.context
 
 irb.context.evaluate("require 'irb/completion'", 0)
-irb.context.evaluate(
-  %@
+irb.context.evaluate(%@
 HISTFILE = "../.irb_history"
 MAXHISTSIZE = 100
 begin
@@ -56,8 +55,7 @@ ETC_IRBRC_LOADED=true
 include Spontaneous
 
 
-  @, 0
-)
+@, 0)
 
 
 trap("SIGINT") do
@@ -67,7 +65,4 @@ end
 catch(:IRB_EXIT) do
   irb.eval_input
 end
-
-
-
 
