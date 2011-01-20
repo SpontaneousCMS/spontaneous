@@ -5,7 +5,7 @@ module Spontaneous
     class Base < Thor
       include Thor::Actions
 
-      class_option :site, :type => :string, :aliases => "-s", :desc => "Site root dir"
+      class_option :site, :type => :string, :aliases => ["-s", "--root"], :desc => "Site root dir"
       class_option :environment, :type => :string,  :aliases => "-e", :required => true, :default => :development, :desc => "Spontaneous Environment"
       class_option :help, :type => :boolean, :desc => "Show help usage"
 
@@ -36,6 +36,24 @@ module Spontaneous
         prepare :revision
         require File.expand_path('config/boot.rb')
         puts "Site is at revision #{Site.revision}"
+      end
+
+      desc "console", "Gives you console access to the current site"
+      def console
+        prepare :console
+        ARGV.clear
+        puts "=> Loading #{options.environment} console"
+        require 'irb'
+        require File.expand_path('config/boot.rb')
+        IRB.setup(nil)
+        irb = IRB::Irb.new
+        IRB.conf[:MAIN_CONTEXT] = irb.context
+        irb.context.evaluate("require 'irb/completion'", 0)
+        irb.context.evaluate("require '#{File.expand_path(File.dirname(__FILE__) + '/console')}'", 0)
+        irb.context.evaluate("include Spontaneous", 0)
+        catch(:IRB_EXIT) do
+          irb.eval_input
+        end
       end
 
       private

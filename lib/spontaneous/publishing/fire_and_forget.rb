@@ -15,6 +15,7 @@ module Spontaneous
       def self.register_task
         publish_binary = (Pathname.new(Spontaneous.gem_dir) + "/bin/spot publish").to_s
         site_root = Pathname.new(Spontaneous.root).to_s
+        # TODO: make nice value configurable
         FAF.add_task(task_name, publish_binary, 15, {
           "site" => site_root,
           "environment" => Spontaneous.env
@@ -28,11 +29,11 @@ module Spontaneous
       end
 
       def publish_changes(change_list)
-        FAF.fire(task_name, {"revision" => revision, "changes" => change_list})
+        FAF.fire(task_name, {"changes" => change_list})
       end
 
       def publish_all
-        FAF.fire(task_name, {"revision" => revision})
+        FAF.fire(task_name)
       end
     end # FireAndForget
   end # Publishing
