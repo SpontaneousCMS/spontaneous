@@ -48,7 +48,7 @@ module Spontaneous
             if Spontaneous.development?
               scripts.map do |script|
                 src = "/js/#{script}.js"
-                path = Spontaneous.application_file(src)
+                path = Spontaneous.application_dir(src)
                 size = File.size(path)
                 ["#{NAMESPACE}#{src}", size]
                 # %(<script src="#{NAMESPACE}/js/#{script}.js" type="text/javascript"></script>)

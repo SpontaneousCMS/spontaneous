@@ -18,8 +18,7 @@ module Spontaneous
       self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
       self.mode = options.delete(:mode) || :back
       self.config = options
-      # DataMapper::Logger.new(log_dir / "#{mode}.log", :debug)
-      # DataMapper.setup(:default, db_settings)
+      Logger.setup!
       self.database = Sequel.connect(db_settings)
       Schema.load
     end
@@ -104,8 +103,8 @@ module Spontaneous
       Render.template_root = template_root.nil? ? nil : File.expand_path(template_root)
     end
 
-    def template_root
-      Render.template_root
+    def template_root(*path)
+      relative_dir(Render.template_root, *path)
     end
 
     def template_path(*args)
@@ -116,8 +115,9 @@ module Spontaneous
       @schema_root = schema_root
     end
 
-    def schema_root
+    def schema_root(*path)
       @schema_root ||= root / "schema"
+      relative_dir(@schema_root, *path)
     end
 
     def template_ext
@@ -130,61 +130,70 @@ module Spontaneous
       @media_dir = File.expand_path(dir)
     end
 
-    def media_dir
+    def media_dir(*path)
       @media_dir ||= File.expand_path(root / "../media")
+      relative_dir(@media_dir, *path)
     end
 
     def media_path(*args)
       Media.media_path(*args)
     end
 
-    def root
+    def root(*path)
       @root ||= File.expand_path(Dir.pwd)
+      relative_dir(@root, *path)
     end
 
     def root=(root)
       @root = File.expand_path(root)
     end
 
-    def revision_root
+    def revision_root(*path)
       @revision_dir ||= File.expand_path(root / '../revisions')
+      relative_dir(@revision_dir, *path)
     end
 
     def revision_root=(revision_dir)
       @revision_dir = File.expand_path(revision_dir)
     end
 
-    def gem_dir
+    def gem_dir(*path)
       @gem_dir ||= File.expand_path(File.dirname(__FILE__) / '..')
+      relative_dir(@gem_dir, *path)
     end
 
-    def application_dir
+    def application_dir(*path)
       @application_dir ||= File.expand_path("../../application", __FILE__)
+      relative_dir(@application_dir, *path)
     end
 
-    def application_file(*args)
-      File.join(application_dir, *args)
-    end
+    # def application_file(*args)
+    #   File.join(application_dir, *args)
+    # end
 
-    def static_dir
+    def static_dir(*path)
       application_dir / "static"
+      relative_dir(application_dir / "static", *path)
     end
 
-    def js_dir
-      application_dir / "js"
+    def js_dir(*path)
+      relative_dir(application_dir / "js", *path)
     end
 
-    def css_dir
-      application_dir / "css"
+    def css_dir(*path)
+      relative_dir(application_dir / "css", *path)
     end
 
-    def load!(environment=:development, mode=:back)
-      Spontaneous.init(:mode => mode, :environment => environment)
+    private
+
+    def relative_dir(root, *path)
+      File.join(root, *path)
     end
   end
 
   autoload :ProxyObject, "spontaneous/proxy_object"
   autoload :Plugins, "spontaneous/plugins"
+  autoload :Logger, "spontaneous/logger"
 
   autoload :Constants, "spontaneous/constants"
   autoload :Config, "spontaneous/config"
