@@ -14,4 +14,4 @@ require 'spontaneous'
 # using config settings to determine engine
 require 'cutaneous'
 
-Spontaneous.load!(SPOT_ENV)
+Spontaneous.init(:environment => SPOT_ENV)
