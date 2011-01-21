@@ -28,7 +28,7 @@ GEM
       abstract (>= 1.0.0)
     eventmachine (0.12.10)
     executioner (0.3.0)
-    fire_and_forget (0.3.1)
+    fire_and_forget (0.3.2)
       daemons (~> 1.1.0)
     home_run (0.9.4)
     kgio (1.3.1)

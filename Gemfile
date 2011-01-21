@@ -19,7 +19,7 @@ gem "unicorn", "~>2.0.0"
 gem "less", "~>1.2"
 gem "stringex", "~>1.1"
 gem 'miso', '~> 0.3.3'
-gem 'fire_and_forget', '~>0.3.1'
+gem 'fire_and_forget', '~>0.3.2'
 gem 'thor', '~>0.14.6'
 
 gem 'rdiscount', '~> 1.6.5'
