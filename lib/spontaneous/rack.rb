@@ -17,7 +17,7 @@ module Spontaneous
       end
 
       def port
-        Spontaneous.config[Spontaneous.mode][:port]
+        Spontaneous.config.port
       end
     end
 

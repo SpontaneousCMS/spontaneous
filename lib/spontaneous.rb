@@ -11,16 +11,28 @@ require 'fileutils'
 
 Sequel.extension :inflector
 
+require 'spontaneous/logger'
+
 module Spontaneous
   SLASH = "/".freeze
   class << self
     def init(options={})
+      # return false if loaded?
       self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
-      self.mode = options.delete(:mode) || :back
-      self.config = options
+      self.mode = options.delete(:mode) || ENV["SPOT_MODE"] || :back
       Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
-      self.database = Sequel.connect(db_settings)
+      Config.load
+      connect_to_database
       Schema.load
+      Thread.current[:spontaneous_loaded] = true
+    end
+
+    def loaded?
+      Thread.current[:spontaneous_loaded]
+    end
+
+    def connect_to_database
+      self.database = Sequel.connect(db_settings)
     end
 
     def database=(database)
@@ -31,27 +43,8 @@ module Spontaneous
       @database
     end
 
-    def config=(config={})
-      config.delete(:db)
-      @config = {
-        :template_root => root / "templates",
-        :template_extension => "erb",
-        :db => db_settings
-      }
-      @config[mode] = mode_settings
-      @config.merge(config)
-    end
-
     def config
-      @config
-    end
-
-    def log_dir
-      root / "log"
-    end
-
-    def config_dir
-      root / "config"
+      Spontaneous::Config
     end
 
     def mode_settings
@@ -62,11 +55,11 @@ module Spontaneous
 
     def db_settings
       @db_settings = YAML.load_file(File.join(config_dir, "database.yml"))
-      @db_settings[environment]
+      self.config.db = @db_settings[environment]
     end
 
     def mode=(mode)
-      @mode = mode
+      @mode = mode.to_sym
     end
 
     def mode
@@ -84,6 +77,7 @@ module Spontaneous
     def environment=(env)
       @environment = env.to_sym rescue environment
     end
+    alias_method :env=, :environment=
 
     def environment
       @environment ||= (ENV["SPOT_ENV"] || :development).to_sym
@@ -97,6 +91,14 @@ module Spontaneous
 
     def production?
       environment == :production
+    end
+
+    def log_dir(*path)
+      relative_dir(root / "log", *path)
+    end
+
+    def config_dir(*path)
+      relative_dir(root / "config", *path)
     end
 
     def template_root=(template_root)

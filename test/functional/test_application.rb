@@ -58,11 +58,11 @@ class ApplicationTest < Test::Unit::TestCase
     end
 
     should "have correct db settings" do
-      Spontaneous.config[:db][:adapter].should == "mysql2"
-      Spontaneous.config[:db][:database].should == "spontaneous_example"
-      Spontaneous.config[:db][:user].should == "spontaneous"
-      Spontaneous.config[:db][:password].should == "password"
-      Spontaneous.config[:db][:host].should == "localhost"
+      Spontaneous.config.db[:adapter].should == "mysql2"
+      Spontaneous.config.db[:database].should == "spontaneous_example"
+      Spontaneous.config.db[:user].should == "spontaneous"
+      Spontaneous.config.db[:password].should == "password"
+      Spontaneous.config.db[:host].should == "localhost"
     end
 
     should "configure the datamapper connection" do
@@ -105,8 +105,8 @@ class ApplicationTest < Test::Unit::TestCase
       Spontaneous::Rack.port.should == 9002
     end
   end
-  context "back, production" do
 
+  context "back, production" do
     setup do
       Spontaneous.init(:mode => :back, :environment => :production)
     end
@@ -121,20 +121,17 @@ class ApplicationTest < Test::Unit::TestCase
       Spontaneous.environment.should == :production
       Spontaneous.development?.should be_false
       Spontaneous.production?.should be_true
+      # Spontaneous.config.environment.should == :production
     end
 
     should "have correct db settings" do
-      Spontaneous.config[:db][:adapter].should == "mysql2"
-      Spontaneous.config[:db][:database].should == "spontaneous_example_production"
-      Spontaneous.config[:db][:user].should == "spontaneous"
-      Spontaneous.config[:db][:password].should == "Passw0rd"
-      Spontaneous.config[:db][:host].should == "localhost"
+      Spontaneous.config.db[:adapter].should == "mysql2"
+      Spontaneous.config.db[:database].should == "spontaneous_example_production"
+      Spontaneous.config.db[:user].should == "spontaneous_prod"
+      Spontaneous.config.db[:password].should == "Passw0rd"
+      Spontaneous.config.db[:host].should == "localhost"
     end
 
-    should "configure the datamapper connection" do
-      # opts = DataMapper.repository.adapter.options
-      # opts.should == {"username"=>"spontaneous", "adapter"=>"mysql", "database"=>"spontaneous_example_production", "host"=>"localhost", "password"=>"Passw0rd"}
-    end
     should "have the right rack port" do
       Spontaneous::Rack.port.should == 3001
     end

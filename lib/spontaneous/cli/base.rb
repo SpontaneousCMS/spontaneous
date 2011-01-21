@@ -7,6 +7,7 @@ module Spontaneous
 
       class_option :site, :type => :string, :aliases => ["-s", "--root"], :desc => "Site root dir"
       class_option :environment, :type => :string,  :aliases => "-e", :required => true, :default => :development, :desc => "Spontaneous Environment"
+      class_option :mode, :type => :string,  :aliases => "-m", :default => :back, :desc => "Spontaneous mode ('front' or 'back')"
       class_option :help, :type => :boolean, :desc => "Show help usage"
 
       desc :start, "Starts the Spontaneous CMS"
@@ -69,6 +70,7 @@ module Spontaneous
           raise SystemExit
         end
         ENV["SPOT_ENV"] ||= options.environment.to_s
+        ENV["SPOT_MODE"] ||= options.mode.to_s
         ENV["RACK_ENV"] = ENV["SPOT_ENV"] # Also set this for middleware
         chdir(options.site)
         # unless File.exist?('config/boot.rb')

@@ -1,3 +1,4 @@
+require 'forwardable'
 
 module Spontaneous
   module Config
@@ -15,6 +16,21 @@ module Spontaneous
         instance_eval(File.read(@file))
       end
 
+
+      def back(&block)
+        __mode__(:back, &block)
+      end
+
+      def front(&block)
+        __mode__(:front, &block)
+      end
+
+      def __mode__(mode, &block)
+        if Spontaneous.mode == mode
+          yield if block_given?
+        end
+      end
+
       def method_missing(parameter, *args, &block)
         if args.length == 1
           args = args[0]
@@ -24,7 +40,7 @@ module Spontaneous
     end
 
     class Configuration
-      extend Forwardable
+      extend ::Forwardable
 
       def initialize(name, settings={})
         @name, @settings = name, settings
@@ -75,16 +91,17 @@ module Spontaneous
     @@environments = Hash.new { |hash, key| hash[key] = {} }
     @@base = Configuration.new(:base)
     @@defaults = Configuration.new(:defaults, {
-      #TODO: add in sensible default configuration
+      #TODO: add in sensible default configuration (or do it in the generators)
     })
 
     class << self
-      def load(pwd=Dir.pwd)
-        Loader.read(@@base, File.join(pwd, 'config/environment.rb'))
-        Dir.glob('config/environments/*.rb').each do |file|
+      def load(pwd=Spontaneous.root)
+        default = File.join(pwd, 'config/environment.rb')
+        Loader.read(@@base, default) if File.exist?(default)
+        Dir.glob(File.join(pwd, 'config/environments/*.rb')).each do |file|
           environment = File.basename(file, '.rb').to_sym
           store = {}
-          Loader.read(store, File.join(pwd, file))
+          Loader.read(store, file)
           @@environments[environment] = Configuration.new(environment, store)
         end
       end
@@ -94,7 +111,7 @@ module Spontaneous
       end
 
       def environment
-        @environment ||= :development
+         @environment || Spontaneous.env
       end
 
       def environment=(env)
@@ -137,7 +154,7 @@ module Spontaneous
 end
 
 # automatically load the config if it looks like we're in an app dir
-if File.exist?('config/environment.rb')
-  Spontaneous::Config.load
-end
+# if File.exist?('config/environment.rb')
+#   Spontaneous::Config.load
+# end
 

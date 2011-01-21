@@ -16,7 +16,7 @@
 :production:
   <<:         *defaults
   :database:  spontaneous_example_production
-  :user:  spontaneous
+  :user:  spontaneous_prod
   :password:  Passw0rd
 
 :rake:

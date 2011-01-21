@@ -8,6 +8,7 @@ class LoggerTest < Test::Unit::TestCase
   include Spontaneous
 
   def setup
+    Spontaneous.env = :test
     Spontaneous::Logger::Config[:test][:stream] = :null # The default
     Spontaneous::Logger.setup!
   end
@@ -28,7 +29,6 @@ class LoggerTest < Test::Unit::TestCase
       end
 
       should 'use StringIO as default for test' do
-        p Spontaneous.env
         assert_instance_of StringIO, Spontaneous.logger.log
       end
 

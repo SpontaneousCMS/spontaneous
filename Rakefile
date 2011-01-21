@@ -1,7 +1,8 @@
 require 'rubygems'
 require 'bundler'
 
-# $:.unshift(File.dirname(__FILE__) + '/lib')
+# Set up the Spontaneous environment
+ENV["SPOT_ENV"] = "test"
 
 begin
   Bundler.setup(:default, :development)

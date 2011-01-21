@@ -90,5 +90,23 @@ class ConfigTest < Test::Unit::TestCase
     teardown do
       Dir.chdir(@pwd)
     end
+    context "Spontaneous :back" do
+      setup do
+        Spontaneous.mode = :back
+        Config.load
+      end
+      should "read the correct configuration values" do
+        Config.port.should == 9001
+      end
+    end
+    context "Spontaneous :front" do
+      setup do
+        Spontaneous.mode = :front
+        Config.load
+      end
+      should "read the correct configuration values" do
+        Config.port.should == 9002
+      end
+    end
   end
 end

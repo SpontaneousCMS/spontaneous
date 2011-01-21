@@ -751,7 +751,7 @@ class PublishingTest < Test::Unit::TestCase
         Content.revision_exists?(@revision).should be_false
         # don't like peeking into implementation here but don't know how else
         # to simulate the right error
-        Plugins::Site::Publishing::ImmediatePublishing.expects(:render_revision).raises(Exception)
+        S::Render.expects(:render_pages).raises(Exception)
         begin
           Site.publish_all
         rescue Exception; end
