@@ -1,0 +1,8 @@
+source :rubygems
+
+## choose your poison:
+# gem 'pg', '~>0.9.0'
+gem 'mysql2', '~>0.2'
+
+gem 'spontaneous', '~><%= Spontaneous::VERSION %>'
+

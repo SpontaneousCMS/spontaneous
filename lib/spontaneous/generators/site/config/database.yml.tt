@@ -1,0 +1,21 @@
+---
+:development: &defaults
+  :adapter:    mysql2
+  :database:   <%= @site_name %>
+  :user:       root
+  :host:       localhost
+
+:test:
+  <<:         *defaults
+  :database:   <%= @site_name %>_test
+
+:production:
+  <<:         *defaults
+  :database:  <%= @site_name %>
+  :user:      <%= @site_name %>
+  :password:
+
+:rake:
+  <<:         *defaults
+
+

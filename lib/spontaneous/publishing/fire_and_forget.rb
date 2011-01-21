@@ -15,8 +15,9 @@ module Spontaneous
       def self.register_task
         publish_binary = (Pathname.new(Spontaneous.gem_dir) + "bin/spot publish").expand_path.to_s
         site_root = Pathname.new(Spontaneous.root).expand_path.to_s
+        niceness = S.config.publish_niceness || 15
         # TODO: make nice value configurable
-        FAF.add_task(task_name, publish_binary, 15, {
+        FAF.add_task(task_name, publish_binary, niceness, {
           "site" => site_root,
           "logfile" => "log/publish.log",
           "environment" => Spontaneous.env

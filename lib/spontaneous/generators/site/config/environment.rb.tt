@@ -1,0 +1,10 @@
+
+site_name = '<%= @site_name %>'
+
+back do
+	port 2011
+end
+
+front do
+	port 2012
+end

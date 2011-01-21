@@ -233,6 +233,8 @@ module Spontaneous
   autoload :Revision, "spontaneous/revision"
   autoload :Publishing, "spontaneous/publishing"
 
+  autoload :Generators, "spontaneous/generators"
+
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"
     autoload :ErubisTemplate, "spontaneous/templates/erubis_template"
