@@ -9,38 +9,39 @@ module Spontaneous
       class_option :environment, :type => :string,  :aliases => "-e", :required => true, :default => :development, :desc => "Spontaneous Environment"
       class_option :help, :type => :boolean, :desc => "Show help usage"
 
-      desc "start", "Starts the Spontaneous CMS"
+      desc :start, "Starts the Spontaneous CMS"
       def start
         prepare :start
         puts "starting"
       end
 
-      desc "publish", "Publishes the site"
+      desc :publish, "Publishes the site"
       method_option :changes, :type => :array, :desc => "List of changesets to include"
       method_option :logfile, :type => :string, :desc => "Location of logfile"
+
       def publish
         prepare :publish
         # TODO: set up logging
         require File.expand_path('config/boot.rb')
-        puts "publishing revision #{Site.revision} of site #{options.site}"
-
+        Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
+        logger.info { "publishing revision #{Site.revision} of site #{options.site}" }
         if options.changes
-          puts "Publishing changes #{options.changes.inspect}"
+          logger.info "Publishing changes #{options.changes.inspect}"
           Site.publish_changes(options.changes)
         else
-          puts "Publishing all"
+          logger.info "Publishing all"
           Site.publish_all
         end
       end
 
-      desc "revision", "Shows the site status"
+      desc :revision, "Shows the site status"
       def revision
         prepare :revision
         require File.expand_path('config/boot.rb')
         puts "Site is at revision #{Site.revision}"
       end
 
-      desc "console", "Gives you console access to the current site"
+      desc :console, "Gives you console access to the current site"
       def console
         prepare :console
         ARGV.clear

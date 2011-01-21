@@ -18,7 +18,7 @@ module Spontaneous
       self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
       self.mode = options.delete(:mode) || :back
       self.config = options
-      Logger.setup!
+      Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
       self.database = Sequel.connect(db_settings)
       Schema.load
     end

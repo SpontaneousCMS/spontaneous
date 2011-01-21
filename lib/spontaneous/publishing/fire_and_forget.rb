@@ -18,6 +18,7 @@ module Spontaneous
         # TODO: make nice value configurable
         FAF.add_task(task_name, publish_binary, 15, {
           "site" => site_root,
+          "logfile" => "log/publish.log",
           "environment" => Spontaneous.env
         }, {})
       end

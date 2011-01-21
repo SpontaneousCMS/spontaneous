@@ -15,8 +15,8 @@ module Spontaneous
       attr_reader :revision
 
       def initialize(revision)
-        puts "rendering revision #{revision}"
         @revision = revision
+        logger.info {  "Publishing revision #{@revision}"}
       end
 
       def publish_changes(change_list)
@@ -41,7 +41,7 @@ module Spontaneous
       def page_rendered(page)
         @pages_rendered += 1
         set_status("rendering", percent_complete)
-        puts "Rendered page #{page.path}"
+        logger.info { "Rendered page #{page.path}" }
       end
 
       protected

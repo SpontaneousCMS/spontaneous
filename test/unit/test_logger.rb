@@ -38,6 +38,21 @@ class LoggerTest < Test::Unit::TestCase
         Spontaneous::Logger.setup!
         assert_equal my_stream, Spontaneous.logger.log
       end
+
+      context "with custom log file path" do
+        setup do
+          @relative_path = "tmp/log/mylogfile.log"
+        end
+
+        teardown do
+          FileUtils.rm_r(@relative_path) if File.exists?(@relative_path)
+        end
+
+        should "log to given file" do
+          logger = Spontaneous::Logger.setup(:logfile => @relative_path)
+          logger.log.path.should == @relative_path
+        end
+      end
     end
 
     should 'log something' do

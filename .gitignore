@@ -5,4 +5,5 @@
 test/fixtures/example_application/public/media/*
 test/fixtures/media/*
 test/fixtures/revisions/*
+test/fixtures/example_application/log/*
 tmp

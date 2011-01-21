@@ -127,17 +127,31 @@ module Spontaneous
     # Setup a new logger
     #
     def self.setup!
+      setup
+    end
+
+    ##
+    # Setup a new logger with options
+    #
+    def self.setup(options = {})
       config_level = (SPOT_LOG_LEVEL || Spontaneous.env || :test).to_sym # need this for SPOT_LOG_LEVEL
       config = Config[config_level]
-      stream = case config[:stream]
-        when :to_file
-          FileUtils.mkdir_p(Spontaneous.root("log")) unless File.exists?(Spontaneous.root("log"))
-          File.new(Spontaneous.root("log", "#{Spontaneous.env}.log"), "a+")
-        when :null   then StringIO.new
-        when :stdout then $stdout
-        when :stderr then $stderr
-        else config[:stream] # return itself, probabilly is a custom stream.
-      end
+      stream = \
+        if logfile = options[:logfile]
+          FileUtils.mkdir_p(File.dirname(logfile)) unless File.directory?(File.dirname(logfile))
+          File.new(logfile, "a+")
+        else
+          case config[:stream]
+          when :to_file
+            FileUtils.mkdir_p(Spontaneous.root("log")) unless File.exists?(Spontaneous.root("log"))
+            File.new(Spontaneous.root("log", "#{Spontaneous.env}.log"), "a+")
+          when :null   then StringIO.new
+          when :stdout then $stdout
+          when :stderr then $stderr
+          else config[:stream] # return itself, probabilly is a custom stream.
+          end
+        end
+      config[:log_level] = options[:log_level] if options[:log_level]
       Spontaneous.logger = Spontaneous::Logger.new(config.merge(:stream => stream))
     end
 
