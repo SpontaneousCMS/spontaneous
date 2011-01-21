@@ -84,11 +84,12 @@ Publishing:
 - difficulty is with getting the dependencies to load correctly - perhaps a simple pwd change would solve all of this though @done
 
 Command Line:
-- binary is 'spot' -- yeah!
+- binary is 'spot' -- yeah! @done
 - 'spot gen site www.example.com'
-- 'spot console'
-- have a good look at thor or alternatives
+- 'spot console' @done
+- have a good look at thor or alternatives @done
 
 Design:
 
-Look at Frutiger as an interface font (distribution nightmare - open source equivalents?)
+- Look at Frutiger as an interface font (distribution nightmare - open source equivalents?) @done
+
