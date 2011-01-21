@@ -1,5 +1,8 @@
 # encoding: UTF-8
 
+# Set up the Spontaneous environment
+ENV["SPOT_ENV"] = "test"
+
 require "rubygems"
 require "bundler"
 Bundler.setup(:default, :development)

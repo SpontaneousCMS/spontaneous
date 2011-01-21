@@ -6,6 +6,9 @@
   :password:   password
   :host:       localhost
 
+:gem:
+  <<:         *defaults
+
 :test:
   <<:         *defaults
   :database:   spontaneous_example_test
