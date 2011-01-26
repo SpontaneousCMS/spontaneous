@@ -40,7 +40,8 @@ module Spontaneous
     autoload :Back, 'spontaneous/rack/back'
     autoload :Front, 'spontaneous/rack/front'
     autoload :Public, 'spontaneous/rack/public'
-    autoload :UpdateCache, 'spontaneous/rack/update_cache'
+    autoload :AroundBack, 'spontaneous/rack/around_back'
+    autoload :AroundFront, 'spontaneous/rack/around_front'
   end
 end
 

@@ -44,6 +44,10 @@ module Spontaneous::Plugins
           publishing_method.status = status
         end
 
+        def with_published(&block)
+          S::Content.with_published(&block)
+        end
+
         protected
 
         def set_published_revision(revision)

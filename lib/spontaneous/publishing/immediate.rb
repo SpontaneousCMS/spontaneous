@@ -110,17 +110,19 @@ module Spontaneous
         # which is only sometimes appropriate/desirable
         path = Pathname.new(Spontaneous.root).realpath.to_s
         # TODO: enable custom rack middleware by changing config/front into a proper rackup file
+        rackup = 'config/front.ru'
         template = (<<-RACKUP).gsub(/^ +/, '')
           # This is an automatically generated file *DO NOT EDIT*
           # To configure your Rack application make your changes in
-          # '#{path}/config/front.ru'
+          # '#{path}/#{rackup}'
 
           # Set the revision to display
           ENV["#{Spontaneous::ENV_REVISION_NUMBER}"] = '#{revision}'
 
           # Change to the absolute path of our application and load the Rack config
-          Dir.chdir('#{path}')
-          eval(::File.read('config/front.ru'))
+          root = '#{path}'
+          Dir.chdir(root)
+          eval(::File.read('#{rackup}'), binding, ::File.join(root, '#{rackup}'), __LINE__)
         RACKUP
         rack_file = S::Site.revision_dir(revision) / 'config.ru'
         File.open(rack_file, 'w') { |f| f.write(template) }
