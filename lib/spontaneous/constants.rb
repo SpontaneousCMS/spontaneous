@@ -11,6 +11,7 @@ module Spontaneous
     LF = "\n".freeze
 
     ENV_REVISION_NUMBER = "SPOT_REVISION".freeze
+    ENV_ROOT = "SPOT_ROOT".freeze
 
     RE_QUOTES = /['"]/.freeze
     RE_FLATTEN = /[^\.a-z0-9-]+/.freeze

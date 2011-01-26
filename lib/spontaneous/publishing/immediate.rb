@@ -118,11 +118,13 @@ module Spontaneous
 
           # Set the revision to display
           ENV["#{Spontaneous::ENV_REVISION_NUMBER}"] = '#{revision}'
+          ENV["#{Spontaneous::ENV_ROOT}"] = '#{root}'
 
           # Change to the absolute path of our application and load the Rack config
           root = '#{path}'
           Dir.chdir(root)
           eval(::File.read('#{rackup}'), binding, ::File.join(root, '#{rackup}'), __LINE__)
+
         RACKUP
         rack_file = S::Site.revision_dir(revision) / 'config.ru'
         File.open(rack_file, 'w') { |f| f.write(template) }
