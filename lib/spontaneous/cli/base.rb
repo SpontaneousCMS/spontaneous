@@ -5,6 +5,14 @@ module Spontaneous
     class Base < Thor
       include Thor::Actions
 
+      class InvalidGenerator < Error
+        attr_reader :name
+        def initialize(name)
+          @name = name
+          super()
+        end
+      end
+
       class_option :site, :type => :string, :aliases => ["-s", "--root"], :desc => "Site root dir"
       class_option :environment, :type => :string,  :aliases => "-e", :required => true, :default => :development, :desc => "Spontaneous Environment"
       class_option :mode, :type => :string,  :aliases => "-m", :default => :back, :desc => "Spontaneous mode ('front' or 'back')"
@@ -63,6 +71,34 @@ module Spontaneous
         end
       end
 
+
+      desc :generate, "Run generators"
+      def generate(*args)
+        require File.expand_path('../../../spontaneous', __FILE__)
+        ARGV.shift
+        generator_name = ARGV.shift
+        generator = nil
+        d = Spontaneous::Generators
+        case generator_name
+        when ''
+          raise InvalidGenerator.new(generator_name)
+        when 'site'
+          generator = d::Site
+        when /[a-zA-Z0-9-]+(\.[a-z]+)+/
+          # generator called as 'spot generate domain.com'
+          ARGV.unshift(generator_name)
+          generator = d::Site
+        else
+          raise InvalidGenerator.new(generator_name)
+        end
+        generator.start(ARGV) if generator
+      rescue InvalidGenerator => e
+        say "Unrecognised generator '#{e.name}'. Available options are:\n\n  #{available_generators.join("\n  ")}\n"
+      end
+
+      desc "g", "Executes the Padrino generator with given options."
+      alias :g :generate
+
       private
       def prepare(task)
         if options.help?
@@ -79,6 +115,11 @@ module Spontaneous
         # end
       end
 
+      def available_generators
+        Spontaneous::Generators.available.map do |g|
+          g.name.demodulize.underscore
+        end
+      end
       protected
       def chdir(dir)
         return unless dir
