@@ -51,6 +51,12 @@ class GeneratorsTest < Test::Unit::TestCase
       assert_file_exists(site_root, 'schema')
       assert_file_exists(site_root, 'public/js')
       assert_file_exists(site_root, 'public/css')
+      assert_file_exists(site_root, 'lib/tasks/pot8o_org.rake')
+      assert_file_exists(site_root, 'log')
+      assert_file_exists(site_root, 'tmp')
+      assert_file_exists(site_root, '.gitignore')
     end
+    should "accept domain names starting with numbers"
+    should "accept domain names containing dashes"
   end
 end

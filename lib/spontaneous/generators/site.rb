@@ -36,6 +36,11 @@ module Spontaneous
           directory "public"
           template "Gemfile.tt", "Gemfile"
           template "Rakefile.tt", "Rakefile"
+          empty_directory "lib/tasks"
+          empty_directory "log"
+          empty_directory "tmp"
+          copy_file ".gitignore"
+          template "lib/tasks/site.rake.tt", "lib/tasks/#{@site_name}.rake"
         else
           @valid = false
           say "Invalid database selection '#{options.database}'. Valid options are: #{available_dbs.join(', ')}", :red
@@ -78,7 +83,7 @@ module Spontaneous
         ---------------------------------------------------------
         1. cd #{options[:root]}/#{@site_name}
         2. bundle install
-        3. rake db:migrate
+        3. rake spot:migrate
 
         Then go to http://spontaneouscms.org/docs
         and read the many useful guides to getting started with Spontaneous.

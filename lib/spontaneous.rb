@@ -187,6 +187,10 @@ module Spontaneous
       relative_dir(application_dir / "css", *path)
     end
 
+    def load_tasks
+      puts "Loading tasks"
+    end
+
     private
 
     def relative_dir(root, *path)

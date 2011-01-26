@@ -9,7 +9,7 @@ gem 'mysql2', '~> 0.2'
 
 
 ## TODO: replace this path based gem with a version once the gem is live
-#gem 'spontaneous', '~> <%= Spontaneous::VERSION %>'
+#gem 'spontaneous', '<%= Spontaneous::VERSION %>'
 gem 'spontaneous', :path => "/Users/garry/Dropbox/Development/spontaneous3/working"
 
 # group :development, :test do
