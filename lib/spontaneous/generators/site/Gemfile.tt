@@ -1,8 +1,18 @@
 source :rubygems
 
 ## choose your poison:
-# gem 'pg', '~>0.9.0'
-gem 'mysql2', '~>0.2'
+# gem 'pg', '~> 0.9.0'
+gem 'mysql2', '~> 0.2'
 
-gem 'spontaneous', '~><%= Spontaneous::VERSION %>'
+# Deploy with Capistrano
+# gem 'capistrano'
+
+
+## TODO: replace this path based gem with a version once the gem is live
+#gem 'spontaneous', '~> <%= Spontaneous::VERSION %>'
+gem 'spontaneous', :path => "/Users/garry/Dropbox/Development/spontaneous3/working"
+
+# group :development, :test do
+#   gem 'webrat'
+# end
 

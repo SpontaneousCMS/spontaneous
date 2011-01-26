@@ -44,6 +44,12 @@ class Test::Unit::TestCase
   include Spontaneous
   include CustomMatchers
 
+  def assert_file_exists(*path)
+    path = File.join(*path)
+    assert File.exist?(path), "File at path '#{path}' does not exist!"
+  end
+  alias :assert_dir_exists :assert_file_exists
+
   def setup_site_fixture
     @app_dir = File.expand_path("../fixtures/application", __FILE__)
     File.exists?(@app_dir).should be_true

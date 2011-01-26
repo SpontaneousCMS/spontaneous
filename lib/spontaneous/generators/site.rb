@@ -35,6 +35,7 @@ module Spontaneous
           directory "templates"
           directory "public"
           template "Gemfile.tt", "Gemfile"
+          template "Rakefile.tt", "Rakefile"
         else
           @valid = false
           say "Invalid database selection '#{options.database}'. Valid options are: #{available_dbs.join(', ')}", :red
@@ -42,27 +43,34 @@ module Spontaneous
       end
 
       def create_database
+        connection_params = {
+          :user => 'root'
+        }
+        connection_params[:password] = options.dbpwd unless options.dbpwd.empty?
+
+        case options.database
+        when 'mysql'
+          connection_params[:adapter] = "mysql2"
+        when 'postgres'
+          connection_params[:adapter] = "postgres"
+        end
+        connection = Sequel.connect(connection_params)
         ["", "_test"].map { |ext| "#{@site_name}#{ext}"}.each do |db|
-          cmd = \
-            case options.database
-            when 'mysql'
-              password = options.dbpwd.empty? ? "" : "-p#{options.dbpwd}"
-              "mysql -u root #{password} -e \"CREATE DATABASE \\`#{db}\\` CHARACTER SET UTF8\""
-            when 'postgres'
-              # TODO: work out postgres db creation string
-            end
           begin
-            puts cmd
-            system(cmd)
+            connection.run("CREATE DATABASE `#{db}` CHARACTER SET UTF8")
           rescue  => e
             say "Unable to create #{options.database} database #{db}: #{e}", :red
           end
         end
+      rescue
+        say "Unable to connect to #{options.database}: #{e}", :red
       end
 
       def finish_message
         return unless @valid
         message = (<<-MSG).gsub(/^ +/, '')
+
+
         =========================================================
         Site #{@domain} is ready.
 
