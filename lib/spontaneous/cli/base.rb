@@ -19,9 +19,15 @@ module Spontaneous
       class_option :help, :type => :boolean, :desc => "Show help usage"
 
       desc :start, "Starts the Spontaneous CMS"
+      method_option :adapter,     :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
+      method_option :host,        :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
+      method_option :port,        :type => :numeric, :aliases => "-p", :desc => "Use PORT"
+
       def start
         prepare :start
-        puts "starting"
+        require File.expand_path(File.dirname(__FILE__) + "/adapter")
+        require File.expand_path('config/boot.rb')
+        Spontaneous::Cli::Adapter.start(options)
       end
 
       desc :publish, "Publishes the site"

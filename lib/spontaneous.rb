@@ -239,6 +239,8 @@ module Spontaneous
 
   autoload :Generators, "spontaneous/generators"
 
+  autoload :Server, "spontaneous/server"
+
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"
     autoload :ErubisTemplate, "spontaneous/templates/erubis_template"

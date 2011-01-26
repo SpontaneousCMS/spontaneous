@@ -12,6 +12,10 @@ gem 'mysql2', '~> 0.2'
 #gem 'spontaneous', '<%= Spontaneous::VERSION %>'
 gem 'spontaneous', :path => "/Users/garry/Dropbox/Development/spontaneous3/working"
 
+# Choose a Rack handler
+gem 'thin'
+# gem 'mongrel'
+
 # group :development, :test do
 #   gem 'webrat'
 # end

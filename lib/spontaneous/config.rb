@@ -4,6 +4,7 @@ module Spontaneous
   module Config
 
     class Loader
+
       def self.read(settings, file)
         self.new(settings, file).load
       end
@@ -14,6 +15,7 @@ module Spontaneous
 
       def load
         instance_eval(File.read(@file))
+        @settings
       end
 
 
@@ -100,7 +102,7 @@ module Spontaneous
         Loader.read(@@base, default) if File.exist?(default)
         Dir.glob(File.join(pwd, 'config/environments/*.rb')).each do |file|
           environment = File.basename(file, '.rb').to_sym
-          store = {}
+          store = Hash.new
           Loader.read(store, file)
           @@environments[environment] = Configuration.new(environment, store)
         end
