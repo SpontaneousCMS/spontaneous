@@ -29,13 +29,15 @@ module Spontaneous
       else
         handler = detect_handler
       end
-      puts "=> Spontaneous:#{Spontaneous.mode.to_s.ljust(5, " ")} running on port #{host}:#{port}"
+      puts "=> Spontaneous:#{Spontaneous.mode.to_s.ljust(5, " ")} running on port #{host}:#{port} (PID #{$$})"
 
       handler.run Spontaneous::Rack.application.to_app, :Host => host, :Port => port do |server|
-        trap(:INT) do
+        term = Proc.new do
           server.respond_to?(:stop!) ? server.stop! : server.stop
           puts "=> Spontaneous:#{Spontaneous.mode.to_s.ljust(5, " ")} exiting..."
         end
+        trap(:INT, &term)
+        trap(:TERM, &term)
       end
     rescue RuntimeError => e
       if e.message =~ /no acceptor/

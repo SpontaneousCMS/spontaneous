@@ -28,10 +28,10 @@ module Spontaneous
         trap(:INT) { }
         pids << fork { front }
         pids << fork { back }
-        sleep(1) # give servers a chance to start
+        sleep(2) # give servers a chance to start
         pids << fork { console }
         Process.wait
-        pids.each { |pid| Process.kill(:KILL, pid) rescue nil }
+        pids.each { | pid | Process.kill(:TERM, pid) rescue nil }
       end
 
       desc :server, "Starts Spontaneous"
