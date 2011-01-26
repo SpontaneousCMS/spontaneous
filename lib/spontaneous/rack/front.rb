@@ -15,21 +15,14 @@ module Spontaneous
           end
         }
       end
-      class Server < Sinatra::Base
+      class Server < Spontaneous::Rack::Public
+
+        use AroundFront
 
         before do
           content_type 'text/html', :charset => 'utf-8'
         end
 
-
-        # preview routes
-        get "/" do
-          Site.root.render
-        end
-
-        get "*" do
-          Site[params[:splat].first].render
-        end
       end
     end
   end

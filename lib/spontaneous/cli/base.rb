@@ -72,7 +72,7 @@ module Spontaneous
       end
 
 
-      desc :generate, "Run generators"
+      desc :generate, "Executes the Spontaneous generator with given options."
       def generate(*args)
         require File.expand_path('../../../spontaneous', __FILE__)
         ARGV.shift
@@ -96,7 +96,7 @@ module Spontaneous
         say "Unrecognised generator '#{e.name}'. Available options are:\n\n  #{available_generators.join("\n  ")}\n"
       end
 
-      desc "g", "Executes the Padrino generator with given options."
+      desc "g", "Executes the Spontaneous generator with given options."
       alias :g :generate
 
       private
@@ -110,7 +110,7 @@ module Spontaneous
         ENV["RACK_ENV"] = ENV["SPOT_ENV"] # Also set this for middleware
         chdir(options.site)
         # unless File.exist?('config/boot.rb')
-        #   puts "=> Could not find boot file in: #{options.chdir}/config/boot.rb !!!"
+        #   puts "=> Could not find boot file in: #{options.chdir}/config/boot.rb"
         #   raise SystemExit
         # end
       end
@@ -120,15 +120,16 @@ module Spontaneous
           g.name.demodulize.underscore
         end
       end
+
       protected
       def chdir(dir)
         return unless dir
         begin
           Dir.chdir(dir.to_s)
         rescue Errno::ENOENT
-          puts "=> Specified site '#{dir}' does not appear to exist!"
+          puts "=> Specified site '#{dir}' does not appear to exist"
         rescue Errno::EACCES
-          puts "=> Specified site '#{dir}' cannot be accessed by the current user!"
+          puts "=> Specified site '#{dir}' cannot be accessed by the current user"
         end
       end
 

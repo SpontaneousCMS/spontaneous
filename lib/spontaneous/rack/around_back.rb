@@ -4,7 +4,7 @@ require 'less'
 
 module Spontaneous
   module Rack
-    class UpdateCache
+    class AroundBack
       def initialize(app)
         @app = app
       end

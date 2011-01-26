@@ -129,6 +129,14 @@ class PublishingTest < Test::Unit::TestCase
         Content.dataset.should be_content_revision
       end
 
+      should "read revision from the environment if present" do
+        ENV["SPOT_REVISION"] = '1001'
+        Content.with_published do
+          Content.dataset.should be_content_revision(1001)
+        end
+        ENV.delete("SPOT_REVISION")
+      end
+
       context "subclasses" do
         setup do
           class ::Subclass < Page; end

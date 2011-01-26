@@ -10,6 +10,8 @@ module Spontaneous
     QUESTION = "?".freeze
     LF = "\n".freeze
 
+    ENV_REVISION_NUMBER = "SPOT_REVISION".freeze
+
     RE_QUOTES = /['"]/.freeze
     RE_FLATTEN = /[^\.a-z0-9-]+/.freeze
     RE_FLATTEN_REPEAT = /\-+/.freeze

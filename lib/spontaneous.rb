@@ -14,7 +14,8 @@ Sequel.extension :inflector
 require 'spontaneous/logger'
 
 module Spontaneous
-  SLASH = "/".freeze
+  autoload :Constants, "spontaneous/constants"
+  include Constants
   class << self
     def init(options={})
       # return false if loaded?
@@ -197,7 +198,6 @@ module Spontaneous
   autoload :Plugins, "spontaneous/plugins"
   autoload :Logger, "spontaneous/logger"
 
-  autoload :Constants, "spontaneous/constants"
   autoload :Config, "spontaneous/config"
 
 

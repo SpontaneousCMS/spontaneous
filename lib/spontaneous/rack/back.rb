@@ -25,7 +25,7 @@ module Spontaneous
 
       class EditingInterface < ServerBase
 
-        use UpdateCache
+        use AroundBack
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 

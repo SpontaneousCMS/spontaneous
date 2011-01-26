@@ -1,15 +1,8 @@
-require "rubygems"
-require "bundler"
-Bundler.setup(:default)
 
-require 'spontaneous'
-require 'cutaneous'
+ENV["SPOT_MODE"] = "front"
 
-env = (ENV['SPOT_ENV'] || 'development').to_sym
+require File.expand_path("../boot.rb", __FILE__)
 
+logger.info { "Spontaneous::Front running on port #{Spontaneous::Rack.port}" }
 
-Spontaneous.init(:mode => :front, :environment => env)
-Spontaneous.database.logger = Logger.new($stdout)
-
-
-puts "Spontaneous::Front running on port #{Spontaneous::Rack.port}"
+run Spontaneous::Rack::Front.application.to_app
