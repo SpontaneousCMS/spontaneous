@@ -302,4 +302,4 @@ Dir[File.join(File.dirname(__FILE__), 'spontaneous', 'extensions', '*.rb')].each
   require extension
 end
 
-S = Spot = Spontaneous
+S = Spot = Spontaneous unless defined?(S)
