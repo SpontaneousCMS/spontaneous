@@ -82,10 +82,12 @@ Publishing:
 - Pathname#realpath will point to a version of the root that doesn't involve symlinks @done
 - revision is hardcoded into ruby rather than a db lookup
 - difficulty is with getting the dependencies to load correctly - perhaps a simple pwd change would solve all of this though @done
+- make sure that first_published_at (or whatever) isn't modified if publishing fails
+- link success of rendering to success of publishing (i.e. only calling after publish lambdas after render & indexing are complete)
 
 Command Line:
 - binary is 'spot' -- yeah! @done
-- 'spot gen site www.example.com'
+- 'spot gen site www.example.com' @done
 - 'spot console' @done
 - have a good look at thor or alternatives @done
 
