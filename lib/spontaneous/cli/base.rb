@@ -109,8 +109,8 @@ module Spontaneous
         when 'site'
           generator = d::Site
         when 'page'
-          prepare :generator
-            require File.expand_path('config/boot.rb')
+          prepare(:generator)
+          require File.expand_path('config/boot.rb')
           generator = d::Page
         when /[a-zA-Z0-9-]+(\.[a-z]+)+/
           # generator called as 'spot generate domain.com'
