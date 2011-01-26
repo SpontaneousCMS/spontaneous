@@ -108,6 +108,8 @@ module Spontaneous
           raise InvalidGenerator.new(generator_name)
         when 'site'
           generator = d::Site
+        when 'page'
+          generator = d::Page
         when /[a-zA-Z0-9-]+(\.[a-z]+)+/
           # generator called as 'spot generate domain.com'
           ARGV.unshift(generator_name)

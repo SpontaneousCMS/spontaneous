@@ -2,9 +2,12 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title><%= @domain %> ­ Spontaneous CMS</title>
+  <title>{{ title }} ­ <%= @domain %></title>
 </head>
 <body>
 
+  {% block :content %}
+    <h2>Welcome to <%= @domain %></h2>
+  {% endblock :content %}
 </body>
 </html>
