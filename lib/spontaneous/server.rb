@@ -34,7 +34,7 @@ module Spontaneous
       handler.run Spontaneous::Rack.application.to_app, :Host => host, :Port => port do |server|
         trap(:INT) do
           server.respond_to?(:stop!) ? server.stop! : server.stop
-          puts "Spontaneous/#{Spontaneous.mode} exiting..."
+          puts "=> Spontaneous/#{Spontaneous.mode} exiting..."
         end
       end
     rescue RuntimeError => e

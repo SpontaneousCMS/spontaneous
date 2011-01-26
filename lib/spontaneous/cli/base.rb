@@ -131,10 +131,10 @@ module Spontaneous
         ENV["SPOT_MODE"] ||= options.mode.to_s
         ENV["RACK_ENV"] = ENV["SPOT_ENV"] # Also set this for middleware
         chdir(options.site)
-        # unless File.exist?('config/boot.rb')
-        #   puts "=> Could not find boot file in: #{options.chdir}/config/boot.rb"
-        #   raise SystemExit
-        # end
+        unless File.exist?('config/boot.rb')
+          puts "=> Could not find boot file in: #{options.chdir}/config/boot.rb\n=> Are you sure this is a Spontaneous site?"
+          raise SystemExit
+        end
       end
 
       def start_server(mode)
