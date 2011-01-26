@@ -29,12 +29,12 @@ module Spontaneous
       else
         handler = detect_handler
       end
-      puts "Using handler #{handler.inspect}"
+      puts "=> Spontaneous/#{Spontaneous.mode} running on port #{host}:#{port}"
 
       handler.run Spontaneous::Rack.application.to_app, :Host => host, :Port => port do |server|
         trap(:INT) do
           server.respond_to?(:stop!) ? server.stop! : server.stop
-          puts "Spontaneous exiting..."
+          puts "Spontaneous/#{Spontaneous.mode} exiting..."
         end
       end
     rescue RuntimeError => e

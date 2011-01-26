@@ -1,3 +1,5 @@
 
 publishing_method :fire_and_forget
 
+# used by publishing mech to determine a restart strategy
+handler :unicorn

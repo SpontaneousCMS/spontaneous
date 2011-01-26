@@ -24,10 +24,26 @@ module Spontaneous
       method_option :port,        :type => :numeric, :aliases => "-p", :desc => "Use PORT"
 
       def start
-        prepare :start
-        require File.expand_path(File.dirname(__FILE__) + "/adapter")
-        require File.expand_path('config/boot.rb')
-        Spontaneous::Cli::Adapter.start(options)
+        pids = []
+        trap(:INT) { }
+        pids << fork { front }
+        pids << fork { back }
+        Process.wait
+        pids.each { |pid| Process.kill(:KILL, pid) rescue nil }
+      end
+
+      desc :server, "Starts Spontaneous CMS"
+      alias_method :server, :start
+
+
+      desc :front, "Starts Spontaneous in front/public mode"
+      def front
+        start_server(:front)
+      end
+
+      desc :back, "Starts Spontaneous in back/CMS mode"
+      def back
+        start_server(:back)
       end
 
       desc :publish, "Publishes the site"
@@ -119,6 +135,14 @@ module Spontaneous
         #   puts "=> Could not find boot file in: #{options.chdir}/config/boot.rb"
         #   raise SystemExit
         # end
+      end
+
+      def start_server(mode)
+        prepare mode.to_sym
+        ENV["SPOT_MODE"] = mode.to_s
+        require File.expand_path(File.dirname(__FILE__) + "/adapter")
+        require File.expand_path('config/boot.rb')
+        Spontaneous::Cli::Adapter.start(options)
       end
 
       def available_generators
