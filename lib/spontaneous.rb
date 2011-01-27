@@ -12,194 +12,22 @@ require 'fileutils'
 Sequel.extension :inflector
 
 require 'spontaneous/logger'
+require 'spontaneous/plugins'
+require 'spontaneous/constants'
+
+Dir[File.expand_path('../spontaneous/plugins/application/*.rb', __FILE__)].each do |file|
+  require file
+end
 
 module Spontaneous
-  autoload :Constants, "spontaneous/constants"
+  extend Plugins
   include Constants
-  class << self
-    def init(options={})
-      # return false if loaded?
-      self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
-      self.mode = options.delete(:mode) || ENV["SPOT_MODE"] || :back
-      Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
-      Config.load
-      connect_to_database
-      Schema.load
-      Thread.current[:spontaneous_loaded] = true
-    end
 
-    def loaded?
-      Thread.current[:spontaneous_loaded]
-    end
-
-    def connect_to_database
-      self.database = Sequel.connect(db_settings)
-    end
-
-    def database=(database)
-      @database = database
-    end
-
-    def database
-      @database
-    end
-
-    def config
-      Spontaneous::Config
-    end
-
-    def mode_settings
-      config_file = root / "config" / "#{mode}.yml"
-      config = YAML.load_file(config_file)
-      config[environment]
-    end
-
-    def db_settings
-      @db_settings = YAML.load_file(File.join(config_dir, "database.yml"))
-      self.config.db = @db_settings[environment]
-    end
-
-    def mode=(mode)
-      @mode = mode.to_sym
-    end
-
-    def mode
-      @mode
-    end
-
-    def front?
-      mode == :front
-    end
-
-    def back?
-      mode == :back
-    end
-
-    def environment=(env)
-      @environment = env.to_sym rescue environment
-    end
-    alias_method :env=, :environment=
-
-    def environment
-      @environment ||= (ENV["SPOT_ENV"] || :development).to_sym
-    end
-
-    alias_method :env, :environment
-
-    def development?
-      environment == :development
-    end
-
-    def production?
-      environment == :production
-    end
-
-    def log_dir(*path)
-      relative_dir(root / "log", *path)
-    end
-
-    def config_dir(*path)
-      relative_dir(root / "config", *path)
-    end
-
-    def template_root=(template_root)
-      Render.template_root = template_root.nil? ? nil : File.expand_path(template_root)
-    end
-
-    def template_root(*path)
-      relative_dir(Render.template_root, *path)
-    end
-
-    def template_path(*args)
-      File.join(template_root, *args)
-    end
-
-    def schema_root=(schema_root)
-      @schema_root = schema_root
-    end
-
-    def schema_root(*path)
-      @schema_root ||= root / "schema"
-      relative_dir(@schema_root, *path)
-    end
-
-    def template_ext
-      Cutaneous.extension
-    end
-
-    attr_accessor :render_engine
-
-    def media_dir=(dir)
-      @media_dir = File.expand_path(dir)
-    end
-
-    def media_dir(*path)
-      @media_dir ||= File.expand_path(root / "../media")
-      relative_dir(@media_dir, *path)
-    end
-
-    def media_path(*args)
-      Media.media_path(*args)
-    end
-
-    def root(*path)
-      @root ||= File.expand_path(ENV[Spontaneous::ENV_ROOT] || Dir.pwd)
-      relative_dir(@root, *path)
-    end
-
-    def root=(root)
-      @root = File.expand_path(root)
-    end
-
-    def revision_root(*path)
-      @revision_dir ||= File.expand_path(root / '../revisions')
-      relative_dir(@revision_dir, *path)
-    end
-
-    def revision_root=(revision_dir)
-      @revision_dir = File.expand_path(revision_dir)
-    end
-
-    def gem_dir(*path)
-      @gem_dir ||= File.expand_path(File.dirname(__FILE__) / '..')
-      relative_dir(@gem_dir, *path)
-    end
-
-    def application_dir(*path)
-      @application_dir ||= File.expand_path("../../application", __FILE__)
-      relative_dir(@application_dir, *path)
-    end
-
-    # def application_file(*args)
-    #   File.join(application_dir, *args)
-    # end
-
-    def static_dir(*path)
-      application_dir / "static"
-      relative_dir(application_dir / "static", *path)
-    end
-
-    def js_dir(*path)
-      relative_dir(application_dir / "js", *path)
-    end
-
-    def css_dir(*path)
-      relative_dir(application_dir / "css", *path)
-    end
-
-    def load_tasks
-      puts "Loading tasks"
-    end
-
-    private
-
-    def relative_dir(root, *path)
-      File.join(root, *path)
-    end
-  end
+  plugin Plugins::Application::State
+  plugin Plugins::Application::Paths
+  plugin Plugins::Application::Render
 
   autoload :ProxyObject, "spontaneous/proxy_object"
-  autoload :Plugins, "spontaneous/plugins"
   autoload :Logger, "spontaneous/logger"
 
   autoload :Config, "spontaneous/config"
@@ -302,4 +130,5 @@ Dir[File.join(File.dirname(__FILE__), 'spontaneous', 'extensions', '*.rb')].each
   require extension
 end
 
-S = Spot = Spontaneous unless defined?(S)
+Spot = S = Spontaneous unless defined?(Spot)
+
