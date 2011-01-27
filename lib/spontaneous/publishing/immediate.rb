@@ -118,7 +118,7 @@ module Spontaneous
 
           # Set the revision to display
           ENV["#{Spontaneous::ENV_REVISION_NUMBER}"] = '#{revision}'
-          ENV["#{Spontaneous::ENV_ROOT}"] = '#{root}'
+          ENV["#{Spontaneous::ENV_ROOT}"] = '#{path}'
 
           # Change to the absolute path of our application and load the Rack config
           root = '#{path}'
