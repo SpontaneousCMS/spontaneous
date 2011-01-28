@@ -101,7 +101,23 @@ module Spontaneous::Plugins
         Spontaneous.database
       end
 
-      def publish(revision, content=nil)
+      ##
+      # Publish a revision
+      #
+      # If content is a non-empty list of Content ids then this will only publish changes to those
+      # rows (taking the rest of the content from the previous revision)
+      # Pass in a block if you want to tie some bit of post processing to the success or failure
+      # of the publish step (used in the site render stage for example)
+      def publish(revision, content=nil, &block)
+        mark_first_published = Proc.new do |dataset|
+          dataset.update(:first_published_at => Sequel.datetime_class.now, :first_published_revision => revision)
+        end
+
+        mark_published = Proc.new do |dataset|
+          dataset.update(:last_published_at => Sequel.datetime_class.now)
+        end
+        first_published = published = nil
+
         with_editable do
           first_published = self.filter(:first_published_at => nil)
           published = self.filter
@@ -109,18 +125,7 @@ module Spontaneous::Plugins
           must_publish_all = (content.nil? || (!revision_exists?(revision-1)) || \
             (content.is_a?(Array) && content.empty?))
 
-          mark_first_published = Proc.new do |dataset|
-            dataset.update(:first_published_at => Sequel.datetime_class.now, :first_published_revision => revision)
-          end
-
-          mark_published = Proc.new do |dataset|
-            dataset.update(:last_published_at => Sequel.datetime_class.now)
-          end
-
           if must_publish_all
-            mark_first_published[first_published]
-            mark_published[published]
-
             create_revision(revision)
           else
             content = content.map do |c|
@@ -129,19 +134,35 @@ module Spontaneous::Plugins
             first_published = first_published.filter(:id => content.map { |c| c.id })
             published = published.filter(:id => content.map { |c| c.id })
 
-            mark_first_published[first_published]
-            mark_published[published]
-
             create_revision(revision, revision-1)
             content.each do |c|
               c.sync_to_revision(revision)
             end
           end
+
+          # run any passed code and if it fails revert the publish step
+          if block_given?
+            begin
+              with_revision(revision) { yield }
+            rescue Exception => e
+              delete_revision(revision)
+              raise e
+            end
+          end
+
+          with_editable do
+            mark_first_published[first_published]
+            mark_published[published]
+          end
+          with_revision(revision) do
+            mark_first_published[first_published]
+            mark_published[published]
+          end
         end
       end
 
-      def publish_all(revision)
-        publish(revision, nil)
+      def publish_all(revision, &block)
+        publish(revision, nil, &block)
       end
 
       def create_revision(revision, from_revision=nil)

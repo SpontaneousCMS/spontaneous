@@ -259,17 +259,18 @@ class PublishingTest < Test::Unit::TestCase
           editable1.label.should be_nil
           editable1.label = "published"
           editable1.save
-          editable1.reload
+          # editable1.reload
           editable2 = Content.first(:uid => '1.1')
           editable2.label = "unpublished"
           editable2.save
           # editable2.reload
           Content.publish(@final_revision, [editable1.id])
-
+          editable1.reload
           Content.with_revision(@final_revision) do
             published = Content[editable1.id]
             unpublished = Content[editable2.id]
             assert_content_equal(published, editable1)
+
             # published.should == editable1
             unpublished.should_not == editable2
           end
@@ -281,9 +282,9 @@ class PublishingTest < Test::Unit::TestCase
 
           editable1 << new_content
           editable1.save
+          Content.publish(@final_revision, [editable1.id])
           new_content.reload
           editable1.reload
-          Content.publish(@final_revision, [editable1.id])
           Content.with_revision(@final_revision) do
             published1 = Content[editable1.id]
             published2 = Content[new_content.id]
@@ -298,8 +299,8 @@ class PublishingTest < Test::Unit::TestCase
           editable1 = Content.first(:uid => '0')
           deleted = editable1.entries.first.target
           editable1.entries.first.destroy
-          editable1.reload
           Content.publish(@final_revision, [editable1.id])
+          editable1.reload
           Content.with_revision(@final_revision) do
             published1 = Content[editable1.id]
             assert_content_equal(published1, editable1)
@@ -316,10 +317,10 @@ class PublishingTest < Test::Unit::TestCase
           editable1.save
           slot.save
           new_page.save
+          Content.publish(@final_revision, [editable1.id])
           new_page.reload
           editable1.reload
           slot.reload
-          Content.publish(@final_revision, [editable1.id])
           Content.with_revision(@final_revision) do
             published1 = Content[editable1.id]
             published2 = Content[new_page.id]
@@ -337,14 +338,14 @@ class PublishingTest < Test::Unit::TestCase
           editable1 = Content.first(:uid => '0')
           editable1 << Content.new(:uid => "added")
           editable1.save
-          editable1.reload
           editable2 = Content.first(:uid => '0.0.0')
           new_content = Content.new(:uid => "new")
           editable2 << new_content
           editable2.save
+          Content.publish(@final_revision, [editable1.id])
+          editable1.reload
           editable2.reload
           new_content.reload
-          Content.publish(@final_revision, [editable1.id])
           Content.with_revision(@final_revision) do
             published1 = Content[editable1.id]
             Content.first(:uid => "added").should_not be_nil
@@ -355,6 +356,9 @@ class PublishingTest < Test::Unit::TestCase
             published3.uid.should_not == "new"
           end
           Content.publish(@final_revision+1, [editable2.id])
+          editable1.reload
+          editable2.reload
+          new_content.reload
           Content.with_revision(@final_revision+1) do
             published1 = Content[editable1.id]
             # published1.should == editable1
@@ -610,6 +614,11 @@ class PublishingTest < Test::Unit::TestCase
         Content.first.first_published_at.to_i.should == @now.to_i
         Content.first.last_published_at.to_i.should == @now.to_i
         Content.first.first_published_revision.should == @revision
+        Content.with_editable do
+          Content.first.first_published_at.to_i.should == @now.to_i
+          Content.first.last_published_at.to_i.should == @now.to_i
+          Content.first.first_published_revision.should == @revision
+        end
         Content.with_revision(@revision) do
           Content.first.first_published_at.to_i.should == @now.to_i
           Content.first.last_published_at.to_i.should == @now.to_i
@@ -627,8 +636,14 @@ class PublishingTest < Test::Unit::TestCase
         Content.publish(@revision+1)
         Content.first.first_published_at.to_i.should == @now.to_i
         Content.first.last_published_at.to_i.should == @now.to_i + 100
-        c = Content[c.id]
-        c.first_published_at.to_i.should == @now.to_i + 100
+        Content.with_editable do
+          c = Content[c.id]
+          c.first_published_at.to_i.should == @now.to_i + 100
+        end
+        Content.with_revision(@revision+1) do
+          c = Content[c.id]
+          c.first_published_at.to_i.should == @now.to_i + 100
+        end
       end
 
       should "not set publishing date for items not published" do
@@ -643,6 +658,29 @@ class PublishingTest < Test::Unit::TestCase
         added.first_published_at.should be_nil
         added.last_published_at.should be_nil
       end
+
+      should "not set publishing dates if exception raised in passed block" do
+        Content.first.first_published_at.should be_nil
+        begin
+          Content.publish(@revision) do
+            raise Exception
+          end
+        rescue Exception; end
+        Content.first.first_published_at.should be_nil
+      end
+
+      should "delete revision tables if exception raised in passed block" do
+        Content.revision_exists?(@revision).should be_false
+        begin
+          Content.publish(@revision) do
+            Content.revision_exists?(@revision).should be_true
+            Content.revision.should == @revision
+            raise Exception
+          end
+        rescue Exception; end
+        Content.revision_exists?(@revision).should be_false
+      end
+
       should "always publish all if no previous revisions exist" do
         page = Content.first
         Content.filter(:first_published_at => nil).count.should == Content.count
@@ -724,6 +762,7 @@ class PublishingTest < Test::Unit::TestCase
         Site.publish_all
         Change.count.should == 0
       end
+
       should "not delete changes after an exception during publish" do
         change1 = Change.new
         change1.modified_list = [1, 2, 3]
@@ -751,6 +790,19 @@ class PublishingTest < Test::Unit::TestCase
       should "reset Site.pending_revision after publishing" do
         Site.publish_all
         Site.pending_revision.should be_nil
+      end
+
+      should "not update first_published or last_published if rendering fails" do
+        c = Content.create
+        Content.first.first_published_at.should be_nil
+        Content.delete_all_revisions!
+        S::Render.expects(:render_pages).raises(Exception)
+        begin
+          Site.publish_all
+        rescue Exception; end
+        Content.with_editable do
+          Content.first.first_published_at.should be_nil
+        end
       end
 
       should "clean up state on publishing failure" do
