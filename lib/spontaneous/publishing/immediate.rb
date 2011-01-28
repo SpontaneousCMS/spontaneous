@@ -76,7 +76,7 @@ module Spontaneous
       def render_revision
         @pages_rendered = 0
         S::Content.with_identity_map do
-          S::Render.with_engine(Cutaneous::PublishRenderEngine) do
+          S::Render.with_publishing_engine do
             set_status("rendering:0")
             formats.each do |format|
               S::Render.render_pages(revision, pages, format, self)

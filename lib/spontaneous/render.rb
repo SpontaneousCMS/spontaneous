@@ -23,6 +23,10 @@ module Spontaneous
         @engine ||= engine_class.new(template_root)
       end
 
+      def with_publishing_engine(&block)
+        with_engine(Cutaneous::PublishRenderEngine, &block)
+      end
+
       @@engine_stack = []
 
       def with_engine(new_engine_class, &block)
