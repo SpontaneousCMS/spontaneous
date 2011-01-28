@@ -10,9 +10,10 @@ module Spontaneous
     QUESTION = "?".freeze
     LF = "\n".freeze
 
-    ENV_REVISION_NUMBER = "SPOT_REVISION".freeze
-    ENV_ROOT = "SPOT_ROOT".freeze
-    ENV_MODE = "SPOT_MODE".freeze
+    SPOT_REVISION_NUMBER = "SPOT_REVISION".freeze
+    SPOT_ROOT = "SPOT_ROOT".freeze
+    SPOT_MODE = "SPOT_MODE".freeze
+    SPOT_ENV = "SPOT_ENV".freeze
 
     RE_QUOTES = /['"]/.freeze
     RE_FLATTEN = /[^\.a-z0-9-]+/.freeze

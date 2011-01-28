@@ -52,7 +52,7 @@ module Spontaneous::Plugins::Application
       end
 
       def root(*path)
-        @root ||= File.expand_path(ENV[Spontaneous::ENV_ROOT] || Dir.pwd)
+        @root ||= File.expand_path(ENV[Spontaneous::SPOT_ROOT] || Dir.pwd)
         relative_dir(@root, *path)
       end
 
