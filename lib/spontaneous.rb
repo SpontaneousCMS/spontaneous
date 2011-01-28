@@ -23,6 +23,10 @@ module Spontaneous
   extend Plugins
   include Constants
 
+  def self.gem_root
+    @gem_root ||= File.expand_path(File.dirname(__FILE__) / '..')
+  end
+
   plugin Plugins::Application::State
   plugin Plugins::Application::Paths
   plugin Plugins::Application::Render

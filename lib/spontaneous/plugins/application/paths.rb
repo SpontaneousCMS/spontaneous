@@ -70,18 +70,13 @@ module Spontaneous::Plugins::Application
       end
 
       def gem_dir(*path)
-        @gem_dir ||= File.expand_path(File.dirname(__FILE__) / '..')
-        relative_dir(@gem_dir, *path)
+        relative_dir(Spontaneous.gem_root, *path)
       end
 
       def application_dir(*path)
-        @application_dir ||= File.expand_path("../../application", __FILE__)
+        @application_dir ||= File.expand_path("application", Spontaneous.gem_root)
         relative_dir(@application_dir, *path)
       end
-
-      # def application_file(*args)
-      #   File.join(application_dir, *args)
-      # end
 
       def static_dir(*path)
         application_dir / "static"
