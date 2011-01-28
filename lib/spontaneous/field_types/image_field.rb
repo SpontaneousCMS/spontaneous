@@ -144,6 +144,7 @@ module Spontaneous
     end
 
     class ImageProcessor
+      MAX_DIM = 2 ** ([42].pack('i').size * 8) - 1 unless defined?(MAX_DIM)
       include ImageFieldUtilities
 
       attr_reader :path
@@ -185,10 +186,10 @@ module Spontaneous
           end
         end
         if size.key?(:width)
-          image.send(:fit, size[:width], nil)
+          image.send(:fit, size[:width], MAX_DIM)
         end
         if size.key?(:height)
-          image.send(:fit, nil, size[:height])
+          image.send(:fit, MAX_DIM, size[:height])
         end
         file_path = filename_for_size(name)
         image.write(file_path)
