@@ -60,7 +60,14 @@ Version 1.0:
 - Hiding
 - Aliasing
 - Users & permissions
--
+- Generators
+- Prototypes
+- Test framework
+
+Prototypes:
+
+- Keep it simple: have a #prototype method that is called if it exists on new Content. Within this method you can then add everything you want to the object before it is saved (this should happen after any auto-insertion of slots though)
+- Need to figure out an easy way to have multiple prototypes available. Should it be done by having #prototype_with_name and then calling create(:with_name) or having a #prototype(template=nil) and leaving it up to the developer to put in the relevant switches? Am leaning towards the latter.
 
 Aliases:
 
@@ -129,3 +136,10 @@ Some examples:-
 
 What about selecting by slugs? What about selecting all pages & all non-pages?
 
+ #*			-> every page
+ #* > *  -> every non-page
+
+
+Sequel:
+
+- Creating associations without saving. Currently associations need the parent to have an id -- this sucks, especially for my ideas for prototypes
