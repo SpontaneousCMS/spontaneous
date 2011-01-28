@@ -80,12 +80,13 @@ Publishing:
 
 - publish creates a 'config.ru' file that requires a specific deployed file, this means that the site is robust against deployment because a particular revision has its codebase hardcoded (which will work with upgrades of gems too as these will require a re-deploy) @done
 - Pathname#realpath will point to a version of the root that doesn't involve symlinks @done
-- revision is hardcoded into ruby rather than a db lookup
+- revision is hardcoded into ruby rather than a db lookup @done
 - difficulty is with getting the dependencies to load correctly - perhaps a simple pwd change would solve all of this though @done
 - make sure that first_published_at (or whatever) isn't modified if publishing fails
 - link success of rendering to success of publishing (i.e. only calling after publish lambdas after render & indexing are complete)
 
 Command Line:
+
 - binary is 'spot' -- yeah! @done
 - 'spot gen site www.example.com' @done
 - 'spot console' @done
@@ -99,12 +100,31 @@ Users & Permissions:
 
 - User editable/db driven groups (?)
 - Work out roles of User levels, groups & individual permissions. How to manage the code-db bridge? Levels:code, Groups:db?, Users:db
-Perhaps page permissions should only address groups. Replace users in current model with groups. Like on unix, creating a user also creates a group of which they are the only member. That would enable ACL style access. If single-user-groups (SUGs) are flagged as such then interface becomes easier as list of real groups is not overwhelmed by these virtual SUGs. 
+
+Perhaps page permissions should only address groups. Replace users in current model with groups. Like on unix, creating a user also creates a group of which they are the only member. That would enable ACL style access. If single-user-groups (SUGs) are flagged as such then interface becomes easier as list of real groups is not overwhelmed by these virtual SUGs.
+
 - Do I need solid query language in order to express group access perms? How to express "just this page", "just this page and all it's children" (and more complex variations on this, think CSS selectors) or "all pages" in a way suitable for storing in a db?
-- Assuming I do need a query language what should the syntax be? Again, think CSS: 
-  .class : .schema type/ruby class selectors
-  #id : page uids
-  234: Page IDs
-  /path: Page paths
-  [slotname] : a particular slot
-  [1..2] : a range of slots
+- Assuming I do need a query language what should the syntax be? Again, think CSS:
+
+See http://api.jquery.com/category/selectors/ for ideas
+
+  .class			-> .schema type/ruby class selectors
+  #id					-> page uids
+  234					-> Page IDs
+  /path				-> Page paths
+  @[slotname]	-> a particular slot
+  @[1..3]			-> a range of slots (slots 1, 2 & 3 in this case)
+  @[1,3]			-> slots with indexes 1 & 4
+
+Some examples:-
+
+	*																-> everything
+  /about > .Person								-> all content of type 'Person' on the page found at path /about
+  #welcome@[1]										-> first slot on page with uid 'welcome'
+  #welcome@[images,people]				-> slots 'images' and 'people' on page with uid 'welcome'
+  #welcome@[.Text]								-> all slots of type 'Text' on page #welcome
+  12 > .House[title~="Mouse"]			-> all content of type 'House' on page with id 12 whose 'title' field contains 'Mouse'
+	#projects .Image								-> all content on page with uid 'projects' and its child-pages of type 'Image'
+	#projects > *                   -> all content of page #projects
+
+  #projects
