@@ -82,8 +82,8 @@ Publishing:
 - Pathname#realpath will point to a version of the root that doesn't involve symlinks @done
 - revision is hardcoded into ruby rather than a db lookup @done
 - difficulty is with getting the dependencies to load correctly - perhaps a simple pwd change would solve all of this though @done
-- make sure that first_published_at (or whatever) isn't modified if publishing fails
-- link success of rendering to success of publishing (i.e. only calling after publish lambdas after render & indexing are complete)
+- make sure that first_published_at (or whatever) isn't modified if publishing fails @done
+- link success of rendering to success of publishing (i.e. only calling after publish lambdas after render & indexing are complete) @done
 
 Command Line:
 
@@ -127,4 +127,5 @@ Some examples:-
 	#projects .Image								-> all content on page with uid 'projects' and its child-pages of type 'Image'
 	#projects > *                   -> all content of page #projects
 
-  #projects
+What about selecting by slugs? What about selecting all pages & all non-pages?
+
