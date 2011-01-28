@@ -26,11 +26,13 @@ module Spontaneous
 
       # serve static files from the app's public dir
 
-      mime_type :js,  'text/javascript; charset=utf-8'
-      mime_type :css, 'text/css; charset=utf-8'
+      ## removed these as sinatra now sets utf-8 by default
+      # mime_type :js,  'text/javascript; charset=utf-8'
+      # mime_type :css, 'text/css; charset=utf-8'
 
       before do
-        content_type 'text/html', :charset => 'utf-8'
+        ## globally setting this screws up auto content type setting by send_file
+        # content_type 'text/html', :charset => 'utf-8'
         if Spontaneous.development?
           Templates.clear_cache!
         end

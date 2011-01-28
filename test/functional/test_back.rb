@@ -66,14 +66,14 @@ class BackTest < Test::Unit::TestCase
     should "return scripts from js dir" do
       get '/@spontaneous/js/test.js'
       assert last_response.ok?
-      last_response.content_type.should == "text/javascript; charset=utf-8"
+      last_response.content_type.should == "application/javascript;charset=utf-8"
       assert_equal File.read(@app_dir / 'js/test.js'), last_response.body
     end
 
     should "return less rendered to css from css dir" do
       get '/@spontaneous/css/test.css'
       assert last_response.ok?
-      last_response.content_type.should == "text/css; charset=utf-8"
+      last_response.content_type.should == "text/css;charset=utf-8"
       assert_equal "h1 { color: #4d926f; }\n", last_response.body
     end
 
