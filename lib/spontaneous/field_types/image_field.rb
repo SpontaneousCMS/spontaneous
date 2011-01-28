@@ -144,8 +144,9 @@ module Spontaneous
     end
 
     class ImageProcessor
-      MAX_DIM = 2 ** ([42].pack('i').size * 8) - 1 unless defined?(MAX_DIM)
       include ImageFieldUtilities
+
+      MAX_DIM = 2 ** ([42].pack('i').size * 8) - 1 unless defined?(MAX_DIM)
 
       attr_reader :path
 
