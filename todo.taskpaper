@@ -95,3 +95,16 @@ Design:
 
 - Look at Frutiger as an interface font (distribution nightmare - open source equivalents?) @done
 
+Users & Permissions:
+
+- User editable/db driven groups (?)
+- Work out roles of User levels, groups & individual permissions. How to manage the code-db bridge? Levels:code, Groups:db?, Users:db
+Perhaps page permissions should only address groups. Replace users in current model with groups. Like on unix, creating a user also creates a group of which they are the only member. That would enable ACL style access. If single-user-groups (SUGs) are flagged as such then interface becomes easier as list of real groups is not overwhelmed by these virtual SUGs. 
+- Do I need solid query language in order to express group access perms? How to express "just this page", "just this page and all it's children" (and more complex variations on this, think CSS selectors) or "all pages" in a way suitable for storing in a db?
+- Assuming I do need a query language what should the syntax be? Again, think CSS: 
+  .class : .schema type/ruby class selectors
+  #id : page uids
+  234: Page IDs
+  /path: Page paths
+  [slotname] : a particular slot
+  [1..2] : a range of slots
