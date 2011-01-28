@@ -37,12 +37,20 @@ require 'mocha'
 require 'pp'
 
 require 'support/custom_matchers'
-require 'support/timing'
+# require 'support/timing'
 
 
 class Test::Unit::TestCase
   include Spontaneous
   include CustomMatchers
+
+  def silence_logger(&block)
+    $stdout = log_buffer = StringIO.new
+    block.call
+    $stdout = STDOUT
+    log_buffer.string
+  end
+  alias :silence_stdout :silence_logger
 
   def assert_file_exists(*path)
     path = File.join(*path)

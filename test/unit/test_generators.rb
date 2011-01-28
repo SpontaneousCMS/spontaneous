@@ -21,7 +21,9 @@ class GeneratorsTest < Test::Unit::TestCase
 
 
   def generate(name, *params)
-    "Spontaneous::Generators::#{name.to_s.camelize}".constantize.start(params)
+    silence_logger {
+      "Spontaneous::Generators::#{name.to_s.camelize}".constantize.start(params)
+    }
   end
 
   attr_reader :site_root
@@ -30,7 +32,7 @@ class GeneratorsTest < Test::Unit::TestCase
     teardown do
     end
     should "create a site using passed parameters" do
-      puts @tmp
+      # puts @tmp
       generate(:site, "pot8o.org", "--root=#{@tmp}")
       %w(pot8o_org pot8o_org_test).each do |db|
         db = Sequel.mysql2(:user => "root", :database => db)
@@ -76,7 +78,6 @@ class GeneratorsTest < Test::Unit::TestCase
         assert_file_exists(site_root, 'templates/large_page/page.html.cut')
         assert_file_exists(site_root, 'templates/large_page/inline.html.cut')
         class_file = ::File.join(site_root,  'schema/large_page.rb')
-        puts File.read(class_file)
         assert /class LargePage < Spontaneous::Page/ === File.read(class_file)
         `rm -rf #{@tmp}`
       end
