@@ -9,8 +9,13 @@ Spontaneous.Page = (function($, S) {
 	FunctionBar.prototype = {
 		panel: function() {
 			this.panel = $(dom.div, {'id': 'page-info'});
-			this.panel.append($('<h1/>').text(this.page.title()))
+			this.title = $('<h1/>').text(this.page.title());
+			this.panel.append(this.title);
 			var path_wrap = $(dom.div, {'class':'path'})
+
+			this.page.title_field().add_listener('value', function(t) {
+				this.set_title(t);
+			}.bind(this));
 
 			path_wrap.append($('<h3/>').text(this.page.path).click(function() {
 				if (this.page.path !== '/') {
@@ -21,6 +26,9 @@ Spontaneous.Page = (function($, S) {
 			this.panel.append(path_wrap);
 			this.path_wrap = path_wrap
 			return this.panel;
+		},
+		set_title: function(title) {
+			this.title.text(title);
 		},
 		unavailable_loaded: function(response) {
 			var u = {};
@@ -127,7 +135,10 @@ Spontaneous.Page = (function($, S) {
 			this.path = content.path;
 		},
 		title: function() {
-			return this.fields().title.value();
+			return this.title_field().value();
+		},
+		title_field: function() {
+			return this.fields().title;
 		},
 		panel: function() {
 			this.panel = $(dom.div, {'id':'page-content'});
