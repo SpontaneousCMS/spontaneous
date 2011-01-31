@@ -12,9 +12,11 @@ def launch_selenium
   if !@_selenium_pid
     puts "Launching selenium #{SELENIUM_BIN}"
     @_selenium_pid = fork do
-      exec("java -jar #{SELENIUM_BIN} -port #{SELENIUM_PORT} >/dev/null")
+      STDOUT.reopen("/dev/null")
+      exec("java -jar #{SELENIUM_BIN} -port #{SELENIUM_PORT}")
     end
     running = false
+    sock = nil
     begin
       sleep(1)
       begin
@@ -24,6 +26,8 @@ def launch_selenium
         puts "Waiting for Selenium server..."
         running = false
         sleep(1)
+      ensure
+        sock.close if sock
       end
     end while !running
     puts "Selenium running on port #{SELENIUM_PORT} PID #{@_selenium_pid}"
@@ -36,3 +40,52 @@ def kill_selenium
     Process.kill("TERM", @_selenium_pid)
   end
 end
+
+module SeleniumTest
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
+
+  module ClassMethods
+    def startup
+      launch_selenium
+    end
+
+    def shutdown
+      kill_selenium
+    end
+
+    def suite
+      mysuite = super
+      def mysuite.run(*args)
+        PageEditingTest.startup()
+        begin
+          super
+        ensure
+          PageEditingTest.shutdown()
+        end
+      end
+      mysuite
+    end
+
+  end
+
+  def setup
+    @browser = Selenium::Client::Driver.new(
+      :host => "localhost",
+      :port => SELENIUM_PORT,
+      :browser => "*firefox",
+      # :browser => "*firefox3/Applications/Firefox/Firefox3_5.app/Contents/MacOS/firefox-bin",
+      # :browser => "*chrome/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome",
+      :url => "http://localhost:2011/",
+      :timeout_in_second => 60
+    )
+    @browser.start_new_browser_session
+  end
+
+  def teardown
+    @browser.close_current_browser_session
+  end
+
+end
+

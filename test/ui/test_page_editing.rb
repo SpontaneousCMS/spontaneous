@@ -8,42 +8,7 @@ require 'ui_helper'
 
 
 class PageEditingTest < Test::Unit::TestCase
-  def self.startup
-    launch_selenium
-  end
-  def self.shutdown
-    kill_selenium
-  end
-
-  def self.suite
-    mysuite = super
-    def mysuite.run(*args)
-      PageEditingTest.startup()
-      begin
-        super
-      ensure
-        PageEditingTest.shutdown()
-      end
-    end
-    mysuite
-  end
-
-  def setup
-    @browser = Selenium::Client::Driver.new(
-      :host => "localhost",
-      :port => SELENIUM_PORT,
-      :browser => "*firefox",
-      # :browser => "*firefox3/Applications/Firefox/Firefox3_5.app/Contents/MacOS/firefox-bin",
-      # :browser => "*chrome/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome",
-      :url => "http://localhost:2011/",
-      :timeout_in_second => 60
-    )
-    @browser.start_new_browser_session
-  end
-
-  def teardown
-    @browser.close_current_browser_session
-  end
+  include SeleniumTest
 
   context "Page attributes" do
     should "set the editor title when page title changed" do
