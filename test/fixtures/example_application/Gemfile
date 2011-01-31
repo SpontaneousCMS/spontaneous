@@ -1,4 +1,6 @@
 source :rubygems
 
 gem 'mysql2', '~>0.2'
+
+gem 'thin'
 gem 'spontaneous', :path => '/Users/garry/Dropbox/Development/spontaneous3/working'

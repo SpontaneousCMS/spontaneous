@@ -67,3 +67,4 @@ PLATFORMS
 DEPENDENCIES
   mysql2 (~> 0.2)
   spontaneous!
+  thin
