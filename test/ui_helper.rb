@@ -16,10 +16,20 @@ module SeleniumTest
   module ClassMethods
     def startup
       launch_selenium
+      launch_site
     end
 
     def shutdown
       kill_selenium
+      kill_site
+    end
+
+    def launch_site
+      puts "TODO: Launch & initialise site"
+    end
+
+    def kill_site
+      puts "TODO: kill site"
     end
 
     def launch_selenium
