@@ -38,6 +38,7 @@ GEM
       rack (>= 1.0)
     rake (0.8.7)
     rdiscount (1.6.5)
+    selenium-client (1.2.18)
     sequel (3.16.0)
     shoulda (2.11.3)
     sinatra (1.1.2)
@@ -75,6 +76,7 @@ DEPENDENCIES
   rack!
   rack-test (~> 0.5)
   rdiscount (~> 1.6.5)
+  selenium-client (~> 1.2.18)
   sequel (~> 3.16)
   shoulda (~> 2.10)
   sinatra (~> 1.1.2)
