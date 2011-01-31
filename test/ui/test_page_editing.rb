@@ -19,8 +19,11 @@ class PageEditingTest < Test::Unit::TestCase
     mysuite = super
     def mysuite.run(*args)
       PageEditingTest.startup()
-      super
-      PageEditingTest.shutdown()
+      begin
+        super
+      ensure
+        PageEditingTest.shutdown()
+      end
     end
     mysuite
   end

@@ -12,7 +12,7 @@ def launch_selenium
   if !@_selenium_pid
     puts "Launching selenium #{SELENIUM_BIN}"
     @_selenium_pid = fork do
-      exec("java -jar #{SELENIUM_BIN}")
+      exec("java -jar #{SELENIUM_BIN} -port #{SELENIUM_PORT} >/dev/null")
     end
     running = false
     begin
