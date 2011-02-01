@@ -74,14 +74,13 @@ class Test::Unit::TestCase
   include CustomMatchers
 
   def silence_logger(&block)
-    # $std_err_backup = STDERR.dup
     begin
       $stdout = log_buffer = StringIO.new
       $stderr.reopen("/dev/null", 'w')
       block.call
     ensure
       $stdout = STDOUT
-      $stderr = STDERR #$std_err_backup
+      $stderr = STDERR
       log_buffer.string
     end
   end
