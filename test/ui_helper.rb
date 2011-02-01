@@ -34,50 +34,58 @@ module SeleniumTest
 
     def launch_selenium
       if !@_selenium_pid
-        puts "Launching selenium #{SELENIUM_BIN}"
+        puts ">>> Launching selenium #{SELENIUM_BIN}"
         @_selenium_pid = fork do
           STDOUT.reopen("/dev/null")
           exec("java -jar #{SELENIUM_BIN} -port #{SELENIUM_PORT}")
         end
         running = false
         sock = nil
-        begin
-          sleep(1)
+        waiting, max_wait = 0, 8
+        catch :giveup do
           begin
-            sock = TCPSocket.open('127.0.0.1', SELENIUM_PORT)
-            running = true
-          rescue Errno::ECONNREFUSED
-            puts "Waiting for Selenium server..."
-            running = false
-            sleep(1)
-          ensure
-            sock.close if sock
-          end
-        end while !running
-        puts "Selenium running on port #{SELENIUM_PORT} PID #{@_selenium_pid}"
+            sleep(2)
+            begin
+              sock = TCPSocket.open('127.0.0.1', SELENIUM_PORT)
+              running = true
+            rescue Errno::ECONNREFUSED
+              puts "  > Waiting for Selenium server..."
+              running = false
+              waiting += 1
+              throw :giveup if waiting >= max_wait
+            ensure
+              sock.close if sock
+            end
+          end while !running
+          puts ">>> Selenium running on port #{SELENIUM_PORT} PID #{@_selenium_pid}"
+        end
+        unless running
+          puts ">>> Failed to start Selenium server\n>>> Does #{SELENIUM_BIN} exist?"
+          exit(1)
+        end
       end
     end
 
     def kill_selenium
       if @_selenium_pid
-        puts "Killing selenium PID #{@_selenium_pid}"
+        puts "\n>>> Killing selenium PID #{@_selenium_pid}"
         Process.kill("TERM", @_selenium_pid)
       end
     end
 
     def suite
       mysuite = super
-      def mysuite.run(*args)
-        PageEditingTest.startup()
+      test_class = self
+      mysuite.meta.send(:define_method, :run) do |*args, &block|
         begin
-          super
+          test_class.startup()
+          super(*args, &block)
         ensure
-          PageEditingTest.shutdown()
+          test_class.shutdown()
         end
       end
       mysuite
     end
-
   end
 
   def setup
