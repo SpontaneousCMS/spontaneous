@@ -15,7 +15,7 @@ module Spontaneous::Plugins
 
     module InstanceMethods
       def visible?
-        self.assigned_visible && self.inherited_visible
+        self.visible
       end
 
       def hidden?
@@ -38,48 +38,47 @@ module Spontaneous::Plugins
 
       protected
 
-      def after_save
-        super
-        if @_visibility_modified
-          if page?
-            hide_page_descendents(self.visible?)
-          else
-            hide_facet_descendents(self.visible?)
-          end
-          @_visibility_modified = false
-        end
-      end
-
-      def set_visible(visible, inherited = false, recurse = true)
-        protect_root_visibility!
-        if inherited
-          self.inherited_visible = visible
-        else
-          self.assigned_visible = visible
-        end
-        @_visibility_modified = recurse
-      end
-
-      def set_visible!(state, inherited=false, recurse=true)
-        self.set_visible(state, inherited, recurse)
+      def set_visible!(state, origin=nil, recurse=true)
+        self.set_visible(state, origin, recurse)
         self.save
         self
       end
 
-      def hide_page_descendents(visible)
-        path_like = :p__ancestor_path.like("#{self[:ancestor_path]}.#{self.id}%")
-        # hide all ancestor paths
-        Spontaneous::Content.from(:content___p).filter(path_like).update(:inherited_visible => visible)
-        # hide current page contents
-        Spontaneous::Content.filter(:page_id => self.id).set(:inherited_visible => visible)
-        # hide all descendent page content
-        Spontaneous::Content.from(:content___n, :content___p).filter(path_like).filter(:n__page_id => :p__id).set(:n__inherited_visible => visible)
+      def set_visible(visible, origin=nil, recurse = true)
+        protect_root_visibility!
+        self[:visible] = visible
+        self[:inherited_visible] = origin
+        @_visibility_origin = (origin || self.id)
+        @_visibility_modified = recurse
       end
 
-      def hide_facet_descendents(visible)
+      def after_save
+        super
+        if @_visibility_modified
+          if page?
+            hide_page_descendents(self.visible?, @_visibility_origin)
+          else
+            hide_facet_descendents(self.visible?, @_visibility_origin)
+          end
+          @_visibility_origin = nil
+          @_visibility_modified = false
+        end
+      end
+
+      def hide_page_descendents(visible, origin=nil)
+        path_like = :p__ancestor_path.like("#{self[:ancestor_path]}.#{self.id}%")
+        # hide all ancestor paths
+        Spontaneous::Content.from(:content___p).filter(path_like).update(:visible => visible, :inherited_visible => origin)
+        # hide current page contents
+        Spontaneous::Content.filter(:page_id => self.id).set(:visible => visible, :inherited_visible => origin)
+        # hide all descendent page content
+        Spontaneous::Content.from(:content___n, :content___p).filter(path_like).filter(:n__page_id => :p__id).set(:n__visible => visible, :n__inherited_visible => origin)
+      end
+
+      def hide_facet_descendents(visible, origin=nil)
         pages, non_pages = find_first_child_page_recurse(self)
-        pages.each     { |c| c.set_visible!(visible, true, true) }
-        non_pages.each { |c| c.set_visible!(visible, true, false) }
+        pages.each     { |c| c.set_visible!(visible, origin, true) }
+        non_pages.each { |c| c.set_visible!(visible, origin, false) }
       end
 
       ## collect all child content of this node but stop at pages
