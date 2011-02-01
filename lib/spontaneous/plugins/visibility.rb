@@ -3,13 +3,25 @@
 
 module Spontaneous::Plugins
   module Visibility
+    S = Spontaneous unless defined?(S)
 
     def self.configure(base)
     end
 
     module ClassMethods
+      @@visible_filter = false
+
       def with_visible(&block)
-        yield
+        begin
+          @@visible_filter = true
+          yield
+        ensure
+          @@visible_filter = false
+        end
+      end
+
+      def visible_only?
+        @@visible_filter
       end
     end # ClassMethods
 

@@ -11,13 +11,13 @@ class VisibilityTest < Test::Unit::TestCase
       Content.delete
       @root = Page.new(:uid => 'root')
       2.times do |i|
-        c = Page.new(:uid => i)
+        c = Page.new(:uid => i, :slug => "#{i}")
         @root << c
         4.times do |j|
           d = Facet.new(:uid => "#{i}.#{j}")
           c << d
           2.times do |k|
-            e = Page.new(:uid => "#{i}.#{j}.#{k}")
+            e = Page.new(:uid => "#{i}.#{j}.#{k}", :slug => "#{i}-#{j}-#{k}")
             d << e
             2.times do |l|
               e << Facet.new(:uid => "#{i}.#{j}.#{k}.#{l}")
@@ -144,15 +144,20 @@ class VisibilityTest < Test::Unit::TestCase
 
     context "visibility scoping" do
       setup do
-        @uid = '0.0'
+        @uid = '0'
         @page = Page.uid(@uid)
         @page.hide!
         @page.reload
       end
 
       should "xx prevent inclusion of hidden content" do
+        # Spontaneous.database.logger = ::Logger.new($stdout)
+        Page.path("/0").should == @page
+        Page.uid(@uid).should == @page
         Content.with_visible do
-          Page.uid(@uid).should be_nil
+          Content.visible_only?.should be_true
+          Page.uid(@uid).should be_blank
+          Page.path("/0").should be_blank
         end
       end
     end
