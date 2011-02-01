@@ -54,6 +54,7 @@ module Spontaneous::Plugins
       def root?
         path == Spontaneous::SLASH
       end
+      alias_method :is_root?, :root?
 
       def root
         Spontaneous::Page.root

@@ -97,6 +97,7 @@ module Spontaneous
     autoload :Media, "spontaneous/plugins/media"
     autoload :Publishing, "spontaneous/plugins/publishing"
     autoload :Aliases, "spontaneous/plugins/aliases"
+    autoload :Visibility, "spontaneous/plugins/visibility"
 
     module Slots
       autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"

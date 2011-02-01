@@ -37,6 +37,7 @@ module Spontaneous
     def page?
       true
     end
+    alias_method :is_page?, :page?
 
     def page
       self

@@ -25,8 +25,13 @@ module Spontaneous
     def self.identity_map_key(pk)
       "#{super}:#{revision}"
     end
+
+    # must resolve my is_*? schizophrenia
     def self.page?
       false
+    end
+    def self.is_page?
+      page?
     end
 
     extend Plugins
@@ -44,6 +49,7 @@ module Spontaneous
     plugin Plugins::Media
     plugin Plugins::Publishing
     plugin Plugins::Aliases
+    plugin Plugins::Visibility
 
     many_to_one :container, :class => self, :reciprocal => :nodes
     one_to_many :nodes,    :key => :container_id, :class => self, :reciprocal => :container
@@ -65,6 +71,7 @@ module Spontaneous
     def page?
       false
     end
+    alias_method :is_page?, :page?
 
 
 
