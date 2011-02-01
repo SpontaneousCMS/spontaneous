@@ -55,6 +55,7 @@ class ImagesTest < Test::Unit::TestCase
       end
 
       ResizingImageField.register
+
       class ::ContentWithImage < Content
         field :photo, :resizing_image
       end
@@ -65,7 +66,9 @@ class ImagesTest < Test::Unit::TestCase
       @instance.stubs(:id).returns(@content_id)
       @image = @instance.photo
       @image.owner.should == @instance
-      @image.value = @origin_image.to_s
+      silence_logger {
+        @image.value = @origin_image.to_s
+      }
     end
 
     teardown do

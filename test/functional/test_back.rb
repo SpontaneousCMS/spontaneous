@@ -6,7 +6,15 @@ require 'test_helper'
 
 
 class BackTest < Test::Unit::TestCase
+  include StartupShutdown
   include ::Rack::Test::Methods
+
+
+  def self.startup
+  end
+
+  def self.shutdown
+  end
 
   def app
     Spontaneous::Rack::Back.application

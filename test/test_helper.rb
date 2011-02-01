@@ -40,37 +40,50 @@ require 'support/custom_matchers'
 # require 'support/timing'
 
 
-class Test::Unit::TestCase
-  include Spontaneous
-  include CustomMatchers
+module StartupShutdown
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
 
-  def suite
-    mysuite = super
-    test_class = self
-    mysuite.meta.send(:define_method, :run) do |*args, &block|
+  module ClassMethods
+    def suite
+      mysuite = super
+      test_class = self
+      mysuite.meta.send(:define_method, :run) do |*args, &block|
       begin
         test_class.startup() if test_class.respond_to?(:startup)
         super(*args, &block)
       ensure
         test_class.shutdown() if test_class.respond_to?(:shutdown)
       end
+      end
+      mysuite
     end
-    mysuite
-  end
+    def startup
+      puts "+ Running #{self.name} startup"
+    end
 
-  def self.startup
-    puts "+ Running #{self.name} startup"
-  end
+    def shutdown
+      puts "- Running #{self.name} shutdown"
+    end
+  end # ClassMethods
+end
 
-  def self.shutdown
-    puts "- Running #{self.name} shutdown"
-  end
+class Test::Unit::TestCase
+  include Spontaneous
+  include CustomMatchers
 
   def silence_logger(&block)
-    $stdout = log_buffer = StringIO.new
-    block.call
-    $stdout = STDOUT
-    log_buffer.string
+    # $std_err_backup = STDERR.dup
+    begin
+      $stdout = log_buffer = StringIO.new
+      $stderr.reopen("/dev/null", 'w')
+      block.call
+    ensure
+      $stdout = STDOUT
+      $stderr = STDERR #$std_err_backup
+      log_buffer.string
+    end
   end
   alias :silence_stdout :silence_logger
 

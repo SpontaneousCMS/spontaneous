@@ -4,6 +4,17 @@ require 'test_helper'
 
 
 class PublishingTest < Test::Unit::TestCase
+  include StartupShutdown
+
+  def self.startup
+    Spontaneous.database = DB
+    Content.delete_all_revisions!
+  end
+
+  def self.shutdown
+    Spontaneous.database = DB
+    Content.delete_all_revisions!
+  end
 
   def assert_content_equal(result, compare)
     serialised_columns = [:field_store, :entry_store]
@@ -40,7 +51,7 @@ class PublishingTest < Test::Unit::TestCase
     end
 
     teardown do
-      Content.delete_all_revisions!
+      # Content.delete_all_revisions!
       Content.delete
       DB.logger = nil
     end
@@ -162,14 +173,18 @@ class PublishingTest < Test::Unit::TestCase
 
     context "content revisions" do
       setup do
+        @revision = 1
         @now = Sequel.datetime_class.now
         Sequel.datetime_class.stubs(:now).returns(@now)
       end
+      teardown do
+        Content.delete_revision(@revision)
+        Content.delete_revision(@revision+1)
+      end
       should "be testable for existance" do
-        revision = 1
-        Content.revision_exists?(revision).should be_false
-        Content.create_revision(revision)
-        Content.revision_exists?(revision).should be_true
+        Content.revision_exists?(@revision).should be_false
+        Content.create_revision(@revision)
+        Content.revision_exists?(@revision).should be_true
       end
       should "be deletable en masse" do
         tables = (1..10).map { |i| Content.revision_table(i).to_sym }
@@ -186,12 +201,11 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       should "be creatable from current content" do
-        revision = 1
-        DB.tables.include?(Content.revision_table(revision).to_sym).should be_false
-        Content.create_revision(revision)
-        DB.tables.include?(Content.revision_table(revision).to_sym).should be_true
+        DB.tables.include?(Content.revision_table(@revision).to_sym).should be_false
+        Content.create_revision(@revision)
+        DB.tables.include?(Content.revision_table(@revision).to_sym).should be_true
         count = Content.count
-        Content.with_revision(revision) do
+        Content.with_revision(@revision) do
           Content.count.should == count
           Content.all.each do |published|
             Content.with_editable do
@@ -204,7 +218,7 @@ class PublishingTest < Test::Unit::TestCase
 
       should "be creatable from any revision" do
         revision = 2
-        source_revision = 1
+        source_revision = @revision
         source_revision_count = nil
 
         Content.create_revision(source_revision)
@@ -232,10 +246,9 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       should "have the correct indexes" do
-        revision = 1
-        Content.create_revision(revision)
+        Content.create_revision(@revision)
         content_indexes = DB.indexes(:content)
-        published_indexes = DB.indexes(Content.revision_table(revision))
+        published_indexes = DB.indexes(Content.revision_table(@revision))
         # made slightly complex by the fact that the index names depend on the table names
         # (which are different)
         assert_same_elements published_indexes.values, content_indexes.values
@@ -251,6 +264,9 @@ class PublishingTest < Test::Unit::TestCase
         end
 
         teardown do
+          Content.delete_revision(@initial_revision)
+          Content.delete_revision(@final_revision)
+          Content.delete_revision(@final_revision+1)
           DB.logger = nil
         end
 
@@ -606,6 +622,10 @@ class PublishingTest < Test::Unit::TestCase
         @now = Sequel.datetime_class.now
         Sequel.datetime_class.stubs(:now).returns(@now)
       end
+      teardown do
+        Content.delete_revision(@revision)
+        Content.delete_revision(@revision+1)
+      end
 
       should "set correct timestamps on first publish" do
         Content.first.first_published_at.should be_nil
@@ -700,6 +720,7 @@ class PublishingTest < Test::Unit::TestCase
         Site.revision.should == @revision
       end
       teardown do
+        Content.delete_revision(@revision)
         Revision.delete
         Change.delete
       end
@@ -795,7 +816,7 @@ class PublishingTest < Test::Unit::TestCase
       should "not update first_published or last_published if rendering fails" do
         c = Content.create
         Content.first.first_published_at.should be_nil
-        Content.delete_all_revisions!
+        # Content.delete_all_revisions!
         S::Render.expects(:render_pages).raises(Exception)
         begin
           Site.publish_all
@@ -806,7 +827,7 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       should "clean up state on publishing failure" do
-        Content.delete_all_revisions!
+        # Content.delete_all_revisions!
         Site.pending_revision.should be_nil
         Content.revision_exists?(@revision).should be_false
         # don't like peeking into implementation here but don't know how else
@@ -864,6 +885,7 @@ class PublishingTest < Test::Unit::TestCase
 
       teardown do
         # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
+        Content.delete_revision(@revision)
         Content.delete
         Site.delete
         Object.send(:remove_const, :PublishablePage)

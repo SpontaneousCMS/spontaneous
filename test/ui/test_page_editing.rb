@@ -8,6 +8,7 @@ require 'ui_helper'
 
 
 class PageEditingTest < Test::Unit::TestCase
+  include StartupShutdown
   include SeleniumTest
 
   context "Page attributes" do

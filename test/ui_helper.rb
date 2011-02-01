@@ -34,14 +34,14 @@ module SeleniumTest
 
     def launch_selenium
       if !@_selenium_pid
-        puts ">>> Launching selenium #{SELENIUM_BIN}"
+        puts "\n>>> Launching selenium #{SELENIUM_BIN}"
         @_selenium_pid = fork do
           STDOUT.reopen("/dev/null")
           exec("java -jar #{SELENIUM_BIN} -port #{SELENIUM_PORT}")
         end
-        running = false
-        sock = nil
+        running, sock = false, nil
         waiting, max_wait = 0, 8
+
         catch :giveup do
           begin
             sleep(2)
@@ -72,8 +72,7 @@ module SeleniumTest
         Process.kill("TERM", @_selenium_pid)
       end
     end
-
-  end
+  end # ClassMethods
 
   def setup
     @browser = Selenium::Client::Driver.new(
