@@ -44,6 +44,28 @@ class Test::Unit::TestCase
   include Spontaneous
   include CustomMatchers
 
+  def suite
+    mysuite = super
+    test_class = self
+    mysuite.meta.send(:define_method, :run) do |*args, &block|
+      begin
+        test_class.startup() if test_class.respond_to?(:startup)
+        super(*args, &block)
+      ensure
+        test_class.shutdown() if test_class.respond_to?(:shutdown)
+      end
+    end
+    mysuite
+  end
+
+  def self.startup
+    puts "+ Running #{self.name} startup"
+  end
+
+  def self.shutdown
+    puts "- Running #{self.name} shutdown"
+  end
+
   def silence_logger(&block)
     $stdout = log_buffer = StringIO.new
     block.call

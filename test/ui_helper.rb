@@ -73,19 +73,6 @@ module SeleniumTest
       end
     end
 
-    def suite
-      mysuite = super
-      test_class = self
-      mysuite.meta.send(:define_method, :run) do |*args, &block|
-        begin
-          test_class.startup()
-          super(*args, &block)
-        ensure
-          test_class.shutdown()
-        end
-      end
-      mysuite
-    end
   end
 
   def setup
