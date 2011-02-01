@@ -84,8 +84,17 @@ class VisibilityTest < Test::Unit::TestCase
       end
     end
 
+    should "re-show all page content" do
+      @child.hide!
+      @child.show!
+      @child.reload
+      Content.all.each do |c|
+        c.visible?.should be_true
+        c.inherited_visible.should be_nil
+      end
+    end
+
     should "hide all descendents of page content" do
-      Spontaneous.database.logger = ::Logger.new($stdout)
       facet = Content.first(:uid => "0.0")
       f = Facet.new(:uid => "0.0.X")
       facet << f
@@ -107,6 +116,17 @@ class VisibilityTest < Test::Unit::TestCase
           c.hidden?.should be_false
           c.inherited_visible.should be_nil
         end
+      end
+
+    end
+
+    should "re-show all descendents of page content" do
+      facet = Content.first(:uid => "0.0")
+      facet.hide!
+      facet.show!
+      Content.all.each do |c|
+        c.visible?.should be_true
+        c.inherited_visible.should be_nil
       end
     end
 

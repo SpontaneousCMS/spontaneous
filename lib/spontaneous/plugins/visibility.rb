@@ -48,7 +48,7 @@ module Spontaneous::Plugins
         protect_root_visibility!
         self[:visible] = visible
         self[:inherited_visible] = origin
-        @_visibility_origin = (origin || self.id)
+        @_visibility_origin = visible ? nil : (origin || self.id)
         @_visibility_modified = recurse
       end
 
