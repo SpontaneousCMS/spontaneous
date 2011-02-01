@@ -58,10 +58,10 @@ class VisibilityTest < Test::Unit::TestCase
       @child.hide!
       @child.children.each do |child1|
         child1.visible?.should be_false
-        child1.inherited_visible.should == @child.id
+        child1.visibility_origin.should == @child.id
         child1.children.each do |child2|
           child2.visible?.should be_false
-          child2.inherited_visible.should == @child.id
+          child2.visibility_origin.should == @child.id
         end
       end
     end
@@ -74,13 +74,13 @@ class VisibilityTest < Test::Unit::TestCase
         f.page.ancestors.include?(@child) || f.page == @child
       end.each do |f|
         f.visible?.should be_false
-        f.inherited_visible.should == @child.id
+        f.visibility_origin.should == @child.id
       end
       Facet.all.select do | f |
         !f.page.ancestors.include?(@child) && f.page != @child
       end.each do |f|
         f.visible?.should be_true
-        f.inherited_visible.should be_nil
+        f.visibility_origin.should be_nil
       end
     end
 
@@ -90,7 +90,7 @@ class VisibilityTest < Test::Unit::TestCase
       @child.reload
       Content.all.each do |c|
         c.visible?.should be_true
-        c.inherited_visible.should be_nil
+        c.visibility_origin.should be_nil
       end
     end
 
@@ -107,14 +107,14 @@ class VisibilityTest < Test::Unit::TestCase
           c.hidden?.should be_true
           if c.uid == "0.0"
             c.visible.should be_false
-            c.inherited_visible.should be_nil
+            c.visibility_origin.should be_nil
           else
             c.visible.should be_false
-            c.inherited_visible.should == facet.id
+            c.visibility_origin.should == facet.id
           end
         else
           c.hidden?.should be_false
-          c.inherited_visible.should be_nil
+          c.visibility_origin.should be_nil
         end
       end
 
@@ -126,7 +126,7 @@ class VisibilityTest < Test::Unit::TestCase
       facet.show!
       Content.all.each do |c|
         c.visible?.should be_true
-        c.inherited_visible.should be_nil
+        c.visibility_origin.should be_nil
       end
     end
 
