@@ -20,6 +20,9 @@ class ContentTest < Test::Unit::TestCase
       @instance = Content.new
     end
 
+    teardown do
+      Content.delete
+    end
     should "be initialised empty" do
       @instance.entries.should == []
     end
@@ -30,6 +33,8 @@ class ContentTest < Test::Unit::TestCase
       @instance.entries.length.should == 1
       @instance.entries.first.should == e
       @instance.entries.first.container.should == @instance
+      e.content_path.should == "#{@instance.id}"
+      @instance.entries.first.content_path.should == "#{@instance.id}"
     end
 
     should "accept addition of multiple children" do
@@ -42,6 +47,8 @@ class ContentTest < Test::Unit::TestCase
       @instance.entries.last.should == f
       @instance.entries.first.container.should == @instance
       @instance.entries.last.container.should == @instance
+      @instance.entries.first.content_path.should == "#{@instance.id}"
+      @instance.entries.last.content_path.should == "#{@instance.id}"
     end
 
     should "allow for a deep hierarchy" do
@@ -52,7 +59,9 @@ class ContentTest < Test::Unit::TestCase
       @instance.entries.length.should == 1
       @instance.entries.first.should == e
       e.container.should == @instance
+      e.content_path.should == "#{@instance.id}"
       f.container.id.should == e.id
+      f.content_path.should == "#{@instance.id}.#{e.id}"
     end
 
     should "persist hierarchy" do
@@ -161,7 +170,7 @@ class ContentTest < Test::Unit::TestCase
       Content.all.map { |c| c.id }.should == [@a, @d].map { |c| c.id }
     end
 
-    ## doesn't work due to 
+    ## doesn't work due to
     should "work through entries" do
       @a.entries.first.destroy
       Content.count.should == 2
@@ -260,7 +269,7 @@ class ContentTest < Test::Unit::TestCase
     end
   end
   context "identity map" do
-    setup do 
+    setup do
       Spontaneous.database = DB
       Content.delete
       Content.delete_all_revisions!
@@ -281,7 +290,7 @@ class ContentTest < Test::Unit::TestCase
       end
     end
 
-    should "work for Content" do
+    should "work for subclasses" do
       Content.with_identity_map do
         IdentitySubclass[@i1.id].object_id.should == IdentitySubclass[@i1.id].object_id
       end

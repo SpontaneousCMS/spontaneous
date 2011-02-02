@@ -8,6 +8,7 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+      CONTENT_PATH_SEP = ".".freeze
 
       # because it's possible to build content out of order
       # some relations don't necessarily get created straight away
@@ -136,6 +137,11 @@ module Spontaneous::Plugins
 
       def entry
         @entry ||= resolve_entry
+      end
+
+      def container=(container)
+        super
+        self[:content_path] = [container.content_path, container.id].compact.join(CONTENT_PATH_SEP)
       end
 
       def resolve_entry
