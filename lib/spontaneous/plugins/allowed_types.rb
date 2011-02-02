@@ -51,9 +51,26 @@ module Spontaneous::Plugins
       def default_style
         styles.first
       end
+
+      def prototype
+        @options[:prototype]
+      end
     end
 
     module ClassMethods
+      ##
+      # Sets up an allowed type for a particular content type
+      # this determines the list of types that appears in the editing UI
+      #
+      # Parameters:
+      #   type  => A String, Symbol or Class defining the content type that is allowed
+      #
+      # Options:
+      #
+      #   :styles    => The list of (inline) style names that can be used by the entries
+      #   :prototype => The name of the prototype to use when creating entries of this type
+      #
+      # TODO: finish these!
       def allow(type, options={})
         begin
           allowed_types_config << AllowedType.new(type, options)
@@ -76,8 +93,17 @@ module Spontaneous::Plugins
       def allowed_types
         self.class.allowed_types
       end
+
       def allowed_type(content)
         self.class.allowed.find { |a| a.instance_class == content.class }
+      end
+
+      def prototype_for_content(content)
+        if allowed = allowed_type(content)
+          allowed.prototype
+        else
+          super
+        end
       end
 
       def style_for_content(content)

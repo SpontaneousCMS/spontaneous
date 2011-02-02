@@ -54,6 +54,7 @@ module Spontaneous
     plugin Plugins::Publishing
     plugin Plugins::Aliases
     plugin Plugins::Visibility
+    plugin Plugins::Prototypes
 
 
 

@@ -123,6 +123,7 @@ module Spontaneous::Plugins
 
       def insert_with_style(type, index, content)
         entry_style = style_for_content(content)
+        content._prototype = prototype_for_content(content)
         entry = Spontaneous::Entry.send(type, self, content, entry_style)
         begin
           entries.insert(index, entry)
@@ -142,6 +143,10 @@ module Spontaneous::Plugins
 
       def style_for_content(content)
         content.styles.default
+      end
+
+      def prototype_for_content(content)
+        nil
       end
 
       def available_styles(content)

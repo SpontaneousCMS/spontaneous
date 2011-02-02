@@ -100,6 +100,7 @@ module Spontaneous
     autoload :Publishing, "spontaneous/plugins/publishing"
     autoload :Aliases, "spontaneous/plugins/aliases"
     autoload :Visibility, "spontaneous/plugins/visibility"
+    autoload :Prototypes, "spontaneous/plugins/prototypes"
 
     module Slots
       autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"

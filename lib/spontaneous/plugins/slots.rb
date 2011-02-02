@@ -39,13 +39,27 @@ module Spontaneous::Plugins
     end # ClassMethods
 
     module InstanceMethods
+      def slots
+        @slots ||= SlotSet.new(self)
+      end
+
+      def slot?(slot_name)
+        self.class.slot?(slot_name.to_sym)
+      end
+
+      protected
+
       def after_initialize
         super
         if new?
-          self.class.slots.instantiate(self)
+          initialize_slots!
         else
           self.class.slots.verify(self)
         end
+      end
+
+      def initialize_slots!
+        self.class.slots.instantiate(self)
       end
 
       def after_save
@@ -55,13 +69,6 @@ module Spontaneous::Plugins
         super
       end
 
-      def slots
-        @slots ||= SlotSet.new(self)
-      end
-
-      def slot?(slot_name)
-        self.class.slot?(slot_name.to_sym)
-      end
 
     end # InstanceMethods
   end # Slots
