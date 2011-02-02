@@ -3,8 +3,8 @@ source :rubygems
 # gemspec :path => '.'
 
 gem "bundler", "~> 1.0.9"
-gem "home_run", "~> 0.9.4"
-gem "sequel", "~> 3.16"
+gem "home_run", "~> 1.0.0"
+gem "sequel", "~> 3.20"
 gem "yajl-ruby", "~> 0.7"
 gem "erubis", "~> 2.6"
 gem "tenjin", "~> 0.6.1"
