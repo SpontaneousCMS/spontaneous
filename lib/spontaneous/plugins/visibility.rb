@@ -42,11 +42,19 @@ module Spontaneous::Plugins
         set_visible!(true)
       end
 
+      ##
+      # Is true when the current object is hidden independently of its ancestors
+      # and false when hidden because one of its ancestors is hidden (so to show
+      # this you need to show that ancestor)
+      def showable?
+        hidden? && hidden_origin.blank?
+      end
 
       def visible=(visible)
         protect_root_visibility!
         set_visible(visible)
       end
+
 
       protected
 
@@ -59,6 +67,7 @@ module Spontaneous::Plugins
       def set_visible(visible)
         protect_root_visibility!
         if self.visible? != visible
+          raise Spontaneous::NotShowable.new(self, hidden_origin) if hidden? && visible && !showable?
           self[:hidden] = !visible
           self[:hidden_origin] = nil
           @_visibility_modified = true

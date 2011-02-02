@@ -42,7 +42,7 @@ GEM
     polyglot (0.3.1)
     rack (1.2.1)
     rdiscount (1.6.8)
-    sequel (3.19.0)
+    sequel (3.20.0)
     sinatra (1.1.2)
       rack (~> 1.1)
       tilt (~> 1.2)

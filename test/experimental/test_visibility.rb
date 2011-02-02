@@ -130,8 +130,23 @@ class VisibilityTest < Test::Unit::TestCase
       end
     end
 
-    # hiding something that is hidden because its ancestor is hidden shouldn't be possible
-    should "stop hidden child content from being hidden"
+    should "know if something is hidden because its ancestor is hidden" do
+      facet = Content.first(:uid => "0.0")
+      facet.hide!
+      facet.showable?.should be_true
+      child = Content.first(:uid => "0.0.0.0")
+      child.visible?.should be_false
+      child.showable?.should be_false
+    end
+
+    # showing something that is hidden because its ancestor is hidden shouldn't be possible
+    should "stop hidden child content from being hidden" do
+      facet = Content.first(:uid => "0.0")
+      facet.hide!
+      child = Content.first(:uid => "0.0.0.0")
+      child.visible?.should be_false
+      lambda { child.show! }.should raise_error(Spontaneous::NotShowable)
+    end
 
     context "root" do
       should "should not be hidable" do
