@@ -37,6 +37,7 @@ module SeleniumTest
         puts "\n>>> Launching selenium #{SELENIUM_BIN}"
         @_selenium_pid = fork do
           STDOUT.reopen("/dev/null")
+          STDERR.reopen("/dev/null")
           exec("java -jar #{SELENIUM_BIN} -port #{SELENIUM_PORT}")
         end
         running, sock = false, nil
