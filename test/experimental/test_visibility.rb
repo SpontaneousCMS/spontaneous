@@ -58,10 +58,10 @@ class VisibilityTest < Test::Unit::TestCase
       @child.hide!
       @child.children.each do |child1|
         child1.visible?.should be_false
-        child1.visibility_origin.should == @child.id
+        child1.hidden_origin.should == @child.id
         child1.children.each do |child2|
           child2.visible?.should be_false
-          child2.visibility_origin.should == @child.id
+          child2.hidden_origin.should == @child.id
         end
       end
     end
@@ -74,13 +74,13 @@ class VisibilityTest < Test::Unit::TestCase
         f.page.ancestors.include?(@child) || f.page == @child
       end.each do |f|
         f.visible?.should be_false
-        f.visibility_origin.should == @child.id
+        f.hidden_origin.should == @child.id
       end
       Facet.all.select do | f |
         !f.page.ancestors.include?(@child) && f.page != @child
       end.each do |f|
         f.visible?.should be_true
-        f.visibility_origin.should be_nil
+        f.hidden_origin.should be_nil
       end
     end
 
@@ -90,7 +90,7 @@ class VisibilityTest < Test::Unit::TestCase
       @child.reload
       Content.all.each do |c|
         c.visible?.should be_true
-        c.visibility_origin.should be_nil
+        c.hidden_origin.should be_nil
       end
     end
 
@@ -106,15 +106,15 @@ class VisibilityTest < Test::Unit::TestCase
         if c.uid =~ /^0\.0/
           c.hidden?.should be_true
           if c.uid == "0.0"
-            c.visible.should be_false
-            c.visibility_origin.should be_nil
+            c.visible?.should be_false
+            c.hidden_origin.should be_nil
           else
-            c.visible.should be_false
-            c.visibility_origin.should == facet.id
+            c.visible?.should be_false
+            c.hidden_origin.should == facet.id
           end
         else
           c.hidden?.should be_false
-          c.visibility_origin.should be_nil
+          c.hidden_origin.should be_nil
         end
       end
 
@@ -126,7 +126,7 @@ class VisibilityTest < Test::Unit::TestCase
       facet.show!
       Content.all.each do |c|
         c.visible?.should be_true
-        c.visibility_origin.should be_nil
+        c.hidden_origin.should be_nil
       end
     end
 
@@ -175,6 +175,7 @@ class VisibilityTest < Test::Unit::TestCase
         page = Content.first(:uid => "1")
         Content.with_visible do
           lambda { page.entries << Facet.new }.should raise_error(TypeError)
+          lambda { page << Facet.new }.should raise_error(TypeError)
         end
       end
     end

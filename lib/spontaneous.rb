@@ -14,6 +14,7 @@ Sequel.extension :inflector
 require 'spontaneous/logger'
 require 'spontaneous/plugins'
 require 'spontaneous/constants'
+require 'spontaneous/errors'
 
 Dir[File.expand_path('../spontaneous/plugins/application/*.rb', __FILE__)].each do |file|
   require file
@@ -22,6 +23,7 @@ end
 module Spontaneous
   extend Plugins
   include Constants
+  include Errors
 
   def self.gem_root
     @gem_root ||= File.expand_path(File.dirname(__FILE__) / '..')

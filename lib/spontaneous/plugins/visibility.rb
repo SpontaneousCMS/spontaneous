@@ -27,11 +27,11 @@ module Spontaneous::Plugins
 
     module InstanceMethods
       def visible?
-        self.visible
+        !self.hidden
       end
 
       def hidden?
-        !visible?
+        self.hidden
       end
 
       def hide!
@@ -59,8 +59,8 @@ module Spontaneous::Plugins
       def set_visible(visible)
         protect_root_visibility!
         if self.visible? != visible
-          self[:visible] = visible
-          self[:visibility_origin] = nil
+          self[:hidden] = !visible
+          self[:hidden_origin] = nil
           @_visibility_modified = true
         end
       end
@@ -76,14 +76,14 @@ module Spontaneous::Plugins
       def hide_descendents(visible)
         path_like = :content_path.like("#{self[:content_path]}.#{self.id}%")
         origin = visible ? nil : self.id
-        Spontaneous::Content.filter(path_like).update(:visible => visible, :visibility_origin => origin)
+        Spontaneous::Content.filter(path_like).update(:hidden => !visible, :hidden_origin => origin)
 
         ## I'm saving these for posterity: I worked out some Sequel magic and I don't want to lose it
         #
-        # Spontaneous::Content.from(:content___p).filter(path_like).update(:visible => visible, :visibility_origin => origin)
-        # Spontaneous::Content.filter(:page_id => self.id).set(:visible => visible, :visibility_origin => origin)
+        # Spontaneous::Content.from(:content___p).filter(path_like).update(:visible => visible, :hidden_origin => origin)
+        # Spontaneous::Content.filter(:page_id => self.id).set(:visible => visible, :hidden_origin => origin)
         ## Update with join:
-        # Spontaneous::Content.from(:content___n, :content___p).filter(path_like).filter(:n__page_id => :p__id).set(:n__visible => visible, :n__visibility_origin => origin)
+        # Spontaneous::Content.from(:content___n, :content___p).filter(path_like).filter(:n__page_id => :p__id).set(:n__visible => visible, :n__hidden_origin => origin)
       end
 
       def protect_root_visibility!

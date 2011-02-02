@@ -74,6 +74,9 @@ class RenderTest < Test::Unit::TestCase
         @content << @child
         @content.entries.first.style = TemplateClass.styles[:this_template]
       end
+      teardown do
+        Content.delete
+      end
 
       should "be accessible through #content method" do
         @content.render.should == "<complex>\nThe Title\n<facet><html><title>Child Title</title><body>Child Description</body></html>\n</facet>\n</complex>\n"
@@ -81,6 +84,16 @@ class RenderTest < Test::Unit::TestCase
 
       should "cascade the chosen format to all subsequent #render calls" do
         @content.render(:pdf).should == "<pdf>\nThe Title\n<facet><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</facet>\n</pdf>\n"
+      end
+
+      should "only show visible entries" do
+        child = TemplateClass.new
+        child.title = "Child2 Title"
+        child.description = "Child2 Description"
+        @content << child
+        @content.entries.last.style = TemplateClass.styles[:this_template]
+        @content.entries.last.hide!
+        @content.render.should == "<complex>\nThe Title\n<facet><html><title>Child Title</title><body>Child Description</body></html>\n</facet>\n</complex>\n"
       end
     end
 

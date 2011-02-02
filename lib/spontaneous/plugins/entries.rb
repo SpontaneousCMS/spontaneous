@@ -38,7 +38,7 @@ module Spontaneous::Plugins
       end
 
       def recursive_destroy
-        entries.destroy
+        all_entries.destroy
       end
 
       def destroy_entry!(entry)
@@ -54,30 +54,30 @@ module Spontaneous::Plugins
       end
 
       def entry_modified!(modified_entry)
-        self.entry_store = entries.serialize
+        self.entry_store = all_entries.serialize
       end
 
       def entries
-        if self.class.visible_only?
-          all_entries.select { |e| e.visible? }.freeze
+        if Spontaneous::Content.visible_only?
+          visible_entries
         else
           all_entries
         end
       end
 
       def all_entries
-        @entries ||= Spontaneous::EntrySet.new(self, entry_store)
-      end
-
-      protected(:all_entries)
-
-      def reload
-        @entries = nil
-        super
+        @all_entries ||= Spontaneous::EntrySet.new(self, entry_store)
       end
 
       def visible_entries
-        entries
+        @visible_entries ||= all_entries.visible!
+      end
+
+      protected(:all_entries, :visible_entries)
+
+      def reload
+        @all_entries = @visible_entries = nil
+        super
       end
 
 
@@ -124,7 +124,14 @@ module Spontaneous::Plugins
       def insert_with_style(type, index, content)
         entry_style = style_for_content(content)
         entry = Spontaneous::Entry.send(type, self, content, entry_style)
-        entries.insert(index, entry)
+        begin
+          entries.insert(index, entry)
+        rescue TypeError => e
+          # TODO: raise a custom more helpful error here
+          logger.error { "Attempting to modify visible only entries" }
+          raise e
+        end
+
         entry
       end
 
@@ -155,8 +162,10 @@ module Spontaneous::Plugins
       end
 
       def resolve_entry
-        container.entries.find { |e| e.target_id == self.id }
+        container.all_entries.find { |e| e.target_id == self.id }
       end
+
+      protected(:resolve_entry)
 
       def method_missing(method, *args, &block)
         if entry = entries.labelled(method)

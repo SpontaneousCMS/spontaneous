@@ -32,7 +32,7 @@ module Spontaneous::Render
     end
 
     def content
-      target.visible_entries
+      target.entries
     end
 
     def entries

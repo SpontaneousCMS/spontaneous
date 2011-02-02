@@ -8,7 +8,7 @@ module Spontaneous
 
     attr_reader :owner
 
-    def initialize(owner, entry_store)
+    def initialize(owner, entry_store, only_visible=false)
       @owner = owner
       @name_map = {}
 
@@ -95,6 +95,13 @@ module Spontaneous
       map do | entry |
         entry.to_hash
       end
+    end
+
+    def visible!
+      # puts "copy >> "
+      # p self.dup.map { |e| e.visible? }
+      self.dup.reject { |e| e.hidden? }.freeze
+      # copy
     end
 
     protected
