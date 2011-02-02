@@ -39,6 +39,7 @@ Backend:
 - Look into inline image size definitions not working (see Project in example application) @done
 - Files should have their names sanitised @done
 - Move ALT text into image attributes?
+- Change 'default_value' do 'default' in field definitions
 
 Templates:
 - {{ }}, {$ $}, {% %} ==> #{ }, ${ }, %{ } @done
@@ -64,14 +65,15 @@ Version 1.0:
 - Aliasing UI
 - Users & permissions
 - Generators
-- Prototypes
+- Prototypes @done
 - Test framework
 - Roles
+- Rendering of published content using pre-generated templates
 
 Prototypes:
 
-- Keep it simple: have a #prototype method that is called if it exists on new Content. Within this method you can then add everything you want to the object before it is saved (this should happen after any auto-insertion of slots though)
-- Need to figure out an easy way to have multiple prototypes available. Should it be done by having #prototype_with_name and then calling create(:with_name) or having a #prototype(template=nil) and leaving it up to the developer to put in the relevant switches? Am leaning towards the latter.
+- Keep it simple: have a #prototype method that is called if it exists on new Content. Within this method you can then add everything you want to the object before it is saved (this should happen after any auto-insertion of slots though) @done
+- Need to figure out an easy way to have multiple prototypes available. Should it be done by having #prototype_with_name and then calling create(:with_name) or having a #prototype(template=nil) and leaving it up to the developer to put in the relevant switches? Am leaning towards the latter. @done
 
 Aliases:
 
@@ -95,6 +97,20 @@ Publishing:
 - difficulty is with getting the dependencies to load correctly - perhaps a simple pwd change would solve all of this though @done
 - make sure that first_published_at (or whatever) isn't modified if publishing fails @done
 - link success of rendering to success of publishing (i.e. only calling after publish lambdas after render & indexing are complete) @done
+- With sandboxed versions I need some way to restart the public site after a publish is complete. Easy with passenger but what about other frameworks?
+
+	See http://unicorn.bogomips.org/SIGNALS.html -- seems like sending a HUP would do exactly what I want.
+	The question is: how to let the site know how it sends that signal? Some kind of config option -- a lambda perhaps
+	but currently assigning a lambda to a config option just means that lambda is called to return the result. Perhaps this would work?
+	Seems nasty.
+
+Comfig:
+
+Current setup doesn't allow any room for non-value based config. i.e. there's no room for initialisation code in any of the config/* files
+Change environment.rb away from a config file, or add another initialisation file where you can run actual code?
+Wrap config settings in the environment/*.rb files in a call so that rest of file can run code-based init commands? See how rails3 does it...
+- Add 'initializers' dir (like rails3)
+- Wrap config settings in a call so that the env file can just be required rather than eval'd -- this will allow running of custom code in environment/*.rb (see e.g. problems with restart call after publication)
 
 Command Line:
 
@@ -112,7 +128,7 @@ Users & Permissions:
 - User editable/db driven groups (?)
 - Work out roles of User levels, groups & individual permissions. How to manage the code-db bridge? Levels:code, Groups:db?, Users:db
 
-Perhaps page permissions should only address groups. Replace users in current model with groups. Like on unix, creating a user also creates a group of which they are the only member. That would enable ACL style access. If single-user-groups (SUGs) are flagged as such then interface becomes easier as list of real groups is not overwhelmed by these virtual SUGs.
+	Perhaps page permissions should only address groups. Replace users in current model with groups. Like on unix, creating a user also creates a group of which they are the only member. That would enable ACL style access. If single-user-groups (SUGs) are flagged as such then interface becomes easier as list of real groups is not overwhelmed by these virtual SUGs.
 
 - Do I need solid query language in order to express group access perms? How to express "just this page", "just this page and all it's children" (and more complex variations on this, think CSS selectors) or "all pages" in a way suitable for storing in a db?
 - Assuming I do need a query language what should the syntax be? Again, think CSS:
