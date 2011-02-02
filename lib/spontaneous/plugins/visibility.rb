@@ -77,6 +77,7 @@ module Spontaneous::Plugins
         path_like = :content_path.like("#{self[:content_path]}.#{self.id}%")
         origin = visible ? nil : self.id
         Spontaneous::Content.filter(path_like).update(:visible => visible, :visibility_origin => origin)
+
         ## I'm saving these for posterity: I worked out some Sequel magic and I don't want to lose it
         #
         # Spontaneous::Content.from(:content___p).filter(path_like).update(:visible => visible, :visibility_origin => origin)
