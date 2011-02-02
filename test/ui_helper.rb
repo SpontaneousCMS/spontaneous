@@ -42,22 +42,24 @@ module SeleniumTest
         running, sock = false, nil
         waiting, max_wait = 0, 8
 
+        print "  > Waiting for Selenium server."
         catch :giveup do
           begin
-            sleep(2)
             begin
               sock = TCPSocket.open('127.0.0.1', SELENIUM_PORT)
               running = true
             rescue Errno::ECONNREFUSED
-              puts "  > Waiting for Selenium server..."
+              print "."
+              $stdout.flush
               running = false
               waiting += 1
               throw :giveup if waiting >= max_wait
+              sleep(2)
             ensure
               sock.close if sock
             end
           end while !running
-          puts ">>> Selenium running on port #{SELENIUM_PORT} PID #{@_selenium_pid}"
+          puts "\n>>> Selenium running on port #{SELENIUM_PORT} PID #{@_selenium_pid}"
         end
         unless running
           puts ">>> Failed to start Selenium server\n>>> Does #{SELENIUM_BIN} exist?"
