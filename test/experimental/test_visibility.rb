@@ -144,20 +144,37 @@ class VisibilityTest < Test::Unit::TestCase
 
     context "visibility scoping" do
       setup do
+      end
+
+      should "prevent inclusion of hidden content" do
         @uid = '0'
         @page = Page.uid(@uid)
         @page.hide!
         @page.reload
-      end
-
-      should "xx prevent inclusion of hidden content" do
         # Spontaneous.database.logger = ::Logger.new($stdout)
         Page.path("/0").should == @page
-        Page.uid(@uid).should == @page
         Content.with_visible do
           Content.visible_only?.should be_true
           Page.uid(@uid).should be_blank
           Page.path("/0").should be_blank
+          Page.uid('0.0.0').should be_blank
+        end
+      end
+
+      should "only show visibile entries" do
+        page = Content.first(:uid => "1")
+        page.entries.length.should == 4
+        page.entries.first.hide!
+        page.reload
+        Content.with_visible do
+          page.entries.length.should == 3
+        end
+      end
+
+      should "stop modification of entries" do
+        page = Content.first(:uid => "1")
+        Content.with_visible do
+          lambda { page.entries << Facet.new }.should raise_error(TypeError)
         end
       end
     end

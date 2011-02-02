@@ -58,8 +58,18 @@ module Spontaneous::Plugins
       end
 
       def entries
+        if self.class.visible_only?
+          all_entries.select { |e| e.visible? }.freeze
+        else
+          all_entries
+        end
+      end
+
+      def all_entries
         @entries ||= Spontaneous::EntrySet.new(self, entry_store)
       end
+
+      protected(:all_entries)
 
       def reload
         @entries = nil
