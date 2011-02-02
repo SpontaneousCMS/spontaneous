@@ -16,13 +16,17 @@ module Spontaneous::Plugins
       #   new(values, &block).save
       # end
 
+      def create_without_prototype(values = {}, &block)
+        create(false, values, &block)
+      end
+
       ##
       # Create a new content instance
       def create(*args, &block)
         first = args.shift
         prototype = values = nil
         case first
-        when Symbol
+        when Symbol, false
           prototype = first
           values = args.shift || {}
         when Hash
@@ -30,8 +34,7 @@ module Spontaneous::Plugins
         else
           values = {}
         end
-        instance = new(values.merge(:_prototype => prototype), &block)
-        instance.save
+        new(values.merge(:_prototype => prototype), &block).save
       end
     end # ClassMethods
 
@@ -45,6 +48,7 @@ module Spontaneous::Plugins
       protected
 
       def apply_prototype
+        return if _prototype == false
         initialize_slots!
         if _prototype.blank?
           prototype if respond_to?(:prototype)

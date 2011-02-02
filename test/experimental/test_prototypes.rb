@@ -91,6 +91,12 @@ class PrototypesTest < Test::Unit::TestCase
       content.images2 << ImageClass.new
       content.images2.first.description.value.should == "Complex"
     end
+
+    should "allow creation by-passing the prototype" do
+      content = PrototypeClass.create_without_prototype
+      content.title.value.should == ""
+      content.date.value.should == ""
+    end
   end
 end
 
