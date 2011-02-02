@@ -55,14 +55,18 @@ Preview:
 
 Version 1.0:
 
-- Publishing
-- Templates
-- Hiding
-- Aliasing
+- Publishing @done
+- Publishing UI
+- Templates @done
+- Hiding @done
+- Hiding UI
+- Aliasing @done
+- Aliasing UI
 - Users & permissions
 - Generators
 - Prototypes
 - Test framework
+- Roles
 
 Prototypes:
 
