@@ -9,3 +9,5 @@ front do
   port 9002
 end
 
+
+TopLevel.parameter = :dev

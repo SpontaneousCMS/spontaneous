@@ -19,3 +19,4 @@ front do
   port 3002
 end
 
+TopLevel.parameter = :prod

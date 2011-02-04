@@ -8,23 +8,34 @@ class ConfigTest < Test::Unit::TestCase
     setup do
       @pwd = Dir.pwd
       Config = ::Spontaneous::Config
-      Dir.chdir(File.expand_path("../../fixtures/example_application", __FILE__))
+      Dir.chdir(File.expand_path("../../fixtures/config", __FILE__))
+      Spontaneous.root = Dir.pwd
       @lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../../../../lib'))
+      class ::TopLevel
+        def self.parameter=(something)
+          @parameter = something
+        end
+
+        def self.parameter
+          @parameter
+        end
+      end
       # defined?(Spontaneous).should be_nil
       # Object.send(:remove_const, :Spontaneous) rescue nil
       # defined?(Spontaneous).should be_nil
       # require @lib_dir + '/spontaneous/config.rb'
-      Config.load
-      Config.environment = :development
+      # Config.environment = :development
+      Config.load(:development)
     end
 
     teardown do
       self.class.send(:remove_const, :Config) rescue nil
+      Object.send(:remove_const, :TopLevel)
       Dir.chdir(@pwd)
     end
 
     should "be run from application dir" do
-      File.exist?('schema').should be_true
+      File.exist?('config').should be_true
     end
 
     should "read from the global environment file" do
@@ -35,28 +46,30 @@ class ConfigTest < Test::Unit::TestCase
       Config.environment.should == :development
     end
 
-    should "allow setting of environment" do
-      Config.environment.should == :development
-      Config.environment = :production
-      Config.environment.should == :production
-    end
+    # should "allow setting of environment" do
+    #   Config.environment.should == :development
+    #   Config.environment = :production
+    #   Config.environment.should == :production
+    # end
 
     should "overwrite values depending on environment" do
-      Config[:development].over_ridden.should == :development_value
-      Config[:production].over_ridden.should == :production_value
-      Config[:staging].over_ridden.should == :environment_value
+      Config.over_ridden.should == :development_value
+      Config.load(:production)
+      Config.over_ridden.should == :production_value
+      Config.load(:staging)
+      Config.over_ridden.should == :environment_value
     end
 
     should "allow setting of env values" do
-      Config[:development].something_else.should be_nil
-      Config[:development][:something_else] = "loud"
-      Config[:development].something_else.should == "loud"
+      Config.something_else.should be_nil
+      Config[:something_else] = "loud"
+      Config.something_else.should == "loud"
     end
 
     should "allow setting of env values through method calls" do
-      Config[:development].something_else2.should be_nil
-      Config[:development].something_else2 = "loud"
-      Config[:development].something_else2.should == "loud"
+      Config.something_else2.should be_nil
+      Config.something_else2 = "loud"
+      Config.something_else2.should == "loud"
     end
 
     should "dynamically switch values according to the configured env" do
@@ -87,13 +100,17 @@ class ConfigTest < Test::Unit::TestCase
       Config.new_dynamic_setting.should == "flying"
     end
 
+    should "allow calling of global methods" do
+      TopLevel.parameter.should == :dev
+    end
+
     teardown do
       Dir.chdir(@pwd)
     end
     context "Spontaneous :back" do
       setup do
         Spontaneous.mode = :back
-        Config.load
+        Config.load(:development)
       end
       should "read the correct configuration values" do
         Config.port.should == 9001

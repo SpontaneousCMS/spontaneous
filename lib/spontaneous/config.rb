@@ -89,23 +89,24 @@ module Spontaneous
       def_delegators :@settings, :key?, :[]=
     end
 
-    @@local = Configuration.new(:local)
-    @@environments = Hash.new { |hash, key| hash[key] = {} }
-    @@base = Configuration.new(:base)
+    @@local = nil
+    @@environment = nil
+    @@base = nil
     @@defaults = Configuration.new(:defaults, {
       #TODO: add in sensible default configuration (or do it in the generators)
     })
 
     class << self
-      def load(pwd=Spontaneous.root)
+      def load(environment=:development, pwd=Spontaneous.root)
+        @environment = environment.to_sym
+        @@base = Configuration.new(:base)
+        @@local = Configuration.new(:local)
         default = File.join(pwd, 'config/environment.rb')
         Loader.read(@@base, default) if File.exist?(default)
-        Dir.glob(File.join(pwd, 'config/environments/*.rb')).each do |file|
-          environment = File.basename(file, '.rb').to_sym
-          store = Hash.new
-          Loader.read(store, file)
-          @@environments[environment] = Configuration.new(environment, store)
-        end
+        store = Hash.new
+        file =  File.join(pwd, "config/environments/#{environment}.rb")
+        Loader.read(store, file) if ::File.exists?(file)
+        @@environment = Configuration.new(@environment, store)
       end
 
       def defaults
@@ -113,50 +114,49 @@ module Spontaneous
       end
 
       def environment
-         @environment || Spontaneous.env
+        @environment || Spontaneous.env
       end
 
       def environment=(env)
-        @environment = env.to_sym
+        self.load(env.to_sym)
       end
 
       def configuration
-        @@environments[environment]
+        @@environment
       end
 
       def base
         @@base
       end
 
-      def [](env)
-        @@environments[env]
+      def [](key)
+        if @@local.key?(key)
+          @@local[key]
+        elsif configuration.key?(key)
+          configuration[key]
+        elsif base.key?(key)
+          base[key]
+        elsif defaults.key?(key)
+          defaults[key]
+        else
+          # acting like a hash and returning nil for an unknown setting
+          nil
+        end
+      end
+
+      def []=(key, val)
+        @@local[key] = val
       end
 
       def method_missing(key, *args, &block)
         if key.to_s =~ /=$/
           key = key.to_s.gsub(/=$/, '').to_sym
-          @@local[key] = args[0]
+          self[key] = args[0]
         else
-          if @@local.key?(key)
-            @@local[key]
-          elsif configuration.key?(key)
-            configuration[key]
-          elsif base.key?(key)
-            base[key]
-          elsif defaults.key?(key)
-            defaults[key]
-          else
-            # acting like a hash and returning nil for an unknown setting
-            nil
-          end
+          self[key]
         end
       end
     end
   end
 end
-
-# automatically load the config if it looks like we're in an app dir
-# if File.exist?('config/environment.rb')
-#   Spontaneous::Config.load
-# end
 

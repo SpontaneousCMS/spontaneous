@@ -13,7 +13,7 @@ module Spontaneous::Plugins::Application
         self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
         self.mode = options.delete(:mode) || ENV["SPOT_MODE"] || :back
         Spot::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
-        Spot::Config.load
+        Spot::Config.load(self.environment, self.root)
         connect_to_database
         Spot::Schema.load
         Thread.current[:spontaneous_loaded] = true
