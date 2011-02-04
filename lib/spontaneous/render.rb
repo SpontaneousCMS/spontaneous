@@ -28,7 +28,7 @@ module Spontaneous
       end
 
       def with_published_engine(&block)
-        with_engine(Cutaneous::PublishRenderEngine, &block)
+        with_engine(Cutaneous::PublishedRenderEngine, &block)
       end
 
       @@engine_stack = []

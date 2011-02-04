@@ -2,6 +2,7 @@
 
 require 'test_helper'
 
+ENV['RACK_ENV'] = 'test'
 
 class FrontTest < Test::Unit::TestCase
   include StartupShutdown
@@ -9,6 +10,7 @@ class FrontTest < Test::Unit::TestCase
 
   class ::SitePage < Spontaneous::Page
     page_style :default
+    page_style :dynamic
   end
   def self.startup
     Site.delete
@@ -51,6 +53,10 @@ class FrontTest < Test::Unit::TestCase
   end
   def news
     @@news
+  end
+
+  def session
+    last_request.env['rack.session']
   end
 
   context "Public pages" do
@@ -179,5 +185,25 @@ class FrontTest < Test::Unit::TestCase
         assert last_response.status == 307
       end
     end
+
+    context "Templates" do
+      setup do
+        Page.stubs(:path).with("/about").returns(about)
+        about.style = :dynamic
+        # about.save
+      end
+
+      teardown do
+        about.style = :default
+        # about.save
+      end
+
+      should "have access to the params, request & session object" do
+        get '/about', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+        assert last_response.ok?
+        last_response.body.should == "42/peter/example.org\n"
+      end
+    end
   end
+
 end

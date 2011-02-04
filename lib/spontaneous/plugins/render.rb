@@ -8,7 +8,6 @@ module Spontaneous::Plugins
 
     module InstanceMethods
       def render(format=:html, params={}, *args)
-        params = {}
         if format.is_a?(Hash)
           params = format
           format = :html

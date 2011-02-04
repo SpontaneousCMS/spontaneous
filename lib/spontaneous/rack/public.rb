@@ -7,6 +7,14 @@ module Spontaneous
       set :static, true
       set :public, Proc.new { Spontaneous.root / "public" }
 
+      # see http://benprew.posterous.com/testing-sessions-with-sinatra
+      if test?
+        set :sessions, false
+      else
+        set :sessions, true
+      end
+
+
       get "/" do
         Site.root.render
       end
@@ -35,7 +43,11 @@ module Spontaneous
 
           if page && page.provides_format?(format)
             content_type(::Rack::Mime.mime_type("#{DOT}#{format}")) if format
-            page.render(format)
+            page.render(format, {
+              :params => params,
+              :request => request,
+              :session => session
+            })
           else
             # perhaps we should return the html version if the page exists but
             # doesn't respond to the requested format?
