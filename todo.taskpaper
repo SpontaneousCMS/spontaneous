@@ -27,7 +27,7 @@ UI:
 
 - Attach URL editing/displaying box to bottom of page-info and then animate #page-info {height:'+10'} to expand for editing... @done
 - Preview mode is not using the edited URL of current page
-
+- Developer info (post User stuff)
 - Editing of page UID
 
 Backend:
@@ -69,6 +69,9 @@ Version 1.0:
 - Test framework
 - Roles
 - Rendering of published content using pre-generated templates
+- Javascript & CSS compression (publishing)
+- Javascript & CSS compression (gem)
+
 
 Prototypes:
 
@@ -111,6 +114,7 @@ Change environment.rb away from a config file, or add another initialisation fil
 Wrap config settings in the environment/*.rb files in a call so that rest of file can run code-based init commands? See how rails3 does it...
 - Add 'initializers' dir (like rails3)
 - Wrap config settings in a call so that the env file can just be required rather than eval'd -- this will allow running of custom code in environment/*.rb (see e.g. problems with restart call after publication)
+- Update boot.rb to match style of that found in Rails3
 
 Command Line:
 
@@ -163,3 +167,25 @@ What about selecting by slugs? What about selecting all pages & all non-pages?
 Sequel:
 
 - Creating associations without saving. Currently associations need the parent to have an id -- this sucks, especially for my ideas for prototypes
+
+Update Workflow:
+
+Need to think about the workflow for updates to css. Have just had situation on BP where I updated the CSS but this meant that incremental publishes broke the live site. How to avoid this? Sandboxing the published version doesn't work because we're talking about changes after publishing.
+
+Ideally you'd tie the CSS to the page, so publishing a page means publishing the CSS and everything remains consistent. I've tried this stuff before in v1 and the result was a disaster.
+
+This comes back to the idea of type-fields -- like class variables but for content. However in the BP case above that wouldn't have worked, what would have been needed was a way to link updates to CSS with publication of an individual page, not a class of pages.
+
+Maybe I should just have done the update to the CSS better. Making the new version backwardly compatible so that incremenatal publishes would work.
+
+
+PDFs:
+
+- Find more generic way to re-produce the v1 "PDF" link option. Instead of making this PDF only, I could generalise it into a system where you define a content type, one of its fields and name to give this selection and it will append this list of links onto the set available in text editors.
+
+Optimisation/Ideas:
+
+- Bundle HWIA gem (https://github.com/methodmissing/hwia) and use StrHash / (Hash with indifferent access) liberally
+- Move to Active Support 3
+
+
