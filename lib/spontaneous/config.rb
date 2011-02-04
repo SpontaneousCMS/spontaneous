@@ -95,21 +95,28 @@ module Spontaneous
     @@defaults = Configuration.new(:defaults, {
       #TODO: add in sensible default configuration (or do it in the generators)
     })
+    @@loaded = false
 
     class << self
       def load(environment=:development, pwd=Spontaneous.root)
         @environment = environment.to_sym
         @@base = Configuration.new(:base)
-        @@local = Configuration.new(:local)
+        @@local = nil
         default = File.join(pwd, 'config/environment.rb')
         Loader.read(@@base, default) if File.exist?(default)
         store = Hash.new
         file =  File.join(pwd, "config/environments/#{environment}.rb")
         Loader.read(store, file) if ::File.exists?(file)
         @@environment = Configuration.new(@environment, store)
+        @@loaded = true
+      end
+
+      def load!
+        load unless @@loaded
       end
 
       def defaults
+        load!
         @@defaults
       end
 
@@ -122,16 +129,18 @@ module Spontaneous
       end
 
       def configuration
+        load!
         @@environment
       end
 
       def base
+        load!
         @@base
       end
 
       def [](key)
-        if @@local.key?(key)
-          @@local[key]
+        if local.key?(key)
+          local[key]
         elsif configuration.key?(key)
           configuration[key]
         elsif base.key?(key)
@@ -145,7 +154,7 @@ module Spontaneous
       end
 
       def []=(key, val)
-        @@local[key] = val
+        local[key] = val
       end
 
       def method_missing(key, *args, &block)
@@ -155,6 +164,11 @@ module Spontaneous
         else
           self[key]
         end
+      end
+
+      def local
+        load!
+        @@local ||= Configuration.new(:local)
       end
     end
   end

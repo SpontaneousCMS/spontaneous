@@ -30,6 +30,16 @@ class ApplicationTest < Test::Unit::TestCase
     end
   end
 
+  context "Site" do
+    should "have the same config as Spontaneous" do
+      Site.config.should == Spontaneous.config
+    end
+
+    should "enable setting config vars on Site" do
+      Site.config.butter = "yummy"
+      Site.config.butter.should == "yummy"
+    end
+  end
   context "back, development" do
 
     setup do

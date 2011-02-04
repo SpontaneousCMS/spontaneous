@@ -84,6 +84,10 @@ module Spontaneous
       def pending_revision
         instance.pending_revision
       end
+
+      def config
+        Spontaneous.config
+      end
     end
   end
 end
