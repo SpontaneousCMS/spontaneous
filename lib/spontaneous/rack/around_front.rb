@@ -10,8 +10,10 @@ module Spontaneous
       def call(env)
         response = nil
         Content.with_identity_map do
-          Site.with_published do
-            response = @app.call(env)
+          S::Render.with_published_engine do
+            Site.with_published do
+              response = @app.call(env)
+            end
           end
         end
         response
@@ -20,5 +22,4 @@ module Spontaneous
 
   end
 end
-
 

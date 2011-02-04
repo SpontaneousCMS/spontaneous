@@ -40,6 +40,8 @@ require 'support/custom_matchers'
 # require 'support/timing'
 
 
+Spontaneous.database = DB
+
 module StartupShutdown
   def self.included(base)
     base.extend(ClassMethods)

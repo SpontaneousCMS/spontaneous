@@ -27,6 +27,10 @@ module Spontaneous
         with_engine(Cutaneous::PublishRenderEngine, &block)
       end
 
+      def with_published_engine(&block)
+        with_engine(Cutaneous::PublishRenderEngine, &block)
+      end
+
       @@engine_stack = []
 
       def with_engine(new_engine_class, &block)
@@ -68,7 +72,7 @@ module Spontaneous
 
       def render(content, format=:html, params={})
         Content.with_visible do
-          engine.render_content(content, format, params)
+          engine.render_content(content, format || :html, params)
         end
       end
     end

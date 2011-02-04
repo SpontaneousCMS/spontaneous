@@ -27,6 +27,12 @@ module Spontaneous::Plugins
         page_styles.default
       end
 
+
+      def provides_format?(format)
+        format ||= :html
+        style.formats.include?(format.to_sym)
+      end
+
       def style=(page_style)
         case page_style
         when String, Symbol

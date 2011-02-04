@@ -139,4 +139,4 @@ Dir[File.join(File.dirname(__FILE__), 'spontaneous', 'extensions', '*.rb')].each
 end
 
 Spot = S = Spontaneous unless defined?(Spot)
-
+# Site = Spontaneous::Site
