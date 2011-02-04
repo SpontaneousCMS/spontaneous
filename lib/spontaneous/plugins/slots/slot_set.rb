@@ -25,6 +25,14 @@ module Spontaneous::Plugins
         owner.entries
       end
 
+      def [](name)
+        slot = target[name] || create_slot(name)
+      end
+
+      def create_slot(name)
+        owner.class.slots.create_slot_named(owner, name)
+      end
+
       def method_missing(method, *args, &block)
         target.send(method, *args, &block)
       end

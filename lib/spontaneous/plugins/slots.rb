@@ -51,15 +51,18 @@ module Spontaneous::Plugins
 
       def after_initialize
         super
-        if new?
-          initialize_slots!
-        else
-          self.class.slots.verify(self)
-        end
+        verify_slots!
       end
 
-      def initialize_slots!
-        self.class.slots.instantiate(self)
+      def verify_slots!
+        unless @_slots_verified
+          if new?
+            self.class.slots.instantiate(self)
+          else
+            self.class.slots.verify(self)
+          end
+          @_slots_verified = true
+        end
       end
 
       def after_save

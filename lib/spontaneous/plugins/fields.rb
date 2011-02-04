@@ -43,6 +43,7 @@ module Spontaneous::Plugins
       def fields
         field_names.map { |n| field_prototypes[n] }
       end
+
       def default_field_order
         (supertype ? supertype.field_names : []) + local_field_order
       end

@@ -47,22 +47,23 @@ module Spontaneous::Plugins
 
       protected
 
+      DEFAULT_PROTOTYPE_METHOD = :prototype unless defined?(DEFAULT_PROTOTYPE_METHOD)
+
       def apply_prototype
         return if _prototype == false
-        initialize_slots!
-        if _prototype.blank?
-          prototype if respond_to?(:prototype)
-        else
-          method = "#{_prototype}_prototype".to_sym
-          if respond_to?(method)
-            self.__send__(method)
-          else
-            logger.warn {
-              "Invalid prototype name '#{_prototype}' being passed to class #{self.class}. No method #{method} available."
-            }
-          end
+        prototype_method = DEFAULT_PROTOTYPE_METHOD
+        unless _prototype.blank?
+          prototype_method = "#{_prototype}_prototype".to_sym
         end
-        save
+
+        if respond_to?(prototype_method)
+          self.__send__(prototype_method)
+          save
+        else
+          logger.warn {
+            "Invalid prototype name '#{_prototype}' being passed to class #{self.class}. No method #{prototype_method} available."
+          } unless prototype_method == DEFAULT_PROTOTYPE_METHOD
+        end
       end
 
       def _prototype=(prototype)

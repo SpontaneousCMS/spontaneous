@@ -27,7 +27,6 @@ module Spontaneous::Plugins
       end
 
       def parent=(parent)
-        puts "Paths#parent=(#{parent})"
         super
       end
 

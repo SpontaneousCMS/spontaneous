@@ -98,10 +98,7 @@ module Spontaneous
     end
 
     def visible!
-      # puts "copy >> "
-      # p self.dup.map { |e| e.visible? }
       self.dup.reject { |e| e.hidden? }.freeze
-      # copy
     end
 
     protected

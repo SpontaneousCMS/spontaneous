@@ -47,6 +47,11 @@ module Spontaneous::Plugins
         self.select { |s| s.tag == tag }
       end
 
+      def create_slot_named(content, slot_name)
+        slot = @store.detect { |slot| slot.name == slot_name.to_sym }
+        content.slots.push(slot)
+      end
+
       def verify(content)
         # if the class doesn't define any slots then just skip this
         return if @content_class.slots.length == 0
