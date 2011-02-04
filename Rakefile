@@ -43,7 +43,8 @@ end
 Rake::TestTask.new(:test) do |test|
   test.libs << 'test'
   test.ruby_opts << '-rubygems'
-  test.pattern = $test_glob || 'test/**/test_*.rb'
+  test.pattern = $test_glob || 'test/{unit,functional,experimental}/test_*.rb'
+  # test.pattern = $test_glob || 'test/**/test_*.rb'
   test.verbose = false
 end
 
@@ -71,6 +72,12 @@ namespace :test do
     test.libs << 'test'
     test.ruby_opts << '-rubygems'
     test.pattern = 'test/javascript/**/test_*.rb'
+    test.verbose = true
+  end
+  Rake::TestTask.new(:ui) do |test|
+    test.libs << 'test'
+    test.ruby_opts << '-rubygems'
+    test.pattern = 'test/ui/**/test_*.rb'
     test.verbose = true
   end
 end
