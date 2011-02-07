@@ -16,6 +16,13 @@ Spontaneous.Init = (function($, S) {
 
 
 		return function() {
+
+			//// won't work unfortunately
+			// $('img').live('error', function() {
+			// 	console.log('error', this)
+			// 	$(this).attr('src', '/media/01158/0039/fright_night.jpeg')
+			// });
+
 			Types.init();
 
 			Location.add_listener('location', TopBar, 'location_changed');
