@@ -165,14 +165,14 @@ class BackTest < Test::Unit::TestCase
       get "/"
       assert last_response.ok?
       last_response.content_type.should == "text/html;charset=utf-8"
-      assert_equal @home.render, last_response.body
+      assert_equal S::Render.with_preview_renderer { @home.render }, last_response.body
     end
 
     should "return rendered child-page" do
       get "/about"
       assert last_response.ok?
       last_response.content_type.should == "text/html;charset=utf-8"
-      assert_equal @about.render, last_response.body
+      assert_equal S::Render.with_preview_renderer { @about.render }, last_response.body
     end
   end
   context "static files" do
