@@ -10,7 +10,6 @@ module Spontaneous
         template = preview_renderer.render_file(content.template, content, format, params)
         result = request_renderer.render_string(template, content, format, params)
 
-
         result
       end
     end # PreviewRenderer

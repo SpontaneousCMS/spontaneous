@@ -44,6 +44,7 @@ module Spontaneous
     autoload :Public, 'spontaneous/rack/public'
     autoload :AroundBack, 'spontaneous/rack/around_back'
     autoload :AroundFront, 'spontaneous/rack/around_front'
+    autoload :AroundPreview, 'spontaneous/rack/around_preview'
   end
 end
 

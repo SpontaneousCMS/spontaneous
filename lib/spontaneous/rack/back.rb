@@ -215,6 +215,8 @@ module Spontaneous
       end # EditingInterface
 
       class Preview < Spontaneous::Rack::Public
+        use AroundPreview
+
         get "/favicon.ico" do
           send_file(Spontaneous.static_dir / "favicon.ico")
         end
