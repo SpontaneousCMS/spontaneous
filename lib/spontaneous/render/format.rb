@@ -7,6 +7,7 @@ module Spontaneous::Render
       @format ||= self.name.demodulize.downcase.to_sym
     end
 
+
     attr_reader :progress
 
     def initialize(revision, pages, progress=nil)
@@ -27,7 +28,7 @@ module Spontaneous::Render
     end
 
     def after_page_rendered(page)
-      progress.page_rendered(page)
+      progress.page_rendered(page) if progress
     end
 
     def before_render; end
@@ -42,11 +43,11 @@ module Spontaneous::Render
     end
 
     def output_path(page, output)
-      ext = ".#{format}"
-      ext += ".#{render_engine.extension}" if render_engine.is_dynamic?(output)
+      ext = nil
+      ext = renderer.extension if renderer.is_dynamic?(output)
+      path = Spontaneous::Render.output_path(@revision, page, format, ext)
 
-      dir = revision_root / format / page.path
-      path = dir / "/index#{ext}"
+      dir = File.dirname(path)
       FileUtils.mkdir_p(dir) unless File.exist?(dir)
       path
     end
@@ -55,8 +56,8 @@ module Spontaneous::Render
       S::Site.revision_dir(@revision)
     end
 
-    def render_engine
-      Spontaneous::Render.engine
+    def renderer
+      Spontaneous::Render.renderer
     end
   end
 end

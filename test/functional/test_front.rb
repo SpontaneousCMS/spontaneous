@@ -15,6 +15,9 @@ class FrontTest < Test::Unit::TestCase
   def self.startup
     Site.delete
     Content.delete
+    Spontaneous.environment = :test
+    # see http://benprew.posterous.com/testing-sessions-with-sinatra
+    Spontaneous::Rack::Front.send(:set, :sessions, false)
     Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
     @@root = SitePage.create
     @@about = SitePage.create(:slug => "about", :uid => "about")
@@ -195,7 +198,7 @@ class FrontTest < Test::Unit::TestCase
 
       teardown do
         about.style = :default
-        # about.save
+        about.save
       end
 
       should "have access to the params, request & session object" do

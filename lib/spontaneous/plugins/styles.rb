@@ -99,7 +99,7 @@ module Spontaneous::Plugins
 
       def has_default_template?(format)
         return false if @label.nil? or @label.empty?
-        Spontaneous::Render.exists?(style.path, format)
+        Spontaneous::Render.exists?(Spontaneous::Render.template_root, style.path, format)
       end
 
       def style

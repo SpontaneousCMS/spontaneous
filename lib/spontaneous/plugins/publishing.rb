@@ -83,11 +83,7 @@ module Spontaneous::Plugins
       end
 
       def with_published(&block)
-        revision = if ENV.key?(Spontaneous::SPOT_REVISION_NUMBER)
-                     ENV[Spontaneous::SPOT_REVISION_NUMBER]
-                   else
-                     Spontaneous::Site.published_revision
-                   end
+        revision = Spontaneous::Site.published_revision
         with_revision(revision, &block)
       end
 

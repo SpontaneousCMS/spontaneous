@@ -78,7 +78,11 @@ module Spontaneous
       end
 
       def published_revision
-        instance.published_revision
+        if ENV.key?(Spontaneous::SPOT_REVISION_NUMBER)
+          ENV[Spontaneous::SPOT_REVISION_NUMBER]
+        else
+          instance.published_revision
+        end
       end
 
       def pending_revision

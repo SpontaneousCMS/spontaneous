@@ -7,10 +7,10 @@ class RenderTest < Test::Unit::TestCase
   include Spontaneous
 
   def setup
-    @saved_engine_class = Spontaneous::Render.engine_class
+    @saved_engine_class = Spontaneous::Render.renderer_class
   end
   def teardown
-    Spontaneous::Render.engine_class = @saved_engine_class
+    Spontaneous::Render.renderer_class = @saved_engine_class
   end
 
   def template_root
@@ -20,7 +20,7 @@ class RenderTest < Test::Unit::TestCase
   context "First render step" do
     setup do
       Spontaneous::Render.template_root = template_root
-      Spontaneous::Render.engine_class = Cutaneous::FirstRenderEngine
+      Spontaneous::Render.renderer_class = Spontaneous::Render::PublishedRenderer
 
       class ::TemplateClass < Content
         field :title do
@@ -262,7 +262,7 @@ class RenderTest < Test::Unit::TestCase
 
     context "Preview render" do
       setup do
-        Spontaneous::Render.engine_class = Cutaneous::PreviewRenderEngine
+        Spontaneous::Render.renderer_class = Spontaneous::Render::PreviewRenderer
         PreviewRender.page_style :page
       end
 
@@ -280,7 +280,7 @@ PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
     end
     context "Request rendering" do
       setup do
-        Spontaneous::Render.engine_class = Cutaneous::PreviewRenderEngine
+        Spontaneous::Render.renderer_class = Spontaneous::Render::PreviewRenderer
         PreviewRender.page_style :params
       end
 
@@ -294,7 +294,7 @@ PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
 
     context "entry parameters" do
       setup do
-        Spontaneous::Render.engine_class = Cutaneous::FirstRenderEngine
+        Spontaneous::Render.renderer_class = Spontaneous::Render::PublishedRenderer
         PreviewRender.page_style :entries
         @first = PreviewRender.new(:title => "first")
         @second = PreviewRender.new(:title => "second")

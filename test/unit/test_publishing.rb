@@ -864,7 +864,7 @@ class PublishingTest < Test::Unit::TestCase
         Spontaneous.revision_root = @revision_dir
         Spontaneous.template_root = @template_root
         # Cutaneous::PreviewRenderEngine.context_class = Cutaneous::PublishContext
-        Spontaneous::Render.engine_class = Cutaneous::FirstRenderEngine
+        Spontaneous::Render.renderer_class = Spontaneous::Render::PublishedRenderer
 
         @home = PublishablePage.create(:title => 'Home')
         @home.style = "dynamic"

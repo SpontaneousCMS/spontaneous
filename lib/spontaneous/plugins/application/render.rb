@@ -1,6 +1,8 @@
 # encoding: UTF-8
 
 
+require 'cutaneous'
+
 module Spontaneous::Plugins::Application
   module Render
 
@@ -11,9 +13,17 @@ module Spontaneous::Plugins::Application
       attr_accessor :render_engine
 
       def template_ext
-        Cutaneous.extension
+        template_engine.extension
+      end
+
+      def template_engine
+        @template_engine ||= Cutaneous
+      end
+
+      def template_engine=(engine)
+        @template_engine = engine
       end
     end # ClassMethods
   end # Render
-end
+end # Spontaneous::Plugins::Application
 

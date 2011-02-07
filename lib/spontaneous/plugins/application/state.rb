@@ -79,6 +79,10 @@ module Spontaneous::Plugins::Application
       def production?
         environment == :production
       end
+
+      def test?
+        environment == :test
+      end
     end # ClassMethods
   end # State
 end

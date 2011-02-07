@@ -3,6 +3,20 @@
 
 module Spontaneous
   module Render
+    def self.output_path(revision, page, format, extension = nil)
+      ext = ".#{format}"
+      ext += ".#{extension}" if extension
+
+      dir = revision_root(revision) / format / page.path
+      path = dir / "/index#{ext}"
+      path
+    end
+
+
+    def self.revision_root(revision)
+      S::Site.revision_dir(revision)
+    end
+
     class << self
       def render_pages(revision, pages, format, progress=nil)
         klass = Format.const_get("#{format.to_s.camelize}")
@@ -10,35 +24,43 @@ module Spontaneous
         renderer.render
       end
 
-      def engine_class
-        @engine_class ||= Cutaneous::FirstRenderEngine
+      def render_page(revision, page, format, progress=nil)
+        render_pages(revision, [page], format, progress)
       end
 
-      def engine_class=(klass)
-        @engine_class = klass
-        @engine = nil
+      def renderer_class
+        @renderer_class ||= PublishedRenderer
       end
 
-      def engine
-        @engine ||= engine_class.new(template_root)
+      def renderer_class=(klass)
+        @renderer_class = klass
+        @renderer = nil
       end
 
-      def with_publishing_engine(&block)
-        with_engine(Cutaneous::PublishRenderEngine, &block)
+      def renderer
+        @renderer ||= renderer_class.new(template_root)
       end
 
-      def with_published_engine(&block)
-        with_engine(Cutaneous::PublishedRenderEngine, &block)
+      def with_preview_renderer(&block)
+        with_renderer(PreviewRenderer, &block)
       end
 
-      @@engine_stack = []
+      def with_publishing_renderer(&block)
+        with_renderer(PublishingRenderer, &block)
+      end
 
-      def with_engine(new_engine_class, &block)
-        @@engine_stack.push(self.engine_class)
-        self.engine_class = new_engine_class
+      def with_published_renderer(&block)
+        with_renderer(PublishedRenderer, &block)
+      end
+
+      @@renderer_stack = []
+
+      def with_renderer(new_renderer, &block)
+        @@renderer_stack.push(self.renderer_class)
+        self.renderer_class = new_renderer
         yield if block_given?
       ensure
-        self.engine_class = @@engine_stack.pop
+        self.renderer_class = @@renderer_stack.pop
       end
 
 
@@ -46,25 +68,35 @@ module Spontaneous
         @template_root ||= Spontaneous.root / "templates"
       end
 
+      def template_path(*path)
+        ::File.join(template_root, *path)
+      end
+
       def template_root=(root)
         @template_root = root
-        @engine = nil
+        @renderer = nil
       end
 
       def extension
-        engine.extension
+        Spontaneous.template_ext
       end
 
-      def exists?(template, format)
-        File.exists?(template_file(template, format))
+      def exists?(template_root, template, format)
+        File.exists?(template_file(template_root, template, format))
       end
 
-      def template_file(template, format)
-        engine.template_file(template, format)
+      def template_file(template_root, filename, format)
+        ::File.join(template_root, template_name(filename, format))
       end
+
+      def template_name(filename, format)
+        "#{filename}.#{format}.#{Spontaneous.template_ext}"
+      end
+
+
 
       def formats(style)
-        glob = "#{engine.template_path(style.path)}.*.#{extension}"
+        glob = "#{template_path(style.path)}.*.#{extension}"
         Dir[glob].map do |file|
           file.split('.')[-2].to_sym
         end
@@ -72,13 +104,19 @@ module Spontaneous
 
       def render(content, format=:html, params={})
         Content.with_visible do
-          engine.render_content(content, format || :html, params)
+          renderer.render_content(content, format || :html, params)
         end
       end
     end
+    autoload :Engine, "spontaneous/render/engine"
 
     autoload :Context, "spontaneous/render/context"
-    autoload :Engine, "spontaneous/render/engine"
+
+    autoload :Renderer, "spontaneous/render/renderer"
+    autoload :PreviewRenderer, "spontaneous/render/preview_renderer"
+    autoload :PublishingRenderer, "spontaneous/render/publishing_renderer"
+    autoload :PublishedRenderer, "spontaneous/render/published_renderer"
+
     autoload :Format, "spontaneous/render/format"
   end
 end

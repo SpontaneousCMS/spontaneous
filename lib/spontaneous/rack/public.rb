@@ -7,14 +7,6 @@ module Spontaneous
       set :static, true
       set :public, Proc.new { Spontaneous.root / "public" }
 
-      # see http://benprew.posterous.com/testing-sessions-with-sinatra
-      if test?
-        set :sessions, false
-      else
-        set :sessions, true
-      end
-
-
       get "/" do
         Site.root.render
       end

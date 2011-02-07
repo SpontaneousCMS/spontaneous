@@ -12,8 +12,10 @@ module Spontaneous
       def call(env)
         response = nil
         Content.with_identity_map do
-          Change.record do
-            response = @app.call(env)
+          S::Render.with_preview_renderer do
+            Change.record do
+              response = @app.call(env)
+            end
           end
         end
         response

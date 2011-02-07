@@ -33,7 +33,11 @@ module Cutaneous
 
     def render_content(content, format, params={})
       context = context_class.new(content, format, params)
-      render(context.template, context)
+      render(path_for_content(context), context)
+    end
+
+    def path_for_content(content)
+      content.template
     end
 
     def render(filename, context, _layout=true)

@@ -10,7 +10,7 @@ module Spontaneous
       def call(env)
         response = nil
         Content.with_identity_map do
-          S::Render.with_published_engine do
+          S::Render.with_published_renderer do
             Site.with_published do
               response = @app.call(env)
             end
