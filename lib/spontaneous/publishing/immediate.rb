@@ -127,12 +127,12 @@ module Spontaneous
           eval(::File.read('#{rackup}'), binding, ::File.join(root, '#{rackup}'), __LINE__)
 
         RACKUP
-        rack_file = S::Site.revision_dir(revision) / 'config.ru'
+        rack_file = Spontaneous.revision_dir(revision) / 'config.ru'
         File.open(rack_file, 'w') { |f| f.write(template) }
         end
 
       def copy_static_files
-        public_dest = Pathname.new(S::Site.revision_dir(revision) / 'public')
+        public_dest = Pathname.new(Spontaneous.revision_dir(revision) / 'public')
         public_src = Pathname.new(Spontaneous.root / 'public').realpath
         FileUtils.mkdir_p(public_dest) unless File.exists?(public_dest)
         Dir[public_src.to_s / "**/*"].each do |src|
@@ -156,13 +156,13 @@ module Spontaneous
         S::Revision.create(:revision => revision, :published_at => Time.now)
         S::Site.send(:set_published_revision, revision)
         S::Site.send(:pending_revision=, nil)
-        system("ln -nsf #{S::Site.revision_dir(revision)} #{S::Site.revision_dir}")
+        system("ln -nsf #{Spontaneous.revision_dir(revision)} #{Spontaneous.revision_dir}")
         set_status("complete")
       end
 
       def abort_publish
         set_status("aborting")
-        FileUtils.rm_r(S::Site.revision_dir(revision)) if File.exists?(S::Site.revision_dir(revision))
+        FileUtils.rm_r(Spontaneous.revision_dir(revision)) if File.exists?(Spontaneous.revision_dir(revision))
         S::Site.send(:pending_revision=, nil)
         # S::Content.delete_revision(revision)
         set_status("error")

@@ -37,7 +37,12 @@ module Cutaneous
     def get_template(template_or_filepath, format)
       case template_or_filepath
       when String
-        filepath = Spontaneous::Render.template_file(template_root, template_or_filepath, format)
+        filepath = if ::File.exists?(template_or_filepath)
+                     template_or_filepath
+                   else
+                     Spontaneous::Render.template_file(template_root, template_or_filepath, format)
+                   end
+
         create_template(filepath, format)
       when Proc
         create_template(template_or_filepath, format)

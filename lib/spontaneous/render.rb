@@ -14,7 +14,7 @@ module Spontaneous
 
 
     def self.revision_root(revision)
-      S::Site.revision_dir(revision)
+      Spontaneous.revision_dir(revision)
     end
 
     class << self
@@ -116,6 +116,7 @@ module Spontaneous
     autoload :PreviewRenderer, "spontaneous/render/preview_renderer"
     autoload :PublishingRenderer, "spontaneous/render/publishing_renderer"
     autoload :PublishedRenderer, "spontaneous/render/published_renderer"
+    autoload :DevelopmentRenderer, "spontaneous/render/development_renderer"
 
     autoload :Format, "spontaneous/render/format"
   end

@@ -20,7 +20,7 @@ class RenderTest < Test::Unit::TestCase
   context "First render step" do
     setup do
       Spontaneous::Render.template_root = template_root
-      Spontaneous::Render.renderer_class = Spontaneous::Render::PublishedRenderer
+      Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
 
       class ::TemplateClass < Content
         field :title do
@@ -292,9 +292,10 @@ PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
       end
     end
 
+
     context "entry parameters" do
       setup do
-        Spontaneous::Render.renderer_class = Spontaneous::Render::PublishedRenderer
+        Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
         PreviewRender.page_style :entries
         @first = PreviewRender.new(:title => "first")
         @second = PreviewRender.new(:title => "second")
@@ -307,6 +308,19 @@ PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
         @page.render.should == "0>first\n1second\n2<third\n0:first\n1:second\n2:third\nfirst.second.third\n"
       end
     end
+
+    context "Published rendering" do
+      setup do
+        @file = ::File.expand_path("../../fixtures/templates/direct.html.cut", __FILE__)
+        @root = ::File.expand_path("../../fixtures/templates/", __FILE__)
+        File.exists?(@file).should be_true
+      end
+      should "Use file directly if it exists" do
+        result = Spontaneous.template_engine.request_renderer.new(@root).render_file(@file, nil)
+        result.should == "correct\n"
+      end
+    end
+
   end
 end
 

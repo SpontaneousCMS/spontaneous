@@ -892,7 +892,7 @@ class PublishingTest < Test::Unit::TestCase
       end
 
       should "put its files into a numbered revision directory" do
-        Site.revision_dir(2).should == @revision_dir / "00002"
+        Spontaneous.revision_dir(2).should == @revision_dir / "00002"
       end
 
       should "symlink the latest revision to 'current'" do

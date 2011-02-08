@@ -16,22 +16,37 @@ class FrontTest < Test::Unit::TestCase
     Site.delete
     Content.delete
     Spontaneous.environment = :test
+
+    @saved_revision_root = Spontaneous.revision_root
+    @saved_root = Spontaneous.root
+    Spontaneous.root = File.expand_path('../../fixtures/example_application', __FILE__)
+    @@revision_root = "#{Dir.tmpdir}/spontaneous-tests/#{Time.now.to_i}"
+    puts @@revision_root
+    `mkdir -p #{@@revision_root}`
+    Spontaneous.revision_root = @@revision_root
+
     Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
+
     @@root = SitePage.create
     @@about = SitePage.create(:slug => "about", :uid => "about")
     @@news = SitePage.create(:slug => "news", :uid => "news")
+    @@dynamic = SitePage.create(:slug => "dynamic", :uid => "dynamic")
+    @@dynamic.style = :dynamic
     @@root << @@about
     @@root << @@news
+    @@root << @@dynamic
     @@root.save
     Content.delete_revision(1)
-    Content.publish(1)
-    Site.create(:published_revision => 1)
+    Site.publish_all
   end
 
   def self.shutdown
     Content.delete
     Site.delete
     Content.delete_revision(1)
+    Spontaneous.revision_root = @saved_revision_root
+    Spontaneous.root = @saved_root
+    FileUtils.rm_rf(@@revision_root)
   end
 
   def setup
@@ -56,6 +71,13 @@ class FrontTest < Test::Unit::TestCase
   end
   def news
     @@news
+  end
+  def dynamic
+    @@dynamic
+  end
+
+  def revision_root
+    @@revision_root
   end
 
   def session
@@ -191,20 +213,38 @@ class FrontTest < Test::Unit::TestCase
 
     context "Templates" do
       setup do
-        Page.stubs(:path).with("/about").returns(about)
-        about.style = :dynamic
+        # Page.stubs(:path).with("/about").returns(about)
+        # about.style = :dynamic
         # about.save
       end
 
       teardown do
-        about.style = :default
-        about.save
+        # about.style = :default
+        # about.save
       end
 
       should "have access to the params, request & session object" do
-        get '/about', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+        get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
         assert last_response.ok?
         last_response.body.should == "42/peter/example.org\n"
+      end
+
+      context "caching" do
+        setup do
+          # puts `ls -l #{revision_root}`
+        end
+
+        teardown do
+        end
+
+        should "use pre-rendered versions of the templates" do
+          dummy_content = 'cached-version/#{session[\'user_id\']}'
+          dummy_template = File.join(revision_root, "dummy.html.cut")
+          File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
+          Spontaneous::Render.stubs(:output_path).returns(dummy_template)
+          get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+          last_response.body.should == "cached-version/42"
+        end
       end
     end
   end

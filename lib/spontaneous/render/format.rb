@@ -53,7 +53,7 @@ module Spontaneous::Render
     end
 
     def revision_root
-      S::Site.revision_dir(@revision)
+      Spontaneous.revision_dir(@revision)
     end
 
     def renderer

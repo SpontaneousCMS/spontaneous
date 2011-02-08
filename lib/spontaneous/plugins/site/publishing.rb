@@ -5,10 +5,6 @@ module Spontaneous::Plugins
   module Site
     module Publishing
       module ClassMethods
-        def revision_dir(revision=nil)
-          return S.revision_root / 'current' if revision.nil?
-          S.revision_root / revision.to_s.rjust(5, "0")
-        end
 
         def default_publishing_method
           S::Publishing::Immediate
