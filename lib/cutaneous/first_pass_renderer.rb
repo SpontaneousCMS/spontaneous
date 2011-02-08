@@ -3,14 +3,13 @@
 module Cutaneous
   class FirstPassRenderer < Renderer
 
-    def initialize(template_root, context_class=PublishContext)
-      super(template_root, context_class)
-    end
-
     def template_class
       Cutaneous::FirstPassParser
     end
 
+    def context_class
+      Cutaneous::PublishContext
+    end
   end
 end
 

@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 module Cutaneous
-  module TemplateCore
+  module ParserCore
     def self.included(base)
       base.extend(ClassMethods)
     end
@@ -21,8 +21,9 @@ module Cutaneous
         convert(File.read(filename), filename)
       end
     end
-    
+
   end
 end
+
 
 

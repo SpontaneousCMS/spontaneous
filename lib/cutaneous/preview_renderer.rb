@@ -3,10 +3,9 @@
 module Cutaneous
   class PreviewRenderer < FirstPassRenderer
 
-    def initialize(template_root, context_class=PreviewContext)
-      super(template_root, context_class)
+    def context_class
+      Cutaneous::PreviewContext
     end
-
   end
 end
 

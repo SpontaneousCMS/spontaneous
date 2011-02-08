@@ -29,7 +29,7 @@ module Spontaneous
       end
 
       def renderer_class
-        @renderer_class ||= PublishedRenderer
+        @renderer_class ||= PublishingRenderer
       end
 
       def renderer_class=(klass)

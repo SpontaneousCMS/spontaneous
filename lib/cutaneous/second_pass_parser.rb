@@ -2,7 +2,7 @@
 
 module Cutaneous
   class SecondPassParser < Tenjin::Template
-    include TemplateCore
+    include ParserCore
 
     ## %{ ruby_code }
     STMT_PATTERN = /%\{( |\t|\r?\n)(.*?) *\}(?:[ \t]*\r?\n)?/m

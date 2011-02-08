@@ -6,12 +6,12 @@ require 'test_helper'
 class TemplatesTest < Test::Unit::TestCase
   def first_pass(base_dir, filename, context=nil)
     context ||= @context
-    Cutaneous::FirstRenderEngine.new(template_root(base_dir)).render(filename, context)
+    Cutaneous::FirstPassRenderer.new(template_root(base_dir)).render(filename, context)
   end
 
   def second_pass(base_dir, filename, context=nil)
     context ||= @context
-    Cutaneous::SecondRenderEngine.new(template_root(base_dir)).render(filename, context)
+    Cutaneous::SecondPassRenderer.new(template_root(base_dir)).render(filename, context)
   end
 
   def template_root(base_dir)
@@ -42,7 +42,7 @@ class TemplatesTest < Test::Unit::TestCase
 
   context "First render" do
     setup do
-      @template = Cutaneous::Preprocessor.new
+      @template = Cutaneous::FirstPassParser.new
     end
 
     should "ignore second level statements" do
@@ -67,7 +67,7 @@ class TemplatesTest < Test::Unit::TestCase
     should "generate 2nd render templates" do
       @template.convert("<html><title>{{title}}</title>{% 2.times do %}\#{bell}\n{% end %}</html>")
       output = @template.render(@context)
-      second = Cutaneous::Template.new
+      second = Cutaneous::SecondPassParser.new
       second.convert(output)
       output = second.render(@context)
       output.should == "<html><title>THE TITLE</title>ding\nding\n</html>"
@@ -76,7 +76,7 @@ class TemplatesTest < Test::Unit::TestCase
 
   context "Second render" do
     setup do
-      @template = Cutaneous::Template.new
+      @template = Cutaneous::SecondPassParser.new
     end
 
     should "a render unescaped expressions" do
@@ -190,7 +190,7 @@ class TemplatesTest < Test::Unit::TestCase
           @klass.new
         end
       end
-      @template = Cutaneous::Preprocessor.new
+      @template = Cutaneous::FirstPassParser.new
     end
 
     should "call #render(format) if context responds to it" do

@@ -2,7 +2,7 @@
 
 module Cutaneous
   class FirstPassParser < Tenjin::Preprocessor
-    include TemplateCore
+    include ParserCore
 
     ## {% ruby_code %}
     STMT_PATTERN = /\{%( |\t|\r?\n)(.*?) *%\}([ \t]*\r?\n)?/m

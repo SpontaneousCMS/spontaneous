@@ -3,29 +3,26 @@
 module Cutaneous
   class Renderer# < Spontaneous::Renderer
     attr_reader :template_root
-    attr_accessor :context_class
-    attr_accessor :template_class
 
-    def initialize(template_root, context_class)
+    def initialize(template_root)
       @template_root = template_root
-      @context_class = context_class
     end
 
     def extension
       Cutaneous.extension
     end
 
-    def render_string(string, content, format, params = {})
+    def render_string(string, content, format = :html, params = {})
       template = string_to_template(string)
       render_template(template, content, format, params)
     end
 
-    def render_file(file_path, content, format, params = {})
+    def render_file(file_path, content, format = :html, params = {})
       template = get_template(file_path, format)
       render_template(template, content, format, params)
     end
 
-    protected
+    # protected
 
     def render_template(template, content, format, params = {})
       context = context_class.new(content, format, params)
@@ -55,15 +52,6 @@ module Cutaneous
       template.convert(string)
       template
     end
-
-    # def render_content(content, format, params={})
-    #   context = context_class.new(content, format, params)
-    #   render(path_for_content(context), context)
-    # end
-
-    # def path_for_content(content)
-    #   content.template
-    # end
 
     def render(filename, context, _layout=true)
       hook_context(context)
