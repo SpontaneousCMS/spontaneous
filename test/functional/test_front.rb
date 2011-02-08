@@ -21,7 +21,6 @@ class FrontTest < Test::Unit::TestCase
     @saved_root = Spontaneous.root
     Spontaneous.root = File.expand_path('../../fixtures/example_application', __FILE__)
     @@revision_root = "#{Dir.tmpdir}/spontaneous-tests/#{Time.now.to_i}"
-    puts @@revision_root
     `mkdir -p #{@@revision_root}`
     Spontaneous.revision_root = @@revision_root
 
@@ -37,7 +36,9 @@ class FrontTest < Test::Unit::TestCase
     @@root << @@dynamic
     @@root.save
     Content.delete_revision(1)
-    Site.publish_all
+    silence_logger {
+      Site.publish_all
+    }
   end
 
   def self.shutdown

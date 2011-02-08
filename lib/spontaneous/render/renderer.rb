@@ -38,7 +38,7 @@ module Spontaneous
       end
 
       def cache?
-        nil
+        Spontaneous.production?
       end
     end # Renderer
   end  # Render

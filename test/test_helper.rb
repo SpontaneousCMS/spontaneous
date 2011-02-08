@@ -71,10 +71,6 @@ module StartupShutdown
   end # ClassMethods
 end
 
-class Test::Unit::TestCase
-  include Spontaneous
-  include CustomMatchers
-
   def silence_logger(&block)
     begin
       $stdout = log_buffer = StringIO.new
@@ -86,6 +82,10 @@ class Test::Unit::TestCase
       log_buffer.string
     end
   end
+class Test::Unit::TestCase
+  include Spontaneous
+  include CustomMatchers
+
   alias :silence_stdout :silence_logger
 
   def assert_file_exists(*path)

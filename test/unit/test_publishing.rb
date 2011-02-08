@@ -410,7 +410,7 @@ class PublishingTest < Test::Unit::TestCase
         now = @now + 100
         Time.stubs(:now).returns(now)
         c = Content.first
-        c.modified_at.to_i.should == @now.to_i
+        (c.modified_at.to_i - @now.to_i).abs.should <= 1
         c.label = "changed"
         c.save
         c.modified_at.should == now

@@ -6,5 +6,8 @@ test/fixtures/example_application/public/media/*
 test/fixtures/media/*
 test/fixtures/revisions/*
 test/fixtures/example_application/log/*
-test/fixtures/public/templates/site_page/*.rb
+# cached templates
+*.html.rb
+*.pdf.rb
+*.epub.rb
 tmp
