@@ -19,10 +19,6 @@ module Spontaneous
         Render.template_file(template_root, filename, format)
       end
 
-      def is_dynamic?(template_string)
-        publishing_renderer.is_dynamic?(template_string)
-      end
-
       def extension
         Spontaneous.template_engine.extension
       end

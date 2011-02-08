@@ -25,6 +25,11 @@ module Cutaneous
     SecondPassRenderer
   end
 
+  def self.is_dynamic?(render)
+    SecondPassParser::STMT_PATTERN === render || SecondPassParser::EXPR_PATTERN === render
+  end
+
+
   autoload :ContextHelper, "cutaneous/context_helper"
   autoload :PreviewContext, "cutaneous/preview_context"
   autoload :PublishContext, "cutaneous/publish_context"
@@ -48,5 +53,4 @@ module Cutaneous
   autoload :SecondPassRenderer, "cutaneous/second_pass_renderer"
   autoload :PreviewRenderer, "cutaneous/preview_renderer"
 end
-
 

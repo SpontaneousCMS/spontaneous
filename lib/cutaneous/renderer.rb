@@ -25,14 +25,6 @@ module Cutaneous
       render_template(template, content, format, params)
     end
 
-    def self.is_dynamic?(render)
-      SecondPassParser::STMT_PATTERN === render || SecondPassParser::EXPR_PATTERN === render
-    end
-
-    def is_dynamic?(render)
-      self.class.is_dynamic?(render)
-    end
-
     protected
 
     def render_template(template, content, format, params = {})

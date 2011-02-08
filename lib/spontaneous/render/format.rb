@@ -44,7 +44,7 @@ module Spontaneous::Render
 
     def output_path(page, output)
       ext = nil
-      ext = renderer.extension if renderer.is_dynamic?(output)
+      ext = renderer.extension if Spontaneous.template_engine.is_dynamic?(output)
       path = Spontaneous::Render.output_path(@revision, page, format, ext)
 
       dir = File.dirname(path)
