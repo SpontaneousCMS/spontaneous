@@ -16,8 +16,6 @@ class FrontTest < Test::Unit::TestCase
     Site.delete
     Content.delete
     Spontaneous.environment = :test
-    # see http://benprew.posterous.com/testing-sessions-with-sinatra
-    Spontaneous::Rack::Front.send(:set, :sessions, false)
     Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
     @@root = SitePage.create
     @@about = SitePage.create(:slug => "about", :uid => "about")
@@ -38,6 +36,8 @@ class FrontTest < Test::Unit::TestCase
 
   def setup
     @saved_template_root = Spontaneous.template_root
+    # see http://benprew.posterous.com/testing-sessions-with-sinatra
+    app.send(:set, :sessions, false)
   end
 
   def teardown
