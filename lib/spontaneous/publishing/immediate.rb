@@ -156,6 +156,8 @@ module Spontaneous
         S::Revision.create(:revision => revision, :published_at => Time.now)
         S::Site.send(:set_published_revision, revision)
         S::Site.send(:pending_revision=, nil)
+        tmp = Spontaneous.revision_dir(revision) / "tmp"
+        FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
         system("ln -nsf #{Spontaneous.revision_dir(revision)} #{Spontaneous.revision_dir}")
         set_status("complete")
       end

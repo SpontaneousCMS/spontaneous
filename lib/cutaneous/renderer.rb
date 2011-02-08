@@ -2,10 +2,15 @@
 
 module Cutaneous
   class Renderer# < Spontaneous::Renderer
-    attr_reader :template_root
+    attr_reader :template_root, :cache_root
 
-    def initialize(template_root)
+    def initialize(template_root, cache = nil)
       @template_root = template_root
+      @cache = cache
+    end
+
+    def use_cache?
+      !@cache.nil?
     end
 
     def extension
@@ -31,18 +36,44 @@ module Cutaneous
 
 
     def create_template(filepath, format)
-      template_class.new(filepath, format)
+      template = template_class.new(nil, format)
+      case filepath
+      when String
+        template.timestamp = Time.now
+        template.filename = filepath
+        if use_cache?
+          cache_path = filepath[0...(-Cutaneous.extension.length)] + 'rb'
+          if test(?f, cache_path)
+            # puts "Using cached template #{cache_path}"
+            template.script = File.read(cache_path)
+          else
+            template.convert(File.read(filepath))
+            File.open(cache_path, 'w') do |f|
+              f.flock(File::LOCK_EX)
+              f.write(template.script)
+            end
+          end
+        else
+          template.convert(File.read(filepath))
+        end
+      when Proc
+        template = template_class.new(nil, format)
+        template.convert(filepath.call, filepath.to_s)
+      end
+      template
     end
 
     def get_template(template_or_filepath, format)
       case template_or_filepath
       when String
-        filepath = if ::File.exists?(template_or_filepath)
-                     template_or_filepath
-                   else
-                     Spontaneous::Render.template_file(template_root, template_or_filepath, format)
-                   end
-
+        filepath = \
+          # if the path is absolute and points to an existing file, just render that
+          # used by the published renderer
+          if ::File.exists?(template_or_filepath)
+            template_or_filepath
+          else
+            Spontaneous::Render.template_file(template_root, template_or_filepath, format)
+          end
         create_template(filepath, format)
       when Proc
         create_template(template_or_filepath, format)

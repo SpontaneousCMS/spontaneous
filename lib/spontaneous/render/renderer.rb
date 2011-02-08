@@ -26,15 +26,19 @@ module Spontaneous
       protected
 
       def preview_renderer
-        Spontaneous.template_engine.preview_renderer.new(template_root)
+        Spontaneous.template_engine.preview_renderer.new(template_root, cache?)
       end
 
       def publishing_renderer
-        Spontaneous.template_engine.publishing_renderer.new(template_root)
+        Spontaneous.template_engine.publishing_renderer.new(template_root, cache?)
       end
 
       def request_renderer
-        Spontaneous.template_engine.request_renderer.new(template_root)
+        Spontaneous.template_engine.request_renderer.new(template_root, cache?)
+      end
+
+      def cache?
+        nil
       end
     end # Renderer
   end  # Render

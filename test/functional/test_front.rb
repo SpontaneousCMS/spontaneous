@@ -231,7 +231,6 @@ class FrontTest < Test::Unit::TestCase
 
       context "caching" do
         setup do
-          # puts `ls -l #{revision_root}`
         end
 
         teardown do
@@ -244,6 +243,19 @@ class FrontTest < Test::Unit::TestCase
           Spontaneous::Render.stubs(:output_path).returns(dummy_template)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           last_response.body.should == "cached-version/42"
+        end
+
+        should "cache templates as ruby files" do
+          cache = "#{Spontaneous.revision_dir(1)}/html/dynamic/index.html.rb"
+          FileUtils.rm(cache) if File.exists?(cache)
+          File.exists?(cache).should be_false
+          get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+          # puts `ls -l #{File.dirname(cache)}`
+          File.exists?(cache).should be_true
+          File.open(cache, 'w') { |f| f.write('_buf << %Q`cached-version/#{params[\'wendy\']}`;')}
+          get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+          last_response.body.should == "cached-version/peter"
+          FileUtils.rm(cache)
         end
       end
     end
