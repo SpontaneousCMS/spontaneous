@@ -41,7 +41,6 @@ module Cutaneous
         create_template(filepath, format)
       when Proc
         create_template(template_or_filepath, format)
-        # string_to_template(template_or_filepath.call)
       else
         template_or_filepath
       end
