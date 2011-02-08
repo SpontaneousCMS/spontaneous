@@ -24,6 +24,10 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			} else {
 				img = $(dom.img, {'src':value});
 			}
+			img.error(function() {
+				console.log("***** MISSING IMAGE", value);
+				$(this).addClass('missing');
+			});
 			img.load(function() {
 				var r = this.width/this.height, $this = $(this), h = $this.height(), dh = 0;
 				if (r >= 1 && h < dim) { // landscape -- fit image vertically
