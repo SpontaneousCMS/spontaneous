@@ -23,8 +23,12 @@ Spontaneous.Preview = (function($, S) {
 		},
 		display: function(page) {
 			console.log('display', page)
-			this.iframe.fadeIn();
+			this.iframe.show().fadeOut(0)
 			this.iframe.bind('load.preview', function() {
+				var _iframe = this;
+				$(this.contentWindow.document).ready(function() {
+					$(_iframe).fadeIn(100);
+				})
 				console.log('iframe.load', this.contentWindow.location.pathname);
 				S.Preview.set({
 					'title': this.contentWindow.document.title,
@@ -35,8 +39,11 @@ Spontaneous.Preview = (function($, S) {
 			this.goto(page);
 		},
 		goto: function(page) {
-			if (!page || page.path == this.get('path')) { return; }
-			this.iframe[0].contentWindow.location.href = page.path + click_param();
+			if (page) {
+				var path = page.path + click_param();
+				// console.log('goto', path)
+				this.iframe[0].contentWindow.location.href = path;
+			}
 		},
 		hide: function() {
 			this.iframe.unbind('load.preview').hide();
