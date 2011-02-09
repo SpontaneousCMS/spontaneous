@@ -37,10 +37,6 @@ module Spontaneous
         template = publishing_renderer.render_file(content.template, content, format)
         request_renderer.render_string(template, content, format, params)
       end
-
-      def cache?
-        true
-      end
     end # PublishedRenderer
   end # Render
 end # Spontaneous

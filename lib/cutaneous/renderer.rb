@@ -10,7 +10,7 @@ module Cutaneous
     end
 
     def use_cache?
-      !@cache.nil?
+      @cache
     end
 
     def extension
@@ -27,7 +27,25 @@ module Cutaneous
       render_template(template, content, format, params)
     end
 
-    # protected
+    def render(filename, context, _layout=true)
+      hook_context(context)
+      while true
+        template = get_template(filename, context.format)
+        _buf = context._buf
+        output = template.render(context)
+        context._buf = _buf
+        unless context._layout.nil?
+          layout = context._layout
+          context._layout = nil
+        end
+        break unless layout
+        filename = layout
+        layout = false
+      end
+      output
+    end
+
+    protected
 
     def render_template(template, content, format, params = {})
       context = context_class.new(content, format, params)
@@ -88,23 +106,6 @@ module Cutaneous
       template
     end
 
-    def render(filename, context, _layout=true)
-      hook_context(context)
-      while true
-        template = get_template(filename, context.format)
-        _buf = context._buf
-        output = template.render(context)
-        context._buf = _buf
-        unless context._layout.nil?
-          layout = context._layout
-          context._layout = nil
-        end
-        break unless layout
-        filename = layout
-        layout = false
-      end
-      output
-    end
 
     def hook_context(context)
       context._engine = self

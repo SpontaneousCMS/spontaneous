@@ -38,7 +38,7 @@ module Spontaneous
       end
 
       def cache?
-        Spontaneous.production?
+        Spontaneous::Render.cache_templates?
       end
     end # Renderer
   end  # Render

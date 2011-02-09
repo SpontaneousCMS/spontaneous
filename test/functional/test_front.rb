@@ -232,9 +232,12 @@ class FrontTest < Test::Unit::TestCase
 
       context "caching" do
         setup do
+          Spontaneous::Render.cache_templates = true
+          @cache_file = "#{Spontaneous.revision_dir(1)}/html/dynamic/index.html.rb"
         end
 
         teardown do
+          Spontaneous::Render.cache_templates = false
         end
 
         should "use pre-rendered versions of the templates" do
@@ -247,19 +250,26 @@ class FrontTest < Test::Unit::TestCase
         end
 
         should "cache templates as ruby files" do
-          cache = "#{Spontaneous.revision_dir(1)}/html/dynamic/index.html.rb"
-          FileUtils.rm(cache) if File.exists?(cache)
-          File.exists?(cache).should be_false
+          @cache_file = "#{Spontaneous.revision_dir(1)}/html/dynamic/index.html.rb"
+          FileUtils.rm(@cache_file) if File.exists?(@cache_file)
+          File.exists?(@cache_file).should be_false
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
-          # puts `ls -l #{File.dirname(cache)}`
-          File.exists?(cache).should be_true
-          File.open(cache, 'w') { |f| f.write('_buf << %Q`cached-version/#{params[\'wendy\']}`;')}
+          # puts `ls -l #{File.dirname(@cache_file)}`
+          File.exists?(@cache_file).should be_true
+          File.open(@cache_file, 'w') { |f| f.write('_buf << %Q`@cache_filed-version/#{params[\'wendy\']}`;')}
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
-          last_response.body.should == "cached-version/peter"
-          FileUtils.rm(cache)
+          last_response.body.should == "@cache_filed-version/peter"
+          FileUtils.rm(@cache_file)
+        end
+
+        should "not cache templates if caching turned off" do
+          Spontaneous::Render.cache_templates = false
+          FileUtils.rm(@cache_file) if File.exists?(@cache_file)
+          File.exists?(@cache_file).should be_false
+          get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+          File.exists?(@cache_file).should be_false
         end
       end
     end
   end
-
 end

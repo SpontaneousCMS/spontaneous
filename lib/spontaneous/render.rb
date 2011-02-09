@@ -3,21 +3,30 @@
 
 module Spontaneous
   module Render
-    def self.output_path(revision, page, format, extension = nil)
-      ext = ".#{format}"
-      ext += ".#{extension}" if extension
-
-      dir = revision_root(revision) / format / page.path
-      path = dir / "/index#{ext}"
-      path
-    end
-
-
-    def self.revision_root(revision)
-      Spontaneous.revision_dir(revision)
-    end
 
     class << self
+      def output_path(revision, page, format, extension = nil)
+        ext = ".#{format}"
+        ext += ".#{extension}" if extension
+
+        dir = revision_root(revision) / format / page.path
+        path = dir / "/index#{ext}"
+        path
+      end
+
+
+      def revision_root(revision)
+        Spontaneous.revision_dir(revision)
+      end
+
+      def cache_templates?
+        @cache_templates ||= Spontaneous.production?
+      end
+
+      def cache_templates=(value)
+        @cache_templates = value
+      end
+
       def render_pages(revision, pages, format, progress=nil)
         klass = Format.const_get("#{format.to_s.camelize}")
         renderer = klass.new(revision, pages, progress)
