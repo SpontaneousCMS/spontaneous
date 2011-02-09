@@ -67,12 +67,15 @@ class FrontTest < Test::Unit::TestCase
   def root
     @@root
   end
+
   def about
     @@about
   end
+
   def news
     @@news
   end
+
   def dynamic
     @@dynamic
   end

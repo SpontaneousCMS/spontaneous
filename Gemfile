@@ -3,6 +3,7 @@ source :rubygems
 # gemspec :path => '.'
 
 gem "bundler", "~> 1.0.9"
+gem "activesupport", "~> 3.0.4"
 gem "home_run", "~> 1.0.0"
 gem "sequel", "~> 3.20"
 gem "yajl-ruby", "~> 0.7"

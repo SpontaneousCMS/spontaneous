@@ -8,7 +8,7 @@ module Spontaneous
       set :public, Proc.new { Spontaneous.root / "public" }
 
       get "/" do
-        Site.root.render
+        render_page(Site.root)
       end
 
       get '/media/*' do
@@ -35,11 +35,7 @@ module Spontaneous
 
           if page && page.provides_format?(format)
             content_type(::Rack::Mime.mime_type("#{DOT}#{format}")) if format
-            page.render(format, {
-              :params => params,
-              :request => request,
-              :session => session
-            })
+            render_page(page, format)
           else
             # perhaps we should return the html version if the page exists but
             # doesn't respond to the requested format?
@@ -47,6 +43,14 @@ module Spontaneous
             not_found!
           end
         end
+      end
+
+      def render_page(page, format = :html, local_params = {})
+        page.render(format, local_params.merge({
+          :params => params,
+          :request => request,
+          :session => session
+        }))
       end
 
       REDIRECTS = {

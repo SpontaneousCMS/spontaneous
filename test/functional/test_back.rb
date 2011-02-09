@@ -161,6 +161,10 @@ class BackTest < Test::Unit::TestCase
   end # context @spontaneous
 
   context "preview" do
+    setup do
+      @now = Time.now
+      Time.stubs(:now).returns(@now)
+    end
     should "return rendered root page" do
       get "/"
       assert last_response.ok?
@@ -174,7 +178,25 @@ class BackTest < Test::Unit::TestCase
       last_response.content_type.should == "text/html;charset=utf-8"
       assert_equal S::Render.with_preview_renderer { @about.render }, last_response.body
     end
+
+    should "return cache-busting headers" do
+      ["/about", "/"].each do |path|
+        get path
+        last_response.headers['Expires'].should == @now.to_formatted_s(:rfc822)
+        last_response.headers['Last-Modified'].should == @now.to_formatted_s(:rfc822)
+      end
+    end
+
+    should "return cache-control headers" do
+      ["/about", "/"].each do |path|
+        get path
+        ["no-store", 'no-cache', 'must-revalidate', 'max-age=0'].each do |p|
+          last_response.headers['Cache-Control'].should =~ %r(#{p})
+        end
+      end
+    end
   end
+
   context "static files" do
     should "work for site" do
       get "/test.html"
