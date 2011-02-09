@@ -80,6 +80,7 @@ Spontaneous.Location = (function($, S) {
 		},
 		location_loaded: function(location) {
 			this.set('location', location);
+			// HACK: see preview.js (Preview.display)
 			this.set('path', location.path);
 			this.update_state(location, this.get('view_mode'));
 		},
