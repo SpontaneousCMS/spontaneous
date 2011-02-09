@@ -113,6 +113,8 @@ Spontaneous.Page = (function($, S) {
 				this.page.path = response.path;
 				view.text(response.path);
 				this.close();
+				// HACK: see preview.js (Preview.display)
+				Spontaneous.Location.set('path', this.page.path)
 			} else {
 				if (xhr.status === 409) { // duplicate path
 					this.show_path_error();

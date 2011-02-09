@@ -22,7 +22,12 @@ Spontaneous.Preview = (function($, S) {
 			return this;
 		},
 		display: function(page) {
-			console.log('display', page)
+
+			// HACK: must be a better way of making sure that updates to the path are
+			// propagated throughout entrie interface
+			var path = S.Location.get('path');
+			// console.log('display', page)
+			// console.log('>>> path', S.Location.get('path'))
 			this.iframe.show().fadeOut(0)
 			this.iframe.bind('load.preview', function() {
 				var _iframe = this;
@@ -36,13 +41,18 @@ Spontaneous.Preview = (function($, S) {
 				});
 				S.Location.load_path(this.contentWindow.location.pathname)
 			});
-			this.goto(page);
+			this.goto_path(path);
+		},
+		goto_path: function(path) {
+				console.log('goto_path', path)
+			if (path) {
+				path += click_param();
+				this.iframe[0].contentWindow.location.href = path;
+			}
 		},
 		goto: function(page) {
 			if (page) {
-				var path = page.path + click_param();
-				// console.log('goto', path)
-				this.iframe[0].contentWindow.location.href = path;
+				this.goto_path(page.path);
 			}
 		},
 		hide: function() {
