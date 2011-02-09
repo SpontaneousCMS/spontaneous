@@ -7,6 +7,7 @@ PATH
       erubis (~> 2.6)
       fire_and_forget (~> 0.3.2)
       home_run (~> 1.0.0)
+      hwia (~> 1.0.2)
       less (~> 1.2)
       miso (~> 0.3.3)
       rack
@@ -32,6 +33,7 @@ GEM
     fire_and_forget (0.3.2)
       daemons (~> 1.1.0)
     home_run (1.0.0)
+    hwia (1.0.2)
     less (1.2.21)
       mutter (>= 0.4.2)
       treetop (>= 1.4.2)

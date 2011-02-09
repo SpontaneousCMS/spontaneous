@@ -264,8 +264,6 @@ Gem::Specification.new do |s|
     "lib/spontaneous/templates/template_base.rb",
     "lib/spontaneous/version.rb",
     "spontaneous.gemspec",
-    "test/experimental/test_prototypes.rb",
-    "test/experimental/test_visibility.rb",
     "test/fixtures/application/css/test.less",
     "test/fixtures/application/js/test.js",
     "test/fixtures/application/static/favicon.ico",
@@ -387,6 +385,7 @@ Gem::Specification.new do |s|
     "test/unit/test_logger.rb",
     "test/unit/test_media.rb",
     "test/unit/test_page.rb",
+    "test/unit/test_prototypes.rb",
     "test/unit/test_publishing.rb",
     "test/unit/test_render.rb",
     "test/unit/test_schema.rb",
@@ -395,6 +394,7 @@ Gem::Specification.new do |s|
     "test/unit/test_slots.rb",
     "test/unit/test_styles.rb",
     "test/unit/test_templates.rb",
+    "test/unit/test_visibility.rb",
     "todo.taskpaper"
   ]
   s.homepage = %q{http://spontaneouscms.org}
@@ -403,8 +403,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.6}
   s.summary = %q{TODO: one-line summary of your gem}
   s.test_files = [
-    "test/experimental/test_prototypes.rb",
-    "test/experimental/test_visibility.rb",
+    "test/experimental/test_permissions.rb",
     "test/fixtures/config/config/environment.rb",
     "test/fixtures/config/config/environments/development.rb",
     "test/fixtures/config/config/environments/production.rb",
@@ -449,6 +448,7 @@ Gem::Specification.new do |s|
     "test/unit/test_logger.rb",
     "test/unit/test_media.rb",
     "test/unit/test_page.rb",
+    "test/unit/test_prototypes.rb",
     "test/unit/test_publishing.rb",
     "test/unit/test_render.rb",
     "test/unit/test_schema.rb",
@@ -456,7 +456,8 @@ Gem::Specification.new do |s|
     "test/unit/test_site.rb",
     "test/unit/test_slots.rb",
     "test/unit/test_styles.rb",
-    "test/unit/test_templates.rb"
+    "test/unit/test_templates.rb",
+    "test/unit/test_visibility.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -479,6 +480,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<miso>, ["~> 0.3.3"])
       s.add_runtime_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
       s.add_runtime_dependency(%q<thor>, ["~> 0.14.6"])
+      s.add_runtime_dependency(%q<hwia>, ["~> 1.0.2"])
       s.add_runtime_dependency(%q<rdiscount>, ["~> 1.6.5"])
       s.add_development_dependency(%q<mysql2>, ["~> 0.2"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5"])
@@ -506,6 +508,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<miso>, ["~> 0.3.3"])
       s.add_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
       s.add_dependency(%q<thor>, ["~> 0.14.6"])
+      s.add_dependency(%q<hwia>, ["~> 1.0.2"])
       s.add_dependency(%q<rdiscount>, ["~> 1.6.5"])
       s.add_dependency(%q<mysql2>, ["~> 0.2"])
       s.add_dependency(%q<jeweler>, ["~> 1.5"])
@@ -534,6 +537,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<miso>, ["~> 0.3.3"])
     s.add_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
     s.add_dependency(%q<thor>, ["~> 0.14.6"])
+    s.add_dependency(%q<hwia>, ["~> 1.0.2"])
     s.add_dependency(%q<rdiscount>, ["~> 1.6.5"])
     s.add_dependency(%q<mysql2>, ["~> 0.2"])
     s.add_dependency(%q<jeweler>, ["~> 1.5"])

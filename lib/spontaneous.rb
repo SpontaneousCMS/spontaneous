@@ -76,6 +76,8 @@ module Spontaneous
 
   autoload :Server, "spontaneous/server"
 
+  autoload :UserLevel, "spontaneous/user_level"
+
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"
     autoload :ErubisTemplate, "spontaneous/templates/erubis_template"
