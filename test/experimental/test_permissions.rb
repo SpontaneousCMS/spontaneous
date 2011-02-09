@@ -54,18 +54,87 @@ class PermissionsTest < Test::Unit::TestCase
       UserLevel[:admin].should >= UserLevel[:admin]
       UserLevel[:editor].should >= UserLevel[:editor]
     end
+
+    should "return a minimum level > none" do
+      UserLevel.minimum.should == UserLevel.editor
+    end
+    should "have a valid string representation" do
+      UserLevel[:editor].to_s.should == 'editor'
+      UserLevel[:none].to_s.should == 'none'
+      UserLevel[:root].to_s.should == 'root'
+      UserLevel[:designer].to_s.should == 'designer'
+    end
   end
 
   context "Users" do
-    should "validate name"
-    should "validate email address"
-    should "validate login"
-    should "have a created_at date"
-    should "have an associated 'invisible' group"
+    setup do
+      @now = Time.now
+      Time.stubs(:now).returns(@now)
+      @user = User.create(:name => "A Person", :email => "person@example.org", :login => "person")
+      @user.reload
+    end
+    should "validate name" do
+      user = User.new(:email => "person@example.org", :login => "person")
+      user.save.should be_nil
+      user.valid?.should be_false
+      user.errors[:name].should_not be_blank
+      user = User.new(:name => "A Person", :email => "person@example.org", :login => "person")
+      user.save.should be_instance_of(User)
+      user.valid?.should be_true
+    end
+
+    should "validate presence of email address" do
+      user = User.new(:name => "A Person", :login => "person")
+      user.save
+      user.valid?.should be_false
+      user.errors[:email].should_not be_blank
+    end
+
+    should "validate format of email address" do
+      user = User.new(:name => "A Person", :email => "not_email_address", :login => "person")
+      user.save
+      user.valid?.should be_false
+      user.errors[:email].should_not be_blank
+      user = User.new(:name => "A Person", :email => "person@example.org", :login => "person")
+      user.save.should_not be_blank
+      user.valid?.should be_true
+    end
+
+    should "validate presence of login" do
+      user = User.new(:name => "A Person", :email => "person@example.org")
+      user.save
+      user.valid?.should be_false
+      user.errors[:login].should_not be_blank
+      user = User.new(:name => "A Person", :email => "person@example.org", :login => "person")
+      user.save.should_not be_blank
+      user.valid?.should be_true
+    end
+    should "validate length of login" do
+      user = User.new(:name => "A Person", :email => "person@example.org", :login => "in")
+      user.save
+      user.valid?.should be_false
+      user.errors[:login].should_not be_blank
+    end
+
+    should "have a created_at date" do
+      @user.created_at.to_i.should == @now.to_i
+    end
+    should "have an associated 'invisible' group" do
+      @user.group.should be_instance_of(AccessGroup)
+      @user.group.invisible?.should be_true
+      @user.group.level.should == UserLevel.minimum
+    end
+
     # the following actually works on the associated silent group
-    should "default to a user level of :none"
-    should "have a settable user level"
-    should "have their own group"
+    should "default to a user level of UserLevel.minimum" do
+      @user.level.should == UserLevel.minimum
+    end
+
+    should "have a settable user level" do
+      @user.update(:level => UserLevel[:root])
+      @user.reload.level.should == UserLevel.root
+    end
+
     should "be blockable"
     should "be able to belong to more than one group"
     should "be able to login with right login/password combination"
