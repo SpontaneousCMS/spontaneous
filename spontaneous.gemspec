@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Garry Hill"]
-  s.date = %q{2011-02-09}
+  s.date = %q{2011-02-10}
   s.description = %q{TODO: longer description of your gem}
   s.email = %q{garry@magnetised.info}
   s.executables = ["unlimit-upload", "nginx", "spot", "unicorn", "limit-upload", "console", "back"]
@@ -128,6 +128,7 @@ Gem::Specification.new do |s|
     "db/migrations/20101202113205_site_publishing_flags.rb",
     "db/migrations/20101206124543_aliases.rb",
     "db/migrations/20110201133550_visibility.rb",
+    "db/migrations/20110209152710_users_and_groups.rb",
     "lib/cutaneous.rb",
     "lib/cutaneous/context_helper.rb",
     "lib/cutaneous/first_pass_parser.rb",
@@ -197,6 +198,9 @@ Gem::Specification.new do |s|
     "lib/spontaneous/media.rb",
     "lib/spontaneous/page.rb",
     "lib/spontaneous/page_entry.rb",
+    "lib/spontaneous/permissions/access_group.rb",
+    "lib/spontaneous/permissions/user.rb",
+    "lib/spontaneous/permissions/user_level.rb",
     "lib/spontaneous/plugins.rb",
     "lib/spontaneous/plugins/aliases.rb",
     "lib/spontaneous/plugins/allowed_types.rb",
@@ -264,6 +268,7 @@ Gem::Specification.new do |s|
     "lib/spontaneous/templates/template_base.rb",
     "lib/spontaneous/version.rb",
     "spontaneous.gemspec",
+    "test/experimental/test_permissions.rb",
     "test/fixtures/application/css/test.less",
     "test/fixtures/application/js/test.js",
     "test/fixtures/application/static/favicon.ico",
@@ -320,6 +325,7 @@ Gem::Specification.new do |s|
     "test/fixtures/images/size.png24",
     "test/fixtures/images/size.png8",
     "test/fixtures/media/101/003/rose.jpg",
+    "test/fixtures/permissions/config/user_levels.yml",
     "test/fixtures/public/templates/site_page/default.html.cut",
     "test/fixtures/public/templates/site_page/default.pdf.cut",
     "test/fixtures/public/templates/site_page/dynamic.html.cut",
@@ -481,6 +487,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
       s.add_runtime_dependency(%q<thor>, ["~> 0.14.6"])
       s.add_runtime_dependency(%q<hwia>, ["~> 1.0.2"])
+      s.add_runtime_dependency(%q<base58>, ["~> 0.1.0"])
       s.add_runtime_dependency(%q<rdiscount>, ["~> 1.6.5"])
       s.add_development_dependency(%q<mysql2>, ["~> 0.2"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5"])
@@ -509,6 +516,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
       s.add_dependency(%q<thor>, ["~> 0.14.6"])
       s.add_dependency(%q<hwia>, ["~> 1.0.2"])
+      s.add_dependency(%q<base58>, ["~> 0.1.0"])
       s.add_dependency(%q<rdiscount>, ["~> 1.6.5"])
       s.add_dependency(%q<mysql2>, ["~> 0.2"])
       s.add_dependency(%q<jeweler>, ["~> 1.5"])
@@ -538,6 +546,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
     s.add_dependency(%q<thor>, ["~> 0.14.6"])
     s.add_dependency(%q<hwia>, ["~> 1.0.2"])
+    s.add_dependency(%q<base58>, ["~> 0.1.0"])
     s.add_dependency(%q<rdiscount>, ["~> 1.6.5"])
     s.add_dependency(%q<mysql2>, ["~> 0.2"])
     s.add_dependency(%q<jeweler>, ["~> 1.5"])

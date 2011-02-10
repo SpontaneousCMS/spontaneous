@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module Spontaneous
+module Spontaneous::Permissions
   class AccessGroup < Sequel::Model(:spontaneous_groups)
     def level
       UserLevel[level_name]

@@ -3,7 +3,7 @@
 require 'hwia'
 require 'yaml'
 
-module Spontaneous
+module Spontaneous::Permissions
   class UserLevel
 
     class Root

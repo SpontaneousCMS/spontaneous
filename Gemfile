@@ -22,7 +22,7 @@ gem 'miso', '~> 0.3.3'
 gem 'fire_and_forget', '~> 0.3.2'
 gem 'thor', '~> 0.14.6'
 gem 'hwia', '~> 1.0.2'
-
+gem 'base58', '~> 0.1.0'
 gem 'rdiscount', '~> 1.6.5'
 
 

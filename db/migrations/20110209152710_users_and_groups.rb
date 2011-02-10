@@ -6,7 +6,7 @@ Sequel.migration do
     create_table!(:spontaneous_users) do
       primary_key :id
       varchar     :name
-      varchar     :login, :size => 32
+      varchar     :login, :size => 32, :index => true, :unique => true
       varchar     :email
       varchar     :salt
       varchar     :crypted_password
@@ -15,7 +15,7 @@ Sequel.migration do
       datetime    :last_login_at
       datetime    :created_at
 
-      index       [:login, :crypted_password, :disabled], :name => "login_index"
+      index       [:login, :disabled], :name => "enabled_login_index"
     end
 
     create_table!(:spontaneous_groups) do
@@ -48,7 +48,7 @@ Sequel.migration do
       datetime    :last_access_at
       varchar     :last_access_ip
       varchar     :source_ip
-      varchar     :created_at
+      datetime    :created_at
     end
   end
 

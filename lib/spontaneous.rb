@@ -76,9 +76,8 @@ module Spontaneous
 
   autoload :Server, "spontaneous/server"
 
-  autoload :UserLevel, "spontaneous/user_level"
-  autoload :User, "spontaneous/user"
-  autoload :AccessGroup, "spontaneous/access_group"
+
+  autoload :Permissions, "spontaneous/permissions"
 
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"

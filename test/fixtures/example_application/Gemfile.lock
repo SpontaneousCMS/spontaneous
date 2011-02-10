@@ -3,6 +3,7 @@ PATH
   specs:
     spontaneous (0.0.1)
       activesupport (~> 3.0.4)
+      base58 (~> 0.1.0)
       bundler (~> 1.0.9)
       erubis (~> 2.6)
       fire_and_forget (~> 0.3.2)
@@ -25,6 +26,7 @@ GEM
   specs:
     abstract (1.0.0)
     activesupport (3.0.4)
+    base58 (0.1.0)
     daemons (1.1.0)
     erubis (2.6.6)
       abstract (>= 1.0.0)
