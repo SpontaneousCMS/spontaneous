@@ -5,6 +5,15 @@ require 'test_helper'
 
 class PermissionsTest < Test::Unit::TestCase
 
+  def setup
+    Permissions::UserLevel.level_file = File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml'
+  end
+  def teardown
+    Permissions::AccessGroup.delete
+    Permissions::AccessKey.delete
+    Permissions::User.delete
+  end
+
   context "Permissions" do
     should "be able to generate random strings of any length" do
       (2..256).each do |length|
@@ -18,14 +27,10 @@ class PermissionsTest < Test::Unit::TestCase
   end
   context "Levels" do
     setup do
-      Permissions::UserLevel
-      @pwd = Dir.pwd
-      Dir.chdir(File.expand_path('../../fixtures/permissions', __FILE__))
-      File.exists?('config/user_levels.yml').should be_true
     end
     teardown do
-      Dir.chdir(@pwd)
     end
+
     should "always have a level of :none/0" do
       Permissions::UserLevel.none.should == Permissions::UserLevel::None
       Permissions::UserLevel[:none].should == Permissions::UserLevel.none
@@ -91,8 +96,6 @@ class PermissionsTest < Test::Unit::TestCase
     end
 
     teardown do
-      Permissions::User.delete
-      Permissions::AccessKey.delete
     end
 
     should "be creatable with valid params" do
@@ -187,12 +190,12 @@ class PermissionsTest < Test::Unit::TestCase
       should "have an associated 'invisible' group" do
         @user.group.should be_instance_of(Permissions::AccessGroup)
         @user.group.invisible?.should be_true
-        @user.group.level.should == Permissions::UserLevel.minimum
+        @user.group.level.should == Permissions::UserLevel::None
       end
 
       # the following actually works on the associated silent group
       should "default to a user level of Permissions::UserLevel.minimum" do
-        @user.level.should == Permissions::UserLevel.minimum
+        @user.level.should == Permissions::UserLevel.none
       end
 
       should "have a settable user level" do
@@ -225,11 +228,42 @@ class PermissionsTest < Test::Unit::TestCase
         @user.access_keys.first.last_access_at.to_i.should == @now.to_i
       end
 
-      should "be able to belong to more than one group"
-      should "be blockable"
-      should "have a login count"
-      should "have a list of access keys"
-      should "be able to remove a specific access key"
+      should "have a list of access keys" do
+        @user.access_keys.should be_instance_of(Array)
+      end
+
+      should "be blockable" do
+        @user.update(:disabled => true)
+        key = Permissions::User.authenticate(@user.login, @user.password)
+        key.should be_nil
+      end
+
+      should "be able to belong to more than one group" do
+        group1 = Permissions::AccessGroup.create(:name => "Group 1")
+        group2 = Permissions::AccessGroup.create(:name => "Group 2")
+        @user.add_group(group1)
+        @user.add_group(group2)
+        @user.groups.length.should == 2
+        group1.members.should == [@user]
+        group2.members.should == [@user]
+      end
+
+      should "return the right user level for a piece of content" do
+        page = Page.create
+        @user.update(:level => Permissions::UserLevel.admin)
+        @user.access_selector.should == "*"
+        @user.level_for(page).should == Permissions::UserLevel.admin
+      end
+
+      should "return the highest access level when multiple exist" do
+        page = Page.create
+        @user.update(:level => Permissions::UserLevel.none)
+        group1 = Permissions::AccessGroup.create(:name => "Group 1", :level => Permissions::UserLevel.admin)
+        group2 = Permissions::AccessGroup.create(:name => "Group 1", :level => Permissions::UserLevel.editor)
+        group1.add_member(@user)
+        group2.add_member(@user)
+        @user.level_for(page).should == Permissions::UserLevel.admin
+      end
     end
   end
 
@@ -245,9 +279,8 @@ class PermissionsTest < Test::Unit::TestCase
         :password_confirmation => "xxxxxx"
       }
     end
+
     teardown do
-      Permissions::AccessKey.delete
-      Permissions::User.delete
     end
 
     should "have a generated key_id" do
@@ -285,12 +318,15 @@ class PermissionsTest < Test::Unit::TestCase
       key1 = Permissions::AccessKey.create
       key1.created_at.to_i.should == @now.to_i
     end
+
     should "have a source IP address"
+
     should "retrieve their associated user" do
       user = Permissions::User.create(@valid)
       key1 = Permissions::AccessKey.create(:user_id => user.id)
       key1.reload.user.should == user
     end
+
     should "be disabled when user blocked" do
       user = Permissions::User.create(@valid)
       key1 = Permissions::AccessKey.create(:user_id => user.id)
@@ -303,12 +339,50 @@ class PermissionsTest < Test::Unit::TestCase
 
 
   context "Groups" do
-    should "always have a name"
-    should "be blockable"
-    should "have a list of users"
-    should "have an associated user level"
-    should "default to a user level of :none/0"
-    should "default to applying to the whole site"
+    setup do
+      @valid_group = {
+        :name => "Some People"
+      }
+    end
+
+    teardown do
+    end
+
+    should "always have a name" do
+      group = Permissions::AccessGroup.new(@valid_group.merge(:name => ""))
+      group.valid?.should be_false
+      group.errors[:name].should_not be_blank
+    end
+
+    should "default to a user level of :none" do
+      group = Permissions::AccessGroup.create(@valid_group)
+      group.reload
+      group.level.should == Permissions::UserLevel::None
+    end
+
+    # disabling a user and blocking a group are different
+    # if you disable a user you disable their login
+    # if you block a group they belong to you remove the permissions
+    # granted by that group but you aren't stopping them from logging in
+    should "be blockable" do
+      group = Permissions::AccessGroup.create(@valid_group.merge(:level => Permissions::UserLevel.admin))
+      group.level.should == Permissions::UserLevel.admin
+      group.update(:disabled => true)
+      group.level.should == Permissions::UserLevel.none
+    end
+
+    should "default to applying to the whole site" do
+      group = Permissions::AccessGroup.create(@valid_group)
+      group.access_selector.should == "*"
+    end
+
+    should "return the right user level for a piece of content" do
+      group = Permissions::AccessGroup.create(@valid_group)
+      page = Page.create
+      group.update(:level => Permissions::UserLevel.admin)
+      group.access_selector.should == "*"
+      group.level_for(page).should == Permissions::UserLevel.admin
+    end
   end
 
 end

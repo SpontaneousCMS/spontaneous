@@ -77,7 +77,9 @@ module Spontaneous
   autoload :Server, "spontaneous/server"
 
 
+
   autoload :Permissions, "spontaneous/permissions"
+  autoload :ContentQuery, "spontaneous/content_query"
 
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"

@@ -22,17 +22,13 @@ Sequel.migration do
       primary_key :id
       foreign_key :user_id, :spontaneous_users, :on_delete => :cascade # test for being a single user group is user_id.nil?
       index       :user_id
+      varchar     :name
       varchar     :level_name, :default => 'none'
       boolean     :disabled, :default => false
+      varchar     :access_selector, :default => "*"
     end
 
-    create_table!(:spontaneous_group_access) do
-      primary_key :id
-      foreign_key :group_id, :spontaneous_groups, :on_delete => :cascade
-      varchar     :access_rule, :default => "*"
-    end
 
-    # user :join_table in many_to_many call
     create_table!(:spontaneous_groups_users) do
       primary_key :id
       foreign_key :user_id, :spontaneous_users
@@ -43,7 +39,6 @@ Sequel.migration do
       primary_key :id
       foreign_key :user_id, :spontaneous_users, :on_delete => :cascade
       index       :user_id
-      # Base58.encode(OpenSSL::Random.random_bytes(32).unpack("h*").first.to_i(16)) #=> 44 chars
       char        :key_id, :size => 44, :index => true, :unique => true
       datetime    :last_access_at
       varchar     :last_access_ip
@@ -55,7 +50,6 @@ Sequel.migration do
   down do
     drop_table :spontaneous_users
     drop_table :spontaneous_groups
-    drop_table :spontaneous_groups_access
     drop_table :spontaneous_groups_users
     drop_table :spontaneous_access_keys
   end

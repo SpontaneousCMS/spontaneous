@@ -11,14 +11,15 @@ module Spontaneous::Permissions
     one_to_many  :access_keys,  :class => :'Spontaneous::Permissions::AccessKey'
 
     set_restricted_columns(:crypted_password)
-    def_delegators :group, :level
+
+    def_delegators :group, :level, :access_selector
 
     def self.encrypt_password(clear_password, salt)
       Digest::SHA1.hexdigest("--#{salt}--#{clear_password}--")
     end
 
     def self.authenticate(login, clear_password)
-      if user = self[:login => login]
+      if user = self[:login => login, :disabled => false]
         crypted_password = user.encrypt_password(clear_password)
         if crypted_password == user.crypted_password
           access_key = user.logged_in!
@@ -29,6 +30,13 @@ module Spontaneous::Permissions
     end
 
     attr_accessor :password, :password_confirmation
+
+    ##
+    # Find the highest access level available from all the groups we
+    # belong to
+    def level_for(content)
+      memberships.map(&:level).sort.last
+    end
 
     def last_access_at
       access_keys.map(&:last_access_at).sort.last
@@ -133,7 +141,7 @@ module Spontaneous::Permissions
 
     def ensure_group!
       if group.nil?
-        self.group = AccessGroup.create(:user_id => id, :level_name => UserLevel.minimum.to_s)
+        self.group = AccessGroup.create(:user_id => id, :name => "_#{name}_", :level_name => UserLevel.none.to_s)
       end
     end
   end
