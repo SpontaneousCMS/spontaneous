@@ -45,7 +45,7 @@ class GeneratorsTest < Test::Unit::TestCase
       %w(development.rb production.rb).each do |f|
         assert_file_exists(site_root, 'config/environments', f)
       end
-      %w(back.ru front.ru boot.rb database.yml deploy.rb environment.rb).each do |f|
+      %w(back.ru front.ru boot.rb database.yml deploy.rb environment.rb user_levels.yml).each do |f|
         assert_file_exists(site_root, 'config', f)
       end
       %w(favicon.ico robots.txt).each do |f|
