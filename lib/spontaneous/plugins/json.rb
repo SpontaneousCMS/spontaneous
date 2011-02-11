@@ -9,9 +9,13 @@ module Spontaneous::Plugins
         {
           :type=> self.json_name,
           :title=> self.title,
-          :fields => field_names.map { |name| field_prototypes[name].to_hash },
+          :fields => readable_fields.map { |name| field_prototypes[name].to_hash },
           :allowed_types => allowed_types.map { |type| type.instance_class.json_name }
         }
+      end
+
+      def readable_fields
+        field_names.select { |name| field_readable?(name) }
       end
 
       def to_json

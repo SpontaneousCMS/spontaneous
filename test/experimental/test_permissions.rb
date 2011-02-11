@@ -582,5 +582,108 @@ class PermissionsTest < Test::Unit::TestCase
         @i.slot_writable?(:default_level).should be_true
       end
     end
+
+    should "serialise only things viewable by the current user" do
+      C.to_hash.should == {:type=>"C",
+                           :allowed_types=>[],
+                           :title=>"C",
+                           :fields=>
+      [{:type=>"Spontaneous.FieldTypes.StringField",
+        :title=>"Editor Level",
+        :comment=>"",
+        :name=>"editor_level", :writable => true},
+        {:type=>"Spontaneous.FieldTypes.StringField",
+         :title=>"Admin Level",
+         :comment=>"",
+         :name=>"admin_level", :writable => true},
+         {:type=>"Spontaneous.FieldTypes.StringField",
+          :title=>"Root Level",
+          :comment=>"",
+          :name=>"root_level", :writable => true},
+          {:type=>"Spontaneous.FieldTypes.StringField",
+           :title=>"Mixed Level",
+           :comment=>"",
+           :name=>"mixed_level", :writable => true},
+           {:type=>"Spontaneous.FieldTypes.StringField",
+            :title=>"Default Level",
+            :comment=>"",
+            :name=>"default_level", :writable => true}]}
+      Permissions.with_user(@visitor) do
+        C.to_hash.should == {:type=>"C",
+                             :allowed_types=>[],
+                             :title=>"C",
+                             :fields=> [ {:type=>"Spontaneous.FieldTypes.StringField",
+                                          :title=>"Default Level",
+                                          :comment=>"",
+                                          :name=>"default_level", :writable => false}]}
+      end
+      Permissions.with_user(@editor) do
+        C.to_hash.should == {:type=>"C",
+                             :allowed_types=>[],
+                             :title=>"C",
+                             :fields=> [{:type=>"Spontaneous.FieldTypes.StringField",
+             :title=>"Editor Level",
+             :comment=>"",
+             :name=>"editor_level", :writable => true},
+             {:type=>"Spontaneous.FieldTypes.StringField",
+              :title=>"Mixed Level",
+              :comment=>"",
+              :name=>"mixed_level", :writable => false},
+              {:type=>"Spontaneous.FieldTypes.StringField",
+               :title=>"Default Level",
+               :comment=>"",
+               :name=>"default_level", :writable => true}]}
+      end
+      Permissions.with_user(@admin) do
+        C.to_hash.should == {:type=>"C",
+                             :allowed_types=>[],
+                             :title=>"C",
+                             :fields=>
+        [{:type=>"Spontaneous.FieldTypes.StringField",
+          :title=>"Editor Level",
+          :comment=>"",
+          :name=>"editor_level", :writable => true},
+          {:type=>"Spontaneous.FieldTypes.StringField",
+           :title=>"Admin Level",
+           :comment=>"",
+           :name=>"admin_level", :writable => true},
+           {:type=>"Spontaneous.FieldTypes.StringField",
+            :title=>"Mixed Level",
+            :comment=>"",
+            :name=>"mixed_level", :writable => false},
+            {:type=>"Spontaneous.FieldTypes.StringField",
+             :title=>"Default Level",
+             :comment=>"",
+             :name=>"default_level", :writable => true}]}
+
+      end
+      Permissions.with_user(@root) do
+        C.to_hash.should == {:type=>"C",
+                             :allowed_types=>[],
+                             :title=>"C",
+                             :fields=>
+        [{:type=>"Spontaneous.FieldTypes.StringField",
+          :title=>"Editor Level",
+          :comment=>"",
+          :name=>"editor_level", :writable => true},
+          {:type=>"Spontaneous.FieldTypes.StringField",
+           :title=>"Admin Level",
+           :comment=>"",
+           :name=>"admin_level", :writable => true},
+           {:type=>"Spontaneous.FieldTypes.StringField",
+            :title=>"Root Level",
+            :comment=>"",
+            :name=>"root_level", :writable => true},
+            {:type=>"Spontaneous.FieldTypes.StringField",
+             :title=>"Mixed Level",
+             :comment=>"",
+             :name=>"mixed_level", :writable => true},
+             {:type=>"Spontaneous.FieldTypes.StringField",
+              :title=>"Default Level",
+              :comment=>"",
+              :name=>"default_level", :writable => true}]}
+
+      end
+    end
   end
 end

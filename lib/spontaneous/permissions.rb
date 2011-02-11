@@ -18,6 +18,11 @@ module Spontaneous
         UserLevel[level_name]
       end
 
+      def has_level?(level)
+        return true unless active_user
+        active_user.level >= level
+      end
+
       def with_user(user)
         self.active_user = user
         yield if block_given?

@@ -83,7 +83,8 @@ module Spontaneous::Plugins
           :name => name.to_s,
           :type => field_class.json_name,
           :title => title,
-          :comment => comment || ""
+          :comment => comment || "",
+          :writable => Spontaneous::Permissions.has_level?(write_level)
         }
       end
     end
