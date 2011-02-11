@@ -34,13 +34,13 @@ module Spontaneous::Plugins
           :depth => depth,
           :fields  => fields.to_hash,
           :name => slot_name,
-          :label => label,
+          :label => label
         }
       end
 
       def to_hash
         to_shallow_hash.merge({
-          :entries => entries.to_hash
+          :entries => (slots.empty? ? entries : slots).to_hash
         })
       end
 

@@ -33,6 +33,16 @@ module Spontaneous::Plugins
         owner.class.slots.create_slot_named(owner, name)
       end
 
+      # this is a freakin mess. this whole class in fact
+      # hopefully moving slots out of the Content table will make all this easier
+      def to_hash
+        owner.class.slots.select do | slot |
+          owner.slot_readable?(slot.name)
+        end.map do |slot|
+          self[slot.name].to_hash.merge(:writable => owner.slot_writable?(slot.name))
+        end
+      end
+
       def method_missing(method, *args)
         if block_given?
           target.send(method, *args, &Proc.new)

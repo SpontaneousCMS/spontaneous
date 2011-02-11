@@ -583,7 +583,7 @@ class PermissionsTest < Test::Unit::TestCase
       end
     end
 
-    should "serialise only things viewable by the current user" do
+    should "serialise only things in class viewable by the current user" do
       C.to_hash.should == {:type=>"C",
                            :allowed_types=>[],
                            :title=>"C",
@@ -683,6 +683,45 @@ class PermissionsTest < Test::Unit::TestCase
               :comment=>"",
               :name=>"default_level", :writable => true}]}
 
+      end
+    end
+    should "serialise only things in instance viewable by the current user" do
+      @i.to_hash[:entries].should == [
+        {:type=>"C__EditorLevelSlot", :style=>"", :label=>"editor_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Editor Level", :id=>@i.slots.editor_level.id, :writable => true},
+        {:type=>"C__AdminLevelSlot", :style=>"", :label=>"admin_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Admin Level", :id=>@i.slots.admin_level.id, :writable => true},
+        {:type=>"C__RootLevelSlot", :style=>"", :label=>"root_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Root Level", :id=>@i.slots.root_level.id, :writable => true},
+        {:type=>"C__MixedLevelSlot", :style=>"", :label=>"mixed_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Mixed Level", :id=>@i.slots.mixed_level.id, :writable => true},
+        {:type=>"C__DefaultLevelSlot", :style=>"", :label=>"default_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Default Level", :id=>@i.slots.default_level.id, :writable => true}
+      ]
+
+      Permissions.with_user(@visitor) do
+        @i.to_hash[:entries].should == [
+          {:type=>"C__DefaultLevelSlot", :style=>"", :label=>"default_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Default Level", :id=>@i.slots.default_level.id, :writable => false}
+        ]
+      end
+      Permissions.with_user(@editor) do
+        @i.to_hash[:entries].should == [
+          {:type=>"C__EditorLevelSlot", :style=>"", :label=>"editor_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Editor Level", :id=>@i.slots.editor_level.id, :writable => true},
+          {:type=>"C__MixedLevelSlot", :style=>"", :label=>"mixed_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Mixed Level", :id=>@i.slots.mixed_level.id, :writable => false},
+          {:type=>"C__DefaultLevelSlot", :style=>"", :label=>"default_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Default Level", :id=>@i.slots.default_level.id, :writable => true}
+        ]
+      end
+      Permissions.with_user(@admin) do
+        @i.to_hash[:entries].should == [
+          {:type=>"C__EditorLevelSlot", :style=>"", :label=>"editor_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Editor Level", :id=>@i.slots.editor_level.id, :writable => true},
+          {:type=>"C__AdminLevelSlot", :style=>"", :label=>"admin_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Admin Level", :id=>@i.slots.admin_level.id, :writable => true},
+          {:type=>"C__MixedLevelSlot", :style=>"", :label=>"mixed_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Mixed Level", :id=>@i.slots.mixed_level.id, :writable => false},
+          {:type=>"C__DefaultLevelSlot", :style=>"", :label=>"default_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Default Level", :id=>@i.slots.default_level.id, :writable => true}
+        ]
+      end
+      Permissions.with_user(@root) do
+        @i.to_hash[:entries].should == [
+          {:type=>"C__EditorLevelSlot", :style=>"", :label=>"editor_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Editor Level", :id=>@i.slots.editor_level.id, :writable => true},
+          {:type=>"C__AdminLevelSlot", :style=>"", :label=>"admin_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Admin Level", :id=>@i.slots.admin_level.id, :writable => true},
+          {:type=>"C__RootLevelSlot", :style=>"", :label=>"root_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Root Level", :id=>@i.slots.root_level.id, :writable => true},
+          {:type=>"C__MixedLevelSlot", :style=>"", :label=>"mixed_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Mixed Level", :id=>@i.slots.mixed_level.id, :writable => true},
+          {:type=>"C__DefaultLevelSlot", :style=>"", :label=>"default_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Default Level", :id=>@i.slots.default_level.id, :writable => true}
+        ]
       end
     end
   end
