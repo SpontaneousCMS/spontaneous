@@ -8,6 +8,7 @@ class PermissionsTest < Test::Unit::TestCase
   def setup
     Permissions::UserLevel.level_file = File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml'
   end
+
   def teardown
     Permissions::AccessGroup.delete
     Permissions::AccessKey.delete
@@ -385,4 +386,201 @@ class PermissionsTest < Test::Unit::TestCase
     end
   end
 
+  context "Guards" do
+    setup do
+      @visitor = Permissions::User.create(:email => "visitor@example.com", :login => "visitor", :name => "visitor", :password => "visitorpass", :password_confirmation => "visitorpass")
+      @editor = Permissions::User.create(:email => "editor@example.com", :login => "editor", :name => "editor", :password => "editorpass", :password_confirmation => "editorpass")
+      @admin = Permissions::User.create(:email => "admin@example.com", :login => "admin", :name => "admin", :password => "adminpass", :password_confirmation => "adminpass")
+      @root = Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
+      @editor.update(:level => Permissions::UserLevel.editor)
+      @admin.update(:level => Permissions::UserLevel.admin)
+      @root.update(:level => Permissions::UserLevel.root)
+
+      class ::C < Content; end
+
+      C.field :editor_level, :user_level => :editor
+      C.field :admin_level, :user_level => :admin
+      C.field :root_level, :user_level => :root
+      C.field :mixed_level, :read_level => :editor, :write_level => :root
+      C.field :default_level
+
+      C.slot :editor_level, :user_level => :editor do
+        allow :D, :user_level => :editor
+        allow :C, :user_level => :admin
+      end
+
+      C.slot :admin_level, :user_level => :admin do
+        allow :C, :user_level => :admin
+      end
+
+      C.slot :root_level, :user_level => :root do
+        allow :C, :user_level => :root
+      end
+
+      C.slot :mixed_level, :read_level => :editor, :write_level => :root
+
+      C.slot :default_level do
+        allow :C
+      end
+
+      class ::D < Content; end
+      @i = C.new
+    end
+
+    teardown do
+      Object.send(:remove_const, :C)
+      Object.send(:remove_const, :D)
+    end
+
+    should "protect field reads" do
+      # without user (e.g. terminal/console access) everything is always
+      # possible
+      @i.field_readable?(:editor_level).should be_true
+      @i.field_readable?(:admin_level).should be_true
+      @i.field_readable?(:root_level).should be_true
+      @i.field_readable?(:mixed_level).should be_true
+      @i.field_readable?(:default_level).should be_true
+
+      Permissions.with_user(@visitor) do
+        @i.field_readable?(:editor_level).should be_false
+        @i.field_readable?(:admin_level).should be_false
+        @i.field_readable?(:root_level).should be_false
+        @i.field_readable?(:mixed_level).should be_false
+        @i.field_readable?(:default_level).should be_true
+      end
+      Permissions.with_user(@editor) do
+        @i.field_readable?(:editor_level).should be_true
+        @i.field_readable?(:admin_level).should be_false
+        @i.field_readable?(:root_level).should be_false
+        @i.field_readable?(:mixed_level).should be_true
+        @i.field_readable?(:default_level).should be_true
+      end
+      Permissions.with_user(@admin) do
+        @i.field_readable?(:editor_level).should be_true
+        @i.field_readable?(:admin_level).should be_true
+        @i.field_readable?(:root_level).should be_false
+        @i.field_readable?(:mixed_level).should be_true
+        @i.field_readable?(:default_level).should be_true
+      end
+      Permissions.with_user(@root) do
+        @i.field_readable?(:editor_level).should be_true
+        @i.field_readable?(:admin_level).should be_true
+        @i.field_readable?(:root_level).should be_true
+        @i.field_readable?(:mixed_level).should be_true
+        @i.field_readable?(:default_level).should be_true
+      end
+    end
+
+    should "protect field writes" do
+      # without user (e.g. terminal/console access) everything is always
+      # possible
+      @i.field_writable?(:editor_level).should be_true
+      @i.field_writable?(:admin_level).should be_true
+      @i.field_writable?(:root_level).should be_true
+      @i.field_writable?(:mixed_level).should be_true
+      @i.field_writable?(:default_level).should be_true
+
+      Permissions.with_user(@visitor) do
+        @i.field_writable?(:editor_level).should be_false
+        @i.field_writable?(:admin_level).should be_false
+        @i.field_writable?(:root_level).should be_false
+        @i.field_writable?(:mixed_level).should be_false
+        @i.field_writable?(:default_level).should be_false
+      end
+      Permissions.with_user(@editor) do
+        @i.field_writable?(:editor_level).should be_true
+        @i.field_writable?(:admin_level).should be_false
+        @i.field_writable?(:root_level).should be_false
+        @i.field_writable?(:mixed_level).should be_false
+        @i.field_writable?(:default_level).should be_true
+      end
+      Permissions.with_user(@admin) do
+        @i.field_writable?(:editor_level).should be_true
+        @i.field_writable?(:admin_level).should be_true
+        @i.field_writable?(:root_level).should be_false
+        @i.field_writable?(:mixed_level).should be_false
+        @i.field_writable?(:default_level).should be_true
+      end
+      Permissions.with_user(@root) do
+        @i.field_writable?(:editor_level).should be_true
+        @i.field_writable?(:admin_level).should be_true
+        @i.field_writable?(:root_level).should be_true
+        @i.field_writable?(:mixed_level).should be_true
+        @i.field_writable?(:default_level).should be_true
+      end
+    end
+
+    should "protect slot reads" do
+      @i.slot_readable?(:editor_level).should be_true
+      @i.slot_readable?(:admin_level).should be_true
+      @i.slot_readable?(:root_level).should be_true
+      @i.slot_readable?(:mixed_level).should be_true
+      @i.slot_readable?(:default_level).should be_true
+
+      Permissions.with_user(@visitor) do
+        @i.slot_readable?(:editor_level).should be_false
+        @i.slot_readable?(:admin_level).should be_false
+        @i.slot_readable?(:root_level).should be_false
+        @i.slot_readable?(:mixed_level).should be_false
+        @i.slot_readable?(:default_level).should be_true
+      end
+      Permissions.with_user(@editor) do
+        @i.slot_readable?(:editor_level).should be_true
+        @i.slot_readable?(:admin_level).should be_false
+        @i.slot_readable?(:root_level).should be_false
+        @i.slot_readable?(:mixed_level).should be_true
+        @i.slot_readable?(:default_level).should be_true
+      end
+      Permissions.with_user(@admin) do
+        @i.slot_readable?(:editor_level).should be_true
+        @i.slot_readable?(:admin_level).should be_true
+        @i.slot_readable?(:root_level).should be_false
+        @i.slot_readable?(:mixed_level).should be_true
+        @i.slot_readable?(:default_level).should be_true
+      end
+      Permissions.with_user(@root) do
+        @i.slot_readable?(:editor_level).should be_true
+        @i.slot_readable?(:admin_level).should be_true
+        @i.slot_readable?(:root_level).should be_true
+        @i.slot_readable?(:mixed_level).should be_true
+        @i.slot_readable?(:default_level).should be_true
+      end
+    end
+    should "protect slot writes" do
+      @i.slot_writable?(:editor_level).should be_true
+      @i.slot_writable?(:admin_level).should be_true
+      @i.slot_writable?(:root_level).should be_true
+      @i.slot_writable?(:mixed_level).should be_true
+      @i.slot_writable?(:default_level).should be_true
+
+      Permissions.with_user(@visitor) do
+        @i.slot_writable?(:editor_level).should be_false
+        @i.slot_writable?(:admin_level).should be_false
+        @i.slot_writable?(:root_level).should be_false
+        @i.slot_writable?(:mixed_level).should be_false
+        @i.slot_writable?(:default_level).should be_false
+      end
+      Permissions.with_user(@editor) do
+        @i.slot_writable?(:editor_level).should be_true
+        @i.slot_writable?(:admin_level).should be_false
+        @i.slot_writable?(:root_level).should be_false
+        @i.slot_writable?(:mixed_level).should be_false
+        @i.slot_writable?(:default_level).should be_true
+      end
+      Permissions.with_user(@admin) do
+        @i.slot_writable?(:editor_level).should be_true
+        @i.slot_writable?(:admin_level).should be_true
+        @i.slot_writable?(:root_level).should be_false
+        @i.slot_writable?(:mixed_level).should be_false
+        @i.slot_writable?(:default_level).should be_true
+      end
+      Permissions.with_user(@root) do
+        @i.slot_writable?(:editor_level).should be_true
+        @i.slot_writable?(:admin_level).should be_true
+        @i.slot_writable?(:root_level).should be_true
+        @i.slot_writable?(:mixed_level).should be_true
+        @i.slot_writable?(:default_level).should be_true
+      end
+    end
+  end
 end

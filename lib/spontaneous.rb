@@ -107,6 +107,7 @@ module Spontaneous
     autoload :Aliases, "spontaneous/plugins/aliases"
     autoload :Visibility, "spontaneous/plugins/visibility"
     autoload :Prototypes, "spontaneous/plugins/prototypes"
+    autoload :Permissions, "spontaneous/plugins/permissions"
 
     module Slots
       autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"

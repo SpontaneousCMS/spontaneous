@@ -56,6 +56,19 @@ module Spontaneous::Plugins
         @options[:comment]
       end
 
+
+      # default read level is None, i.e. every logged in user can read the field
+      def read_level
+        level_name = @options[:read_level] || @options[:user_level] || :none
+        Spontaneous::Permissions[level_name]
+      end
+
+      # default write level is the first level above None
+      def write_level
+        level_name = @options[:write_level] || @options[:user_level] || Spontaneous::Permissions::UserLevel.minimum.to_sym
+        Spontaneous::Permissions[level_name]
+      end
+
       def to_field(values=nil)
         from_db = !values.nil?
         values ||= {

@@ -16,6 +16,16 @@ module Spontaneous::Plugins
         in_order(:map, &block)
       end
 
+      def [](slot_name)
+        case slot_name
+        when Symbol, String
+          slot_name = slot_name.to_sym
+          @store.detect { |slot| slot.name == slot_name }
+        else
+          @store[slot_name]
+        end
+      end
+
       alias_method :collect, :map
 
       def each(&block)

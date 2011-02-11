@@ -55,6 +55,7 @@ module Spontaneous
     plugin Plugins::Aliases
     plugin Plugins::Visibility
     plugin Plugins::Prototypes
+    plugin Plugins::Permissions
 
 
 

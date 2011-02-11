@@ -17,7 +17,10 @@ module Spontaneous::Permissions
     class None
       private(:initialize)
       def self.>(level); false; end
-      def self.>=(level); false; end
+      def self.>=(level)
+        level.equal?(None)
+      end
+
       def self.<=>(level); -1; end
       def self.to_s; 'none'; end
     end
@@ -72,6 +75,10 @@ module Spontaneous::Permissions
 
       def to_s
         @name.to_s
+      end
+
+      def to_sym
+        @name.to_sym
       end
     end
 
