@@ -128,8 +128,12 @@ module Spontaneous
       @target = target
     end
 
-    def method_missing(method, *args, &block)
-      self.target.__send__(method, *args, &block)
+    def method_missing(method, *args)
+      if block_given?
+        self.target.__send__(method, *args, &Proc.new)
+      else
+        self.target.__send__(method, *args)
+      end
     end
 
     def serialize

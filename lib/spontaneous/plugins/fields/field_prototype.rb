@@ -6,13 +6,13 @@ module Spontaneous::Plugins
     class FieldPrototype
       attr_reader :name
 
-      def initialize(name, type, options={}, &block)
+      def initialize(name, type, options={})
         @name = name
         # if the type is nil then try the name, this will assign sensible defaults
         # to fields like 'image' or 'date'
         base_class = Spontaneous::FieldTypes[type || name]
-        if block
-          @field_class = Class.new(base_class, &block)
+        if block_given?
+          @field_class = Class.new(base_class, &Proc.new)
           @field_class.meta.send(:define_method, :name) do
             base_class.name
           end
@@ -68,7 +68,7 @@ module Spontaneous::Plugins
       def to_hash
         {
           :name => name.to_s,
-          :type => field_class.json_name, 
+          :type => field_class.json_name,
           :title => title,
           :comment => comment || ""
         }

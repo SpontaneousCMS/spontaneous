@@ -69,7 +69,7 @@ module Spontaneous::Plugins
         revision_stack.clear
       end
 
-      def with_revision(revision=nil, &block)
+      def with_revision(revision=nil)
         revision_push(revision)
         begin
           yield
@@ -104,7 +104,7 @@ module Spontaneous::Plugins
       # rows (taking the rest of the content from the previous revision)
       # Pass in a block if you want to tie some bit of post processing to the success or failure
       # of the publish step (used in the site render stage for example)
-      def publish(revision, content=nil, &block)
+      def publish(revision, content=nil)
         mark_first_published = Proc.new do |dataset|
           dataset.update(:first_published_at => Sequel.datetime_class.now, :first_published_revision => revision)
         end

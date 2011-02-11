@@ -40,9 +40,13 @@ module Spontaneous::Plugins
         super || target.class.field?(field_name)
       end
 
-      def method_missing(method, *args, &block)
+      def method_missing(method, *args)
         if target && target.respond_to?(method)
-          target.__send__(method, *args, &block)
+          if block_given?
+            target.__send__(method, *args, &Proc.new)
+          else
+            target.__send__(method, *args)
+          end
         else
           super
         end

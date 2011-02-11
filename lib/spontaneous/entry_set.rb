@@ -103,7 +103,7 @@ module Spontaneous
 
     protected
 
-    def method_missing(method, *args, &block)
+    def method_missing(method, *args)
       if entry = labelled(method)
         entry
       else

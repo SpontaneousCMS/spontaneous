@@ -79,14 +79,18 @@ module Spontaneous::Render
 
     protected
 
-    def method_missing(method, *args, &block)
+    def method_missing(method, *args)
       key = method.to_sym
       if target.field?(key)
         target.__send__(key, *args)
       elsif target.slot?(key)
         self.class.new(target.slots[key], format, @params)
       else
-        target.__send__(method, *args, &block)
+        if block_given?
+          target.__send__(method, *args, &Proc.new)
+        else
+          target.__send__(method, *args)
+        end
       end
     rescue
       # TODO: sensible, configurable fallback for when template calls non-existant method

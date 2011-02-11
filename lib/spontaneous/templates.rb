@@ -12,9 +12,9 @@ module Spontaneous
         @template_cache ||= {}
       end
 
-      def cached(path, &block)
+      def cached(path)
         unless template_cache.key?(path)
-          template_cache[path] = yield
+          template_cache[path] = yield if block_given?
         end
         template_cache[path]
       end

@@ -33,8 +33,12 @@ module Spontaneous::Plugins
         owner.class.slots.create_slot_named(owner, name)
       end
 
-      def method_missing(method, *args, &block)
-        target.send(method, *args, &block)
+      def method_missing(method, *args)
+        if block_given?
+          target.send(method, *args, &Proc.new)
+        else
+          target.send(method, *args)
+        end
       end
 
     end # Slot Proxy

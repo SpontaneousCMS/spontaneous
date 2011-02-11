@@ -176,7 +176,7 @@ module Spontaneous
         @preprocessed = nil
       end
 
-      def method_missing(method_name, *args, &block)
+      def method_missing(method_name, *args)
         if self.has_attribute?(method_name)
           attribute_get(method_name, *args)
         else

@@ -133,7 +133,7 @@ module Spontaneous::Permissions
         @store ||= StrHash.new
       end
 
-      def method_missing(method, *args, &block)
+      def method_missing(method, *args)
         if level = get(method)
           level
         else

@@ -44,14 +44,18 @@ module Spontaneous
       end.join("\n")
     end
 
-    def method_missing(method, *args, &block)
+    def method_missing(method, *args)
       key = method.to_sym
       if target.field?(key)
         target.fields[key].__send__(output_method)
       elsif target.slot?(key)
         context_cache[target.slots[key]]
       else
-        target.__send__(method, *args, &block)
+        if block_given?
+          target.__send__(method, *args, &Proc.new)
+        else
+          target.__send__(method, *args)
+        end
       end
     end
 

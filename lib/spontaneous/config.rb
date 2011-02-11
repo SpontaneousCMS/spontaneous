@@ -33,7 +33,7 @@ module Spontaneous
         end
       end
 
-      def method_missing(parameter, *args, &block)
+      def method_missing(parameter, *args)
         if args.length == 1
           args = args[0]
         end
@@ -73,7 +73,7 @@ module Spontaneous
         get_setting(key)
       end
 
-      def method_missing(key, *args, &block)
+      def method_missing(key, *args)
         if key.to_s =~ /=$/
           key = key.to_s.gsub(/=$/, '').to_sym
           @settings[key] = args[0]
@@ -157,7 +157,7 @@ module Spontaneous
         local[key] = val
       end
 
-      def method_missing(key, *args, &block)
+      def method_missing(key, *args)
         if key.to_s =~ /=$/
           key = key.to_s.gsub(/=$/, '').to_sym
           self[key] = args[0]

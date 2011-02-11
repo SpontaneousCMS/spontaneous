@@ -11,7 +11,7 @@ module Spontaneous
     @@instance = nil
 
     class << self
-      def record(&block)
+      def record
         entry_point = @@instance.nil?
         @@instance ||= self.new(:modified_list => [])
         yield if block_given?

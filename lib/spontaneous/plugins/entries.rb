@@ -172,7 +172,7 @@ module Spontaneous::Plugins
 
       protected(:resolve_entry)
 
-      def method_missing(method, *args, &block)
+      def method_missing(method, *args)
         if entry = entries.labelled(method)
           entry
         else
