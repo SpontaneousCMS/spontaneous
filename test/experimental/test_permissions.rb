@@ -584,80 +584,80 @@ class PermissionsTest < Test::Unit::TestCase
     end
 
     should "serialise only things in class viewable by the current user" do
-      C.to_hash[:fields].should == [
-        {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Editor Level", :comment=>"", :name=>"editor_level", :writable => true},
-        {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Admin Level", :comment=>"", :name=>"admin_level", :writable => true},
-        {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Root Level", :comment=>"", :name=>"root_level", :writable => true},
-        {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Mixed Level", :comment=>"", :name=>"mixed_level", :writable => true},
-        {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Default Level", :comment=>"", :name=>"default_level", :writable => true}
+      C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == [
+          ["editor_level", true],
+          ["admin_level", true],
+          ["root_level", true],
+          ["mixed_level", true],
+          ["default_level", true]
       ]
       Permissions.with_user(@visitor) do
-        C.to_hash[:fields].should == [
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Default Level", :comment=>"", :name=>"default_level", :writable => false}
+        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == [
+          ["default_level", false]
         ]
       end
       Permissions.with_user(@editor) do
-        C.to_hash[:fields].should == [
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Editor Level", :comment=>"", :name=>"editor_level", :writable => true},
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Mixed Level", :comment=>"", :name=>"mixed_level", :writable => false},
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Default Level", :comment=>"", :name=>"default_level", :writable => true}
+        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == [
+          ["editor_level", true],
+          ["mixed_level", false],
+          ["default_level", true]
         ]
       end
       Permissions.with_user(@admin) do
-        C.to_hash[:fields].should == [
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Editor Level", :comment=>"", :name=>"editor_level", :writable => true},
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Admin Level", :comment=>"", :name=>"admin_level", :writable => true},
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Mixed Level", :comment=>"", :name=>"mixed_level", :writable => false},
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Default Level", :comment=>"", :name=>"default_level", :writable => true}
+        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == [
+          ["editor_level", true],
+          ["admin_level", true],
+          ["mixed_level", false],
+          ["default_level", true]
         ]
 
       end
       Permissions.with_user(@root) do
-        C.to_hash[:fields].should == [
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Editor Level", :comment=>"", :name=>"editor_level", :writable => true},
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Admin Level", :comment=>"", :name=>"admin_level", :writable => true},
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Root Level", :comment=>"", :name=>"root_level", :writable => true},
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Mixed Level", :comment=>"", :name=>"mixed_level", :writable => true},
-          {:type=>"Spontaneous.FieldTypes.StringField", :title=>"Default Level", :comment=>"", :name=>"default_level", :writable => true}
+        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == [
+          ["editor_level", true],
+          ["admin_level", true],
+          ["root_level", true],
+          ["mixed_level", true],
+          ["default_level", true]
         ]
       end
     end
     should "serialise only things in instance viewable by the current user" do
-      @i.to_hash[:entries].should == [
-        {:type=>"C__EditorLevelSlot", :style=>"", :label=>"editor_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Editor Level", :id=>@i.slots.editor_level.id, :writable => true},
-        {:type=>"C__AdminLevelSlot", :style=>"", :label=>"admin_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Admin Level", :id=>@i.slots.admin_level.id, :writable => true},
-        {:type=>"C__RootLevelSlot", :style=>"", :label=>"root_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Root Level", :id=>@i.slots.root_level.id, :writable => true},
-        {:type=>"C__MixedLevelSlot", :style=>"", :label=>"mixed_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Mixed Level", :id=>@i.slots.mixed_level.id, :writable => true},
-        {:type=>"C__DefaultLevelSlot", :style=>"", :label=>"default_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Default Level", :id=>@i.slots.default_level.id, :writable => true}
+      @i.to_hash[:entries].map { |f| [f[:label], f[:writable]] }.should == [
+          ["editor_level", true],
+          ["admin_level", true],
+          ["root_level", true],
+          ["mixed_level", true],
+          ["default_level", true]
       ]
 
       Permissions.with_user(@visitor) do
-        @i.to_hash[:entries].should == [
-          {:type=>"C__DefaultLevelSlot", :style=>"", :label=>"default_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Default Level", :id=>@i.slots.default_level.id, :writable => false}
+        @i.to_hash[:entries].map { |f| [f[:label], f[:writable]] }.should == [
+          ["default_level", false]
         ]
       end
       Permissions.with_user(@editor) do
-        @i.to_hash[:entries].should == [
-          {:type=>"C__EditorLevelSlot", :style=>"", :label=>"editor_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Editor Level", :id=>@i.slots.editor_level.id, :writable => true},
-          {:type=>"C__MixedLevelSlot", :style=>"", :label=>"mixed_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Mixed Level", :id=>@i.slots.mixed_level.id, :writable => false},
-          {:type=>"C__DefaultLevelSlot", :style=>"", :label=>"default_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Default Level", :id=>@i.slots.default_level.id, :writable => true}
+        @i.to_hash[:entries].map { |f| [f[:label], f[:writable]] }.should == [
+          ["editor_level", true],
+          ["mixed_level", false],
+          ["default_level", true]
         ]
       end
       Permissions.with_user(@admin) do
-        @i.to_hash[:entries].should == [
-          {:type=>"C__EditorLevelSlot", :style=>"", :label=>"editor_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Editor Level", :id=>@i.slots.editor_level.id, :writable => true},
-          {:type=>"C__AdminLevelSlot", :style=>"", :label=>"admin_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Admin Level", :id=>@i.slots.admin_level.id, :writable => true},
-          {:type=>"C__MixedLevelSlot", :style=>"", :label=>"mixed_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Mixed Level", :id=>@i.slots.mixed_level.id, :writable => false},
-          {:type=>"C__DefaultLevelSlot", :style=>"", :label=>"default_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Default Level", :id=>@i.slots.default_level.id, :writable => true}
+        @i.to_hash[:entries].map { |f| [f[:label], f[:writable]] }.should == [
+          ["editor_level", true],
+          ["admin_level", true],
+          ["mixed_level", false],
+          ["default_level", true]
         ]
       end
       Permissions.with_user(@root) do
-        @i.to_hash[:entries].should == [
-          {:type=>"C__EditorLevelSlot", :style=>"", :label=>"editor_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Editor Level", :id=>@i.slots.editor_level.id, :writable => true},
-          {:type=>"C__AdminLevelSlot", :style=>"", :label=>"admin_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Admin Level", :id=>@i.slots.admin_level.id, :writable => true},
-          {:type=>"C__RootLevelSlot", :style=>"", :label=>"root_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Root Level", :id=>@i.slots.root_level.id, :writable => true},
-          {:type=>"C__MixedLevelSlot", :style=>"", :label=>"mixed_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Mixed Level", :id=>@i.slots.mixed_level.id, :writable => true},
-          {:type=>"C__DefaultLevelSlot", :style=>"", :label=>"default_level", :styles=>[], :depth=>1, :is_page=>false, :entries=>[], :fields=>[], :name=>"Default Level", :id=>@i.slots.default_level.id, :writable => true}
+        @i.to_hash[:entries].map { |f| [f[:label], f[:writable]] }.should == [
+          ["editor_level", true],
+          ["admin_level", true],
+          ["root_level", true],
+          ["mixed_level", true],
+          ["default_level", true]
         ]
       end
     end
