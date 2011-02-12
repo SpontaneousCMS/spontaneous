@@ -39,10 +39,13 @@ module Spontaneous
 
   autoload :Config, "spontaneous/config"
 
+  autoload :NamedSet, "spontaneous/named_set"
 
   autoload :Content, "spontaneous/content"
   autoload :Page, "spontaneous/page"
   autoload :Facet, "spontaneous/facet"
+  autoload :Box, "spontaneous/box"
+  autoload :BoxPrototype, "spontaneous/box_prototype"
 
   autoload :FieldTypes, "spontaneous/field_types"
 
@@ -88,6 +91,7 @@ module Spontaneous
 
   module Plugins
     autoload :Slots, "spontaneous/plugins/slots"
+    autoload :Boxes, "spontaneous/plugins/boxes"
     autoload :Fields, "spontaneous/plugins/fields"
     autoload :Entries, "spontaneous/plugins/entries"
     autoload :Styles, "spontaneous/plugins/styles"
