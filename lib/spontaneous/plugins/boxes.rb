@@ -15,11 +15,16 @@ module Spontaneous::Plugins
       end
 
       def boxes(*args)
-        @boxes ||= Spontaneous::NamedSet.new(self, :boxes, supertype)
+        @boxes ||= Spontaneous::NamedSet.new(self, :boxes, superclass)
       end
 
       def has_boxes?
         !boxes.empty?
+      end
+
+      def box_order(*new_order)
+        new_order.flatten!
+        boxes.set_order(new_order)
       end
     end
 

@@ -4,8 +4,14 @@ module Spontaneous
   class Box
     attr_reader :name
 
-    def initialize(name, owner)
-      @name, @owner = name, owner
+    attr_reader :prototype
+
+    def initialize(name, prototype, owner)
+      @name, @prototype, @owner = name, prototype, owner
+    end
+
+    def box_name
+      prototype.name
     end
   end
 end

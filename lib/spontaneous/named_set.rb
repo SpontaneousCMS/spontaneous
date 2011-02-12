@@ -10,9 +10,10 @@ module Spontaneous
 
     def initialize(owner, name, supertype = nil)
       @owner, @name, @supertype = owner, name, supertype
-      @superset = supertype.send(name) if supertype
+      @superset = supertype.send(name) if supertype && supertype.respond_to?(name)
       @names = []
       @store = StrHash.new
+      @order = nil
     end
 
     def push(item)
@@ -34,6 +35,7 @@ module Spontaneous
     end
 
     def names
+      return @order if @order
       (@superset ? @superset.names : []) + @names
     end
 
@@ -47,14 +49,28 @@ module Spontaneous
       end
     end
 
+    def set_order(new_order)
+      @order = new_order
+    end
+
     def last
       get_named(names.last)
     end
 
-    def [](index)
+    def [](*args)
+      if args.length == 1
+        get_indexed(args[0])
+      else
+        args.map { |index| get_indexed(index) }.flatten
+      end
+    end
+
+    def get_indexed(index)
       case index
       when String, Symbol
         get_named(index)
+      when Range
+        names[index].map { | name | get_named(name) }
       else
         get_named(names[index])
       end
@@ -69,7 +85,6 @@ module Spontaneous
     def empty?
       names.empty?
     end
-
   end
 end
 

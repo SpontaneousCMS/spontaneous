@@ -13,7 +13,7 @@ module Spontaneous
     end
 
     def get_instance(owner)
-      instance = instance_class.new(name, owner)
+      instance = instance_class.new(name, self, owner)
     end
 
     def instance_class

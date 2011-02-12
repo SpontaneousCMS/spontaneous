@@ -79,6 +79,12 @@ class BoxesTest < Test::Unit::TestCase
       instance.boxes.last.class.should == MyBoxClass
     end
 
+    should "give access to the prototype within the instance" do
+      MyContentClass.box :images1
+      instance = MyContentClass.new
+      instance.boxes[:images1].prototype.should == MyContentClass.boxes[:images1]
+    end
+
     should "Use the name as the title by default" do
       MyContentClass.box :band_and_band
       MyContentClass.box :related_items
@@ -101,16 +107,75 @@ class BoxesTest < Test::Unit::TestCase
       instance.boxes.length.should == 2
     end
 
-    should "allow access to groups of boxes through tags"
-    should "allow access to groups of boxes through ranges"
-    #   MyContentClass.box :images5, :tag => :main
-    #   MyContentClass.box :posts, :tag => :main
-    #   MyContentClass.box :comments
-    #   MyContentClass.box :last, :tag => :main
-    #   @instance = MyBoxClass.new
-    #   @instance.boxes.tagged(:main).length.should == 3
-    #   @instance.boxes.tagged('main').map {|e| e.name }.should == [:images5, :posts, :last]
-    # end
+    context "ranges" do
+      setup do
+        MyContentClass.box :images1
+        MyContentClass.box :images2
+        MyContentClass.box :images3
+        MyContentClass.box :images4
+        MyContentClass.box :images5
+        MyContentClass2.box :images6
+        @instance = MyContentClass.new
+        @instance2 = MyContentClass2.new
+      end
+      should "allow access to groups of boxes through ranges" do
+        @instance.boxes[1..-2].map { |b| b.box_name }.should == [:images2, :images3, :images4]
+        @instance2.boxes[1..-2].map { |b| b.box_name }.should == [:images2, :images3, :images4, :images5]
+      end
+
+      should "allow you to pass a list of names" do
+        @instance.boxes[:images1, :images4].map { |b| b.box_name }.should == [:images1, :images4]
+        @instance2.boxes[:images1, :images6].map { |b| b.box_name }.should == [:images1, :images6]
+      end
+
+      should "allow a mix of names and indexes" do
+        @instance.boxes[0..2, :images5].map { |b| b.box_name }.should == [:images1, :images2, :images3, :images5]
+      end
+      should "allow access to groups of boxes through tags"
+      #   MyContentClass.box :images5, :tag => :main
+      #   MyContentClass.box :posts, :tag => :main
+      #   MyContentClass.box :comments
+      #   MyContentClass.box :last, :tag => :main
+      #   @instance = MyBoxClass.new
+      #   @instance.boxes.tagged(:main).length.should == 3
+      #   @instance.boxes.tagged('main').map {|e| e.name }.should == [:images5, :posts, :last]
+      # end
+    end
+    context "with superclasses" do
+      setup do
+        MyContentClass.box :images6, :tag => :main
+
+        @subclass1 = Class.new(MyContentClass) do
+          box :monkeys, :tag => :main
+          box :apes
+        end
+        @subclass2 = Class.new(@subclass1) do
+          box :peanuts
+        end
+      end
+      should "inherit boxes from its superclass" do
+        @subclass2.boxes.length.should == 4
+        @subclass2.boxes.map { |s| s.name }.should == [:images6, :monkeys, :apes, :peanuts]
+        # @subclass2.boxes.tagged(:main).length.should == 2
+        instance = @subclass2.new
+        instance.boxes.length.should == 4
+      end
+
+      should "allow customisation of the box order" do
+        new_order = [:peanuts, :apes, :images6, :monkeys]
+        @subclass2.box_order *new_order
+        @subclass2.boxes.map { |s| s.name }.should == new_order
+      end
+
+      should "take order of instance boxes from class defn" do
+        new_order = [:peanuts, :apes, :images6, :monkeys]
+        @subclass2.box_order *new_order
+        instance = @subclass2.new
+        instance.boxes.map { |e| e.box_name.to_sym }.should == new_order
+      end
+    end
+
+
 
     should "accept values for the box's fields"
   end
