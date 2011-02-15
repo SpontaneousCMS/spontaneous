@@ -4,6 +4,7 @@ require 'test_helper'
 
 
 class BoxesTest < Test::Unit::TestCase
+
   context "Box definitions" do
     setup do
       class ::MyBoxClass < Box; end
@@ -183,6 +184,7 @@ class BoxesTest < Test::Unit::TestCase
 
   context "Box classes" do
     setup do
+      Spontaneous.template_root = File.expand_path('../../fixtures/templates/boxes', __FILE__)
       class ::MyContentClass < Content; end
       class ::MyBoxClass < Box; end
       MyContentClass.box :images, :class => :MyBoxClass
@@ -210,6 +212,47 @@ class BoxesTest < Test::Unit::TestCase
         @content.save
         @content.reload
         @content.images.title.processed_value.should == "something"
+      end
+    end
+
+    should "default to template in root with the same name" do
+    end
+
+    context "with styles" do
+      setup do
+        MyBoxClass.field :title, :string
+        MyBoxClass.inline_style :christy
+        class ::InheritedStyleBox < MyBoxClass; end
+        class ::WithTemplateBox < Box; end
+        class ::WithoutTemplateBox < Box; end
+        class ::BlankContent < Content; end
+        @content = MyContentClass.new
+        @content.images.title = "whisty"
+      end
+
+      teardown do
+        Object.send(:remove_const, :InheritedStyleBox)
+        Object.send(:remove_const, :WithTemplateBox)
+        Object.send(:remove_const, :WithoutTemplateBox)
+      end
+
+      should "render using explicit styles" do
+        @content.images.render.should == "christy: whisty\n"
+      end
+
+      should "render using default template style" do
+        BlankContent.box :images, :class => :WithTemplateBox
+        instance = BlankContent.new
+        instance.images.render.should == "with_template_box.html.cut\n"
+      end
+
+      should "render using global default box styles" do
+        entry = Object.new
+        entry.stubs(:render).returns("<entry>")
+        BlankContent.box :images, :class => :WithoutTemplateBox
+        instance = BlankContent.new
+        instance.images.stubs(:entries).returns([entry])
+        instance.images.render.should == "<entry>"
       end
     end
   end

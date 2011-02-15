@@ -6,6 +6,8 @@ module Spontaneous
 
     plugin Plugins::SchemaHierarchy
     plugin Plugins::Fields
+    plugin Plugins::Styles
+    plugin Plugins::Render
 
     # use underscores to protect against field name conflicts
     attr_reader :_name, :_prototype, :_owner
@@ -31,6 +33,22 @@ module Spontaneous
        :box_id => _name,
        :fields => fields.serialize
      }
+    end
+
+    def style_id
+      _owner.box_style_id(_name)
+    end
+
+    def container
+      _owner
+    end
+
+    def label
+      _name.to_s
+    end
+
+    def entries
+      []
     end
   end
 end
