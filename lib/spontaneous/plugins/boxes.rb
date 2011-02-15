@@ -8,7 +8,7 @@ module Spontaneous::Plugins
         unless method_defined?(name)
           class_eval <<-BOX
             def #{name}
-              boxes[:#{name}]
+              boxes.named(:#{name})
             end
           BOX
         end
@@ -29,6 +29,11 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+      def reload
+        @boxes = nil
+        super
+      end
+
       def boxes(*args)
         @boxes ||= instantiate_boxes
       end
@@ -36,9 +41,27 @@ module Spontaneous::Plugins
       def instantiate_boxes
         boxes = Spontaneous::NamedSet.new(self, :boxes)
         self.class.boxes.each do | box_prototype |
-          boxes.push_named(box_prototype.name, box_prototype.get_instance(self))
+          box = box_prototype.get_instance(self)
+          boxes.push_named(box_prototype.name, box)
         end
         boxes
+      end
+
+      def box_data(box_name)
+        # TODO: use schema id to retrieve box data
+        (self.box_store || []).detect { |data| data[:box_id] = box_name } || {}
+      end
+
+      def box_field_store(box_name)
+        box_data(box_name)[:fields]
+      end
+
+      def box_modified!(modified_box)
+        self.box_store = serialize_boxes
+      end
+
+      def serialize_boxes
+        boxes.map { |box| box.serialize }
       end
     end
   end

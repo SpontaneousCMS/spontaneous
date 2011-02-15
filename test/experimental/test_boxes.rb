@@ -82,7 +82,7 @@ class BoxesTest < Test::Unit::TestCase
     should "give access to the prototype within the instance" do
       MyContentClass.box :images1
       instance = MyContentClass.new
-      instance.boxes[:images1].prototype.should == MyContentClass.boxes[:images1]
+      instance.boxes[:images1]._prototype.should == MyContentClass.boxes[:images1]
     end
 
     should "Use the name as the title by default" do
@@ -178,6 +178,40 @@ class BoxesTest < Test::Unit::TestCase
 
 
     should "accept values for the box's fields"
+    should "allow overwriting of class definitions using a block"
+  end
+
+  context "Box classes" do
+    setup do
+      class ::MyContentClass < Content; end
+      class ::MyBoxClass < Box; end
+      MyContentClass.box :images, :class => :MyBoxClass
+      @content = MyContentClass.new
+    end
+
+    teardown do
+      Object.send(:remove_const, :MyContentClass)
+      Object.send(:remove_const, :MyBoxClass)
+    end
+
+    should "have fields" do
+      MyBoxClass.fields.length.should == 0
+      MyBoxClass.field :title, :string
+      MyBoxClass.fields.length.should == 1
+    end
+
+    context "with fields" do
+      setup do
+        MyBoxClass.field :title, :string
+      end
+
+      should "save their field values" do
+        @content.images.title = "something"
+        @content.save
+        @content.reload
+        @content.images.title.processed_value.should == "something"
+      end
+    end
   end
 end
 

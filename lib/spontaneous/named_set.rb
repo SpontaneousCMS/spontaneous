@@ -30,7 +30,7 @@ module Spontaneous
 
     def each
       names.each do |name|
-        yield get_named(name) if block_given?
+        yield named(name) if block_given?
       end
     end
 
@@ -39,7 +39,7 @@ module Spontaneous
       (@superset ? @superset.names : []) + @names
     end
 
-    def get_named(name)
+    def named(name)
       if @store.key?(name)
         @store[name]
       elsif @superset
@@ -54,7 +54,7 @@ module Spontaneous
     end
 
     def last
-      get_named(names.last)
+      named(names.last)
     end
 
     def [](*args)
@@ -68,11 +68,11 @@ module Spontaneous
     def get_indexed(index)
       case index
       when String, Symbol
-        get_named(index)
+        named(index)
       when Range
-        names[index].map { | name | get_named(name) }
+        names[index].map { | name | named(name) }
       else
-        get_named(names[index])
+        named(names[index])
       end
     end
 

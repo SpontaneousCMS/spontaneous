@@ -13,7 +13,7 @@ module Spontaneous
     alias_method :each_attribute, :each
 
     sequel_plugin :content_table_inheritance, :type_id
-    sequel_plugin :yajl_serialization, :field_store, :entry_store
+    sequel_plugin :yajl_serialization, :field_store, :entry_store, :box_store
     sequel_plugin :instance_hooks
     sequel_plugin :skip_create_refresh
     sequel_plugin :timestamps, :create=>:created_at, :update=>:modified_at
