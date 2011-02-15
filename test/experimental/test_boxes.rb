@@ -254,6 +254,13 @@ class BoxesTest < Test::Unit::TestCase
         instance.images.stubs(:entries).returns([entry])
         instance.images.render.should == "<entry>"
       end
+
+      should "inherit styles from their superclass" do
+        BlankContent.box :images, :class => :InheritedStyleBox
+        instance = BlankContent.new
+        instance.images.title = "ytsirhc"
+        instance.images.render.should == "christy: ytsirhc\n"
+      end
     end
   end
 end
