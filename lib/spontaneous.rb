@@ -43,7 +43,7 @@ module Spontaneous
 
   autoload :Content, "spontaneous/content"
   autoload :Page, "spontaneous/page"
-  autoload :Facet, "spontaneous/facet"
+  autoload :Piece, "spontaneous/piece"
   autoload :Box, "spontaneous/box"
   autoload :BoxPrototype, "spontaneous/box_prototype"
 

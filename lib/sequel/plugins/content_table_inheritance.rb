@@ -126,7 +126,7 @@ module Sequel
           end
         end
 
-        # used by Page and Facet classes to control the subclasses used in searches
+        # used by Page and Piece classes to control the subclasses used in searches
         # see 'test_content_inheritance.rb'
         def set_inheritance_root
           @is_content_inheritance_root = true

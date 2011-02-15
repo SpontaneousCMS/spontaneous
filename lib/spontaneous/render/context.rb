@@ -39,7 +39,7 @@ module Spontaneous::Render
       content
     end
 
-    def facets
+    def pieces
       content
     end
 
@@ -82,7 +82,7 @@ module Spontaneous::Render
     def method_missing(method, *args)
       key = method.to_sym
       if target.field?(key)
-        target.__send__(key, *args)
+        target.send(key, *args)
       elsif target.slot?(key)
         self.class.new(target.slots[key], format, @params)
       else

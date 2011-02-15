@@ -147,20 +147,20 @@ class StylesTest < Test::Unit::TestCase
         @a.entries.first.style.should == ::StyleTestClass.styles[:first_style]
       end
 
-      context "direct facet access" do
+      context "direct piece access" do
         setup do
           @a.entries.first.style = StyleTestClass.styles[:first_style]
           @a.save
-          facet_id = @a.entries.first.target.id
-          @facet = StyleTestClass[facet_id]
+          piece_id = @a.entries.first.target.id
+          @piece = StyleTestClass[piece_id]
         end
 
-        should "be accessible directly for facets" do
-          @facet.style.should == ::StyleTestClass.styles[:first_style]
+        should "be accessible directly for pieces" do
+          @piece.style.should == ::StyleTestClass.styles[:first_style]
         end
 
-        should "not be settable directly on bare facets" do
-          lambda { @facet.style = ::StyleTestClass.styles.default }.should raise_error(NoMethodError)
+        should "not be settable directly on bare pieces" do
+          lambda { @piece.style = ::StyleTestClass.styles.default }.should raise_error(NoMethodError)
         end
       end
     end

@@ -89,16 +89,16 @@ module Spontaneous::Plugins
         entries.last
       end
 
-      def push(page_or_facet)
-        insert(-1, page_or_facet)
+      def push(page_or_piece)
+        insert(-1, page_or_piece)
       end
 
-      def insert(index, page_or_facet)
+      def insert(index, page_or_piece)
         save if new?
-        if page_or_facet.page?
-          insert_page(index, page_or_facet)
+        if page_or_piece.page?
+          insert_page(index, page_or_piece)
         else
-          insert_facet(index, page_or_facet)
+          insert_piece(index, page_or_piece)
         end
       end
 
@@ -114,11 +114,11 @@ module Spontaneous::Plugins
         insert_with_style(:page, index, child_page)
       end
 
-      def insert_facet(index, facet)
-        facet.container = self
-        facet.page = page if page
-        facet.depth = (depth || 0) + 1
-        insert_with_style(:facet, index, facet)
+      def insert_piece(index, piece)
+        piece.container = self
+        piece.page = page if page
+        piece.depth = (depth || 0) + 1
+        insert_with_style(:piece, index, piece)
       end
 
       def insert_with_style(type, index, content)

@@ -211,9 +211,9 @@ class SlotsTest < Test::Unit::TestCase
         @instance.slot?(:none).should be_false
       end
 
-      should "instantiate a corresponding facet in new instances" do
+      should "instantiate a corresponding piece in new instances" do
         @instance.entries.length.should == 1
-        # @instance.entries.first.class.should == Facet
+        # @instance.entries.first.class.should == Piece
         @instance.entries.first.label.should == :images12
         @instance.entries.first.slot_name.should == "Images12"
       end

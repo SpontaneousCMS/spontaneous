@@ -12,6 +12,7 @@ module Spontaneous::Permissions
       def self.>=(level); true; end
       def self.<=>(level); 1; end
       def self.to_s; 'root'; end
+      def self.to_sym; :root; end
     end
 
     class None
@@ -23,6 +24,7 @@ module Spontaneous::Permissions
 
       def self.<=>(level); -1; end
       def self.to_s; 'none'; end
+      def self.to_sym; :none; end
     end
 
     class Level
@@ -84,7 +86,7 @@ module Spontaneous::Permissions
 
     class << self
       def minimum
-        get(all[1])
+        get(all[1]) || None
       end
 
       def [](level)
@@ -92,7 +94,6 @@ module Spontaneous::Permissions
       end
 
       def get(level)
-        init!
         store[level]
       end
 
@@ -118,6 +119,11 @@ module Spontaneous::Permissions
         @level_file = file
       end
 
+      def reset!
+        @initialised = false
+        @store = nil
+      end
+
       def init!
         return if @initialised
         store[:none] = None
@@ -137,7 +143,11 @@ module Spontaneous::Permissions
       end
 
       def store
-        @store ||= StrHash.new
+        if !@store
+          @store = StrHash.new
+          init!
+        end
+        @store
       end
 
       def method_missing(method, *args)

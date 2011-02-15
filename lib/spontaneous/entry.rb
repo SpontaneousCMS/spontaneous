@@ -7,10 +7,13 @@ module Spontaneous
     plugin Plugins::Render
 
     def self.find_target(container, id)
+      # container.pieces.find { |f| f.id == id }
       Content[id]
+
+
       ## the following results in infinite loops in some circumstances
       # if container.page
-      #   container.page.facets.find { |f| f.id == id }
+      #   container.page.content.find { |f| f.id == id }
       # else
       #   Content[id]
       # end
@@ -20,8 +23,8 @@ module Spontaneous
       create(PageEntry, container, page, entry_style)
     end
 
-    def self.facet(container, facet, entry_style)
-      create(Entry, container, facet, entry_style)
+    def self.piece(container, piece, entry_style)
+      create(Entry, container, piece, entry_style)
     end
 
 
@@ -105,7 +108,7 @@ module Spontaneous
       @entry_style_name = style.name
       target[:style_id] = style.name
       # because it's not obvious that a change to an entry
-      # will affect the fields of the target facet
+      # will affect the fields of the target piece
       # make sure that the target is saved using an instance hook
       @container.after_save_hook do
         target.save

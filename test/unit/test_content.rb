@@ -99,8 +99,8 @@ class ContentTest < Test::Unit::TestCase
       i = Content[@instance.id]
       e = Content[e.id]
       f = Content[f.id]
-      i.nodes.should == [e]
-      e.nodes.should == [f]
+      i.pieces.should == [e]
+      e.pieces.should == [f]
     end
 
     should "record the depth of the nodes" do
@@ -119,7 +119,7 @@ class ContentTest < Test::Unit::TestCase
       c.depth.should == 2
     end
 
-    should "add shortcut access methods based on facet.name" do
+    should "add shortcut access methods based on piece.name" do
       a = Content.new
       b = Content.new
       c = Content.new

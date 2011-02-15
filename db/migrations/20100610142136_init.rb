@@ -14,7 +14,7 @@ Sequel.migration do
       integer :parent_id, :index => true
       varchar :ancestor_path, :index => true # materialised path
 
-      # used to get the parent Content item (Page or Facet)
+      # used to get the parent Content item (Page or Piece)
       integer :container_id, :index => true
 
       # used to find all content for a Page

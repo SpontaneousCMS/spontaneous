@@ -1,6 +1,6 @@
 <complex>
 {{ title }}
-{% content.each do |facet| %}
-<facet>{{ facet }}</facet>
+{% content.each do |piece| %}
+<piece>{{ piece }}</piece>
 {% end %}
 </complex>

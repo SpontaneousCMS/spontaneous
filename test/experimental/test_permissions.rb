@@ -6,6 +6,7 @@ require 'test_helper'
 class PermissionsTest < Test::Unit::TestCase
 
   def setup
+    Permissions::UserLevel.reset!
     Permissions::UserLevel.level_file = File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml'
   end
 

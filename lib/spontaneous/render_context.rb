@@ -34,7 +34,7 @@ module Spontaneous
       content
     end
 
-    def facets
+    def pieces
       content
     end
 

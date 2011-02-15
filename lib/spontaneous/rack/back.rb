@@ -101,8 +101,8 @@ module Spontaneous
 
 
         post '/content/:id/position/:position' do
-          facet = Content[params[:id]]
-          facet.update_position(params[:position].to_i)
+          content = Content[params[:id]]
+          content.update_position(params[:position].to_i)
           json( {:message => 'OK'} )
         end
 

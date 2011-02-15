@@ -12,7 +12,7 @@ module Spontaneous
 
     many_to_one :parent,   :class => Content, :reciprocal => :children
     one_to_many :children, :class => Content, :key => :parent_id, :reciprocal => :parent
-    one_to_many :facets,   :class => Content, :key => :page_id, :reciprocal => :page
+    one_to_many :content,   :class => Content, :key => :page_id, :reciprocal => :page
 
     field :title, :string, :default_value => "New Page"
 
@@ -45,7 +45,7 @@ module Spontaneous
       # the response can be:
       #   a uid: in the form 'uid' or '#uid' to have requests to this page show the content from the page (recommended)
       #   a path: "/path/to/page" (not recommended as paths change!)
-      #   a Content instance: either a Page or a Facet
+      #   a Content instance: either a Page or a Piece
       #   anything that responds to #render(format)
     end
 

@@ -107,42 +107,42 @@ class BackTest < Test::Unit::TestCase
       assert_equal Site.map(@about.id).to_json, last_response.body
     end
 
-    should "reorder facets" do
-      post "/@spontaneous/content/#{@facet2_5.id}/position/0"
+    should "reorder pieces" do
+      post "/@spontaneous/content/#{@piece2_5.id}/position/0"
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
-      @about.text.entries.first.id.should == @facet2_5.id
+      @about.text.entries.first.id.should == @piece2_5.id
 
       p = Content[@about.id]
-      p.text.entries.first.id.should == @facet2_5.id
+      p.text.entries.first.id.should == @piece2_5.id
     end
     # should "reorder pages" do
     #   post "/@spontaneous/page/#{@about.id}/position/0"
     #   assert last_response.ok?
     #   last_response.content_type.should == "application/json;charset=utf-8"
     #   # can't actually be bothered to set this test up
-    #   # @facet2_2.reload.entries.first.target.id.should == @facet2_5.id
+    #   # @piece2_2.reload.entries.first.target.id.should == @piece2_5.id
     # end
 
     context "saving" do
       setup do
         @home = HomePage.new
-        @facet = Text.new
-        @home.in_progress << @facet
+        @piece = Text.new
+        @home.in_progress << @piece
         @home.save
-        @facet.save
+        @piece.save
       end
 
       should "update content field values" do
         params = {
           "field[text][value]" => "Updated field_name_1"
         }
-        post "/@spontaneous/save/#{@facet.id}", params
+        post "/@spontaneous/save/#{@piece.id}", params
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        @facet = Content[@facet.id]
-        last_response.body.should == @facet.to_json
-        @facet.fields.text.value.should ==  "<p>Updated field_name_1</p>\n"
+        @piece = Content[@piece.id]
+        last_response.body.should == @piece.to_json
+        @piece.fields.text.value.should ==  "<p>Updated field_name_1</p>\n"
       end
       should "update page field values" do
         params = {
@@ -255,7 +255,7 @@ class BackTest < Test::Unit::TestCase
       post "@spontaneous/file/replace/#{@barakapoint.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => 'image'
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
-      @barakapoint.reload
+      @barakapoint = Content[@barakapoint.id]
       src = @barakapoint.image.src
       src.should =~ /^\/media(.+)\/rose\.jpg$/
       last_response.body.should == {
@@ -345,10 +345,10 @@ class BackTest < Test::Unit::TestCase
   context "aaa Request cache" do
       setup do
         @home = HomePage.new
-        @facet = Text.new
-        @home.in_progress << @facet
+        @piece = Text.new
+        @home.in_progress << @piece
         @home.save
-        @facet.save
+        @piece.save
         Change.delete
       end
     should "wrap all updates in a Change.record" do
@@ -356,7 +356,7 @@ class BackTest < Test::Unit::TestCase
         "field[text][value]" => "Updated field_name_1"
       }
       Change.count.should == 0
-      post "/@spontaneous/save/#{@facet.id}", params
+      post "/@spontaneous/save/#{@piece.id}", params
       Change.count.should == 1
       Change.first.modified_list.should == [@home.id]
     end

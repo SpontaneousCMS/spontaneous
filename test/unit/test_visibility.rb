@@ -14,13 +14,13 @@ class VisibilityTest < Test::Unit::TestCase
         c = Page.new(:uid => i, :slug => "#{i}")
         @root << c
         4.times do |j|
-          d = Facet.new(:uid => "#{i}.#{j}")
+          d = Piece.new(:uid => "#{i}.#{j}")
           c << d
           2.times do |k|
             e = Page.new(:uid => "#{i}.#{j}.#{k}", :slug => "#{i}-#{j}-#{k}")
             d << e
             2.times do |l|
-              e << Facet.new(:uid => "#{i}.#{j}.#{k}.#{l}")
+              e << Piece.new(:uid => "#{i}.#{j}.#{k}.#{l}")
             end
             d.save
           end
@@ -69,14 +69,14 @@ class VisibilityTest < Test::Unit::TestCase
     should "hide page content" do
       @child.hide!
       @child.reload
-      Facet.all.select { |f| f.visible? }.length.should == 20
-      Facet.all.select do |f|
+      Piece.all.select { |f| f.visible? }.length.should == 20
+      Piece.all.select do |f|
         f.page.ancestors.include?(@child) || f.page == @child
       end.each do |f|
         f.visible?.should be_false
         f.hidden_origin.should == @child.id
       end
-      Facet.all.select do | f |
+      Piece.all.select do | f |
         !f.page.ancestors.include?(@child) && f.page != @child
       end.each do |f|
         f.visible?.should be_true
@@ -95,12 +95,12 @@ class VisibilityTest < Test::Unit::TestCase
     end
 
     should "hide all descendents of page content" do
-      facet = Content.first(:uid => "0.0")
-      f = Facet.new(:uid => "0.0.X")
-      facet << f
-      facet.save
-      facet.reload
-      facet.hide!
+      piece = Content.first(:uid => "0.0")
+      f = Piece.new(:uid => "0.0.X")
+      piece << f
+      piece.save
+      piece.reload
+      piece.hide!
 
       Content.all.each do |c|
         if c.uid =~ /^0\.0/
@@ -110,7 +110,7 @@ class VisibilityTest < Test::Unit::TestCase
             c.hidden_origin.should be_nil
           else
             c.visible?.should be_false
-            c.hidden_origin.should == facet.id
+            c.hidden_origin.should == piece.id
           end
         else
           c.hidden?.should be_false
@@ -121,9 +121,9 @@ class VisibilityTest < Test::Unit::TestCase
     end
 
     should "re-show all descendents of page content" do
-      facet = Content.first(:uid => "0.0")
-      facet.hide!
-      facet.show!
+      piece = Content.first(:uid => "0.0")
+      piece.hide!
+      piece.show!
       Content.all.each do |c|
         c.visible?.should be_true
         c.hidden_origin.should be_nil
@@ -131,9 +131,9 @@ class VisibilityTest < Test::Unit::TestCase
     end
 
     should "know if something is hidden because its ancestor is hidden" do
-      facet = Content.first(:uid => "0.0")
-      facet.hide!
-      facet.showable?.should be_true
+      piece = Content.first(:uid => "0.0")
+      piece.hide!
+      piece.showable?.should be_true
       child = Content.first(:uid => "0.0.0.0")
       child.visible?.should be_false
       child.showable?.should be_false
@@ -141,8 +141,8 @@ class VisibilityTest < Test::Unit::TestCase
 
     # showing something that is hidden because its ancestor is hidden shouldn't be possible
     should "stop hidden child content from being hidden" do
-      facet = Content.first(:uid => "0.0")
-      facet.hide!
+      piece = Content.first(:uid => "0.0")
+      piece.hide!
       child = Content.first(:uid => "0.0.0.0")
       child.visible?.should be_false
       lambda { child.show! }.should raise_error(Spontaneous::NotShowable)
@@ -191,8 +191,8 @@ class VisibilityTest < Test::Unit::TestCase
         Content.with_visible do
           # would like to make sure we're raising a predictable error
           # but 1.9 changes the typeerror to a runtime error
-          lambda { page.entries << Facet.new }.should raise_error#(TypeError)
-          lambda { page << Facet.new }.should raise_error#(TypeError)
+          lambda { page.entries << Piece.new }.should raise_error#(TypeError)
+          lambda { page << Piece.new }.should raise_error#(TypeError)
         end
       end
     end

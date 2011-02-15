@@ -161,12 +161,12 @@ class PublishingTest < Test::Unit::TestCase
           Content.with_revision(23) do
             Subclass.revision.should ==23
             Subclass.dataset.should be_content_revision(23, 'Subclass')
-            # facet wasn't loaded until this point
-            Facet.dataset.should  be_content_revision(23, 'Spontaneous::Facet')
-            Facet.revision.should == 23
+            # piece wasn't loaded until this point
+            Piece.dataset.should  be_content_revision(23, 'Spontaneous::Piece')
+            Piece.revision.should == 23
           end
           Subclass.dataset.should  be_content_revision(nil, 'Subclass')
-          Facet.dataset.should  be_content_revision(nil, 'Spontaneous::Facet')
+          Piece.dataset.should  be_content_revision(nil, 'Spontaneous::Piece')
         end
       end
     end
@@ -416,7 +416,7 @@ class PublishingTest < Test::Unit::TestCase
         c.modified_at.should == now
       end
 
-      should "update page timestamps on modification of a facet" do
+      should "update page timestamps on modification of a piece" do
         Time.stubs(:now).returns(@now+3600)
         page = Page.first
         page.modified_at.to_i.should == @now.to_i
@@ -428,7 +428,7 @@ class PublishingTest < Test::Unit::TestCase
         page.modified_at.to_i.should == @now.to_i + 3600
       end
 
-      should "update page timestamp on addition of facet" do
+      should "update page timestamp on addition of piece" do
         Sequel.datetime_class.stubs(:now).returns(@now+3600)
         page = Page.first
         content = Content[page.entries.first.id]

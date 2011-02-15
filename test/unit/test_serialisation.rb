@@ -25,7 +25,7 @@ class SerialisationTest < Test::Unit::TestCase
         inline_style :sitting
         inline_style :kneeling
       end
-      class ::SerialisedFacet < Facet
+      class ::SerialisedPiece < Piece
         title "Type Title"
         field :title, :string
         field :location, :string, :title => "Where", :comment => "Fill in the address"
@@ -41,46 +41,46 @@ class SerialisationTest < Test::Unit::TestCase
 
 
       @class_hash = {
-        :type => "SerialisedFacet",
+        :type => "SerialisedPiece",
         :title => "Type Title",
         :fields => [
-          {:name => "title", :type => "Spontaneous.FieldTypes.StringField", :title => "Title",  :comment => "" },
-          {:name => "location", :type => "Spontaneous.FieldTypes.StringField", :title => "Where",  :comment => "Fill in the address" },
-          {:name => "date", :type => "Spontaneous.FieldTypes.DateField", :title => "Date",  :comment => "" },
-          {:name => "image", :type => "Spontaneous.FieldTypes.ImageField", :title => "Image",  :comment => "" }
+          {:name => "title", :type => "Spontaneous.FieldTypes.StringField", :title => "Title",  :comment => "" , :writable=>true},
+          {:name => "location", :type => "Spontaneous.FieldTypes.StringField", :title => "Where",  :comment => "Fill in the address" , :writable=>true},
+          {:name => "date", :type => "Spontaneous.FieldTypes.DateField", :title => "Date",  :comment => "" , :writable=>true},
+          {:name => "image", :type => "Spontaneous.FieldTypes.ImageField", :title => "Image",  :comment => "", :writable=>true}
       ],
-        :allowed_types => ["SerialisedPage"] 
+        :allowed_types => ["SerialisedPage"]
       }
     end
 
     teardown do
-      Object.send(:remove_const, :SerialisedFacet)
+      Object.send(:remove_const, :SerialisedPiece)
       Object.send(:remove_const, :SerialisedPage)
     end
 
     context "classes" do
       should "generate a hash for JSON serialisation" do
-        SerialisedFacet.to_hash.should == @class_hash
+        SerialisedPiece.to_hash.should == @class_hash
       end
       should "serialise to JSON" do
-        SerialisedFacet.to_json.should == @class_hash.to_json
+        SerialisedPiece.to_json.should == @class_hash.to_json
       end
     end
 
-    context "facets" do
+    context "pieces" do
       setup do
 
         date = Date.today.to_s
 
         @root = SerialisedPage.new
-        @facet1 = SerialisedFacet.new
-        @facet2 = SerialisedFacet.new
-        @facet3 = SerialisedFacet.new
+        @piece1 = SerialisedPiece.new
+        @piece2 = SerialisedPiece.new
+        @piece3 = SerialisedPiece.new
         @child = SerialisedPage.new(:slug=> "about")
-        @root << @facet1
-        @root << @facet2
-        @facet1 << @child
-        @child << @facet3
+        @root << @piece1
+        @root << @piece2
+        @piece1 << @child
+        @child << @piece3
 
 
         @root.title = "Home"
@@ -89,21 +89,21 @@ class SerialisationTest < Test::Unit::TestCase
         @root.uid = "home"
 
 
-        @facet1.label = "label1"
-        @facet1.slot_name = "The Pages"
-        @facet1.title = "Facet 1"
-        @facet1.location = "Facet 1 Location"
-        @facet1.date = date
+        @piece1.label = "label1"
+        @piece1.slot_name = "The Pages"
+        @piece1.title = "Piece 1"
+        @piece1.location = "Piece 1 Location"
+        @piece1.date = date
 
-        @facet2.label = "label2"
-        @facet2.slot_name = "The Doors"
-        @facet2.title = "Facet 2"
-        @facet2.location = "Facet 2 Location"
-        @facet2.date = date
+        @piece2.label = "label2"
+        @piece2.slot_name = "The Doors"
+        @piece2.title = "Piece 2"
+        @piece2.location = "Piece 2 Location"
+        @piece2.date = date
 
-        @facet3.title = "Facet 3"
-        @facet3.location = "Facet 3 Location"
-        @facet3.date = date
+        @piece3.title = "Piece 3"
+        @piece3.location = "Piece 3 Location"
+        @piece3.date = date
 
         @child.title = "Child Page"
         @child.thumbnail = "/images/thumb.jpg"
@@ -116,36 +116,36 @@ class SerialisationTest < Test::Unit::TestCase
 
         @child.path.should == "/about"
 
-        [@root, @facet1, @facet2, @facet3, @child].each { |c| c.save }
+        [@root, @piece1, @piece2, @piece3, @child].each { |c| c.save }
         @root_hash = {:type=>"SerialisedPage",
           :depth=>0,
           :path=>"/",
           :fields=>
-        [{:unprocessed_value=>"Home", :processed_value=>"Home", :name=>"title", :attributes => {}},
-          {:unprocessed_value=>"S", :processed_value=>"South", :name=>"direction", :attributes => {}},
+        [{:unprocessed_value=>"Home", :processed_value=>"Home", :name=>"title", :attributes => {}, :writable => true},
+          {:unprocessed_value=>"S", :processed_value=>"South", :name=>"direction", :attributes => {}, :writable => true},
           {:unprocessed_value=>"/images/home.jpg",
             :processed_value=>"/images/home.jpg",
-            :name=>"thumbnail", :attributes => {}}],
+            :name=>"thumbnail", :attributes => {}, :writable => true}],
             :uid=>"home",
             :entries=>
-        [{:type=>"SerialisedFacet",
+        [{:type=>"SerialisedPiece",
           :label=>"label1",
           :depth=>1,
           :styles=>["freezing", "boiling"],
           :fields=>
         [
-          {:unprocessed_value=>"Facet 1",
-            :processed_value=>"Facet 1",
-            :name=>"title", :attributes => {}},
-          {:unprocessed_value=>"Facet 1 Location",
-            :processed_value=>"Facet 1 Location",
-            :name=>"location", :attributes => {}},
+          {:unprocessed_value=>"Piece 1",
+            :processed_value=>"Piece 1",
+            :name=>"title", :attributes => {}, :writable => true},
+          {:unprocessed_value=>"Piece 1 Location",
+            :processed_value=>"Piece 1 Location",
+            :name=>"location", :attributes => {}, :writable => true},
           {:unprocessed_value=>date,
             :processed_value=>date,
-            :name=>"date", :attributes => {}},
+            :name=>"date", :attributes => {}, :writable => true},
           {:unprocessed_value=>"",
             :processed_value=>"",
-            :name=>"image", :attributes => {}} ],
+            :name=>"image", :attributes => {}, :writable => true} ],
                 :style=>"freezing",
               :entries=>
         [{:type=>"SerialisedPage",
@@ -155,13 +155,13 @@ class SerialisationTest < Test::Unit::TestCase
           :fields=>
         [{:unprocessed_value=>"Child Page",
           :processed_value=>"Child Page",
-          :name=>"title", :attributes => {}},
+          :name=>"title", :attributes => {}, :writable => true},
           {:unprocessed_value=>"N",
             :processed_value=>"North",
-            :name=>"direction", :attributes => {}},
+            :name=>"direction", :attributes => {}, :writable => true},
             {:unprocessed_value=>"/images/thumb.jpg",
               :processed_value=>"/images/thumb.jpg",
-              :name=>"thumbnail", :attributes => {}}],
+              :name=>"thumbnail", :attributes => {}, :writable => true}],
               :uid=>"about",
               :style=>"sitting",
               :is_page=>true,
@@ -169,34 +169,35 @@ class SerialisationTest < Test::Unit::TestCase
               :id=>@child.id}],
               :is_page=>false,
               :name=>"The Pages",
-              :id=>@facet1.id},
-              {:type=>"SerialisedFacet",
+              :id=>@piece1.id},
+              {:type=>"SerialisedPiece",
                 :label=>"label2",
                 :depth=>1,
                 :styles=>["freezing", "boiling"],
                 :fields=>
-        [{:unprocessed_value=>"Facet 2",
-          :processed_value=>"Facet 2",
-          :name=>"title", :attributes => {}},
-          {:unprocessed_value=>"Facet 2 Location",
-            :processed_value=>"Facet 2 Location",
-            :name=>"location", :attributes => {}},
+        [{:unprocessed_value=>"Piece 2",
+          :processed_value=>"Piece 2",
+          :name=>"title", :attributes => {}, :writable => true},
+          {:unprocessed_value=>"Piece 2 Location",
+            :processed_value=>"Piece 2 Location",
+            :name=>"location", :attributes => {}, :writable => true},
             {:unprocessed_value=>date,
               :processed_value=>date,
-              :name=>"date", :attributes => {}},
+              :name=>"date", :attributes => {}, :writable => true},
             {:unprocessed_value=>"",
               :processed_value=>"",
-              :name=>"image", :attributes => {}} ],
+              :name=>"image", :attributes => {}, :writable => true} ],
               :style=>"boiling",
               :entries=>[],
               :is_page=>false,
               :name=>"The Doors",
-              :id=>@facet2.id}],
+              :id=>@piece2.id}],
               :is_page=>true,
               :slug=>"",
               :id=>@root.id}
       end
       should "generate a hash for JSON serialisation" do
+        pp @root.to_hash
         @root.to_hash.should == @root_hash
       end
 

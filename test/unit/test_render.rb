@@ -62,7 +62,7 @@ class RenderTest < Test::Unit::TestCase
       @content.render(:epub).should == "<EPUB><title>The Title</title><body>The Description</body></EPUB>\n"
     end
 
-    context "facet trees" do
+    context "piece trees" do
       setup do
         TemplateClass.inline_style :complex_template, :default => true
         @content = TemplateClass.new
@@ -79,11 +79,11 @@ class RenderTest < Test::Unit::TestCase
       end
 
       should "be accessible through #content method" do
-        @content.render.should == "<complex>\nThe Title\n<facet><html><title>Child Title</title><body>Child Description</body></html>\n</facet>\n</complex>\n"
+        @content.render.should == "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
       end
 
       should "cascade the chosen format to all subsequent #render calls" do
-        @content.render(:pdf).should == "<pdf>\nThe Title\n<facet><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</facet>\n</pdf>\n"
+        @content.render(:pdf).should == "<pdf>\nThe Title\n<piece><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</piece>\n</pdf>\n"
       end
 
       should "only show visible entries" do
@@ -93,7 +93,7 @@ class RenderTest < Test::Unit::TestCase
         @content << child
         @content.entries.last.style = TemplateClass.styles[:this_template]
         @content.entries.last.hide!
-        @content.render.should == "<complex>\nThe Title\n<facet><html><title>Child Title</title><body>Child Description</body></html>\n</facet>\n</complex>\n"
+        @content.render.should == "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
       end
     end
 
@@ -183,24 +183,24 @@ class RenderTest < Test::Unit::TestCase
 
       setup do
         class ::PageClass < Page; end
-        class ::FacetClass < Facet; end
+        class ::PieceClass < Piece; end
         PageClass.page_style :page_style
         PageClass.inline_style :inline_style
         @parent = PageClass.new
         @parent.title = "Parent"
-        @facet = Facet.new
+        @piece = Piece.new
         @page = PageClass.new
         @page.title = "Child"
-        @parent << @facet
-        @facet << @page
+        @parent << @piece
+        @piece << @page
         @parent.save
-        @facet.save
+        @piece.save
         @page.save
       end
 
       teardown do
         Object.send(:remove_const, :PageClass)
-        Object.send(:remove_const, :FacetClass)
+        Object.send(:remove_const, :PieceClass)
       end
 
       should "use style assigned by entry" do

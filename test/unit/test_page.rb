@@ -183,16 +183,16 @@ class PageTest < Test::Unit::TestCase
   context "page entries" do
     setup do
       @parent = Page.create
-      @facet = Facet.new
+      @piece = Piece.new
       @child = Page.new
-      @parent << @facet
-      @facet << @child
+      @parent << @piece
+      @piece << @child
       @parent.save
-      @facet.save
+      @piece.save
       @child.save
     end
 
-    should "report their depth according to their position in the facet tree" do
+    should "report their depth according to their position in the piece tree" do
       @parent.depth.should == 0
       @parent.entries.first.depth.should == 1
       @parent.entries.first.entries.first.depth.should == 2

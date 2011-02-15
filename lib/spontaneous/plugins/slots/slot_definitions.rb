@@ -86,7 +86,7 @@ module Spontaneous::Plugins
             # on creation. slug is not editable in the ui
             # so we can use it as a quick test for "slottiness"
 
-            # find all facets that have a #slug defined that does not match with
+            # find all pieces that have a #slug defined that does not match with
             # a defined slot name and delete them
             orphan_slots = []
             content.entries.each do |entry|

@@ -82,7 +82,7 @@ module Spontaneous::Plugins
     # SlotsOwningClass.template_directory/slot_name.{format}.erb
     # and use it if it exists
     # if not it falls back to a default template that just renders the
-    # Facet's content
+    # Piece's content
     class AnonymousStyle
       def initialize(container, label)
         @container = container

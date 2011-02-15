@@ -34,9 +34,9 @@ module Spontaneous
       page?
     end
 
-    many_to_one :container, :class => self, :reciprocal => :nodes
-    one_to_many :nodes,    :key => :container_id, :class => self, :reciprocal => :container
-    many_to_one :page, :class => Content, :key => :page_id, :reciprocal => :facets
+    many_to_one :container, :class => self, :reciprocal => :pieces
+    one_to_many :pieces,    :key => :container_id, :class => self, :reciprocal => :container
+    many_to_one :page, :class => Content, :key => :page_id, :reciprocal => :content
 
     extend Plugins
 

@@ -21,7 +21,7 @@ class AliasTest < Test::Unit::TestCase
       @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
       Spontaneous.template_root = @template_root
 
-      class ::A < Facet
+      class ::A < Piece
         field :a_field1
         field :a_field2
 
@@ -46,18 +46,18 @@ class AliasTest < Test::Unit::TestCase
         field :bb_field1
       end
 
-      class ::AAlias < Facet
+      class ::AAlias < Piece
         alias_of :A
 
         field :a_alias_field1
         inline_style :a_alias_style
       end
 
-      class ::AAAlias < Facet
+      class ::AAAlias < Piece
         alias_of :AA
       end
 
-      class ::AAAAlias < Facet
+      class ::AAAAlias < Piece
         alias_of :AAA
       end
 
@@ -66,11 +66,11 @@ class AliasTest < Test::Unit::TestCase
         alias_of :B
       end
 
-      class ::BBAlias < Facet
+      class ::BBAlias < Piece
         alias_of :BB
       end
 
-      class ::MultipleAlias < Facet
+      class ::MultipleAlias < Piece
         alias_of :AA, :B
       end
       @root = Page.create
@@ -161,7 +161,7 @@ class AliasTest < Test::Unit::TestCase
       end
     end
 
-    context "Facet aliases" do
+    context "Piece aliases" do
       should "be allowed to target pages" do
         a = BBAlias.create(:target => @bb)
         a.bb_field1.value.should == "BB"
@@ -176,7 +176,7 @@ class AliasTest < Test::Unit::TestCase
     end
 
     context "Page aliases" do
-      should "be allowed to have facet classes as targets" do
+      should "be allowed to have piece classes as targets" do
         class ::CAlias < Page
           alias_of :AAA
           page_style :page

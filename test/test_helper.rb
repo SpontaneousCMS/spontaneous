@@ -138,16 +138,16 @@ class Test::Unit::TestCase
 
     @home.pages << @about
 
-    @facet2_1 = Text.new(:text => "Text 1")
-    @facet2_2 = Text.new(:text => "Text 2")
-    @facet2_3 = Text.new(:text => "Text 3")
-    @facet2_4 = Text.new(:text => "Text 4")
-    @facet2_5 = Text.new(:text => "Text 5")
-    @about.text << @facet2_1
-    @about.text << @facet2_2
-    @about.text << @facet2_3
-    @about.text << @facet2_4
-    @about.text << @facet2_5
+    @piece2_1 = Text.new(:text => "Text 1")
+    @piece2_2 = Text.new(:text => "Text 2")
+    @piece2_3 = Text.new(:text => "Text 3")
+    @piece2_4 = Text.new(:text => "Text 4")
+    @piece2_5 = Text.new(:text => "Text 5")
+    @about.text << @piece2_1
+    @about.text << @piece2_2
+    @about.text << @piece2_3
+    @about.text << @piece2_4
+    @about.text << @piece2_5
     @about.save
     @home.save
 
@@ -156,7 +156,7 @@ class Test::Unit::TestCase
     @projects.projects << Project.new(:slug => "tiffl", :title => "TIFFL", :url => "http://tiffl.org", :description => "TIFFL gives you personalised access to the Transport for London Journey Planner.")
     @projects.projects << Project.new(:slug => "on-the-bbc", :title => "On the BBC", :url => "", :description => "On the BBC is an experiment that provides up-to-date twitter alerts for BBC radio and TV channels.")
     @projects.projects << Project.new(:slug => "human-remains", :title => "Human Remains", :url => "http://remains.magnetised.info/", :description => "A project exploring our relationship to our own detritus.")
-    # [@carbon_quilt, @project2, @project3, @facet2_1, @facet2_2, @facet2_3, @facet2_4, @facet2_5].each { |p| p.save }
+    # [@carbon_quilt, @project2, @project3, @piece2_1, @piece2_2, @piece2_3, @piece2_4, @piece2_5].each { |p| p.save }
 
     @projects.save
 

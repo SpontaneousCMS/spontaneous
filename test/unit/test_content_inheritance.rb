@@ -12,31 +12,31 @@ class ContentTest < Test::Unit::TestCase
       class ::PageClass11 < ::PageClass1; end
       class ::PageClass111 < ::PageClass1; end
       class ::PageClass2 < Page; end
-      class ::PageClass22 < PageClass2; end
 
+      class ::PageClass22 < PageClass2; end
       @page1 = PageClass1.create.reload
       @page11 = PageClass11.create.reload
       @page111 = PageClass111.create.reload
       @page2 = PageClass2.create.reload
       @page22 = PageClass22.create.reload
 
-      class ::FacetClass1 < Facet; end
-      class ::FacetClass11 < FacetClass1; end
-      class ::FacetClass111 < FacetClass11; end
-      class ::FacetClass2 < Facet; end
-      class ::FacetClass22 < FacetClass2; end
+      class ::PieceClass1 < Piece; end
+      class ::PieceClass11 < PieceClass1; end
+      class ::PieceClass111 < PieceClass11; end
+      class ::PieceClass2 < Piece; end
+      class ::PieceClass22 < PieceClass2; end
 
-      @facet1 = FacetClass1.create.reload
-      @facet11 = FacetClass11.create.reload
-      @facet111 = FacetClass111.create.reload
-      @facet2 = FacetClass2.create.reload
-      @facet22 = FacetClass22.create.reload
+      @piece1 = PieceClass1.create.reload
+      @piece11 = PieceClass11.create.reload
+      @piece111 = PieceClass111.create.reload
+      @piece2 = PieceClass2.create.reload
+      @piece22 = PieceClass22.create.reload
     end
 
     teardown do
       [
         :PageClass1, :PageClass11, :PageClass111, :PageClass2, :PageClass22,
-        :FacetClass1, :FacetClass11, :FacetClass111, :FacetClass2, :FacetClass22
+        :PieceClass1, :PieceClass11, :PieceClass111, :PieceClass2, :PieceClass22
       ].each do |klass|
         Object.send(:remove_const, klass)
       end
@@ -45,10 +45,10 @@ class ContentTest < Test::Unit::TestCase
     should "correctly type subclasses found via Content" do
       Content.all.map { |c| c.class }.should == \
         [PageClass1, PageClass11, PageClass111, PageClass2, PageClass22,
-          FacetClass1, FacetClass11, FacetClass111, FacetClass2, FacetClass22]
+          PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22]
       Content.all.should == \
         [@page1, @page11, @page111, @page2, @page22,
-          @facet1, @facet11, @facet111, @facet2, @facet22]
+          @piece1, @piece11, @piece111, @piece2, @piece22]
     end
 
     context "Pages" do
@@ -66,20 +66,20 @@ class ContentTest < Test::Unit::TestCase
       end
     end
 
-    context "Facets" do
+    context "Pieces" do
       should "type subclasses found via Page" do
-        Facet.all.map { |c| c.class }.should == \
-          [FacetClass1, FacetClass11, FacetClass111, FacetClass2, FacetClass22]
-        Facet.all.should == [@facet1, @facet11, @facet111, @facet2, @facet22]
+        Piece.all.map { |c| c.class }.should == \
+          [PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22]
+        Piece.all.should == [@piece1, @piece11, @piece111, @piece2, @piece22]
       end
 
       should "only find instances of a single class when searching via that subclass" do
-        FacetClass1.all.map { |c| c.class }.should == [FacetClass1]
-        FacetClass1.all.should == [@facet1]
-        FacetClass11.all.should == [@facet11]
-        FacetClass2.all.map { |c| c.class }.should == [FacetClass2]
-        FacetClass2.all.should == [@facet2]
-        FacetClass22.all.should == [@facet22]
+        PieceClass1.all.map { |c| c.class }.should == [PieceClass1]
+        PieceClass1.all.should == [@piece1]
+        PieceClass11.all.should == [@piece11]
+        PieceClass2.all.map { |c| c.class }.should == [PieceClass2]
+        PieceClass2.all.should == [@piece2]
+        PieceClass22.all.should == [@piece22]
       end
     end
   end

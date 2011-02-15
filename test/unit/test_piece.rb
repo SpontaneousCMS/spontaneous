@@ -3,21 +3,21 @@
 require 'test_helper'
 
 
-class FacetTest < Test::Unit::TestCase
+class PieceTest < Test::Unit::TestCase
   include Spontaneous
 
-  context "Facets" do
+  context "Pieces" do
     should "not be pages" do
-      Facet.new.page?.should be_false
+      Piece.new.page?.should be_false
     end
 
     context "as page content" do
       setup do
-        class ::Fridge < Facet; end
+        class ::Fridge < Piece; end
         @page = Page.create
-        @f1 = Facet.new
+        @f1 = Piece.new
         @page << @f1
-        @f2 = Facet.new
+        @f2 = Piece.new
         @f1 << @f2
         @f3 = Fridge.new
         @f2 << @f3
@@ -28,8 +28,8 @@ class FacetTest < Test::Unit::TestCase
         @f3.save
 
         @page = Page[@page.id]
-        @f1 = Facet[@f1.id]
-        @f2 = Facet[@f2.id]
+        @f1 = Piece[@f1.id]
+        @f2 = Piece[@f2.id]
         @f3 = Content[@f3.id]
       end
       teardown do
@@ -48,16 +48,16 @@ class FacetTest < Test::Unit::TestCase
         @f3.container.should == @f2
       end
 
-      should "know their depth in the facet tree" do
+      should "know their depth in the piece tree" do
         @f1.depth.should == 1
         @f2.depth.should == 2
         @f3.depth.should == 3
       end
 
       should "be available from their containing page" do
-        @page.facets.length.should == 3
-        @page.facets.should == [@f1, @f2, @f3]
-        @page.facets.last.class.should == Fridge
+        @page.content.length.should == 3
+        @page.content.should == [@f1, @f2, @f3]
+        @page.content.last.class.should == Fridge
       end
 
       should "have a link to their entries" do

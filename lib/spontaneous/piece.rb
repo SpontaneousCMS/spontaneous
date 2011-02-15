@@ -2,7 +2,7 @@
 
 
 module Spontaneous
-  class Facet < Content
+  class Piece < Content
     set_inheritance_root
   end
 end
