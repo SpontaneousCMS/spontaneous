@@ -7,8 +7,11 @@ module Spontaneous
     plugin Plugins::Render
 
     def self.find_target(container, id)
-      # container.pieces.find { |f| f.id == id }
-      Content[id]
+      if container
+        container._pieces.find { |f| f.id == id }
+      else
+        Content[id]
+      end
 
 
       ## the following results in infinite loops in some circumstances
@@ -30,7 +33,7 @@ module Spontaneous
 
     def self.create(entry_class, container, content, entry_style, box = nil)
       content.save if content.new?
-      entry = entry_class.new(container, content.id, entry_style ? entry_style.name : nil, box.box_id)
+      entry = entry_class.new(container, content.id, entry_style ? entry_style.name : nil, box ? box.box_id : nil)
       entry.target = content
       entry
     end
@@ -42,7 +45,7 @@ module Spontaneous
       @container = container
       @target_id = target_id
       @entry_style_name = style_name.to_sym if style_name
-      @box_id = box_id.to_sym
+      @box_id = box_id.to_sym if box_id
     end
 
     def box

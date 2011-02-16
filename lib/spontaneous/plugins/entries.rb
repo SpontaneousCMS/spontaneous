@@ -65,6 +65,9 @@ module Spontaneous::Plugins
         end
       end
 
+      # ensure that all access to pieces is through their corresponding entry
+      alias_method :pieces, :entries
+
       def all_entries
         @all_entries ||= Spontaneous::EntrySet.new(self, entry_store)
       end

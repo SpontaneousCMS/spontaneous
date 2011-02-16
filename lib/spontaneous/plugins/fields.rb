@@ -16,14 +16,14 @@ module Spontaneous::Plugins
             fields[name].tap { |f| f.template_params = args }
           end
         else
-          raise "Must give warning when field name clashes with method name #{name}"
+          # raise "Must give warning when field name clashes with method name #{name}"
         end
 
         setter = "#{name}=".to_sym
         unless method_defined?(setter)
           define_method(setter) { |value| fields[name].value = value  }
         else
-          raise "Must give warning when field name clashes with method name"
+          # raise "Must give warning when field name clashes with method name"
         end
       end
 

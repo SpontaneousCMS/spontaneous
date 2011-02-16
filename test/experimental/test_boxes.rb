@@ -333,6 +333,7 @@ class BoxesTest < Test::Unit::TestCase
 
       @parent.images.pieces.first.box.should == @parent.images
       @parent.words.pieces.first.box.should == @parent.words
+      @parent.pieces.first.box.should == @parent.images
     end
 
     should "choose correct style" do
