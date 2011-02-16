@@ -40,7 +40,7 @@ module Spontaneous
 
     def serialize
      {
-       :box_id => _name,
+       :box_id => box_id.to_s,
        :fields => fields.serialize
      }
     end

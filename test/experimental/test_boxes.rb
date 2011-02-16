@@ -215,6 +215,22 @@ class BoxesTest < Test::Unit::TestCase
       end
     end
 
+    should "allow inline definition of fields" do
+      MyContentClass.box :partners do
+        field :name, :string
+        field :logo, :image
+        field :description, :text
+      end
+      instance = MyContentClass.new
+      instance.partners.name.should be_instance_of(Spontaneous::FieldTypes::StringField)
+      instance.partners.name = "Howard"
+      instance.partners.description = "Here is Howard"
+      instance.save
+      instance = Content[instance.id]
+      instance.partners.name.value.should == "Howard"
+      instance.partners.description.value.should == "Here is Howard"
+    end
+
     should "default to template in root with the same name" do
     end
 

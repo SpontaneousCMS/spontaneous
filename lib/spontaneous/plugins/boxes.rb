@@ -49,7 +49,8 @@ module Spontaneous::Plugins
 
       def box_data(box_name)
         # TODO: use schema id to retrieve box data
-        (self.box_store || []).detect { |data| data[:box_id] = box_name } || {}
+        box_name = box_name.to_s
+        (self.box_store || []).detect { |data| data[:box_id] == box_name } || {}
       end
 
       def box_field_store(box_name)
