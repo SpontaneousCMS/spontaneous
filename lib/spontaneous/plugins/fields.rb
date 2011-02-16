@@ -66,6 +66,10 @@ module Spontaneous::Plugins
           prototype.field_class.accepts?(mime_type)
         end
       end
+
+      def readable_fields
+        field_names.select { |name| field_readable?(name) }
+      end
     end
 
     module InstanceMethods

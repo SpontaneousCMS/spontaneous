@@ -5,11 +5,11 @@ module Spontaneous::Plugins
   module Permissions
 
     module ClassMethods
-      def slot_readable?(slot_name)
-        slot_permission(slot_name, :read_level)
+      def box_readable?(box_name)
+        box_permission(box_name, :read_level)
       end
-      def slot_writable?(slot_name)
-        slot_permission(slot_name, :write_level)
+      def box_writable?(box_name)
+        box_permission(box_name, :write_level)
       end
 
       def field_readable?(field_name)
@@ -29,10 +29,10 @@ module Spontaneous::Plugins
         end
       end
 
-      def slot_permission(slot_name, test)
+      def box_permission(box_name, test)
         return true unless user = Spontaneous::Permissions.active_user
-        if slot = slots[slot_name]
-          user.level >= slot.__send__(test)
+        if box = boxes[box_name]
+          user.level >= box.__send__(test)
         else
           nil # or perhaps throw error
         end
@@ -49,11 +49,12 @@ module Spontaneous::Plugins
         self.class.field_writable?(field_name)
       end
 
-      def slot_writable?(slot_name)
-        self.class.slot_writable?(slot_name)
+      def box_writable?(box_name)
+        self.class.box_writable?(box_name)
       end
-      def slot_readable?(slot_name)
-        self.class.slot_readable?(slot_name)
+
+      def box_readable?(box_name)
+        self.class.box_readable?(box_name)
       end
     end # InstanceMethods
 

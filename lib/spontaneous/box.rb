@@ -9,9 +9,11 @@ module Spontaneous
     plugin Plugins::Styles
     plugin Plugins::Render
     plugin Plugins::AllowedTypes
+    plugin Plugins::Permissions
 
     # use underscores to protect against field name conflicts
     attr_reader :_name, :_prototype, :_owner
+
 
     def initialize(name, prototype, owner)
       @_name, @_prototype, @_owner = name.to_sym, prototype, owner
@@ -39,10 +41,10 @@ module Spontaneous
     end
 
     def serialize
-     {
-       :box_id => box_id.to_s,
-       :fields => fields.serialize
-     }
+      {
+        :box_id => box_id.to_s,
+        :fields => fields.serialize
+      }
     end
 
     def style_id
@@ -75,6 +77,25 @@ module Spontaneous
     def pieces
       @pieces ||= _owner.entries.for_box(self)
     end
-  end
-end
 
+    def to_hash
+      {
+        :title => _prototype.title,
+        :id => _prototype.schema_id,
+        :name => _prototype.name.to_s,
+        :writable => _owner.box_writable?(_name),
+        :fields => self.class.readable_fields.map { |name| field_prototypes[name].to_hash },
+        :allowed_types => allowed_types.map { |type| type.instance_class.json_name }
+      }
+    end
+
+    def writable?
+      self._owner.box_writable?(_name)
+    end
+
+    def readable?
+      self._owner.box_readable?(_name)
+    end
+  end
+
+end

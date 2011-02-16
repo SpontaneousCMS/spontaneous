@@ -406,21 +406,51 @@ class PermissionsTest < Test::Unit::TestCase
       C.field :default_level
 
       C.box :editor_level, :user_level => :editor do
+        field :editor_level, :user_level => :editor
+        field :admin_level, :user_level => :admin
+        field :root_level, :user_level => :root
+        field :mixed_level, :read_level => :editor, :write_level => :root
+        field :default_level
+
         allow :D, :user_level => :editor
         allow :C, :user_level => :admin
       end
 
       C.box :admin_level, :user_level => :admin do
+        field :editor_level, :user_level => :editor
+        field :admin_level, :user_level => :admin
+        field :root_level, :user_level => :root
+        field :mixed_level, :read_level => :editor, :write_level => :root
+        field :default_level
+
         allow :C, :user_level => :admin
       end
 
       C.box :root_level, :user_level => :root do
+        field :editor_level, :user_level => :editor
+        field :admin_level, :user_level => :admin
+        field :root_level, :user_level => :root
+        field :mixed_level, :read_level => :editor, :write_level => :root
+        field :default_level
+
         allow :C, :user_level => :root
       end
 
-      C.box :mixed_level, :read_level => :editor, :write_level => :root
+      C.box :mixed_level, :read_level => :editor, :write_level => :root do
+        field :editor_level, :user_level => :editor
+        field :admin_level, :user_level => :admin
+        field :root_level, :user_level => :root
+        field :mixed_level, :read_level => :editor, :write_level => :root
+        field :default_level
+      end
 
       C.box :default_level do
+        field :editor_level, :user_level => :editor
+        field :admin_level, :user_level => :admin
+        field :root_level, :user_level => :root
+        field :mixed_level, :read_level => :editor, :write_level => :root
+        field :default_level
+
         allow :C
       end
 
@@ -511,76 +541,76 @@ class PermissionsTest < Test::Unit::TestCase
       end
     end
 
-    should "protect slot reads" do
-      @i.slot_readable?(:editor_level).should be_true
-      @i.slot_readable?(:admin_level).should be_true
-      @i.slot_readable?(:root_level).should be_true
-      @i.slot_readable?(:mixed_level).should be_true
-      @i.slot_readable?(:default_level).should be_true
+    should "protect box reads" do
+      @i.box_readable?(:editor_level).should be_true
+      @i.box_readable?(:admin_level).should be_true
+      @i.box_readable?(:root_level).should be_true
+      @i.box_readable?(:mixed_level).should be_true
+      @i.box_readable?(:default_level).should be_true
 
       Permissions.with_user(@visitor) do
-        @i.slot_readable?(:editor_level).should be_false
-        @i.slot_readable?(:admin_level).should be_false
-        @i.slot_readable?(:root_level).should be_false
-        @i.slot_readable?(:mixed_level).should be_false
-        @i.slot_readable?(:default_level).should be_true
+        @i.box_readable?(:editor_level).should be_false
+        @i.box_readable?(:admin_level).should be_false
+        @i.box_readable?(:root_level).should be_false
+        @i.box_readable?(:mixed_level).should be_false
+        @i.box_readable?(:default_level).should be_true
       end
       Permissions.with_user(@editor) do
-        @i.slot_readable?(:editor_level).should be_true
-        @i.slot_readable?(:admin_level).should be_false
-        @i.slot_readable?(:root_level).should be_false
-        @i.slot_readable?(:mixed_level).should be_true
-        @i.slot_readable?(:default_level).should be_true
+        @i.box_readable?(:editor_level).should be_true
+        @i.box_readable?(:admin_level).should be_false
+        @i.box_readable?(:root_level).should be_false
+        @i.box_readable?(:mixed_level).should be_true
+        @i.box_readable?(:default_level).should be_true
       end
       Permissions.with_user(@admin) do
-        @i.slot_readable?(:editor_level).should be_true
-        @i.slot_readable?(:admin_level).should be_true
-        @i.slot_readable?(:root_level).should be_false
-        @i.slot_readable?(:mixed_level).should be_true
-        @i.slot_readable?(:default_level).should be_true
+        @i.box_readable?(:editor_level).should be_true
+        @i.box_readable?(:admin_level).should be_true
+        @i.box_readable?(:root_level).should be_false
+        @i.box_readable?(:mixed_level).should be_true
+        @i.box_readable?(:default_level).should be_true
       end
       Permissions.with_user(@root) do
-        @i.slot_readable?(:editor_level).should be_true
-        @i.slot_readable?(:admin_level).should be_true
-        @i.slot_readable?(:root_level).should be_true
-        @i.slot_readable?(:mixed_level).should be_true
-        @i.slot_readable?(:default_level).should be_true
+        @i.box_readable?(:editor_level).should be_true
+        @i.box_readable?(:admin_level).should be_true
+        @i.box_readable?(:root_level).should be_true
+        @i.box_readable?(:mixed_level).should be_true
+        @i.box_readable?(:default_level).should be_true
       end
     end
-    should "protect slot writes" do
-      @i.slot_writable?(:editor_level).should be_true
-      @i.slot_writable?(:admin_level).should be_true
-      @i.slot_writable?(:root_level).should be_true
-      @i.slot_writable?(:mixed_level).should be_true
-      @i.slot_writable?(:default_level).should be_true
+    should "protect box writes" do
+      @i.box_writable?(:editor_level).should be_true
+      @i.box_writable?(:admin_level).should be_true
+      @i.box_writable?(:root_level).should be_true
+      @i.box_writable?(:mixed_level).should be_true
+      @i.box_writable?(:default_level).should be_true
 
       Permissions.with_user(@visitor) do
-        @i.slot_writable?(:editor_level).should be_false
-        @i.slot_writable?(:admin_level).should be_false
-        @i.slot_writable?(:root_level).should be_false
-        @i.slot_writable?(:mixed_level).should be_false
-        @i.slot_writable?(:default_level).should be_false
+        @i.box_writable?(:editor_level).should be_false
+        @i.box_writable?(:admin_level).should be_false
+        @i.box_writable?(:root_level).should be_false
+        @i.box_writable?(:mixed_level).should be_false
+        @i.box_writable?(:default_level).should be_false
       end
       Permissions.with_user(@editor) do
-        @i.slot_writable?(:editor_level).should be_true
-        @i.slot_writable?(:admin_level).should be_false
-        @i.slot_writable?(:root_level).should be_false
-        @i.slot_writable?(:mixed_level).should be_false
-        @i.slot_writable?(:default_level).should be_true
+        @i.box_writable?(:editor_level).should be_true
+        @i.box_writable?(:admin_level).should be_false
+        @i.box_writable?(:root_level).should be_false
+        @i.box_writable?(:mixed_level).should be_false
+        @i.box_writable?(:default_level).should be_true
       end
       Permissions.with_user(@admin) do
-        @i.slot_writable?(:editor_level).should be_true
-        @i.slot_writable?(:admin_level).should be_true
-        @i.slot_writable?(:root_level).should be_false
-        @i.slot_writable?(:mixed_level).should be_false
-        @i.slot_writable?(:default_level).should be_true
+        @i.box_writable?(:editor_level).should be_true
+        @i.box_writable?(:admin_level).should be_true
+        @i.box_writable?(:root_level).should be_false
+        @i.box_writable?(:mixed_level).should be_false
+        @i.box_writable?(:default_level).should be_true
       end
       Permissions.with_user(@root) do
-        @i.slot_writable?(:editor_level).should be_true
-        @i.slot_writable?(:admin_level).should be_true
-        @i.slot_writable?(:root_level).should be_true
-        @i.slot_writable?(:mixed_level).should be_true
-        @i.slot_writable?(:default_level).should be_true
+        @i.box_writable?(:editor_level).should be_true
+        @i.box_writable?(:admin_level).should be_true
+        @i.box_writable?(:root_level).should be_true
+        @i.box_writable?(:mixed_level).should be_true
+        @i.box_writable?(:default_level).should be_true
       end
     end
 
@@ -624,7 +654,7 @@ class PermissionsTest < Test::Unit::TestCase
       end
     end
     should "serialise only things in instance viewable by the current user" do
-      @i.to_hash[:entries].map { |f| [f[:label], f[:writable]] }.should == [
+      @i.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == [
           ["editor_level", true],
           ["admin_level", true],
           ["root_level", true],
@@ -633,19 +663,19 @@ class PermissionsTest < Test::Unit::TestCase
       ]
 
       Permissions.with_user(@visitor) do
-        @i.to_hash[:entries].map { |f| [f[:label], f[:writable]] }.should == [
+        @i.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == [
           ["default_level", false]
         ]
       end
       Permissions.with_user(@editor) do
-        @i.to_hash[:entries].map { |f| [f[:label], f[:writable]] }.should == [
+        @i.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == [
           ["editor_level", true],
           ["mixed_level", false],
           ["default_level", true]
         ]
       end
       Permissions.with_user(@admin) do
-        @i.to_hash[:entries].map { |f| [f[:label], f[:writable]] }.should == [
+        @i.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == [
           ["editor_level", true],
           ["admin_level", true],
           ["mixed_level", false],
@@ -653,7 +683,7 @@ class PermissionsTest < Test::Unit::TestCase
         ]
       end
       Permissions.with_user(@root) do
-        @i.to_hash[:entries].map { |f| [f[:label], f[:writable]] }.should == [
+        @i.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == [
           ["editor_level", true],
           ["admin_level", true],
           ["root_level", true],
@@ -662,5 +692,6 @@ class PermissionsTest < Test::Unit::TestCase
         ]
       end
     end
+    should "only list allowed types addable by the user"
   end
 end

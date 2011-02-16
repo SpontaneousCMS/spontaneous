@@ -9,8 +9,8 @@ module Spontaneous::Plugins
         {
           :type=> self.json_name,
           :title=> self.title,
-          :fields => readable_fields.map { |name| field_prototypes[name].to_hash },
-          :allowed_types => allowed_types.map { |type| type.instance_class.json_name }
+          :fields => readable_fields.map { |name| field_prototypes[name].to_hash }
+          # :allowed_types => allowed_types.map { |type| type.instance_class.json_name }
         }
       end
 
@@ -40,7 +40,8 @@ module Spontaneous::Plugins
 
       def to_hash
         to_shallow_hash.merge({
-          :entries => (slots.empty? ? entries : slots).to_hash
+          # :entries => (slots.empty? ? entries : slots).to_hash
+          :boxes => boxes.to_hash
         })
       end
 

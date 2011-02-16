@@ -85,6 +85,10 @@ module Spontaneous
     def empty?
       names.empty?
     end
+
+    def to_hash
+      self.select { |box| box.readable? }.map { |box| box.to_hash }
+    end
   end
 end
 
