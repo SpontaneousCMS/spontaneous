@@ -277,6 +277,7 @@ class BoxesTest < Test::Unit::TestCase
     setup do
       class ::BlankContent < Content; end
       BlankContent.box :images
+      BlankContent.box :words
       @parent = BlankContent.new
     end
 
@@ -285,13 +286,24 @@ class BoxesTest < Test::Unit::TestCase
     end
 
     should "be addable" do
-      child = BlankContent.new
-      @parent.images << child
+      child1 = BlankContent.new
+      child2 = BlankContent.new
+      child3 = BlankContent.new
+      @parent.images << child1
+      @parent.words << child2
       @parent.save
+      child1.images << child3
+      child1.save
       @parent = Content[@parent.id]
-      child.reload
-      @parent.images.pieces.should == [child]
-      @parent.pieces.should == [child]
+      child1.reload; child2.reload; child3.reload
+      @parent.images.pieces.should == [child1]
+      @parent.words.pieces.should == [child2]
+      @parent.pieces.should == [child1, child2]
+      child1.images.pieces.should == [child3]
+      child1.pieces.should == [child3]
+
+      @parent.images.pieces.first.box.should == @parent.images
+      @parent.words.pieces.first.box.should == @parent.words
     end
   end
 end

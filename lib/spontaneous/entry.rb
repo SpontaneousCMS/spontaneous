@@ -45,6 +45,10 @@ module Spontaneous
       @box_id = box_id.to_sym
     end
 
+    def box
+      container.boxes.named(@box_id)
+    end
+
     def each
       entries.each { |c| yield(c) } if block_given?
     end
