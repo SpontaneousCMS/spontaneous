@@ -108,7 +108,7 @@ module Spontaneous::Plugins
       end
 
       def anonymous_class
-        @anonymous_class ||= define_slot_class(Spontaneous::Facet).tap do |klass|
+        @anonymous_class ||= define_slot_class(Spontaneous::Piece).tap do |klass|
           klass.class_eval(&@extend) if @extend
           if style
             klass.inline_style style, :class_name => template_class_name

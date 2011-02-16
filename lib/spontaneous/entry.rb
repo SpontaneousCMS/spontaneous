@@ -19,28 +19,30 @@ module Spontaneous
       # end
     end
 
-    def self.page(container, page, entry_style)
-      create(PageEntry, container, page, entry_style)
+    def self.page(container, page, entry_style, box = nil)
+      create(PageEntry, container, page, entry_style, box)
     end
 
-    def self.piece(container, piece, entry_style)
-      create(Entry, container, piece, entry_style)
+    def self.piece(container, piece, entry_style, box = nil)
+      create(Entry, container, piece, entry_style, box)
     end
 
 
-    def self.create(entry_class, container, content, entry_style)
+    def self.create(entry_class, container, content, entry_style, box = nil)
       content.save if content.new?
-      entry = entry_class.new(container, content.id, entry_style ? entry_style.name : nil)
+      entry = entry_class.new(container, content.id, entry_style ? entry_style.name : nil, box.box_id)
       entry.target = content
       entry
     end
 
     attr_accessor :entry_store
+    attr_reader :box_id
 
-    def initialize(container, target_id, style_name)
+    def initialize(container, target_id, style_name, box_id = nil)
       @container = container
       @target_id = target_id
       @entry_style_name = style_name.to_sym if style_name
+      @box_id = box_id.to_sym
     end
 
     def each
@@ -144,12 +146,14 @@ module Spontaneous
         :type => self.proxy_class.name.demodulize,
         :id => target.id,
         :style => @entry_style_name,
-        :slot => target.slot_id
+        # TODO: remove reference to slot
+        :slot => target.slot_id,
+        :box_id => @box_id
       }
     end
 
     def inspect
-      "#<#{self.proxy_class.name.demodulize}:#{self.object_id.to_s(16)} content=#{target} entry_style=\"#{@entry_style_name}\" label=\"#{label}\" slot_id=\"#{slot_id}\">"
+      "#<#{self.proxy_class.name.demodulize}:#{self.object_id.to_s(16)} content=#{target} entry_style=\"#{@entry_style_name}\" label=\"#{label}\" box_id=\"#{@box_id}\">"
     end
 
     def to_hash

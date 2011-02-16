@@ -17,7 +17,7 @@ module Spontaneous
 
       (entry_store || []).each do |data|
         klass = Spontaneous.const_get(data[:type])
-        entry = klass.new(@owner, data[:id], data[:style])
+        entry = klass.new(@owner, data[:id], data[:style], data[:box_id])
         if data[:slot]
           slot_map[data[:slot].to_sym] = entry
         else
@@ -35,6 +35,11 @@ module Spontaneous
       unmapped.each do |entry|
         store_push(entry)
       end
+    end
+
+    def for_box(box)
+      box_id = box.box_id
+      self.select { |e| e.box_id == box_id }
     end
 
     def push(entry)

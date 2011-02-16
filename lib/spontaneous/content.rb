@@ -49,7 +49,6 @@ module Spontaneous
     plugin Plugins::Render
     plugin Plugins::SchemaHierarchy
     plugin Plugins::InstanceCode
-    plugin Plugins::AllowedTypes
     plugin Plugins::JSON
     plugin Plugins::Media
     plugin Plugins::Publishing

@@ -405,22 +405,22 @@ class PermissionsTest < Test::Unit::TestCase
       C.field :mixed_level, :read_level => :editor, :write_level => :root
       C.field :default_level
 
-      C.slot :editor_level, :user_level => :editor do
+      C.box :editor_level, :user_level => :editor do
         allow :D, :user_level => :editor
         allow :C, :user_level => :admin
       end
 
-      C.slot :admin_level, :user_level => :admin do
+      C.box :admin_level, :user_level => :admin do
         allow :C, :user_level => :admin
       end
 
-      C.slot :root_level, :user_level => :root do
+      C.box :root_level, :user_level => :root do
         allow :C, :user_level => :root
       end
 
-      C.slot :mixed_level, :read_level => :editor, :write_level => :root
+      C.box :mixed_level, :read_level => :editor, :write_level => :root
 
-      C.slot :default_level do
+      C.box :default_level do
         allow :C
       end
 

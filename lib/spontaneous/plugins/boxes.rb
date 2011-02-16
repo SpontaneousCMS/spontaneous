@@ -67,6 +67,12 @@ module Spontaneous::Plugins
       def box_style_id(box_name)
         nil
       end
+
+      def entries_for_box(box)
+        p self.pieces
+        p self.entries
+        self.entries.for_box(box)
+      end
     end
   end
 end

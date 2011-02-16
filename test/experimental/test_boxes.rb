@@ -236,17 +236,25 @@ class BoxesTest < Test::Unit::TestCase
         Object.send(:remove_const, :WithoutTemplateBox)
       end
 
-      should "render using explicit styles" do
+      should_eventually "render using explicit styles" do
         @content.images.render.should == "christy: whisty\n"
       end
 
-      should "render using default template style" do
+      should_eventually "allow defining style in definition" do
+        BlankContent.box :images do
+          inline_style :inline_style
+        end
+        instance = BlankContent.new
+        instance.images.style.filename.should == "inline_style.html.cut"
+      end
+
+      should_eventually "render using default template style" do
         BlankContent.box :images, :class => :WithTemplateBox
         instance = BlankContent.new
         instance.images.render.should == "with_template_box.html.cut\n"
       end
 
-      should "render using global default box styles" do
+      should_eventually "render using global default box styles" do
         entry = Object.new
         entry.stubs(:render).returns("<entry>")
         BlankContent.box :images, :class => :WithoutTemplateBox
@@ -255,12 +263,35 @@ class BoxesTest < Test::Unit::TestCase
         instance.images.render.should == "<entry>"
       end
 
-      should "inherit styles from their superclass" do
+      should_eventually "inherit styles from their superclass" do
         BlankContent.box :images, :class => :InheritedStyleBox
         instance = BlankContent.new
         instance.images.title = "ytsirhc"
         instance.images.render.should == "christy: ytsirhc\n"
       end
+    end
+
+  end
+
+  context "Box content" do
+    setup do
+      class ::BlankContent < Content; end
+      BlankContent.box :images
+      @parent = BlankContent.new
+    end
+
+    teardown do
+      Object.send(:remove_const, :BlankContent)
+    end
+
+    should "be addable" do
+      child = BlankContent.new
+      @parent.images << child
+      @parent.save
+      @parent = Content[@parent.id]
+      child.reload
+      @parent.images.pieces.should == [child]
+      @parent.pieces.should == [child]
     end
   end
 end

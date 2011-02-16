@@ -98,19 +98,20 @@ module Spontaneous::Plugins
         self.class.allowed.find { |a| a.instance_class == content.class }
       end
 
-      def prototype_for_content(content)
+      def prototype_for_content(content, box = nil)
         if allowed = allowed_type(content)
           allowed.prototype
         else
-          super
+          nil
         end
       end
 
-      def style_for_content(content)
+      # TODO: BOXES remove box reference here
+      def style_for_content(content, box = nil)
         if allowed = allowed_type(content)
           allowed.default_style
         else
-          super
+          content.styles.default
         end
       end
 

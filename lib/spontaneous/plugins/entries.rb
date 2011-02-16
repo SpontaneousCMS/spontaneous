@@ -93,17 +93,17 @@ module Spontaneous::Plugins
         insert(-1, page_or_piece)
       end
 
-      def insert(index, page_or_piece)
+      def insert(index, page_or_piece, box = nil)
         save if new?
         if page_or_piece.page?
-          insert_page(index, page_or_piece)
+          insert_page(index, page_or_piece, box)
         else
-          insert_piece(index, page_or_piece)
+          insert_piece(index, page_or_piece, box)
         end
       end
 
 
-      def insert_page(index, child_page)
+      def insert_page(index, child_page, box = nil)
         child_page.container = self
         if page
           child_page.depth = page.depth + 1
@@ -111,23 +111,23 @@ module Spontaneous::Plugins
           child_page.parent = page
           child_page.update_path
         end
-        insert_with_style(:page, index, child_page)
+        insert_with_style(:page, index, child_page, box)
       end
 
-      def insert_piece(index, piece)
+      def insert_piece(index, piece, box = nil)
         piece.container = self
         piece.page = page if page
         piece.depth = (depth || 0) + 1
-        insert_with_style(:piece, index, piece)
+        insert_with_style(:piece, index, piece, box)
       end
 
-      def insert_with_style(type, index, content)
-        entry_style = style_for_content(content)
-        content._prototype = prototype_for_content(content)
-        entry = Spontaneous::Entry.send(type, self, content, entry_style)
+      def insert_with_style(type, index, content, box = nil)
+        entry_style = style_for_content(content, box)
+        content._prototype = box.prototype_for_content(content) if box
+        entry = Spontaneous::Entry.send(type, self, content, entry_style, box)
         begin
           entries.insert(index, entry)
-        rescue TypeError => e
+        rescue TypeError, RuntimeError => e
           # TODO: raise a custom more helpful error here
           logger.error { "Attempting to modify visible only entries" }
           raise e
@@ -141,12 +141,12 @@ module Spontaneous::Plugins
         container.save
       end
 
-      def style_for_content(content)
-        content.styles.default
-      end
-
-      def prototype_for_content(content)
-        nil
+      def style_for_content(content, box = nil)
+        if box
+          box.style_for_content(content)
+        else
+          content.styles.default
+        end
       end
 
       def available_styles(content)

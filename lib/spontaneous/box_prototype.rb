@@ -30,6 +30,10 @@ module Spontaneous
     def default_title
       name.to_s.titleize.gsub(/\band\b/i, '&')
     end
+
+    def style
+      @options[:style]# || name
+    end
   end
 end
 

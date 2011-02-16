@@ -8,12 +8,18 @@ module Spontaneous
     plugin Plugins::Fields
     plugin Plugins::Styles
     plugin Plugins::Render
+    plugin Plugins::AllowedTypes
 
     # use underscores to protect against field name conflicts
     attr_reader :_name, :_prototype, :_owner
 
     def initialize(name, prototype, owner)
       @_name, @_prototype, @_owner = name.to_sym, prototype, owner
+    end
+
+    # TODO: use generated schema id here
+    def box_id
+      _name
     end
 
     def box_name
@@ -50,5 +56,25 @@ module Spontaneous
     def entries
       []
     end
+
+    def style
+      _prototype.style
+    end
+
+
+    def push(content)
+      insert(-1, content)
+    end
+
+    alias_method :<<, :push
+
+    def insert(index, content)
+      _owner.insert(index, content, self)
+    end
+
+    def pieces
+      @pieces ||= _owner.entries.for_box(self)
+    end
   end
 end
+
