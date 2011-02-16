@@ -196,19 +196,22 @@ class ContentTest < Test::Unit::TestCase
         inline_style :lancelot
       end
       class ::Allowed4 < Content; end
-      class ::Parent < Content
+      class ::Parent < Box
         allow :Allowed1
         allow Allowed2, :styles => [:ringo, :george]
         allow 'Allowed3'
       end
 
       class ::ChildClass < ::Parent
-        slot :parents, :type => :Parent
+      end
+
+      class ::Allowable < Content
+        box :parents, :type => :Parent
       end
     end
 
     teardown do
-      [:Parent, :Allowed1, :Allowed2, :Allowed3, :Allowed4, :ChildClass].each { |k| Object.send(:remove_const, k) } rescue nil
+      [:Parent, :Allowed1, :Allowed2, :Allowed3, :Allowed4, :ChildClass, :Allowable].each { |k| Object.send(:remove_const, k) } rescue nil
     end
     should "have a list of allowed types" do
       Parent.allowed.length.should == 3
@@ -238,20 +241,20 @@ class ContentTest < Test::Unit::TestCase
     end
 
     should "use a configured style when adding a defined allowed type" do
-      a = Parent.new
+      a = Allowable.new
       b = Allowed2.new
-      a << b
-      a.entries.first.style.should == Allowed2.inline_styles[:ringo]
+      a.parents << b
+      a.parents.entries.first.style.should == Allowed2.inline_styles[:ringo]
     end
 
     should "know what the available styles are for an entry" do
-      a = Parent.new
+      a = Allowable.new
       b = Allowed2.new
       c = Allowed3.new
-      a << b
-      a << c
-      a.available_styles(b).map { |s| s.name }.should == [:ringo, :george]
-      a.available_styles(c).map { |s| s.name }.should == [:arthur, :lancelot]
+      a.parents << b
+      a.parents << c
+      a.parents.available_styles(b).map { |s| s.name }.should == [:ringo, :george]
+      a.parents.available_styles(c).map { |s| s.name }.should == [:arthur, :lancelot]
     end
 
     should "inherit allowed types from superclass" do
@@ -264,7 +267,7 @@ class ContentTest < Test::Unit::TestCase
     end
 
     should "propagate allowed types to slots" do
-      instance = ChildClass.new
+      instance = Allowable.new
       instance.parents.allowed_types.should == Parent.allowed_types
     end
   end

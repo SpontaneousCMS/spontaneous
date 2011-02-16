@@ -4,6 +4,9 @@ module Spontaneous::Plugins
   module SchemaHierarchy
 
     module ClassMethods
+      def schema_validate
+      end
+
       def subclasses
         @subclasses ||= []
       end

@@ -65,13 +65,14 @@ class RenderTest < Test::Unit::TestCase
     context "piece trees" do
       setup do
         TemplateClass.inline_style :complex_template, :default => true
+        TemplateClass.box :bits
         @content = TemplateClass.new
         @content.title = "The Title"
         @content.description = "The Description"
         @child = TemplateClass.new
         @child.title = "Child Title"
         @child.description = "Child Description"
-        @content << @child
+        @content.bits << @child
         @content.entries.first.style = TemplateClass.styles[:this_template]
       end
       teardown do
@@ -97,10 +98,10 @@ class RenderTest < Test::Unit::TestCase
       end
     end
 
-    context "slots" do
+    context "boxes" do
       setup do
         TemplateClass.inline_style :slots_template, :default => true
-        TemplateClass.slot :images
+        TemplateClass.box :images
         @content = TemplateClass.new
         @content.title = "The Title"
         @content.description = "The Description"
@@ -111,18 +112,18 @@ class RenderTest < Test::Unit::TestCase
         @content.images.first.style = TemplateClass.styles[:this_template]
       end
 
-      should "render slots" do
-        @content.render.should == "<slots>\n  <img><html><title>Child Title</title><body>Child Description</body></html>\n</img>\n</slots>\n"
+      should "render boxes" do
+        @content.render.should == "<boxes>\n  <img><html><title>Child Title</title><body>Child Description</body></html>\n</img>\n</boxes>\n"
       end
-      should "render slots to alternate formats" do
-        @content.render(:pdf).should == "<slots-pdf>\n  <img><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</img>\n</slots-pdf>\n"
+      should "render boxes to alternate formats" do
+        @content.render(:pdf).should == "<boxes-pdf>\n  <img><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</img>\n</boxes-pdf>\n"
       end
     end
 
-    context "anonymous slots" do
+    context "anonymous boxes" do
       setup do
         TemplateClass.inline_style :anonymous_style, :default => true
-        TemplateClass.slot :images do
+        TemplateClass.box :images do
           field :introduction
         end
 
@@ -152,7 +153,7 @@ class RenderTest < Test::Unit::TestCase
     context "default templates" do
       setup do
         TemplateClass.inline_style :default_template_style, :default => true
-        TemplateClass.slot :images_with_template do
+        TemplateClass.box :images_with_template do
           field :introduction
         end
 
@@ -183,28 +184,26 @@ class RenderTest < Test::Unit::TestCase
 
       setup do
         class ::PageClass < Page; end
-        class ::PieceClass < Piece; end
+        # class ::PieceClass < Piece; end
+        PageClass.box :things
         PageClass.page_style :page_style
         PageClass.inline_style :inline_style
         @parent = PageClass.new
         @parent.title = "Parent"
-        @piece = Piece.new
         @page = PageClass.new
         @page.title = "Child"
-        @parent << @piece
-        @piece << @page
+        @parent.things << @page
         @parent.save
-        @piece.save
         @page.save
       end
 
       teardown do
         Object.send(:remove_const, :PageClass)
-        Object.send(:remove_const, :PieceClass)
       end
 
       should "use style assigned by entry" do
-        @parent.entries.first.entries.first.style.should == PageClass.inline_styles.default
+        @parent.entries.first.style.should == PageClass.inline_styles.default
+        @parent.things.first.style.should == PageClass.inline_styles.default
       end
 
       should "use their default page style when accessed directly" do
@@ -216,12 +215,13 @@ class RenderTest < Test::Unit::TestCase
 
       should "persist sub-page style settings" do
         @parent = Page[@parent.id]
-        @parent.entries.first.entries.first.style.should == PageClass.inline_styles.default
+        @parent.entries.first.style.should == PageClass.inline_styles.default
       end
 
       should "render using the inline style" do
-        @parent.entries.first.first.template.should == 'page_class/inline_style'
-        @parent.entries.first.first.render.should == "Child\n"
+        @parent.entries.first.template.should == 'page_class/inline_style'
+        @parent.entries.first.render.should == "Child\n"
+        @parent.things.render.should == "Child\n"
         @parent.render.should == "<html>Child\n</html>\n"
       end
     end
@@ -249,7 +249,7 @@ class RenderTest < Test::Unit::TestCase
 
       class ::PreviewRender < Page; end
       PreviewRender.inline_style :inline
-      PreviewRender.slot :images
+      PreviewRender.box :images
       PreviewRender.field :description, :markdown
       @page = PreviewRender.new(:title => "PAGE", :description => "DESCRIPTION")
       @page.stubs(:id).returns(24)
@@ -272,8 +272,8 @@ class RenderTest < Test::Unit::TestCase
 PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
  <p>DESCRIPTION</p>
 
-<!-- spontaneous:previewedit:start:content id:#{@page.images.id} -->
-<!-- spontaneous:previewedit:end:content id:#{@page.images.id} -->
+<!-- spontaneous:previewedit:start:box id:#{@page.images.id} -->
+<!-- spontaneous:previewedit:end:box id:#{@page.images.id} -->
 
         HTML
       end

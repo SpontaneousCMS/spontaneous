@@ -9,10 +9,10 @@ class ClientProject < Spontaneous::Piece
   field :description, :markdown
   field :completed, :date
 
-  slot :images do
+  box :images do
     allow :ProjectImage
   end
-  slot :other_stuff do
+  box :other_stuff do
     allow :ProjectImage
   end
 end

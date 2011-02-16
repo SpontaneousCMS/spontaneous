@@ -87,7 +87,7 @@ module Spontaneous
     end
 
     def to_hash
-      self.select { |box| box.readable? }.map { |box| box.to_hash }
+      self.map { |item| item.to_hash }
     end
   end
 end

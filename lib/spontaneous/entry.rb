@@ -96,6 +96,14 @@ module Spontaneous
       container.entries.last == self
     end
 
+    def set_position(new_position)
+      if box
+        box.set_position(self, new_position)
+      else
+        container.entries.set_position(self, new_position)
+      end
+    end
+
     def position
       container.entries.index(self)
     end

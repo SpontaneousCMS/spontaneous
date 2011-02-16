@@ -23,7 +23,7 @@ class PrototypesTest < Test::Unit::TestCase
         field :date,  :string
         field :something, :string, :default_value => "Here"
 
-        slot :images
+        box :images
 
         def prototype
           self.title = "Naughty"
@@ -83,8 +83,8 @@ class PrototypesTest < Test::Unit::TestCase
       content.date.value.should == ""
     end
 
-    should "allow slots to define the prototype used when adding items" do
-      PrototypeClass.slot :images2 do
+    should "allow boxes to define the prototype used when adding items" do
+      PrototypeClass.box :images2 do
         allow :ImageClass, :prototype => :complex
       end
       content = PrototypeClass.create

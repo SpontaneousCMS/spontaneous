@@ -188,19 +188,23 @@ class StylesTest < Test::Unit::TestCase
 
     context "default styles" do
       setup do
-        class ::DefaultStyleClass < Content
+        class ::DefaultStyleClass < Box
+          field :title
+        end
+        class ::WithDefaultStyleClass < Content
           field :title
         end
         class ::WithoutDefaultStyleClass < Content
           field :title
-          slot :with_style, :type => :DefaultStyleClass
+          box :with_style, :type => :DefaultStyleClass
         end
 
-        @with_default_style = DefaultStyleClass.new
+        @with_default_style = WithDefaultStyleClass.new
         @with_default_style.title = "Total Title"
         @without_default_style = WithoutDefaultStyleClass.new
         @without_default_style.title = "No Title"
-        @without_default_style.with_style.title = "Slot Title"
+        @without_default_style.with_style.title = "Box Title"
+        # @without_default_style.with_style.path = "Box Title"
       end
 
       teardown do
@@ -212,12 +216,12 @@ class StylesTest < Test::Unit::TestCase
         @with_default_style.render.should == "Title: Total Title\n"
       end
 
-      should "be used by slots too" do
-        @without_default_style.with_style.render.should == "Title: Slot Title\n"
+      should "be used by boxes too" do
+        @without_default_style.with_style.render.should == "Title: Box Title\n"
       end
 
       should "fallback to anonymous style when default style template doesn't exist" do
-        @without_default_style.render.should == "Title: Slot Title\n"
+        @without_default_style.render.should == "Title: Box Title\n"
       end
     end
   end

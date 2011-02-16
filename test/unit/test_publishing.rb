@@ -494,11 +494,12 @@ class PublishingTest < Test::Unit::TestCase
         new_page = nil
         Change.record do
           new_page = Page.new
-          content << new_page
-          content.save
+          page << new_page
+          page.save
         end
         new_page.reload
-        page.reload
+        page = Content[page.id]
+        new_page = Content[new_page.id]
         Change.count.should == 1
         change = Change.first
         change.modified_list.should be_instance_of(Array)

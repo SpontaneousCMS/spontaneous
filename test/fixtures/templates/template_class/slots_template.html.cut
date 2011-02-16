@@ -1,5 +1,5 @@
-<slots>
+<boxes>
 {% images.entries.each do |image| %}
   <img>{{ image }}</img>
 {% end %}
-</slots>
+</boxes>

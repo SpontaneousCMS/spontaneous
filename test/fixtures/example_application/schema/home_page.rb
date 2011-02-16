@@ -5,11 +5,11 @@ class HomePage < Spontaneous::Page
 	field :welcome_title
   field :introduction, :markdown
 
-  slot :in_progress, :type => :ClientProjects, :fields => { :title => "In Progress" }
-  slot :completed, :type => :ClientProjects, :fields => { :title => "Completed" }
-  slot :archived, :type => :ClientProjects, :fields => { :title => "Archived" }
+  box :in_progress, :type => :ClientProjects, :fields => { :title => "In Progress" }
+  box :completed, :type => :ClientProjects, :fields => { :title => "Completed" }
+  box :archived, :type => :ClientProjects, :fields => { :title => "Archived" }
 
-  slot :pages do
+  box :pages do
   	allow :InfoPage
   end
 

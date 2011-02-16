@@ -54,10 +54,6 @@ module Spontaneous
       name.to_s.titleize.gsub(/\band\b/i, '&')
     end
 
-    def style
-      @options[:style]# || name
-    end
-
     # default read level is None, i.e. every logged in user can read the field
     def read_level
       level_name = @options[:read_level] || @options[:user_level] || :none
@@ -70,10 +66,34 @@ module Spontaneous
       Spontaneous::Permissions[level_name]
     end
 
+    # TODO: must be able to make these into a module
+    def readable?
+      return true unless user = Spontaneous::Permissions.active_user
+      user.level >= read_level
+    end
+
+    def writable?
+      return true unless user = Spontaneous::Permissions.active_user
+      user.level >= write_level
+    end
+
+    def style
+      @options[:style]# || name
+    end
+
     def readable_fields
       instance_class.readable_fields
     end
 
+    def to_hash
+      {
+        :name => name.to_s,
+        :id => schema_id.to_s,
+        :title => title,
+        :writable => writable?,
+        :allowed_types => instance_class.allowed_types.map { |type| type.instance_class.json_name }
+      }
+    end
   end
 end
 

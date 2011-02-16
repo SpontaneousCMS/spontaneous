@@ -56,7 +56,7 @@ module Spontaneous
 
   autoload :Style, "spontaneous/style"
   autoload :StyleDefinitions, "spontaneous/style_definitions"
-  autoload :RenderContext, "spontaneous/render_context"
+  # autoload :RenderContext, "spontaneous/render_context"
   autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
 
   autoload :Site, "spontaneous/site"

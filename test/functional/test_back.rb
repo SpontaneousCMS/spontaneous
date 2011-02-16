@@ -111,10 +111,11 @@ class BackTest < Test::Unit::TestCase
       post "/@spontaneous/content/#{@piece2_5.id}/position/0"
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
-      @about.text.entries.first.id.should == @piece2_5.id
+      @about.reload
+      @about.text.pieces.first.id.should == @piece2_5.id
 
       p = Content[@about.id]
-      p.text.entries.first.id.should == @piece2_5.id
+      p.text.pieces.first.id.should == @piece2_5.id
     end
     # should "reorder pages" do
     #   post "/@spontaneous/page/#{@about.id}/position/0"
@@ -182,6 +183,7 @@ class BackTest < Test::Unit::TestCase
     should "return cache-busting headers" do
       ["/about", "/"].each do |path|
         get path
+        assert last_response.ok?
         last_response.headers['Expires'].should == @now.to_formatted_s(:rfc822)
         last_response.headers['Last-Modified'].should == @now.to_formatted_s(:rfc822)
       end
@@ -190,6 +192,7 @@ class BackTest < Test::Unit::TestCase
     should "return cache-control headers" do
       ["/about", "/"].each do |path|
         get path
+        assert last_response.ok?
         ["no-store", 'no-cache', 'must-revalidate', 'max-age=0'].each do |p|
           last_response.headers['Cache-Control'].should =~ %r(#{p})
         end
@@ -268,16 +271,16 @@ class BackTest < Test::Unit::TestCase
     end
 
     should "be able to wrap entries around files using default addable class" do
-      slot = @home.in_progress
-      current_count = slot.entries.length
-      first_id = slot.entries.first.id
+      box = @home.in_progress
+      current_count = box.entries.length
+      first_id = box.entries.first.id
 
-      post "/@spontaneous/file/wrap/#{slot.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
+      post "/@spontaneous/file/wrap/#{@home.id}/#{box.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
-      slot = @home.reload.in_progress
-      first = slot.entries.first
-      slot.entries.length.should == current_count+1
+      box = @home.reload.in_progress
+      first = box.entries.first
+      box.entries.length.should == current_count+1
       first.image.src.should =~ /^\/media(.+)\/#{File.basename(@src_file)}$/
       required_response = {
         :position => 0,
@@ -291,7 +294,7 @@ class BackTest < Test::Unit::TestCase
       current_count = @home.in_progress.entries.length
       first_id = @home.in_progress.entries.first.id
       @home.in_progress.entries.first.class.name.should_not == "ProjectImage"
-      post "/@spontaneous/add/#{@home.in_progress.id}/ProjectImage"
+      post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.id}/ProjectImage"
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
       @home.reload
@@ -304,6 +307,7 @@ class BackTest < Test::Unit::TestCase
       }
       last_response.body.json.should == required_response.to_hash
     end
+
     should "be removable" do
       target = @home.in_progress.first
       post "/@spontaneous/destroy/#{target.id}"
@@ -312,6 +316,7 @@ class BackTest < Test::Unit::TestCase
       Content[target.id].should be_nil
     end
   end
+
   context "Page paths" do
     should "be editable" do
       @about.path.should == '/about'

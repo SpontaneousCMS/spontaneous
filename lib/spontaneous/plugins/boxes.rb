@@ -26,9 +26,14 @@ module Spontaneous::Plugins
         new_order.flatten!
         boxes.set_order(new_order)
       end
+
+      def box?(box_name)
+        !boxes[box_name].nil?
+      end
     end
 
     module InstanceMethods
+
       def reload
         @boxes = nil
         super
@@ -45,6 +50,14 @@ module Spontaneous::Plugins
           boxes.push_named(box_prototype.name, box)
         end
         boxes
+      end
+
+      def _content(*args)
+        boxes
+      end
+
+      def box?(box_name)
+        self.class.box?(box_name.to_sym)
       end
 
       def box_data(box)

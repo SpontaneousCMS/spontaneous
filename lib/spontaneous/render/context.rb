@@ -31,10 +31,13 @@ module Spontaneous::Render
       content.map { |c| yield(c) } if block_given?
     end
 
-    def content
-      target.entries
+    def _content
+      target._content
     end
 
+    def content
+      _content
+    end
     def entries
       content
     end
@@ -63,9 +66,10 @@ module Spontaneous::Render
     #   target.container.visible_entries.index(self) if target.container
     # end
 
+    # TODO: replace the use of _content with a iterator by using #each & Enumerable
     def render_content
-      content.map do |c|
-        c.render
+      _content.map do |c|
+        c.render(format)
       end.join("\n")
     end
 
@@ -81,10 +85,20 @@ module Spontaneous::Render
 
     def method_missing(method, *args)
       key = method.to_sym
+      # if target.respond_to?(method)
+      #   if block_given?
+      #     target.__send__(method, *args, &Proc.new)
+      #   else
+      #     target.__send__(method, *args)
+      #   end
+
       if target.field?(key)
         target.send(key, *args)
-      elsif target.slot?(key)
-        self.class.new(target.slots[key], format, @params)
+      elsif target.box?(key)
+        # WHY do I have to wrap boxes in a context? Is there anyway of removing this
+        # need for a context wrapper from everything? Is it just there to pass along the current
+        # format??
+        self.class.new(target.boxes[key], format, @params)
       else
         if block_given?
           target.__send__(method, *args, &Proc.new)
@@ -92,7 +106,7 @@ module Spontaneous::Render
           target.__send__(method, *args)
         end
       end
-    rescue
+    rescue => e
       # TODO: sensible, configurable fallback for when template calls non-existant method
       # - logging.warn when happens
       # - an inline comment when in dev mode?

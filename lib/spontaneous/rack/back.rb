@@ -125,14 +125,15 @@ module Spontaneous
         end
 
 
-        post '/file/wrap/:id' do
+        post '/file/wrap/:id/:box_id' do
           content = Content[params[:id]]
+          box = content.boxes[params[:box_id]]
           file = params['file']
-          type = content.type_for_mime_type(file[:type])
+          type = box.type_for_mime_type(file[:type])
           if type
             position = 0
             instance = type.new
-            content.insert(position, instance)
+            box.insert(position, instance)
             field = instance.field_for_mime_type(file[:type])
             media_file = Spontaneous::Media.upload_path(file[:filename])
             FileUtils.mkdir_p(File.dirname(media_file))
@@ -146,12 +147,14 @@ module Spontaneous
           end
         end
 
-        post '/add/:id/:type_name' do
+        post '/add/:id/:box_id/:type_name' do
           position = 0
           content = Content[params[:id]]
+          box = content.boxes[params[:box_id]]
           type = params[:type_name].constantize
+
           instance = type.new
-          content.insert(position, instance)
+          box.insert(position, instance)
           content.save
           json({
             :position => position,

@@ -24,6 +24,8 @@ class SerialisationTest < Test::Unit::TestCase
         inline_style :dancing
         inline_style :sitting
         inline_style :kneeling
+
+        box :insides
       end
       class ::SerialisedPiece < Piece
         title "Type Title"
@@ -36,7 +38,9 @@ class SerialisationTest < Test::Unit::TestCase
 
         inline_style :freezing
         inline_style :boiling
-        allow :SerialisedPage, :styles => [:sitting, :kneeling]
+        box :things, :title => "My Things" do
+          allow :SerialisedPage, :styles => [:sitting, :kneeling]
+        end
       end
 
 
@@ -49,7 +53,15 @@ class SerialisationTest < Test::Unit::TestCase
           {:name => "date", :type => "Spontaneous.FieldTypes.DateField", :title => "Date",  :comment => "" , :writable=>true},
           {:name => "image", :type => "Spontaneous.FieldTypes.ImageField", :title => "Image",  :comment => "", :writable=>true}
       ],
-        :allowed_types => ["SerialisedPage"]
+        :boxes => [
+          {
+            :name => "things",
+            :id => "things",
+            :title => "My Things",
+            :writable => true,
+            :allowed_types => ["SerialisedPage"]
+          }
+      ]
       }
     end
 
@@ -77,10 +89,10 @@ class SerialisationTest < Test::Unit::TestCase
         @piece2 = SerialisedPiece.new
         @piece3 = SerialisedPiece.new
         @child = SerialisedPage.new(:slug=> "about")
-        @root << @piece1
-        @root << @piece2
-        @piece1 << @child
-        @child << @piece3
+        @root.insides << @piece1
+        @root.insides << @piece2
+        @piece1.things << @child
+        @child.insides << @piece3
 
 
         @root.title = "Home"
@@ -117,88 +129,88 @@ class SerialisationTest < Test::Unit::TestCase
         @child.path.should == "/about"
 
         [@root, @piece1, @piece2, @piece3, @child].each { |c| c.save }
-        @root_hash = {:type=>"SerialisedPage",
+        @root_hash = {
+          :type=>"SerialisedPage",
           :depth=>0,
+          :uid=>"home",
           :path=>"/",
-          :fields=>
-        [{:unprocessed_value=>"Home", :processed_value=>"Home", :name=>"title", :attributes => {}, :writable => true},
-          {:unprocessed_value=>"S", :processed_value=>"South", :name=>"direction", :attributes => {}, :writable => true},
-          {:unprocessed_value=>"/images/home.jpg",
-            :processed_value=>"/images/home.jpg",
-            :name=>"thumbnail", :attributes => {}, :writable => true}],
-            :uid=>"home",
-            :entries=>
-        [{:type=>"SerialisedPiece",
+          :fields=> [
+            {:unprocessed_value=>"Home", :processed_value=>"Home", :name=>"title", :attributes => {}},
+            {:unprocessed_value=>"S", :processed_value=>"South", :name=>"direction", :attributes => {}},
+            {:unprocessed_value=>"/images/home.jpg", :processed_value=>"/images/home.jpg", :name=>"thumbnail", :attributes => {}}
+        ],
+          :is_page=>true,
+          :slug=>"",
+          :id=>@root.id,
+          :boxes => [
+            {
+          :id=>"insides",
+          :fields=>[],
+          :entries=> [
+          { # root.boxes.first.entries.first
+          :type=>"SerialisedPiece",
           :label=>"label1",
           :depth=>1,
           :styles=>["freezing", "boiling"],
-          :fields=>
-        [
-          {:unprocessed_value=>"Piece 1",
-            :processed_value=>"Piece 1",
-            :name=>"title", :attributes => {}, :writable => true},
-          {:unprocessed_value=>"Piece 1 Location",
-            :processed_value=>"Piece 1 Location",
-            :name=>"location", :attributes => {}, :writable => true},
-          {:unprocessed_value=>date,
-            :processed_value=>date,
-            :name=>"date", :attributes => {}, :writable => true},
-          {:unprocessed_value=>"",
-            :processed_value=>"",
-            :name=>"image", :attributes => {}, :writable => true} ],
-                :style=>"freezing",
-              :entries=>
-        [{:type=>"SerialisedPage",
+          :fields=> [
+            {:unprocessed_value=>"Piece 1", :processed_value=>"Piece 1", :name=>"title", :attributes => {}},
+            {:unprocessed_value=>"Piece 1 Location", :processed_value=>"Piece 1 Location", :name=>"location", :attributes => {}},
+            {:unprocessed_value=>date, :processed_value=>date, :name=>"date", :attributes => {}},
+            {:unprocessed_value=>"", :processed_value=>"", :name=>"image", :attributes => {}}
+        ],
+          :style=>"freezing",
+          :boxes => [
+            {
+          :fields => [], :id => 'things',
+          :entries=> [
+            { # root.boxes.entries.first.entries.first
+          :type=>"SerialisedPage",
           :path=>"/about",
           :depth=>2,
-          :styles=>["sitting", "kneeling"],
-          :fields=>
-        [{:unprocessed_value=>"Child Page",
-          :processed_value=>"Child Page",
-          :name=>"title", :attributes => {}, :writable => true},
-          {:unprocessed_value=>"N",
-            :processed_value=>"North",
-            :name=>"direction", :attributes => {}, :writable => true},
-            {:unprocessed_value=>"/images/thumb.jpg",
-              :processed_value=>"/images/thumb.jpg",
-              :name=>"thumbnail", :attributes => {}, :writable => true}],
-              :uid=>"about",
-              :style=>"sitting",
-              :is_page=>true,
-              :slug=>"about",
-              :id=>@child.id}],
-              :is_page=>false,
-              :name=>"The Pages",
-              :id=>@piece1.id},
-              {:type=>"SerialisedPiece",
-                :label=>"label2",
-                :depth=>1,
-                :styles=>["freezing", "boiling"],
-                :fields=>
-        [{:unprocessed_value=>"Piece 2",
-          :processed_value=>"Piece 2",
-          :name=>"title", :attributes => {}, :writable => true},
-          {:unprocessed_value=>"Piece 2 Location",
-            :processed_value=>"Piece 2 Location",
-            :name=>"location", :attributes => {}, :writable => true},
-            {:unprocessed_value=>date,
-              :processed_value=>date,
-              :name=>"date", :attributes => {}, :writable => true},
-            {:unprocessed_value=>"",
-              :processed_value=>"",
-              :name=>"image", :attributes => {}, :writable => true} ],
-              :style=>"boiling",
-              :entries=>[],
-              :is_page=>false,
-              :name=>"The Doors",
-              :id=>@piece2.id}],
-              :is_page=>true,
-              :slug=>"",
-              :id=>@root.id}
+          :styles=>["dancing", "sitting", "kneeling"],
+          :fields=> [
+            {:unprocessed_value=>"Child Page", :processed_value=>"Child Page", :name=>"title", :attributes => {}},
+            {:unprocessed_value=>"N", :processed_value=>"North", :name=>"direction", :attributes => {}},
+            {:unprocessed_value=>"/images/thumb.jpg", :processed_value=>"/images/thumb.jpg", :name=>"thumbnail", :attributes => {}}
+        ],
+          :uid=>"about",
+          :style=>"sitting",
+          :is_page=>true,
+          :slug=>"about",
+          :id=>@child.id
+        }
+        ],
+        }
+        ],
+          :is_page=>false,
+          :name=>"The Pages",
+          :id=>@piece1.id
+        },
+          { # ENTRY
+          :type=>"SerialisedPiece",
+          :label=>"label2",
+          :depth=>1,
+          :styles=>["freezing", "boiling"],
+          :fields=> [
+            {:unprocessed_value=>"Piece 2", :processed_value=>"Piece 2", :name=>"title", :attributes => {}},
+            {:unprocessed_value=>"Piece 2 Location", :processed_value=>"Piece 2 Location", :name=>"location", :attributes => {}},
+            {:unprocessed_value=>date, :processed_value=>date, :name=>"date", :attributes => {}},
+            {:unprocessed_value=>"", :processed_value=>"", :name=>"image", :attributes => {}}
+        ],
+          :style=>"boiling",
+          :is_page=>false,
+          :name=>"The Doors",
+          :id=>@piece2.id,
+        :boxes=>[{:entries=>[], :fields=>[], :id=>"things"}]
+        }
+        ]
+        }
+        ]
+        }
       end
       should "generate a hash for JSON serialisation" do
-        pp @root.to_hash
-        @root.to_hash.should == @root_hash
+        # pp @root.to_hash
+        assert_hashes_equal(@root_hash, @root.to_hash)
       end
 
       should "serialise to JSON" do

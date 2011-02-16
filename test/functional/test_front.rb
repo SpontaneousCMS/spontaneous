@@ -8,10 +8,6 @@ class FrontTest < Test::Unit::TestCase
   include StartupShutdown
   include ::Rack::Test::Methods
 
-  class ::SitePage < Spontaneous::Page
-    page_style :default
-    page_style :dynamic
-  end
   def self.startup
     Site.delete
     Content.delete
@@ -25,6 +21,10 @@ class FrontTest < Test::Unit::TestCase
     Spontaneous.revision_root = @@revision_root
 
     Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
+    Object.const_set(:SitePage, Class.new(Spontaneous::Page) do
+      page_style :default
+      page_style :dynamic
+    end)
 
     @@root = SitePage.create
     @@about = SitePage.create(:slug => "about", :uid => "about")
@@ -48,6 +48,7 @@ class FrontTest < Test::Unit::TestCase
     Spontaneous.revision_root = @saved_revision_root
     Spontaneous.root = @saved_root
     FileUtils.rm_rf(@@revision_root)
+    Object.send(:remove_const, :SitePage)
   end
 
   def setup

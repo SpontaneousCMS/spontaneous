@@ -18,7 +18,7 @@ module Spontaneous
       end
 
       def load_file(file)
-        # puts "-- Loaded #{File.basename(file, '.rb')}" 
+        # puts "-- Loaded #{File.basename(file, '.rb')}"
         require(file)
       end
 

@@ -21,7 +21,7 @@ class AliasTest < Test::Unit::TestCase
       @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
       Spontaneous.template_root = @template_root
 
-      class ::A < Piece
+      class ::A < Spontaneous::Piece
         field :a_field1
         field :a_field2
 

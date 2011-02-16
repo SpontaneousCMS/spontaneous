@@ -94,6 +94,40 @@ class Test::Unit::TestCase
   end
   alias :assert_dir_exists :assert_file_exists
 
+  def assert_hashes_equal(expected_hash, result_hash, path = [], level = 0)
+    assert result_hash.is_a?(Hash), "'#{path[0..level].join(' > ')}' Expected a hash #{expected_hash.inspect} !== #{result_hash.inspect}"
+    assert_equal expected_hash.keys.length, result_hash.keys.length, "'#{path[0..level].join(' > ')}' Expected #{expected_hash.keys.length} keys #{expected_hash.keys.inspect} !== #{result_hash.keys.inspect} >> #{(expected_hash.keys - result_hash.keys).inspect}"
+    expected_hash.keys.each do |key|
+      path[level] = key
+      expected = expected_hash[key]
+      result = result_hash[key]
+      case expected
+      when Hash
+        assert_hashes_equal(expected, result, path, level+1)
+      when Array
+        assert_arrays_equal(expected, result, path, level+1)
+      else
+        assert_equal expected, result, "Key '#{path[0..level].join(' > ')}' should be identical"
+      end
+    end
+  end
+
+  def assert_arrays_equal(expected_array, result_array, path = [], level = 0)
+    assert_equal expected_array.length, result_array.length
+    expected_array.each_with_index do |expected, index|
+      path[level] = index
+      result = result_array[index]
+      case expected
+      when Hash
+        assert_hashes_equal(expected, result, path, level+1)
+      when Array
+        assert_arrays_equal(expected, result, path, level+1)
+      else
+        assert_equal expected, result, "Key '#{path[0..level].join(' > ')}' should be identical"
+      end
+    end
+  end
+
   def setup_site_fixture
     @app_dir = File.expand_path("../fixtures/application", __FILE__)
     File.exists?(@app_dir).should be_true

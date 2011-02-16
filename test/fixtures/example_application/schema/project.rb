@@ -8,7 +8,7 @@ class Project < Spontaneous::Page
   end
   field :description
 
-  slot :text do
+  box :text do
     allow :Text
     allow :InlineImage
   end

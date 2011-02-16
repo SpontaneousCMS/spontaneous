@@ -1,3 +1,18 @@
-:editor:   1
-:admin:    10
-:designer: 50
+# User levels
+
+# Feel free to add your own
+# the 'root' user level is added automatically and
+# will always be higher than any you add here
+# Similary the 'none' level will always be lower
+# It doesn't matter what the numbers are, but someone
+# will a permission level of 40 will always be able to do
+# anything that someone with a level of 30 can do.
+# You get the picture...
+
+:guest:     10
+:editor:    20
+:publisher: 30
+:admin:     40
+:designer:  50
+:developer: 60
+

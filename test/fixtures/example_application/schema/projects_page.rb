@@ -4,7 +4,7 @@
 class ProjectsPage < Spontaneous::Page
   field :introduction, :markdown
 
-  slot :projects do
+  box :projects do
     allow :Project
   end
 

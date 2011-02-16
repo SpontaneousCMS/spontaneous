@@ -40,7 +40,7 @@ module Spontaneous
 
     extend Plugins
 
-    plugin Plugins::Slots
+    # plugin Plugins::Slots
     plugin Plugins::Boxes
     plugin Plugins::Fields
     plugin Plugins::Entries

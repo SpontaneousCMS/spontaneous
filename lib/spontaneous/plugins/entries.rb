@@ -24,6 +24,13 @@ module Spontaneous::Plugins
         super
       end
 
+      def after_save
+        entries.each do |entry|
+          entry.save if entry.modified?
+        end
+        super
+      end
+
       def destroy(remove_container_entry=true, container=nil)
         container ||= self.container
         if container && remove_container_entry
@@ -140,7 +147,7 @@ module Spontaneous::Plugins
       end
 
       def update_position(position)
-        container.entries.set_position(self, position)
+        entry.set_position(position)
         container.save
       end
 

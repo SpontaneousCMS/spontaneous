@@ -3,6 +3,7 @@
 module Spontaneous
   class Box
     extend Plugins
+    include Enumerable
 
     plugin Plugins::SchemaHierarchy
     plugin Plugins::Fields
@@ -25,12 +26,19 @@ module Spontaneous
       _name
     end
 
+    alias_method :id, :box_id
+
     def box_name
       _name
     end
 
     def label
       _name.to_s
+    end
+
+    # needed by Render::Context
+    def box?(box_name)
+      false
     end
 
     def field_store
@@ -54,6 +62,7 @@ module Spontaneous
     end
 
     def field_modified!(modified_field)
+      @modified = true
       _owner.box_modified!(self)
     end
 
@@ -72,13 +81,17 @@ module Spontaneous
       _owner
     end
 
-    def entries
-      []
+    def page
+      container.page
     end
 
-    def style
-      _prototype.style
+    def depth
+      container.depth
     end
+
+    # def style
+    #   _prototype.style
+    # end
 
 
     def push(content)
@@ -88,21 +101,46 @@ module Spontaneous
     alias_method :<<, :push
 
     def insert(index, content)
+      @modified = true
       _owner.insert(index, content, self)
+    end
+
+    def set_position(entry, new_position)
+      @modified = true
+      piece = pieces[new_position]
+      new_position = container.entries.index(piece)
+      container.entries.set_position(entry, new_position)
+    end
+
+    def modified?
+      @modified
     end
 
     def pieces
       @pieces ||= _owner.entries.for_box(self)
     end
 
+    alias_method :entries, :pieces
+
+    def each
+      pieces.each do |piece|
+        yield piece if block_given?
+      end
+    end
+
+    def last
+      pieces.last
+    end
+
+    def _content
+      pieces
+    end
+
     def to_hash
       {
-        :title => _prototype.title,
         :id => _prototype.schema_id,
-        :name => _prototype.name.to_s,
-        :writable => _owner.box_writable?(_name),
         :fields => self.class.readable_fields.map { |name| field_prototypes[name].to_hash },
-        :allowed_types => allowed_types.map { |type| type.instance_class.json_name }
+        :entries => pieces.map { |p| p.to_hash }
       }
     end
 
@@ -112,6 +150,14 @@ module Spontaneous
 
     def readable?
       self._owner.box_readable?(_name)
+    end
+
+    def start_inline_edit_marker
+      "spontaneous:previewedit:start:box id:#{id}"
+    end
+
+    def end_inline_edit_marker
+      "spontaneous:previewedit:end:box id:#{id}"
     end
   end
 
