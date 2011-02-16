@@ -4,37 +4,41 @@
 module Spontaneous
   class EntrySet < Array
     alias_method :store_insert, :insert
-    alias_method :store_push, :push
+    alias_method :store_push,   :push
+    alias_method :store_delete, :delete
 
     attr_reader :owner
 
     def initialize(owner, entry_store, only_visible=false)
       @owner = owner
-      @name_map = {}
+      # @name_map = {}
 
       slot_map = {}
       unmapped = []
+      type_cache = Hash.new { |hash, key| hash[key] = Spontaneous.const_get(key) }
 
       (entry_store || []).each do |data|
-        klass = Spontaneous.const_get(data[:type])
+        klass = type_cache[data[:type]]
         entry = klass.new(@owner, data[:id], data[:style], data[:box_id])
-        if data[:slot]
-          slot_map[data[:slot].to_sym] = entry
-        else
-          unmapped << entry
-        end
+        store_push(entry)
+        # if data[:slot]
+        #   slot_map[data[:slot].to_sym] = entry
+        # else
+        #   unmapped << entry
+        # end
       end
 
-      @owner.class.slots.ordered_slots.each do |slot|
-        if e = slot_map[slot.name]
-          store_push(e)
-        end
-      end
+      # DELETABLE
+      # @owner.class.slots.ordered_slots.each do |slot|
+      #   if e = slot_map[slot.name]
+      #     store_push(e)
+      #   end
+      # end
 
       # append entries without corresponding slots to end
-      unmapped.each do |entry|
-        store_push(entry)
-      end
+      # unmapped.each do |entry|
+      #   store_push(entry)
+      # end
     end
 
     def for_box(box)
@@ -42,13 +46,15 @@ module Spontaneous
       self.select { |e| e.box_id == box_id }
     end
 
+    # DELETABLE
     def push(entry)
       super(entry)
-      @name_map[entry.name.to_sym] = entry unless (entry.name.nil? or entry.name.empty?)
+      # @name_map[entry.name.to_sym] = entry unless entry.name.blank?
     end
 
     alias_method :<<, :push
 
+    # DELETABLE
     def [](index)
       case index
       when Symbol, String
@@ -58,6 +64,7 @@ module Spontaneous
       end
     end
 
+    # DELETABLE
     def labelled(label)
       label = label.to_sym
       find { |e| e.label == label }
@@ -66,13 +73,13 @@ module Spontaneous
     def insert(index, entry)
       entry.entry_store = self
       store_insert(index, entry)
-      @owner.entry_modified!(entry)
+      owner.entry_modified!(entry)
     end
 
 
     def destroy!
       self.destroy
-      @owner.entry_modified!(nil)
+      owner.entry_modified!(nil)
     end
 
     def destroy
@@ -80,8 +87,13 @@ module Spontaneous
     end
 
     def remove(entry)
-      e = self.delete(entry)
-      @owner.entry_modified!(nil)
+      delete(entry)
+    end
+
+
+    def delete(entry)
+      e = store_delete(entry)
+      owner.entry_modified!(nil)
     end
 
     def serialize
@@ -91,9 +103,9 @@ module Spontaneous
 
     def set_position(content, position)
       entry = self.detect {|e| e.target == content }
-      self.delete(entry)
+      self.store_delete(entry)
       self.insert(position, entry)
-      @owner.entry_modified!(entry)
+      owner.entry_modified!(entry)
     end
 
     def to_hash
@@ -108,6 +120,7 @@ module Spontaneous
 
     protected
 
+    # DELETABLE
     def method_missing(method, *args)
       if entry = labelled(method)
         entry

@@ -23,7 +23,11 @@ module Spontaneous
     end
 
     def box_name
-      _prototype.name
+      _name
+    end
+
+    def label
+      _name.to_s
     end
 
     def field_store
@@ -47,10 +51,6 @@ module Spontaneous
 
     def container
       _owner
-    end
-
-    def label
-      _name.to_s
     end
 
     def entries

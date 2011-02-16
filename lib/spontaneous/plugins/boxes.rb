@@ -71,7 +71,6 @@ module Spontaneous::Plugins
       def entries_for_box(box)
         p self.pieces
         p self.entries
-        self.entries.for_box(box)
       end
     end
   end
