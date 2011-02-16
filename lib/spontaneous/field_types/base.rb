@@ -5,8 +5,6 @@ module Spontaneous
   module FieldTypes
     class Base
 
-      attr_accessor :template_params
-
       def self.register(*labels)
         labels = self.labels if labels.empty?
         FieldTypes.register(self, *labels)
@@ -35,7 +33,9 @@ module Spontaneous
         end
       end
 
-      attr_accessor :owner, :name, :unprocessed_value
+      attr_accessor :owner, :name, :unprocessed_value, :template_params
+      attr_reader   :processed_value
+
 
 
       def initialize(attributes={}, from_db=false)
@@ -58,13 +58,11 @@ module Spontaneous
       end
 
       # override this to return custom values derived from (un)processed_value
-      def value
-        processed_value
-      end
+      alias_method :value, :processed_value
+      # def value
+      #   processed_value
+      # end
 
-      def processed_value
-        @processed_value
-      end
 
       def to_s
         value.to_s

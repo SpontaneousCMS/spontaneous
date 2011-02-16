@@ -187,7 +187,10 @@ class BoxesTest < Test::Unit::TestCase
       Spontaneous.template_root = File.expand_path('../../fixtures/templates/boxes', __FILE__)
       class ::MyContentClass < Content; end
       class ::MyBoxClass < Box; end
-      MyContentClass.box :images, :class => :MyBoxClass
+      MyContentClass.box :images, :class => :MyBoxClass, :fields => {
+        :title => "Default Title",
+        :description => "Default Description"
+      }
       @content = MyContentClass.new
     end
 
@@ -205,13 +208,21 @@ class BoxesTest < Test::Unit::TestCase
     context "with fields" do
       setup do
         MyBoxClass.field :title, :string
+        MyBoxClass.field :description, :text
       end
 
       should "save their field values" do
         @content.images.title = "something"
+        @content.images.description = "description here"
         @content.save
         @content.reload
-        @content.images.title.processed_value.should == "something"
+        @content.images.title.value.should == "something"
+        @content.images.description.value.should == "description here"
+      end
+
+      should "take initialvalues from box definition" do
+        @content.images.title.value.should == "Default Title"
+        @content.images.description.value.should == "Default Description"
       end
     end
 

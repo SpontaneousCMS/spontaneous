@@ -71,10 +71,10 @@ module Spontaneous::Plugins
 
       def to_field(values=nil)
         from_db = !values.nil?
-        values ||= {
+        values = {
           :name => name,
           :unprocessed_value => default_value
-        }
+        }.merge(values || {})
         self.field_class.new(values, from_db)
       end
 

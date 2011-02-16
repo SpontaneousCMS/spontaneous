@@ -17,6 +17,7 @@ module Spontaneous
 
     def initialize(name, prototype, owner)
       @_name, @_prototype, @_owner = name.to_sym, prototype, owner
+      @field_initialization = false
     end
 
     # TODO: use generated schema id here
@@ -33,7 +34,23 @@ module Spontaneous
     end
 
     def field_store
-      _owner.box_field_store(_name)
+      _owner.box_field_store(self) || initialize_fields
+    end
+
+    # don't like this
+    def initialize_fields
+      field_store = nil
+      if default_values = _prototype.field_defaults
+        field_store = []
+        default_values.each do |field_name, value|
+          if self.field?(field_name)
+            field = self.class.field_prototypes[field_name].to_field
+            field.unprocessed_value = value
+            field_store << field.to_hash
+          end
+        end
+      end
+      field_store
     end
 
     def field_modified!(modified_field)

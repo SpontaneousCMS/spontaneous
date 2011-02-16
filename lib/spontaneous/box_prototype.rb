@@ -21,6 +21,10 @@ module Spontaneous
       instance = instance_class.new(name, self, owner)
     end
 
+    def field_defaults
+      @options[:fields]
+    end
+
     def instance_class
       @_instance_class ||= create_instance_class
     end
