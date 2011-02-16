@@ -3,8 +3,8 @@
 module Spontaneous::Plugins
   module Boxes
     module ClassMethods
-      def box(name, options = {})
-        boxes.push(Spontaneous::BoxPrototype.new(name, options))
+      def box(name, options = {}, &block)
+        boxes.push(Spontaneous::BoxPrototype.new(name, options, &block))
         unless method_defined?(name)
           class_eval <<-BOX
             def #{name}
@@ -66,11 +66,6 @@ module Spontaneous::Plugins
 
       def box_style_id(box_name)
         nil
-      end
-
-      def entries_for_box(box)
-        p self.pieces
-        p self.entries
       end
     end
   end

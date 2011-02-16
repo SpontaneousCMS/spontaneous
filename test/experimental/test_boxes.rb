@@ -276,13 +276,26 @@ class BoxesTest < Test::Unit::TestCase
   context "Box content" do
     setup do
       class ::BlankContent < Content; end
+      class ::StyledContent < Content; end
+      BlankContent.inline_style :blank1
+      BlankContent.inline_style :blank2
+      BlankContent.inline_style :blank3
       BlankContent.box :images
       BlankContent.box :words
+
+      StyledContent.box :one do
+        allow :BlankContent, :style => :blank2
+      end
+
+      StyledContent.box :two do
+        allow :BlankContent, :styles => [:blank3, :blank2]
+      end
       @parent = BlankContent.new
     end
 
     teardown do
       Object.send(:remove_const, :BlankContent)
+      Object.send(:remove_const, :StyledContent)
     end
 
     should "be addable" do
@@ -304,6 +317,19 @@ class BoxesTest < Test::Unit::TestCase
 
       @parent.images.pieces.first.box.should == @parent.images
       @parent.words.pieces.first.box.should == @parent.words
+    end
+
+    should "choose correct style" do
+      styled = StyledContent.new
+      child1 = BlankContent.new
+      child2 = BlankContent.new
+      child3 = BlankContent.new
+      styled.one << child1
+      styled.two << child2
+      styled.save
+      styled = Content[styled.id]
+      styled.one.pieces.first.style.name.should == :blank2
+      styled.two.pieces.first.style.name.should == :blank3
     end
   end
 end

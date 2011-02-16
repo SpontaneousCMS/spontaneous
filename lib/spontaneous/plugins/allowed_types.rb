@@ -16,6 +16,7 @@ module Spontaneous::Plugins
       end
 
       def check_styles
+        @options[:styles] = [@options[:style]] if @options.key?(:style)
         if @options.key?(:styles) and styles = @options[:styles]
           styles.each do |s|
             if instance_class.inline_styles[s].nil?
