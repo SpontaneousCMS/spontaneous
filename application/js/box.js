@@ -26,6 +26,9 @@ Spontaneous.Box = (function($, S) {
 			return this._type;
 		},
 
+		depth: function() {
+			return 'box';
+		},
 		panel: function() {
 			if (!this._panel) {
 				var panel = $(dom.div, {'class': 'slot-content'});
