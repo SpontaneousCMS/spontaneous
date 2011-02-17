@@ -4,9 +4,16 @@ require 'test_helper'
 
 ENV['RACK_ENV'] = 'test'
 
+
 class FrontTest < Test::Unit::TestCase
   include StartupShutdown
   include ::Rack::Test::Methods
+
+  class SitePage < Spontaneous::Page
+    page_style :default
+    page_style :dynamic
+    box :pages
+  end
 
   def self.startup
     Site.delete
@@ -21,24 +28,22 @@ class FrontTest < Test::Unit::TestCase
     Spontaneous.revision_root = @@revision_root
 
     Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
-    Object.const_set(:SitePage, Class.new(Spontaneous::Page) do
-      page_style :default
-      page_style :dynamic
-    end)
 
     @@root = SitePage.create
     @@about = SitePage.create(:slug => "about", :uid => "about")
     @@news = SitePage.create(:slug => "news", :uid => "news")
     @@dynamic = SitePage.create(:slug => "dynamic", :uid => "dynamic")
     @@dynamic.style = :dynamic
-    @@root << @@about
-    @@root << @@news
-    @@root << @@dynamic
+    @@root.pages << @@about
+    @@root.pages << @@news
+    @@root.pages << @@dynamic
     @@root.save
+
     Content.delete_revision(1)
-    silence_logger {
+
+    # silence_logger {
       Site.publish_all
-    }
+    # }
   end
 
   def self.shutdown
@@ -48,7 +53,7 @@ class FrontTest < Test::Unit::TestCase
     Spontaneous.revision_root = @saved_revision_root
     Spontaneous.root = @saved_root
     FileUtils.rm_rf(@@revision_root)
-    Object.send(:remove_const, :SitePage)
+    # Object.send(:remove_const, :SitePage)
   end
 
   def setup
