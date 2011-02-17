@@ -55,11 +55,6 @@ module Spontaneous::Render
       target.container.pieces.last == self
     end
 
-    # def position
-    #   target.container.visible_pieces.index(self) if target.container
-    # end
-
-    # TODO: replace the use of _content with a iterator by using #each & Enumerable
     def render_content
       target.map do |c|
         c.render(format)
@@ -77,27 +72,10 @@ module Spontaneous::Render
     protected
 
     def method_missing(method, *args)
-      key = method.to_sym
-      # if target.respond_to?(method)
-      #   if block_given?
-      #     target.__send__(method, *args, &Proc.new)
-      #   else
-      #     target.__send__(method, *args)
-      #   end
-
-      if target.field?(key)
-        target.send(key, *args)
-      elsif target.box?(key)
-        # WHY do I have to wrap boxes in a context? Is there anyway of removing this
-        # need for a context wrapper from everything? Is it just there to pass along the current
-        # format??
-        self.class.new(target.boxes[key], format, @params)
+      if block_given?
+        target.__send__(method, *args, &Proc.new)
       else
-        if block_given?
-          target.__send__(method, *args, &Proc.new)
-        else
-          target.__send__(method, *args)
-        end
+        target.__send__(method, *args)
       end
     rescue => e
       # TODO: sensible, configurable fallback for when template calls non-existant method
