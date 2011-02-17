@@ -146,7 +146,8 @@ Spontaneous.Page = (function($, S) {
 			this.panel = $(dom.div, {'id':'page-content'});
 			this.panel.append(new FunctionBar(this).panel());
 			this.panel.append(new Spontaneous.FieldPreview(this, 'page-fields').panel());
-			this.panel.append(new Spontaneous.SlotContainer(this, 'page-slots').panel());
+			// this.panel.append(new Spontaneous.SlotContainer(this, 'page-slots').panel());
+			this.panel.append(new Spontaneous.BoxContainer(this, 'page-slots').panel());
 			return this.panel;
 		},
 		depth: function() {

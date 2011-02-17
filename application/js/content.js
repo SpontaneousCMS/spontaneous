@@ -79,6 +79,7 @@ Spontaneous.Content = (function($, S) {
 		},
 		fields: function() {
 			if (!this._fields) {
+				console.log("Content.fields", this.type())
 				var fields = {}, type = this.type(), prototypes = type.field_prototypes;
 
 				for (var i = 0, ii = this.content.fields.length; i < ii; i++) {
@@ -137,9 +138,20 @@ Spontaneous.Content = (function($, S) {
 			return this._entries;
 		},
 
+		boxes: function() {
+			if (!this._boxes) {
+				var _boxes = [];
+				for (var i = 0, ee = this.content.boxes, ii = ee.length; i < ii; i++) {
+					_boxes.push(ee[i]);
+				}
+				this._boxes = _boxes;
+			}
+			return this._boxes;
+		},
+
 		wrap_entry: function(entry) {
 			var entry_class = Spontaneous.Entry;
-			if (entry.is_page) { 
+			if (entry.is_page) {
 				entry_class = Spontaneous.PageEntry;
 			}
 			return new entry_class(entry, this);
@@ -161,7 +173,7 @@ Spontaneous.Content = (function($, S) {
 			Spontaneous.Ajax.post(['/add', this.content.id, type.type].join('/'), {}, this, function(result) {
 				this.entry_added(result, callback);
 			});
-		}, 
+		},
 
 		entry_added: function(result, callback) {
 			console.log("Content.entry_added", result)

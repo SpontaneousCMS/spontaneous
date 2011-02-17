@@ -21,7 +21,7 @@
     <script type="text/javascript" charset="utf-8">
       Spontaneous.Require.init(Spontaneous.asynchronous);
       <%# list of scripts to append, in order %>
-      var sources = <%= scripts :'vendor/jquery-1.4.3.min', :'vendor/jquery-ui-1.8.6.custom.min', :'vendor/JS.Class-2.1.5/min/core', :'extensions', :'spontaneous', :'properties', :'dom', :'ajax', :'types', :'content', :'entry', :'page_entry', :'slot', :'page', :'field', :'field_types/string_field', :'field_types/file_field', :'field_types/image_field', :'field_types/discount_field', :'field_types/date_field', :'content_area', :'preview', :'editing', :'location', :'state', :'top_bar', :'field_preview', :'slot_container', :'progress', :'status_bar', :'upload_manager', :'dialogue', :'edit_dialogue', :'init', :'load' %>;
+      var sources = <%= scripts :'vendor/jquery-1.4.3.min', :'vendor/jquery-ui-1.8.6.custom.min', :'vendor/JS.Class-2.1.5/min/core', :'extensions', :'spontaneous', :'properties', :'dom', :'ajax', :'types', :'content', :'entry', :'page_entry', :'box', :'slot', :'page', :'field', :'field_types/string_field', :'field_types/file_field', :'field_types/image_field', :'field_types/discount_field', :'field_types/date_field', :'content_area', :'preview', :'editing', :'location', :'state', :'top_bar', :'field_preview', :'box_container', :'slot_container', :'progress', :'status_bar', :'upload_manager', :'dialogue', :'edit_dialogue', :'init', :'load' %>;
       for (var i = 0, ii = sources.length; i < ii; i++) {
         Spontaneous.require(sources[i]);
       }

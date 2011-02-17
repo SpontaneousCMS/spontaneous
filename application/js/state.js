@@ -20,6 +20,12 @@ Spontaneous.State = (function($, S) {
 		storage_key: function() {
 			return 'content-state-'+this.content.id();
 		},
+		activate_box: function(box) {
+			this.state.box = box.id();
+		},
+		active_box: function() {
+			return this.state.box;
+		},
 		activate_slot: function(slot) {
 			this.state.slot = slot.id();
 		},
@@ -34,6 +40,15 @@ Spontaneous.State = (function($, S) {
 		get: function(content) {
 			var s = new ContentState(content);
 			return s;
+		},
+		activate_box: function(content, box) {
+			var s = this.get(content);
+			s.activate_box(box);
+			s.save();
+		},
+		active_box: function(content) {
+			var s = this.get(content);
+			return s.active_box();
 		},
 		activate_slot: function(content, slot) {
 			var s = this.get(content);
