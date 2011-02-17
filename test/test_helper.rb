@@ -164,11 +164,7 @@ class Test::Unit::TestCase
     @home.save
 
 
-    @about = InfoPage.new({
-      :slug => "about",
-      :uid => "about",
-      :title => "About"
-    })
+    @about = InfoPage.new({ :slug => "about", :uid => "about", :title => "About" })
 
     @home.pages << @about
 
@@ -183,11 +179,12 @@ class Test::Unit::TestCase
     @about.text << @piece2_4
     @about.text << @piece2_5
     @about.save
-    @home.save
+    # @home.save
 
     @projects = ProjectsPage.new(:slug => "projects", :title => "Projects", :introduction => "Welcome to projects page", :uid => "projects")
     @home.pages << @projects
-    @projects.projects << Project.new(:slug => "tiffl", :title => "TIFFL", :url => "http://tiffl.org", :description => "TIFFL gives you personalised access to the Transport for London Journey Planner.")
+    project = Project.new(:slug => "tiffl", :title => "TIFFL", :url => "http://tiffl.org", :description => "TIFFL gives you personalised access to the Transport for London Journey Planner.")
+    @projects.projects << project
     @projects.projects << Project.new(:slug => "on-the-bbc", :title => "On the BBC", :url => "", :description => "On the BBC is an experiment that provides up-to-date twitter alerts for BBC radio and TV channels.")
     @projects.projects << Project.new(:slug => "human-remains", :title => "Human Remains", :url => "http://remains.magnetised.info/", :description => "A project exploring our relationship to our own detritus.")
     # [@carbon_quilt, @project2, @project3, @piece2_1, @piece2_2, @piece2_3, @piece2_4, @piece2_5].each { |p| p.save }

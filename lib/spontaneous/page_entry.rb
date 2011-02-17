@@ -8,7 +8,7 @@ module Spontaneous
     end
 
     def depth
-      container.depth + 1
+      container.content_depth + 1
     end
 
     def style

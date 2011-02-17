@@ -26,6 +26,9 @@ class ApplicationTest < Test::Unit::TestCase
         @home.in_progress.depth.should == 0
         @home.in_progress.last.depth.should == 1
         @home.in_progress.last.images.depth.should == 1
+        @home.depth.should == 0
+        @about.depth.should == 1
+        @projects.reload.depth.should == 1
       end
     end
 

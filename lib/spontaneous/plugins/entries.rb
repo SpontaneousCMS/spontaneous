@@ -127,7 +127,7 @@ module Spontaneous::Plugins
       def insert_piece(index, piece, box = nil)
         piece.container = self
         piece.page = page if page
-        piece.depth = (depth || 0) + 1
+        piece.depth = (content_depth || 0) + 1
         insert_with_style(:piece, index, piece, box)
       end
 
