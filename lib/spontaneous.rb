@@ -90,7 +90,6 @@ module Spontaneous
   end
 
   module Plugins
-    autoload :Slots, "spontaneous/plugins/slots"
     autoload :Boxes, "spontaneous/plugins/boxes"
     autoload :Fields, "spontaneous/plugins/fields"
     autoload :Entries, "spontaneous/plugins/entries"
@@ -112,12 +111,6 @@ module Spontaneous
     autoload :Visibility, "spontaneous/plugins/visibility"
     autoload :Prototypes, "spontaneous/plugins/prototypes"
     autoload :Permissions, "spontaneous/plugins/permissions"
-
-    module Slots
-      autoload :SlotDefinitions, "spontaneous/plugins/slots/slot_definitions"
-      autoload :SlotSet, "spontaneous/plugins/slots/slot_set"
-      autoload :Slot, "spontaneous/plugins/slots/slot"
-    end
 
     module Fields
       autoload :FieldPrototype, "spontaneous/plugins/fields/field_prototype"
