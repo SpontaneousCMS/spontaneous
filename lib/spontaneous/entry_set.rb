@@ -9,14 +9,14 @@ module Spontaneous
 
     attr_reader :owner
 
-    def initialize(owner, entry_store)
+    def initialize(owner, piece_store)
       @owner = owner
       type_cache = Hash.new { |hash, key| hash[key] = Spontaneous.const_get(key) }
 
-      (entry_store || []).each do |data|
+      (piece_store || []).each do |data|
         klass = type_cache[data[:type]]
-        entry = klass.new(@owner, data[:id], data[:style], data[:box_id])
-        store_push(entry)
+        piece = klass.new(@owner, data[:id], data[:style], data[:box_id])
+        store_push(piece)
       end
     end
 
@@ -25,10 +25,10 @@ module Spontaneous
       self.select { |e| e.box_id == box_id }
     end
 
-    def insert(index, entry)
-      entry.entry_store = self
-      store_insert(index, entry)
-      owner.entry_modified!(entry)
+    def insert(index, piece)
+      piece.piece_store = self
+      store_insert(index, piece)
+      owner.entry_modified!(piece)
     end
 
 
@@ -41,13 +41,13 @@ module Spontaneous
       self.dup.each { |e| e.destroy(false) }
     end
 
-    def remove(entry)
-      delete(entry)
+    def remove(piece)
+      delete(piece)
     end
 
 
-    def delete(entry)
-      e = store_delete(entry)
+    def delete(piece)
+      e = store_delete(piece)
       owner.entry_modified!(nil)
     end
 
@@ -57,15 +57,15 @@ module Spontaneous
 
 
     def set_position(content, position)
-      entry = self.detect {|e| e.target == content }
-      self.store_delete(entry)
-      self.insert(position, entry)
-      owner.entry_modified!(entry)
+      piece = self.detect {|e| e.target == content }
+      self.store_delete(piece)
+      self.insert(position, piece)
+      owner.entry_modified!(piece)
     end
 
     def to_hash
-      map do | entry |
-        entry.to_hash
+      map do | piece |
+        piece.to_hash
       end
     end
 

@@ -124,9 +124,9 @@ class SerialisationTest < Test::Unit::TestCase
         @child.direction = "N"
         @child.uid = "about"
 
-        @root.entries[0].style = :freezing
-        @root.entries[1].style = :boiling
-        @root.entries[0].entries[0].style = :sitting
+        @root.pieces[0].style = :freezing
+        @root.pieces[1].style = :boiling
+        @root.pieces[0].pieces[0].style = :sitting
 
         @child.path.should == "/about"
 

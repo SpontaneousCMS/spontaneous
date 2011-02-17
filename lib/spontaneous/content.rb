@@ -58,6 +58,7 @@ module Spontaneous
     plugin Plugins::Permissions
 
 
+    include Enumerable
 
     def after_initialize
       if new?
@@ -92,6 +93,12 @@ module Spontaneous
 
     def to_s
       %(#<#{self.class.name} id=#{id}>)
+    end
+
+    def each
+      iterable.each do |i|
+        yield i if block_given?
+      end
     end
   end
 end

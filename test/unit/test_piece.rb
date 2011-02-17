@@ -60,9 +60,9 @@ class PieceTest < Test::Unit::TestCase
         @page.content.last.class.should == Fridge
       end
 
-      should "have a link to their entries" do
-        @f1.entry.should == @page.entries.first
-        @f2.entry.should == @page.entries.first.entries.first
+      should "have a link to their pieces" do
+        @f1.entry.should == @page.pieces.first
+        @f2.entry.should == @page.pieces.first.pieces.first
       end
     end
   end

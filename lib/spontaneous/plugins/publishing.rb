@@ -234,8 +234,8 @@ module Spontaneous::Plugins
           published_copy = Spontaneous::Content[self.id]
           if published_copy
             if publish and published_copy.entry_store
-              entries_to_delete = published_copy.entry_store - self.entry_store
-              entries_to_delete.each do |entry|
+              pieces_to_delete = published_copy.entry_store - self.entry_store
+              pieces_to_delete.each do |entry|
                 if c = Spontaneous::Content[entry[:id]]
                   c.destroy(false)
                 end
@@ -248,7 +248,7 @@ module Spontaneous::Plugins
 
           if publish
             with_editable do
-              self.entries.each do |entry|
+              self.pieces.each do |entry|
                 entry.target.sync_to_revision(revision, false)
               end
             end

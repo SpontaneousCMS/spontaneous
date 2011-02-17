@@ -51,7 +51,7 @@ class SlotsTest < Test::Unit::TestCase
     should "have 'title' option" do
       SlotClass.slot :images4, :title => "Custom Title"
       @instance = SlotClass.new
-      @instance.entries.first.slot_name.should == "Custom Title"
+      @instance.pieces.first.slot_name.should == "Custom Title"
     end
 
     should "accept values for the slot's fields" do
@@ -156,7 +156,7 @@ class SlotsTest < Test::Unit::TestCase
         instance.images10.monkey.should == "magic"
       end
 
-      should "correctly save entries" do
+      should "correctly save pieces" do
         instance = SlotClass.new
         c1 = AllowedType.new
         c2 = AllowedType.new
@@ -172,7 +172,7 @@ class SlotsTest < Test::Unit::TestCase
         c3.save
 
         instance = SlotClass[instance.id]
-        instance.images10.entries.length.should == 3
+        instance.images10.pieces.length.should == 3
       end
     end
 
@@ -212,10 +212,10 @@ class SlotsTest < Test::Unit::TestCase
       end
 
       should "instantiate a corresponding piece in new instances" do
-        @instance.entries.length.should == 1
-        # @instance.entries.first.class.should == Piece
-        @instance.entries.first.label.should == :images12
-        @instance.entries.first.slot_name.should == "Images12"
+        @instance.pieces.length.should == 1
+        # @instance.pieces.first.class.should == Piece
+        @instance.pieces.first.label.should == :images12
+        @instance.pieces.first.slot_name.should == "Images12"
       end
 
       should "have a #slots method for accessing slots" do

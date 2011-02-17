@@ -31,15 +31,8 @@ module Spontaneous::Render
       content.map { |c| yield(c) } if block_given?
     end
 
-    def _content
-      target._content
-    end
-
     def content
-      _content
-    end
-    def entries
-      content
+      target.iterable
     end
 
     def pieces
@@ -55,20 +48,20 @@ module Spontaneous::Render
     end
 
     def first?
-      target.container.visible_entries.first == self
+      target.container.pieces.first == self
     end
 
     def last?
-      target.container.visible_entries.last == self
+      target.container.pieces.last == self
     end
 
     # def position
-    #   target.container.visible_entries.index(self) if target.container
+    #   target.container.visible_pieces.index(self) if target.container
     # end
 
     # TODO: replace the use of _content with a iterator by using #each & Enumerable
     def render_content
-      _content.map do |c|
+      target.map do |c|
         c.render(format)
       end.join("\n")
     end

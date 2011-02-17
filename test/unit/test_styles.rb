@@ -134,28 +134,28 @@ class StylesTest < Test::Unit::TestCase
       end
 
       should "assign the default style" do
-        @a.entries.first.style.should == ::StyleTestClass.styles.default
+        @a.pieces.first.style.should == ::StyleTestClass.styles.default
       end
 
       should "persist" do
         @a.save
         @b.save
         @a = StyleTestClass[@a.id]
-        @a.entries.first.style.should == ::StyleTestClass.styles.default
+        @a.pieces.first.style.should == ::StyleTestClass.styles.default
       end
 
       should "be settable" do
-        @a.entries.first.style = StyleTestClass.styles[:first_style]
+        @a.pieces.first.style = StyleTestClass.styles[:first_style]
         @a.save
         @a = StyleTestClass[@a.id]
-        @a.entries.first.style.should == ::StyleTestClass.styles[:first_style]
+        @a.pieces.first.style.should == ::StyleTestClass.styles[:first_style]
       end
 
       context "direct piece access" do
         setup do
-          @a.entries.first.style = StyleTestClass.styles[:first_style]
+          @a.pieces.first.style = StyleTestClass.styles[:first_style]
           @a.save
-          piece_id = @a.entries.first.target.id
+          piece_id = @a.pieces.first.target.id
           @piece = StyleTestClass[piece_id]
         end
 

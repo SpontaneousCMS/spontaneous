@@ -73,7 +73,7 @@ class RenderTest < Test::Unit::TestCase
         @child.title = "Child Title"
         @child.description = "Child Description"
         @content.bits << @child
-        @content.entries.first.style = TemplateClass.styles[:this_template]
+        @content.pieces.first.style = TemplateClass.styles[:this_template]
       end
       teardown do
         Content.delete
@@ -87,13 +87,13 @@ class RenderTest < Test::Unit::TestCase
         @content.render(:pdf).should == "<pdf>\nThe Title\n<piece><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</piece>\n</pdf>\n"
       end
 
-      should "only show visible entries" do
+      should "only show visible pieces" do
         child = TemplateClass.new
         child.title = "Child2 Title"
         child.description = "Child2 Description"
         @content << child
-        @content.entries.last.style = TemplateClass.styles[:this_template]
-        @content.entries.last.hide!
+        @content.pieces.last.style = TemplateClass.styles[:this_template]
+        @content.pieces.last.hide!
         @content.render.should == "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
       end
     end
@@ -202,7 +202,7 @@ class RenderTest < Test::Unit::TestCase
       end
 
       should "use style assigned by entry" do
-        @parent.entries.first.style.should == PageClass.inline_styles.default
+        @parent.pieces.first.style.should == PageClass.inline_styles.default
         @parent.things.first.style.should == PageClass.inline_styles.default
       end
 
@@ -215,12 +215,12 @@ class RenderTest < Test::Unit::TestCase
 
       should "persist sub-page style settings" do
         @parent = Page[@parent.id]
-        @parent.entries.first.style.should == PageClass.inline_styles.default
+        @parent.pieces.first.style.should == PageClass.inline_styles.default
       end
 
       should "render using the inline style" do
-        @parent.entries.first.template.should == 'page_class/inline_style'
-        @parent.entries.first.render.should == "Child\n"
+        @parent.pieces.first.template.should == 'page_class/inline_style'
+        @parent.pieces.first.render.should == "Child\n"
         @parent.things.render.should == "Child\n"
         @parent.render.should == "<html>Child\n</html>\n"
       end

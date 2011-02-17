@@ -1,5 +1,5 @@
 <images>
-{% content.each do |image| %}
+{% pieces.each do |image| %}
   {{ image }}
 {% end %}
 </images>

@@ -15,7 +15,7 @@ class ContentTest < Test::Unit::TestCase
       @instance.monkey.should == 'magic'
     end
   end
-  context "Entries" do
+  context "pieces" do
     setup do
       @instance = Content.new
     end
@@ -24,17 +24,17 @@ class ContentTest < Test::Unit::TestCase
       Content.delete
     end
     should "be initialised empty" do
-      @instance.entries.should == []
+      @instance.pieces.should == []
     end
 
     should "accept addition of child content" do
       e = Content.new
       @instance << e
-      @instance.entries.length.should == 1
-      @instance.entries.first.should == e
-      @instance.entries.first.container.should == @instance
+      @instance.pieces.length.should == 1
+      @instance.pieces.first.should == e
+      @instance.pieces.first.container.should == @instance
       e.content_path.should == "#{@instance.id}"
-      @instance.entries.first.content_path.should == "#{@instance.id}"
+      @instance.pieces.first.content_path.should == "#{@instance.id}"
     end
 
     should "accept addition of multiple children" do
@@ -42,13 +42,13 @@ class ContentTest < Test::Unit::TestCase
       f = Content.new
       @instance << e
       @instance << f
-      @instance.entries.length.should == 2
-      @instance.entries.first.should == e
-      @instance.entries.last.should == f
-      @instance.entries.first.container.should == @instance
-      @instance.entries.last.container.should == @instance
-      @instance.entries.first.content_path.should == "#{@instance.id}"
-      @instance.entries.last.content_path.should == "#{@instance.id}"
+      @instance.pieces.length.should == 2
+      @instance.pieces.first.should == e
+      @instance.pieces.last.should == f
+      @instance.pieces.first.container.should == @instance
+      @instance.pieces.last.container.should == @instance
+      @instance.pieces.first.content_path.should == "#{@instance.id}"
+      @instance.pieces.last.content_path.should == "#{@instance.id}"
     end
 
     should "allow for a deep hierarchy" do
@@ -56,8 +56,8 @@ class ContentTest < Test::Unit::TestCase
       f = Content.new
       @instance << e
       e << f
-      @instance.entries.length.should == 1
-      @instance.entries.first.should == e
+      @instance.pieces.length.should == 1
+      @instance.pieces.first.should == e
       e.container.should == @instance
       e.content_path.should == "#{@instance.id}"
       f.container.id.should == e.id
@@ -77,14 +77,14 @@ class ContentTest < Test::Unit::TestCase
       e = Content[e.id]
       f = Content[f.id]
 
-      i.entries.length.should == 1
-      i.entries.first.should == e
+      i.pieces.length.should == 1
+      i.pieces.first.should == e
 
       e.container.should == i
       f.container.should == e
-      e.entry.should == i.entries.first
-      f.entry.should == e.entries.first
-      e.entries.first.should == f
+      e.entry.should == i.pieces.first
+      f.entry.should == e.pieces.first
+      e.pieces.first.should == f
     end
 
     should "have a list of child nodes" do
@@ -151,16 +151,16 @@ class ContentTest < Test::Unit::TestCase
       @b.destroy
       Content.count.should == 2
       @a.reload
-      @a.entries.length.should == 1
-      @a.entries.first.should == @d.reload
+      @a.pieces.length.should == 1
+      @a.pieces.first.should == @d.reload
       Content.all.map { |c| c.id }.should == [@a, @d].map { |c| c.id }
     end
 
     ## doesn't work due to
-    should "work through entries" do
-      @a.entries.first.destroy
+    should "work through pieces" do
+      @a.pieces.first.destroy
       Content.count.should == 2
-      @a.entries.length.should == 1
+      @a.pieces.length.should == 1
     end
   end
 
@@ -230,7 +230,7 @@ class ContentTest < Test::Unit::TestCase
       a = Allowable.new
       b = Allowed2.new
       a.parents << b
-      a.parents.entries.first.style.should == Allowed2.inline_styles[:ringo]
+      a.parents.pieces.first.style.should == Allowed2.inline_styles[:ringo]
     end
 
     should "know what the available styles are for an entry" do

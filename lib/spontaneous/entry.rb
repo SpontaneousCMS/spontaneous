@@ -38,7 +38,7 @@ module Spontaneous
       entry
     end
 
-    attr_accessor :entry_store
+    attr_accessor :piece_store
     attr_reader :box_id
 
     def initialize(container, target_id, style_name, box_id = nil)
@@ -53,7 +53,7 @@ module Spontaneous
     end
 
     def each
-      entries.each { |c| yield(c) } if block_given?
+      pieces.each { |c| yield(c) } if block_given?
     end
 
     def destroy(remove_container_entry=true, _container=nil)
@@ -76,36 +76,36 @@ module Spontaneous
       target.label.to_sym
     end
 
-    def entries
-      target.entries
+    def pieces
+      target.pieces
     end
 
     def first
-      entries.first
+      pieces.first
     end
 
     def first?
-      container.entries.first == self
+      container.pieces.first == self
     end
 
     def last
-      entries.last
+      pieces.last
     end
 
     def last?
-      container.entries.last == self
+      container.pieces.last == self
     end
 
     def set_position(new_position)
       if box
         box.set_position(self, new_position)
       else
-        container.entries.set_position(self, new_position)
+        container.pieces.set_position(self, new_position)
       end
     end
 
     def position
-      container.entries.index(self)
+      container.pieces.index(self)
     end
 
     def style

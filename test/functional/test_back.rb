@@ -122,7 +122,7 @@ class BackTest < Test::Unit::TestCase
     #   assert last_response.ok?
     #   last_response.content_type.should == "application/json;charset=utf-8"
     #   # can't actually be bothered to set this test up
-    #   # @piece2_2.reload.entries.first.target.id.should == @piece2_5.id
+    #   # @piece2_2.reload.pieces.first.target.id.should == @piece2_5.id
     # end
 
     context "saving" do
@@ -270,17 +270,17 @@ class BackTest < Test::Unit::TestCase
       assert last_response.ok?
     end
 
-    should "be able to wrap entries around files using default addable class" do
+    should "be able to wrap pieces around files using default addable class" do
       box = @home.in_progress
-      current_count = box.entries.length
-      first_id = box.entries.first.id
+      current_count = box.pieces.length
+      first_id = box.pieces.first.id
 
       post "/@spontaneous/file/wrap/#{@home.id}/#{box.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
       box = @home.reload.in_progress
-      first = box.entries.first
-      box.entries.length.should == current_count+1
+      first = box.pieces.first
+      box.pieces.length.should == current_count+1
       first.image.src.should =~ /^\/media(.+)\/#{File.basename(@src_file)}$/
       required_response = {
         :position => 0,
@@ -289,21 +289,21 @@ class BackTest < Test::Unit::TestCase
       last_response.body.json.should == required_response
     end
   end
-  context "Entries" do
+  context "pieces" do
     should "be addable" do
-      current_count = @home.in_progress.entries.length
-      first_id = @home.in_progress.entries.first.id
-      @home.in_progress.entries.first.class.name.should_not == "ProjectImage"
+      current_count = @home.in_progress.pieces.length
+      first_id = @home.in_progress.pieces.first.id
+      @home.in_progress.pieces.first.class.name.should_not == "ProjectImage"
       post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.id}/ProjectImage"
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
       @home.reload
-      @home.in_progress.entries.length.should == current_count+1
-      @home.in_progress.entries.first.id.should_not == first_id
-      @home.in_progress.entries.first.class.name.should == "ProjectImage"
+      @home.in_progress.pieces.length.should == current_count+1
+      @home.in_progress.pieces.first.id.should_not == first_id
+      @home.in_progress.pieces.first.class.name.should == "ProjectImage"
       required_response = {
         :position => 0,
-        :entry => @home.in_progress.entries.first.to_hash
+        :entry => @home.in_progress.pieces.first.to_hash
       }
       last_response.body.json.should == required_response.to_hash
     end

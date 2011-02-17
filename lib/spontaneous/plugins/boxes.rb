@@ -52,7 +52,7 @@ module Spontaneous::Plugins
         boxes
       end
 
-      def _content(*args)
+      def iterable
         boxes
       end
 

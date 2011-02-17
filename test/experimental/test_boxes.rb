@@ -286,7 +286,7 @@ class BoxesTest < Test::Unit::TestCase
         entry.stubs(:render).returns("<entry>")
         BlankContent.box :images, :class => :WithoutTemplateBox
         instance = BlankContent.new
-        instance.images.stubs(:entries).returns([entry])
+        instance.images.stubs(:pieces).returns([entry])
         instance.images.render.should == "<entry>"
       end
 

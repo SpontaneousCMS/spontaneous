@@ -108,8 +108,8 @@ module Spontaneous
     def set_position(entry, new_position)
       @modified = true
       piece = pieces[new_position]
-      new_position = container.entries.index(piece)
-      container.entries.set_position(entry, new_position)
+      new_position = container.pieces.index(piece)
+      container.pieces.set_position(entry, new_position)
     end
 
     def modified?
@@ -117,10 +117,9 @@ module Spontaneous
     end
 
     def pieces
-      @pieces ||= _owner.entries.for_box(self)
+      @pieces ||= _owner.pieces.for_box(self)
     end
 
-    alias_method :entries, :pieces
 
     def each
       pieces.each do |piece|
@@ -132,7 +131,7 @@ module Spontaneous
       pieces.last
     end
 
-    def _content
+    def iterable
       pieces
     end
 

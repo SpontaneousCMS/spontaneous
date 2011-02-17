@@ -77,8 +77,8 @@ module Spontaneous::Plugins
       #
       # Options:
       #
-      #   :styles    => The list of (inline) style names that can be used by the entries
-      #   :prototype => The name of the prototype to use when creating entries of this type
+      #   :styles    => The list of (inline) style names that can be used by the pieces
+      #   :prototype => The name of the prototype to use when creating pieces of this type
       #
       # TODO: finish these!
       def allow(type, options={})

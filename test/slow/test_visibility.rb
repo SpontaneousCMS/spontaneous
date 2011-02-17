@@ -183,22 +183,22 @@ class VisibilityTest < Test::Unit::TestCase
         end
       end
 
-      should "only show visibile entries" do
+      should "only show visibile pieces" do
         page = Content.first(:uid => "1")
-        page.entries.length.should == 4
-        page.entries.first.hide!
+        page.pieces.length.should == 4
+        page.pieces.first.hide!
         page.reload
         Content.with_visible do
-          page.entries.length.should == 3
+          page.pieces.length.should == 3
         end
       end
 
-      should "stop modification of entries" do
+      should "stop modification of pieces" do
         page = Content.first(:uid => "1")
         Content.with_visible do
           # would like to make sure we're raising a predictable error
           # but 1.9 changes the typeerror to a runtime error
-          lambda { page.entries << Piece.new }.should raise_error#(TypeError)
+          lambda { page.pieces << Piece.new }.should raise_error#(TypeError)
           lambda { page << Piece.new }.should raise_error#(TypeError)
         end
       end

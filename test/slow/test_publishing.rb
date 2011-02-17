@@ -313,8 +313,8 @@ class PublishingTest < Test::Unit::TestCase
 
         should "publish deletions to contents of page" do
           editable1 = Content.first(:uid => '0')
-          deleted = editable1.entries.first.target
-          editable1.entries.first.destroy
+          deleted = editable1.pieces.first.target
+          editable1.pieces.first.destroy
           Content.publish(@final_revision, [editable1.id])
           editable1.reload
           Content.with_revision(@final_revision) do
@@ -328,7 +328,7 @@ class PublishingTest < Test::Unit::TestCase
         should "publish page additions" do
           editable1 = Content.first(:uid => '0')
           new_page = Page.new(:uid => "new")
-          slot = editable1.entries.first
+          slot = editable1.pieces.first
           slot << new_page
           editable1.save
           slot.save
@@ -383,9 +383,9 @@ class PublishingTest < Test::Unit::TestCase
             published3 = Content[editable2.id]
             # published3.should == editable2
             assert_content_equal(published3, editable2)
-            published4 = Content[editable2.entries.first.id]
-            # published4.should == editable2.entries.first
-            assert_content_equal(published4, editable2.entries.first)
+            published4 = Content[editable2.pieces.first.id]
+            # published4.should == editable2.pieces.first
+            assert_content_equal(published4, editable2.pieces.first)
           end
         end
       end
@@ -420,7 +420,7 @@ class PublishingTest < Test::Unit::TestCase
         Time.stubs(:now).returns(@now+3600)
         page = Page.first
         page.modified_at.to_i.should == @now.to_i
-        content = page.entries.first
+        content = page.pieces.first
         content.page.should == page
         content.label = "changed"
         content.save
@@ -431,7 +431,7 @@ class PublishingTest < Test::Unit::TestCase
       should "update page timestamp on addition of piece" do
         Sequel.datetime_class.stubs(:now).returns(@now+3600)
         page = Page.first
-        content = Content[page.entries.first.id]
+        content = Content[page.pieces.first.id]
         content << Content.new
         content.save
         content.modified_at.to_i.should == @now.to_i + 3600
@@ -474,7 +474,7 @@ class PublishingTest < Test::Unit::TestCase
 
       should "be created on updating a page's content" do
         page = Page.first
-        content = Content[page.entries.first.target.id]
+        content = Content[page.pieces.first.target.id]
         Change.record do
           content.label = "changed"
           content.save
@@ -490,7 +490,7 @@ class PublishingTest < Test::Unit::TestCase
 
       should "include all modified pages" do
         page = Page.first
-        content = Content[page.entries.first.target.id]
+        content = Content[page.pieces.first.target.id]
         new_page = nil
         Change.record do
           new_page = Page.new

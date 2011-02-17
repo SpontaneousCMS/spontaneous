@@ -19,8 +19,8 @@ class ApplicationTest < Test::Unit::TestCase
         @home.completed.page.should == @home
         @home.archived.page.should == @home
 
-        @home.in_progress.entries.first.page.should == @home
-        @home.in_progress.entries.first.images.page.should == @home
+        @home.in_progress.pieces.first.page.should == @home
+        @home.in_progress.pieces.first.images.page.should == @home
       end
       should "have the right depth" do
         @home.in_progress.depth.should == 0

@@ -78,9 +78,9 @@ class PageTest < Test::Unit::TestCase
     end
 
     should "have the right entry classes" do
-      @p.entries.first.proxy_class.should == Spontaneous::PageEntry
-      @q.entries.first.proxy_class.should == Spontaneous::PageEntry
-      @s.entries.first.proxy_class.should == Spontaneous::PageEntry
+      @p.pieces.first.proxy_class.should == Spontaneous::PageEntry
+      @q.pieces.first.proxy_class.should == Spontaneous::PageEntry
+      @s.pieces.first.proxy_class.should == Spontaneous::PageEntry
     end
 
     should "have a reference to their parent" do
@@ -180,7 +180,7 @@ class PageTest < Test::Unit::TestCase
     end
   end
 
-  context "page entries" do
+  context "page pieces" do
     setup do
       @parent = Page.create
       @piece = Piece.new
@@ -194,8 +194,8 @@ class PageTest < Test::Unit::TestCase
 
     should "report their depth according to their position in the piece tree" do
       @parent.depth.should == 0
-      @parent.entries.first.depth.should == 1
-      @parent.entries.first.entries.first.depth.should == 2
+      @parent.pieces.first.depth.should == 1
+      @parent.pieces.first.pieces.first.depth.should == 2
     end
   end
 
