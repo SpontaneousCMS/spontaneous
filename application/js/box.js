@@ -80,11 +80,11 @@ Spontaneous.Box = (function($, S) {
 				dropper.get(0).addEventListener('drop', drop, true);
 				dropper.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
 
-				var _slot = this;
+				var _box = this;
 				$.each(allowed, function(i, type) {
 					var add_allowed = function(type) {
 						this.add_content(type, 0);
-					}.bind(_slot, type);
+					}.bind(_box, type);
 					var a = $(dom.a).click(add_allowed).text(type.title);
 					allowed_bar.append(a)
 				});
@@ -136,11 +136,11 @@ Spontaneous.Box = (function($, S) {
 			// console.log('Slot.sorted', entry);
 		},
 		upload_complete: function(values) {
-			console.log('Slot.upload_complete', values);
+			console.log('Box.upload_complete', values);
 			this.insert_entry(this.wrap_entry(values.entry), values.position);
 		},
 		upload_progress: function(position, total) {
-			console.log('Slot.upload_progress', position, total);
+			console.log('Box.upload_progress', position, total);
 		},
 		claim_entry: function(entry) {
 			var div = entry.panel();
@@ -155,6 +155,14 @@ Spontaneous.Box = (function($, S) {
 
 		add_content: function(content_type, position) {
 			this.add_entry(content_type, position, this.insert_entry.bind(this));
+		},
+		add_entry: function(type, position, callback) {
+			Spontaneous.Ajax.post(['/add', this.container.id(), this.id(), type.type].join('/'), {}, this, function(result) {
+				this.entry_added(result, callback);
+			});
+		},
+		save_path: function() {
+			return ['/savebox', this.container.id(), this.id()].join('/');
 		},
 		insert_entry: function(entry, position) {
 			var w = this.entry_wrappers(), e = this.claim_entry(entry), h;

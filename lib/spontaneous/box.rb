@@ -137,11 +137,22 @@ module Spontaneous
     end
 
     def to_hash
+      to_shallow_hash.merge({
+        :entries => pieces.map { |p| p.to_hash }
+      })
+    end
+
+    def to_shallow_hash
       {
         :id => _prototype.schema_id,
-        :fields => self.class.readable_fields.map { |name| fields[name].to_hash },
-        :entries => pieces.map { |p| p.to_hash }
+        :fields => self.class.readable_fields.map { |name| fields[name].to_hash }
       }
+    end
+
+    # only called directly after saving a boxes fields so
+    # we don't need to return the entries
+    def to_json
+      to_shallow_hash.to_json
     end
 
     def writable?
@@ -158,6 +169,10 @@ module Spontaneous
 
     def end_inline_edit_marker
       "spontaneous:previewedit:end:box id:#{id}"
+    end
+
+    def save
+      _owner.save
     end
   end
 

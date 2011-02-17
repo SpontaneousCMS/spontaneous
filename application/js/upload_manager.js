@@ -9,6 +9,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.manager = manager;
 			this.field_name = target.name
 			this.uid = target.uid();
+			this.target = target;
 			this.target_id = target.id();
 			this.position = 0;
 			this.failure_count = 0;
@@ -21,12 +22,12 @@ Spontaneous.UploadManager = (function($, S) {
 			var form = new FormData();
 			form.append('file', this.file);
 			form.append('field', this.field_name);
-			this.post("/@spontaneous/file/replace/"+this.target_id, form);
+			this.post("/file/replace/"+this.target_id, form);
 		},
 		post: function(url, form_data) {
 			this.xhr = new XMLHttpRequest();
 			this.upload = this.xhr.upload;
-			this.xhr.open("POST", url, true);
+			this.xhr.open("POST", this.namespaced_path(url), true);
 			this.upload.onprogress = this.onprogress.bind(this);
 			this.upload.onload = this.onload.bind(this);
 			this.upload.onloadend = this.onloadend.bind(this);
@@ -34,6 +35,9 @@ Spontaneous.UploadManager = (function($, S) {
 			this.xhr.onreadystatechange = this.onreadystatechange.bind(this);
 			this.started = (new Date()).valueOf();
 			this.xhr.send(form_data);
+		},
+		namespaced_path: function(path) {
+			return '/@spontaneous' + path;
 		},
 		// While loading and sending data.
 		onprogress: function(event) {
@@ -71,7 +75,7 @@ Spontaneous.UploadManager = (function($, S) {
 		start: function() {
 			var form = new FormData();
 			form.append('file', this.file);
-			this.post("/@spontaneous/file/wrap/"+this.target_id, form);
+			this.post("/file/wrap/"+this.target_id, form);
 		}
 	});
 	var FormUpload = new JS.Class(Upload, {
@@ -82,7 +86,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.name = "Saving...";
 		},
 		start: function() {
-			this.post(['/@spontaneous/save', this.target_id].join('/'), this.form_data);
+			this.post(this.target.content.save_path(), this.form_data);
 		}
 	});
 	var UploadManager = {

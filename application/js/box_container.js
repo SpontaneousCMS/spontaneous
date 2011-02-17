@@ -70,7 +70,6 @@ Spontaneous.BoxContainer = (function($, S) {
 				var f = function(i, box) {
 					_boxes.push(new Spontaneous.Box(box, this.content, content_container))
 				}.bind(this);
-				console.log(this.content.boxes())
 				$.each(this.content.boxes(), f);
 				this._boxes = _boxes;
 			}

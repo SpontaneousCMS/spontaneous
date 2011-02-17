@@ -99,6 +99,12 @@ module Spontaneous
           update_fields(content, params[:field])
         end
 
+        post '/savebox/:id/:box_id' do
+          content = Content[params[:id]]
+          box = content.boxes[params[:box_id]]
+          update_fields(box, params[:field])
+        end
+
 
         post '/content/:id/position/:position' do
           content = Content[params[:id]]
