@@ -615,80 +615,90 @@ class PermissionsTest < Test::Unit::TestCase
     end
 
     should "serialise only things in class viewable by the current user" do
-      C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == [
-          ["editor_level", true],
-          ["admin_level", true],
-          ["root_level", true],
-          ["mixed_level", true],
-          ["default_level", true]
+      expected = [
+        ["editor_level", true],
+        ["admin_level", true],
+        ["root_level", true],
+        ["mixed_level", true],
+        ["default_level", true]
       ]
+      C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
+      C.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
+
+      Permissions.with_user(@root) do
+        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
+      end
+
       Permissions.with_user(@visitor) do
-        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == [
+        expected = [
           ["default_level", false]
         ]
+        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
       end
-      Permissions.with_user(@editor) do
-        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == [
-          ["editor_level", true],
-          ["mixed_level", false],
-          ["default_level", true]
-        ]
-      end
-      Permissions.with_user(@admin) do
-        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == [
-          ["editor_level", true],
-          ["admin_level", true],
-          ["mixed_level", false],
-          ["default_level", true]
-        ]
 
-      end
-      Permissions.with_user(@root) do
-        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == [
+      Permissions.with_user(@editor) do
+        expected = [
           ["editor_level", true],
-          ["admin_level", true],
-          ["root_level", true],
-          ["mixed_level", true],
+          ["mixed_level", false],
           ["default_level", true]
         ]
+        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
+      end
+
+      Permissions.with_user(@admin) do
+        expected = [
+          ["editor_level", true],
+          ["admin_level", true],
+          ["mixed_level", false],
+          ["default_level", true]
+        ]
+        C.to_hash[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
       end
     end
+
     should "serialise only things in instance viewable by the current user" do
-      @i.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == [
-          ["editor_level", true],
-          ["admin_level", true],
-          ["root_level", true],
-          ["mixed_level", true],
-          ["default_level", true]
+      @i.to_hash[:boxes].map { |f| f[:id] }.should == [
+          "editor_level",
+          "admin_level",
+          "root_level",
+          "mixed_level",
+          "default_level"
       ]
 
       Permissions.with_user(@visitor) do
-        @i.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == [
-          ["default_level", false]
+        @i.to_hash[:boxes].map { |f| f[:id] }.should == [
+          "default_level"
         ]
       end
+
       Permissions.with_user(@editor) do
-        @i.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == [
-          ["editor_level", true],
-          ["mixed_level", false],
-          ["default_level", true]
+        @i.to_hash[:boxes].map { |f| f[:id] }.should == [
+          "editor_level",
+          "mixed_level",
+          "default_level"
         ]
       end
+
       Permissions.with_user(@admin) do
-        @i.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == [
-          ["editor_level", true],
-          ["admin_level", true],
-          ["mixed_level", false],
-          ["default_level", true]
+        @i.to_hash[:boxes].map { |f| f[:id] }.should == [
+          "editor_level",
+          "admin_level",
+          "mixed_level",
+          "default_level"
         ]
       end
+
       Permissions.with_user(@root) do
-        @i.to_hash[:boxes].map { |f| [f[:name], f[:writable]] }.should == [
-          ["editor_level", true],
-          ["admin_level", true],
-          ["root_level", true],
-          ["mixed_level", true],
-          ["default_level", true]
+        @i.to_hash[:boxes].map { |f| f[:id] }.should == [
+          "editor_level",
+          "admin_level",
+          "root_level",
+          "mixed_level",
+          "default_level"
         ]
       end
     end
