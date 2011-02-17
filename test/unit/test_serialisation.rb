@@ -40,6 +40,7 @@ class SerialisationTest < Test::Unit::TestCase
         inline_style :boiling
         box :things, :title => "My Things" do
           allow :SerialisedPage, :styles => [:sitting, :kneeling]
+          field :title, :string
         end
       end
 
@@ -59,7 +60,8 @@ class SerialisationTest < Test::Unit::TestCase
             :id => "things",
             :title => "My Things",
             :writable => true,
-            :allowed_types => ["SerialisedPage"]
+            :allowed_types => ["SerialisedPage"],
+            :fields => [{:name => "title", :type => "Spontaneous.FieldTypes.StringField", :title => "Title",  :comment => "" , :writable=>true}]
           }
       ]
       }
@@ -94,7 +96,7 @@ class SerialisationTest < Test::Unit::TestCase
         @piece1.things << @child
         @child.insides << @piece3
 
-
+        @piece1.things.title = "Things title"
         @root.title = "Home"
         @root.direction = "S"
         @root.thumbnail = "/images/home.jpg"
@@ -161,7 +163,7 @@ class SerialisationTest < Test::Unit::TestCase
           :style=>"freezing",
           :boxes => [
             {
-          :fields => [], :id => 'things',
+          :fields => [{:unprocessed_value=>"Things title", :processed_value=>"Things title", :name=>"title", :attributes => {}}], :id => 'things',
           :entries=> [
             { # root.boxes.entries.first.entries.first
           :type=>"SerialisedPage",
@@ -201,7 +203,7 @@ class SerialisationTest < Test::Unit::TestCase
           :is_page=>false,
           :name=>"The Doors",
           :id=>@piece2.id,
-        :boxes=>[{:entries=>[], :fields=>[], :id=>"things"}]
+        :boxes=>[{:entries=>[], :fields=>[{:unprocessed_value=>"", :processed_value=>"", :name=>"title", :attributes => {}}], :id=>"things"}]
         }
         ]
         }

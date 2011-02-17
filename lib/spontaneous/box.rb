@@ -139,7 +139,7 @@ module Spontaneous
     def to_hash
       {
         :id => _prototype.schema_id,
-        :fields => self.class.readable_fields.map { |name| field_prototypes[name].to_hash },
+        :fields => self.class.readable_fields.map { |name| fields[name].to_hash },
         :entries => pieces.map { |p| p.to_hash }
       }
     end

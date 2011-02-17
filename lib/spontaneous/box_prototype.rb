@@ -95,7 +95,8 @@ module Spontaneous
         :id => schema_id.to_s,
         :title => title,
         :writable => writable?,
-        :allowed_types => allowed_types
+        :allowed_types => allowed_types,
+        :fields => readable_fields.map { |name| instance_class.field_prototypes[name].to_hash },
       }
     end
   end
