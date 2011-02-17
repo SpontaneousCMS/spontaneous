@@ -23,9 +23,9 @@ Spontaneous.Entry = (function($, S) {
 			var fields = new Spontaneous.FieldPreview(this, '');
 			entry.append(fields.panel());
 			// console.log("Entry#panel", this.entries())
-			var slot_container = new Spontaneous.SlotContainer(this);
+			var box_container = new Spontaneous.BoxContainer(this);
 			wrapper.append(entry);
-			wrapper.append(slot_container.panel());
+			wrapper.append(box_container.panel());
 			this.wrapper = wrapper;
 			return wrapper;
 		},

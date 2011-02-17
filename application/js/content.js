@@ -143,8 +143,10 @@ Spontaneous.Content = (function($, S) {
 		boxes: function() {
 			if (!this._boxes) {
 				var _boxes = [];
-				for (var i = 0, ee = this.content.boxes, ii = ee.length; i < ii; i++) {
-					_boxes.push(ee[i]);
+				if (this.content.boxes) {
+					for (var i = 0, ee = this.content.boxes, ii = ee.length; i < ii; i++) {
+						_boxes.push(ee[i]);
+					}
 				}
 				this._boxes = _boxes;
 			}
