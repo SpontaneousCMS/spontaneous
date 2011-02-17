@@ -119,20 +119,6 @@ class ContentTest < Test::Unit::TestCase
       c.depth.should == 2
     end
 
-    should "add shortcut access methods based on piece.name" do
-      a = Content.new
-      b = Content.new
-      c = Content.new
-
-      b.label = "fishes"
-      c.label = "cows"
-
-      a << b
-      b << c
-
-      a.fishes.should == b
-      b.cows.should == c
-    end
 
   end
   context "Deletion" do

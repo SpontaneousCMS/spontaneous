@@ -9,65 +9,20 @@ module Spontaneous
 
     attr_reader :owner
 
-    def initialize(owner, entry_store, only_visible=false)
+    def initialize(owner, entry_store)
       @owner = owner
-      # @name_map = {}
-
-      slot_map = {}
-      unmapped = []
       type_cache = Hash.new { |hash, key| hash[key] = Spontaneous.const_get(key) }
 
       (entry_store || []).each do |data|
         klass = type_cache[data[:type]]
         entry = klass.new(@owner, data[:id], data[:style], data[:box_id])
         store_push(entry)
-        # if data[:slot]
-        #   slot_map[data[:slot].to_sym] = entry
-        # else
-        #   unmapped << entry
-        # end
       end
-
-      # DELETABLE
-      # @owner.class.slots.ordered_slots.each do |slot|
-      #   if e = slot_map[slot.name]
-      #     store_push(e)
-      #   end
-      # end
-
-      # append entries without corresponding slots to end
-      # unmapped.each do |entry|
-      #   store_push(entry)
-      # end
     end
 
     def for_box(box)
       box_id = box.box_id
       self.select { |e| e.box_id == box_id }
-    end
-
-    # DELETABLE
-    def push(entry)
-      super(entry)
-      # @name_map[entry.name.to_sym] = entry unless entry.name.blank?
-    end
-
-    alias_method :<<, :push
-
-    # DELETABLE
-    def [](index)
-      case index
-      when Symbol, String
-        labelled(index.to_sym)
-      else
-        super
-      end
-    end
-
-    # DELETABLE
-    def labelled(label)
-      label = label.to_sym
-      find { |e| e.label == label }
     end
 
     def insert(index, entry)
@@ -118,15 +73,5 @@ module Spontaneous
       self.dup.reject { |e| e.hidden? }.freeze
     end
 
-    protected
-
-    # DELETABLE
-    def method_missing(method, *args)
-      if entry = labelled(method)
-        entry
-      else
-        super
-      end
-    end
   end
 end
