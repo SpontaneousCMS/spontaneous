@@ -43,7 +43,11 @@ module Spontaneous
       if class_name = @options[:class_name]
         class_name.underscore
       else
-        @owner.style_directory_name
+        if @owner.respond_to?(:style_directory_name)
+          @owner.style_directory_name
+        else
+          @owner.name.demodulize.underscore
+        end
       end
     end
 

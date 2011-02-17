@@ -18,6 +18,10 @@ class StylesTest < Test::Unit::TestCase
     end
   end
 
+  def setup
+    Spontaneous::Render.use_development_renderer
+  end
+
   context "style class" do
     setup do
       Spontaneous.template_root = template_root
@@ -187,17 +191,19 @@ class StylesTest < Test::Unit::TestCase
     end
 
     context "default styles" do
+      class ::DefaultStyleClass < Spontaneous::Box
+        field :title
+      end
+
+      class ::WithDefaultStyleClass < Content
+        field :title
+      end
+      class ::WithoutDefaultStyleClass < Content
+        field :title
+        box :with_style, :type => :DefaultStyleClass
+      end
       setup do
-        class ::DefaultStyleClass < Box
-          field :title
-        end
-        class ::WithDefaultStyleClass < Content
-          field :title
-        end
-        class ::WithoutDefaultStyleClass < Content
-          field :title
-          box :with_style, :type => :DefaultStyleClass
-        end
+        Content.delete
 
         @with_default_style = WithDefaultStyleClass.new
         @with_default_style.title = "Total Title"
@@ -208,8 +214,10 @@ class StylesTest < Test::Unit::TestCase
       end
 
       teardown do
-        Object.send(:remove_const, :DefaultStyleClass)
-        Object.send(:remove_const, :WithoutDefaultStyleClass)
+        Content.delete
+        # Object.send(:remove_const, :DefaultStyleClass)
+        # Object.send(:remove_const, :WithDefaultStyleClass)
+        # Object.send(:remove_const, :WithoutDefaultStyleClass)
       end
 
       should "be used when available" do

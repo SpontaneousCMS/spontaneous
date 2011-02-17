@@ -62,6 +62,22 @@ module Spontaneous
         with_renderer(PublishedRenderer, &block)
       end
 
+      def use_development_renderer
+        self.renderer_class = DevelopmentRenderer
+      end
+
+      def use_preview_renderer
+        self.renderer_class = PreviewRenderer
+      end
+
+      def use_publishing_renderer
+        self.renderer_class = PublishingRenderer
+      end
+
+      def use_published_renderer
+        self.renderer_class = PublishedRenderer
+      end
+
       @@renderer_stack = []
 
       def with_renderer(new_renderer, &block)
