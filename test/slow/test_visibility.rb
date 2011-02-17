@@ -7,20 +7,27 @@ class VisibilityTest < Test::Unit::TestCase
 
   context "Content" do
     setup do
+      class ::R < Page; end
+      R.box :pages
+      class ::P < Page; end
+      P.box :things
+      class ::E < Piece; end
+      E.box :pages
+
       Spontaneous.database = DB
       Content.delete
-      @root = Page.new(:uid => 'root')
+      @root = R.new(:uid => 'root')
       2.times do |i|
-        c = Page.new(:uid => i, :slug => "#{i}")
-        @root << c
+        c = P.new(:uid => i, :slug => "#{i}")
+        @root.pages << c
         4.times do |j|
-          d = Piece.new(:uid => "#{i}.#{j}")
-          c << d
+          d = E.new(:uid => "#{i}.#{j}")
+          c.things << d
           2.times do |k|
-            e = Page.new(:uid => "#{i}.#{j}.#{k}", :slug => "#{i}-#{j}-#{k}")
-            d << e
+            e = P.new(:uid => "#{i}.#{j}.#{k}", :slug => "#{i}-#{j}-#{k}")
+            d.pages << e
             2.times do |l|
-              e << Piece.new(:uid => "#{i}.#{j}.#{k}.#{l}")
+              e.things << E.new(:uid => "#{i}.#{j}.#{k}.#{l}")
             end
             d.save
           end
