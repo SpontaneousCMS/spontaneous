@@ -56,6 +56,15 @@ module Spontaneous::Plugins
       def prototype
         @options[:prototype]
       end
+
+      def user_level
+        level = @options[:level] || @options[:user_level] || Spontaneous::Permissions::UserLevel.minimum.to_sym
+        Spontaneous::Permissions[level]
+      end
+
+      def readable?
+        Spontaneous::Permissions.has_level?(user_level)
+      end
     end
 
     module ClassMethods

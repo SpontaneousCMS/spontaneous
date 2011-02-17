@@ -68,13 +68,11 @@ module Spontaneous
 
     # TODO: must be able to make these into a module
     def readable?
-      return true unless user = Spontaneous::Permissions.active_user
-      user.level >= read_level
+      Spontaneous::Permissions.has_level?(read_level)
     end
 
     def writable?
-      return true unless user = Spontaneous::Permissions.active_user
-      user.level >= write_level
+      Spontaneous::Permissions.has_level?(write_level)
     end
 
     def style
@@ -86,12 +84,18 @@ module Spontaneous
     end
 
     def to_hash
+      allowed_types = \
+        if writable?
+          instance_class.allowed_types.select { |type| type.readable? }.map { |type| type.instance_class.json_name }
+        else
+          []
+        end
       {
         :name => name.to_s,
         :id => schema_id.to_s,
         :title => title,
         :writable => writable?,
-        :allowed_types => instance_class.allowed_types.map { |type| type.instance_class.json_name }
+        :allowed_types => allowed_types
       }
     end
   end

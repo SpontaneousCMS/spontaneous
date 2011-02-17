@@ -442,6 +442,8 @@ class PermissionsTest < Test::Unit::TestCase
         field :root_level, :user_level => :root
         field :mixed_level, :read_level => :editor, :write_level => :root
         field :default_level
+
+        allow :C, :user_level => :editor
       end
 
       C.box :default_level do
@@ -660,6 +662,44 @@ class PermissionsTest < Test::Unit::TestCase
       end
     end
 
+    should "only list allowed types addable by the user" do
+      expected = [
+        ["editor_level", ["D", "C"]],
+        ["admin_level", ["C"]],
+        ["root_level", ["C"]],
+        ["mixed_level", ["C"]],
+        ["default_level", ["C"]]
+      ]
+      C.to_hash[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
+
+      Permissions.with_user(@root) do
+        C.to_hash[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
+      end
+      Permissions.with_user(@visitor) do
+        expected = [
+          ["default_level", []]
+        ]
+        C.to_hash[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
+      end
+      Permissions.with_user(@editor) do
+        expected = [
+          ["editor_level", ["D"]],
+          ["mixed_level", []],
+          ["default_level", ["C"]]
+        ]
+        C.to_hash[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
+      end
+      Permissions.with_user(@admin) do
+        expected = [
+          ["editor_level", ["D", "C"]],
+          ["admin_level", ["C"]],
+          ["mixed_level", []],
+          ["default_level", ["C"]]
+        ]
+        C.to_hash[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
+      end
+    end
+
     should "serialise only things in instance viewable by the current user" do
       @i.to_hash[:boxes].map { |f| f[:id] }.should == [
           "editor_level",
@@ -702,6 +742,5 @@ class PermissionsTest < Test::Unit::TestCase
         ]
       end
     end
-    should "only list allowed types addable by the user"
   end
 end
