@@ -82,6 +82,7 @@ module Spontaneous::Render
       # - logging.warn when happens
       # - an inline comment when in dev mode?
       # - some placeholder text, perhaps the name of the missing method and line no.
+      logger.error(e)
       nil
     end
 
