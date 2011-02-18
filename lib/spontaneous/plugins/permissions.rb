@@ -22,7 +22,7 @@ module Spontaneous::Plugins
 
       def field_permission(field_name, test)
         return true unless user = Spontaneous::Permissions.active_user
-        if field = field_prototypes[field_name]
+        if field = field_prototypes[field_name.to_sym]
           user.level >= field.__send__(test)
         else
           nil # or perhaps throw error
@@ -31,7 +31,7 @@ module Spontaneous::Plugins
 
       def box_permission(box_name, test)
         return true unless user = Spontaneous::Permissions.active_user
-        if box = boxes[box_name]
+        if box = boxes[box_name.to_sym]
           user.level >= box.__send__(test)
         else
           nil # or perhaps throw error

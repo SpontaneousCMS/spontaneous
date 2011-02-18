@@ -154,8 +154,15 @@ module Spontaneous
       to_shallow_hash.to_json
     end
 
-    def writable?
-      self._owner.box_writable?(_name)
+    def writable?(content_type = nil)
+      return true if Spontaneous::Permissions.has_level?(Spontaneous::Permissions.root)
+      box_writable = self._owner.box_writable?(_name)
+      if content_type
+        allowed = self.allowed_type(content_type)
+        box_writable && allowed && allowed.addable?
+      else
+        box_writable
+      end
     end
 
     def readable?

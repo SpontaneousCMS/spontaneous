@@ -18,17 +18,26 @@ module Spontaneous
             end
           end
 
+          def unauthorised!
+            halt 401#, "You do not have the necessary permissions to update the '#{name}' field"
+          end
+
           def api_key
             request.cookies[AUTH_COOKIE]
           end
 
           def user
-            api_key = request.cookies[AUTH_COOKIE]
-            if api_key && key = Spontaneous::Permissions::AccessKey.authenticate(api_key)
-              key.user
-            else
-              nil
-            end
+            @user ||= load_user
+          end
+
+          def load_user
+            Spontaneous::Permissions.active_user
+            # api_key = request.cookies[AUTH_COOKIE]
+            # if api_key && key = Spontaneous::Permissions::AccessKey.authenticate(api_key)
+            #   key.user
+            # else
+            #   nil
+            # end
           end
         end
 
@@ -97,7 +106,11 @@ module Spontaneous
 
         def update_fields(model, field_data)
           field_data.each do | name, values |
-            model.fields[name].update(values)
+            if model.field_writable?(name.to_sym)
+              model.fields[name].update(values)
+            else
+              unauthorised!
+            end
           end
           if model.save
             json(model)
@@ -121,7 +134,6 @@ module Spontaneous
         end
 
         get '/?' do
-          p @user
           erubis :index
         end
 
@@ -164,17 +176,26 @@ module Spontaneous
         post '/savebox/:id/:box_id' do
           content = Content[params[:id]]
           box = content.boxes[params[:box_id]]
-          update_fields(box, params[:field])
+          if box.writable?
+            update_fields(box, params[:field])
+          else
+            unauthorised!
+          end
         end
 
 
         post '/content/:id/position/:position' do
           content = Content[params[:id]]
-          content.update_position(params[:position].to_i)
-          json( {:message => 'OK'} )
+          if content.box.writable?
+            content.update_position(params[:position].to_i)
+            json( {:message => 'OK'} )
+          else
+            unauthorised!
+          end
         end
 
 
+        # Don't think this is actually used
         post '/file/upload/:id' do
           file = params['file']
           media_file = Spontaneous::Media.upload_path(file[:filename])
@@ -187,9 +208,13 @@ module Spontaneous
           content = Content[params[:id]]
           file = params['file']
           field = content.fields[params['field']]
-          field.unprocessed_value = file
-          content.save
-          json({ :id => content.id, :src => field.src})
+          if content.field_writable?(field.name)
+            field.unprocessed_value = file
+            content.save
+            json({ :id => content.id, :src => field.src})
+          else
+            unauthorised!
+          end
         end
 
 
@@ -199,19 +224,23 @@ module Spontaneous
           file = params['file']
           type = box.type_for_mime_type(file[:type])
           if type
-            position = 0
-            instance = type.new
-            box.insert(position, instance)
-            field = instance.field_for_mime_type(file[:type])
-            media_file = Spontaneous::Media.upload_path(file[:filename])
-            FileUtils.mkdir_p(File.dirname(media_file))
-            FileUtils.mv(file[:tempfile].path, media_file)
-            field.unprocessed_value = media_file
-            content.save
-            json({
-              :position => position,
-              :entry => instance.entry.to_hash
-            })
+            if box.writable?(type)
+              position = 0
+              instance = type.new
+              box.insert(position, instance)
+              field = instance.field_for_mime_type(file[:type])
+              media_file = Spontaneous::Media.upload_path(file[:filename])
+              FileUtils.mkdir_p(File.dirname(media_file))
+              FileUtils.mv(file[:tempfile].path, media_file)
+              field.unprocessed_value = media_file
+              content.save
+              json({
+                :position => position,
+                :entry => instance.entry.to_hash
+              })
+            else
+              unauthorised!
+            end
           end
         end
 
@@ -220,20 +249,27 @@ module Spontaneous
           content = Content[params[:id]]
           box = content.boxes[params[:box_id]]
           type = params[:type_name].constantize
-
-          instance = type.new
-          box.insert(position, instance)
-          content.save
-          json({
-            :position => position,
-            :entry => instance.entry.to_hash
-          })
+          if box.writable?(type)
+            instance = type.new
+            box.insert(position, instance)
+            content.save
+            json({
+              :position => position,
+              :entry => instance.entry.to_hash
+            })
+          else
+            unauthorised!
+          end
         end
 
         post '/destroy/:id' do
           content = Content[params[:id]]
-          content.destroy
-          json({})
+          if content.box.writable?
+            content.destroy
+            json({})
+          else
+            unauthorised!
+          end
         end
 
         post '/slug/:id' do
@@ -269,6 +305,7 @@ module Spontaneous
         get '/css/*' do
           # need to check for file existing and just send that
           # though production server would handle that I suppose
+          # as long as I release pre-compliled CSS files
           file = params[:splat].first
           if file =~ /\.css$/
             less_template = Spontaneous.css_dir / File.basename(file, ".css") + ".less"

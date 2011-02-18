@@ -34,6 +34,10 @@ module Spontaneous::Plugins
 
     module InstanceMethods
 
+      def box
+        self.entry.box if self.entry
+      end
+
       def reload
         @boxes = nil
         super

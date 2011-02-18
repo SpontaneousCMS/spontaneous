@@ -65,6 +65,7 @@ module Spontaneous::Plugins
       def readable?
         Spontaneous::Permissions.has_level?(user_level)
       end
+      alias_method :addable?, :readable?
     end
 
     module ClassMethods
@@ -105,7 +106,8 @@ module Spontaneous::Plugins
       end
 
       def allowed_type(content)
-        self.class.allowed.find { |a| a.instance_class == content.class }
+        klass = content.is_a?(Class) ? content : content.class
+        self.class.allowed.find { |a| a.instance_class == klass }
       end
 
       def prototype_for_content(content, box = nil)

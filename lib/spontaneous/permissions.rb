@@ -18,6 +18,10 @@ module Spontaneous
         UserLevel[level_name]
       end
 
+      def root
+        UserLevel.root
+      end
+
       def has_level?(level)
         return true unless active_user
         active_user.level >= level

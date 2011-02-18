@@ -8,13 +8,10 @@ module Spontaneous
       set :public, Proc.new { Spontaneous.root / "public" }
 
       get "/" do
-        puts "Public#getting /"
         render_page(Site.root)
       end
 
       get '/media/*' do
-        puts "*** MEDIA"
-        puts Spontaneous.media_dir
         send_file(Spontaneous.media_dir / params[:splat].first)
       end
 
