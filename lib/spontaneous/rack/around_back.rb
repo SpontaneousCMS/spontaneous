@@ -9,8 +9,11 @@ module Spontaneous
         @app = app
       end
 
+      def user
+      end
       def call(env)
         response = nil
+
         Content.with_identity_map do
           S::Render.with_preview_renderer do
             Change.record do

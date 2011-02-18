@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Spontaneous: Please Login</title>
+    <link rel="stylesheet" href="/@spontaneous/css/v2.css" type="text/css" media="screen" charset="utf-8" />
+    <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/compatibility.js"></script>
+  </head>
+  <body id="spontaneous">
+    <form action="/@spontaneous/login" method="post" accept-charset="UTF-8">
+      <p>
+      	<label><input type="text" name="user[login]" value="" /> Login</label>
+      </p>
+      <p>
+      	<label><input type="password" name="user[password]" value="" /> Password</label>
+      </p>
+      <p><button type="submit">Login</button></p>
+    </form>
+  </body>
+</html>
+

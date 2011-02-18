@@ -6,6 +6,50 @@ module Spontaneous
   module Rack
     module Back
       NAMESPACE = "/@spontaneous".freeze
+      AUTH_COOKIE = "spontaneous_api_key".freeze
+
+      module Authentication
+        module Helpers
+          def authorised?
+            if cookie = request.cookies[AUTH_COOKIE]
+              puts "authorised"
+              true
+            else
+              false
+            end
+          end
+
+          def api_key
+            request.cookies[AUTH_COOKIE]
+          end
+
+          def user
+            if key = Spontaneous::Permissions::AccessKey.authenticate(api_key)
+              key.user
+            end
+          end
+        end
+
+        def self.registered(app)
+          app.helpers Authentication::Helpers
+          app.post "#{NAMESPACE}/login" do
+            puts "LOGGING IN"
+          end
+        end
+
+        def requires_authentication!(options = {})
+          exceptions = options[:except] || []
+          before do
+            puts "AUTH: path:#{request.path} user:#{user.inspect}"
+            p exceptions.detect { |e| e === request.path }
+            unless exceptions.detect { |e| e === request.path }
+              halt(401, erubis(:login)) unless user
+            end
+          end
+        end
+
+      end
+
 
       def self.application
         app = ::Rack::Builder.new {
@@ -26,6 +70,9 @@ module Spontaneous
       class EditingInterface < ServerBase
 
         use AroundBack
+        register Authentication
+
+        requires_authentication! :except => %w(static css js).map{ |p| %r(^#{NAMESPACE}/#{p}) }
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
@@ -75,10 +122,10 @@ module Spontaneous
           json Schema
         end
 
-        get '/type/:type' do
-          klass = params[:type].gsub(/\./, "::").constantize
-          json klass
-        end
+        # get '/type/:type' do
+        #   klass = params[:type].gsub(/\\./, "::").constantize
+        #   json klass
+        # end
 
         get '/map' do
           json Site.map
@@ -228,13 +275,28 @@ module Spontaneous
         HTTP_CACHE_CONTROL = "Cache-Control".freeze
         HTTP_LAST_MODIFIED = "Last-Modified".freeze
         HTTP_NO_CACHE = "max-age=0, must-revalidate, no-cache, no-store".freeze
+
         use AroundPreview
+        register Authentication
+
+        set :views, Proc.new { Spontaneous.application_dir + '/views' }
+
+        # I don't want this because I'm redirecting everything to /@spontaneous unless
+        # we're logged in
+        # requires_authentication! :except => ['/', '/favicon.ico']
+
+        # redirect to /@spontaneous unless we're logged in
+        before do
+          unless user or %r{^/media} === request.path
+            redirect NAMESPACE, 302
+          end
+        end
 
         get "/favicon.ico" do
           send_file(Spontaneous.static_dir / "favicon.ico")
         end
 
-      def render_page(page, format = :html, local_params = {})
+        def render_page(page, format = :html, local_params = {})
           now = Time.now.to_formatted_s(:rfc822)
           response.headers[HTTP_EXPIRES] = now
           response.headers[HTTP_LAST_MODIFIED] = now
