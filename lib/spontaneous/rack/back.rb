@@ -12,7 +12,6 @@ module Spontaneous
         module Helpers
           def authorised?
             if cookie = request.cookies[AUTH_COOKIE]
-              puts "authorised"
               true
             else
               false
@@ -24,26 +23,41 @@ module Spontaneous
           end
 
           def user
-            if key = Spontaneous::Permissions::AccessKey.authenticate(api_key)
+            api_key = request.cookies[AUTH_COOKIE]
+            if api_key && key = Spontaneous::Permissions::AccessKey.authenticate(api_key)
               key.user
+            else
+              nil
             end
           end
         end
 
         def self.registered(app)
           app.helpers Authentication::Helpers
-          app.post "#{NAMESPACE}/login" do
-            puts "LOGGING IN"
+          app.post "/login" do
+            login = params[:user][:login]
+            password = params[:user][:password]
+            if key = Spontaneous::Permissions::User.authenticate(login, password)
+              response.set_cookie(AUTH_COOKIE, {
+                :value => key.key_id,
+                :path => '/'
+              })
+              redirect NAMESPACE, 302
+            else
+              halt(401, erubis(:login))
+            end
           end
         end
 
         def requires_authentication!(options = {})
-          exceptions = options[:except] || []
+          exceptions = (options[:except] || []).push("#{NAMESPACE}/login" )
           before do
-            puts "AUTH: path:#{request.path} user:#{user.inspect}"
-            p exceptions.detect { |e| e === request.path }
+            # puts "AUTH: path:#{request.path} user:#{user.inspect}"
+            # p exceptions.detect { |e| e === request.path }
             unless exceptions.detect { |e| e === request.path }
-              halt(401, erubis(:login)) unless user
+              unless user
+                halt(401, erubis(:login)) unless user
+              end
             end
           end
         end
@@ -107,6 +121,7 @@ module Spontaneous
         end
 
         get '/?' do
+          p @user
           erubis :index
         end
 
