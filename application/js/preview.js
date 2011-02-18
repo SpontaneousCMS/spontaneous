@@ -34,7 +34,6 @@ Spontaneous.Preview = (function($, S) {
 				$(this.contentWindow.document).ready(function() {
 					$(_iframe).fadeIn(100);
 				})
-				console.log('iframe.load', this.contentWindow.location.pathname);
 				S.Preview.set({
 					'title': this.contentWindow.document.title,
 					'path': this.contentWindow.location.pathname
@@ -44,7 +43,6 @@ Spontaneous.Preview = (function($, S) {
 			this.goto_path(path);
 		},
 		goto_path: function(path) {
-				console.log('goto_path', path)
 			if (path) {
 				path += click_param();
 				this.iframe[0].contentWindow.location.href = path;

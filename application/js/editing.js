@@ -15,10 +15,10 @@ Spontaneous.Editing = (function($, S) {
 		},
 		display: function(page) {
 			this.goto(page);
-			this.container.fadeIn();
 		},
 		goto: function(page) {
 			if (!page) { return; }
+			this.container.show().fadeOut(0)
 			S.Ajax.get('/page/{id}'.replace('{id}', page.id), this, this.page_loaded);
 			this.set('location', page);
 		},
@@ -29,6 +29,7 @@ Spontaneous.Editing = (function($, S) {
 			this.container.append(page.panel());
 			this.page = page;
 			this.set('page', page);
+			this.container.fadeIn(300);
 		},
 		hide: function() {
 			this.container.hide();
