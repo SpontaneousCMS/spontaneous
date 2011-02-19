@@ -268,9 +268,7 @@ class RenderTest < Test::Unit::TestCase
 
       should "render all tags & include preview edit markers" do
         @page.render.should == <<-HTML
-<!-- spontaneous:previewedit:start:field id:24 name:title -->
-PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
- <p>DESCRIPTION</p>
+PAGE <p>DESCRIPTION</p>
 
 <!-- spontaneous:previewedit:start:box id:#{@page.images.id} -->
 <!-- spontaneous:previewedit:end:box id:#{@page.images.id} -->
@@ -288,7 +286,7 @@ PAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->
         result = @page.render({
           :welcome => "hello"
         })
-        result.should == "<!-- spontaneous:previewedit:start:field id:24 name:title -->\nPAGE<!-- spontaneous:previewedit:end:field id:24 name:title -->\nhello\n"
+        result.should == "PAGE hello\n"
       end
     end
 

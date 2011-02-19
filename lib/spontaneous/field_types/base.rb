@@ -130,12 +130,12 @@ module Spontaneous
         end
       end
 
-      def start_inline_edit_marker
-        "spontaneous:previewedit:start:field id:#{owner.id} name:#{self.name}"
-      end
-      def end_inline_edit_marker
-        "spontaneous:previewedit:end:field id:#{owner.id} name:#{self.name}"
-      end
+      # def start_inline_edit_marker
+      #   "spontaneous:previewedit:start:field id:#{owner.id} name:#{self.name}"
+      # end
+      # def end_inline_edit_marker
+      #   "spontaneous:previewedit:end:field id:#{owner.id} name:#{self.name}"
+      # end
 
       def to_hash
         {
