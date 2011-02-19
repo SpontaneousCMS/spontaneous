@@ -145,35 +145,35 @@ class FrontTest < Test::Unit::TestCase
       end
 
       should "render an alternate page if passed a page" do
-        about.stubs(:show).returns(news)
+        about.stubs(:request_show).returns(news)
         get '/about'
         assert last_response.ok?
         last_response.body.should == "/news.html\n"
       end
 
       should "render an alternate page if passed a path" do
-        about.stubs(:show).returns("/news")
+        about.stubs(:request_show).returns("/news")
         get '/about'
         assert last_response.ok?
         last_response.body.should == "/news.html\n"
       end
 
       should "render an alternate page if passed a uid with a #" do
-        about.stubs(:show).returns("#news")
+        about.stubs(:request_show).returns("#news")
         get '/about'
         assert last_response.ok?
         last_response.body.should == "/news.html\n"
       end
 
       should "render an alternate page if passed a uid" do
-        about.stubs(:show).returns("news")
+        about.stubs(:request_show).returns("news")
         get '/about'
         assert last_response.ok?
         last_response.body.should == "/news.html\n"
       end
 
-      should "return not found of #show returns an invalid uid or path" do
-        about.stubs(:show).returns("caterpillars")
+      should "return not found of #request_show returns an invalid uid or path" do
+        about.stubs(:request_show).returns("caterpillars")
         get '/about'
         assert last_response.status == 404
       end
@@ -181,7 +181,7 @@ class FrontTest < Test::Unit::TestCase
       # should "handle anything that responds to #render(format)" do
       #   show = mock()
       #   show.stubs(:render).returns("mocked")
-      #   about.stubs(:show).returns(show)
+      #   about.stubs(:request_show).returns(show)
       #   get '/about'
       #   last_response.body.should == "mocked"
       # end
@@ -193,28 +193,28 @@ class FrontTest < Test::Unit::TestCase
       end
 
       should "respond appropriatly to redirects to path" do
-        about.stubs(:redirect).returns("/news")
+        about.stubs(:request_redirect).returns("/news")
         get '/about'
         assert last_response.status == 302
         last_response.headers["Location"].should == "http://example.org/news"
       end
 
       should "recognise a :temporary redirect" do
-        about.stubs(:redirect).returns([ "/news", :temporary ])
+        about.stubs(:request_redirect).returns([ "/news", :temporary ])
         get '/about'
         assert last_response.status == 302
         last_response.headers["Location"].should == "http://example.org/news"
       end
 
       should "recognise a :permanent redirect" do
-        about.stubs(:redirect).returns([ "/news", :permanent ])
+        about.stubs(:request_redirect).returns([ "/news", :permanent ])
         get '/about'
         assert last_response.status == 301
         last_response.headers["Location"].should == "http://example.org/news"
       end
 
       should "correctly apply numeric status codes" do
-        about.stubs(:redirect).returns([ "/news", 307 ])
+        about.stubs(:request_redirect).returns([ "/news", 307 ])
         get '/about'
         last_response.headers["Location"].should == "http://example.org/news"
         assert last_response.status == 307

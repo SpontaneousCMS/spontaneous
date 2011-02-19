@@ -34,13 +34,13 @@ module Spontaneous
       [:html]
     end
 
-    def redirect(params = nil, request = nil, session = nil)
+    def request_redirect(params = nil, request = nil, session = nil)
       # overwrite and return a Page or a string (containing a path) to cause this page to redirect when accessed
       # if you return a [ location, code ] array then the supplied code will be used in the redirection
       # the code can be either a numeric value (301, 302, ...) or one of :permanent (301) or :temporary (302)
     end
 
-    def show(params = nil, request = nil, session = nil)
+    def request_show(params = nil, request = nil, session = nil)
       # use this to let a call to render this page actually render the content of another
       # the response can be:
       #   a uid: in the form 'uid' or '#uid' to have requests to this page show the content from the page (recommended)

@@ -24,7 +24,7 @@ module Spontaneous
         if destination = redirect?(page)
           redirect(*destination)
         else
-          if show = page.show(params, request, session)
+          if show = page.request_show(params, request, session)
             case show
             when String
               page = Site[show]
@@ -59,7 +59,7 @@ module Spontaneous
       }
 
       def redirect?(page)
-        redirection, redirect_code = page.redirect(params, request, session)
+        redirection, redirect_code = page.request_redirect(params, request, session)
         if redirection
           redirection = redirection.path if redirection.respond_to?(:path)
           redirect_code = REDIRECTS[redirect_code] if Symbol === redirect_code
