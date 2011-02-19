@@ -117,6 +117,17 @@ module Spontaneous
           end
         end
 
+        def content_for_request
+          content = Content[params[:id]]
+          halt 404 if content.nil?
+          if box_id = params[:box_id]
+            box = content.boxes[box_id]
+            [content, box]
+          else
+            content
+          end
+        end
+
         helpers do
           def scripts(*scripts)
             if Spontaneous.development?
@@ -142,7 +153,7 @@ module Spontaneous
         end
 
         get '/page/:id' do
-          json Content[params[:id]]
+          json(content_for_request)
         end
 
         get '/types' do
@@ -169,13 +180,11 @@ module Spontaneous
         end
 
         post '/save/:id' do
-          content = Content[params[:id]]
-          update_fields(content, params[:field])
+          update_fields(content_for_request, params[:field])
         end
 
         post '/savebox/:id/:box_id' do
-          content = Content[params[:id]]
-          box = content.boxes[params[:box_id]]
+          content, box = content_for_request
           if box.writable?
             update_fields(box, params[:field])
           else
@@ -185,7 +194,7 @@ module Spontaneous
 
 
         post '/content/:id/position/:position' do
-          content = Content[params[:id]]
+          content = content_for_request
           if content.box.writable?
             content.update_position(params[:position].to_i)
             json( {:message => 'OK'} )
@@ -205,7 +214,7 @@ module Spontaneous
         end
 
         post '/file/replace/:id' do
-          content = Content[params[:id]]
+          content = content_for_request
           file = params['file']
           field = content.fields[params['field']]
           if content.field_writable?(field.name)
@@ -219,8 +228,7 @@ module Spontaneous
 
 
         post '/file/wrap/:id/:box_id' do
-          content = Content[params[:id]]
-          box = content.boxes[params[:box_id]]
+          content, box = content_for_request
           file = params['file']
           type = box.type_for_mime_type(file[:type])
           if type
@@ -245,9 +253,8 @@ module Spontaneous
         end
 
         post '/add/:id/:box_id/:type_name' do
+          content, box = content_for_request
           position = 0
-          content = Content[params[:id]]
-          box = content.boxes[params[:box_id]]
           type = params[:type_name].constantize
           if box.writable?(type)
             instance = type.new
@@ -263,7 +270,7 @@ module Spontaneous
         end
 
         post '/destroy/:id' do
-          content = Content[params[:id]]
+          content = content_for_request
           if content.box.writable?
             content.destroy
             json({})
@@ -273,7 +280,7 @@ module Spontaneous
         end
 
         post '/slug/:id' do
-          content = Content[params[:id]]
+          content = content_for_request
           if params[:slug].nil? or params[:slug].empty?
             406 # Not Acceptable
           else
@@ -288,7 +295,7 @@ module Spontaneous
         end
 
         get '/slug/:id/unavailable' do
-          content = Content[params[:id]]
+          content = content_for_request
           json(content.siblings.map { |c| c.slug })
         end
 
