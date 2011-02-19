@@ -52,6 +52,7 @@ Spontaneous.Entry = (function($, S) {
 			return this._title_bar;
 		},
 		visibility_toggled: function(result) {
+			this.wrapper.removeClass('visible hidden');
 			if (result.hidden) {
 				this.wrapper.switchClass('visible', 'hidden', 200);
 			} else {
