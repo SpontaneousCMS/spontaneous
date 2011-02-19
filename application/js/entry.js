@@ -11,7 +11,7 @@ Spontaneous.Entry = (function($, S) {
 			// console.log('FacetEntry#new', content, content.depth);
 		},
 		panel: function() {
-			var wrapper = $(dom.div, {'class':'entry-wrap ' + this.depth_class()});
+			var wrapper = $(dom.div, {'class':['entry-wrap ', this.depth_class(), this.visibility_class()].join(' ')});
 			wrapper.append($(dom.div, {'class':'white-bg'}))
 			if (this.depth() < 4) {
 				wrapper.append($(dom.div, {'class':'grey-bg'}));
@@ -32,21 +32,31 @@ Spontaneous.Entry = (function($, S) {
 		title_bar: function(wrapper) {
 			if (!this._title_bar) {
 				var title_bar = $(dom.div, {'class':'title-bar'});
-				var actions = $(dom.div, {'class':'actions', 'style':'display: none'});
+				var actions = $(dom.div, {'class':'actions', 'xstyle':'display: none'});
 				var destroy = $(dom.a, {'class':'delete'});
+				var visibility = $(dom.a, {'class':'visibility'});
 				actions.append(destroy);
+				actions.append(visibility);
 				title_bar.append(actions);
 				var _hide_pause;
-				wrapper.mouseenter(function() {
-					if (_hide_pause) { window.clearTimeout(_hide_pause); }
-					actions.slideDown(50);
-				}).mouseleave(function() {
-					_hide_pause = window.setTimeout(function() { actions.slideUp(100) }, 200);
-				});
+				// wrapper.mouseenter(function() {
+				// 	if (_hide_pause) { window.clearTimeout(_hide_pause); }
+				// 	actions.slideDown(50);
+				// }).mouseleave(function() {
+				// 	_hide_pause = window.setTimeout(function() { actions.slideUp(100) }, 200);
+				// });
 				destroy.click(this.confirm_destroy.bind(this));
+				visibility.click(this.toggle_visibility.bind(this));
 				this._title_bar = title_bar;
 			}
 			return this._title_bar;
+		},
+		visibility_toggled: function(result) {
+			if (result.hidden) {
+				this.wrapper.switchClass('visible', 'hidden', 200);
+			} else {
+				this.wrapper.switchClass('hidden', 'visible', 200);
+			}
 		},
 		confirm_destroy: function() {
 			var d = this.dialogue_box;

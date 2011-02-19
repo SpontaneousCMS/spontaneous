@@ -171,6 +171,10 @@ Spontaneous.Content = (function($, S) {
 		depth_class: function() {
 			return 'depth-'+this.depth();
 		},
+		visibility_class: function() {
+			console.log(this.content)
+			return this.content.hidden ? 'hidden' : 'visible';
+		},
 
 
 		entry_added: function(result, callback) {
@@ -184,6 +188,12 @@ Spontaneous.Content = (function($, S) {
 		destroy: function() {
 			console.log('Content.destroy', this.content.id);
 			Spontaneous.Ajax.post(['/destroy', this.content.id].join('/'), {}, this, this.destroyed);
+		},
+		toggle_visibility: function() {
+			console.log('Content.visibility', this.content.id);
+			Spontaneous.Ajax.post(['/toggle', this.content.id].join('/'), {}, this, this.visibility_toggled);
+		},
+		visibility_toggled: function(result) {
 		},
 		destroyed: function() {
 

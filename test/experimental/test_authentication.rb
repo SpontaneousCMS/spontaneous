@@ -224,7 +224,7 @@ class AuthenticationTest < Test::Unit::TestCase
     end
 
     should "see a login page for all POSTs" do
-      %(/save/#{root.id} /savebox/#{root.id}/editor_level /content/#{root.id}/position/0 /file/upload/#{root.id} /file/replace/#{root.id} /file/wrap/#{root.id}/pages /add/#{root.id}/pages/SitePage /destroy/#{root.id} /slug/#{root.id} /slug/#{root.id}/unavailable).split.each do |path|
+      %(/save/#{root.id} /savebox/#{root.id}/editor_level /content/#{root.id}/position/0 /file/upload/#{root.id} /file/replace/#{root.id} /file/wrap/#{root.id}/pages /add/#{root.id}/pages/SitePage /destroy/#{root.id} /slug/#{root.id} /slug/#{root.id}/unavailable /toggle/#{root.id}).split.each do |path|
         post "/@spontaneous#{path}"
         assert_login_page(path, "POST")
       end
@@ -379,6 +379,12 @@ class AuthenticationTest < Test::Unit::TestCase
           piece = root.boxes[:root_level].pieces.first
           src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
           post "/@spontaneous/file/replace/#{piece.id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg"), "field" => "photo"
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+
+        should "not be able to hide entries in root-level boxes" do
+          piece = root.boxes[:root_level].pieces.first
+          post "/@spontaneous/toggle/#{piece.id}"
           assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
         end
 

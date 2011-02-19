@@ -203,6 +203,16 @@ module Spontaneous
           end
         end
 
+        post '/toggle/:id' do
+          content = content_for_request
+          if content.box && content.box.writable?
+            content.toggle_visibility!
+            json({:id => content.id, :hidden => (content.hidden? ? true : false) })
+          else
+            unauthorised!
+          end
+        end
+
 
         # Don't think this is actually used
         post '/file/upload/:id' do

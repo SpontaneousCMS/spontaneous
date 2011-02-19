@@ -42,6 +42,14 @@ module Spontaneous::Plugins
         set_visible!(true)
       end
 
+      def toggle_visibility!
+        if hidden?
+          show!
+        else
+          hide!
+        end
+      end
+
       ##
       # Is true when the current object is hidden independently of its ancestors
       # and false when hidden because one of its ancestors is hidden (so to show

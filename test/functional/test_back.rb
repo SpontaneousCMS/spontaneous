@@ -166,6 +166,27 @@ class BackTest < Test::Unit::TestCase
     end
   end # context @spontaneous
 
+  context "Visibility" do
+    setup do
+      @home = HomePage.new
+      @piece = Text.new
+      @home.in_progress << @piece
+      @home.save
+      @piece.save
+    end
+    should "be toggled" do
+      @piece.reload.visible?.should == true
+      post "/@spontaneous/toggle/#{@piece.id}"
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      last_response.body.json.should == {:id => @piece.id, :hidden => true}
+      @piece.reload.visible?.should == false
+      post "/@spontaneous/toggle/#{@piece.id}"
+      assert last_response.ok?
+      @piece.reload.visible?.should == true
+      last_response.body.json.should == {:id => @piece.id, :hidden => false}
+    end
+  end
   context "preview" do
     setup do
       @now = Time.now
