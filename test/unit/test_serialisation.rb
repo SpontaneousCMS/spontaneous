@@ -125,6 +125,7 @@ class SerialisationTest < Test::Unit::TestCase
         @child.uid = "about"
 
         @root.pieces[0].style = :freezing
+        @root.pieces[0].visible = false
         @root.pieces[1].style = :boiling
         @root.pieces[0].pieces[0].style = :sitting
 
@@ -136,6 +137,7 @@ class SerialisationTest < Test::Unit::TestCase
           :depth=>0,
           :uid=>"home",
           :path=>"/",
+          :hidden => false,
           :fields=> [
             {:unprocessed_value=>"Home", :processed_value=>"Home", :name=>"title", :attributes => {}},
             {:unprocessed_value=>"S", :processed_value=>"South", :name=>"direction", :attributes => {}},
@@ -161,6 +163,7 @@ class SerialisationTest < Test::Unit::TestCase
             {:unprocessed_value=>"", :processed_value=>"", :name=>"image", :attributes => {}}
         ],
           :style=>"freezing",
+          :hidden => true,
           :boxes => [
             {
           :fields => [{:unprocessed_value=>"Things title", :processed_value=>"Things title", :name=>"title", :attributes => {}}], :id => 'things',
@@ -177,6 +180,7 @@ class SerialisationTest < Test::Unit::TestCase
         ],
           :uid=>"about",
           :style=>"sitting",
+          :hidden => false,
           :is_page=>true,
           :slug=>"about",
           :id=>@child.id
@@ -200,6 +204,7 @@ class SerialisationTest < Test::Unit::TestCase
             {:unprocessed_value=>"", :processed_value=>"", :name=>"image", :attributes => {}}
         ],
           :style=>"boiling",
+          :hidden => false,
           :is_page=>false,
           :name=>"The Doors",
           :id=>@piece2.id,

@@ -35,6 +35,7 @@ module Spontaneous::Plugins
           :type => self.class.json_name,
           # :type_id => type.id,
           :is_page => page?,
+          :hidden => (hidden? ? true : false),
           :depth => content_depth,
           :fields  => fields.to_hash,
           :name => slot_name,
