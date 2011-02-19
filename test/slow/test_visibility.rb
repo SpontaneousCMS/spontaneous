@@ -155,6 +155,25 @@ class VisibilityTest < Test::Unit::TestCase
       lambda { child.show! }.should raise_error(Spontaneous::NotShowable)
     end
 
+    should "not reveal child content that was hidden before its parent" do
+      piece1 = Content.first(:uid => "0.0.0.0")
+      piece2 = Content.first(:uid => "0.0.0.1")
+      parent = Content.first(:uid => "0.0.0")
+      piece1.container.should == parent
+      piece2.container.should == parent
+      piece1.hide!
+      parent.hide!
+      parent.reload.visible?.should be_false
+      piece1.reload.visible?.should be_false
+      piece2.reload.visible?.should be_false
+      piece1.hidden_origin.should be_blank
+      piece2.hidden_origin.should == parent.id
+      parent.show!
+      parent.reload.visible?.should be_true
+      piece2.reload.visible?.should be_true
+      piece1.reload.visible?.should be_false
+    end
+
     context "root" do
       should "should not be hidable" do
         @root.is_root?.should be_true
