@@ -419,6 +419,18 @@ class BackTest < Test::Unit::TestCase
       last_response.content_type.should == "application/json;charset=utf-8"
       last_response.body.should == Change.outstanding.to_json
     end
+
+    should "be able to start a publish with a set of change sets" do
+      Site.expects(:publish_changes).with([@c1.id])
+      post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id]
+      assert last_response.ok?
+    end
+
+    should "recognise when the list of changes is complete" do
+      Site.expects(:publish_changes).with([@c1.id, @c2.id])
+      post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id, @c2.id]
+      assert last_response.ok?
+    end
   end
 end
 

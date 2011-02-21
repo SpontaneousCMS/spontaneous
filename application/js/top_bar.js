@@ -35,7 +35,7 @@ Spontaneous.TopBar = (function($, S) {
 				var page = $(this).data('page');
 				S.Location.load_id(page.id);
 			}).text(this.title));
-			
+
 			return link;
 		}
 	};
@@ -78,7 +78,7 @@ Spontaneous.TopBar = (function($, S) {
 			// 	// S.Location.load_id(page.id);
 			// 	select.toggle().trigger('click');
 			// }).text(this.title));
-			// 
+			//
 			// link.append(select);
 			// return link;
 			return li;
@@ -121,19 +121,32 @@ Spontaneous.TopBar = (function($, S) {
 			this.wrap = $(dom.div, {'id':'top'});
 			this.location = $(dom.ul, {'id': 'navigation'});
 			this.location.append($(dom.li).append($(dom.a)))
-			this.mode_switch = $(dom.a, {'class': 'switch-mode'}).
+			this.mode_switch = $(dom.a, {'id': 'switch-mode'}).
 				text(this.opposite_mode(S.ContentArea.mode)).
 				click(function() {
 					S.TopBar.toggle_modes();
 			});
+			this.publish_button = $(dom.a, {'id': 'open-publish'}).
+				text("Publish").
+				click(function() {
+					S.Publishing.open_dialogue();
+			});
 			this.wrap.append(this.location);
 			this.wrap.append(this.mode_switch);
+			this.wrap.append(this.publish_button);
 			return this.wrap;
 		},
 		init: function() {
 			if (!this.get('mode')) {
 				this.set('mode', S.ContentArea.mode);
 			}
+			//// Not working without fixing bubbling of events from editing fields
+			// $(document).keyup(function(event) {
+			// 	console.log('key press', event, event.srcElement)
+			// 	if (event.keyCode === 13 && event.srcElement === window.document) {
+			// 		this.toggle_modes();
+			// 	}
+			// }.bind(this));
 		},
 		set_mode: function(mode) {
 			this.set('mode', mode);

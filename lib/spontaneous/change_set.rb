@@ -26,7 +26,8 @@ module Spontaneous
         {
           :id => page.id,
           :title => page.title.to_s.escape_js,
-          :path => page.path
+          :path => page.path,
+          :depth => page.depth
         }
       end
       h

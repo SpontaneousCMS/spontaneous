@@ -256,8 +256,8 @@ class SerialisationTest < Test::Unit::TestCase
       Change.outstanding.to_json.should == [
         {
         :pages=> [
-          {:path=>"/", :title=>"New Page", :id=>@page1.id},
-          {:path=>"/page2", :title=>"New Page", :id=>@page2.id}
+          {:path=>"/", :title=>"New Page", :depth => 0, :id=>@page1.id},
+          {:path=>"/page2", :title=>"New Page", :depth => 1, :id=>@page2.id}
       ],
         :changes=> [
           {:page_ids=>[@page1.id, @page2.id], :created_at=> @now.to_s, :id=>@c1.id},

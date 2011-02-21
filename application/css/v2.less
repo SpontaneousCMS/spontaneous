@@ -267,12 +267,15 @@ img.missing {
 			}
 		}
 	}
-	.switch-mode {
+	#switch-mode, #open-publish {
 		.button;
 		position: absolute;
 		right: 0;
 		margin: 4px @container-padding 0 0;
-		width: 128px;
+		width: 64px;
+	}
+	#open-publish {
+		right: 74px;
 	}
 }
 
@@ -1024,13 +1027,68 @@ img.missing {
 		}
 	}
 }
-#editing {
+.dialogue-wrapper {
 	.rounded;
-	.clearfix;
 	position: relative;
-	width: 980px;
-	margin: 32px auto;
 	top: 32px;
+	background-color: #cccccc;
+	width: @dialogue-width;
+	margin: 32px auto;
+}
+#publishing-dialogue {
+	.dialogue-wrapper;
+	padding-top: (@container-padding/2);
+	padding-bottom: (@container-padding/2);
+	.publish-summary {
+		margin: (@container-padding/2);
+		margin-top: 0;
+		.publish-all {
+			.button;
+			.interface;
+			width: 128px;
+			float: right;
+			text-align: left;
+			background-color: #666;
+				input {
+					margin: 1px 8px 0 8px;
+					padding: 0;
+					vertical-align: top;
+					position: relative;
+				}
+		}
+		.publish-all.checked {
+			background-color: @action;
+		}
+	}
+	.change-set {
+		.rounded;
+		cursor: pointer;
+		border: solid 3px transparent;
+		margin: (@container-padding/2);
+		background-color: #eee;
+		padding: (@container-padding/4);
+		.titles {
+			a {
+				display: block;
+				margin-bottom: 2px;
+				span {
+					font-size: 11px;
+					margin-left: 1em;
+				}
+			}
+		}
+	}
+	.change-set:hover {
+		border-color: @action;
+	}
+	.change-set.selected {
+		background-color: @action;
+		color: #fff;
+	}
+}
+#editing {
+	.dialogue-wrapper;
+	.clearfix;
 	z-index: 1001;
 	background-color: #5B5B5B;
 	.button {

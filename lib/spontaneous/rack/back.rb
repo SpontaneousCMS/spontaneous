@@ -319,6 +319,16 @@ module Spontaneous
           end
         end
 
+        post '/publish/publish' do
+          change_sets = params[:change_set_ids].map(&:to_i)
+          if user.level.can_publish?
+            Site.publish_changes(change_sets)
+            json({})
+          else
+            unauthorised!
+          end
+        end
+
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)
         end

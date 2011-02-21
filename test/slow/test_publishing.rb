@@ -608,10 +608,10 @@ class PublishingTest < Test::Unit::TestCase
         change.save
         result = Change.outstanding
         result.first.to_hash.should == {
-          :changes => [{:id => change.id, :created_at => change.created_at.to_s}],
+          :changes => [{:id => change.id, :created_at => change.created_at.to_s, :page_ids => [1, 2]}],
           :pages => [
-            {:id => 1, :title => "Page \\\"1\\\"", :path => "/page-1"},
-            {:id => 2, :title => "Page 2", :path => "/page-2"}
+            {:id => 1, :title => "Page \\\"1\\\"", :path => "/page-1", :depth => 0},
+            {:id => 2, :title => "Page 2", :path => "/page-2", :depth => 0}
           ]
         }
       end
@@ -733,8 +733,25 @@ class PublishingTest < Test::Unit::TestCase
         change2 = Change.new
         change2.modified_list = [3, 4, 5]
         change2.save
+        change3 = Change.new
+        change3.modified_list = [8, 9]
+        change3.save
         Content.expects(:publish).with(@revision, [1, 2, 3, 4, 5])
         Site.publish_changes([change1.id, change2.id])
+      end
+
+      should "issue a publish_all if passed list including all change sets" do
+        change1 = Change.new
+        change1.modified_list = [1, 2, 3]
+        change1.save
+        change2 = Change.new
+        change2.modified_list = [3, 4, 5]
+        change2.save
+        change3 = Change.new
+        change3.modified_list = [8, 9]
+        change3.save
+        Content.expects(:publish).with(@revision, nil)
+        Site.publish_changes([change1.id, change2.id, change3.id])
       end
 
       should "publish all" do

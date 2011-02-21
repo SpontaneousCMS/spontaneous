@@ -23,13 +23,19 @@ module Spontaneous
         changes = change_list.flatten.map { |c|
           c.is_a?(S::Change) ? c : S::Change[c]
         }
-        change_set = S::ChangeSet.new(changes)
+        all_changes = S::Change.all
+        if changes == all_changes
+          # publish_all is quicker
+          publish_all
+        else
+          change_set = S::ChangeSet.new(changes)
+          publish(change_set.page_ids)
 
-        publish(change_set.page_ids)
-
-        changes.each do |change|
-          change.destroy
+          changes.each do |change|
+            change.destroy
+          end
         end
+
       end
 
       def publish_all
