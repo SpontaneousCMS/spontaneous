@@ -39,8 +39,15 @@ module Spontaneous
       end
 
       def publish_all
+        # maybe someone will make a change while we're publishing the site
+        # (but after we've duplicated the tables)
+        # so save the current list of changes
+        # TODO: make sure this is robust
+        changes = S::Change.all
         publish(nil)
-        S::Change.delete
+        changes.each do |change|
+          change.destroy
+        end
       end
 
       # Called from the Format#render method to provide progress reports
@@ -109,8 +116,6 @@ module Spontaneous
 
       def set_status(state, progress='*')
         self.class.status = "#{state}:#{progress}"
-        puts self.class.status
-        puts Spontaneous::Site.publishing_status
       end
 
       def generate_rackup_file

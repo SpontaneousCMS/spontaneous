@@ -16,6 +16,9 @@ class PublishingTest < Test::Unit::TestCase
     Content.delete_all_revisions!
   end
 
+  def setup
+    Site.publishing_method = :immediate
+  end
   def assert_content_equal(result, compare)
     serialised_columns = [:field_store, :entry_store]
     columns = Content.columns - serialised_columns
