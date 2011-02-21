@@ -390,6 +390,22 @@ class AuthenticationTest < Test::Unit::TestCase
 
         should "not be allowed to update path of pages without permission"
       end
+      context "Editor access" do
+        setup do
+          @root_copy = root
+          post "/@spontaneous/login", "user[login]" => "editor", "user[password]" => "editor_password"
+        end
+
+        teardown do
+          clear_cookies
+        end
+
+        should "not be able to retrieve the list of changes" do
+          Change.delete
+          get "/@spontaneous/publish/changes"
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+      end
     end
 
   end

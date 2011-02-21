@@ -312,7 +312,11 @@ module Spontaneous
         end
 
         get '/publish/changes' do
-          json(Change.outstanding)
+          if user.level.can_publish?
+            json(Change.outstanding)
+          else
+            unauthorised!
+          end
         end
 
         get '/static/*' do
