@@ -152,6 +152,8 @@ module Spontaneous
           json Site.root
         end
 
+        # TODO: check for perms on the particular bit of content
+        # and pass user level into returned JSON
         get '/page/:id' do
           json(content_for_request)
         end
