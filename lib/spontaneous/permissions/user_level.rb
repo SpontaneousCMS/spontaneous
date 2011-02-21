@@ -13,6 +13,7 @@ module Spontaneous::Permissions
       def self.<=>(level); 1; end
       def self.to_s; 'root'; end
       def self.to_sym; :root; end
+      def self.can_publish?; true; end
     end
 
     class None
@@ -25,24 +26,26 @@ module Spontaneous::Permissions
       def self.<=>(level); -1; end
       def self.to_s; 'none'; end
       def self.to_sym; :none; end
+      def self.can_publish?; false; end
     end
 
     class Level
       @@instances = Hash.new
 
-      def self.[](name, value)
+      def self.[](value, description)
+        name = description.delete(:name)
         if @@instances.key?(value.to_i)
           @@instances[value.to_i]
         else
-          @@instances[value.to_i] = self.new(name, value)
+          @@instances[value.to_i] = self.new(name, value.to_i, description)
         end
       end
 
-      attr_reader  :value
+      attr_reader  :name, :value
       alias_method :to_i, :value
 
-      def initialize(name, value)
-        @name, @value = name, value.to_i
+      def initialize(name, value, permissions)
+        @name, @value, @permissions = name.to_sym, value.to_i, permissions
       end
 
       def >(level)
@@ -75,6 +78,9 @@ module Spontaneous::Permissions
         return @value == level.to_i
       end
 
+      def can_publish?
+        @permissions[:publish]
+      end
       def to_s
         @name.to_s
       end
@@ -128,11 +134,12 @@ module Spontaneous::Permissions
         return if @initialised
         store[:none] = None
         store[:root] = Root
-
+        numeric = 1
         if File.exists?(level_file)
           levels = YAML.load_file(level_file)
-          levels.each do |name, level|
-            store[name] = Level[name, level]
+          levels.each_with_index do |description, index|
+            level = Level[(index+1), description]
+            store[level.name] = level
           end
         else
           logger.warn {

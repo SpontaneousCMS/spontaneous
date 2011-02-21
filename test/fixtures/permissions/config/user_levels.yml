@@ -1,3 +1,8 @@
-:editor:   1
-:admin:    10
-:designer: 50
+
+- :name: editor
+  :publish: false
+- :name: admin
+  :publish: false
+- :name: designer
+  :publish: true
+

@@ -4,15 +4,19 @@
 # the 'root' user level is added automatically and
 # will always be higher than any you add here
 # Similary the 'none' level will always be lower
-# It doesn't matter what the numbers are, but someone
-# will a permission level of 40 will always be able to do
-# anything that someone with a level of 30 can do.
-# You get the picture...
+# The order is important -- later leves are higher levels
+# higher levels will always be able to do everything that a lower level can do
+# 'publish' defines the particular level's access to the publishing process
+# This is set per-level -- higher levels don't inherit the value from lower levels
 
-:guest:     10
-:editor:    20
-:publisher: 30
-:admin:     40
-:designer:  50
-:developer: 60
+- :name:    editor
+  :publish: false
 
+- :name:    admin
+  :publish: true
+
+- :name:    designer
+  :publish: true
+
+# - :name:    my_level
+#   :publish: true

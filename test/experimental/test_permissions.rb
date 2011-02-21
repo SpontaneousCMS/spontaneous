@@ -38,12 +38,14 @@ class PermissionsTest < Test::Unit::TestCase
       Permissions::UserLevel[:none].should == Permissions::UserLevel.none
       Permissions::UserLevel['none'].should == Permissions::UserLevel.none
     end
+
     should "load from the config/user_levels.yml file" do
-      Permissions::UserLevel[:editor].should == 1
-      Permissions::UserLevel['editor'].should == 1
-      Permissions::UserLevel['admin'].should == 10
-      Permissions::UserLevel['designer'].should == 50
+      Permissions::UserLevel[:editor].should be_instance_of(Permissions::UserLevel::Level)
+      Permissions::UserLevel['editor'].should be_instance_of(Permissions::UserLevel::Level)
+      Permissions::UserLevel['admin'].should be_instance_of(Permissions::UserLevel::Level)
+      Permissions::UserLevel['designer'].should be_instance_of(Permissions::UserLevel::Level)
     end
+
     should "provide a sorted list of all levels" do
       Permissions::UserLevel.all.should == [:none, :editor, :admin, :designer, :root]
     end
@@ -81,6 +83,14 @@ class PermissionsTest < Test::Unit::TestCase
       Permissions::UserLevel[:none].to_s.should == 'none'
       Permissions::UserLevel[:root].to_s.should == 'root'
       Permissions::UserLevel[:designer].to_s.should == 'designer'
+    end
+
+    should "have configurable level above which you have access to the publishing mechanism" do
+      Permissions::UserLevel[:none].can_publish?.should be_false
+      Permissions::UserLevel[:editor].can_publish?.should be_false
+      Permissions::UserLevel[:admin].can_publish?.should be_false
+      Permissions::UserLevel[:designer].can_publish?.should be_true
+      Permissions::UserLevel[:root].can_publish?.should be_true
     end
   end
 
