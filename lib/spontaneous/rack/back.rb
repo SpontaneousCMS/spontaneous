@@ -309,6 +309,10 @@ module Spontaneous
           json(content.siblings.map { |c| c.slug })
         end
 
+        get '/publish/changes' do
+          json(Change.outstanding)
+        end
+
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)
         end

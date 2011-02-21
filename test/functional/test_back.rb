@@ -373,7 +373,7 @@ class BackTest < Test::Unit::TestCase
       last_response.body.json.should == %w(projects products)
     end
   end
-  context "aaa Request cache" do
+  context "Request cache" do
       setup do
         @home = HomePage.new
         @piece = Text.new
@@ -392,6 +392,33 @@ class BackTest < Test::Unit::TestCase
       Change.first.modified_list.should == [@home.id]
     end
 
+  end
+
+  context "Publishing" do
+    setup do
+      @now = Time.now
+      Time.stubs(:now).returns(@now)
+      Change.delete
+      @c1 = Change.new
+      @c1.push(@home)
+      @c1.push(@about)
+      @c1.save
+      @c2 = Change.new
+      @c2.push(@home)
+      @c2.push(@about)
+      @c2.save
+    end
+
+    teardown do
+      Change.delete
+    end
+
+    should "be able to retrieve a serialised list of all unpublished changes" do
+      get "/@spontaneous/publish/changes"
+      assert last_response.ok?
+      last_response.content_type.should == "application/json;charset=utf-8"
+      last_response.body.should == Change.outstanding.to_json
+    end
   end
 end
 

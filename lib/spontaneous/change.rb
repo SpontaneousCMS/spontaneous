@@ -84,7 +84,8 @@ module Spontaneous
     def to_hash
       {
         :id => self.id,
-        :created_at => self.created_at.to_s
+        :created_at => self.created_at.to_s,
+        :page_ids => modified_list
       }
     end
   end

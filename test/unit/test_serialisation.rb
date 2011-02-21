@@ -226,4 +226,43 @@ class SerialisationTest < Test::Unit::TestCase
       end
     end
   end
+
+  context "Publishing" do
+    setup do
+      @now = Time.now
+      Time.stubs(:now).returns(@now)
+      Content.delete
+      Change.delete
+      @page1 = Page.create
+      @page2 = Page.create(:slug => "page2")
+      @page1 << @page2
+      @page2.save
+      @c1 = Change.new
+      @c1.push(@page1)
+      @c1.push(@page2)
+      @c1.save
+      @c2 = Change.new
+      @c2.push(@page1)
+      @c2.push(@page2)
+      @c2.save
+    end
+
+    teardown do
+      Content.delete
+      Change.delete
+    end
+
+    should "serialise outstanding changes" do
+      Change.outstanding.to_json.should == [
+        {
+        :pages=> [
+          {:path=>"/", :title=>"New Page", :id=>@page1.id},
+          {:path=>"/page2", :title=>"New Page", :id=>@page2.id}
+      ],
+        :changes=> [
+          {:page_ids=>[@page1.id, @page2.id], :created_at=> @now.to_s, :id=>@c1.id},
+          {:page_ids=>[@page1.id, @page2.id], :created_at=> @now.to_s, :id=>@c2.id}
+      ] } ].to_json
+    end
+  end
 end
