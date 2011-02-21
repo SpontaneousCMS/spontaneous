@@ -328,6 +328,13 @@ module Spontaneous
             unauthorised!
           end
         end
+        get '/publish/status' do
+          s = Spontaneous::Site.publishing_status.to_s.split(/:/)
+          json({
+            :status => s[0],
+            :progress => s[1]
+          })
+        end
 
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)

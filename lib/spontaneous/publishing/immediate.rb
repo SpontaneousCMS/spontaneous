@@ -74,7 +74,7 @@ module Spontaneous
           end
           after_publish
         rescue Exception => e
-          abort_publish
+          abort_publish(e)
           raise(e)
         end
       end
@@ -109,6 +109,8 @@ module Spontaneous
 
       def set_status(state, progress='*')
         self.class.status = "#{state}:#{progress}"
+        puts self.class.status
+        puts Spontaneous::Site.publishing_status
       end
 
       def generate_rackup_file
@@ -168,12 +170,12 @@ module Spontaneous
         set_status("complete")
       end
 
-      def abort_publish
+      def abort_publish(exception)
         set_status("aborting")
         FileUtils.rm_r(Spontaneous.revision_dir(revision)) if File.exists?(Spontaneous.revision_dir(revision))
         S::Site.send(:pending_revision=, nil)
-        # S::Content.delete_revision(revision)
-        set_status("error")
+        S::Content.delete_revision(revision)
+        set_status("error", exception)
       end
     end # Immediate
   end # Publishing

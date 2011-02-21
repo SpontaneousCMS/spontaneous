@@ -114,6 +114,88 @@ Spontaneous.TopBar = (function($, S) {
 		}
 	}
 
+	var PublishButton = new JS.Class({
+		initialize: function() {
+			this.status = false;
+			this.check_status();
+			this.set_interval(10000);
+		},
+		check_status: function() {
+			S.Ajax.get('/publish/status', this, this.status_recieved);
+		},
+		status_recieved: function(status) {
+			if (status !== this.status) {
+			// this.update_status({'status':'initialising', 'progress':null})
+				this.status = status;
+				this.update_status(status);
+			}
+		},
+		update_status: function(status) {
+			if (status === null || status === '') { return; }
+			var action = status.status, progress = status.progress
+			var b = this.button();
+			var transform_button = function() {
+				if (!b.hasClass('progress')) {
+					b.switchClass('', 'progress')
+				}
+			};
+			if (action === 'rendering') {
+				this.in_progress = true;
+				this.set_interval(1000);
+				transform_button();
+				this.progress().update(progress);
+			} else if (action === 'complete' || action === '' || action === null) {
+				this.in_progress = false;
+				this.set_interval(10000);
+				this.progress().stop();
+				b.switchClass('progress', '')
+			} else {
+				this.in_progress = true;
+				this.set_interval(1000);
+				transform_button();
+				this.progress().indeterminate();
+			}
+		},
+		publishing_started: function() {
+			this.set_interval(1000);
+			var b = this.button();
+			if (!b.hasClass('progress')) {
+				b.switchClass('', 'progress')
+			}
+			this.in_progress = true;
+		},
+		button: function() {
+			if (!this._button) {
+				this._progress_container = $(dom.span, {'id':'publish-progress'});
+				this._button = $(dom.a, {'id': 'open-publish'}).append(this._progress_container).append("Publish");
+
+				this._button.click(function() {
+					if (!this.in_progress) {
+						S.Publishing.open_dialogue();
+					}
+				}.bind(this));
+			}
+			return this._button
+		},
+		progress: function() {
+			if (!this._progress) {
+				this._progress = Spontaneous.Progress('publish-progress', 16, {
+					spinner_fg_color: '#ccc',
+					progress_fg_color: '#aaa'
+				});
+				this._progress.init();
+			}
+			return this._progress;
+		},
+		set_interval: function(milliseconds) {
+			if (this.timer_intervall === milliseconds) { return; }
+			this.timer_interval = milliseconds;
+			if (this.status_timer) {
+				window.clearInterval(this.status_timer);
+			}
+			this.status_timer = window.setInterval(this.check_status.bind(this), milliseconds);
+		}
+	});
 	var TopBar = new JS.Singleton({
 		include: Spontaneous.Properties,
 		location: "/",
@@ -126,14 +208,10 @@ Spontaneous.TopBar = (function($, S) {
 				click(function() {
 					S.TopBar.toggle_modes();
 			});
-			this.publish_button = $(dom.a, {'id': 'open-publish'}).
-				text("Publish").
-				click(function() {
-					S.Publishing.open_dialogue();
-			});
+			this.publish_button = new PublishButton();
 			this.wrap.append(this.location);
 			this.wrap.append(this.mode_switch);
-			this.wrap.append(this.publish_button);
+			this.wrap.append(this.publish_button.button());
 			return this.wrap;
 		},
 		init: function() {
@@ -161,6 +239,9 @@ Spontaneous.TopBar = (function($, S) {
 			} else if (to_mode === 'edit') {
 				return 'preview';
 			}
+		},
+		publishing_started: function() {
+			this.publish_button.publishing_started();
 		},
 		location_changed: function(new_location) {
 			document.title = "Editing: '{title}'".replace("{title}", new_location.title);

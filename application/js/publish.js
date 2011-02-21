@@ -3,7 +3,7 @@ console.log('Loading Publishing...')
 Spontaneous.Publishing = (function($, S) {
 	var dom = S.Dom, Dialogue = Spontaneous.Dialogue;
 
-	var EditDialogue = new JS.Class(Dialogue, {
+	var PublishingDialogue = new JS.Class(Dialogue, {
 		initialize: function(content) {
 			this.change_sets = [];
 		},
@@ -23,31 +23,37 @@ Spontaneous.Publishing = (function($, S) {
 			for (var i = 0, ii = changes.length; i < ii; i++) {
 				ids.push(changes[i].id);
 			}
-			console.log('publish changes', ids);
 			Spontaneous.Ajax.post(['/publish', 'publish'].join('/'),{'change_set_ids': ids}, this, this.publish_requested);
 		},
 
 
 		publish_requested: function() {
 			console.log('publish requested')
+			Spontaneous.TopBar.publishing_started();
 			this.close();
 		},
 		change_list_loaded: function(change_list) {
 			var w = this.wrapper, __dialogue = this;
 			w.empty();
-			var summary = $(dom.p, {'class':'publish-summary'}).text(change_list.length + " changes");
-			var cb = $(dom.input, {'type':'checkbox'}).change(function() {
-				var checked = $(this).is(':checked');
-				__dialogue.set_publish_all(checked);
-			});
-			var label = $(dom.label, {'class':'publish-all'}).append(cb).append('Publish All');
-			summary.append(label)
-			w.append(summary);
-			this.publish_all_label = label;
-			for (var i = 0, ii = change_list.length; i < ii; i++) {
-				var cs = new ChangeSet(this, change_list[i]);
-				this.change_sets.push(cs);
-				w.append(cs.panel())
+			if (change_list.length === 0) {
+				var summary = $(dom.p, {'class':'publish-summary'}).text("The site is up to date");
+				w.append(summary);
+				this.disable_button('Publish');
+			} else {
+				var summary = $(dom.p, {'class':'publish-summary'}).text(change_list.length + " changes");
+				var cb = $(dom.input, {'type':'checkbox'}).change(function() {
+					var checked = $(this).is(':checked');
+					__dialogue.set_publish_all(checked);
+				});
+				var label = $(dom.label, {'class':'publish-all'}).append(cb).append('Publish All');
+				summary.append(label)
+				w.append(summary);
+				this.publish_all_label = label;
+				for (var i = 0, ii = change_list.length; i < ii; i++) {
+					var cs = new ChangeSet(this, change_list[i]);
+					this.change_sets.push(cs);
+					w.append(cs.panel())
+				}
 			}
 		},
 		set_publish_all: function(state) {
@@ -145,7 +151,7 @@ Spontaneous.Publishing = (function($, S) {
 
 	var Publishing = new JS.Singleton({
 		open_dialogue: function() {
-			EditDialogue.open(new EditDialogue());
+			Dialogue.open(new PublishingDialogue());
 		}
 	});
 

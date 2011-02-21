@@ -7,7 +7,7 @@ module Spontaneous::Plugins
       module ClassMethods
 
         def default_publishing_method
-          S::Publishing::Immediate
+          resolve_publishing_method(Spontaneous.config.publishing_method || :immediate)
         end
 
         def publishing_method
@@ -15,12 +15,16 @@ module Spontaneous::Plugins
         end
 
         def publishing_method=(method)
+          @publishing_method = resolve_publishing_method(method)
+        end
+
+        def resolve_publishing_method(method)
           klass_name = method.to_s.camelize
           begin
-            @publishing_method = S::Publishing.const_get(klass_name)
+            S::Publishing.const_get(klass_name)
           rescue NameError => e
             puts "Unknown method #{method} (#{klass_name})"
-            @publishing_method = default_publishing_method
+            S::Publishing::Immediate
           end
         end
 

@@ -431,6 +431,13 @@ class BackTest < Test::Unit::TestCase
       post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id, @c2.id]
       assert last_response.ok?
     end
+
+    should "be able to retrieve the publishing status" do
+      Site.publishing_method.status = "something:50"
+      get "/@spontaneous/publish/status"
+      assert last_response.ok?
+      last_response.body.should == "something:50"
+    end
   end
 end
 

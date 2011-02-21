@@ -9,27 +9,42 @@ Spontaneous.Dialogue = (function($, S) {
 			this.label = label;
 			this.action = action;
 			this.is_default = is_default;
+			this.disabled = false;
 		},
 
 		html: function() {
 			var el = $(dom.a, {'class': this.css_class() }).text(this.label);
 			if (typeof this.action === 'function') {
-				var __action = this.action;
+				var __button = this;
 				el.click(function() {
-					__action();
+					if (!__button.disabled) { __button.action(); }
 					return false;
 				});
 			}
+			this.button = el;
 			return el;
 		},
 		css_class: function() {
 			return ['button', (this.is_default ? 'default' : ''), this.label.toLowerCase().split(' ')[0]].join(' ');
+		},
+		disable: function() {
+			this.set_disabled(true)
+		},
+		enable: function() {
+			this.set_disabled(false)
+		},
+		set_disabled: function(state) {
+			this.disabled = state;
+			this.button.removeClass('disabled');
+			if (this.disabled) {
+				this.button.addClass('disabled')
+			}
 		}
 	});
 	var CancelButton = new JS.Class(Button, {
 		initialize: function(label, is_default) {
-			this.callSuper(label + " (Esc)", function() { 
-				Dialogue.cancel();
+			this.callSuper(label + " (Esc)", function() {
+				Spontaneous.Dialogue.cancel();
 			}, is_default);
 		},
 		css_class: function() {
@@ -38,14 +53,14 @@ Spontaneous.Dialogue = (function($, S) {
 	});
 	var Dialogue = new JS.Class({
 		open: function() {
-			Dialogue.open(this);
+			Spontaneous.Dialogue.open(this);
 		},
 		close: function() {
-			Dialogue.close(this);
+			Spontaneous.Dialogue.close(this);
 		},
 		buttons: function() {
-			// return a 
-			//   { label : action } 
+			// return a
+			//   { label : action }
 			// or
 			//   { label : [action, is_default ]}
 			// set to define non-cancel action buttons
@@ -57,6 +72,9 @@ Spontaneous.Dialogue = (function($, S) {
 		},
 		cancel_label: function() {
 			return 'Cancel';
+		},
+		disable_button: function(button_name) {
+			Spontaneous.Dialogue.disable_button(button_name);
 		}
 	});
 
@@ -71,10 +89,13 @@ Spontaneous.Dialogue = (function($, S) {
 			this._instance = instance;
 			$('body').css("overflow", "hidden");
 			this.overlay().fadeIn(200);
-			var c = this.container(), a = this._actions;
+			var c = this.container(), a = this._actions, b;
+			var buttons = instance.buttons(), button_map = {};
 			a.empty();
-			a.append((new CancelButton(instance.cancel_label()).html()));
-			var buttons = instance.buttons();
+			b = new CancelButton(instance.cancel_label());
+			button_map['cancel'] = b;
+			button_map[instance.cancel_label().toLowerCase()] = b;
+			a.append(b.html());
 			if (buttons) {
 				$.each(buttons, function(label, params) {
 					var action, is_default = false;
@@ -87,9 +108,12 @@ Spontaneous.Dialogue = (function($, S) {
 						action = params.action;
 						is_default = params.is_default;
 					}
-					a.append((new Button(label, action, is_default)).html());
+					b = new Button(label, action, is_default);
+					a.append(b.html());
+					button_map[label.toLowerCase()] = b;
 				});
 			}
+			this.button_map = button_map;
 			this._body.empty().append(instance.body());
 			c.fadeIn(200);
 			$(document).bind('keydown.dialogue', function(event) {
@@ -100,6 +124,10 @@ Spontaneous.Dialogue = (function($, S) {
 			this._open = true;
 		},
 
+		disable_button: function(button_name) {
+			var button = this.button_map[button_name.toLowerCase()]
+			button.disable();
+		},
 		close: function() {
 			if (!this._instance || !this._open) { return; }
 			this._instance.cleanup();

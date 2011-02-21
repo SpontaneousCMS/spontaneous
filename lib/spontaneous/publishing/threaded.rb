@@ -8,7 +8,7 @@ module Spontaneous
 
       def publish_changes(change_list)
         Thread.new do
-          immediate_publish_changes
+          immediate_publish_changes(change_list)
         end
       end
 

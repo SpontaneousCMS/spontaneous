@@ -95,12 +95,12 @@ Spontaneous.Progress = (function($, S) {
 					ctx.beginPath();
 					ctx.moveTo(center, center);
 					ctx.arc(  // draw next arc
-					center, // x
-					center, // y
-					radius,    // radius
-					Math.PI * -0.5, // -0.5 sets set the start to be top
-					Math.PI * 2,
-					false // clockwise?
+						center, // x
+						center, // y
+						radius,    // radius
+						Math.PI * -0.5, // -0.5 sets set the start to be top
+						Math.PI * 2,
+						false // clockwise?
 					);
 					ctx.closePath();
 					ctx.fillStyle = colour;    // color
@@ -113,12 +113,12 @@ Spontaneous.Progress = (function($, S) {
 				ctx.beginPath();
 				ctx.moveTo(center, center); // center of the pie
 				ctx.arc(  // draw next arc
-				center, // x
-				center, // y
-				radius,    // radius
-				Math.PI * -0.5, // -0.5 sets set the start to be top
-				Math.PI * (- 0.5 + 2 * a),
-				false // clockwise?
+					center, // x
+					center, // y
+					radius,    // radius
+					Math.PI * -0.5, // -0.5 sets set the start to be top
+					Math.PI * (- 0.5 + 2 * a),
+					false // clockwise?
 				);
 
 				ctx.lineTo(center, center); // line back to the center
@@ -198,21 +198,21 @@ Spontaneous.Progress = (function($, S) {
 				var a1 = Math.PI - a;
 				var a2 = 2 * Math.PI - a;
 				ctx.arc(
-				c + r1 * sin, // x
-				c + r1 * cos, // y
-				p/2,// radius
-				a1,
-				a2,
-				false
+					c + r1 * sin, // x
+					c + r1 * cos, // y
+					p/2,// radius
+					a1,
+					a2,
+					false
 				);
 
 				ctx.arc(
-				c + r2 * sin, // x
-				c + r2 * cos, // y
-				p/2, // radius
-				a2,
-				a1,
-				false
+					c + r2 * sin, // x
+					c + r2 * cos, // y
+					p/2, // radius
+					a2,
+					a1,
+					false
 				);
 
 			},
