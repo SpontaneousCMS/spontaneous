@@ -11,6 +11,7 @@ module Spontaneous
     def matches(content)
       return true if @selector == ALL
     end
+    alias_method :matches?, :matches
   end
 end
 

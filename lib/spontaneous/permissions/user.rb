@@ -34,8 +34,9 @@ module Spontaneous::Permissions
     ##
     # Find the highest access level available from all the groups we
     # belong to
+    # TODO: actually match the content against the memberships
     def level_for(content)
-      memberships.map(&:level).sort.last
+      memberships.map { |m| m.level_for(content) }.sort.last
     end
 
     def last_access_at

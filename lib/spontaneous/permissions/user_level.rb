@@ -81,6 +81,7 @@ module Spontaneous::Permissions
       def can_publish?
         @permissions[:publish]
       end
+
       def to_s
         @name.to_s
       end

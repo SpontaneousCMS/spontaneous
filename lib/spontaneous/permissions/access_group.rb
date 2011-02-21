@@ -16,6 +16,14 @@ module Spontaneous::Permissions
       @selector ||= Spontaneous::ContentQuery.new(access_selector)
     end
 
+    def level_for(content)
+      if selector.matches?(content)
+        level
+      else
+        UserLevel.none
+      end
+    end
+
     def level
       if disabled
         UserLevel.none
