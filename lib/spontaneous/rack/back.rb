@@ -320,12 +320,16 @@ module Spontaneous
         end
 
         post '/publish/publish' do
-          change_sets = params[:change_set_ids].map(&:to_i)
-          if user.level.can_publish?
-            Site.publish_changes(change_sets)
-            json({})
+          change_sets = (params[:change_set_ids] || []).map(&:to_i)
+          if change_sets.empty?
+            400
           else
-            unauthorised!
+            if user.level.can_publish?
+              Site.publish_changes(change_sets)
+              json({})
+            else
+              unauthorised!
+            end
           end
         end
         get '/publish/status' do

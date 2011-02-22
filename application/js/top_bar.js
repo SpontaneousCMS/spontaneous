@@ -126,8 +126,7 @@ Spontaneous.TopBar = (function($, S) {
 			S.Ajax.get('/publish/status', this, this.status_recieved);
 		},
 		status_recieved: function(status) {
-			if (status !== this.status) {
-				this.status = status;
+			if (status != this.status) {
 				this.update_status(status);
 			}
 			window.setTimeout(this.check_status.bind(this), this.timer_interval);
@@ -135,12 +134,18 @@ Spontaneous.TopBar = (function($, S) {
 		update_status: function(status) {
 			if (status === null || status === '') { return; }
 			var action = status.status, progress = status.progress
-			if (action === 'complete') {
+			if (action == this.current_action && progress == this.current_progress) { return; }
+			this.current_action = action;
+			this.current_progress = progress;
+			if (action === null || action === '' || action === 'complete' || action === 'error') {
 				this.progress().stop();
 				this.in_progress = false;
 				this.set_interval(this.normal_check);
 				this.set_label("Publish");
 				this.button().switchClass('progress', '')
+				if (action === 'error') {
+					alert('There was a problem publishing: ' + progress)
+				}
 			} else {
 				this.publishing_state();
 				if (action === 'rendering') {

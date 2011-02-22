@@ -24,7 +24,7 @@ module Spontaneous::Render
         render_page(page) if page.formats.include?(format)
         after_page_rendered(page)
         # sleep(delay) if delay = Spontaneous.config.publishing_delay
-        # sleep(3)
+        sleep(3)
       end
       after_render
     end

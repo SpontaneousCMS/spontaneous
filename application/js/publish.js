@@ -23,7 +23,10 @@ Spontaneous.Publishing = (function($, S) {
 			for (var i = 0, ii = changes.length; i < ii; i++) {
 				ids.push(changes[i].id);
 			}
-			Spontaneous.Ajax.post(['/publish', 'publish'].join('/'),{'change_set_ids': ids}, this, this.publish_requested);
+			if (ids.length > 0) {
+				Spontaneous.Ajax.post(['/publish', 'publish'].join('/'),{'change_set_ids': ids}, this, this.publish_requested);
+			} else {
+			}
 		},
 
 

@@ -37,7 +37,8 @@ module Spontaneous::Plugins
         end
 
         def publishing_status
-          Hash[[:status, :progress].zip(publishing_method.status.split(':'))] rescue ""
+          status, *rest = publishing_method.status.split(':')
+          Hash[[:status, :progress].zip([status, rest.join(':')])] rescue ""
         end
 
         def publishing_status=(status)

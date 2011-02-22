@@ -426,6 +426,13 @@ class BackTest < Test::Unit::TestCase
       assert last_response.ok?
     end
 
+    should "not launch publish if list of changes is empty" do
+      Site.expects(:publish_changes).with().never
+      post "/@spontaneous/publish/publish", :change_set_ids => ""
+      assert last_response.status == 400
+      post "/@spontaneous/publish/publish", :change_set_ids => nil
+      assert last_response.status == 400
+    end
     should "recognise when the list of changes is complete" do
       Site.expects(:publish_changes).with([@c1.id, @c2.id])
       post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id, @c2.id]
