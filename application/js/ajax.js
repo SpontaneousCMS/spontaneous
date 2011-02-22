@@ -10,12 +10,13 @@ Spontaneous.Ajax = (function($, S) {
 	return {
 		namespace: "/@spontaneous",
 		get: function(url, caller, callback) {
-			var success = function(data, textStatus, XMLHttpRequest) {
+			var handle_response = function(data, textStatus, XMLHttpRequest) {
 				callback.call(caller, data, textStatus, XMLHttpRequest);
 			};
 			$.ajax({
 				'url': this.request_url(url),
-				'success': success
+				'success': handle_response,
+				'error': handle_response // pass the error to the handler too
 			});
 		},
 		post: function(url, post_data, caller, callback) {
