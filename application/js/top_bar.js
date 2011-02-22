@@ -143,14 +143,17 @@ Spontaneous.TopBar = (function($, S) {
 				this.in_progress = true;
 				this.set_interval(1000);
 				transform_button();
+				this.set_label("Publishing");
 				this.progress().update(progress);
 			} else if (action === 'complete' || action === '' || action === null) {
 				this.in_progress = false;
 				this.set_interval(10000);
 				this.progress().stop();
+				this.set_label("Publish");
 				b.switchClass('progress', '')
 			} else {
 				this.in_progress = true;
+				this.set_label("Publishing");
 				this.set_interval(1000);
 				transform_button();
 				this.progress().indeterminate();
@@ -159,16 +162,25 @@ Spontaneous.TopBar = (function($, S) {
 		publishing_started: function() {
 			this.set_interval(1000);
 			var b = this.button();
+			this.progress().indeterminate();
+			this.set_label("Publishing");
 			if (!b.hasClass('progress')) {
 				b.switchClass('', 'progress')
 			}
 			this.in_progress = true;
 		},
+		set_label: function(label) {
+			if (label !== this._label_text) {
+				this._label_text = label;
+				this._label.text(label);
+			}
+		},
 		button: function() {
 			if (!this._button) {
 				this._progress_container = $(dom.span, {'id':'publish-progress'});
-				this._button = $(dom.a, {'id': 'open-publish'}).append(this._progress_container).append("Publish");
-
+				this._label = $(dom.span);
+				this._button = $(dom.a, {'id': 'open-publish'}).append(this._progress_container).append(this._label);
+				this.set_label("Publish");
 				this._button.click(function() {
 					if (!this.in_progress) {
 						S.Publishing.open_dialogue();
