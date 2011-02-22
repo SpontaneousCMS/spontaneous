@@ -138,11 +138,13 @@ Spontaneous.TopBar = (function($, S) {
 			this.current_action = action;
 			this.current_progress = progress;
 			if (action === null || action === '' || action === 'complete' || action === 'error') {
-				this.progress().stop();
-				this.in_progress = false;
-				this.set_interval(this.normal_check);
-				this.set_label("Publish");
-				this.button().switchClass('progress', '')
+				if (this.in_progress) {
+					this.in_progress = false;
+					this.progress().stop();
+					this.set_interval(this.normal_check);
+					this.set_label("Publish");
+					this.button().switchClass('progress', '')
+				}
 				if (action === 'error') {
 					alert('There was a problem publishing: ' + progress)
 				}
