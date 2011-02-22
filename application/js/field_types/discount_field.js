@@ -79,39 +79,40 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		pre: '_',
 		post: '_'
 	});
-	var Header = new JS.Class(TextCommand, {
+	var H1 = new JS.Class(TextCommand, {
+		name: "H1",
 		pre: '',
 		post: "=",
 		scale: 1.0,
 		surround: function(text) {
-			if (this.matches_removal(text)) {
-				text = this.remove(text);
-			}
+			// remove existing header (which must be different from this version)
+			if (this.matches_removal(text)) { text = this.remove(text); }
 			var line = '', n = Math.max(text.length, 30), newline = /([\r\n]+)$/, newlines = newline.exec(text), undef;
 			newlines = (!newlines || (newlines === undef) ? "" : newlines[1])
 			for (var i = 0; i < n; i++) { line += this.post; }
 			return text.replace(newline, '') + "\n" + line + newlines;
 		},
+		// removes either h1 or h2
 		remove: function(text) {
 			var r = new RegExp('[\r\n][=-]+'), s =  text.replace(r, '')
 			return s.replace(/ +$/, '');
 		},
+		// matches either h1 or h2
 		matches_removal: function(selection) {
 			return (new RegExp('[\r\n][=\\-]+[\r\n ]*$')).exec(selection)
 		},
+		// matches only the current header class
 		matches_selection: function(selection) {
 			return (new RegExp('[\r\n]'+this.post+'+[\r\n ]*$')).exec(selection)
 		}
 	});
 
-	var H1 = new JS.Class(Header, {
-		name: "H1"
-	});
-	var H2 = new JS.Class(Header, {
+	var H2 = new JS.Class(H1, {
 		name: "H2",
 		post: "-",
-		scale: 1.5,
+		scale: 1.2 // hyphens are narrower than equals and narrower than the average char
 	});
+
 	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {
 		actions: [Bold, Italic, H1, H2],
 		get_input: function() {
@@ -122,28 +123,25 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			this._wrapper = $(dom.div, {'class':'markdown-editor', 'id':'editor-'+this.css_id()});
 			this._toolbar = $(dom.div, {'class':'md-toolbar'});
 			this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
-			this.input.select(function() {
-				this.on_select();
-			}.bind(this))
+			this.input.select(this.on_select.bind(this))
 			var c = this.actions;
 		this.commands = [];
 			for (var i = 0, ii = c.length; i < ii; i++) {
-				var cmd_class = c[i];
-				var cmd = new cmd_class(this.input);
+				var cmd_class = c[i], cmd = new cmd_class(this.input);
 				this.commands.push(cmd);
 				this._toolbar.append(cmd.button());
 			}
 			this._wrapper.append(this._toolbar).append(this.input)
 			return this._wrapper;
 		},
-		on_select: function() {
+		// iterates through all the buttons and lets them highlight themselves depending on the
+		// currently selected text
+		on_select: function(event) {
+			console.log(event)
 			var state = TextCommand.get_state(this.input);
 			$.each(this.commands, function() {
 				this.respond_to_selection(state);
 			});
-		},
-		bold: function() {
-			(new Bold(this.input)).execute();
 		}
 	});
 
