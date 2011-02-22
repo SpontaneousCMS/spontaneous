@@ -329,11 +329,7 @@ module Spontaneous
           end
         end
         get '/publish/status' do
-          s = Spontaneous::Site.publishing_status.to_s.split(/:/)
-          json({
-            :status => s[0],
-            :progress => s[1]
-          })
+          json(Spontaneous::Site.publishing_status)
         end
 
         get '/static/*' do

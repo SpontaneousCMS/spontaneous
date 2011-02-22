@@ -436,7 +436,7 @@ class BackTest < Test::Unit::TestCase
       Site.publishing_method.status = "something:50"
       get "/@spontaneous/publish/status"
       assert last_response.ok?
-      last_response.body.should == "something:50"
+      last_response.body.should == {:status => "something", :progress => "50"}.to_json
     end
   end
 end
