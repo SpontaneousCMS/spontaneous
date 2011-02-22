@@ -125,7 +125,6 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		status_recieved: function(status) {
 			if (status !== this.status) {
-			// this.update_status({'status':'initialising', 'progress':null})
 				this.status = status;
 				this.update_status(status);
 			}
@@ -133,40 +132,30 @@ Spontaneous.TopBar = (function($, S) {
 		update_status: function(status) {
 			if (status === null || status === '') { return; }
 			var action = status.status, progress = status.progress
-			var b = this.button();
-			var transform_button = function() {
-				if (!b.hasClass('progress')) {
-					b.switchClass('', 'progress')
-				}
-			};
-			if (action === 'rendering') {
-				this.in_progress = true;
-				this.set_interval(1000);
-				transform_button();
-				this.set_label("Publishing");
-				this.progress().update(progress);
-			} else if (action === 'complete' || action === '' || action === null) {
+			if (action === 'complete') {
+				this.progress().stop();
 				this.in_progress = false;
 				this.set_interval(10000);
-				this.progress().stop();
 				this.set_label("Publish");
-				b.switchClass('progress', '')
+				this.button().switchClass('progress', '')
 			} else {
-				this.in_progress = true;
-				this.set_label("Publishing");
-				this.set_interval(1000);
-				transform_button();
-				this.progress().indeterminate();
+				this.publishing_state();
+				if (action === 'rendering') {
+					this.progress().update(progress);
+				} else {
+					this.progress().indeterminate();
+				}
 			}
 		},
 		publishing_started: function() {
-			this.set_interval(1000);
-			var b = this.button();
+			this.publishing_state();
 			this.progress().indeterminate();
+		},
+		publishing_state: function() {
+			this.set_interval(1000);
 			this.set_label("Publishing");
-			if (!b.hasClass('progress')) {
-				b.switchClass('', 'progress')
-			}
+			var b = this.button();
+			if (!b.hasClass('progress')) { b.switchClass('', 'progress'); }
 			this.in_progress = true;
 		},
 		set_label: function(label) {
