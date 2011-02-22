@@ -74,6 +74,9 @@ module Spontaneous
       end
 
       def publish(pages)
+        at_exit {
+          abort_publish_at_exit
+        }
         before_publish
         begin
           S::Content.publish(revision, pages) do
@@ -175,12 +178,18 @@ module Spontaneous
         set_status("complete")
       end
 
+      def abort_publish_at_exit
+        abort_publish(nil)
+      end
+
       def abort_publish(exception)
-        set_status("aborting")
-        FileUtils.rm_r(Spontaneous.revision_dir(revision)) if File.exists?(Spontaneous.revision_dir(revision))
-        S::Site.send(:pending_revision=, nil)
-        S::Content.delete_revision(revision)
-        set_status("error", exception)
+        if r = S::Site.pending_revision
+          set_status("aborting")
+          FileUtils.rm_r(Spontaneous.revision_dir(revision)) if File.exists?(Spontaneous.revision_dir(revision))
+          S::Site.send(:pending_revision=, nil)
+          S::Content.delete_revision(revision)
+          set_status("error", exception)
+        end
       end
     end # Immediate
   end # Publishing
