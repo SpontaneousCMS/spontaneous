@@ -8,7 +8,7 @@ class FieldsTest < Test::Unit::TestCase
   context "New content instances" do
     setup do
       @content_class = Class.new(Content) do
-        field :title, :default_value => "Magic"
+        field :title, :default => "Magic"
         field :thumbnail, :image
       end
       @instance = @content_class.new
@@ -43,7 +43,7 @@ class FieldsTest < Test::Unit::TestCase
         field :title
         field :synopsis, :string
       end
-      @content_class.field :complex, :image, :default_value => "My default", :comment => "Use this to"
+      @content_class.field :complex, :image, :default => "My default", :comment => "Use this to"
     end
 
     should "be creatable with just a field name" do
@@ -52,9 +52,9 @@ class FieldsTest < Test::Unit::TestCase
     end
 
     should "work with just a name & options" do
-      @content_class.field :minimal, :default_value => "Small"
+      @content_class.field :minimal, :default => "Small"
       @content_class.field_prototypes[:minimal].name.should == :minimal
-      @content_class.field_prototypes[:minimal].default_value.should == "Small"
+      @content_class.field_prototypes[:minimal].default.should == "Small"
     end
     should "map :string type to FieldTypes::Text" do
       @content_class.field_prototypes[:synopsis].field_class.should == Spontaneous::FieldTypes::StringField
@@ -84,7 +84,7 @@ class FieldsTest < Test::Unit::TestCase
       end
 
       should "default to a value of ''" do
-        @prototype.default_value.should == ""
+        @prototype.default.should == ""
       end
 
       should "match name to type if sensible" do
@@ -131,7 +131,7 @@ class FieldsTest < Test::Unit::TestCase
       end
 
       should "parse default value" do
-        @prototype.default_value.should == "My default"
+        @prototype.default.should == "My default"
       end
 
       should "parse ui comment" do
@@ -209,7 +209,7 @@ class FieldsTest < Test::Unit::TestCase
   context "field instances" do
     setup do
       ::CC = Class.new(Content) do
-        field :title, :default_value => "Magic" do
+        field :title, :default => "Magic" do
           def process(value)
             "*#{value}*"
           end
@@ -242,7 +242,7 @@ class FieldsTest < Test::Unit::TestCase
   context "Field value persistence" do
     setup do
       class ::PersistedField < Content
-        field :title, :default_value => "Magic"
+        field :title, :default => "Magic"
       end
     end
     teardown do

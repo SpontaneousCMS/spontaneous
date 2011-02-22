@@ -39,7 +39,7 @@ module Spontaneous::Plugins
 
       def parse_options(options)
         @options = {
-          :default_value => '',
+          :default => '',
           :comment => false
         }.merge(options)
       end
@@ -48,8 +48,8 @@ module Spontaneous::Plugins
         @field_class
       end
 
-      def default_value
-        @options[:default_value]
+      def default
+        @options[:default]
       end
 
       def comment
@@ -73,7 +73,7 @@ module Spontaneous::Plugins
         from_db = !values.nil?
         values = {
           :name => name,
-          :unprocessed_value => default_value
+          :unprocessed_value => default
         }.merge(values || {})
         self.field_class.new(values, from_db)
       end

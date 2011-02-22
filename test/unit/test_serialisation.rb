@@ -253,7 +253,7 @@ class SerialisationTest < Test::Unit::TestCase
     end
 
     should "serialise outstanding changes" do
-      Change.outstanding.to_json.should == [
+      Change.outstanding.to_json.json.should == [
         {
         :pages=> [
           {:path=>"/", :title=>"New Page", :depth => 0, :id=>@page1.id},
@@ -262,7 +262,7 @@ class SerialisationTest < Test::Unit::TestCase
         :changes=> [
           {:page_ids=>[@page1.id, @page2.id], :created_at=> @now.to_s, :id=>@c1.id},
           {:page_ids=>[@page1.id, @page2.id], :created_at=> @now.to_s, :id=>@c2.id}
-      ] } ].to_json
+      ] } ]
     end
   end
 end

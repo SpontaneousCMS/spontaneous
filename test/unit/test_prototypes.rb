@@ -21,7 +21,7 @@ class PrototypesTest < Test::Unit::TestCase
       class ::PrototypeClass < Spontaneous::Content
         field :title, :string
         field :date,  :string
-        field :something, :string, :default_value => "Here"
+        field :something, :string, :default => "Here"
 
         box :images
 

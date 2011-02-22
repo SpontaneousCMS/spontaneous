@@ -229,7 +229,7 @@ class RenderTest < Test::Unit::TestCase
     context "params in templates" do
       setup do
         class ::TemplateParams < Page; end
-        TemplateParams.field :image, :default_value => "/images/fromage.jpg"
+        TemplateParams.field :image, :default => "/images/fromage.jpg"
         TemplateParams.page_style :page_style
         @page = TemplateParams.new
       end
