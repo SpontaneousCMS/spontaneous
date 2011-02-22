@@ -15,6 +15,10 @@ module SeleniumTest
 
   module ClassMethods
     def startup
+      Spontaneous::Permissions::User.delete
+      @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
+      @user.update(:level => Spontaneous::Permissions.root)
+      @user.save
       launch_selenium
       launch_site
     end

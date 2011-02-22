@@ -10,12 +10,16 @@ module Spontaneous
       end
 
       def user(env)
-        request = ::Rack::Request.new(env)
-        api_key = request.cookies[Spontaneous::Rack::Back::AUTH_COOKIE]
-        if api_key && key = Spontaneous::Permissions::AccessKey.authenticate(api_key)
-          key.user
+        if login = Spontaneous.config.auto_login
+          user = Spontaneous::Permissions::User[:login => login]
         else
-          nil
+          request = ::Rack::Request.new(env)
+          api_key = request.cookies[Spontaneous::Rack::Back::AUTH_COOKIE]
+          if api_key && key = Spontaneous::Permissions::AccessKey.authenticate(api_key)
+            key.user
+          else
+            nil
+          end
         end
       end
 
