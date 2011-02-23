@@ -54,6 +54,7 @@ And this is line 4.
       _start = @original_text.index('line 1')
       _end   = _start + 6
       select_text(_start, _end)
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.bold.active").should be_false
       @browser.click("css=#editor-field-description-1 .md-toolbar a.bold")
       # @browser.wait_for_element("css=#nontingnhgd")
       @browser.value("css=#field-description-1").should == (<<-TXT).strip
@@ -66,17 +67,20 @@ And this is line 4.
       TXT
       @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
       @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _start + 10
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.bold.active").should be_true
 
       @browser.click("css=#editor-field-description-1 .md-toolbar a.bold")
       @browser.value("css=#field-description-1").should == @original_text.strip
       @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
       @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _end
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.bold.active").should be_false
     end
 
     should "italicise text" do
       _start = @original_text.index('this is line 2')
       _end   = _start + 14
       select_text(_start, _end)
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.italic.active").should be_false
       @browser.click("css=#editor-field-description-1 .md-toolbar a.italic")
       # @browser.wait_for_element("css=#nontingnhgd")
       @browser.value("css=#field-description-1").should == (<<-TXT).strip
@@ -89,11 +93,13 @@ And this is line 4.
       TXT
       @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
       @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _start + 16
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.italic.active").should be_true
 
       @browser.click("css=#editor-field-description-1 .md-toolbar a.italic")
       @browser.value("css=#field-description-1").should == @original_text.strip
       @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
       @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _end
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.italic.active").should be_false
     end
 
     should "add headers" do
@@ -102,6 +108,7 @@ And this is line 4.
       _end   = _start + _select.length
       select_text(_start, _end)
       @browser.click("css=#editor-field-description-1 .md-toolbar a.h1")
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.h1.active").should be_false
       # @browser.wait_for_element("css=#nontingnhgd")
       @browser.value("css=#field-description-1").should == (<<-TXT).strip
 This is line 1.
@@ -114,6 +121,7 @@ And this is line 4.
       TXT
       @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
       @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _end + 31
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.h1.active").should be_true
 
       @browser.click("css=#editor-field-description-1 .md-toolbar a.h2")
       @browser.value("css=#field-description-1").should == (<<-TXT).strip
@@ -127,15 +135,21 @@ And this is line 4.
       TXT
       @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
       @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _end + 31
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.h1.active").should be_false
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.h2.active").should be_true
 
       @browser.click("css=#editor-field-description-1 .md-toolbar a.h2")
       @browser.value("css=#field-description-1").should == @original_text.strip
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.h1.active").should be_false
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.h2.active").should be_false
 
       @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
       @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _end
       @browser.click("css=#editor-field-description-1 .md-toolbar a.h1")
       @browser.click("css=#editor-field-description-1 .md-toolbar a.h1")
       @browser.value("css=#field-description-1").should == @original_text.strip
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.h1.active").should be_false
+      # @browser.element?("css=#editor-field-description-1 .md-toolbar a.h2.active").should be_false
     end
 
 

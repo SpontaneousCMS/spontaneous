@@ -1360,3 +1360,26 @@ img.missing {
 #script-load-splash.loaded {
 	background-position: 0 -80px;
 }
+
+.markdown-editor {
+	.md-toolbar {
+		background-color: rgba(0, 0, 0, 0.1);
+		a {
+			.interface;
+			display: inline-block;
+			border: solid 1px transparent;
+			padding: 2px 6px;
+			cursor: pointer;
+		}
+		a.active {
+			border: solid 1px @action;
+			background-color: rgba(0, 0, 0, 0.1);
+		}
+		a:hover {
+			background-color: rgba(0, 0, 0, 0.1);
+		}
+		a + a {
+			margin-left: 10px;
+		}
+	}
+}

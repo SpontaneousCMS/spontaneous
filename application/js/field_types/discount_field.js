@@ -59,7 +59,9 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		respond_to_selection: function(state) {
 			if (this.matches_selection(state.selection)) {
-				console.log('> selected', this.name, state)
+				this.button().addClass('active');
+			} else {
+				this.button().removeClass('active');
 			}
 		},
 		matches_removal: function(selection) {
