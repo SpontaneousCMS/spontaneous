@@ -252,16 +252,30 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {
 		actions: [Bold, Italic, H1, H2, Link],
 		get_input: function() {
-			this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
 			return this.input;
+		},
+		on_focus: function() {
+			if (!this.expanded) {
+				this.input.data('original-height', this.input.innerHeight())
+				var text_height = this.input[0].scrollHeight, max_height = 500, resize_height = Math.min(text_height, max_height);
+				this.input.animate({'height':resize_height});
+				this.expanded = true;
+			}
+			this.callSuper();
+		},
+		on_blur: function() {
+			this.input.animate({ 'height':this.input.data('original-height') });
+			this.expanded = false;
+			this.callSuper();
 		},
 		edit: function() {
 			this._wrapper = $(dom.div, {'class':'markdown-editor', 'id':'editor-'+this.css_id()});
 			this._toolbar = $(dom.div, {'class':'md-toolbar'});
 			this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
 			this.input.select(this.on_select.bind(this))
+			this.expanded = false;
 			var c = this.actions;
-		this.commands = [];
+			this.commands = [];
 			for (var i = 0, ii = c.length; i < ii; i++) {
 				var cmd_class = c[i], cmd = new cmd_class(this.input);
 				this.commands.push(cmd);

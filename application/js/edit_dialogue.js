@@ -73,12 +73,13 @@ Spontaneous.EditDialogue = (function($, S) {
 			outer.append(image_field_wrap);
 			outer.append(submit);
 			editing.append(outer);
+			__dialogue = this;
 			// activate the highlighting
-			// $('input, textarea', editing).focus(function() {
-			// 	$(this).parents('.field').first().addClass('focus');
-			// }).blur(function() {
-			// 	$(this).parents('.field').first().removeClass('focus');
-			// });
+			$('input, textarea', editing).focus(function() {
+				__dialogue.field_focus(this);
+			}).blur(function() {
+				// $(this).parents('.field').first().removeClass('focus');
+			});
 			editing.submit(this.save.bind(this));
 			this.form = editing;
 			$(':input', this.form).add(document).bind('keydown.savedialog', function(event) {
@@ -89,6 +90,24 @@ Spontaneous.EditDialogue = (function($, S) {
 				}
 			}.bind(this));
 			return this.form;
+		},
+		field_focus: function(input) {
+			var text_fields = this.content.text_fields(), active_field = false;
+			for (var i = 0, ii = text_fields.length; i < ii; i++) {
+				var field = text_fields[i];
+				if (field.input[0] === input) {
+					active_field = field;
+					break;
+				}
+			}
+			if (active_field === this.active_field) { return; }
+			if (this.active_field) {
+				this.active_field.on_blur();
+			}
+			if (active_field) {
+				this.active_field = active_field;
+				this.active_field.on_focus();
+			}
 		},
 		field_edit: function(field) {
 			var d = $(dom.div, {'class':'field'});

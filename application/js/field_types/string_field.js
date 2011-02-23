@@ -29,7 +29,7 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			return this.get('value')
 		},
 		activate: function(el) {
-			el.find('a[href^="/"]').click(function() { 
+			el.find('a[href^="/"]').click(function() {
 				S.Location.load_path($(this).attr('href'));
 				return false;
 			});
@@ -65,6 +65,12 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		},
 		edit: function() {
 			return this.get_input();
+		},
+		on_focus: function() {
+			$(this.input).parents('.field').first().addClass('focus');
+		},
+		on_blur: function() {
+			$(this.input).parents('.field').first().removeClass('focus');
 		}
 	});
 
