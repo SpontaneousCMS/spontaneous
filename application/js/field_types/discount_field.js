@@ -29,7 +29,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			this.wrap();
 		},
 		wrap: function() {
-			var input = this.input, s = TextCommand.get_state(input), start = s.start, end = s.end,
+			var input = this.input, s = this.fix_selection(), start = s.start, end = s.end,
 				before = s.before, middle = s.middle, after = s.after, wrapped;
 			if ((end - start) <= 0 ) { return; }
 			if (this.matches_selection(middle)) {
@@ -40,6 +40,39 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			input.val(before + wrapped + after);
 			input[0].selectionStart = start;
 			input[0].selectionEnd = start + wrapped.length;
+		},
+		get_state: function() {
+			return TextCommand.get_state(this.input);
+		},
+		fix_selection: function() {
+			var state = this.get_state(), selected = state.selection, m, start = state.start, end = state.end;
+			console.log('fix_selection', state, "'"+selected+"'");
+			m = /^( +)/.exec(selected);
+			if (m) {
+				console.log('found whitespace before', selected, m[1], m[1].length)
+				start += m[1].length
+				selected = selected.substr(1);
+			}
+			m = /( +)$/.exec(selected);
+			if (m) {
+				console.log('found whitespace after', selected)
+				end -= m[1].length
+				selected = selected.substr(0, selected.length-1);
+			}
+			if (selected.indexOf(this.pre) !== 0) {
+				if (state.before.substr(-1) === this.pre.substr(0, 1)) {
+					start -= 1;
+					selected = this.pre.substr(0, 1) + selected;
+				}
+			}
+			if (selected.substr(-this.post.length) !== this.post) {
+				if (state.after.substr(0, 1) === this.post.substr(0, 1)) {
+					end += 1;
+					selected += this.post.substr(0, 1);
+				}
+			}
+			this.input[0].setSelectionRange(start, end);
+			return TextCommand.get_state(this.input);
 		},
 		surround: function(text) {
 			return this.pre + text + this.post;
@@ -80,6 +113,10 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		name: 'Bold',
 		pre: '**',
 		post: '**'
+		// fix_selection: function() {
+		// 	var state = this.callSuper();
+		// 	return this.get_state();
+		// }
 	});
 
 	var Italic = new JS.Class(TextCommand, {
@@ -183,7 +220,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		name: 'Link',
 		link_matcher: /^\[([^\]]+)\]\(([^\)]+)\)$/,
 		execute: function(event) {
-			var input = this.input, s = TextCommand.get_state(input), start = s.start, end = s.end,
+			var input = this.input, s = this.fix_selection(), start = s.start, end = s.end,
 			before = s.before, middle = s.middle, after = s.after, wrapped,
 			m = this.link_matcher.exec(middle), text = middle, url;
 			if (m) {
