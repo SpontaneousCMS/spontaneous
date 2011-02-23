@@ -24,7 +24,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		initialize: function(input) {
 			this.input = input;
 		},
-		execute: function() {
+		execute: function(event) {
 			this.wrap();
 		},
 		wrap: function() {
@@ -51,8 +51,8 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		button: function() {
 			if (!this._button) {
-				var b = $(dom.a, {'class':this.name.toLowerCase()}).click(function() {
-					this.execute();
+				var b = $(dom.a, {'class':this.name.toLowerCase()}).click(function(event) {
+					this.execute(event);
 					return false;
 				}.bind(this)).text(this.name);
 				this._button = b;
@@ -86,40 +86,6 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		pre: '_',
 		post: '_'
 	});
-	var Link = new JS.Class(TextCommand, {
-		name: 'Link',
-		link_matcher: /^\[([^\]]+)\]\(([^\)]+)\)$/,
-		surround: function(text, url) {
-			if (!url) {
-				url =  "http://example.com/";
-			}
-			var entered_url = window.prompt("Enter URL", url);
-			console.log(entered_url)
-			if (entered_url === null) {
-				// user hit 'Cancel'
-				entered_url = url;
-			}
-			if (entered_url === '') {
-				return text;
-			} else {
-				return '[' + text + '](' + entered_url + ')';
-			}
-		},
-		remove: function(text) {
-			// remove is mostly change
-			var m = this.link_matcher.exec(text), text = m[1], url = m[2]
-			return this.surround(text, url);
-		},
-		remove_link: function(text) {
-			// we know that the text must match the regexp for us to arrive here
-			var m = this.link_matcher.exec(text);
-			return m[1];
-		},
-		matches_selection: function(selection) {
-			return this.link_matcher.exec(selection);
-		}
-	});
-
 	var H1 = new JS.Class(TextCommand, {
 		name: "H1",
 		pre: '',
@@ -152,6 +118,103 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		name: "H2",
 		post: "-",
 		scale: 1.2 // hyphens are narrower than equals and narrower than the average char
+	});
+
+
+	console.log('Spontaneous.PopoverView', Spontaneous.PopoverView)
+	var LinkView = new JS.Class(Spontaneous.PopoverView, {
+		initialize: function(editor, link_text, url) {
+			console.log('LinkView', link_text, url)
+			this.editor = editor;
+			this.link_text = link_text;
+			this.url = url;
+			this.callSuper();
+		},
+		width: function() {
+			return 300;
+		},
+		position_from_event: function(event) {
+			var t = $(event.currentTarget), o = t.offset();
+			o.top += t.outerHeight();
+			o.left += t.outerWidth() / 2;
+			console.log(event.currentTarget, t.offset());
+			return o
+		},
+		view: function() {
+			var w = $(dom.div), text_input = $(dom.input).val(this.link_text), url_input = $(dom.input).val(this.url),
+			cancel = $(dom.a, {'class':'button cancel'}).text('Cancel').click(function() {
+				this.close();
+				return false;
+			}.bind(this)), insert = $(dom.a, {'class':'button'}).text('Insert').click(function() {
+				this.insert_link(text_input, url_input);
+				return false;
+			}.bind(this))
+			w.append($(dom.p).append(text_input)).append($(dom.p).append(url_input));
+			w.append($(dom.p).append(cancel).append(insert));
+			return w;
+		},
+		insert_link: function(text, url) {
+			console.log('inserting', text.val(), url.val())
+			this.editor.insert_link(text.val(), url.val());
+			this.close();
+		},
+		cancel: function() {
+			this.close();
+		},
+		after_close: function() {
+			this.editor.dialogue_closed();
+		}
+	});
+
+	var Link = new JS.Class(TextCommand, {
+		name: 'Link',
+		link_matcher: /^\[([^\]]+)\]\(([^\)]+)\)$/,
+		execute: function(event) {
+			var input = this.input, s = TextCommand.get_state(input), start = s.start, end = s.end,
+			before = s.before, middle = s.middle, after = s.after, wrapped,
+			m = this.link_matcher.exec(middle), text = middle, url;
+			if (m) {
+				text = m[1];
+				url = m[2];
+			}
+			if (!this._dialogue) {
+				this._dialogue = Spontaneous.Popover.open(event, new LinkView(this, text, url));
+			} else {
+				this._dialogue.close();
+				this._dialogue = null;
+			}
+			this.input.focus();
+			return false;
+		},
+
+		dialogue_closed: function() {
+			console.log('dialogue_closed')
+			this._dialogue = null;
+			this.input.focus();
+		},
+		insert_link: function(text, url) {
+			var edit = function(input_text) {
+				return this.surround_with_link(text, url);
+			}.bind(this);
+			this.surround = edit;
+			this.remove = edit;
+			this.wrap();
+		},
+		surround_with_link: function(text, url) {
+			if (url === '') {
+				return text;
+			} else {
+				return '[' + text + '](' + url + ')';
+			}
+		},
+		remove_link: function(text) {
+			// we know that the text must match the regexp for us to arrive here
+			var m = this.link_matcher.exec(text);
+			return m[1];
+		},
+		matches_selection: function(selection) {
+			return this.link_matcher.exec(selection);
+		}
 	});
 
 	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {

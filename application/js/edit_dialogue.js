@@ -74,11 +74,11 @@ Spontaneous.EditDialogue = (function($, S) {
 			outer.append(submit);
 			editing.append(outer);
 			// activate the highlighting
-			$('input, textarea', editing).focus(function() {
-				$(this).parents('.field').first().addClass('focus');
-			}).blur(function() {
-				$(this).parents('.field').first().removeClass('focus');
-			});
+			// $('input, textarea', editing).focus(function() {
+			// 	$(this).parents('.field').first().addClass('focus');
+			// }).blur(function() {
+			// 	$(this).parents('.field').first().removeClass('focus');
+			// });
 			editing.submit(this.save.bind(this));
 			this.form = editing;
 			$(':input', this.form).add(document).bind('keydown.savedialog', function(event) {

@@ -11,7 +11,7 @@ Spontaneous.Dom = (function($, S) {
 		ul: '<ul/>', li: '<li/>',
 		dl: '<dl/>', dt: '<dt/>', dd: '<dd/>',
 		table: '<table/>', tr: '<tr/>', td:'<td/>',
-		h3: '<h3/>',
+		h3: '<h3/>', header: '<header/>',
 		input:'<input/>', button: '<button/>', form: '<form/>',
 		textarea:'<textarea/>'
 	};

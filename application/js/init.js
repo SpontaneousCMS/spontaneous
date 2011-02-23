@@ -41,6 +41,9 @@ Spontaneous.Init = (function($, S) {
 				TopBar.init();
 			});
 
+			// $(document).click(function(event) {
+			// 	Spontaneous.Popover.open(event, new Spontaneous.PopoverView())
+			// })
 			// Spontaneous.Spin = SideBar.spinner();
 		};
 	}
