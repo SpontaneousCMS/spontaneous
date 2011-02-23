@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'sass'
 require 'less'
 
 module Spontaneous
@@ -352,9 +353,12 @@ module Spontaneous
           # as long as I release pre-compliled CSS files
           file = params[:splat].first
           if file =~ /\.css$/
+            content_type :css
+            sass_template = Spontaneous.css_dir / File.basename(file, ".css") + ".scss"
             less_template = Spontaneous.css_dir / File.basename(file, ".css") + ".less"
-            if File.exists?(less_template)
-              content_type :css
+            if File.exists?(sass_template)
+              Sass::Engine.for_file(sass_template, :load_paths => [Spontaneous.css_dir], :filename => sass_template, :cache => false).render
+            elsif File.exists?(less_template)
               Less::Engine.new(File.new(less_template)).to_css
             else
               raise Sinatra::NotFound

@@ -17,6 +17,7 @@ gem "rack", :git => "git://github.com/rack/rack.git", :ref => "1598f873c89128895
 gem "thin", "~> 1.2"
 # gem "unicorn", "~> 2.0.0"
 gem "less", "~> 1.2"
+gem "sass", "~> 3.1.0.alpha"
 gem "stringex", "~> 1.1"
 gem 'miso', '~> 0.3.3'
 gem 'fire_and_forget', '~> 0.3.2'
