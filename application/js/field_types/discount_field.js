@@ -209,7 +209,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			if (url) {
 				if (/^https?:/.test(url)) {
 					url = url;
-				} else if (/^[a-z-]+\.([a-z-]+\.)*[a-z]{2,}$/i.exec(url)) { // look for urls without http:
+				} else if (/^[a-z-]+\.([a-z-]+\.)*[a-z]{2,}(\/[^ ]*)*$/i.exec(url)) { // look for urls without http:
 					url = 'http://' + url;
 				} else if (/^[^ @]+@([a-z-]+\.)+[a-z]{2,}$/i.exec(url)) { // email addresses
 					url = 'mailto:' + url;
@@ -274,9 +274,8 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
 			this.input.select(this.on_select.bind(this))
 			this.expanded = false;
-			var c = this.actions;
 			this.commands = [];
-			for (var i = 0, ii = c.length; i < ii; i++) {
+			for (var i = 0, c = this.actions, ii = c.length; i < ii; i++) {
 				var cmd_class = c[i], cmd = new cmd_class(this.input);
 				this.commands.push(cmd);
 				this._toolbar.append(cmd.button());
