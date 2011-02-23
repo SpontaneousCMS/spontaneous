@@ -1,3 +1,10 @@
+
+Naming:
+
+- 'Facet' -> 'Piece' @done
+- 'Slot' -> 'Box' @done
+- Make slots/boxes work like fields. Has far reaching consequences but I think the results will be bloody marvellous @done
+
 UI:
 - Browser feature detection
 - Loading progress @done
@@ -29,6 +36,16 @@ UI:
 - Preview mode is not using the edited URL of current page
 - Developer info (post User stuff)
 - Editing of page UID
+- Page publish/modification status
+- Piece publish/modification status
+- Markdown editor
+- Publishing interface @done
+- Aliasing interface
+- Fix for preview view not using updated url @done
+- Fix for preview view using cached version @done
+- Drag & drop updating of image in edit dialogue
+- Clearing of images
+- Move to top & bottom of slot
 
 Backend:
 
@@ -38,8 +55,12 @@ Backend:
 - Look into Text not rendering on Project pages @done
 - Look into inline image size definitions not working (see Project in example application) @done
 - Files should have their names sanitised @done
-- Move ALT text into image attributes?
-- Change 'default_value' do 'default' in field definitions
+- Change 'default_value' do 'default' in field definitions @done
+- Visibility needs to be in the JSON @done
+- Showability needs to be in the JSON
+- Rename the to_json calls to 'serialise' or something to avoid potential JSON format clashes
+- Page#show -> Page#request_show, Page#redirect -> Page#request-redirect ? Whatever, I need new names for these methods @done
+
 
 Templates:
 - {{ }}, {$ $}, {% %} ==> #{ }, ${ }, %{ } @done
@@ -47,7 +68,9 @@ Templates:
 - Cutaneous, "Of the skin" (.cut)? @done
 - Instantaneous, "Occurring, arising, or functioning without any delay" (.ins)? @done
 - Some useful handling of invalid tags in template
-- Look at fix for Spontaneous:: namespace (i.e. can't just use 'Site' have to use Spontaneous:Site)
+- Look at fix for Spontaneous:: namespace (i.e. can't just use 'Site' have to use Spontaneous::Site)
+- Generate a Page class that inherits from Spontaneous::Page
+- Set up a top level Site class that links to Spontaneous::Site
 - Switch to kramdown for markdown processing http://kramdown.rubyforge.org/index.html
 
 Preview:
@@ -63,14 +86,15 @@ Version 1.0:
 - Hiding UI
 - Aliasing @done
 - Aliasing UI
-- Users & permissions
+- Users & permissions @done
 - Generators
 - Prototypes @done
-- Test framework
+- Test framework (use MiniTest/TestMini)
 - Roles
 - Rendering of published content using pre-generated templates
 - Javascript & CSS compression (publishing)
 - Javascript & CSS compression (gem)
+- Schema IDs & migration
 
 
 Prototypes:
@@ -107,13 +131,12 @@ Publishing:
 	but currently assigning a lambda to a config option just means that lambda is called to return the result. Perhaps this would work?
 	Seems nasty.
 
-Comfig:
+Config:
 
-Current setup doesn't allow any room for non-value based config. i.e. there's no room for initialisation code in any of the config/* files
-Change environment.rb away from a config file, or add another initialisation file where you can run actual code?
-Wrap config settings in the environment/*.rb files in a call so that rest of file can run code-based init commands? See how rails3 does it...
-- Add 'initializers' dir (like rails3)
-- Wrap config settings in a call so that the env file can just be required rather than eval'd -- this will allow running of custom code in environment/*.rb (see e.g. problems with restart call after publication)
+- Current setup doesn't allow any room for non-value based config. i.e. there's no room for initialisation code in any of the config/* files @done
+- Change environment.rb away from a config file, or add another initialisation file where you can run actual code? Wrap config settings in the environment/*.rb files in a call so that rest of file can run code-based init commands? See how rails3 does it... @done
+- Wrap config settings in a call so that the env file can just be required rather than eval'd -- this will allow running of custom code in environment/*.rb (see e.g. problems with restart call after publication) @done
+- Add 'initializers' dir (like rails3)?
 - Update boot.rb to match style of that found in Rails3
 
 Command Line:
@@ -129,8 +152,8 @@ Design:
 
 Users & Permissions:
 
-- User editable/db driven groups (?)
-- Work out roles of User levels, groups & individual permissions. How to manage the code-db bridge? Levels:code, Groups:db?, Users:db
+- User editable/db driven groups (?) @done
+- Work out roles of User levels, groups & individual permissions. How to manage the code-db bridge? Levels:code, Groups:db?, Users:db @done
 
 	Perhaps page permissions should only address groups. Replace users in current model with groups. Like on unix, creating a user also creates a group of which they are the only member. That would enable ACL style access. If single-user-groups (SUGs) are flagged as such then interface becomes easier as list of real groups is not overwhelmed by these virtual SUGs.
 
@@ -150,12 +173,12 @@ See http://api.jquery.com/category/selectors/ for ideas
 Some examples:-
 
 	*																-> everything
-  /about > .Person								-> all content of type 'Person' on the page found at path /about
+  /about > Person								-> all content of type 'Person' on the page found at path /about
   #welcome@[1]										-> first slot on page with uid 'welcome'
   #welcome@[images,people]				-> slots 'images' and 'people' on page with uid 'welcome'
-  #welcome@[.Text]								-> all slots of type 'Text' on page #welcome
-  12 > .House[title~="Mouse"]			-> all content of type 'House' on page with id 12 whose 'title' field contains 'Mouse'
-	#projects .Image								-> all content on page with uid 'projects' and its child-pages of type 'Image'
+  #welcome@[Text]								-> all slots of type 'Text' on page #welcome
+  12 > House[title~="Mouse"]			-> all content of type 'House' on page with id 12 whose 'title' field contains 'Mouse'
+	#projects Image								-> all content on page with uid 'projects' and its child-pages of type 'Image'
 	#projects > *                   -> all content of page #projects
 
 What about selecting by slugs? What about selecting all pages & all non-pages?
@@ -163,10 +186,36 @@ What about selecting by slugs? What about selecting all pages & all non-pages?
  #*			-> every page
  #* > *  -> every non-page
 
+- Allow programatic refusal to perform certain actions using lambdas. E.g. if you want to disable the deletion of a particular type if it's not empty, then setting the permissions to that type as a lambda { return false unless entries.empty? } would stop accidental deletion
+
+- Actions:
+  * Field
+    * View
+    * Update
+  * Facet
+    * Edit (calculated -- if no fields have write permission then its not editable)
+  * Slots
+    * View - slots get special treatment, they are only editable from within the schema
+    * Add (per type)
+  * Entries
+    * View entry
+    * Add entry
+    * Delete entry
+    * Reorder entries
+    * Hide entry
+  * Pages
+    * View page
+    * Hide page
+    * Change path
+
+- Meta actions:
+  * user_level => [*all]
+  * edit       => [view, edit, add_entry]
+
 
 Sequel:
 
-- Creating associations without saving. Currently associations need the parent to have an id -- this sucks, especially for my ideas for prototypes
+- Creating associations without saving. Currently associations need the parent to have an id -- this sucks, especially for my ideas for prototypes @done
 
 Update Workflow:
 
@@ -189,3 +238,113 @@ Optimisation/Ideas:
 - Move to Active Support 3
 
 
+
+Versions:
+
+- Remove support for 1.8.6
+
+Smells:
+
+- Slot definitions -- very confusing @done
+- Default template choosing and styles in general. Too many old decisions messing things up.
+
+
+Rendering Rewrite:
+
+- Re-write template engine API @done
+
+
+
+Boxes:
+
+- Styles
+
+class ABoxClass < Box
+  inline_style :monkey
+  inline_style :crazy
+end
+
+class SomeContent
+  box :images
+  ## templates/some_content/images.html.cut
+  # OR if that template doesn't exist
+  ## <anonymous>
+
+
+  box :images do
+    inline_style :something
+  end
+  ## templates/some_content/something.html.cut
+  # OR if that template doesn't exist
+  ## templates/something.html.cut
+
+
+  # using the same template for multiple boxes
+
+  box :images, :style => :listy
+  box :more_images, :style => :listy
+
+  ## templates/some_content/listy.html.cut
+  # OR if that template doesn't exist
+  ## templates/listy.html.cut
+
+
+  box :images, :class => :ABoxClass
+
+  # chooses the box class's default style which is
+  ## templates/a_box_class/monkey.html.cut
+  # OR
+  ## templates/a_box_class.html.cut
+  # OR if that template doesn't exist
+  ## <anonymous>
+
+
+
+
+  # selecting an existing style on ABoxClass
+  box :images, :class => :ABoxClass, :style => :monkey
+
+  # templates/a_box_class/monkey.html.cut
+
+
+  box :images, :class => :ABoxClass
+    inline_style :naughty
+  end
+
+  ## templates/some_content/naughty.html.cut
+  # OR if that template doesn't exist
+  ## templates/naughty.html.cut
+end
+
+Pages:
+
+- Templates for mobile browsers e.g.
+
+  page_style :iphone, :user_agent => :iphone
+
+Have preconfigured user-agent regexps
+
+But, is this as useful as having template helpers that do the heavy lifting with CSS media queries? Both would be good: user-agent templates and CSS media query helpers AND user-agent template helpers
+
+Blog Posts:
+
+- A/B testing (using request_show). Can easily provide the code by having an 'examples' project on the spontaneous github acct (must look at easy ways to bootstrap sites from example code, shouldn't be hard)
+
+Search:
+
+- Have a configurable 'title' column in the db. Individual types can set this up using a 'title_field' call or by over-riding a method
+
+Publishing:
+
+- Have a check after someone has launched a publish to make sure that no-one has modified the site in between them viewing the publish list and hitting 'publish'. Not sure that this will be 100% reliable. Would have to check modified list of any new changes against modified list of changes included in publish. Would have to add a time to the info in the change list.
+
+Markdown:
+
+- Ranges fix themselves to strip whitespace and catch missed delimiters
+- Highlight active styles using Borders & background colours
+- Popup for links has tabs for local pages, URL entry & custom field linking (see above)
+- Not sure that Popup for links should be positioned over text - would move input area away from mouse arbitrarily. Perhaps instead of fixed toolbar I show a floating one with the actions? More difficult but would be great
+- Change font to Lucida Grande: helvetica is too fussy & letters too small for easy editing (need windows equivalent though)
+- Change selection colour based on selected text??
+- Resizing of textareas - perhaps automatically? Show as standard size initially but then resize to fit text on focus (and shrink on blur). Only grow during editing if amount of text changes significantly, say you can only see 50% of text. Textarea resizes up to some max height rather than just as big as the text. Max height determined by window size: no point having it bigger than window because you're just moving the need to scroll away from the textarea an into the window. 
+- Disable manual resizing of textarea in webkit & ff. 
