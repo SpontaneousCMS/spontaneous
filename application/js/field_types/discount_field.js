@@ -26,7 +26,6 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		execute: function() {
 			this.wrap();
-			return false;
 		},
 		wrap: function() {
 			var input = this.input, s = TextCommand.get_state(input), start = s.start, end = s.end,
@@ -52,13 +51,17 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		button: function() {
 			if (!this._button) {
-				var b = $(dom.a, {'class':this.name.toLowerCase()}).click(this.execute.bind(this)).text(this.name);
+				var b = $(dom.a, {'class':this.name.toLowerCase()}).click(function() {
+					this.execute();
+					return false;
+				}.bind(this)).text(this.name);
 				this._button = b;
 			}
 			return this._button;
 		},
 		respond_to_selection: function(state) {
 			if (this.matches_selection(state.selection)) {
+				console.log('matches', this.name)
 				this.button().addClass('active');
 			} else {
 				this.button().removeClass('active');
@@ -71,16 +74,52 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			return (selection.indexOf(this.pre) === 0 && selection.lastIndexOf(this.post) === (selection.length - this.post.length))
 		}
 	});
+
 	var Bold = new JS.Class(TextCommand, {
-		name: 'bold',
+		name: 'Bold',
 		pre: '**',
 		post: '**'
 	});
+
 	var Italic = new JS.Class(TextCommand, {
-		name: 'italic',
+		name: 'Italic',
 		pre: '_',
 		post: '_'
 	});
+	var Link = new JS.Class(TextCommand, {
+		name: 'Link',
+		link_matcher: /^\[([^\]]+)\]\(([^\)]+)\)$/,
+		surround: function(text, url) {
+			if (!url) {
+				url =  "http://example.com/";
+			}
+			var entered_url = window.prompt("Enter URL", url);
+			console.log(entered_url)
+			if (entered_url === null) {
+				// user hit 'Cancel'
+				entered_url = url;
+			}
+			if (entered_url === '') {
+				return text;
+			} else {
+				return '[' + text + '](' + entered_url + ')';
+			}
+		},
+		remove: function(text) {
+			// remove is mostly change
+			var m = this.link_matcher.exec(text), text = m[1], url = m[2]
+			return this.surround(text, url);
+		},
+		remove_link: function(text) {
+			// we know that the text must match the regexp for us to arrive here
+			var m = this.link_matcher.exec(text);
+			return m[1];
+		},
+		matches_selection: function(selection) {
+			return this.link_matcher.exec(selection);
+		}
+	});
+
 	var H1 = new JS.Class(TextCommand, {
 		name: "H1",
 		pre: '',
@@ -116,7 +155,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 	});
 
 	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {
-		actions: [Bold, Italic, H1, H2],
+		actions: [Bold, Italic, H1, H2, Link],
 		get_input: function() {
 			this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
 			return this.input;
