@@ -52,7 +52,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		button: function() {
 			if (!this._button) {
-				var b = $(dom.a, {'class':this.name}).click(this.execute.bind(this)).text(this.name);
+				var b = $(dom.a, {'class':this.name.toLowerCase()}).click(this.execute.bind(this)).text(this.name);
 				this._button = b;
 			}
 			return this._button;

@@ -12,8 +12,17 @@ module SeleniumTest
   def self.included(base)
     base.extend(ClassMethods)
   end
+  @@browser = nil
+
+  def browser
+    @@browser
+  end
 
   module ClassMethods
+    def browser
+      @@browser
+    end
+
     def startup
       Spontaneous::Permissions::User.delete
       @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
@@ -21,9 +30,20 @@ module SeleniumTest
       @user.save
       launch_selenium
       launch_site
+      @@browser = Selenium::Client::Driver.new(
+        :host => "localhost",
+        :port => SELENIUM_PORT,
+        :browser => "*firefox",
+        # :browser => "*firefox3/Applications/Firefox/Firefox3_5.app/Contents/MacOS/firefox-bin",
+        # :browser => "*chrome/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome",
+        :url => "http://localhost:2011/",
+        :timeout_in_second => 60
+      )
+      # @@browser.start_new_browser_session
     end
 
     def shutdown
+      # @@browser.close_current_browser_session
       kill_selenium
       kill_site
     end
@@ -82,20 +102,12 @@ module SeleniumTest
   end # ClassMethods
 
   def setup
-    @browser = Selenium::Client::Driver.new(
-      :host => "localhost",
-      :port => SELENIUM_PORT,
-      :browser => "*firefox",
-      # :browser => "*firefox3/Applications/Firefox/Firefox3_5.app/Contents/MacOS/firefox-bin",
-      # :browser => "*chrome/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome",
-      :url => "http://localhost:2011/",
-      :timeout_in_second => 60
-    )
-    @browser.start_new_browser_session
+    @browser = self.class.browser
+    self.class.browser.start_new_browser_session
   end
 
   def teardown
-    @browser.close_current_browser_session
+      self.class.browser.close_current_browser_session
   end
 
 end

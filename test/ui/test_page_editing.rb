@@ -25,12 +25,23 @@ class PageEditingTest < Test::Unit::TestCase
     end
   end
 
+  def select_text(_start, _end, _selector='field-description-1')
+    @browser.get_eval(<<-JS)
+        var el = window.document.getElementById('#{_selector}');
+        el.selectionStart = #{_start};
+        el.selectionEnd = #{_end};
+    JS
+  end
+
   context "Markdown text editor" do
     setup do
       @original_text = <<-ORIGINAL
 This is line 1.
 
 This is line 2. And this is line 2 too.
+
+But this is line 3.
+And this is line 4.
       ORIGINAL
       @browser.open("/@spontaneous#/1@edit")
       @browser.wait_for_element("css=#page-fields")
@@ -39,39 +50,105 @@ This is line 2. And this is line 2 too.
       @browser.type('name=field[description][unprocessed_value]', @original_text)
     end
 
-    should "wrap selected text in bold delimiters" do
+    should "embolden text" do
       _start = @original_text.index('line 1')
       _end   = _start + 6
-      @browser.get_eval(<<-JS)
-        var el = window.document.getElementById('field-description-1');
-        el.selectionStart = #{_start};
-        el.selectionEnd = #{_end};
-      JS
+      select_text(_start, _end)
       @browser.click("css=#editor-field-description-1 .md-toolbar a.bold")
       # @browser.wait_for_element("css=#nontingnhgd")
       @browser.value("css=#field-description-1").should == (<<-TXT).strip
-This is __line 1__.
+This is **line 1**.
 
 This is line 2. And this is line 2 too.
+
+But this is line 3.
+And this is line 4.
       TXT
-      # puts @browser.get_eval('window.document.getElementById("field-description-1").selectionStart')
-      # puts @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd')
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _start + 10
+
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.bold")
+      @browser.value("css=#field-description-1").should == @original_text.strip
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _end
     end
 
-    should "not add bold markers around empty selection" do
-      _start = @original_text.index('line 1')
-      _end   = _start + 6
-      @browser.get_eval(<<-JS)
-        var el = window.document.getElementById('field-description-1');
-        el.selectionStart = 0
-        el.selectionEnd = 0
-      JS
-      @browser.click("css=#editor-field-description-1 .md-toolbar a.bold")
+    should "italicise text" do
+      _start = @original_text.index('this is line 2')
+      _end   = _start + 14
+      select_text(_start, _end)
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.italic")
+      # @browser.wait_for_element("css=#nontingnhgd")
+      @browser.value("css=#field-description-1").should == (<<-TXT).strip
+This is line 1.
+
+This is line 2. And _this is line 2_ too.
+
+But this is line 3.
+And this is line 4.
+      TXT
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _start + 16
+
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.italic")
+      @browser.value("css=#field-description-1").should == @original_text.strip
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _end
+    end
+
+    should "add headers" do
+      _select = 'But this is line 3.'
+      _start = @original_text.index(_select)
+      _end   = _start + _select.length
+      select_text(_start, _end)
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.h1")
+      # @browser.wait_for_element("css=#nontingnhgd")
       @browser.value("css=#field-description-1").should == (<<-TXT).strip
 This is line 1.
 
 This is line 2. And this is line 2 too.
+
+But this is line 3.
+==============================
+And this is line 4.
       TXT
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _end + 31
+
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.h2")
+      @browser.value("css=#field-description-1").should == (<<-TXT).strip
+This is line 1.
+
+This is line 2. And this is line 2 too.
+
+But this is line 3.
+------------------------------
+And this is line 4.
+      TXT
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _end + 31
+
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.h2")
+      @browser.value("css=#field-description-1").should == @original_text.strip
+
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionStart').to_i.should == _start
+      @browser.get_eval('window.document.getElementById("field-description-1").selectionEnd').to_i.should == _end
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.h1")
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.h1")
+      @browser.value("css=#field-description-1").should == @original_text.strip
+    end
+
+
+    should "not alter empty selection" do
+      select_text(0, 0)
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.bold")
+      @browser.value("css=#field-description-1").should == @original_text.strip
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.italic")
+      @browser.value("css=#field-description-1").should == @original_text.strip
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.h1")
+      @browser.value("css=#field-description-1").should == @original_text.strip
+      @browser.click("css=#editor-field-description-1 .md-toolbar a.h2")
+      @browser.value("css=#field-description-1").should == @original_text.strip
     end
   end
 end
