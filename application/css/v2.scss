@@ -14,6 +14,7 @@ $highlight_b: 3;
 $error: #f00;
 
 $content-font-family:  "HelveticaNeue", "Helvetica Neue", "FrutigerLTStd-Light", "Frutiger LT Std 45 Light";
+$input-font-family:  "Lucida Grande";
 $headline-font-family:   "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "FrutigerLTStd-Light", "Frutiger LT Std";
 $interface-font-family: "HelveticaNeue", "Helvetica Neue", "FrutigerLTStd-Roman", "Frutiger LT Std";
 /*$interface-font-family: "Helvetica";*/
@@ -928,9 +929,9 @@ img.missing {
       padding: 6px;
       background-color: white;
       textarea, input[type="text"] {
-        font-family: $content-font-family;
-        font-size: 12px;
-        line-height: 15px;
+        font-family: $input-font-family;
+        font-size: 11px;
+        line-height: 14px;
         outline: none; }
       input[type="file"] {
         visibility: hidden;
