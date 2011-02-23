@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Garry Hill"]
-  s.date = %q{2011-02-10}
+  s.date = %q{2011-02-23}
   s.description = %q{TODO: longer description of your gem}
   s.email = %q{garry@magnetised.info}
   s.executables = ["unlimit-upload", "nginx", "spot", "unicorn", "limit-upload", "console", "back"]
@@ -22,6 +22,8 @@ Gem::Specification.new do |s|
     "application/css/v2.less",
     "application/css/variables.less",
     "application/js/ajax.js",
+    "application/js/box.js",
+    "application/js/box_container.js",
     "application/js/compatibility.js",
     "application/js/content.js",
     "application/js/content_area.js",
@@ -46,10 +48,9 @@ Gem::Specification.new do |s|
     "application/js/preview.js",
     "application/js/progress.js",
     "application/js/properties.js",
+    "application/js/publish.js",
     "application/js/require.js",
     "application/js/side_bar.js",
-    "application/js/slot.js",
-    "application/js/slot_container.js",
     "application/js/spontaneous.js",
     "application/js/state.js",
     "application/js/status_bar.js",
@@ -99,7 +100,9 @@ Gem::Specification.new do |s|
     "application/js/vendor/JS.Class-2.1.5/src/stdlib.js",
     "application/js/vendor/jquery-1.4.2.min.js",
     "application/js/vendor/jquery-1.4.3.min.js",
+    "application/js/vendor/jquery-1.5.1rc1.min.js",
     "application/js/vendor/jquery-ui-1.8.6.custom.min.js",
+    "application/js/vendor/jquery-ui-1.8.9.custom.min.js",
     "application/js/vendor/jquery-ui-1.8.custom.min.js",
     "application/js/vendor/jquery.hotkeys-0.7.9.js",
     "application/js/vendor/jquery.hotkeys-0.7.9.min.js",
@@ -115,6 +118,7 @@ Gem::Specification.new do |s|
     "application/static/splash.png",
     "application/static/spontaneous.png",
     "application/views/index.erubis",
+    "application/views/login.erubis",
     "bin/back",
     "bin/console",
     "bin/limit-upload",
@@ -129,6 +133,7 @@ Gem::Specification.new do |s|
     "db/migrations/20101206124543_aliases.rb",
     "db/migrations/20110201133550_visibility.rb",
     "db/migrations/20110209152710_users_and_groups.rb",
+    "db/migrations/20110215133910_boxes.rb",
     "lib/cutaneous.rb",
     "lib/cutaneous/context_helper.rb",
     "lib/cutaneous/first_pass_parser.rb",
@@ -144,6 +149,8 @@ Gem::Specification.new do |s|
     "lib/sequel/plugins/content_table_inheritance.rb",
     "lib/sequel/plugins/yajl_serialization.rb",
     "lib/spontaneous.rb",
+    "lib/spontaneous/box.rb",
+    "lib/spontaneous/box_prototype.rb",
     "lib/spontaneous/change.rb",
     "lib/spontaneous/change_set.rb",
     "lib/spontaneous/cli/adapter.rb",
@@ -152,6 +159,7 @@ Gem::Specification.new do |s|
     "lib/spontaneous/config.rb",
     "lib/spontaneous/constants.rb",
     "lib/spontaneous/content.rb",
+    "lib/spontaneous/content_query.rb",
     "lib/spontaneous/entry.rb",
     "lib/spontaneous/entry_set.rb",
     "lib/spontaneous/errors.rb",
@@ -161,7 +169,6 @@ Gem::Specification.new do |s|
     "lib/spontaneous/extensions/json.rb",
     "lib/spontaneous/extensions/object.rb",
     "lib/spontaneous/extensions/string.rb",
-    "lib/spontaneous/facet.rb",
     "lib/spontaneous/field_types.rb",
     "lib/spontaneous/field_types/base.rb",
     "lib/spontaneous/field_types/date_field.rb",
@@ -185,6 +192,7 @@ Gem::Specification.new do |s|
     "lib/spontaneous/generators/site/config/environments/development.rb.tt",
     "lib/spontaneous/generators/site/config/environments/production.rb.tt",
     "lib/spontaneous/generators/site/config/front.ru",
+    "lib/spontaneous/generators/site/config/user_levels.yml",
     "lib/spontaneous/generators/site/lib/tasks/site.rake.tt",
     "lib/spontaneous/generators/site/public/css/site.css",
     "lib/spontaneous/generators/site/public/favicon.ico",
@@ -196,17 +204,22 @@ Gem::Specification.new do |s|
     "lib/spontaneous/image_size.rb",
     "lib/spontaneous/logger.rb",
     "lib/spontaneous/media.rb",
+    "lib/spontaneous/named_set.rb",
     "lib/spontaneous/page.rb",
     "lib/spontaneous/page_entry.rb",
+    "lib/spontaneous/permissions.rb",
     "lib/spontaneous/permissions/access_group.rb",
+    "lib/spontaneous/permissions/access_key.rb",
     "lib/spontaneous/permissions/user.rb",
     "lib/spontaneous/permissions/user_level.rb",
+    "lib/spontaneous/piece.rb",
     "lib/spontaneous/plugins.rb",
     "lib/spontaneous/plugins/aliases.rb",
     "lib/spontaneous/plugins/allowed_types.rb",
     "lib/spontaneous/plugins/application/paths.rb",
     "lib/spontaneous/plugins/application/render.rb",
     "lib/spontaneous/plugins/application/state.rb",
+    "lib/spontaneous/plugins/boxes.rb",
     "lib/spontaneous/plugins/entries.rb",
     "lib/spontaneous/plugins/fields.rb",
     "lib/spontaneous/plugins/fields/field_prototype.rb",
@@ -218,6 +231,7 @@ Gem::Specification.new do |s|
     "lib/spontaneous/plugins/page_styles.rb",
     "lib/spontaneous/plugins/page_tree.rb",
     "lib/spontaneous/plugins/paths.rb",
+    "lib/spontaneous/plugins/permissions.rb",
     "lib/spontaneous/plugins/prototypes.rb",
     "lib/spontaneous/plugins/publishing.rb",
     "lib/spontaneous/plugins/render.rb",
@@ -225,10 +239,6 @@ Gem::Specification.new do |s|
     "lib/spontaneous/plugins/schema_title.rb",
     "lib/spontaneous/plugins/site/publishing.rb",
     "lib/spontaneous/plugins/site_map.rb",
-    "lib/spontaneous/plugins/slots.rb",
-    "lib/spontaneous/plugins/slots/slot.rb",
-    "lib/spontaneous/plugins/slots/slot_definitions.rb",
-    "lib/spontaneous/plugins/slots/slot_set.rb",
     "lib/spontaneous/plugins/styles.rb",
     "lib/spontaneous/plugins/visibility.rb",
     "lib/spontaneous/proxy_object.rb",
@@ -253,7 +263,6 @@ Gem::Specification.new do |s|
     "lib/spontaneous/render/published_renderer.rb",
     "lib/spontaneous/render/publishing_renderer.rb",
     "lib/spontaneous/render/renderer.rb",
-    "lib/spontaneous/render_context.rb",
     "lib/spontaneous/render_format_proxy.rb",
     "lib/spontaneous/revision.rb",
     "lib/spontaneous/schema.rb",
@@ -268,6 +277,9 @@ Gem::Specification.new do |s|
     "lib/spontaneous/templates/template_base.rb",
     "lib/spontaneous/version.rb",
     "spontaneous.gemspec",
+    "test/disabled/test_slots.rb",
+    "test/experimental/test_authentication.rb",
+    "test/experimental/test_boxes.rb",
     "test/experimental/test_permissions.rb",
     "test/fixtures/application/css/test.less",
     "test/fixtures/application/js/test.js",
@@ -280,6 +292,7 @@ Gem::Specification.new do |s|
     "test/fixtures/config/config/environments/staging.rb",
     "test/fixtures/example_application/Gemfile",
     "test/fixtures/example_application/Gemfile.lock",
+    "test/fixtures/example_application/Rakefile",
     "test/fixtures/example_application/config/back.rb",
     "test/fixtures/example_application/config/back.ru",
     "test/fixtures/example_application/config/back.yml",
@@ -293,6 +306,7 @@ Gem::Specification.new do |s|
     "test/fixtures/example_application/config/front.ru",
     "test/fixtures/example_application/config/front.yml",
     "test/fixtures/example_application/config/unicorn.rb",
+    "test/fixtures/example_application/config/user_levels.yml",
     "test/fixtures/example_application/public/css/test.css",
     "test/fixtures/example_application/public/favicon.ico",
     "test/fixtures/example_application/public/js/test.js",
@@ -326,6 +340,7 @@ Gem::Specification.new do |s|
     "test/fixtures/images/size.png8",
     "test/fixtures/media/101/003/rose.jpg",
     "test/fixtures/permissions/config/user_levels.yml",
+    "test/fixtures/permissions/media/image.jpg",
     "test/fixtures/public/templates/site_page/default.html.cut",
     "test/fixtures/public/templates/site_page/default.pdf.cut",
     "test/fixtures/public/templates/site_page/dynamic.html.cut",
@@ -334,6 +349,8 @@ Gem::Specification.new do |s|
     "test/fixtures/templates/aliases/b/page.html.cut",
     "test/fixtures/templates/aliases/b_alias/alternate.html.cut",
     "test/fixtures/templates/aliases/c_alias/page.html.cut",
+    "test/fixtures/templates/boxes/my_box_class/christy.html.cut",
+    "test/fixtures/templates/boxes/with_template_box.html.cut",
     "test/fixtures/templates/content/include.html.cut",
     "test/fixtures/templates/content/include_dir.html.cut",
     "test/fixtures/templates/content/included.epub.cut",
@@ -368,9 +385,12 @@ Gem::Specification.new do |s|
     "test/fixtures/templates/template_class/this_template.html.cut",
     "test/fixtures/templates/template_class/this_template.pdf.cut",
     "test/fixtures/templates/template_params/page_style.html.cut",
+    "test/fixtures/templates/with_default_style_class.html.cut",
     "test/functional/test_application.rb",
     "test/functional/test_back.rb",
     "test/functional/test_front.rb",
+    "test/slow/test_publishing.rb",
+    "test/slow/test_visibility.rb",
     "test/support/custom_matchers.rb",
     "test/support/timing.rb",
     "test/test_helper.rb",
@@ -383,7 +403,6 @@ Gem::Specification.new do |s|
     "test/unit/test_content.rb",
     "test/unit/test_content_inheritance.rb",
     "test/unit/test_extensions.rb",
-    "test/unit/test_facet.rb",
     "test/unit/test_fields.rb",
     "test/unit/test_generators.rb",
     "test/unit/test_image_size.rb",
@@ -391,16 +410,14 @@ Gem::Specification.new do |s|
     "test/unit/test_logger.rb",
     "test/unit/test_media.rb",
     "test/unit/test_page.rb",
+    "test/unit/test_piece.rb",
     "test/unit/test_prototypes.rb",
-    "test/unit/test_publishing.rb",
     "test/unit/test_render.rb",
     "test/unit/test_schema.rb",
     "test/unit/test_serialisation.rb",
     "test/unit/test_site.rb",
-    "test/unit/test_slots.rb",
     "test/unit/test_styles.rb",
     "test/unit/test_templates.rb",
-    "test/unit/test_visibility.rb",
     "todo.taskpaper"
   ]
   s.homepage = %q{http://spontaneouscms.org}
@@ -409,6 +426,9 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.6}
   s.summary = %q{TODO: one-line summary of your gem}
   s.test_files = [
+    "test/disabled/test_slots.rb",
+    "test/experimental/test_authentication.rb",
+    "test/experimental/test_boxes.rb",
     "test/experimental/test_permissions.rb",
     "test/fixtures/config/config/environment.rb",
     "test/fixtures/config/config/environments/development.rb",
@@ -434,6 +454,8 @@ Gem::Specification.new do |s|
     "test/functional/test_application.rb",
     "test/functional/test_back.rb",
     "test/functional/test_front.rb",
+    "test/slow/test_publishing.rb",
+    "test/slow/test_visibility.rb",
     "test/support/custom_matchers.rb",
     "test/support/timing.rb",
     "test/test_helper.rb",
@@ -446,7 +468,6 @@ Gem::Specification.new do |s|
     "test/unit/test_content.rb",
     "test/unit/test_content_inheritance.rb",
     "test/unit/test_extensions.rb",
-    "test/unit/test_facet.rb",
     "test/unit/test_fields.rb",
     "test/unit/test_generators.rb",
     "test/unit/test_image_size.rb",
@@ -454,16 +475,14 @@ Gem::Specification.new do |s|
     "test/unit/test_logger.rb",
     "test/unit/test_media.rb",
     "test/unit/test_page.rb",
+    "test/unit/test_piece.rb",
     "test/unit/test_prototypes.rb",
-    "test/unit/test_publishing.rb",
     "test/unit/test_render.rb",
     "test/unit/test_schema.rb",
     "test/unit/test_serialisation.rb",
     "test/unit/test_site.rb",
-    "test/unit/test_slots.rb",
     "test/unit/test_styles.rb",
-    "test/unit/test_templates.rb",
-    "test/unit/test_visibility.rb"
+    "test/unit/test_templates.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -482,6 +501,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<rack>, [">= 0"])
       s.add_runtime_dependency(%q<thin>, ["~> 1.2"])
       s.add_runtime_dependency(%q<less>, ["~> 1.2"])
+      s.add_runtime_dependency(%q<sass>, ["~> 3.1.0.alpha"])
       s.add_runtime_dependency(%q<stringex>, ["~> 1.1"])
       s.add_runtime_dependency(%q<miso>, ["~> 0.3.3"])
       s.add_runtime_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
@@ -511,6 +531,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rack>, [">= 0"])
       s.add_dependency(%q<thin>, ["~> 1.2"])
       s.add_dependency(%q<less>, ["~> 1.2"])
+      s.add_dependency(%q<sass>, ["~> 3.1.0.alpha"])
       s.add_dependency(%q<stringex>, ["~> 1.1"])
       s.add_dependency(%q<miso>, ["~> 0.3.3"])
       s.add_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
@@ -541,6 +562,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rack>, [">= 0"])
     s.add_dependency(%q<thin>, ["~> 1.2"])
     s.add_dependency(%q<less>, ["~> 1.2"])
+    s.add_dependency(%q<sass>, ["~> 3.1.0.alpha"])
     s.add_dependency(%q<stringex>, ["~> 1.1"])
     s.add_dependency(%q<miso>, ["~> 0.3.3"])
     s.add_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
