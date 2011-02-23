@@ -1,4 +1,5 @@
 console.log('Loading DiscountField...')
+
 Spontaneous.FieldTypes.DiscountField = (function($, S) {
 	var dom = S.Dom;
 	var TextCommand = new JS.Class({
@@ -141,7 +142,19 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			return o
 		},
 		view: function() {
-			var w = $(dom.div), text_input = $(dom.input).val(this.link_text), url_input = $(dom.input).val(this.url),
+			var __view = this, w = $(dom.div), text_input, url_input;
+			var input = function(value) {
+				var i = $(dom.input).keypress(function(event) {
+					if (event.charCode === 13) {
+						__view.insert_link(text_input, url_input); // sick
+						return false;
+					}
+				}).val(value)
+				return i;
+			}
+			text_input = input(this.link_text);
+			url_input = input(this.url);
+
 			cancel = $(dom.a, {'class':'button cancel'}).text('Cancel').click(function() {
 				this.close();
 				return false;
@@ -151,10 +164,10 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			}.bind(this))
 			w.append($(dom.p).append(text_input)).append($(dom.p).append(url_input));
 			w.append($(dom.p).append(cancel).append(insert));
+			url_input.select();
 			return w;
 		},
 		insert_link: function(text, url) {
-			console.log('inserting', text.val(), url.val())
 			this.editor.insert_link(text.val(), url.val());
 			this.close();
 		},
@@ -178,7 +191,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 				url = m[2];
 			}
 			if (!this._dialogue) {
-				this._dialogue = Spontaneous.Popover.open(event, new LinkView(this, text, url));
+				this._dialogue = Spontaneous.Popover.open(event, new LinkView(this, text, this.preprocess_url(text, url)));
 			} else {
 				this._dialogue.close();
 				this._dialogue = null;
@@ -186,9 +199,19 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			this.input.focus();
 			return false;
 		},
-
+		preprocess_url: function(text, url) {
+			if (!url) {
+				if (/^https?:/.test(text)) {
+					url = text;
+				} else if (/^[a-z-]+\.([a-z-]+\.)*[a-z]{2,}$/i.exec(text)) { // look for urls without http:
+					url = 'http://' + text;
+				} else if (/^[^ @]+@([a-z-]+\.)+[a-z]{2,}$/i.exec(text)) { // email addresses
+					url = 'mailto:' + text;
+				}
+			}
+			return url;
+		},
 		dialogue_closed: function() {
-			console.log('dialogue_closed')
 			this._dialogue = null;
 			this.input.focus();
 		},
@@ -241,7 +264,6 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		// iterates through all the buttons and lets them highlight themselves depending on the
 		// currently selected text
 		on_select: function(event) {
-			console.log(event)
 			var state = TextCommand.get_state(this.input);
 			$.each(this.commands, function() {
 				this.respond_to_selection(state);
