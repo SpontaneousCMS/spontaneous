@@ -201,12 +201,20 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		preprocess_url: function(text, url) {
 			if (!url) {
-				if (/^https?:/.test(text)) {
-					url = text;
-				} else if (/^[a-z-]+\.([a-z-]+\.)*[a-z]{2,}$/i.exec(text)) { // look for urls without http:
-					url = 'http://' + text;
-				} else if (/^[^ @]+@([a-z-]+\.)+[a-z]{2,}$/i.exec(text)) { // email addresses
-					url = 'mailto:' + text;
+				url = this.postprocess_url(String(text)) || '';
+			}
+			return url;
+		},
+		postprocess_url: function(url) {
+			if (url) {
+				if (/^https?:/.test(url)) {
+					url = url;
+				} else if (/^[a-z-]+\.([a-z-]+\.)*[a-z]{2,}$/i.exec(url)) { // look for urls without http:
+					url = 'http://' + url;
+				} else if (/^[^ @]+@([a-z-]+\.)+[a-z]{2,}$/i.exec(url)) { // email addresses
+					url = 'mailto:' + url;
+				} else {
+					return false
 				}
 			}
 			return url;
@@ -216,6 +224,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			this.input.focus();
 		},
 		insert_link: function(text, url) {
+			url = this.postprocess_url(url) || url;
 			var edit = function(input_text) {
 				return this.surround_with_link(text, url);
 			}.bind(this);
