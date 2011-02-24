@@ -44,31 +44,52 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		get_state: function() {
 			return TextCommand.get_state(this.input);
 		},
-		fix_selection: function() {
-			var state = this.get_state(), selected = state.selection, m, start = state.start, end = state.end;
-			console.log('fix_selection', state, "'"+selected+"'");
+		fix_selection_whitespace: function(selected) {
+			var m, d_start = 0, d_end = 0, l;
 			m = /^( +)/.exec(selected);
 			if (m) {
 				console.log('found whitespace before', selected, m[1], m[1].length)
-				start += m[1].length
-				selected = selected.substr(1);
+				l = m[1].length
+				d_start = l;
+				selected = selected.substr(l);
 			}
 			m = /( +)$/.exec(selected);
 			if (m) {
 				console.log('found whitespace after', selected)
-				end -= m[1].length
-				selected = selected.substr(0, selected.length-1);
+				l = m[1].length
+				d_end = -l;
+				selected = selected.substr(0, selected.length-l);
 			}
+			return {ds: d_start, de: d_end, selected: selected};
+		},
+		fix_selection: function() {
+			var state = this.get_state(), selected = state.selection, m, start = state.start, end = state.end, ws;
+			console.log('fix_selection', state, "'"+selected+"'", start, end);
+			ws = this.fix_selection_whitespace(selected)
+			start += ws.ds;
+			end += ws.de;
+			selected = ws.selected;
+			console.log('after whitespace', selected, start, end)
 			if (selected.indexOf(this.pre) !== 0) {
-				if (state.before.substr(-1) === this.pre.substr(0, 1)) {
-					start -= 1;
-					selected = this.pre.substr(0, 1) + selected;
+				var sel;
+				for (var i = 0, ii = this.pre.length; i < ii; i++) {
+					sel = state.before.substr(-(i+1)) + selected;
+					if (sel.indexOf(this.pre) === 0) {
+						start -= (i+1);
+						selected = sel;
+						break;
+					}
 				}
 			}
 			if (selected.substr(-this.post.length) !== this.post) {
-				if (state.after.substr(0, 1) === this.post.substr(0, 1)) {
-					end += 1;
-					selected += this.post.substr(0, 1);
+				var sel;
+				for (var i = 0, ii = this.post.length; i < ii; i++) {
+					sel = selected + state.after.substr(0, (i+1));
+					if (sel.substr(-this.post.length) === this.post) {
+						end += (i+1);
+						selected = sel;
+						break;
+					}
 				}
 			}
 			this.input[0].setSelectionRange(start, end);
