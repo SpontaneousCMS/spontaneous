@@ -170,6 +170,40 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		// matches only the current header class
 		matches_selection: function(selection) {
 			return (new RegExp('[\r\n]'+this.post+'+[\r\n ]*$')).exec(selection)
+		},
+		fix_selection: function() {
+			var state = this.get_state(), selected = state.selection, m, start = state.start, end = state.end, ws;
+			console.log('h* fix selection', "'"+selected+"'")
+			var br = /\r?\n/, lines = selected.split(br), underline = new RegExp('^[=-]+$'), found = false;
+			for (var i = 0, ii = lines.length; i < ii; i++) {
+				var l = lines[i];
+				if (underline.test(l)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				// expand selection down by one line
+				lines = state.after.split(br, 2);
+				console.log('searching in', lines)
+				for (var i = 0, ii = lines.length; i < ii; i++) {
+					var l = lines[i];
+					if (underline.test(l)) {
+						end += l.length + i;
+						break;
+					}
+				}
+				this.input[0].setSelectionRange(start, end);
+			} else {
+				// make sure that we have the whole of the underline included in the selection
+				var r = new RegExp('^([=-]+)'), m = r.exec(state.after);
+				if (m) {
+					var extra = m[1];
+					end += extra.length;
+					this.input[0].setSelectionRange(start, end);
+				}
+			}
+			return TextCommand.get_state(this.input);
 		}
 	});
 
