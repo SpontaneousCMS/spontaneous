@@ -153,7 +153,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		surround: function(text) {
 			// remove existing header (which must be different from this version)
 			if (this.matches_removal(text)) { text = this.remove(text); }
-			var line = '', n = Math.max(text.length, 30), newline = /([\r\n]+)$/, newlines = newline.exec(text), undef;
+			var line = '', n = Math.floor(this.input.attr('cols')*0.5), newline = /([\r\n]+)$/, newlines = newline.exec(text), undef;
 			newlines = (!newlines || (newlines === undef) ? "" : newlines[1])
 			for (var i = 0; i < n; i++) { line += this.post; }
 			return text.replace(newline, '') + "\n" + line + newlines;
@@ -173,16 +173,14 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		fix_selection: function() {
 			var state = this.get_state(), selected = state.selection, m, start = state.start, end = state.end, br = /\r?\n/;
-			console.log('h* fix selection', "'"+selected+"'")
 			if ((end - start) === 0) {
 				// expand to select current line
-				console.log('no selection')
-				m = /\r?\n(.+)/.exec(state.before);
+				m = /(.+)$/.exec(state.before);
 				if (m) {
 					var s = m[1];
 					start -= s.length;
 				}
-				m = /(.+)\r?\n/.exec(state.after);
+				m = /^(.+)/.exec(state.after);
 				if (m) {
 					var s = m[1];
 					end += s.length;
@@ -199,7 +197,6 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			if (!found) {
 				// expand selection down by one line
 				lines = state.after.split(br, 2);
-				console.log('searching in', lines)
 				for (var i = 0, ii = lines.length; i < ii; i++) {
 					var l = lines[i];
 					if (underline.test(l)) {
@@ -304,6 +301,22 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			this.input.focus();
 			return false;
 		},
+		fix_selection: function() {
+			if (!this.matches_selection(selected)) {
+				var state = this.get_state(), selected = state.selection, m, start = state.start, end = state.end;
+				m = /(\[.*)$/.exec(state.before);
+					if (m) {
+						start -= m[1].length;
+					}
+					// TODO: this breaks if ')' in URL...
+					m = /(^[^\)]*?\))/.exec(state.after);
+					if (m) {
+						end += m[1].length;
+					}
+					this.input[0].setSelectionRange(start, end);
+			}
+			return this.get_state();
+		},
 		preprocess_url: function(text, url) {
 			if (!url) {
 				url = this.postprocess_url(String(text)) || '';
@@ -376,7 +389,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		edit: function() {
 			this._wrapper = $(dom.div, {'class':'markdown-editor', 'id':'editor-'+this.css_id()});
 			this._toolbar = $(dom.div, {'class':'md-toolbar'});
-			this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
+			this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':90}).text(this.unprocessed_value());
 			this.input.select(this.on_select.bind(this))
 			this.expanded = false;
 			this.commands = [];
