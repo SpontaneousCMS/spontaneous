@@ -445,6 +445,10 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {
 		actions: [Bold, Italic, H1, H2, UL, OL, Link],
 		get_input: function() {
+			if (!this.input) {
+				this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':90}).text(this.unprocessed_value());
+				this.input.select(this.on_select.bind(this)).click(this.on_select.bind(this))
+			}
 			return this.input;
 		},
 		on_focus: function() {
@@ -461,20 +465,22 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			this.expanded = false;
 			this.callSuper();
 		},
-		edit: function() {
+		toolbar: function() {
 			this._wrapper = $(dom.div, {'class':'markdown-editor', 'id':'editor-'+this.css_id()});
 			this._toolbar = $(dom.div, {'class':'md-toolbar'});
-			this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':90}).text(this.unprocessed_value());
-			this.input.select(this.on_select.bind(this)).click(this.on_select.bind(this))
-			this.expanded = false;
 			this.commands = [];
 			for (var i = 0, c = this.actions, ii = c.length; i < ii; i++) {
-				var cmd_class = c[i], cmd = new cmd_class(this.input);
+				var cmd_class = c[i], cmd = new cmd_class(this.get_input());
 				this.commands.push(cmd);
 				this._toolbar.append(cmd.button());
 			}
-			this._wrapper.append(this._toolbar).append(this.input)
+			this._wrapper.append(this._toolbar);
 			return this._wrapper;
+		},
+		edit: function() {
+			this.expanded = false;
+			// this._wrapper.append(this.input)
+			return this.get_input();
 		},
 		// iterates through all the buttons and lets them highlight themselves depending on the
 		// currently selected text

@@ -66,6 +66,12 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		edit: function() {
 			return this.get_input();
 		},
+		toolbar: function() {
+			return false;
+		},
+		footer: function() {
+			return false;
+		},
 		on_focus: function() {
 			$(this.input).parents('.field').first().addClass('focus');
 		},

@@ -112,8 +112,16 @@ Spontaneous.EditDialogue = (function($, S) {
 		field_edit: function(field) {
 			var d = $(dom.div, {'class':'field'});
 			d.append($(dom.label, {'class':'name', 'for':field.css_id()}).html(field.label()));
+			var toolbar = field.toolbar();
+			if (toolbar) {
+				d.append($(dom.div, {'class':'toolbar'}).html(toolbar));
+			}
 			var edit = field.edit();
 			d.append($(dom.div, {'class':'value'}).html(edit));
+			var footer = field.footer();
+			if (footer) {
+				d.append($(dom.div, {'class':'footer'}).html(footer));
+			}
 			return d;
 		}
 	});
