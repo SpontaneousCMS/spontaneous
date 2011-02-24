@@ -48,14 +48,12 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			var m, d_start = 0, d_end = 0, l;
 			m = /^( +)/.exec(selected);
 			if (m) {
-				console.log('found whitespace before', selected, m[1], m[1].length)
 				l = m[1].length
 				d_start = l;
 				selected = selected.substr(l);
 			}
 			m = /( +)$/.exec(selected);
 			if (m) {
-				console.log('found whitespace after', selected)
 				l = m[1].length
 				d_end = -l;
 				selected = selected.substr(0, selected.length-l);
@@ -64,12 +62,10 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		expand_selection: function(state) {
 			var selected = state.selection, m, start = state.start, end = state.end, ws;
-			console.log('fix_selection', state, "'"+selected+"'", start, end);
 			ws = this.fix_selection_whitespace(selected)
 			start += ws.ds;
 			end += ws.de;
 			selected = ws.selected;
-			console.log('after whitespace', selected, start, end)
 			if (selected.indexOf(this.pre) !== 0) {
 				var sel;
 				for (var i = 0, ii = this.pre.length; i < ii; i++) {
@@ -97,7 +93,6 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		fix_selection: function() {
 			var state = this.get_state(), change = this.expand_selection(state)
 			$.extend(state, change);
-			console.log('changed', [change.selection], change);
 			this.update_state(state);
 			return this.get_state();
 		},
@@ -125,9 +120,9 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		respond_to_selection: function(state) {
 			var expanded = this.expand_selection(state);
-			console.log('>>>>> ', this.name, 'expanded', expanded.selection, this.matches_selection(expanded.selection));
+			// console.log('>>>>> ', this.name, 'expanded', expanded.selection, this.matches_selection(expanded.selection));
 			if (this.matches_selection(expanded.selection)) {
-				console.log('matches', this.name)
+				// console.log('matches', this.name)
 				this.button().addClass('active');
 				return true;
 			} else {
@@ -161,6 +156,69 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		pre: '_',
 		post: '_'
 	});
+
+	var UL = new JS.Class(TextCommand, {
+		name: 'UL',
+		pre: '*',
+		post: '',
+		br: /\r?\n/,
+		strip_bullet: /^ *(\d+\.|\*) */,
+		is_list_entry:/(?:\r?\n)( *\*.+?)$/,
+		surround: function(text) {
+			var lines = text.split(this.br);
+			for (var i = 0, ii = lines.length; i < ii; i++) {
+				if (/^\s*$/.test(lines[i])) {
+				} else {
+					lines[i] = this.bullet_for(i) + lines[i].replace(this.strip_bullet, '');
+				}
+			}
+			return lines.join("\n")
+		},
+		remove: function(text) {
+			var lines = text.split(this.br);
+			for (var i = 0, ii = lines.length; i < ii; i++) {
+				lines[i] = lines[i].replace(this.strip_bullet, '');
+			}
+			return lines.join("\n")
+		},
+		expand_selection: function(state) {
+			var selected = (state.selection || ''), m, start = state.start, end = state.end, br = /\r?\n/;
+			if (!this.matches_selection(selected)) {
+				m = this.strip_bullet.exec(selected);
+				if (!m) {
+					m = this.is_list_entry.exec(state.before);
+					if (m) {
+						start -= m[1].length;
+						selected = m[1] + selected;
+						m = /^(.*?)(?:\r?\n)/.exec(state.after);
+						if (m) {
+							end += m[1].length;
+							selected += m[1];
+						}
+					}
+				}
+			}
+			return {selection:selected, start:start, end:end};
+		},
+		bullet_for: function(n) {
+			return "* ";
+		},
+		matches_selection: function(selection) {
+			return /^ *\*/.test(selection)
+		}
+
+	});
+	var OL = new JS.Class(UL, {
+		name: 'OL',
+		is_list_entry:/(?:\r?\n)( *\d+\..+?)$/,
+		bullet_for: function(n) {
+			return (n+1)+". ";
+		},
+		matches_selection: function(selection) {
+			return /^ *\d+\./.test(selection)
+		}
+	});
+
 	var H1 = new JS.Class(TextCommand, {
 		name: "H1",
 		pre: '',
@@ -245,7 +303,6 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 
 	var LinkView = new JS.Class(Spontaneous.PopoverView, {
 		initialize: function(editor, link_text, url) {
-			console.log('LinkView', link_text, url)
 			this.editor = editor;
 			this.link_text = link_text;
 			this.url = url;
@@ -258,7 +315,6 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			var t = $(event.currentTarget), o = t.offset();
 			o.top += t.outerHeight();
 			o.left += t.outerWidth() / 2;
-			console.log(event.currentTarget, t.offset());
 			return o
 		},
 		view: function() {
@@ -387,7 +443,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 	});
 
 	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {
-		actions: [Bold, Italic, H1, H2, Link],
+		actions: [Bold, Italic, H1, H2, UL, OL, Link],
 		get_input: function() {
 			return this.input;
 		},
