@@ -59,12 +59,17 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		label: function() {
 			return this.title;
 		},
-		get_input: function() {
-			this.input = $(dom.input, {'type':'text', 'id':this.css_id(), 'name':this.form_name(), 'value':this.unprocessed_value()})
-			return this.input;
+		input: function() {
+			if (!this._input) {
+				this._input = $(dom.input, {'type':'text', 'id':this.css_id(), 'name':this.form_name(), 'value':this.unprocessed_value()})
+			}
+			return this._input;
+		},
+		close_edit: function() {
+			this._input = null;
 		},
 		edit: function() {
-			return this.get_input();
+			return this.input();
 		},
 		toolbar: function() {
 			return false;
@@ -73,10 +78,10 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			return false;
 		},
 		on_focus: function() {
-			$(this.input).parents('.field').first().addClass('focus');
+			this.input().parents('.field').first().addClass('focus');
 		},
 		on_blur: function() {
-			$(this.input).parents('.field').first().removeClass('focus');
+			this.input().parents('.field').first().removeClass('focus');
 		}
 	});
 

@@ -47,6 +47,11 @@ Spontaneous.EditDialogue = (function($, S) {
 			this.close();
 		},
 		cleanup: function() {
+			var fields = this.content.field_list();
+			for (var i = 0, ii = fields.length; i < ii; i++) {
+				var field = fields[i];
+				field.close_edit();
+			}
 			$(':input', this.form).add(document).unbind('keydown.savedialog');
 		},
 		body: function() {
@@ -95,7 +100,7 @@ Spontaneous.EditDialogue = (function($, S) {
 			var text_fields = this.content.text_fields(), active_field = false;
 			for (var i = 0, ii = text_fields.length; i < ii; i++) {
 				var field = text_fields[i];
-				if (field.input[0] === input) {
+				if (field.input()[0] === input) {
 					active_field = field;
 					break;
 				}

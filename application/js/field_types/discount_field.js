@@ -66,25 +66,27 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			start += ws.ds;
 			end += ws.de;
 			selected = ws.selected;
-			if (selected.indexOf(this.pre) !== 0) {
-				var sel;
-				for (var i = 0, ii = this.pre.length; i < ii; i++) {
-					sel = state.before.substr(-(i+1)) + selected;
-					if (sel.indexOf(this.pre) === 0) {
-						start -= (i+1);
-						selected = sel;
-						break;
+			if ((end - start) > 0) {
+				if (selected.indexOf(this.pre) !== 0) {
+					var sel;
+					for (var i = 0, ii = this.pre.length; i < ii; i++) {
+						sel = state.before.substr(-(i+1)) + selected;
+						if (sel.indexOf(this.pre) === 0) {
+							start -= (i+1);
+							selected = sel;
+							break;
+						}
 					}
 				}
-			}
-			if (selected.substr(-this.post.length) !== this.post) {
-				var sel;
-				for (var i = 0, ii = this.post.length; i < ii; i++) {
-					sel = selected + state.after.substr(0, (i+1));
-					if (sel.substr(-this.post.length) === this.post) {
-						end += (i+1);
-						selected = sel;
-						break;
+				if (selected.substr(-this.post.length) !== this.post) {
+					var sel;
+					for (var i = 0, ii = this.post.length; i < ii; i++) {
+						sel = selected + state.after.substr(0, (i+1));
+						if (sel.substr(-this.post.length) === this.post) {
+							end += (i+1);
+							selected = sel;
+							break;
+						}
 					}
 				}
 			}
@@ -163,7 +165,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		post: '',
 		br: /\r?\n/,
 		strip_bullet: /^ *(\d+\.|\*) */,
-		is_list_entry:/(?:\r?\n)( *\*.+?)$/,
+		is_list_entry:/(?:\r?\n)( *\*{1} +.+?)$/,
 		surround: function(text) {
 			var lines = text.split(this.br);
 			for (var i = 0, ii = lines.length; i < ii; i++) {
@@ -204,7 +206,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			return "* ";
 		},
 		matches_selection: function(selection) {
-			return /^ *\*/.test(selection)
+			return /^ *\* +/.test(selection)
 		}
 
 	});
@@ -444,48 +446,62 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 
 	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {
 		actions: [Bold, Italic, H1, H2, UL, OL, Link],
-		get_input: function() {
-			if (!this.input) {
-				this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':90}).text(this.unprocessed_value());
-				this.input.select(this.on_select.bind(this)).click(this.on_select.bind(this))
+		input: function() {
+			if (!this._input) {
+				this._input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':90}).text(this.unprocessed_value());
 			}
-			return this.input;
+			return this._input;
 		},
 		on_focus: function() {
 			if (!this.expanded) {
-				this.input.data('original-height', this.input.innerHeight())
-				var text_height = this.input[0].scrollHeight, max_height = 500, resize_height = Math.min(text_height, max_height);
-				this.input.animate({'height':resize_height});
+				var input = this.input();
+				input.data('original-height', input.innerHeight())
+				var text_height = input[0].scrollHeight, max_height = 500, resize_height = Math.min(text_height, max_height);
+				input.animate({'height':resize_height});
 				this.expanded = true;
 			}
 			this.callSuper();
 		},
 		on_blur: function() {
-			this.input.animate({ 'height':this.input.data('original-height') });
+			var input = this.input();
+			input.animate({ 'height':input.data('original-height') });
 			this.expanded = false;
 			this.callSuper();
 		},
 		toolbar: function() {
-			this._wrapper = $(dom.div, {'class':'markdown-editor', 'id':'editor-'+this.css_id()});
-			this._toolbar = $(dom.div, {'class':'md-toolbar'});
-			this.commands = [];
-			for (var i = 0, c = this.actions, ii = c.length; i < ii; i++) {
-				var cmd_class = c[i], cmd = new cmd_class(this.get_input());
-				this.commands.push(cmd);
-				this._toolbar.append(cmd.button());
+			if (!this._toolbar) {
+				this._wrapper = $(dom.div, {'class':'markdown-editor', 'id':'editor-'+this.css_id()});
+				this._toolbar = $(dom.div, {'class':'md-toolbar'});
+				this.commands = [];
+				var input = this.input();
+				for (var i = 0, c = this.actions, ii = c.length; i < ii; i++) {
+					var cmd_class = c[i], cmd = new cmd_class(input);
+					this.commands.push(cmd);
+					this._toolbar.append(cmd.button());
+				}
+				this._wrapper.append(this._toolbar);
+				input.css('height', '');
 			}
-			this._wrapper.append(this._toolbar);
 			return this._wrapper;
 		},
 		edit: function() {
 			this.expanded = false;
-			// this._wrapper.append(this.input)
-			return this.get_input();
+			var input = this.input();
+			input.unbind('select.markdown').unbind('click.markdown');
+			input.bind('select.markdown', this.on_select.bind(this)).bind('click.markdown', this.on_select.bind(this))
+			return input;
+		},
+		close_edit: function() {
+			this._input = null;
+			this._toolbar = null;
+			this.commands = [];
+			this.expanded = false;
+			this.callSuper();
 		},
 		// iterates through all the buttons and lets them highlight themselves depending on the
 		// currently selected text
 		on_select: function(event) {
-			var state = TextCommand.get_state(this.input);
+			var state = TextCommand.get_state(this.input());
 			$.each(this.commands, function() { this.clear_selection(); });
 			for (var i = 0, c = this.commands, ii = c.length; i < ii; i++) {
 				if (c[i].respond_to_selection(state)) { break;	}
