@@ -322,18 +322,17 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		expand_selection: function(state) {
 			var selected = state.selected, m, start = state.start, end = state.end;
 			if (!this.matches_selection(state.selected)) {
-				m = /(\[.*?)$/.exec(state.before);
+				m = /(\[[^\)]*?)$/.exec(state.before);
 				if (m) {
 					start -= m[1].length;
 					selected = m[1] + selected;
 				}
 				// TODO: this breaks if ')' in URL...
-				m = /(^[^\)]*?\))/.exec(state.after);
+				m = /(^[^\)\[]*?\))/.exec(state.after);
 				if (m) {
 					end += m[1].length;
 					selected += m[1];
 				}
-				console.log(selected);
 			}
 			return {selection:selected, start:start, end:end};
 		},
