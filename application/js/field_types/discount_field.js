@@ -172,9 +172,23 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			return (new RegExp('[\r\n]'+this.post+'+[\r\n ]*$')).exec(selection)
 		},
 		fix_selection: function() {
-			var state = this.get_state(), selected = state.selection, m, start = state.start, end = state.end, ws;
+			var state = this.get_state(), selected = state.selection, m, start = state.start, end = state.end, br = /\r?\n/;
 			console.log('h* fix selection', "'"+selected+"'")
-			var br = /\r?\n/, lines = selected.split(br), underline = new RegExp('^[=-]+$'), found = false;
+			if ((end - start) === 0) {
+				// expand to select current line
+				console.log('no selection')
+				m = /\r?\n(.+)/.exec(state.before);
+				if (m) {
+					var s = m[1];
+					start -= s.length;
+				}
+				m = /(.+)\r?\n/.exec(state.after);
+				if (m) {
+					var s = m[1];
+					end += s.length;
+				}
+			}
+			var lines = selected.split(br), underline = new RegExp('^[=-]+$'), found = false;
 			for (var i = 0, ii = lines.length; i < ii; i++) {
 				var l = lines[i];
 				if (underline.test(l)) {
@@ -193,16 +207,15 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 						break;
 					}
 				}
-				this.input[0].setSelectionRange(start, end);
 			} else {
 				// make sure that we have the whole of the underline included in the selection
 				var r = new RegExp('^([=-]+)'), m = r.exec(state.after);
 				if (m) {
 					var extra = m[1];
 					end += extra.length;
-					this.input[0].setSelectionRange(start, end);
 				}
 			}
+			this.input[0].setSelectionRange(start, end);
 			return TextCommand.get_state(this.input);
 		}
 	});
