@@ -12,37 +12,41 @@ Spontaneous.Popover = (function($, S) {
 			this.depth = 0;
 		},
 		open: function(event) {
+			var view = this.view;
 			var location = Popover.div();
 			var wrapper = $(dom.div, {'class':'pop-over'});
 			var handle = $(dom.div, {'class':'menuHandle'});
-			var header = $(dom.header).append(back_btn).append(title).css('width', this.view.width())
-			var back_btn = $(dom.a, {'class':'button back black'}).append($(dom.span, {'class':'pointer'})).append($(dom.span, {'class':'label'}).text("Back")).hide();
-			var title = $(dom.h3).text('Header from view');
-			var close_btn = $(dom.a, {'class':'button close black'}).text('Close').click(this.close.bind(this));
+			var header = $(dom.header).append(back_btn).append(title);
+			var back_btn = $(dom.a, {'class':'button back'}).append($(dom.span, {'class':'pointer'})).append($(dom.span, {'class':'label'}).text("Back")).css('visibility', 'hidden');
+			var title = $(dom.h3).text(view.title());
+			var close_btn = $(dom.a, {'class':'button close'}).text(view.close_text()).click(this.close.bind(this));
 
-			var view_wrapper = $(dom.div).css('width', this.view.width());
-			view_wrapper.append(this.view.view());
+			var view_wrapper = $(dom.div).css('width', view.width());
+			view_wrapper.append(view.view());
 			header.append(back_btn).append(title).append(close_btn);
 			wrapper.append(handle).append(header).append(view_wrapper);
-			var o = this.view.position_from_event(event);
+			var o = view.position_from_event(event);
 			console.log(o)
-			wrapper.offset({top:(o.top+18), left:(o.left - 24)});
+			wrapper.offset({top:(o.top+18), left:(o.left - 30)});
 			wrapper.hide();
 			location.append(wrapper);
 			this.wrapper = wrapper;
-			wrapper.fadeIn(200);
+			wrapper.fadeIn(200, this.after_open.bind(this));
+		},
+		after_open: function() {
+			this.view.after_open();
 		},
 		close: function() {
 			Popover.close();
 			return false;
 		},
 		do_close: function() {
+			var view = this.view;
 			// do actual element removal here
-			this.view.before_close();
-			this.view.do_close();
-			this.view.after_close();
+			view.before_close();
+			view.do_close();
+			view.after_close();
 			this.wrapper.fadeOut(100, function() {
-
 				$(this).remove();
 			});
 		}

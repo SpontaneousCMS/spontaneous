@@ -323,36 +323,49 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		width: function() {
 			return 300;
 		},
+		title: function() {
+			return "Insert Link";
+		},
 		position_from_event: function(event) {
 			var t = $(event.currentTarget), o = t.offset();
 			o.top += t.outerHeight();
 			o.left += t.outerWidth() / 2;
 			return o
 		},
+		close_text: function() {
+			return 'Cancel';
+		},
 		view: function() {
-			var __view = this, w = $(dom.div), text_input, url_input;
-			var input = function(value) {
-				var i = $(dom.input).keypress(function(event) {
+			var __view = this, w = $(dom.div, {'class': 'pop-insert-link'}), text_input, url_input;
+			var input = function(label, value, type) {
+				var l, i = $((type || dom.input), {'type':'text'}).keypress(function(event) {
 					if (event.charCode === 13) {
 						__view.insert_link(text_input, url_input); // sick
 						return false;
 					}
-				}).val(value)
-				return i;
+				}).val(value);
+				l = $(dom.label).append($(dom.span).text(label)).append(i);
+				return l;
 			}
-			text_input = input(this.link_text);
-			url_input = input(this.url);
+			text_input = input("Text", this.link_text);
+			url_input = input("URL", this.url, dom.textarea);
+			url_input.find('textarea').attr('rows', 3);
 
-			cancel = $(dom.a, {'class':'button cancel'}).text('Cancel').click(function() {
-				this.close();
+			cancel = $(dom.a, {'class':'button cancel'}).text('Clear').click(function() {
+				// this.close();
+				this.insert_link(text_input, url_input.val(''));
 				return false;
-			}.bind(this)), insert = $(dom.a, {'class':'button'}).text('Insert').click(function() {
+			}.bind(this)), insert = $(dom.a, {'class':'button'}).text('OK').click(function() {
 				this.insert_link(text_input, url_input);
 				return false;
 			}.bind(this))
 			w.append($(dom.p).append(text_input)).append($(dom.p).append(url_input));
-			w.append($(dom.p).append(cancel).append(insert));
+			var buttons = $(dom.div, {'class':'buttons'});
+			w.append(buttons.append(cancel).append(insert));
+			url_input = url_input.find(':input')
+			text_input = text_input.find(':input')
 			url_input.select();
+			this.wrapper = w;
 			return w;
 		},
 		insert_link: function(text, url) {
@@ -361,6 +374,9 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		cancel: function() {
 			this.close();
+		},
+		after_open: function() {
+			this.wrapper.find('textarea').select();
 		},
 		after_close: function() {
 			this.editor.dialogue_closed();
@@ -456,6 +472,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			return this.link_matcher.exec(selection);
 		}
 	});
+
 
 	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {
 		actions: [Bold, Italic, H1, H2, UL, OL, Link],

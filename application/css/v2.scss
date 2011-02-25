@@ -1,4 +1,6 @@
 
+$unit: 8px;
+
 $action: #10b2fe;
 $action_r: 16;
 $action_g: 178;
@@ -12,6 +14,9 @@ $highlight_g: 108;
 $highlight_b: 3;
 
 $error: #f00;
+
+$chrome-bg: #222;
+$chrome-accent: #404040;
 
 $content-font-family:  "HelveticaNeue", "Helvetica Neue", "FrutigerLTStd-Light", "Frutiger LT Std 45 Light";
 $input-font-family:  "Lucida Grande";
@@ -79,10 +84,36 @@ $dialogue-width: 980px;
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from($start-color), to($end-color));
   background: -moz-linear-gradient(top, $start-color, $end-color); }
 
+@mixin display-box {
+  display: -webkit-box;
+  display: -moz-box;
+  display: box;
+}
 @mixin box-sizing($model: border-box) {
   -webkit-box-sizing: $model;
   -moz-box-sizing: $model;
   box-sizing: $model; }
+
+@mixin box-orient($direction: horizontal) {
+  box-orient: $direction;
+  -webkit-box-orient: $direction;
+  -moz-box-orient: $direction;
+}
+@mixin box-pack($packing: center) {
+  box-pack: $packing;
+  -webkit-box-pack: $packing;
+  -moz-box-pack: $packing;
+}
+@mixin box-align($aligning: start) {
+  box-align: $aligning;
+  -webkit-box-align: $aligning;
+  -moz-box-align: $aligning;
+}
+.box-flexible {
+  -webkit-box-flex: 1;
+        -moz-box-flex: 1;
+        box-flex: 1;
+}
 
 .no-select {
   -moz-user-select: none;
@@ -166,7 +197,7 @@ img.missing {
   clear: both; }
 
 .controls-gradient {
-  @include vertical-gradient(#404040, #222222); }
+  @include vertical-gradient($chrome-accent, $chrome-bg); }
 
 #top {
   @extend .container-padding;
@@ -1077,7 +1108,7 @@ img.missing {
   background-position: 0 -80px; }
 
 .markdown-editor .md-toolbar {
-  background-color: rgba(0, 0, 0, 0.1);
+  // background-color: rgba(0, 0, 0, 0.1);
   a {
     @extend .interface;
     display: inline-block;
