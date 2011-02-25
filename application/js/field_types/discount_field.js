@@ -412,13 +412,16 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		postprocess_url: function(url) {
 			if (url) {
-				if (/^https?:/.test(url)) {
+				if (/^(https?|mailto|ftp|javscript):/.test(url)) { // URLs staring with a protocol
 					url = url;
-				} else if (/^[a-z-]+\.([a-z-]+\.)*[a-z]{2,}(\/[^ ]*)*$/i.exec(url)) { // look for urls without http:
+				} else if (/^[a-z-]+\.([a-z-]+\.)*[a-z]{2,}(\/[^ ]*)*$/i.exec(url)) { // look for addresses without http:
 					url = 'http://' + url;
 				} else if (/^[^ @]+@([a-z-]+\.)+[a-z]{2,}$/i.exec(url)) { // email addresses
 					url = 'mailto:' + url;
 				} else {
+					// need a flag saying that the string doesn't look like URL because
+					// this function is used in two places and each one needs to respond
+					// differently to this condition
 					return false
 				}
 			}
