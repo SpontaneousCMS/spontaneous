@@ -515,7 +515,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			var state = TextCommand.get_state(this.input());
 			$.each(this.commands, function() { this.deactivate(); });
 			for (var i = 0, c = this.commands, ii = c.length; i < ii; i++) {
-				if (c[i].respond_to_selection(state)) { break;	}
+				if (c[i].respond_to_selection(state)) { /* break */;	}
 			}
 		}
 	});
