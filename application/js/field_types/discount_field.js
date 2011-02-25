@@ -261,20 +261,18 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		expand_selection: function(state) {
 			var selected = (state.selection || ''), m, start = state.start, end = state.end, br = /\r?\n/;
-			if ((end - start) === 0) {
-				// expand to select current line
-				m = /(.+)$/.exec(state.before);
-				if (m) {
-					var s = m[1];
-					start -= s.length;
-					selected = m[1] + selected;
-				}
-				m = /^(.+)/.exec(state.after);
-				if (m) {
-					var s = m[1];
-					end += s.length;
-					selected += m[1];
-				}
+			// expand to select current line
+			m = /(.+)$/.exec(state.before);
+			if (m) {
+				var s = m[1];
+				start -= s.length;
+				selected = m[1] + selected;
+			}
+			m = /^(.+)/.exec(state.after);
+			if (m) {
+				var s = m[1];
+				end += s.length;
+				selected += m[1];
 			}
 			var lines = selected.split(br), underline = new RegExp('^[=-]+$'), found = false;
 			for (var i = 0, ii = lines.length; i < ii; i++) {
@@ -499,8 +497,10 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		edit: function() {
 			this.expanded = false;
 			var input = this.input();
-			input.unbind('select.markdown').unbind('click.markdown');
-			input.bind('select.markdown', this.on_select.bind(this)).bind('click.markdown', this.on_select.bind(this))
+			input.unbind('select.markdown').unbind('click.markdown').unbind('keyup.markdown');
+			input.bind('select.markdown', this.on_select.bind(this))
+			input.bind('click.markdown', this.on_select.bind(this))
+			input.bind('keyup.markdown', this.on_select.bind(this))
 			return input;
 		},
 		close_edit: function() {
