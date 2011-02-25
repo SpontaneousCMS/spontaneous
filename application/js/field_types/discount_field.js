@@ -62,7 +62,19 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		expand_selection: function(state) {
 			state = this.fix_selection_whitespace(state);
-			var selected = state.selection, m, start = state.start, end = state.end, ws;
+			var selected = state.selection, m, start = state.start, end = state.end,
+				_pre_ = this.pre.replace(/\*/g, "\\*"), _post_ = this.post.replace(/\*/g, "\\*");
+			m = (new RegExp('(?:^| )('+_pre_+'[^('+_pre_+')]*)$', 'm')).exec(state.before)
+			if (m) {
+				start -= m[1].length;
+				selected = m[1] + selected;
+			}
+			m = (new RegExp('^([^('+_post_+')]*?'+_post_+')[^('+_post_+')\w ]*? ')).exec(state.after)
+			if (m) {
+				end += m[1].length;
+				selected += m[1];
+			}
+			// fix condition where half of the pre/post markers are selected
 			if ((end - start) > 0) {
 				if (selected.indexOf(this.pre) !== 0) {
 					var sel;
