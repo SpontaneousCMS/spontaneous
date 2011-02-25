@@ -44,28 +44,25 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		get_state: function() {
 			return TextCommand.get_state(this.input);
 		},
-		fix_selection_whitespace: function(selected) {
-			var m, d_start = 0, d_end = 0, l;
+		fix_selection_whitespace: function(state) {
+			var selected = state.selection, m, l;
 			m = /^( +)/.exec(selected);
 			if (m) {
 				l = m[1].length
-				d_start = l;
-				selected = selected.substr(l);
+				state.start += l;
+				state.selection = selected.substr(l);
 			}
 			m = /( +)$/.exec(selected);
 			if (m) {
 				l = m[1].length
-				d_end = -l;
-				selected = selected.substr(0, selected.length-l);
+				state.end -= l;
+				state.selection = selected.substr(0, selected.length-l);
 			}
-			return {ds: d_start, de: d_end, selected: selected};
+			return state;
 		},
 		expand_selection: function(state) {
+			state = this.fix_selection_whitespace(state);
 			var selected = state.selection, m, start = state.start, end = state.end, ws;
-			ws = this.fix_selection_whitespace(selected)
-			start += ws.ds;
-			end += ws.de;
-			selected = ws.selected;
 			if ((end - start) > 0) {
 				if (selected.indexOf(this.pre) !== 0) {
 					var sel;
@@ -93,13 +90,17 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			return {start: start, end: end, selection:selected};
 		},
 		fix_selection: function() {
-			var state = this.get_state(), change = this.expand_selection(state)
-			$.extend(state, change);
-			this.update_state(state);
-			return this.get_state();
+			var state = this.get_state(), change;
+			if (!this.matches_selection(state.selection)) {
+				change = this.expand_selection(state)
+				$.extend(state, change);
+				state = this.update_state(state);
+			}
+			return state;
 		},
 		update_state: function(state) {
 			this.input[0].setSelectionRange(state.start, state.end);
+			return this.get_state();
 		},
 		surround: function(text) {
 			return this.pre + text + this.post;
@@ -121,18 +122,18 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			return this._button;
 		},
 		respond_to_selection: function(state) {
-			var expanded = this.expand_selection(state);
-			// console.log('>>>>> ', this.name, 'expanded', expanded.selection, this.matches_selection(expanded.selection));
-			if (this.matches_selection(expanded.selection)) {
-				// console.log('matches', this.name)
-				this.button().addClass('active');
+			if (this.matches_selection(state.selection) || this.matches_selection(this.expand_selection(state).selection)) {
+				this.activate();
 				return true;
 			} else {
-				this.clear_selection();
+				this.deactivate();
 				return false;
 			}
 		},
-		clear_selection: function() {
+		activate: function() {
+			this.button().addClass('active');
+		},
+		deactivate: function() {
 			this.button().removeClass('active');
 		},
 		matches_removal: function(selection) {
@@ -185,18 +186,16 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		expand_selection: function(state) {
 			var selected = (state.selection || ''), m, start = state.start, end = state.end, br = /\r?\n/;
-			if (!this.matches_selection(selected)) {
-				m = this.strip_bullet.exec(selected);
-				if (!m) {
-					m = this.is_list_entry.exec(state.before);
+			m = this.strip_bullet.exec(selected);
+			if (!m) {
+				m = this.is_list_entry.exec(state.before);
+				if (m) {
+					start -= m[1].length;
+					selected = m[1] + selected;
+					m = /^(.*?)(?:\r?\n)/.exec(state.after);
 					if (m) {
-						start -= m[1].length;
-						selected = m[1] + selected;
-						m = /^(.*?)(?:\r?\n)/.exec(state.after);
-						if (m) {
-							end += m[1].length;
-							selected += m[1];
-						}
+						end += m[1].length;
+						selected += m[1];
 					}
 				}
 			}
@@ -378,19 +377,19 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			return false;
 		},
 		expand_selection: function(state) {
-			var selected = state.selected, m, start = state.start, end = state.end;
-			if (!this.matches_selection(state.selected)) {
-				m = /(\[[^\)]*?)$/.exec(state.before);
-				if (m) {
-					start -= m[1].length;
-					selected = m[1] + selected;
-				}
-				// TODO: this breaks if ')' in URL...
-				m = /(^[^\)\[]*?\))/.exec(state.after);
-				if (m) {
-					end += m[1].length;
-					selected += m[1];
-				}
+			state = this.fix_selection_whitespace(state)
+			var selected = state.selection, m, start = state.start, end = state.end;
+
+			m = /(\[[^\)]*?)$/.exec(state.before);
+			if (m) {
+				start -= m[1].length;
+				selected = m[1] + selected;
+			}
+			// TODO: this breaks if ')' in URL...
+			m = /^([^\)\[]*?\))/.exec(state.after);
+			if (m) {
+				end += m[1].length;
+				selected += m[1];
 			}
 			return {selection:selected, start:start, end:end};
 		},
@@ -502,7 +501,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		// currently selected text
 		on_select: function(event) {
 			var state = TextCommand.get_state(this.input());
-			$.each(this.commands, function() { this.clear_selection(); });
+			$.each(this.commands, function() { this.deactivate(); });
 			for (var i = 0, c = this.commands, ii = c.length; i < ii; i++) {
 				if (c[i].respond_to_selection(state)) { break;	}
 			}
