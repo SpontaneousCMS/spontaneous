@@ -134,6 +134,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			return this._button;
 		},
 		respond_to_selection: function(state) {
+			this.deactivate();
 			if (this.matches_selection(state.selection) || this.matches_selection(this.expand_selection(state).selection)) {
 				this.activate();
 				return true;
@@ -513,10 +514,9 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		// currently selected text
 		on_select: function(event) {
 			var state = TextCommand.get_state(this.input());
-			$.each(this.commands, function() { this.deactivate(); });
-			for (var i = 0, c = this.commands, ii = c.length; i < ii; i++) {
-				if (c[i].respond_to_selection(state)) { /* break */;	}
-			}
+			$.each(this.commands, function() {
+				this.respond_to_selection(state);
+			});
 		}
 	});
 
