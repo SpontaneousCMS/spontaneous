@@ -127,7 +127,16 @@ module Spontaneous
       desc "g", "Executes the Spontaneous generator with given options."
       alias :g :generate
 
+      desc :browse, "Launces a browser pointing to the current development CMS"
+      def browse
+        prepare :browse
+        require 'launchy'
+        require File.expand_path('config/boot.rb')
+        ::Launchy::Browser.run("http://localhost:#{Spontaneous.config.port}/@spontaneous")
+      end
+
       private
+
       def prepare(task)
         if options.help?
           help(task.to_s)
