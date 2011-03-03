@@ -205,7 +205,7 @@
 			@include rounded-bottom;
 
 			background-color: #fff;
-			padding: $unit/2 0;
+			padding: $unit 0;
 
 			.page {
 				cursor: pointer;
@@ -256,7 +256,7 @@
 					@extend .interface;
 					text-transform: none;
 					cursor: pointer;
-					a {
+					&, a {
 						color: #666;
 					}
 					span {

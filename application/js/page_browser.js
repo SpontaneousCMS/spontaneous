@@ -5,6 +5,8 @@ Spontaneous.PageBrowser = (function($, S) {
 	var dom = S.Dom;
 	var PageBrowser = new JS.Class(Spontaneous.PopoverView, {
 		initialize: function(origin) {
+			console.log('!!!', [origin])
+			this.selected = !!origin;
 			this.origin = origin || '/';
 			this.page_list = this.origin_list();
 			this.ancestor_list = this.origin_ancestors();
@@ -73,9 +75,13 @@ Spontaneous.PageBrowser = (function($, S) {
 						return false;
 					};
 				};
+
 				for (var i = 0, ii = ancestors.length; i < ii; i++) {
 					var a = ancestors[i], li = $(dom.li).append($(dom.a).text(a.title)).append($(dom.span).text("/")).click(click(a));
 					list.append(li);
+				}
+				if (ancestors.length === 0) {
+					list.append($(dom.li).text('Choose a page...'))
 				}
 				this.ancestors.append(list);
 			}
@@ -89,6 +95,7 @@ Spontaneous.PageBrowser = (function($, S) {
 			};
 			var next = function() {
 				_browser.next_level(page);
+				return false;
 			}
 
 			var row = $(dom.div, {'class':'page'}).click(selected(page)), title = $(dom.a).text(page.title);
@@ -97,7 +104,7 @@ Spontaneous.PageBrowser = (function($, S) {
 				var next = $(dom.span).text('>').click(next)
 				row.append(next);
 			}
-			if (page.id === this.location.id) {
+			if (this.selected && (page.id === this.location.id)) {
 				row.addClass('active');
 			}
 			return row;
