@@ -221,6 +221,7 @@
 				font-size: 11px;
 
 				border-bottom: solid 1px #eee;
+
 				&:last-child {
 					border-bottom: none;
 				}
@@ -232,6 +233,9 @@
 				&.active {
 					background-color: $action;
 					color: white;
+					span:hover {
+						background-color: darken($action, 5%);
+					}
 				}
 				span {
 					@include box-sizing;
@@ -246,25 +250,27 @@
 					font-weight: normal;
 					width: $deeper-width;
 					margin: 2px;
-					// border: solid 1px #eee;
 					background: url("/@spontaneous/static/page-browser-next.png") right 1px no-repeat;
 					&:hover {
-						color: #000;
 						background-position: right -39px;
-						background-color: #666;
+						background-color: #8d8d8d;
+					}
+					&:active {
+						background-color: $action;
 					}
 				}
 			}
 		}
 		.page-ancestors {
-			@include rounded-top;
-			background-color: $chrome-accent;
+			// @include rounded-top;
+			background-color: lighten($chrome-accent, 5%);
 
 			ul {
-				margin: 0;
-				padding: 0;
 				@include display-box;
 				@include box-orient(horizontal);
+				margin: 0;
+				padding: 0;
+				// outline: solid 1px red;
 
 				padding: $unit/2;
 				li {
@@ -281,7 +287,7 @@
 						margin: 0 2px;
 					}
 					&:hover a {
-						color: #000;
+						color: #fff;
 					}
 					&:active a {
 						color: $action;

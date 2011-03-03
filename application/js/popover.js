@@ -70,6 +70,11 @@ Spontaneous.Popover = (function($, S) {
 			}
 		}
 	});
+	$(document).bind('keydown.popover', function(event) {
+		if (event.keyCode === 27) {
+			Popover.close();
+		}
+	})
 	return Popover;
 })(jQuery, Spontaneous);
 

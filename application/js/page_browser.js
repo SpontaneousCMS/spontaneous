@@ -87,7 +87,7 @@ Spontaneous.PageBrowser = (function($, S) {
 					list.append(li);
 				}
 				if (ancestors.length === 0) {
-					list.append($(dom.li).text('Choose a page...'))
+					list.append($(dom.li).append($(dom.a).text('Choose a page...')))
 				}
 				this.ancestors.append(list);
 			}

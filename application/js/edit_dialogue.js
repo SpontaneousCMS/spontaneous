@@ -47,6 +47,8 @@ Spontaneous.EditDialogue = (function($, S) {
 			this.close();
 		},
 		cleanup: function() {
+			S.Popover.close();
+
 			var fields = this.content.field_list();
 			for (var i = 0, ii = fields.length; i < ii; i++) {
 				var field = fields[i];

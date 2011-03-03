@@ -403,18 +403,10 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		view: function() {
 			var w = $(dom.div);
 
-			w.append($(dom.div, {'class':'link-page-browser'}).append(this.browser.view()));
+			w.append($(dom.div, {'class':'link-page-browser'}).append($(dom.label).append($(dom.span).text('Page Browser')).append(this.browser.view())));
 			return w;
 		},
 		page_list_loaded: function(view) {
-			console.log('page_list_loaded', view)
-			// this.path.empty();
-			// var list = $(dom.ul), ancestors = view.location.ancestors;
-			// this.depth = ancestors.length;
-			// for (var i = 0, ii = ancestors.length; i < ii; i++) {
-			// 	list.append($(dom.li).text(ancestors[i].title + ">"))
-			// }
-			// this.path.append(list);
 		},
 		page_selected: function(page) {
 			console.log('page_selected', page, page.path);
