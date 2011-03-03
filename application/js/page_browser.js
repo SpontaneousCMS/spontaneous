@@ -7,8 +7,8 @@ Spontaneous.PageBrowser = (function($, S) {
 		initialize: function(origin) {
 			origin = String(origin || "");
 			if (/^\//.test(origin)) {
-				this.selected = !!origin;
 				this.origin = origin || '/';
+				this.selected = this.origin;
 			} else {
 				this.selected = false;
 				this.origin = '/';
@@ -110,7 +110,7 @@ Spontaneous.PageBrowser = (function($, S) {
 				var next = $(dom.span).text('>').click(next)
 				row.append(next);
 			}
-			if (this.selected && (page.id === this.location.id)) {
+			if (this.selected && (page.path === this.selected)) {
 				row.addClass('active');
 			}
 			return row;
@@ -132,6 +132,7 @@ Spontaneous.PageBrowser = (function($, S) {
 		page_selected: function(page) {
 			var table = this.table;
 			$('.page', table).removeClass('active');
+			this.selected = page.path;
 			this.manager.page_selected(page);
 		},
 		title: function() {

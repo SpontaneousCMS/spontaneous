@@ -200,6 +200,7 @@
 
 .pop-over {
 	.page-browser {
+		margin-bottom: $unit;
 		.page-list {
 
 			@include rounded-bottom;
@@ -248,7 +249,7 @@
 		}
 		.page-ancestors {
 			@include rounded-top;
-			background-color: #ccc;
+			background-color: $chrome-accent;
 
 			ul {
 				margin: 0;
@@ -259,10 +260,11 @@
 				padding: $unit/2;
 				li {
 					@extend .interface;
+					font-size: 10px;
 					text-transform: none;
 					cursor: pointer;
 					&, a {
-						color: #666;
+						color: #ccc;
 					}
 					span {
 						display: inline-block;
