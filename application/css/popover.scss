@@ -208,12 +208,15 @@
 			background-color: #fff;
 			padding: $unit 0;
 
+			$deeper-width: 80px;
+
 			.page {
 				cursor: pointer;
 				color: #333;
 				@extend .interface;
 				text-transform: none;
 				padding: $unit/2 $unit/2;
+				padding-right: $deeper-width;
 				position: relative;
 				font-size: 11px;
 
@@ -231,18 +234,24 @@
 					color: white;
 				}
 				span {
+					@include box-sizing;
+					@include rounded;
 					display: block;
 					position: absolute;
-					right: $unit;
+					right: 0;
 					top: 0;
+					bottom: 0;
 					font-size: 16px;
 					line-height: 13px;
 					font-weight: normal;
-					width: 50px;
-					height: 100%;
-					text-align: right;
+					width: $deeper-width;
+					margin: 2px;
+					// border: solid 1px #eee;
+					background: url("/@spontaneous/static/page-browser-next.png") right 1px no-repeat;
 					&:hover {
 						color: #000;
+						background-position: right -39px;
+						background-color: #666;
 					}
 				}
 			}

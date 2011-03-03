@@ -99,17 +99,18 @@ Spontaneous.PageBrowser = (function($, S) {
 					$(this).addClass('active');
 				};
 			};
-			var next = function() {
+			var next_click = function() {
 				_browser.next_level(page);
 				return false;
 			}
 
 			var row = $(dom.div, {'class':'page'}).click(selected(page)), title = $(dom.a).text(page.title);
-			row.append(title)
 			if (page.children > 0) {
-				var next = $(dom.span).text('>').click(next)
+				var next = $(dom.span)
+				next.click(next_click);
 				row.append(next);
 			}
+			row.append(title);
 			if (this.selected && (page.path === this.selected)) {
 				row.addClass('active');
 			}
