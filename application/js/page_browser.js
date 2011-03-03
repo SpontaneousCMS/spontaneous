@@ -5,9 +5,15 @@ Spontaneous.PageBrowser = (function($, S) {
 	var dom = S.Dom;
 	var PageBrowser = new JS.Class(Spontaneous.PopoverView, {
 		initialize: function(origin) {
+			origin = String(origin || "");
+			if (/^\//.test(origin)) {
+				this.selected = !!origin;
+				this.origin = origin || '/';
+			} else {
+				this.selected = false;
+				this.origin = '/';
+			}
 			console.log('!!!', [origin])
-			this.selected = !!origin;
-			this.origin = origin || '/';
 			this.page_list = this.origin_list();
 			this.ancestor_list = this.origin_ancestors();
 			console.log('PageBrowser for', [this.origin]);
