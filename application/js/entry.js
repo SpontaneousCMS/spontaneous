@@ -12,7 +12,8 @@ Spontaneous.Entry = (function($, S) {
 		},
 		panel: function() {
 			var wrapper = $(dom.div, {'class':['entry-wrap ', this.depth_class(), this.visibility_class()].join(' ')});
-			wrapper.append($(dom.div, {'class':'white-bg'}))
+			var outline = $(dom.div, {'class':'white-bg'}).mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
+			wrapper.append(outline)
 			if (this.depth() < 4) {
 				wrapper.append($(dom.div, {'class':'grey-bg'}));
 			}
@@ -27,6 +28,7 @@ Spontaneous.Entry = (function($, S) {
 			wrapper.append(entry);
 			wrapper.append(box_container.panel());
 			this.wrapper = wrapper;
+			this.outline = outline;
 			return wrapper;
 		},
 		title_bar: function(wrapper) {
@@ -58,6 +60,12 @@ Spontaneous.Entry = (function($, S) {
 			} else {
 				this.wrapper.switchClass('hidden', 'visible', 200);
 			}
+		},
+		mouseover: function() {
+			this.outline.addClass('active');
+		},
+		mouseout: function() {
+			this.outline.removeClass('active');
 		},
 		confirm_destroy: function() {
 			var d = this.dialogue_box;

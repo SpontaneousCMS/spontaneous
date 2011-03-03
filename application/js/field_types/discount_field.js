@@ -340,7 +340,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			var input = function(label, value, type) {
 				var l, i = $((type || dom.input), {'type':'text'}).keypress(function(event) {
 					if (event.charCode === 13) {
-						__view.insert_link(text_input, url_input); // sick
+						__view.insert_link_and_close(text_input, url_input); // sick
 						return false;
 					}
 				}).val(value);
@@ -353,23 +353,30 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 
 			cancel = $(dom.a, {'class':'button cancel'}).text('Clear').click(function() {
 				// this.close();
-				this.insert_link(text_input, url_input.val(''));
+				this.insert_link_and_close(text_input, url_input.val(''));
 				return false;
 			}.bind(this)), insert = $(dom.a, {'class':'button'}).text('OK').click(function() {
-				this.insert_link(text_input, url_input);
+				this.insert_link_and_close(text_input, url_input);
 				return false;
 			}.bind(this))
 			w.append($(dom.p).append(text_input)).append($(dom.p).append(url_input));
 			var buttons = $(dom.div, {'class':'buttons'});
-			w.append(buttons.append(cancel).append(insert));
 			url_input = url_input.find(':input')
 			text_input = text_input.find(':input')
-			url_input.select();
+			this.text_input = text_input;
+			this.url_input = url_input;
+			this.page_browser = new PageSelector(this.url, this);
+			w.append(this.page_browser.view());
+			w.append(buttons.append(cancel).append(insert));
 			this.wrapper = w;
 			return w;
 		},
+
 		insert_link: function(text, url) {
 			this.editor.insert_link(text.val(), url.val());
+		},
+		insert_link_and_close: function(text, url) {
+			this.insert_link(text, url);
 			this.close();
 		},
 		cancel: function() {
@@ -380,6 +387,43 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		after_close: function() {
 			this.editor.dialogue_closed();
+		},
+		page_selected: function(page) {
+			this.url_input.val(page.path);
+		}
+	});
+
+	var PageSelector = new JS.Class({
+		initialize: function(location, parent) {
+			this.parent = parent;
+			this.location = location
+			this.browser = new Spontaneous.PageBrowser(this.location);
+			this.browser.set_manager(this);
+		},
+		view: function() {
+			var w = $(dom.div), path = $(dom.div).text('path here')
+
+			w.append(path)
+			w.append($(dom.div, {'class':'link-page-browser'}).append(this.browser.view()));
+			this.path = path;
+			return w;
+		},
+		page_list_loaded: function(view) {
+			console.log('page_list_loaded', view)
+			this.path.empty();
+			var list = $(dom.ul), ancestors = view.location.ancestors;
+			this.depth = ancestors.length;
+			for (var i = 0, ii = ancestors.length; i < ii; i++) {
+				list.append($(dom.li).text(ancestors[i].title + ">"))
+			}
+			this.path.append(list);
+		},
+		page_selected: function(page) {
+			console.log('page_selected', page, page.path);
+			this.parent.page_selected(page);
+		},
+		next_level: function(page) {
+			this.location = page
 		}
 	});
 
@@ -484,18 +528,23 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		on_focus: function() {
 			if (!this.expanded) {
-				var input = this.input();
-				input.data('original-height', input.innerHeight())
+				var input = this.input(), h = input.innerHeight();
+
+				input.data('original-height', h)
 				var text_height = input[0].scrollHeight, max_height = 500, resize_height = Math.min(text_height, max_height);
-				input.animate({'height':resize_height});
-				this.expanded = true;
+				if (Math.abs(resize_height - h) > 50) {
+					input.animate({'height':resize_height});
+					this.expanded = true;
+				}
 			}
 			this.callSuper();
 		},
 		on_blur: function() {
-			var input = this.input();
-			input.animate({ 'height':input.data('original-height') });
-			this.expanded = false;
+			if (this.expanded) {
+				var input = this.input();
+				input.animate({ 'height':input.data('original-height') });
+				this.expanded = false;
+			}
 			this.callSuper();
 		},
 		toolbar: function() {

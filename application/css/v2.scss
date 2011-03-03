@@ -413,11 +413,11 @@ img.missing {
 .fields-preview {
   @extend .clearfix;
   @include box-sizing;
-  border: solid 3px transparent;
+  // border: solid 3px transparent;
   cursor: pointer; }
 
-.fields-preview:hover {
-  border-color: $action !important; }
+// .fields-preview:hover {
+//   border-color: $action !important; }
 
 .fields-preview .value p {
   margin: 0 0 8px 0;
@@ -681,7 +681,13 @@ img.missing {
       bottom: 0px;
       margin: 4px;
       background-color: white;
-      z-index: 1; }
+      z-index: 1;
+      border-width: 8px;
+    }
+    .white-bg.active {
+      -webkit-border-image: url(/@spontaneous/static/inner-glow.png) 8 8 8 8 repeat;
+      // border-color: red;
+}
     .grey-bg {
       left: 60%;
       right: 0;
@@ -915,11 +921,13 @@ img.missing {
   @extend .clearfix;
   z-index: 1001;
   background-color: #5b5b5b;
+    // background-color: #f0d5a9;
+  @extend .shadow;
   .button {
     background-color: $editing; }
   .field-group-bg {
     @include rounded;
-    background-color: #6b6b6b;
+    // background-color: #6b6b6b;
     position: absolute;
     margin: 8px;
     top: 0px;
@@ -939,10 +947,10 @@ img.missing {
     position: relative;
     z-index: 1010;
     float: left;
-    margin: 8px 0 0 8px;
+    // margin: 8px 0 0 8px;
     padding: 8px;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    // margin-top: 8px;
+    // margin-bottom: 8px;
     .field + .field {
       margin-top: 8px; }
     .name {
@@ -950,6 +958,7 @@ img.missing {
       @include box-sizing;
       @extend .interface;
       background-color: #d1d1d1;
+      // background-image: url(/@spontaneous/static/paper-texture-dark.png);
       display: block;
       height: 24px;
       padding-left: 8px;
@@ -987,9 +996,9 @@ img.missing {
       .value {
         border-color: $editing; } } }
   .field-group.text {
-    width: 605px; }
+    width: 621px; }
   .field-group.image {
-    width: 319px;
+    width: 327px;
     .field .value {
       position: relative;
       min-height: 70px;

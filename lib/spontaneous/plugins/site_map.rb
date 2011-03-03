@@ -15,7 +15,7 @@ module Spontaneous::Plugins
         shallow_map_entry.merge({
           :children => self.children.map {|c| c.shallow_map_entry },
           :generation => self.generation.map {|c| c.shallow_map_entry },
-          :ancestors => self.ancestors.map {|c| c.shallow_map_entry }, 
+          :ancestors => self.ancestors.map {|c| c.shallow_map_entry },
         })
       end
       def shallow_map_entry
@@ -23,7 +23,9 @@ module Spontaneous::Plugins
           :id => id,
           :title => fields.title.value,
           :path => path,
-          :type => self.class.json_name
+          :type => self.class.json_name,
+          :children => self.children.length,
+          :depth => depth
         }
       end
     end
