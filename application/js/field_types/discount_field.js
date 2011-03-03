@@ -401,22 +401,20 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			this.browser.set_manager(this);
 		},
 		view: function() {
-			var w = $(dom.div), path = $(dom.div).text('path here')
+			var w = $(dom.div);
 
-			w.append(path)
 			w.append($(dom.div, {'class':'link-page-browser'}).append(this.browser.view()));
-			this.path = path;
 			return w;
 		},
 		page_list_loaded: function(view) {
 			console.log('page_list_loaded', view)
-			this.path.empty();
-			var list = $(dom.ul), ancestors = view.location.ancestors;
-			this.depth = ancestors.length;
-			for (var i = 0, ii = ancestors.length; i < ii; i++) {
-				list.append($(dom.li).text(ancestors[i].title + ">"))
-			}
-			this.path.append(list);
+			// this.path.empty();
+			// var list = $(dom.ul), ancestors = view.location.ancestors;
+			// this.depth = ancestors.length;
+			// for (var i = 0, ii = ancestors.length; i < ii; i++) {
+			// 	list.append($(dom.li).text(ancestors[i].title + ">"))
+			// }
+			// this.path.append(list);
 		},
 		page_selected: function(page) {
 			console.log('page_selected', page, page.path);

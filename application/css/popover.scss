@@ -201,7 +201,9 @@
 .pop-over {
 	.page-browser {
 		.page-list {
-			@include rounded;
+
+			@include rounded-bottom;
+
 			background-color: #fff;
 			padding: $unit/2 0;
 
@@ -210,14 +212,64 @@
 				color: #333;
 				@extend .interface;
 				text-transform: none;
-				padding: 2px 1px;
+				padding: $unit/2 $unit/2;
+				position: relative;
+
 				&:hover {
 					background-color: #999;
 					color: #fff;
 				}
+
 				&.active {
 					background-color: $action;
 					color: white;
+				}
+				span {
+					display: block;
+					position: absolute;
+					right: $unit;
+					top: 0;
+					font-size: 16px;
+					line-height: 13px;
+					font-weight: normal;
+					width: 50px;
+					height: 100%;
+					text-align: right;
+					&:hover {
+						color: #000;
+					}
+				}
+			}
+		}
+		.page-ancestors {
+			@include rounded-top;
+			background-color: #ccc;
+
+			ul {
+				margin: 0;
+				padding: 0;
+				@include display-box;
+				@include box-orient(horizontal);
+
+				padding: $unit/2;
+				li {
+					@extend .interface;
+					text-transform: none;
+					cursor: pointer;
+					a {
+						color: #666;
+					}
+					span {
+						display: inline-block;
+						color: #777;
+						margin: 0 2px;
+					}
+					&:hover a {
+						color: #000;
+					}
+					&:active a {
+						color: $action;
+					}
 				}
 			}
 		}

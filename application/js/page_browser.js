@@ -6,19 +6,29 @@ Spontaneous.PageBrowser = (function($, S) {
 	var PageBrowser = new JS.Class(Spontaneous.PopoverView, {
 		initialize: function(origin) {
 			this.origin = origin || '/';
-			this.page_source = this.origin_source();
+			this.page_list = this.origin_list();
+			this.ancestor_list = this.origin_ancestors();
 			console.log('PageBrowser for', [this.origin]);
 
-			// origin could be path or page object (?)
 		},
-		origin_source: function() {
+		origin_list: function() {
 			return function(location) {
 				return location.generation;
 			}
 		},
-		children_source: function() {
+		children_list: function() {
 			return function(location) {
 				return location.children;
+			}
+		},
+		origin_ancestors: function() {
+			return function(location) {
+				return location.ancestors;
+			}
+		},
+		children_ancestors: function() {
+			return function(location) {
+				return location.ancestors.concat(location);
 			}
 		},
 		get_page_list: function() {
@@ -33,9 +43,11 @@ Spontaneous.PageBrowser = (function($, S) {
 		},
 		view: function() {
 			var wrapper = $(dom.div, {'class':'page-browser'}), table = $(dom.div, {'class':'page-list'});
-			wrapper.append(table);
+			ancestors = $(dom.div, {'class':'page-ancestors'});
+			wrapper.append(ancestors).append(table);
 			this.wrapper = wrapper;
 			this.table = table;
+			this.ancestors = ancestors;
 			this.get_page_list();
 			return wrapper;
 		},
@@ -45,11 +57,27 @@ Spontaneous.PageBrowser = (function($, S) {
 				console.log(status, page_list)
 				this.location = page_list;
 				this.manager.page_list_loaded(this);
-				var g = this.page_source(this.location), table = this.table;
+				var g = this.page_list(this.location), table = this.table;
 				for (var i = 0, ii = g.length; i < ii; i++) {
 					var page = g[i];
 					table.append(this.get_entry(page));
 				}
+
+				this.ancestors.empty();
+				var _browser = this, list = $(dom.ul), ancestors = this.ancestor_list(this.location);
+
+				this.depth = ancestors.length;
+				var click = function(p) {
+					return function(event) {
+						_browser.ancestor_selected(p);
+						return false;
+					};
+				};
+				for (var i = 0, ii = ancestors.length; i < ii; i++) {
+					var a = ancestors[i], li = $(dom.li).append($(dom.a).text(a.title)).append($(dom.span).text("/")).click(click(a));
+					list.append(li);
+				}
+				this.ancestors.append(list);
 			}
 		},
 		get_entry: function(page) {
@@ -74,8 +102,16 @@ Spontaneous.PageBrowser = (function($, S) {
 			}
 			return row;
 		},
+		ancestor_selected: function(page) {
+			console.log('ancestor', page, page.path);
+			this.page_list = this.origin_list();
+			this.ancestor_list = this.origin_ancestors();
+			this.origin = page;
+			this.get_page_list();
+		},
 		next_level: function(page) {
-			this.page_source = this.children_source();
+			this.page_list = this.children_list();
+			this.ancestor_list = this.children_ancestors();
 			this.origin = page;
 			this.get_page_list();
 			// this.manager.next_level(page);
