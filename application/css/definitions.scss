@@ -1,0 +1,154 @@
+
+$unit: 8px;
+
+$action: #10b2fe;
+$action_r: 16;
+$action_g: 178;
+$action_b: 254;
+
+$editing: #42AB06;
+
+$highlight: #FF6C03;
+$highlight_r: 255;
+$highlight_g: 108;
+$highlight_b: 3;
+
+$error: #f00;
+
+$chrome-bg: #222;
+$chrome-accent: #404040;
+
+$content-font-family:  "HelveticaNeue", "Helvetica Neue", "FrutigerLTStd-Light", "Frutiger LT Std 45 Light";
+$input-font-family:  "Lucida Grande";
+$headline-font-family:   "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "FrutigerLTStd-Light", "Frutiger LT Std";
+$interface-font-family: "HelveticaNeue", "Helvetica Neue", "FrutigerLTStd-Roman", "Frutiger LT Std";
+/*$interface-font-family: "Helvetica";*/
+
+$field-preview-font-size: 11px;
+
+$container-padding: 32px;
+$field-text-preview-width: 580px;
+$field-image-preview-width: 300px;
+$field-preview-total-width: $field-text-preview-width + $field-image-preview-width + 32px;
+$title-bar-height: 16px;
+$dialogue-width: 980px;
+
+@mixin rounded($radius: 4px) {
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  border-radius: $radius; }
+
+@mixin rounded-top($radius: 4px) {
+  -webkit-border-top-right-radius: $radius;
+  -moz-border-radius-topright: $radius;
+  border-top-right-radius: $radius;
+  -webkit-border-top-left-radius: $radius;
+  -moz-border-radius-topleft: $radius;
+  border-top-left-radius: $radius; }
+
+@mixin rounded-bottom($radius: 4px) {
+  -webkit-border-bottom-right-radius: $radius;
+  -moz-border-radius-bottomright: $radius;
+  border-bottom-right-radius: $radius;
+  -webkit-border-bottom-left-radius: $radius;
+  -moz-border-radius-bottomleft: $radius;
+  border-bottom-left-radius: $radius; }
+
+@mixin rounded-top-left($radius: 4px) {
+  -webkit-border-top-left-radius: $radius;
+  -moz-border-radius-topleft: $radius;
+  border-top-left-radius: $radius; }
+
+@mixin rounded-top-right($radius: 4px) {
+  -webkit-border-top-right-radius: $radius;
+  -moz-border-radius-topright: $radius;
+  border-top-right-radius: $radius; }
+
+@mixin rounded-right($radius: 4px) {
+  -webkit-border-radius: 0 $radius $radius 0;
+  -moz-border-radius: 0 $radius $radius 0;
+  border-radius: 0 $radius $radius 0; }
+
+.shadow {
+  -webkit-box-shadow: 0px 3px 30px #cccccc;
+  -moz-box-shadow: 0px 3px 30px #cccccc; }
+
+.clearfix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden; }
+
+@mixin vertical-gradient($start-color: #cccccc, $end-color: black, $mid-point: 0.5) {
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from($start-color), to($end-color));
+  background-image: -moz-linear-gradient(top, $start-color, $end-color);
+}
+
+@mixin display-box {
+  display: -webkit-box;
+  display: -moz-box;
+  display: box;
+}
+@mixin box-sizing($model: border-box) {
+  -webkit-box-sizing: $model;
+  -moz-box-sizing: $model;
+  box-sizing: $model; }
+
+@mixin box-orient($direction: horizontal) {
+  box-orient: $direction;
+  -webkit-box-orient: $direction;
+  -moz-box-orient: $direction;
+}
+@mixin box-pack($packing: center) {
+  box-pack: $packing;
+  -webkit-box-pack: $packing;
+  -moz-box-pack: $packing;
+}
+@mixin box-align($aligning: start) {
+  box-align: $aligning;
+  -webkit-box-align: $aligning;
+  -moz-box-align: $aligning;
+}
+.box-flexible {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+
+.no-select {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+.interface {
+  font-family: $interface-font-family;
+  -webkit-font-smoothing: antialiased;
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: bold;
+  @extend .no-select;
+}
+
+@mixin button($background-color: $action) {
+  @include rounded;
+  @include box-sizing;
+  @extend .interface;
+  margin: 0;
+  cursor: pointer;
+  text-align: center;
+  height: 22px;
+  padding-top: 5px;
+  font-weight: bold;
+  display: inline-block;
+  background-color: $background-color;
+	@include vertical-gradient(lighten($background-color, 5%), darken($background-color, 5%));
+  text-decoration: none;
+  color: white;
+	&:hover {
+		background-color: $highlight !important;
+		@include vertical-gradient($highlight, darken($highlight, 5%));
+		color: white !important;
+	}
+}
+

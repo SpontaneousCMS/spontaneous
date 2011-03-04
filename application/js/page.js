@@ -148,12 +148,41 @@ Spontaneous.Page = (function($, S) {
 		title_field: function() {
 			return this.fields().title;
 		},
+		edit: function() {
+			var panel = this.callSuper(), view = panel.view(), w = this.edit_wrapper, i = this.inside;
+			if (!i.data('height')) {
+				i.data('height', i.outerHeight());
+				console.log('inner height', i.data('height'), this.inside)
+			}
+			w.append(view);
+			w.add(this.inside).animate({'height':view.height()}, 200, function() {
+			});
+		},
+		edit_closed: function() {
+			var w = this.edit_wrapper, t = 200, inside = this.inside;
+			inside.animate({'height':inside.data('height')}, t, function() {
+				inside.css('height', 'auto')
+			});
+			w.animate({'height':''}, t, function() {
+				w.empty();
+			})
+		},
 		panel: function() {
 			this.panel = $(dom.div, {'id':'page-content'});
 			this.panel.append(new FunctionBar(this).panel());
-			this.panel.append(new Spontaneous.FieldPreview(this, 'page-fields').panel());
+			var edit_slot = $(dom.div, {'style':'position: relative;overflow:visible'});
+			var edit_wrapper = $(dom.div, {'style':'position: absolute; z-index:4;left: -4px; top: 0; right: -4px;'});
+			edit_slot.append(edit_wrapper);
+			var fields = $(dom.div, {'id':'page-fields'})
+			var fp = new Spontaneous.FieldPreview(this, '');
+			var p = fp.panel();
+			fields.append(edit_slot);
+			fields.append(p);
+			this.panel.append(fields);
 			// this.panel.append(new Spontaneous.SlotContainer(this, 'page-slots').panel());
 			this.panel.append(new Spontaneous.BoxContainer(this, 'page-slots').panel());
+			this.edit_wrapper = edit_wrapper;
+			this.inside = p;
 			return this.panel;
 		},
 		depth: function() {

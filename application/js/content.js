@@ -186,11 +186,9 @@ Spontaneous.Content = (function($, S) {
 		},
 
 		destroy: function() {
-			console.log('Content.destroy', this.content.id);
 			Spontaneous.Ajax.post(['/destroy', this.content.id].join('/'), {}, this, this.destroyed);
 		},
 		toggle_visibility: function() {
-			console.log('Content.visibility', this.content.id);
 			Spontaneous.Ajax.post(['/toggle', this.content.id].join('/'), {}, this, this.visibility_toggled);
 		},
 		visibility_toggled: function(result) {
@@ -209,8 +207,8 @@ Spontaneous.Content = (function($, S) {
 			}
 		},
 		edit: function() {
-			console.log('Content.edit', this.content);
-			(new Spontaneous.EditDialogue(this)).open();
+			return new Spontaneous.EditPanel(this);
+			// (new Spontaneous.EditDialogue(this)).open();
 		},
 		save: function(dialogue, form_data) {
 			// Spontaneous.Ajax.post('/'+this.model_name+'/'+this.id + '/save', $(form).serialize(), this, this.saved);

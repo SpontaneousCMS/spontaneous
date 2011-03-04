@@ -1,146 +1,16 @@
+@import "definitions";
 
-$unit: 8px;
-
-$action: #10b2fe;
-$action_r: 16;
-$action_g: 178;
-$action_b: 254;
-
-$editing: #42AB06;
-
-$highlight: #FF6C03;
-$highlight_r: 255;
-$highlight_g: 108;
-$highlight_b: 3;
-
-$error: #f00;
-
-$chrome-bg: #222;
-$chrome-accent: #404040;
-
-$content-font-family:  "HelveticaNeue", "Helvetica Neue", "FrutigerLTStd-Light", "Frutiger LT Std 45 Light";
-$input-font-family:  "Lucida Grande";
-$headline-font-family:   "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "FrutigerLTStd-Light", "Frutiger LT Std";
-$interface-font-family: "HelveticaNeue", "Helvetica Neue", "FrutigerLTStd-Roman", "Frutiger LT Std";
-/*$interface-font-family: "Helvetica";*/
-
-$field-preview-font-size: 11px;
-
-$container-padding: 32px;
-$field-text-preview-width: 580px;
-$field-image-preview-width: 300px;
-$field-preview-total-width: $field-text-preview-width + $field-image-preview-width + 32px;
-$title-bar-height: 16px;
-$dialogue-width: 980px;
-
-@mixin rounded($radius: 4px) {
-  -webkit-border-radius: $radius;
-  -moz-border-radius: $radius;
-  border-radius: $radius; }
-
-@mixin rounded-top($radius: 4px) {
-  -webkit-border-top-right-radius: $radius;
-  -moz-border-radius-topright: $radius;
-  border-top-right-radius: $radius;
-  -webkit-border-top-left-radius: $radius;
-  -moz-border-radius-topleft: $radius;
-  border-top-left-radius: $radius; }
-
-@mixin rounded-bottom($radius: 4px) {
-  -webkit-border-bottom-right-radius: $radius;
-  -moz-border-radius-bottomright: $radius;
-  border-bottom-right-radius: $radius;
-  -webkit-border-bottom-left-radius: $radius;
-  -moz-border-radius-bottomleft: $radius;
-  border-bottom-left-radius: $radius; }
-
-@mixin rounded-top-left($radius: 4px) {
-  -webkit-border-top-left-radius: $radius;
-  -moz-border-radius-topleft: $radius;
-  border-top-left-radius: $radius; }
-
-@mixin rounded-top-right($radius: 4px) {
-  -webkit-border-top-right-radius: $radius;
-  -moz-border-radius-topright: $radius;
-  border-top-right-radius: $radius; }
-
-@mixin rounded-right($radius: 4px) {
-  -webkit-border-radius: 0 $radius $radius 0;
-  -moz-border-radius: 0 $radius $radius 0;
-  border-radius: 0 $radius $radius 0; }
-
-.shadow {
-  -webkit-box-shadow: 0px 3px 30px #cccccc;
-  -moz-box-shadow: 0px 3px 30px #cccccc; }
-
-.clearfix:after {
-  content: ".";
-  display: block;
-  height: 0;
-  clear: both;
-  visibility: hidden; }
-
-@mixin vertical-gradient($start-color: #cccccc, $end-color: black, $mid-point: 0.5) {
-  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from($start-color), to($end-color));
-  background: -moz-linear-gradient(top, $start-color, $end-color); }
-
-@mixin display-box {
-  display: -webkit-box;
-  display: -moz-box;
-  display: box;
+@mixin image-overlay {
+      opacity: 0.7;
+      color: black;
+      padding-left: 4px;
+      padding-top: 2px;
+      background-color: #efefef;
 }
-@mixin box-sizing($model: border-box) {
-  -webkit-box-sizing: $model;
-  -moz-box-sizing: $model;
-  box-sizing: $model; }
-
-@mixin box-orient($direction: horizontal) {
-  box-orient: $direction;
-  -webkit-box-orient: $direction;
-  -moz-box-orient: $direction;
-}
-@mixin box-pack($packing: center) {
-  box-pack: $packing;
-  -webkit-box-pack: $packing;
-  -moz-box-pack: $packing;
-}
-@mixin box-align($aligning: start) {
-  box-align: $aligning;
-  -webkit-box-align: $aligning;
-  -moz-box-align: $aligning;
-}
-.box-flexible {
-  -webkit-box-flex: 1;
-        -moz-box-flex: 1;
-        box-flex: 1;
-}
-
-.no-select {
-  -moz-user-select: none;
-  -webkit-user-select: none; }
-
-.interface {
-  font-family: $interface-font-family;
-  -webkit-font-smoothing: antialiased;
-  text-transform: uppercase;
-  font-size: 10px;
-  font-weight: bold;
-  @extend .no-select; }
 
 .button {
-  @include rounded;
-  @include box-sizing;
-  @extend .interface;
-  margin: 0;
-  cursor: pointer;
-  text-align: center;
-  height: 22px;
-  padding-top: 5px;
-  font-weight: bold;
-  display: inline-block;
-  background-color: $action;
-  text-decoration: none;
-  color: white; }
+  @include button;
+}
 
 .button:hover {
   background-color: $highlight !important;
@@ -265,7 +135,7 @@ img.missing {
       a {
         padding-right: 28px; } } }
   #switch-mode, #open-publish {
-    @extend .button;
+    @include button;
     position: absolute;
     right: 0;
     margin: 4px $container-padding 0 0;
@@ -405,10 +275,13 @@ img.missing {
           display: block;
           text-transform: uppercase; } } } }
   #page-fields {
-    @extend .container-padding;
-    .fields-preview-text {}
-    padding-top: 8px;
-    padding-bottom: 8px; } }
+    .fields-preview {
+      @extend .container-padding;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+  }
+}
 
 .fields-preview {
   @extend .clearfix;
@@ -471,6 +344,7 @@ img.missing {
     position: relative;
     .name {
       @extend .preview-label;
+      @include image-overlay;
       @include box-sizing;
       position: absolute;
       left: 0;
@@ -478,11 +352,6 @@ img.missing {
       bottom: 0;
       top: auto;
       height: 16px;
-      opacity: 0.7;
-      color: black;
-      padding-left: 4px;
-      padding-top: 2px;
-      background-color: #efefef;
       z-index: 1; }
     .value {
       @include rounded;
@@ -589,12 +458,12 @@ img.missing {
     padding-top: 10px;
     position: relative;
     a {
-      @extend .button;
+      @include button;
       padding-right: 16px;
       padding-left: 16px; }
-    a:hover {
-      background-color: $highlight;
-      color: white; }
+    // a:hover {
+    //   background-color: $highlight;
+    //   color: white; }
     a + a {
       margin-left: 8px; }
     .down {
@@ -664,8 +533,8 @@ img.missing {
       color: white;
       .buttons {
         a {
-          @extend .button;
-          background-color: #cccccc;
+          @include button(#cccccc);
+          // background-color: ;
           padding-left: 16px;
           padding-right: 16px; }
         a + a {
@@ -766,12 +635,12 @@ img.missing {
         height: 31px;
         padding: 5px 8px 0 8px;
         a {
-          @extend .button;
-          background-color: #6b6b6b;
+          @include button(#6b6b6b);
+          // background-color: #6b6b6b;
           padding-left: 8px;
           padding-right: 8px; }
-        a:hover {
-          background-color: $highlight; }
+        // a:hover {
+        //   background-color: $highlight; }
         .down {
           display: none; } }
       .slot-entries {
@@ -884,12 +753,12 @@ img.missing {
     margin: $container-padding / 2;
     margin-top: 0;
     .publish-all {
-      @extend .button;
+      @include button(#666);
       @extend .interface;
       width: 128px;
       float: right;
       text-align: left;
-      background-color: #666666;
+      // background-color: #666666;
       input {
         margin: 1px 8px 0 8px;
         padding: 0;
@@ -1116,20 +985,5 @@ img.missing {
 #script-load-splash.loaded {
   background-position: 0 -80px; }
 
-.markdown-editor .md-toolbar {
-  // background-color: rgba(0, 0, 0, 0.1);
-  a {
-    @extend .interface;
-    display: inline-block;
-    border: solid 1px transparent;
-    padding: 2px 6px;
-    cursor: pointer; }
-  a.active {
-    border: solid 1px $action;
-    background-color: rgba(0, 0, 0, 0.1); }
-  a:hover {
-    background-color: rgba(0, 0, 0, 0.1); }
-  a + a {
-    margin-left: 10px; } }
-
 @import "popover";
+@import "editing"

@@ -29,13 +29,46 @@ Spontaneous.Box = (function($, S) {
 		depth: function() {
 			return 'box';
 		},
+
+		edit: function() {
+			var panel = this.callSuper(), view = panel.view(), w = this.edit_wrapper, i = this.inside;
+			if (!i.data('height')) {
+				i.data('height', i.height());
+				console.log('inner height', i.data('height'), this.inside)
+			}
+			w.append(view);
+			w.add(this.inside).animate({'height':view.height()}, 200, function() {
+			});
+		},
+
+		edit_closed: function() {
+			var w = this.edit_wrapper, t = 200, inside = this.inside;
+			inside.animate({'height':inside.data('height')}, t, function() {
+				inside.css('height', 'auto')
+			});
+			w.animate({'height':''}, t, function() {
+				w.empty();
+			})
+		},
+
 		panel: function() {
 			if (!this._panel) {
 				var panel = $(dom.div, {'class': 'slot-content'});
 				if (this.has_fields()) {
+					var w = $(dom.div, {'class':'box-fields'});
 					var fields = new Spontaneous.FieldPreview(this, '');
-					panel.append(fields.panel())
+					var inside = $(dom.div, {'class':'clearfix'});
+					var edit_slot = $(dom.div, {'style':'position: relative;overflow:visible'})
+					var edit_wrapper = $(dom.div, {'style':'position: absolute; z-index:4;left: -4px; top: 0; right: -4px;'});
+					edit_slot.append(edit_wrapper);
+					w.append(edit_slot);
+					inside.append(fields.panel())
+					w.append(inside);
+					panel.append(w);
+					this.edit_wrapper = edit_wrapper;
+					this.inside = inside;
 				}
+
 				var allowed = this.allowed_types();
 				var allowed_bar = $(dom.div, {'class':'slot-addable'});
 				var dropper = allowed_bar;

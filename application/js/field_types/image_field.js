@@ -49,7 +49,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				dropper.removeClass('drop-active').addClass('uploading');
 				var files = event.dataTransfer.files;
 				if (files.length > 0) {
-					var file = files[0], url = window.createBlobURL(file);
+					var file = files[0], url = window.URL.createObjectURL(file);
 					this.image.attr('src', url)
 					S.UploadManager.replace(this, file);
 				}
@@ -111,7 +111,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return 0;
 		},
 		edit: function() {
-			var wrap = $(dom.div);
+			var wrap = $(dom.div, {'style':'position:relative;'});
 			var onclick = function() {
 				input.trigger('click');
 				return false;
@@ -128,17 +128,29 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			var onchange = function() {
 				var files = this.input[0].files;
 				if (files.length > 0) {
-					var file = files[0], url = window.createBlobURL(file);
+					var file = files[0], url = window.URL.createObjectURL(file);
 					img.attr('src', url).removeClass('empty');
 					this.image.attr('src', url)
 				}
 			}.bind(this);
 			var input = this.get_input().change(onchange);
 			var actions = $(dom.div, {'class':'actions'});
-			var change = $(dom.a, {'class':'button change'}).text('Change').click(onclick);
+			var attr = this.data.attributes.original;
+				console.log('-------', this.data.attributes);
+			// var change = $(dom.a, {'class':'button change'}).text('Change').click(onclick);
 			var clear = $(dom.a, {'class':'button clear'}).text('Clear');
-			actions.append(input).append(change).append(clear);
+			actions.append(input).append(clear);
 			wrap.append(img).append(actions);
+			if (attr) {
+				var info = $(dom.div, {'class':'info'});
+				var s = attr.src.split('/'), filename = s[s.length - 1];
+				info.append($(dom.div, {'class':'filename'}).text(filename))
+				var sizes = $(dom.div, {'class':'sizes'})
+				info.append(sizes)
+				sizes.append($(dom.div, {'class':'filesize'}).text(parseFloat(attr.filesize, 10).to_filesize()))
+				sizes.append($(dom.div, {'class':'dimensions'}).text(attr.width + 'x' + attr.height))
+				wrap.append(info);
+			}
 			return wrap;
 		}
 	});
