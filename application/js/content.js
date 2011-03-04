@@ -206,9 +206,32 @@ Spontaneous.Content = (function($, S) {
 				callback(this);
 			}
 		},
+		// edit: function() {
+		// 	return ;
+		// 	// (new Spontaneous.EditDialogue(this)).open();
+		// },
 		edit: function() {
-			return new Spontaneous.EditPanel(this);
-			// (new Spontaneous.EditDialogue(this)).open();
+			var panel = new Spontaneous.EditPanel(this), view = panel.view(), w = this.edit_wrapper, i = this.inside;
+			if (!i.data('height')) { i.data('height', i.outerHeight()); }
+			view.hide();
+			w.css('height', 0).show();
+			w.append(view);
+			w.add(this.inside).animate({'height':view.height()}, 200, function() {
+				view.fadeIn(300);
+			});
+		},
+
+		edit_closed: function() {
+			var w = this.edit_wrapper, t = 200, inside = this.inside;
+			// w.animate({'height':''}, t, function() {
+			// 	w.empty();
+			// })
+			w.fadeOut(200, function() {
+				w.empty().hide();
+				inside.animate({'height':inside.data('height')}, t, function() {
+					inside.css('height', 'auto')
+				});
+			});
 		},
 		save: function(dialogue, form_data) {
 			// Spontaneous.Ajax.post('/'+this.model_name+'/'+this.id + '/save', $(form).serialize(), this, this.saved);

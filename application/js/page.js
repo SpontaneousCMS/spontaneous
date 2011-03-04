@@ -148,25 +148,7 @@ Spontaneous.Page = (function($, S) {
 		title_field: function() {
 			return this.fields().title;
 		},
-		edit: function() {
-			var panel = this.callSuper(), view = panel.view(), w = this.edit_wrapper, i = this.inside;
-			if (!i.data('height')) {
-				i.data('height', i.outerHeight());
-				console.log('inner height', i.data('height'), this.inside)
-			}
-			w.append(view);
-			w.add(this.inside).animate({'height':view.height()}, 200, function() {
-			});
-		},
-		edit_closed: function() {
-			var w = this.edit_wrapper, t = 200, inside = this.inside;
-			inside.animate({'height':inside.data('height')}, t, function() {
-				inside.css('height', 'auto')
-			});
-			w.animate({'height':''}, t, function() {
-				w.empty();
-			})
-		},
+
 		panel: function() {
 			this.panel = $(dom.div, {'id':'page-content'});
 			this.panel.append(new FunctionBar(this).panel());

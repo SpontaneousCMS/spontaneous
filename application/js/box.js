@@ -30,26 +30,6 @@ Spontaneous.Box = (function($, S) {
 			return 'box';
 		},
 
-		edit: function() {
-			var panel = this.callSuper(), view = panel.view(), w = this.edit_wrapper, i = this.inside;
-			if (!i.data('height')) {
-				i.data('height', i.height());
-				console.log('inner height', i.data('height'), this.inside)
-			}
-			w.append(view);
-			w.add(this.inside).animate({'height':view.height()}, 200, function() {
-			});
-		},
-
-		edit_closed: function() {
-			var w = this.edit_wrapper, t = 200, inside = this.inside;
-			inside.animate({'height':inside.data('height')}, t, function() {
-				inside.css('height', 'auto')
-			});
-			w.animate({'height':''}, t, function() {
-				w.empty();
-			})
-		},
 
 		panel: function() {
 			if (!this._panel) {
