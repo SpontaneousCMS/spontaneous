@@ -2,7 +2,7 @@ $editing-0: #ede9e4;
 $editing-1: #e1ded8;
 $editing-2: #dbd7d1;
 
-#editing-panel {
+.editing-panel {
 
 	// @extend .dialogue-wrapper;
 	@extend .clearfix;
@@ -424,6 +424,15 @@ a + a {
 }
 }
 
+#page-fields .editing-panel {
+	.editing-fields, .editing-toolbar {
+		padding-left: $container-padding;
+		padding-right: $container-padding;
+	}
+	.field-group.text {
+		padding-left: 0;
+	}
+}
 .markdown-editor .md-toolbar {
   background-color: $editing-2;
   a {

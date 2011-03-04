@@ -275,10 +275,13 @@ img.missing {
           display: block;
           text-transform: uppercase; } } } }
   #page-fields {
-    @extend .container-padding;
-    .fields-preview-text {}
-    padding-top: 8px;
-    padding-bottom: 8px; } }
+    .fields-preview {
+      @extend .container-padding;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+  }
+}
 
 .fields-preview {
   @extend .clearfix;

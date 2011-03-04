@@ -73,9 +73,9 @@ Spontaneous.EditPanel = (function($, S) {
 				if (class_name) { toolbar.addClass(class_name); }
 				return toolbar;
 			};
-			var editing = $(dom.form, {'id':'editing-panel', 'enctype':'multipart/form-data', 'method':'post'});
+			var editing = $(dom.form, {'class':'editing-panel', 'enctype':'multipart/form-data', 'method':'post'});
 			var toolbar = get_toolbar();
-			var outer = $(dom.div);
+			var outer = $(dom.div, {'class':'editing-fields'});
 			var text_field_wrap = $(dom.div, {'class':'field-group text'});
 			var image_field_wrap = $(dom.div, {'class':'field-group image'});
 			var text_fields = this.content.text_fields();

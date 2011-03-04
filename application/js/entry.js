@@ -40,7 +40,6 @@ Spontaneous.Entry = (function($, S) {
 			return wrapper;
 		},
 		edit: function() {
-			console.log('edit!', ++debug)
 			var panel = this.callSuper(), view = panel.view(), w = this.edit_wrapper, i = this.inside;
 			if (!i.data('height')) {
 				i.data('height', i.height());
