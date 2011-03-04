@@ -424,7 +424,8 @@ a + a {
 }
 }
 
-#page-fields .editing-panel {
+#page-fields .editing-panel,
+.box-fields .editing-panel {
 	.editing-fields, .editing-toolbar {
 		padding-left: $container-padding;
 		padding-right: $container-padding;

@@ -50,8 +50,10 @@ Spontaneous.Entry = (function($, S) {
 			});
 		},
 		edit_closed: function() {
-			var w = this.edit_wrapper, t = 200;
-			this.inside.animate({'height':this.inside.data('height')}, t);
+			var w = this.edit_wrapper, t = 200, inside = this.inside;
+			inside.animate({'height':inside.data('height')}, t, function() {
+				inside.css('height', 'auto')
+			});
 			w.animate({'height':''}, t, function() {
 				w.empty();
 			})
