@@ -1,3 +1,209 @@
+$editing-0: #ede9e4;
+$editing-1: #e1ded8;
+$editing-2: #dbd7d1;
+
+#editing-panel {
+
+	// @extend .dialogue-wrapper;
+	@extend .clearfix;
+	z-index: 1001;
+	background-color: $editing-0;
+	background: $editing-0 url(/@spontaneous/static/editing-0-noise.png) 0 0 repeat;
+
+.editing-toolbar {
+	@include display-box;
+	@include box-orient(horizontal);
+	@include box-pack(justify);
+	// background-color: $editing-1;
+	background: $editing-1 url(/@spontaneous/static/editing-1-noise.png) 0 0 repeat;
+	padding: $unit/2 $unit;
+	.save, .cancel {
+		@include button($action);
+	}
+	.cancel {
+		@include button(darken($editing-2, 20%));
+	}
+	.save, .cancel {
+		display: block;
+		width: 128px;
+	}
+}
+.field-group-bg {
+	@include rounded;
+	// background-color: #6b6b6b;
+	position: absolute;
+	margin: 8px;
+	top: 0px;
+	bottom: 0px;
+}
+.field-group-bg.text {
+	left: 0;
+	right: 343px;
+}
+.field-group-bg.image {
+	left: 629px;
+	right: 0;
+}
+input[type="submit"] {
+	visibility: hidden;
+	position: absolute;
+	width: 0;
+	height: 0;
+}
+.field-group {
+	position: relative;
+	z-index: 1010;
+	float: left;
+	// margin: 8px 0 0 8px;
+	padding: 8px;
+	// margin-top: 8px;
+	// margin-bottom: 8px;
+	.field + .field {
+		margin-top: 8px;
+	}
+.name {
+	@include rounded-top;
+	@include box-sizing;
+	@extend .interface;
+	background-color: $editing-1;
+	// background-image: url(/@spontaneous/static/paper-texture-dark.png);
+	display: block;
+	height: 16px;
+	padding-left: 8px;
+	padding-top: 2px;
+}
+.value {
+	@include rounded-bottom;
+	border: solid 2px transparent;
+	padding: 6px;
+	background-color: white;
+	textarea, input[type="text"] {
+		font-family: $input-font-family;
+		font-size: 11px;
+		line-height: 14px;
+		outline: none;
+}
+input[type="file"] {
+	visibility: hidden;
+	position: absolute;
+	width: 0;
+	height: 0;
+}
+textarea {
+	@include box-sizing;
+	border: none;
+	width: 100%;
+	padding-right: 64px;
+}
+input[type="text"] {
+	@include box-sizing;
+	width: 100%;
+	border: none;
+	display: block;
+	font-weight: bold;
+}
+}
+.field.focus {
+	.name {
+		background-color: $editing;
+		color: white;
+}
+.value {
+	border-color: $editing;
+}
+}
+}
+.field-group.text {
+	width: 621px;
+}
+.field-group.image {
+	display: inline-block;
+	// width: 327px;
+	.field {
+		display: inline-block;
+		vertical-align: top;
+		min-width: 100px;
+	}
+	.field + .field {
+		margin-top: 0;
+		margin-left: $unit;
+	}
+	.field .value {
+		position: relative;
+		min-height: 70px;
+		text-align: center;
+		img {
+			max-height: 300px;
+			@extend .shadow;
+			cursor: pointer;
+		}
+		img:hover {
+			outline: solid 1px $action;
+		}
+		img.empty {
+			width: 50%;
+			height: 100px;
+		}
+		.actions {
+			margin: 0px;
+			margin-left: 0;
+			position: absolute;
+			top: 0;
+			right: 0;
+			width: 60px;
+			.button {
+				display: block;
+			}
+			.button.clear {
+				color: #5b5b5b;
+				background-color: #d1d1d1;
+				width: 100%;
+			}
+		}
+		.info {
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			padding: $unit;
+      @include image-overlay;
+			@extend .interface;
+			text-transform: none;
+			@include display-box;
+			@include box-orient(vertical);
+			.sizes {
+				padding-top: $unit/2;
+				@include display-box;
+				@include box-orient(horizontal);
+				@include box-pack(justify);
+			}
+		}
+.landscape {
+	img {
+		max-width: 100%;
+		max-height: 50%;
+}
+.actions {
+	width: auto;
+	display: block;
+	margin: 8px 0 0 0;
+	position: relative;
+	.button {
+		display: inline-block;
+		width: 109px;
+}
+.button.clear {
+	position: static;
+}
+.button.change {
+	position: absolute;
+	right: 0;
+}
+}
+}
+}
+}
+}
 @import "variables";
 
 #editing {
@@ -13,162 +219,224 @@
 		position: absolute;
 		top: 0;
 		left: 0;
-		right: 0; }
-	#function-panel {
-		position: absolute;
-		top: $bar-height;
-		left: 0;
 		right: 0;
-		height: 34px; }
-	#content-panel {
-		position: absolute;
-		top: $bar-height * 2.5;
+}
+#function-panel {
+	position: absolute;
+	top: $bar-height;
+	left: 0;
+	right: 0;
+	height: 34px;
+}
+#content-panel {
+	position: absolute;
+	top: $bar-height * 2.5;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	overflow: auto;
+	padding: 0 $padding;
+	padding-bottom: 100px;
+	.tabs {
+		@include rounded-top;
+		background-color: $level2;
+		list-style: none;
+		height: $bar-height;
+		@extend .clearfix;
+		.tab:first-child {
+			@include rounded-top-left;
+}
+.tab {
+	@extend .bar;
+	display: block;
+	float: left;
+	padding-left: $padding;
+	min-width: 130px;
+	border-right: solid 1px $level4;
+	cursor: pointer;
+	&:hover {
+		background-color: $blue;
+}
+}
+.tab.active {
+	background-color: $level4;
+	font-weight: bold;
+}
+}
+#content-wrapper {
+	border-top: solid 1px $level3;
+	background-color: $level1;
+	.field-wrap {
+		.edit, .preview {
+			padding: $padding;
+			background-color: $level3;
+}
+.field {
+	@include rounded;
+	width: 100%;
+	.name, .value {
+		display: table-cell;
+}
+.name {
+	@include rounded-left;
+	vertical-align: top;
+	font-weight: bold;
+	width: 150px;
+	padding-right: $padding;
+	text-align: right;
+}
+.value {
+	@include rounded-right;
+	padding-left: $padding;
+}
+}
+.field.edit {
+	.name {
+		@extend .bar;
+}
+.name {
+	background-color: $level7;
+}
+.name.active {
+	background-color: $blue;
+	color: $white;
+}
+.value {
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-right: 0;
+	padding-left: 0px;
+	position: relative;
+	input.input {
+		@extend .bar;
+		@include rounded-right;
+		@extend .border-box;
+		display: block;
+		position: relative;
 		left: 0;
-		right: 0;
-		bottom: 0;
-		overflow: auto;
-		padding: 0 $padding;
-		padding-bottom: 100px;
-		.tabs {
-			@include rounded-top;
+		width: 100%;
+		height: $bar-height;
+		border: solid 2px $blue;
+		outline: none;
+		padding-left: $padding;
+		vertical-align: top;
+		&:focus {
+			border-color: $blue;
+}
+}
+}
+}
+.field + .field {
+	margin-top: $padding;
+}
+}
+.facet-contents-wrap .facet-contents-wrap .facet-drag-bar {
+	display: none;
+}
+.facet-contents-wrap .editing .facet-contents-wrap .facet-drag-bar {
+	display: block;
+}
+.facet.depth-1 .facet-contents-wrap {
+	background-color: $level2;
+}
+.facet.depth-2 {
+	background-color: $level1;
+	.field-wrap .preview {
+		background-color: $white;
+}
+.field-wrap .edit {
+	background-color: $level1;
+}
+.facet-contents-wrap {
+	background-color: $level1;
+}
+}
+.facet.depth-1 > .facet-bottom-bar {
+	@include rounded-bottom;
+	background-color: $level1;
+}
+.field-wrap + .facet-allowed {}
+.facet-allowed {
+	background-color: $level3;
+	padding: 0;
+	.type-list {
+		@include rounded-top;
+		@extend .clearfix;
+		padding-left: $padding;
+		padding-right: $padding;
+		padding-bottom: 6px;
+		$a-height: $bar-height - 6;
+		$a-pad: ($a-height - $line-height) / 2 - 1;
+		a {
+			@include rounded;
+			display: block;
+			float: left;
+			min-width: 95px;
+			padding: $a-pad 6px 0 6px;
+			height: $a-height - $a-pad;
 			background-color: $level2;
-			list-style: none;
-			height: $bar-height;
-			@extend .clearfix;
-			.tab:first-child {
-				@include rounded-top-left; }
-			.tab {
-				@extend .bar;
-				display: block;
-				float: left;
-				padding-left: $padding;
-				min-width: 130px;
-				border-right: solid 1px $level4;
-				cursor: pointer;
-				&:hover {
-					background-color: $blue; } }
-			.tab.active {
-				background-color: $level4;
-				font-weight: bold; } }
-		#content-wrapper {
-			border-top: solid 1px $level3;
-			background-color: $level1;
-			.field-wrap {
-				.edit, .preview {
-					padding: $padding;
-					background-color: $level3; }
-				.field {
-					@include rounded;
-					width: 100%;
-					.name, .value {
-						display: table-cell; }
-					.name {
-						@include rounded-left;
-						vertical-align: top;
-						font-weight: bold;
-						width: 150px;
-						padding-right: $padding;
-						text-align: right; }
-					.value {
-						@include rounded-right;
-						padding-left: $padding; } }
-				.field.edit {
-					.name {
-						@extend .bar; }
-					.name {
-						background-color: $level7; }
-					.name.active {
-						background-color: $blue;
-						color: $white; }
-					.value {
-						padding-top: 0;
-						padding-bottom: 0;
-						padding-right: 0;
-						padding-left: 0px;
-						position: relative;
-						input.input {
-							@extend .bar;
-							@include rounded-right;
-							@extend .border-box;
-							display: block;
-							position: relative;
-							left: 0;
-							width: 100%;
-							height: $bar-height;
-							border: solid 2px $blue;
-							outline: none;
-							padding-left: $padding;
-							vertical-align: top;
-							&:focus {
-								border-color: $blue; } } } }
-				.field + .field {
-					margin-top: $padding; } }
-			.facet-contents-wrap .facet-contents-wrap .facet-drag-bar {
-				display: none; }
-			.facet-contents-wrap .editing .facet-contents-wrap .facet-drag-bar {
-				display: block; }
-			.facet.depth-1 .facet-contents-wrap {
-				background-color: $level2; }
-			.facet.depth-2 {
-				background-color: $level1;
-				.field-wrap .preview {
-					background-color: $white; }
-				.field-wrap .edit {
-					background-color: $level1; }
-				.facet-contents-wrap {
-					background-color: $level1; } }
-			.facet.depth-1 > .facet-bottom-bar {
-				@include rounded-bottom;
-				background-color: $level1; }
-			.field-wrap + .facet-allowed {}
-			.facet-allowed {
-				background-color: $level3;
-				padding: 0;
-				.type-list {
-					@include rounded-top;
-					@extend .clearfix;
-					padding-left: $padding;
-					padding-right: $padding;
-					padding-bottom: 6px;
-					$a-height: $bar-height - 6;
-					$a-pad: ($a-height - $line-height) / 2 - 1;
-					a {
-						@include rounded;
-						display: block;
-						float: left;
-						min-width: 95px;
-						padding: $a-pad 6px 0 6px;
-						height: $a-height - $a-pad;
-						background-color: $level2;
-						margin-top: 6px;
-						&:hover {
-							background-color: $blue;
-							color: $white; } }
-					a + a {
-						margin-left: 6px; } } }
-			.page-entry-link h3 {
-				@extend .bar;
-				@include rounded;
-				background-color: $level1;
-				margin-bottom: $padding;
-				font-size: 150%;
-				padding-left: $padding;
-				a {
-					font-weight: normal; } }
-			.facet-contents-wrap {
-				padding: $padding;
-				.facet-drag-bar {
-					@include rounded-top;
-					height: $bar-height - $padding;
-					background-color: $level4; }
-				.facet {
-					margin-top: 2 * $padding; }
-				.field-wrap {}
-				.page .field-wrap {
-					padding-bottom: $padding; } }
-			.depth-2 .facet-contents-wrap {
-				background-color: $level3; }
-			.facet-bottom-bar {
-				@include rounded-bottom;
-				height: $padding;
-				background-color: $level2; } } } }
+			margin-top: 6px;
+			&:hover {
+				background-color: $blue;
+				color: $white;
+}
+}
+a + a {
+	margin-left: 6px;
+}
+}
+}
+.page-entry-link h3 {
+	@extend .bar;
+	@include rounded;
+	background-color: $level1;
+	margin-bottom: $padding;
+	font-size: 150%;
+	padding-left: $padding;
+	a {
+		font-weight: normal;
+}
+}
+.facet-contents-wrap {
+	padding: $padding;
+	.facet-drag-bar {
+		@include rounded-top;
+		height: $bar-height - $padding;
+		background-color: $level4;
+}
+.facet {
+	margin-top: 2 * $padding;
+}
+.field-wrap {}
+.page .field-wrap {
+	padding-bottom: $padding;
+}
+}
+.depth-2 .facet-contents-wrap {
+	background-color: $level3;
+}
+.facet-bottom-bar {
+	@include rounded-bottom;
+	height: $padding;
+	background-color: $level2;
+}
+}
+}
+}
+
+.markdown-editor .md-toolbar {
+  background-color: $editing-2;
+  a {
+    @extend .interface;
+    display: inline-block;
+    border: solid 1px transparent;
+    padding: 2px 6px;
+    cursor: pointer; }
+  a.active {
+    border: solid 1px $action;
+    background-color: rgba(0, 0, 0, 0.1); }
+  a:hover {
+    background-color: rgba(0, 0, 0, 0.1); }
+  a + a {
+    margin-left: 10px; } }
+

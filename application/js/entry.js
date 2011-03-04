@@ -2,7 +2,7 @@ console.log('Loading Entry...')
 
 Spontaneous.Entry = (function($, S) {
 	var dom = S.Dom;
-
+	var debug = 0;
 	var Entry = new JS.Class(Spontaneous.Content, {
 		initialize: function(content, container) {
 			this.container = container;
@@ -18,6 +18,12 @@ Spontaneous.Entry = (function($, S) {
 				wrapper.append($(dom.div, {'class':'grey-bg'}));
 			}
 			wrapper.append(this.title_bar(wrapper));
+			var edit_slot = $(dom.div, {'style':'position: relative;overflow:visible'})
+			var edit_wrapper = $(dom.div, {'style':'position: absolute; z-index:4;left: -4px; top: 0; right: -4px;'});
+			edit_slot.append(edit_wrapper);
+			var inside = $(dom.div, {'class':'clearfix'});
+			wrapper.append(edit_slot);
+			wrapper.append(inside);
 			this.dialogue_box = $(dom.div, {'class':'dialogue', 'style':'display: none'});
 			wrapper.append(this.dialogue_box);
 			var entry = $(dom.div, {'class':'entry'});
@@ -25,11 +31,31 @@ Spontaneous.Entry = (function($, S) {
 			entry.append(fields.panel());
 			// console.log("Entry#panel", this.entries())
 			var box_container = new Spontaneous.BoxContainer(this);
-			wrapper.append(entry);
-			wrapper.append(box_container.panel());
+			inside.append(entry);
+			inside.append(box_container.panel());
 			this.wrapper = wrapper;
 			this.outline = outline;
+			this.edit_wrapper = edit_wrapper;
+			this.inside = inside;
 			return wrapper;
+		},
+		edit: function() {
+			console.log('edit!', ++debug)
+			var panel = this.callSuper(), view = panel.view(), w = this.edit_wrapper, i = this.inside;
+			if (!i.data('height')) {
+				i.data('height', i.height());
+				console.log('inner height', i.data('height'), this.inside)
+			}
+			w.append(view);
+			w.add(this.inside).animate({'height':view.height()}, 200, function() {
+			});
+		},
+		edit_closed: function() {
+			var w = this.edit_wrapper, t = 200;
+			this.inside.animate({'height':this.inside.data('height')}, t);
+			w.animate({'height':''}, t, function() {
+				w.empty();
+			})
 		},
 		title_bar: function(wrapper) {
 			if (!this._title_bar) {

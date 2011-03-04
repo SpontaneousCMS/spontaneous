@@ -24,6 +24,7 @@ Spontaneous.FieldPreview = (function($, S) {
 				wrapper.mouseout(this.content.mouseout.bind(this.content))
 			}
 			wrapper.click(function() {
+				console.log('field_preview.edit')
 				this.content.edit();
 			}.bind(this))
 			return wrapper;
