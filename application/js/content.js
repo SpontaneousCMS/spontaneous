@@ -234,7 +234,7 @@ Spontaneous.Content = (function($, S) {
 		},
 
 		edit: function() {
-			var time_to_reveal = 2000, back = 10, front = 20,
+			var time_to_reveal = 300, back = 10, front = 20,
 				a = this.editing_area, o = a.outer, w = a.write, r = a.read, wi = a.write_inner, ri = a.read_inner;
 			var panel = new Spontaneous.EditPanel(this), view = panel.view();
 			r.css('z-index', front);
@@ -251,7 +251,7 @@ Spontaneous.Content = (function($, S) {
 		},
 
 		edit_closed: function() {
-			var time_to_reveal = 2000, back = 10, front = 20,
+			var time_to_reveal = 300, back = 10, front = 20,
 			  a = this.editing_area, o = a.outer, w = a.write, r = a.read, wi = a.write_inner, ri = a.read_inner;
 				var h = ri.outerHeight();
 				o.add(r).animate({'height':h}, { queue: false, duration: time_to_reveal });

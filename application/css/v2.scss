@@ -485,7 +485,7 @@ img.missing {
     position: relative;
     margin-left: $container-padding;
     margin-right: $container-padding;
-    margin-bottom: $container-padding;
+    margin-bottom: $container-padding/2;
     background-color: gray;
     padding: 4px;
     padding-top: $title-bar-height + 4px;
@@ -510,7 +510,7 @@ img.missing {
         background-color: rgba(0, 0, 0, 0.2);
         position: absolute;
         top: 0;
-        right: 8px;
+        right: $unit/2;
         a {
           background: url("/@spontaneous/static/item-buttons.png") 0 0 no-repeat;
           display: inline-block;
@@ -669,11 +669,11 @@ img.missing {
       .slot-entries {
         padding-top: 8px; }
       .entry-wrap.depth-2 {
-        padding: 4px 4px;
-        padding-top: $title-bar-height + 4;
-        margin-left: 8px;
-        margin-right: 8px;
-        margin-bottom: 8px;
+        padding: $unit/2 $unit/2;
+        padding-top: $title-bar-height + ($unit/2);
+        margin-left: $unit;
+        margin-right: $unit;
+        margin-bottom: $unit;
         .entry {
           @include rounded;
           width: 100%;
@@ -887,8 +887,10 @@ img.missing {
         color: white; }
       .value {
         border-color: $editing; } } }
-  .field-group.text {
-    width: 621px; }
+  // .field-group.text {
+  //   // width: 621px;
+  //   width: 100%;
+  // }
   .field-group.image {
     width: 327px;
     .field .value {

@@ -69,11 +69,13 @@ Spontaneous.EditPanel = (function($, S) {
 			var get_toolbar = function(class_name) {
 				var save = $(dom.a, {'class':'save'}).text('Save').click(_save_);
 				var cancel = $(dom.a, {'class':'cancel'}).text('Cancel').click(_cancel_);
-				var toolbar = $(dom.div, {'class':'editing-toolbar'}).append(cancel).append(save);;
+				var shadow = $(dom.div, {'class':'indent'});
+				var buttons = $(dom.div, {'class':'buttons'}).append(cancel).append(save);
+				var toolbar = $(dom.div, {'class':'editing-toolbar'}).append(shadow).append(buttons);
 				if (class_name) { toolbar.addClass(class_name); }
 				return toolbar;
 			};
-			var editing = $(dom.form, {'class':'editing-panel', 'enctype':'multipart/form-data', 'method':'post'});
+			var editing = $(dom.form, {'class':'editing-panel '+ this.content.depth_class(), 'enctype':'multipart/form-data', 'method':'post'});
 			var toolbar = get_toolbar();
 			var outer = $(dom.div, {'class':'editing-fields'});
 			var text_field_wrap = $(dom.div, {'class':'field-group text'});

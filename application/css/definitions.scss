@@ -26,7 +26,7 @@ $interface-font-family: "HelveticaNeue", "Helvetica Neue", "FrutigerLTStd-Roman"
 
 $field-preview-font-size: 11px;
 
-$container-padding: 32px;
+$container-padding: 64px;
 $field-text-preview-width: 580px;
 $field-image-preview-width: 300px;
 $field-preview-total-width: $field-text-preview-width + $field-image-preview-width + 32px;
@@ -146,8 +146,8 @@ $corner-radius: 4px;
   margin: 0;
   cursor: pointer;
   text-align: center;
-  height: 22px;
-  padding-top: 5px;
+  height: 17px;
+  padding-top: 2px;
   font-weight: bold;
   display: inline-block;
   background-color: $background-color;

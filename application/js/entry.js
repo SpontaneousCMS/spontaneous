@@ -14,20 +14,16 @@ Spontaneous.Entry = (function($, S) {
 			var wrapper = $(dom.div, {'class':['entry-wrap ', this.depth_class(), this.visibility_class()].join(' ')});
 			var inside = $(dom.div, {'class':'entry-inner'});
 			var outline = $(dom.div, {'class':'white-bg'}).mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
-			// wrapper.append(outline)
 			inside.append(outline)
 			if (this.depth() < 4) {
-				// wrapper.append($(dom.div, {'class':'grey-bg'}));
 				inside.append($(dom.div, {'class':'grey-bg'}));
 			}
 			wrapper.append(this.title_bar(wrapper));
 			this.dialogue_box = $(dom.div, {'class':'dialogue', 'style':'display: none'});
 			wrapper.append(this.dialogue_box);
-			// wrapper.append(inside);
 			var entry = $(dom.div, {'class':'entry'});
 			var fields = new Spontaneous.FieldPreview(this, '');
 			entry.append(fields.panel());
-			// console.log("Entry#panel", this.entries())
 			var box_container = new Spontaneous.BoxContainer(this);
 			inside.append(entry);
 			inside.append(box_container.panel());
@@ -35,8 +31,6 @@ Spontaneous.Entry = (function($, S) {
 			wrapper.append(preview_area)
 			this.wrapper = wrapper;
 			this.outline = outline;
-			// this.edit_wrapper = edit_wrapper;
-			this.inside = inside;
 			return wrapper;
 		},
 

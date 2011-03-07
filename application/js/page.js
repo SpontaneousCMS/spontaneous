@@ -152,21 +152,14 @@ Spontaneous.Page = (function($, S) {
 		panel: function() {
 			this.panel = $(dom.div, {'id':'page-content'});
 			this.panel.append(new FunctionBar(this).panel());
-			// var edit_slot = $(dom.div, {'style':'position: relative;overflow:visible'});
-			// var edit_wrapper = $(dom.div, {'style':'position: absolute; z-index:4;left: -4px; top: 0; right: -4px;'});
-			// edit_slot.append(edit_wrapper);
 
 			var fields = $(dom.div, {'id':'page-fields'})
 			var fp = new Spontaneous.FieldPreview(this, '');
 			var p = fp.panel();
-			fields.append(p);
-			var preview_area = this.create_edit_wrapper(fields);
-			// fields.append(edit_slot);
-			this.panel.append(preview_area);
-			// this.panel.append(new Spontaneous.SlotContainer(this, 'page-slots').panel());
+			var preview_area = this.create_edit_wrapper(p);
+			fields.append(preview_area)
+			this.panel.append(fields);
 			this.panel.append(new Spontaneous.BoxContainer(this, 'page-slots').panel());
-			// this.edit_wrapper = edit_wrapper;
-			// this.inside = p;
 			return this.panel;
 		},
 		depth: function() {

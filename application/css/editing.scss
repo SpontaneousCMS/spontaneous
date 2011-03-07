@@ -2,6 +2,8 @@ $editing-0: #ede9e4;
 $editing-1: #e1ded8;
 $editing-2: #dbd7d1;
 
+$text-edit-width: 621px;
+
 .editing-panel {
 
 	// @extend .dialogue-wrapper;
@@ -11,21 +13,44 @@ $editing-2: #dbd7d1;
 	background: $editing-0 url(/@spontaneous/static/editing-0-noise.png) 0 0 repeat;
 
 .editing-toolbar {
-	@include display-box;
-	@include box-orient(horizontal);
-	@include box-pack(justify);
 	// background-color: $editing-1;
 	background: $editing-1 url(/@spontaneous/static/editing-1-noise.png) 0 0 repeat;
 	padding: $unit/2 $unit;
-	.save, .cancel {
-		@include button($action);
+	.indent {
+
+		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAGCAYAAAACEPQxAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODUyNjQ3NjA0MTA0MTFFMDg3MzVEMzQxRjc2ODUxM0YiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODUyNjQ3NjE0MTA0MTFFMDg3MzVEMzQxRjc2ODUxM0YiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4NTI2NDc1RTQxMDQxMUUwODczNUQzNDFGNzY4NTEzRiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4NTI2NDc1RjQxMDQxMUUwODczNUQzNDFGNzY4NTEzRiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpE8+XgAAAAfSURBVHjaYmBgYFBiAhJ/mIEEO4hgAhEMIOI/QIABABqLAjW6aph5AAAAAElFTkSuQmCC) 0 0 repeat-x;
+		// background: url(/@spontaneous/static/editing-toolbar-shadow-top.png) 0 0 repeat-x;
+		position: absolute;
+		top: 0;
+		right: 0;
+		left: 0;
+		height: 6px;
 	}
-	.cancel {
-		@include button(darken($editing-2, 20%));
+	&.bottom .indent {
+		top: auto;
+		bottom: 0;
+		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAGCAYAAAACEPQxAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NkI2NEVCN0M0MTA0MTFFMDg3MzVEMzQxRjc2ODUxM0YiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NkI2NEVCN0Q0MTA0MTFFMDg3MzVEMzQxRjc2ODUxM0YiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpGQjZCNDk2MTQxMDExMUUwODczNUQzNDFGNzY4NTEzRiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpGQjZCNDk2MjQxMDExMUUwODczNUQzNDFGNzY4NTEzRiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PraoBnIAAAAdSURBVHjaYmBgYGBiAhIsIIIdRHCCCA6wGECAAQACQwAt8zOshgAAAABJRU5ErkJggg==) 0 0 repeat-x;
 	}
-	.save, .cancel {
-		display: block;
-		width: 128px;
+	.buttons {
+		@include display-box;
+		@include box-orient(horizontal);
+		@include box-pack(justify);
+		padding-top: $unit/2;
+		width: $text-edit-width;
+		.save, .cancel {
+			@include button($action);
+		}
+		.cancel {
+			@include button(darken($editing-2, 20%));
+		}
+		.save, .cancel {
+			display: block;
+			width: 128px;
+		}
+	}
+	&.bottom .buttons {
+		padding-bottom: $unit/2;
+		padding-top: 0;
 	}
 }
 .field-group-bg {
@@ -114,7 +139,20 @@ input[type="text"] {
 }
 }
 .field-group.text {
-	width: 621px;
+	width: $text-edit-width;
+}
+&.depth-2 {
+
+
+	.editing-toolbar {
+		.buttons {
+			width: 100%;
+		}
+	}
+	.field-group.text {
+		width: 100%;
+		@include box-sizing;
+	}
 }
 .field-group.image {
 	display: inline-block;
