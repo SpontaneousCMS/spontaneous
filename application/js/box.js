@@ -37,16 +37,10 @@ Spontaneous.Box = (function($, S) {
 				if (this.has_fields()) {
 					var w = $(dom.div, {'class':'box-fields'});
 					var fields = new Spontaneous.FieldPreview(this, '');
-					var inside = $(dom.div, {'class':'clearfix'});
-					var edit_slot = $(dom.div, {'style':'position: relative;overflow:visible'})
-					var edit_wrapper = $(dom.div, {'style':'position: absolute; z-index:4;left: -4px; top: 0; right: -4px;'});
-					edit_slot.append(edit_wrapper);
-					w.append(edit_slot);
-					inside.append(fields.panel())
-					w.append(inside);
+					var preview_area = this.create_edit_wrapper(fields.panel());
+
+					w.append(preview_area);
 					panel.append(w);
-					this.edit_wrapper = edit_wrapper;
-					this.inside = inside;
 				}
 
 				var allowed = this.allowed_types();

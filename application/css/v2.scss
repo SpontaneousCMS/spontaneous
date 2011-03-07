@@ -286,6 +286,7 @@ img.missing {
 .fields-preview {
   @extend .clearfix;
   @include box-sizing;
+  background-color: #fff;
   // border: solid 3px transparent;
   cursor: pointer; }
 
@@ -488,6 +489,13 @@ img.missing {
     background-color: gray;
     padding: 4px;
     padding-top: $title-bar-height + 4px;
+    .entry-inner {
+      @extend .clearfix;
+      @include rounded;
+      background-color: gray;
+      // padding: $unit;
+      position: relative;
+    }
     .title-bar {
       @include vertical-gradient(gray + #111111, gray);
       @include rounded-top;
@@ -542,50 +550,64 @@ img.missing {
         a.default {
           background-color: $action; } } }
     .white-bg, .grey-bg {
-      @include rounded;
+      // @include rounded;
       position: absolute;
       left: 0px;
       right: 40%;
-      top: $title-bar-height;
+      // top: $title-bar-height;
+      top: 0;
       bottom: 0px;
-      margin: 4px;
+      margin: 0;
       background-color: white;
       z-index: 1;
       border-width: 8px;
     }
+    .white-bg {
+      @include corners($corner-radius, 0, 0, $corner-radius);
+    }
     .white-bg.active {
       -webkit-border-image: url(/@spontaneous/static/inner-glow.png) 8 8 8 8 repeat;
       // border-color: red;
-}
+    }
     .grey-bg {
+      @include corners(0, $corner-radius, $corner-radius, 0);
       left: 60%;
       right: 0;
       background-color: #6b6b6b;
-      margin-left: 0px; }
+      margin-left: 0;
+    }
     .entry {
       @include rounded;
+      @include box-sizing;
       position: relative;
       z-index: 2;
       float: left;
+
       .fields-preview {
         @include rounded;
-        margin-right: 3px;
+        // margin-right: 3px;
         padding: 4px;
         background: none;
-        border-color: white; }
+        border-color: white;
+      }
       .fields-preview-text {
         width: 100%;
         position: relative;
         margin-bottom: 0;
         @include box-sizing;
         li {
-          @include box-sizing; } } }
+          @include box-sizing;
+        }
+      }
+    }
     .slots {
+      @include box-sizing;
       position: relative;
+      padding-left: 0;
       float: left;
       width: 40%;
       z-index: 2;
-      left: 1px;
+      // left: 1px;
       .slot-tabs {
         @extend .clearfix;
         @include rounded-top;
@@ -609,9 +631,10 @@ img.missing {
           background-color: #6b6b6b;
           color: #f2f2f2; }
         li:first-child {
-          @include rounded-top-left; }
+          // @include rounded-top-left;
+        }
         li:nth-child(4) {
-          @include rounded-top-right;
+          // @include rounded-top-right;
           float: right;
           position: relative;
           border-right: none; }

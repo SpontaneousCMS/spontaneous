@@ -1,6 +1,7 @@
 console.log('Loading Content...')
 
 Spontaneous.Content = (function($, S) {
+	var dom = S.Dom;
 
 	var Content = new JS.Class({
 		include: Spontaneous.Properties,
@@ -210,28 +211,57 @@ Spontaneous.Content = (function($, S) {
 		// 	return ;
 		// 	// (new Spontaneous.EditDialogue(this)).open();
 		// },
+		//
+		create_edit_wrapper: function(read_content) {
+			var s = {'style':'position: relative; overflow: hidden;'}
+			var outer = $(dom.div, s);
+			var write = $(dom.div, {'style':'position: absolute; height: 0; overflow: hidden;'})
+			var write_inner = $(dom.div);
+			var read = $(dom.div, s);
+			var read_inner = $(dom.div);
+			write.append(write_inner);
+			read_inner.append(read_content);
+			read.append(read_inner);
+			outer.append(write).append(read);
+			this.editing_area = {
+				outer: outer,
+				write: write,
+				write_inner: write_inner,
+				read: read,
+				read_inner: read_inner
+			};
+			return outer;
+		},
+
 		edit: function() {
-			var panel = new Spontaneous.EditPanel(this), view = panel.view(), w = this.edit_wrapper, i = this.inside;
-			if (!i.data('height')) { i.data('height', i.outerHeight()); }
-			view.hide();
-			w.css('height', 0).show();
-			w.append(view);
-			w.add(this.inside).animate({'height':view.height()}, 200, function() {
-				view.fadeIn(300);
-			});
+			var time_to_reveal = 2000, back = 10, front = 20,
+				a = this.editing_area, o = a.outer, w = a.write, r = a.read, wi = a.write_inner, ri = a.read_inner;
+			var panel = new Spontaneous.EditPanel(this), view = panel.view();
+			r.css('z-index', front);
+			w.css('z-index', back).css('height', 'auto').show();
+			wi.append(view);
+			var h = wi.outerHeight();
+			o.add(r).animate({'height':h}, { queue: false, duration: time_to_reveal });
+			w.css({'position':'relative'});
+			r.css({'position':'absolute', 'top':0, 'right':0, 'left':0}).animate({'top':h}, { queue: false, duration: time_to_reveal, complete:function() {
+				w.css({'z-index': front, 'position':'relative', 'height':'auto'})
+				r.css({'z-index': back, 'position':'absolute'})
+				o.css('height', 'auto')
+			}});
 		},
 
 		edit_closed: function() {
-			var w = this.edit_wrapper, t = 200, inside = this.inside;
-			// w.animate({'height':''}, t, function() {
-			// 	w.empty();
-			// })
-			w.fadeOut(200, function() {
-				w.empty().hide();
-				inside.animate({'height':inside.data('height')}, t, function() {
-					inside.css('height', 'auto')
-				});
-			});
+			var time_to_reveal = 2000, back = 10, front = 20,
+			  a = this.editing_area, o = a.outer, w = a.write, r = a.read, wi = a.write_inner, ri = a.read_inner;
+				var h = ri.outerHeight();
+				o.add(r).animate({'height':h}, { queue: false, duration: time_to_reveal });
+				r.css({'z-index':front, 'height':h, 'top':wi.outerHeight()+'px'}).animate({'top':0}, { queue: true, duration: time_to_reveal, complete: function() {
+					w.css({'position':'absolute', 'z-index':back});
+					r.css({'position':'relative', 'height':'auto', 'z-index':front})
+					o.css('height', 'auto')
+					wi.empty();
+				}});
+
 		},
 		save: function(dialogue, form_data) {
 			// Spontaneous.Ajax.post('/'+this.model_name+'/'+this.id + '/save', $(form).serialize(), this, this.saved);

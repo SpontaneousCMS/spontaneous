@@ -12,20 +12,18 @@ Spontaneous.Entry = (function($, S) {
 		},
 		panel: function() {
 			var wrapper = $(dom.div, {'class':['entry-wrap ', this.depth_class(), this.visibility_class()].join(' ')});
+			var inside = $(dom.div, {'class':'entry-inner'});
 			var outline = $(dom.div, {'class':'white-bg'}).mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
-			wrapper.append(outline)
+			// wrapper.append(outline)
+			inside.append(outline)
 			if (this.depth() < 4) {
-				wrapper.append($(dom.div, {'class':'grey-bg'}));
+				// wrapper.append($(dom.div, {'class':'grey-bg'}));
+				inside.append($(dom.div, {'class':'grey-bg'}));
 			}
 			wrapper.append(this.title_bar(wrapper));
-			var edit_slot = $(dom.div, {'style':'position: relative;overflow:visible'})
-			var edit_wrapper = $(dom.div, {'style':'position: absolute; z-index:4;left: -4px; top: 0; right: -4px;'});
-			edit_slot.append(edit_wrapper);
-			var inside = $(dom.div, {'class':'clearfix'});
-			wrapper.append(edit_slot);
-			wrapper.append(inside);
 			this.dialogue_box = $(dom.div, {'class':'dialogue', 'style':'display: none'});
 			wrapper.append(this.dialogue_box);
+			// wrapper.append(inside);
 			var entry = $(dom.div, {'class':'entry'});
 			var fields = new Spontaneous.FieldPreview(this, '');
 			entry.append(fields.panel());
@@ -33,9 +31,11 @@ Spontaneous.Entry = (function($, S) {
 			var box_container = new Spontaneous.BoxContainer(this);
 			inside.append(entry);
 			inside.append(box_container.panel());
+			var preview_area = this.create_edit_wrapper(inside);
+			wrapper.append(preview_area)
 			this.wrapper = wrapper;
 			this.outline = outline;
-			this.edit_wrapper = edit_wrapper;
+			// this.edit_wrapper = edit_wrapper;
 			this.inside = inside;
 			return wrapper;
 		},

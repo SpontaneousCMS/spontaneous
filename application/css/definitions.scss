@@ -33,10 +33,19 @@ $field-preview-total-width: $field-text-preview-width + $field-image-preview-wid
 $title-bar-height: 16px;
 $dialogue-width: 980px;
 
+$corner-radius: 4px;
+
 @mixin rounded($radius: 4px) {
   -webkit-border-radius: $radius;
   -moz-border-radius: $radius;
-  border-radius: $radius; }
+  border-radius: $radius;
+}
+
+@mixin corners($radius-tl: 4px, $radius-tr: 4px, $radius-br: 4px, $radius-bl: 4px) {
+  -webkit-border-radius: $radius-tl $radius-tr $radius-br $radius-bl;
+  -moz-border-radius: $radius-tl $radius-tr $radius-br $radius-bl;
+  border-radius: $radius-tl $radius-tr $radius-br $radius-bl;
+}
 
 @mixin rounded-top($radius: 4px) {
   -webkit-border-top-right-radius: $radius;
