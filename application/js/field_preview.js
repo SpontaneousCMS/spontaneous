@@ -16,7 +16,6 @@ Spontaneous.FieldPreview = (function($, S) {
 			var wrapper = $(dom.div, {'id':this.wrap_id, 'class':'fields-preview ' + this.depth_class()});
 			wrapper.append(this.fields_panel(this.content.text_fields(), 'text'));
 			wrapper.append(this.fields_panel(this.content.image_fields(), 'image'));
-			console.log(this.content, this.content.hover)
 			if (this.content.mouseover) {
 				wrapper.mouseover(this.content.mouseover.bind(this.content))
 			}
@@ -24,7 +23,6 @@ Spontaneous.FieldPreview = (function($, S) {
 				wrapper.mouseout(this.content.mouseout.bind(this.content))
 			}
 			wrapper.click(function() {
-				console.log('field_preview.edit')
 				this.content.edit();
 			}.bind(this))
 			return wrapper;

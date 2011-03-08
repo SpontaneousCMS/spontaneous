@@ -29,7 +29,6 @@ Spontaneous.Page = (function($, S) {
 			return this.panel;
 		},
 		set_title: function(title) {
-			console.log('page', this.page)
 			title = title || this.page.title();
 			this.title.text(title);
 			if (this.page.content.hidden) {

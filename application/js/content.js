@@ -173,7 +173,6 @@ Spontaneous.Content = (function($, S) {
 			return 'depth-'+this.depth();
 		},
 		visibility_class: function() {
-			console.log(this.content)
 			return this.content.hidden ? 'hidden' : 'visible';
 		},
 
