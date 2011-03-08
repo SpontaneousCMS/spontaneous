@@ -31,6 +31,7 @@ Spontaneous.Box = (function($, S) {
 		},
 
 
+
 		panel: function() {
 			if (!this._panel) {
 				var panel = $(dom.div, {'class': 'slot-content'});
