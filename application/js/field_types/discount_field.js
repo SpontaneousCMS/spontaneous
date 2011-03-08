@@ -434,7 +434,6 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		page_list_loaded: function(view) {
 		},
 		page_selected: function(page) {
-			console.log('page_selected', page, page.path);
 			this.parent.page_selected(page);
 		},
 		next_level: function(page) {

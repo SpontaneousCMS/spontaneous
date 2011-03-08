@@ -30,7 +30,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			});
 			img.load(function() {
 				var r = this.width/this.height, $this = $(this), h = $this.height(), dh = 0;
-				if (r >= 1 && h < dim) { // landscape -- fit image vertically
+				if (r >= 1 && h <= dim) { // landscape -- fit image vertically
 					var dh = (dim - h)/2;
 				}
 				$this.css('top', (dh) + 'px');
@@ -118,7 +118,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			};
 			var src = this.value();
 			var img = $(dom.img, {'src':src}).click(onclick).load(function() {
-				if (this.width > this.height) {
+				if (this.width >= this.height) {
 					wrap.addClass('landscape');
 				} else {
 					wrap.removeClass('landscape');
