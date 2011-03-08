@@ -105,17 +105,21 @@ Spontaneous.Entry = (function($, S) {
 			this.outline.removeClass('active');
 		},
 		confirm_destroy: function() {
+			if (this._dialogue && !this._dialogue.is_open) { this.close_destroy_dialogue(); }
 			if (!this._dialogue) {
 				this._dialogue = Spontaneous.Popover.open(event, new ConfirmDeletePopup(this));
 			} else {
-				this.cancel_destroy();
+				this.close_destroy_dialogue();
 			}
 		},
 		destroy: function() {
-			this.cancel_destroy();
+			this.close_destroy_dialogue();
 			this.callSuper();
 		},
 		cancel_destroy: function() {
+			this.close_destroy_dialogue();
+		},
+		close_destroy_dialogue: function() {
 			if (this._dialogue) {
 				this._dialogue.close();
 				this._dialogue = null;

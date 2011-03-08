@@ -46,9 +46,10 @@ Spontaneous.Popover = (function($, S) {
 			wrapper.hide();
 			location.append(wrapper);
 			this.wrapper = wrapper;
-			view.is_open = true;
+			this.is_open = true;
 			wrapper.fadeIn(200, this.after_open.bind(this));
 		},
+
 		after_open: function() {
 			this.view.after_open();
 		},
@@ -62,7 +63,7 @@ Spontaneous.Popover = (function($, S) {
 			view.before_close();
 			view.do_close();
 			view.after_close();
-			view.is_open = false;
+			this.is_open = false;
 			this.wrapper.fadeOut(100, function() {
 				$(this).remove();
 			});
