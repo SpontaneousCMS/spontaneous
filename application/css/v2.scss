@@ -1,11 +1,11 @@
 @import "definitions";
 
 @mixin image-overlay {
-      opacity: 0.7;
-      color: black;
-      padding-left: 4px;
-      padding-top: 2px;
-      background-color: #efefef;
+  opacity: 0.7;
+  color: black;
+  padding-left: 4px;
+  padding-top: 2px;
+  background-color: #efefef;
 }
 
 .button {
@@ -14,7 +14,8 @@
 
 .button:hover {
   background-color: $highlight !important;
-  color: white !important; }
+  color: white !important;
+}
 
 @mixin down-arrow($image: "/@spontaneous/static/orange-down-arrow.png", $height: 7px) {
   position: absolute;
@@ -23,51 +24,62 @@
   right: 0;
   bottom: 0 - $height;
   height: $height;
-  background: url($image) 50% 0 no-repeat; }
+  background: url($image) 50% 0 no-repeat;
+}
 
 .preview-label {
   @extend .interface;
-  color: #333333; }
+  color: #333333;
+}
 
 .preview-value {
   font-size: $field-preview-font-size;
   font-family: $content-font-family;
   line-height: $field-preview-font-size + 2;
   color: #666666;
-  font-weight: normal; }
+  font-weight: normal;
+}
 
 .container-padding {
   padding-left: $container-padding;
-  padding-right: $container-padding; }
+  padding-right: $container-padding;
+}
 
 body, h1, h2, h3, h4, h5, h6, dd, dt, ul, ol, li {
   margin: 0;
   padding: 0;
   font-weight: normal;
-  -webkit-font-smoothing: antialiased; }
+  -webkit-font-smoothing: antialiased;
+}
 
 body {
   margin-bottom: 300px;
   background-color: white;
-  font-family: $content-font-family; }
+  font-family: $content-font-family;
+}
 
 ul, ol {
-  list-style-type: none; }
+  list-style-type: none;
+}
 
 a {
-  text-decoration: none; }
+  text-decoration: none;
+}
 
 img.missing {
   width: 100%;
   height: 50px;
   background: url("/@spontaneous/static/missing.png") 50% 50% no-repeat;
-  border: none; }
+  border: none;
+}
 
 .clear {
-  clear: both; }
+  clear: both;
+}
 
 .controls-gradient {
-  @include vertical-gradient($chrome-accent, $chrome-bg); }
+  @include vertical-gradient($chrome-accent, $chrome-bg);
+}
 
 #top {
   @extend .container-padding;
@@ -108,50 +120,64 @@ img.missing {
         height: 31px;
         color: #888888;
         font-weight: bold;
-        width: 100%; }
-      select.unselected {
-        color: #555555;
-        font-weight: normal;
-        font-style: italic;
-        max-width: 80px; }
-      a {
-        @include box-sizing;
-        cursor: pointer;
-        color: #888888;
-        height: 31px;
-        padding-top: 9px;
-        display: block;
-        background: url("/@spontaneous/static/select-arrow.png") right 50% no-repeat;
-        padding-right: 20px; }
-      a:hover, select:hover {
-        color: white; } }
-    li.root a {
-      background-image: none; }
-    li:first-child {
-      background-image: url("/@spontaneous/static/spontaneous.png"), url("/@spontaneous/static/location-arrow.png");
-      background-position: 0 70%, right 0;
-      background-repeat: no-repeat;
-      padding-right: 12px;
-      a {
-        padding-right: 28px; } } }
-  #switch-mode, #open-publish {
-    @include button;
+        width: 100%;
+}
+select.unselected {
+  color: #555555;
+  font-weight: normal;
+  font-style: italic;
+  max-width: 80px;
+}
+a {
+  @include box-sizing;
+  cursor: pointer;
+  color: #888888;
+  height: 31px;
+  padding-top: 9px;
+  display: block;
+  background: url("/@spontaneous/static/select-arrow.png") right 50% no-repeat;
+  padding-right: 20px;
+}
+a:hover, select:hover {
+  color: white;
+}
+}
+li.root a {
+  background-image: none;
+}
+li:first-child {
+  background-image: url("/@spontaneous/static/spontaneous.png"), url("/@spontaneous/static/location-arrow.png");
+  background-position: 0 70%, right 0;
+  background-repeat: no-repeat;
+  padding-right: 12px;
+  a {
+    padding-right: 28px;
+}
+}
+}
+#switch-mode, #open-publish {
+  @include button;
+  position: absolute;
+  right: 0;
+  margin: 4px $container-padding 0 0;
+  width: 64px;
+}
+#open-publish {
+  right: 74px;
+  #publish-progress {
     position: absolute;
-    right: 0;
-    margin: 4px $container-padding 0 0;
-    width: 64px; }
-  #open-publish {
-    right: 74px;
-    #publish-progress {
-      position: absolute;
-      left: 8px;
-      top: 4px; } }
-  #open-publish.progress {
-    padding-left: 20px;
-    padding-right: 20px;
-    width: 124px;
-    background-color: #333333;
-    color: #666666; } }
+    left: 8px;
+    top: 4px;
+}
+}
+#open-publish.progress {
+  padding-left: 20px;
+  padding-right: 20px;
+  width: 124px;
+  background-color: #333333;
+  color: #666666;
+}
+}
 
 #content {
   position: fixed;
@@ -169,7 +195,9 @@ img.missing {
     top: 0;
     bottom: 0;
     width: 100%;
-    height: 100%; } }
+    height: 100%;
+}
+}
 
 #page-content {
   #page-info {
@@ -179,108 +207,131 @@ img.missing {
     padding-top: 10px;
     position: relative;
     h1, h3 {
-      position: relative; }
-    h1 {
-      font-family: $headline-font-family;
-      font-weight: 100;
-      color: white;
-      font-size: 24px;
-      line-height: 21px;
-      span {
-        color: #888888; } }
-    .path, .path h3 {
-      @extend .interface;
-      cursor: pointer;
-      color: #c1c1c1;
-      font-size: 11px;
-      line-height: 12px;
-      text-transform: none; }
-    .path {
-      position: absolute;
-      bottom: 10px; }
-    .path .edit {
-      .input-error {
-        position: relative;
-        top: 0;
-        vertical-align: top;
-        margin-left: 8px;
-        input[type="text"], span {
-          height: 16px;
-          padding: 4px; }
-        input[type="text"] {
-          @include rounded;
-          font-weight: bold;
-          width: 400px;
-          border: none;
-          outline: none;
-          vertical-align: top; }
-        span {
-          @include rounded-right;
-          padding-left: 8px;
-          padding-right: 8px;
-          background-color: $error;
-          position: absolute;
-          right: -1px;
-          top: 0;
-          color: white; } }
-      input[type="text"].error {
-        color: $error; }
-      .button {
-        padding-left: 20px;
-        padding-right: 20px;
-        margin-left: 8px;
-        height: 24px;
-        vertical-align: top; }
-      span, a.path {
-        position: relative;
-        top: 4px; }
-      a.path {
-        color: #c1c1c1;
-        margin-right: 1px;
-        &:hover {
-          color: white; } }
-      span {
-        color: #bbbbbb;
-        margin-right: 1px; } }
-    .path h3:hover {
-      color: white; }
-    .buttons {
-      position: absolute;
-      right: $container-padding;
-      top: 16px;
-      .button.publish {
-        width: 120px;
-        height: 32px;
-        padding-top: 8px;
-        background-color: #666666;
-        font-size: 12px;
-        position: relative; }
-      .button.publish:hover {
-        background-color: $highlight; }
-      .status {
-        @extend .interface;
-        vertical-align: top;
-        display: inline-block;
-        text-transform: none;
-        font-weight: normal;
-        margin: 0;
-        padding: 0;
-        color: #666666;
-        font-size: 10px;
-        line-height: 11px;
-        position: relative;
-        top: 5px;
-        margin-right: 8px;
-        strong {
-          display: block;
-          text-transform: uppercase; } } } }
-  #page-fields {
-    .fields-preview {
-      @extend .container-padding;
-      padding-top: 8px;
-      padding-bottom: 8px;
-    }
+      position: relative;
+}
+h1 {
+  font-family: $headline-font-family;
+  font-weight: 100;
+  color: white;
+  font-size: 24px;
+  line-height: 21px;
+  span {
+    color: #888888;
+}
+}
+.path, .path h3 {
+  @extend .interface;
+  cursor: pointer;
+  color: #c1c1c1;
+  font-size: 11px;
+  line-height: 12px;
+  text-transform: none;
+}
+.path {
+  position: absolute;
+  bottom: 10px;
+}
+.path .edit {
+  .input-error {
+    position: relative;
+    top: 0;
+    vertical-align: top;
+    margin-left: 8px;
+    input[type="text"], span {
+      height: 16px;
+      padding: 4px;
+}
+input[type="text"] {
+  @include rounded;
+  font-weight: bold;
+  width: 400px;
+  border: none;
+  outline: none;
+  vertical-align: top;
+}
+span {
+  @include rounded-right;
+  padding-left: 8px;
+  padding-right: 8px;
+  background-color: $error;
+  position: absolute;
+  right: -1px;
+  top: 0;
+  color: white;
+}
+}
+input[type="text"].error {
+  color: $error;
+}
+.button {
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-left: 8px;
+  height: 24px;
+  vertical-align: top;
+}
+span, a.path {
+  position: relative;
+  top: 4px;
+}
+a.path {
+  color: #c1c1c1;
+  margin-right: 1px;
+  &:hover {
+    color: white;
+}
+}
+span {
+  color: #bbbbbb;
+  margin-right: 1px;
+}
+}
+.path h3:hover {
+  color: white;
+}
+.buttons {
+  position: absolute;
+  right: $container-padding;
+  top: 16px;
+  .button.publish {
+    width: 120px;
+    height: 32px;
+    padding-top: 8px;
+    background-color: #666666;
+    font-size: 12px;
+    position: relative;
+}
+.button.publish:hover {
+  background-color: $highlight;
+}
+.status {
+  @extend .interface;
+  vertical-align: top;
+  display: inline-block;
+  text-transform: none;
+  font-weight: normal;
+  margin: 0;
+  padding: 0;
+  color: #666666;
+  font-size: 10px;
+  line-height: 11px;
+  position: relative;
+  top: 5px;
+  margin-right: 8px;
+  strong {
+    display: block;
+    text-transform: uppercase;
+}
+}
+}
+}
+#page-fields {
+  .fields-preview {
+    @extend .container-padding;
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
+}
 }
 
 .fields-preview {
@@ -288,17 +339,21 @@ img.missing {
   @include box-sizing;
   background-color: #fff;
   // border: solid 3px transparent;
-  cursor: pointer; }
+  cursor: pointer;
+}
 
 // .fields-preview:hover {
-//   border-color: $action !important; }
+//   border-color: $action !important;
+//}
 
 .fields-preview .value p {
   margin: 0 0 8px 0;
-  padding: 0; }
+  padding: 0;
+}
 
 .fields-preview .value p:last-child {
-  margin-bottom: 0; }
+  margin-bottom: 0;
+}
 
 .fields-preview-text {
   @include box-sizing;
@@ -320,48 +375,52 @@ img.missing {
     position: relative;
     padding-left: 100px;
     .name, .value {
-      float: left; } }
-  li:last-child {
-    border-bottom: none; }
-  .name {
-    @extend .preview-label;
-    width: 100px;
-    right: 100px;
-    margin-left: -100px; }
-  .value {
-    @extend .preview-value;
-    a {
-      color: $highlight;
-    }
-    h1, h2 {
-      font-size: 1.2em;
-      font-weight: bold;
-      margin-bottom: 1em;
-    }
-    h2 {
-      font-size: 1em;
-    }
-    ul, ol {
-      display: block;
-      padding-left: 1.4em;
-      margin-bottom: $unit;
+      float: left;
+}
+}
+li:last-child {
+  border-bottom: none;
+}
+.name {
+  @extend .preview-label;
+  width: 100px;
+  right: 100px;
+  margin-left: -100px;
+}
+.value {
+  @extend .preview-value;
+  a {
+    color: $highlight;
+  }
+  h1, h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 1em;
+  }
+  h2 {
+    font-size: 1em;
+  }
+  ul, ol {
+    display: block;
+    padding-left: 1.4em;
+    margin-bottom: $unit;
 
-      li {
-        display: list-item;
-        list-style-position: outside;
-        border: none;
-        margin: 0;
-        padding: 0;
-        float: none;
-      }
-    }
-    ul {
-      list-style-type: disc !important;
-    }
-    ol {
-      list-style-type: decimal !important;
+    li {
+      display: list-item;
+      list-style-position: outside;
+      border: none;
+      margin: 0;
+      padding: 0;
+      float: none;
     }
   }
+  ul {
+    list-style-type: disc !important;
+  }
+  ol {
+    list-style-type: decimal !important;
+  }
+}
 }
 
 .fields-preview-image {
@@ -384,53 +443,61 @@ img.missing {
       bottom: 0;
       top: auto;
       height: 16px;
-      z-index: 1; }
-    .value {
-      @include rounded;
-      background-color: #efefef;
-      max-height: 90px;
-      min-height: 45px;
-      min-width: 90px;
-      cursor: pointer;
-      text-align: center;
-      position: relative;
-      .image-drop {
-        @include rounded;
-        z-index: 2;
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        .drop-upload-outer {
-          @include rounded(4px);
-          border: solid 1px white;
-          position: absolute;
-          margin: 4px;
-          height: 6px;
-          left: 0;
-          right: 0;
-          bottom: 50%;
-          padding: 0 1px;
-          .drop-upload-inner {
-            position: relative;
-            margin-right: 2px;
-            top: 1px;
-            @include rounded(3px);
-            background-color: white;
-            height: 4px; } } }
-      .image-drop.drop-active {
-        border: solid 2px $action;
-        cursor: copy; }
-      .image-drop.drop-invalid {
-        cursor: no-drop; }
-      .image-drop.uploading {
-        background-color: rgba($highlight_r, $highlight_g, $highlight_b, 0.7); }
-      img {
-        @extend .no-select;
+      z-index: 1;
+}
+.value {
+  @include rounded;
+  background-color: #efefef;
+  max-height: 90px;
+  min-height: 45px;
+  min-width: 90px;
+  cursor: pointer;
+  text-align: center;
+  position: relative;
+  .image-drop {
+    @include rounded;
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    .drop-upload-outer {
+      @include rounded(4px);
+      border: solid 1px white;
+      position: absolute;
+      margin: 4px;
+      height: 6px;
+      left: 0;
+      right: 0;
+      bottom: 50%;
+      padding: 0 1px;
+      .drop-upload-inner {
         position: relative;
-        max-height: 90px; }
-      img:hover {} } } }
+        margin-right: 2px;
+        top: 1px;
+        @include rounded(3px);
+        background-color: white;
+        height: 4px;
+}
+}
+}
+.image-drop.drop-active {
+  border: solid 2px $action;
+  cursor: copy;
+}
+.image-drop.drop-invalid {
+  cursor: no-drop;
+}
+.image-drop.uploading {
+  background-color: rgba($highlight_r, $highlight_g, $highlight_b, 0.7);
+}
+img {
+  @extend .no-select;
+  position: relative;
+  max-height: 90px;
+}
+img:hover {} } } }
 
 .fields-preview-text + .fields-preview-image {}
 
@@ -456,52 +523,69 @@ img.missing {
       border-right: solid 1px #494949;
       position: relative;
       .down {
-        display: none; } }
-    li:first-child {
-      padding-left: $container-padding; }
-    li:hover, li.active {
-      @include vertical-gradient($highlight + #111111, $highlight);
-      background-color: $highlight;
-      color: white;
-      border-right-color: $highlight;
-      .down {
-        @include down-arrow("/@spontaneous/static/orange-down-arrow.png", 7px);
-        z-index: 1; } }
-    li.active + li:hover {
-      border-left-color: $highlight - #151515; } }
-  .fields-preview.depth-box {
-    @extend .container-padding;
-    padding-top: 12px;
-    padding-bottom: 5px;
-    @include vertical-gradient(#eeeeee, #dddddd);
-    border-top-color: #e6e6e6;
-    border-bottom-color: #dddddd;
-    &:hover {
-      border-top-color: $action;
-      border-bottom-color: $action; }
-    .value {
-      color: #555555; } }
-  .slot-addable {
-    @extend .container-padding;
-    @include box-sizing;
-    @include vertical-gradient(#dddddd, #eeeeee);
-    border-top: solid 1px #cccccc;
-    height: 40px;
-    padding-top: 10px;
-    position: relative;
-    a {
-      @include button;
-      padding-right: 16px;
-      padding-left: 16px; }
-    // a:hover {
-    //   background-color: $highlight;
-    //   color: white; }
-    a + a {
-      margin-left: 8px; }
-    .down {
-      @include down-arrow("/@spontaneous/static/slot-down-arrow.png", 18px); } }
-  .slot-addable.drop-active {
-    outline: solid 2px $action; } }
+        display: none;
+}
+}
+li:first-child {
+  padding-left: $container-padding;
+}
+li:hover, li.active {
+  @include vertical-gradient($highlight + #111111, $highlight);
+  background-color: $highlight;
+  color: white;
+  border-right-color: $highlight;
+  .down {
+    @include down-arrow("/@spontaneous/static/orange-down-arrow.png", 7px);
+    z-index: 1;
+}
+}
+li.active + li:hover {
+  border-left-color: $highlight - #151515;
+}
+}
+.fields-preview.depth-box {
+  @extend .container-padding;
+  padding-top: 12px;
+  padding-bottom: 5px;
+  @include vertical-gradient(#eeeeee, #dddddd);
+  border-top-color: #e6e6e6;
+  border-bottom-color: #dddddd;
+  &:hover {
+    border-top-color: $action;
+    border-bottom-color: $action;
+}
+.value {
+  color: #555555;
+}
+}
+.slot-addable {
+  @extend .container-padding;
+  @include box-sizing;
+  @include vertical-gradient(#dddddd, #eeeeee);
+  border-top: solid 1px #cccccc;
+  height: 40px;
+  padding-top: 10px;
+  position: relative;
+  a {
+    @include button;
+    padding-right: 16px;
+    padding-left: 16px;
+}
+// a:hover {
+//   background-color: $highlight;
+//   color: white;
+// }
+a + a {
+  margin-left: 8px;
+}
+.down {
+  @include down-arrow("/@spontaneous/static/slot-down-arrow.png", 18px);
+}
+}
+.slot-addable.drop-active {
+  outline: solid 2px $action;
+}
+}
 
 #page-slots.slots .slot-entries {
   padding-top: 32px;
@@ -509,242 +593,285 @@ img.missing {
     @include rounded;
     padding: 4px;
     background: none;
-    background-color: white; }
-  .entry-wrap {
+    background-color: white;
+}
+.entry-wrap {
+  @extend .clearfix;
+  @include rounded;
+  position: relative;
+  margin-left: $container-padding;
+  margin-right: $container-padding;
+  margin-bottom: $container-padding/2;
+  background-color: gray;
+  padding: 4px;
+  padding-top: $title-bar-height + 4px;
+  .entry-inner {
     @extend .clearfix;
     @include rounded;
-    position: relative;
-    margin-left: $container-padding;
-    margin-right: $container-padding;
-    margin-bottom: $container-padding/2;
     background-color: gray;
-    padding: 4px;
-    padding-top: $title-bar-height + 4px;
-    .entry-inner {
-      @extend .clearfix;
-      @include rounded;
-      background-color: gray;
-      // padding: $unit;
-      position: relative;
-    }
-    .title-bar {
-      @include vertical-gradient(gray + #111111, gray);
-      @include rounded-top;
-      cursor: ns-resize;
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      height: $title-bar-height;
-      .actions {
-        @include rounded-bottom;
-        background-color: rgba(0, 0, 0, 0.2);
-        position: absolute;
-        top: 0;
-        right: $unit/2;
-        a {
-          background: url("/@spontaneous/static/item-buttons.png") 0 0 no-repeat;
-          display: inline-block;
-          width: 15px;
-          height: 15px;
-          position: relative;
-          top: 4px;
-          cursor: pointer;
-          padding: 0 10px; }
-        .delete {
-          background-position: -54px 0; }
-        .delete:hover {
-          background-position: -54px -20px; }
-        .visibility {
-          background-position: -25px 0; }
-        .visibility:hover {
-          background-position: -25px -20px; } } }
-    .dialogue {
+    // padding: $unit;
+    position: relative;
+  }
+  .title-bar {
+    @include vertical-gradient(gray + #111111, gray);
+    @include rounded-top;
+    cursor: ns-resize;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: $title-bar-height;
+    .actions {
       @include rounded-bottom;
-      @extend .shadow;
+      background-color: rgba(0, 0, 0, 0.2);
       position: absolute;
-      top: $title-bar-height + 4;
-      left: 4px;
-      right: 4px;
-      background-color: rgba(0, 0, 0, 0.9);
-      z-index: 10;
-      padding: $container-padding / 2;
-      color: white;
-      .buttons {
-        a {
-          @include button(#cccccc);
-          // background-color: ;
-          padding-left: 16px;
-          padding-right: 16px; }
-        a + a {
-          margin-left: 8px; }
-        a.default {
-          background-color: $action; } } }
-    .white-bg, .grey-bg {
-      // @include rounded;
-      position: absolute;
-      left: 0px;
-      right: 40%;
-      // top: $title-bar-height;
       top: 0;
-      bottom: 0px;
-      margin: 0;
-      background-color: white;
-      z-index: 1;
-      border-width: 8px;
-    }
-    .white-bg {
-      @include corners($corner-radius, 0, 0, $corner-radius);
-    }
-    .white-bg.active {
-      -webkit-border-image: url(/@spontaneous/static/inner-glow.png) 8 8 8 8 repeat;
-      // border-color: red;
-    }
-    .grey-bg {
-      @include corners(0, $corner-radius, $corner-radius, 0);
-      left: 60%;
-      right: 0;
-      background-color: #6b6b6b;
-      margin-left: 0;
-    }
-    .entry {
-      @include rounded;
-      @include box-sizing;
-      position: relative;
-      z-index: 2;
-      float: left;
-
-      .fields-preview {
-        @include rounded;
-        // margin-right: 3px;
-        padding: 4px;
-        background: none;
-        border-color: white;
-      }
-      .fields-preview-text {
-        width: 100%;
+      right: $unit/2;
+      a {
+        background: url("/@spontaneous/static/item-buttons.png") 0 0 no-repeat;
+        display: inline-block;
+        width: 15px;
+        height: 15px;
         position: relative;
-        margin-bottom: 0;
+        top: 4px;
+        cursor: pointer;
+        padding: 0 10px;
+}
+.delete {
+  background-position: -54px 0;
+}
+.delete:hover {
+  background-position: -54px -20px;
+}
+.visibility {
+  background-position: -25px 0;
+}
+.visibility:hover {
+  background-position: -25px -20px;
+}
+}
+}
+.dialogue {
+  @include rounded-bottom;
+  @extend .shadow;
+  position: absolute;
+  top: $title-bar-height + 4;
+  left: 4px;
+  right: 4px;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 30;
+  padding: $container-padding / 2;
+  color: white;
+  .buttons {
+    a {
+      @include button(#cccccc);
+      // background-color: ;
+      padding-left: 16px;
+      padding-right: 16px;
+}
+a + a {
+  margin-left: 8px;
+}
+a.default {
+  background-color: $action;
+}
+}
+}
+.white-bg, .grey-bg {
+  // @include rounded;
+  position: absolute;
+  left: 0px;
+  right: 40%;
+  // top: $title-bar-height;
+  top: 0;
+  bottom: 0px;
+  margin: 0;
+  background-color: white;
+  z-index: 1;
+  border-width: 8px;
+  }
+  .white-bg {
+    @include corners($corner-radius, 0, 0, $corner-radius);
+  }
+  .white-bg.active {
+    -webkit-border-image: url(/@spontaneous/static/inner-glow.png) 8 8 8 8 repeat;
+    // border-color: red;
+  }
+  .grey-bg {
+    @include corners(0, $corner-radius, $corner-radius, 0);
+    left: 60%;
+    right: 0;
+    background-color: #6b6b6b;
+    margin-left: 0;
+  }
+  .entry {
+    @include rounded;
+    @include box-sizing;
+    position: relative;
+    z-index: 2;
+    float: left;
+
+    .fields-preview {
+      @include rounded;
+      // margin-right: 3px;
+      padding: 4px;
+      background: none;
+      border-color: white;
+    }
+    .fields-preview-text {
+      width: 100%;
+      position: relative;
+      margin-bottom: 0;
+      @include box-sizing;
+      li {
         @include box-sizing;
-        li {
-          @include box-sizing;
-        }
       }
     }
-    .slots {
+  }
+  .slots {
+    @include box-sizing;
+    position: relative;
+    padding-left: 0;
+    float: left;
+    width: 40%;
+    z-index: 2;
+    // left: 1px;
+    .slot-tabs {
+      @extend .clearfix;
+      @include rounded-top;
       @include box-sizing;
-      position: relative;
-      padding-left: 0;
-      float: left;
-      width: 40%;
-      z-index: 2;
-      // left: 1px;
-      .slot-tabs {
-        @extend .clearfix;
-        @include rounded-top;
+      height: 24px;
+      display: block;
+      margin-right: 1px;
+      width: 100%;
+      background: none;
+      li {
         @include box-sizing;
-        height: 24px;
-        display: block;
-        margin-right: 1px;
-        width: 100%;
-        background: none;
-        li {
-          @include box-sizing;
-          @extend .interface;
-          float: left;
-          width: 25%;
-          height: 100%;
-          display: block;
-          padding-left: 8px;
-          padding-top: 6px;
-          cursor: pointer;
-          border-right: solid 1px #565656;
-          background-color: #6b6b6b;
-          color: #f2f2f2; }
-        li:first-child {
-          // @include rounded-top-left;
-        }
-        li:nth-child(4) {
-          // @include rounded-top-right;
-          float: right;
-          position: relative;
-          border-right: none; }
-        li.active:hover, li.active {
-          background: #565656 none;
-          border-right: solid 1px #565656;
-          color: white; }
-        li:hover {
-          background-color: $highlight;
-          border-right-color: $highlight; }
-        li:hover + li:nth-child(4) {
-          border-left-color: $highlight; }
-        li .down {
-          display: none; } }
-      .slot-addable {
         @extend .interface;
-        @include box-sizing;
-        border: none;
-        background: none;
-        background-color: #565656;
-        height: 31px;
-        padding: 5px 8px 0 8px;
-        a {
-          @include button(#6b6b6b);
-          // background-color: #6b6b6b;
-          padding-left: 8px;
-          padding-right: 8px; }
-        // a:hover {
-        //   background-color: $highlight; }
-        .down {
-          display: none; } }
-      .slot-entries {
-        padding-top: 8px; }
-      .entry-wrap.depth-2 {
-        padding: $unit/2 $unit/2;
-        padding-top: $title-bar-height + ($unit/2);
-        margin-left: $unit;
-        margin-right: $unit;
-        margin-bottom: $unit;
-        .entry {
-          @include rounded;
-          width: 100%;
-          .fields-preview {
-            @include rounded;
-            padding: 4px;
-            background: none;
-            background-color: white;
-            border-color: white;
-            width: 100%;
-            .fields-preview-text {
-              width: 100%;
-              margin-bottom: 0; }
-            .fields-preview-image {
-              float: none;
-              width: 100%;
-              margin-left: 0;
-              margin-top: 4px;
-              padding-top: 4px; } } }
-        .entry + .entry {
-          margin-top: 8px; } } } }
-  .entry-wrap.hidden {
-    opacity: 0.4; }
-  .entry-wrap.ui-sortable-helper {
-    @extend .shadow; }
-  .entry-wrap.depth-1 .entry {
-    width: 60%;
-    .fields-preview.depth-1 {
-      .fields-preview-text {
-        margin-right: -110px;
-        padding-right: 110px; }
-      .fields-preview-image {
-        width: 94px;
+        float: left;
+        width: 25%;
+        height: 100%;
+        display: block;
+        padding-left: 8px;
+        padding-top: 6px;
+        cursor: pointer;
+        border-right: solid 1px #565656;
+        background-color: #6b6b6b;
+        color: #f2f2f2;
+}
+li:first-child {
+  // @include rounded-top-left;
+      }
+      li:nth-child(4) {
+        // @include rounded-top-right;
         float: right;
-        img {
-          max-width: 94px; }
-        li {
-          margin-right: 0; }
-        li:last-child {
-          margin-bottom: 0; } } } } }
+        position: relative;
+        border-right: none;
+}
+li.active:hover, li.active {
+  background: #565656 none;
+  border-right: solid 1px #565656;
+  color: white;
+}
+li:hover {
+  background-color: $highlight;
+  border-right-color: $highlight;
+}
+li:hover + li:nth-child(4) {
+  border-left-color: $highlight;
+}
+li .down {
+  display: none;
+}
+}
+.slot-addable {
+  @extend .interface;
+  @include box-sizing;
+  border: none;
+  background: none;
+  background-color: #565656;
+  height: 31px;
+  padding: 5px 8px 0 8px;
+  a {
+    @include button(#6b6b6b);
+    // background-color: #6b6b6b;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+// a:hover {
+//   background-color: $highlight;
+//}
+.down {
+  display: none;
+}
+}
+.slot-entries {
+  padding-top: 8px;
+}
+.entry-wrap.depth-2 {
+  padding: $unit/2 $unit/2;
+  padding-top: $title-bar-height + ($unit/2);
+  margin-left: $unit;
+  margin-right: $unit;
+  margin-bottom: $unit;
+  .entry {
+    @include rounded;
+    width: 100%;
+    .fields-preview {
+      @include rounded;
+      padding: 4px;
+      background: none;
+      background-color: white;
+      border-color: white;
+      width: 100%;
+      .fields-preview-text {
+        width: 100%;
+        margin-bottom: 0;
+}
+.fields-preview-image {
+  float: none;
+  width: 100%;
+  margin-left: 0;
+  margin-top: 4px;
+  padding-top: 4px;
+}
+}
+}
+.entry + .entry {
+  margin-top: 8px;
+}
+}
+}
+}
+.entry-wrap.hidden {
+  opacity: 0.4;
+}
+.entry-wrap.ui-sortable-helper {
+  @extend .shadow;
+}
+.entry-wrap.depth-1 .entry {
+  width: 60%;
+  .fields-preview.depth-1 {
+    .fields-preview-text {
+      margin-right: -110px;
+      padding-right: 110px;
+}
+.fields-preview-image {
+  width: 94px;
+  float: right;
+  img {
+    max-width: 94px;
+}
+li {
+  margin-right: 0;
+}
+li:last-child {
+  margin-bottom: 0;
+}
+}
+}
+}
+}
 
 #dialogue-overlay {
   position: fixed;
@@ -753,7 +880,8 @@ img.missing {
   top: 0;
   bottom: 0;
   background-color: rgba(255, 255, 255, 0.9);
-  z-index: 1000; }
+  z-index: 1000;
+}
 
 #dialogue-wrap {
   position: fixed;
@@ -781,15 +909,23 @@ img.missing {
       .dialogue-actions {
         .button {
           width: 128px;
-          margin: 16px 16px 10px 16px; }
-        .cancel {
-          background-color: #6b6b6b; }
-        .save {
-          background-color: $action;
-          float: right; }
-        .disabled, .disabled:hover {
-          background-color: #333333 !important;
-          color: #6b6b6b !important; } } } } }
+          margin: 16px 16px 10px 16px;
+}
+.cancel {
+  background-color: #6b6b6b;
+}
+.save {
+  background-color: $action;
+  float: right;
+}
+.disabled, .disabled:hover {
+  background-color: #333333 !important;
+  color: #6b6b6b !important;
+}
+}
+}
+}
+}
 
 .dialogue-wrapper {
   @include rounded;
@@ -797,7 +933,8 @@ img.missing {
   top: 32px;
   background-color: #cccccc;
   width: $dialogue-width;
-  margin: 32px auto; }
+  margin: 32px auto;
+}
 
 #publishing-dialogue {
   @extend .dialogue-wrapper;
@@ -817,154 +954,194 @@ img.missing {
         margin: 1px 8px 0 8px;
         padding: 0;
         vertical-align: top;
-        position: relative; } }
-    .publish-all.checked {
-      background-color: $action; } }
-  .change-set {
-    @include rounded;
-    cursor: pointer;
-    border: solid 3px transparent;
-    margin: $container-padding / 2;
-    background-color: #eeeeee;
-    padding: $container-padding / 4;
-    .titles a {
-      display: block;
-      margin-bottom: 2px;
-      span {
-        font-size: 11px;
-        margin-left: 1em; } } }
-  .change-set:hover {
-    border-color: $action; }
-  .change-set.selected {
-    background-color: $action;
-    color: white; } }
+        position: relative;
+}
+}
+.publish-all.checked {
+  background-color: $action;
+}
+}
+.change-set {
+  @include rounded;
+  cursor: pointer;
+  border: solid 3px transparent;
+  margin: $container-padding / 2;
+  background-color: #eeeeee;
+  padding: $container-padding / 4;
+  .titles a {
+    display: block;
+    margin-bottom: 2px;
+    span {
+      font-size: 11px;
+      margin-left: 1em;
+}
+}
+}
+.change-set:hover {
+  border-color: $action;
+}
+.change-set.selected {
+  background-color: $action;
+  color: white;
+}
+}
 
 #editing {
   @extend .dialogue-wrapper;
   @extend .clearfix;
   z-index: 1001;
   background-color: #5b5b5b;
-    // background-color: #f0d5a9;
+  // background-color: #f0d5a9;
   @extend .shadow;
   .button {
-    background-color: $editing; }
-  .field-group-bg {
-    @include rounded;
-    // background-color: #6b6b6b;
-    position: absolute;
-    margin: 8px;
-    top: 0px;
-    bottom: 0px; }
-  .field-group-bg.text {
-    left: 0;
-    right: 343px; }
-  .field-group-bg.image {
-    left: 629px;
-    right: 0; }
-  input[type="submit"] {
-    visibility: hidden;
-    position: absolute;
-    width: 0;
-    height: 0; }
-  .field-group {
+    background-color: $editing;
+}
+.field-group-bg {
+  @include rounded;
+  // background-color: #6b6b6b;
+  position: absolute;
+  margin: 8px;
+  top: 0px;
+  bottom: 0px;
+}
+.field-group-bg.text {
+  left: 0;
+  right: 343px;
+}
+.field-group-bg.image {
+  left: 629px;
+  right: 0;
+}
+input[type="submit"] {
+  visibility: hidden;
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.field-group {
+  position: relative;
+  z-index: 1010;
+  float: left;
+  // margin: 8px 0 0 8px;
+  padding: 8px;
+  // margin-top: 8px;
+  // margin-bottom: 8px;
+  .field + .field {
+    margin-top: 8px;
+}
+.name {
+  @include rounded-top;
+  @include box-sizing;
+  @extend .interface;
+  background-color: #d1d1d1;
+  // background-image: url(/@spontaneous/static/paper-texture-dark.png);
+  display: block;
+  height: 24px;
+  padding-left: 8px;
+  padding-top: 6px;
+}
+.value {
+  @include rounded-bottom;
+  border: solid 2px transparent;
+  padding: 6px;
+  background-color: white;
+  textarea, input[type="text"] {
+    font-family: $input-font-family;
+    font-size: 11px;
+    line-height: 14px;
+    outline: none;
+}
+input[type="file"] {
+  visibility: hidden;
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+textarea {
+  @include box-sizing;
+  border: none;
+  width: 100%;
+  padding-right: 64px;
+}
+input[type="text"] {
+  @include box-sizing;
+  width: 100%;
+  border: none;
+  display: block;
+  font-weight: bold;
+}
+}
+.field.focus {
+  .name {
+    background-color: $editing;
+    color: white;
+}
+.value {
+  border-color: $editing;
+}
+}
+}
+// .field-group.text {
+//   // width: 621px;
+//   width: 100%;
+// }
+.field-group.image {
+  width: 327px;
+  .field .value {
     position: relative;
-    z-index: 1010;
-    float: left;
-    // margin: 8px 0 0 8px;
-    padding: 8px;
-    // margin-top: 8px;
-    // margin-bottom: 8px;
-    .field + .field {
-      margin-top: 8px; }
-    .name {
-      @include rounded-top;
-      @include box-sizing;
-      @extend .interface;
-      background-color: #d1d1d1;
-      // background-image: url(/@spontaneous/static/paper-texture-dark.png);
-      display: block;
-      height: 24px;
-      padding-left: 8px;
-      padding-top: 6px; }
-    .value {
-      @include rounded-bottom;
-      border: solid 2px transparent;
-      padding: 6px;
-      background-color: white;
-      textarea, input[type="text"] {
-        font-family: $input-font-family;
-        font-size: 11px;
-        line-height: 14px;
-        outline: none; }
-      input[type="file"] {
-        visibility: hidden;
-        position: absolute;
-        width: 0;
-        height: 0; }
-      textarea {
-        @include box-sizing;
-        border: none;
-        width: 100%;
-        padding-right: 64px; }
-      input[type="text"] {
-        @include box-sizing;
-        width: 100%;
-        border: none;
-        display: block;
-        font-weight: bold; } }
-    .field.focus {
-      .name {
-        background-color: $editing;
-        color: white; }
-      .value {
-        border-color: $editing; } } }
-  // .field-group.text {
-  //   // width: 621px;
-  //   width: 100%;
-  // }
-  .field-group.image {
-    width: 327px;
-    .field .value {
-      position: relative;
-      min-height: 70px;
-      img {
-        max-width: 50%; }
-      img.empty {
-        width: 50%;
-        height: 100px; }
-      .actions {
-        margin: 8px;
-        margin-left: 0;
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 109px;
-        .button {
-          display: block; }
-        .button.clear {
-          color: #5b5b5b;
-          background-color: #d1d1d1;
-          position: absolute;
-          bottom: 0;
-          width: 100%; } }
-      .landscape {
-        img {
-          max-width: 100%;
-          max-height: 50%; }
-        .actions {
-          width: auto;
-          display: block;
-          margin: 8px 0 0 0;
-          position: relative;
-          .button {
-            display: inline-block;
-            width: 109px; }
-          .button.clear {
-            position: static; }
-          .button.change {
-            position: absolute;
-            right: 0; } } } } } }
+    min-height: 70px;
+    img {
+      max-width: 50%;
+}
+img.empty {
+  width: 50%;
+  height: 100px;
+}
+.actions {
+  margin: 8px;
+  margin-left: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 109px;
+  .button {
+    display: block;
+}
+.button.clear {
+  color: #5b5b5b;
+  background-color: #d1d1d1;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+}
+.landscape {
+  img {
+    max-width: 100%;
+    max-height: 50%;
+}
+.actions {
+  width: auto;
+  display: block;
+  margin: 8px 0 0 0;
+  position: relative;
+  .button {
+    display: inline-block;
+    width: 109px;
+}
+.button.clear {
+  position: static;
+}
+.button.change {
+  position: absolute;
+  right: 0;
+}
+}
+}
+}
+}
+}
 
 #status-bar {
   @extend .container-padding;
@@ -996,20 +1173,26 @@ img.missing {
         position: absolute;
         top: 0;
         left: 0;
-        opacity: 0.7; }
-      #progress-individual {
-        opacity: 0.3; }
-      #progress-total {} }
+        opacity: 0.7;
+}
+#progress-individual {
+  opacity: 0.3;
+}
+#progress-total {} }
     #progress-name {
       position: absolute;
       right: $container-padding;
       top: 0;
-      text-align: right; }
-    #progress-stats {
-      position: absolute;
-      left: 50%;
-      top: -1px;
-      margin-left: 10px; } } }
+      text-align: right;
+}
+#progress-stats {
+  position: absolute;
+  left: 50%;
+  top: -1px;
+  margin-left: 10px;
+}
+}
+}
 
 #script-load-splash {
   $progress-color: #dddddd;
@@ -1031,15 +1214,20 @@ img.missing {
     div {
       @include rounded(6px);
       background-color: $progress-color;
-      height: 4px; } }
-  #script-load-progress.synchronous {
-    border: none;
-    color: $progress-color;
-    top: 44px;
-    left: 47px; } }
+      height: 4px;
+}
+}
+#script-load-progress.synchronous {
+  border: none;
+  color: $progress-color;
+  top: 44px;
+  left: 47px;
+}
+}
 
 #script-load-splash.loaded {
-  background-position: 0 -80px; }
+  background-position: 0 -80px;
+}
 
 @import "popover";
-@import "editing"
+@import "editing";
