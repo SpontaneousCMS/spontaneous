@@ -14,6 +14,8 @@ Spontaneous.PopoverView = (function($, S) {
 		view: function() {
 			// construct view
 		},
+		align: 'left',
+		has_navigation: true,
 		title: function() {
 			return "Popover";
 		},
@@ -21,6 +23,15 @@ Spontaneous.PopoverView = (function($, S) {
 			return 400;
 		},
 		position_from_event: function(event) {
+			return this.position_from_element(event);
+		},
+		position_from_element: function(event) {
+			var t = $(event.currentTarget), o = t.offset();
+			o.top += t.outerHeight();
+			o.left += t.outerWidth() / 2;
+			return o
+		},
+		position_from_mouse: function(event) {
 			return {top: event.clientX, left: event.clientY};
 		},
 		after_open: function() {

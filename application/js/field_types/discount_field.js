@@ -326,15 +326,16 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		title: function() {
 			return "Insert Link";
 		},
-		position_from_event: function(event) {
-			var t = $(event.currentTarget), o = t.offset();
-			o.top += t.outerHeight();
-			o.left += t.outerWidth() / 2;
-			return o
-		},
+		// position_from_event: function(event) {
+		// 	var t = $(event.currentTarget), o = t.offset();
+		// 	o.top += t.outerHeight();
+		// 	o.left += t.outerWidth() / 2;
+		// 	return o
+		// },
 		close_text: function() {
 			return 'Cancel';
 		},
+		// align: 'right',
 		view: function() {
 			var __view = this, w = $(dom.div, {'class': 'pop-insert-link'}), text_input, url_input;
 			var input = function(label, value, type) {

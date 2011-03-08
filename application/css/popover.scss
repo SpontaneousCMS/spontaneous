@@ -298,4 +298,23 @@
 			}
 		}
 	}
+	#popover-delete {
+		@include display-box;
+		@include box-orient(horizontal);
+		@include box-pack(justify);
+
+		a.ok {
+			@include button;
+			display: block;
+
+		}
+		a.cancel {
+			@include button($chrome-accent);
+			display: block;
+		}
+		a {
+			@extend .box-flexible;
+			max-width: 100px
+		}
+	}
 }

@@ -3,6 +3,40 @@ console.log('Loading Entry...')
 Spontaneous.Entry = (function($, S) {
 	var dom = S.Dom;
 	var debug = 0;
+	var ConfirmDeletePopup = new JS.Class(Spontaneous.PopoverView, {
+		initialize: function(entry) {
+			this.entry = entry;
+		},
+		width: function() {
+			return 208;
+		},
+		align: 'right',
+		has_navigation: false,
+		close_text: function() {
+			return false;
+		},
+		title: function() {
+			return "Delete this Piece?";
+		},
+		position_from_event: function(event) {
+			return this.position_from_element(event);
+		},
+		view: function() {
+			var __entry = this.entry;
+			var w = $(dom.div, {'id':'popover-delete'}).click(function() {
+				__entry.cancel_destroy();
+				return false;
+			});
+
+			var ok = $(dom.a, {'class':'ok'}).text("Delete").click(function() {
+				__entry.destroy();
+				return false;
+			});
+			var cancel = $(dom.a, {'class':'cancel'}).text("Cancel");
+			w.append(cancel, ok)
+			return w;
+		}
+	});
 	var Entry = new JS.Class(Spontaneous.Content, {
 		initialize: function(content, container) {
 			this.container = container;
@@ -19,8 +53,8 @@ Spontaneous.Entry = (function($, S) {
 				inside.append($(dom.div, {'class':'grey-bg'}));
 			}
 			wrapper.append(this.title_bar(wrapper));
-			this.dialogue_box = $(dom.div, {'class':'dialogue', 'style':'display: none'});
-			wrapper.append(this.dialogue_box);
+			// this.dialogue_box = $(dom.div, {'class':'dialogue', 'style':'display: none'});
+			// wrapper.append(this.dialogue_box);
 			var entry = $(dom.div, {'class':'entry'});
 			var fields = new Spontaneous.FieldPreview(this, '');
 			entry.append(fields.panel());
@@ -71,28 +105,23 @@ Spontaneous.Entry = (function($, S) {
 			this.outline.removeClass('active');
 		},
 		confirm_destroy: function() {
-			var d = this.dialogue_box;
-			d.empty();
-			var msg = $(dom.p, {'class':'message'}).text('Are you sure you want to delete this?');
-			var btns = $(dom.div, {'class':'buttons'});
-			var ok = $(dom.a, {'class':'default'}).text("Delete").click(function() {
-				this.dialogue_box.slideUp(100, function() {
-					this.wrapper.fadeTo(100, 0.5);
-					this.destroy();
-				}.bind(this));
-				return false;
-			}.bind(this))
-
-			var cancel = $(dom.a).text("Cancel").click(function() {
-				this.dialogue_box.slideUp();
-				return false;
-			}.bind(this));
-			btns.append(ok).append(cancel);
-			d.append(msg).append(btns);
-			d.slideDown(200);
+			if (!this._dialogue) {
+				this._dialogue = Spontaneous.Popover.open(event, new ConfirmDeletePopup(this));
+			} else {
+				this.cancel_destroy();
+			}
+		},
+		destroy: function() {
+			this.cancel_destroy();
+			this.callSuper();
+		},
+		cancel_destroy: function() {
+			if (this._dialogue) {
+				this._dialogue.close();
+				this._dialogue = null;
+			}
 		},
 		destroyed: function() {
-			console.log('Entry.destroyed', this.content)
 			this.wrapper.slideUp(200, function() {
 				this.wrapper.remove();
 			}.bind(this));
