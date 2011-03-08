@@ -28,7 +28,7 @@ module Spontaneous
       end
     end
 
-    DiscountField.register(:discount, :markdown)
+    DiscountField.register(:richtext, :discount, :markdown)
   end
 end
 

@@ -6,7 +6,7 @@ class Project < Spontaneous::Page
   field :image, :image do
     sizes :thumbnail => { :width => 100 }
   end
-  field :description
+  field :description, :richtext
 
   box :text do
     allow :Text
