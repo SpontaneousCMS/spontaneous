@@ -260,46 +260,68 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			return (new RegExp('[\r\n]?'+this.post+'+[\r\n ]*$', 'm')).exec(selection)
 		},
 		expand_selection: function(state) {
-			var selected = (state.selection || ''), m, start = state.start, end = state.end, br = /\r?\n/;
-			// expand to select current line
-			m = /(.+)$/.exec(state.before);
-			if (m) {
-				var s = m[1];
-				start -= s.length;
-				selected = m[1] + selected;
-			}
-			m = /^(.+)/.exec(state.after);
-			if (m) {
-				var s = m[1];
-				end += s.length;
-				selected += m[1];
-			}
-			var lines = selected.split(br), underline = new RegExp('^[=-]+$'), found = false;
-			for (var i = 0, ii = lines.length; i < ii; i++) {
-				var l = lines[i];
-				if (underline.test(l)) {
-					found = true;
-					break;
+			var selected = (state.selection || ''), m, start = state.start, end = state.end, br = /\r?\n/, below = false;
+			// detect & deal with the cursor being on the line below
+			// (the one with the -'s or ='s)
+			// TODO: deal with the case where the cursor is at the start of the =- line
+			m = /([=-]+)$/.exec(state.before);
+			n = /^([=-]+)/.exec(state.after);
+			if (m || n) {
+				m = /(?:[\n]|^)(.+[\n]+([=-]+))$/.exec(state.before);
+				if (m) {
+					var s = m[1];
+					start -= s.length;
+					selected = s + selected;
 				}
+				if (n) {
+					var s = n[1];
+					end += s.length;
+					selected += s;
+				}
+				below = true;
 			}
-			if (!found) {
-				// expand selection down by one line
-				lines = state.after.split(br, 2);
+			// if we're on the line below then skip all this
+			if (!below) {
+				// expand to select current line
+				m = /(.+)$/.exec(state.before);
+				if (m) {
+					var s = m[1];
+					start -= s.length;
+					selected = m[1] + selected;
+				}
+				m = /^(.+)/.exec(state.after);
+				if (m) {
+					var s = m[1];
+					end += s.length;
+					selected += m[1];
+				}
+				var lines = selected.split(br), underline = new RegExp('^[=-]+$'), found = false;
 				for (var i = 0, ii = lines.length; i < ii; i++) {
 					var l = lines[i];
 					if (underline.test(l)) {
-						end += l.length + i;
-						selected += l;
+						found = true;
 						break;
 					}
 				}
-			} else {
-				// make sure that we have the whole of the underline included in the selection
-				var r = new RegExp('^([=-]+)'), m = r.exec(state.after);
-				if (m) {
-					var extra = m[1];
-					end += extra.length;
-					selected += m[1];
+				if (!found) {
+					// expand selection down by one line
+					lines = state.after.split(br, 2);
+					for (var i = 0, ii = lines.length; i < ii; i++) {
+						var l = lines[i];
+						if (underline.test(l)) {
+							end += l.length + i;
+							selected += l;
+							break;
+						}
+					}
+				} else {
+					// make sure that we have the whole of the underline included in the selection
+					var r = new RegExp('^([=-]+)'), m = r.exec(state.after);
+					if (m) {
+						var extra = m[1];
+						end += extra.length;
+						selected += m[1];
+					}
 				}
 			}
 			return {selection:selected, start:start, end:end};
@@ -402,9 +424,11 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			this.browser.set_manager(this);
 		},
 		view: function() {
-			var w = $(dom.div);
-
-			w.append($(dom.div, {'class':'link-page-browser'}).append($(dom.label).append($(dom.span).text('Page Browser')).append(this.browser.view())));
+			var w = $(dom.div),
+			text = $(dom.span).text('Page Browser'),
+			inner = $(dom.div, {'class':'link-page-browser'});
+			inner.append($(dom.label).append(text)).append(this.browser.view());
+			w.append(inner);
 			return w;
 		},
 		page_list_loaded: function(view) {
