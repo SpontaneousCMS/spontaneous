@@ -331,7 +331,38 @@ img.missing {
   .value {
     @extend .preview-value;
     a {
-      color: $highlight; } } }
+      color: $highlight;
+    }
+    h1, h2 {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 1em;
+    }
+    h2 {
+      font-size: 1em;
+    }
+    ul, ol {
+      display: block;
+      padding-left: 1.4em;
+      margin-bottom: $unit;
+
+      li {
+        display: list-item;
+        list-style-position: outside;
+        border: none;
+        margin: 0;
+        padding: 0;
+        float: none;
+      }
+    }
+    ul {
+      list-style-type: disc !important;
+    }
+    ol {
+      list-style-type: decimal !important;
+    }
+  }
+}
 
 .fields-preview-image {
   @extend .clearfix;

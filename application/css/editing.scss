@@ -1,6 +1,7 @@
 $editing-0: #ede9e4;
 $editing-1: #e1ded8;
 $editing-2: #dbd7d1;
+$editing-3: darken($editing-2, 20%);
 
 $text-edit-width: 621px;
 
@@ -41,7 +42,7 @@ $text-edit-width: 621px;
 			@include button($action);
 		}
 		.cancel {
-			@include button(darken($editing-2, 20%));
+			@include button($editing-3);
 		}
 		.save, .cancel {
 			display: block;
@@ -90,7 +91,7 @@ input[type="submit"] {
 	@include rounded-top;
 	@include box-sizing;
 	@extend .interface;
-	background-color: $editing-1;
+	background-color: $editing-2;
 	// background-image: url(/@spontaneous/static/paper-texture-dark.png);
 	display: block;
 	height: 16px;
@@ -472,19 +473,30 @@ a + a {
 		padding-left: 0;
 	}
 }
+.box-fields .editing-panel {
+	.editing-toolbar.bottom .indent {
+		opacity: 0.2;
+	}
+}
 .markdown-editor .md-toolbar {
-  background-color: $editing-2;
+	@include display-box;
+	@include box-orient;
+  background-color: $editing-1;
   a {
     @extend .interface;
-    display: inline-block;
+    display: block;
     border: solid 1px transparent;
     padding: 2px 6px;
     cursor: pointer; }
   a.active {
-    border: solid 1px $action;
-    background-color: rgba(0, 0, 0, 0.1); }
+    border: solid 1px $editing-2;
+    background-color: $editing-3;
+	}
   a:hover {
-    background-color: rgba(0, 0, 0, 0.1); }
+    background-color: $editing-3;
+	}
   a + a {
-    margin-left: 10px; } }
+    margin-left: 10px;
+	}
+}
 

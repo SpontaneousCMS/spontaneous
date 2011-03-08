@@ -69,7 +69,8 @@
 	}
 	.button.close,
 	.button.cancel {
-			background-color: $chrome-accent;
+			// background-color: $chrome-accent;
+		@include button($chrome-accent);
 			min-width: 50px;
 	}
 	.po-button.forward {
