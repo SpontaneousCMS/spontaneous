@@ -1,4 +1,4 @@
-console.log("Loading Ajax...");
+// console.log("Loading Ajax...");
 
 Spontaneous.Ajax = (function($, S) {
 	$.ajaxSetup({

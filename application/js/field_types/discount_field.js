@@ -1,4 +1,4 @@
-console.log('Loading DiscountField...')
+// console.log('Loading DiscountField...')
 
 Spontaneous.FieldTypes.DiscountField = (function($, S) {
 	var dom = S.Dom;

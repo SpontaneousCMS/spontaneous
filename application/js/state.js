@@ -1,4 +1,4 @@
-console.log("Loading State...")
+// console.log("Loading State...")
 
 Spontaneous.State = (function($, S) {
 	var ajax = S.Ajax;

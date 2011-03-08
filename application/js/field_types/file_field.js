@@ -1,4 +1,4 @@
-console.log('Loading FileField...')
+// console.log('Loading FileField...')
 Spontaneous.FieldTypes.FileField = (function($, S) {
 	var dom = S.Dom;
 	var FileField = new JS.Class(Spontaneous.FieldTypes.StringField, {

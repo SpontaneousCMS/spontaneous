@@ -1,4 +1,4 @@
-console.log('Loading ImageField...')
+// console.log('Loading ImageField...')
 Spontaneous.FieldTypes.ImageField = (function($, S) {
 	var dom = S.Dom;
 	var ImageField = new JS.Class(Spontaneous.FieldTypes.FileField, {

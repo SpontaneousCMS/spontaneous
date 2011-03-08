@@ -1,4 +1,4 @@
-console.log('Loading Types...');
+// console.log('Loading Types...');
 
 Spontaneous.Types = (function($, S) {
 	var ajax = S.Ajax, type_map = {};

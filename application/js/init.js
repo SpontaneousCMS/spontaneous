@@ -1,4 +1,4 @@
-console.log("Loading Init...");
+// console.log("Loading Init...");
 
 
 Spontaneous.Init = (function($, S) {

@@ -1,4 +1,4 @@
-console.log('Loading DOM...');
+// console.log('Loading DOM...');
 
 Spontaneous.Dom = (function($, S) {
 	return {

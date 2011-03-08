@@ -1,4 +1,4 @@
-console.log('Loading EditPanel...')
+// console.log('Loading EditPanel...')
 
 Spontaneous.EditPanel = (function($, S) {
 	var dom = S.Dom, Dialogue = Spontaneous.Dialogue;

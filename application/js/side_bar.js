@@ -1,4 +1,4 @@
-console.log('Loading Side Bar...')
+// console.log('Loading Side Bar...')
 
 Spontaneous.SideBar = (function($, S) {
 	var dom = S.Dom, Page = S.Page;

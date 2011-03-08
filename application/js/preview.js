@@ -1,4 +1,4 @@
-console.log('Loading Preview...');
+// console.log('Loading Preview...');
 
 Spontaneous.Preview = (function($, S) {
 	var dom = S.Dom, goto_id = 0;

@@ -1,4 +1,4 @@
-console.log('Loading Dialogue...')
+// console.log('Loading Dialogue...')
 
 Spontaneous.Dialogue = (function($, S) {
 	var dom = S.Dom;

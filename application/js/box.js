@@ -1,4 +1,4 @@
-console.log('Loading Box...')
+// console.log('Loading Box...')
 
 Spontaneous.Box = (function($, S) {
 	var dom = S.Dom;

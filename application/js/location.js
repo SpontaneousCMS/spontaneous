@@ -1,4 +1,4 @@
-console.log("Loading Location...")
+// console.log("Loading Location...")
 
 Spontaneous.Location = (function($, S) {
 	var ajax = S.Ajax;

@@ -1,4 +1,4 @@
-console.log("Loading UploadManager...");
+// console.log("Loading UploadManager...");
 
 
 Spontaneous.UploadManager = (function($, S) {

@@ -1,4 +1,4 @@
-console.log("Loading PageBrowser...");
+// console.log("Loading PageBrowser...");
 
 
 Spontaneous.PageBrowser = (function($, S) {

@@ -1,4 +1,4 @@
-console.log('Loading PageEntry...')
+// console.log('Loading PageEntry...')
 
 Spontaneous.PageEntry = (function($, S) {
 	var dom = S.Dom;

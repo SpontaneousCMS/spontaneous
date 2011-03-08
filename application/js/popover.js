@@ -1,4 +1,4 @@
-console.log("Loading Popover...");
+// console.log("Loading Popover...");
 
 
 Spontaneous.Popover = (function($, S) {

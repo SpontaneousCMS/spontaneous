@@ -1,4 +1,4 @@
-console.log("Loading TopBar...")
+// console.log("Loading TopBar...")
 
 Spontaneous.TopBar = (function($, S) {
 	var dom = S.Dom;

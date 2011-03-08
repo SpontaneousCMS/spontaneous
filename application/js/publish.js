@@ -1,4 +1,4 @@
-console.log('Loading Publishing...')
+// console.log('Loading Publishing...')
 
 Spontaneous.Publishing = (function($, S) {
 	var dom = S.Dom, Dialogue = Spontaneous.Dialogue;

@@ -1,4 +1,4 @@
-console.log('Loading DateField...')
+// console.log('Loading DateField...')
 Spontaneous.FieldTypes.DateField = (function($, S) {
 	var dom = S.Dom;
 	var DateField = new JS.Class(Spontaneous.FieldTypes.StringField, {

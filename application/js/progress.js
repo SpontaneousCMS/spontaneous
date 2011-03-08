@@ -1,4 +1,4 @@
-console.log('Loading Progress...');
+// console.log('Loading Progress...');
 
 Spontaneous.Progress = (function($, S) {
 	var Progress = function(parent, size, options) {

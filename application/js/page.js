@@ -1,4 +1,4 @@
-console.log('Loading Page...')
+// console.log('Loading Page...')
 
 Spontaneous.Page = (function($, S) {
 	var dom = S.Dom, Slot = S.Slot;

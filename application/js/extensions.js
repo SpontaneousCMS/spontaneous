@@ -20,7 +20,7 @@ if (!window.console) {
 	// };
 }
 
-console.log('Loading Extensions...')
+// console.log('Loading Extensions...')
 
 // Thank you Prototype
 function $A(iterable) {

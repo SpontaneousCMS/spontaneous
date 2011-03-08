@@ -1,4 +1,4 @@
-console.log("Loading StatusBar...");
+// console.log("Loading StatusBar...");
 
 
 Spontaneous.StatusBar = (function($, S) {

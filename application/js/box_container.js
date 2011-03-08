@@ -1,4 +1,4 @@
-console.log('Loading BoxContainer...')
+// console.log('Loading BoxContainer...')
 
 Spontaneous.BoxContainer = (function($, S) {
 	var dom = S.Dom;

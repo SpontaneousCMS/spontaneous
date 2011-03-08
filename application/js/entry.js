@@ -1,4 +1,4 @@
-console.log('Loading Entry...')
+// console.log('Loading Entry...')
 
 Spontaneous.Entry = (function($, S) {
 	var dom = S.Dom;

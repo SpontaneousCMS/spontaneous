@@ -1,4 +1,4 @@
-console.log('Loading Content...')
+// console.log('Loading Content...')
 
 Spontaneous.Content = (function($, S) {
 	var dom = S.Dom;

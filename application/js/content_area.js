@@ -1,4 +1,4 @@
-console.log('Loading Content Area...')
+// console.log('Loading Content Area...')
 
 Spontaneous.ContentArea = (function($, S) {
 	var dom = S.Dom;

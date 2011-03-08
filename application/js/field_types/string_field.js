@@ -1,4 +1,4 @@
-console.log('Loading StringField...')
+// console.log('Loading StringField...')
 Spontaneous.FieldTypes.StringField = (function($, S) {
 	var dom = S.Dom;
 	var StringField = new JS.Class({

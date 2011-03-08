@@ -1,4 +1,4 @@
-console.log('Loading Editing Interface...')
+// console.log('Loading Editing Interface...')
 
 Spontaneous.Editing = (function($, S) {
 	var dom = S.Dom, Page = S.Page;

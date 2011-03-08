@@ -1,4 +1,4 @@
-console.log('Loading FieldPreview...')
+// console.log('Loading FieldPreview...')
 
 Spontaneous.FieldPreview = (function($, S) {
 	var dom = S.Dom;
