@@ -2,6 +2,7 @@
 Spontaneous.FieldTypes.FileField = (function($, S) {
 	var dom = S.Dom;
 	var FileField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+		selected_files: false,
 		preview: function() {
 			Spontaneous.UploadManager.register(this);
 			return this.callSuper();
@@ -30,15 +31,16 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 		},
 		// called by edit dialogue in order to begin the async upload of files
 		save: function() {
-			if (!this.input) { return; }
-			var files = this.input[0].files;
-			if (files.length > 0) {
+			if (!this.selected_files) { return; }
+			var files = this.selected_files; //this.input[0].files;
+			if (files && files.length > 0) {
 				this.drop_target.addClass('uploading');
 				this.progress_bar().parent().show();
 				var file_data = new FormData();
 				var file = files[0];
 				S.UploadManager.replace(this, file);
 			}
+			this.selected_files = false;
 		}
 	});
 	return FileField;

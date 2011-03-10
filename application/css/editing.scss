@@ -211,6 +211,21 @@ $text-edit-width: 621px;
 				width: 50%;
 				height: 100px;
 			}
+			.image-drop {
+				// @include rounded;
+        @include box-sizing;
+				z-index: 2;
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+
+        &.drop-active,
+        &:hover {
+          border: solid 1px $action;
+        }
+      }
 			.actions {
 				margin: 0px;
 				margin-left: 0;
