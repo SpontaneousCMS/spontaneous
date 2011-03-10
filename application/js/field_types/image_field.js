@@ -113,7 +113,6 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			var wrap = dom.div({'style':'position:relative;'});
 			var src = this.value();
 			var img = dom.img({'src':src}).load(function() {
-				console.log('image loaded', $(this).attr('src'))
 				// doesn't work because it returns the size of the HTML element
 				// (as constrained by CSS)
 				// rather than the size of the source image
@@ -175,7 +174,6 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 
 			var actions = dom.div('.actions');
 			var attr = this.data.attributes.original;
-				console.log('-------', this.data.attributes);
 			// var change = $(dom.a, {'class':'button change'}).text('Change').click(onclick);
 			var clear = dom.a('.button.clear').text('Clear');
 			actions.append(input).append(clear);
@@ -187,7 +185,6 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				event.preventDefault();
 				dropper.removeClass('drop-active');
 				var files = event.dataTransfer.files;
-				console.log(files)
 				files_selected(files);
 				return false;
 			}.bind(this);

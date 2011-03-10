@@ -538,7 +538,6 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		input: function() {
 			if (!this._input) {
 				this._input = dom.textarea(dom.id(this.css_id()), {'name':this.form_name(), 'rows':10, 'cols':90}).val(this.unprocessed_value());
-				console.log(this._input)
 			}
 			return this._input;
 		},
