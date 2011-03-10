@@ -34,9 +34,10 @@ Spontaneous.Box = (function($, S) {
 
 		panel: function() {
 			if (!this._panel) {
-				var panel = $(dom.div, {'class': 'slot-content'});
+				// var panel = $(dom.div, {'class': 'slot-content'});
+				var panel = dom.div('.slot-content');
 				if (this.has_fields()) {
-					var w = $(dom.div, {'class':'box-fields'});
+					var w = dom.div('.box-fields');
 					var fields = new Spontaneous.FieldPreview(this, '');
 					var preview_area = this.create_edit_wrapper(fields.panel());
 
@@ -45,7 +46,8 @@ Spontaneous.Box = (function($, S) {
 				}
 
 				var allowed = this.allowed_types();
-				var allowed_bar = $(dom.div, {'class':'slot-addable'});
+				// var allowed_bar = $(dom.div, {'class':'slot-addable'});
+				var allowed_bar = dom.div('.slot-addable');
 				var dropper = allowed_bar;
 				var drop = function(event) {
 					dropper.removeClass('drop-active').addClass('uploading');
@@ -93,12 +95,13 @@ Spontaneous.Box = (function($, S) {
 					var add_allowed = function(type) {
 						this.add_content(type, 0);
 					}.bind(_box, type);
-					var a = $(dom.a).click(add_allowed).text(type.title);
+					var a = dom.a().click(add_allowed).text(type.title);
 					allowed_bar.append(a)
 				});
-				allowed_bar.append($(dom.span, {'class':'down'}));
+				allowed_bar.append(dom.span('.down'));
 				panel.append(allowed_bar);
-				var entries = $(dom.div, {'class':'slot-entries'});
+				// var entries = $(dom.div, {'class':'slot-entries'});
+				var entries = dom.div('.slot-entries');
 				// panel.append();
 				for (var i = 0, ee = this.entries(), ii = ee.length;i < ii; i++) {
 					var entry = ee[i];

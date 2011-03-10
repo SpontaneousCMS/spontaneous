@@ -4,6 +4,8 @@ $editing-2: #dbd7d1;
 $editing-3: darken($editing-2, 20%);
 $editing-4: darken($editing-3, 20%);
 
+$editing-focus: #8ac551;
+
 $text-edit-width: 621px;
 
 .editing-panel {
@@ -136,7 +138,6 @@ $text-edit-width: 621px;
 			}
 		}
 
-		$editing-focus: #94c666;
 
 		.field.focus {
 			.name {
@@ -155,6 +156,7 @@ $text-edit-width: 621px;
 
 		.editing-fields {
 			padding: 0;
+      @include box-orient(vertical);
 		}
 		.editing-toolbar {
 			padding-left: $unit;
@@ -167,6 +169,9 @@ $text-edit-width: 621px;
 			width: 100%;
 			@include box-sizing;
 		}
+    .field-group.image {
+      padding: $unit;
+    }
 	}
 	.field-group.image {
 		@include box-sizing;

@@ -8,7 +8,7 @@ Spontaneous.BoxContainer = (function($, S) {
 		initialize: function(content, wrap_id) {
 			this.content = content;
 			this.wrap_id = wrap_id;
-			this.box_content_container = $(dom.div);
+			this.box_content_container = dom.div();
 		},
 
 		panel: function() {

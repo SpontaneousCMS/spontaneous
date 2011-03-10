@@ -683,6 +683,7 @@ img.missing {
 			}
 		}
 		.white-bg, .grey-bg {
+			@include box-sizing;
 			// @include rounded;
 			position: absolute;
 			left: 0px;
@@ -693,18 +694,21 @@ img.missing {
 			margin: 0;
 			background-color: white;
 			z-index: 1;
-			border-width: 8px;
 		}
 		.white-bg {
 			@include corners($corner-radius, 0, 0, $corner-radius);
+			border-width: 2px;
+			border-color: transparent;
+			border-style: solid;
 		}
 		.white-bg.active {
-			-webkit-border-image: url(/@spontaneous/static/inner-glow.png) 8 8 8 8 repeat;
-			// border-color: red;
+			// -webkit-border-image: url(/@spontaneous/static/inner-glow.png) 8 8 8 8 repeat;
+			border-color: $action;
 		}
 		.grey-bg {
 			@include corners(0, $corner-radius, $corner-radius, 0);
-			left: 60%;
+			left: auto;
+			width: 40%;
 			right: 0;
 			background-color: #6b6b6b;
 			margin-left: 0;
@@ -740,7 +744,7 @@ img.missing {
 			float: left;
 			width: 40%;
 			z-index: 2;
-			// left: 1px;
+			left: 1px; // kludge (rounding errors?)
 			.slot-tabs {
 				@extend .clearfix;
 				@include rounded-top;
@@ -819,6 +823,14 @@ img.missing {
 				margin-left: $unit;
 				margin-right: $unit;
 				margin-bottom: $unit;
+				.white-bg {
+					@include rounded;
+					width: auto;
+					right: 0;
+				}
+				.grey-bg {
+					display: none;
+				}
 				.entry {
 					@include rounded;
 					width: 100%;
@@ -826,8 +838,8 @@ img.missing {
 						@include rounded;
 						padding: 4px;
 						background: none;
-						background-color: white;
-						border-color: white;
+						// background-color: white;
+						// border-color: white;
 						width: 100%;
 						.fields-preview-text {
 							width: 100%;

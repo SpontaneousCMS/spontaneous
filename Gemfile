@@ -41,7 +41,7 @@ group :development do
   gem 'selenium-client', '~> 1.2.18'
   gem 'launchy', '~> 0.4.0'
   # gem 'Selenium', '~> 1.1.14'
-  # gem 'johnson',    '2.0.0.pre1'
-  # gem 'harmony',    '~> 0.5'
+  gem 'johnson',    '2.0.0.pre3'
+  gem 'harmony',    '~> 0.5'
 end
 
