@@ -30,7 +30,16 @@ Spontaneous.Box = (function($, S) {
 			return 'box';
 		},
 
-
+		mouseover: function() {
+			if (this.fields_preview) {
+				this.fields_preview.addClass('hover');
+			}
+		},
+		mouseout: function() {
+			if (this.fields_preview) {
+				this.fields_preview.removeClass('hover');
+			}
+		},
 
 		panel: function() {
 			if (!this._panel) {
@@ -39,10 +48,13 @@ Spontaneous.Box = (function($, S) {
 				if (this.has_fields()) {
 					var w = dom.div('.box-fields');
 					var fields = new Spontaneous.FieldPreview(this, '');
-					var preview_area = this.create_edit_wrapper(fields.panel());
+					var fields_preview = fields.panel();
+					fields_preview.append(dom.div('.overlay'))
+					var preview_area = this.create_edit_wrapper(fields_preview);
 
 					w.append(preview_area);
 					panel.append(w);
+					this.fields_preview = fields_preview;
 				}
 
 				var allowed = this.allowed_types();

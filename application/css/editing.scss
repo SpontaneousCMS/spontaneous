@@ -44,6 +44,8 @@ $text-edit-width: 621px;
 			@include display-box;
 			@include box-orient(horizontal);
 			@include box-pack(justify);
+			// @include box-pack(end); // for right aligned buttons
+			// @include box-align(end); // for right aligned buttons
 			padding-top: $unit/2;
 			width: $text-edit-width;
 			.save, .cancel {
@@ -51,6 +53,7 @@ $text-edit-width: 621px;
 			}
 			.cancel {
 				@include button($editing-3);
+        // margin-right: $unit; // for right aligned buttons
 			}
 			.save, .cancel {
 				display: block;

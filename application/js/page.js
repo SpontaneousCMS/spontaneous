@@ -155,11 +155,24 @@ Spontaneous.Page = (function($, S) {
 			var fields = dom.div('#page-fields')
 			var fp = new Spontaneous.FieldPreview(this, '');
 			var p = fp.panel();
+			p.append(dom.div('.overlay'))
+
 			var preview_area = this.create_edit_wrapper(p);
 			fields.append(preview_area)
 			this.panel.append(fields);
 			this.panel.append(new Spontaneous.BoxContainer(this, 'page-slots').panel());
+			this.fields_preview = p;
 			return this.panel;
+		},
+		mouseover: function() {
+			if (this.fields_preview) {
+				this.fields_preview.addClass('hover');
+			}
+		},
+		mouseout: function() {
+			if (this.fields_preview) {
+				this.fields_preview.removeClass('hover');
+			}
 		},
 		depth: function() {
 			// depth in this case refers to content depth which is always 0 for pages
