@@ -67,21 +67,22 @@ Spontaneous.EditPanel = (function($, S) {
 			var _save_ = this.save.bind(this);
 			var _cancel_ = this.cancel.bind(this);
 			var get_toolbar = function(class_name) {
-				var save = $(dom.a, {'class':'save'}).text('Save').click(_save_);
-				var cancel = $(dom.a, {'class':'cancel'}).text('Cancel').click(_cancel_);
-				var shadow = $(dom.div, {'class':'indent'});
-				var buttons = $(dom.div, {'class':'buttons'}).append(cancel).append(save);
-				var toolbar = $(dom.div, {'class':'editing-toolbar'}).append(shadow).append(buttons);
+				var save = dom.a('.save').text('Save').click(_save_);
+				var cancel = dom.a('.save').text('Cancel').click(_cancel_);
+				var shadow = dom.div('.indent');
+				var buttons = dom.div('.buttons').append(cancel).append(save);
+				var toolbar = dom.div('.editing-toolbar').append(shadow).append(buttons);
 				if (class_name) { toolbar.addClass(class_name); }
 				return toolbar;
 			};
-			var editing = $(dom.form, {'class':'editing-panel '+ this.content.depth_class(), 'enctype':'multipart/form-data', 'method':'post'});
+			var editing = dom.form(['.editing-panel', this.content.depth_class()], {'enctype':'multipart/form-data', 'method':'post'})
+			// $(dom.form, {'class':'editing-panel '+ this.content.depth_class(), 'enctype':'multipart/form-data', 'method':'post'});
 			var toolbar = get_toolbar();
-			var outer = $(dom.div, {'class':'editing-fields'});
-			var text_field_wrap = $(dom.div, {'class':'field-group text'});
-			var image_field_wrap = $(dom.div, {'class':'field-group image'});
+			var outer = dom.div('.editing-fields');
+			var text_field_wrap = dom.div('.field-group.text');
+			var image_field_wrap = dom.div('.field-group.image');
 			var text_fields = this.content.text_fields();
-			var submit = $(dom.input, {'type':'submit'});
+			var submit = dom.input({'type':'submit'});
 			editing.append(toolbar);
 			for (var i = 0, ii = text_fields.length; i < ii; i++) {
 				var field = text_fields[i];
@@ -97,7 +98,7 @@ Spontaneous.EditPanel = (function($, S) {
 			outer.append(image_field_wrap);
 			outer.append(submit);
 			editing.append(outer);
-			editing.append($(dom.div, {'class':'clear'}));
+			editing.append(dom.div('.clear'));
 			editing.append(get_toolbar('bottom'));
 			__dialogue = this;
 			// activate the highlighting
@@ -136,17 +137,18 @@ Spontaneous.EditPanel = (function($, S) {
 			}
 		},
 		field_edit: function(field) {
-			var d = $(dom.div, {'class':'field'});
-			d.append($(dom.label, {'class':'name', 'for':field.css_id()}).html(field.label()));
+			var d = dom.div('.field');
+			// d.append($(dom.label, {'class':'name', 'for':field.css_id()}).html(field.label()));
+			d.append(dom.label('.name', {'for':field.css_id()}).html(field.label()));
 			var toolbar = field.toolbar();
 			if (toolbar) {
-				d.append($(dom.div, {'class':'toolbar'}).html(toolbar));
+				d.append(dom.div('.toolbar').html(toolbar));
 			}
 			var edit = field.edit();
-			d.append($(dom.div, {'class':'value'}).html(edit));
+			d.append(dom.div('.value').html(edit));
 			var footer = field.footer();
 			if (footer) {
-				d.append($(dom.div, {'class':'footer'}).html(footer));
+				d.append(dom.div('.footer').html(footer));
 			}
 			return d;
 		}

@@ -23,16 +23,16 @@ Spontaneous.Entry = (function($, S) {
 		},
 		view: function() {
 			var __entry = this.entry;
-			var w = $(dom.div, {'id':'popover-delete'}).click(function() {
+			var w = dom.div('#popover-delete').click(function() {
 				__entry.cancel_destroy();
 				return false;
 			});
 
-			var ok = $(dom.a, {'class':'ok'}).text("Delete").click(function() {
+			var ok = dom.a('.ok').text("Delete").click(function() {
 				__entry.destroy();
 				return false;
 			});
-			var cancel = $(dom.a, {'class':'cancel'}).text("Cancel");
+			var cancel = dom.a('.cancel').text("Cancel");
 			w.append(cancel, ok)
 			return w;
 		}
@@ -45,17 +45,18 @@ Spontaneous.Entry = (function($, S) {
 			// console.log('FacetEntry#new', content, content.depth);
 		},
 		panel: function() {
-			var wrapper = $(dom.div, {'class':['entry-wrap ', this.depth_class(), this.visibility_class()].join(' ')});
-			var inside = $(dom.div, {'class':'entry-inner'});
-			var outline = $(dom.div, {'class':'white-bg'}).mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
+			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class()])
+			// $(dom.div, {'class':['entry-wrap ', this.depth_class(), this.visibility_class()].join(' ')});
+			var inside = dom.div('.entry-inner');
+			var outline = dom.div('.white-bg').mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
 			inside.append(outline)
 			if (this.depth() < 4) {
-				inside.append($(dom.div, {'class':'grey-bg'}));
+				inside.append(dom.div('.grey-bg'));
 			}
 			wrapper.append(this.title_bar(wrapper));
 			// this.dialogue_box = $(dom.div, {'class':'dialogue', 'style':'display: none'});
 			// wrapper.append(this.dialogue_box);
-			var entry = $(dom.div, {'class':'entry'});
+			var entry = dom.div('.entry');
 			var fields = new Spontaneous.FieldPreview(this, '');
 			entry.append(fields.panel());
 			var box_container = new Spontaneous.BoxContainer(this);
@@ -70,10 +71,10 @@ Spontaneous.Entry = (function($, S) {
 
 		title_bar: function(wrapper) {
 			if (!this._title_bar) {
-				var title_bar = $(dom.div, {'class':'title-bar'});
-				var actions = $(dom.div, {'class':'actions', 'xstyle':'display: none'});
-				var destroy = $(dom.a, {'class':'delete'});
-				var visibility = $(dom.a, {'class':'visibility'});
+				var title_bar = dom.div('.title-bar');
+				var actions = dom.div('.actions', {'xstyle':'display: none'});
+				var destroy = dom.a('.delete');
+				var visibility = dom.a('.visibility');
 				actions.append(destroy);
 				actions.append(visibility);
 				title_bar.append(actions);

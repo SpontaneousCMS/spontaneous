@@ -213,11 +213,11 @@ Spontaneous.Content = (function($, S) {
 		//
 		create_edit_wrapper: function(read_content) {
 			var s = {'style':'position: relative; overflow: hidden;'}
-			var outer = $(dom.div, s);
-			var write = $(dom.div, {'style':'position: absolute; height: 0; overflow: hidden;'})
-			var write_inner = $(dom.div);
-			var read = $(dom.div, s);
-			var read_inner = $(dom.div);
+			var outer = dom.div(s);
+			var write = dom.div({'style':'position: absolute; height: 0; overflow: hidden;'})
+			var write_inner = dom.div();
+			var read = dom.div(s);
+			var read_inner = dom.div();
 			write.append(write_inner);
 			read_inner.append(read_content);
 			read.append(read_inner);

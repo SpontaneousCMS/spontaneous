@@ -8,11 +8,11 @@ Spontaneous.Page = (function($, S) {
 	};
 	FunctionBar.prototype = {
 		panel: function() {
-			this.panel = $(dom.div, {'id': 'page-info'});
+			this.panel = dom.div('#page-info');
 			this.title = $('<h1/>');
 			this.set_title();
 			this.panel.append(this.title);
-			var path_wrap = $(dom.div, {'class':'path'})
+			var path_wrap = dom.div('.path');
 
 			this.page.title_field().add_listener('value', function(t) {
 				this.set_title(t);
@@ -23,7 +23,7 @@ Spontaneous.Page = (function($, S) {
 					this.open_url_editor();
 				}
 			}.bind(this)));
-			path_wrap.append($(dom.div, {'class':'edit'}));
+			path_wrap.append(dom.div('.edit'));
 			this.panel.append(path_wrap);
 			this.path_wrap = path_wrap
 			return this.panel;
@@ -32,7 +32,7 @@ Spontaneous.Page = (function($, S) {
 			title = title || this.page.title();
 			this.title.text(title);
 			if (this.page.content.hidden) {
-				this.title.append($(dom.span).text(' (hidden)'));
+				this.title.append(dom.span().text(' (hidden)'));
 			}
 		},
 		unavailable_loaded: function(response) {
@@ -51,26 +51,26 @@ Spontaneous.Page = (function($, S) {
 				edit.hide().empty();
 				var path = [""], parts = this.page.path.split('/'), slug = parts.pop();
 				parts.shift(); // remove empty entry caused by leading '/'
-				edit.append($(dom.span).text('/'))
+				edit.append(dom.span().text('/'))
 				for (var i = 0, ii = parts.length; i < ii; i++) {
 					var p = parts[i];
 					path.push(p)
-					edit.append($(dom.a, {'class':'path'}).text(p).attr('href', path.join('/')).click(function() {
+					edit.append(dom.a('.path').text(p).attr('href', path.join('/')).click(function() {
 						S.Location.load_path($(this).attr('href'));
 						return false;
 					}));
-					edit.append($(dom.span).text('/'));
+					edit.append(dom.span().text('/'));
 				}
-				var input_and_error = $(dom.span, {'class':'input-error'});
-				var input = $(dom.input, {'type':'text', 'autofocus':'autofocus'}).val(slug).select();
-				var error = $(dom.span).text('Duplicate URL').hide();
+				var input_and_error = dom.span('.input-error');
+				var input = dom.input({'type':'text', 'autofocus':'autofocus'}).val(slug).select();
+				var error = dom.span().text('Duplicate URL').hide();
 				input_and_error.append(input);
 				input_and_error.append(error);
 				edit.append(input_and_error);
 				var submit = function() {
 					this.save(input.val());
 				}.bind(this);
-				edit.append($(dom.a, {'class':'button'}).text('Save').click(submit));
+				edit.append(dom.a('.button').text('Save').click(submit));
 				input.keyup(function(event) {
 					if (event.keyCode === 13) {
 						submit();
@@ -149,10 +149,10 @@ Spontaneous.Page = (function($, S) {
 		},
 
 		panel: function() {
-			this.panel = $(dom.div, {'id':'page-content'});
+			this.panel = dom.div('#page-content');
 			this.panel.append(new FunctionBar(this).panel());
 
-			var fields = $(dom.div, {'id':'page-fields'})
+			var fields = dom.div('#page-fields')
 			var fp = new Spontaneous.FieldPreview(this, '');
 			var p = fp.panel();
 			var preview_area = this.create_edit_wrapper(p);

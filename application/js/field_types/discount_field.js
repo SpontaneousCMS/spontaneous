@@ -125,7 +125,8 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		button: function() {
 			if (!this._button) {
-				var b = $(dom.a, {'class':this.name.toLowerCase()}).click(function(event) {
+				// var b = $(dom.a, {'class':this.name.toLowerCase()}).click(function(event) {
+				var b = dom.a(this.name.toLowerCase()).click(function(event) {
 					this.execute(event);
 					return false;
 				}.bind(this)).text(this.name);
@@ -359,31 +360,31 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		// align: 'right',
 		view: function() {
-			var __view = this, w = $(dom.div, {'class': 'pop-insert-link'}), text_input, url_input;
+			var __view = this, w = dom.div('.pop-insert-link'), text_input, url_input;
 			var input = function(label, value, type) {
-				var l, i = $((type || dom.input), {'type':'text'}).keypress(function(event) {
+				var l, i = dom[(type || 'input')]({'type':'text'}).keypress(function(event) {
 					if (event.charCode === 13) {
 						__view.insert_link_and_close(text_input, url_input); // sick
 						return false;
 					}
 				}).val(value);
-				l = $(dom.label).append($(dom.span).text(label)).append(i);
+				l = dom.label().append(dom.span().text(label)).append(i);
 				return l;
 			}
 			text_input = input("Text", this.link_text);
-			url_input = input("URL", this.url, dom.textarea);
+			url_input = input("URL", this.url, 'textarea');
 			url_input.find('textarea').attr('rows', 3);
 
-			cancel = $(dom.a, {'class':'button cancel'}).text('Clear').click(function() {
+			cancel = dom.a('.button.cancel').text('Clear').click(function() {
 				// this.close();
 				this.insert_link_and_close(text_input, url_input.val(''));
 				return false;
-			}.bind(this)), insert = $(dom.a, {'class':'button'}).text('OK').click(function() {
+			}.bind(this)), insert = dom.a('.button').text('OK').click(function() {
 				this.insert_link_and_close(text_input, url_input);
 				return false;
 			}.bind(this))
-			w.append($(dom.p).append(text_input)).append($(dom.p).append(url_input));
-			var buttons = $(dom.div, {'class':'buttons'});
+			w.append(dom.p().append(text_input)).append(dom.p().append(url_input));
+			var buttons = dom.div('.buttons');
 			url_input = url_input.find(':input')
 			text_input = text_input.find(':input')
 			this.text_input = text_input;
@@ -424,10 +425,10 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			this.browser.set_manager(this);
 		},
 		view: function() {
-			var w = $(dom.div),
-			text = $(dom.span).text('Page Browser'),
-			inner = $(dom.div, {'class':'link-page-browser'});
-			inner.append($(dom.label).append(text)).append(this.browser.view());
+			var w = dom.div();
+			text = dom.span().text('Page Browser'),
+			inner = dom.div('.link-page-browser');
+			inner.append(dom.label().append(text)).append(this.browser.view());
 			w.append(inner);
 			return w;
 		},
@@ -536,7 +537,8 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		actions: [Bold, Italic, H1, H2, UL, OL, Link],
 		input: function() {
 			if (!this._input) {
-				this._input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':90}).text(this.unprocessed_value());
+				// this._input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':90}).text(this.unprocessed_value());
+				this._input = dom.textarea(dom.id(this.css_id(), {'name':this.form_name(), 'rows':10, 'cols':90})).val(this.unprocessed_value());
 			}
 			return this._input;
 		},
@@ -563,8 +565,9 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		},
 		toolbar: function() {
 			if (!this._toolbar) {
-				this._wrapper = $(dom.div, {'class':'markdown-editor', 'id':'editor-'+this.css_id()});
-				this._toolbar = $(dom.div, {'class':'md-toolbar'});
+				this._wrapper = dom.div([dom.id('editor-'+this.css_id()), '.markdown-editor']);
+				// $(dom.div, {'class':'markdown-editor', 'id':'editor-'+this.css_id()});
+				this._toolbar = dom.div('.md-toolbar');
 				this.commands = [];
 				var input = this.input();
 				for (var i = 0, c = this.actions, ii = c.length; i < ii; i++) {

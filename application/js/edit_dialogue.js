@@ -57,14 +57,14 @@ Spontaneous.EditDialogue = (function($, S) {
 			$(':input', this.form).add(document).unbind('keydown.savedialog');
 		},
 		body: function() {
-			var editing = $(dom.form, {'id':'editing', 'enctype':'multipart/form-data', 'method':'post'});
-			var outer = $(dom.div);
-			outer.append($(dom.div, {'class':'field-group-bg text'}));
-			outer.append($(dom.div, {'class':'field-group-bg image'}));
-			var text_field_wrap = $(dom.div, {'class':'field-group text'});
-			var image_field_wrap = $(dom.div, {'class':'field-group image'});
+			var editing = dom.form('#editing', {'enctype':'multipart/form-data', 'method':'post'});
+			var outer = dom.div();
+			outer.append(dom.div('.field-group-bg.text'));
+			outer.append(dom.div('.field-group-bg.image'));
+			var text_field_wrap = dom.div('.field-group.text');
+			var image_field_wrap = dom.div('.field-group.image');
 			var text_fields = this.content.text_fields();
-			var submit = $(dom.input, {'type':'submit'});
+			var submit = dom.input({'type':'submit'});
 
 			for (var i = 0, ii = text_fields.length; i < ii; i++) {
 				var field = text_fields[i];
@@ -117,17 +117,17 @@ Spontaneous.EditDialogue = (function($, S) {
 			}
 		},
 		field_edit: function(field) {
-			var d = $(dom.div, {'class':'field'});
-			d.append($(dom.label, {'class':'name', 'for':field.css_id()}).html(field.label()));
+			var d = dom.div('.field');
+			d.append(dom.label('.name', {'for':field.css_id()}).html(field.label()));
 			var toolbar = field.toolbar();
 			if (toolbar) {
-				d.append($(dom.div, {'class':'toolbar'}).html(toolbar));
+				d.append(dom.div('.toolbar').html(toolbar));
 			}
 			var edit = field.edit();
-			d.append($(dom.div, {'class':'value'}).html(edit));
+			d.append(dom.div('.value').html(edit));
 			var footer = field.footer();
 			if (footer) {
-				d.append($(dom.div, {'class':'footer'}).html(footer));
+				d.append(dom.div('.footer').html(footer));
 			}
 			return d;
 		}

@@ -175,11 +175,11 @@ Spontaneous.UploadManager = (function($, S) {
 			this.status_bar.show();
 			if (this.progress_showing) { return; }
 			var c = this.status_bar.progress_container();
-			var outer = $(dom.div, {'id':'progress-bars'});
-			var total = $(dom.div, {"id":"progress-total", 'class':'bar'});
-			var individual = $(dom.div, {"id":"progress-individual", 'class':'bar'});
-			var name = $(dom.div, {'id': 'progress-name'});
-			var stats = $(dom.div, {'id': 'progress-stats'});
+			var outer = dom.div('#progress-bars');
+			var total = dom.div('#progress-total.bar');
+			var individual = dom.div('#progress-individual.bar');
+			var name = dom.div('#progress-name');
+			var stats = dom.div('#progress-stats');
 			outer.append(individual);
 			outer.append(total);
 			c.append(outer);

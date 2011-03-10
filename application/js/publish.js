@@ -8,7 +8,7 @@ Spontaneous.Publishing = (function($, S) {
 			this.change_sets = [];
 		},
 		body: function() {
-			var wrapper = $(dom.div, {'id':'publishing-dialogue'}).text('publishing')
+			var wrapper = dom.div('#publishing-dialogue').text('publishing')
 			this.wrapper = wrapper;
 			Spontaneous.Ajax.get(['/publish', 'changes'].join('/'), this, this.change_list_loaded);
 			return wrapper;
@@ -39,16 +39,16 @@ Spontaneous.Publishing = (function($, S) {
 			var w = this.wrapper, __dialogue = this;
 			w.empty();
 			if (change_list.length === 0) {
-				var summary = $(dom.p, {'class':'publish-summary'}).text("The site is up to date");
+				var summary = dom.p('.publish-summary').text("The site is up to date");
 				w.append(summary);
 				this.disable_button('Publish');
 			} else {
-				var summary = $(dom.p, {'class':'publish-summary'}).text(change_list.length + " changes");
-				var cb = $(dom.input, {'type':'checkbox'}).change(function() {
+				var summary = dom.p('.publish-summary').text(change_list.length + " changes");
+				var cb = dom.input('.checkbox').change(function() {
 					var checked = $(this).is(':checked');
 					__dialogue.set_publish_all(checked);
 				});
-				var label = $(dom.label, {'class':'publish-all'}).append(cb).append('Publish All');
+				var label = dom.label('.publish-all').append(cb).append('Publish All');
 				summary.append(label)
 				w.append(summary);
 				this.publish_all_label = label;
@@ -114,9 +114,9 @@ Spontaneous.Publishing = (function($, S) {
 			this.selected = false;
 		},
 		panel: function() {
-			var w = $(dom.div, {'class':'change-set'}), pages = this.pages(), titles = $(dom.div, {'class':'titles'});
+			var w = dom.div('.change-set'), pages = this.pages(), titles = dom.div('.titles');
 			for (var i = 0, ii = pages.length; i < ii; i++) {
-				titles.append($(dom.a).text(pages[i].title).append($(dom.span).text(pages[i].path)));
+				titles.append(dom.a().text(pages[i].title).append(dom.span().text(pages[i].path)));
 			}
 			w.click(function() {
 				this.select_toggle();

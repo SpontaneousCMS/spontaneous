@@ -131,7 +131,7 @@ module Spontaneous
         end
 
         helpers do
-          def scripts(*scripts)
+          def scripts(scripts)
             if Spontaneous.development?
               scripts.map do |script|
                 src = "/js/#{script}.js"

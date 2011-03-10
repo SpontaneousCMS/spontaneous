@@ -61,7 +61,7 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		},
 		input: function() {
 			if (!this._input) {
-				this._input = $(dom.input, {'type':'text', 'id':this.css_id(), 'name':this.form_name(), 'value':this.unprocessed_value()})
+				this._input = dom.input(dom.id(this.css_id()), {'type':'text', 'name':this.form_name(), 'value':this.unprocessed_value()})
 			}
 			return this._input;
 		},

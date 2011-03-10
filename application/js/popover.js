@@ -14,21 +14,21 @@ Spontaneous.Popover = (function($, S) {
 		open: function(event) {
 			var view = this.view;
 			var location = Popover.div();
-			var wrapper = $(dom.div, {'class':'pop-over'});
-			var handle = $(dom.div, {'class':'menuHandle'});
-			var header = $(dom.header);//.append(back_btn).append(title);
-			var title = $(dom.h3).text(view.title());
+			var wrapper = dom.div('.pop-over');
+			var handle = dom.div('.menuHandle');
+			var header = dom.header();//.append(back_btn).append(title);
+			var title = dom.h3().text(view.title());
 
-			var view_wrapper = $(dom.div).css('width', view.width());
+			var view_wrapper = dom.div().css('width', view.width());
 			view_wrapper.append(view.view());
 
 			if (view.has_navigation) {
-				var back_btn = $(dom.a, {'class':'button back'}).append($(dom.span, {'class':'pointer'})).append($(dom.span, {'class':'label'}).text("Back")).css('visibility', 'hidden');
+				var back_btn = dom.a('.button.back').append(dom.span('.pointer')).append(dom.span('.label').text("Back")).css('visibility', 'hidden');
 				header.append(back_btn);
 			}
 			header.append(title);
 			if (view.close_text()) {
-				var close_btn = $(dom.a, {'class':'button close'}).text(view.close_text()).click(this.close.bind(this));
+				var close_btn = dom.a('.button.close').text(view.close_text()).click(this.close.bind(this));
 				header.append(close_btn);
 			}
 			wrapper.append(handle).append(header).append(view_wrapper);

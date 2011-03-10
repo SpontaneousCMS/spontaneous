@@ -7,7 +7,7 @@ Spontaneous.StatusBar = (function($, S) {
 	var StatusBar = {
 		showing: false,
 		init: function() {
-			this.container = $(dom.div, {'id':'status-bar'}).hide();
+			this.container = dom.div('#status-bar').hide();
 			S.UploadManager.init(this);
 			// window.setTimeout(function() {this.hide();}.bind(this), 1000);
 			return this.container;
@@ -34,7 +34,7 @@ Spontaneous.StatusBar = (function($, S) {
 		},
 		progress_container: function() {
 			if (!this._progress_container) {
-				var c = $(dom.div, {'id':'progress-container'});
+				var c = dom.div('#progress-container');
 				this.container.append(c);
 				this._progress_container = c;
 			}

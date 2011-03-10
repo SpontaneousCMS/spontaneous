@@ -5,10 +5,10 @@ Spontaneous.SideBar = (function($, S) {
 
 	var side_bar = {
 		panel: function() {
-			this.panel = $(dom.div, {'id': 'side-bar'});
-			this.logo_panel = $(dom.div, {'id':'logo'})
-			this.page_info_panel = $(dom.div, {'class':'page-info'})
-			this.user_panel = $(dom.div, {'id':'user'})
+			this.panel = dom.div('#side-bar');
+			this.logo_panel = dom.div('#logo')
+			this.page_info_panel = dom.div('.page-info')
+			this.user_panel = dom.div('#user')
 			this.panel.append(this.logo_panel).append(this.page_info_panel).append(this.user_panel);
 			return this.panel;
 		},

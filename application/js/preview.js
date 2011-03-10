@@ -16,7 +16,7 @@ Spontaneous.Preview = (function($, S) {
 			return this.get('title') || "";
 		},
 		init: function(container) {
-			this.iframe = $(dom.iframe, {"id":"preview_pane", src:'about:blank'})
+			this.iframe = dom.iframe("#preview_pane", {'src':'about:blank'})
 			this.iframe.hide();
 			container.append(this.iframe);
 			return this;

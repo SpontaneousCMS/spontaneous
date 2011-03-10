@@ -12,7 +12,8 @@ Spontaneous.BoxContainer = (function($, S) {
 		},
 
 		panel: function() {
-			var wrapper = $(dom.div, {'id':this.wrap_id, 'class':'slots'});
+			// var wrapper = $(dom.div, {'id':this.wrap_id, 'class':'slots'});
+			var wrapper = dom.div([dom.id(this.wrap_id), 'slots']);
 
 			wrapper.append(this.tab_bar());
 			wrapper.append(this.box_content_container);
@@ -23,12 +24,13 @@ Spontaneous.BoxContainer = (function($, S) {
 		tab_bar: function() {
 			if (this.boxes().length === 0) { return ''; }
 			if (!this._tab_bar) {
-				var bar = $(dom.ul, {'class':'slot-tabs'});
+				var bar = dom.ul('.slot-tabs');
 				for (var i = 0, boxes = this.boxes(), ii = boxes.length; i < ii; i++) {
 					var box = boxes[i];
-					var li = $(dom.li)
+					var li = dom.li();
 					li.text(box.name())
-					li.append($(dom.span, {'class':'down'}));
+					// li.append($(dom.span, {'class':'down'}));
+					li.append(dom.span('.down'));
 					var click = function(index) {
 						this.activate(index, true);
 					}.bind(this, i);

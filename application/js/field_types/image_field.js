@@ -9,8 +9,8 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		},
 		progress_bar: function() {
 			if (!this._progress_bar) {
-				var progress_outer = $(dom.div, {'class':'drop-upload-outer'}).hide();
-				var progress_inner = $(dom.div, {'class':'drop-upload-inner'}).css('width', 0);
+				var progress_outer = dom.div('.drop-upload-outer').hide();
+				var progress_inner = dom.div('.drop-upload-inner').css('width', 0);
 				progress_outer.append(progress_inner);
 				this._progress_bar = progress_inner;
 			}
@@ -20,9 +20,9 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			Spontaneous.UploadManager.register(this);
 			var value = this.get('value'), img = null, dim = 45;
 			if (value === "") {
-				img = $(dom.img, {'src':'/@spontaneous/static/px.gif','class':'missing-image'});
+				img = dom.img('.missing-image', {'src':'/@spontaneous/static/px.gif'});
 			} else {
-				img = $(dom.img, {'src':value});
+				img = dom.img({'src':value});
 			}
 			img.error(function() {
 				console.log("***** MISSING IMAGE", value);
@@ -37,8 +37,8 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			});
 			this.image = img;
 
-			var outer = $(dom.div);
-			var dropper = $(dom.div, {'class':'image-drop'});
+			var outer = dom.div();
+			var dropper = dom.div('.image-drop');
 			outer.append(img);
 			outer.append(dropper);
 			dropper.append(this.progress_bar().parent());
@@ -111,13 +111,13 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return 0;
 		},
 		edit: function() {
-			var wrap = $(dom.div, {'style':'position:relative;'});
+			var wrap = dom.div({'style':'position:relative;'});
 			var onclick = function() {
 				input.trigger('click');
 				return false;
 			};
 			var src = this.value();
-			var img = $(dom.img, {'src':src}).click(onclick).load(function() {
+			var img = dom.img({'src':src}).click(onclick).load(function() {
 				if (this.width >= this.height) {
 					wrap.addClass('landscape');
 				} else {
@@ -134,21 +134,21 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				}
 			}.bind(this);
 			var input = this.get_input().change(onchange);
-			var actions = $(dom.div, {'class':'actions'});
+			var actions = dom.div('.actions');
 			var attr = this.data.attributes.original;
 				console.log('-------', this.data.attributes);
 			// var change = $(dom.a, {'class':'button change'}).text('Change').click(onclick);
-			var clear = $(dom.a, {'class':'button clear'}).text('Clear');
+			var clear = dom.a('.button.clear').text('Clear');
 			actions.append(input).append(clear);
 			wrap.append(img).append(actions);
 			if (attr) {
-				var info = $(dom.div, {'class':'info'});
+				var info = dom.div('.info');
 				var s = attr.src.split('/'), filename = s[s.length - 1];
-				info.append($(dom.div, {'class':'filename'}).text(filename))
-				var sizes = $(dom.div, {'class':'sizes'})
-				info.append(sizes)
-				sizes.append($(dom.div, {'class':'filesize'}).text(parseFloat(attr.filesize, 10).to_filesize()))
-				sizes.append($(dom.div, {'class':'dimensions'}).text(attr.width + 'x' + attr.height))
+				info.append(dom.div('.filename').text(filename))
+				var sizes = dom.div('.sizes');
+				info.append(sizes);
+				sizes.append(dom.div('.filesize').text(parseFloat(attr.filesize, 10).to_filesize()));
+				sizes.append(dom.div('.dimensions').text(attr.width + 'x' + attr.height));
 				wrap.append(info);
 			}
 			return wrap;

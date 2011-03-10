@@ -13,7 +13,7 @@ Spontaneous.Dialogue = (function($, S) {
 		},
 
 		html: function() {
-			var el = $(dom.a, {'class': this.css_class() }).text(this.label);
+			var el = dom.a(this.css_class()).text(this.label);
 			if (typeof this.action === 'function') {
 				var __button = this;
 				el.click(function() {
@@ -143,11 +143,15 @@ Spontaneous.Dialogue = (function($, S) {
 		},
 		container: function() {
 			if (!this._container) {
-				var w = $(dom.div, {'id':'dialogue-wrap'}).css('z-index', this.z_index()).hide();
-				var cw = $(dom.div, {'id':'dialogue-control-wrap'});
-				var c = $(dom.div, {'id':'dialogue-controls'});
-				var a = $(dom.div, {'class':'dialogue-actions top'});
-				var b = $(dom.div, {'id':'dialogue-body'});
+				var w = dom.div('#dialogue-wrap').css('z-index', this.z_index()).hide();
+				// var cw = $(dom.div, {'id':'dialogue-control-wrap'});
+				var cw = dom.div('#dialogue-control-wrap');
+				// var c = $(dom.div, {'id':'dialogue-controls'});
+				var c = dom.div('#dialogue-controls');
+				// var a = $(dom.div, {'class':'dialogue-actions top'});
+				var a = dom.div('.dialogue-actions.top');
+				// var b = $(dom.div, {'id':'dialogue-body'});
+				var b = dom.div('#dialogue-body');
 
 				c.append(a);
 				cw.append(c);
@@ -162,7 +166,7 @@ Spontaneous.Dialogue = (function($, S) {
 		},
 		overlay: function() {
 			if (!this._overlay) {
-				var o = $(dom.div, {'id':'dialogue-overlay'}).css('z-index', this.z_index()).hide();
+				var o = dom.div('#dialogue-overlay').css('z-index', this.z_index()).hide();
 				$('#content').append(o)
 				this._overlay = o;
 			}

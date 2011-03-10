@@ -50,8 +50,8 @@ Spontaneous.PageBrowser = (function($, S) {
 			S.Ajax.get(path, this, this.page_list_loaded);
 		},
 		view: function() {
-			var wrapper = $(dom.div, {'class':'page-browser'}), table = $(dom.div, {'class':'page-list'});
-			ancestors = $(dom.div, {'class':'page-ancestors'});
+			var wrapper = dom.div('.page-browser'), table = dom.div('.page-list');
+			ancestors = dom.div('.page-ancestors');
 			wrapper.append(ancestors).append(table);
 			this.wrapper = wrapper;
 			this.table = table;
@@ -72,7 +72,7 @@ Spontaneous.PageBrowser = (function($, S) {
 				}
 
 				this.ancestors.empty();
-				var _browser = this, list = $(dom.ul), ancestors = this.ancestor_list(this.location);
+				var _browser = this, list = dom.ul(), ancestors = this.ancestor_list(this.location);
 
 				this.depth = ancestors.length;
 				var click = function(p) {
@@ -83,11 +83,11 @@ Spontaneous.PageBrowser = (function($, S) {
 				};
 
 				for (var i = 0, ii = ancestors.length; i < ii; i++) {
-					var a = ancestors[i], li = $(dom.li).append($(dom.a).text(a.title)).append($(dom.span).text("/")).click(click(a));
+					var a = ancestors[i], li = dom.li().append(dom.a().text(a.title)).append(dom.span().text("/")).click(click(a));
 					list.append(li);
 				}
 				if (ancestors.length === 0) {
-					list.append($(dom.li).append($(dom.a).text('Choose a page...')))
+					list.append(dom.li().append(dom.a().text('Choose a page...')))
 				}
 				this.ancestors.append(list);
 			}
@@ -104,9 +104,9 @@ Spontaneous.PageBrowser = (function($, S) {
 				return false;
 			}
 
-			var row = $(dom.div, {'class':'page'}).click(selected(page)), title = $(dom.a).text(page.title);
+			var row = dom.div('.page').click(selected(page)), title = dom.a().text(page.title);
 			if (page.children > 0) {
-				var next = $(dom.span)
+				var next = dom.span()
 				next.click(next_click);
 				row.append(next);
 			}

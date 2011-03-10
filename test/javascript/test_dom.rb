@@ -35,6 +35,16 @@ class LocationBarTest < Test::Unit::TestCase
       attrs.has_key?('class').should be_false
     end
 
+    should "work with multile classes without initial dot" do
+      attrs = parse_selector("'class-1.class-2'")
+      attrs['class'].should == 'class-1 class-2'
+      attrs.has_key?('id').should be_false
+    end
+    should "work with single class without initial dots" do
+      attrs = parse_selector("'class-1'")
+      attrs['class'].should == 'class-1'
+      attrs.has_key?('id').should be_false
+    end
     should "convert string to id" do
       id = @page.x("Spontaneous.Dom.id('the-thing')")
       id.should == "#the-thing"

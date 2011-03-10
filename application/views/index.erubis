@@ -22,7 +22,7 @@
     <script type="text/javascript" charset="utf-8">
       Spontaneous.Require.init(Spontaneous.asynchronous);
       <%# list of scripts to append, in order %>
-      var sources = <%= scripts Spontaneous::Rack::Back::JAVASCRIPT_FILES  %>;
+      var sources = <%= scripts(Spontaneous::Rack::Back::JAVASCRIPT_FILES)  %>;
       for (var i = 0, ii = sources.length; i < ii; i++) {
         Spontaneous.require(sources[i]);
       }

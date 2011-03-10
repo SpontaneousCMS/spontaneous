@@ -11,8 +11,8 @@ Spontaneous.TopBar = (function($, S) {
 	}
 	RootNode.prototype = {
 		element: function() {
-			var li = $(dom.li, {'class':'root'});
-			var link = $(dom.a, {'href': this.url}).text(this.title).data('page', this.page);
+			var li = dom.li('.root');
+			var link = dom.a({'href': this.url}).text(this.title).data('page', this.page);
 			link.click(function() {
 				var page = $(this).data('page');
 				S.Location.load_id(page.id);
@@ -31,7 +31,7 @@ Spontaneous.TopBar = (function($, S) {
 	};
 	AncestorNode.prototype = {
 		element: function() {
-			var link = $(dom.li).append($('<a/>').data('page', this.page).click(function() {
+			var link = dom.li().append($('<a/>').data('page', this.page).click(function() {
 				var page = $(this).data('page');
 				S.Location.load_id(page.id);
 			}).text(this.title));
@@ -60,8 +60,8 @@ Spontaneous.TopBar = (function($, S) {
 
 	CurrentNode.prototype = {
 		element: function() {
-			var li = $(dom.li);
-			var select = $(dom.select);
+			var li = dom.li();
+			var select = dom.select();
 			select.change(function() {
 				var page = $(this.options[this.selectedIndex]).data('page');
 				S.Location.load_id(page.id);
@@ -69,7 +69,7 @@ Spontaneous.TopBar = (function($, S) {
 			});
 			for (var i = 0, ii = this.pages.length; i < ii; i++) {
 				var p = this.pages[i];
-				select.append($(dom.option, {'value': p.id, 'selected':(i == this.selected) }).text(p.title).data('page', p))
+				select.append(dom.option({'value': p.id, 'selected':(i == this.selected) }).text(p.title).data('page', p))
 			};
 			li.append(select);
 			// select.hide();
@@ -95,9 +95,9 @@ Spontaneous.TopBar = (function($, S) {
 
 	ChildrenNode.prototype = {
 		element: function() {
-			var li = $(dom.li);
-			var select = $(dom.select, {'class':'unselected'});
-			select.append($(dom.option).text('('+(this.children.length)+' pages)'));
+			var li = dom.li();
+			var select = dom.select('.unselected');
+			select.append(dom.option().text('('+(this.children.length)+' pages)'));
 			select.change(function() {
 				var p = $(this.options[this.selectedIndex]).data('page');
 				if (p) {
@@ -107,7 +107,7 @@ Spontaneous.TopBar = (function($, S) {
 			});
 			for (var i = 0, ii = this.children.length; i < ii; i++) {
 				var p = this.children[i];
-				select.append($(dom.option, {'value': p.id}).text(p.title).data('page', p))
+				select.append(dom.option({'value': p.id}).text(p.title).data('page', p))
 			};
 			li.append(select);
 			return li;
@@ -176,9 +176,9 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		button: function() {
 			if (!this._button) {
-				this._progress_container = $(dom.span, {'id':'publish-progress'});
-				this._label = $(dom.span);
-				this._button = $(dom.a, {'id': 'open-publish'}).append(this._progress_container).append(this._label);
+				this._progress_container = dom.span('#publish-progress');
+				this._label = dom.span();
+				this._button = dom.a('#open-publish').append(this._progress_container).append(this._label);
 				this.set_label("Publish");
 				this._button.click(function() {
 					if (!this.in_progress) {
@@ -206,10 +206,10 @@ Spontaneous.TopBar = (function($, S) {
 		include: Spontaneous.Properties,
 		location: "/",
 		panel: function() {
-			this.wrap = $(dom.div, {'id':'top'});
-			this.location = $(dom.ul, {'id': 'navigation'});
-			this.location.append($(dom.li).append($(dom.a)))
-			this.mode_switch = $(dom.a, {'id': 'switch-mode'}).
+			this.wrap = dom.div('#top');
+			this.location = dom.ul('#navigation');
+			this.location.append(dom.li().append(dom.a()))
+			this.mode_switch = dom.a('#switch-mode').
 				text(this.opposite_mode(S.ContentArea.mode)).
 				click(function() {
 					S.TopBar.toggle_modes();
