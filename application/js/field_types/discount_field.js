@@ -265,8 +265,8 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 			// detect & deal with the cursor being on the line below
 			// (the one with the -'s or ='s)
 			// TODO: deal with the case where the cursor is at the start of the =- line
-			m = /([=-]+)$/.exec(state.before);
-			n = /^([=-]+)/.exec(state.after);
+			m = /[\r\n]([=-]+)$/.exec(state.before);
+			n = /^([=-]+)[\r\n]/.exec(state.after);
 			if (m || n) {
 				m = /(?:[\n]|^)(.+[\n]+([=-]+))$/.exec(state.before);
 				if (m) {
