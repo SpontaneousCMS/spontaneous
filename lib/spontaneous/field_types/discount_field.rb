@@ -16,15 +16,15 @@ module Spontaneous
         # casual users
         # code taken from:
         # http://github.github.com/github-flavored-markdown/
-        input.gsub!(/^[\w\<][^\n]*\n+/) do |x|
+        output = input.gsub(/^[\w\<][^\n]*\n+/) do |x|
           x =~ /\n{2}/ ? x : (x.strip!; x << "  \n")
         end
 
         # prevent foo_bar_baz from ending up with an italic word in the middle
-        input.gsub!(/(^(?! {4}|\t)\w+_\w+_\w[\w_]*)/) do |x|
+        output.gsub!(/(^(?! {4}|\t)\w+_\w+_\w[\w_]*)/) do |x|
           x.gsub('_', '\_') if x.split('').sort.to_s[0..1] == '__'
         end
-        input
+        output
       end
     end
 
