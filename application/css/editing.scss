@@ -253,6 +253,9 @@ $text-edit-width: 621px;
 				text-transform: none;
 				@include display-box;
 				@include box-orient(vertical);
+        .filename {
+          word-wrap: break-word;
+        }
 				.sizes {
 					padding-top: $unit/2;
 					@include display-box;
