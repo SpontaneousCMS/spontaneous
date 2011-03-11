@@ -55,7 +55,7 @@ module Spontaneous
               })
               redirect NAMESPACE, 302
             else
-              halt(401, erubis(:login))
+              halt(401, erubis(:login, :locals => { :login => login, :failed => true }))
             end
           end
         end
@@ -67,7 +67,8 @@ module Spontaneous
             # p exceptions.detect { |e| e === request.path }
             unless exceptions.detect { |e| e === request.path }
               unless user
-                halt(401, erubis(:login)) unless user
+                # halt(401, erubis(:login)) unless user
+                halt(401, erubis(:login, :locals => { :login => '' })) unless user
               end
             end
           end
@@ -336,6 +337,10 @@ module Spontaneous
         end
         get '/publish/status' do
           json(Spontaneous::Site.publishing_status)
+        end
+
+        get "/favicon.ico" do
+          send_file(Spontaneous.static_dir / "favicon.ico")
         end
 
         get '/static/*' do

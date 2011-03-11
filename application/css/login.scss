@@ -1,0 +1,91 @@
+@import "definitions";
+
+$login-width: 600px;
+$splash-width: 100px;
+
+#outer {
+	width: $login-width;
+	margin: 0 auto;
+	top: 100px;
+	position: relative;
+	h1 {
+		margin: 0;
+		padding: 0;
+		padding-left: $splash-width + 2*$unit;
+		font-family: $headline-font-family;
+		font-weight: 100;
+		-webkit-font-smoothing: antialiased;
+		font-size: 24px;
+		line-height: 28px;
+		color: #333;
+	}
+	#login {
+		position: relative;
+		// padding: $unit;
+		#splash {
+			width: $splash-width;
+			height: $splash-width+8;
+			background: url(/@spontaneous/static/spot.svg) 0 0 no-repeat;
+			@include background-size;
+			position: absolute;
+			left: $unit;
+			top: -5px;
+		}
+		form {
+			@include rounded($unit);
+			background-color: #eee;
+			border: solid 3px #fafafa;
+			margin-left: $splash-width + $unit;
+			font-family: $content-font-family;
+			p {
+				position: relative;
+				margin-top: 0;
+				margin-bottom: $unit/2;
+			}
+			p.error {
+				@include rounded-top($unit);
+				@include vertical-gradient(#f00, #ee0000);
+				// background-color: red;
+				padding: $unit;
+				color: #fff;
+			}
+			.inputs {
+				padding: $unit;
+				input {
+					@include box-sizing;
+					@include rounded;
+					border: none;
+					font-size: 14px;
+					font-weight: bold;
+					padding: $unit/2;
+					width: $login-width - $splash-width - ($unit*4);
+					font-family: $content-font-family;
+					outline-color: $action;
+				}
+				label {
+					position: relative;
+					span {
+						@extend .interface;
+						position: absolute;
+						left: $unit;
+						top: $unit/2;
+						color: #999;
+						&.faded {
+							opacity: 0.5;
+						}
+					}
+				}
+				.submit {
+					@extend .clearfix;
+					margin-bottom: 0;
+				}
+				button {
+					@include button;
+					border: none;
+					float: right;
+					width: 96px;
+				}
+			}
+		}
+	}
+}

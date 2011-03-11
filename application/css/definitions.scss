@@ -161,3 +161,9 @@ $corner-radius: 4px;
 	}
 }
 
+@mixin background-size($size-w: 100%, $size-h: 100%) {
+	-moz-background-size: $size-w $size-h;
+	-o-background-size: $size-w $size-h;
+	-webkit-background-size: $size-w $size-h;
+	background-size: $size-w $size-h;
+}
