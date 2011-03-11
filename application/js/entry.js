@@ -58,7 +58,8 @@ Spontaneous.Entry = (function($, S) {
 			// wrapper.append(this.dialogue_box);
 			var entry = dom.div('.entry');
 			var fields = new Spontaneous.FieldPreview(this, '');
-			entry.append(fields.panel());
+			var fields_panel = fields.panel();
+			entry.append(fields_panel);
 			var box_container = new Spontaneous.BoxContainer(this);
 			inside.append(entry);
 			inside.append(box_container.panel());
@@ -66,6 +67,7 @@ Spontaneous.Entry = (function($, S) {
 			wrapper.append(preview_area)
 			this.wrapper = wrapper;
 			this.outline = outline;
+			this.fields_preview = fields_panel;
 			return wrapper;
 		},
 
@@ -101,9 +103,15 @@ Spontaneous.Entry = (function($, S) {
 		},
 		mouseover: function() {
 			this.outline.addClass('active');
+			if (this.fields_preview) {
+				this.fields_preview.addClass('hover');
+			}
 		},
 		mouseout: function() {
 			this.outline.removeClass('active');
+			if (this.fields_preview) {
+				this.fields_preview.removeClass('hover');
+			}
 		},
 		confirm_destroy: function() {
 			if (this._dialogue && !this._dialogue.is_open) { this.close_destroy_dialogue(); }

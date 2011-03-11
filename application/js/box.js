@@ -49,7 +49,7 @@ Spontaneous.Box = (function($, S) {
 					var w = dom.div('.box-fields');
 					var fields = new Spontaneous.FieldPreview(this, '');
 					var fields_preview = fields.panel();
-					fields_preview.append(dom.div('.overlay'))
+					fields_preview.prepend(dom.div('.overlay'))
 					var preview_area = this.create_edit_wrapper(fields_preview);
 
 					w.append(preview_area);

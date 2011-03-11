@@ -371,6 +371,13 @@ img.missing {
 	margin-bottom: 0;
 }
 
+.fields-preview .fields-preview-text {
+	@include box-sizing;
+	border: dotted 1px transparent;
+}
+.fields-preview.hover .fields-preview-text {
+	border: dotted 1px $action;
+}
 .fields-preview-text {
 	@include box-sizing;
 	width: $field-text-preview-width;

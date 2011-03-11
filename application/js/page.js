@@ -155,7 +155,7 @@ Spontaneous.Page = (function($, S) {
 			var fields = dom.div('#page-fields')
 			var fp = new Spontaneous.FieldPreview(this, '');
 			var p = fp.panel();
-			p.append(dom.div('.overlay'))
+			p.prepend(dom.div('.overlay'))
 
 			var preview_area = this.create_edit_wrapper(p);
 			fields.append(preview_area)
