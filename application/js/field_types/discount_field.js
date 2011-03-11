@@ -547,7 +547,8 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 
 				input.data('original-height', h)
 				var text_height = input[0].scrollHeight, max_height = 500, resize_height = Math.min(text_height, max_height);
-				if (Math.abs(resize_height - h) > 50) {
+				// console.log(resize_height, h)
+				if (Math.abs(resize_height - h) > 20) {
 					input.animate({'height':resize_height});
 					this.expanded = true;
 				}
