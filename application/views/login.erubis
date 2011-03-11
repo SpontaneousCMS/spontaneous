@@ -43,11 +43,11 @@
           <div id="splash"></div>
           <form action="/@spontaneous/login" method="post" accept-charset="UTF-8">
             <% if locals[:failed] %>
-            <p class="error">Login failed: please check your login and password</p>
+            <p class="error">Login failed for &lsquo;<%= locals[:login] %>&rsquo;</p>
           <% end %>
             <div class="inputs">
             <p>
-            <label><input type="text" id="user-login" name="user[login]" value="<%= locals[:login] %>" /><span>Login</span></label>
+            <label><input type="text" id="user-login" name="user[login]" value="<%= locals[:login] %>" /><span>Username</span></label>
             </p>
             <p>
             <label><input type="password" name="user[password]" value="" /><span>Password</span></label>

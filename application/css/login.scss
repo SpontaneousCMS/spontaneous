@@ -1,6 +1,6 @@
 @import "definitions";
 
-$login-width: 600px;
+$login-width: 400px;
 $splash-width: 100px;
 
 #outer {
@@ -11,31 +11,32 @@ $splash-width: 100px;
 	h1 {
 		margin: 0;
 		padding: 0;
-		padding-left: $splash-width + 2*$unit;
+		padding-left: $unit;
 		font-family: $headline-font-family;
 		font-weight: 100;
 		-webkit-font-smoothing: antialiased;
 		font-size: 24px;
 		line-height: 28px;
-		color: #333;
+		color: #666;
 	}
 	#login {
 		position: relative;
 		// padding: $unit;
 		#splash {
+			display: none;
 			width: $splash-width;
 			height: $splash-width+8;
 			background: url(/@spontaneous/static/spot.svg) 0 0 no-repeat;
 			@include background-size;
 			position: absolute;
-			left: $unit;
+			left: -($splash-width+$unit);
 			top: -5px;
 		}
 		form {
 			@include rounded($unit);
 			background-color: #eee;
 			border: solid 3px #fafafa;
-			margin-left: $splash-width + $unit;
+			// margin-left: $splash-width + $unit;
 			font-family: $content-font-family;
 			p {
 				position: relative;
@@ -43,8 +44,9 @@ $splash-width: 100px;
 				margin-bottom: $unit/2;
 			}
 			p.error {
+				-webkit-font-smoothing: antialiased;
 				@include rounded-top($unit);
-				@include vertical-gradient(#f00, #ee0000);
+				@include vertical-gradient(#f00, #f00000);
 				// background-color: red;
 				padding: $unit;
 				color: #fff;
@@ -58,7 +60,7 @@ $splash-width: 100px;
 					font-size: 14px;
 					font-weight: bold;
 					padding: $unit/2;
-					width: $login-width - $splash-width - ($unit*4);
+					width: $login-width -  ($unit*3);
 					font-family: $content-font-family;
 					outline-color: $action;
 				}
@@ -69,7 +71,7 @@ $splash-width: 100px;
 						position: absolute;
 						left: $unit;
 						top: $unit/2;
-						color: #999;
+						color: #666;
 						&.faded {
 							opacity: 0.5;
 						}
