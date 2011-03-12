@@ -466,7 +466,7 @@ img.missing {
 			bottom: 0;
 			top: auto;
 			height: 16px;
-			z-index: 1;
+			z-index: 4;
 		}
 		.value {
 			@include rounded;
@@ -513,10 +513,11 @@ img.missing {
 				cursor: no-drop;
 			}
 			.image-drop.uploading {
-				background-color: rgba($highlight_r, $highlight_g, $highlight_b, 0.7);
+				background-color: rgba(0, 0, 0, 0.5);
 			}
 			img {
 				@extend .no-select;
+        @include rounded;
 				position: relative;
 				max-height: 90px;
 			}
@@ -1212,7 +1213,7 @@ img.missing {
 	#progress-container {
 		position: relative;
 		top: 12px;
-		font-size: 9px;
+		font-size: 10px;
 		color: #888888;
 		#progress-bars {
 			@include rounded;
@@ -1223,6 +1224,7 @@ img.missing {
 			.bar {
 				@include rounded;
 				height: 8px;
+        padding: 0;
 				background-color: black;
 				position: absolute;
 				top: 0;
@@ -1233,13 +1235,13 @@ img.missing {
 				opacity: 0.3;
 			}
 			#progress-total {
-
+        background-color: $action;
 			}
 		}
 		#progress-name {
 			position: absolute;
-			right: $container-padding;
-			top: 0;
+			right: 2*$unit;
+			top: -1px;
 			text-align: right;
 		}
 		#progress-stats {

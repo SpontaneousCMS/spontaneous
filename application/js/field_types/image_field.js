@@ -18,6 +18,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		},
 		preview: function() {
 			Spontaneous.UploadManager.register(this);
+
 			var value = this.get('value'), img = null, dim = 45;
 			if (value === "") {
 				img = dom.img('.missing-image', {'src':'/@spontaneous/static/px.gif'});
