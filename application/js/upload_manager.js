@@ -41,7 +41,7 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		// While loading and sending data.
 		onprogress: function(event) {
-			console.log("Upload#onprogress", event);
+			// console.log("Upload#onprogress", event);
 			var position = event.position;
 			this.position = position;
 			this.time = (new Date()).valueOf() - this.started;
@@ -50,16 +50,16 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		// When the request has successfully completed.
 		onload: function(event) {
-			console.log("Upload#onload", event);
+			// console.log("Upload#onload", event);
 			// this.manager.upload_complete(this);
 		},
 		// When the request has completed (either in success or failure).
 		onloadend: function(event) {
-			console.log("Upload#onloadend", event);
+			// console.log("Upload#onloadend", event);
 			this.manager.upload_failed(this);
 		},
 		onreadystatechange: function(event) {
-			console.log("Upload#onreadystatechange", event);
+			// console.log("Upload#onreadystatechange", event);
 			var xhr = event.currentTarget;
 			if (xhr.readyState == 4 && xhr.status === 200) {
 				var result = JSON.parse(xhr.responseText);
@@ -121,7 +121,7 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		replace: function(field, file) {
 			this.add(field, new Upload(this, field, file))
-			console.log("UploadManager#replace", field, file, this.pending);
+			// console.log("UploadManager#replace", field, file, this.pending);
 			if (!this.current) {
 				this.next();
 			}
@@ -218,7 +218,7 @@ Spontaneous.UploadManager = (function($, S) {
 		update_progress_bars: function() {
 			var total = this.data_total(), completed = this.data_completed();
 
-			console.log("UploadManager#update_progress_bars", completed, total)
+			// console.log("UploadManager#update_progress_bars", completed, total)
 			this.set_bar_length('total', completed, total);
 			if (this.current) {
 				this.set_bar_length('individual', this.current.position, this.current.total);
@@ -266,7 +266,7 @@ Spontaneous.UploadManager = (function($, S) {
 				target.upload_complete(result);
 			}
 			this.current = null;
-			console.log("UploadManager#upload_complete", result, this.pending, this.completed)
+			// console.log("UploadManager#upload_complete", result, this.pending, this.completed)
 			this.next();
 		},
 		upload_failed: function(upload) {

@@ -47,6 +47,10 @@ Spontaneous.EditPanel = (function($, S) {
 			this.close();
 		},
 		cancel: function() {
+			var fields = this.content.field_list();
+			for (var i = 0, ii = fields.length; i < ii; i++) {
+				fields[i].cancel_edit();
+			}
 			this.close();
 			return false;
 		},
@@ -55,8 +59,7 @@ Spontaneous.EditPanel = (function($, S) {
 
 			var fields = this.content.field_list();
 			for (var i = 0, ii = fields.length; i < ii; i++) {
-				var field = fields[i];
-				field.close_edit();
+				fields[i].close_edit();
 			}
 			$(':input', this.form).add(document).unbind('keydown.savedialog');
 			if (typeof this.content.edit_closed === 'function') {

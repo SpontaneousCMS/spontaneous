@@ -1,4 +1,4 @@
-console.log("Initialising...");
+// console.log("Initialising...");
 
 jQuery(Spontaneous.Init);
 

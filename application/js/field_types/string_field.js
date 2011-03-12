@@ -65,6 +65,8 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			}
 			return this._input;
 		},
+		cancel_edit: function() {
+		},
 		close_edit: function() {
 			this._input = null;
 		},

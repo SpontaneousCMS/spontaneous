@@ -2,11 +2,16 @@
 Spontaneous.FieldTypes.ImageField = (function($, S) {
 	var dom = S.Dom;
 	var ImageField = new JS.Class(Spontaneous.FieldTypes.FileField, {
+		is_image: function() {
+			return true;
+		},
+
 		unload: function() {
 			this.callSuper();
 			this.image = null;
 			this._progress_bar = null;
 		},
+
 		progress_bar: function() {
 			if (!this._progress_bar) {
 				var progress_outer = dom.div('.drop-upload-outer').hide();
@@ -16,28 +21,32 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			}
 			return this._progress_bar;
 		},
+
 		preview: function() {
 			Spontaneous.UploadManager.register(this);
 
 			var value = this.get('value'), img = null, dim = 45;
+
 			if (value === "") {
 				img = dom.img('.missing-image', {'src':'/@spontaneous/static/px.gif'});
 			} else {
 				img = dom.img({'src':value});
 			}
+
 			img.error(function() {
 				$(this).addClass('missing');
 			});
+
 			img.load(function() {
 				var r = this.width/this.height, $this = $(this), h = $this.height(), dh = 0;
 				if (r >= 1 && h <= dim) { // landscape -- fit image vertically
 					var dh = (dim - h)/2;
 				}
-				$this.css('top', (dh) + 'px');
+				$this.css('top', dom.px(dh));
 			});
 			this.image = img;
 
-			var outer = dom.div();
+			var outer = dom.div('.image-outer');
 			var dropper = dom.div('.image-drop');
 			outer.append(img);
 			outer.append(dropper);
@@ -81,9 +90,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			this.drop_target = dropper;
 			return outer;
 		},
-		is_image: function() {
-			return true;
-		},
+
 		upload_complete: function(values) {
 			this.callSuper(values)
 			this.set('value', values.src);
@@ -142,6 +149,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 					dimensions_info.text('');
 				}
 			};
+
 			var set_info = function(filename, filesize, width, height) {
 				filename_info.text(filename);
 				filesize_info.text(parseFloat(filesize, 10).to_filesize());
@@ -154,6 +162,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 					img.attr('src', url).removeClass('empty');
 					this.selected_files = files;
 					img.attr('src', url)
+					this.image.attr('src', url)
 					set_info(file.fileName, file.fileSize, null, null)
 				}
 			}.bind(this);
@@ -220,6 +229,9 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				set_info(filename, attr.filesize, attr.width, attr.height);
 			}
 			return wrap;
+		},
+		cancel_edit: function() {
+			this.image.attr('src', this.get('value'));
 		}
 	});
 

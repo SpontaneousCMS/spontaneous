@@ -9,6 +9,9 @@ Spontaneous.Dom = (function($, S) {
 		id: function(name) {
 			return '#'+name;
 		},
+		px: function(dim) {
+			return dim + 'px';
+		},
 		parse_selector: function(selector) {
 			var p, id = '', classes = [], result = {};
 			selector = selector || '';
