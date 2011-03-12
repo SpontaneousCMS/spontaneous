@@ -167,3 +167,9 @@ $corner-radius: 4px;
 	-webkit-background-size: $size-w $size-h;
 	background-size: $size-w $size-h;
 }
+
+@mixin header {
+	font-weight: 100;
+	font-family: $headline-font-family;
+	-webkit-font-smoothing: antialiased;
+}

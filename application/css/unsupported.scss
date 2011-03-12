@@ -1,0 +1,16 @@
+@import "definitions";
+
+#outer {
+	width: 600px;
+	margin: 0 auto;
+	font-family: $content-font-family;
+	font-size: 14px;
+	color: #666;
+	h1 {
+		@include header;
+		color: #666;
+	}
+	h2 {
+		@include header;
+	}
+}

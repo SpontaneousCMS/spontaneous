@@ -3,10 +3,20 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Spontaneous CMS: Unsupported Browser</title>
+	<link rel="stylesheet" href="/@spontaneous/css/unsupported.css" type="text/css" media="screen" charset="utf-8" />
+
 </head>
 <body>
-	<p>
-	You are using an unsupported browser...
-	</p>
+	<div id="outer">
+	<h1>Sorry!</h1>
+	<h2>You are using an unsupported browser...</h2>
+	<p>In order to provide the best editing experience Spontaneous uses features found in the best, modern, browsers.</p>
+	<p>Please download and install one of the following browsers in order to use this CMS as well as enjoy the best of the internet.  You won&rsquo;t regret it...</p>
+	<ul>
+		<li><a href="http://www.google.com/chrome">Google Chrome</a></li>
+		<li><a href="http://www.mozilla.com/firefox/">Firefox 4</a></li>
+		<!-- <li><a href="http://www.mozilla.com/firefox/">Safari</a></li> -->
+	</ul>
+	</div>
 </body>
 </html>
