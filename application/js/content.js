@@ -267,7 +267,7 @@ Spontaneous.Content = (function($, S) {
 		},
 		save: function(dialogue, form_data) {
 			// Spontaneous.Ajax.post('/'+this.model_name+'/'+this.id + '/save', $(form).serialize(), this, this.saved);
-			console.log(form_data);
+			// console.log(form_data);
 		}
 	});
 

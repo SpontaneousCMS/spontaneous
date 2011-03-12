@@ -98,7 +98,7 @@ module Spontaneous
         use AroundBack
         register Authentication
 
-        requires_authentication! :except => %w(static css js).map{ |p| %r(^#{NAMESPACE}/#{p}) }
+        requires_authentication! :except => %w(unsupported static css js).map{ |p| %r(^#{NAMESPACE}/#{p}) }
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
@@ -149,6 +149,10 @@ module Spontaneous
 
         get '/?' do
           erubis :index
+        end
+
+        get '/unsupported' do
+          erubis :unsupported
         end
 
         get '/root' do
