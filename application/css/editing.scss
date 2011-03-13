@@ -530,6 +530,7 @@ $text-edit-width: 621px;
 	background-color: $editing-1;
 	a {
 		@extend .interface;
+    @extend .no-select;
 		color: $editing-4;
 		display: block;
 		border: solid 1px transparent;

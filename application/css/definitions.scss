@@ -34,6 +34,7 @@ $title-bar-height: 16px;
 $dialogue-width: 980px;
 
 $corner-radius: 4px;
+$radius: $corner-radius;
 
 @mixin rounded($radius: 4px) {
   -webkit-border-radius: $radius;
@@ -102,7 +103,8 @@ $corner-radius: 4px;
 @mixin box-sizing($model: border-box) {
   -webkit-box-sizing: $model;
   -moz-box-sizing: $model;
-  box-sizing: $model; }
+  box-sizing: $model;
+}
 
 @mixin box-orient($direction: horizontal) {
   box-orient: $direction;
@@ -172,4 +174,27 @@ $corner-radius: 4px;
 	font-weight: 100;
 	font-family: $headline-font-family;
 	-webkit-font-smoothing: antialiased;
+}
+
+@mixin padding-start($p: 0) {
+	-webkit-padding-start: $p;
+	-moz-padding-start: $p;
+}
+
+@mixin transform($transform) {
+	-webkit-transform: $transform;
+	-moz-transform: $transform;
+	transform: $transform;
+}
+
+@mixin background-clip($clip:content) {
+		-webkit-background-clip: $clip;
+		-moz-background-clip: $clip;
+		background-clip: $clip;
+}
+
+@mixin transition($transition) {
+	-webkit-transition: $transition;
+	-moz-transition: $transition;
+	transition: $transition;
 }
