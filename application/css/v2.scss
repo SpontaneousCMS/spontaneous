@@ -477,6 +477,16 @@ img.missing {
 			cursor: pointer;
 			text-align: center;
 			position: relative;
+      .waiting {
+        position: absolute;
+        display: block;
+        left: 0;
+        right: 0;
+        text-align: center;
+        top: 30%;
+        height: $unit*2;
+				z-index: 3;
+      }
 			.image-drop {
 				@include rounded;
 				z-index: 2;
@@ -485,6 +495,7 @@ img.missing {
 				right: 0;
 				bottom: 0;
 				left: 0;
+        text-align: center;
 				.drop-upload-outer {
 					@include rounded(4px);
 					border: solid 1px white;

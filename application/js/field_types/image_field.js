@@ -22,6 +22,16 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return this._progress_bar;
 		},
 
+		upload_complete: function(values) {
+			this.callSuper();
+		},
+
+		upload_progress: function(position, total) {
+			this.spinner().stop();
+			this.waiting.find(':visible').hide();
+			this.callSuper();
+		},
+
 		preview: function() {
 			Spontaneous.UploadManager.register(this);
 
@@ -48,15 +58,21 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 
 			var outer = dom.div('.image-outer');
 			var dropper = dom.div('.image-drop');
+			var waiting = dom.div('.waiting').hide();
 			outer.append(img);
+			outer.append(waiting);
 			outer.append(dropper);
+
 			dropper.append(this.progress_bar().parent());
+			this.waiting = waiting;
 
 			var drop = function(event) {
 				event.stopPropagation();
 				event.preventDefault();
 				dropper.removeClass('drop-active').addClass('uploading');
 				var files = event.dataTransfer.files;
+				this.waiting.show();
+				this.spinner().indeterminate();
 				if (files.length > 0) {
 					var file = files[0], url = window.URL.createObjectURL(file);
 					this.image.attr('src', url)
@@ -91,6 +107,16 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return outer;
 		},
 
+		spinner: function() {
+			if (!this._spinner) {
+				this._spinner = Spontaneous.Progress(this.waiting[0], 16, {
+					spinner_fg_color: '#fff',
+					period: 800
+				});
+				this._spinner.init();
+			}
+			return this._spinner;
+		},
 		upload_complete: function(values) {
 			this.callSuper(values)
 			this.set('value', values.src);
