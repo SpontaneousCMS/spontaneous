@@ -7,6 +7,7 @@ class PublishingTest < Test::Unit::TestCase
   include StartupShutdown
 
   def self.startup
+    Spontaneous.config.publishing_delay = nil
     Spontaneous.database = DB
     Content.delete_all_revisions!
   end
@@ -553,6 +554,8 @@ class PublishingTest < Test::Unit::TestCase
         Change.count.should == 1
       end
 
+
+
       should "correctly calculate dependencies" do
         Change.delete
         changes = [
@@ -617,6 +620,21 @@ class PublishingTest < Test::Unit::TestCase
             {:id => 2, :title => "Page 2", :path => "/page-2", :depth => 0}
           ]
         }
+      end
+
+      should "silently work around deleted content" do
+        Change.delete
+        @page1 = Page.create(:title => "Page \"1\"", :path => "/page-1")
+        @page2 = Page.create(:title => "Page 2", :path => "/page-2")
+        @page3 = Page.create(:title => "Page 3", :path => "/page-3")
+        change = Change.new
+        change.push(@page1)
+        change.push(@page2)
+        change.push(@page3)
+        change.save
+        @page2.destroy
+        result = Change.outstanding
+        result.first.to_hash.should be_instance_of(Hash)
       end
     end
 

@@ -22,7 +22,10 @@ module Spontaneous
       h = {
         :changes => changes.map { |c| c.to_hash },
       }
-      h[:pages] = pages.map  do |page|
+      # use compact because it's possible that some pages have been deleted since
+      # the change was created and the best way to deal with them is to silently
+      # ignore them and let the publishing mech delete them as usual
+      h[:pages] = pages.compact.map  do |page|
         {
           :id => page.id,
           :title => page.title.to_s.escape_js,

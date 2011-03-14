@@ -20,10 +20,11 @@ module Spontaneous::Render
 
     def render
       before_render
+      delay = Spontaneous.config.publishing_delay
       @pages.each_with_index do |page, n|
         render_page(page) if page.formats.include?(format)
         after_page_rendered(page)
-        sleep(delay) if delay = Spontaneous.config.publishing_delay
+        sleep(delay) if delay
         # sleep(3)
       end
       after_render
