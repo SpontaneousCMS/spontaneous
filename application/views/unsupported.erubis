@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Spontaneous CMS: Unsupported Browser</title>
+		<link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
 	<link rel="stylesheet" href="/@spontaneous/css/unsupported.css" type="text/css" media="screen" charset="utf-8" />
 
 </head>

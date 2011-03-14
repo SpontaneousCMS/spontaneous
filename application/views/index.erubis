@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="chrome=1" />
     <title>Spontaneous: Loading...</title>
+		<link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
     <link rel="stylesheet" href="/@spontaneous/css/v2.css" type="text/css" media="screen" charset="utf-8" />
     <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/compatibility.js"></script>
     <script type="text/javascript" charset="utf-8">

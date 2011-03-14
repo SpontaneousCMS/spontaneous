@@ -343,9 +343,10 @@ module Spontaneous
           json(Spontaneous::Site.publishing_status)
         end
 
-        get "/favicon.ico" do
-          send_file(Spontaneous.static_dir / "favicon.ico")
-        end
+        # get "/favicon.ico" do
+        #   puts "Editing/favicon"
+        #   send_file(Spontaneous.static_dir / "favicon.ico")
+        # end
 
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)
@@ -402,9 +403,6 @@ module Spontaneous
           end
         end
 
-        get "/favicon.ico" do
-          send_file(Spontaneous.static_dir / "favicon.ico")
-        end
 
         def render_page(page, format = :html, local_params = {})
           now = Time.now.to_formatted_s(:rfc822)
