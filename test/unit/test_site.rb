@@ -60,14 +60,16 @@ class SiteTest < Test::Unit::TestCase
           :title => "Page 3 2",
           :path => '/page1-1/page2-1/page3-2',
           :type => 'Spontaneous.Page',
+          :depth => 3,
+          :children => [],
           :ancestors => [
-            { :id => @root.id, :title => "Homepage", :path => '/', :type => 'Spontaneous.Page' },
-            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :type => 'Spontaneous.Page' },
-            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :type => 'Spontaneous.Page' }
+            { :id => @root.id, :title => "Homepage", :path => '/', :type => 'Spontaneous.Page', :depth => 0, :children => 2 },
+            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :type => 'Spontaneous.Page', :depth => 1, :children => 1 },
+            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :type => 'Spontaneous.Page', :depth => 2, :children => 2 }
           ],
           :generation => [
-            { :id => @page3_1.id, :title => "Page 3 1", :path => '/page1-1/page2-1/page3-1', :type => 'Spontaneous.Page' },
-            { :id => @page3_2.id, :title => "Page 3 2", :path => '/page1-1/page2-1/page3-2', :type => 'Spontaneous.Page' }
+            { :id => @page3_1.id, :title => "Page 3 1", :path => '/page1-1/page2-1/page3-1', :type => 'Spontaneous.Page', :depth => 3, :children => 0 },
+            { :id => @page3_2.id, :title => "Page 3 2", :path => '/page1-1/page2-1/page3-2', :type => 'Spontaneous.Page', :depth => 3, :children => 0 }
           ],
           :children => []
       }
@@ -77,16 +79,25 @@ class SiteTest < Test::Unit::TestCase
           :title => "Page 2 1",
           :path => '/page1-1/page2-1',
           :type => 'Spontaneous.Page',
+          :depth => 2,
+          :children => [{:depth=>3,
+                         :type=>"Spontaneous.Page",
+                         :children=>0,
+                         :path=>"/page1-1/page2-1/page3-1",
+                         :title=>"Page 3 1",
+                         :id=>@page3_1.id},
+                         {:depth=>3,
+                          :type=>"Spontaneous.Page",
+                          :children=>0,
+                          :path=>"/page1-1/page2-1/page3-2",
+                          :title=>"Page 3 2",
+                          :id=>@page3_2.id}],
           :ancestors => [
-            { :id => @root.id, :title => "Homepage", :path => '/', :type => 'Spontaneous.Page' },
-            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :type => 'Spontaneous.Page' }
+            { :id => @root.id, :title => "Homepage", :path => '/', :type => 'Spontaneous.Page', :depth => 0, :children => 2 },
+            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :type => 'Spontaneous.Page', :depth => 1, :children => 1 }
           ],
           :generation => [
-            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :type => 'Spontaneous.Page' }
-          ],
-          :children => [
-            { :id => @page3_1.id, :title => "Page 3 1", :path => '/page1-1/page2-1/page3-1', :type => 'Spontaneous.Page' },
-            { :id => @page3_2.id, :title => "Page 3 2", :path => '/page1-1/page2-1/page3-2', :type => 'Spontaneous.Page' }
+            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :type => 'Spontaneous.Page', :depth => 2, :children => 2 }
           ]
       }
     end
