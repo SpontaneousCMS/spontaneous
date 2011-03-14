@@ -18,7 +18,9 @@ class FrontTest < Test::Unit::TestCase
   def self.startup
     Site.delete
     Content.delete
+    Change.delete
     Spontaneous.environment = :test
+    Site.publishing_method = :immediate
 
     @saved_revision_root = Spontaneous.revision_root
     @saved_root = Spontaneous.root

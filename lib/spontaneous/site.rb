@@ -63,12 +63,13 @@ module Spontaneous
       end
 
       def method_missing(method, *args)
-        if p = self[method.to_s]
-          p
+        if page = self[method.to_s]
+          page
         else
           super
         end
       end
+
       def working_revision
         instance.revision
       end
