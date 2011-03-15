@@ -15,7 +15,8 @@ module Spontaneous::Plugins::Application
         Spot::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
         Spot::Config.load(self.environment, self.root)
         connect_to_database
-        Spot::Schema.load
+        # Spot::Schema.load
+        Spontaneous::Loader.load
         Thread.current[:spontaneous_loaded] = true
       end
 

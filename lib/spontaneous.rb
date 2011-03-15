@@ -12,6 +12,10 @@ require 'active_support/core_ext/date_time/conversions'
 
 Sequel.extension :inflector
 
+Dir[File.join(File.dirname(__FILE__), 'spontaneous', 'extensions', '*.rb')].each do |extension|
+  require extension
+end
+
 require 'spontaneous/logger'
 require 'spontaneous/plugins'
 require 'spontaneous/constants'
@@ -35,7 +39,8 @@ module Spontaneous
   plugin Plugins::Application::Render
 
   autoload :ProxyObject, "spontaneous/proxy_object"
-  autoload :Logger, "spontaneous/logger"
+  # autoload :Logger, "spontaneous/logger"
+
 
   autoload :Config, "spontaneous/config"
 
@@ -136,11 +141,9 @@ module Spontaneous
 
 end
 
+require 'spontaneous/loader'
 require 'spontaneous/version'
 
-Dir[File.join(File.dirname(__FILE__), 'spontaneous', 'extensions', '*.rb')].each do |extension|
-  require extension
-end
 
 Spot = S = Spontaneous unless defined?(Spot)
 # Site = Spontaneous::Site

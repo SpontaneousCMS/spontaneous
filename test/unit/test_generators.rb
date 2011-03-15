@@ -55,9 +55,13 @@ class GeneratorsTest < Test::Unit::TestCase
         assert_file_exists(site_root, 'templates', f)
       end
       assert_file_exists(site_root, 'schema')
+      assert_file_exists(site_root, 'schema/page.rb')
+      File.read(site_root / 'schema/page.rb') =~ /class Page < Spontaneous::Page/
       assert_file_exists(site_root, 'public/js')
       assert_file_exists(site_root, 'public/css')
       assert_file_exists(site_root, 'lib/tasks/pot8o_org.rake')
+      assert_file_exists(site_root, 'lib/site.rb')
+      File.read(site_root / 'lib/site.rb') =~ /class Site < Spontaneous::Site/
       assert_file_exists(site_root, 'log')
       assert_file_exists(site_root, 'tmp')
       assert_file_exists(site_root, '.gitignore')

@@ -36,6 +36,7 @@ module Spontaneous
           directory "public"
           template "Gemfile.tt", "Gemfile"
           template "Rakefile.tt", "Rakefile"
+          template "lib/site.rb.tt", "lib/site.rb"
           empty_directory "lib/tasks"
           empty_directory "log"
           empty_directory "tmp"

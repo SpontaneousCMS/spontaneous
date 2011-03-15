@@ -86,7 +86,7 @@ module Spontaneous
         IRB.conf[:MAIN_CONTEXT] = irb.context
         irb.context.evaluate("require 'irb/completion'", 0)
         irb.context.evaluate("require '#{File.expand_path(File.dirname(__FILE__) + '/console')}'", 0)
-        irb.context.evaluate("include Spontaneous", 0)
+        # irb.context.evaluate("include Spontaneous", 0)
         trap("SIGINT") do
           irb.signal_handle
         end
