@@ -31,12 +31,23 @@ function $A(iterable) {
   return results;
 };
 
+var function_id = 0;
+
 jQuery.extend(Function.prototype, {
 	bind: function() {
 		var __method = this, args = $A(arguments), object = args.shift();
 		return function() {
       return __method.apply(object, args.concat($A(arguments)));
     };
+	},
+	cache: function() {
+		var __method = this, id = '__cached__'+(++function_id), _undefined_;
+		return function() {
+			if (this[id] === _undefined_) {
+				this[id] =	__method.apply(this, arguments) || null;
+			}
+			return this[id];
+		};
 	}
 });
 

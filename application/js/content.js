@@ -17,11 +17,8 @@ Spontaneous.Content = (function($, S) {
 			return this.content.id;
 		},
 		type: function() {
-			if (!this._type) {
-				this._type = S.Types.type(this.content.type);
-			}
-			return this._type;
-		},
+			return S.Types.type(this.content.type);
+		}.cache(),
 
 		constantize: function(type) {
 			var parts = type.split(/\./), obj = window;
@@ -36,17 +33,14 @@ Spontaneous.Content = (function($, S) {
 			$.each(this.entries(), function(i, e) { e.unload(); });
 		},
 		field_list: function() {
-			if (!this._field_list) {
-
 			var type = this.type(), prototypes = type.field_prototypes, names = type.field_names;
 			var fields = this.fields(), list = [];
-				for (var i = 0, ii = names.length; i < ii; i++) {
-					list.push(fields[names[i]]);
-				}
-				this._field_list = list;
+			for (var i = 0, ii = names.length; i < ii; i++) {
+				list.push(fields[names[i]]);
 			}
-			return this._field_list;
-		},
+			return list;
+		}.cache(),
+
 		text_fields: function() {
 			var fields = [], all_fields = this.field_list();
 			for (var i = 0, ii = all_fields.length; i < ii; i++) {
@@ -78,31 +72,29 @@ Spontaneous.Content = (function($, S) {
 			return fields;
 		},
 		fields: function() {
-			if (!this._fields) {
-				var fields = {}, type = this.type(), prototypes = type.field_prototypes;
+			var fields = {}, type = this.type(), prototypes = type.field_prototypes;
 
-				for (var i = 0, ii = this.content.fields.length; i < ii; i++) {
-					var f = this.content.fields[i],
-						prototype = prototypes[f.name],
-						type_class = this.constantize(prototype.type)
-					if (!type_class) {
-						console.warn(
-							"Content#fields:",
-							"Field has invalid type", prototype.type,
-							"content_id:", this.content.id,
-							"type:", "'"+type.title+"'",
-							"field_name:", f.name
-						);
-						type_class = Spontaneous.FieldTypes.StringField;
-					}
-					var field = new type_class(this, f);
-					// field.add_listener('value', this.field_updated.bind(this, field));
-					fields[f.name] = field;
-				};
-				this._fields = fields;
-			}
-			return this._fields;
-		},
+			for (var i = 0, ii = this.content.fields.length; i < ii; i++) {
+				var f = this.content.fields[i],
+				prototype = prototypes[f.name],
+				type_class = this.constantize(prototype.type)
+				if (!type_class) {
+					console.warn(
+						"Content#fields:",
+						"Field has invalid type", prototype.type,
+						"content_id:", this.content.id,
+						"type:", "'"+type.title+"'",
+						"field_name:", f.name
+					);
+					type_class = Spontaneous.FieldTypes.StringField;
+				}
+				var field = new type_class(this, f);
+				// field.add_listener('value', this.field_updated.bind(this, field));
+				fields[f.name] = field;
+			};
+			return fields;
+		}.cache(),
+
 		field: function(name) {
 			return this.fields()[name];
 		},
@@ -131,28 +123,22 @@ Spontaneous.Content = (function($, S) {
 			if (!this.content.entries) {
 				return [];
 			}
-			if (!this._entries) {
-				var _entries = [];
-				for (var i = 0, ee = this.content.entries, ii = ee.length; i < ii; i++) {
-					_entries.push(this.wrap_entry(ee[i]));
-				}
-				this._entries = _entries;
+			var _entries = [];
+			for (var i = 0, ee = this.content.entries, ii = ee.length; i < ii; i++) {
+				_entries.push(this.wrap_entry(ee[i]));
 			}
-			return this._entries;
-		},
+			return _entries;
+		}.cache(),
 
 		boxes: function() {
-			if (!this._boxes) {
-				var _boxes = [];
-				if (this.content.boxes) {
-					for (var i = 0, ee = this.content.boxes, ii = ee.length; i < ii; i++) {
-						_boxes.push(ee[i]);
-					}
+			var _boxes = [];
+			if (this.content.boxes) {
+				for (var i = 0, ee = this.content.boxes, ii = ee.length; i < ii; i++) {
+					_boxes.push(ee[i]);
 				}
-				this._boxes = _boxes;
 			}
-			return this._boxes;
-		},
+			return _boxes;
+		}.cache(),
 
 		wrap_entry: function(entry) {
 			var entry_class = Spontaneous.Entry;
