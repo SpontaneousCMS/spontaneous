@@ -11,6 +11,10 @@ module Spontaneous
         validate_schema
       end
 
+      def validate!
+        validate_schema
+      end
+
       def validate_schema
         self.classes.each do | schema_class |
           schema_class.schema_validate
