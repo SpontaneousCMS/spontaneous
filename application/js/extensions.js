@@ -40,8 +40,8 @@ jQuery.extend(Function.prototype, {
       return __method.apply(object, args.concat($A(arguments)));
     };
 	},
-	cache: function() {
-		var __method = this, id = '__cached__'+(++function_id), _undefined_;
+	cache: function(name) {
+		var __method = this, id = name || ('__cached__'+(++function_id)), _undefined_;
 		return function() {
 			if (this[id] === _undefined_) {
 				this[id] =	__method.apply(this, arguments) || null;
