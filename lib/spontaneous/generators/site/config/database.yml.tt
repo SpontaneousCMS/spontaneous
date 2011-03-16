@@ -13,7 +13,7 @@
   <<:         *defaults
   :database:  <%= @site_name %>
   :user:      <%= @site_name %>
-  :password:
+  :password:  passw0rd
 
 :rake:
   <<:         *defaults

@@ -135,6 +135,35 @@ module Spontaneous
         ::Launchy::Browser.run("http://localhost:#{Spontaneous.config.port}/@spontaneous")
       end
 
+
+      desc :init, "Creates databases and initialises a new Spontaneous site"
+      def init
+        prepare :init
+        require File.expand_path('../../../spontaneous', __FILE__)
+        Sequel.extension :migration
+        connection_params = Spontaneous.db_settings
+        database = connection_params.delete(:database)
+        catch(:error) do
+          Sequel.connect(connection_params) do |connection|
+            ["", "_test"].map { |ext| "#{database}#{ext}"}.each do |db|
+              begin
+                say "  >> Creating database `#{db}`"
+                connection.run("CREATE DATABASE `#{db}` CHARACTER SET UTF8")
+              rescue => e
+                say " >>> Unable to create #{connection_params[:adapter]} database `#{db}`:\n   > #{e}", :red
+                throw :error
+              end
+            end
+          end
+          require File.expand_path('config/boot.rb')
+          Spontaneous.database.logger = nil
+          say "  >> Running migrations..."
+          Sequel::Migrator.apply(Spontaneous.database, Spontaneous.gem_dir('db/migrations'))
+          say "  >> Done"
+        end
+      end
+
+
       private
 
       def prepare(task)

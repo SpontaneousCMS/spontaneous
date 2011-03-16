@@ -48,43 +48,20 @@ module Spontaneous
         end
       end
 
-      def create_database
-        connection_params = {
-          :user => 'root'
-        }
-        connection_params[:password] = options.dbpwd unless options.dbpwd.empty?
-
-        case options.database
-        when 'mysql'
-          connection_params[:adapter] = "mysql2"
-        when 'postgres'
-          connection_params[:adapter] = "postgres"
-        end
-        connection = Sequel.connect(connection_params)
-        ["", "_test"].map { |ext| "#{@site_name}#{ext}"}.each do |db|
-          begin
-            connection.run("CREATE DATABASE `#{db}` CHARACTER SET UTF8")
-          rescue  => e
-            say "Unable to create #{options.database} database #{db}: #{e}", :red
-          end
-        end
-      rescue
-        say "Unable to connect to #{options.database}: #{e}", :red
-      end
-
       def finish_message
         return unless @valid
         message = (<<-MSG).gsub(/^ +/, '')
 
 
         =========================================================
+
         Site #{@domain} is ready.
 
         To start using your new CMS do the following:
         ---------------------------------------------------------
         1. cd #{options[:root]}/#{@site_name}
         2. bundle install
-        3. rake spot:migrate
+        3. spot init
 
         Then go to http://spontaneouscms.org/docs
         and read the many useful guides to getting started with Spontaneous.
