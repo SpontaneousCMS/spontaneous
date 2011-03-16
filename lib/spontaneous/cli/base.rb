@@ -173,7 +173,8 @@ module Spontaneous
         valid_login = /^[a-z0-9_]{3,}$/
         levels = Spontaneous::Permissions::UserLevel.all.map(&:to_s)
         level = nil
-        say("All fields are required:\n", :green)
+
+        say("\nAll fields are required:\n", :green)
         begin
           attrs[:login] = ask "Login : ".rjust(width, " ")
           say("Login must consist of at least 3 letters, numbers and underscores", :red) unless valid_login === attrs[:login]
@@ -195,8 +196,10 @@ module Spontaneous
             say("Invalid level '#{level}'", :red) unless levels.include?(level)
           end while !levels.include?(level)
         end
+
         attrs[:password_confirmation] = attrs[:password]
         user = Spontaneous::Permissions::User.new(attrs)
+
         if user.save
           user.update(:level => level)
           say("\nUser '#{user.login}' created with level '#{user.level}'", :green)

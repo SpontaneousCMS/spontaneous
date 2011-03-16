@@ -4,15 +4,17 @@
 module Spontaneous
   module Rack
     class Public < ServerBase
-      set :static, true
-      set :public, Proc.new { Spontaneous.root / "public" }
+      use ::Rack::Reloader if Spontaneous::Config.reload_classes
+      # use Reloader if Spontaneous::Config.reload_classes
+      # set :static, true
+      # set :public, Proc.new { Spontaneous.root / "public" }
+
+      # get '/media/*' do
+      #   send_file(Spontaneous.media_dir / params[:splat].first)
+      # end
 
       get "/" do
         render_page(Site.root)
-      end
-
-      get '/media/*' do
-        send_file(Spontaneous.media_dir / params[:splat].first)
       end
 
       DOT = '.'.freeze

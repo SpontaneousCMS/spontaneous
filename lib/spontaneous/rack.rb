@@ -42,9 +42,12 @@ module Spontaneous
     autoload :Back, 'spontaneous/rack/back'
     autoload :Front, 'spontaneous/rack/front'
     autoload :Public, 'spontaneous/rack/public'
+    autoload :Media, 'spontaneous/rack/media'
+    autoload :Static, 'spontaneous/rack/static'
     autoload :AroundBack, 'spontaneous/rack/around_back'
     autoload :AroundFront, 'spontaneous/rack/around_front'
     autoload :AroundPreview, 'spontaneous/rack/around_preview'
+    autoload :Reloader, 'spontaneous/rack/reloader'
   end
 end
 

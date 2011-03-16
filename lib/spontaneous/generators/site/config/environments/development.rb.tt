@@ -1,6 +1,9 @@
 
 publishing_method :threaded
 
+# ensures that schema classes are reloaded with every request
+reload_classes true
+
 host 'localhost'
 
 back do

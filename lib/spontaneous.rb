@@ -89,6 +89,8 @@ module Spontaneous
   autoload :Permissions, "spontaneous/permissions"
   autoload :ContentQuery, "spontaneous/content_query"
 
+  autoload :Reloader, "spontaneous/reloader"
+
   module Templates
     autoload :TemplateBase, "spontaneous/templates/template_base"
     autoload :ErubisTemplate, "spontaneous/templates/erubis_template"

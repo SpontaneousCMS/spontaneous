@@ -78,23 +78,39 @@ module Spontaneous
 
 
       def self.application
-        app = ::Rack::Builder.new {
+        app = ::Rack::Builder.new do
           # use ::Rack::CommonLogger, STDERR  if Spontaneous.development?
           use ::Rack::Lint
           use ::Rack::ShowExceptions if Spontaneous.development?
 
+          use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
+            :urls => %w[/],
+            :try => ['.html', 'index.html', '/index.html']
+
+          # map "#{NAMESPACE}/static" do
+          # use Spontaneous::Rack::Static, :root => Spontaneous.application_dir / "static",
+          #   :urls => %w[/]
+          # end
+
           map NAMESPACE do
+            use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static /js)
             run EditingInterface
+          end
+
+          map "/media" do
+            run Spontaneous::Rack::Media
           end
 
           map "/" do
             run Preview
           end
-        }
+        end
       end
 
       class EditingInterface < ServerBase
 
+        # use Reloader if Spontaneous::Config.reload_classes
+        use ::Rack::Reloader if Spontaneous::Config.reload_classes
         use AroundBack
         register Authentication
 
@@ -398,7 +414,7 @@ module Spontaneous
 
         # redirect to /@spontaneous unless we're logged in
         before do
-          unless user or %r{^/media} === request.path
+          unless user
             redirect NAMESPACE, 302
           end
         end

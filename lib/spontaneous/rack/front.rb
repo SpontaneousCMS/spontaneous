@@ -10,6 +10,14 @@ module Spontaneous
           # use ::Rack::CommonLogger, STDERR  #unless server.name =~ /CGI/
           # use ::Rack::ShowExceptions
 
+          use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
+            :urls => %w[/],
+            :try => ['.html', 'index.html', '/index.html']
+
+          map "/media" do
+            run Spontaneous::Rack::Media
+          end
+
           map "/" do
             run Server
           end
