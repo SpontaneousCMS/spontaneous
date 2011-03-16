@@ -58,6 +58,7 @@ module Sequel
           @sti_key = key
           @sti_dataset = dataset
           @is_content_inheritance_root = false
+          @is_site_inheritance_root = false
           @sti_model_map = opts[:model_map] || lambda{|v| v if v && v != ''}
           @sti_key_map = if km = opts[:key_map]
                            if km.is_a?(Hash)
@@ -103,6 +104,8 @@ module Sequel
 
         attr_reader :sti_subclasses_array
 
+        attr_reader :is_site_inheritance_root
+
         # Copy the necessary attributes to the subclasses, and filter the
         # subclass's dataset based on the sti_kep_map entry for the class.
         def inherited(subclass)
@@ -112,9 +115,11 @@ module Sequel
           skm = sti_key_map
           smm = sti_model_map
           key = skm[subclass]
-          sti_subclass_added(key)
           ska = [key]
-          subclass.set_dataset(sd.filter(SQL::QualifiedIdentifier.new(table_name, sk)=>ska), :inherited=>true)
+          sti_subclass_added(key, subclass)
+          unless subclass.is_site_inheritance_root
+            subclass.set_dataset(sd.filter(SQL::QualifiedIdentifier.new(table_name, sk)=>ska), :inherited=>true)
+          end
           subclass.instance_eval do
             @sti_key = sk
             @sti_key_array = ska
@@ -130,7 +135,16 @@ module Sequel
         # see 'test_content_inheritance.rb'
         def set_inheritance_root
           @is_content_inheritance_root = true
-          dataset.row_proc = superclass.dataset.row_proc
+          dataset.row_proc = Spontaneous::Content.dataset.row_proc
+        end
+
+        def set_site_inheritance_root
+          @is_site_inheritance_root = true
+          dataset.row_proc = Spontaneous::Content.dataset.row_proc
+        end
+
+        def unset_site_inheritance_root
+          @is_site_inheritance_root = false
         end
 
         # Return an instance of the class specified by sti_key,
@@ -141,9 +155,19 @@ module Sequel
 
         # Make sure that all subclasses of the parent class correctly include
         # keys for all of their descendant classes.
-        def sti_subclass_added(key)
+        # Subclasses of Spontaneous::[Page, Piece] as well as ::Page & ::Piece are treated specially
+        # they only return instances of that one class as this is the intuitively correct result
+        # The top level Page & Piece classes return all sub-classes
+        def sti_subclass_added(key, subclass = nil)
           if sti_key_array
-            sti_key_array << key if @is_content_inheritance_root
+            if subclass
+              if @is_content_inheritance_root
+                subclass.set_site_inheritance_root
+              end
+            end
+            if @is_site_inheritance_root or @is_content_inheritance_root
+              sti_key_array << key unless sti_key_array.include?(key)
+            end
             sti_subclasses_array << key
             superclass.sti_subclass_added(key)
           end
