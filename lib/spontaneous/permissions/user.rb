@@ -104,7 +104,7 @@ module Spontaneous::Permissions
       if login.blank?
         errors.add(:login, 'is required')
       else
-        errors.add(:login, 'should only contain letters, numbers & underscore') unless login =~ /^[a-zA-z0-9_]+$/
+        errors.add(:login, 'should only contain letters, numbers & underscore') unless login =~ /^[a-zA-Z0-9_]+$/
         errors.add(:login, 'should be at least 3 letters long') if login.length < 3
       end
 
