@@ -34,10 +34,11 @@ class GeneratorsTest < Test::Unit::TestCase
     should "create a site using passed parameters" do
       # puts @tmp
       generate(:site, "pot8o.org", "--root=#{@tmp}")
-      %w(pot8o_org pot8o_org_test).each do |db|
-        db = Sequel.mysql2(:user => "root", :database => db)
-        lambda { db.tables }.should_not raise_error(Sequel::DatabaseConnectionError)
-      end
+      # Have moved db creation into separate step (spot init) so this no longer applies
+      # %w(pot8o_org pot8o_org_test).each do |db|
+      #   db = Sequel.mysql2(:user => "root", :database => db)
+      #   lambda { db.tables }.should_not raise_error(Sequel::DatabaseConnectionError)
+      # end
       site_root = File.join(@tmp, 'pot8o_org')
       %w(Rakefile Gemfile).each do |f|
         assert_file_exists(site_root, f)
@@ -57,6 +58,8 @@ class GeneratorsTest < Test::Unit::TestCase
       assert_file_exists(site_root, 'schema')
       assert_file_exists(site_root, 'schema/page.rb')
       File.read(site_root / 'schema/page.rb') =~ /class Page < Spontaneous::Page/
+      assert_file_exists(site_root, 'schema/piece.rb')
+      File.read(site_root / 'schema/piece.rb') =~ /class Piece < Spontaneous::Piece/
       assert_file_exists(site_root, 'public/js')
       assert_file_exists(site_root, 'public/css')
       assert_file_exists(site_root, 'lib/tasks/pot8o_org.rake')
