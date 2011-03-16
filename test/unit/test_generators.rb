@@ -85,7 +85,7 @@ class GeneratorsTest < Test::Unit::TestCase
         assert_file_exists(site_root, 'templates/large_page/page.html.cut')
         assert_file_exists(site_root, 'templates/large_page/inline.html.cut')
         class_file = ::File.join(site_root,  'schema/large_page.rb')
-        assert /class LargePage < Spontaneous::Page/ === File.read(class_file)
+        assert /class LargePage < Page/ === File.read(class_file)
         `rm -rf #{@tmp}`
       end
     end
