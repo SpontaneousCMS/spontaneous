@@ -33,9 +33,8 @@ GEM
       abstract (>= 1.0.0)
     eventmachine (0.12.10)
     executioner (0.3.0)
-    fire_and_forget (0.3.2)
-      daemons (~> 1.1.0)
-    home_run (1.0.0)
+    fire_and_forget (0.3.3)
+    home_run (1.0.1)
     hwia (1.0.2)
     less (1.2.21)
       mutter (>= 0.4.2)
@@ -46,9 +45,9 @@ GEM
     mysql2 (0.2.6)
     polyglot (0.3.1)
     rack (1.2.1)
-    rdiscount (1.6.5)
+    rdiscount (1.6.8)
     sass (3.1.0.alpha.221)
-    sequel (3.20.0)
+    sequel (3.21.0)
     sinatra (1.1.3)
       rack (~> 1.1)
       tilt (>= 1.2.2, < 2.0)
@@ -62,7 +61,7 @@ GEM
     tilt (1.2.2)
     treetop (1.4.9)
       polyglot (>= 0.3.1)
-    yajl-ruby (0.7.8)
+    yajl-ruby (0.8.1)
 
 PLATFORMS
   ruby
