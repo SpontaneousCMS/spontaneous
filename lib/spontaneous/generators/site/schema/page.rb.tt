@@ -1,4 +1,5 @@
 # encoding: UTF-8
 
 class Page < Spontaneous::Page
+  page_style :page
 end

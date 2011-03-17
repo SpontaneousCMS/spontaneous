@@ -180,6 +180,32 @@ class RenderTest < Test::Unit::TestCase
       end
     end
 
+    context "page styles" do
+      setup do
+        class ::PageClass < Page; end
+        # PageClass.box :things
+        # PageClass.inline_style :inline_style
+        PageClass.page_style :subdir_style
+        PageClass.page_style :standard_page
+        @parent = PageClass.new
+        @parent.title = "Parent"
+      end
+
+      teardown do
+        Object.send(:remove_const, :PageClass)
+      end
+
+      should "find page styles at root of templates dir" do
+        @parent.style = :standard_page
+        @parent.render.should == "/Parent/\n"
+      end
+
+      should "find page styles in class sub dir" do
+        @parent.style = :subdir_style
+        @parent.render.should == "<Parent>\n"
+      end
+    end
+
     context "pages as inline content" do
 
       setup do

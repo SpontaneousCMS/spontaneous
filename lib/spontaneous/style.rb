@@ -52,6 +52,10 @@ module Spontaneous
     end
 
     def filename(format=:html)
+      self.class.filename(basename, format)
+    end
+
+    def self.filename(basename, format)
       "#{basename}.#{format}.#{Spontaneous.template_ext}"
     end
 
@@ -60,7 +64,16 @@ module Spontaneous
     end
 
     def path(format=:html)
-      File.join(directory, basename.to_s)
+      @path ||= test_paths(format)
+    end
+
+    def test_paths(format)
+      [directory, ""].map do |d|
+        File.join(d, basename.to_s)
+      end.detect do |path|
+        f = Spontaneous.template_root / self.class.filename(path, format)
+        File.exists?(f)
+      end
     end
 
     def formats
