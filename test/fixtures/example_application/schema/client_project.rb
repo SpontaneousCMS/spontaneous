@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 
-class ClientProject < Spontaneous::Piece
+class ClientProject < Piece
   field :title
   field :url
   field :image

@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 
-class InfoPage < Spontaneous::Page
+class InfoPage < Page
   box :text do
     allow :Text
     allow :InlineImage

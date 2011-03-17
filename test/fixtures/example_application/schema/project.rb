@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 
-class Project < Spontaneous::Page
+class Project < Page
   field :url
   field :image, :image do
     sizes :thumbnail => { :width => 100 }

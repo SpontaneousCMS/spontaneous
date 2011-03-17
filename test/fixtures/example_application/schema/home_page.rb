@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 
-class HomePage < Spontaneous::Page
+class HomePage < Page
 	field :welcome_title
   field :introduction, :markdown
 

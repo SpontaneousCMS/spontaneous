@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 
-class ProjectsPage < Spontaneous::Page
+class ProjectsPage < Page
   field :introduction, :markdown
 
   box :projects do

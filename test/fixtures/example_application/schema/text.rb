@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 
-class Text < Spontaneous::Piece
+class Text < Piece
   field :text, :markdown
   #inline_style :text
   #template '<p>#{text}</p>'

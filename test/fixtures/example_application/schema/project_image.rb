@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 
-class ProjectImage < Spontaneous::Piece
+class ProjectImage < Piece
   field :title
 
   field :image do
