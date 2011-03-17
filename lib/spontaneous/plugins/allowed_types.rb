@@ -83,11 +83,11 @@ module Spontaneous::Plugins
       #
       # TODO: finish these!
       def allow(type, options={})
-        begin
+        # begin
           allowed_types_config << AllowedType.new(type, options)
-        rescue NameError => e
-          raise Spontaneous::UnknownTypeException.new(self, type)
-        end
+        # rescue NameError => e
+        #   raise Spontaneous::UnknownTypeException.new(self, type)
+        # end
       end
 
       def allowed_types_config
