@@ -7,7 +7,7 @@ require File.expand_path("../../sequel/plugins/content_table_inheritance", __FIL
 module Spontaneous
   class Content < Sequel::Model(:content)
     class << self
-      alias_method :sequel_plugin, :plugin
+      alias_method :sequel_plugin, :plugin unless method_defined?(:sequel_plugin)
     end
 
     alias_method :each_attribute, :each
