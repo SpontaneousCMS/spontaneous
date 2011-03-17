@@ -47,6 +47,7 @@ class SerialisationTest < Test::Unit::TestCase
 
       @class_hash = {
         :type => "SerialisedPiece",
+        :is_page => false,
         :title => "Type Title",
         :fields => [
           {:name => "title", :type => "Spontaneous.FieldTypes.StringField", :title => "Title",  :comment => "" , :writable=>true},
