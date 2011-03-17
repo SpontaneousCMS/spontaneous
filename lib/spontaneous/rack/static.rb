@@ -17,10 +17,6 @@ module Spontaneous
           resp = @static.call(env.merge!({'PATH_INFO' => orig_path + path}))
           break if 404 != resp[0] && found = resp
         end
-        if found
-          puts "found static"
-          p found
-        end
         found or @app.call(env.merge!('PATH_INFO' => orig_path))
       end
 
