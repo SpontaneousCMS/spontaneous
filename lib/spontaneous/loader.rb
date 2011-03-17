@@ -9,7 +9,14 @@ module Spontaneous
     class << self
       def load
         Spontaneous.load_paths.each do |component, path|
-          load_classes(path.first / path.last)
+          root = \
+            case path.first
+            when Proc
+              path.first.call
+            else
+              path.first
+            end
+          load_classes(root / path.last)
         end
       end
 
@@ -26,7 +33,7 @@ module Spontaneous
             begin
               load_file file
             rescue NameError => ne
-              puts "Stashed file with missing requirements for later reloading: #{file}"
+              # puts "Stashed file with missing requirements for later reloading: #{file}"
               # ne.backtrace.each_with_index { |line, idx| puts "[#{idx}]: #{line}" }
               orphaned_classes.unshift(file)
             end
@@ -86,8 +93,8 @@ module Spontaneous
 
     unless Spontaneous.load_paths.is_a?(OrderedHash)
       Spontaneous.load_paths = OrderedHash.new
-      Spontaneous.add_path(:schema, Spontaneous.schema_root)
-      Spontaneous.add_path(:lib, Spontaneous.root / 'lib')
+      Spontaneous.add_path(:schema, lambda { Spontaneous.schema_root })
+      Spontaneous.add_path(:lib, lambda { Spontaneous.root / 'lib' })
     end
   end
 end # Spontaneous
