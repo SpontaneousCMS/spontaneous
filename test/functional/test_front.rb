@@ -41,7 +41,7 @@ class FrontTest < Test::Unit::TestCase
     @@root.pages << @@dynamic
     @@root.save
 
-    Content.delete_revision(1)
+    Content.delete_revision(1) rescue nil
 
     # silence_logger {
       Site.publish_all
@@ -60,6 +60,7 @@ class FrontTest < Test::Unit::TestCase
 
   def setup
     @saved_template_root = Spontaneous.template_root
+    Site.publishing_method = :immediate
     # see http://benprew.posterous.com/testing-sessions-with-sinatra
     app.send(:set, :sessions, false)
   end

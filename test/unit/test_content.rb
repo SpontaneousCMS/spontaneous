@@ -210,7 +210,7 @@ class ContentTest < Test::Unit::TestCase
     end
 
     should "raise an error when given an invalid type name" do
-      lambda { Parent.allow :WhatTheHellIsThis }.should raise_error(UnknownTypeException)
+      lambda { Parent.allow :WhatTheHellIsThis }.should raise_error(NameError)
     end
 
     should "allow all styles by default" do

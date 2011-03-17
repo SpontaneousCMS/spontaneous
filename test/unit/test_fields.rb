@@ -3,8 +3,10 @@
 require 'test_helper'
 
 class FieldsTest < Test::Unit::TestCase
-  include Spontaneous
 
+  def setup
+    Site.publishing_method = :immediate
+  end
   context "New content instances" do
     setup do
       @content_class = Class.new(Content) do
