@@ -79,7 +79,6 @@ PLATFORMS
 DEPENDENCIES
   activesupport (~> 3.0.4)
   base58 (~> 0.1.0)
-  bundler (~> 1.0.9)
   erubis (~> 2.6)
   fire_and_forget (~> 0.3.2)
   harmony (~> 0.5)
