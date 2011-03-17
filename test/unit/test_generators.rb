@@ -13,7 +13,7 @@ class GeneratorsTest < Test::Unit::TestCase
 
   def teardown
     conn = Sequel.mysql2(:user => "root")
-    %w(pot8o_org pot8o_org_test).each do |db|
+    %w(example_com example_com_test).each do |db|
       conn.run("DROP DATABASE `#{db}`") rescue nil
     end
     `rm -rf #{@tmp}`
@@ -33,13 +33,13 @@ class GeneratorsTest < Test::Unit::TestCase
     end
     should "create a site using passed parameters" do
       # puts @tmp
-      generate(:site, "pot8o.org", "--root=#{@tmp}")
+      generate(:site, "example.com", "--root=#{@tmp}")
       # Have moved db creation into separate step (spot init) so this no longer applies
-      # %w(pot8o_org pot8o_org_test).each do |db|
+      # %w(example_com example_com_test).each do |db|
       #   db = Sequel.mysql2(:user => "root", :database => db)
       #   lambda { db.tables }.should_not raise_error(Sequel::DatabaseConnectionError)
       # end
-      site_root = File.join(@tmp, 'pot8o_org')
+      site_root = File.join(@tmp, 'example_com')
       %w(Rakefile Gemfile).each do |f|
         assert_file_exists(site_root, f)
       end
@@ -62,7 +62,7 @@ class GeneratorsTest < Test::Unit::TestCase
       File.read(site_root / 'schema/piece.rb') =~ /class Piece < Spontaneous::Piece/
       assert_file_exists(site_root, 'public/js')
       assert_file_exists(site_root, 'public/css')
-      assert_file_exists(site_root, 'lib/tasks/pot8o_org.rake')
+      assert_file_exists(site_root, 'lib/tasks/example_com.rake')
       assert_file_exists(site_root, 'lib/site.rb')
       File.read(site_root / 'lib/site.rb') =~ /class Site < Spontaneous::Site/
       assert_file_exists(site_root, 'log')
@@ -75,8 +75,8 @@ class GeneratorsTest < Test::Unit::TestCase
 
   context "Page generator" do
     setup do
-      generate(:site, "pot8o.org", "--root=#{@tmp}")
-      @site_root = File.join(@tmp, 'pot8o_org')
+      generate(:site, "example.com", "--root=#{@tmp}")
+      @site_root = File.join(@tmp, 'example_com')
     end
     should "create a page class and associated templates" do
       %w(large_page LargePage).each do |name|
