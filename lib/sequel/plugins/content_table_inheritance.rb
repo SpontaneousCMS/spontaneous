@@ -161,7 +161,10 @@ module Sequel
         def sti_subclass_added(key, subclass = nil)
           if sti_key_array
             if subclass
-              if @is_content_inheritance_root
+              # alright, so this is a bit of a hack
+              # we want the site defined ::Page, ::Piece classes to work like Spot::[Page,Piece]
+              # but we don't want generic subclasses of Spot::[Page, Piece] to do so
+              if subclass.name.demodulize == self.name.demodulize && @is_content_inheritance_root
                 subclass.set_site_inheritance_root
               end
             end
