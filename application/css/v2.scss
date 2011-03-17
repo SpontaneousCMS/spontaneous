@@ -995,6 +995,7 @@ img.missing {
 
 .dialogue-wrapper {
 	@include rounded;
+	@include box-sizing;
 	position: relative;
 	top: 32px;
 	background-color: #cccccc;
@@ -1002,6 +1003,27 @@ img.missing {
 	margin: 32px auto;
 }
 
+#create-home-dialogue {
+	@extend .dialogue-wrapper;
+	padding: $unit;
+	background-color: #eee;
+	color: #000;
+	.type {
+		@include rounded;
+		padding: $unit;
+		background-color: #ddd;
+		cursor: pointer;
+		&:hover {
+			background-color: $highlight;
+		}
+		&.selected {
+			background-color: $action;
+		}
+	}
+	.type + .type {
+		margin-top: $unit * 2;
+	}
+}
 #publishing-dialogue {
 	@extend .dialogue-wrapper;
 	padding-top: $container-padding / 2;

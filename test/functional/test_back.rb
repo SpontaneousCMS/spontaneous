@@ -448,6 +448,31 @@ class BackTest < Test::Unit::TestCase
       last_response.body.should == {:status => "something", :progress => "50"}.to_json
     end
   end
+
+  context "New sites" do
+    setup do
+      @root_class = Site.root.class
+      Content.delete
+    end
+    should "raise a 406 Not Acceptable error when downloading page details" do
+      get "/@spontaneous/location/"
+      last_response.status.should == 406
+    end
+    should "create a homepage of the specified type" do
+      post "/@spontaneous/root", 'type' => @root_class.name
+      assert last_response.ok?
+      Site.root.should be_instance_of(@root_class)
+      Site.root.title.value.should =~ /Home/
+    end
+    should "only create one root" do
+      post "/@spontaneous/root", 'type' => @root_class.name
+      assert last_response.ok?
+      Content.count.should == 1
+      post "/@spontaneous/root", 'type' => @root_class.name
+      assert last_response.status == 403
+      Content.count.should == 1
+    end
+  end
 end
 
 

@@ -57,6 +57,9 @@ Spontaneous.Types = (function($, S) {
 				}
 			}
 			return types;
+		},
+		is_page: function() {
+			return this.data.is_page;
 		}
 	});
 	var Types = new JS.Singleton({

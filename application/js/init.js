@@ -23,8 +23,6 @@ Spontaneous.Init = (function($, S) {
 		// 	$(this).attr('src', '/media/01158/0039/fright_night.jpeg')
 // });
 
-		S.Types.init();
-
 		location.add_listener('location', top_bar, 'location_changed');
 		location.add_listener('location', content_area, 'location_changed');
 
@@ -37,9 +35,14 @@ Spontaneous.Init = (function($, S) {
 		b.append(content_area.init());
 		b.append(S.StatusBar.init());
 
+		S.Types.init(function() {
 		location.init(function() {
 			top_bar.init();
 		});
+	});
+
+
+
 
 		// $(document).click(function(event) {
 		// 	Spontaneous.Popover.open(event, new Spontaneous.PopoverView())

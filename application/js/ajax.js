@@ -10,8 +10,12 @@ Spontaneous.Ajax = (function($, S) {
 	return {
 		namespace: "/@spontaneous",
 		get: function(url, caller, callback) {
-			var handle_response = function(data, textStatus, XMLHttpRequest) {
-				callback.call(caller, data, textStatus, XMLHttpRequest);
+			var handle_response = function(data, textStatus, xhr) {
+				if (textStatus !== 'success') {
+					xhr = data;
+					data = {};
+				}
+				callback.call(caller, data, textStatus, xhr);
 			};
 			$.ajax({
 				'url': this.request_url(url),

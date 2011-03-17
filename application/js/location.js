@@ -78,11 +78,19 @@ Spontaneous.Location = (function($, S) {
 		},
 		load_map: function() {
 		},
-		location_loaded: function(location) {
-			this.set('location', location);
-			// HACK: see preview.js (Preview.display)
-			this.set('path', location.path);
-			this.update_state(location, this.get('view_mode'));
+		location_loaded: function(location, status, xhr) {
+			console.log(status)
+			if (status !== 'success') {
+				if (xhr.status === 406) { // Code returned if site is missing a root page
+					var d = new Spontaneous.AddHomeDialogue(Spontaneous.Types.get('types'));
+					d.open();
+				}
+			} else {
+				this.set('location', location);
+				// HACK: see preview.js (Preview.display)
+				this.set('path', location.path);
+				this.update_state(location, this.get('view_mode'));
+			}
 		},
 		update_state: function(location, mode) {
 			State.page(location, mode);

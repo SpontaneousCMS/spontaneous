@@ -8,6 +8,7 @@ module Spontaneous::Plugins
       def to_hash
         {
           :type=> self.json_name,
+          :is_page => self.page?,
           :title=> self.title,
           :fields => readable_fields.map { |name| field_prototypes[name].to_hash },
           :boxes => readable_boxes.map { |box| box.to_hash }
