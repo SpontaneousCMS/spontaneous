@@ -18,7 +18,7 @@ Spontaneous.AddHomeDialogue = (function($, S) {
 		},
 		create_home: function() {
 			if (this.type) {
-				console.log('craeating homepage', this.type)
+				console.log('creating homepage', this.type)
 				S.Ajax.post('/root', {'type':this.type.type}, this, this.home_created);
 			}
 		},

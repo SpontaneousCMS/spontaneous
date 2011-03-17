@@ -453,6 +453,7 @@ class BackTest < Test::Unit::TestCase
     setup do
       @root_class = Site.root.class
       Content.delete
+      Change.delete
     end
     should "raise a 406 Not Acceptable error when downloading page details" do
       get "/@spontaneous/location/"
@@ -471,6 +472,11 @@ class BackTest < Test::Unit::TestCase
       post "/@spontaneous/root", 'type' => @root_class.name
       assert last_response.status == 403
       Content.count.should == 1
+    end
+    should "have a change reflecting creation of root" do
+      Change.count.should == 0
+      post "/@spontaneous/root", 'type' => @root_class.name
+      Change.count.should == 1
     end
   end
 end

@@ -213,6 +213,7 @@ module Spontaneous
             class_name = params[:type].gsub('.', '::')
             type = class_name.constantize
             root = type.create(:title => "Home")
+            Spontaneous::Change.push(root)
             json({:id => root.id})
           else
             403
