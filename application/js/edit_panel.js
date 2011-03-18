@@ -142,7 +142,12 @@ Spontaneous.EditPanel = (function($, S) {
 		field_edit: function(field) {
 			var d = dom.div('.field');
 			// d.append($(dom.label, {'class':'name', 'for':field.css_id()}).html(field.label()));
-			d.append(dom.label('.name', {'for':field.css_id()}).html(field.label()));
+			var label = dom.label('.name', {'for':field.css_id()}).html(field.label());
+			if (field.type.comment) {
+			var comment = dom.span('.comment').text('('+field.type.comment+')');
+			label.append(comment)
+			}
+			d.append(label);
 			var toolbar = field.toolbar();
 			if (toolbar) {
 				d.append(dom.div('.toolbar').html(toolbar));

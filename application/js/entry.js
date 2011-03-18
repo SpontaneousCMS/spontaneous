@@ -16,7 +16,7 @@ Spontaneous.Entry = (function($, S) {
 			return false;
 		},
 		title: function() {
-			return "Delete this Piece?";
+			return "Delete this " + (this.entry.type().is_page() ? "Page?" : "Piece?");
 		},
 		position_from_event: function(event) {
 			return this.position_from_element(event);
@@ -37,6 +37,7 @@ Spontaneous.Entry = (function($, S) {
 			return w;
 		}
 	});
+
 	var Entry = new JS.Class(Spontaneous.Content, {
 		initialize: function(content, container) {
 			this.container = container;

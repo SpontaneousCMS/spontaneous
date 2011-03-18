@@ -108,6 +108,12 @@ $text-edit-width: 621px;
 			height: 16px;
 			padding-left: 8px;
 			padding-top: 2px;
+			.comment {
+				font-weight: normal;
+				text-transform: none;
+				margin-left: $unit;
+				color: $editing-4;
+			}
 		}
 		.value {
 			@include rounded-bottom;
@@ -146,6 +152,9 @@ $text-edit-width: 621px;
 			.name {
 				background-color: $editing-focus;
 				color: white;
+				.comment {
+					color: white;
+				}
 			}
 			.value {
 				border-color: $editing-focus;
