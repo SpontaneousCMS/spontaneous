@@ -39,6 +39,26 @@ class FieldsTest < Test::Unit::TestCase
     end
   end
 
+  context "Overwriting fields" do
+    setup do
+      @class1 = Class.new(Content) do
+        field :title, :string, :default => "One"
+        field :date, :string
+      end
+      @class2 = Class.new(@class1) do
+        field :title, :image, :default => "Two"
+      end
+      @instance = @class2.new
+    end
+
+    should "overwrite field definitions" do
+      @class2.fields.first.name.should == :title
+      @class2.fields.last.name.should == :date
+      @class2.fields.length.should == 2
+      @instance.title.value.should == "Two"
+      @instance.title.class.should == Spontaneous::FieldTypes::ImageField
+    end
+  end
   context "Field Prototypes" do
     setup do
       @content_class = Class.new(Content) do

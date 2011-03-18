@@ -9,7 +9,10 @@ module Spontaneous::Plugins
           type = nil
         end
 
-        local_field_order << name
+        # if the field already exists then don't add it to our list
+        # of local fields
+        local_field_order << name unless field?(name)
+
         field_prototypes[name] = FieldPrototype.new(name, type, options, &block)
         unless method_defined?(name)
           define_method(name) do |*args|
@@ -27,8 +30,12 @@ module Spontaneous::Plugins
         end
       end
 
+      def supertype?
+        superclass && superclass.respond_to?(:field_prototypes)
+      end
+
       def field_prototypes
-        @field_prototypes ||= (supertype ? supertype.field_prototypes.dup : {})
+        @field_prototypes ||= (supertype? ? superclass.field_prototypes.dup : {})
       end
 
       def field_names
@@ -45,7 +52,7 @@ module Spontaneous::Plugins
       end
 
       def default_field_order
-        (supertype ? supertype.field_names : []) + local_field_order
+        (supertype? ? superclass.field_names : []) + local_field_order
       end
 
       def field_order(*new_order)
@@ -58,7 +65,7 @@ module Spontaneous::Plugins
 
       def field?(field_name)
         field_name = field_name.to_sym
-        field_prototypes.key?(field_name) || (supertype ? supertype.field?(field_name) : false)
+        field_prototypes.key?(field_name) || (supertype? ? superclass.field?(field_name) : false)
       end
 
       def field_for_mime_type(mime_type)
