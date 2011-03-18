@@ -4,8 +4,8 @@
 module Spontaneous
   module Rack
     class Public < ServerBase
-      use ::Rack::Reloader if Spontaneous::Config.reload_classes
-      # use Reloader if Spontaneous::Config.reload_classes
+      # use ::Rack::Reloader if Spontaneous::Config.reload_classes
+      use Reloader if Spontaneous::Config.reload_classes
       # set :static, true
       # set :public, Proc.new { Spontaneous.root / "public" }
 

@@ -109,8 +109,8 @@ module Spontaneous
 
       class EditingInterface < ServerBase
 
-        # use Reloader if Spontaneous::Config.reload_classes
-        use ::Rack::Reloader if Spontaneous::Config.reload_classes
+        use Reloader if Spontaneous::Config.reload_classes
+        # use ::Rack::Reloader if Spontaneous::Config.reload_classes
         use AroundBack
         register Authentication
 
