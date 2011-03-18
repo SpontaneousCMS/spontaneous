@@ -166,8 +166,9 @@ Spontaneous.Content = (function($, S) {
 		entry_added: function(result, callback) {
 			console.log("Content.entry_added", result)
 			var position = result.position, e = result.entry, entry = this.wrap_entry(e);
+			console.log(position, this.content.entries, this._entries)
 			this.content.entries.splice(position, 0, e);
-			this._entries.splice(position, 0, entry);
+			this.entries().splice(position, 0, entry);
 			callback(entry, position);
 		},
 
