@@ -83,11 +83,14 @@ module Spontaneous::Plugins
       #
       # TODO: finish these!
       def allow(type, options={})
-        # begin
-          allowed_types_config << AllowedType.new(type, options)
-        # rescue NameError => e
-        #   raise Spontaneous::UnknownTypeException.new(self, type)
-        # end
+        allowed_types_config << AllowedType.new(type, options)
+      end
+
+      def allow_subclasses(type, options = {})
+        parent_type = AllowedType.new(type)
+        parent_type.instance_class.subclasses.each do |subclass|
+          allow(subclass, options)
+        end
       end
 
       def allowed_types_config

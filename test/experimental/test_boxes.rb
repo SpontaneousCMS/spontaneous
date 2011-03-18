@@ -208,7 +208,7 @@ class BoxesTest < Test::Unit::TestCase
     context "with fields" do
       setup do
         MyBoxClass.field :title, :string
-        MyBoxClass.field :description, :text
+        MyBoxClass.field :description, :string
       end
 
       should "save their field values" do
@@ -230,7 +230,7 @@ class BoxesTest < Test::Unit::TestCase
       MyContentClass.box :partners do
         field :name, :string
         field :logo, :image
-        field :description, :text
+        field :description, :string
       end
       instance = MyContentClass.new
       instance.partners.name.should be_instance_of(Spontaneous::FieldTypes::StringField)
@@ -304,6 +304,7 @@ class BoxesTest < Test::Unit::TestCase
     setup do
       class ::BlankContent < Content; end
       class ::StyledContent < Content; end
+
       BlankContent.inline_style :blank1
       BlankContent.inline_style :blank2
       BlankContent.inline_style :blank3
@@ -317,6 +318,7 @@ class BoxesTest < Test::Unit::TestCase
       StyledContent.box :two do
         allow :BlankContent, :styles => [:blank3, :blank2]
       end
+
       @parent = BlankContent.new
     end
 
@@ -358,6 +360,114 @@ class BoxesTest < Test::Unit::TestCase
       styled = Content[styled.id]
       styled.one.pieces.first.style.name.should == :blank2
       styled.two.pieces.first.style.name.should == :blank3
+    end
+
+    should "allow selection of subclasses" do
+    end
+  end
+  context "Allowed types" do
+    setup do
+      class ::Allowed1 < Content
+        inline_style :frank
+        inline_style :freddy
+      end
+      class ::Allowed2 < Content
+        inline_style :john
+        inline_style :paul
+        inline_style :ringo
+        inline_style :george
+      end
+      class ::Allowed3 < Content
+        inline_style :arthur
+        inline_style :lancelot
+      end
+      class ::Allowed4 < Content; end
+
+      class ::Allowed11 < ::Allowed1; end
+      class ::Allowed111 < ::Allowed1; end
+
+      class ::Parent < Box
+        allow :Allowed1
+        allow Allowed2, :styles => [:ringo, :george]
+        allow 'Allowed3'
+      end
+
+      class ::ChildClass < ::Parent
+      end
+
+      class ::Allowable < Content
+        box :parents, :type => :Parent
+      end
+
+      class ::Mixed < Box
+        allow_subclasses :Allowed1
+      end
+    end
+
+    teardown do
+      [:Parent, :Allowed1, :Allowed11, :Allowed111, :Allowed2, :Allowed3, :Allowed4, :ChildClass, :Allowable, :Mixed].each { |k| Object.send(:remove_const, k) } rescue nil
+    end
+
+    should "have a list of allowed types" do
+      Parent.allowed.length.should == 3
+    end
+
+    should "have understood the type parameter" do
+      Parent.allowed[0].instance_class.should == Allowed1
+      Parent.allowed[1].instance_class.should == Allowed2
+      Parent.allowed[2].instance_class.should == Allowed3
+    end
+
+    should "raise an error when given an invalid type name" do
+      lambda { Parent.allow :WhatTheHellIsThis }.should raise_error(NameError)
+    end
+
+    should "allow all styles by default" do
+      Parent.allowed[2].styles.should == Allowed3.inline_styles
+    end
+
+    should "have a list of allowable styles" do
+      Parent.allowed[1].styles.length.should == 2
+      Parent.allowed[1].styles.map { |s| s.name }.should == [:ringo, :george]
+    end
+
+    should "raise an error if we try to use an unknown style" do
+      lambda { Parent.allow :Allowed3, :styles => [:merlin, :arthur]  }.should raise_error(Spontaneous::UnknownStyleException)
+    end
+
+    should "use a configured style when adding a defined allowed type" do
+      a = Allowable.new
+      b = Allowed2.new
+      a.parents << b
+      a.parents.pieces.first.style.should == Allowed2.inline_styles[:ringo]
+    end
+
+    should "know what the available styles are for an entry" do
+      a = Allowable.new
+      b = Allowed2.new
+      c = Allowed3.new
+      a.parents << b
+      a.parents << c
+      a.parents.available_styles(b).map { |s| s.name }.should == [:ringo, :george]
+      a.parents.available_styles(c).map { |s| s.name }.should == [:arthur, :lancelot]
+    end
+
+    should "inherit allowed types from superclass" do
+      ChildClass.allowed.should == Parent.allowed
+    end
+
+    should "include a subtype's allowed list as well as the supertype's" do
+      ChildClass.allow :Allowed4
+      ChildClass.allowed.map {|a| a.instance_class }.should == (Parent.allowed.map {|a| a.instance_class } + [Allowed4])
+    end
+
+    should "propagate allowed types to slots" do
+      instance = Allowable.new
+      instance.parents.allowed_types.should == Parent.allowed_types
+    end
+
+    should "correctly allow addition of subclasses" do
+      Mixed.allowed.map {|a| a.instance_class }.should == [Allowed11, Allowed111]
     end
   end
 end
