@@ -557,7 +557,7 @@ img.missing {
 			height: 100%;
 			padding-left: 16px;
 			width: 160px;
-			padding-top: 8px;
+			padding-top: 9px;
 			cursor: pointer;
 			border-left: solid 1px transparent;
 			border-right: solid 1px #494949;
@@ -565,9 +565,6 @@ img.missing {
 			.down {
 				display: none;
 			}
-		}
-		li:first-child {
-			padding-left: $container-padding;
 		}
 		li:hover, li.active {
 			@include vertical-gradient($highlight + #111111, $highlight);
@@ -577,6 +574,15 @@ img.missing {
 			.down {
 				@include down-arrow("/@spontaneous/static/orange-down-arrow.png", 7px);
 				z-index: 1;
+			}
+		}
+		li:first-child {
+			padding-left: $container-padding;
+			width: 160px + $container-padding;
+			&.active {
+				.down {
+					padding-left: $container-padding;
+				}
 			}
 		}
 		li.active + li:hover {
