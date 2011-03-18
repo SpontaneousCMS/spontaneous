@@ -123,7 +123,6 @@ module Spontaneous
       end
     end
 
-    ImageField.register
 
     class ImageAttributes
       include ImageFieldUtilities
@@ -217,6 +216,8 @@ module Spontaneous
         }
       end
     end
+
+    ImageField.register
 
   end
 end
