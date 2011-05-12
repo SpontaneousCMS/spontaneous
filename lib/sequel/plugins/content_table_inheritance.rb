@@ -160,7 +160,7 @@ module Sequel
         # The top level Page & Piece classes return all sub-classes
         def sti_subclass_added(key, subclass = nil)
           if sti_key_array
-            if subclass
+            if subclass && subclass.name
               # alright, so this is a bit of a hack
               # we want the site defined ::Page, ::Piece classes to work like Spot::[Page,Piece]
               # but we don't want generic subclasses of Spot::[Page, Piece] to do so

@@ -350,10 +350,10 @@ class AuthenticationTest < MiniTest::Spec
         end
         should "not be able to delete from root level box" do
           piece = root.boxes[:root_level].pieces.first
-          root.reload.boxes[:root_level].pieces.length.should == 2
+          pieces = root.reload.boxes[:root_level].pieces.length
           post "/@spontaneous/destroy/#{piece.id}"
           assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          root.reload.boxes[:root_level].pieces.length.should == 2
+          root.reload.boxes[:root_level].pieces.length.should == pieces
         end
         should "not be able to wrap files in root level box" do
           src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)

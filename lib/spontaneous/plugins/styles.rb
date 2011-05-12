@@ -144,7 +144,7 @@ module Spontaneous::Plugins
     end
 
     def owner_directory_name
-      @owner.name.underscore
+      (@owner.name || "").underscore
     end
 
     def title

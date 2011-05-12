@@ -359,7 +359,9 @@ module Spontaneous
         end
 
         post '/publish/publish' do
-          change_sets = (params[:change_set_ids] || []).map(&:to_i)
+          ids = params[:change_set_ids]
+          ids = ids.blank? ? [] : ids
+          change_sets = ids.map(&:to_i)
           if change_sets.empty?
             400
           else

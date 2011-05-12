@@ -7,6 +7,7 @@ class PublishingTest < MiniTest::Spec
   include StartupShutdown
 
   def self.startup
+    Spontaneous.root = File.expand_path("../../fixtures/example_application", __FILE__)
     Spontaneous.config.publishing_delay = nil
     Spontaneous.database = DB
     Content.delete_all_revisions!
@@ -20,6 +21,7 @@ class PublishingTest < MiniTest::Spec
   def setup
     Site.publishing_method = :immediate
   end
+
   def assert_content_equal(result, compare)
     serialised_columns = [:field_store, :entry_store]
     columns = Content.columns - serialised_columns
@@ -741,6 +743,7 @@ class PublishingTest < MiniTest::Spec
         Site.create(:revision => @revision, :published_revision => 2)
         Site.revision.should == @revision
       end
+
       teardown do
         Content.delete_revision(@revision)
         Revision.delete

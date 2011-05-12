@@ -432,7 +432,8 @@ class BackTest < MiniTest::Spec
     should "not launch publish if list of changes is empty" do
       Site.expects(:publish_changes).with().never
       post "/@spontaneous/publish/publish", :change_set_ids => ""
-      assert last_response.status == 400
+      assert last_response.status == 400, "Expected 400, recieved #{last_response.status}"
+
       post "/@spontaneous/publish/publish", :change_set_ids => nil
       assert last_response.status == 400
     end
