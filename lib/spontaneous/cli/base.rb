@@ -142,7 +142,9 @@ module Spontaneous
         require File.expand_path('../../../spontaneous', __FILE__)
         Sequel.extension :migration
         connection_params = Spontaneous.db_settings
+        connection_params[:user] = 'root'
         database = connection_params.delete(:database)
+        password = connection_params.delete(:password)
         catch(:error) do
           Sequel.connect(connection_params) do |connection|
             ["", "_test"].map { |ext| "#{database}#{ext}"}.each do |db|
