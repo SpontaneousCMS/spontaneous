@@ -137,6 +137,7 @@ $text-edit-width: 621px;
 				border: none;
 				width: 100%;
 				padding-right: 64px;
+				resize:vertical;
 			}
 			input[type="text"] {
 				@include box-sizing;
