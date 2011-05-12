@@ -6,7 +6,7 @@ module Spontaneous
         @app = app
         @try = ['', *options.delete(:try)].compact
         @static = ::Rack::Static.new(
-          lambda { [404, {}, []] },
+          lambda { |env| [404, {}, []] },
           options)
       end
 

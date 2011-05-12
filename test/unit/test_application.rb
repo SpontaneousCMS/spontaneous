@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class ApplicationTest < Test::Unit::TestCase
+class ApplicationTest < MiniTest::Spec
   context "content building" do
     setup do
       setup_site_fixture

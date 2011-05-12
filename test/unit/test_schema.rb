@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class SchemaTest < Test::Unit::TestCase
+class SchemaTest < MiniTest::Spec
   include Spontaneous
 
   context "Configurable names" do

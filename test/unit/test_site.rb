@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class SiteTest < Test::Unit::TestCase
+class SiteTest < MiniTest::Spec
   include Spontaneous
   def setup
     Content.delete

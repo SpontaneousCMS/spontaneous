@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class AliasTest < Test::Unit::TestCase
+class AliasTest < MiniTest::Spec
 
   def assert_same_content(c1, c2)
     assert_equal c1.length, c2.length

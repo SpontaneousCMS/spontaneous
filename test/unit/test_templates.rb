@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class TemplatesTest < Test::Unit::TestCase
+class TemplatesTest < MiniTest::Spec
   def first_pass(base_dir, filename, context=nil)
     context ||= @context
     Cutaneous::FirstPassRenderer.new(template_root(base_dir)).render(filename, context)

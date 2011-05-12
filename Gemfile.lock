@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/dasch/shoulda.git
+  revision: 16984cacbbff26413f83f19ca2f5c7aa1326cd27
+  branch: minitest
+  specs:
+    shoulda (2.11.3)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -35,6 +42,7 @@ GEM
     less (1.2.21)
       mutter (>= 0.4.2)
       treetop (>= 1.4.2)
+    minitest (2.1.0)
     miso (0.3.3)
       executioner (>= 0.3.0)
     mocha (0.9.8)
@@ -50,7 +58,6 @@ GEM
     sass (3.1.0.alpha.221)
     selenium-client (1.2.18)
     sequel (3.20.0)
-    shoulda (2.11.3)
     sinatra (1.1.2)
       rack (~> 1.1)
       tilt (~> 1.2)
@@ -86,6 +93,7 @@ DEPENDENCIES
   launchy (~> 0.4.0)
   leftright (~> 0.9)
   less (~> 1.2)
+  minitest (~> 2.1.0)
   miso (~> 0.3.3)
   mocha (~> 0.9)
   mysql2 (~> 0.2)
@@ -95,7 +103,7 @@ DEPENDENCIES
   sass (~> 3.1.0.alpha)
   selenium-client (~> 1.2.18)
   sequel (~> 3.20)
-  shoulda (~> 2.10)
+  shoulda!
   sinatra (~> 1.1.2)
   stackdeck (~> 0.2)
   stringex (~> 1.1)

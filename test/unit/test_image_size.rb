@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class ImageSizeTest < Test::Unit::TestCase
+class ImageSizeTest < MiniTest::Spec
   context "Image size parser" do
     setup do
       @base_dir = File.expand_path(File.join(File.dirname(__FILE__), '../fixtures/images'))

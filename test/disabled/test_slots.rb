@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class SlotsTest < Test::Unit::TestCase
+class SlotsTest < MiniTest::Spec
   include Spontaneous
 
   context "Slot containers" do

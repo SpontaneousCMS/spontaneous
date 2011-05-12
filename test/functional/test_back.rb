@@ -5,7 +5,7 @@ require 'test_helper'
 # set :environment, :test
 
 
-class BackTest < Test::Unit::TestCase
+class BackTest < MiniTest::Spec
   include StartupShutdown
   include ::Rack::Test::Methods
 
@@ -219,6 +219,7 @@ class BackTest < Test::Unit::TestCase
     should "return cache-control headers" do
       ["/about", "/"].each do |path|
         get path
+        # puts last_response.body
         assert last_response.ok?
         ["no-store", 'no-cache', 'must-revalidate', 'max-age=0'].each do |p|
           last_response.headers['Cache-Control'].should =~ %r(#{p})
@@ -462,7 +463,7 @@ class BackTest < Test::Unit::TestCase
     should "create a homepage of the specified type" do
       post "/@spontaneous/root", 'type' => @root_class.name
       assert last_response.ok?
-      Site.root.should be_instance_of(@root_class)
+      Site.root.must_be_instance_of(@root_class)
       Site.root.title.value.should =~ /Home/
     end
     should "only create one root" do

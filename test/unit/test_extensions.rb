@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class ExtensionsTest < Test::Unit::TestCase
+class ExtensionsTest < MiniTest::Spec
   context "String" do
     should "create paths with String#/" do
       ("this" / "that").should == "this/that"

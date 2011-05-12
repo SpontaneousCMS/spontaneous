@@ -3,7 +3,7 @@
 require 'test_helper'
 
 # borrowed from Padrino
-class GeneratorsTest < Test::Unit::TestCase
+class GeneratorsTest < MiniTest::Spec
   include Spontaneous
 
   def setup
@@ -37,7 +37,7 @@ class GeneratorsTest < Test::Unit::TestCase
       # Have moved db creation into separate step (spot init) so this no longer applies
       # %w(example_com example_com_test).each do |db|
       #   db = Sequel.mysql2(:user => "root", :database => db)
-      #   lambda { db.tables }.should_not raise_error(Sequel::DatabaseConnectionError)
+      #   lambda { db.tables }.must_raise(Sequel::DatabaseConnectionError)
       # end
       site_root = File.join(@tmp, 'example_com')
       %w(Rakefile Gemfile).each do |f|

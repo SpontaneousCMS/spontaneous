@@ -4,7 +4,7 @@ require 'test_helper'
 
 # set :environment, :test
 
-class ApplicationTest < Test::Unit::TestCase
+class ApplicationTest < MiniTest::Spec
   include Spontaneous
   include ::Rack::Test::Methods
 
@@ -26,7 +26,7 @@ class ApplicationTest < Test::Unit::TestCase
     end
 
     should "load" do
-      Object.const_get(:HomePage).should be_instance_of(Class)
+      Object.const_get(:HomePage).must_be_instance_of(Class)
     end
   end
 

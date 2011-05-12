@@ -4,7 +4,7 @@
 require 'test_helper'
 # require 'openssl'
 
-class ImagesTest < Test::Unit::TestCase
+class ImagesTest < MiniTest::Spec
   include Spontaneous
 
   context "Image fields set using absolute values" do

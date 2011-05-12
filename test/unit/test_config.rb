@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class ConfigTest < Test::Unit::TestCase
+class ConfigTest < MiniTest::Spec
   include CustomMatchers
   def setup
   end

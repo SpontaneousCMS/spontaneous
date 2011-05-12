@@ -7,7 +7,7 @@ require 'ui_helper'
 
 
 
-class PageEditingTest < Test::Unit::TestCase
+class PageEditingTest < MiniTest::Spec
   include StartupShutdown
   include SeleniumTest
 

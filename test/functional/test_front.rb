@@ -5,7 +5,7 @@ require 'test_helper'
 ENV['RACK_ENV'] = 'test'
 
 
-class FrontTest < Test::Unit::TestCase
+class FrontTest < MiniTest::Spec
   include StartupShutdown
   include ::Rack::Test::Methods
 

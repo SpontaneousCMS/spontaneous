@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class VisibilityTest < Test::Unit::TestCase
+class VisibilityTest < MiniTest::Spec
 
   context "Content" do
     setup do
@@ -152,7 +152,7 @@ class VisibilityTest < Test::Unit::TestCase
       piece.hide!
       child = Content.first(:uid => "0.0.0.0")
       child.visible?.should be_false
-      lambda { child.show! }.should raise_error(Spontaneous::NotShowable)
+      lambda { child.show! }.must_raise(Spontaneous::NotShowable)
     end
 
     should "not reveal child content that was hidden before its parent" do
@@ -177,8 +177,8 @@ class VisibilityTest < Test::Unit::TestCase
     context "root" do
       should "should not be hidable" do
         @root.is_root?.should be_true
-        lambda { @root.visible = false }.should raise_error
-        lambda { @root.hide! }.should raise_error
+        lambda { @root.visible = false }.must_raise(RuntimeError)
+        lambda { @root.hide! }.must_raise(RuntimeError)
         @root.visible?.should be_true
       end
     end
@@ -217,8 +217,8 @@ class VisibilityTest < Test::Unit::TestCase
         Content.with_visible do
           # would like to make sure we're raising a predictable error
           # but 1.9 changes the typeerror to a runtime error
-          lambda { page.pieces << Piece.new }.should raise_error#(TypeError)
-          lambda { page << Piece.new }.should raise_error#(TypeError)
+          lambda { page.pieces << Piece.new }.must_raise(TypeError, RuntimeError)
+          lambda { page << Piece.new }.must_raise(TypeError, RuntimeError)
         end
       end
     end

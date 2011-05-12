@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class SerialisationTest < Test::Unit::TestCase
+class SerialisationTest < MiniTest::Spec
   include Spontaneous
   context "Content" do
     setup do

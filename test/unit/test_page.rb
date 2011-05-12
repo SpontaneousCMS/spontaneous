@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class PageTest < Test::Unit::TestCase
+class PageTest < MiniTest::Spec
   include Spontaneous
 
   context "All pages" do

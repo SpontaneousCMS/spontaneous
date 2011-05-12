@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class PrototypesTest < Test::Unit::TestCase
+class PrototypesTest < MiniTest::Spec
   context "Prototypes" do
     setup do
       class ::ImageClass < Spontaneous::Content

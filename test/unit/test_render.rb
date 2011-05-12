@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class RenderTest < Test::Unit::TestCase
+class RenderTest < MiniTest::Spec
   include Spontaneous
 
   def setup

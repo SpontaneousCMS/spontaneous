@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class MediaTest < Test::Unit::TestCase
+class MediaTest < MiniTest::Spec
   context "Utilitity methods" do
     should "be able to sanitise filenames" do
       filename = "Something with-dodgy 'characters'.many.jpg"

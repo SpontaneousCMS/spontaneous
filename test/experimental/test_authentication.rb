@@ -5,7 +5,7 @@ require 'test_helper'
 # set :environment, :test
 
 
-class AuthenticationTest < Test::Unit::TestCase
+class AuthenticationTest < MiniTest::Spec
   include StartupShutdown
   include ::Rack::Test::Methods
 

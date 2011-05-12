@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class PermissionsTest < Test::Unit::TestCase
+class PermissionsTest < MiniTest::Spec
 
   def setup
     Permissions::UserLevel.reset!
@@ -40,10 +40,10 @@ class PermissionsTest < Test::Unit::TestCase
     end
 
     should "load from the config/user_levels.yml file" do
-      Permissions::UserLevel[:editor].should be_instance_of(Permissions::UserLevel::Level)
-      Permissions::UserLevel['editor'].should be_instance_of(Permissions::UserLevel::Level)
-      Permissions::UserLevel['admin'].should be_instance_of(Permissions::UserLevel::Level)
-      Permissions::UserLevel['designer'].should be_instance_of(Permissions::UserLevel::Level)
+      Permissions::UserLevel[:editor].must_be_instance_of(Permissions::UserLevel::Level)
+      Permissions::UserLevel['editor'].must_be_instance_of(Permissions::UserLevel::Level)
+      Permissions::UserLevel['admin'].must_be_instance_of(Permissions::UserLevel::Level)
+      Permissions::UserLevel['designer'].must_be_instance_of(Permissions::UserLevel::Level)
     end
 
     should "provide a sorted list of all levels" do
@@ -112,7 +112,7 @@ class PermissionsTest < Test::Unit::TestCase
 
     should "be creatable with valid params" do
       user = Permissions::User.new(@valid)
-      user.save.should be_instance_of(Permissions::User)
+      user.save.must_be_instance_of(Permissions::User)
       user.valid?.should be_true
     end
 
@@ -200,7 +200,7 @@ class PermissionsTest < Test::Unit::TestCase
       end
 
       should "have an associated 'invisible' group" do
-        @user.group.should be_instance_of(Permissions::AccessGroup)
+        @user.group.must_be_instance_of(Permissions::AccessGroup)
         @user.group.invisible?.should be_true
         @user.group.level.should == Permissions::UserLevel::None
       end
@@ -241,7 +241,7 @@ class PermissionsTest < Test::Unit::TestCase
       end
 
       should "have a list of access keys" do
-        @user.access_keys.should be_instance_of(Array)
+        @user.access_keys.must_be_instance_of(Array)
       end
 
       should "be blockable" do
@@ -323,7 +323,7 @@ class PermissionsTest < Test::Unit::TestCase
     should "be guaranteed unique" do
       Permissions.stubs(:random_string).returns("xxxx")
       key1 = Permissions::AccessKey.create()
-      lambda { Permissions::AccessKey.create() }.should raise_error
+      lambda { Permissions::AccessKey.create() }.must_raise(Sequel::DatabaseError)
     end
 
     should "have a creation date" do

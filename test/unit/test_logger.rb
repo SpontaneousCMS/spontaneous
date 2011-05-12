@@ -4,7 +4,7 @@
 require 'test_helper'
 
 # borrowed from Padrino
-class LoggerTest < Test::Unit::TestCase
+class LoggerTest < MiniTest::Spec
   include Spontaneous
 
   def setup
@@ -60,7 +60,7 @@ class LoggerTest < Test::Unit::TestCase
       @logger.error "You log this error?"
       assert_match(/You log this error?/, @log.string)
       @logger.debug "You don't log this error!"
-      assert_no_match(/You don't log this error!/, @log.string)
+      refute_match(/You don't log this error!/, @log.string)
       @logger << "Yep this can be logged"
       assert_match(/Yep this can be logged/, @log.string)
     end

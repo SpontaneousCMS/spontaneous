@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class PublishingTest < Test::Unit::TestCase
+class PublishingTest < MiniTest::Spec
   include StartupShutdown
 
   def self.startup
@@ -469,7 +469,7 @@ class PublishingTest < Test::Unit::TestCase
         page.reload
         Change.count.should == 1
         change = Change.first
-        change.modified_list.should be_instance_of(Array)
+        change.modified_list.must_be_instance_of(Array)
         change.modified_list.length.should == 1
         change.modified_list.should == [page.id]
         change.modified.should == [page]
@@ -486,7 +486,7 @@ class PublishingTest < Test::Unit::TestCase
         page.reload
         Change.count.should == 1
         change = Change.first
-        change.modified_list.should be_instance_of(Array)
+        change.modified_list.must_be_instance_of(Array)
         change.modified_list.length.should == 1
         change.modified_list.should == [page.id]
         change.modified.should == [page]
@@ -506,7 +506,7 @@ class PublishingTest < Test::Unit::TestCase
         new_page = Content[new_page.id]
         Change.count.should == 1
         change = Change.first
-        change.modified_list.should be_instance_of(Array)
+        change.modified_list.must_be_instance_of(Array)
         change.modified_list.length.should == 2
         change.modified_list.should == [page.id, new_page.id]
         change.modified.should == [page, new_page]
@@ -527,7 +527,7 @@ class PublishingTest < Test::Unit::TestCase
         p2.reload
         Change.count.should == 1
         change = Change.first
-        change.modified_list.should be_instance_of(Array)
+        change.modified_list.must_be_instance_of(Array)
         change.modified_list.length.should == 2
         change.modified_list.should == [page.id, p2.id]
         change.modified.should == [page, p2]
@@ -583,7 +583,7 @@ class PublishingTest < Test::Unit::TestCase
           ids.each { |id| Content.insert(:id => id) rescue nil }
         end
         result = Change.outstanding
-        result.should be_instance_of(Array)
+        result.must_be_instance_of(Array)
         result.length.should == 2
         page_ids = [
           [200, 201, 202],
@@ -592,7 +592,7 @@ class PublishingTest < Test::Unit::TestCase
         result.each_with_index do |set, i|
           changes = publish_sets[i].map { |id| Change[id] }
           pages = page_ids[i].map { |id| Content[id] }
-          set.should be_instance_of(ChangeSet)
+          set.must_be_instance_of(ChangeSet)
           set.changes.should == changes
           set.pages.should == pages
         end
@@ -634,7 +634,7 @@ class PublishingTest < Test::Unit::TestCase
         change.save
         @page2.destroy
         result = Change.outstanding
-        result.first.to_hash.should be_instance_of(Hash)
+        result.first.to_hash.must_be_instance_of(Hash)
       end
     end
 

@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class ContentTest < Test::Unit::TestCase
+class ContentTest < MiniTest::Spec
   context "Content instances" do
     should "evaluate instance code" do
       @instance = Content.create({

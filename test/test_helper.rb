@@ -5,6 +5,7 @@ ENV["SPOT_ENV"] = "test"
 
 require "rubygems"
 require "bundler"
+gem 'minitest'
 Bundler.setup(:default, :development)
 
 Bundler.require
@@ -12,11 +13,6 @@ Bundler.require
 require 'rack'
 require 'logger'
 
-begin
-  require 'leftright'
-rescue LoadError
-  # fails for ruby 1.9
-end
 
 Sequel.extension :migration
 
@@ -28,13 +24,19 @@ Sequel::Migrator.apply(DB, 'db/migrations')
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spontaneous')
 require File.expand_path(File.dirname(__FILE__) + '/../lib/cutaneous')
 
-require 'test/unit'
+# require 'test/unit'
+require 'minitest/spec'
 require 'rack/test'
 require 'matchy'
 require 'shoulda'
 require 'timecop'
 require 'mocha'
 require 'pp'
+begin
+  require 'leftright'
+rescue LoadError
+  # fails for ruby 1.9
+end
 
 require 'support/custom_matchers'
 # require 'support/timing'
@@ -42,25 +44,39 @@ require 'support/custom_matchers'
 
 Spontaneous.database = DB
 
+class MiniTestWithHooks < MiniTest::Unit
+  def before_suites
+  end
+
+  def after_suites
+  end
+
+  def _run_suites(suites, type)
+    begin
+      before_suites
+      super(suites, type)
+    ensure
+      after_suites
+    end
+  end
+
+  def _run_suite(suite, type)
+    begin
+      suite.startup if suite.respond_to?(:startup)
+      super(suite, type)
+    ensure
+      suite.shutdown if suite.respond_to?(:shutdown)
+    end
+  end
+end
+
+
 module StartupShutdown
   def self.included(base)
     base.extend(ClassMethods)
   end
 
   module ClassMethods
-    def suite
-      mysuite = super
-      test_class = self
-      mysuite.meta.send(:define_method, :run) do |*args, &block|
-      begin
-        test_class.startup() if test_class.respond_to?(:startup)
-        super(*args, &block)
-      ensure
-        test_class.shutdown() if test_class.respond_to?(:shutdown)
-      end
-      end
-      mysuite
-    end
     def startup
       puts "+ Running #{self.name} startup"
     end
@@ -70,6 +86,8 @@ module StartupShutdown
     end
   end # ClassMethods
 end
+
+MiniTest::Unit.runner = MiniTestWithHooks.new
 
   def silence_logger(&block)
     begin
@@ -82,7 +100,7 @@ end
       log_buffer.string
     end
   end
-class Test::Unit::TestCase
+class MiniTest::Spec
   include Spontaneous
   include CustomMatchers
 
@@ -141,7 +159,7 @@ class Test::Unit::TestCase
     Spontaneous.init(:mode => :back, :environment => :development)
     # Schema.load
 
-    Object.const_get(:HomePage).should be_instance_of(Class)
+    Object.const_get(:HomePage).must_be_instance_of(Class)
 
     # Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
     #########
@@ -226,5 +244,6 @@ end
 
 
 
+require 'minitest/autorun'
 
 

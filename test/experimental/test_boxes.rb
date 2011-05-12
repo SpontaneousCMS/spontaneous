@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class BoxesTest < Test::Unit::TestCase
+class BoxesTest < MiniTest::Spec
 
   context "Box definitions" do
     setup do
@@ -233,7 +233,7 @@ class BoxesTest < Test::Unit::TestCase
         field :description, :string
       end
       instance = MyContentClass.new
-      instance.partners.name.should be_instance_of(Spontaneous::FieldTypes::StringField)
+      instance.partners.name.must_be_instance_of(Spontaneous::FieldTypes::StringField)
       instance.partners.name = "Howard"
       instance.partners.description = "Here is Howard"
       instance.save
@@ -419,7 +419,7 @@ class BoxesTest < Test::Unit::TestCase
     end
 
     should "raise an error when given an invalid type name" do
-      lambda { Parent.allow :WhatTheHellIsThis }.should raise_error(NameError)
+      lambda { Parent.allow :WhatTheHellIsThis }.must_raise(NameError)
     end
 
     should "allow all styles by default" do
@@ -432,7 +432,7 @@ class BoxesTest < Test::Unit::TestCase
     end
 
     should "raise an error if we try to use an unknown style" do
-      lambda { Parent.allow :Allowed3, :styles => [:merlin, :arthur]  }.should raise_error(Spontaneous::UnknownStyleException)
+      lambda { Parent.allow :Allowed3, :styles => [:merlin, :arthur]  }.must_raise(Spontaneous::UnknownStyleException)
     end
 
     should "use a configured style when adding a defined allowed type" do

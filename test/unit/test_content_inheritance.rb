@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class ContentTest < Test::Unit::TestCase
+class ContentTest < MiniTest::Spec
 
   context "Single table inheritance" do
     setup do

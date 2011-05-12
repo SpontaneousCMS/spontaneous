@@ -29,20 +29,22 @@ gem 'rdiscount', '~> 1.6.5'
 gem 'kramdown', '~> 0.13.3'
 
 group :development do
+  gem 'minitest', '~> 2.1.0'
   gem 'mysql2', '~> 0.2'
   # gem 'pg', '~> 0.9.0'
   gem 'jeweler', '~> 1.5'
   gem 'jnunemaker-matchy', '~> 0.4'
-  gem 'shoulda',    '~> 2.10'
+  gem 'shoulda', :git => "https://github.com/dasch/shoulda.git", :branch => "minitest"
+  # gem 'mini_shoulda',    '~> 0.3.0'
   gem 'timecop',    '~> 0.3'
   gem 'mocha',      '~> 0.9'
   gem 'rack-test',  '~> 0.5'
   gem 'leftright',  '~> 0.9'
   gem 'stackdeck',  '~> 0.2'
-  gem 'selenium-client', '~> 1.2.18'
+  gem 'selenium-client', '~> 1.2.18', :platforms => [:mri_18]
   gem 'launchy', '~> 0.4.0'
   # gem 'Selenium', '~> 1.1.14'
-  gem 'johnson',    '2.0.0.pre3'
-  gem 'harmony',    '~> 0.5'
+  gem 'johnson',    '2.0.0.pre3', :platforms => [:mri_18]
+  gem 'harmony',    '~> 0.5', :platforms => [:mri_18]
 end
 

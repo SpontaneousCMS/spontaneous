@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class StylesTest < Test::Unit::TestCase
+class StylesTest < MiniTest::Spec
   include Spontaneous
 
   def template_root
@@ -61,7 +61,7 @@ class StylesTest < Test::Unit::TestCase
     should "raise an error if we try to initialize with an unsupported format" do
       # disabled because it makes testing styles more difficult
       # perhaps raise this instead at the template level when rendering?
-      # lambda { @style.template(:monkey) }.should raise_error(UnsupportedFormatException)
+      # lambda { @style.template(:monkey) }.must_raise(UnsupportedFormatException)
     end
 
     context "inline templates" do
@@ -164,7 +164,7 @@ class StylesTest < Test::Unit::TestCase
         end
 
         should "not be settable directly on bare pieces" do
-          lambda { @piece.style = ::StyleTestClass.styles.default }.should raise_error(NoMethodError)
+          lambda { @piece.style = ::StyleTestClass.styles.default }.must_raise(NoMethodError)
         end
       end
     end

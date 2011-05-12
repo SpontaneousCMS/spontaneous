@@ -3,7 +3,7 @@
 require 'test_helper'
 
 
-class PieceTest < Test::Unit::TestCase
+class PieceTest < MiniTest::Spec
   include Spontaneous
 
   context "Pieces" do
