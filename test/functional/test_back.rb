@@ -118,10 +118,10 @@ class BackTest < Test::Unit::TestCase
       assert last_response.ok?
       last_response.content_type.should == "application/json;charset=utf-8"
       @about.reload
-      @about.text.pieces.first.id.should == @piece2_5.id
+      @about.contents.pieces.first.id.should == @piece2_5.id
 
       p = Content[@about.id]
-      p.text.pieces.first.id.should == @piece2_5.id
+      p.contents.pieces.first.id.should == @piece2_5.id
     end
     # should "reorder pages" do
     #   post "/@spontaneous/page/#{@about.id}/position/0"

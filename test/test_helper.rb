@@ -173,11 +173,11 @@ class Test::Unit::TestCase
     @piece2_3 = Text.new(:text => "Text 3")
     @piece2_4 = Text.new(:text => "Text 4")
     @piece2_5 = Text.new(:text => "Text 5")
-    @about.text << @piece2_1
-    @about.text << @piece2_2
-    @about.text << @piece2_3
-    @about.text << @piece2_4
-    @about.text << @piece2_5
+    @about.contents << @piece2_1
+    @about.contents << @piece2_2
+    @about.contents << @piece2_3
+    @about.contents << @piece2_4
+    @about.contents << @piece2_5
     @about.save
     # @home.save
 
