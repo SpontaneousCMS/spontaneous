@@ -79,10 +79,13 @@ module Spontaneous::Render
       end
     rescue => e
       # TODO: sensible, configurable fallback for when template calls non-existant method
+      # - need line number and file that generated error
       # - logging.warn when happens
       # - an inline comment when in dev mode?
       # - some placeholder text, perhaps the name of the missing method and line no.
       logger.error(e)
+      # logger.error(target)
+      # logger.error(e.backtrace.join("\\n"))
       nil
     end
 

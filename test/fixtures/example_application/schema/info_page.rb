@@ -2,7 +2,7 @@
 
 
 class InfoPage < Page
-  box :text do
+  box :contents do
     allow :Text
     allow :InlineImage
   end
