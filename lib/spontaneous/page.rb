@@ -4,7 +4,6 @@
 module Spontaneous
   class Page < Content
 
-    # plugin Plugins::PageStyles
     plugin Plugins::Layouts
     plugin Plugins::Paths
     plugin Plugins::PageTree
