@@ -82,8 +82,8 @@ class GeneratorsTest < MiniTest::Spec
       %w(large_page LargePage).each do |name|
         generate(:page, name, "--root=#{site_root}")
         assert_file_exists(site_root, 'schema/large_page.rb')
-        assert_file_exists(site_root, 'templates/large_page/page.html.cut')
-        assert_file_exists(site_root, 'templates/large_page/inline.html.cut')
+        # assert_file_exists(site_root, 'templates/large_page/page.html.cut')
+        assert_file_exists(site_root, 'templates/large_page.html.cut')
         class_file = ::File.join(site_root,  'schema/large_page.rb')
         assert /class LargePage < Page/ === File.read(class_file)
         `rm -rf #{@tmp}`
