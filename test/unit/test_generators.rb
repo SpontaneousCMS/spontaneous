@@ -52,8 +52,8 @@ class GeneratorsTest < MiniTest::Spec
       %w(favicon.ico robots.txt).each do |f|
         assert_file_exists(site_root, 'public', f)
       end
-      %w(page.html.cut).each do |f|
-        assert_file_exists(site_root, 'templates', f)
+      %w(standard.html.cut).each do |f|
+        assert_file_exists(site_root, 'templates/layouts', f)
       end
       assert_file_exists(site_root, 'schema')
       assert_file_exists(site_root, 'schema/page.rb')
