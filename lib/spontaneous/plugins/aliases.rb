@@ -66,9 +66,19 @@ module Spontaneous::Plugins
         ""
       end
 
-      def page_styles
-        @page_styles ||= S::StyleDefinitions.new(self.class.page_styles, [target, :page_styles])
+      def layout
+        # if this alias class has no layouts defined, then just use the one set on the target
+        if self.class.layouts.empty?
+          target.resolve_layout(self.style_id)
+        else
+          # but if it does have layouts defined, use them
+          self.resolve_layout(self.style_id) or target.resolve_layout(self.style_id)
+        end
       end
+
+      # def layouts
+      #   @layouts ||= S::StyleDefinitions.new(self.class.layouts, [target, :layouts])
+      # end
     end
   end
 end

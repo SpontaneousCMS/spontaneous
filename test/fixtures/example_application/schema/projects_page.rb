@@ -8,5 +8,5 @@ class ProjectsPage < Page
     allow :Project
   end
 
-  page_style :projects_page
+  layout :projects
 end

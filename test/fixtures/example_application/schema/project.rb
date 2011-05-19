@@ -13,6 +13,6 @@ class Project < Page
     allow :InlineImage
   end
 
-  page_style :page
+  layout :project
   inline_style :inline
 end

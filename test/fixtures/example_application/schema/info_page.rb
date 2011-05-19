@@ -7,6 +7,7 @@ class InfoPage < Page
     allow :InlineImage
   end
 
-  page_style :page
+  layout :info
+
   inline_style :inline
 end

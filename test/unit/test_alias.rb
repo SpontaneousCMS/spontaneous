@@ -39,7 +39,7 @@ class AliasTest < MiniTest::Spec
 
       class ::B < Page
         field :b_field1
-        page_style :page
+        layout :b
       end
 
       class ::BB < ::B
@@ -179,7 +179,7 @@ class AliasTest < MiniTest::Spec
       should "be allowed to have piece classes as targets" do
         class ::CAlias < Page
           alias_of :AAA
-          page_style :page
+          layout :c_alias
         end
 
         c = CAlias.new(:target => @aaa1)
@@ -196,7 +196,7 @@ class AliasTest < MiniTest::Spec
         Site["/aliases/b"].should == a
       end
 
-      should "render the using targets style when accessed via the path and no local page styles defined" do
+      should "render the using target's layout when accessed via the path and no local layouts defined" do
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases << a
         @aliases.save
@@ -205,7 +205,7 @@ class AliasTest < MiniTest::Spec
       end
 
       should "render with locally defined style when available" do
-        BAlias.page_style :alternate
+        BAlias.layout :b_alias
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases << a
         @aliases.save
@@ -214,12 +214,12 @@ class AliasTest < MiniTest::Spec
       end
 
       should "have access to their target's page styles" do
-        BAlias.page_style :alternate
+        BAlias.layout :b_alias
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases << a
         @aliases.save
         a.reload
-        a.style = :page
+        a.layout = :b
         a.render.should == @b.render
       end
     end

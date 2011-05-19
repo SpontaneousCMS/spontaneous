@@ -261,9 +261,10 @@ class BoxesTest < MiniTest::Spec
         Object.send(:remove_const, :InheritedStyleBox)
         Object.send(:remove_const, :WithTemplateBox)
         Object.send(:remove_const, :WithoutTemplateBox)
+        Object.send(:remove_const, :BlankContent)
       end
 
-      should_eventually "render using explicit styles" do
+      should "render using explicit styles" do
         @content.images.render.should == "christy: whisty\n"
       end
 
@@ -275,13 +276,13 @@ class BoxesTest < MiniTest::Spec
         instance.images.style.filename.should == "inline_style.html.cut"
       end
 
-      should_eventually "render using default template style" do
+      should "render using default template style" do
         BlankContent.box :images, :class => :WithTemplateBox
         instance = BlankContent.new
         instance.images.render.should == "with_template_box.html.cut\n"
       end
 
-      should_eventually "render using global default box styles" do
+      should "render using global default box styles" do
         entry = Object.new
         entry.stubs(:render).returns("<entry>")
         BlankContent.box :images, :class => :WithoutTemplateBox
@@ -290,7 +291,19 @@ class BoxesTest < MiniTest::Spec
         instance.images.render.should == "<entry>"
       end
 
-      should_eventually "inherit styles from their superclass" do
+      should "find templates named after box in owning classes template dir" do
+        BlankContent.box :things
+        instance = BlankContent.new
+        instance.things.render.should == "blank_content/things.html.cut\n"
+      end
+
+      should "not use templates with box name found in root template dir" do
+        BlankContent.box :thangs
+        instance = BlankContent.new
+        instance.thangs.render.should == ""
+      end
+
+      should "inherit styles from their superclass" do
         BlankContent.box :images, :class => :InheritedStyleBox
         instance = BlankContent.new
         instance.images.title = "ytsirhc"

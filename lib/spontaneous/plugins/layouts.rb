@@ -28,7 +28,8 @@ module Spontaneous::Plugins
       end
 
       def verify_layout_name(layout_name)
-        raise Spontaneous::Errors::UnknownLayoutError.new(self, layout_name) unless find_named_layout(layout_name)
+        # do I want this? instead of checking hierarchy, it should test for existance of template
+        # raise Spontaneous::Errors::UnknownLayoutError.new(self, layout_name) unless find_named_layout(layout_name)
         layout_name
       end
 
@@ -51,7 +52,11 @@ module Spontaneous::Plugins
 
     module InstanceMethods
       def layout
-        self.class.resolve_layout(self.style_id)
+        resolve_layout(self.style_id)
+      end
+
+      def resolve_layout(style_id)
+        self.class.resolve_layout(style_id)
       end
 
       def layout=(layout_name)
@@ -60,6 +65,11 @@ module Spontaneous::Plugins
 
       def template
         layout.template
+      end
+
+      def provides_format?(format)
+        format = (format || :html).to_sym
+        layout.formats.include?(format)
       end
     end # InstanceMethods
   end # Layouts

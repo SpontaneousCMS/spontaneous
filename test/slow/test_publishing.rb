@@ -901,15 +901,15 @@ class PublishingTest < MiniTest::Spec
         @template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")
         FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
         class ::PublishablePage < Page; end
-        PublishablePage.page_style "static"
-        PublishablePage.page_style "dynamic"
+        PublishablePage.layout :"static"
+        PublishablePage.layout :"dynamic"
         Spontaneous.revision_root = @revision_dir
         Spontaneous.template_root = @template_root
         # Cutaneous::PreviewRenderEngine.context_class = Cutaneous::PublishContext
         Spontaneous::Render.renderer_class = Spontaneous::Render::PublishedRenderer
 
         @home = PublishablePage.create(:title => 'Home')
-        @home.style = "dynamic"
+        @home.layout = :"dynamic"
         @about = PublishablePage.create(:title => "About", :slug => "about")
         @blog = PublishablePage.create(:title => "Blog", :slug => "blog")
         @post1 = PublishablePage.create(:title => "Post 1", :slug => "post-1")

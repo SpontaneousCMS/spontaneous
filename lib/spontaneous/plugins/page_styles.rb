@@ -4,6 +4,11 @@ module Spontaneous::Plugins
   module PageStyles
 
     module ClassMethods
+      def layout(name, options={})
+        p __FILE__
+        p caller
+        # layouts << Spontaneous::Layout.new(self, name, options)
+      end
       def page_style(name, options={})
         page_styles << Spontaneous::Style.new(self, name, options)
       end

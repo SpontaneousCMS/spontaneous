@@ -15,7 +15,7 @@ class AuthenticationTest < MiniTest::Spec
   class D < Spontaneous::Piece; end
 
   class SitePage < Spontaneous::Page
-    page_style :default
+    # page_style :default
     field :editor_level, :user_level => :editor
       field :admin_level, :user_level => :admin
     field :root_level, :user_level => :root

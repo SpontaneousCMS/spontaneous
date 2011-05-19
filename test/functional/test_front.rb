@@ -10,8 +10,8 @@ class FrontTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
   class SitePage < Spontaneous::Page
-    page_style :default
-    page_style :dynamic
+    layout :default
+    layout :dynamic
     box :pages
   end
 
@@ -35,7 +35,7 @@ class FrontTest < MiniTest::Spec
     @@about = SitePage.create(:slug => "about", :uid => "about")
     @@news = SitePage.create(:slug => "news", :uid => "news")
     @@dynamic = SitePage.create(:slug => "dynamic", :uid => "dynamic")
-    @@dynamic.style = :dynamic
+    @@dynamic.layout = :dynamic
     @@root.pages << @@about
     @@root.pages << @@news
     @@root.pages << @@dynamic

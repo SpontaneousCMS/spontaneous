@@ -185,8 +185,8 @@ class RenderTest < MiniTest::Spec
         class ::PageClass < Page; end
         # PageClass.box :things
         # PageClass.inline_style :inline_style
-        PageClass.page_style :subdir_style
-        PageClass.page_style :standard_page
+        PageClass.layout :subdir_style
+        PageClass.layout :standard_page
         @parent = PageClass.new
         @parent.title = "Parent"
       end
@@ -196,12 +196,12 @@ class RenderTest < MiniTest::Spec
       end
 
       should "find page styles at root of templates dir" do
-        @parent.style = :standard_page
+        @parent.layout = :standard_page
         @parent.render.should == "/Parent/\n"
       end
 
       should "find page styles in class sub dir" do
-        @parent.style = :subdir_style
+        @parent.layout = :subdir_style
         @parent.render.should == "<Parent>\n"
       end
     end
@@ -212,7 +212,7 @@ class RenderTest < MiniTest::Spec
         class ::PageClass < Page; end
         # class ::PieceClass < Piece; end
         PageClass.box :things
-        PageClass.page_style :page_style
+        PageClass.layout :page_style
         PageClass.inline_style :inline_style
         @parent = PageClass.new
         @parent.title = "Parent"
@@ -234,8 +234,8 @@ class RenderTest < MiniTest::Spec
 
       should "use their default page style when accessed directly" do
         @page = PageClass[@page.id]
-        @page.style.should == PageClass.page_styles.default
-        @parent.template.should == 'page_class/page_style'
+        @page.layout.should == PageClass.default_layout
+        @parent.template.should == 'layouts/page_style'
         @page.render.should == "<html></html>\n"
       end
 
@@ -256,7 +256,7 @@ class RenderTest < MiniTest::Spec
       setup do
         class ::TemplateParams < Page; end
         TemplateParams.field :image, :default => "/images/fromage.jpg"
-        TemplateParams.page_style :page_style
+        TemplateParams.layout :template_params
         @page = TemplateParams.new
       end
       teardown do
@@ -289,7 +289,7 @@ class RenderTest < MiniTest::Spec
     context "Preview render" do
       setup do
         Spontaneous::Render.renderer_class = Spontaneous::Render::PreviewRenderer
-        PreviewRender.page_style :page
+        PreviewRender.layout :preview_render
       end
 
       should "render all tags & include preview edit markers" do
@@ -305,7 +305,7 @@ PAGE <p>DESCRIPTION</p>
     context "Request rendering" do
       setup do
         Spontaneous::Render.renderer_class = Spontaneous::Render::PreviewRenderer
-        PreviewRender.page_style :params
+        PreviewRender.layout :params
       end
 
       should "pass on passed params" do
@@ -320,7 +320,7 @@ PAGE <p>DESCRIPTION</p>
     context "entry parameters" do
       setup do
         Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
-        PreviewRender.page_style :entries
+        PreviewRender.layout :entries
         @first = PreviewRender.new(:title => "first")
         @second = PreviewRender.new(:title => "second")
         @third = PreviewRender.new(:title => "third")

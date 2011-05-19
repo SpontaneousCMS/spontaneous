@@ -11,9 +11,14 @@ module Spontaneous
     def template
       ::File.join('layouts', "#{name}")
     end
+    alias_method :path, :template
 
     def default?
       @options[:default]
+    end
+
+    def formats
+      Spontaneous::Render.formats(self)
     end
   end
 end

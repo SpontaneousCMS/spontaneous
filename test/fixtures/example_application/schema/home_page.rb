@@ -13,7 +13,7 @@ class HomePage < Page
   	allow :InfoPage
   end
 
-  page_style :page
+  layout :home
 
   def prototype
     # make sure things are working with a prototype method
