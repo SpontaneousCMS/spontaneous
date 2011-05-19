@@ -11,5 +11,11 @@ module Spontaneous
         @content, @hidden_ancestor_id = content, hidden_ancestor_id
       end
     end
+
+    class UnknownLayoutError < Error
+      def initialize(parent_class, layout_name)
+        @parent_class, @layout_name = parent_class, layout_name
+      end
+    end
   end
 end

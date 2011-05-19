@@ -60,6 +60,7 @@ module Spontaneous
 
 
   autoload :Style, "spontaneous/style"
+  autoload :Layout, "spontaneous/layout"
   autoload :StyleDefinitions, "spontaneous/style_definitions"
   # autoload :RenderContext, "spontaneous/render_context"
   autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
@@ -101,6 +102,7 @@ module Spontaneous
     autoload :Fields, "spontaneous/plugins/fields"
     autoload :Entries, "spontaneous/plugins/entries"
     autoload :Styles, "spontaneous/plugins/styles"
+    autoload :Layouts, "spontaneous/plugins/layouts"
     autoload :SchemaTitle, "spontaneous/plugins/schema_title"
     autoload :Render, "spontaneous/plugins/render"
     autoload :SchemaHierarchy, "spontaneous/plugins/schema_hierarchy"
