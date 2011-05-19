@@ -30,9 +30,7 @@ module Spontaneous
       def generate_page
         self.destination_root = options[:root]
         empty_directory "schema"
-        # empty_directory "templates/#{disk_name}"
         template 'page.rb.tt', "schema/#{disk_name}.rb"
-        # template 'page.html.cut.tt', "templates/#{disk_name}/page.html.#{Spontaneous::Render.extension}"
         copy_file 'inline.html.cut', "templates/#{disk_name}.html.#{Spontaneous::Render.extension}"
       end
     end
