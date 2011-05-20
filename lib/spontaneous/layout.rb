@@ -8,9 +8,10 @@ module Spontaneous
       @name, @options = name.to_sym, options
     end
 
-    def template
+    def template(format = :html)
       ::File.join('layouts', "#{name}")
     end
+
     alias_method :path, :template
 
     def default?

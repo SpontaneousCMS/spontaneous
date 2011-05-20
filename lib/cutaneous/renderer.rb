@@ -90,7 +90,7 @@ module Cutaneous
           if ::File.exists?(template_or_filepath)
             template_or_filepath
           else
-            Spontaneous::Render.template_file(template_root, template_or_filepath, format)
+            Spontaneous::Render.template_file_with_root(template_root, template_or_filepath, format)
           end
         create_template(filepath, format)
       when Proc

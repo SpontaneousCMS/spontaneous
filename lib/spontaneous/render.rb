@@ -106,11 +106,15 @@ module Spontaneous
         Spontaneous.template_ext
       end
 
-      def exists?(template_root, template, format)
-        File.exists?(template_file(template_root, template, format))
+      def exists?(template, format)
+        File.exists?(template_file(template, format))
       end
 
-      def template_file(template_root, filename, format)
+      def template_file(filename, format)
+        ::File.join(template_root, template_name(filename, format))
+      end
+
+      def template_file_with_root(template_root, filename, format)
         ::File.join(template_root, template_name(filename, format))
       end
 

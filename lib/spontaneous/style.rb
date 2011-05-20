@@ -9,6 +9,36 @@ module Spontaneous
   end
 
   class Style
+    attr_reader :directory, :name
+
+    def initialize(directory, name, options={})
+      @directory, @name, @options = directory, name.to_sym, options
+    end
+
+    def template(format = :html)
+      try_templates.detect do |t|
+        Spontaneous::Render.exists?(t, format)
+      end.tap do |t|
+        logger.error("Missing templates: #{try_templates.join(',')}") if t.nil?
+      end
+    end
+
+    def try_templates
+      [::File.join([directory, name.to_s].compact), name.to_s].uniq
+    end
+
+    alias_method :path, :template
+
+    def default?
+      @options[:default]
+    end
+
+    def formats
+      Spontaneous::Render.formats(self)
+    end
+  end
+
+  class OldStyle
     def initialize(owner, name, options={})
       @owner = owner
       @name = name.to_sym

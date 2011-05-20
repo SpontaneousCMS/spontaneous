@@ -4,15 +4,19 @@ require 'test_helper'
 
 class LayoutsTest < MiniTest::Spec
 
+  def self.startup
+    Spontaneous::Render.use_development_renderer
+    Spontaneous.template_root = ::File.expand_path('../../fixtures/layouts', __FILE__)
+  end
+
   context "layouts" do
 
     setup do
-      Spontaneous.template_root = ::File.expand_path('../../fixtures/layouts', __FILE__)
       class ::LayoutPage < Spontaneous::Page; end
       class ::ABoxClass < Spontaneous::Box; end
       class ::SubPage < LayoutPage; end
-      ABoxClass.inline_style :monkey
-      ABoxClass.inline_style :crazy
+      ABoxClass.style :monkey
+      ABoxClass.style :crazy
 
       class ::SomeContent < Spontaneous::Piece; end
     end
