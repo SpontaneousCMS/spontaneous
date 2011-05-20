@@ -26,18 +26,23 @@ module Spontaneous::Plugins
       def default_style(format = :html)
         if styles.empty?
           style = Spontaneous::Style.new(nil, style_directory_name)
-          if S::Render.exists?(style.template, format)
+          if style.exists?(format)
             style
           else
             if supertype_has_styles?
               supertype.default_style(format)
             else
-              nil
+              # this is the case where no template file can be found
+              anonymous_style
             end
           end
         else
           styles.detect { |s| s.default? } or styles.first
         end
+      end
+
+      def anonymous_style
+        Spontaneous::Style::Anonymous.new
       end
 
       def find_named_style(format, style_id)
@@ -82,6 +87,10 @@ module Spontaneous::Plugins
         resolve_style(format, self.style_id)
       end
 
+      def default_style(format = :html)
+        self.class.default_style(format)
+      end
+
       def resolve_style(format, style_id)
         self.class.resolve_style(format, style_id)
       end
@@ -93,84 +102,6 @@ module Spontaneous::Plugins
 
     end # InstanceMethods
 
-    class InlineStyle
-      def initialize(target)
-        @target = target
-      end
-
-      def template(format=:html)
-        @target.class.inline_templates[format.to_sym]
-      end
-    end # InlineStyle
-
-
-    # Used by slots to check for the existance of a template named
-    # SlotsOwningClass.template_directory/slot_name.{format}.erb
-    # and use it if it exists
-    # if not it falls back to a default template that just renders the
-    # Piece's content
-    class AnonymousStyle
-      def initialize(container, label)
-        @container = container
-        @label = label
-      end
-
-      def template(format=:html)
-        if has_default_template?(format)
-          style.template(format)
-        else
-          lambda { '{{ render_content }}' }
-        end
-      end
-
-      def has_default_template?(format)
-        return false if @label.nil? or @label.empty?
-        Spontaneous::Render.exists?(Spontaneous::Render.template_root, style.path, format)
-      end
-
-      def style
-        @style ||= Spontaneous::Style.new(@container.class, @label)
-      end
-
-      def render(context)
-        context.instance_eval('render_content')
-      end
-
-      def path
-        "<Anonymous>"
-      end
-    end # AnonymousStyle
-  end
-
-  class DefaultStyle < Spontaneous::Style
-    def initialize(owner)
-      @owner = owner
-    end
-
-    def path(format=:html)
-      owner_directory_name
-    end
-
-    def name
-      owner_directory_name
-    end
-
-
-    def default?
-      true
-    end
-
-    def basename
-      owner_directory_name
-    end
-
-    def owner_directory_name
-      (@owner.name || "").underscore
-    end
-
-    def title
-      "#{owner.name} Default"
-    end
   end
 end
 

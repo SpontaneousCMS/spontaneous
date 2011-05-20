@@ -108,12 +108,13 @@ module Spontaneous
       container.pieces.index(self)
     end
 
-    def style
-      if @entry_style_name
-        target.styles[@entry_style_name]
-      else
+    def style(format = :html)
         target.style
-      end
+      # if @entry_style_name
+      #   target.styles[@entry_style_name]
+      # else
+      #   target.style
+      # end
     end
 
     def template(format=:html)

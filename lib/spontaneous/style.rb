@@ -9,7 +9,7 @@ module Spontaneous
   end
 
   class Style
-    attr_reader :directory, :name
+    attr_reader :directory, :name, :options
 
     def initialize(directory, name, options={})
       @directory, @name, @options = directory, name.to_sym, options
@@ -33,8 +33,34 @@ module Spontaneous
       @options[:default]
     end
 
+    def exists?(format = :html)
+      S::Render.exists?(template, format)
+    end
+
     def formats
       Spontaneous::Render.formats(self)
     end
+
+    class Anonymous
+      def initialize(template_code = "")
+        @template_code = template_code
+      end
+      def template(format = :html)
+        Proc.new { @template_code }
+      end
+      def exists?(format = :html)
+        true
+      end
+    end
+    class BoxStyle < Style
+      def initialize(owner_directory, type_directory, name, options={})
+        @owner_directory, @type_directory, @name, @options = owner_directory, type_directory, name.to_sym, options
+      end
+      def try_templates
+        [::File.join([directory, name.to_s].compact), name.to_s].uniq
+      end
+    end
   end
+
+
 end
