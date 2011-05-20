@@ -74,56 +74,40 @@ module Spontaneous
     end
 
     def self.resolve_style(format, box)
+      prototype = box._prototype
+      owner_class = box._owner.class.style_directory_name
+      box_class = prototype.box_base_class.style_directory_name
+
+      possible_styles = [
+        S::Style.new(owner_class, box._name),
+      ]
       if styles.empty?
-        box_default_style(format, box)
+        possible_styles << S::Style.new(nil, box_class) if box_class
       else
-        style = box_name_style(format, box)
-        if style.exists?(format)
-          style
+        if style_name = prototype.default_style
+          possible_styles << S::Style.new(owner_class, style_name)
+          possible_styles << S::Style.new(box_class, style_name)
         else
-          styles.map do |s|
-            Spontaneous::Style.new(box._prototype.box_base_class.style_directory_name, s.name, s.options)
-          end.detect do |s|
-            s.exists?(format)
+          styles.each do |style|
+            possible_styles << S::Style.new(owner_class, style.name, style.options)
+            possible_styles << S::Style.new(box_class, style.name, style.options)
           end
         end
       end
-    end
-
-
-    def self.box_default_style(format, box)
-      style = box_name_style(format, box)
-
-      if style.exists?(format)
-        style
-      else
-        style = box.class.default_style(format)
-        if style.exists?
-          style
-        else
-          anonymous_style
-        end
-      end
+      # anonymous styles always exist so this will be the result if all else fails
+      possible_styles << anonymous_style
+      possible_styles.detect { |s| s.exists? }
     end
 
     def self.anonymous_style
       Spontaneous::Style::Anonymous.new("{{ render_content }}")
     end
 
-    def self.box_name_style(format, box)
-      style = nil
-      if styles.empty?
-        style = Spontaneous::Style.new(box._owner.class.style_directory_name, box._name)
-      else
-        style_name = styles.first.name
-        if default_style = box._prototype.default_style
-          style_name = default_style
-        end
-        style = Spontaneous::Style.new(box._owner.class.style_directory_name, style_name)
-      end
-      style
-    end
 
+    def self.style_directory_name
+      return nil if self == Spontaneous::Box
+      super
+    end
 
     def style(format = :html)
       resolve_style(format, self)
