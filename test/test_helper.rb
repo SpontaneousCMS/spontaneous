@@ -141,7 +141,7 @@ class MiniTest::Spec
       when Array
         assert_arrays_equal(expected, result, path, level+1)
       else
-        assert_equal expected, result, "Key '#{path[0..level].join(' > ')}' should be identical"
+        assert_equal expected, result, "Key '#{path[0..level].join(' -> ')}' should be identical"
       end
     end
   end

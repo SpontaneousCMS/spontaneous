@@ -16,7 +16,7 @@ module Spontaneous
     end
 
     def style_id
-      name
+      @options[:style_id]
     end
 
     def template(format = :html)
@@ -49,9 +49,11 @@ module Spontaneous
       def initialize(template_code = "")
         @template_code = template_code
       end
+
       def template(format = :html)
         Proc.new { @template_code }
       end
+
       def exists?(format = :html)
         true
       end
@@ -74,6 +76,7 @@ module Spontaneous
       end
     end
   end
+
 
 
 end

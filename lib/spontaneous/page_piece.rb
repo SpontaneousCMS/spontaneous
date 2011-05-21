@@ -42,7 +42,7 @@ module Spontaneous
     def styles_to_hash
       {
         :style => style_id.to_s,
-        :styles => container.available_styles(target).map { |n, s| s.name.to_s },
+        :styles => container.available_styles(target).map { |s| s.name.to_s },
       }
     end
 

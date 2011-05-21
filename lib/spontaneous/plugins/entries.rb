@@ -142,6 +142,7 @@ module Spontaneous::Plugins
           when :page
             Spontaneous::PagePiece.new(self, content, entry_style.style_id)
           when :piece
+            content.style = entry_style
             content
           end
         begin
@@ -177,12 +178,8 @@ module Spontaneous::Plugins
       end
 
       def available_styles(content)
-        content.styles
+        content.class.styles
       end
-
-      # def entry=(entry)
-      #   @entry = entry
-      # end
 
       def container=(container)
         super
