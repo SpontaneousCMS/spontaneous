@@ -23,7 +23,7 @@ module Spontaneous
       try_templates.detect do |t|
         Spontaneous::Render.exists?(t, format)
       end.tap do |t|
-        logger.error("Missing templates: #{try_templates.join(',')}") if t.nil?
+        # logger.error("Missing templates: #{try_templates.join(',')}") if t.nil?
       end
     end
 

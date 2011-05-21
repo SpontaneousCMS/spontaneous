@@ -313,7 +313,7 @@ module Spontaneous
             content.save
             json({
               :position => position,
-              :entry => instance.entry.to_hash
+              :entry => instance.to_hash
             })
           else
             unauthorised!

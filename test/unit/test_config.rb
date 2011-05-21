@@ -9,8 +9,9 @@ class ConfigTest < MiniTest::Spec
 
   context "Config" do
     setup do
+      @lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../lib'))
+      load @lib_dir + '/spontaneous/config.rb'
       Config = ::Spontaneous::Config
-      @lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../../../../lib'))
       @pwd = Dir.pwd
       Dir.chdir(File.expand_path("../../fixtures/config", __FILE__))
       Spontaneous.root = Dir.pwd
@@ -28,6 +29,7 @@ class ConfigTest < MiniTest::Spec
       Object.send(:remove_const, :TopLevel)
       Dir.chdir(@pwd)
       self.class.send(:remove_const, :Config) rescue nil
+      Spontaneous.send(:remove_const, :Config) rescue nil
     end
 
     context "Config" do

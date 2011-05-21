@@ -208,10 +208,10 @@ module Spontaneous::Plugins
         page.modified!(page?) if page
       end
 
-      def after_create
-        super
-        push_page_change
-      end
+      # def after_create
+      #   super
+      #   push_page_change
+      # end
 
       def modified!(caller_is_page)
         unless caller_is_page

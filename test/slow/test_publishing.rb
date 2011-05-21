@@ -510,8 +510,8 @@ class PublishingTest < MiniTest::Spec
         change = Change.first
         change.modified_list.must_be_instance_of(Array)
         change.modified_list.length.should == 2
-        change.modified_list.should == [new_page.id, page.id]
-        change.modified.should == [new_page, page]
+        change.modified_list.should == [page.id, new_page.id]
+        change.modified.should == [page, new_page]
       end
 
 

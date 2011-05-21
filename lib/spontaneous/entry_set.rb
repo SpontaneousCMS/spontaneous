@@ -14,7 +14,8 @@ module Spontaneous
       (piece_store || []).each do |data|
         entry = \
           if data[:page]
-            PagePiece.new(@owner, data[:page], data[:style_id])
+            page = @owner._pieces.detect { |piece| piece.id == data[:page] }
+            PagePiece.new(@owner, page, data[:style_id])
           else
             @owner._pieces.detect { |piece| piece.id == data[:piece] }
           end
@@ -59,7 +60,7 @@ module Spontaneous
 
 
     def set_position(content, position)
-      piece = self.detect {|e| e.target == content }
+      piece = self.detect {|e| e.id == content.id }
       self.array_delete(piece)
       self.insert(position, piece)
       owner.entry_modified!(piece)

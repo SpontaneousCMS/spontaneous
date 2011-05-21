@@ -11,6 +11,7 @@ class BackTest < MiniTest::Spec
 
 
   def self.startup
+    Spontaneous.logger = nil
   end
 
   def self.shutdown

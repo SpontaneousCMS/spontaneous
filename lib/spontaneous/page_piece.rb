@@ -7,18 +7,14 @@ module Spontaneous
     plugin Plugins::Render
 
     attr_accessor :container
-    attr_reader :target_id, :style_id
+    attr_reader :target, :style_id
 
-    def initialize(container, target_id, style_id)
-      @container, @target_id, @style_id = container, target_id, style_id
+    def initialize(container, target, style_id)
+      @container, @target, @style_id = container, target, style_id
     end
 
-    def self.find_target(container, id)
-      Content[id]
-    end
-
-    def target
-      @target ||= Content[target_id]
+    def id
+      target.id
     end
 
     def depth
@@ -27,6 +23,14 @@ module Spontaneous
 
     def style(format = :html)
       target.class.resolve_style(style_name, format)
+    end
+
+    def entry
+      @entry ||= resolve_entry
+    end
+
+    def resolve_entry
+      container.all_pieces.find { |e| e.id == target.id }
     end
 
     def to_hash

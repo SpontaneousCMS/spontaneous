@@ -4,9 +4,15 @@ module Spontaneous::Plugins
   module Entry
     module InstanceMethods
 
+      # kept to allow access to pages & pieces as they would be seen when
+      # accessed as an entry in a box
+      def entry
+        self
+      end
 
       def box_id
-        self[:box_id].to_sym
+        return nil unless box_id = self[:box_id]
+        box_id.to_sym
       end
 
       def box

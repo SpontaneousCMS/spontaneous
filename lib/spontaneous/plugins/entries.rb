@@ -140,11 +140,10 @@ module Spontaneous::Plugins
         entry = \
           case type
           when :page
-            Spontaneous::PagePiece.new(self, content.id, entry_style.style_id)
+            Spontaneous::PagePiece.new(self, content, entry_style.style_id)
           when :piece
             content
           end
-          # Spontaneous::Entry.send(type, self, content, entry_style, box)
         begin
           pieces.insert(index, entry)
         rescue TypeError, RuntimeError => e
@@ -161,6 +160,14 @@ module Spontaneous::Plugins
         container.save
       end
 
+      def set_position(new_position)
+        if box
+          box.set_position(self, new_position)
+        else
+          container.pieces.set_position(self, new_position)
+        end
+      end
+
       def style_for_content(content, box = nil)
         if box
           box.style_for_content(content)
@@ -173,24 +180,15 @@ module Spontaneous::Plugins
         content.styles
       end
 
-      def entry=(entry)
-        @entry = entry
-      end
-
-      def entry
-        @entry ||= resolve_entry
-      end
+      # def entry=(entry)
+      #   @entry = entry
+      # end
 
       def container=(container)
         super
         self[:content_path] = [container.content_path, container.id].compact.join(CONTENT_PATH_SEP)
       end
 
-      def resolve_entry
-        container.all_pieces.find { |e| e.target_id == self.id }
-      end
-
-      protected(:resolve_entry)
     end # InstanceMethods
   end # Entries
 end # Spontaneous::Plugins
