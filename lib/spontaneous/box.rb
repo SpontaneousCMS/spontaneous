@@ -73,14 +73,17 @@ module Spontaneous
       }
     end
 
-    def self.resolve_style(format, box)
+    def self.resolve_style(box, format = :html)
       prototype = box._prototype
       owner_class = box._owner.class.style_directory_name
       box_class = prototype.box_base_class.style_directory_name
 
+      # you can always over-ride the configured styles by having a template named after the box
+      # in the style directory for its owning class
       possible_styles = [
         S::Style.new(owner_class, box._name),
       ]
+
       if styles.empty?
         possible_styles << S::Style.new(nil, box_class) if box_class
       else
@@ -110,7 +113,7 @@ module Spontaneous
     end
 
     def style(format = :html)
-      resolve_style(format, self)
+      resolve_style(self, format)
     end
 
     def container
@@ -124,11 +127,6 @@ module Spontaneous
     def depth
       container.content_depth
     end
-
-    # def style
-    #   _prototype.style
-    # end
-
 
     def push(content)
       insert(-1, content)

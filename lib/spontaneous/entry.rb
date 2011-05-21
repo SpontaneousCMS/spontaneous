@@ -157,7 +157,7 @@ module Spontaneous
       end
     end
 
-    def serialize
+    def serialize_entry
       {
         :type => self.proxy_class.name.demodulize,
         :id => target.id,
@@ -179,7 +179,7 @@ module Spontaneous
     def styles_to_hash
       {
         :style => @entry_style_name.to_s,
-        :styles => container.available_styles(target).map { |s| s.name.to_s },
+        :styles => container.available_styles(target).map { |n, s| s.name.to_s },
       }
     end
 

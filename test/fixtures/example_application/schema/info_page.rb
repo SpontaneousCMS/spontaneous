@@ -9,5 +9,5 @@ class InfoPage < Page
 
   layout :info
 
-  inline_style :inline
+  style :inline
 end

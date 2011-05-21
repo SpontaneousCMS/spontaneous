@@ -15,6 +15,10 @@ module Spontaneous
       @directory, @name, @options = directory, name.to_sym, options
     end
 
+    def style_id
+      name
+    end
+
     def template(format = :html)
       try_templates.detect do |t|
         Spontaneous::Render.exists?(t, format)
@@ -51,7 +55,16 @@ module Spontaneous
       def exists?(format = :html)
         true
       end
+
+      def name
+        nil
+      end
+
+      def style_id
+        nil
+      end
     end
+
     class BoxStyle < Style
       def initialize(owner_directory, type_directory, name, options={})
         @owner_directory, @type_directory, @name, @options = owner_directory, type_directory, name.to_sym, options

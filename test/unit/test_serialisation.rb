@@ -21,9 +21,9 @@ class SerialisationTest < MiniTest::Spec
         end
         field :thumbnail, :image
 
-        inline_style :dancing
-        inline_style :sitting
-        inline_style :kneeling
+        style :dancing
+        style :sitting
+        style :kneeling
 
         box :insides
       end
@@ -36,8 +36,8 @@ class SerialisationTest < MiniTest::Spec
           sizes :thumbnail => { :width => 50 }
         end
 
-        inline_style :freezing
-        inline_style :boiling
+        style :freezing
+        style :boiling
         box :things, :title => "My Things" do
           allow :SerialisedPage, :styles => [:sitting, :kneeling]
           field :title, :string
@@ -105,13 +105,11 @@ class SerialisationTest < MiniTest::Spec
 
 
         @piece1.label = "label1"
-        @piece1.slot_name = "The Pages"
         @piece1.title = "Piece 1"
         @piece1.location = "Piece 1 Location"
         @piece1.date = date
 
         @piece2.label = "label2"
-        @piece2.slot_name = "The Doors"
         @piece2.title = "Piece 2"
         @piece2.location = "Piece 2 Location"
         @piece2.date = date
@@ -126,13 +124,15 @@ class SerialisationTest < MiniTest::Spec
         @child.uid = "about"
 
         @root.pieces[0].style = :freezing
-        @root.pieces[0].visible = false
+        @root.insides.pieces[0].visible = false
         @root.pieces[1].style = :boiling
         @root.pieces[0].pieces[0].style = :sitting
 
         @child.path.should == "/about"
 
-        [@root, @piece1, @piece2, @piece3, @child].each { |c| c.save }
+
+        [@root, @child, @piece1, @piece2, @piece3, @child].each { |c| c.save }
+
         @root_hash = {
           :type=>"SerialisedPage",
           :depth=>0,
@@ -181,7 +181,7 @@ class SerialisationTest < MiniTest::Spec
         ],
           :uid=>"about",
           :style=>"sitting",
-          :hidden => false,
+          :hidden => true,
           :is_page=>true,
           :slug=>"about",
           :id=>@child.id
@@ -190,7 +190,7 @@ class SerialisationTest < MiniTest::Spec
         }
         ],
           :is_page=>false,
-          :name=>"The Pages",
+          # :name=>"The Pages",
           :id=>@piece1.id
         },
           { # ENTRY
@@ -207,7 +207,7 @@ class SerialisationTest < MiniTest::Spec
           :style=>"boiling",
           :hidden => false,
           :is_page=>false,
-          :name=>"The Doors",
+          # :name=>"The Doors",
           :id=>@piece2.id,
         :boxes=>[{:entries=>[], :fields=>[{:unprocessed_value=>"", :processed_value=>"", :name=>"title", :attributes => {}}], :id=>"things"}]
         }
@@ -215,8 +215,11 @@ class SerialisationTest < MiniTest::Spec
         }
         ]
         }
+        @root = Content[@root.id]
       end
+
       should "generate a hash for JSON serialisation" do
+        # pp @root_hash
         # pp @root.to_hash
         assert_hashes_equal(@root_hash, @root.to_hash)
       end

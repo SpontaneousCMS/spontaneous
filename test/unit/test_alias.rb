@@ -25,12 +25,12 @@ class AliasTest < MiniTest::Spec
         field :a_field1
         field :a_field2
 
-        inline_style :a_style
+        style :a_style
       end
 
       class ::AA < ::A
         field :aa_field1
-        inline_style :aa_style
+        style :aa_style
       end
 
       class ::AAA < ::AA
@@ -50,7 +50,7 @@ class AliasTest < MiniTest::Spec
         alias_of :A
 
         field :a_alias_field1
-        inline_style :a_alias_style
+        style :a_alias_style
       end
 
       class ::AAAlias < Piece

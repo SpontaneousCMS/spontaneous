@@ -37,11 +37,11 @@ class RenderTest < MiniTest::Spec
           end
         end
 
-        inline_style :this_template
-        inline_style :another_template
+        style :this_template
+        style :another_template
       end
       @content = TemplateClass.new
-      @content.style.should == TemplateClass.styles.default
+      @content.style.should == TemplateClass.default_style
       @content.title = "The Title"
       @content.description = "The Description"
     end
@@ -64,7 +64,7 @@ class RenderTest < MiniTest::Spec
 
     context "piece trees" do
       setup do
-        TemplateClass.inline_style :complex_template, :default => true
+        TemplateClass.style :complex_template, :default => true
         TemplateClass.box :bits
         @content = TemplateClass.new
         @content.title = "The Title"
@@ -73,7 +73,7 @@ class RenderTest < MiniTest::Spec
         @child.title = "Child Title"
         @child.description = "Child Description"
         @content.bits << @child
-        @content.pieces.first.style = TemplateClass.styles[:this_template]
+        @content.pieces.first.style = TemplateClass.get_style(:this_template)
       end
       teardown do
         Content.delete
@@ -92,7 +92,7 @@ class RenderTest < MiniTest::Spec
         child.title = "Child2 Title"
         child.description = "Child2 Description"
         @content << child
-        @content.pieces.last.style = TemplateClass.styles[:this_template]
+        @content.pieces.last.style = TemplateClass.get_style(:this_template)
         @content.pieces.last.hide!
         @content.render.should == "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
       end
@@ -100,7 +100,7 @@ class RenderTest < MiniTest::Spec
 
     context "boxes" do
       setup do
-        TemplateClass.inline_style :slots_template, :default => true
+        TemplateClass.style :slots_template, :default => true
         TemplateClass.box :images
         @content = TemplateClass.new
         @content.title = "The Title"
@@ -109,7 +109,7 @@ class RenderTest < MiniTest::Spec
         @child.title = "Child Title"
         @child.description = "Child Description"
         @content.images << @child
-        @content.images.first.style = TemplateClass.styles[:this_template]
+        @content.images.first.style = TemplateClass.get_style(:this_template)
       end
 
       should "render boxes" do
@@ -122,7 +122,7 @@ class RenderTest < MiniTest::Spec
 
     context "anonymous boxes" do
       setup do
-        TemplateClass.inline_style :anonymous_style, :default => true
+        TemplateClass.style :anonymous_style, :default => true
         TemplateClass.box :images do
           field :introduction
         end
@@ -152,7 +152,7 @@ class RenderTest < MiniTest::Spec
 
     context "default templates" do
       setup do
-        TemplateClass.inline_style :default_template_style, :default => true
+        TemplateClass.style :default_template_style, :default => true
         TemplateClass.box :images_with_template do
           field :introduction
         end
@@ -184,7 +184,7 @@ class RenderTest < MiniTest::Spec
       setup do
         class ::PageClass < Page; end
         # PageClass.box :things
-        # PageClass.inline_style :inline_style
+        # PageClass.style :inline_style
         PageClass.layout :subdir_style
         PageClass.layout :standard_page
         @parent = PageClass.new
@@ -213,7 +213,7 @@ class RenderTest < MiniTest::Spec
         # class ::PieceClass < Piece; end
         PageClass.box :things
         PageClass.layout :page_style
-        PageClass.inline_style :inline_style
+        PageClass.style :inline_style
         @parent = PageClass.new
         @parent.title = "Parent"
         @page = PageClass.new
@@ -228,8 +228,8 @@ class RenderTest < MiniTest::Spec
       end
 
       should "use style assigned by entry" do
-        @parent.pieces.first.style.should == PageClass.inline_styles.default
-        @parent.things.first.style.should == PageClass.inline_styles.default
+        @parent.pieces.first.style.should == PageClass.default_style
+        @parent.things.first.style.should == PageClass.default_style
       end
 
       should "use their default page style when accessed directly" do
@@ -241,7 +241,7 @@ class RenderTest < MiniTest::Spec
 
       should "persist sub-page style settings" do
         @parent = Page[@parent.id]
-        @parent.pieces.first.style.should == PageClass.inline_styles.default
+        @parent.pieces.first.style.should == PageClass.default_style
       end
 
       should "render using the inline style" do
@@ -274,11 +274,12 @@ class RenderTest < MiniTest::Spec
       Spontaneous::Render.template_root = template_root
 
       class ::PreviewRender < Page; end
-      PreviewRender.inline_style :inline
+      PreviewRender.style :inline
       PreviewRender.box :images
       PreviewRender.field :description, :markdown
       @page = PreviewRender.new(:title => "PAGE", :description => "DESCRIPTION")
-      @page.stubs(:id).returns(24)
+      # @page.stubs(:id).returns(24)
+      @page.save
       @session = ::Rack::MockSession.new(Sinatra::Application)
     end
 
@@ -327,6 +328,7 @@ PAGE <p>DESCRIPTION</p>
         @page.images << @first
         @page.images << @second
         @page.images << @third
+        @page.save
       end
       should "be available to templates" do
         @page.render.should == "0>first\n1second\n2<third\n0:first\n1:second\n2:third\nfirst.second.third\n"

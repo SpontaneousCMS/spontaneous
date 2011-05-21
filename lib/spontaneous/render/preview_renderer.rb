@@ -7,7 +7,7 @@ module Spontaneous
       def render_content(content, format=:html, params = {})
         # render content using first_pass_renderer
         # then render this using second_pass_renderer
-        template = preview_renderer.render_file(content.template, content, format, params)
+        template = preview_renderer.render_file(content.template(format), content, format, params)
         result = request_renderer.render_string(template, content, format, params)
 
         result

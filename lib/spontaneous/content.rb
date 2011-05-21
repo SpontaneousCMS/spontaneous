@@ -34,13 +34,14 @@ module Spontaneous
       page?
     end
 
-    many_to_one :container, :class => self, :reciprocal => :pieces
+    many_to_one :container, :key => :container_id, :class => self, :reciprocal => :_pieces
     one_to_many :_pieces,    :key => :container_id, :class => self, :reciprocal => :container
     many_to_one :page, :class => Content, :key => :page_id, :reciprocal => :content
 
     extend Plugins
 
     # plugin Plugins::Slots
+    plugin Plugins::Entry
     plugin Plugins::Boxes
     plugin Plugins::Fields
     plugin Plugins::Entries

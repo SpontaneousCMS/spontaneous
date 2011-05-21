@@ -34,7 +34,7 @@ module Spontaneous::Plugins
       def destroy(remove_container_entry=true, container=nil)
         container ||= self.container
         if container && remove_container_entry
-          container.destroy_entry!(self.entry)
+          container.destroy_entry!(self)
         end
         super()
       end
@@ -132,9 +132,19 @@ module Spontaneous::Plugins
       end
 
       def insert_with_style(type, index, content, box = nil)
+        self._pieces << content
         entry_style = style_for_content(content, box)
+        content.box_id = box.box_id if box
         content._prototype = box.prototype_for_content(content) if box
-        entry = Spontaneous::Entry.send(type, self, content, entry_style, box)
+        content.save if content.new?
+        entry = \
+          case type
+          when :page
+            Spontaneous::PagePiece.new(self, content.id, entry_style.style_id)
+          when :piece
+            content
+          end
+          # Spontaneous::Entry.send(type, self, content, entry_style, box)
         begin
           pieces.insert(index, entry)
         rescue TypeError, RuntimeError => e
@@ -155,7 +165,7 @@ module Spontaneous::Plugins
         if box
           box.style_for_content(content)
         else
-          content.styles.default
+          content.default_style
         end
       end
 

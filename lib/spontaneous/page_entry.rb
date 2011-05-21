@@ -11,8 +11,8 @@ module Spontaneous
       container.content_depth + 1
     end
 
-    def style
-      target.class.inline_styles[style_name]
+    def style(format = :html)
+      target.class.resolve_style(style_name, format)
     end
 
     def to_hash

@@ -55,7 +55,8 @@ module Spontaneous
   autoload :FieldTypes, "spontaneous/field_types"
 
   autoload :Entry, "spontaneous/entry"
-  autoload :PageEntry, "spontaneous/page_entry"
+  # autoload :PageEntry, "spontaneous/page_entry"
+  autoload :PagePiece, "spontaneous/page_piece"
   autoload :EntrySet, "spontaneous/entry_set"
 
 
@@ -101,6 +102,7 @@ module Spontaneous
     autoload :Boxes, "spontaneous/plugins/boxes"
     autoload :Fields, "spontaneous/plugins/fields"
     autoload :Entries, "spontaneous/plugins/entries"
+    autoload :Entry, "spontaneous/plugins/entry"
     autoload :Styles, "spontaneous/plugins/styles"
     autoload :Layouts, "spontaneous/plugins/layouts"
     autoload :SchemaTitle, "spontaneous/plugins/schema_title"

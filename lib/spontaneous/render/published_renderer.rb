@@ -34,7 +34,7 @@ module Spontaneous
       end
 
       def rerender(content, format = :html, params = {})
-        template = publishing_renderer.render_file(content.template, content, format)
+        template = publishing_renderer.render_file(content.template(format), content, format)
         request_renderer.render_string(template, content, format, params)
       end
     end # PublishedRenderer

@@ -12,32 +12,36 @@ module Spontaneous::Plugins
       end
 
       def styles
-        @inline_styles ||= []
+        @styles ||= []
       end
 
-      def resolve_style(format, style_id)
+      def resolve_style(style_id, format = :html)
         if style_id.blank?
           default_style(format)
         else
-          find_named_style(format, style_id)
+          find_named_style(style_id)
         end
       end
 
       def default_style(format = :html)
-        if styles.empty?
-          style = Spontaneous::Style.new(nil, style_directory_name)
-          if style.exists?(format)
-            style
-          else
-            if supertype_has_styles?
-              supertype.default_style(format)
-            else
-              # this is the case where no template file can be found
-              anonymous_style
-            end
-          end
+        if template_string = inline_templates[format.to_sym]
+          Spontaneous::Style::Anonymous.new(template_string)
         else
-          styles.detect { |s| s.default? } or styles.first
+          if styles.empty?
+            style = Spontaneous::Style.new(nil, style_directory_name)
+            if style.exists?(format)
+              style
+            else
+              if supertype_has_styles?
+                supertype.default_style(format)
+              else
+                # this is the case where no template file can be found
+                anonymous_style
+              end
+            end
+          else
+            styles.detect { |s| s.default? } or styles.first
+          end
         end
       end
 
@@ -45,7 +49,7 @@ module Spontaneous::Plugins
         Spontaneous::Style::Anonymous.new
       end
 
-      def find_named_style(format, style_id)
+      def find_named_style(style_id)
         name = style_id.to_sym
         unless style = styles.detect { |s| s.name == name }
           # style = supertype.resolve_style(name) if supertype_has_style?
@@ -53,17 +57,19 @@ module Spontaneous::Plugins
         style
       end
 
-      # def template(format=:html, erb_code=nil)
-      #   if erb_code.nil?
-      #     erb_code = format
-      #     format = :html
-      #   end
-      #   inline_templates[format.to_sym] = eval(%(Proc.new { #{erb_code.inspect} }))
-      # end
+      alias_method :get_style, :find_named_style
 
-      # def inline_templates
-      #   @inline_templates ||= {}
-      # end
+      def template(format=:html, template_string=nil)
+        if template_string.nil?
+          template_string = format
+          format = :html
+        end
+        inline_templates[format.to_sym] = template_string
+      end
+
+      def inline_templates
+        @inline_templates ||= {}
+      end
 
       # Used to determine the name of the directory under template_root
       # that holds a classe's templates
@@ -79,20 +85,25 @@ module Spontaneous::Plugins
 
     module InstanceMethods
 
-      def style=(style_id)
-        self.style_id = style_id
+      def style=(style)
+        style = style.style_id if style.is_a?(Spontaneous::Style)
+        self.style_id = style
       end
 
       def style(format = :html)
-        resolve_style(format, self.style_id)
+        resolve_style(self.style_id, format)
       end
 
       def default_style(format = :html)
         self.class.default_style(format)
       end
 
-      def resolve_style(format, style_id)
-        self.class.resolve_style(format, style_id)
+      def resolve_style(style_id, format = :html)
+        self.class.resolve_style(style_id, format)
+      end
+
+      def styles
+        @_styles ||= Hash[self.class.styles.map { |s| [s.name, s]}]
       end
 
       def template(format = :html)
