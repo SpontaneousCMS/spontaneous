@@ -142,13 +142,14 @@ class AliasTest < MiniTest::Spec
         end
 
         should "have their own styles" do
-          @a_alias.styles.first.name.should == :a_alias_style
-          @a_alias.styles.default.name.should == :a_alias_style
+          @a_alias.style.template.should == 'a_alias/a_alias_style'
         end
+
         should "present their target's styles as their own" do
-          @a_alias.styles.length.should == 2
-          @a_alias.styles.map { |s| s.name }.should == [:a_alias_style, :a_style]
+          @a_alias.style = :a_style
+          @a_alias.style.template.should == 'a/a_style'
         end
+
         # should "have an independent style setting"
         should "not delete their target when deleted" do
           @a_alias.destroy

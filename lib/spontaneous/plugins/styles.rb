@@ -108,9 +108,9 @@ module Spontaneous::Plugins
         self.class.resolve_style(style_id, format)
       end
 
-      def styles
-        @_styles ||= Hash[self.class.styles.map { |s| [s.name, s]}]
-      end
+      # def styles
+      #   []#@_styles ||= Hash[self.class.styles.map { |s| [s.name, s]}]
+      # end
 
       def template(format = :html)
         style(format).template(format)

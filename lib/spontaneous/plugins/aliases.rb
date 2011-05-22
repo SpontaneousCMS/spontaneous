@@ -52,8 +52,12 @@ module Spontaneous::Plugins
         end
       end
 
-      def styles
-        @styles ||= S::StyleDefinitions.new(self.class.styles, [target, :styles])
+      def style(format = :html)
+        if self.class.styles.empty?
+          target.resolve_style(style_id, format)
+        else
+          self.resolve_style(self.style_id, format) or target.resolve_style(self.style_id, format)
+        end
       end
     end
 
@@ -76,9 +80,6 @@ module Spontaneous::Plugins
         end
       end
 
-      # def layouts
-      #   @layouts ||= S::StyleDefinitions.new(self.class.layouts, [target, :layouts])
-      # end
     end
   end
 end

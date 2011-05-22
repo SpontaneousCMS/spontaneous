@@ -58,7 +58,6 @@ module Spontaneous
 
   autoload :Style, "spontaneous/style"
   autoload :Layout, "spontaneous/layout"
-  autoload :StyleDefinitions, "spontaneous/style_definitions"
 
   autoload :Site, "spontaneous/site"
   autoload :Schema, "spontaneous/schema"
