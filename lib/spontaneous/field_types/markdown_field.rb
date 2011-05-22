@@ -1,13 +1,12 @@
 # encoding: UTF-8
 
-
-require 'rdiscount'
+require 'kramdown'
 
 module Spontaneous
   module FieldTypes
-    class DiscountField < Base
+    class MarkdownField < Base
       def process(input)
-        RDiscount.new(preprocess(input), :smart, :filter_html).to_html
+        Kramdown::Document.new(preprocess(input)).to_html
       end
 
       def preprocess(input)
@@ -28,8 +27,7 @@ module Spontaneous
       end
     end
 
-    DiscountField.register(:text, :richtext, :markdown, :discount)
+    MarkdownField.register(:markdown, :text, :richtext)
   end
 end
-
 

@@ -25,7 +25,6 @@ gem 'thor', '~> 0.14.6'
 gem 'hwia', '~> 1.0.2'
 gem 'base58', '~> 0.1.0'
 # markdown
-gem 'rdiscount', '~> 1.6.5'
 gem 'kramdown', '~> 0.13.3'
 
 group :development do

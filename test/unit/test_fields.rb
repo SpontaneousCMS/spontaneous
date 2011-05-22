@@ -291,23 +291,23 @@ class FieldsTest < MiniTest::Spec
     end
   end
 
-  context "Discount fields" do
+  context "Markdown fields" do
     setup do
-      class ::DiscountContent < Content
+      class ::MarkdownContent < Content
         field :text1, :markdown
-        field :text2, :discount
+        field :text2, :text
       end
-      @instance = DiscountContent.new
+      @instance = MarkdownContent.new
     end
     teardown do
-      Object.send(:remove_const, :DiscountContent)
+      Object.send(:remove_const, :MarkdownContent)
     end
 
-    should "be abvailable as the :markdown type" do
-      DiscountContent.field_prototypes[:text1].field_class.should == Spontaneous::FieldTypes::DiscountField
+    should "be available as the :markdown type" do
+      MarkdownContent.field_prototypes[:text1].field_class.should == Spontaneous::FieldTypes::MarkdownField
     end
-    should "be abvailable as the :discount type" do
-      DiscountContent.field_prototypes[:text2].field_class.should == Spontaneous::FieldTypes::DiscountField
+    should "be available as the :text type" do
+      MarkdownContent.field_prototypes[:text2].field_class.should == Spontaneous::FieldTypes::MarkdownField
     end
 
     should "process input into HTML" do
@@ -317,9 +317,9 @@ class FieldsTest < MiniTest::Spec
 
     should "use more sensible linebreaks" do
       @instance.text1 = "With\nLinebreak"
-      @instance.text1.value.should == "<p>With<br/>\nLinebreak</p>\n"
+      @instance.text1.value.should == "<p>With<br />\nLinebreak</p>\n"
       @instance.text2 = "With  \nLinebreak"
-      @instance.text2.value.should == "<p>With<br/>\nLinebreak</p>\n"
+      @instance.text2.value.should == "<p>With<br />\nLinebreak</p>\n"
     end
   end
 end
