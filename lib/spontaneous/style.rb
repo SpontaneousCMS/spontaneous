@@ -15,11 +15,15 @@ module Spontaneous
       @directory, @name, @options = directory, name.to_sym, options
     end
 
+    def style_id
+      @options[:style_id]
+    end
+
     def template(format = :html)
       try_templates.detect do |t|
         Spontaneous::Render.exists?(t, format)
       end.tap do |t|
-        logger.error("Missing templates: #{try_templates.join(',')}") if t.nil?
+        # logger.error("Missing templates: #{try_templates.join(',')}") if t.nil?
       end
     end
 
@@ -45,22 +49,23 @@ module Spontaneous
       def initialize(template_code = "")
         @template_code = template_code
       end
+
       def template(format = :html)
         Proc.new { @template_code }
       end
+
       def exists?(format = :html)
         true
       end
-    end
-    class BoxStyle < Style
-      def initialize(owner_directory, type_directory, name, options={})
-        @owner_directory, @type_directory, @name, @options = owner_directory, type_directory, name.to_sym, options
+
+      def name
+        nil
       end
-      def try_templates
-        [::File.join([directory, name.to_s].compact), name.to_s].uniq
+
+      def style_id
+        nil
       end
     end
   end
-
-
 end
+

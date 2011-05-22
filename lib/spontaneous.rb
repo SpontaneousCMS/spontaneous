@@ -12,9 +12,9 @@ require 'active_support/core_ext/date_time/conversions'
 
 Sequel.extension :inflector
 
-Dir[File.join(File.dirname(__FILE__), 'spontaneous', 'extensions', '*.rb')].each do |extension|
-  require extension
-end
+Dir[File.join(File.dirname(__FILE__), 'spontaneous/extensions/*.rb')].each { |file|
+  require file
+}
 
 require 'spontaneous/logger'
 require 'spontaneous/plugins'
@@ -39,8 +39,6 @@ module Spontaneous
   plugin Plugins::Application::Render
 
   autoload :ProxyObject, "spontaneous/proxy_object"
-  # autoload :Logger, "spontaneous/logger"
-
 
   autoload :Config, "spontaneous/config"
 
@@ -54,16 +52,12 @@ module Spontaneous
 
   autoload :FieldTypes, "spontaneous/field_types"
 
-  autoload :Entry, "spontaneous/entry"
-  autoload :PageEntry, "spontaneous/page_entry"
+  autoload :PagePiece, "spontaneous/page_piece"
   autoload :EntrySet, "spontaneous/entry_set"
 
 
   autoload :Style, "spontaneous/style"
   autoload :Layout, "spontaneous/layout"
-  autoload :StyleDefinitions, "spontaneous/style_definitions"
-  # autoload :RenderContext, "spontaneous/render_context"
-  autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
 
   autoload :Site, "spontaneous/site"
   autoload :Schema, "spontaneous/schema"
@@ -73,7 +67,6 @@ module Spontaneous
   autoload :Rack, "spontaneous/rack"
 
   autoload :Render, "spontaneous/render"
-  autoload :Templates, "spontaneous/templates"
   autoload :Media, "spontaneous/media"
 
   autoload :Change, "spontaneous/change"
@@ -85,29 +78,20 @@ module Spontaneous
 
   autoload :Server, "spontaneous/server"
 
-
-
   autoload :Permissions, "spontaneous/permissions"
   autoload :ContentQuery, "spontaneous/content_query"
-
-  # autoload :Reloader, "spontaneous/reloader"
-
-  module Templates
-    autoload :TemplateBase, "spontaneous/templates/template_base"
-    autoload :ErubisTemplate, "spontaneous/templates/erubis_template"
-  end
 
   module Plugins
     autoload :Boxes, "spontaneous/plugins/boxes"
     autoload :Fields, "spontaneous/plugins/fields"
     autoload :Entries, "spontaneous/plugins/entries"
+    autoload :Entry, "spontaneous/plugins/entry"
     autoload :Styles, "spontaneous/plugins/styles"
     autoload :Layouts, "spontaneous/plugins/layouts"
     autoload :SchemaTitle, "spontaneous/plugins/schema_title"
     autoload :Render, "spontaneous/plugins/render"
     autoload :SchemaHierarchy, "spontaneous/plugins/schema_hierarchy"
     autoload :InstanceCode, "spontaneous/plugins/instance_code"
-    # autoload :PageStyles, "spontaneous/plugins/page_styles"
     autoload :Paths, "spontaneous/plugins/paths"
     autoload :PageTree, "spontaneous/plugins/page_tree"
     autoload :AllowedTypes, "spontaneous/plugins/allowed_types"

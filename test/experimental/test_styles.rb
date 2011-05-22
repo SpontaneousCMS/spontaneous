@@ -243,26 +243,31 @@ class StylesTest < MiniTest::Spec
       #   end
       # end
 
-      # context "inline templates" do
-      #   setup do
-      #     class ::InlineTemplateClass < Content
-      #       field :title
+      context "inline templates" do
+        setup do
+          class ::InlineTemplateClass < Content
+            field :title
 
-      #       template 'title: {{title}}'
-      #     end
+            template 'html: {{title}}'
+            template :pdf, 'pdf: {{title}}'
+          end
 
-      #     @a = InlineTemplateClass.new
-      #     @a.title = "Total Title"
-      #   end
+          @a = InlineTemplateClass.new
+          @a.title = "Total Title"
+        end
 
-      #   teardown do
-      #     Object.send(:remove_const, :InlineTemplateClass)
-      #   end
+        teardown do
+          Object.send(:remove_const, :InlineTemplateClass)
+        end
 
-      #   should "be used to render the content" do
-      #     @a.render.should ==  "title: Total Title"
-      #   end
-      # end
+        should "be used to render the content" do
+          @a.render.should ==  "html: Total Title"
+        end
+
+        should "be used to render the content with the right format" do
+          @a.render(:pdf).should ==  "pdf: Total Title"
+        end
+      end
 
       # context "default styles" do
       #   class ::DefaultStyleClass < Spontaneous::Box

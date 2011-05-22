@@ -65,6 +65,15 @@ class LoggerTest < MiniTest::Spec
       assert_match(/Yep this can be logged/, @log.string)
     end
 
+    should "be silenceable" do
+      setup_logger(:log_level => :debug)
+      @logger.silent!
+      @logger.error "You log this error?"
+      assert_empty(@log.string)
+      @logger.resume!
+      @logger.error "You log this error?"
+      assert_match(/You log this error?/, @log.string)
+    end
   end
 
 

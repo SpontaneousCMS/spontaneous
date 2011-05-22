@@ -222,7 +222,9 @@ module Spontaneous
     # the output of this block will be appended to the message.
     #
     def push(message = nil, level = nil)
+      unless @silent
       self << @format_message % [colored_level(level), set_color(Time.now.strftime(@format_datetime), :yellow), message.to_s.strip]
+      end
     end
 
     ##
@@ -283,6 +285,26 @@ module Spontaneous
       LEVELMETHODS
     end
 
+    def silent!
+      @silent = true
+      if block_given?
+        begin
+          yield
+        ensure
+          @silent = false
+        end
+      end
+    end
+
+    alias_method :pause!, :silent!
+
+    def silent?
+      @silent
+    end
+
+    def resume!
+      @silent = false
+    end
     ##
     # Spontaneous::Loggger::Rack forwards every request to an +app+ given, and
     # logs a line in the Apache common log format to the +logger+, or

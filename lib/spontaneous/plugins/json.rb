@@ -39,7 +39,6 @@ module Spontaneous::Plugins
           :hidden => (hidden? ? true : false),
           :depth => content_depth,
           :fields  => fields.to_hash,
-          :name => slot_name,
           :label => label
         }
       end

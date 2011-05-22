@@ -3,20 +3,23 @@
 
 module Spontaneous
   class EntrySet < Array
-    alias_method :store_insert, :insert
-    alias_method :store_push,   :push
-    alias_method :store_delete, :delete
+    alias_method :array_insert, :insert
+    alias_method :array_push,   :push
+    alias_method :array_delete, :delete
 
     attr_reader :owner
 
     def initialize(owner, piece_store)
       @owner = owner
-      type_cache = Hash.new { |hash, key| hash[key] = Spontaneous.const_get(key) }
-
       (piece_store || []).each do |data|
-        klass = type_cache[data[:type]]
-        piece = klass.new(@owner, data[:id], data[:style], data[:box_id])
-        store_push(piece)
+        entry = \
+          if data[:page]
+            page = @owner._pieces.detect { |piece| piece.id == data[:page] }
+            PagePiece.new(@owner, page, data[:style_id])
+          else
+            @owner._pieces.detect { |piece| piece.id == data[:piece] }
+          end
+        array_push(entry)
       end
     end
 
@@ -26,8 +29,8 @@ module Spontaneous
     end
 
     def insert(index, piece)
-      piece.piece_store = self
-      store_insert(index, piece)
+      # piece.piece_store = self
+      array_insert(index, piece)
       owner.entry_modified!(piece)
     end
 
@@ -47,18 +50,18 @@ module Spontaneous
 
 
     def delete(piece)
-      e = store_delete(piece)
+      e = array_delete(piece)
       owner.entry_modified!(nil)
     end
 
     def serialize
-      self.map { |e| e.serialize }
+      self.map { |e| e.serialize_entry }
     end
 
 
     def set_position(content, position)
-      piece = self.detect {|e| e.target == content }
-      self.store_delete(piece)
+      piece = self.detect {|e| e.id == content.id }
+      self.array_delete(piece)
       self.insert(position, piece)
       owner.entry_modified!(piece)
     end

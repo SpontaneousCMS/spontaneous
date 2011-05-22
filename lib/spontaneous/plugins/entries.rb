@@ -34,7 +34,7 @@ module Spontaneous::Plugins
       def destroy(remove_container_entry=true, container=nil)
         container ||= self.container
         if container && remove_container_entry
-          container.destroy_entry!(self.entry)
+          container.destroy_entry!(self)
         end
         super()
       end
@@ -132,9 +132,19 @@ module Spontaneous::Plugins
       end
 
       def insert_with_style(type, index, content, box = nil)
+        self._pieces << content
         entry_style = style_for_content(content, box)
+        content.box_id = box.box_id if box
         content._prototype = box.prototype_for_content(content) if box
-        entry = Spontaneous::Entry.send(type, self, content, entry_style, box)
+        content.save if content.new?
+        entry = \
+          case type
+          when :page
+            Spontaneous::PagePiece.new(self, content, entry_style.style_id)
+          when :piece
+            content.style = entry_style
+            content
+          end
         begin
           pieces.insert(index, entry)
         rescue TypeError, RuntimeError => e
@@ -151,24 +161,24 @@ module Spontaneous::Plugins
         container.save
       end
 
+      def set_position(new_position)
+        if box
+          box.set_position(self, new_position)
+        else
+          container.pieces.set_position(self, new_position)
+        end
+      end
+
       def style_for_content(content, box = nil)
         if box
           box.style_for_content(content)
         else
-          content.styles.default
+          content.default_style
         end
       end
 
       def available_styles(content)
-        content.styles
-      end
-
-      def entry=(entry)
-        @entry = entry
-      end
-
-      def entry
-        @entry ||= resolve_entry
+        content.class.styles
       end
 
       def container=(container)
@@ -176,11 +186,6 @@ module Spontaneous::Plugins
         self[:content_path] = [container.content_path, container.id].compact.join(CONTENT_PATH_SEP)
       end
 
-      def resolve_entry
-        container.all_pieces.find { |e| e.target_id == self.id }
-      end
-
-      protected(:resolve_entry)
     end # InstanceMethods
   end # Entries
 end # Spontaneous::Plugins

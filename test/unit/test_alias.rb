@@ -25,12 +25,12 @@ class AliasTest < MiniTest::Spec
         field :a_field1
         field :a_field2
 
-        inline_style :a_style
+        style :a_style
       end
 
       class ::AA < ::A
         field :aa_field1
-        inline_style :aa_style
+        style :aa_style
       end
 
       class ::AAA < ::AA
@@ -50,7 +50,7 @@ class AliasTest < MiniTest::Spec
         alias_of :A
 
         field :a_alias_field1
-        inline_style :a_alias_style
+        style :a_alias_style
       end
 
       class ::AAAlias < Piece
@@ -142,13 +142,14 @@ class AliasTest < MiniTest::Spec
         end
 
         should "have their own styles" do
-          @a_alias.styles.first.name.should == :a_alias_style
-          @a_alias.styles.default.name.should == :a_alias_style
+          @a_alias.style.template.should == 'a_alias/a_alias_style'
         end
+
         should "present their target's styles as their own" do
-          @a_alias.styles.length.should == 2
-          @a_alias.styles.map { |s| s.name }.should == [:a_alias_style, :a_style]
+          @a_alias.style = :a_style
+          @a_alias.style.template.should == 'a/a_style'
         end
+
         # should "have an independent style setting"
         should "not delete their target when deleted" do
           @a_alias.destroy

@@ -78,9 +78,9 @@ class PageTest < MiniTest::Spec
     end
 
     should "have the right entry classes" do
-      @p.pieces.first.proxy_class.should == Spontaneous::PageEntry
-      @q.pieces.first.proxy_class.should == Spontaneous::PageEntry
-      @s.pieces.first.proxy_class.should == Spontaneous::PageEntry
+      @p.pieces.first.proxy_class.should == Spontaneous::PagePiece
+      @q.pieces.first.proxy_class.should == Spontaneous::PagePiece
+      @s.pieces.first.proxy_class.should == Spontaneous::PagePiece
     end
 
     should "have a reference to their parent" do

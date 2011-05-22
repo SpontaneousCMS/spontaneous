@@ -11,15 +11,15 @@ module Spontaneous::Plugins
         @layouts ||= []
       end
 
-      def resolve_layout(layout_name)
+      def resolve_layout(layout_name, format = :html)
         if layout_name.blank?
-          default_layout
+          default_layout(format)
         else
-          find_named_layout(layout_name)
+          find_named_layout(layout_name, format)
         end
       end
 
-      def find_named_layout(layout_name)
+      def find_named_layout(layout_name, format = :html)
         name = layout_name.to_sym
         unless layout = layouts.detect { |l| l.name == name }
           layout = supertype.resolve_layout(layout_name) if supertype_has_layout?
@@ -33,10 +33,10 @@ module Spontaneous::Plugins
         layout_name
       end
 
-      def default_layout
+      def default_layout(format = :html)
         if layouts.empty?
           if supertype_has_layout?
-            supertype.default_layout
+            supertype.default_layout(format)
           else
             Spontaneous::Layout.new(:standard)
           end
@@ -51,20 +51,20 @@ module Spontaneous::Plugins
     end # ClassMethods
 
     module InstanceMethods
-      def layout
-        resolve_layout(self.style_id)
+      def layout(format = :html)
+        resolve_layout(self.style_id, format)
       end
 
-      def resolve_layout(style_id)
-        self.class.resolve_layout(style_id)
+      def resolve_layout(style_id, format = :html)
+        self.class.resolve_layout(style_id, format)
       end
 
       def layout=(layout_name)
         self.style_id = self.class.verify_layout_name(layout_name)
       end
 
-      def template
-        layout.template
+      def template(format = :html)
+        layout(format).template(format)
       end
 
       def provides_format?(format)

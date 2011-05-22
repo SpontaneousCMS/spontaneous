@@ -4,5 +4,5 @@
 class ClientProjects < Spontaneous::Box
 	field :title
   allow :ClientProject
-  #inline_style :default
+  #style :default
 end

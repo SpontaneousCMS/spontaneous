@@ -22,6 +22,12 @@ module Spontaneous
       true
     end
 
+    def page?
+      true
+    end
+
+    alias_method :is_page?, :page?
+
     def before_save
       if parent
         self.depth = parent.depth+1
@@ -49,10 +55,6 @@ module Spontaneous
       #   anything that responds to #render(format)
     end
 
-    def page?
-      true
-    end
-    alias_method :is_page?, :page?
 
     def page
       self

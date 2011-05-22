@@ -9,8 +9,10 @@ class ConfigTest < MiniTest::Spec
 
   context "Config" do
     setup do
+      Spontaneous.send(:remove_const, :Config) rescue nil
+      @lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../lib'))
+      load @lib_dir + '/spontaneous/config.rb'
       Config = ::Spontaneous::Config
-      @lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../../../../lib'))
       @pwd = Dir.pwd
       Dir.chdir(File.expand_path("../../fixtures/config", __FILE__))
       Spontaneous.root = Dir.pwd

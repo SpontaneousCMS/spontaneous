@@ -14,5 +14,5 @@ class Project < Page
   end
 
   layout :project
-  inline_style :inline
+  style :inline
 end

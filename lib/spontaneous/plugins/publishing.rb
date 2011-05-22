@@ -208,13 +208,21 @@ module Spontaneous::Plugins
         page.modified!(page?) if page
       end
 
+      # def after_create
+      #   super
+      #   push_page_change
+      # end
+
       def modified!(caller_is_page)
         unless caller_is_page
           self.model.where(:id => self.id).update(:modified_at => Sequel.datetime_class.now)
         end
-        Spontaneous::Change.push(self) if page?
+        push_page_change
       end
 
+      def push_page_change
+        Spontaneous::Change.push(self) if page?
+      end
 
 
       def with_revision(revision, &block)
@@ -236,7 +244,8 @@ module Spontaneous::Plugins
             if publish and published_copy.entry_store
               pieces_to_delete = published_copy.entry_store - self.entry_store
               pieces_to_delete.each do |entry|
-                if c = Spontaneous::Content[entry[:id]]
+                id = entry[:piece] || entry[:page]
+                if c = Spontaneous::Content[id]
                   c.destroy(false)
                 end
               end
@@ -249,7 +258,7 @@ module Spontaneous::Plugins
           if publish
             with_editable do
               self.pieces.each do |entry|
-                entry.target.sync_to_revision(revision, false)
+                entry.sync_to_revision(revision, false)
               end
             end
             Spontaneous::Content.where(:id => self.id).update(self.values)

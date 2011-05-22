@@ -165,6 +165,17 @@ module Spontaneous
         end
       end
 
+      desc :migrate, "Runs migrations"
+      def migrate
+        prepare :init
+        require File.expand_path('config/boot.rb')
+        Sequel.extension :migration
+        connection_params = Spontaneous.db_settings
+        say "  >> Running migrations..."
+        Sequel::Migrator.apply(Spontaneous.database, Spontaneous.gem_dir('db/migrations'))
+        say "  >> Done"
+      end
+
       desc :adduser, "Add a user"
       def adduser
         prepare :adduser

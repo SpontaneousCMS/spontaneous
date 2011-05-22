@@ -319,7 +319,7 @@ class PublishingTest < MiniTest::Spec
 
         should "publish deletions to contents of page" do
           editable1 = Content.first(:uid => '0')
-          deleted = editable1.pieces.first.target
+          deleted = editable1.pieces.first
           editable1.pieces.first.destroy
           Content.publish(@final_revision, [editable1.id])
           editable1.reload
@@ -352,7 +352,7 @@ class PublishingTest < MiniTest::Spec
             # published2.should == new_page
             assert_content_equal(published2, new_page)
             # published3.should == slot
-            assert_content_equal(published3, slot.target)
+            assert_content_equal(published3, slot)
           end
         end
 
@@ -480,7 +480,7 @@ class PublishingTest < MiniTest::Spec
 
       should "be created on updating a page's content" do
         page = Page.first
-        content = Content[page.pieces.first.target.id]
+        content = Content[page.pieces.first.id]
         Change.record do
           content.label = "changed"
           content.save
@@ -494,9 +494,9 @@ class PublishingTest < MiniTest::Spec
         change.modified.should == [page]
       end
 
-      should "include all modified pages" do
+      should "include newly created pages" do
         page = Page.first
-        content = Content[page.pieces.first.target.id]
+        content = Content[page.pieces.first.id]
         new_page = nil
         Change.record do
           new_page = Page.new
@@ -513,6 +513,7 @@ class PublishingTest < MiniTest::Spec
         change.modified_list.should == [page.id, new_page.id]
         change.modified.should == [page, new_page]
       end
+
 
       should "handle being called twice" do
         page = Page.first

@@ -19,7 +19,7 @@ module Spontaneous::Plugins
         @options[:styles] = [@options[:style]] if @options.key?(:style)
         if @options.key?(:styles) and styles = @options[:styles]
           styles.each do |s|
-            if instance_class.inline_styles[s].nil?
+            if instance_class.get_style(s).nil?
               raise Spontaneous::UnknownStyleException.new(s, instance_class)
             end
           end
@@ -41,12 +41,12 @@ module Spontaneous::Plugins
 
       def configured_styles
         if @options.key?(:styles) and styles = @options[:styles]
-          styles.map { |s| instance_class.inline_styles[s] }
+          styles.map { |s| instance_class.resolve_style(s) }
         end
       end
 
       def all_styles
-        instance_class.inline_styles
+        instance_class.styles
       end
 
       def default_style

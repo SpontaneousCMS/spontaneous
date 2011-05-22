@@ -81,22 +81,25 @@ module Cutaneous
       template
     end
 
-    def get_template(template_or_filepath, format)
-      case template_or_filepath
+    def get_template(template, format)
+      case template
       when String
-        filepath = \
-          # if the path is absolute and points to an existing file, just render that
-          # used by the published renderer
-          if ::File.exists?(template_or_filepath)
-            template_or_filepath
-          else
-            Spontaneous::Render.template_file_with_root(template_root, template_or_filepath, format)
-          end
+        # if the path is absolute and points to an existing file, just render that
+        # used by the published renderer
+        filepath = make_path_absolute(template, format)
         create_template(filepath, format)
       when Proc
-        create_template(template_or_filepath, format)
+        create_template(template, format)
       else
-        template_or_filepath
+        template
+      end
+    end
+
+    def make_path_absolute(path, format)
+      if ::File.exists?(path)
+        path
+      else
+        Spontaneous::Render.template_file_with_root(template_root, path, format)
       end
     end
 

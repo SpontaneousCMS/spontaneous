@@ -52,8 +52,12 @@ module Spontaneous::Plugins
         end
       end
 
-      def styles
-        @styles ||= S::StyleDefinitions.new(self.class.inline_styles, [target, :styles])
+      def style(format = :html)
+        if self.class.styles.empty?
+          target.resolve_style(style_id, format)
+        else
+          self.resolve_style(self.style_id, format) or target.resolve_style(self.style_id, format)
+        end
       end
     end
 
@@ -66,19 +70,16 @@ module Spontaneous::Plugins
         ""
       end
 
-      def layout
+      def layout(format = :html)
         # if this alias class has no layouts defined, then just use the one set on the target
         if self.class.layouts.empty?
-          target.resolve_layout(self.style_id)
+          target.resolve_layout(self.style_id, format)
         else
           # but if it does have layouts defined, use them
-          self.resolve_layout(self.style_id) or target.resolve_layout(self.style_id)
+          self.resolve_layout(self.style_id, format) or target.resolve_layout(self.style_id, format)
         end
       end
 
-      # def layouts
-      #   @layouts ||= S::StyleDefinitions.new(self.class.layouts, [target, :layouts])
-      # end
     end
   end
 end
