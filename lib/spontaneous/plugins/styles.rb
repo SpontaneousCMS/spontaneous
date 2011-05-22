@@ -19,7 +19,7 @@ module Spontaneous::Plugins
         if style_id.blank?
           default_style(format)
         else
-          find_named_style(style_id.to_sym)
+          find_named_style(style_id, format)
         end
       end
 
@@ -40,16 +40,21 @@ module Spontaneous::Plugins
               end
             end
           else
-            styles.detect { |s| s.default? } or styles.first
+            usable_styles = styles_for_format(format)
+            usable_styles.detect { |s| s.default? } or usable_styles.first
           end
         end
+      end
+
+      def styles_for_format(format)
+        styles.select { |s| s.exists?(format) }
       end
 
       def anonymous_style
         Spontaneous::Style::Anonymous.new
       end
 
-      def find_named_style(style_id)
+      def find_named_style(style_id, format = :html)
         name = style_id.to_sym
         unless style = styles.detect { |s| s.name == name }
           style = supertype.resolve_style(name) if supertype_has_styles?
