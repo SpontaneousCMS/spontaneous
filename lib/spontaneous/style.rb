@@ -66,17 +66,6 @@ module Spontaneous
         nil
       end
     end
-
-    class BoxStyle < Style
-      def initialize(owner_directory, type_directory, name, options={})
-        @owner_directory, @type_directory, @name, @options = owner_directory, type_directory, name.to_sym, options
-      end
-      def try_templates
-        [::File.join([directory, name.to_s].compact), name.to_s].uniq
-      end
-    end
   end
-
-
-
 end
+
