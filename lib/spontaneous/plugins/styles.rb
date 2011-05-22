@@ -74,6 +74,7 @@ module Spontaneous::Plugins
       # Used to determine the name of the directory under template_root
       # that holds a classe's templates
       def style_directory_name
+        return nil if self.name.blank?
         self.name.demodulize.underscore
       end
 
