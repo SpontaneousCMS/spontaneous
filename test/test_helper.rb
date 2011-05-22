@@ -69,7 +69,9 @@ class MiniTestWithHooks < MiniTest::Unit
   def _run_suite(suite, type)
     begin
       Spontaneous.logger.silent!
-      print "\n#{suite.to_s.gsub(/Test$/, '').ljust(@max_name_length, " ")}  " unless exclude?(suite)
+      unless exclude?(suite)
+        print "\n#{suite.to_s.gsub(/Test$/, '').ljust(@max_name_length, " ")}  "
+      end
       suite.startup if suite.respond_to?(:startup)
       super(suite, type)
     ensure
