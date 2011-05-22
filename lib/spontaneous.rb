@@ -39,8 +39,6 @@ module Spontaneous
   plugin Plugins::Application::Render
 
   autoload :ProxyObject, "spontaneous/proxy_object"
-  # autoload :Logger, "spontaneous/logger"
-
 
   autoload :Config, "spontaneous/config"
 
@@ -54,8 +52,6 @@ module Spontaneous
 
   autoload :FieldTypes, "spontaneous/field_types"
 
-  autoload :Entry, "spontaneous/entry"
-  # autoload :PageEntry, "spontaneous/page_entry"
   autoload :PagePiece, "spontaneous/page_piece"
   autoload :EntrySet, "spontaneous/entry_set"
 
@@ -63,8 +59,6 @@ module Spontaneous
   autoload :Style, "spontaneous/style"
   autoload :Layout, "spontaneous/layout"
   autoload :StyleDefinitions, "spontaneous/style_definitions"
-  # autoload :RenderContext, "spontaneous/render_context"
-  autoload :RenderFormatProxy, "spontaneous/render_format_proxy"
 
   autoload :Site, "spontaneous/site"
   autoload :Schema, "spontaneous/schema"
@@ -74,7 +68,6 @@ module Spontaneous
   autoload :Rack, "spontaneous/rack"
 
   autoload :Render, "spontaneous/render"
-  autoload :Templates, "spontaneous/templates"
   autoload :Media, "spontaneous/media"
 
   autoload :Change, "spontaneous/change"
@@ -86,17 +79,8 @@ module Spontaneous
 
   autoload :Server, "spontaneous/server"
 
-
-
   autoload :Permissions, "spontaneous/permissions"
   autoload :ContentQuery, "spontaneous/content_query"
-
-  # autoload :Reloader, "spontaneous/reloader"
-
-  module Templates
-    autoload :TemplateBase, "spontaneous/templates/template_base"
-    autoload :ErubisTemplate, "spontaneous/templates/erubis_template"
-  end
 
   module Plugins
     autoload :Boxes, "spontaneous/plugins/boxes"
@@ -109,7 +93,6 @@ module Spontaneous
     autoload :Render, "spontaneous/plugins/render"
     autoload :SchemaHierarchy, "spontaneous/plugins/schema_hierarchy"
     autoload :InstanceCode, "spontaneous/plugins/instance_code"
-    # autoload :PageStyles, "spontaneous/plugins/page_styles"
     autoload :Paths, "spontaneous/plugins/paths"
     autoload :PageTree, "spontaneous/plugins/page_tree"
     autoload :AllowedTypes, "spontaneous/plugins/allowed_types"

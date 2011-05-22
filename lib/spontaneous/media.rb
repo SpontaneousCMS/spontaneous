@@ -33,11 +33,14 @@ module Spontaneous
       end
 
       def to_filename(input)
-        p = input.strip.split(/\./)
-        ext = p.last
-        n = p[0..-2].join(DOT)
-        n = n.gsub(RE_QUOTES, EMPTY).gsub(/[^\.A-Za-z0-9_-]+/, DASH).gsub(RE_FLATTEN_REPEAT, DASH).gsub(RE_FLATTEN_TRAILING, EMPTY)
-        [n, ext].join(DOT)
+        parts = input.strip.split(/\./)
+        ext = parts.last
+        name = parts[0..-2].join(DOT)
+        name.gsub!(RE_QUOTES, EMPTY)
+        name.gsub!(/[^\.A-Za-z0-9_-]+/, DASH)
+        name.gsub!(RE_FLATTEN_REPEAT, DASH)
+        name.gsub!(RE_FLATTEN_TRAILING, EMPTY)
+        [name, ext].join(DOT)
       end
     end
   end
