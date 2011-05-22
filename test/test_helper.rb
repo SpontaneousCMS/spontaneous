@@ -51,7 +51,13 @@ class MiniTestWithHooks < MiniTest::Unit
   def after_suites
   end
 
+  def exclude?(suite)
+    [MiniTest::Spec, Test::Unit::TestCase].include?(suite)
+  end
+
   def _run_suites(suites, type)
+    names = suites.reject { |s| exclude?(s) }.map { |s| s.to_s.gsub(/Test$/, '') }
+    @max_name_length = names.inject(-1) { |max, name| [name.length, max].max }
     begin
       before_suites
       super(suites, type)
@@ -62,6 +68,8 @@ class MiniTestWithHooks < MiniTest::Unit
 
   def _run_suite(suite, type)
     begin
+      Spontaneous.logger.silent!
+      print "\n#{suite.to_s.gsub(/Test$/, '').ljust(@max_name_length, " ")}  " unless exclude?(suite)
       suite.startup if suite.respond_to?(:startup)
       super(suite, type)
     ensure

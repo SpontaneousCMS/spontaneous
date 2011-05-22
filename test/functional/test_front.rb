@@ -43,9 +43,9 @@ class FrontTest < MiniTest::Spec
 
     Content.delete_revision(1) rescue nil
 
-    # silence_logger {
+    Spontaneous.logger.silent! {
       Site.publish_all
-    # }
+    }
   end
 
   def self.shutdown

@@ -12,9 +12,9 @@ require 'active_support/core_ext/date_time/conversions'
 
 Sequel.extension :inflector
 
-Dir[File.join(File.dirname(__FILE__), 'spontaneous', 'extensions', '*.rb')].each do |extension|
-  require extension
-end
+Dir[File.join(File.dirname(__FILE__), 'spontaneous/extensions/*.rb')].each { |file|
+  require file
+}
 
 require 'spontaneous/logger'
 require 'spontaneous/plugins'
