@@ -260,7 +260,7 @@ Versions:
 Smells:
 
 	- Slot definitions -- very confusing @done
-	- Default template choosing and styles in general. Too many old decisions messing things up.
+	- Default template choosing and styles in general. Too many old decisions messing things up. @done
 
 
 Rendering Rewrite:
@@ -273,7 +273,7 @@ Boxes:
 
 	- Deletion of boxes leaves stray content around. How to signal the deletion of a box? Would the schema migration system handle this? Options for migrations would be replace/delete...
 	
-	- Styles
+	- Styles @done
 	
 	class ABoxClass < Box
 	  inline_style :monkey
@@ -341,6 +341,7 @@ Pages:
 	Have preconfigured user-agent regexps
 	
 	But, is this as useful as having template helpers that do the heavy lifting with CSS media queries? Both would be good: user-agent templates and CSS media query helpers AND user-agent template helpers
+	- Have a better mechanism than 'instance_code' to extend individual pages. Perhaps a module named after the pages UID or ID that all instances are extended with
 
 Blog Posts:
 
@@ -422,3 +423,7 @@ Visibility/Hiding:
 	- every access to content (ancestors, children... find them all!) must have all_ and visible_ versions much like 'pieces' does so that it's almost impossible for templates to accidentally include invisible content
 	- perhaps work the above check into the context -- when loading the content it checks for visibility and if it finds that the item is invisible it simply returns '' for the render call -- probably won't catch all possible uses though (e.g. iterating & outputting properties rather than render calls)
 	- 
+Fix template system:
+	- 'inline_style'/'style' -> 'template' @done
+	- 'page_style' -> 'layout' @done
+	- move page templates into top-level 'layouts' directory @done
