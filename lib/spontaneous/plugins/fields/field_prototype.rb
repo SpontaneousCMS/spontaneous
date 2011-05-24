@@ -4,9 +4,10 @@
 module Spontaneous::Plugins
   module Fields
     class FieldPrototype
-      attr_reader :name
+      attr_reader :owner, :name
 
-      def initialize(name, type, options={})
+      def initialize(owner, name, type, options={})
+        @owner = owner
         @name = name
         # if the type is nil then try the name, this will assign sensible defaults
         # to fields like 'image' or 'date'

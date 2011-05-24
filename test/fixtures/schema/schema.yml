@@ -1,0 +1,13 @@
+---
+xxxxxxxxxxxx:
+  :name: SchemaTest::SchemaClass
+  :categories:
+    :field:
+      ffffffffffff: description
+    :box:
+      bbbbbbbbbbbb: posts
+    :style:
+      ssssssssssss: simple
+    :layout:
+      llllllllllll: clean
+

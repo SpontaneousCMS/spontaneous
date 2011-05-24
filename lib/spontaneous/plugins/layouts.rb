@@ -4,7 +4,8 @@ module Spontaneous::Plugins
   module Layouts
     module ClassMethods
       def layout(name, options={})
-        layouts << Spontaneous::Layout.new(name, options)
+        schema_id = Spontaneous::Schema.schema_id(self, :layout, name.to_s)
+        layouts << Spontaneous::Layout.new(name, options.merge(:schema_id => schema_id))
       end
 
       def layouts

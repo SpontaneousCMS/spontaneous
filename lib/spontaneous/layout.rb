@@ -8,6 +8,10 @@ module Spontaneous
       @name, @options = name.to_sym, options
     end
 
+    def schema_id
+      @options[:schema_id]
+    end
+
     def template(format = :html)
       ::File.join('layouts', "#{name}")
     end

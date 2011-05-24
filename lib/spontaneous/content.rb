@@ -47,6 +47,7 @@ module Spontaneous
     plugin Plugins::Entries
     plugin Plugins::Styles
     plugin Plugins::SchemaTitle
+    plugin Plugins::SchemaId
     plugin Plugins::Render
     plugin Plugins::SchemaHierarchy
     plugin Plugins::InstanceCode

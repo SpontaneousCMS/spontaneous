@@ -15,6 +15,10 @@ module Spontaneous
       @directory, @name, @options = directory, name.to_sym, options
     end
 
+    def schema_id
+      @options[:schema_id]
+    end
+
     def style_id
       @options[:style_id]
     end

@@ -21,6 +21,18 @@ module Spontaneous
       @field_initialization = false
     end
 
+    def self.schema_name
+      self.name
+    end
+
+    def schema_id
+      Spontaneous::Schema.schema_id(_owner.class, :box, _name.to_s)
+    end
+
+    def schema_name
+      _name.to_s
+    end
+
     # TODO: use generated schema id here
     def box_id
       _name

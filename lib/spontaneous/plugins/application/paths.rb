@@ -37,6 +37,15 @@ module Spontaneous::Plugins::Application
         relative_dir(@schema_root, *path)
       end
 
+      def schema_map
+        @schema_map_file ||= root / "config" / "schema.yml"
+      end
+
+      def schema_map=(path)
+        Spontaneous::Schema.reset!
+        @schema_map_file = path
+      end
+
 
       def media_dir=(dir)
         @media_dir = File.expand_path(dir)

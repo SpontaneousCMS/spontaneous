@@ -89,6 +89,7 @@ module Spontaneous
     autoload :Styles, "spontaneous/plugins/styles"
     autoload :Layouts, "spontaneous/plugins/layouts"
     autoload :SchemaTitle, "spontaneous/plugins/schema_title"
+    autoload :SchemaId, "spontaneous/plugins/schema_id"
     autoload :Render, "spontaneous/plugins/render"
     autoload :SchemaHierarchy, "spontaneous/plugins/schema_hierarchy"
     autoload :InstanceCode, "spontaneous/plugins/instance_code"

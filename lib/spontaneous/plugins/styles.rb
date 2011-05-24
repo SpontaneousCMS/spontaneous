@@ -8,7 +8,8 @@ module Spontaneous::Plugins
 
     module ClassMethods
       def style(name, options={})
-        styles << Spontaneous::Style.new(style_directory_name, name, options.merge(:style_id => name))
+        schema_id = Spontaneous::Schema.schema_id(self, :style, name.to_s)
+        styles << Spontaneous::Style.new(style_directory_name, name, options.merge(:style_id => name, :schema_id => schema_id))
       end
 
       def styles
@@ -108,9 +109,9 @@ module Spontaneous::Plugins
         self.class.resolve_style(style_id, format)
       end
 
-      # def styles
-      #   []#@_styles ||= Hash[self.class.styles.map { |s| [s.name, s]}]
-      # end
+      def styles
+        @_styles ||= Hash[self.class.styles.map { |s| [s.name, s]}]
+      end
 
       def template(format = :html)
         style(format).template(format)
