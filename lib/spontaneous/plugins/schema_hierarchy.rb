@@ -5,6 +5,12 @@ module Spontaneous::Plugins
 
     module ClassMethods
       def schema_validate
+        if schema_id.nil?
+          Spontaneous::Schema.missing_id!(self)
+        end
+        # field_prototypes.each do |field|
+        #   Spontaneous::Schema.missing_id!(self, :field, field.name) unless field.schema_id
+        # end
       end
 
       def subclasses
@@ -26,6 +32,7 @@ module Spontaneous::Plugins
 
       def inherited(subclass)
         super
+        Spontaneous::Schema.classes << subclass
         subclasses << subclass
         subclass.supertype = self
       end

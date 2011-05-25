@@ -8,6 +8,7 @@ module Spontaneous
     plugin Plugins::SchemaHierarchy
     plugin Plugins::Fields
     plugin Plugins::Styles
+    plugin Plugins::JSON
     plugin Plugins::Render
     plugin Plugins::AllowedTypes
     plugin Plugins::Permissions

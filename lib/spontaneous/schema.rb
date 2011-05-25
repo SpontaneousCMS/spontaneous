@@ -8,20 +8,44 @@ module Spontaneous
   module Schema
     class << self
 
+      attr_accessor :missing_classes
 
       def validate!
+        @missing_from_map = Hash.new { |hash, key| hash[key] = [] }
+        @missing_from_schema = Hash.new { |hash, key| hash[key] = [] }
         validate_schema
+        unless @missing_from_map.empty? and @missing_from_schema.empty?
+          raise Spontaneous::SchemaModificationError.new(@missing_from_map, @missing_from_schema)
+        end
       end
 
       def validate_schema
-        self.classes.each do | schema_class |
+        # will check that each of the classes in the schema has a
+        # corresponding id
+        self.content_classes.each do | schema_class |
           schema_class.schema_validate
         end
+        # now check that each of the ids in the map has a
+        # corresponding entry in the schema
+
+        names = self.content_classes.map { |c| c.name }
+        not_found = []
+        map.each do |id, entry|
+          not_found << entry unless names.include?(entry.name)
+        end
+
+        not_found.each do |entry|
+          @missing_from_schema[:class] << [entry.name, nil]
+        end
+      end
+
+      def missing_id!(klass, category=:class, name=nil)
+        @missing_from_map[category] << [klass, name]
       end
 
 
       def to_hash
-        self.classes.inject({}) do |hash, klass|
+        self.content_classes.inject({}) do |hash, klass|
           hash[klass.name] = klass.to_hash
           hash
         end
@@ -31,22 +55,30 @@ module Spontaneous
         to_hash.to_json
       end
 
+      # all classes including boxes
       def classes
+        @classes ||= []
+      end
+
+      # just subclasses of Content (excluding boxes)
+      def content_classes
         classes = []
         Content.subclasses.each do |klass|
+          classes << klass unless [Spontaneous::Page, Spontaneous::Piece].include?(klass)
           recurse_classes(klass, classes)
         end
-        classes
+        classes.uniq
       end
 
       def recurse_classes(root_class, list)
         root_class.subclasses.each do |klass|
-          list << klass
+          list << klass unless list.include?(klass)
           recurse_classes(klass, list)
         end
       end
 
       def reset!
+        @classes = []
         @map = nil
       end
 
@@ -60,6 +92,8 @@ module Spontaneous
     end
 
     class Map
+      include Enumerable
+
       def initialize(path)
         @path = path
       end
@@ -79,7 +113,7 @@ module Spontaneous
 
       def root_entry(root_object)
         return nil unless map
-        map.detect do |uid, entry|
+        mapping.detect do |uid, entry|
           entry.name == root_object.schema_name
         end
       end
@@ -88,14 +122,17 @@ module Spontaneous
 
       end
 
-      def map
-        @map ||= load_map
+      def mapping
+        @mapping ||= load_mapping
       end
 
-      def load_map
-        map = nil
+      def each
+        mapping.each { |e| yield e if block_given? }
+      end
+
+      def load_mapping
+        map = {}
         if ::File.exists?(@path)
-          map = {}
           root = YAML.load_file(@path)
           root.each do |uid, entry|
             map[uid] = RootEntry.new(uid, entry)

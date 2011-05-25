@@ -1,0 +1,25 @@
+---
+cccccccccccc:
+  :name: SchemaTest::C
+  :categories:
+    :field:
+      ffffffffffff: description
+    :box:
+      bbbbbbbbbbbb: posts
+    :style:
+      ssssssssssss: simple
+    :layout:
+      llllllllllll: clean
+dddddddddddd:
+  :name: SchemaTest::D
+  :categories:
+    :field:
+      ffffffffffff: description
+    :box:
+      bbbbbbbbbbbb: posts
+    :style:
+      ssssssssssss: simple
+    :layout:
+      llllllllllll: clean
+
+

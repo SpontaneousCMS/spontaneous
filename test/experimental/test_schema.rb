@@ -102,5 +102,56 @@ class SchemaTest < MiniTest::Spec
       @instance.layout.schema_id.should == "llllllllllll"
     end
   end
+  context "schema verification" do
+    setup do
+      Spontaneous.schema_map = File.expand_path('../../fixtures/schema/before.yml', __FILE__)
+      class C < Content; end
+      class D < Content; end
+      Schema.classes.should == [C, D]
+      C.schema_id.should == "cccccccccccc"
+      D.schema_id.should == "dddddddddddd"
+    end
+
+    teardown do
+      SchemaTest.send(:remove_const, :C) rescue nil
+      SchemaTest.send(:remove_const, :D) rescue nil
+      SchemaTest.send(:remove_const, :E) rescue nil
+    end
+
+    should "detect addition of classes" do
+      class E < Content; end
+      exception = nil
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.added_classes.should == [E]
+      # need to explicitly define solution to validation error
+      # Schema.expects(:generate).returns('dddddddddddd')
+      # D.schema_id.should == 'dddddddddddd'
+    end
+
+    should "detect removal of classes" do
+      SchemaTest.send(:remove_const, :D) rescue nil
+      Schema.stubs(:classes).returns([C])
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.removed_classes.should == ["SchemaTest::D"]
+    end
+    should "detect addition of fields"
+    should "detect removal of fields"
+    should "detect addition of boxes"
+    should "detect removal of boxes"
+    should "detect addition of styles"
+    should "detect removal of styles"
+    should "detect addition of layouts"
+    should "detect removal of layouts"
+  end
 end
 
