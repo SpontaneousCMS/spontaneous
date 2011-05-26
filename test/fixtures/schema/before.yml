@@ -1,25 +1,26 @@
 ---
+bbbbbbbbbbbb:
+  :name: SchemaTest::B
+  :categories:
+    :field:
+      ffffffffffff: description
+      author000000: author
+    :box:
+    :style:
+    :layout:
 cccccccccccc:
   :name: SchemaTest::C
   :categories:
     :field:
-      ffffffffffff: description
     :box:
-      bbbbbbbbbbbb: posts
     :style:
-      ssssssssssss: simple
     :layout:
-      llllllllllll: clean
 dddddddddddd:
   :name: SchemaTest::D
   :categories:
     :field:
-      ffffffffffff: description
     :box:
-      bbbbbbbbbbbb: posts
     :style:
-      ssssssssssss: simple
     :layout:
-      llllllllllll: clean
 
 

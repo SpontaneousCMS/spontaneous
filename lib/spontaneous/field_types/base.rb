@@ -85,7 +85,7 @@ module Spontaneous
       end
 
       def schema_id
-        Spontaneous::Schema.schema_id(self.prototype.owner, :field, name.to_s)
+        self.prototype.schema_id
       end
 
       def serialize

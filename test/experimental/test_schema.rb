@@ -105,21 +105,33 @@ class SchemaTest < MiniTest::Spec
   context "schema verification" do
     setup do
       Spontaneous.schema_map = File.expand_path('../../fixtures/schema/before.yml', __FILE__)
+      class B < Content; end
       class C < Content; end
       class D < Content; end
-      Schema.classes.should == [C, D]
+      B.field :description
+      B.field :author
+      # have to use mocking because schema class list is totally fecked up
+      # after running other tests
+      # TODO: look into reliable, non-harmful way of clearing out the schema state
+      #       between tests
+      Schema.stubs(:content_classes).returns([B, C, D])
+      Schema.classes.should == [B, C, D]
+      B.schema_id.should == "bbbbbbbbbbbb"
       C.schema_id.should == "cccccccccccc"
       D.schema_id.should == "dddddddddddd"
     end
 
     teardown do
+      SchemaTest.send(:remove_const, :B) rescue nil
       SchemaTest.send(:remove_const, :C) rescue nil
       SchemaTest.send(:remove_const, :D) rescue nil
       SchemaTest.send(:remove_const, :E) rescue nil
+      SchemaTest.send(:remove_const, :F) rescue nil
     end
 
     should "detect addition of classes" do
       class E < Content; end
+      Schema.stubs(:content_classes).returns([B, C, D, E])
       exception = nil
       begin
         Schema.validate!
@@ -134,24 +146,77 @@ class SchemaTest < MiniTest::Spec
     end
 
     should "detect removal of classes" do
+      SchemaTest.send(:remove_const, :C) rescue nil
       SchemaTest.send(:remove_const, :D) rescue nil
-      Schema.stubs(:classes).returns([C])
+      Schema.stubs(:content_classes).returns([B])
       begin
         Schema.validate!
         flunk("Validation should raise an exception")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
       end
-      exception.removed_classes.should == ["SchemaTest::D"]
+      exception.removed_classes.should == ["SchemaTest::C", "SchemaTest::D"]
     end
-    should "detect addition of fields"
-    should "detect removal of fields"
+
+    should "detect multiple removals & additions of classes" do
+      SchemaTest.send(:remove_const, :C) rescue nil
+      SchemaTest.send(:remove_const, :D) rescue nil
+      class E < Content; end
+      class F < Content; end
+      Schema.stubs(:content_classes).returns([B, E, F])
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if schema is modified")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.added_classes.should == [E, F]
+      exception.removed_classes.should == ["SchemaTest::C", "SchemaTest::D"]
+    end
+
+    should "detect addition of fields" do
+      B.field :name
+      C.field :location
+      C.field :description
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if new fields are added")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.added_fields.should == [B.field_prototypes[:name], C.field_prototypes[:location], C.field_prototypes[:description]]
+    end
+
+    should "detect removal of fields" do
+      fields = [B.field_prototypes[:author]]
+      B.stubs(:fields).returns(fields)
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if fields are removed")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.removed_fields.should == ["description"]
+    end
+
     should "detect addition of boxes"
     should "detect removal of boxes"
     should "detect addition of styles"
     should "detect removal of styles"
     should "detect addition of layouts"
     should "detect removal of layouts"
+
+    should "detect addition of fields to box types"
+    should "detect removal of fields from box types"
+    should "detect addition of styles to box types"
+    should "detect removal of styles from box types"
+
+    should "detect addition of styles to anonymous boxes"
+    should "detect removal of styles from anonymous boxes"
+    should "detect addition of fields to anonymous boxes"
+    should "detect removal of fields from anonymous boxes"
+    should "detect addition of styles to anonymous boxes"
+    should "detect removal of styles from anonymous boxes"
   end
 end
 

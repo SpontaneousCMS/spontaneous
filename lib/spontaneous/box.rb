@@ -22,6 +22,8 @@ module Spontaneous
       @field_initialization = false
     end
 
+    def self.schema_id
+    end
     def self.schema_name
       self.name
     end

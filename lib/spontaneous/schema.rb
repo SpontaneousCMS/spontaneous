@@ -15,11 +15,16 @@ module Spontaneous
         @missing_from_schema = Hash.new { |hash, key| hash[key] = [] }
         validate_schema
         unless @missing_from_map.empty? and @missing_from_schema.empty?
-          raise Spontaneous::SchemaModificationError.new(@missing_from_map, @missing_from_schema)
+          modification = SchemaModification.new(@missing_from_map, @missing_from_schema)
+          raise Spontaneous::SchemaModificationError.new(modification)
         end
       end
 
       def validate_schema
+        validate_classes
+      end
+
+      def validate_classes
         # will check that each of the classes in the schema has a
         # corresponding id
         self.content_classes.each do | schema_class |
@@ -28,15 +33,41 @@ module Spontaneous
         # now check that each of the ids in the map has a
         # corresponding entry in the schema
 
+        find_missing_classes
+        find_missing_fields
+      end
+
+
+      def find_missing_classes
         names = self.content_classes.map { |c| c.name }
         not_found = []
         map.each do |id, entry|
           not_found << entry unless names.include?(entry.name)
         end
-
         not_found.each do |entry|
           @missing_from_schema[:class] << [entry.name, nil]
         end
+      end
+
+
+      def find_missing_fields
+        find_missing(:field, :fields)
+      end
+
+      def find_missing(category, method)
+        # should probably be #classes to detect changes to box classes
+        self.content_classes.each do |klass|
+          names = klass.send(method).map { |f| f.name.to_s }
+          uid, categories = map.root_entry(klass)
+          if categories
+            (categories[category] || {}).each do |id, name|
+              unless names.include?(name)
+                @missing_from_schema[category] << [klass, name]
+              end
+            end
+          end
+        end
+
       end
 
       def missing_id!(klass, category=:class, name=nil)
@@ -91,6 +122,29 @@ module Spontaneous
       end
     end
 
+    class SchemaModification
+      def initialize(missing_from_map, missing_from_schema)
+        @missing_from_map = missing_from_map
+        @missing_from_schema = missing_from_schema
+      end
+
+      def added_classes
+        @missing_from_map[:class].map { |m| m[0] }
+      end
+
+      def removed_classes
+        @missing_from_schema[:class].map { |m| m[0] }
+      end
+
+      def added_fields
+        @missing_from_map[:field].map { |m| m[1] }
+      end
+
+      def removed_fields
+        @missing_from_schema[:field].map { |m| m[1] }
+      end
+    end
+
     class Map
       include Enumerable
 
@@ -101,7 +155,8 @@ module Spontaneous
       def object_to_id(root, category, name)
         uid, entry = root_entry(root)
         return nil unless uid
-        if category and c = entry[category]
+        if category
+          c = entry[category] || {}
           uid, schema_name = c.detect do |i, n|
             n == name
           end

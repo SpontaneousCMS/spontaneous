@@ -7,10 +7,13 @@ module Spontaneous::Plugins
       def schema_validate
         if schema_id.nil?
           Spontaneous::Schema.missing_id!(self)
+        else # only need to check internal consistency if class already existed
+          fields.each do |field|
+            unless field.schema_id
+              Spontaneous::Schema.missing_id!(self, :field, field)
+            end
+          end
         end
-        # field_prototypes.each do |field|
-        #   Spontaneous::Schema.missing_id!(self, :field, field.name) unless field.schema_id
-        # end
       end
 
       def subclasses

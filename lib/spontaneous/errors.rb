@@ -20,18 +20,14 @@ module Spontaneous
 
   end
   class SchemaModificationError < Errors::Error
+    extend Forwardable
 
-    def initialize(missing_from_map, missing_from_schema)
-      @missing_from_map = missing_from_map
-      @missing_from_schema = missing_from_schema
+    attr_reader :modification
+
+    def initialize(modification)
+      @modification = modification
     end
 
-    def added_classes
-      @missing_from_map[:class].map { |m| m[0] }
-    end
-
-    def removed_classes
-      @missing_from_schema[:class].map { |m| m[0] }
-    end
+    def_delegators :@modification, :added_classes, :removed_classes, :added_fields, :removed_fields
   end
 end

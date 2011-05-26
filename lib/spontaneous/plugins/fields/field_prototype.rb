@@ -25,6 +25,10 @@ module Spontaneous::Plugins
         parse_options(options)
       end
 
+      def schema_id
+        Spontaneous::Schema.schema_id(owner, :field, name.to_s)
+      end
+
       def title(new_title=nil)
         self.title = new_title if new_title
         @title || @options[:title] || default_title
