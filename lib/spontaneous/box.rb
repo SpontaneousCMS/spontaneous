@@ -103,7 +103,7 @@ module Spontaneous
         S::Style.new(self, owner_class, box._name),
       ]
 
-      if styles.empty?
+      if all_styles.empty?
         possible_styles << S::Style.new(self, nil, box_class) if box_class
       else
         if style_name = prototype.default_style

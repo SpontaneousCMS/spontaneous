@@ -389,8 +389,8 @@ class StylesTest < MiniTest::Spec
             TemplateClass.box :sprinters, :type => :BoxA, :style => :runny
             TemplateClass.box :strollers, :type => :BoxA, :style => :walky
             piece = TemplateClass.new
-            piece.sprinters.template.should == "box_a/runny"
             piece.strollers.template.should == "template_class/walky"
+            piece.sprinters.template.should == "box_a/runny"
           end
         end
       end

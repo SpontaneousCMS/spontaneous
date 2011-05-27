@@ -17,6 +17,10 @@ module Spontaneous::Plugins
         @styles ||= []
       end
 
+      def all_styles
+        styles.concat(supertype_has_styles? ? supertype.all_styles : [])
+      end
+
       def resolve_style(style_id, format = :html)
         if style_id.blank?
           default_style(format)
