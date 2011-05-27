@@ -7,10 +7,32 @@ module Spontaneous::Plugins
       def schema_validate
         if schema_id.nil?
           Spontaneous::Schema.missing_id!(self)
-        else # only need to check internal consistency if class already existed
+        else
+          # only need to check internal consistency if class already existed
           fields.each do |field|
-            unless field.schema_id
+            if field.schema_id.nil?
               Spontaneous::Schema.missing_id!(self, :field, field)
+            end
+          end
+          # boxes don't have boxes
+          if respond_to?(:boxes)
+            boxes.each do |box|
+              if box.schema_id.nil?
+                Spontaneous::Schema.missing_id!(self, :box, box)
+              end
+            end
+          end
+
+          styles.each do |style|
+            if style.schema_id.nil?
+              Spontaneous::Schema.missing_id!(self, :style, style)
+            end
+          end
+          if respond_to?(:layouts)
+            layouts.each do |layout|
+              if layout.schema_id.nil?
+                Spontaneous::Schema.missing_id!(self, :layout, layout)
+              end
             end
           end
         end

@@ -14,7 +14,7 @@ module Spontaneous
     one_to_many :children, :class => Content, :key => :parent_id, :reciprocal => :parent
     one_to_many :content,   :class => Content, :key => :page_id, :reciprocal => :page
 
-    field :title, :string, :default => "New Page"
+    # field :title, :string, :default => "New Page"
 
     set_inheritance_root
 

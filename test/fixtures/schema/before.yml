@@ -1,26 +1,22 @@
 ---
-bbbbbbbbbbbb:
-  :name: SchemaTest::B
-  :categories:
-    :field:
-      ffffffffffff: description
-      author000000: author
-    :box:
-    :style:
-    :layout:
-cccccccccccc:
-  :name: SchemaTest::C
-  :categories:
-    :field:
-    :box:
-    :style:
-    :layout:
-dddddddddddd:
-  :name: SchemaTest::D
-  :categories:
-    :field:
-    :box:
-    :style:
-    :layout:
-
+bbbbbbbbbbbb: type//SchemaTest::B
+ffffffffffff: field/bbbbbbbbbbbb/description
+author000000: field/bbbbbbbbbbbb/author
+promotions00: box/bbbbbbbbbbbb/promotions
+publishers00: box/bbbbbbbbbbbb/publishers
+inline000000: style/bbbbbbbbbbbb/inline
+outline00000: style/bbbbbbbbbbbb/outline
+thinlayout00: layout/bbbbbbbbbbbb/thin
+fatlayout000: layout/bbbbbbbbbbbb/fat
+cccccccccccc: type//SchemaTest::C
+dddddddddddd: type//SchemaTest::D
+boxfield0100: field/promotions00/field1
+boxfield0200: field/promotions00/field2
+boxstyle0100: style/promotions00/style1
+boxstyle0200: style/promotions00/style2
+oooooooooooo: type//SchemaTest::O
+boxfield0300: field/oooooooooooo/ofield1
+boxfield0400: field/oooooooooooo/ofield2
+boxstyle0300: style/oooooooooooo/ostyle1
+boxstyle0400: style/oooooooooooo/ostyle2
 

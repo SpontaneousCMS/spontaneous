@@ -9,7 +9,7 @@ module Spontaneous::Plugins
       end
 
       def schema_name
-        self.name
+        "type//#{self.name}"
       end
     end # ClassMethods
   end # SchemaId

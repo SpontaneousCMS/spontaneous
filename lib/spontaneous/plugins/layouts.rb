@@ -4,8 +4,7 @@ module Spontaneous::Plugins
   module Layouts
     module ClassMethods
       def layout(name, options={})
-        schema_id = Spontaneous::Schema.schema_id(self, :layout, name.to_s)
-        layouts << Spontaneous::Layout.new(name, options.merge(:schema_id => schema_id))
+        layouts << Spontaneous::Layout.new(self, name, options)
       end
 
       def layouts
@@ -39,7 +38,7 @@ module Spontaneous::Plugins
           if supertype_has_layout?
             supertype.default_layout(format)
           else
-            Spontaneous::Layout.new(:standard)
+            Spontaneous::Layout.new(self, :standard)
           end
         else
           layouts.detect { |l| l.default? } or layouts.first

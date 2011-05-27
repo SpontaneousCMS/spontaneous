@@ -2,14 +2,18 @@
 
 module Spontaneous
   class Layout
-    attr_reader :name
+    attr_reader :owner, :name
 
-    def initialize(name, options={})
-      @name, @options = name.to_sym, options
+    def initialize(owner, name, options={})
+      @owner, @name, @options = owner, name.to_sym, options
+    end
+
+    def schema_name
+      "layout/#{owner.schema_id}/#{name}"
     end
 
     def schema_id
-      @options[:schema_id]
+      Spontaneous::Schema.schema_id(self)
     end
 
     def template(format = :html)

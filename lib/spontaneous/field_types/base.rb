@@ -88,6 +88,10 @@ module Spontaneous
         self.prototype.schema_id
       end
 
+      def schema_name
+        self.prototype.schema_name
+      end
+
       def serialize
         {
           :name => name,

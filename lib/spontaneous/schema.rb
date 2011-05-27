@@ -12,7 +12,7 @@ module Spontaneous
 
       def validate!
         @missing_from_map = Hash.new { |hash, key| hash[key] = [] }
-        @missing_from_schema = Hash.new { |hash, key| hash[key] = [] }
+        @missing_from_schema = []
         validate_schema
         unless @missing_from_map.empty? and @missing_from_schema.empty?
           modification = SchemaModification.new(@missing_from_map, @missing_from_schema)
@@ -27,48 +27,49 @@ module Spontaneous
       def validate_classes
         # will check that each of the classes in the schema has a
         # corresponding id
-        self.content_classes.each do | schema_class |
+        self.classes.each do | schema_class |
           schema_class.schema_validate
         end
         # now check that each of the ids in the map has a
         # corresponding entry in the schema
 
-        find_missing_classes
-        find_missing_fields
+        find_orphaned_ids
+        # find_orphaned_field_ids
       end
 
-
-      def find_missing_classes
-        names = self.content_classes.map { |c| c.name }
-        not_found = []
-        map.each do |id, entry|
-          not_found << entry unless names.include?(entry.name)
-        end
-        not_found.each do |entry|
-          @missing_from_schema[:class] << [entry.name, nil]
-        end
-      end
-
-
-      def find_missing_fields
-        find_missing(:field, :fields)
-      end
-
-      def find_missing(category, method)
-        # should probably be #classes to detect changes to box classes
-        self.content_classes.each do |klass|
-          names = klass.send(method).map { |f| f.name.to_s }
-          uid, categories = map.root_entry(klass)
-          if categories
-            (categories[category] || {}).each do |id, name|
-              unless names.include?(name)
-                @missing_from_schema[category] << [klass, name]
-              end
+      def all_defined_ids
+        ids = {}
+        classes.each do | schema_class |
+          ids[schema_class.schema_id] = schema_class
+          [:fields, :boxes, :styles, :layouts].each do |category|
+            if schema_class.respond_to?(category)
+              schema_class.send(category).each { |o| ids[o.schema_id] = o }
             end
           end
         end
-
+        ids
       end
+
+      def find_orphaned_ids
+        ids = all_defined_ids.keys
+        map = self.map.dup
+        ids.each { |id| map.delete(id) }
+        map.each do |id, name|
+          @missing_from_schema << name
+        end
+      end
+
+      def find_orphaned_class_ids
+        names = self.classes.map { |c| c.schema_name }
+        not_found = []
+        map.each do |id, entry|
+          not_found << entry unless names.include?(entry)
+        end
+        not_found.each do |entry|
+          @missing_from_schema[:class] << [entry, nil]
+        end
+      end
+
 
       def missing_id!(klass, category=:class, name=nil)
         @missing_from_map[category] << [klass, name]
@@ -110,15 +111,39 @@ module Spontaneous
 
       def reset!
         @classes = []
-        @map = nil
+        @map = @inverse_map = nil
       end
 
-      def schema_id(root, category = nil, name = nil)
-        map.object_to_id(root, category, name)
+      def find(id)
+        all_defined_ids[id]
+      end
+
+      def schema_id(obj)
+        name_to_id(obj.schema_name)
+      end
+
+      def id_to_name(id)
+        map[id]
+      end
+
+      def name_to_id(name)
+        inverse_map[name]
       end
 
       def map
-        @map ||= Map.new(Spontaneous.schema_map)
+        @map ||= load_map
+      end
+
+      def inverse_map
+        @inverse_map ||= map.invert
+      end
+
+      def load_map
+        map = {}
+        if ::File.exists?(Spontaneous.schema_map)
+          map = YAML.load_file(Spontaneous.schema_map)
+        end
+        map
       end
     end
 
@@ -128,12 +153,22 @@ module Spontaneous
         @missing_from_schema = missing_from_schema
       end
 
+      def select_missing(select_type)
+        @missing_from_schema.map do |name|
+          name.split('/')
+        end.select do |type, owner, name|
+          type == select_type
+        end.map do |type, owner, name|
+          [owner, name]
+        end
+      end
+
       def added_classes
         @missing_from_map[:class].map { |m| m[0] }
       end
 
       def removed_classes
-        @missing_from_schema[:class].map { |m| m[0] }
+        select_missing('type').map { |owner, name| name }
       end
 
       def added_fields
@@ -141,76 +176,58 @@ module Spontaneous
       end
 
       def removed_fields
-        @missing_from_schema[:field].map { |m| m[1] }
+        select_missing('field').map { |owner, name| MissingField.new(owner, name) }
       end
+
+      def added_boxes
+        @missing_from_map[:box].map { |m| m[1] }
+      end
+
+      def removed_boxes
+        select_missing('box').map { |owner, name| MissingBox.new(owner, name) }
+      end
+
+      def added_styles
+        @missing_from_map[:style].map { |m| m[1] }
+      end
+
+      def removed_styles
+        select_missing('style').map { |owner, name| MissingStyle.new(owner, name) }
+      end
+
+      def added_layouts
+        @missing_from_map[:layout].map { |m| m[1] }
+      end
+
+      def removed_layouts
+        select_missing('layout').map { |owner, name| MissingLayout.new(owner, name) }
+      end
+
+      def self.Missing(category)
+        Class.new do
+          class_eval (<<-RUBY)
+            attr_reader :owner, :name
+            attr_accessor :category
+
+            def initialize(owner_id, name)
+              @owner = Spontaneous::Schema.find(owner_id)
+              @name = name
+            end
+
+            def category
+              :#{category}
+            end
+          RUBY
+        end
+      end
+
+      MissingType = Missing(:type)
+      MissingBox = Missing(:box)
+      MissingField = Missing(:field)
+      MissingStyle = Missing(:style)
+      MissingLayout = Missing(:layout)
     end
 
-    class Map
-      include Enumerable
-
-      def initialize(path)
-        @path = path
-      end
-
-      def object_to_id(root, category, name)
-        uid, entry = root_entry(root)
-        return nil unless uid
-        if category
-          c = entry[category] || {}
-          uid, schema_name = c.detect do |i, n|
-            n == name
-          end
-          uid
-        else
-          uid
-        end
-      end
-
-      def root_entry(root_object)
-        return nil unless map
-        mapping.detect do |uid, entry|
-          entry.name == root_object.schema_name
-        end
-      end
-
-      def id_to_object(id)
-
-      end
-
-      def mapping
-        @mapping ||= load_mapping
-      end
-
-      def each
-        mapping.each { |e| yield e if block_given? }
-      end
-
-      def load_mapping
-        map = {}
-        if ::File.exists?(@path)
-          root = YAML.load_file(@path)
-          root.each do |uid, entry|
-            map[uid] = RootEntry.new(uid, entry)
-          end
-        end
-        map
-      end
-
-      class RootEntry
-        attr_reader :uid, :name
-
-        def initialize(uid, entry)
-          @uid = entry
-          @name = entry[:name]
-          @categories = entry[:categories]
-        end
-
-        def [](category)
-          @categories[category]
-        end
-
-      end
-    end
     class UID
       @@uid_lock  = Mutex.new
       @@uid_index = 0

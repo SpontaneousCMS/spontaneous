@@ -45,5 +45,6 @@ group :development do
   # gem 'Selenium', '~> 1.1.14'
   gem 'johnson',    '2.0.0.pre3', :platforms => [:mri_18]
   gem 'harmony',    '~> 0.5', :platforms => [:mri_18]
+  gem 'ruby-debug'
 end
 

@@ -105,20 +105,39 @@ class SchemaTest < MiniTest::Spec
   context "schema verification" do
     setup do
       Spontaneous.schema_map = File.expand_path('../../fixtures/schema/before.yml', __FILE__)
-      class B < Content; end
+      class B < Page; end
       class C < Content; end
       class D < Content; end
+      class O < Box; end
       B.field :description
       B.field :author
+      B.box :promotions do
+        field :field1
+        field :field2
+        style :style1
+        style :style2
+      end
+      B.box :publishers, :type => O
+      B.style :inline
+      B.style :outline
+      B.layout :thin
+      B.layout :fat
+
+      O.field :ofield1
+      O.field :ofield2
+      O.style :ostyle1
+      O.style :ostyle2
+
       # have to use mocking because schema class list is totally fecked up
       # after running other tests
       # TODO: look into reliable, non-harmful way of clearing out the schema state
       #       between tests
-      Schema.stubs(:content_classes).returns([B, C, D])
-      Schema.classes.should == [B, C, D]
+      Schema.stubs(:classes).returns([B, C, D, O])
+      Schema.classes.should == [B, C, D, O]
       B.schema_id.should == "bbbbbbbbbbbb"
       C.schema_id.should == "cccccccccccc"
       D.schema_id.should == "dddddddddddd"
+      O.schema_id.should == "oooooooooooo"
     end
 
     teardown do
@@ -127,11 +146,12 @@ class SchemaTest < MiniTest::Spec
       SchemaTest.send(:remove_const, :D) rescue nil
       SchemaTest.send(:remove_const, :E) rescue nil
       SchemaTest.send(:remove_const, :F) rescue nil
+      SchemaTest.send(:remove_const, :O) rescue nil
     end
 
     should "detect addition of classes" do
       class E < Content; end
-      Schema.stubs(:content_classes).returns([B, C, D, E])
+      Schema.stubs(:classes).returns([B, C, D, E])
       exception = nil
       begin
         Schema.validate!
@@ -148,7 +168,7 @@ class SchemaTest < MiniTest::Spec
     should "detect removal of classes" do
       SchemaTest.send(:remove_const, :C) rescue nil
       SchemaTest.send(:remove_const, :D) rescue nil
-      Schema.stubs(:content_classes).returns([B])
+      Schema.stubs(:classes).returns([B, O])
       begin
         Schema.validate!
         flunk("Validation should raise an exception")
@@ -163,7 +183,7 @@ class SchemaTest < MiniTest::Spec
       SchemaTest.send(:remove_const, :D) rescue nil
       class E < Content; end
       class F < Content; end
-      Schema.stubs(:content_classes).returns([B, E, F])
+      Schema.stubs(:classes).returns([B, E, F, O])
       begin
         Schema.validate!
         flunk("Validation should raise an exception if schema is modified")
@@ -196,25 +216,128 @@ class SchemaTest < MiniTest::Spec
       rescue Spontaneous::SchemaModificationError => e
         exception = e
       end
-      exception.removed_fields.should == ["description"]
+      exception.removed_fields.length == 1
+      exception.removed_fields[0].name.should == "description"
+      exception.removed_fields[0].owner.should == SchemaTest::B
+      exception.removed_fields[0].category.should == :field
     end
 
-    should "detect addition of boxes"
-    should "detect removal of boxes"
-    should "detect addition of styles"
-    should "detect removal of styles"
-    should "detect addition of layouts"
-    should "detect removal of layouts"
+    should "detect addition of boxes" do
+      B.box :changes
+      B.box :updates
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if new boxes are added")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.added_boxes.should == [B.boxes[:changes], B.boxes[:updates]]
+    end
+
+    should "detect removal of boxes" do
+      boxes = [B.boxes[:promotions]]
+      B.stubs(:boxes).returns(boxes)
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if fields are removed")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.removed_boxes.length.should == 1
+      exception.removed_boxes[0].name.should == "publishers"
+      exception.removed_boxes[0].owner.should == SchemaTest::B
+      exception.removed_boxes[0].category.should == :box
+    end
+
+    should "detect addition of styles" do
+      B.style :fancy
+      B.style :dirty
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if new styles are added")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.added_styles.should == [B.styles.detect{ |s| s.name == :fancy }, B.styles.detect{ |s| s.name == :dirty }]
+    end
+
+    should "detect removal of styles" do
+      styles = [B.styles.detect{ |s| s.name == :inline }]
+      B.stubs(:styles).returns(styles)
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if styles are removed")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.removed_styles.length.should == 1
+      exception.removed_styles[0].name.should == "outline"
+      exception.removed_styles[0].owner.should == SchemaTest::B
+      exception.removed_styles[0].category.should == :style
+    end
+
+    should "detect addition of layouts" do
+      B.layout :fancy
+      B.layout :dirty
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if new layouts are added")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.added_layouts.should == [B.layouts.detect{ |s| s.name == :fancy }, B.layouts.detect{ |s| s.name == :dirty }]
+    end
+
+    should "detect removal of layouts" do
+      layouts = [B.layouts.first]
+      B.stubs(:layouts).returns(layouts)
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if fields are removed")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.removed_layouts.length.should == 1
+      exception.removed_layouts[0].name.should == "fat"
+      exception.removed_layouts[0].owner.should == SchemaTest::B
+      exception.removed_layouts[0].category.should == :layout
+    end
 
     should "detect addition of fields to box types"
     should "detect removal of fields from box types"
     should "detect addition of styles to box types"
     should "detect removal of styles from box types"
 
+    should "detect addition of fields to anonymous boxes" do
+      f1 = B.boxes[:publishers].instance_class.field :field3
+      f2 = B.boxes[:promotions].instance_class.field :field3
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if new fields are added to anonymous boxes")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.added_fields.should == [f1, f2]
+    end
+
+    should "detect removal of fields from anonymous boxes" do
+      f1 = B.boxes[:promotions].instance_class.field_prototypes[:field1]
+      f2 = B.boxes[:promotions].instance_class.field_prototypes[:field2]
+      B.boxes[:promotions].instance_class.stubs(:fields).returns([f2])
+      begin
+        Schema.validate!
+        flunk("Validation should raise an exception if fields are removed from anonymous boxes")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.removed_fields.length.should == 1
+      exception.removed_fields[0].name.should == "field1"
+      exception.removed_fields[0].owner.should == SchemaTest::B.boxes[:promotions].instance_class
+      exception.removed_fields[0].category.should == :field
+    end
+
     should "detect addition of styles to anonymous boxes"
     should "detect removal of styles from anonymous boxes"
-    should "detect addition of fields to anonymous boxes"
-    should "detect removal of fields from anonymous boxes"
     should "detect addition of styles to anonymous boxes"
     should "detect removal of styles from anonymous boxes"
   end

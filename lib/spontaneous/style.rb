@@ -9,14 +9,18 @@ module Spontaneous
   end
 
   class Style
-    attr_reader :directory, :name, :options
+    attr_reader :owner, :directory, :name, :options
 
-    def initialize(directory, name, options={})
-      @directory, @name, @options = directory, name.to_sym, options
+    def initialize(owner, directory, name, options={})
+      @owner, @directory, @name, @options = owner, directory, name.to_sym, options
+    end
+
+    def schema_name
+      "style/#{owner.schema_id}/#{name}"
     end
 
     def schema_id
-      @options[:schema_id]
+      Spontaneous::Schema.schema_id(self)
     end
 
     def style_id

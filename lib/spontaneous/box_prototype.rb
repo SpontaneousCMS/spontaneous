@@ -5,16 +5,21 @@ require 'hwia'
 module Spontaneous
   class BoxPrototype
 
-    attr_reader :name, :options
+    attr_reader :name, :options, :owner
 
-    def initialize(name, options, &block)
+    def initialize(owner, name, options, &block)
+      @owner = owner
       @name = name.to_sym
       @options = options
       @extend = block
     end
 
     def schema_id
-      name.to_s
+      instance_class.schema_id
+    end
+
+    def schema_name
+      instance_class.schema_name
     end
 
     def get_instance(owner)
@@ -30,13 +35,19 @@ module Spontaneous
     end
 
     def create_instance_class
-      if @extend
-        Class.new(box_base_class).tap do |instance_class|
+      Class.new(box_base_class).tap do |instance_class|
+        instance_class.class_eval(<<-RUBY)
+            def self.schema_name
+              "box/#{owner.schema_id}/#{self.name}"
+            end
+        RUBY
+        if @extend
           instance_class.class_eval(&@extend)
         end
-      else
-        box_base_class
       end
+      # else
+      #   box_base_class
+      # end
     end
 
     def box_base_class

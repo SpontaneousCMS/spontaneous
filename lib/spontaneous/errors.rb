@@ -28,6 +28,10 @@ module Spontaneous
       @modification = modification
     end
 
-    def_delegators :@modification, :added_classes, :removed_classes, :added_fields, :removed_fields
+    def_delegators :@modification, :added_classes, :removed_classes
+    def_delegators :@modification, :added_fields, :removed_fields
+    def_delegators :@modification, :added_boxes, :removed_boxes
+    def_delegators :@modification, :added_styles, :removed_styles
+    def_delegators :@modification, :added_layouts, :removed_layouts
   end
 end

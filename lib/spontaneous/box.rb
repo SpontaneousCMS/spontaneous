@@ -23,13 +23,17 @@ module Spontaneous
     end
 
     def self.schema_id
+      Spontaneous::Schema.schema_id(self)
     end
+
     def self.schema_name
-      self.name
+      "type//#{self.name}"
     end
 
     def schema_id
-      Spontaneous::Schema.schema_id(_owner.class, :box, _name.to_s)
+      # Spontaneous::Schema.schema_id(_owner.class, :box, _name.to_s)
+      # _prototype.schema_id
+      self.class.schema_id
     end
 
     def schema_name
@@ -96,19 +100,19 @@ module Spontaneous
       # you can always over-ride the configured styles by having a template named after the box
       # in the style directory for its owning class
       possible_styles = [
-        S::Style.new(owner_class, box._name),
+        S::Style.new(self, owner_class, box._name),
       ]
 
       if styles.empty?
-        possible_styles << S::Style.new(nil, box_class) if box_class
+        possible_styles << S::Style.new(self, nil, box_class) if box_class
       else
         if style_name = prototype.default_style
-          possible_styles << S::Style.new(owner_class, style_name)
-          possible_styles << S::Style.new(box_class, style_name)
+          possible_styles << S::Style.new(self, owner_class, style_name)
+          possible_styles << S::Style.new(self, box_class, style_name)
         else
           styles.each do |style|
-            possible_styles << S::Style.new(owner_class, style.name, style.options)
-            possible_styles << S::Style.new(box_class, style.name, style.options)
+            possible_styles << S::Style.new(self, owner_class, style.name, style.options)
+            possible_styles << S::Style.new(self, box_class, style.name, style.options)
           end
         end
       end

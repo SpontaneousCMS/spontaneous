@@ -8,8 +8,7 @@ module Spontaneous::Plugins
 
     module ClassMethods
       def style(name, options={})
-        schema_id = Spontaneous::Schema.schema_id(self, :style, name.to_s)
-        styles << Spontaneous::Style.new(style_directory_name, name, options.merge(:style_id => name, :schema_id => schema_id))
+        styles << Spontaneous::Style.new(self, style_directory_name, name, options.merge(:style_id => name))
       end
 
       def styles
@@ -29,7 +28,7 @@ module Spontaneous::Plugins
           Spontaneous::Style::Anonymous.new(template_string)
         else
           if styles.empty?
-            style = Spontaneous::Style.new(nil, style_directory_name)
+            style = Spontaneous::Style.new(self, nil, style_directory_name)
             if style.exists?(format)
               style
             else
