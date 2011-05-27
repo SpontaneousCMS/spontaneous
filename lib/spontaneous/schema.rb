@@ -10,18 +10,23 @@ module Spontaneous
 
       attr_accessor :missing_classes
 
+      # validate the schema & attempt to fix anything that can be resolved without human
+      # interaction (i.e. pure additions)
       def validate!
+        validate_schema
+      end
+
+      # look for differences between identities found in schema map and
+      # those defined in the schema classes and raise an error if any
+      # are found
+      def validate_schema
         @missing_from_map = Hash.new { |hash, key| hash[key] = [] }
         @missing_from_schema = []
-        validate_schema
+        validate_classes
         unless @missing_from_map.empty? and @missing_from_schema.empty?
           modification = SchemaModification.new(@missing_from_map, @missing_from_schema)
           raise Spontaneous::SchemaModificationError.new(modification)
         end
-      end
-
-      def validate_schema
-        validate_classes
       end
 
       def validate_classes
@@ -164,7 +169,7 @@ module Spontaneous
       end
 
       def added_classes
-        @missing_from_map[:class].map { |m| m[0] }
+        @missing_from_map[:class].map { |m| m[0] }.uniq
       end
 
       def removed_classes
@@ -172,7 +177,7 @@ module Spontaneous
       end
 
       def added_fields
-        @missing_from_map[:field].map { |m| m[1] }
+        @missing_from_map[:field].map { |m| m[1] }.uniq
       end
 
       def removed_fields
@@ -180,7 +185,7 @@ module Spontaneous
       end
 
       def added_boxes
-        @missing_from_map[:box].map { |m| m[1] }
+        @missing_from_map[:box].map { |m| m[1] }.uniq
       end
 
       def removed_boxes

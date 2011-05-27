@@ -149,12 +149,18 @@ class SchemaTest < MiniTest::Spec
       SchemaTest.send(:remove_const, :O) rescue nil
     end
 
+    should "return the right schema anme for inherited box fields" do
+      f = B.boxes[:publishers].instance_class.field :newfield
+      B.boxes[:publishers].instance_class.fields.first.schema_name.should == "field/oooooooooooo/ofield1"
+      f.schema_name.should == "field/publishers00/newfield"
+    end
+
     should "detect addition of classes" do
       class E < Content; end
       Schema.stubs(:classes).returns([B, C, D, E])
       exception = nil
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -170,7 +176,7 @@ class SchemaTest < MiniTest::Spec
       SchemaTest.send(:remove_const, :D) rescue nil
       Schema.stubs(:classes).returns([B, O])
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -185,7 +191,7 @@ class SchemaTest < MiniTest::Spec
       class F < Content; end
       Schema.stubs(:classes).returns([B, E, F, O])
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if schema is modified")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -199,7 +205,7 @@ class SchemaTest < MiniTest::Spec
       C.field :location
       C.field :description
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if new fields are added")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -211,7 +217,7 @@ class SchemaTest < MiniTest::Spec
       fields = [B.field_prototypes[:author]]
       B.stubs(:fields).returns(fields)
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if fields are removed")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -226,7 +232,7 @@ class SchemaTest < MiniTest::Spec
       B.box :changes
       B.box :updates
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if new boxes are added")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -238,7 +244,7 @@ class SchemaTest < MiniTest::Spec
       boxes = [B.boxes[:promotions]]
       B.stubs(:boxes).returns(boxes)
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if fields are removed")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -253,7 +259,7 @@ class SchemaTest < MiniTest::Spec
       B.style :fancy
       B.style :dirty
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if new styles are added")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -265,7 +271,7 @@ class SchemaTest < MiniTest::Spec
       styles = [B.styles.detect{ |s| s.name == :inline }]
       B.stubs(:styles).returns(styles)
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if styles are removed")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -280,7 +286,7 @@ class SchemaTest < MiniTest::Spec
       B.layout :fancy
       B.layout :dirty
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if new layouts are added")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -292,7 +298,7 @@ class SchemaTest < MiniTest::Spec
       layouts = [B.layouts.first]
       B.stubs(:layouts).returns(layouts)
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if fields are removed")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -303,16 +309,11 @@ class SchemaTest < MiniTest::Spec
       exception.removed_layouts[0].category.should == :layout
     end
 
-    should "detect addition of fields to box types"
-    should "detect removal of fields from box types"
-    should "detect addition of styles to box types"
-    should "detect removal of styles from box types"
-
     should "detect addition of fields to anonymous boxes" do
       f1 = B.boxes[:publishers].instance_class.field :field3
       f2 = B.boxes[:promotions].instance_class.field :field3
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if new fields are added to anonymous boxes")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -325,7 +326,7 @@ class SchemaTest < MiniTest::Spec
       f2 = B.boxes[:promotions].instance_class.field_prototypes[:field2]
       B.boxes[:promotions].instance_class.stubs(:fields).returns([f2])
       begin
-        Schema.validate!
+        Schema.validate_schema
         flunk("Validation should raise an exception if fields are removed from anonymous boxes")
       rescue Spontaneous::SchemaModificationError => e
         exception = e
@@ -336,10 +337,62 @@ class SchemaTest < MiniTest::Spec
       exception.removed_fields[0].category.should == :field
     end
 
-    should "detect addition of styles to anonymous boxes"
-    should "detect removal of styles from anonymous boxes"
-    should "detect addition of styles to anonymous boxes"
-    should "detect removal of styles from anonymous boxes"
+    should "detect addition of fields to box types" do
+      O.field :name
+      begin
+        Schema.validate_schema
+        flunk("Validation should raise an exception if new fields are added to boxes")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.added_fields.should == [O.field_prototypes[:name]]
+    end
+
+    # should "detect removal of fields from box types" do
+    #   skip "stubbing is messing up the field hierarchy in weird ways"
+    #   fields = [O.field_prototypes[:ofield1]]
+    #   O.stubs(:fields).returns(fields)
+    #   begin
+    #     Schema.validate_schema
+    #     flunk("Validation should raise an exception if fields are removed")
+    #   rescue Spontaneous::SchemaModificationError => e
+    #     exception = e
+    #   end
+    #   exception.removed_fields.length == 1
+    #   exception.removed_fields[0].name.should == "ofield2"
+    #   exception.removed_fields[0].owner.should == SchemaTest::O
+    #   exception.removed_fields[0].category.should == :field
+    # end
+
+    should "detect addition of styles to box types"
+    should "detect removal of styles from box types"
+
+    should "detect addition of styles to anonymous boxes" do
+      s1 = B.boxes[:publishers].instance_class.style :style3
+      s2 = B.boxes[:promotions].instance_class.style :style3
+      begin
+        Schema.validate_schema
+        flunk("Validation should raise an exception if new fields are added to anonymous boxes")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.added_styles.should == [s1, s2]
+    end
+
+    should "detect removal of styles from anonymous boxes" do
+      styles = [B.boxes[:promotions].instance_class.styles.first]
+      B.boxes[:promotions].instance_class.stubs(:styles).returns(styles)
+      begin
+        Schema.validate_schema
+        flunk("Validation should raise an exception if styles are removed")
+      rescue Spontaneous::SchemaModificationError => e
+        exception = e
+      end
+      exception.removed_styles.length.should == 1
+      exception.removed_styles[0].name.should == "style2"
+      exception.removed_styles[0].owner.should == SchemaTest::B.boxes[:promotions].instance_class
+      exception.removed_styles[0].category.should == :style
+    end
   end
 end
 

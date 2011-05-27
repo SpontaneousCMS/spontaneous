@@ -8,7 +8,9 @@ module Spontaneous::Plugins
 
     module ClassMethods
       def style(name, options={})
-        styles << Spontaneous::Style.new(self, style_directory_name, name, options.merge(:style_id => name))
+        s = Spontaneous::Style.new(self, style_directory_name, name, options.merge(:style_id => name))
+        styles << s
+        s
       end
 
       def styles

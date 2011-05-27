@@ -37,17 +37,17 @@ module Spontaneous
     def create_instance_class
       Class.new(box_base_class).tap do |instance_class|
         instance_class.class_eval(<<-RUBY)
-            def self.schema_name
-              "box/#{owner.schema_id}/#{self.name}"
-            end
+          def self.schema_name
+            "box/#{owner.schema_id}/#{self.name}"
+          end
         RUBY
         if @extend
           instance_class.class_eval(&@extend)
         end
+      end.tap do |klass|
+        # doing this means we get proper names for the anonymous box classes
+        owner.const_set("#{name.to_s.capitalize}Box", klass)
       end
-      # else
-      #   box_base_class
-      # end
     end
 
     def box_base_class
