@@ -18,6 +18,10 @@ module Spontaneous::Plugins
         @boxes ||= Spontaneous::NamedSet.new(self, :boxes, superclass)
       end
 
+      def box_prototypes
+        Hash[@boxes.map { |p| [p.name, p] }]
+      end
+
       def has_boxes?
         !boxes.empty?
       end

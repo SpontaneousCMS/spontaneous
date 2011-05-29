@@ -11,6 +11,14 @@ module Spontaneous::Plugins
         @layouts ||= []
       end
 
+      def all_layouts
+        layouts.concat(supertype_has_layout? ? supertype.all_layouts : [])
+      end
+
+      def layout_prototypes
+        Hash[ all_layouts.map { |s| [s.name, s] } ]
+      end
+
       def resolve_layout(layout_name, format = :html)
         if layout_name.blank?
           default_layout(format)

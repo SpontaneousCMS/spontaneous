@@ -8,7 +8,10 @@ module Spontaneous
   module Schema
     class << self
 
-      attr_accessor :missing_classes
+
+      def [](schema_id)
+        find(schema_id).target
+      end
 
       # validate the schema & attempt to fix anything that can be resolved without human
       # interaction (i.e. pure additions)
@@ -122,7 +125,7 @@ module Spontaneous
       end
 
       def find(id)
-        all_defined_ids[id]
+        map[id]
       end
 
       def schema_id(obj)
@@ -142,15 +145,53 @@ module Spontaneous
       end
 
       def inverse_map
-        @inverse_map ||= map.invert
+        @inverse_map ||= Hash[ map.map { |uid, ref| [ref.reference, uid]} ]
       end
 
       def load_map
-        map = {}
         if ::File.exists?(Spontaneous.schema_map)
           map = YAML.load_file(Spontaneous.schema_map)
+          Hash[map.map { | uid, reference |
+              [uid, SchemaReference.new(reference)]
+          }]
+        else
+          {}
         end
-        map
+      end
+    end
+
+    class SchemaReference
+      SEP = "/".freeze
+
+      attr_reader :reference, :category, :name
+
+      def initialize(reference)
+        @reference = reference
+        @category, @owner_uid, @name = reference.split(SEP)
+        @category = @category.to_sym
+      end
+
+      def target
+        @target ||= find_target
+      end
+
+      def find_target
+        case @category
+        when :type
+          @name.constantize
+        when :box
+          owner.box_prototypes[name.to_sym]
+        when :field
+          owner.field_prototypes[name.to_sym]
+        when :style
+          owner.style_prototypes[name.to_sym]
+        when :layout
+          owner.layout_prototypes[name.to_sym]
+        end
+      end
+
+      def owner
+        @owner ||= Schema[@owner_uid]
       end
     end
 
@@ -161,12 +202,8 @@ module Spontaneous
       end
 
       def select_missing(select_type)
-        @missing_from_schema.map do |name|
-          name.split('/')
-        end.select do |type, owner, name|
-          type == select_type
-        end.map do |type, owner, name|
-          [owner, name]
+        @missing_from_schema.select do |reference|
+          reference.category == select_type
         end
       end
 
@@ -175,7 +212,7 @@ module Spontaneous
       end
 
       def removed_classes
-        select_missing('type').map { |owner, name| name }
+        select_missing(:type)
       end
 
       def added_fields
@@ -183,7 +220,7 @@ module Spontaneous
       end
 
       def removed_fields
-        select_missing('field').map { |owner, name| MissingField.new(owner, name) }
+        select_missing(:field)
       end
 
       def added_boxes
@@ -191,7 +228,7 @@ module Spontaneous
       end
 
       def removed_boxes
-        select_missing('box').map { |owner, name| MissingBox.new(owner, name) }
+        select_missing(:box)
       end
 
       def added_styles
@@ -199,7 +236,7 @@ module Spontaneous
       end
 
       def removed_styles
-        select_missing('style').map { |owner, name| MissingStyle.new(owner, name) }
+        select_missing(:style)
       end
 
       def added_layouts
@@ -207,32 +244,8 @@ module Spontaneous
       end
 
       def removed_layouts
-        select_missing('layout').map { |owner, name| MissingLayout.new(owner, name) }
+        select_missing(:layout)
       end
-
-      def self.Missing(category)
-        Class.new do
-          class_eval (<<-RUBY)
-            attr_reader :owner, :name
-            attr_accessor :category
-
-            def initialize(owner_id, name)
-              @owner = Spontaneous::Schema.find(owner_id)
-              @name = name
-            end
-
-            def category
-              :#{category}
-            end
-          RUBY
-        end
-      end
-
-      MissingType = Missing(:type)
-      MissingBox = Missing(:box)
-      MissingField = Missing(:field)
-      MissingStyle = Missing(:style)
-      MissingLayout = Missing(:layout)
     end
 
     class UID

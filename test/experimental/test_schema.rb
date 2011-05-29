@@ -101,7 +101,26 @@ class SchemaTest < MiniTest::Spec
       @instance.layout.name.should == :clean
       @instance.layout.schema_id.should == "llllllllllll"
     end
+
+    context "lookups" do
+      should "return classes" do
+        Schema["xxxxxxxxxxxx"].should == SchemaClass
+      end
+      should "return fields" do
+        Schema["ffffffffffff"].should == SchemaClass.field_prototypes[:description]
+      end
+      should "return boxes" do
+        Schema["bbbbbbbbbbbb"].should == SchemaClass.box_prototypes[:posts]
+      end
+      should "return styles" do
+        Schema["ssssssssssss"].should == SchemaClass.style_prototypes[:simple]
+      end
+      should "return layouts" do
+        Schema["llllllllllll"].should == SchemaClass.layout_prototypes[:clean]
+      end
+    end
   end
+
   context "schema verification" do
     setup do
       Spontaneous.schema_map = File.expand_path('../../fixtures/schema/before.yml', __FILE__)
@@ -186,7 +205,7 @@ class SchemaTest < MiniTest::Spec
       rescue Spontaneous::SchemaModificationError => e
         exception = e
       end
-      exception.removed_classes.should == ["SchemaTest::C", "SchemaTest::D"]
+      exception.removed_classes.map { |c| c.name }.sort.should == ["SchemaTest::C", "SchemaTest::D"]
     end
 
     should "detect multiple removals & additions of classes" do
@@ -202,7 +221,7 @@ class SchemaTest < MiniTest::Spec
         exception = e
       end
       exception.added_classes.should == [E, F]
-      exception.removed_classes.should == ["SchemaTest::C", "SchemaTest::D"]
+      exception.removed_classes.map {|c| c.name}.sort.should == ["SchemaTest::C", "SchemaTest::D"]
     end
 
     should "detect addition of fields" do
@@ -338,7 +357,7 @@ class SchemaTest < MiniTest::Spec
       end
       exception.removed_fields.length.should == 1
       exception.removed_fields[0].name.should == "field1"
-      exception.removed_fields[0].owner.should == SchemaTest::B.boxes[:promotions].instance_class
+      exception.removed_fields[0].owner.instance_class.should == SchemaTest::B.boxes[:promotions].instance_class
       exception.removed_fields[0].category.should == :field
     end
 
@@ -395,7 +414,7 @@ class SchemaTest < MiniTest::Spec
       end
       exception.removed_styles.length.should == 1
       exception.removed_styles[0].name.should == "style2"
-      exception.removed_styles[0].owner.should == SchemaTest::B.boxes[:promotions].instance_class
+      exception.removed_styles[0].owner.instance_class.should == SchemaTest::B.boxes[:promotions].instance_class
       exception.removed_styles[0].category.should == :style
     end
   end
