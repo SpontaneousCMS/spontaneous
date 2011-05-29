@@ -1,4 +1,6 @@
 ---
+tttttttttttt: type//Page
+pagetitle000: field/tttttttttttt/title
 bbbbbbbbbbbb: type//SchemaTest::B
 ffffffffffff: field/bbbbbbbbbbbb/description
 author000000: field/bbbbbbbbbbbb/author

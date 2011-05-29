@@ -105,7 +105,10 @@ class SchemaTest < MiniTest::Spec
   context "schema verification" do
     setup do
       Spontaneous.schema_map = File.expand_path('../../fixtures/schema/before.yml', __FILE__)
-      class B < Page; end
+      class ::Page < Spontaneous::Page
+        field :title
+      end
+      class B < ::Page; end
       class C < Content; end
       class D < Content; end
       class O < Box; end
@@ -132,8 +135,9 @@ class SchemaTest < MiniTest::Spec
       # after running other tests
       # TODO: look into reliable, non-harmful way of clearing out the schema state
       #       between tests
-      Schema.stubs(:classes).returns([B, C, D, O])
-      Schema.classes.should == [B, C, D, O]
+      # Schema.stubs(:classes).returns([B, C, D, O])
+      # Schema.classes.should == [B, C, D, O]
+      ::Page.schema_id.should == "tttttttttttt"
       B.schema_id.should == "bbbbbbbbbbbb"
       C.schema_id.should == "cccccccccccc"
       D.schema_id.should == "dddddddddddd"
@@ -141,6 +145,7 @@ class SchemaTest < MiniTest::Spec
     end
 
     teardown do
+      Object.send(:remove_const, :Page) rescue nil
       SchemaTest.send(:remove_const, :B) rescue nil
       SchemaTest.send(:remove_const, :C) rescue nil
       SchemaTest.send(:remove_const, :D) rescue nil
@@ -174,7 +179,7 @@ class SchemaTest < MiniTest::Spec
     should "detect removal of classes" do
       SchemaTest.send(:remove_const, :C) rescue nil
       SchemaTest.send(:remove_const, :D) rescue nil
-      Schema.stubs(:classes).returns([B, O])
+      Schema.stubs(:classes).returns([::Page, B, O])
       begin
         Schema.validate_schema
         flunk("Validation should raise an exception")
@@ -189,7 +194,7 @@ class SchemaTest < MiniTest::Spec
       SchemaTest.send(:remove_const, :D) rescue nil
       class E < Content; end
       class F < Content; end
-      Schema.stubs(:classes).returns([B, E, F, O])
+      Schema.stubs(:classes).returns([::Page, B, E, F, O])
       begin
         Schema.validate_schema
         flunk("Validation should raise an exception if schema is modified")

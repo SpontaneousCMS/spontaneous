@@ -48,7 +48,9 @@ module Spontaneous
           ids[schema_class.schema_id] = schema_class
           [:fields, :boxes, :styles, :layouts].each do |category|
             if schema_class.respond_to?(category)
-              schema_class.send(category).each { |o| ids[o.schema_id] = o }
+              schema_class.send(category).each { |o|
+                ids[o.schema_id] = o
+              }
             end
           end
         end
