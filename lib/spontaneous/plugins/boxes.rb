@@ -19,7 +19,7 @@ module Spontaneous::Plugins
       end
 
       def box_prototypes
-        Hash[@boxes.map { |p| [p.name, p] }]
+        Hash[boxes.map { |p| [p.name, p] }]
       end
 
       def has_boxes?

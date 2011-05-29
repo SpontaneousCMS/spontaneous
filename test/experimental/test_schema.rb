@@ -238,8 +238,9 @@ class SchemaTest < MiniTest::Spec
     end
 
     should "detect removal of fields" do
-      fields = [B.field_prototypes[:author]]
-      B.stubs(:fields).returns(fields)
+      field = B.field_prototypes[:author]
+      B.stubs(:field_prototypes).returns({:author => field})
+      B.stubs(:fields).returns([field])
       begin
         Schema.validate_schema
         flunk("Validation should raise an exception if fields are removed")
@@ -346,8 +347,9 @@ class SchemaTest < MiniTest::Spec
     end
 
     should "detect removal of fields from anonymous boxes" do
-      f1 = B.boxes[:promotions].instance_class.field_prototypes[:field1]
+      # f1 = B.boxes[:promotions].instance_class.field_prototypes[:field1]
       f2 = B.boxes[:promotions].instance_class.field_prototypes[:field2]
+      B.boxes[:promotions].instance_class.stubs(:field_prototypes).returns({:field2 => f2})
       B.boxes[:promotions].instance_class.stubs(:fields).returns([f2])
       begin
         Schema.validate_schema

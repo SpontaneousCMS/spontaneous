@@ -38,48 +38,18 @@ module Spontaneous
         self.classes.each do | schema_class |
           schema_class.schema_validate
         end
+
         # now check that each of the ids in the map has a
         # corresponding entry in the schema
-
         find_orphaned_ids
-        # find_orphaned_field_ids
-      end
-
-      def all_defined_ids
-        ids = {}
-        classes.each do | schema_class |
-          ids[schema_class.schema_id] = schema_class
-          [:fields, :boxes, :styles, :layouts].each do |category|
-            if schema_class.respond_to?(category)
-              schema_class.send(category).each { |o|
-                ids[o.schema_id] = o
-              }
-            end
-          end
-        end
-        ids
       end
 
       def find_orphaned_ids
-        ids = all_defined_ids.keys
-        map = self.map.dup
-        ids.each { |id| map.delete(id) }
-        map.each do |id, name|
-          @missing_from_schema << name
+        gaps = map.select { |uid, reference| reference.target.nil? }
+        gaps.each do |uid, missing|
+          @missing_from_schema << missing
         end
       end
-
-      def find_orphaned_class_ids
-        names = self.classes.map { |c| c.schema_name }
-        not_found = []
-        map.each do |id, entry|
-          not_found << entry unless names.include?(entry)
-        end
-        not_found.each do |entry|
-          @missing_from_schema[:class] << [entry, nil]
-        end
-      end
-
 
       def missing_id!(klass, category=:class, name=nil)
         @missing_from_map[category] << [klass, name]
@@ -178,7 +148,11 @@ module Spontaneous
       def find_target
         case @category
         when :type
-          @name.constantize
+          begin
+            @name.constantize
+          rescue NameError => e
+            nil
+          end
         when :box
           owner.box_prototypes[name.to_sym]
         when :field

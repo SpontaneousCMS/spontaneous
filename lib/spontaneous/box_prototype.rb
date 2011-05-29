@@ -14,6 +14,13 @@ module Spontaneous
       @extend = block
     end
 
+    def field_prototypes
+      instance_class.field_prototypes
+    end
+    def style_prototypes
+      instance_class.style_prototypes
+    end
+
     def schema_id
       instance_class.schema_id
     end
