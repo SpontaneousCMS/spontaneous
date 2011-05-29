@@ -6,6 +6,7 @@ require 'socket'
 
 module Spontaneous
   module Schema
+    # schema class <=> uid map backed by a file
     class PersistentMap
       attr_reader :map, :inverse_map
 
@@ -46,6 +47,9 @@ module Spontaneous
       end
     end
 
+    # schema class <=> uid map with no backing, each run will generate different uids and
+    # no schema validation errors will ever be thrown
+    # used for tests
     class TransientMap < PersistentMap
       def initialize(path)
         @map = {}
@@ -75,8 +79,6 @@ module Spontaneous
     end
 
     class << self
-
-
       def map_class
         @map_class ||= PersistentMap
       end
