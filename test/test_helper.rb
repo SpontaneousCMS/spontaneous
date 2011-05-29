@@ -84,21 +84,6 @@ class MiniTestWithHooks < MiniTest::Unit
 end
 
 
-module StartupShutdown
-  def self.included(base)
-    base.extend(ClassMethods)
-  end
-
-  module ClassMethods
-    def startup
-      puts "+ Running #{self.name} startup"
-    end
-
-    def shutdown
-      puts "- Running #{self.name} shutdown"
-    end
-  end # ClassMethods
-end
 
 MiniTest::Unit.runner = MiniTestWithHooks.new
 

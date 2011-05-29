@@ -6,7 +6,6 @@ ENV['RACK_ENV'] = 'test'
 
 
 class FrontTest < MiniTest::Spec
-  include StartupShutdown
   include ::Rack::Test::Methods
 
   class SitePage < Spontaneous::Page

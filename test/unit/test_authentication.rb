@@ -6,7 +6,6 @@ require 'test_helper'
 
 
 class AuthenticationTest < MiniTest::Spec
-  include StartupShutdown
   include ::Rack::Test::Methods
 
   class C < Spontaneous::Piece

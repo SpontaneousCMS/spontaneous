@@ -4,7 +4,6 @@ require 'test_helper'
 
 
 class PublishingTest < MiniTest::Spec
-  include StartupShutdown
 
   def self.startup
     Spontaneous.root = File.expand_path("../../fixtures/example_application", __FILE__)

@@ -6,7 +6,6 @@ require 'test_helper'
 
 
 class BackTest < MiniTest::Spec
-  include StartupShutdown
   include ::Rack::Test::Methods
 
 
