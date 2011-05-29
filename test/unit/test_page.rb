@@ -7,11 +7,11 @@ class PageTest < MiniTest::Spec
   include Spontaneous
 
   context "All pages" do
-    should "have a pre-defined 'title' field" do
-      p = Page.new
-      p.field?(:title).should be_true
-      p.title.value.should == "New Page"
-    end
+    # should "have a pre-defined 'title' field" do
+    #   p = Page.new
+    #   p.field?(:title).should be_true
+    #   p.title.value.should == "New Page"
+    # end
   end
   context "Root page" do
     setup do

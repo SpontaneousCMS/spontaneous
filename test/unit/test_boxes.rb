@@ -43,8 +43,8 @@ class BoxesTest < MiniTest::Spec
       MyContentClass.box :images1
       MyContentClass.box :images2, :type => :MyBoxClass
       instance = MyContentClass.new
-      instance.images1.class.should == Box
-      instance.images2.class.should == MyBoxClass
+      instance.images1.class.superclass.should == Box
+      instance.images2.class.superclass.should == MyBoxClass
     end
 
     should "be available by name" do
@@ -53,31 +53,31 @@ class BoxesTest < MiniTest::Spec
       MyContentClass.boxes[:images1].should == MyContentClass.boxes.first
       MyContentClass.boxes[:images2].should == MyContentClass.boxes.last
       instance = MyContentClass.new
-      instance.boxes[:images1].class.should == Box
-      instance.boxes[:images2].class.should == MyBoxClass
+      instance.boxes[:images1].class.superclass.should == Box
+      instance.boxes[:images2].class.superclass.should == MyBoxClass
     end
 
     should "accept a custom instance class" do
       MyContentClass.box :images1, :type => MyBoxClass
-      MyContentClass.boxes.first.instance_class.should == MyBoxClass
+      MyContentClass.boxes.first.instance_class.superclass.should == MyBoxClass
     end
 
     should "accept a custom instance class as a string" do
       MyContentClass.box :images1, :type => 'MyBoxClass'
-      MyContentClass.boxes.first.instance_class.should == MyBoxClass
+      MyContentClass.boxes.first.instance_class.superclass.should == MyBoxClass
     end
 
     should "accept a custom instance class as a symbol" do
       MyContentClass.box :images1, :type => :MyBoxClass
-      MyContentClass.boxes.first.instance_class.should == MyBoxClass
+      MyContentClass.boxes.first.instance_class.superclass.should == MyBoxClass
     end
 
     should "Instantiate a box of the correct class" do
       MyContentClass.box :images1
       MyContentClass.box :images2, :type => :MyBoxClass
       instance = MyContentClass.new
-      instance.boxes.first.class.should == Box
-      instance.boxes.last.class.should == MyBoxClass
+      instance.boxes.first.class.superclass.should == Box
+      instance.boxes.last.class.superclass.should == MyBoxClass
     end
 
     should "give access to the prototype within the instance" do
@@ -103,8 +103,8 @@ class BoxesTest < MiniTest::Spec
       MyContentClass2.box :images2
       MyContentClass2.boxes.length.should == 2
       instance = MyContentClass2.new
-      instance.images1.class.should == MyBoxClass
-      instance.images2.class.should == Box
+      instance.images1.class.superclass.should == MyBoxClass
+      instance.images2.class.superclass.should == Box
       instance.boxes.length.should == 2
     end
 

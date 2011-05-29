@@ -5,6 +5,9 @@ require 'test_helper'
 
 class SerialisationTest < MiniTest::Spec
   include Spontaneous
+  class Page < Spontaneous::Page
+    field :title, :string, :default => "New Page"
+  end
   context "Content" do
     setup do
       Content.delete
