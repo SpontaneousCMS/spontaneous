@@ -6,11 +6,83 @@ require 'socket'
 
 module Spontaneous
   module Schema
+    class PersistentMap
+      include Enumerable
+      attr_reader :map, :inverse_map
+
+      def initialize(path)
+        @map = load_map(path)
+        @inverse_map ||= Hash[ map.map { |uid, ref| [ref.reference, uid]} ]
+      end
+
+      def schema_id(obj)
+        name_to_id(obj.schema_name)
+      end
+
+      def name_to_id(name)
+        inverse_map[name]
+      end
+
+      def [](id)
+        map[id].target
+      end
+
+      def each
+        map.each { |uid, reference| yield(uid, reference) } if block_given?
+      end
+
+      def load_map(path)
+        if ::File.exists?(path)
+          map = YAML.load_file(path)
+          Hash[map.map { | uid, reference |
+                         [uid, SchemaReference.new(reference)]
+          }]
+        else
+          {}
+        end
+      end
+      def orphaned_ids
+        map.select { |uid, reference| reference.target.nil? }
+      end
+    end
+
+    class TransientMap < PersistentMap
+      def initialize(path)
+        @map = {}
+      end
+
+      def schema_id(obj)
+        if id = inverse_map[obj]
+          id
+        else
+          Schema::UID.generate.to_s.tap do | id |
+            map[id] = obj
+          end
+        end
+      end
+
+      def [](id)
+        map[id]
+      end
+
+      def inverse_map
+        map.invert
+      end
+
+      def orphaned_ids
+        {}
+      end
+    end
+
     class << self
 
 
-      def [](schema_id)
-        find(schema_id).target
+      def map_class
+        @map_class ||= PersistentMap
+      end
+
+      def map_class=(klass)
+        @map_class = klass
       end
 
       # validate the schema & attempt to fix anything that can be resolved without human
@@ -45,8 +117,7 @@ module Spontaneous
       end
 
       def find_orphaned_ids
-        gaps = map.select { |uid, reference| reference.target.nil? }
-        gaps.each do |uid, missing|
+        map.orphaned_ids.each do |uid, missing|
           @missing_from_schema << missing
         end
       end
@@ -73,6 +144,7 @@ module Spontaneous
       end
 
       # just subclasses of Content (excluding boxes)
+      # only need this for the serialisation (which doesn't include boxes)
       def content_classes
         classes = []
         Content.subclasses.each do |klass|
@@ -91,43 +163,21 @@ module Spontaneous
 
       def reset!
         @classes = []
-        @map = @inverse_map = nil
-      end
-
-      def find(id)
-        map[id]
-      end
-
-      def schema_id(obj)
-        name_to_id(obj.schema_name)
-      end
-
-      def id_to_name(id)
-        map[id]
-      end
-
-      def name_to_id(name)
-        inverse_map[name]
+        @map = nil
       end
 
       def map
-        @map ||= load_map
+        @map ||= self.map_class.new(Spontaneous.schema_map)
       end
 
-      def inverse_map
-        @inverse_map ||= Hash[ map.map { |uid, ref| [ref.reference, uid]} ]
+      def schema_id(obj)
+        map.schema_id(obj)
       end
 
-      def load_map
-        if ::File.exists?(Spontaneous.schema_map)
-          map = YAML.load_file(Spontaneous.schema_map)
-          Hash[map.map { | uid, reference |
-              [uid, SchemaReference.new(reference)]
-          }]
-        else
-          {}
-        end
+      def [](schema_id)
+        map[schema_id]
       end
+
     end
 
     class SchemaReference

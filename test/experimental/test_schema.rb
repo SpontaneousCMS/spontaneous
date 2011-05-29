@@ -6,6 +6,11 @@ require 'test_helper'
 class SchemaTest < MiniTest::Spec
   include Spontaneous
 
+  def setup
+    Spontaneous::Schema.map_class = Spontaneous::Schema::PersistentMap
+    Spontaneous::Schema.reset!
+  end
+
   context "Configurable names" do
     setup do
       class ::FunkyContent < Content; end
