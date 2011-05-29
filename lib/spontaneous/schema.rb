@@ -7,12 +7,11 @@ require 'socket'
 module Spontaneous
   module Schema
     class PersistentMap
-      include Enumerable
       attr_reader :map, :inverse_map
 
       def initialize(path)
         @map = load_map(path)
-        @inverse_map ||= Hash[ map.map { |uid, ref| [ref.reference, uid]} ]
+        invert_map
       end
 
       def schema_id(obj)
@@ -27,10 +26,6 @@ module Spontaneous
         map[id].target
       end
 
-      def each
-        map.each { |uid, reference| yield(uid, reference) } if block_given?
-      end
-
       def load_map(path)
         if ::File.exists?(path)
           map = YAML.load_file(path)
@@ -41,6 +36,11 @@ module Spontaneous
           {}
         end
       end
+
+      def invert_map
+        @inverse_map ||= Hash[ map.map { |uid, ref| [ref.reference, uid]} ]
+      end
+
       def orphaned_ids
         map.select { |uid, reference| reference.target.nil? }
       end
