@@ -12,12 +12,12 @@ module Spontaneous::Plugins
       end
 
       def initialize_from_prototypes(initial_values)
-        values = Hash[(initial_values || []).map { |value| [value[:name].to_sym, value] }]
+        values = Hash[(initial_values || []).map { |value| [value[:id], value] }]
         prototype_names = []
         owner.field_prototypes.each do |field_name, field_prototype|
           # use this to look for orphaned fields in initial_values
           prototype_names << field_name
-          field = field_prototype.to_field(values[field_name])
+          field = field_prototype.to_field(values[field_prototype.schema_id])
           add_field(field)
         end
       end

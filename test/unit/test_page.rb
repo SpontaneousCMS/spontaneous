@@ -16,6 +16,7 @@ class PageTest < MiniTest::Spec
   context "Root page" do
     setup do
       Content.delete
+      S::Schema.validate!
     end
     should "be created by first page insert" do
       p = Page.create
@@ -182,6 +183,7 @@ class PageTest < MiniTest::Spec
 
   context "page pieces" do
     setup do
+      Content.delete
       @parent = Page.create
       @piece = Piece.new
       @child = Page.new

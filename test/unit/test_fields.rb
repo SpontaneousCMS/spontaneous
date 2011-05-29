@@ -208,6 +208,7 @@ class FieldsTest < MiniTest::Spec
 
     should "not process values coming from db" do
       content_class = Class.new(Content)
+
       content_class.field :title do
         def process(value)
           "<#{value}>"

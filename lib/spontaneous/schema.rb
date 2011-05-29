@@ -24,7 +24,11 @@ module Spontaneous
       end
 
       def [](id)
-        map[id].target
+        if obj = map[id]
+          obj.target
+        else
+          nil
+        end
       end
 
       def load_map(path)
@@ -39,7 +43,11 @@ module Spontaneous
       end
 
       def invert_map
-        @inverse_map ||= Hash[ map.map { |uid, ref| [ref.reference, uid]} ]
+        @inverse_map ||= generate_inverse
+      end
+
+      def generate_inverse
+        Hash[ map.map { |uid, ref| [ref.reference, uid]} ]
       end
 
       def orphaned_ids
@@ -51,26 +59,24 @@ module Spontaneous
     # no schema validation errors will ever be thrown
     # used for tests
     class TransientMap < PersistentMap
+      Reference = Struct.new(:reference, :target)
       def initialize(path)
         @map = {}
       end
 
       def schema_id(obj)
-        if id = inverse_map[obj]
+        if id = inverse_map[obj.schema_name]
           id
         else
           Schema::UID.generate.to_s.tap do | id |
-            map[id] = obj
+            ref = Reference.new(obj.schema_name, obj)
+            map[id] = ref
           end
         end
       end
 
-      def [](id)
-        map[id]
-      end
-
       def inverse_map
-        map.invert
+        generate_inverse
       end
 
       def orphaned_ids
