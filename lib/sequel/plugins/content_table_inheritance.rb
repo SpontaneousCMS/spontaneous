@@ -59,25 +59,10 @@ module Sequel
           @sti_dataset = dataset
           @is_content_inheritance_root = false
           @is_site_inheritance_root = false
+          # @sti_model_map =  lambda{|v| v if v && v != ''}
+          # @sti_key_map = lambda{|klass| klass.name.to_s}
           @sti_model_map = lambda { |id| Spontaneous::Schema[id] }
-            # opts[:model_map] || lambda{|v| v if v && v != ''}
           @sti_key_map = lambda { |klass| klass.schema_id }
-            # if km = opts[:key_map]
-            #   if km.is_a?(Hash)
-            #     h = Hash.new{|h,k| h[k.to_s] unless k.is_a?(String)}
-            #     h.merge!(km)
-            #   else
-            #     km
-            #   end
-            # elsif sti_model_map.is_a?(Hash)
-            #   h = Hash.new{|h,k| h[k.to_s] unless k.is_a?(String)}
-            #   sti_model_map.each do |k,v|
-            #     h[v.to_s] = k
-            #   end
-            #   h
-            # else
-            #   lambda{|klass| klass.name.to_s}
-            # end
           dataset.row_proc = lambda{|r| model.sti_load(r)}
         end
       end

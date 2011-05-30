@@ -8,6 +8,7 @@ class RenderTest < MiniTest::Spec
 
   def setup
     @saved_engine_class = Spontaneous::Render.renderer_class
+        Schema.reset!
   end
   def teardown
     Spontaneous::Render.renderer_class = @saved_engine_class
@@ -182,7 +183,9 @@ class RenderTest < MiniTest::Spec
 
     context "page styles" do
       setup do
-        class ::PageClass < Page; end
+        class ::PageClass < Page
+          field :title, :string
+        end
         # PageClass.box :things
         # PageClass.style :inline_style
         PageClass.layout :subdir_style
@@ -209,7 +212,9 @@ class RenderTest < MiniTest::Spec
     context "pages as inline content" do
 
       setup do
-        class ::PageClass < Page; end
+        class ::PageClass < Page
+          field :title, :string
+        end
         # class ::PieceClass < Piece; end
         PageClass.box :things
         PageClass.layout :page_style
@@ -273,7 +278,9 @@ class RenderTest < MiniTest::Spec
     setup do
       Spontaneous::Render.template_root = template_root
 
-      class ::PreviewRender < Page; end
+      class ::PreviewRender < Page
+        field :title, :string
+      end
       PreviewRender.style :inline
       PreviewRender.box :images
       PreviewRender.field :description, :markdown

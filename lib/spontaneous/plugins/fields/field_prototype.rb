@@ -21,7 +21,7 @@ module Spontaneous::Plugins
           @field_class = base_class
         end
 
-        @field_class.prototype = self
+        # @field_class.prototype = self
         parse_options(options)
       end
 
@@ -84,7 +84,9 @@ module Spontaneous::Plugins
           :name => name,
           :unprocessed_value => default
         }.merge(values || {})
-        self.field_class.new(values, from_db)
+        field = self.field_class.new(values, from_db)
+        field.prototype = self
+        field
       end
 
       def to_hash

@@ -15,13 +15,13 @@ module Spontaneous
         [self.name.demodulize.gsub(/Field$/, '').underscore]
       end
 
-      def self.prototype=(prototype)
-        @prototype = prototype
-      end
+      # def self.prototype=(prototype)
+      #   @prototype = prototype
+      # end
 
-      def self.prototype
-        @prototype
-      end
+      # def self.prototype
+      #   @prototype
+      # end
 
       def self.accepts
         %w(text/.+)
@@ -80,9 +80,10 @@ module Spontaneous
         self.unprocessed_value = value
       end
 
-      def prototype
-        self.class.prototype
-      end
+      attr_accessor :prototype
+      # def prototype
+      #   self.class.prototype
+      # end
 
       def schema_id
         self.prototype.schema_id

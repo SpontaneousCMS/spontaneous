@@ -39,6 +39,7 @@ module Sequel
       def self.parse(json)
         parser.parse(json)
       end
+
       def self.parser
         Yajl::Parser.new(:symbolize_keys => true)
       end
@@ -46,6 +47,7 @@ module Sequel
       def self.encode(obj)
         encoder.encode(obj)
       end
+
       def self.encoder
         Yajl::Encoder.new
       end
