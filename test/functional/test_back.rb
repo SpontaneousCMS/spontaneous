@@ -97,7 +97,7 @@ class BackTest < MiniTest::Spec
     end
 
     teardown do
-      [:Page, :HomePage, :Job, :Project, :Image].each { |klass| BackTest.send(:remove_const, klass) rescue nil }
+      [:Page, :Piece, :HomePage, :Job, :Project, :Image].each { |klass| BackTest.send(:remove_const, klass) rescue nil }
       Spontaneous::Permissions::User.delete
     end
 
