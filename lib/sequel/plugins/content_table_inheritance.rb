@@ -110,7 +110,7 @@ module Sequel
           subclass.instance_eval do
             @sti_key = sk
             @sti_key_array = ska
-            @sti_subclasses_array = [subclass.name]
+            @sti_subclasses_array = [skm[subclass]]
             @sti_dataset = sd
             @sti_key_map = skm
             @sti_model_map = smm

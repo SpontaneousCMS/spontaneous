@@ -14,14 +14,21 @@ class AliasTest < MiniTest::Spec
       assert_equal a.class, b.class
     end
   end
+
   context "Aliases:" do
     setup do
+      Spot::Schema.reset!
       Content.delete
 
       @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
       Spontaneous.template_root = @template_root
+      class ::Page < Spontaneous::Page
+        field :title
+      end
 
-      class ::A < Spontaneous::Piece
+      class ::Piece < Spontaneous::Piece; end
+
+      class ::A < ::Piece
         field :a_field1
         field :a_field2
 
@@ -37,7 +44,7 @@ class AliasTest < MiniTest::Spec
         field :aaa_field1
       end
 
-      class ::B < Page
+      class ::B < ::Page
         field :b_field1
         layout :b
       end
@@ -46,35 +53,35 @@ class AliasTest < MiniTest::Spec
         field :bb_field1
       end
 
-      class ::AAlias < Piece
+      class ::AAlias < ::Piece
         alias_of :A
 
         field :a_alias_field1
         style :a_alias_style
       end
 
-      class ::AAAlias < Piece
+      class ::AAAlias < ::Piece
         alias_of :AA
       end
 
-      class ::AAAAlias < Piece
+      class ::AAAAlias < ::Piece
         alias_of :AAA
       end
 
 
-      class ::BAlias < Page
+      class ::BAlias < ::Page
         alias_of :B
       end
 
-      class ::BBAlias < Piece
+      class ::BBAlias < ::Piece
         alias_of :BB
       end
 
-      class ::MultipleAlias < Piece
+      class ::MultipleAlias < ::Piece
         alias_of :AA, :B
       end
-      @root = Page.create
-      @aliases = Page.create(:slug => "aliases").reload
+      @root = ::Page.create
+      @aliases = ::Page.create(:slug => "aliases").reload
       @root << @aliases
       @a = A.create.reload
       @aa = AA.create.reload
@@ -88,10 +95,10 @@ class AliasTest < MiniTest::Spec
     end
 
     teardown do
-      [:A, :AA, :AAA, :B, :BB, :AAlias, :AAAlias, :AAAAlias, :BBAlias, :BAlias, :MultipleAlias].each do |c|
-        Object.send(:remove_const, c) rescue nil
+      [:Page, :Piece, :A, :AA, :AAA, :B, :BB, :AAlias, :AAAlias, :AAAAlias, :BBAlias, :BAlias, :MultipleAlias].each do |c|
+        Object.send(:remove_const, c)
       end
-      Content.delete
+      # Content.delete
     end
 
     context "All alias" do

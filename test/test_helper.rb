@@ -87,17 +87,18 @@ end
 
 MiniTest::Unit.runner = MiniTestWithHooks.new
 
-  def silence_logger(&block)
-    begin
-      $stdout = log_buffer = StringIO.new
-      $stderr.reopen("/dev/null", 'w')
-      block.call
-    ensure
-      $stdout = STDOUT
-      $stderr = STDERR
-      log_buffer.string
-    end
+def silence_logger(&block)
+  begin
+    $stdout = log_buffer = StringIO.new
+    $stderr.reopen("/dev/null", 'w')
+    block.call
+  ensure
+    $stdout = STDOUT
+    $stderr = STDERR
+    log_buffer.string
   end
+end
+
 class MiniTest::Spec
   include Spontaneous
   include CustomMatchers
@@ -156,6 +157,7 @@ class MiniTest::Spec
     File.exists?(Spontaneous.root).should be_true
     Spontaneous.init(:mode => :back, :environment => :development)
     # Schema.load
+    Schema.reset!
 
     Object.const_get(:HomePage).must_be_instance_of(Class)
 
@@ -243,5 +245,4 @@ end
 
 
 require 'minitest/autorun'
-
 
