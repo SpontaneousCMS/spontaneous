@@ -140,7 +140,7 @@ module Spontaneous::Plugins
         entry = \
           case type
           when :page
-            Spontaneous::PagePiece.new(self, content, entry_style.style_id)
+            Spontaneous::PagePiece.new(self, content, entry_style ? entry_style.style_id : nil)
           when :piece
             content.style = entry_style
             content

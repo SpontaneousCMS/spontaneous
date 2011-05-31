@@ -5,13 +5,14 @@ require 'test_helper'
 
 class SerialisationTest < MiniTest::Spec
   include Spontaneous
-  class Page < Spontaneous::Page
-    field :title, :string, :default => "New Page"
-  end
   context "Content" do
     setup do
       Content.delete
-      class ::SerialisedPage < Page
+      Spot::Schema.reset!
+      class ::Page < Spontaneous::Page
+        field :title, :string, :default => "New Page"
+      end
+      class ::SerialisedPage < ::Page
         field :direction, :title => "Pointing Direction", :comment => "NSEW" do
           def process(value)
             ({
@@ -61,7 +62,7 @@ class SerialisationTest < MiniTest::Spec
         :boxes => [
           {
             :name => "things",
-            :id => "things",
+            :id => SerialisedPiece.boxes[:things].schema_id,
             :title => "My Things",
             :writable => true,
             :allowed_types => ["SerialisedPage"],
@@ -72,6 +73,7 @@ class SerialisationTest < MiniTest::Spec
     end
 
     teardown do
+      Object.send(:remove_const, :Page)
       Object.send(:remove_const, :SerialisedPiece)
       Object.send(:remove_const, :SerialisedPage)
     end
@@ -152,7 +154,8 @@ class SerialisationTest < MiniTest::Spec
           :id=>@root.id,
           :boxes => [
             {
-          :id=>"insides",
+          :id=>@root.insides.schema_id,
+          :name => "insides",
           :fields=>[],
           :entries=> [
           { # root.boxes.first.entries.first
@@ -170,7 +173,9 @@ class SerialisationTest < MiniTest::Spec
           :hidden => true,
           :boxes => [
             {
-          :fields => [{:unprocessed_value=>"Things title", :processed_value=>"Things title", :name=>"title", :attributes => {}}], :id => 'things',
+          :fields => [{:unprocessed_value=>"Things title", :processed_value=>"Things title", :name=>"title", :attributes => {}}],
+          :id => SerialisedPiece.boxes[:things].schema_id,
+          :name => "things",
           :entries=> [
             { # root.boxes.entries.first.entries.first
           :type=>"SerialisedPage",
@@ -212,7 +217,10 @@ class SerialisationTest < MiniTest::Spec
           :is_page=>false,
           # :name=>"The Doors",
           :id=>@piece2.id,
-        :boxes=>[{:entries=>[], :fields=>[{:unprocessed_value=>"", :processed_value=>"", :name=>"title", :attributes => {}}], :id=>"things"}]
+        :boxes=>[{:entries=>[], :fields=>[{:unprocessed_value=>"", :processed_value=>"", :name=>"title", :attributes => {}}],
+                  :id=>@piece2.things.schema_id,
+                  :name => "things"
+        }]
         }
         ]
         }
@@ -236,12 +244,16 @@ class SerialisationTest < MiniTest::Spec
 
   context "Publishing" do
     setup do
+      Spot::Schema.reset!
+      class ::Page < Spontaneous::Page
+        field :title, :string, :default => "New Page"
+      end
       @now = Time.now
       Time.stubs(:now).returns(@now)
       Content.delete
       Change.delete
-      @page1 = Page.create
-      @page2 = Page.create(:slug => "page2")
+      @page1 = ::Page.create
+      @page2 = ::Page.create(:slug => "page2")
       @page1 << @page2
       @page2.save
       @c1 = Change.new
@@ -255,6 +267,7 @@ class SerialisationTest < MiniTest::Spec
     end
 
     teardown do
+      Object.send(:remove_const, :Page)
       Content.delete
       Change.delete
     end

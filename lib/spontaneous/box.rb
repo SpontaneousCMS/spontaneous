@@ -196,6 +196,7 @@ module Spontaneous
 
     def to_shallow_hash
       {
+        :name => _prototype.name.to_s,
         :id => _prototype.schema_id,
         :fields => self.class.readable_fields.map { |name| fields[name].to_hash }
       }

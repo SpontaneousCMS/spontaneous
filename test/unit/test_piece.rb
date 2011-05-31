@@ -7,19 +7,32 @@ class PieceTest < MiniTest::Spec
   include Spontaneous
 
   context "Pieces" do
+    setup do
+      Content.delete
+      Spot::Schema.reset!
+      class ::Piece < Spot::Piece; end
+      class ::Page < Spot::Page; end
+      class ::Fridge < ::Piece; end
+    end
+
+    teardown do
+      Object.send(:remove_const, :Page)
+      Object.send(:remove_const, :Piece)
+      Object.send(:remove_const, :Fridge)
+    end
+
     should "not be pages" do
       Piece.new.page?.should be_false
     end
 
     context "as page content" do
       setup do
-        class ::Fridge < Piece; end
-        @page = Page.create
-        @f1 = Piece.new
+        @page = ::Page.create
+        @f1 = ::Piece.new
         @page << @f1
-        @f2 = Piece.new
+        @f2 = ::Piece.new
         @f1 << @f2
-        @f3 = Fridge.new
+        @f3 = ::Fridge.new
         @f2 << @f3
 
         @page.save
@@ -27,13 +40,10 @@ class PieceTest < MiniTest::Spec
         @f2.save
         @f3.save
 
-        @page = Page[@page.id]
-        @f1 = Piece[@f1.id]
-        @f2 = Piece[@f2.id]
+        @page = ::Page[@page.id]
+        @f1 = ::Piece[@f1.id]
+        @f2 = ::Piece[@f2.id]
         @f3 = Content[@f3.id]
-      end
-      teardown do
-        Object.send(:remove_const, :Fridge)
       end
 
       should "have a link to the page" do

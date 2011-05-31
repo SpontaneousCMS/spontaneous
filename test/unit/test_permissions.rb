@@ -746,8 +746,8 @@ class PermissionsTest < MiniTest::Spec
         "mixed_level",
         "default_level"
       ]
-      @i.to_hash[:boxes].map { |f| f[:id] }.should == expected
-      @i.to_hash[:boxes].map { |b| [b[:id], b[:fields].map {|f| f[:name]}] }.should == [
+      @i.to_hash[:boxes].map { |f| f[:name] }.should == expected
+      @i.to_hash[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
         ["editor_level", expected],
         ["admin_level", expected],
         ["root_level", expected],
@@ -755,8 +755,8 @@ class PermissionsTest < MiniTest::Spec
         ["default_level", expected]
       ]
       Permissions.with_user(@root) do
-        @i.to_hash[:boxes].map { |f| f[:id] }.should == expected
-        @i.to_hash[:boxes].map { |b| [b[:id], b[:fields].map {|f| f[:name]}] }.should == [
+        @i.to_hash[:boxes].map { |f| f[:name] }.should == expected
+        @i.to_hash[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
           ["editor_level", expected],
           ["admin_level", expected],
           ["root_level", expected],
@@ -766,10 +766,10 @@ class PermissionsTest < MiniTest::Spec
       end
 
       Permissions.with_user(@visitor) do
-        @i.to_hash[:boxes].map { |f| f[:id] }.should == [
+        @i.to_hash[:boxes].map { |f| f[:name] }.should == [
           "default_level"
         ]
-        @i.to_hash[:boxes].map { |b| [b[:id], b[:fields].map {|f| f[:name]}] }.should == [
+        @i.to_hash[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
           ["default_level", ["default_level"]]
         ]
       end
@@ -780,8 +780,8 @@ class PermissionsTest < MiniTest::Spec
           "mixed_level",
           "default_level"
         ]
-        @i.to_hash[:boxes].map { |f| f[:id] }.should == expected
-        @i.to_hash[:boxes].map { |b| [b[:id], b[:fields].map {|f| f[:name]}] }.should == [
+        @i.to_hash[:boxes].map { |f| f[:name] }.should == expected
+        @i.to_hash[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
           ["editor_level", expected],
           ["mixed_level", expected],
           ["default_level", expected]
@@ -795,8 +795,8 @@ class PermissionsTest < MiniTest::Spec
           "mixed_level",
           "default_level"
         ]
-        @i.to_hash[:boxes].map { |f| f[:id] }.should == expected
-        @i.to_hash[:boxes].map { |b| [b[:id], b[:fields].map {|f| f[:name]}] }.should == [
+        @i.to_hash[:boxes].map { |f| f[:name] }.should == expected
+        @i.to_hash[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
           ["editor_level", expected],
           ["admin_level", expected],
           ["mixed_level", expected],

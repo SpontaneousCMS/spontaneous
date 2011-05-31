@@ -36,10 +36,15 @@ class PublishingTest < MiniTest::Spec
   context "publishing" do
 
     setup do
+      Spot::Schema.reset!
       Spontaneous.database = DB
 
       # DB.logger = Logger.new($stdout)
       Content.delete
+
+      class Page < Spontaneous::Page
+        field :title, :string, :default => "New Page"
+      end
 
       2.times do |i|
         c = Page.new(:uid => i)
@@ -57,6 +62,7 @@ class PublishingTest < MiniTest::Spec
 
     teardown do
       # Content.delete_all_revisions!
+      PublishingTest.send(:remove_const, :Page)
       Content.delete
       DB.logger = nil
     end
@@ -165,13 +171,13 @@ class PublishingTest < MiniTest::Spec
         should "set all subclasses to use the same dataset" do
           Content.with_revision(23) do
             Subclass.revision.should ==23
-            Subclass.dataset.should be_content_revision(23, 'Subclass')
+            Subclass.dataset.should be_content_revision(23, Subclass.schema_id)
             # piece wasn't loaded until this point
-            Piece.dataset.should  be_content_revision(23, 'Spontaneous::Piece')
+            Piece.dataset.should  be_content_revision(23, Piece.schema_id)
             Piece.revision.should == 23
           end
-          Subclass.dataset.should  be_content_revision(nil, 'Subclass')
-          Piece.dataset.should  be_content_revision(nil, 'Spontaneous::Piece')
+          Subclass.dataset.should  be_content_revision(nil, Subclass.schema_id)
+          Piece.dataset.should  be_content_revision(nil, Spontaneous::Piece.schema_id)
         end
       end
     end

@@ -3,10 +3,11 @@
 require 'test_helper'
 
 
-class ContentTest < MiniTest::Spec
+class ContentInheritanceTest < MiniTest::Spec
 
   context "Single table inheritance" do
     setup do
+      Spot::Schema.reset!
       Content.delete
       class ::Page < Spontaneous::Page; end
       class ::PageClass1 < ::Page; end

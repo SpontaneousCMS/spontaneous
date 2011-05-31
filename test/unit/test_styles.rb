@@ -26,12 +26,16 @@ class StylesTest < MiniTest::Spec
   context "styles for" do
 
     setup do
+      Spot::Schema.reset!
+      class ::MissingClass < Piece; end
       class ::TemplateClass < Content; end
       class ::TemplateSubClass1 < TemplateClass; end
       class ::TemplateSubClass2 < TemplateClass; end
       class ::InvisibleClass < Content; end
     end
+
     teardown do
+      Object.send(:remove_const, :MissingClass)
       Object.send(:remove_const, :TemplateClass)
       Object.send(:remove_const, :TemplateSubClass1)
       Object.send(:remove_const, :TemplateSubClass2)
@@ -43,6 +47,11 @@ class StylesTest < MiniTest::Spec
       context "default styles" do
         setup do
           @piece = TemplateClass.new
+        end
+
+        should "return anonymous style if no templates are found" do
+          piece = MissingClass.new
+          piece.style.class.should == Spontaneous::Style::Anonymous
         end
 
         should "derive path from owning class and name" do
