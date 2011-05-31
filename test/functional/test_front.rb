@@ -8,52 +8,52 @@ ENV['RACK_ENV'] = 'test'
 class FrontTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
-  class SitePage < Spontaneous::Page
-    layout :default
-    layout :dynamic
-    box :pages
-  end
+  # class SitePage < Spontaneous::Page
+  #   layout :default
+  #   layout :dynamic
+  #   box :pages
+  # end
 
   def self.startup
-    Site.delete
-    Content.delete
-    Change.delete
-    Spontaneous.environment = :test
-    Site.publishing_method = :immediate
+    # Site.delete
+    # Content.delete
+    # Change.delete
+    # Spontaneous.environment = :test
+    # Site.publishing_method = :immediate
 
-    @saved_revision_root = Spontaneous.revision_root
-    @saved_root = Spontaneous.root
-    Spontaneous.root = File.expand_path('../../fixtures/example_application', __FILE__)
-    @@revision_root = "#{Dir.tmpdir}/spontaneous-tests/#{Time.now.to_i}"
-    `mkdir -p #{@@revision_root}`
-    Spontaneous.revision_root = @@revision_root
+    # @saved_revision_root = Spontaneous.revision_root
+    # @saved_root = Spontaneous.root
+    # Spontaneous.root = File.expand_path('../../fixtures/example_application', __FILE__)
+    # @@revision_root = "#{Dir.tmpdir}/spontaneous-tests/#{Time.now.to_i}"
+    # `mkdir -p #{@@revision_root}`
+    # Spontaneous.revision_root = @@revision_root
 
-    Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
+    # Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
 
-    @@root = SitePage.create
-    @@about = SitePage.create(:slug => "about", :uid => "about")
-    @@news = SitePage.create(:slug => "news", :uid => "news")
-    @@dynamic = SitePage.create(:slug => "dynamic", :uid => "dynamic")
-    @@dynamic.layout = :dynamic
-    @@root.pages << @@about
-    @@root.pages << @@news
-    @@root.pages << @@dynamic
-    @@root.save
+    # @@root = SitePage.create
+    # @@about = SitePage.create(:slug => "about", :uid => "about")
+    # @@news = SitePage.create(:slug => "news", :uid => "news")
+    # @@dynamic = SitePage.create(:slug => "dynamic", :uid => "dynamic")
+    # @@dynamic.layout = :dynamic
+    # @@root.pages << @@about
+    # @@root.pages << @@news
+    # @@root.pages << @@dynamic
+    # @@root.save
 
-    Content.delete_revision(1) rescue nil
+    # Content.delete_revision(1) rescue nil
 
-    Spontaneous.logger.silent! {
-      Site.publish_all
-    }
+    # Spontaneous.logger.silent! {
+    #   Site.publish_all
+    # }
   end
 
   def self.shutdown
-    Content.delete
-    Site.delete
-    Content.delete_revision(1)
-    Spontaneous.revision_root = @saved_revision_root
-    Spontaneous.root = @saved_root
-    FileUtils.rm_rf(@@revision_root)
+    # Content.delete
+    # Site.delete
+    # Content.delete_revision(1)
+    # Spontaneous.revision_root = @saved_revision_root
+    # Spontaneous.root = @saved_root
+    # FileUtils.rm_rf(@@revision_root)
     # Object.send(:remove_const, :SitePage)
   end
 
@@ -73,23 +73,23 @@ class FrontTest < MiniTest::Spec
   end
 
   def root
-    @@root
+    @root
   end
 
   def about
-    @@about
+    @about
   end
 
   def news
-    @@news
+    @news
   end
 
   def dynamic
-    @@dynamic
+    @dynamic
   end
 
   def revision_root
-    @@revision_root
+    @revision_root
   end
 
   def session
@@ -98,9 +98,54 @@ class FrontTest < MiniTest::Spec
 
   context "Public pages" do
     setup do
+      Site.delete
+      Content.delete
+      Change.delete
+      Spot::Schema.reset!
+
+      class ::SitePage < Spontaneous::Page
+        layout :default
+        layout :dynamic
+        box :pages
+      end
+
+      Spontaneous.environment = :test
+      Site.publishing_method = :immediate
+
+      @saved_revision_root = Spontaneous.revision_root
+      @saved_root = Spontaneous.root
+      Spontaneous.root = File.expand_path('../../fixtures/example_application', __FILE__)
+      @revision_root = "#{Dir.tmpdir}/spontaneous-tests/#{Time.now.to_i}"
+      `mkdir -p #{@revision_root}`
+      Spontaneous.revision_root = @revision_root
+
+      Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
+
+      @root = ::SitePage.create
+      @about = ::SitePage.create(:slug => "about", :uid => "about")
+      @news = ::SitePage.create(:slug => "news", :uid => "news")
+      @dynamic = ::SitePage.create(:slug => "dynamic", :uid => "dynamic")
+      @dynamic.layout = :dynamic
+      @root.pages << @about
+      @root.pages << @news
+      @root.pages << @dynamic
+      @root.save
+
+      Content.delete_revision(1) rescue nil
+
+      Spontaneous.logger.silent! {
+        Site.publish_all
+      }
     end
 
     teardown do
+      Object.send(:remove_const, :SitePage)
+      Content.delete
+      Site.delete
+      Content.delete_revision(1)
+      Spontaneous.revision_root = @saved_revision_root
+      Spontaneous.root = @saved_root
+      FileUtils.rm_rf(@revision_root)
     end
 
     should "return a 404 if asked for a non-existant page" do
