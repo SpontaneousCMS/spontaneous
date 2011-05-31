@@ -7,6 +7,7 @@ class BoxesTest < MiniTest::Spec
 
   context "Box definitions" do
     setup do
+      S::Schema.reset!
       class ::MyBoxClass < Box; end
       class ::MyContentClass < Content; end
       class ::MyContentClass2 < MyContentClass; end
@@ -184,9 +185,12 @@ class BoxesTest < MiniTest::Spec
 
   context "Box classes" do
     setup do
+      Schema.reset!
       Spontaneous.template_root = File.expand_path('../../fixtures/templates/boxes', __FILE__)
       class ::MyContentClass < Content; end
       class ::MyBoxClass < Box; end
+      MyBoxClass.field :title, :string
+      MyBoxClass.field :description, :string
       MyContentClass.box :images, :class => :MyBoxClass, :fields => {
         :title => "Default Title",
         :description => "Default Description"
@@ -200,16 +204,12 @@ class BoxesTest < MiniTest::Spec
     end
 
     should "have fields" do
-      MyBoxClass.fields.length.should == 0
-      MyBoxClass.field :title, :string
-      MyBoxClass.fields.length.should == 1
+      MyBoxClass.fields.length.should == 2
+      MyBoxClass.field :another, :string
+      MyBoxClass.fields.length.should == 3
     end
 
     context "with fields" do
-      setup do
-        MyBoxClass.field :title, :string
-        MyBoxClass.field :description, :string
-      end
 
       should "save their field values" do
         @content.images.title = "something"
@@ -220,7 +220,7 @@ class BoxesTest < MiniTest::Spec
         @content.images.description.value.should == "description here"
       end
 
-      should "take initialvalues from box definition" do
+      should "take initial values from box definition" do
         @content.images.title.value.should == "Default Title"
         @content.images.description.value.should == "Default Description"
       end

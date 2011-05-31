@@ -73,7 +73,7 @@ module Spontaneous
           if self.field?(field_name)
             field = self.class.field_prototypes[field_name].to_field
             field.unprocessed_value = value
-            field_store << field.to_hash
+            field_store << field.serialize
           end
         end
       end

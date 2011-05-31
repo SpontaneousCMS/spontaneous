@@ -59,7 +59,13 @@ module Spontaneous
     # no schema validation errors will ever be thrown
     # used for tests
     class TransientMap < PersistentMap
-      Reference = Struct.new(:reference, :target)
+      class Reference
+        attr_accessor :reference, :target
+        def initialize(reference, target)
+          @reference, @target = reference, target
+        end
+      end
+
       def initialize(path)
         @map = {}
       end
