@@ -38,6 +38,10 @@ module Spontaneous::Plugins
         end
       end
 
+      def schema_reset!
+        @subclasses = nil
+      end
+
       def subclasses
         @subclasses ||= []
       end
@@ -61,6 +65,7 @@ module Spontaneous::Plugins
         subclasses << subclass
         subclass.supertype = self
       end
+
     end
   end
 end

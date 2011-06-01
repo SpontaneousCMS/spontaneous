@@ -12,6 +12,9 @@ module Spontaneous
 
     alias_method :each_attribute, :each
 
+    # need to load this first because it's used by the ContentTableInheritance plugin
+    plugin Plugins::SchemaId
+
     sequel_plugin :content_table_inheritance, :type_id
     sequel_plugin :yajl_serialization, :field_store, :entry_store, :box_store
     sequel_plugin :instance_hooks
@@ -47,7 +50,6 @@ module Spontaneous
     plugin Plugins::Entries
     plugin Plugins::Styles
     plugin Plugins::SchemaTitle
-    plugin Plugins::SchemaId
     plugin Plugins::Render
     plugin Plugins::SchemaHierarchy
     plugin Plugins::InstanceCode

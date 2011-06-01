@@ -173,11 +173,11 @@ class PublishingTest < MiniTest::Spec
             Subclass.revision.should ==23
             Subclass.dataset.should be_content_revision(23, Subclass.schema_id)
             # piece wasn't loaded until this point
-            Piece.dataset.should  be_content_revision(23, Piece.schema_id)
+            Piece.dataset.should  be_content_revision(23)
             Piece.revision.should == 23
           end
           Subclass.dataset.should  be_content_revision(nil, Subclass.schema_id)
-          Piece.dataset.should  be_content_revision(nil, Spontaneous::Piece.schema_id)
+          Piece.dataset.should  be_content_revision(nil)
         end
       end
     end

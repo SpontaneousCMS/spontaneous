@@ -179,6 +179,7 @@ module Spontaneous
       end
 
       def reset!
+        Content.schema_reset!
         @classes = []
         @map = nil
       end

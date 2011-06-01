@@ -53,16 +53,16 @@ module Sequel
       # Setup the necessary STI variables, see the module RDoc for SingleTableInheritance
       def self.configure(model, key, opts={})
         model.instance_eval do
-          @sti_key_array = nil
-          @sti_subclasses_array = [model.name]
-          @sti_key = key
-          @sti_dataset = dataset
-          @is_content_inheritance_root = false
-          @is_site_inheritance_root = false
           # @sti_model_map =  lambda{|v| v if v && v != ''}
           # @sti_key_map = lambda{|klass| klass.name.to_s}
           @sti_model_map = lambda { |id| Spontaneous::Schema[id] }
           @sti_key_map = lambda { |klass| klass.schema_id }
+          @sti_key_array = nil
+          @sti_subclasses_array = [sti_key_map[model]]
+          @sti_key = key
+          @sti_dataset = dataset
+          @is_content_inheritance_root = false
+          @is_site_inheritance_root = false
           dataset.row_proc = lambda{|r| model.sti_load(r)}
         end
       end
