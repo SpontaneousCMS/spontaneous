@@ -24,6 +24,7 @@ module Spontaneous::Plugins
           :title => fields.title.value,
           :path => path,
           :type => self.class.json_name,
+          :type_id => self.class.schema_id,
           :children => self.children.length,
           :depth => depth
         }

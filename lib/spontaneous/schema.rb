@@ -91,11 +91,7 @@ module Spontaneous
 
     class << self
       def map_class
-        @map_class ||= if ::File.exists?(Spontaneous.schema_map)
-                         PersistentMap
-                       else
-                         TransientMap
-                       end
+        @map_class ||= PersistentMap
       end
 
       def map_class=(klass)

@@ -51,6 +51,7 @@ class SerialisationTest < MiniTest::Spec
 
       @class_hash = {
         :type => "SerialisedPiece",
+        :id => SerialisedPiece.schema_id,
         :is_page => false,
         :title => "Type Title",
         :fields => [
@@ -140,6 +141,7 @@ class SerialisationTest < MiniTest::Spec
 
         @root_hash = {
           :type=>"SerialisedPage",
+          :type_id=> SerialisedPage.schema_id,
           :depth=>0,
           :uid=>"home",
           :path=>"/",
@@ -160,6 +162,7 @@ class SerialisationTest < MiniTest::Spec
           :entries=> [
           { # root.boxes.first.entries.first
           :type=>"SerialisedPiece",
+          :type_id=> SerialisedPiece.schema_id,
           :label=>"label1",
           :depth=>1,
           :styles=>["freezing", "boiling"],
@@ -179,6 +182,7 @@ class SerialisationTest < MiniTest::Spec
           :entries=> [
             { # root.boxes.entries.first.entries.first
           :type=>"SerialisedPage",
+          :type_id=> SerialisedPage.schema_id,
           :path=>"/about",
           :depth=>2,
           :styles=>["dancing", "sitting", "kneeling"],
@@ -203,6 +207,7 @@ class SerialisationTest < MiniTest::Spec
         },
           { # ENTRY
           :type=>"SerialisedPiece",
+          :type_id=> SerialisedPiece.schema_id,
           :label=>"label2",
           :depth=>1,
           :styles=>["freezing", "boiling"],
