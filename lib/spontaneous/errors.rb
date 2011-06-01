@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'forwardable'
 module Spontaneous
   module Errors
     class Error < StandardError; end

@@ -1,8 +1,7 @@
 # encoding: UTF-8
 
 
-require 'digest/md5'
-require 'socket'
+require 'base58'
 
 module Spontaneous
   module Schema
@@ -296,38 +295,24 @@ module Spontaneous
 
       def self.get_inc
         @@uid_lock.synchronize do
-          @@uid_index = (@@uid_index + 1) % 0xFFFFFF
+          @@uid_index = (@@uid_index + 1) % 0xFFFF
         end
       end
 
       def self.generate
+        # reverse the time so that sequential ids are more obviously different
+        oid =  Base58.encode((Time.now.to_f * 1000).to_i).reverse
+        oid << Base58.encode(get_inc).rjust(3, '0')
+      end
+
+      def self.generate16
         oid = ''
         # 4 bytes current time
-        time = Time.new.to_i
-        oid += [time].pack("N")
+        oid = (Time.now.to_f * 1000).to_i.to_s(16)
         # 2 bytes inc
-        oid += [get_inc].pack("N")[2, 3]
-
-        data = oid.unpack("C6")
-        str = ' ' * 12
-        6.times do |i|
-          str[i * 2, 2] = '%02x' % data[i]
-        end
-        self.new(str)
+        oid << get_inc.to_s(16).rjust(4, '0')
       end
 
-      def initialize(uid)
-        @uid = uid
-      end
-
-      def eql?(o)
-        o.to_s == @uid
-      end
-      alias_method :==, :eql?
-
-      def to_s
-        @uid
-      end
     end
   end
 end

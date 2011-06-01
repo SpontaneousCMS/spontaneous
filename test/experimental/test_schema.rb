@@ -69,22 +69,22 @@ class SchemaTest < MiniTest::Spec
       SchemaTest.send(:remove_const, :SchemaClass) rescue nil
     end
 
-    should "be 12 characters long" do
-      Schema::UID.generate.to_s.length.should == 12
-    end
+    # should "be 12 characters long" do
+    #   Schema::UID.generate.to_s.length.should == 12
+    # end
 
     should "be unique" do
       ids = (0..10000).map { Schema::UID.generate }
       ids.uniq.length.should == ids.length
     end
 
-    should "be comparable" do
-      uid1 = Schema::UID.new("aaaaaaaaaaaa")
-      uid2 = Schema::UID.new("aaaaaaaaaaaa")
-      uid3 = Schema::UID.new("bbbbbbbbbbbb")
-      uid1.should == uid2
-      uid1.should_not == uid3
-    end
+    # should "be comparable" do
+    #   uid1 = Schema::UID.new("aaaaaaaaaaaa")
+    #   uid2 = Schema::UID.new("aaaaaaaaaaaa")
+    #   uid3 = Schema::UID.new("bbbbbbbbbbbb")
+    #   uid1.should == uid2
+    #   uid1.should_not == uid3
+    # end
 
     should "be readable by content classes" do
       SchemaClass.schema_id.should == "xxxxxxxxxxxx"
