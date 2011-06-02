@@ -408,6 +408,7 @@ class PermissionsTest < MiniTest::Spec
       @root.update(:level => Permissions::UserLevel.root)
 
       class ::C < Content; end
+      class ::D < Content; end
 
       C.field :editor_level, :user_level => :editor
       C.field :admin_level, :user_level => :admin
@@ -466,13 +467,12 @@ class PermissionsTest < MiniTest::Spec
         allow :C
       end
 
-      class ::D < Content; end
       @i = C.new
     end
 
     teardown do
-      Object.send(:remove_const, :C)
-      Object.send(:remove_const, :D)
+      Object.send(:remove_const, :C) rescue nil
+      Object.send(:remove_const, :D) rescue nil
     end
 
     should "protect field reads" do

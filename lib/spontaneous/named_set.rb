@@ -13,20 +13,30 @@ module Spontaneous
       @superset = supertype.send(name) if supertype && supertype.respond_to?(name)
       @names = []
       @store = StrHash.new
+      @ids = StrHash.new
       @order = nil
     end
 
     def push(item)
       push_named(item.name, item)
+      @ids[item.id] = item.name
+    end
+
+    def push_with_name(item, name)
+      push_named(name, item)
+      @ids[item.id] = name
     end
 
     alias_method :<<, :push
+
 
     def push_named(name, item)
       name = name.to_sym
       @store[name] = item
       @names.push(name)
     end
+
+    protected :push_named
 
     def each
       names.each do |name|
@@ -40,6 +50,7 @@ module Spontaneous
     end
 
     def named(name)
+      name = @ids[name] if @ids.key?(name)
       if @store.key?(name)
         @store[name]
       elsif @superset

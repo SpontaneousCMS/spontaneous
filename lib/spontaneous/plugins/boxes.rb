@@ -51,7 +51,7 @@ module Spontaneous::Plugins
         boxes = Spontaneous::NamedSet.new(self, :boxes)
         self.class.boxes.each do | box_prototype |
           box = box_prototype.get_instance(self)
-          boxes.push_named(box_prototype.name, box)
+          boxes.push_with_name(box, box._name)
         end
         boxes
       end

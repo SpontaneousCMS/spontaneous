@@ -26,6 +26,10 @@ module Spontaneous::Plugins
         store[name.to_sym]
       end
 
+      def find(id)
+        store.values.detect { |f| f.id == id }
+      end
+
       def owner
         @owner
       end

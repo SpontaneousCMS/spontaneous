@@ -73,7 +73,7 @@ module Spontaneous
         if id = inverse_map[obj.schema_name]
           id
         else
-          Schema::UID.generate.to_s.tap do | id |
+          Schema::UID.generate.tap do | id |
             ref = Reference.new(obj.schema_name, obj)
             map[id] = ref
           end

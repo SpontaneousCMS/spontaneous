@@ -348,7 +348,8 @@ class SchemaTest < MiniTest::Spec
       rescue Spontaneous::SchemaModificationError => e
         exception = e
       end
-      exception.added_fields.should == [f1, f2]
+      # exception.added_fields.should == [f1, f2]
+      assert_same_elements exception.added_fields, [f2, f1]
     end
 
     should "detect removal of fields from anonymous boxes" do
@@ -407,7 +408,7 @@ class SchemaTest < MiniTest::Spec
       rescue Spontaneous::SchemaModificationError => e
         exception = e
       end
-      exception.added_styles.should == [s1, s2]
+      assert_same_elements exception.added_styles, [s2, s1]
     end
 
     should "detect removal of styles from anonymous boxes" do

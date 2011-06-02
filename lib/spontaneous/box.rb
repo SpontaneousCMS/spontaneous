@@ -42,7 +42,7 @@ module Spontaneous
 
     # TODO: use generated schema id here
     def box_id
-      _name
+      schema_id
     end
 
     alias_method :id, :box_id

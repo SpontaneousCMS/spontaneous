@@ -33,6 +33,8 @@ module Spontaneous::Plugins
         Spontaneous::Schema.schema_id(self)
       end
 
+      alias_method :id, :schema_id
+
       def title(new_title=nil)
         self.title = new_title if new_title
         @title || @options[:title] || default_title

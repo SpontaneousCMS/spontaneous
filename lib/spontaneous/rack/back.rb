@@ -124,9 +124,10 @@ module Spontaneous
         end
 
         def update_fields(model, field_data)
-          field_data.each do | name, values |
-            if model.field_writable?(name.to_sym)
-              model.fields[name].update(values)
+          field_data.each do | id, values |
+            field = model.fields.find(id)
+            if model.field_writable?(field.name.to_sym)
+              field.update(values)
             else
               unauthorised!
             end
@@ -140,7 +141,7 @@ module Spontaneous
           content = Content[params[:id]]
           halt 404 if content.nil?
           if box_id = params[:box_id]
-            box = content.boxes[box_id]
+            box = content.boxes.detect { |box| box.schema_id == box_id }
             [content, box]
           else
             content
@@ -267,7 +268,7 @@ module Spontaneous
         post '/file/replace/:id' do
           content = content_for_request
           file = params['file']
-          field = content.fields[params['field']]
+          field = content.fields.find(params['field'])
           if content.field_writable?(field.name)
             field.unprocessed_value = file
             content.save
@@ -306,7 +307,7 @@ module Spontaneous
         post '/add/:id/:box_id/:type_name' do
           content, box = content_for_request
           position = 0
-          type = params[:type_name].constantize
+          type = Spontaneous::Schema[params[:type_name]]#.constantize
           if box.writable?(type)
             instance = type.new
             box.insert(position, instance)

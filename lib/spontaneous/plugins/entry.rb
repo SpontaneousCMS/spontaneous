@@ -11,8 +11,8 @@ module Spontaneous::Plugins
       end
 
       def box_id
-        return nil unless box_id = self[:box_id]
-        box_id.to_sym
+        return nil unless bid = self[:box_id]
+        bid
       end
 
       def box

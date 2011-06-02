@@ -25,6 +25,8 @@ module Spontaneous
       instance_class.schema_id
     end
 
+    alias_method :id, :schema_id
+
     def schema_name
       instance_class.schema_name
     end
