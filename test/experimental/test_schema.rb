@@ -78,14 +78,6 @@ class SchemaTest < MiniTest::Spec
       ids.uniq.length.should == ids.length
     end
 
-    # should "be comparable" do
-    #   uid1 = Schema::UID.new("aaaaaaaaaaaa")
-    #   uid2 = Schema::UID.new("aaaaaaaaaaaa")
-    #   uid3 = Schema::UID.new("bbbbbbbbbbbb")
-    #   uid1.should == uid2
-    #   uid1.should_not == uid3
-    # end
-
     should "be readable by content classes" do
       SchemaClass.schema_id.should == "xxxxxxxxxxxx"
     end
@@ -348,12 +340,10 @@ class SchemaTest < MiniTest::Spec
       rescue Spontaneous::SchemaModificationError => e
         exception = e
       end
-      # exception.added_fields.should == [f1, f2]
       assert_same_elements exception.added_fields, [f2, f1]
     end
 
     should "detect removal of fields from anonymous boxes" do
-      # f1 = B.boxes[:promotions].instance_class.field_prototypes[:field1]
       f2 = B.boxes[:promotions].instance_class.field_prototypes[:field2]
       B.boxes[:promotions].instance_class.stubs(:field_prototypes).returns({:field2 => f2})
       B.boxes[:promotions].instance_class.stubs(:fields).returns([f2])

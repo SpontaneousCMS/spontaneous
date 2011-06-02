@@ -96,7 +96,7 @@ class AliasTest < MiniTest::Spec
 
     teardown do
       [:Page, :Piece, :A, :AA, :AAA, :B, :BB, :AAlias, :AAAlias, :AAAAlias, :BBAlias, :BAlias, :MultipleAlias].each do |c|
-        Object.send(:remove_const, c)
+        Object.send(:remove_const, c) rescue nil
       end
       # Content.delete
     end
