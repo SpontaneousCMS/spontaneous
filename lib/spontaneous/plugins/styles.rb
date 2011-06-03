@@ -8,7 +8,7 @@ module Spontaneous::Plugins
 
     module ClassMethods
       def style(name, options={})
-        s = Spontaneous::Style.new(self, style_directory_name, name, options.merge(:style_id => name))
+        s = Spontaneous::Style.new(self, style_directory_name, name, options.merge(:style_id => true))
         styles << s
         s
       end
@@ -65,9 +65,9 @@ module Spontaneous::Plugins
       end
 
       def find_named_style(style_id, format = :html)
-        name = style_id.to_sym
-        unless style = styles.detect { |s| s.name == name }
-          style = supertype.resolve_style(name) if supertype_has_styles?
+        # name = style_id#.to_sym
+        unless style = styles.detect { |s| s.style_id == style_id }
+          style = supertype.resolve_style(style_id) if supertype_has_styles?
         end
         style
       end
@@ -102,7 +102,13 @@ module Spontaneous::Plugins
     module InstanceMethods
 
       def style=(style)
-        style = style.style_id if style.respond_to?(:style_id)
+        if style.respond_to?(:style_id)
+          style = style.style_id
+        else
+          if s = self.class.styles.detect { |s| s.name == style }
+            style = s.style_id
+          end
+        end
         self.style_id = style
       end
 

@@ -23,8 +23,11 @@ module Spontaneous
       Spontaneous::Schema.schema_id(self)
     end
 
+    # TODO: new style class that has a better way of knowing if it's anonymous
+    # or named. Only named styles have schema_ids -- anonymous styles are resolved
+    # according to the files on the disk
     def style_id
-      @options[:style_id]
+      @options[:style_id] ? schema_id : nil
     end
 
     def template(format = :html)

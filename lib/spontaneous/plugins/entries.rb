@@ -172,6 +172,7 @@ module Spontaneous::Plugins
       def style_for_content(content, box = nil)
         if box
           box.style_for_content(content)
+
         else
           content.default_style
         end
