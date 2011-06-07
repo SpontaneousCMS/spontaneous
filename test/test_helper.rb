@@ -69,7 +69,7 @@ class MiniTestWithHooks < MiniTest::Unit
 
   def _run_suite(suite, type)
     begin
-      Spontaneous::Schema.map_class = Spontaneous::Schema::TransientMap
+      Spontaneous::Schema.schema_loader_class = Spontaneous::Schema::TransientMap
       Spontaneous::Schema.reset!
       Spontaneous.logger.silent!
       unless exclude?(suite)

@@ -44,7 +44,6 @@ class ContentInheritanceTest < MiniTest::Spec
       ].each do |klass|
         Object.send(:remove_const, klass)
       end
-      Content.delete
     end
 
     should "aaa correctly type subclasses found via Content" do

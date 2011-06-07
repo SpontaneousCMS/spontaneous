@@ -10,7 +10,7 @@ module Spontaneous
       attr_reader :map, :inverse_map
 
       def initialize(path)
-        @map = load_map(path)
+        load_map(path)
         invert_map
       end
 
@@ -23,21 +23,20 @@ module Spontaneous
       end
 
       def [](id)
-        if obj = map[UID[id]]
-          obj.target
+        if uid = UID[id]
+          uid.target
         else
           nil
         end
       end
 
       def load_map(path)
+        UID.clear!
         if ::File.exists?(path)
           map = YAML.load_file(path)
-          Hash[map.map { | uid, reference |
-                         [UID[uid], SchemaReference.new(reference)]
-          }]
-        else
-          {}
+          map.each do | uid, reference |
+            UID.load(uid, reference)
+          end
         end
       end
 
@@ -46,11 +45,11 @@ module Spontaneous
       end
 
       def generate_inverse
-        Hash[ map.map { |uid, ref| [ref.reference, uid]} ]
+        Hash[ UID.map { |uid| [uid.reference, uid]} ]
       end
 
       def orphaned_ids
-        map.select { |uid, reference| reference.target.nil? }
+        UID.select { |uid| uid.target.nil? }
       end
     end
 
@@ -66,17 +65,14 @@ module Spontaneous
       end
 
       def initialize(path)
-        @map = {}
+        UID.clear!
       end
 
       def schema_id(obj)
         if id = inverse_map[obj.schema_name]
           id
         else
-          Schema::UID.generate.tap do | id |
-            ref = Reference.new(obj.schema_name, obj)
-            map[id] = ref
-          end
+          UID.load(Schema::UID.generate, obj.schema_name)
         end
       end
 
@@ -90,12 +86,12 @@ module Spontaneous
     end
 
     class << self
-      def map_class
-        @map_class ||= TransientMap#PersistentMap
+      def schema_loader_class
+        @schema_loader_class ||= PersistentMap
       end
 
-      def map_class=(klass)
-        @map_class = klass
+      def schema_loader_class=(klass)
+        @schema_loader_class = klass
       end
 
       # validate the schema & attempt to fix anything that can be resolved without human
@@ -130,8 +126,8 @@ module Spontaneous
       end
 
       def find_orphaned_ids
-        map.orphaned_ids.each do |uid, missing|
-          @missing_from_schema << missing
+        map.orphaned_ids.each do |uid|
+          @missing_from_schema << uid
         end
       end
 
@@ -181,7 +177,7 @@ module Spontaneous
       end
 
       def map
-        @map ||= self.map_class.new(Spontaneous.schema_map)
+        @map ||= self.schema_loader_class.new(Spontaneous.schema_map)
       end
 
       def schema_id(obj)
@@ -194,45 +190,6 @@ module Spontaneous
 
     end
 
-    class SchemaReference
-      SEP = "/".freeze
-
-      attr_reader :reference, :category, :name
-
-      def initialize(reference)
-        @reference = reference
-        @category, @owner_uid, @name = reference.split(SEP)
-        @category = @category.to_sym
-        @owner_uid = UID[@owner_uid]
-      end
-
-      def target
-        @target ||= find_target
-      end
-
-      def find_target
-        case @category
-        when :type
-          begin
-            @name.constantize
-          rescue NameError => e
-            nil
-          end
-        when :box
-          owner.box_prototypes[name.to_sym]
-        when :field
-          owner.field_prototypes[name.to_sym]
-        when :style
-          owner.style_prototypes[name.to_sym]
-        when :layout
-          owner.layout_prototypes[name.to_sym]
-        end
-      end
-
-      def owner
-        @owner ||= Schema[@owner_uid]
-      end
-    end
 
     class SchemaModification
       def initialize(missing_from_map, missing_from_schema)
@@ -293,15 +250,29 @@ module Spontaneous
       @@uid_index = 0
       @@instances = {}
 
-      def self.[](id)
-        return id if self === id
-        return nil if id.blank?
+      extend Enumerable
+
+      def self.load(id, reference)
         @@instance_lock.synchronize do
           unless instance = @@instances[id]
-            @@instances[id] = instance = self.new(id)
+            @@instances[id] = instance = self.new(id, reference)
           end
           instance
         end
+      end
+
+      def self.clear!
+        @@instances = {}
+      end
+
+      def self.[](id)
+        return id if self === id
+        return nil if id.blank?
+        @@instances[id]
+      end
+
+      def self.each
+        @@instances.each { |id, instance| yield(instance) if block_given? }
       end
 
       def self.get_inc
@@ -311,7 +282,7 @@ module Spontaneous
       end
 
       def self.generate
-        self[generate58]
+        generate58
       end
 
       def self.generate58
@@ -328,12 +299,46 @@ module Spontaneous
         oid << get_inc.to_s(16).rjust(4, '0')
       end
 
+      REFERENCE_SEP = "/".freeze
+
+      attr_reader :reference, :name, :category
+
+      def initialize(id, reference)
+        @id = id.freeze
+        @reference = reference
+        @category, @owner_uid, @name = reference.split(REFERENCE_SEP)
+        @category = @category.to_sym
+      end
+
       class << self
         protected :new
       end
 
-      def initialize(id)
-        @id = id.freeze
+      def target
+        @target ||= find_target
+      end
+
+      def find_target
+        case @category
+        when :type
+          begin
+            @name.constantize
+          rescue NameError => e
+            nil
+          end
+        when :box
+          owner.box_prototypes[name.to_sym]
+        when :field
+          owner.field_prototypes[name.to_sym]
+        when :style
+          owner.style_prototypes[name.to_sym]
+        when :layout
+          owner.layout_prototypes[name.to_sym]
+        end
+      end
+
+      def owner
+        @owner ||= self.class[@owner_uid].target
       end
 
       def ==(obj)
