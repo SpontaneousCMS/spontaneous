@@ -43,8 +43,8 @@ module Spontaneous
     many_to_one :page, :class => Content, :key => :page_id, :reciprocal => :content
 
     extend Plugins
+    include Enumerable
 
-    # plugin Plugins::Slots
     plugin Plugins::Entry
     plugin Plugins::Boxes
     plugin Plugins::Fields
@@ -62,8 +62,6 @@ module Spontaneous
     plugin Plugins::Prototypes
     plugin Plugins::Permissions
 
-
-    include Enumerable
 
     def after_initialize
       if new?
