@@ -154,6 +154,7 @@ class AliasTest < MiniTest::Spec
 
         should "present their target's styles as their own" do
           @a_alias.style = :a_style
+
           @a_alias.style.template.should == 'a/a_style'
         end
 

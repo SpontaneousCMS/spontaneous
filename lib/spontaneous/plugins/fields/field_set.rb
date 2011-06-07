@@ -12,7 +12,7 @@ module Spontaneous::Plugins
       end
 
       def initialize_from_prototypes(initial_values)
-        values = Hash[(initial_values || []).map { |value| [value[:id], value] }]
+        values = Hash[(initial_values || []).map { |value| [Spontaneous::Schema::UID[value[:id]], value] }]
         prototype_names = []
         owner.field_prototypes.each do |field_name, field_prototype|
           # use this to look for orphaned fields in initial_values

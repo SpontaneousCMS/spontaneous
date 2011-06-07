@@ -346,8 +346,8 @@ class BoxesTest < MiniTest::Spec
       child3 = BlankContent.new
       @parent.images << child1
       @parent.words << child2
-      child1.box_id.should == @parent.images.box_id
-      child2.box_id.should == @parent.words.box_id
+      child1.box.schema_id.should == @parent.images.schema_id
+      child2.box.schema_id.should == @parent.words.schema_id
       @parent.save
       child1.images << child3
       child1.save

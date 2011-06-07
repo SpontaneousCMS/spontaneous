@@ -18,18 +18,18 @@ module Spontaneous::Plugins
       end
 
       def all_styles
-        styles.concat(supertype_has_styles? ? supertype.all_styles : [])
+        @all_styles ||= styles.concat(supertype_has_styles? ? supertype.all_styles : [])
       end
 
       def style_prototypes
         Hash[ all_styles.map { |s| [s.name, s] } ]
       end
 
-      def resolve_style(style_id, format = :html)
-        if style_id.blank?
+      def resolve_style(style_sid, format = :html)
+        if style_sid.blank?
           default_style(format)
         else
-          find_named_style(style_id, format)
+          find_style(style_sid, format)
         end
       end
 
@@ -64,10 +64,17 @@ module Spontaneous::Plugins
         Spontaneous::Style::Anonymous.new
       end
 
-      def find_named_style(style_id, format = :html)
+      def find_style(style_sid, format = :html)
         # name = style_id#.to_sym
-        unless style = styles.detect { |s| s.style_id == style_id }
-          style = supertype.resolve_style(style_id) if supertype_has_styles?
+        unless style = styles.detect { |s| s.schema_id == style_sid }
+          style = supertype.resolve_style(style_sid) if supertype_has_styles?
+        end
+        style
+      end
+
+      def find_named_style(style_name)
+        unless style = styles.detect { |s| s.name == style_name }
+          style = supertype.find_named_style(style_name) if supertype_has_styles?
         end
         style
       end
@@ -102,26 +109,39 @@ module Spontaneous::Plugins
     module InstanceMethods
 
       def style=(style)
-        if style.respond_to?(:style_id)
-          style = style.style_id
+        self.style_sid = style_to_schema_id(style)
+      end
+
+      # converts a symbol or string into a Schema::UID instance
+      def style_to_schema_id(style)
+        sid = nil
+        if style.respond_to?(:schema_id)
+          sid = style.schema_id
         else
-          if s = self.class.styles.detect { |s| s.name == style }
-            style = s.style_id
+          if Spontaneous::Schema::UID === style
+            sid = style
+          else
+            if s = self.find_named_style(style)
+              sid = s.schema_id
+            end
           end
         end
-        self.style_id = style
+      end
+
+      def find_named_style(style_name)
+        self.class.find_named_style(style_name)
       end
 
       def style(format = :html)
-        resolve_style(self.style_id, format)
+        resolve_style(self.style_sid, format)
       end
 
       def default_style(format = :html)
         self.class.default_style(format)
       end
 
-      def resolve_style(style_id, format = :html)
-        self.class.resolve_style(style_id, format)
+      def resolve_style(style_sid, format = :html)
+        self.class.resolve_style(style_sid, format)
       end
 
       def styles

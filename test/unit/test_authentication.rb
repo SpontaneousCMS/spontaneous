@@ -234,7 +234,7 @@ class AuthenticationTest < MiniTest::Spec
       end
 
       should "see a login page for all POSTs" do
-        %(/save/#{root.id} /savebox/#{root.id}/#{root.boxes[:editor_level].schema_id} /content/#{root.id}/position/0 /file/upload/#{root.id} /file/replace/#{root.id} /file/wrap/#{root.id}/pages /add/#{root.id}/pages/#{SitePage.schema_id} /destroy/#{root.id} /slug/#{root.id} /slug/#{root.id}/unavailable /toggle/#{root.id}).split.each do |path|
+        %(/save/#{root.id} /savebox/#{root.id}/#{root.boxes[:editor_level].schema_id} /content/#{root.id}/position/0 /file/upload/#{root.id} /file/replace/#{root.id} /file/wrap/#{root.id}/#{root.boxes[:pages].schema_id} /add/#{root.id}/#{root.boxes[:pages].schema_id}/#{SitePage.schema_id} /destroy/#{root.id} /slug/#{root.id} /slug/#{root.id}/unavailable /toggle/#{root.id}).split.each do |path|
           post "/@spontaneous#{path}"
           assert_login_page(path, "POST")
         end
@@ -300,14 +300,14 @@ class AuthenticationTest < MiniTest::Spec
 
           should "be able to update root level fields" do
             field = root.fields.root_level
-            post "/@spontaneous/save/#{root.id}", "field[#{field.id}][unprocessed_value]" => "Updated"
+            post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => "Updated"
             assert last_response.ok?
             root.reload.fields[:root_level].value.should == "Updated"
           end
 
           should "be able to add to root level box" do
             klass = AuthenticationTest::C
-            post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].id}/#{klass.schema_id}"
+            post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].schema_id}/#{klass.schema_id}"
             assert last_response.ok?
           end
         end
@@ -324,7 +324,7 @@ class AuthenticationTest < MiniTest::Spec
           should "not be able to update root level fields" do
             value = "Updated #{version}"
             field = root.fields[:root_level]
-            post "/@spontaneous/save/#{root.id}", "field[#{field.id}][unprocessed_value]" => value
+            post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
             assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
             root.reload.fields[:root_level].value.should == @root_copy.root_level.value
           end
@@ -332,37 +332,37 @@ class AuthenticationTest < MiniTest::Spec
           should "be able to update admin level fields" do
             value = "Updated #{version}"
             field = root.fields[:admin_level]
-            post "/@spontaneous/save/#{root.id}", "field[#{field.id}][unprocessed_value]" => value
+            post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
             assert last_response.ok?
             root.reload.fields[:admin_level].value.should == value
           end
 
           should "not be able to add to root level box" do
-            post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].id}/#{AuthenticationTest::C.schema_id}"
+            post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].schema_id}/#{AuthenticationTest::C.schema_id}"
             assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
           end
 
           should "not be able to add root level types to admin level box" do
-            post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].id}/#{AuthenticationTest::D.schema_id}"
+            post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{AuthenticationTest::D.schema_id}"
             assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
           end
 
           should "be able to add to admin level box" do
-            post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].id}/#{AuthenticationTest::C.schema_id}"
+            post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{AuthenticationTest::C.schema_id}"
             # post "/@spontaneous/add/#{root.id}/admin_level/AuthenticationTest::C"
             assert last_response.ok?
           end
           should "not be able to update fields from root level box" do
             value = "Updated #{version}"
             field = root.fields[:editor_level]
-            post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].id}", "field[#{field.schema_id}][unprocessed_value]" => value
+            post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
             assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
           end
 
           should "not be able to update root level fields from admin level box" do
             value = "Updated #{version}"
             field = root.boxes[:admin_level].fields[:root_level]
-            post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:admin_level].id}", "field[#{field.schema_id}][unprocessed_value]" => value
+            post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:admin_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
             assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
           end
 
@@ -375,7 +375,7 @@ class AuthenticationTest < MiniTest::Spec
           end
           should "not be able to wrap files in root level box" do
             src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-            post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:root_level].id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
+            post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:root_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
             assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
           end
           should "not be able to wrap files in box if allow permissions don't permit it" do
@@ -383,7 +383,7 @@ class AuthenticationTest < MiniTest::Spec
             # only type with an image field is C
             # editor_level box allows addition of type C but only by root
             # so the following should throw a perms error:
-            post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:editor_level].id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
+            post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:editor_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
             assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
           end
           should "not be able to re-order pieces in root level box" do
@@ -397,7 +397,7 @@ class AuthenticationTest < MiniTest::Spec
             piece = root.boxes[:root_level].pieces.first
             src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
             field = piece.fields[:photo]
-            post "/@spontaneous/file/replace/#{piece.id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg"), "field" => field.id
+            post "/@spontaneous/file/replace/#{piece.id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg"), "field" => field.schema_id
             assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
           end
 

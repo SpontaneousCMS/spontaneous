@@ -12,6 +12,16 @@ module Spontaneous::Plugins
         "type//#{self.name}"
       end
     end # ClassMethods
+
+    module InstanceMethods
+      def schema_id
+        self.class.schema_id
+      end
+
+      def schema_name
+        self.class.schema_name
+      end
+    end # InstanceMethods
   end # SchemaId
 end
 

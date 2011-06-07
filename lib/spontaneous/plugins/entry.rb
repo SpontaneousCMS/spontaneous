@@ -10,13 +10,16 @@ module Spontaneous::Plugins
         self
       end
 
-      def box_id
-        return nil unless bid = self[:box_id]
-        bid
+      def box_sid
+        @box_sid ||= Spot::Schema::UID[self[:box_sid]]
+      end
+
+      def box_sid=(sid)
+        self[:box_sid] = sid.to_s
       end
 
       def box
-        container.boxes.named(box_id) if container
+        container.boxes.named(box_sid) if container
       end
 
       def first?

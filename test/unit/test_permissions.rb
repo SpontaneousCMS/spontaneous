@@ -6,6 +6,8 @@ require 'test_helper'
 class PermissionsTest < MiniTest::Spec
 
   def setup
+    Spontaneous::Schema.reset!
+    Spontaneous::Content.delete
     Permissions::UserLevel.reset!
     Permissions::UserLevel.level_file = File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml'
   end

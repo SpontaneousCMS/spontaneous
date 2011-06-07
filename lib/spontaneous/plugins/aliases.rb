@@ -52,11 +52,16 @@ module Spontaneous::Plugins
         end
       end
 
+
+      def find_named_style(style_name)
+        super or target.find_named_style(style_name)
+      end
+
       def style(format = :html)
         if self.class.styles.empty?
-          target.resolve_style(style_id, format)
+          target.resolve_style(style_sid, format)
         else
-          self.resolve_style(self.style_id, format) or target.resolve_style(self.style_id, format)
+          self.resolve_style(self.style_sid, format) or target.resolve_style(self.style_sid, format)
         end
       end
     end
@@ -73,13 +78,16 @@ module Spontaneous::Plugins
       def layout(format = :html)
         # if this alias class has no layouts defined, then just use the one set on the target
         if self.class.layouts.empty?
-          target.resolve_layout(self.style_id, format)
+          target.resolve_layout(self.style_sid, format)
         else
           # but if it does have layouts defined, use them
-          self.resolve_layout(self.style_id, format) or target.resolve_layout(self.style_id, format)
+          self.resolve_layout(self.style_sid, format) or target.resolve_layout(self.style_sid, format)
         end
       end
 
+      def find_named_layout(layout_name)
+        super or target.find_named_layout(layout_name)
+      end
     end
   end
 end

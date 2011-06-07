@@ -56,7 +56,7 @@ module Sequel
           # @sti_model_map =  lambda{|v| v if v && v != ''}
           # @sti_key_map = lambda{|klass| klass.name.to_s}
           @sti_model_map = lambda { |id| Spontaneous::Schema[id] }
-          @sti_key_map = lambda { |klass| klass.schema_id }
+          @sti_key_map = lambda { |klass| klass.schema_id.to_s }
           @sti_key_array = nil
           @sti_subclasses_array = [sti_key_map[model]]
           @sti_key = key

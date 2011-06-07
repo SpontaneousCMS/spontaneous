@@ -10,8 +10,8 @@ module Spontaneous
 
     def styles_to_hash
       {
-        :style => style_id.to_s,
-        :styles => container.available_styles(self).map { |s| s.name.to_s },
+        :style => style_sid.to_s,
+        :styles => container.available_styles(self).map { |s| s.schema_id.to_s },
       }
     end
   end

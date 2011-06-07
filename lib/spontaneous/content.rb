@@ -15,7 +15,8 @@ module Spontaneous
     # need to load this first because it's used by the ContentTableInheritance plugin
     plugin Plugins::SchemaId
 
-    sequel_plugin :content_table_inheritance, :type_id
+    sequel_plugin :content_table_inheritance, :type_sid
+    sequel_plugin :schema_uid, :type_sid, :style_sid, :box_sid
     sequel_plugin :yajl_serialization, :field_store, :entry_store, :box_store
     sequel_plugin :instance_hooks
     sequel_plugin :skip_create_refresh
@@ -33,6 +34,7 @@ module Spontaneous
     def self.page?
       false
     end
+
     def self.is_page?
       page?
     end

@@ -6,19 +6,19 @@ module CustomMatchers
     matcher.negative_failure_message = "Expected #{receiver} not to be nil but it was"
     receiver.nil?
   end
-  
+
   custom_matcher :be_blank do |receiver, matcher, args|
     matcher.positive_failure_message = "Expected #{receiver} to be blank but it wasn't"
     matcher.negative_failure_message = "Expected #{receiver} not to be blank but it was"
     receiver.blank?
   end
-  
+
   custom_matcher :be_true do |receiver, matcher, args|
     matcher.positive_failure_message = "Expected #{receiver} to be true but it wasn't"
     matcher.negative_failure_message = "Expected #{receiver} not to be true but it was"
     receiver.eql?(true)
   end
-  
+
   custom_matcher :be_false do |receiver, matcher, args|
     matcher.positive_failure_message = "Expected #{receiver} to be false but it wasn't"
     matcher.negative_failure_message = "Expected #{receiver} not to be false but it was"
@@ -35,7 +35,7 @@ module CustomMatchers
     receiver.valid?
     attribute = args[0]
     expected_message = args[1]
-    
+
     if expected_message.nil?
       matcher.positive_failure_message = "#{receiver} had no errors on #{attribute}"
       matcher.negative_failure_message = "#{receiver} had errors on #{attribute} #{receiver.errors.inspect}"
@@ -47,7 +47,7 @@ module CustomMatchers
       actual == expected_message
     end
   end
-  
+
   custom_matcher :have_index do |receiver, matcher, args|
     index_name = args[0]
     matcher.positive_failure_message = "#{receiver} does not have index named #{index_name}, but should"
@@ -66,7 +66,7 @@ module CustomMatchers
       else
         types = "'#{types}'"
       end
-      sql << " WHERE \\(#{table}.`type_id` IN \\(#{types}"
+      sql << " WHERE \\(#{table}.`type_sid` IN \\(#{types}"
     end
     regexp = %r{^#{sql}}
     matcher.positive_failure_message = "Expected #{receiver.sql} to =~ #{regexp}"

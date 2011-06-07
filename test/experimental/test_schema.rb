@@ -6,6 +6,8 @@ require 'test_helper'
 class SchemaTest < MiniTest::Spec
   include Spontaneous
 
+  UID = Spontaneous::Schema::UID
+
   def setup
     Spontaneous::Schema.map_class = Spontaneous::Schema::PersistentMap
     Spontaneous::Schema.reset!
@@ -78,25 +80,55 @@ class SchemaTest < MiniTest::Spec
       ids.uniq.length.should == ids.length
     end
 
+    should "be singletons" do
+      a = UID["abcdef"]
+      b = UID["abcdef"]
+      c = UID["ftyuio"]
+      a.object_id.should == b.object_id
+      a.should == b
+      c.object_id.should_not == b.object_id
+      c.should_not == b
+    end
+
+    should "not be creatable" do
+      lambda { UID.new('sadf') }.must_raise(NoMethodError)
+    end
+
+    should "return nil if passed nil" do
+      UID[nil].should be_nil
+    end
+
+    should "return nil if passed an empty string" do
+      UID[""].should be_nil
+    end
+
+    should "return the same UID if passed one" do
+      a = UID["asdf"]
+      UID[a].should == a
+    end
+
+    should "test as equal to its string representation" do
+      UID["abc"].should == "abc"
+    end
     should "be readable by content classes" do
-      SchemaClass.schema_id.should == "xxxxxxxxxxxx"
+      SchemaClass.schema_id.should == UID["xxxxxxxxxxxx"]
     end
 
     should "be readable by fields" do
-      @instance.fields[:description].schema_id.should == "ffffffffffff"
+      @instance.fields[:description].schema_id.should == UID["ffffffffffff"]
     end
 
     should "be readable by boxes" do
-      @instance.boxes[:posts].schema_id.should == "bbbbbbbbbbbb"
+      @instance.boxes[:posts].schema_id.should == UID["bbbbbbbbbbbb"]
     end
 
     should "be readable by styles" do
-      @instance.styles[:simple].schema_id.should == "ssssssssssss"
+      @instance.styles[:simple].schema_id.should == UID["ssssssssssss"]
     end
 
     should "be readable by layouts" do
       @instance.layout.name.should == :clean
-      @instance.layout.schema_id.should == "llllllllllll"
+      @instance.layout.schema_id.should == UID["llllllllllll"]
     end
 
     context "lookups" do
@@ -153,11 +185,11 @@ class SchemaTest < MiniTest::Spec
       #       between tests
       # Schema.stubs(:classes).returns([B, C, D, O])
       # Schema.classes.should == [B, C, D, O]
-      ::Page.schema_id.should == "tttttttttttt"
-      B.schema_id.should == "bbbbbbbbbbbb"
-      C.schema_id.should == "cccccccccccc"
-      D.schema_id.should == "dddddddddddd"
-      O.schema_id.should == "oooooooooooo"
+      ::Page.schema_id.should == UID["tttttttttttt"]
+      B.schema_id.should == UID["bbbbbbbbbbbb"]
+      C.schema_id.should == UID["cccccccccccc"]
+      D.schema_id.should == UID["dddddddddddd"]
+      O.schema_id.should == UID["oooooooooooo"]
     end
 
     teardown do

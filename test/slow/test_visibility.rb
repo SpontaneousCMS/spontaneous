@@ -7,6 +7,9 @@ class VisibilityTest < MiniTest::Spec
 
   context "Content" do
     setup do
+      Spontaneous.database = DB
+      Spontaneous::Schema.reset!
+      Content.delete
       class ::R < Page; end
       R.box :pages
       class ::P < Page; end
@@ -14,8 +17,6 @@ class VisibilityTest < MiniTest::Spec
       class ::E < Piece; end
       E.box :pages
 
-      Spontaneous.database = DB
-      Content.delete
       @root = R.new(:uid => 'root')
       2.times do |i|
         c = P.new(:uid => i, :slug => "#{i}")
@@ -40,6 +41,9 @@ class VisibilityTest < MiniTest::Spec
     end
 
     teardown do
+      [:R, :P, :E].each do |k|
+        Object.send(:remove_const, k)
+      end
       Spontaneous.database.logger = nil
       Content.delete
     end

@@ -134,13 +134,13 @@ module Spontaneous::Plugins
       def insert_with_style(type, index, content, box = nil)
         self._pieces << content
         entry_style = style_for_content(content, box)
-        content.box_id = box.box_id if box
+        content.box_sid = box.schema_id if box
         content._prototype = box.prototype_for_content(content) if box
         content.save if content.new?
         entry = \
           case type
           when :page
-            Spontaneous::PagePiece.new(self, content, entry_style ? entry_style.style_id : nil)
+            Spontaneous::PagePiece.new(self, content, entry_style ? entry_style.schema_id : nil)
           when :piece
             content.style = entry_style
             content

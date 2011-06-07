@@ -23,7 +23,7 @@ module Spontaneous
       end
 
       def [](id)
-        if obj = map[id]
+        if obj = map[UID[id]]
           obj.target
         else
           nil
@@ -34,7 +34,7 @@ module Spontaneous
         if ::File.exists?(path)
           map = YAML.load_file(path)
           Hash[map.map { | uid, reference |
-                         [uid, SchemaReference.new(reference)]
+                         [UID[uid], SchemaReference.new(reference)]
           }]
         else
           {}
@@ -91,7 +91,7 @@ module Spontaneous
 
     class << self
       def map_class
-        @map_class ||= PersistentMap
+        @map_class ||= TransientMap#PersistentMap
       end
 
       def map_class=(klass)
@@ -203,6 +203,7 @@ module Spontaneous
         @reference = reference
         @category, @owner_uid, @name = reference.split(SEP)
         @category = @category.to_sym
+        @owner_uid = UID[@owner_uid]
       end
 
       def target
@@ -287,8 +288,21 @@ module Spontaneous
     end
 
     class UID
+      @@instance_lock  = Mutex.new
       @@uid_lock  = Mutex.new
       @@uid_index = 0
+      @@instances = {}
+
+      def self.[](id)
+        return id if self === id
+        return nil if id.blank?
+        @@instance_lock.synchronize do
+          unless instance = @@instances[id]
+            @@instances[id] = instance = self.new(id)
+          end
+          instance
+        end
+      end
 
       def self.get_inc
         @@uid_lock.synchronize do
@@ -297,6 +311,10 @@ module Spontaneous
       end
 
       def self.generate
+        self[generate58]
+      end
+
+      def self.generate58
         # reverse the time so that sequential ids are more obviously different
         oid =  Base58.encode((Time.now.to_f * 1000).to_i).reverse
         oid << Base58.encode(get_inc).rjust(3, '0')
@@ -310,6 +328,29 @@ module Spontaneous
         oid << get_inc.to_s(16).rjust(4, '0')
       end
 
+      class << self
+        protected :new
+      end
+
+      def initialize(id)
+        @id = id.freeze
+      end
+
+      def ==(obj)
+        super or obj == @id
+      end
+
+      def hash
+        @id.hash
+      end
+
+      def to_s
+        @id
+      end
+
+      def inspect
+        %(#<#{self.class}:"#{@id}">)
+      end
     end
   end
 end

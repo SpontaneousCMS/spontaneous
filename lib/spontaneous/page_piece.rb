@@ -42,7 +42,7 @@ module Spontaneous
     def styles_to_hash
       {
         :style => style_id.to_s,
-        :styles => container.available_styles(target).map { |s| s.name.to_s },
+        :styles => container.available_styles(target).map { |s| s.schema_id.to_s },
       }
     end
 
@@ -54,7 +54,7 @@ module Spontaneous
     end
 
     def style=(style)
-      @style_id = style
+      @style_id = style_to_schema_id(style)
       # because it's not obvious that a change to an entry
       # will affect the fields of the container piece
       # make sure that the container is saved using an instance hook

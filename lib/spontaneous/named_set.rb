@@ -24,7 +24,7 @@ module Spontaneous
 
     def push_with_name(item, name)
       push_named(name, item)
-      @ids[item.id] = name
+      @ids[item.schema_id] = name
     end
 
     alias_method :<<, :push
@@ -50,7 +50,9 @@ module Spontaneous
     end
 
     def named(name)
-      name = @ids[name] if @ids.key?(name)
+      if @ids.key?(name)
+        name = @ids[name]
+      end
       if @store.key?(name)
         @store[name]
       elsif @superset

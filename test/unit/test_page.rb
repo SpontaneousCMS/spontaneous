@@ -196,7 +196,6 @@ class PageTest < MiniTest::Spec
 
     context "page pieces" do
       setup do
-        Content.delete
         @parent = Page.create
         @piece = Piece.new
         @child = Page.new

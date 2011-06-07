@@ -24,8 +24,8 @@ module Spontaneous
     end
 
     def for_box(box)
-      box_id = box.box_id
-      self.select { |e| e.box_id == box_id }
+      sid = box.schema_id
+      self.select { |e| e.box_sid == sid }
     end
 
     def insert(index, piece)

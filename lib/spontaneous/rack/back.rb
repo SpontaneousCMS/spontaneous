@@ -140,7 +140,7 @@ module Spontaneous
         def content_for_request
           content = Content[params[:id]]
           halt 404 if content.nil?
-          if box_id = params[:box_id]
+          if box_id = Spontaneous::Schema::UID[params[:box_id]]
             box = content.boxes.detect { |box| box.schema_id == box_id }
             [content, box]
           else

@@ -40,6 +40,9 @@ module Spontaneous::Plugins
 
       def reload
         @boxes = nil
+# require 'ruby-debug'
+# debugger
+
         super
       end
 
@@ -66,7 +69,7 @@ module Spontaneous::Plugins
 
       def box_data(box)
         # TODO: use schema id to retrieve box data
-        box_id = box.box_id.to_s
+        box_id = box.schema_id.to_s
         (self.box_store || []).detect { |data| data[:box_id] == box_id } || {}
       end
 

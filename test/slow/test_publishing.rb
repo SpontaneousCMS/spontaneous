@@ -839,7 +839,7 @@ class PublishingTest < MiniTest::Spec
         change2 = Change.new
         change2.modified_list = [3, 4, 5]
         change2.save
-        Content.expects(:publish).raises(Exception)
+        Content.expects(:publish).at_least_once.raises(Exception)
         Change.count.should == 2
         begin
           Site.publish_all

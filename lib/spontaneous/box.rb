@@ -40,12 +40,7 @@ module Spontaneous
       _name.to_s
     end
 
-    # TODO: use generated schema id here
-    def box_id
-      schema_id
-    end
 
-    alias_method :id, :box_id
 
     def box_name
       _name
@@ -87,7 +82,7 @@ module Spontaneous
 
     def serialize
       {
-        :box_id => box_id.to_s,
+        :box_id => schema_id.to_s,
         :fields => fields.serialize
       }
     end
@@ -197,7 +192,7 @@ module Spontaneous
     def to_shallow_hash
       {
         :name => _prototype.name.to_s,
-        :id => _prototype.schema_id,
+        :id => _prototype.schema_id.to_s,
         :fields => self.class.readable_fields.map { |name| fields[name].to_hash }
       }
     end

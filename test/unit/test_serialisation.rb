@@ -12,6 +12,11 @@ class SerialisationTest < MiniTest::Spec
       class ::Page < Spontaneous::Page
         field :title, :string, :default => "New Page"
       end
+
+      class ::Piece < Spontaneous::Piece
+        style :tepid
+      end
+
       class ::SerialisedPage < ::Page
         field :direction, :title => "Pointing Direction", :comment => "NSEW" do
           def process(value)
@@ -31,7 +36,8 @@ class SerialisationTest < MiniTest::Spec
 
         box :insides
       end
-      class ::SerialisedPiece < Piece
+
+      class ::SerialisedPiece < ::Piece
         title "Type Title"
         field :title, :string
         field :location, :string, :title => "Where", :comment => "Fill in the address"
@@ -42,6 +48,7 @@ class SerialisationTest < MiniTest::Spec
 
         style :freezing
         style :boiling
+
         box :things, :title => "My Things" do
           allow :SerialisedPage, :styles => [:sitting, :kneeling]
           field :title, :string
@@ -49,11 +56,25 @@ class SerialisationTest < MiniTest::Spec
       end
 
 
+      @dancing_style = SerialisedPage.style_prototypes[:dancing].schema_id
+      @sitting_style = SerialisedPage.style_prototypes[:sitting].schema_id
+      @kneeling_style = SerialisedPage.style_prototypes[:kneeling].schema_id
+
+      @freezing_style = SerialisedPiece.style_prototypes[:freezing].schema_id
+      @boiling_style = SerialisedPiece.style_prototypes[:boiling].schema_id
+      @tepid_style = SerialisedPiece.style_prototypes[:tepid].schema_id
+
       @class_hash = {
         :type => "SerialisedPiece",
-        :id => SerialisedPiece.schema_id,
+        :id => SerialisedPiece.schema_id.to_s,
         :is_page => false,
         :title => "Type Title",
+        :styles => [
+          {:name => 'freezing', :schema_id => @freezing_style.to_s },
+          {:name => 'boiling', :schema_id => @boiling_style.to_s },
+          {:name => 'tepid', :schema_id => @tepid_style.to_s }
+        ],
+
         :fields => [
           {:name => "title", :type => "Spontaneous.FieldTypes.StringField", :title => "Title",  :comment => "" , :writable=>true},
           {:name => "location", :type => "Spontaneous.FieldTypes.StringField", :title => "Where",  :comment => "Fill in the address" , :writable=>true},
@@ -63,7 +84,7 @@ class SerialisationTest < MiniTest::Spec
         :boxes => [
           {
             :name => "things",
-            :id => SerialisedPiece.boxes[:things].schema_id,
+            :id => SerialisedPiece.boxes[:things].schema_id.to_s,
             :title => "My Things",
             :writable => true,
             :allowed_types => ["SerialisedPage"],
@@ -75,12 +96,16 @@ class SerialisationTest < MiniTest::Spec
 
     teardown do
       Object.send(:remove_const, :Page)
+      Object.send(:remove_const, :Piece)
       Object.send(:remove_const, :SerialisedPiece)
       Object.send(:remove_const, :SerialisedPage)
     end
 
     context "classes" do
       should "generate a hash for JSON serialisation" do
+        # pp SerialisedPiece.to_hash
+        # puts "==================="
+        # pp @class_hash
         SerialisedPiece.to_hash.should == @class_hash
       end
       should "serialise to JSON" do
@@ -137,11 +162,12 @@ class SerialisationTest < MiniTest::Spec
         @child.path.should == "/about"
 
 
-        [@root, @child, @piece1, @piece2, @piece3, @child].each { |c| c.save }
+        [@root, @child, @piece1, @piece2, @piece3].each { |c| c.save; c.reload }
+
 
         @root_hash = {
           :type=>"SerialisedPage",
-          :type_id=> SerialisedPage.schema_id,
+          :type_id=> SerialisedPage.schema_id.to_s,
           :depth=>0,
           :uid=>"home",
           :path=>"/",
@@ -156,43 +182,43 @@ class SerialisationTest < MiniTest::Spec
           :id=>@root.id,
           :boxes => [
             {
-          :id=>@root.insides.schema_id,
+          :id=>@root.insides.schema_id.to_s,
           :name => "insides",
           :fields=>[],
           :entries=> [
           { # root.boxes.first.entries.first
           :type=>"SerialisedPiece",
-          :type_id=> SerialisedPiece.schema_id,
+          :type_id=> SerialisedPiece.schema_id.to_s,
           :label=>"label1",
           :depth=>1,
-          :styles=>["freezing", "boiling"],
+          :styles=>[@freezing_style.to_s, @boiling_style.to_s, @tepid_style.to_s],
           :fields=> [
             {:unprocessed_value=>"Piece 1", :processed_value=>"Piece 1", :name=>"title", :attributes => {}},
             {:unprocessed_value=>"Piece 1 Location", :processed_value=>"Piece 1 Location", :name=>"location", :attributes => {}},
             {:unprocessed_value=>date, :processed_value=>date, :name=>"date", :attributes => {}},
             {:unprocessed_value=>"", :processed_value=>"", :name=>"image", :attributes => {}}
         ],
-          :style=>"freezing",
+          :style=>@freezing_style.to_s,
           :hidden => true,
           :boxes => [
             {
           :fields => [{:unprocessed_value=>"Things title", :processed_value=>"Things title", :name=>"title", :attributes => {}}],
-          :id => SerialisedPiece.boxes[:things].schema_id,
+          :id => SerialisedPiece.boxes[:things].schema_id.to_s,
           :name => "things",
           :entries=> [
             { # root.boxes.entries.first.entries.first
           :type=>"SerialisedPage",
-          :type_id=> SerialisedPage.schema_id,
+          :type_id=> SerialisedPage.schema_id.to_s,
           :path=>"/about",
           :depth=>2,
-          :styles=>["dancing", "sitting", "kneeling"],
+          :styles=>[@dancing_style.to_s, @sitting_style.to_s, @kneeling_style.to_s],
           :fields=> [
             {:unprocessed_value=>"Child Page", :processed_value=>"Child Page", :name=>"title", :attributes => {}},
             {:unprocessed_value=>"N", :processed_value=>"North", :name=>"direction", :attributes => {}},
             {:unprocessed_value=>"/images/thumb.jpg", :processed_value=>"/images/thumb.jpg", :name=>"thumbnail", :attributes => {}}
         ],
           :uid=>"about",
-          :style=>"sitting",
+          :style=>@sitting_style.to_s,
           :hidden => true,
           :is_page=>true,
           :slug=>"about",
@@ -207,23 +233,23 @@ class SerialisationTest < MiniTest::Spec
         },
           { # ENTRY
           :type=>"SerialisedPiece",
-          :type_id=> SerialisedPiece.schema_id,
+          :type_id=> SerialisedPiece.schema_id.to_s,
           :label=>"label2",
           :depth=>1,
-          :styles=>["freezing", "boiling"],
+          :styles=>[@freezing_style.to_s, @boiling_style.to_s, @tepid_style.to_s],
           :fields=> [
             {:unprocessed_value=>"Piece 2", :processed_value=>"Piece 2", :name=>"title", :attributes => {}},
             {:unprocessed_value=>"Piece 2 Location", :processed_value=>"Piece 2 Location", :name=>"location", :attributes => {}},
             {:unprocessed_value=>date, :processed_value=>date, :name=>"date", :attributes => {}},
             {:unprocessed_value=>"", :processed_value=>"", :name=>"image", :attributes => {}}
         ],
-          :style=>"boiling",
+          :style=>@boiling_style.to_s,
           :hidden => false,
           :is_page=>false,
           # :name=>"The Doors",
           :id=>@piece2.id,
         :boxes=>[{:entries=>[], :fields=>[{:unprocessed_value=>"", :processed_value=>"", :name=>"title", :attributes => {}}],
-                  :id=>@piece2.things.schema_id,
+                  :id=>@piece2.things.schema_id.to_s,
                   :name => "things"
         }]
         }

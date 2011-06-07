@@ -210,7 +210,7 @@ class BackTest < MiniTest::Spec
 
         should "update content field values" do
           params = {
-            "field[#{@job1.fields.title.schema_id}][value]" => "Updated field_name_1"
+            "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1"
           }
           post "/@spontaneous/save/#{@job1.id}", params
           assert last_response.ok?
@@ -222,8 +222,8 @@ class BackTest < MiniTest::Spec
 
         should "update page field values" do
           params = {
-            "field[#{@home.fields.title.schema_id}][value]" => "Updated title",
-            "field[#{@home.fields.introduction.schema_id}][value]" => "Updated intro"
+            "field[#{@home.fields.title.schema_id.to_s}][value]" => "Updated title",
+            "field[#{@home.fields.introduction.schema_id.to_s}][value]" => "Updated intro"
           }
           post "/@spontaneous/save/#{@home.id}", params
           assert last_response.ok?
@@ -237,9 +237,9 @@ class BackTest < MiniTest::Spec
           box = @job1.images
           box.fields.title.to_s.should_not == "Updated title"
           params = {
-            "field[#{box.fields.title.schema_id}][value]" => "Updated title"
+            "field[#{box.fields.title.schema_id.to_s}][value]" => "Updated title"
           }
-          post "/@spontaneous/savebox/#{@job1.id}/#{box.id}", params
+          post "/@spontaneous/savebox/#{@job1.id}/#{box.schema_id.to_s}", params
           assert last_response.ok?
           last_response.content_type.should == "application/json;charset=utf-8"
           @job1 = Content[@job1.id]
@@ -365,7 +365,7 @@ class BackTest < MiniTest::Spec
 
       should "replace values of fields immediately when required" do
         @image1.image.processed_value.should == ""
-        post "@spontaneous/file/replace/#{@image1.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => @image1.image.schema_id
+        post "@spontaneous/file/replace/#{@image1.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => @image1.image.schema_id.to_s
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @image1 = Content[@image1.id]
@@ -383,9 +383,9 @@ class BackTest < MiniTest::Spec
       should "be able to wrap pieces around files using default addable class" do
         box = @job1.images
         current_count = box.pieces.length
-        first_id = box.pieces.first.id
+        first_id = box.pieces.first.id.to_s
 
-        post "/@spontaneous/file/wrap/#{@job1.id}/#{box.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
+        post "/@spontaneous/file/wrap/#{@job1.id}/#{box.schema_id.to_s}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         box = @job1.reload.images
@@ -404,7 +404,7 @@ class BackTest < MiniTest::Spec
         current_count = @home.in_progress.pieces.length
         first_id = @home.in_progress.pieces.first.id
         @home.in_progress.pieces.first.class.name.should_not == "BackTest::Image"
-        post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.id}/#{Image.schema_id}"
+        post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
@@ -468,7 +468,7 @@ class BackTest < MiniTest::Spec
       end
       should "wrap all updates in a Change.record" do
         params = {
-          "field[#{@job1.fields.title.schema_id}][value]" => "Updated field_name_1"
+          "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1"
         }
         Change.count.should == 0
         post "/@spontaneous/save/#{@job1.id}", params

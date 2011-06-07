@@ -97,7 +97,7 @@ module Spontaneous
 
       def serialize
         {
-          :id => schema_id,
+          :id => schema_id.to_s,
           :name => name,
           :unprocessed_value => unprocessed_value,
           :processed_value => processed_value,

@@ -12,6 +12,7 @@ class LayoutsTest < MiniTest::Spec
   context "layouts" do
 
     setup do
+      Spontaneous::Schema.reset!
       class ::LayoutPage < Spontaneous::Page; end
       class ::ABoxClass < Spontaneous::Box; end
       class ::SubPage < LayoutPage; end
