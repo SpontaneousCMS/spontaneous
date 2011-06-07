@@ -57,12 +57,6 @@ module Spontaneous
     # no schema validation errors will ever be thrown
     # used for tests
     class TransientMap < PersistentMap
-      class Reference
-        attr_accessor :reference, :target
-        def initialize(reference, target)
-          @reference, @target = reference, target
-        end
-      end
 
       def initialize(path)
         UID.clear!
@@ -187,62 +181,8 @@ module Spontaneous
       def [](schema_id)
         map[schema_id]
       end
-
     end
 
-
-    class SchemaModification
-      def initialize(missing_from_map, missing_from_schema)
-        @missing_from_map = missing_from_map
-        @missing_from_schema = missing_from_schema
-      end
-
-      def select_missing(select_type)
-        @missing_from_schema.select do |reference|
-          reference.category == select_type
-        end
-      end
-
-      def added_classes
-        @missing_from_map[:class].map { |m| m[0] }.uniq
-      end
-
-      def removed_classes
-        select_missing(:type)
-      end
-
-      def added_fields
-        @missing_from_map[:field].map { |m| m[1] }.uniq
-      end
-
-      def removed_fields
-        select_missing(:field)
-      end
-
-      def added_boxes
-        @missing_from_map[:box].map { |m| m[1] }.uniq
-      end
-
-      def removed_boxes
-        select_missing(:box)
-      end
-
-      def added_styles
-        @missing_from_map[:style].map { |m| m[1] }
-      end
-
-      def removed_styles
-        select_missing(:style)
-      end
-
-      def added_layouts
-        @missing_from_map[:layout].map { |m| m[1] }
-      end
-
-      def removed_layouts
-        select_missing(:layout)
-      end
-    end
 
     class UID
       @@instance_lock  = Mutex.new
@@ -354,8 +294,62 @@ module Spontaneous
       end
 
       def inspect
-        %(#<#{self.class}:"#{@id}">)
+        %(#<#{self.class}:"#{@id}" => "#{reference}">)
+      end
+    end
+
+    class SchemaModification
+      def initialize(missing_from_map, missing_from_schema)
+        @missing_from_map = missing_from_map
+        @missing_from_schema = missing_from_schema
+      end
+
+      def select_missing(select_type)
+        @missing_from_schema.select do |reference|
+          reference.category == select_type
+        end
+      end
+
+      def added_classes
+        @missing_from_map[:class].map { |m| m[0] }.uniq
+      end
+
+      def removed_classes
+        select_missing(:type)
+      end
+
+      def added_fields
+        @missing_from_map[:field].map { |m| m[1] }.uniq
+      end
+
+      def removed_fields
+        select_missing(:field)
+      end
+
+      def added_boxes
+        @missing_from_map[:box].map { |m| m[1] }.uniq
+      end
+
+      def removed_boxes
+        select_missing(:box)
+      end
+
+      def added_styles
+        @missing_from_map[:style].map { |m| m[1] }
+      end
+
+      def removed_styles
+        select_missing(:style)
+      end
+
+      def added_layouts
+        @missing_from_map[:layout].map { |m| m[1] }
+      end
+
+      def removed_layouts
+        select_missing(:layout)
       end
     end
   end
 end
+
