@@ -17,6 +17,8 @@ class PublishingTest < MiniTest::Spec
     Content.delete_all_revisions!
   end
 
+  @@now = Time.now
+
   def setup
     Site.publishing_method = :immediate
   end
@@ -185,8 +187,8 @@ class PublishingTest < MiniTest::Spec
     context "content revisions" do
       setup do
         @revision = 1
-        @now = Sequel.datetime_class.now
-        Sequel.datetime_class.stubs(:now).returns(@now)
+        # @now = Sequel.datetime_class.now
+        Sequel.datetime_class.stubs(:now).returns(@@now)
       end
       teardown do
         Content.delete_revision(@revision)
@@ -406,57 +408,55 @@ class PublishingTest < MiniTest::Spec
 
     context "modification timestamps" do
       setup do
-        k = Sequel.datetime_class
-        @now = k.at(k.now.to_i)
-        Sequel.datetime_class.stubs(:now).returns(@now)
+        Sequel.datetime_class.stubs(:now).returns(@@now)
       end
       should "register creation date of all content" do
         c = Content.create
-        c.created_at.should == @now
+        c.created_at.should == @@now
         p = Page.create
-        p.created_at.should == @now
+        p.created_at.should == @@now
       end
 
       should "register modification date of all content" do
-        now = @now + 100
+        now = @@now + 100
         Time.stubs(:now).returns(now)
         c = Content.first
-        (c.modified_at.to_i - @now.to_i).abs.should <= 1
+        (c.modified_at.to_i - @@now.to_i).abs.should <= 1
         c.label = "changed"
         c.save
-        c.modified_at.should == now
+        (c.modified_at - now).abs.should <= 1
       end
 
       should "update page timestamps on modification of a piece" do
-        Time.stubs(:now).returns(@now+3600)
+        Time.stubs(:now).returns(@@now+3600)
         page = Page.first
-        page.modified_at.to_i.should == @now.to_i
+        (page.modified_at.to_i - @@now.to_i).abs.should <= 1
         content = page.pieces.first
         content.page.should == page
         content.label = "changed"
         content.save
         page.reload
-        page.modified_at.to_i.should == @now.to_i + 3600
+        page.modified_at.to_i.should == @@now.to_i + 3600
       end
 
       should "update page timestamp on addition of piece" do
-        Sequel.datetime_class.stubs(:now).returns(@now+3600)
+        Sequel.datetime_class.stubs(:now).returns(@@now+3600)
         page = Page.first
         content = Content[page.pieces.first.id]
         content << Content.new
         content.save
-        content.modified_at.to_i.should == @now.to_i + 3600
+        content.modified_at.to_i.should == @@now.to_i + 3600
         page.reload
-        page.modified_at.to_i.should == @now.to_i + 3600
+        page.modified_at.to_i.should == @@now.to_i + 3600
       end
     end
 
     context "change sets" do
       setup do
         Change.delete
-        @now = Sequel.datetime_class.now
-        Sequel.datetime_class.stubs(:now).returns(@now)
-        Time.stubs(:now).returns(@now)
+        @@now = Sequel.datetime_class.now
+        Sequel.datetime_class.stubs(:now).returns(@@now)
+        Time.stubs(:now).returns(@@now)
       end
 
       should "have a testable state" do
@@ -480,7 +480,7 @@ class PublishingTest < MiniTest::Spec
         change.modified_list.length.should == 1
         change.modified_list.should == [page.id]
         change.modified.should == [page]
-        change.created_at.to_i.should == @now.to_i
+        change.created_at.to_i.should == @@now.to_i
       end
 
       should "be created on updating a page's content" do
@@ -649,8 +649,8 @@ class PublishingTest < MiniTest::Spec
     context "publication timestamps" do
       setup do
         @revision = 1
-        @now = Sequel.datetime_class.now
-        Sequel.datetime_class.stubs(:now).returns(@now)
+        @@now = Sequel.datetime_class.now
+        Sequel.datetime_class.stubs(:now).returns(@@now)
       end
       teardown do
         Content.delete_revision(@revision)
@@ -661,17 +661,17 @@ class PublishingTest < MiniTest::Spec
         Content.first.first_published_at.should be_nil
         Content.first.last_published_at.should be_nil
         Content.publish(@revision)
-        Content.first.first_published_at.to_i.should == @now.to_i
-        Content.first.last_published_at.to_i.should == @now.to_i
+        Content.first.first_published_at.to_i.should == @@now.to_i
+        Content.first.last_published_at.to_i.should == @@now.to_i
         Content.first.first_published_revision.should == @revision
         Content.with_editable do
-          Content.first.first_published_at.to_i.should == @now.to_i
-          Content.first.last_published_at.to_i.should == @now.to_i
+          Content.first.first_published_at.to_i.should == @@now.to_i
+          Content.first.last_published_at.to_i.should == @@now.to_i
           Content.first.first_published_revision.should == @revision
         end
         Content.with_revision(@revision) do
-          Content.first.first_published_at.to_i.should == @now.to_i
-          Content.first.last_published_at.to_i.should == @now.to_i
+          Content.first.first_published_at.to_i.should == @@now.to_i
+          Content.first.last_published_at.to_i.should == @@now.to_i
           Content.first.first_published_revision.should == @revision
         end
       end
@@ -679,20 +679,20 @@ class PublishingTest < MiniTest::Spec
       should "set correct timestamps on later publishes" do
         Content.first.first_published_at.should be_nil
         Content.publish(@revision)
-        Content.first.first_published_at.to_i.should == @now.to_i
+        Content.first.first_published_at.to_i.should == @@now.to_i
         c = Content.create
         c.first_published_at.should be_nil
-        Sequel.datetime_class.stubs(:now).returns(@now+100)
+        Sequel.datetime_class.stubs(:now).returns(@@now+100)
         Content.publish(@revision+1)
-        Content.first.first_published_at.to_i.should == @now.to_i
-        Content.first.last_published_at.to_i.should == @now.to_i + 100
+        Content.first.first_published_at.to_i.should == @@now.to_i
+        Content.first.last_published_at.to_i.should == @@now.to_i + 100
         Content.with_editable do
           c = Content[c.id]
-          c.first_published_at.to_i.should == @now.to_i + 100
+          c.first_published_at.to_i.should == @@now.to_i + 100
         end
         Content.with_revision(@revision+1) do
           c = Content[c.id]
-          c.first_published_at.to_i.should == @now.to_i + 100
+          c.first_published_at.to_i.should == @@now.to_i + 100
         end
       end
 
@@ -704,7 +704,7 @@ class PublishingTest < MiniTest::Spec
         added = Content.create
         added.first_published_at.should be_nil
         Content.publish(@revision+1, [page])
-        page.first_published_at.to_i.should == @now.to_i
+        page.first_published_at.to_i.should == @@now.to_i
         added.first_published_at.should be_nil
         added.last_published_at.should be_nil
       end
@@ -742,8 +742,8 @@ class PublishingTest < MiniTest::Spec
       setup do
         Content.delete
         @revision = 3
-        @now = Time.at(Time.now.to_i)
-        Time.stubs(:now).returns(@now)
+        @@now = Time.at(Time.now.to_i)
+        Time.stubs(:now).returns(@@now)
         Site.delete
         Change.delete
         Site.create(:revision => @revision, :published_revision => 2)
@@ -800,7 +800,7 @@ class PublishingTest < MiniTest::Spec
 
       should "record date and time of publish" do
         Content.expects(:publish).with(@revision, nil)
-        Revision.expects(:create).with(:revision => @revision, :published_at => @now)
+        Revision.expects(:create).with(:revision => @revision, :published_at => @@now)
         Site.publish_all
       end
       should "bump revision after a publish" do
