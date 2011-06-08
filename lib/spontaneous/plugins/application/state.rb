@@ -16,7 +16,7 @@ module Spontaneous::Plugins::Application
         Spontaneous::Config.load(self.environment, self.root)
         connect_to_database
         Spontaneous::Loader.load
-        # Spontaneous::Schema.validate!
+        Spontaneous::Schema.validate!
         Thread.current[:spontaneous_loaded] = true
       end
 
