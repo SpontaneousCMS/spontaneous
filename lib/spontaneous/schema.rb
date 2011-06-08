@@ -78,7 +78,7 @@ module Spontaneous
       end
 
       def orphaned_ids
-        {}
+        []
       end
 
       def exists?
@@ -108,6 +108,8 @@ module Spontaneous
           # create the thing by populating it with the current schema
           if !map.exists?
             generate_new_schema
+          else
+            raise e
           end
         end
       end
@@ -205,10 +207,11 @@ module Spontaneous
         end
       end
 
+      # should only be used in tests
       def reset!
         Content.schema_reset!
-        @classes = []
         UID.clear!
+        @classes = []
         @map = nil
       end
 
