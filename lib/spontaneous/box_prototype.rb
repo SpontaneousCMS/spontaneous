@@ -45,11 +45,13 @@ module Spontaneous
 
     def create_instance_class
       Class.new(box_base_class).tap do |instance_class|
-        instance_class.class_eval(<<-RUBY)
-          def self.schema_name
-            "box/#{owner.schema_id}/#{self.name}"
+        box_owner = owner
+        box_name = name
+        instance_class.instance_eval do
+          meta.__send__(:define_method, :schema_name) do
+            "box/#{box_owner.schema_id}/#{box_name}"
           end
-        RUBY
+        end
         if @extend
           instance_class.class_eval(&@extend)
         end

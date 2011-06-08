@@ -8,6 +8,10 @@ class SchemaTest < MiniTest::Spec
 
   UID = Spontaneous::Schema::UID
 
+  # declare these early so that Piece & Page get loaded
+  # and are then cleared early by the Schema.reset! call
+  class X < Spontaneous::Piece; end
+  class Y < Spontaneous::Page; end
   def setup
     Spontaneous::Schema.schema_loader_class = Spontaneous::Schema::PersistentMap
     Spontaneous::Schema.reset!
@@ -55,7 +59,7 @@ class SchemaTest < MiniTest::Spec
     end
   end
 
-  context "Persistent" do
+  context "Persistent maps" do
     context "Schema UIDs" do
       setup do
         Spontaneous.schema_map = File.expand_path('../../fixtures/schema/schema.yml', __FILE__)
@@ -477,6 +481,50 @@ class SchemaTest < MiniTest::Spec
 
     should "return UID objects" do
       V.schema_id.must_be_instance_of(Spontaneous::Schema::UID)
+    end
+  end
+
+  context "Map writing" do
+    context "Non-existant maps" do
+      setup do
+        S::Schema.reset!
+        @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)
+        ::File.exists?(@map_file).should be_false
+        Spontaneous.schema_map = @map_file
+        class ::A < Spontaneous::Page
+          field :title
+          field :introduction
+          layout :sparse
+          box :posts do
+            field :description
+          end
+        end
+        class ::B < Spontaneous::Piece
+          field :location
+          style :daring
+        end
+      end
+      teardown do
+        FileUtils.rm(@map_file) if ::File.exists?(@map_file)
+      end
+      should "get created with verification" do
+        S::Schema.validate!
+        classes = [ ::A, ::B]
+        # would like to do all of this using mocks, but don't know how to do that
+        # without fecking up the whole schema id creation process
+        expected = Hash[ classes.map { |klass| [ klass.schema_id.to_s, klass.schema_name ] } ]
+        expected.merge!({
+          A.field_prototypes[:title].schema_id.to_s => A.field_prototypes[:title].schema_name,
+          A.field_prototypes[:introduction].schema_id.to_s => A.field_prototypes[:introduction].schema_name,
+          A.layout_prototypes[:sparse].schema_id.to_s => A.layout_prototypes[:sparse].schema_name,
+          A.boxes[:posts].schema_id.to_s => A.boxes[:posts].schema_name,
+          A.boxes[:posts].field_prototypes[:description].schema_id.to_s => A.boxes[:posts].field_prototypes[:description].schema_name,
+          B.field_prototypes[:location].schema_id.to_s => B.field_prototypes[:location].schema_name,
+          B.style_prototypes[:daring].schema_id.to_s => B.style_prototypes[:daring].schema_name,
+        })
+        File.exists?(@map_file).should be_true
+        YAML.load_file(@map_file).should == expected
+      end
     end
   end
 end

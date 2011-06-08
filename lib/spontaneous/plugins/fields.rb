@@ -32,9 +32,9 @@ module Spontaneous::Plugins
         prototype
       end
 
-      def supertype?
-        superclass && superclass.respond_to?(:field_prototypes)
-      end
+      # def supertype?
+      #   supertype #&& supertype.respond_to?(:field_prototypes)
+      # end
 
       def field_prototypes
         @field_prototypes ||= (supertype? ? superclass.field_prototypes.dup : {})

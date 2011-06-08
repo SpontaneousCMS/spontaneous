@@ -82,6 +82,7 @@ module Spontaneous
   autoload :ContentQuery, "spontaneous/content_query"
 
   module Plugins
+    autoload :Supertype, "spontaneous/plugins/supertype"
     autoload :Boxes, "spontaneous/plugins/boxes"
     autoload :Fields, "spontaneous/plugins/fields"
     autoload :Entries, "spontaneous/plugins/entries"

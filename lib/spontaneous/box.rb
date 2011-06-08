@@ -30,6 +30,17 @@ module Spontaneous
       "type//#{self.name}"
     end
 
+    def self.supertype
+      if self == Spontaneous::Box
+        nil
+      else
+        superclass
+      end
+    end
+    def self.supertype?
+      !supertype.nil? #&& supertype.respond_to?(:field_prototypes)
+    end
+
     def schema_id
       # Spontaneous::Schema.schema_id(_owner.class, :box, _name.to_s)
       # _prototype.schema_id

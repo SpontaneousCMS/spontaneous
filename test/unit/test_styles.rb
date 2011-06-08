@@ -28,10 +28,10 @@ class StylesTest < MiniTest::Spec
     setup do
       Spot::Schema.reset!
       class ::MissingClass < Piece; end
-      class ::TemplateClass < Content; end
+      class ::TemplateClass < Piece; end
       class ::TemplateSubClass1 < TemplateClass; end
       class ::TemplateSubClass2 < TemplateClass; end
-      class ::InvisibleClass < Content; end
+      class ::InvisibleClass < Piece; end
     end
 
     teardown do

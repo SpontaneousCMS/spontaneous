@@ -81,6 +81,14 @@ module Spontaneous
     alias_method :is_page?, :page?
 
 
+    # terminate the supertype chain here
+    def self.supertype
+      nil
+    end
+
+    def self.supertype?
+      !supertype.nil? #&& supertype.respond_to?(:field_prototypes)
+    end
 
     def meta
       class << self; self; end

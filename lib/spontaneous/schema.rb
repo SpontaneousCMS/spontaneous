@@ -10,7 +10,8 @@ module Spontaneous
       attr_reader :map, :inverse_map
 
       def initialize(path)
-        load_map(path)
+        @path = path
+        load_map
         invert_map
       end
 
@@ -30,14 +31,17 @@ module Spontaneous
         end
       end
 
-      def load_map(path)
-        UID.clear!
-        if ::File.exists?(path)
-          map = YAML.load_file(path)
+      def load_map
+        if exists?
+          map = YAML.load_file(@path)
           map.each do | uid, reference |
             UID.load(uid, reference)
           end
         end
+      end
+
+      def exists?
+        ::File.exists?(@path)
       end
 
       def invert_map
@@ -59,14 +63,13 @@ module Spontaneous
     class TransientMap < PersistentMap
 
       def initialize(path)
-        UID.clear!
       end
 
       def schema_id(obj)
         if id = inverse_map[obj.schema_name]
           id
         else
-          UID.load(Schema::UID.generate, obj.schema_name)
+          UID.create(obj.schema_name)
         end
       end
 
@@ -77,6 +80,10 @@ module Spontaneous
       def orphaned_ids
         {}
       end
+
+      def exists?
+        true
+      end
     end
 
     class << self
@@ -85,13 +92,47 @@ module Spontaneous
       end
 
       def schema_loader_class=(klass)
+        UID.clear!
+        @map = nil
         @schema_loader_class = klass
       end
 
       # validate the schema & attempt to fix anything that can be resolved without human
       # interaction (i.e. pure additions)
       def validate!
-        validate_schema
+        begin
+          validate_schema
+        rescue Spontaneous::SchemaModificationError => e
+          changes = e.modification
+          # if the map file is missing, then this is a first run and we can just
+          # create the thing by populating it with the current schema
+          if !map.exists?
+            generate_new_schema
+          end
+        end
+      end
+
+      def generate_new_schema
+        logger.info("Generating new schema map at #{Spontaneous.schema_map}")
+        self.schema_loader_class = TransientMap
+        classes.each do | schema_class |
+          generate_schema_for(schema_class)
+        end
+        File.open(Spontaneous.schema_map, 'w') do |file|
+          file.write(UID.to_hash.to_yaml)
+        end
+      end
+
+      def generate_schema_for(obj)
+        UID.create_for(obj)
+        [:boxes, :fields, :styles, :layouts].each do |category|
+          if obj.respond_to?(category)
+            objects = obj.send(category)
+            objects.each do | c |
+              generate_schema_for(c)
+            end
+          end
+        end
       end
 
       # look for differences between identities found in schema map and
@@ -167,6 +208,7 @@ module Spontaneous
       def reset!
         Content.schema_reset!
         @classes = []
+        UID.clear!
         @map = nil
       end
 
@@ -191,6 +233,7 @@ module Spontaneous
       @@instances = {}
 
       extend Enumerable
+      include Comparable
 
       def self.load(id, reference)
         @@instance_lock.synchronize do
@@ -200,6 +243,22 @@ module Spontaneous
           instance
         end
       end
+
+      def self.create(reference)
+        unless instance = @@instances.values.detect { |i| i.reference == reference }
+          instance = self.load(generate, reference)
+        end
+        instance
+      end
+
+      def existing_references
+        @@instances.values.map { |i| i.reference }
+      end
+
+      def self.create_for(obj)
+        create(obj.schema_name)
+      end
+
 
       def self.clear!
         @@instances = {}
@@ -237,6 +296,10 @@ module Spontaneous
         oid = (Time.now.to_f * 1000).to_i.to_s(16)
         # 2 bytes inc
         oid << get_inc.to_s(16).rjust(4, '0')
+      end
+
+      def self.to_hash
+        Hash[ @@instances.map { |id, ref| [id, ref.reference] } ]
       end
 
       REFERENCE_SEP = "/".freeze
@@ -278,7 +341,7 @@ module Spontaneous
       end
 
       def owner
-        @owner ||= self.class[@owner_uid].target
+        self.class[@owner_uid].target
       end
 
       def ==(obj)
@@ -291,6 +354,10 @@ module Spontaneous
 
       def to_s
         @id
+      end
+
+      def <=>(other)
+        self.to_s <=> other.to_s
       end
 
       def inspect

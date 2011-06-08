@@ -9,7 +9,7 @@ class FieldsTest < MiniTest::Spec
   end
   context "New content instances" do
     setup do
-      @content_class = Class.new(Content) do
+      @content_class = Class.new(Piece) do
         field :title, :default => "Magic"
         field :thumbnail, :image
       end
@@ -41,7 +41,7 @@ class FieldsTest < MiniTest::Spec
 
   context "Overwriting fields" do
     setup do
-      @class1 = Class.new(Content) do
+      @class1 = Class.new(Piece) do
         field :title, :string, :default => "One"
         field :date, :string
       end
@@ -61,7 +61,7 @@ class FieldsTest < MiniTest::Spec
   end
   context "Field Prototypes" do
     setup do
-      @content_class = Class.new(Content) do
+      @content_class = Class.new(Piece) do
         field :title
         field :synopsis, :string
       end
@@ -110,7 +110,7 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "match name to type if sensible" do
-        content_class = Class.new(Content) do
+        content_class = Class.new(Piece) do
           field :image
           field :date
           field :chunky
@@ -124,7 +124,7 @@ class FieldsTest < MiniTest::Spec
 
     context "Field titles" do
       setup do
-        @content_class = Class.new(Content) do
+        @content_class = Class.new(Piece) do
           field :title
           field :having_fun_yet
           field :synopsis, :title => "Custom Title"
@@ -207,7 +207,7 @@ class FieldsTest < MiniTest::Spec
     end
 
     should "not process values coming from db" do
-      content_class = Class.new(Content)
+      content_class = Class.new(Piece)
 
       content_class.field :title do
         def process(value)
@@ -218,7 +218,7 @@ class FieldsTest < MiniTest::Spec
       instance.fields.title = "Monkey"
       instance.save
 
-      new_content_class = Class.new(Content)
+      new_content_class = Class.new(Piece)
       new_content_class.field :title do
         def process(value)
           "*#{value}*"
@@ -231,7 +231,7 @@ class FieldsTest < MiniTest::Spec
 
   context "field instances" do
     setup do
-      ::CC = Class.new(Content) do
+      ::CC = Class.new(Piece) do
         field :title, :default => "Magic" do
           def process(value)
             "*#{value}*"
@@ -264,7 +264,7 @@ class FieldsTest < MiniTest::Spec
 
   context "Field value persistence" do
     setup do
-      class ::PersistedField < Content
+      class ::PersistedField < Piece
         field :title, :default => "Magic"
       end
     end
@@ -294,7 +294,7 @@ class FieldsTest < MiniTest::Spec
 
   context "Markdown fields" do
     setup do
-      class ::MarkdownContent < Content
+      class ::MarkdownContent < Piece
         field :text1, :markdown
         field :text2, :text
       end

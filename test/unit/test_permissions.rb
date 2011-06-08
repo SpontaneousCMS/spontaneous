@@ -409,8 +409,8 @@ class PermissionsTest < MiniTest::Spec
       @admin.update(:level => Permissions::UserLevel.admin)
       @root.update(:level => Permissions::UserLevel.root)
 
-      class ::C < Content; end
-      class ::D < Content; end
+      class ::C < Piece; end
+      class ::D < Piece; end
 
       C.field :editor_level, :user_level => :editor
       C.field :admin_level, :user_level => :admin

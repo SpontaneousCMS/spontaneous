@@ -3,16 +3,27 @@
 
 module Spontaneous
   class Piece < Content
+    plugin Plugins::Supertype
+
     set_inheritance_root
+
     def to_hash
       super.merge(styles_to_hash)
     end
 
     def styles_to_hash
-      {
+      h = {
         :style => style_sid.to_s,
-        :styles => container.available_styles(self).map { |s| s.schema_id.to_s },
       }
+      if container
+        h.merge!({
+          :styles => container.available_styles(self).map { |s| s.schema_id.to_s }
+        })
+      else
+        h.merge!({
+          :styles => self.styles.map { |s| s.schema_id.to_s }
+        })
+      end
     end
   end
 end
