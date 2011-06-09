@@ -304,8 +304,8 @@ class RenderTest < MiniTest::Spec
         @page.render.should == <<-HTML
 PAGE <p>DESCRIPTION</p>
 
-<!-- spontaneous:previewedit:start:box id:#{@page.images.id} -->
-<!-- spontaneous:previewedit:end:box id:#{@page.images.id} -->
+<!-- spontaneous:previewedit:start:box id:#{@page.images.schema_id} -->
+<!-- spontaneous:previewedit:end:box id:#{@page.images.schema_id} -->
 
         HTML
       end

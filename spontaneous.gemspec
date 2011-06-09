@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Garry Hill"]
-  s.date = %q{2011-05-12}
+  s.date = %q{2011-06-09}
   s.description = %q{TODO: longer description of your gem}
   s.email = %q{garry@magnetised.info}
   s.executables = ["unlimit-upload", "nginx", "spot", "unicorn", "limit-upload", "console", "back"]
@@ -154,6 +154,8 @@ Gem::Specification.new do |s|
     "db/migrations/20110201133550_visibility.rb",
     "db/migrations/20110209152710_users_and_groups.rb",
     "db/migrations/20110215133910_boxes.rb",
+    "db/migrations/20110521114145_remove_slots_and_entries.rb",
+    "db/migrations/20110604192145_rename_schema_id_columns.rb",
     "lib/cutaneous.rb",
     "lib/cutaneous/context_helper.rb",
     "lib/cutaneous/first_pass_parser.rb",
@@ -180,7 +182,6 @@ Gem::Specification.new do |s|
     "lib/spontaneous/constants.rb",
     "lib/spontaneous/content.rb",
     "lib/spontaneous/content_query.rb",
-    "lib/spontaneous/entry.rb",
     "lib/spontaneous/entry_set.rb",
     "lib/spontaneous/errors.rb",
     "lib/spontaneous/extensions/array.rb",
@@ -193,8 +194,8 @@ Gem::Specification.new do |s|
     "lib/spontaneous/field_types.rb",
     "lib/spontaneous/field_types/base.rb",
     "lib/spontaneous/field_types/date_field.rb",
-    "lib/spontaneous/field_types/discount_field.rb",
     "lib/spontaneous/field_types/image_field.rb",
+    "lib/spontaneous/field_types/markdown_field.rb",
     "lib/spontaneous/field_types/string_field.rb",
     "lib/spontaneous/generators.rb",
     "lib/spontaneous/generators/page.rb",
@@ -224,14 +225,15 @@ Gem::Specification.new do |s|
     "lib/spontaneous/generators/site/schema/.map",
     "lib/spontaneous/generators/site/schema/page.rb.tt",
     "lib/spontaneous/generators/site/schema/piece.rb.tt",
-    "lib/spontaneous/generators/site/templates/page.html.cut.tt",
+    "lib/spontaneous/generators/site/templates/layouts/standard.html.cut.tt",
     "lib/spontaneous/image_size.rb",
+    "lib/spontaneous/layout.rb",
     "lib/spontaneous/loader.rb",
     "lib/spontaneous/logger.rb",
     "lib/spontaneous/media.rb",
     "lib/spontaneous/named_set.rb",
     "lib/spontaneous/page.rb",
-    "lib/spontaneous/page_entry.rb",
+    "lib/spontaneous/page_piece.rb",
     "lib/spontaneous/permissions.rb",
     "lib/spontaneous/permissions/access_group.rb",
     "lib/spontaneous/permissions/access_key.rb",
@@ -246,14 +248,15 @@ Gem::Specification.new do |s|
     "lib/spontaneous/plugins/application/state.rb",
     "lib/spontaneous/plugins/boxes.rb",
     "lib/spontaneous/plugins/entries.rb",
+    "lib/spontaneous/plugins/entry.rb",
     "lib/spontaneous/plugins/fields.rb",
     "lib/spontaneous/plugins/fields/field_prototype.rb",
     "lib/spontaneous/plugins/fields/field_set.rb",
     "lib/spontaneous/plugins/instance_code.rb",
     "lib/spontaneous/plugins/json.rb",
+    "lib/spontaneous/plugins/layouts.rb",
     "lib/spontaneous/plugins/media.rb",
     "lib/spontaneous/plugins/page_search.rb",
-    "lib/spontaneous/plugins/page_styles.rb",
     "lib/spontaneous/plugins/page_tree.rb",
     "lib/spontaneous/plugins/paths.rb",
     "lib/spontaneous/plugins/permissions.rb",
@@ -261,10 +264,12 @@ Gem::Specification.new do |s|
     "lib/spontaneous/plugins/publishing.rb",
     "lib/spontaneous/plugins/render.rb",
     "lib/spontaneous/plugins/schema_hierarchy.rb",
+    "lib/spontaneous/plugins/schema_id.rb",
     "lib/spontaneous/plugins/schema_title.rb",
     "lib/spontaneous/plugins/site/publishing.rb",
     "lib/spontaneous/plugins/site_map.rb",
     "lib/spontaneous/plugins/styles.rb",
+    "lib/spontaneous/plugins/supertype.rb",
     "lib/spontaneous/plugins/visibility.rb",
     "lib/spontaneous/proxy_object.rb",
     "lib/spontaneous/publishing.rb",
@@ -281,7 +286,6 @@ Gem::Specification.new do |s|
     "lib/spontaneous/rack/public.rb",
     "lib/spontaneous/rack/reloader.rb",
     "lib/spontaneous/rack/static.rb",
-    "lib/spontaneous/reloader.rb",
     "lib/spontaneous/render.rb",
     "lib/spontaneous/render/context.rb",
     "lib/spontaneous/render/development_renderer.rb",
@@ -292,29 +296,24 @@ Gem::Specification.new do |s|
     "lib/spontaneous/render/published_renderer.rb",
     "lib/spontaneous/render/publishing_renderer.rb",
     "lib/spontaneous/render/renderer.rb",
-    "lib/spontaneous/render_format_proxy.rb",
     "lib/spontaneous/revision.rb",
     "lib/spontaneous/schema.rb",
     "lib/spontaneous/server.rb",
     "lib/spontaneous/site.rb",
     "lib/spontaneous/style.rb",
-    "lib/spontaneous/style_definitions.rb",
     "lib/spontaneous/tasks.rb",
     "lib/spontaneous/tasks/database.rake",
-    "lib/spontaneous/templates.rb",
-    "lib/spontaneous/templates/erubis_template.rb",
-    "lib/spontaneous/templates/template_base.rb",
     "lib/spontaneous/version.rb",
     "spontaneous.gemspec",
     "test/disabled/test_slots.rb",
-    "test/experimental/test_authentication.rb",
-    "test/experimental/test_boxes.rb",
-    "test/experimental/test_permissions.rb",
+    "test/experimental/test_schema.rb",
     "test/fixtures/application/css/test.less",
     "test/fixtures/application/js/test.js",
     "test/fixtures/application/static/favicon.ico",
     "test/fixtures/application/static/test.html",
     "test/fixtures/application/views/index.erubis",
+    "test/fixtures/back/public/test.html",
+    "test/fixtures/back/templates/layouts/standard.html.cut",
     "test/fixtures/config/config/environment.rb",
     "test/fixtures/config/config/environments/development.rb",
     "test/fixtures/config/config/environments/production.rb",
@@ -354,33 +353,56 @@ Gem::Specification.new do |s|
     "test/fixtures/example_application/templates/client_project.html.cut",
     "test/fixtures/example_application/templates/client_project/images.html.cut",
     "test/fixtures/example_application/templates/client_projects.html.cut",
-    "test/fixtures/example_application/templates/home_page/page.html.cut",
     "test/fixtures/example_application/templates/info_page/inline.html.cut",
-    "test/fixtures/example_application/templates/info_page/page.html.cut",
     "test/fixtures/example_application/templates/inline_image.html.cut",
+    "test/fixtures/example_application/templates/layouts/home.html.cut",
+    "test/fixtures/example_application/templates/layouts/info.html.cut",
+    "test/fixtures/example_application/templates/layouts/project.html.cut",
+    "test/fixtures/example_application/templates/layouts/projects.html.cut",
+    "test/fixtures/example_application/templates/layouts/standard.html.cut",
     "test/fixtures/example_application/templates/project.html.cut",
     "test/fixtures/example_application/templates/project/inline.html.cut",
-    "test/fixtures/example_application/templates/project/page.html.cut",
     "test/fixtures/example_application/templates/project_image.html.cut",
-    "test/fixtures/example_application/templates/projects_page/projects_page.html.cut",
     "test/fixtures/example_application/templates/text.html.cut",
     "test/fixtures/images/rose.jpg",
     "test/fixtures/images/size.gif",
     "test/fixtures/images/size.jpg",
     "test/fixtures/images/size.png24",
     "test/fixtures/images/size.png8",
+    "test/fixtures/layouts/layouts/custom1.html.cut",
+    "test/fixtures/layouts/layouts/custom1.pdf.cut",
+    "test/fixtures/layouts/layouts/custom1.xml.cut",
+    "test/fixtures/layouts/layouts/custom2.html.cut",
+    "test/fixtures/layouts/layouts/standard.html.cut",
     "test/fixtures/media/101/003/rose.jpg",
     "test/fixtures/permissions/config/user_levels.yml",
     "test/fixtures/permissions/media/image.jpg",
-    "test/fixtures/public/templates/site_page/default.html.cut",
-    "test/fixtures/public/templates/site_page/default.pdf.cut",
-    "test/fixtures/public/templates/site_page/dynamic.html.cut",
+    "test/fixtures/public/templates/layouts/default.html.cut",
+    "test/fixtures/public/templates/layouts/default.pdf.cut",
+    "test/fixtures/public/templates/layouts/dynamic.html.cut",
+    "test/fixtures/public/templates/layouts/standard.html.cut",
+    "test/fixtures/schema/before.yml",
+    "test/fixtures/schema/schema.yml",
+    "test/fixtures/styles/box_a.html.cut",
+    "test/fixtures/styles/box_a/runny.html.cut",
+    "test/fixtures/styles/named2.html.cut",
+    "test/fixtures/styles/orange/apple.html.cut",
+    "test/fixtures/styles/template_class.epub.cut",
+    "test/fixtures/styles/template_class.html.cut",
+    "test/fixtures/styles/template_class.pdf.cut",
+    "test/fixtures/styles/template_class/named1.html.cut",
+    "test/fixtures/styles/template_class/results.html.cut",
+    "test/fixtures/styles/template_class/walky.html.cut",
+    "test/fixtures/styles/template_sub_class1.html.cut",
     "test/fixtures/templates/aliases/a/a_style.html.cut",
     "test/fixtures/templates/aliases/a/page.html.cut",
-    "test/fixtures/templates/aliases/b/page.html.cut",
-    "test/fixtures/templates/aliases/b_alias/alternate.html.cut",
-    "test/fixtures/templates/aliases/c_alias/page.html.cut",
+    "test/fixtures/templates/aliases/a_alias/a_alias_style.html.cut",
+    "test/fixtures/templates/aliases/layouts/b.html.cut",
+    "test/fixtures/templates/aliases/layouts/b_alias.html.cut",
+    "test/fixtures/templates/aliases/layouts/c_alias.html.cut",
+    "test/fixtures/templates/boxes/blank_content/things.html.cut",
     "test/fixtures/templates/boxes/my_box_class/christy.html.cut",
+    "test/fixtures/templates/boxes/thangs.html.cut",
     "test/fixtures/templates/boxes/with_template_box.html.cut",
     "test/fixtures/templates/content/include.html.cut",
     "test/fixtures/templates/content/include_dir.html.cut",
@@ -396,16 +418,17 @@ Gem::Specification.new do |s|
     "test/fixtures/templates/extended/grandparent.html.cut",
     "test/fixtures/templates/extended/main.html.cut",
     "test/fixtures/templates/extended/parent.html.cut",
+    "test/fixtures/templates/layouts/entries.html.cut",
+    "test/fixtures/templates/layouts/page_style.html.cut",
+    "test/fixtures/templates/layouts/params.html.cut",
+    "test/fixtures/templates/layouts/preview_render.html.cut",
+    "test/fixtures/templates/layouts/standard_page.html.cut",
+    "test/fixtures/templates/layouts/subdir_style.html.cut",
+    "test/fixtures/templates/layouts/template_params.html.cut",
     "test/fixtures/templates/page_class/inline_style.html.cut",
-    "test/fixtures/templates/page_class/page_style.html.cut",
-    "test/fixtures/templates/page_class/subdir_style.html.cut",
-    "test/fixtures/templates/preview_render/entries.html.cut",
     "test/fixtures/templates/preview_render/inline.html.cut",
-    "test/fixtures/templates/preview_render/page.html.cut",
-    "test/fixtures/templates/preview_render/params.html.cut",
-    "test/fixtures/templates/publishing/publishable_page/dynamic.html.cut",
-    "test/fixtures/templates/publishing/publishable_page/static.html.cut",
-    "test/fixtures/templates/standard_page.html.cut",
+    "test/fixtures/templates/publishing/layouts/dynamic.html.cut",
+    "test/fixtures/templates/publishing/layouts/static.html.cut",
     "test/fixtures/templates/template_class/anonymous_style.html.cut",
     "test/fixtures/templates/template_class/another_template.html.cut",
     "test/fixtures/templates/template_class/complex_template.html.cut",
@@ -417,7 +440,6 @@ Gem::Specification.new do |s|
     "test/fixtures/templates/template_class/this_template.epub.cut",
     "test/fixtures/templates/template_class/this_template.html.cut",
     "test/fixtures/templates/template_class/this_template.pdf.cut",
-    "test/fixtures/templates/template_params/page_style.html.cut",
     "test/fixtures/templates/with_default_style_class.html.cut",
     "test/functional/test_application.rb",
     "test/functional/test_back.rb",
@@ -432,7 +454,8 @@ Gem::Specification.new do |s|
     "test/ui/test_page_editing.rb",
     "test/ui_helper.rb",
     "test/unit/test_alias.rb",
-    "test/unit/test_application.rb",
+    "test/unit/test_authentication.rb",
+    "test/unit/test_boxes.rb",
     "test/unit/test_config.rb",
     "test/unit/test_content.rb",
     "test/unit/test_content_inheritance.rb",
@@ -441,15 +464,17 @@ Gem::Specification.new do |s|
     "test/unit/test_generators.rb",
     "test/unit/test_image_size.rb",
     "test/unit/test_images.rb",
+    "test/unit/test_layouts.rb",
     "test/unit/test_logger.rb",
     "test/unit/test_media.rb",
     "test/unit/test_page.rb",
+    "test/unit/test_permissions.rb",
     "test/unit/test_piece.rb",
     "test/unit/test_prototypes.rb",
     "test/unit/test_render.rb",
-    "test/unit/test_schema.rb",
     "test/unit/test_serialisation.rb",
     "test/unit/test_site.rb",
+    "test/unit/test_structure.rb",
     "test/unit/test_styles.rb",
     "test/unit/test_templates.rb",
     "todo.taskpaper"
@@ -459,68 +484,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.6.2}
   s.summary = %q{TODO: one-line summary of your gem}
-  s.test_files = [
-    "test/disabled/test_slots.rb",
-    "test/experimental/test_authentication.rb",
-    "test/experimental/test_boxes.rb",
-    "test/experimental/test_permissions.rb",
-    "test/fixtures/config/config/environment.rb",
-    "test/fixtures/config/config/environments/development.rb",
-    "test/fixtures/config/config/environments/production.rb",
-    "test/fixtures/config/config/environments/staging.rb",
-    "test/fixtures/example_application/config/back.rb",
-    "test/fixtures/example_application/config/boot.rb",
-    "test/fixtures/example_application/config/environment.rb",
-    "test/fixtures/example_application/config/environments/development.rb",
-    "test/fixtures/example_application/config/environments/production.rb",
-    "test/fixtures/example_application/config/environments/staging.rb",
-    "test/fixtures/example_application/config/front.rb",
-    "test/fixtures/example_application/config/unicorn.rb",
-    "test/fixtures/example_application/schema/client_project.rb",
-    "test/fixtures/example_application/schema/client_projects.rb",
-    "test/fixtures/example_application/schema/home_page.rb",
-    "test/fixtures/example_application/schema/info_page.rb",
-    "test/fixtures/example_application/schema/inline_image.rb",
-    "test/fixtures/example_application/schema/page.rb",
-    "test/fixtures/example_application/schema/piece.rb",
-    "test/fixtures/example_application/schema/project.rb",
-    "test/fixtures/example_application/schema/project_image.rb",
-    "test/fixtures/example_application/schema/projects_page.rb",
-    "test/fixtures/example_application/schema/text.rb",
-    "test/functional/test_application.rb",
-    "test/functional/test_back.rb",
-    "test/functional/test_front.rb",
-    "test/javascript/test_dom.rb",
-    "test/slow/test_publishing.rb",
-    "test/slow/test_visibility.rb",
-    "test/support/custom_matchers.rb",
-    "test/support/timing.rb",
-    "test/test_helper.rb",
-    "test/test_javascript.rb",
-    "test/ui/test_page_editing.rb",
-    "test/ui_helper.rb",
-    "test/unit/test_alias.rb",
-    "test/unit/test_application.rb",
-    "test/unit/test_config.rb",
-    "test/unit/test_content.rb",
-    "test/unit/test_content_inheritance.rb",
-    "test/unit/test_extensions.rb",
-    "test/unit/test_fields.rb",
-    "test/unit/test_generators.rb",
-    "test/unit/test_image_size.rb",
-    "test/unit/test_images.rb",
-    "test/unit/test_logger.rb",
-    "test/unit/test_media.rb",
-    "test/unit/test_page.rb",
-    "test/unit/test_piece.rb",
-    "test/unit/test_prototypes.rb",
-    "test/unit/test_render.rb",
-    "test/unit/test_schema.rb",
-    "test/unit/test_serialisation.rb",
-    "test/unit/test_site.rb",
-    "test/unit/test_styles.rb",
-    "test/unit/test_templates.rb"
-  ]
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
@@ -543,12 +506,12 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<thor>, ["~> 0.14.6"])
       s.add_runtime_dependency(%q<hwia>, ["~> 1.0.2"])
       s.add_runtime_dependency(%q<base58>, ["~> 0.1.0"])
-      s.add_runtime_dependency(%q<rdiscount>, ["~> 1.6.5"])
       s.add_runtime_dependency(%q<kramdown>, ["~> 0.13.3"])
+      s.add_development_dependency(%q<minitest>, ["~> 2.1.0"])
       s.add_development_dependency(%q<mysql2>, ["~> 0.2"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5"])
       s.add_development_dependency(%q<jnunemaker-matchy>, ["~> 0.4"])
-      s.add_development_dependency(%q<shoulda>, ["~> 2.10"])
+      s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<timecop>, ["~> 0.3"])
       s.add_development_dependency(%q<mocha>, ["~> 0.9"])
       s.add_development_dependency(%q<rack-test>, ["~> 0.5"])
@@ -558,6 +521,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<launchy>, ["~> 0.4.0"])
       s.add_development_dependency(%q<johnson>, ["= 2.0.0.pre3"])
       s.add_development_dependency(%q<harmony>, ["~> 0.5"])
+      s.add_development_dependency(%q<ruby-debug>, [">= 0"])
     else
       s.add_dependency(%q<activesupport>, ["~> 3.0.4"])
       s.add_dependency(%q<home_run>, ["~> 1.0.0"])
@@ -576,12 +540,12 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<thor>, ["~> 0.14.6"])
       s.add_dependency(%q<hwia>, ["~> 1.0.2"])
       s.add_dependency(%q<base58>, ["~> 0.1.0"])
-      s.add_dependency(%q<rdiscount>, ["~> 1.6.5"])
       s.add_dependency(%q<kramdown>, ["~> 0.13.3"])
+      s.add_dependency(%q<minitest>, ["~> 2.1.0"])
       s.add_dependency(%q<mysql2>, ["~> 0.2"])
       s.add_dependency(%q<jeweler>, ["~> 1.5"])
       s.add_dependency(%q<jnunemaker-matchy>, ["~> 0.4"])
-      s.add_dependency(%q<shoulda>, ["~> 2.10"])
+      s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<timecop>, ["~> 0.3"])
       s.add_dependency(%q<mocha>, ["~> 0.9"])
       s.add_dependency(%q<rack-test>, ["~> 0.5"])
@@ -591,6 +555,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<launchy>, ["~> 0.4.0"])
       s.add_dependency(%q<johnson>, ["= 2.0.0.pre3"])
       s.add_dependency(%q<harmony>, ["~> 0.5"])
+      s.add_dependency(%q<ruby-debug>, [">= 0"])
     end
   else
     s.add_dependency(%q<activesupport>, ["~> 3.0.4"])
@@ -610,12 +575,12 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<thor>, ["~> 0.14.6"])
     s.add_dependency(%q<hwia>, ["~> 1.0.2"])
     s.add_dependency(%q<base58>, ["~> 0.1.0"])
-    s.add_dependency(%q<rdiscount>, ["~> 1.6.5"])
     s.add_dependency(%q<kramdown>, ["~> 0.13.3"])
+    s.add_dependency(%q<minitest>, ["~> 2.1.0"])
     s.add_dependency(%q<mysql2>, ["~> 0.2"])
     s.add_dependency(%q<jeweler>, ["~> 1.5"])
     s.add_dependency(%q<jnunemaker-matchy>, ["~> 0.4"])
-    s.add_dependency(%q<shoulda>, ["~> 2.10"])
+    s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<timecop>, ["~> 0.3"])
     s.add_dependency(%q<mocha>, ["~> 0.9"])
     s.add_dependency(%q<rack-test>, ["~> 0.5"])
@@ -625,6 +590,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<launchy>, ["~> 0.4.0"])
     s.add_dependency(%q<johnson>, ["= 2.0.0.pre3"])
     s.add_dependency(%q<harmony>, ["~> 0.5"])
+    s.add_dependency(%q<ruby-debug>, [">= 0"])
   end
 end
 

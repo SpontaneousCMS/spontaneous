@@ -37,6 +37,7 @@ module Spontaneous
         superclass
       end
     end
+
     def self.supertype?
       !supertype.nil? #&& supertype.respond_to?(:field_prototypes)
     end
@@ -230,11 +231,11 @@ module Spontaneous
     end
 
     def start_inline_edit_marker
-      "spontaneous:previewedit:start:box id:#{id}"
+      "spontaneous:previewedit:start:box id:#{schema_id}"
     end
 
     def end_inline_edit_marker
-      "spontaneous:previewedit:end:box id:#{id}"
+      "spontaneous:previewedit:end:box id:#{schema_id}"
     end
 
     def save

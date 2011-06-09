@@ -3,6 +3,7 @@ source :rubygems
 # gemspec :path => '.'
 
 # gem "bundler", "~> 1.0.9"
+gem "rake", "0.8.7"
 gem "activesupport", "~> 3.0.4"
 gem "home_run", "~> 1.0.0"
 gem "sequel", "~> 3.20"
@@ -45,6 +46,6 @@ group :development do
   # gem 'Selenium', '~> 1.1.14'
   gem 'johnson',    '2.0.0.pre3', :platforms => [:mri_18]
   gem 'harmony',    '~> 0.5', :platforms => [:mri_18]
-  gem 'ruby-debug'
+  gem 'ruby-debug', :platforms => [:mri_18]
 end
 

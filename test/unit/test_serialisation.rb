@@ -109,7 +109,7 @@ class SerialisationTest < MiniTest::Spec
         SerialisedPiece.to_hash.should == @class_hash
       end
       should "serialise to JSON" do
-        SerialisedPiece.to_json.should == @class_hash.to_json
+        SerialisedPiece.to_json.json.should == @class_hash
       end
     end
 
@@ -268,7 +268,7 @@ class SerialisationTest < MiniTest::Spec
 
       should "serialise to JSON" do
         # hard to test this as the serialisation order appears to change
-        @root.to_json.should == @root.to_hash.to_json
+        @root.to_json.json.should == @root.to_hash
       end
     end
   end
