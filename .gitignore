@@ -12,3 +12,5 @@ test/fixtures/example_application/log/*
 *.pdf.rb
 *.epub.rb
 tmp
+todo.taskpaper
+
