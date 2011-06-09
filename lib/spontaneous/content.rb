@@ -87,7 +87,7 @@ module Spontaneous
     end
 
     def self.supertype?
-      !supertype.nil? #&& supertype.respond_to?(:field_prototypes)
+      !supertype.nil?
     end
 
     def meta
