@@ -505,6 +505,8 @@ class SchemaTest < MiniTest::Spec
         end
       end
       teardown do
+        Object.send(:remove_const, :A) rescue nil
+        Object.send(:remove_const, :B) rescue nil
         FileUtils.rm(@map_file) if ::File.exists?(@map_file)
       end
       should "get created with verification" do
@@ -524,6 +526,45 @@ class SchemaTest < MiniTest::Spec
         })
         File.exists?(@map_file).should be_true
         YAML.load_file(@map_file).should == expected
+      end
+    end
+    context "automatically resolvable changes" do
+      setup do
+        S::Schema.reset!
+        @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)
+        FileUtils.mkdir_p(File.dirname(@map_file))
+        FileUtils.cp(File.expand_path('../../fixtures/schema/resolvable.yml', __FILE__), @map_file)
+        Spontaneous.schema_map = @map_file
+        class ::A < Spontaneous::Page
+          field :title
+          field :introduction
+          layout :sparse
+          box :posts do
+            field :description
+          end
+        end
+        class ::B < Spontaneous::Piece
+          field :location
+          style :daring
+        end
+        S::Schema.validate!
+        A.schema_id.should == S::Schema::UID["qLcxinA008"]
+      end
+
+      teardown do
+        Object.send(:remove_const, :A) rescue nil
+        Object.send(:remove_const, :B) rescue nil
+        Object.send(:remove_const, :X) rescue nil
+        FileUtils.rm(@map_file) if ::File.exists?(@map_file)
+      end
+
+      should "be made for added classes" do
+        id = "xxxxxxxxxx"
+        class ::X < ::A; end
+        S::Schema::UID.expects(:generate).returns(id)
+        S::Schema.validate!
+        ::X.schema_id.should == id
+        YAML.load_file(@map_file)[id].should == ::X.schema_name
       end
     end
   end

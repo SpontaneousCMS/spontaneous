@@ -65,6 +65,11 @@ module Spontaneous
       box_class = Spontaneous::Box
       class_name = @options[:type] || @options[:class]
       box_class = class_name.to_s.constantize if class_name
+      # box_class = Class.new(box_class) do
+      #   def self.inherited(subclass)
+      #     subclasses << subclass
+      #   end
+      # end
       box_class
     end
 

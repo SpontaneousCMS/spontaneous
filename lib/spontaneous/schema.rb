@@ -109,7 +109,13 @@ module Spontaneous
           if !map.exists?
             generate_new_schema
           else
-            raise e
+            if changes.resolvable?
+              changes.resolve!
+              write_schema(Spontaneous.schema_map)
+              reload!
+            else
+              raise e
+            end
           end
         end
       end
@@ -120,7 +126,12 @@ module Spontaneous
         classes.each do | schema_class |
           generate_schema_for(schema_class)
         end
-        File.open(Spontaneous.schema_map, 'w') do |file|
+        write_schema(Spontaneous.schema_map)
+        self.schema_loader_class = PersistentMap
+      end
+
+      def write_schema(path)
+        File.open(path, 'w') do |file|
           file.write(UID.to_hash.to_yaml)
         end
       end
@@ -210,13 +221,27 @@ module Spontaneous
       # should only be used in tests
       def reset!
         Content.schema_reset!
-        UID.clear!
         @classes = []
+        reload!
+      end
+
+      def reload!
         @map = nil
+        UID.clear!
+      end
+
+      def schema_map_file
+        @schema_map_file ||= Spontaneous.root / "config" / "schema.yml"
+      end
+
+      def schema_map_file=(path)
+        # force a reloading of the schema map
+        @map = nil
+        @schema_map_file = path
       end
 
       def map
-        @map ||= self.schema_loader_class.new(Spontaneous.schema_map)
+        @map ||= self.schema_loader_class.new(schema_map_file)
       end
 
       def schema_id(obj)
@@ -274,7 +299,12 @@ module Spontaneous
       end
 
       def self.each
-        @@instances.each { |id, instance| yield(instance) if block_given? }
+        uids = @@instances.map { |id, instance| instance }
+        if block_given?
+          uids.each { |instance| yield(instance) }
+        else
+          uids.each
+        end
       end
 
       def self.get_inc
@@ -418,6 +448,32 @@ module Spontaneous
 
       def removed_layouts
         select_missing(:layout)
+      end
+
+      def resolvable?
+        removed_items.empty?
+      end
+
+      def resolve!
+        added_items.each do |obj|
+          Spontaneous::Schema.generate_schema_for(obj)
+        end
+      end
+
+      def added_items
+        added = []
+        [:classes, :fields, :boxes, :styles, :layouts].each do |category|
+          added.concat(self.send("added_#{category}"))
+        end
+        added
+      end
+
+      def removed_items
+        removed = []
+        [:classes, :fields, :boxes, :styles, :layouts].each do |category|
+          removed.concat(self.send("removed_#{category}"))
+        end
+        removed
       end
     end
   end

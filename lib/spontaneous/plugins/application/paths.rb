@@ -38,14 +38,12 @@ module Spontaneous::Plugins::Application
       end
 
       def schema_map
-        @schema_map_file ||= root / "config" / "schema.yml"
+        Spontaneous::Schema.schema_map_file
       end
 
       def schema_map=(path)
-        Spontaneous::Schema.reset!
-        @schema_map_file = path
+        Spontaneous::Schema.schema_map_file = path
       end
-
 
       def media_dir=(dir)
         @media_dir = File.expand_path(dir)
