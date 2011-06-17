@@ -13,4 +13,5 @@ test/fixtures/example_application/log/*
 *.epub.rb
 tmp
 todo.taskpaper
+.rvmrc
 
