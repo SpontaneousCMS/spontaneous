@@ -46,6 +46,11 @@ module Spontaneous
         create(obj.schema_name)
       end
 
+      def self.destroy(uid)
+        @@instance_lock.synchronize do
+          @@instances.delete(uid.to_s)
+        end
+      end
 
       def self.clear!
         @@instances = {}
@@ -109,6 +114,10 @@ module Spontaneous
         protected :new
       end
 
+      def destroy
+        self.class.destroy(self)
+      end
+
       def target
         @target ||= find_target
       end
@@ -134,14 +143,23 @@ module Spontaneous
           rescue NameError => e
             nil
           end
-        when :box
-          owner.box_prototypes[name.to_sym]
-        when :field
-          owner.field_prototypes[name.to_sym]
-        when :style
-          owner.style_prototypes[name.to_sym]
-        when :layout
-          owner.layout_prototypes[name.to_sym]
+        else
+          if owner
+            prototypes = \
+              case @category
+              when :box
+                owner.box_prototypes
+              when :field
+                owner.field_prototypes
+              when :style
+                owner.style_prototypes
+              when :layout
+                owner.layout_prototypes
+              end
+            prototypes[name.to_sym]
+          else
+            nil
+          end
         end
       end
 

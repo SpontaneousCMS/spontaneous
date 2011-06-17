@@ -172,6 +172,7 @@ module Spontaneous
         @missing_from_map = Hash.new { |hash, key| hash[key] = [] }
         @missing_from_schema = []
         validate_classes
+
         unless @missing_from_map.empty? and @missing_from_schema.empty?
           modification = SchemaModification.new(@missing_from_map, @missing_from_schema)
         end

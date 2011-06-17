@@ -56,12 +56,36 @@ module Spontaneous
       end
 
       def resolvable?
-        removed_items.empty?
+        only_added_items? or only_removed_items?
+      end
+
+      def only_added_items?
+        if removed_items.empty?
+          !added_items.empty?
+        else
+          false
+        end
+      end
+
+      def only_removed_items?
+        if removed_items.empty?
+          false
+        else
+          added_items.empty?
+        end
       end
 
       def resolve!
-        added_items.each do |obj|
-          Spontaneous::Schema.generate_schema_for(obj)
+        if only_added_items?
+          added_items.each do |obj|
+            Spontaneous::Schema.generate_schema_for(obj)
+          end
+        end
+
+        if only_removed_items?
+          removed_items.each do |uid|
+            uid.destroy
+          end
         end
       end
 

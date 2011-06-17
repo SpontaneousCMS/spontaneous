@@ -94,6 +94,10 @@ module Spontaneous
       name.to_s.titleize.gsub(/\band\b/i, '&')
     end
 
+    def field_prototypes
+      instance_class.field_prototypes
+    end
+
     # default read level is None, i.e. every logged in user can read the field
     def read_level
       level_name = @options[:read_level] || @options[:user_level] || :none
