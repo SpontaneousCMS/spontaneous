@@ -1,0 +1,11 @@
+---
+qLcxinA008: type//A
+qLcxinA00e: type//B
+qLcxinA009: box/qLcxinA008/posts
+qLcxinA00a: field/qLcxinA008/title
+qLcxinA00b: field/qLcxinA008/introduction
+qLcxinA00c: layout/qLcxinA008/sparse
+qLcxinA00d: field/qLcxinA009/description
+qLcxinA00f: field/qLcxinA00e/location
+qLcxinA00g: style/qLcxinA00e/daring
+
