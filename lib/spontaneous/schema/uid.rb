@@ -49,6 +49,7 @@ module Spontaneous
       def self.destroy(uid)
         @@instance_lock.synchronize do
           @@instances.delete(uid.to_s)
+          uid.after_destroy
         end
       end
 
@@ -116,6 +117,13 @@ module Spontaneous
 
       def destroy
         self.class.destroy(self)
+      end
+
+      def after_destroy
+        case @category
+        when :box
+          Spontaneous::Content.filter(:box_sid  => @id).delete
+        end
       end
 
       def target

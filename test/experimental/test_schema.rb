@@ -556,6 +556,7 @@ class SchemaTest < MiniTest::Spec
         Object.send(:remove_const, :B) rescue nil
         Object.send(:remove_const, :X) rescue nil
         Object.send(:remove_const, :Y) rescue nil
+        S::Content.delete
         FileUtils.rm(@map_file) if ::File.exists?(@map_file)
       end
 
@@ -597,6 +598,15 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
+      should "be made if only boxes have been removed" do
+        uid = A.boxes[:posts].schema_id.to_s
+        A.stubs(:boxes).returns([])
+        S::Schema.reload!
+        S::Schema.validate!
+        m = YAML.load_file(@map_file)
+        m.key?(uid).should be_false
+      end
+
       should "be made if only fields have been removed" do
         f1 = A.field_prototypes[:title]
         uid = f1.schema_id.to_s
@@ -609,7 +619,23 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
-      should "delete box content when a box is removed"
+      should "delete box content when a box is removed" do
+        instance = A.new
+        piece1 = B.new
+        piece2 = B.new
+        instance.posts << piece1
+        instance.posts << piece2
+        instance.save
+        instance = S::Content[instance.id]
+        instance.posts.pieces.length.should == 2
+        Content.count.should == 3
+        uid = A.boxes[:posts].schema_id.to_s
+        A.stubs(:boxes).returns([])
+        S::Schema.reload!
+        S::Schema.validate!
+        Content.count.should == 1
+        S::Content[instance.id].should == instance
+      end
     end
   end
 end
