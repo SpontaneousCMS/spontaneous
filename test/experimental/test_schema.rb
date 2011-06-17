@@ -559,6 +559,7 @@ class SchemaTest < MiniTest::Spec
       end
 
       should "be made if only additions are found" do
+        A.field :moose
         class ::X < ::A
           field :wild
           box :monkeys do
@@ -572,7 +573,10 @@ class SchemaTest < MiniTest::Spec
         S::Schema.validate!
         ::X.schema_id.should_not be_nil
         ::Y.schema_id.should_not be_nil
+        ::A.field_prototypes[:moose].schema_id.should_not be_nil
+
         m = YAML.load_file(@map_file)
+        m[::A.field_prototypes[:moose].schema_id.to_s].should == ::A.field_prototypes[:moose].schema_name
         m[::X.schema_id.to_s].should == ::X.schema_name
         m[::Y.schema_id.to_s].should == ::Y.schema_name
         m[::X.field_prototypes[:wild].schema_id.to_s].should == ::X.field_prototypes[:wild].schema_name
@@ -580,6 +584,7 @@ class SchemaTest < MiniTest::Spec
         m[::X.boxes[:monkeys].field_prototypes[:banana].schema_id.to_s].should == ::X.boxes[:monkeys].field_prototypes[:banana].schema_name
         m[::X.layout_prototypes[:rich].schema_id.to_s].should == ::X.layout_prototypes[:rich].schema_name
       end
+
 
     end
   end
