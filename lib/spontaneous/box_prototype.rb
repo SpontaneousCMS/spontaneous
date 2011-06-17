@@ -62,7 +62,7 @@ module Spontaneous
     end
 
     def box_base_class
-      box_class = Spontaneous::Box
+      box_class = Spontaneous::Box # AnonymousBox
       class_name = @options[:type] || @options[:class]
       box_class = class_name.to_s.constantize if class_name
       # box_class = Class.new(box_class) do
@@ -72,6 +72,15 @@ module Spontaneous
       # end
       box_class
     end
+
+    ## failed attempt to exclude anonymous boxes from the list of schema classes
+    ## actually easier to keep them in, despite later problems with UID creation
+    ## because this way their fields & styles are automatically validated
+    # class AnonymousBox < Spontaneous::Box
+    #   def self.schema_class?
+    #     false
+    #   end
+    # end
 
     def title
       @options[:title] || default_title

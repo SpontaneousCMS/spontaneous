@@ -558,14 +558,29 @@ class SchemaTest < MiniTest::Spec
         FileUtils.rm(@map_file) if ::File.exists?(@map_file)
       end
 
-      should "be made for added classes" do
-        id = "xxxxxxxxxx"
-        class ::X < ::A; end
-        S::Schema::UID.expects(:generate).returns(id)
+      should "be made if only additions are found" do
+        class ::X < ::A
+          field :wild
+          box :monkeys do
+            field :banana
+          end
+          layout :rich
+        end
+        class ::Y < ::B
+          style :risky
+        end
         S::Schema.validate!
-        ::X.schema_id.should == id
-        YAML.load_file(@map_file)[id].should == ::X.schema_name
+        ::X.schema_id.should_not be_nil
+        ::Y.schema_id.should_not be_nil
+        m = YAML.load_file(@map_file)
+        m[::X.schema_id.to_s].should == ::X.schema_name
+        m[::Y.schema_id.to_s].should == ::Y.schema_name
+        m[::X.field_prototypes[:wild].schema_id.to_s].should == ::X.field_prototypes[:wild].schema_name
+        m[::X.boxes[:monkeys].schema_id.to_s].should == ::X.boxes[:monkeys].schema_name
+        m[::X.boxes[:monkeys].field_prototypes[:banana].schema_id.to_s].should == ::X.boxes[:monkeys].field_prototypes[:banana].schema_name
+        m[::X.layout_prototypes[:rich].schema_id.to_s].should == ::X.layout_prototypes[:rich].schema_name
       end
+
     end
   end
 end

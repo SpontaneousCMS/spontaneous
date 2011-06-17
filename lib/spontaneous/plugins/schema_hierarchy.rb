@@ -60,10 +60,14 @@ module Spontaneous::Plugins
       end
 
       def inherited(subclass)
-        Spontaneous::Schema.classes << subclass
+        Spontaneous::Schema.classes << subclass if subclass.schema_class?
         subclasses << subclass
         # subclass.supertype = self
         super
+      end
+
+      def schema_class?
+        true
       end
 
     end

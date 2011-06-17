@@ -1,10 +1,11 @@
 # encoding: UTF-8
 
 
-require 'base58'
 
 module Spontaneous
   module Schema
+    autoload :UID, 'spontaneous/schema/uid'
+    autoload :SchemaModification, 'spontaneous/schema/schema_modification'
     # schema class <=> uid map backed by a file
     class PersistentMap
       attr_reader :map, :inverse_map
@@ -45,7 +46,7 @@ module Spontaneous
       end
 
       def invert_map
-        @inverse_map ||= generate_inverse
+        @inverse_map = generate_inverse
       end
 
       def generate_inverse
@@ -53,7 +54,11 @@ module Spontaneous
       end
 
       def orphaned_ids
-        UID.select { |uid| uid.target.nil? }
+        UID.select { |uid| uid.orphaned? }
+      end
+
+      def reload!
+        invert_map
       end
     end
 
@@ -110,7 +115,11 @@ module Spontaneous
             generate_new_schema
           else
             if changes.resolvable?
-              changes.resolve!
+              while changes and changes.resolvable? do
+                changes.resolve!
+                map.reload!
+                changes = perform_validation
+              end
               write_schema(Spontaneous.schema_map)
               reload!
             else
@@ -152,13 +161,21 @@ module Spontaneous
       # those defined in the schema classes and raise an error if any
       # are found
       def validate_schema
+        modification = perform_validation
+        unless modification.nil?
+          raise Spontaneous::SchemaModificationError.new(modification)
+        end
+      end
+
+      def perform_validation
+        modification = nil
         @missing_from_map = Hash.new { |hash, key| hash[key] = [] }
         @missing_from_schema = []
         validate_classes
         unless @missing_from_map.empty? and @missing_from_schema.empty?
           modification = SchemaModification.new(@missing_from_map, @missing_from_schema)
-          raise Spontaneous::SchemaModificationError.new(modification)
         end
+        modification
       end
 
       def validate_classes
@@ -250,230 +267,6 @@ module Spontaneous
 
       def [](schema_id)
         map[schema_id]
-      end
-    end
-
-
-    class UID
-      @@instance_lock  = Mutex.new
-      @@uid_lock  = Mutex.new
-      @@uid_index = 0
-      @@instances = {}
-
-      extend Enumerable
-      include Comparable
-
-      def self.load(id, reference)
-        @@instance_lock.synchronize do
-          unless instance = @@instances[id]
-            @@instances[id] = instance = self.new(id, reference)
-          end
-          instance
-        end
-      end
-
-      def self.create(reference)
-        unless instance = @@instances.values.detect { |i| i.reference == reference }
-          instance = self.load(generate, reference)
-        end
-        instance
-      end
-
-      def existing_references
-        @@instances.values.map { |i| i.reference }
-      end
-
-      def self.create_for(obj)
-        create(obj.schema_name)
-      end
-
-
-      def self.clear!
-        @@instances = {}
-      end
-
-      def self.[](id)
-        return id if self === id
-        return nil if id.blank?
-        @@instances[id]
-      end
-
-      def self.each
-        uids = @@instances.map { |id, instance| instance }
-        if block_given?
-          uids.each { |instance| yield(instance) }
-        else
-          uids.each
-        end
-      end
-
-      def self.get_inc
-        @@uid_lock.synchronize do
-          @@uid_index = (@@uid_index + 1) % 0xFFFF
-        end
-      end
-
-      def self.generate
-        generate58
-      end
-
-      def self.generate58
-        # reverse the time so that sequential ids are more obviously different
-        oid =  Base58.encode((Time.now.to_f * 1000).to_i).reverse
-        oid << Base58.encode(get_inc).rjust(3, '0')
-      end
-
-      def self.generate16
-        oid = ''
-        # 4 bytes current time
-        oid = (Time.now.to_f * 1000).to_i.to_s(16)
-        # 2 bytes inc
-        oid << get_inc.to_s(16).rjust(4, '0')
-      end
-
-      def self.to_hash
-        Hash[ @@instances.map { |id, ref| [id, ref.reference] } ]
-      end
-
-      REFERENCE_SEP = "/".freeze
-
-      attr_reader :reference, :name, :category
-
-      def initialize(id, reference)
-        @id = id.freeze
-        @reference = reference
-        @category, @owner_uid, @name = reference.split(REFERENCE_SEP)
-        @category = @category.to_sym
-      end
-
-      class << self
-        protected :new
-      end
-
-      def target
-        @target ||= find_target
-      end
-
-      def find_target
-        case @category
-        when :type
-          begin
-            @name.constantize
-          rescue NameError => e
-            nil
-          end
-        when :box
-          owner.box_prototypes[name.to_sym]
-        when :field
-          owner.field_prototypes[name.to_sym]
-        when :style
-          owner.style_prototypes[name.to_sym]
-        when :layout
-          owner.layout_prototypes[name.to_sym]
-        end
-      end
-
-      def owner
-        self.class[@owner_uid].target
-      end
-
-      def ==(obj)
-        super or obj == @id
-      end
-
-      def hash
-        @id.hash
-      end
-
-      def to_s
-        @id
-      end
-
-      def <=>(other)
-        self.to_s <=> other.to_s
-      end
-
-      def inspect
-        %(#<#{self.class}:"#{@id}" => "#{reference}">)
-      end
-    end
-
-    class SchemaModification
-      def initialize(missing_from_map, missing_from_schema)
-        @missing_from_map = missing_from_map
-        @missing_from_schema = missing_from_schema
-      end
-
-      def select_missing(select_type)
-        @missing_from_schema.select do |reference|
-          reference.category == select_type
-        end
-      end
-
-      def added_classes
-        @missing_from_map[:class].map { |m| m[0] }.uniq
-      end
-
-      def removed_classes
-        select_missing(:type)
-      end
-
-      def added_fields
-        @missing_from_map[:field].map { |m| m[1] }.uniq
-      end
-
-      def removed_fields
-        select_missing(:field)
-      end
-
-      def added_boxes
-        @missing_from_map[:box].map { |m| m[1] }.uniq
-      end
-
-      def removed_boxes
-        select_missing(:box)
-      end
-
-      def added_styles
-        @missing_from_map[:style].map { |m| m[1] }
-      end
-
-      def removed_styles
-        select_missing(:style)
-      end
-
-      def added_layouts
-        @missing_from_map[:layout].map { |m| m[1] }
-      end
-
-      def removed_layouts
-        select_missing(:layout)
-      end
-
-      def resolvable?
-        removed_items.empty?
-      end
-
-      def resolve!
-        added_items.each do |obj|
-          Spontaneous::Schema.generate_schema_for(obj)
-        end
-      end
-
-      def added_items
-        added = []
-        [:classes, :fields, :boxes, :styles, :layouts].each do |category|
-          added.concat(self.send("added_#{category}"))
-        end
-        added
-      end
-
-      def removed_items
-        removed = []
-        [:classes, :fields, :boxes, :styles, :layouts].each do |category|
-          removed.concat(self.send("removed_#{category}"))
-        end
-        removed
       end
     end
   end
