@@ -666,12 +666,13 @@ class SchemaTest < MiniTest::Spec
       end
 
       should "be made in presence of independent changes to boxes & fields" do
+        class ::X < B; end
+        uid = A.boxes[:posts].schema_id.to_s
+        A.stubs(:boxes).returns([])
         B.field :crisis
         B.box :circus
         A.field :crisis
-        uid = A.boxes[:posts].schema_id.to_s
-        A.stubs(:boxes).returns([])
-        S::Schema.stubs(:classes).returns([A, B])
+        S::Schema.stubs(:classes).returns([::A, ::B, ::X])
         S::Schema.reload!
         S::Schema.validate!
 
@@ -689,6 +690,7 @@ class SchemaTest < MiniTest::Spec
 
         m.key?(uid).should be_false
       end
+
 
       # sanity check
       should "still raise error in case of addition & deletion" do
