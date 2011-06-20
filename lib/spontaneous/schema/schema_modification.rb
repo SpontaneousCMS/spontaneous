@@ -19,7 +19,7 @@ module Spontaneous
       end
 
       def added_classes
-        @missing_from_map[:class].uniq
+        @missing_from_map[:type].uniq
       end
 
       def removed_classes

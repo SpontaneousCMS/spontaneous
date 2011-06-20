@@ -6,7 +6,7 @@ module Spontaneous::Plugins
     module ClassMethods
       def schema_validate
         if schema_id.nil?
-          Spontaneous::Schema.missing_id!(:class, self)
+          Spontaneous::Schema.missing_id!(:type, self)
         else
           # only need to check internal consistency if class already existed
           fields.each do |field|

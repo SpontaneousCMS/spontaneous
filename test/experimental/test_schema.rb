@@ -703,6 +703,15 @@ class SchemaTest < MiniTest::Spec
         lambda { S::Schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
       end
 
+      should "still raise error in case of addition & deletion of classes" do
+        class ::X < A; end
+        uid = B.schema_id.to_s
+        Object.send(:remove_const, :B)
+        S::Schema.stubs(:classes).returns([::A, ::X])
+        S::Schema.reload!
+        lambda { S::Schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
+      end
+
       should "delete box content when a box is removed" do
         instance = A.new
         piece1 = B.new
