@@ -13,15 +13,14 @@ module Spontaneous
       def initialize(path)
         @path = path
         load_map
-        invert_map
       end
 
       def schema_id(obj)
-        name_to_id(obj.schema_name)
+        reference_to_id(obj.schema_name)
       end
 
-      def name_to_id(name)
-        inverse_map[name]
+      def reference_to_id(reference)
+        UID.get_id(reference)
       end
 
       def [](id)
@@ -45,20 +44,20 @@ module Spontaneous
         ::File.exists?(@path)
       end
 
-      def invert_map
-        @inverse_map = generate_inverse
-      end
+      # def invert_map
+      #   @inverse_map = generate_inverse
+      # end
 
-      def generate_inverse
-        Hash[ UID.map { |uid| [uid.reference, uid]} ]
-      end
+      # def generate_inverse
+      #   Hash[ UID.map { |uid| [uid.reference, uid]} ]
+      # end
 
       def orphaned_ids
         UID.select { |uid| uid.orphaned? }
       end
 
       def reload!
-        invert_map
+        # invert_map
       end
     end
 
@@ -71,15 +70,11 @@ module Spontaneous
       end
 
       def schema_id(obj)
-        if id = inverse_map[obj.schema_name]
+        if id = super
           id
         else
           UID.create(obj.schema_name)
         end
-      end
-
-      def inverse_map
-        generate_inverse
       end
 
       def orphaned_ids
@@ -197,8 +192,8 @@ module Spontaneous
         end
       end
 
-      def missing_id!(klass, category=:class, name=nil)
-        @missing_from_map[category] << [klass, name]
+      def missing_id!(category, obj)
+        @missing_from_map[category] << obj
       end
 
 

@@ -63,6 +63,10 @@ module Spontaneous
         @@instances[id]
       end
 
+      def self.get_id(reference)
+        self.find { |uid| uid.reference == reference }
+      end
+
       def self.each
         uids = @@instances.map { |id, instance| instance }
         if block_given?
@@ -172,6 +176,7 @@ module Spontaneous
       end
 
       def owner
+        return nil if owner_uid.nil?
         owner_uid.target
       end
 

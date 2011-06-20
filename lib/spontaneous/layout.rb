@@ -16,6 +16,10 @@ module Spontaneous
       Spontaneous::Schema.schema_id(self)
     end
 
+    def schema_owner
+      owner
+    end
+
     def template(format = :html)
       ::File.join('layouts', "#{name}")
     end

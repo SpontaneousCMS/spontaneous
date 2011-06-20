@@ -545,6 +545,7 @@ class SchemaTest < MiniTest::Spec
         end
         class ::B < Spontaneous::Piece
           field :location
+          field :duration
           style :daring
         end
         S::Schema.validate!
@@ -601,6 +602,7 @@ class SchemaTest < MiniTest::Spec
       should "be made if only boxes have been removed" do
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:boxes).returns([])
+        S::Schema.stubs(:classes).returns([A, B])
         S::Schema.reload!
         S::Schema.validate!
         m = YAML.load_file(@map_file)
@@ -619,6 +621,37 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
+      should "be made in presence of independent addition inside type and of type" do
+        A.field :moose
+        uid = B.schema_id.to_s
+        Object.send(:remove_const, :B)
+        S::Schema.stubs(:classes).returns([::A])
+        S::Schema.reload!
+        S::Schema.validate!
+        ::A.field_prototypes[:moose].schema_id.should_not be_nil
+
+        m = YAML.load_file(@map_file)
+        m[::A.field_prototypes[:moose].schema_id.to_s].should == ::A.field_prototypes[:moose].schema_name
+        m.key?(uid).should be_false
+      end
+
+      should "be made in presence of independent addition & removal of fields" do
+        A.field :moose
+        f1 = B.field_prototypes[:location]
+        uid = f1.schema_id.to_s
+        f2 = B.field_prototypes[:duration]
+        B.stubs(:field_prototypes).returns({:duration => f2})
+        B.stubs(:fields).returns([f2])
+        S::Schema.reload!
+        S::Schema.validate!
+
+        ::A.field_prototypes[:moose].schema_id.should_not be_nil
+
+        m = YAML.load_file(@map_file)
+        m[::A.field_prototypes[:moose].schema_id.to_s].should == ::A.field_prototypes[:moose].schema_name
+        m.key?(uid).should be_false
+      end
+
       should "delete box content when a box is removed" do
         instance = A.new
         piece1 = B.new
@@ -631,6 +664,7 @@ class SchemaTest < MiniTest::Spec
         Content.count.should == 3
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:boxes).returns([])
+        S::Schema.stubs(:classes).returns([A, B])
         S::Schema.reload!
         S::Schema.validate!
         Content.count.should == 1

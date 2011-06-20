@@ -27,7 +27,7 @@ module Spontaneous::Plugins
       end
 
       def find(id)
-        store.values.detect { |f| f.id == id }
+        store.values.detect { |f| f.schema_id == id }
       end
 
       def owner

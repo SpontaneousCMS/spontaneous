@@ -51,6 +51,9 @@ module Spontaneous
           meta.__send__(:define_method, :schema_name) do
             "box/#{box_owner.schema_id}/#{box_name}"
           end
+          meta.__send__(:define_method, :schema_owner) do
+            box_owner
+          end
         end
         if @extend
           instance_class.class_eval(&@extend)

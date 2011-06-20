@@ -89,10 +89,13 @@ module Spontaneous
         self.prototype.schema_id
       end
 
-      alias_method :id, :schema_id
 
       def schema_name
         self.prototype.schema_name
+      end
+
+      def schema_owner
+        self.prototype.owner
       end
 
       def serialize

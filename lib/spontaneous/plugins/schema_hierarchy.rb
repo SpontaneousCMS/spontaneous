@@ -6,32 +6,32 @@ module Spontaneous::Plugins
     module ClassMethods
       def schema_validate
         if schema_id.nil?
-          Spontaneous::Schema.missing_id!(self)
+          Spontaneous::Schema.missing_id!(:class, self)
         else
           # only need to check internal consistency if class already existed
           fields.each do |field|
             if field.schema_id.nil?
-              Spontaneous::Schema.missing_id!(self, :field, field)
+              Spontaneous::Schema.missing_id!(:field, field)
             end
           end
           # boxes don't have boxes
           if respond_to?(:boxes)
             boxes.each do |box|
               if box.schema_id.nil?
-                Spontaneous::Schema.missing_id!(self, :box, box)
+                Spontaneous::Schema.missing_id!(:box, box)
               end
             end
           end
 
           styles.each do |style|
             if style.schema_id.nil?
-              Spontaneous::Schema.missing_id!(self, :style, style)
+              Spontaneous::Schema.missing_id!(:style, style)
             end
           end
           if respond_to?(:layouts)
             layouts.each do |layout|
               if layout.schema_id.nil?
-                Spontaneous::Schema.missing_id!(self, :layout, layout)
+                Spontaneous::Schema.missing_id!(:layout, layout)
               end
             end
           end

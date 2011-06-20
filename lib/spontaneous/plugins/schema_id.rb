@@ -11,6 +11,10 @@ module Spontaneous::Plugins
       def schema_name
         "type//#{self.name}"
       end
+
+      def schema_owner
+        nil
+      end
     end # ClassMethods
 
     module InstanceMethods
@@ -35,6 +39,10 @@ module Spontaneous::Plugins
 
       def schema_name
         self.class.schema_name
+      end
+
+      def schema_owner
+        self.class.schema_owner
       end
     end # InstanceMethods
   end # SchemaId

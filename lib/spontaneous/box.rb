@@ -31,6 +31,10 @@ module Spontaneous
       "type//#{self.name}"
     end
 
+    def schema_owner
+      nil
+    end
+
     def self.supertype
       if self == Spontaneous::Box
         nil

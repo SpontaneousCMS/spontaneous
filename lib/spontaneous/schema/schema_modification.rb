@@ -4,9 +4,12 @@
 module Spontaneous
   module Schema
     class SchemaModification
-      def initialize(missing_from_map, missing_from_schema)
+
+
+      def initialize(missing_from_map, missing_from_schema, grouped=false)
         @missing_from_map = missing_from_map
         @missing_from_schema = missing_from_schema
+        @grouped = grouped
       end
 
       def select_missing(select_type)
@@ -16,7 +19,7 @@ module Spontaneous
       end
 
       def added_classes
-        @missing_from_map[:class].map { |m| m[0] }.uniq
+        @missing_from_map[:class].uniq
       end
 
       def removed_classes
@@ -24,7 +27,7 @@ module Spontaneous
       end
 
       def added_fields
-        @missing_from_map[:field].map { |m| m[1] }.uniq
+        @missing_from_map[:field].uniq
       end
 
       def removed_fields
@@ -32,7 +35,7 @@ module Spontaneous
       end
 
       def added_boxes
-        @missing_from_map[:box].map { |m| m[1] }.uniq
+        @missing_from_map[:box].uniq
       end
 
       def removed_boxes
@@ -40,7 +43,7 @@ module Spontaneous
       end
 
       def added_styles
-        @missing_from_map[:style].map { |m| m[1] }
+        @missing_from_map[:style].uniq
       end
 
       def removed_styles
@@ -48,7 +51,7 @@ module Spontaneous
       end
 
       def added_layouts
-        @missing_from_map[:layout].map { |m| m[1] }
+        @missing_from_map[:layout].uniq
       end
 
       def removed_layouts
@@ -56,7 +59,15 @@ module Spontaneous
       end
 
       def resolvable?
-        only_added_items? or only_removed_items?
+        if @grouped
+          simple?
+        else
+          all_independent_changes?
+        end
+      end
+
+      def simple?
+        only_removed_items? or only_added_items?
       end
 
       def only_added_items?
@@ -75,7 +86,55 @@ module Spontaneous
         end
       end
 
+      def all_independent_changes?
+        !changes_grouped_by_owner.find { |change| !change.resolvable? }
+      end
+
+      def changes_grouped_by_owner
+        @changes_grouped ||= create_changes_grouped_by_owner
+      end
+
+      def create_changes_grouped_by_owner
+        # gulp
+        added = Hash.new { |hash, key| hash[key] =
+          Hash.new { | hash, key | hash[key] = [] }
+        }
+        removed = Hash.new { |hash, key| hash[key] = [] }
+
+        # group changed items by UIDs because in the case of removals
+        # the owner might have gone (e.g. in the case of a box with
+        # a field that has been removed, the field would show as removed
+        # and reference the box as owner but that box is no longer present)
+        removed_items.each do |removal|
+          removed[removal.owner_uid] << removal
+        end
+
+        @missing_from_map.each do |category, additions|
+          additions.each do |addition|
+            # added classes don't have owners
+            uid = addition.schema_owner ? addition.schema_owner.schema_id : nil
+            added[uid][category] << addition
+          end
+        end
+
+        owners = added.keys | removed.keys
+        grouped = []
+
+        owners.each do |owner|
+          grouped << SchemaModification.new(added[owner], removed[owner], true)
+        end
+        grouped
+      end
+
       def resolve!
+        if @grouped
+          resolve_simple
+        else
+          changes_grouped_by_owner.each { |change| change.resolve! }
+        end
+      end
+
+      def resolve_simple
         if only_added_items?
           added_items.each do |obj|
             Spontaneous::Schema.generate_schema_for(obj)
