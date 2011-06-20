@@ -94,6 +94,10 @@ module Spontaneous
         @changes_grouped ||= create_changes_grouped_by_owner
       end
 
+      def change_group_key(category, uid)
+        "#{category}:#{uid.to_s}"
+      end
+
       def create_changes_grouped_by_owner
         # gulp
         added = Hash.new { |hash, key| hash[key] =
@@ -106,14 +110,14 @@ module Spontaneous
         # a field that has been removed, the field would show as removed
         # and reference the box as owner but that box is no longer present)
         removed_items.each do |removal|
-          removed[removal.owner_uid] << removal
+          removed[change_group_key(removal.category, removal.owner_uid)] << removal
         end
 
         @missing_from_map.each do |category, additions|
           additions.each do |addition|
             # added classes don't have owners
             uid = addition.schema_owner ? addition.schema_owner.schema_id : nil
-            added[uid][category] << addition
+            added[change_group_key(category, uid)][category] << addition
           end
         end
 

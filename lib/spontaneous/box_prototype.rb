@@ -25,10 +25,13 @@ module Spontaneous
       instance_class.schema_id
     end
 
-    alias_method :id, :schema_id
 
     def schema_name
       instance_class.schema_name
+    end
+
+    def schema_owner
+      owner
     end
 
     def get_instance(owner)

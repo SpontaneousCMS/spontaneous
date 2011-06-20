@@ -19,7 +19,7 @@ module Spontaneous
 
     def push(item)
       push_named(item.name, item)
-      @ids[item.id] = item.name
+      @ids[item.schema_id] = item.name
     end
 
     def push_with_name(item, name)

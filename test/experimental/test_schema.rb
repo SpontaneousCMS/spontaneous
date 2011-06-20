@@ -652,6 +652,57 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
+      should "be made in presence of independent changes to boxes & fields" do
+        B.field :crisis
+        uid = A.boxes[:posts].schema_id.to_s
+        A.stubs(:boxes).returns([])
+        S::Schema.stubs(:classes).returns([A, B])
+        S::Schema.reload!
+        S::Schema.validate!
+
+        ::B.field_prototypes[:crisis].schema_id.should_not be_nil
+        m = YAML.load_file(@map_file)
+        m.key?(uid).should be_false
+      end
+
+      should "be made in presence of independent changes to boxes & fields" do
+        B.field :crisis
+        B.box :circus
+        A.field :crisis
+        uid = A.boxes[:posts].schema_id.to_s
+        A.stubs(:boxes).returns([])
+        S::Schema.stubs(:classes).returns([A, B])
+        S::Schema.reload!
+        S::Schema.validate!
+
+        ::A.field_prototypes[:crisis].schema_id.should_not be_nil
+        m = YAML.load_file(@map_file)
+
+        box = ::B.boxes[:circus]
+        m[box.schema_id.to_s].should == box.schema_name
+
+        field = ::A.field_prototypes[:crisis]
+        m[field.schema_id.to_s].should == field.schema_name
+
+        field = ::B.field_prototypes[:crisis]
+        m[field.schema_id.to_s].should == field.schema_name
+
+        m.key?(uid).should be_false
+      end
+
+      # sanity check
+      should "still raise error in case of addition & deletion" do
+        A.field :added
+        f1 = A.field_prototypes[:title]
+        f2 = A.field_prototypes[:added]
+        uid = f1.schema_id.to_s
+        f3 = A.field_prototypes[:introduction]
+        A.stubs(:field_prototypes).returns({:added => f2, :introduction => f3})
+        A.stubs(:fields).returns([f2, f3])
+        S::Schema.reload!
+        lambda { S::Schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
+      end
+
       should "delete box content when a box is removed" do
         instance = A.new
         piece1 = B.new
