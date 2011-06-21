@@ -60,13 +60,13 @@ module Spontaneous
 
       def resolvable?
         if @grouped
-          simple?
+          simple_change?
         else
           all_independent_changes?
         end
       end
 
-      def simple?
+      def simple_change?
         only_removed_items? or only_added_items?
       end
 
@@ -105,7 +105,7 @@ module Spontaneous
         }
         removed = Hash.new { |hash, key| hash[key] = [] }
 
-        # group changed items by UIDs because in the case of removals
+        # group changed items by category + UIDs because in the case of removals
         # the owner might have gone (e.g. in the case of a box with
         # a field that has been removed, the field would show as removed
         # and reference the box as owner but that box is no longer present)
@@ -153,19 +153,11 @@ module Spontaneous
       end
 
       def added_items
-        added = []
-        [:classes, :fields, :boxes, :styles, :layouts].each do |category|
-          added.concat(self.send("added_#{category}"))
-        end
-        added
+        @missing_from_map.map { |cat, obj| obj }.flatten
       end
 
       def removed_items
-        removed = []
-        [:classes, :fields, :boxes, :styles, :layouts].each do |category|
-          removed.concat(self.send("removed_#{category}"))
-        end
-        removed
+        @missing_from_schema
       end
     end
   end
