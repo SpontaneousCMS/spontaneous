@@ -94,14 +94,10 @@ module Spontaneous
         @changes_grouped ||= create_changes_grouped_by_owner
       end
 
-      def change_group_key(category, uid)
-        "#{category}:#{uid.to_s}"
-      end
-
       def create_changes_grouped_by_owner
         # gulp
-        added = Hash.new { |hash, key| hash[key] =
-          Hash.new { | hash, key | hash[key] = [] }
+        added = Hash.new { |hash, key|
+          hash[key] = Hash.new { | hash, key | hash[key] = [] }
         }
         removed = Hash.new { |hash, key| hash[key] = [] }
 
@@ -128,6 +124,10 @@ module Spontaneous
           grouped << SchemaModification.new(added[owner], removed[owner], true)
         end
         grouped
+      end
+
+      def change_group_key(category, uid)
+        "#{category}:#{uid.to_s}"
       end
 
       def resolve!
