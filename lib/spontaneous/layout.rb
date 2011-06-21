@@ -20,6 +20,10 @@ module Spontaneous
       owner
     end
 
+    def owner_sid
+      schema_owner.schema_id
+    end
+
     def template(format = :html)
       ::File.join('layouts', "#{name}")
     end

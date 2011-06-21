@@ -98,6 +98,10 @@ module Spontaneous
         self.prototype.owner
       end
 
+      def owner_sid
+        schema_owner.schema_id
+      end
+
       def serialize
         {
           :id => schema_id.to_s,

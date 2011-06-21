@@ -37,6 +37,10 @@ module Spontaneous::Plugins
         owner
       end
 
+      def owner_sid
+        schema_owner.schema_id
+      end
+
       # alias_method :id, :schema_id
 
       def title(new_title=nil)

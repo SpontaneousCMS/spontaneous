@@ -34,6 +34,10 @@ module Spontaneous
       owner
     end
 
+    def owner_sid
+      schema_owner.schema_id
+    end
+
     def get_instance(owner)
       instance = instance_class.new(name, self, owner)
     end
@@ -56,6 +60,9 @@ module Spontaneous
           end
           meta.__send__(:define_method, :schema_owner) do
             box_owner
+          end
+          meta.__send__(:define_method, :owner_sid) do
+            box_owner.schema_id
           end
         end
         if @extend

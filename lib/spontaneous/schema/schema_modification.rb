@@ -106,14 +106,12 @@ module Spontaneous
         # a field that has been removed, the field would show as removed
         # and reference the box as owner but that box is no longer present)
         removed_items.each do |removal|
-          removed[change_group_key(removal.category, removal.owner_uid)] << removal
+          removed[change_group_key(removal.category, removal.owner_sid)] << removal
         end
 
         @missing_from_map.each do |category, additions|
           additions.each do |addition|
-            # added classes don't have owners
-            uid = addition.schema_owner ? addition.schema_owner.schema_id : nil
-            added[change_group_key(category, uid)][category] << addition
+            added[change_group_key(category, addition.owner_sid)][category] << addition
           end
         end
 
@@ -127,7 +125,7 @@ module Spontaneous
       end
 
       def change_group_key(category, uid)
-        "#{category}:#{uid.to_s}"
+        [category, uid]
       end
 
       def resolve!
@@ -158,6 +156,30 @@ module Spontaneous
 
       def removed_items
         @missing_from_schema
+      end
+
+      def owners
+        if @grouped
+          added   = added_items.map   { | obj | obj.schema_owner }
+          removed = removed_items.map { | uid | uid.schema_owner }
+          owners = (added | removed).uniq
+          raise "Invalid grouping of schema modifications" unless owners.length == 1
+          [owners.first]
+        else
+          changes_grouped_by_owner.map { |change| change.owners }
+        end
+      end
+
+      def error_messages
+        if @grouped
+          if !simple_change?
+            "Unable to resolve changes to #{owners.join(", ")}"
+          else
+            nil
+          end
+        else
+          changes_grouped_by_owner.map { |change| change.error_messages }.compact
+        end
       end
     end
   end

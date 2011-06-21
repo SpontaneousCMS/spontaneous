@@ -55,7 +55,7 @@ module Spontaneous
       def publish
         prepare :publish
         # TODO: set up logging
-        require File.expand_path('config/boot.rb')
+        boot!
         Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
         logger.info { "publishing revision #{Site.revision} of site #{options.site}" }
         if options.changes
@@ -70,7 +70,7 @@ module Spontaneous
       desc :revision, "Shows the site status"
       def revision
         prepare :revision
-        require File.expand_path('config/boot.rb')
+        boot!
         puts "Site is at revision #{Site.revision}"
       end
 
@@ -80,7 +80,7 @@ module Spontaneous
         ARGV.clear
         puts "=> Loading #{options.environment} console"
         require 'irb'
-        require File.expand_path('config/boot.rb')
+        boot!
         IRB.setup(nil)
         irb = IRB::Irb.new
         IRB.conf[:MAIN_CONTEXT] = irb.context
@@ -94,7 +94,6 @@ module Spontaneous
           irb.eval_input
         end
       end
-
 
       desc :generate, "Executes the Spontaneous generator with given options."
       def generate(*args)
@@ -110,7 +109,7 @@ module Spontaneous
           generator = d::Site
         when 'page'
           prepare(:generator)
-          require File.expand_path('config/boot.rb')
+          boot!
           generator = d::Page
         when /[a-zA-Z0-9-]+(\.[a-z]+)+/
           # generator called as 'spot generate domain.com'
@@ -131,7 +130,7 @@ module Spontaneous
       def browse
         prepare :browse
         require 'launchy'
-        require File.expand_path('config/boot.rb')
+        boot!
         ::Launchy::Browser.run("http://localhost:#{Spontaneous.config.port}/@spontaneous")
       end
 
@@ -157,7 +156,7 @@ module Spontaneous
               end
             end
           end
-          require File.expand_path('config/boot.rb')
+          boot!
           Spontaneous.database.logger = nil
           say "  >> Running migrations..."
           Sequel::Migrator.apply(Spontaneous.database, Spontaneous.gem_dir('db/migrations'))
@@ -168,7 +167,7 @@ module Spontaneous
       desc :migrate, "Runs migrations"
       def migrate
         prepare :init
-        require File.expand_path('config/boot.rb')
+        boot!
         Sequel.extension :migration
         connection_params = Spontaneous.db_settings
         say "  >> Running migrations..."
@@ -179,7 +178,7 @@ module Spontaneous
       desc :adduser, "Add a user"
       def adduser
         prepare :adduser
-        require File.expand_path('config/boot.rb')
+        boot!
         users = Spontaneous::Permissions::User.count
         attrs = {}
         width = 12
@@ -245,13 +244,24 @@ module Spontaneous
         prepare mode.to_sym
         ENV["SPOT_MODE"] = mode.to_s
         require File.expand_path(File.dirname(__FILE__) + "/adapter")
-        require File.expand_path('config/boot.rb')
+        boot!
         Spontaneous::Cli::Adapter.start(options)
       end
 
       def available_generators
         Spontaneous::Generators.available.map do |g|
           g.name.demodulize.underscore
+        end
+      end
+
+      def boot!
+        begin
+        require File.expand_path('config/boot.rb')
+        rescue Spontaneous::SchemaModificationError => e
+          puts "Unable to boot - schema conflict"
+          c = e.modification
+          puts c.error_messages.join("\n")
+          raise e
         end
       end
 

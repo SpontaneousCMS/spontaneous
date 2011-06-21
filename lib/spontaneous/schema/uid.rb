@@ -111,7 +111,7 @@ module Spontaneous
       def initialize(id, reference)
         @id = id.freeze
         @reference = reference
-        @category, @owner_uid, @name = reference.split(REFERENCE_SEP)
+        @category, @owner_sid, @name = reference.split(REFERENCE_SEP)
         @category = @category.to_sym
       end
 
@@ -139,7 +139,7 @@ module Spontaneous
         when :type
           true
         else
-          owner_uid
+          owner_sid
         end
       end
 
@@ -176,12 +176,14 @@ module Spontaneous
       end
 
       def owner
-        return nil if owner_uid.nil?
-        owner_uid.target
+        return nil if owner_sid.nil?
+        owner_sid.target
       end
 
-      def owner_uid
-        self.class[@owner_uid]
+      alias_method :schema_owner, :owner
+
+      def owner_sid
+        self.class[@owner_sid]
       end
 
       def ==(obj)

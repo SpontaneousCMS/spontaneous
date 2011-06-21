@@ -15,6 +15,10 @@ module Spontaneous::Plugins
       def schema_owner
         nil
       end
+
+      def owner_sid
+        nil
+      end
     end # ClassMethods
 
     module InstanceMethods
@@ -43,6 +47,10 @@ module Spontaneous::Plugins
 
       def schema_owner
         self.class.schema_owner
+      end
+
+      def owner_sid
+        self.class.owner_sid
       end
     end # InstanceMethods
   end # SchemaId

@@ -23,6 +23,10 @@ module Spontaneous
       owner
     end
 
+    def owner_sid
+      schema_owner.schema_id
+    end
+
     # TODO: new style class that has a better way of knowing if it's anonymous
     # or named. Only named styles have schema_ids -- anonymous styles are resolved
     # according to the files on the disk
