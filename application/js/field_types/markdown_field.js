@@ -1,6 +1,6 @@
 // console.log('Loading DiscountField...')
 
-Spontaneous.FieldTypes.DiscountField = (function($, S) {
+Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 	var dom = S.Dom;
 	var TextCommand = new JS.Class({
 		name: '',
@@ -533,7 +533,7 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 	});
 
 
-	var DiscountField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+	var MarkdownField = new JS.Class(Spontaneous.FieldTypes.StringField, {
 		actions: [Bold, Italic, H1, H2, UL, OL, Link],
 		input: function() {
 			if (!this._input) {
@@ -606,6 +606,6 @@ Spontaneous.FieldTypes.DiscountField = (function($, S) {
 		}
 	});
 
-	return DiscountField;
+	return MarkdownField;
 })(jQuery, Spontaneous);
 
