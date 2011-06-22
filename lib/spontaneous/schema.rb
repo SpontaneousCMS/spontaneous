@@ -115,7 +115,7 @@ module Spontaneous
                 map.reload!
                 changes = perform_validation
               end
-              write_schema(Spontaneous.schema_map)
+              write_schema
               reload!
             else
               raise e
@@ -134,8 +134,9 @@ module Spontaneous
           dest = action.dest
           uid.rewrite!(action.dest)
         end
-        write_schema(Spontaneous.schema_map)
+        write_schema
         reload!
+        validate!
       end
 
       def generate_new_schema
@@ -144,12 +145,12 @@ module Spontaneous
         classes.each do | schema_class |
           generate_schema_for(schema_class)
         end
-        write_schema(Spontaneous.schema_map)
+        write_schema
         self.schema_loader_class = PersistentMap
       end
 
-      def write_schema(path)
-        File.open(path, 'w') do |file|
+      def write_schema
+        File.open(Spontaneous.schema_map, 'w') do |file|
           file.write(UID.to_hash.to_yaml)
         end
       end

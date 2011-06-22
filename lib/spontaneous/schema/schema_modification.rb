@@ -194,7 +194,7 @@ module Spontaneous
         end
 
         def description
-          "#{source.category} '#{source.name}'"
+          "Unable to resolve #{source.category} '#{source.name}' of #{source.owner}"
         end
 
       end

@@ -257,12 +257,31 @@ module Spontaneous
 
       def boot!
         begin
-        require File.expand_path('config/boot.rb')
-        rescue Spontaneous::SchemaModificationError => e
-          puts "Unable to boot - schema conflict"
-          c = e.modification
-          puts c.error_messages.join("\n")
-          raise e
+          require File.expand_path('config/boot.rb')
+        rescue Spontaneous::SchemaModificationError => error
+          fix_schema(error)
+        end
+      end
+
+      def fix_schema(error)
+        modification = error.modification
+        actions = modification.actions
+        say(actions.description, :red)
+        say("Please choose one of the solutions below", :yellow)
+        actions.each_with_index do |a, i|
+          say("  #{i+1}: #{a.description}")
+        end
+        choice = ( ask "Choose action : ").to_i rescue nil
+        if choice and choice <= actions.length and choice > 0
+          action = actions[choice - 1]
+          begin
+            Spontaneous::Schema.apply_fix(action)
+          rescue Spontaneous::SchemaModificationError => error
+            fix_schema(error)
+          end
+        else
+          say("Invalid choice '#{choice.inspect}'\n", :red)
+          fix_schema(error)
         end
       end
 
