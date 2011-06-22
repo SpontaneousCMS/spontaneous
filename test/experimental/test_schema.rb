@@ -811,51 +811,146 @@ class SchemaTest < MiniTest::Spec
           end
         end
 
-        should "return list of solutions for removal of two fields" do
-          A.field :a
-          A.field :b
-          A.field :c
-          df1 = A.field_prototypes[:title]
-          df2 = A.field_prototypes[:introduction]
-          af1 = A.field_prototypes[:a]
-          af2 = A.field_prototypes[:b]
-          af3 = A.field_prototypes[:c]
-          uid1 = df1.schema_id.to_s
-          uid2 = df2.schema_id.to_s
-          A.stubs(:field_prototypes).returns({:a => af1, :b => af2, :c => af3})
-          A.stubs(:fields).returns([af1, af2, af3])
-          S::Schema.reload!
-          begin
-            S::Schema.validate!
-            flunk("Validation should raise error when adding & deleting fields")
-          rescue Spontaneous::SchemaModificationError => e
-            modification = e.modification
+        context "with two fields removed" do
+          setup do
+            A.field :a
+            A.field :b
+            A.field :c
+            @df1 = A.field_prototypes[:title]
+            @df2 = A.field_prototypes[:introduction]
+            @af1 = A.field_prototypes[:a]
+            @af2 = A.field_prototypes[:b]
+            @af3 = A.field_prototypes[:c]
+            @uid1 = @df1.schema_id.to_s
+            @uid2 = @df2.schema_id.to_s
+            A.stubs(:field_prototypes).returns({:a => @af1, :b => @af2, :c => @af3})
+            A.stubs(:fields).returns([@af1, @af2, @af3])
+            S::Schema.reload!
+            begin
+              S::Schema.validate!
+              flunk("Validation should raise error when adding & deleting fields")
+            rescue Spontaneous::SchemaModificationError => e
+              @modification = e.modification
+            end
           end
-          # add :a, :b; delete :title, :introduction
-          # rename :title  => :a, :introduction  => :b
-          # rename :introduction  => :a, :title  => :b
-          # add :a; delete :introduction; rename :title  => :b
-          # add :a; delete :title;        rename :introduction  => :b
-          # add :b; delete :introduction; rename :title  => :a
-          # add :b; delete :title;        rename :introduction  => :a
-          modification.actions.description.should =~ /field 'title'/
-          modification.actions.length.should == 4
-          action = modification.actions[0]
-          action.action.should == :delete
-          action.source.should == df1.schema_id
-          action.description.should =~ /delete field 'title'/i
-          action = modification.actions[1]
-          action.action.should == :rename
-          action.source.should == df1.schema_id
-          action.description.should =~ /rename field 'title' to 'a'/i
-          action = modification.actions[2]
-          action.action.should == :rename
-          action.source.should == df1.schema_id
-          action.description.should =~ /rename field 'title' to 'b'/i
-          action = modification.actions[3]
-          action.action.should == :rename
-          action.source.should == df1.schema_id
-          action.description.should =~ /rename field 'title' to 'c'/i
+          should "return list of solutions" do
+            # add :a, :b; delete :title, :introduction
+            # rename :title  => :a, :introduction  => :b
+            # rename :introduction  => :a, :title  => :b
+            # add :a; delete :introduction; rename :title  => :b
+            # add :a; delete :title;        rename :introduction  => :b
+            # add :b; delete :introduction; rename :title  => :a
+            # add :b; delete :title;        rename :introduction  => :a
+            @modification.actions.description.should =~ /field 'title'/
+            @modification.actions.length.should == 4
+            action = @modification.actions[0]
+            action.action.should == :delete
+            action.source.should == @df1.schema_id
+            action.description.should =~ /delete field 'title'/i
+            action = @modification.actions[1]
+            action.action.should == :rename
+            action.source.should == @df1.schema_id
+            action.description.should =~ /rename field 'title' to 'a'/i
+            action = @modification.actions[2]
+            action.action.should == :rename
+            action.source.should == @df1.schema_id
+            action.description.should =~ /rename field 'title' to 'b'/i
+            action = @modification.actions[3]
+            action.action.should == :rename
+            action.source.should == @df1.schema_id
+            action.description.should =~ /rename field 'title' to 'c'/i
+          end
+
+          should "enable fixing the problem by deleting both fields" do
+            action = @modification.actions[0]
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+              flunk("Deletion of field should not have resolved schema error")
+            rescue Spontaneous::SchemaModificationError => e
+              modification = e.modification
+            end
+            action = modification.actions[0]
+
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+            rescue Spontaneous::SchemaModificationError => e
+              flunk("Deletion of field should have resolved schema error")
+            end
+            m = YAML.load_file(@map_file)
+            m.key?(@uid1).should be_false
+            m.key?(@uid2).should be_false
+          end
+
+          should "enable fixing the problem by deleting one field and renaming other as 'a'" do
+            action = @modification.actions[0]
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+              flunk("Deletion of field should not have resolved schema error")
+            rescue Spontaneous::SchemaModificationError => e
+              modification = e.modification
+            end
+            action = modification.actions[1]
+
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+            rescue Spontaneous::SchemaModificationError => e
+              flunk("Deletion of field should have resolved schema error")
+            end
+            m = YAML.load_file(@map_file)
+            m.key?(@uid1).should be_false
+            m.key?(@uid2).should be_true
+            m[@uid2].should == @af1.schema_name
+          end
+
+          should "enable fixing the problem by renaming one field as 'c' and deleting other" do
+            action = @modification.actions[3]
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+              flunk("Renaming of field should not have resolved schema error")
+            rescue Spontaneous::SchemaModificationError => e
+              modification = e.modification
+            end
+            action = modification.actions[0]
+
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+            rescue Spontaneous::SchemaModificationError => e
+              flunk("Deletion of field should have resolved schema error")
+            end
+            m = YAML.load_file(@map_file)
+            m.key?(@uid1).should be_true
+            m.key?(@uid2).should be_false
+            m[@uid1].should == @af3.schema_name
+          end
+          should "enable fixing the problem by renaming one field as 'c' and renaming other as 'b'" do
+            action = @modification.actions[3]
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+              flunk("Renaming of field should not have resolved schema error")
+            rescue Spontaneous::SchemaModificationError => e
+              modification = e.modification
+            end
+            action = modification.actions[2]
+
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+            rescue Spontaneous::SchemaModificationError => e
+              flunk("Deletion of field should have resolved schema error")
+            end
+            m = YAML.load_file(@map_file)
+            m.key?(@uid1).should be_true
+            m.key?(@uid2).should be_true
+            m[@uid1].should == @af3.schema_name
+            m[@uid2].should == @af2.schema_name
+          end
         end
 
       end
