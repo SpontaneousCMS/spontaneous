@@ -69,7 +69,7 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 				start -= m[1].length;
 				selected = m[1] + selected;
 			}
-			m = (new RegExp('^([^('+_post_+')]*?'+_post_+')[^('+_post_+')\w ]*? ')).exec(state.after)
+			m = (new RegExp('^([^('+_post_+')]*?'+_post_+')[^('+_post_+')\w ]*?[ $]?')).exec(state.after)
 			if (m) {
 				end += m[1].length;
 				selected += m[1];
