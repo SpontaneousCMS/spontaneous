@@ -38,6 +38,10 @@ module Spontaneous
 
     protected :push_named
 
+    def key?(name)
+      @store.key?(name)
+    end
+
     def each
       names.each do |name|
         yield named(name) if block_given?

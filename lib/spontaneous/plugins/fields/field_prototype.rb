@@ -102,6 +102,7 @@ module Spontaneous::Plugins
       def to_hash
         {
           :name => name.to_s,
+          :schema_id => schema_id,
           :type => field_class.json_name,
           :title => title,
           :comment => comment || "",

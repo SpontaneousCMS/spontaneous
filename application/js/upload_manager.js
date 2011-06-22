@@ -7,7 +7,7 @@ Spontaneous.UploadManager = (function($, S) {
 	var Upload = new JS.Class({
 		initialize: function(manager, target, file) {
 			this.manager = manager;
-			this.field_name = target.name
+			this.field_name = target.schema_id();
 			this.uid = target.uid();
 			this.target = target;
 			this.target_id = target.id();
@@ -169,7 +169,7 @@ Spontaneous.UploadManager = (function($, S) {
 		finished: function() {
 			console.log('UploadManager.finished', this.pending);
 			this.completed = [];
-			window.setTimeout(this.status_bar.hide.bind(this.status_bar), 1000);
+			this.status_bar.hide();
 		},
 		init_progress_bar: function() {
 			this.status_bar.show();

@@ -54,7 +54,10 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			return 'field-'+this.name+'-'+this.id();
 		},
 		form_name: function() {
-			return 'field['+this.name+'][unprocessed_value]';
+			return 'field['+this.schema_id()+'][unprocessed_value]';
+		},
+		schema_id: function() {
+			return this.type.schema_id;
 		},
 		label: function() {
 			return this.title;

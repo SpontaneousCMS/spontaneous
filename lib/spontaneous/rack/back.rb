@@ -211,8 +211,7 @@ module Spontaneous
 
         post '/root' do
           if Site.root.nil?
-            class_name = params[:type].gsub('.', '::')
-            type = class_name.constantize
+            type = Spontaneous::Schema[params[:type]]
             root = type.create(:title => "Home")
             Spontaneous::Change.push(root)
             json({:id => root.id})

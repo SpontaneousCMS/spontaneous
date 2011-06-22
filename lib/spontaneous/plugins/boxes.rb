@@ -4,13 +4,15 @@ module Spontaneous::Plugins
   module Boxes
     module ClassMethods
       def box(name, options = {}, &block)
-        boxes.push(Spontaneous::BoxPrototype.new(self, name, options, &block))
-        unless method_defined?(name)
-          class_eval <<-BOX
+        unless boxes.key?(name)
+          boxes.push(Spontaneous::BoxPrototype.new(self, name, options, &block))
+          unless method_defined?(name)
+            class_eval <<-BOX
             def #{name}
               boxes.named(:#{name})
             end
-          BOX
+            BOX
+          end
         end
       end
 

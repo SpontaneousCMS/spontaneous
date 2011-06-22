@@ -543,22 +543,22 @@ class BackTest < MiniTest::Spec
         last_response.status.should == 406
       end
       should "create a homepage of the specified type" do
-        post "/@spontaneous/root", 'type' => @root_class.name
+        post "/@spontaneous/root", 'type' => @root_class.schema_id
         assert last_response.ok?
         Site.root.must_be_instance_of(@root_class)
         Site.root.title.value.should =~ /Home/
       end
       should "only create one root" do
-        post "/@spontaneous/root", 'type' => @root_class.name
+        post "/@spontaneous/root", 'type' => @root_class.schema_id
         assert last_response.ok?
         Content.count.should == 1
-        post "/@spontaneous/root", 'type' => @root_class.name
+        post "/@spontaneous/root", 'type' => @root_class.schema_id
         assert last_response.status == 403
         Content.count.should == 1
       end
       should "have a change reflecting creation of root" do
         Change.count.should == 0
-        post "/@spontaneous/root", 'type' => @root_class.name
+        post "/@spontaneous/root", 'type' => @root_class.schema_id
         Change.count.should == 1
       end
     end

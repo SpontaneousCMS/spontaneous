@@ -15,6 +15,9 @@ Spontaneous.EditPanel = (function($, S) {
 		id: function() {
 			return this.content.id();
 		},
+		schema_id: function() {
+
+		},
 		uid: function() {
 			return this.content.uid() + '!editing';
 		},

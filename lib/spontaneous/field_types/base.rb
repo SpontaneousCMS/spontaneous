@@ -158,6 +158,7 @@ module Spontaneous
       def to_hash
         {
         :name => name.to_s,
+        :id => schema_id.to_s,
         :unprocessed_value => unprocessed_value,
         :processed_value => processed_value,
         :attributes => attributes

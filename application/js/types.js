@@ -28,6 +28,7 @@ Spontaneous.Types = (function($, S) {
 	var Type = new JS.Class({
 		initialize: function(type_data) {
 			this.data = type_data;
+			this.schema_id = type_data.id;
 			this.type = type_data.type;
 			this.title = type_data.title;
 			this.field_prototypes = {};
