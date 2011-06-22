@@ -124,6 +124,20 @@ module Spontaneous
         end
       end
 
+      def apply_fix(action)
+        case action.action
+        when :delete
+          uid = action.source
+          uid.destroy
+        when :rename
+          uid = action.source
+          dest = action.dest
+          uid.rewrite!(action.dest)
+        end
+        write_schema(Spontaneous.schema_map)
+        reload!
+      end
+
       def generate_new_schema
         logger.info("Generating new schema map at #{Spontaneous.schema_map}")
         self.schema_loader_class = TransientMap

@@ -110,11 +110,14 @@ module Spontaneous
 
       def initialize(id, reference)
         @id = id.freeze
+        read_reference(reference)
+      end
+
+      def read_reference(reference)
         @reference = reference
         @category, @owner_sid, @name = reference.split(REFERENCE_SEP)
         @category = @category.to_sym
       end
-
       class << self
         protected :new
       end
@@ -128,6 +131,11 @@ module Spontaneous
         when :box
           Spontaneous::Content.filter(:box_sid  => @id).delete
         end
+      end
+
+      def rewrite!(target)
+        read_reference(target.schema_name)
+        @target = nil
       end
 
       def target

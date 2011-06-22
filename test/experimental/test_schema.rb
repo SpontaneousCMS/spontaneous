@@ -528,7 +528,7 @@ class SchemaTest < MiniTest::Spec
         YAML.load_file(@map_file).should == expected
       end
     end
-    context "automatically resolvable changes" do
+    context "change resolution" do
       setup do
         S::Schema.reset!
         @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)
@@ -561,7 +561,7 @@ class SchemaTest < MiniTest::Spec
         FileUtils.rm(@map_file) if ::File.exists?(@map_file)
       end
 
-      should "be made if only additions are found" do
+      should "be done automatically if only additions are found" do
         A.field :moose
         class ::X < ::A
           field :wild
@@ -589,7 +589,7 @@ class SchemaTest < MiniTest::Spec
       end
 
 
-      should "be made if only classes have been removed" do
+      should "be done automatically if only classes have been removed" do
         uid = B.schema_id.to_s
         Object.send(:remove_const, :B)
         S::Schema.stubs(:classes).returns([::A])
@@ -599,7 +599,7 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
-      should "be made if only boxes have been removed" do
+      should "be done automatically if only boxes have been removed" do
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:boxes).returns([])
         S::Schema.stubs(:classes).returns([A, B])
@@ -609,7 +609,7 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
-      should "be made if only fields have been removed" do
+      should "be done automatically if only fields have been removed" do
         f1 = A.field_prototypes[:title]
         uid = f1.schema_id.to_s
         f2 = A.field_prototypes[:introduction]
@@ -621,7 +621,7 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
-      should "be made in presence of independent addition inside type and of type" do
+      should "be done automatically in presence of independent addition inside type and of type" do
         A.field :moose
         uid = B.schema_id.to_s
         Object.send(:remove_const, :B)
@@ -635,7 +635,7 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
-      should "be made in presence of independent addition & removal of fields" do
+      should "be done automatically in presence of independent addition & removal of fields" do
         A.field :moose
         f1 = B.field_prototypes[:location]
         uid = f1.schema_id.to_s
@@ -652,7 +652,7 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
-      should "be made in presence of independent changes to boxes & fields" do
+      should "be done automatically in presence of independent changes to boxes & fields" do
         B.field :crisis
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:boxes).returns([])
@@ -665,7 +665,7 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
-      should "be made in presence of independent changes to boxes & fields" do
+      should "be done automatically in presence of independent changes to boxes & fields" do
         class ::X < B; end
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:boxes).returns([])
@@ -731,6 +731,133 @@ class SchemaTest < MiniTest::Spec
         S::Schema.validate!
         Content.count.should == 1
         S::Content[instance.id].should == instance
+      end
+
+      context "which isn't automatically resolvable" do
+        context "with one field removed" do
+          setup do
+            A.field :a
+            A.field :b
+            @df1 = A.field_prototypes[:title]
+            @af1 = A.field_prototypes[:a]
+            @af2 = A.field_prototypes[:b]
+            @uid = @df1.schema_id.to_s
+            @f3 = A.field_prototypes[:introduction]
+            A.stubs(:field_prototypes).returns({:a => @af1, :b => @af2, :introduction => @f3})
+            A.stubs(:fields).returns([@af1, @af2, @f3])
+            S::Schema.reload!
+            begin
+              S::Schema.validate!
+              flunk("Validation should raise error when adding & deleting fields")
+            rescue Spontaneous::SchemaModificationError => e
+              @modification = e.modification
+            end
+          end
+          should "return list of solutions for removal of one field" do
+            # add :a, :b, delete :title
+            # add :b, rename :title  => :a
+            # add :a, rename :title  => :b
+            @modification.actions.description.should =~ /field 'title'/
+            @modification.actions.length.should == 3
+            action = @modification.actions[0]
+            action.action.should == :delete
+            action.source.should == @df1.schema_id
+            action.description.should =~ /delete field 'title'/i
+            action = @modification.actions[1]
+            action.action.should == :rename
+            action.source.should == @df1.schema_id
+            action.description.should =~ /rename field 'title' to 'a'/i
+            action = @modification.actions[2]
+            action.action.should == :rename
+            action.source.should == @df1.schema_id
+            action.description.should =~ /rename field 'title' to 'b'/i
+          end
+
+          should "enable fixing the problem by deleting field from schema" do
+            action = @modification.actions[0]
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+            rescue Spontaneous::SchemaModificationError => e
+              flunk("Deletion of field should have resolved schema error")
+            end
+
+            m = YAML.load_file(@map_file)
+            m.key?(@uid).should be_false
+          end
+
+          should "enable fixing the problem by renaming field 'a'" do
+            action = @modification.actions[1]
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+            rescue Spontaneous::SchemaModificationError => e
+              flunk("Renaming of field should have resolved schema error")
+            end
+            m = YAML.load_file(@map_file)
+            m[@uid].should == @af1.schema_name
+          end
+
+          should "enable fixing the problem by renaming field 'b'" do
+            action = @modification.actions[2]
+            S::Schema.apply_fix(action)
+            begin
+              S::Schema.validate!
+            rescue Spontaneous::SchemaModificationError => e
+              flunk("Renaming of field should have resolved schema error")
+            end
+            m = YAML.load_file(@map_file)
+            m[@uid].should == @af2.schema_name
+          end
+        end
+
+        should "return list of solutions for removal of two fields" do
+          A.field :a
+          A.field :b
+          A.field :c
+          df1 = A.field_prototypes[:title]
+          df2 = A.field_prototypes[:introduction]
+          af1 = A.field_prototypes[:a]
+          af2 = A.field_prototypes[:b]
+          af3 = A.field_prototypes[:c]
+          uid1 = df1.schema_id.to_s
+          uid2 = df2.schema_id.to_s
+          A.stubs(:field_prototypes).returns({:a => af1, :b => af2, :c => af3})
+          A.stubs(:fields).returns([af1, af2, af3])
+          S::Schema.reload!
+          begin
+            S::Schema.validate!
+            flunk("Validation should raise error when adding & deleting fields")
+          rescue Spontaneous::SchemaModificationError => e
+            modification = e.modification
+          end
+          # add :a, :b; delete :title, :introduction
+          # rename :title  => :a, :introduction  => :b
+          # rename :introduction  => :a, :title  => :b
+          # add :a; delete :introduction; rename :title  => :b
+          # add :a; delete :title;        rename :introduction  => :b
+          # add :b; delete :introduction; rename :title  => :a
+          # add :b; delete :title;        rename :introduction  => :a
+          modification.actions.description.should =~ /field 'title'/
+          modification.actions.length.should == 4
+          action = modification.actions[0]
+          action.action.should == :delete
+          action.source.should == df1.schema_id
+          action.description.should =~ /delete field 'title'/i
+          action = modification.actions[1]
+          action.action.should == :rename
+          action.source.should == df1.schema_id
+          action.description.should =~ /rename field 'title' to 'a'/i
+          action = modification.actions[2]
+          action.action.should == :rename
+          action.source.should == df1.schema_id
+          action.description.should =~ /rename field 'title' to 'b'/i
+          action = modification.actions[3]
+          action.action.should == :rename
+          action.source.should == df1.schema_id
+          action.description.should =~ /rename field 'title' to 'c'/i
+        end
+
       end
     end
   end

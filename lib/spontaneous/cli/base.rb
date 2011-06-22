@@ -18,10 +18,11 @@ module Spontaneous
       class_option :mode, :type => :string,  :aliases => "-m", :default => :back, :desc => "Spontaneous mode ('front' or 'back')"
       class_option :help, :type => :boolean, :desc => "Show help usage"
 
+
       desc :start, "Starts Spontaneous"
-      method_option :adapter,     :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
-      method_option :host,        :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
-      method_option :port,        :type => :numeric, :aliases => "-p", :desc => "Use PORT"
+      method_option :adapter, :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
+      method_option :host, :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
+      method_option :port, :type => :numeric, :aliases => "-p", :desc => "Use PORT"
 
       def start
         pids = []

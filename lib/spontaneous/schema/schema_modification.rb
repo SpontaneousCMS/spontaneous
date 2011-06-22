@@ -181,6 +181,58 @@ module Spontaneous
           changes_grouped_by_owner.map { |change| change.error_messages }.compact
         end
       end
+
+      class Solution < Array
+        attr_reader :source
+        def initialize(source, destinations)
+          super()
+          @source, @destinations = source, destinations
+          self << Action.new(:delete, source)
+          @destinations.each do |dest|
+            self << Action.new(:rename, source, dest)
+          end
+        end
+
+        def description
+          "#{source.category} '#{source.name}'"
+        end
+
+      end
+
+
+      class Action
+        attr_reader :action, :source, :dest
+
+        def initialize(action, source, dest = nil)
+          @action, @source, @dest = action, source, dest
+        end
+
+        def description
+          case action
+          when :delete
+            "Delete #{category} '#{source.name}'"
+          when :rename
+            "Rename #{category} '#{source.name}' to '#{dest.name}'"
+          end
+        end
+
+        def category
+          @source.category
+        end
+      end
+
+      def actions
+        if @grouped
+          if simple_change?
+            nil
+          else
+            Solution.new(removed_items.first, added_items)
+          end
+        else
+          change = changes_grouped_by_owner.first { |c| !c.simple_change? }
+          change.actions
+        end
+      end
     end
   end
 end
