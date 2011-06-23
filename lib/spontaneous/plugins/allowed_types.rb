@@ -7,8 +7,8 @@ module Spontaneous::Plugins
       def initialize(type, options={})
         @type = type
         @options = options
-        check_instance_class
-        check_styles
+        # check_instance_class
+        # check_styles
       end
 
       def check_instance_class
@@ -43,6 +43,10 @@ module Spontaneous::Plugins
         if @options.key?(:styles) and styles = @options[:styles]
           styles.map { |s| instance_class.find_named_style(s) }
         end
+      end
+
+      def includes?(type)
+        instance_class == type
       end
 
       def all_styles
@@ -86,12 +90,13 @@ module Spontaneous::Plugins
         allowed_types_config << AllowedType.new(type, options)
       end
 
-      def allow_subclasses(type, options = {})
-        parent_type = AllowedType.new(type)
-        parent_type.instance_class.subclasses.each do |subclass|
-          allow(subclass, options)
-        end
-      end
+      # TODO: implement this in a way that doesn't require searching through constants at load-time
+      # def allow_subclasses(type, options = {})
+      #   parent_type = AllowedType.new(type)
+      #   parent_type.instance_class.subclasses.each do |subclass|
+      #     allow(subclass, options)
+      #   end
+      # end
 
       def allowed_types_config
         @_allowed_types ||= []
@@ -110,7 +115,7 @@ module Spontaneous::Plugins
 
       def allowed_type(content)
         klass = content.is_a?(Class) ? content : content.class
-        self.class.allowed.find { |a| a.instance_class == klass }
+        self.class.allowed.find { |a| a.includes?(klass) }
       end
 
       def prototype_for_content(content, box = nil)

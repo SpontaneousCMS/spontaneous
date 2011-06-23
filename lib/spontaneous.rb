@@ -33,6 +33,11 @@ module Spontaneous
   def self.gem_root
     @gem_root ||= File.expand_path(File.dirname(__FILE__) / '..')
   end
+  def self.reload!
+    Spontaneous::Schema.reload!
+    Spontaneous::Loader.reload!
+    Spontaneous::Schema.validate!
+  end
 
   plugin Plugins::Application::State
   plugin Plugins::Application::Paths

@@ -26,7 +26,7 @@ module Spontaneous
       end
 
       def reload!
-        Spontaneous::Loader.reload!
+        Spontaneous.reload!
       end
     end # Reloader
   end # Rack

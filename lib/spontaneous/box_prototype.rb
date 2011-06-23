@@ -70,7 +70,7 @@ module Spontaneous
         end
       end.tap do |klass|
         # doing this means we get proper names for the anonymous box classes
-        owner.const_set("#{name.to_s.capitalize}Box", klass)
+        owner.const_set("#{name.to_s.camelize}Box", klass)
       end
     end
 

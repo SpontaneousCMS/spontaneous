@@ -258,6 +258,10 @@ module Spontaneous
         UID.clear!
       end
 
+      def delete(klass)
+        classes.delete(klass)
+      end
+
       def schema_map_file
         @schema_map_file ||= Spontaneous.root / "config" / "schema.yml"
       end
