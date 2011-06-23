@@ -373,10 +373,10 @@ img.missing {
 
 .fields-preview .fields-preview-text {
 	@include box-sizing;
-	border: dotted 1px transparent;
+	// border: dotted 1px transparent;
 }
 .fields-preview.hover .fields-preview-text {
-	border: dotted 1px $action;
+	// border: dotted 1px $action;
 }
 .fields-preview-text {
 	@include box-sizing;
@@ -663,7 +663,7 @@ img.missing {
 		margin-right: $container-padding;
 		margin-bottom: $container-padding/2;
 		background-color: gray;
-		padding: 4px;
+		padding: 1px;
 		padding-top: $title-bar-height + 4px;
 		.entry-inner {
 			@extend .clearfix;
@@ -751,7 +751,7 @@ img.missing {
 			z-index: 1;
 		}
 		.white-bg {
-			@include corners($corner-radius, 0, 0, $corner-radius);
+			@include corners(0, 0, 0, $corner-radius);
 			border-width: 2px;
 			border-color: transparent;
 			border-style: solid;
