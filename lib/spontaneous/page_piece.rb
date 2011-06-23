@@ -26,11 +26,7 @@ module Spontaneous
     end
 
     def entry
-      @entry ||= resolve_entry
-    end
-
-    def resolve_entry
-      container.all_pieces.find { |e| e.id == target.id }
+      self
     end
 
     def to_hash

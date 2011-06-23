@@ -61,6 +61,14 @@ module Spontaneous
       self
     end
 
+    def entry
+      @entry ||= resolve_entry
+    end
+
+    def resolve_entry
+      container.all_pieces.find { |e| e.id == self.id }
+    end
+
     def page=(page)
     end
 
