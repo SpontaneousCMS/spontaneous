@@ -133,7 +133,6 @@ module Spontaneous
           reload = mtime && mtime > MTIMES[file]
 
           logger.debug "Reloading #{file}" if reload
-          logger.debug "Loading #{file}" unless reload
 
           # Removes all classes declared in the specified file
           if klasses = LOADED_CLASSES.delete(file)

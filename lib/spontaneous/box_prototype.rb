@@ -140,19 +140,26 @@ module Spontaneous
       instance_class.readable_fields
     end
 
-    def to_hash
-      allowed_types = \
-        if writable?
-          instance_class.allowed_types.select { |type| type.readable? }.map { |type| type.instance_class.json_name }
-        else
-          []
+    def allowed_types
+      if writable?
+        types = []
+        instance_class.allowed.select { |a| a.readable? }.each do  |a|
+          types.concat(a.instance_classes)
         end
+        types
+      else
+        []
+      end
+    end
+
+    def to_hash
+      allowed = allowed_types.map { |c| c.json_name }
       {
         :name => name.to_s,
         :id => schema_id.to_s,
         :title => title,
         :writable => writable?,
-        :allowed_types => allowed_types,
+        :allowed_types => allowed,
         :fields => readable_fields.map { |name| instance_class.field_prototypes[name].to_hash },
       }
     end

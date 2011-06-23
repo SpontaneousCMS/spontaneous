@@ -433,9 +433,10 @@ class BoxesTest < MiniTest::Spec
       Parent.allowed[2].instance_class.should == Allowed3
     end
 
-    should "raise an error when given an invalid type name" do
-      lambda { Parent.allow :WhatTheHellIsThis }.must_raise(NameError)
-    end
+    # TODO: decide on whether testing class definitions is a good idea
+    # should "raise an error when given an invalid type name" do
+    #   lambda { Parent.allow :WhatTheHellIsThis }.must_raise(NameError)
+    # end
 
     should "allow all styles by default" do
       Parent.allowed[2].styles.should == Allowed3.styles
@@ -446,9 +447,10 @@ class BoxesTest < MiniTest::Spec
       Parent.allowed[1].styles.map { |s| s.name }.should == [:ringo, :george]
     end
 
-    should "raise an error if we try to use an unknown style" do
-      lambda { Parent.allow :Allowed3, :styles => [:merlin, :arthur]  }.must_raise(Spontaneous::UnknownStyleException)
-    end
+    # TODO: decide on whether verifying style names is a good idea
+    # should "raise an error if we try to use an unknown style" do
+    #   lambda { Parent.allow :Allowed3, :styles => [:merlin, :arthur]  }.must_raise(Spontaneous::UnknownStyleException)
+    # end
 
     should "use a configured style when adding a defined allowed type" do
       a = Allowable.new
@@ -482,7 +484,7 @@ class BoxesTest < MiniTest::Spec
     end
 
     should "correctly allow addition of subclasses" do
-      Mixed.allowed.map {|a| a.instance_class }.should == [Allowed11, Allowed111]
+      Mixed.allowed_types.should == [Allowed11, Allowed111]
     end
   end
 end

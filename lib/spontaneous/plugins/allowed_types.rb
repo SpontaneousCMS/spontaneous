@@ -4,6 +4,8 @@
 module Spontaneous::Plugins
   module AllowedTypes
     class AllowedType
+      attr_accessor :allow_subclasses
+
       def initialize(type, options={})
         @type = type
         @options = options
@@ -40,13 +42,26 @@ module Spontaneous::Plugins
       end
 
       def configured_styles
-        if @options.key?(:styles) and styles = @options[:styles]
+        if (@options.key?(:styles) and styles = @options[:styles]) or \
+          (@options.key?(:style) and styles = [@options[:style]].flatten)
           styles.map { |s| instance_class.find_named_style(s) }
         end
       end
 
       def includes?(type)
-        instance_class == type
+        if allow_subclasses
+          instance_class.subclasses.include?(type)
+        else
+          instance_class == type
+        end
+      end
+
+      def instance_classes
+        if allow_subclasses
+          instance_class.subclasses
+        else
+          [instance_class]
+        end
       end
 
       def all_styles
@@ -91,12 +106,14 @@ module Spontaneous::Plugins
       end
 
       # TODO: implement this in a way that doesn't require searching through constants at load-time
-      # def allow_subclasses(type, options = {})
-      #   parent_type = AllowedType.new(type)
-      #   parent_type.instance_class.subclasses.each do |subclass|
-      #     allow(subclass, options)
-      #   end
-      # end
+      def allow_subclasses(type, options = {})
+        parent_type = AllowedType.new(type)
+        parent_type.allow_subclasses = true
+        allowed_types_config << parent_type
+        # parent_type.instance_class.subclasses.each do |subclass|
+        #   allow(subclass, options)
+        # end
+      end
 
       def allowed_types_config
         @_allowed_types ||= []
@@ -105,10 +122,18 @@ module Spontaneous::Plugins
       def allowed
         (supertype ? supertype.allowed : []).concat(allowed_types_config)
       end
-      alias_method :allowed_types, :allowed
+      def allowed_types
+        types = []
+        allowed.each { |a| types.concat(a.instance_classes) }
+        types
+      end
     end
 
     module InstanceMethods
+      def allowed
+        self.class.allowed
+      end
+
       def allowed_types
         self.class.allowed_types
       end

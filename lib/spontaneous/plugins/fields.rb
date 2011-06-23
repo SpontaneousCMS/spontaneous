@@ -106,8 +106,8 @@ module Spontaneous::Plugins
 
       def type_for_mime_type(mime_type)
         self.class.allowed_types.find do |t|
-          t.instance_class.field_for_mime_type(mime_type)
-        end.instance_class
+          t.field_for_mime_type(mime_type)
+        end
       end
 
       def field_for_mime_type(mime_type)
