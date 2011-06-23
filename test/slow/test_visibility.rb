@@ -189,6 +189,11 @@ class VisibilityTest < MiniTest::Spec
 
     context "visibility scoping" do
       setup do
+        # S.database.logger = ::Logger.new($stdout)
+      end
+
+      teardown do
+        # S.database.logger = nil
       end
 
       should "prevent inclusion of hidden content" do
@@ -213,6 +218,8 @@ class VisibilityTest < MiniTest::Spec
         page.reload
         Content.with_visible do
           page.pieces.length.should == 3
+          page.pieces.first.id.should_not == page.id
+          page.pieces.first.first?.should be_true
         end
       end
 
@@ -224,6 +231,19 @@ class VisibilityTest < MiniTest::Spec
           lambda { page.pieces << Piece.new }.must_raise(TypeError, RuntimeError)
           lambda { page << Piece.new }.must_raise(TypeError, RuntimeError)
         end
+      end
+
+      should "ensure that no hidden content can be returned" do
+        @root.reload
+        @root.children.first.children.length.should == 8
+        @root.children.first.pieces.first.hide!
+        # p @root.children.first.children.map { |c| c.visible? }
+        @root.reload
+        Content.with_visible do
+          @root.children.first.children.length.should == 6
+        end
+        # p @root.children.map { |c| c.uid }
+        # p @root.children.first.children.length
       end
     end
   end

@@ -73,7 +73,7 @@ module Spontaneous
     end
 
     def visible!
-      self.dup.reject { |e| e.hidden? }.freeze
+      self.dup.reject { |e| e.nil? or e.hidden? }.freeze
     end
 
   end

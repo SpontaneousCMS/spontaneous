@@ -11,12 +11,40 @@ module Spontaneous::Plugins
     module ClassMethods
       @@visible_filter = false
 
+      def _set_visible_dataset!
+        @_saved_dataset ||= self.dataset
+        ds = self.dataset.filter(:hidden => false)
+        @dataset = ds
+        # set_dataset clears the row_proc which desroys the STI
+        # self.set_dataset(ds)
+      end
+
+      def _restore_dataset!
+        # self.set_dataset( self.dataset.unfiltered) if @_saved_dataset
+        @dataset = @_saved_dataset if @_saved_dataset
+        @_saved_dataset = nil
+      end
+
+      def _content_classes
+        [Spontaneous::Content, Spontaneous::Page, Spontaneous::Piece] + Spontaneous::Schema.content_classes
+      end
+
+      def _unfiltered_dataset
+        @_saved_dataset or dataset
+      end
+
       def with_visible(&block)
-        begin
-          @@visible_filter = true
+        if @@visible_filter
           yield
-        ensure
-          @@visible_filter = false
+        else
+          begin
+            _content_classes.each { |content_class| content_class._set_visible_dataset! }
+            @@visible_filter = true
+            yield
+          ensure
+            @@visible_filter = false
+            _content_classes.each { |content_class| content_class._restore_dataset! }
+          end
         end
       end
 
