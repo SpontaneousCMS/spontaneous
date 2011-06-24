@@ -1,15 +1,11 @@
 # encoding: UTF-8
 
+require 'sinatra/base'
 
 module Spontaneous::Plugins
   module Actions
 
-    def self.configure(base)
-
-    end
-
-
-    class Actions < Sinatra::Base
+    class ActionHandler < Sinatra::Base
       attr_reader :content, :format
 
       def initialize(content, format)
@@ -20,10 +16,6 @@ module Spontaneous::Plugins
       def page
         content.page
       end
-
-      def piece
-        content.page? ? nil : content
-      end
     end
 
     module ClassMethods
@@ -32,7 +24,7 @@ module Spontaneous::Plugins
       end
 
       def actions(namespace, &block)
-        actions_class = Class.new(Actions)
+        actions_class = Class.new(ActionHandler)
         actions_class.class_eval(&block) if block_given?
         self.const_set("#{namespace.to_s.camelize}Actions", actions_class)
         action_handlers[namespace.to_sym] = actions_class
@@ -42,9 +34,9 @@ module Spontaneous::Plugins
     module InstanceMethods
       def process_action(action_path, env, format)
         env = env.dup
-        namespace, *p = action_path.split("/")
-        path = [""].concat(p).join("/")
-        env["PATH_INFO"] = path
+        namespace, *p = action_path.split(S::Constants::SLASH)
+        path = [S::Constants::EMPTY].concat(p).join(S::Constants::SLASH)
+        env[S::Constants::PATH_INFO] = path
         klass = self.class.action_handlers[namespace.to_sym]
         return 404 unless klass
         app = klass.new(self, format)

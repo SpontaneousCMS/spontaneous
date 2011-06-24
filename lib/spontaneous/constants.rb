@@ -9,6 +9,7 @@ module Spontaneous
     DOT = ".".freeze
     QUESTION = "?".freeze
     LF = "\n".freeze
+    PATH_INFO = "PATH_INFO".freeze
 
     SPOT_REVISION_NUMBER = "SPOT_REVISION".freeze
     SPOT_ROOT = "SPOT_ROOT".freeze
