@@ -9,10 +9,10 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Garry Hill"]
-  s.date = %q{2011-06-09}
+  s.date = %q{2011-06-24}
   s.description = %q{TODO: longer description of your gem}
   s.email = %q{garry@magnetised.info}
-  s.executables = ["unlimit-upload", "nginx", "spot", "unicorn", "limit-upload", "console", "back"]
+  s.executables = ["back", "console", "limit-upload", "nginx", "spot", "unicorn", "unlimit-upload"]
   s.files = [
     "Gemfile",
     "Gemfile.lock",
@@ -42,9 +42,9 @@ Gem::Specification.new do |s|
     "application/js/field.js",
     "application/js/field_preview.js",
     "application/js/field_types/date_field.js",
-    "application/js/field_types/discount_field.js",
     "application/js/field_types/file_field.js",
     "application/js/field_types/image_field.js",
+    "application/js/field_types/markdown_field.js",
     "application/js/field_types/string_field.js",
     "application/js/init.js",
     "application/js/load.js",
@@ -298,6 +298,8 @@ Gem::Specification.new do |s|
     "lib/spontaneous/render/renderer.rb",
     "lib/spontaneous/revision.rb",
     "lib/spontaneous/schema.rb",
+    "lib/spontaneous/schema/schema_modification.rb",
+    "lib/spontaneous/schema/uid.rb",
     "lib/spontaneous/server.rb",
     "lib/spontaneous/site.rb",
     "lib/spontaneous/style.rb",
@@ -382,6 +384,7 @@ Gem::Specification.new do |s|
     "test/fixtures/public/templates/layouts/dynamic.html.cut",
     "test/fixtures/public/templates/layouts/standard.html.cut",
     "test/fixtures/schema/before.yml",
+    "test/fixtures/schema/resolvable.yml",
     "test/fixtures/schema/schema.yml",
     "test/fixtures/styles/box_a.html.cut",
     "test/fixtures/styles/box_a/runny.html.cut",
@@ -476,8 +479,7 @@ Gem::Specification.new do |s|
     "test/unit/test_site.rb",
     "test/unit/test_structure.rb",
     "test/unit/test_styles.rb",
-    "test/unit/test_templates.rb",
-    "todo.taskpaper"
+    "test/unit/test_templates.rb"
   ]
   s.homepage = %q{http://spontaneouscms.org}
   s.licenses = ["MIT"]
@@ -489,6 +491,7 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<rake>, ["= 0.8.7"])
       s.add_runtime_dependency(%q<activesupport>, ["~> 3.0.4"])
       s.add_runtime_dependency(%q<home_run>, ["~> 1.0.0"])
       s.add_runtime_dependency(%q<sequel>, ["~> 3.20"])
@@ -523,6 +526,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<harmony>, ["~> 0.5"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
     else
+      s.add_dependency(%q<rake>, ["= 0.8.7"])
       s.add_dependency(%q<activesupport>, ["~> 3.0.4"])
       s.add_dependency(%q<home_run>, ["~> 1.0.0"])
       s.add_dependency(%q<sequel>, ["~> 3.20"])
@@ -558,6 +562,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<ruby-debug>, [">= 0"])
     end
   else
+    s.add_dependency(%q<rake>, ["= 0.8.7"])
     s.add_dependency(%q<activesupport>, ["~> 3.0.4"])
     s.add_dependency(%q<home_run>, ["~> 1.0.0"])
     s.add_dependency(%q<sequel>, ["~> 3.20"])
