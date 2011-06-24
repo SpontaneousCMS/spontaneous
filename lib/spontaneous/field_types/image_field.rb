@@ -64,6 +64,10 @@ module Spontaneous
         @size_definitions ||= {}
       end
 
+      def image?
+        true
+      end
+
       def has_attribute?(attribute_name)
         super || self.class.size_definitions.key?(attribute_name)
       end

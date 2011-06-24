@@ -61,10 +61,16 @@ class BackTest < MiniTest::Spec
 
       class Job < Piece
         field :title
+        field :image, :image
+
         box :images do
           field :title
           allow Image
         end
+      end
+
+      class LinkedJob < Piece
+        alias_of Job
       end
 
       class HomePage < Page
@@ -75,7 +81,12 @@ class BackTest < MiniTest::Spec
         box :in_progress do
           allow Job
         end
+
+        box :featured_jobs do
+          allow LinkedJob
+        end
       end
+
       @home = HomePage.new(:title => "Home")
       @project1 = Project.new(:title => "Project 1", :slug => "project1")
       @project2 = Project.new(:title => "Project 2", :slug => "project2")
@@ -84,9 +95,9 @@ class BackTest < MiniTest::Spec
       @home.projects << @project2
       @home.projects << @project3
 
-      @job1 = Job.new(:title => "Job 1")
-      @job2 = Job.new(:title => "Job 2")
-      @job3 = Job.new(:title => "Job 3")
+      @job1 = Job.new(:title => "Job 1", :image => "/i/job1.jpg")
+      @job2 = Job.new(:title => "Job 2", :image => "/i/job2.jpg")
+      @job3 = Job.new(:title => "Job 3", :image => "/i/job3.jpg")
       @image1 = Image.new
       @job1.images << @image1
       @home.in_progress << @job1
@@ -98,7 +109,7 @@ class BackTest < MiniTest::Spec
     end
 
     teardown do
-      [:Page, :Piece, :HomePage, :Job, :Project, :Image].each { |klass| BackTest.send(:remove_const, klass) rescue nil }
+      [:Page, :Piece, :HomePage, :Job, :Project, :Image, :LinkedJob].each { |klass| BackTest.send(:remove_const, klass) rescue nil }
       Spontaneous::Permissions::User.delete
     end
 
@@ -560,6 +571,42 @@ class BackTest < MiniTest::Spec
         Change.count.should == 0
         post "/@spontaneous/root", 'type' => @root_class.schema_id
         Change.count.should == 1
+      end
+    end
+
+    context "Aliases" do
+      setup do
+      end
+
+      teardown do
+      end
+
+      should "be able to retrieve a list of potential targets" do
+        get "/@spontaneous/targets/#{LinkedJob.schema_id}"
+        assert last_response.ok?
+        last_response.body.json.should == LinkedJob.targets.map do |job|
+          {
+            :id => job.id,
+            :title => job.title.to_s,
+            :icon => job.image.to_s
+          }
+        end
+      end
+      should "be able to add an alias to a box" do
+        @home.featured_jobs.pieces.length.should == 0
+        post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id
+        assert last_response.ok?
+        last_response.content_type.should == "application/json;charset=utf-8"
+        @home.reload
+        @home.featured_jobs.pieces.length.should == 1
+        a = @home.featured_jobs.first
+        a.alias?.should be_true
+        a.target.should == Job.first
+        required_response = {
+          :position => 0,
+          :entry => @home.featured_jobs.pieces.first.to_hash
+        }
+        last_response.body.json.should == required_response.to_hash
       end
     end
   end

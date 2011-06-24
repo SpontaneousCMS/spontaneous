@@ -350,6 +350,41 @@ module Spontaneous
           json(content.siblings.map { |c| c.slug })
         end
 
+
+        get '/targets/:schema_id' do
+          klass = Spontaneous::Schema[params[:schema_id]]
+          if klass.alias?
+            targets = klass.targets.map do |t|
+              {
+                :id => t.id,
+                :title => t.alias_title,
+                :icon => t.alias_icon
+              }
+            end
+            json(targets)
+          end
+        end
+
+        post '/alias/:id/:box_id' do
+          content, box = content_for_request
+          type = Spontaneous::Schema[params[:alias_id]]
+          position = 0
+          if box.writable?(type)
+            target = Spontaneous::Content[params[:target_id]]
+            if target
+              instance = type.create(:target => target)
+              box.insert(position, instance)
+              content.save
+              json({
+                :position => position,
+                :entry => instance.entry.to_hash
+              })
+            end
+          else
+            unauthorised!
+          end
+        end
+
         get '/publish/changes' do
           if user.level.can_publish?
             json(Change.outstanding)
@@ -373,6 +408,7 @@ module Spontaneous
             end
           end
         end
+
         get '/publish/status' do
           json(Spontaneous::Site.publishing_status)
         end

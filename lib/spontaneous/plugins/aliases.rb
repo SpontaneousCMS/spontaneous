@@ -13,6 +13,7 @@ module Spontaneous::Plugins
     module ClassMethods
       def alias_of(*class_list)
         @alias_classes = class_list
+        extend  ClassAliasMethods
         include AliasMethods
         include PageAliasMethods if page?
       end
@@ -28,9 +29,33 @@ module Spontaneous::Plugins
       def target_classes
         @target_classes ||= @alias_classes.map { |c| c.to_s.constantize }
       end
+
+      def alias?
+        false
+      end
     end
 
-    # included only in classes that are aliases
+    module InstanceMethods
+      def alias_title
+        fields[:title].to_s
+      end
+
+      def alias_icon
+        if field = fields.detect { |f| f.image? }
+          field.to_s
+        else
+          nil
+        end
+      end
+    end
+
+    module ClassAliasMethods
+      def alias?
+        true
+      end
+    end
+
+    # included only in instances that are aliases
     module AliasMethods
       def alias?
         true

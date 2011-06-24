@@ -63,6 +63,9 @@ module Spontaneous
       #   processed_value
       # end
 
+      def image?
+        false
+      end
 
       def to_s
         value.to_s

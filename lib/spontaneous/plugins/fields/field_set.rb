@@ -5,6 +5,8 @@ module Spontaneous::Plugins
   module Fields
     class FieldSet
 
+      include Enumerable
+
       def initialize(owner, initial_values)
         @owner = owner
         @store = Hash.new
@@ -24,6 +26,12 @@ module Spontaneous::Plugins
 
       def [](name)
         store[name.to_sym]
+      end
+
+      def each
+        owner.class.field_names.each do |name|
+          yield(self[name])
+        end
       end
 
       def find(id)
