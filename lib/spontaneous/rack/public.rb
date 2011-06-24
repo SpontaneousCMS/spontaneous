@@ -18,9 +18,10 @@ module Spontaneous
       end
 
       DOT = '.'.freeze
+      ACTION = '/@'.freeze
 
       get "*" do
-        path, format = params[:splat].first.split(DOT)
+        path, format, action = parse_path
         page = Site[path]
         return not_found! unless page
         if destination = redirect?(page)
@@ -35,6 +36,54 @@ module Spontaneous
             end
           end
 
+          if action
+            status, headers, result = page.process_action(action, env, format)
+            if status == 404
+              not_found!
+              # our 404 page should come from the CMS
+            else
+              if result.respond_to?(:spontaneous_content?)
+                render_page_with_format(result, format)
+              else
+                [status, headers, result]
+              end
+            end
+          else
+            render_page_with_format(page, format)
+          end
+        end
+      end
+
+      post "*" do
+        path, format, action = parse_path
+        return not_found! unless action
+        page = Site[path]
+        return not_found! unless page
+        status, headers, result = page.process_action(action, env, format)
+        if status == 404
+          not_found!
+          # our 404 page should come from the CMS
+        else
+          if result.respond_to?(:spontaneous_content?)
+            render_page_with_format(result, format)
+          else
+            [status, headers, result]
+          end
+        end
+      end
+
+      def parse_path
+        path = params[:splat].first
+        if path =~ %r(#{ACTION})
+          path, action = path.split(ACTION)
+          action, format = action.split(DOT)
+        else
+          path, format = path.split(DOT)
+        end
+        [path, format, action]
+      end
+
+      def render_page_with_format(page, format)
           if page && page.provides_format?(format)
             content_type(::Rack::Mime.mime_type("#{DOT}#{format}")) if format
             render_page(page, format)
@@ -44,9 +93,7 @@ module Spontaneous
             # or even redirect to the html?
             not_found!
           end
-        end
       end
-
       def render_page(page, format = :html, local_params = {})
         page.render(format, local_params.merge({
           :params => params,

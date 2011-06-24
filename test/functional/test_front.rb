@@ -8,53 +8,10 @@ ENV['RACK_ENV'] = 'test'
 class FrontTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
-  # class SitePage < Spontaneous::Page
-  #   layout :default
-  #   layout :dynamic
-  #   box :pages
-  # end
-
   def self.startup
-    # Site.delete
-    # Content.delete
-    # Change.delete
-    # Spontaneous.environment = :test
-    # Site.publishing_method = :immediate
-
-    # @saved_revision_root = Spontaneous.revision_root
-    # @saved_root = Spontaneous.root
-    # Spontaneous.root = File.expand_path('../../fixtures/example_application', __FILE__)
-    # @@revision_root = "#{Dir.tmpdir}/spontaneous-tests/#{Time.now.to_i}"
-    # `mkdir -p #{@@revision_root}`
-    # Spontaneous.revision_root = @@revision_root
-
-    # Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
-
-    # @@root = SitePage.create
-    # @@about = SitePage.create(:slug => "about", :uid => "about")
-    # @@news = SitePage.create(:slug => "news", :uid => "news")
-    # @@dynamic = SitePage.create(:slug => "dynamic", :uid => "dynamic")
-    # @@dynamic.layout = :dynamic
-    # @@root.pages << @@about
-    # @@root.pages << @@news
-    # @@root.pages << @@dynamic
-    # @@root.save
-
-    # Content.delete_revision(1) rescue nil
-
-    # Spontaneous.logger.silent! {
-    #   Site.publish_all
-    # }
   end
 
   def self.shutdown
-    # Content.delete
-    # Site.delete
-    # Content.delete_revision(1)
-    # Spontaneous.revision_root = @saved_revision_root
-    # Spontaneous.root = @saved_root
-    # FileUtils.rm_rf(@@revision_root)
-    # Object.send(:remove_const, :SitePage)
   end
 
   def setup
@@ -107,6 +64,8 @@ class FrontTest < MiniTest::Spec
         layout :default
         layout :dynamic
         box :pages
+
+        attr_accessor :status
       end
 
       Spontaneous.environment = :test
@@ -325,6 +284,85 @@ class FrontTest < MiniTest::Spec
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           File.exists?(@cache_file).should be_false
         end
+      end
+    end
+
+    context "Model actions" do
+      setup do
+        SitePage.actions :comments do
+          get '/' do
+            "Success"
+          end
+
+          get '/page' do
+            page
+          end
+        end
+
+        SitePage.actions :status do
+          get '/:status' do
+            page.status = params[:status]
+            page
+          end
+
+          post '/:status' do
+            page.status = params[:status]
+            page
+          end
+        end
+
+        Page.stubs(:path).with("/about").returns(about)
+      end
+
+      teardown do
+      end
+
+      should "not be used unless necessary" do
+        get "/about"
+        assert last_response.ok?
+        last_response.body.should == about.render
+      end
+
+      should "be recognised" do
+        get "/about/@comments"
+        assert last_response.ok?
+        last_response.body.should == "Success"
+      end
+
+      should "render the page correctly if action returns page object" do
+        get "/about/@comments/page"
+        assert last_response.ok?
+        last_response.body.should == about.render
+      end
+
+      should "return 404 if trying unknown namespace" do
+        get "/about/@missing/action"
+        assert last_response.status == 404
+      end
+
+      should "respond to multiple namespaces" do
+        get "/about/@status/good"
+        assert last_response.ok?
+        last_response.body.should == about.render
+        about.status.should == "good"
+      end
+
+      should "accept POST requests" do
+        post "/about/@status/good"
+        assert last_response.ok?
+        last_response.body.should == about.render
+        about.status.should == "good"
+      end
+
+      should "return 404 unless post request has an action" do
+        Page.expects(:path).with("/about").never
+        post "/about"
+        assert last_response.status == 404
+      end
+
+      should "return 404 for post requests to unknown actions" do
+        post "/about/@status/missing/action"
+        assert last_response.status == 404
       end
     end
   end

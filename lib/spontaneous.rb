@@ -111,6 +111,7 @@ module Spontaneous
     autoload :Visibility, "spontaneous/plugins/visibility"
     autoload :Prototypes, "spontaneous/plugins/prototypes"
     autoload :Permissions, "spontaneous/plugins/permissions"
+    autoload :Actions, "spontaneous/plugins/actions"
 
     module Fields
       autoload :FieldPrototype, "spontaneous/plugins/fields/field_prototype"

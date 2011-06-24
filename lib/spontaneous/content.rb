@@ -63,6 +63,11 @@ module Spontaneous
     plugin Plugins::Prototypes
     plugin Plugins::Permissions
 
+    # marker method enabling a simple test for "cms content" vs "everything else"
+    def spontaneous_content?
+      true
+    end
+
     def alias?
       false
     end

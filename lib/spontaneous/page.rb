@@ -10,6 +10,7 @@ module Spontaneous
     plugin Plugins::PageTree
     plugin Plugins::SiteMap
     plugin Plugins::PageSearch
+    plugin Plugins::Actions
 
     many_to_one :parent,   :class => Content, :reciprocal => :children
     one_to_many :children, :class => Content, :key => :parent_id, :reciprocal => :parent
