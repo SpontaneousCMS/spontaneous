@@ -59,7 +59,7 @@ GEM
       linecache (>= 0.3)
     sass (3.1.1)
     selenium-client (1.2.18)
-    sequel (3.23.0)
+    sequel (3.24.1)
     sinatra (1.1.4)
       rack (~> 1.1)
       tilt (< 2.0, >= 1.2.2)

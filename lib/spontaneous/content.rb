@@ -22,6 +22,7 @@ module Spontaneous
     sequel_plugin :timestamps, :create=>:created_at, :update=>:modified_at
     sequel_plugin :identity_map
     sequel_plugin :association_dependencies
+    sequel_plugin :defaults_setter
 
     # overwrite the sequel version defined in IdentityMap to support
     # revisions
@@ -61,15 +62,6 @@ module Spontaneous
     plugin Plugins::Visibility
     plugin Plugins::Prototypes
     plugin Plugins::Permissions
-
-
-    def after_initialize
-      if new?
-        self.depth = 0
-        self.path = ""
-      end
-      super
-    end
 
     def alias?
       false
