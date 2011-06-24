@@ -54,7 +54,11 @@ Spontaneous.Entry = (function($, S) {
 			if (this.depth() < 4) {
 				inside.append(dom.div('.grey-bg'));
 			}
+
 			wrapper.append(this.title_bar(wrapper));
+			if (this.type().is_alias()) {
+				wrapper.append(this.alias_target_panel());
+			}
 			// this.dialogue_box = $(dom.div, {'class':'dialogue', 'style':'display: none'});
 			// wrapper.append(this.dialogue_box);
 			var entry = dom.div('.entry');
@@ -72,6 +76,22 @@ Spontaneous.Entry = (function($, S) {
 			return wrapper;
 		},
 
+		alias_target_panel: function() {
+			var content = this.content,
+			wrap = dom.div('.alias-target'),
+			icon = content.alias_icon,
+			title = dom.a().text(content.alias_title).click(function() {
+					S.Location.load_id(content.target.id);
+			});
+			if (icon) {
+
+				console.log(Spontaneous.Image)
+				var img = new Spontaneous.Image(icon);
+				console.log(img)
+				wrap.append(img.fit(60, 60))
+			}
+			return wrap.append(title)
+		},
 		title_bar: function(wrapper) {
 			if (!this._title_bar) {
 				var title_bar = dom.div('.title-bar');

@@ -42,7 +42,7 @@ module Spontaneous::Plugins
 
       def alias_icon
         if field = fields.detect { |f| f.image? }
-          field.to_s
+          field
         else
           nil
         end
@@ -88,6 +88,14 @@ module Spontaneous::Plugins
         else
           self.resolve_style(self.style_sid, format) or target.resolve_style(self.style_sid, format)
         end
+      end
+
+      def styles
+        target.styles.dup.merge(super)
+      end
+
+      def to_hash
+        super.merge(:target => target.to_shallow_hash, :alias_title => target.alias_title, :alias_icon => target.alias_icon.to_hash)
       end
     end
 

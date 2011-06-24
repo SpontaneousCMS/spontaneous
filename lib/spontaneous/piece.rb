@@ -21,7 +21,7 @@ module Spontaneous
         })
       else
         h.merge!({
-          :styles => self.styles.map { |s| s.schema_id.to_s }
+          :styles => self.styles.map { |n, s| s.schema_id.to_s }
         })
       end
     end

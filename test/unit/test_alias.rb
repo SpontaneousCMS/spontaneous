@@ -33,6 +33,13 @@ class AliasTest < MiniTest::Spec
         field :a_field2
 
         style :a_style
+        def alias_title
+          a_field1.value
+        end
+
+        def alias_icon
+          "/aliasicon.png"
+        end
       end
 
       class ::AA < ::A
@@ -83,7 +90,7 @@ class AliasTest < MiniTest::Spec
       @root = ::Page.create
       @aliases = ::Page.create(:slug => "aliases").reload
       @root << @aliases
-      @a = A.create.reload
+      @a = A.create(:a_field1 => "@a.a_field1").reload
       @aa = AA.create.reload
       @aaa1 = AAA.create(:aaa_field1 => "aaa1").reload
       @aaa2 = AAA.create.reload
@@ -166,6 +173,15 @@ class AliasTest < MiniTest::Spec
         should "be deleted when target deleted" do
           @a.destroy
           Content[@a_alias.id].should be_nil
+        end
+
+        should "include target values in serialisation" do
+          @a_alias.to_hash[:target].should == @a.to_shallow_hash
+        end
+
+        should "include alias title & icon in serialisation" do
+          @a_alias.to_hash[:alias_title].should == @a.alias_title
+          @a_alias.to_hash[:alias_icon].should == @a.alias_icon
         end
       end
     end
