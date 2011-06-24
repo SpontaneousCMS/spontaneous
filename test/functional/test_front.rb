@@ -297,6 +297,9 @@ class FrontTest < MiniTest::Spec
           get '/page' do
             page
           end
+          get '/format' do
+            format.to_s
+          end
         end
 
         SitePage.actions :status do
@@ -363,6 +366,26 @@ class FrontTest < MiniTest::Spec
       should "return 404 for post requests to unknown actions" do
         post "/about/@status/missing/action"
         assert last_response.status == 404
+      end
+
+      # probably the wrong place to test this -- should be in units -- but what the heck
+      should "be able to generate urls for actions" do
+        about.action_url(:status, "/good").should == "/about/@status/good"
+      end
+
+      should "pass the format onto the page if the action returns it to the render call" do
+        about.stubs(:provides_format?).with(:'xml', anything).returns(true)
+        about.expects(:render).with(:'xml', anything).returns("/about.xml")
+        about.expects(:render).with(:'html', anything).never
+        get "/about/@comments/page.xml"
+        assert last_response.ok?
+        last_response.body.should == "/about.xml"
+      end
+
+      should "use the format within the action if required" do
+        get "/about/@comments/format.xml"
+        assert last_response.ok?
+        last_response.body.should == "xml"
       end
     end
   end

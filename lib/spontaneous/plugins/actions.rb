@@ -4,6 +4,7 @@ require 'sinatra/base'
 
 module Spontaneous::Plugins
   module Actions
+    ACTION_SEPARATOR = "@".freeze
 
     class ActionHandler < Sinatra::Base
       attr_reader :content, :format
@@ -32,6 +33,7 @@ module Spontaneous::Plugins
     end # ClassMethods
 
     module InstanceMethods
+      # resolve and call the relevant action handler and return the results to the controller
       def process_action(action_path, env, format)
         env = env.dup
         namespace, *p = action_path.split(S::Constants::SLASH)
@@ -41,6 +43,12 @@ module Spontaneous::Plugins
         return 404 unless klass
         app = klass.new(self, format)
         app.call(env)
+      end
+
+      # generate an action URL of the form
+      # <path to page>/@<action namespace>/<action path>
+      def action_url(namespace, path)
+        [self.path, "#{ACTION_SEPARATOR}#{namespace}", path].join(S::Constants::SLASH).gsub(%r{//}, '/')
       end
     end # InstanceMethods
   end # Actions

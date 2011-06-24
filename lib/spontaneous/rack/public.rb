@@ -18,7 +18,7 @@ module Spontaneous
       end
 
       DOT = '.'.freeze
-      ACTION = '/@'.freeze
+      ACTION = "/#{S::Plugins::Actions::ACTION_SEPARATOR}".freeze
 
       get "*" do
         path, format, action = parse_path
@@ -38,9 +38,9 @@ module Spontaneous
 
           if action
             status, headers, result = page.process_action(action, env, format)
+            # our 404 page should come from the CMS
             if status == 404
               not_found!
-              # our 404 page should come from the CMS
             else
               if result.respond_to?(:spontaneous_content?)
                 render_page_with_format(result, format)
@@ -54,15 +54,16 @@ module Spontaneous
         end
       end
 
+      # non-action urls shouldn't respond to post requests
       post "*" do
         path, format, action = parse_path
         return not_found! unless action
         page = Site[path]
         return not_found! unless page
         status, headers, result = page.process_action(action, env, format)
+        # our 404 page should come from the CMS
         if status == 404
           not_found!
-          # our 404 page should come from the CMS
         else
           if result.respond_to?(:spontaneous_content?)
             render_page_with_format(result, format)
@@ -80,6 +81,7 @@ module Spontaneous
         else
           path, format = path.split(DOT)
         end
+        format = (format || :html).to_sym
         [path, format, action]
       end
 
