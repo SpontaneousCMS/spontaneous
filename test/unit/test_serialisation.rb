@@ -70,6 +70,7 @@ class SerialisationTest < MiniTest::Spec
         :type => "SerialisedPiece",
         :id => SerialisedPiece.schema_id.to_s,
         :is_page => false,
+        :is_alias=>false,
         :title => "Type Title",
         :styles => [
           {:name => 'freezing', :schema_id => @freezing_style.to_s },
