@@ -638,6 +638,9 @@ img.missing {
 		a + a {
 			margin-left: 8px;
 		}
+    .alias {
+      font-style: italic;
+    }
 		.down {
 			@include down-arrow("/@spontaneous/static/slot-down-arrow.png", 18px);
 		}
@@ -861,7 +864,11 @@ img.missing {
 					// background-color: #6b6b6b;
 					padding-left: 8px;
 					padding-right: 8px;
+
 				}
+        .alias {
+          font-style: italic;
+        }
 				// a:hover {
 				//   background-color: $highlight;
 				//}

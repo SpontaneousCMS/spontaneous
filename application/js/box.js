@@ -26,6 +26,10 @@ Spontaneous.Box = (function($, S) {
 			return this._type;
 		},
 
+		schema_id: function() {
+			return this.type().data.id;
+		},
+
 		depth: function() {
 			return 'box';
 		},
@@ -104,10 +108,19 @@ Spontaneous.Box = (function($, S) {
 
 				var _box = this;
 				$.each(allowed, function(i, type) {
-					var add_allowed = function(type) {
-						this.add_content(type, 0);
-					}.bind(_box, type);
-					var a = dom.a().click(add_allowed).text(type.title);
+					var a = dom.a().text(type.title), add_allowed;
+					if (type.is_alias()) {
+						a.addClass('alias')
+						add_allowed = function(type) {
+							var d = new Spontaneous.AddAliasDialogue(_box, type);
+							d.open();
+						}.bind(_box, type);
+					} else {
+						add_allowed = function(type) {
+							this.add_content(type, 0);
+						}.bind(_box, type);
+					}
+					a.click(add_allowed);
 					allowed_bar.append(a)
 				});
 				allowed_bar.append(dom.span('.down'));
@@ -177,13 +190,18 @@ Spontaneous.Box = (function($, S) {
 		},
 
 		add_content: function(content_type, position) {
-			this.add_entry(content_type, position, this.insert_entry.bind(this));
+			this.add_entry(content_type, position);
 		},
+
+		update_pieces: function(entry_data) {
+			var callback = this.insert_entry.bind(this);
+			this.entry_added(entry_data, callback)
+		},
+
 		add_entry: function(type, position, callback) {
-			Spontaneous.Ajax.post(['/add', this.container.id(), this.id(), type.schema_id].join('/'), {}, this, function(result) {
-				this.entry_added(result, callback);
-			});
+			Spontaneous.Ajax.post(['/add', this.container.id(), this.id(), type.schema_id].join('/'), {}, this, this.update_pieces);
 		},
+
 		save_path: function() {
 			return ['/savebox', this.container.id(), this.id()].join('/');
 		},

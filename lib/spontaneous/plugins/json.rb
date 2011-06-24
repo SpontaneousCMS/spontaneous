@@ -10,6 +10,7 @@ module Spontaneous::Plugins
           :type=> self.json_name,
           :id => self.schema_id.to_s,
           :is_page => self.page?,
+          :is_alias => self.alias?,
           :title=> self.title,
           :fields => readable_fields.map { |name| field_prototypes[name].to_hash },
           :styles => readable_styles.map { |style| style.to_hash },

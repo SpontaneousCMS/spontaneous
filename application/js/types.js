@@ -61,6 +61,9 @@ Spontaneous.Types = (function($, S) {
 		},
 		is_page: function() {
 			return this.data.is_page;
+		},
+		is_alias: function() {
+			return this.data.is_alias;
 		}
 	});
 	var Types = new JS.Singleton({

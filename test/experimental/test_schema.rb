@@ -665,7 +665,7 @@ class SchemaTest < MiniTest::Spec
         m.key?(uid).should be_false
       end
 
-      should "be done automatically in presence of independent changes to boxes & fields" do
+      should "be done automatically in presence of independent changes to classes, boxes & fields" do
         class ::X < B; end
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:boxes).returns([])
