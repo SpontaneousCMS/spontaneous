@@ -6,7 +6,7 @@ module Spontaneous::Plugins
   module Actions
     ACTION_SEPARATOR = "@".freeze
 
-    class ActionHandler < Sinatra::Base
+    class Controller < Sinatra::Base
       attr_reader :content, :format
 
       def initialize(content, format)
@@ -20,15 +20,23 @@ module Spontaneous::Plugins
     end
 
     module ClassMethods
-      def action_handlers
-        @action_handlers ||= {}
+      def controllers
+        if (supertype? and supertype.respond_to?(:controllers))
+          supertype.controllers.dup.merge(local_controllers)
+        else
+          local_controllers
+        end
       end
 
-      def actions(namespace, &block)
-        actions_class = Class.new(ActionHandler)
-        actions_class.class_eval(&block) if block_given?
-        self.const_set("#{namespace.to_s.camelize}Actions", actions_class)
-        action_handlers[namespace.to_sym] = actions_class
+      def local_controllers
+        @controllers ||= {}
+      end
+
+      def controller(namespace, &block)
+        controller_class = Class.new(Controller)
+        controller_class.class_eval(&block) if block_given?
+        self.const_set("#{namespace.to_s.camelize}Controller", controller_class)
+        local_controllers[namespace.to_sym] = controller_class
       end
     end # ClassMethods
 
@@ -39,7 +47,7 @@ module Spontaneous::Plugins
         namespace, *p = action_path.split(S::Constants::SLASH)
         path = [S::Constants::EMPTY].concat(p).join(S::Constants::SLASH)
         env[S::Constants::PATH_INFO] = path
-        klass = self.class.action_handlers[namespace.to_sym]
+        klass = self.class.controllers[namespace.to_sym]
         return 404 unless klass
         app = klass.new(self, format)
         app.call(env)

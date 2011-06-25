@@ -41,6 +41,10 @@ class FrontTest < MiniTest::Spec
     @news
   end
 
+  def subpage
+    @sub
+  end
+
   def dynamic
     @dynamic
   end
@@ -68,6 +72,8 @@ class FrontTest < MiniTest::Spec
         attr_accessor :status
       end
 
+      class ::SubPage < SitePage; end
+
       Spontaneous.environment = :test
       Site.publishing_method = :immediate
 
@@ -82,12 +88,14 @@ class FrontTest < MiniTest::Spec
 
       @root = ::SitePage.create
       @about = ::SitePage.create(:slug => "about", :uid => "about")
+      @sub = ::SubPage.create(:slug => "now", :uid => "now")
       @news = ::SitePage.create(:slug => "news", :uid => "news")
       @dynamic = ::SitePage.create(:slug => "dynamic", :uid => "dynamic")
       @dynamic.layout = :dynamic
       @root.pages << @about
       @root.pages << @news
       @root.pages << @dynamic
+      @about.pages << @sub
       @root.save
 
       Content.delete_revision(1) rescue nil
@@ -99,6 +107,7 @@ class FrontTest < MiniTest::Spec
 
     teardown do
       Object.send(:remove_const, :SitePage)
+      Object.send(:remove_const, :SubPage)
       Content.delete
       Site.delete
       Content.delete_revision(1)
@@ -287,9 +296,9 @@ class FrontTest < MiniTest::Spec
       end
     end
 
-    context "Model actions" do
+    context "Model controllers" do
       setup do
-        SitePage.actions :comments do
+        SitePage.controller :comments do
           get '/' do
             "Success"
           end
@@ -302,7 +311,7 @@ class FrontTest < MiniTest::Spec
           end
         end
 
-        SitePage.actions :status do
+        SitePage.controller :status do
           get '/:status' do
             page.status = params[:status]
             page
@@ -315,6 +324,7 @@ class FrontTest < MiniTest::Spec
         end
 
         Page.stubs(:path).with("/about").returns(about)
+        Page.stubs(:path).with("/about/now").returns(subpage)
       end
 
       teardown do
@@ -386,6 +396,12 @@ class FrontTest < MiniTest::Spec
         get "/about/@comments/format.xml"
         assert last_response.ok?
         last_response.body.should == "xml"
+      end
+
+      should "be inherited by subclasses" do
+        get "/about/now/@comments"
+        assert last_response.ok?
+        last_response.body.should == "Success"
       end
     end
   end
