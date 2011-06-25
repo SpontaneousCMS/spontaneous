@@ -124,12 +124,14 @@ module Spontaneous
         end
 
         def update_fields(model, field_data)
-          field_data.each do | id, values |
-            field = model.fields.find(id)
-            if model.field_writable?(field.name.to_sym)
-              field.update(values)
-            else
-              unauthorised!
+          if field_data
+            field_data.each do |id, values|
+              field = model.fields.find(id)
+              if model.field_writable?(field.name.to_sym)
+                field.update(values)
+              else
+                unauthorised!
+              end
             end
           end
           if model.save

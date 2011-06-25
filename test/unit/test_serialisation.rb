@@ -114,6 +114,9 @@ class SerialisationTest < MiniTest::Spec
       should "serialise to JSON" do
         SerialisedPiece.to_json.json.should == @class_hash
       end
+      should "include the title field name in the serialisation of page types" do
+        SerialisedPage.to_hash[:title_field].should == 'title'
+      end
     end
 
     context "pieces" do

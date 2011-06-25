@@ -19,7 +19,9 @@ module Spontaneous
           else
             @owner._pieces.detect { |piece| piece.id == data[:piece] }
           end
-        array_push(entry)
+        # if the piece/page has been deleted or is invisible
+        # then we just want to silently skip it
+        array_push(entry) if entry
       end
     end
 

@@ -24,6 +24,14 @@ module Spontaneous
       true
     end
 
+    def self.to_hash
+      super.merge(:title_field => self.title_field.to_s)
+    end
+
+    def self.title_field
+      :title
+    end
+
     def page?
       true
     end
@@ -84,7 +92,7 @@ module Spontaneous
     end
 
     def title_field
-      :title
+      self.class.title_field
     end
 
     def to_shallow_hash
