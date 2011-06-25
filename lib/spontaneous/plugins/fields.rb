@@ -82,6 +82,11 @@ module Spontaneous::Plugins
     end
 
     module InstanceMethods
+      def after_save
+        super
+        fields.saved
+      end
+
       def reload
         @field_set = nil
         super

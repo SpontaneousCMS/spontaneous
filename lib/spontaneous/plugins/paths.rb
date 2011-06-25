@@ -4,16 +4,36 @@
 module Spontaneous::Plugins
   module Paths
 
+    module ClassMethods
+      def generate_default_slug
+        "page-#{Time.now.strftime('%Y%m%d-%H%M%S')}"
+      end
+
+      def is_default_slug?(slug)
+        /^page-\d{8}-\d{6}$/ === slug
+      end
+    end
+
     module InstanceMethods
       ANCESTOR_SEP = "."
 
       def after_initialize
         super
-        self.slug = default_slug if slug.nil?
+        self.slug = default_slug if slug.blank?
       end
 
       def before_create
         place_in_page_tree
+        super
+      end
+
+      def before_save
+        unless new?
+          title = self.fields[:title]
+          if title.modified? and !title.blank? and self.class.is_default_slug?(slug)
+            self.slug = title.value
+          end
+        end
         super
       end
 
@@ -23,7 +43,7 @@ module Spontaneous::Plugins
       end
 
       def default_slug
-        "page-#{Time.now.strftime('%Y%m%d-%H%M%S')}"
+        self.class.generate_default_slug
       end
 
       def parent=(parent)

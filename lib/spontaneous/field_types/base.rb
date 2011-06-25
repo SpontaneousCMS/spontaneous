@@ -83,6 +83,14 @@ module Spontaneous
         self.unprocessed_value = value
       end
 
+      def mark_unmodified
+        @modified = nil
+      end
+
+      def modified?
+        @modified
+      end
+
       attr_accessor :prototype
       # def prototype
       #   self.class.prototype
@@ -172,6 +180,14 @@ module Spontaneous
         %(#<#{self.class.name}:#{self.object_id} #{self.serialize.inspect}>)
       end
 
+      def blank?
+        value.blank?
+      end
+
+      def empty?
+        value.empty?
+      end
+
       protected
 
       def load(attributes={}, from_db=false)
@@ -205,6 +221,7 @@ module Spontaneous
       end
 
       def set_unprocessed_value(value)
+        @modified = (@unprocessed_value != value)
         @unprocessed_value = value
       end
 

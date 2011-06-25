@@ -52,6 +52,9 @@ module Spontaneous::Plugins
         end
       end
 
+      def saved
+        store.each { |name, field| field.mark_unmodified }
+      end
       protected
 
       def store

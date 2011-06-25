@@ -63,6 +63,24 @@ class PageTest < MiniTest::Spec
         p.save
         p.reload.slug.should == "somethings-illegal-and-ugly"
       end
+
+      should "be set from title if using generated slug" do
+        r = Page.create
+        slug = Page.generate_default_slug
+        Page.stubs(:generate_default_slug).returns(slug)
+        o = Page.create
+        o.slug.should == slug
+        r << o
+        o.save.reload
+        o.title = "New Title"
+        o.save
+        o.reload
+        o.slug.should == "new-title"
+        o.title = "Another Title"
+        o.save
+        o.reload
+        o.slug.should == "new-title"
+      end
     end
 
     context "Pages in tree" do
