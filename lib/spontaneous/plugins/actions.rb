@@ -47,9 +47,9 @@ module Spontaneous::Plugins
         namespace, *p = action_path.split(S::Constants::SLASH)
         path = [S::Constants::EMPTY].concat(p).join(S::Constants::SLASH)
         env[S::Constants::PATH_INFO] = path
-        klass = self.class.controllers[namespace.to_sym]
-        return 404 unless klass
-        app = klass.new(self, format)
+        controller_class = self.class.controllers[namespace.to_sym]
+        return 404 unless controller_class
+        app = controller_class.new(self, format)
         app.call(env)
       end
 
