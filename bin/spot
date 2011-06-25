@@ -1,4 +1,5 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -U -KU
+
 require 'rubygems' unless defined?(Gem) # Useful only on --dev mode
 
 spot_path = File.expand_path('../../lib', __FILE__)
