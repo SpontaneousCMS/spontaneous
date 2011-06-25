@@ -107,10 +107,13 @@ module Spontaneous
           # if the map file is missing, then this is a first run and we can just
           # create the thing by populating it with the current schema
           if !map.exists?
+            logger.warn("Generating new schema")
             generate_new_schema
           else
             if changes.resolvable?
+              logger.warn("Schema changed...")
               while changes and changes.resolvable? do
+                logger.warn("Fixing automatically")
                 changes.resolve!
                 map.reload!
                 changes = perform_validation
@@ -118,6 +121,7 @@ module Spontaneous
               write_schema
               reload!
             else
+              logger.warn("Unable to resolve schema changes")
               raise e
             end
           end
@@ -150,7 +154,7 @@ module Spontaneous
       end
 
       def write_schema
-        File.open(Spontaneous.schema_map, 'w') do |file|
+        File.atomic_write(Spontaneous.schema_map) do |file|
           file.write(UID.to_hash.to_yaml)
         end
       end

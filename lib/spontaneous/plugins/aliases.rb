@@ -40,7 +40,7 @@ module Spontaneous::Plugins
         fields[:title].to_s
       end
 
-      def alias_icon
+      def alias_icon_field
         if field = fields.detect { |f| f.image? }
           field
         else
@@ -95,7 +95,7 @@ module Spontaneous::Plugins
       end
 
       def to_hash
-        super.merge(:target => target.to_shallow_hash, :alias_title => target.alias_title, :alias_icon => target.alias_icon.to_hash)
+        super.merge(:target => target.to_shallow_hash, :alias_title => target.alias_title, :alias_icon => target.alias_icon_field.to_hash)
       end
     end
 

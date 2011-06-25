@@ -77,9 +77,20 @@ module Spontaneous
       0
     end
 
+    def page_title
+      if field = self.fields[title_field]
+        field.value
+      end
+    end
+
+    def title_field
+      :title
+    end
+
     def to_shallow_hash
       hash = super.merge({
         :path => path,
+        :title => page_title,
         :slug => slug,
         :uid => uid
       })

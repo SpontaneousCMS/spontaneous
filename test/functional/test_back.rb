@@ -588,7 +588,7 @@ class BackTest < MiniTest::Spec
           {
             :id => job.id,
             :title => job.title.to_s,
-            :icon => job.image.to_s
+            :icon => job.image.to_hash
           }
         end
       end

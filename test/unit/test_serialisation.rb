@@ -171,6 +171,7 @@ class SerialisationTest < MiniTest::Spec
         @root_hash = {
           :type=>"SerialisedPage",
           :type_id=> SerialisedPage.schema_id.to_s,
+          :title => @root.page_title,
           :depth=>0,
           :uid=>"home",
           :path=>"/",
@@ -211,6 +212,7 @@ class SerialisationTest < MiniTest::Spec
           :entries=> [
             { # root.boxes.entries.first.entries.first
           :type=>"SerialisedPage",
+          :title => @child.page_title,
           :type_id=> SerialisedPage.schema_id.to_s,
           :path=>"/about",
           :depth=>2,
@@ -264,7 +266,7 @@ class SerialisationTest < MiniTest::Spec
       end
 
       should "generate a hash for JSON serialisation" do
-        # puts; pp @root_hash; pp @root.to_hash
+       # puts; pp @root_hash; pp @root.to_hash
         assert_hashes_equal(@root_hash, @root.to_hash)
       end
 

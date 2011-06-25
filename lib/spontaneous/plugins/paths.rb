@@ -19,7 +19,7 @@ module Spontaneous::Plugins
 
       def after_initialize
         super
-        self.slug = default_slug if slug.blank?
+        self.slug = default_slug if slug.nil?
       end
 
       def before_create
@@ -29,9 +29,10 @@ module Spontaneous::Plugins
 
       def before_save
         unless new?
-          title = self.fields[:title]
-          if title.modified? and !title.blank? and self.class.is_default_slug?(slug)
-            self.slug = title.value
+          if title = self.fields[:title]
+            if title.modified? and !title.blank? and self.class.is_default_slug?(slug)
+              self.slug = title.value
+            end
           end
         end
         super

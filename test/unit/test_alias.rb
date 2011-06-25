@@ -31,15 +31,16 @@ class AliasTest < MiniTest::Spec
       class ::A < ::Piece
         field :a_field1
         field :a_field2
+        field :image, :image
 
         style :a_style
         def alias_title
           a_field1.value
         end
 
-        def alias_icon
-          "/aliasicon.png"
-        end
+        # def alias_icon_field
+        #   "/aliasicon.png"
+        # end
       end
 
       class ::AA < ::A
@@ -181,7 +182,7 @@ class AliasTest < MiniTest::Spec
 
         should "include alias title & icon in serialisation" do
           @a_alias.to_hash[:alias_title].should == @a.alias_title
-          @a_alias.to_hash[:alias_icon].should == @a.alias_icon
+          @a_alias.to_hash[:alias_icon].should == @a.alias_icon_field.to_hash
         end
       end
     end

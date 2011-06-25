@@ -6,10 +6,11 @@ module Spontaneous
   class NamedSet
 
     include Enumerable
-
+    @superset = nil
 
     def initialize(owner, name, supertype = nil)
       @owner, @name, @supertype = owner, name, supertype
+      @superset = nil
       @superset = supertype.send(name) if supertype && supertype.respond_to?(name)
       @names = []
       @store = StrHash.new

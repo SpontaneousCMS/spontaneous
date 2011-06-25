@@ -141,7 +141,7 @@ module Spontaneous
           content = Content[params[:id]]
           halt 404 if content.nil?
           if box_id = Spontaneous::Schema::UID[params[:box_id]]
-            box = content.boxes.detect { |box| box.schema_id == box_id }
+            box = content.boxes.detect { |b| b.schema_id == box_id }
             [content, box]
           else
             content
@@ -358,7 +358,7 @@ module Spontaneous
               {
                 :id => t.id,
                 :title => t.alias_title,
-                :icon => t.alias_icon
+                :icon => t.alias_icon_field.to_hash
               }
             end
             json(targets)
