@@ -12,6 +12,9 @@ Spontaneous.FieldPreview = (function($, S) {
 		depth_class: function() {
 			return 'depth-'+this.content.depth();
 		},
+		has_fields: function() {
+			return this.content.field_list().length > 0;
+		},
 		panel: function() {
 			var wrapper = dom.div([dom.id(this.wrap_id), 'fields-preview', this.depth_class()])
 			// $(dom.div, {'id':this.wrap_id, 'class':'fields-preview ' + this.depth_class()});

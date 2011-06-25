@@ -31,6 +31,7 @@ Spontaneous.Types = (function($, S) {
 			this.schema_id = type_data.id;
 			this.type = type_data.type;
 			this.title = type_data.title;
+			this.title_field_name = type_data.title_field;
 			this.field_prototypes = {};
 			this.field_names = [];
 			this.box_prototypes = {};

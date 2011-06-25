@@ -141,12 +141,6 @@ Spontaneous.Page = (function($, S) {
 			this.callSuper(content);
 			this.path = content.path;
 		},
-		title: function() {
-			return this.title_field().value();
-		},
-		title_field: function() {
-			return this.fields().title;
-		},
 
 		panel: function() {
 			this.panel = dom.div('#page-content');

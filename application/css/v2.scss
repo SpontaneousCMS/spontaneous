@@ -921,10 +921,46 @@ img.missing {
 				}
 			}
 		}
+    .alias-target {
+      padding: $unit/2;
+      background-color: #444;
+      color: white;
+      font-size: 14px;
+      font-style: italic;
+      .icon-wrap, a {
+        display: inline-block;
+        vertical-align: top;
+        cursor: pointer;
+      }
+      .icon-wrap {
+        margin-right: $unit;
+      }
+    }
 	}
 	.entry-wrap.hidden {
 		opacity: 0.4;
 	}
+  .entry-wrap.page {
+    .white-bg {
+			@include corners(0, 0, $corner-radius, $corner-radius);
+      right: 0;
+    }
+    .page-title {
+      background-color: #444;
+      padding: $unit/2;
+      a {
+        cursor: pointer;
+        font-family: $headline-font-family;
+        font-weight: 100;
+        color: #fff;
+        font-size: 16px;
+        line-height: normal;
+        &:hover {
+          color: $highlight;
+        }
+      }
+    }
+  }
 	.entry-wrap.ui-sortable-helper {
 		@extend .shadow;
 	}
@@ -1334,5 +1370,12 @@ img.missing {
 	background-position: 0 -80px;
 }
 
+.icon-wrap {
+  overflow: hidden;
+  position: relative;
+  img {
+    position: relative;
+  }
+}
 @import "popover";
 @import "editing";

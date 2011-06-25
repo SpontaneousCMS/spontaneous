@@ -119,6 +119,14 @@ Spontaneous.Content = (function($, S) {
 			return (this.content.fields.length > 0)
 		},
 
+		title: function() {
+			return this.title_field().value();
+		},
+
+		title_field: function() {
+			return this.fields()[this.type().title_field_name];
+		},
+
 		entries: function() {
 			if (!this.content.entries) {
 				return [];

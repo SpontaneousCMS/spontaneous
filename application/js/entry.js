@@ -63,8 +63,10 @@ Spontaneous.Entry = (function($, S) {
 			// wrapper.append(this.dialogue_box);
 			var entry = dom.div('.entry');
 			var fields = new Spontaneous.FieldPreview(this, '');
-			var fields_panel = fields.panel();
-			entry.append(fields_panel);
+			if (fields.has_fields()) {
+				var fields_panel = fields.panel();
+				entry.append(fields_panel);
+			}
 			var box_container = new Spontaneous.BoxContainer(this);
 			inside.append(entry);
 			inside.append(box_container.panel());
@@ -80,16 +82,16 @@ Spontaneous.Entry = (function($, S) {
 			var content = this.content,
 			wrap = dom.div('.alias-target'),
 			icon = content.alias_icon,
-			title = dom.a().text(content.alias_title).click(function() {
-					S.Location.load_id(content.target.id);
-			});
-			if (icon) {
+			click = function() { S.Location.load_id(content.target.id); },
+			title = dom.a().text(content.alias_title).click(click);
 
-				console.log(Spontaneous.Image)
+
+			if (icon) {
 				var img = new Spontaneous.Image(icon);
-				console.log(img)
-				wrap.append(img.fit(60, 60))
+				console.log(icon, img.is_empty())
+				wrap.append(img.icon(60, 60).click(click))
 			}
+
 			return wrap.append(title)
 		},
 		title_bar: function(wrapper) {
