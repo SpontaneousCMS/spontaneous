@@ -191,6 +191,13 @@ class BackTest < MiniTest::Spec
         assert_equal Site.map(@project1.id).to_json, last_response.body
       end
 
+      should "return 404 when asked for map of non-existant page" do
+        id = '9999'
+        S::Content.stubs(:[]).with(id).returns(nil)
+        get "/@spontaneous/map/#{id}"
+        assert last_response.status == 404
+      end
+
       should "reorder pieces" do
         post "/@spontaneous/content/#{@job2.id}/position/0"
         assert last_response.ok?

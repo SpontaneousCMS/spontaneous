@@ -198,7 +198,12 @@ module Spontaneous
         end
 
         get '/map/:id' do
-          json Site.map(params[:id])
+          map = Site.map(params[:id])
+          if map
+            json(map)
+          else
+            404
+          end
         end
 
         get '/location*' do

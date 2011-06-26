@@ -32,11 +32,14 @@ module Spontaneous
       end
 
       def map(root_id=nil)
-        if root_id.nil?
-          Page.root.map_entry
-        else
-          Content[root_id].map_entry
-        end
+        page = \
+          if root_id.nil?
+            Page.root
+          else
+            Content[root_id]
+          end
+        return nil unless page
+        page.map_entry
       end
 
       def root
