@@ -298,6 +298,11 @@ class FrontTest < MiniTest::Spec
 
     context "Model controllers" do
       setup do
+        class ::TestController < Spontaneous::PageController
+          get '/' do
+            "Magic"
+          end
+        end
         SitePage.controller :comments do
           get '/' do
             "Success"
@@ -323,11 +328,19 @@ class FrontTest < MiniTest::Spec
           end
         end
 
+        SitePage.controller :test, ::TestController
+        SitePage.controller :test2, ::TestController do
+          get "/block" do
+            "Block"
+          end
+        end
+
         Page.stubs(:path).with("/about").returns(about)
         Page.stubs(:path).with("/about/now").returns(subpage)
       end
 
       teardown do
+        Object.send(:remove_const, :TestController)
       end
 
       should "not be used unless necessary" do
@@ -402,6 +415,47 @@ class FrontTest < MiniTest::Spec
         get "/about/now/@comments"
         assert last_response.ok?
         last_response.body.should == "Success"
+      end
+
+      should "allow definition of controller using class" do
+        get "/about/@test"
+        assert last_response.ok?
+        last_response.body.should == "Magic"
+      end
+
+      should "allow definition of controller using class and extend it using block" do
+        get "/about/@test2/block"
+        assert last_response.ok?
+        last_response.body.should == "Block"
+      end
+
+      context "overriding base controller class" do
+        setup do
+          class ::PageController < S::PageController
+            get '/nothing' do
+              'Something'
+            end
+          end
+
+          SitePage.controller :drummer do
+            get '/' do
+              "Success"
+            end
+          end
+
+        end
+
+        teardown do
+          Object.send(:remove_const, :PageController)
+        end
+
+        should "affect all controller actions" do
+        p defined?(::PageController)
+          p SitePage.controller_base_class
+          get "/about/@drummer/nothing"
+          assert last_response.ok?
+          last_response.body.should == "Something"
+        end
       end
     end
   end

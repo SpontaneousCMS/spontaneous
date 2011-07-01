@@ -11,7 +11,7 @@ module Spontaneous
       end
 
       DOT = '.'.freeze
-      ACTION = "/#{S::Plugins::Actions::ACTION_SEPARATOR}".freeze
+      ACTION = "/#{S::Plugins::Controllers::ACTION_SEPARATOR}".freeze
 
       get "*" do
         path, format, action = parse_path

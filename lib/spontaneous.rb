@@ -87,6 +87,8 @@ module Spontaneous
   autoload :Permissions, "spontaneous/permissions"
   autoload :ContentQuery, "spontaneous/content_query"
 
+  autoload :PageController, "spontaneous/page_controller"
+
   module Plugins
     autoload :Supertype, "spontaneous/plugins/supertype"
     autoload :Boxes, "spontaneous/plugins/boxes"
@@ -112,7 +114,7 @@ module Spontaneous
     autoload :Visibility, "spontaneous/plugins/visibility"
     autoload :Prototypes, "spontaneous/plugins/prototypes"
     autoload :Permissions, "spontaneous/plugins/permissions"
-    autoload :Actions, "spontaneous/plugins/actions"
+    autoload :Controllers, "spontaneous/plugins/controllers"
 
     module Fields
       autoload :FieldPrototype, "spontaneous/plugins/fields/field_prototype"
