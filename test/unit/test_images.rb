@@ -52,7 +52,7 @@ class ImagesTest < MiniTest::Spec
         size :tall, :height => 200
         size :thumbnail, :fit => [50, 50]
         size :icon, :crop => [50, 50]
-        size :greyscale, [[:fit, 50, 50], :greyscale]
+        size :greyscale, [[:fit, 50, 50], :greyscale, [:gaussian_blur, 10]]
       end
 
       ResizingImageField.register

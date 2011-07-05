@@ -450,8 +450,6 @@ class FrontTest < MiniTest::Spec
         end
 
         should "affect all controller actions" do
-        p defined?(::PageController)
-          p SitePage.controller_base_class
           get "/about/@drummer/nothing"
           assert last_response.ok?
           last_response.body.should == "Something"
