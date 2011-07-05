@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Garry Hill"]
-  s.date = %q{2011-06-24}
+  s.date = %q{2011-07-05}
   s.description = %q{TODO: longer description of your gem}
   s.email = %q{garry@magnetised.info}
   s.executables = ["back", "console", "limit-upload", "nginx", "spot", "unicorn", "unlimit-upload"]
@@ -47,6 +47,7 @@ Gem::Specification.new do |s|
     "application/js/field_types/image_field.js",
     "application/js/field_types/markdown_field.js",
     "application/js/field_types/string_field.js",
+    "application/js/image.js",
     "application/js/init.js",
     "application/js/load.js",
     "application/js/location.js",
@@ -234,6 +235,7 @@ Gem::Specification.new do |s|
     "lib/spontaneous/media.rb",
     "lib/spontaneous/named_set.rb",
     "lib/spontaneous/page.rb",
+    "lib/spontaneous/page_controller.rb",
     "lib/spontaneous/page_piece.rb",
     "lib/spontaneous/permissions.rb",
     "lib/spontaneous/permissions/access_group.rb",
@@ -242,13 +244,13 @@ Gem::Specification.new do |s|
     "lib/spontaneous/permissions/user_level.rb",
     "lib/spontaneous/piece.rb",
     "lib/spontaneous/plugins.rb",
-    "lib/spontaneous/plugins/actions.rb",
     "lib/spontaneous/plugins/aliases.rb",
     "lib/spontaneous/plugins/allowed_types.rb",
     "lib/spontaneous/plugins/application/paths.rb",
     "lib/spontaneous/plugins/application/render.rb",
     "lib/spontaneous/plugins/application/state.rb",
     "lib/spontaneous/plugins/boxes.rb",
+    "lib/spontaneous/plugins/controllers.rb",
     "lib/spontaneous/plugins/entries.rb",
     "lib/spontaneous/plugins/entry.rb",
     "lib/spontaneous/plugins/fields.rb",
@@ -506,7 +508,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<less>, ["~> 1.2"])
       s.add_runtime_dependency(%q<sass>, ["~> 3.1.0.alpha"])
       s.add_runtime_dependency(%q<stringex>, ["~> 1.1"])
-      s.add_runtime_dependency(%q<miso>, ["~> 0.3.3"])
+      s.add_runtime_dependency(%q<mini_magick>, ["~> 3.3"])
       s.add_runtime_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
       s.add_runtime_dependency(%q<thor>, ["~> 0.14.6"])
       s.add_runtime_dependency(%q<hwia>, ["~> 1.0.2"])
@@ -541,7 +543,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<less>, ["~> 1.2"])
       s.add_dependency(%q<sass>, ["~> 3.1.0.alpha"])
       s.add_dependency(%q<stringex>, ["~> 1.1"])
-      s.add_dependency(%q<miso>, ["~> 0.3.3"])
+      s.add_dependency(%q<mini_magick>, ["~> 3.3"])
       s.add_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
       s.add_dependency(%q<thor>, ["~> 0.14.6"])
       s.add_dependency(%q<hwia>, ["~> 1.0.2"])
@@ -577,7 +579,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<less>, ["~> 1.2"])
     s.add_dependency(%q<sass>, ["~> 3.1.0.alpha"])
     s.add_dependency(%q<stringex>, ["~> 1.1"])
-    s.add_dependency(%q<miso>, ["~> 0.3.3"])
+    s.add_dependency(%q<mini_magick>, ["~> 3.3"])
     s.add_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
     s.add_dependency(%q<thor>, ["~> 0.14.6"])
     s.add_dependency(%q<hwia>, ["~> 1.0.2"])

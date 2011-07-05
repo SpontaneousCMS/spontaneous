@@ -48,10 +48,11 @@ class ImagesTest < MiniTest::Spec
       # p @digest
 
       class ::ResizingImageField < FieldTypes::ImageField
-        sizes :preview => { :width => 200 },
-          :tall => { :height => 200 },
-          :thumbnail => { :fit => [50, 50] },
-          :icon => { :crop => [50, 50] }
+        size :preview, :width => 200
+        size :tall, :height => 200
+        size :thumbnail, :fit => [50, 50]
+        size :icon, :crop => [50, 50]
+        size :greyscale, [[:fit, 50, 50], :greyscale]
       end
 
       ResizingImageField.register
@@ -66,9 +67,9 @@ class ImagesTest < MiniTest::Spec
       @instance.stubs(:id).returns(@content_id)
       @image = @instance.photo
       @image.owner.should == @instance
-      silence_logger {
+      # silence_logger {
         @image.value = @origin_image.to_s
-      }
+      # }
     end
 
     teardown do
@@ -77,6 +78,18 @@ class ImagesTest < MiniTest::Spec
       (@tmp_dir + "..").rmtree
     end
 
+    context "with defined sizes" do
+      setup do
+      end
+
+      should "create resized versions of the input image" do
+        ImageSize.read(@image.preview.filepath).should == [200, 267]
+        ImageSize.read(@image.tall.filepath).should == [150, 200]
+        ImageSize.read(@image.thumbnail.filepath).should == [38, 50]
+        ImageSize.read(@image.icon.filepath).should == [50, 50]
+        ImageSize.read(@image.greyscale.filepath).should == [38, 50]
+      end
+    end
     context "in templates" do
 
       should "render an <img/> tag in HTML format" do
@@ -119,8 +132,6 @@ class ImagesTest < MiniTest::Spec
     end
     context "defined by classes" do
       setup do
-
-
       end
 
       teardown do
@@ -143,7 +154,7 @@ class ImagesTest < MiniTest::Spec
 
 
       should "have a 'sizes' config option that generates resized versions" do
-        assert_same_elements ResizingImageField.size_definitions.keys, [:preview, :thumbnail, :icon, :tall]
+        assert_same_elements ResizingImageField.size_definitions.keys, [:preview, :thumbnail, :icon, :tall, :greyscale]
       end
 
       should "serialise attributes" do
@@ -212,8 +223,8 @@ class ImagesTest < MiniTest::Spec
         @image.original.filesize.should == @image.filesize
       end
       should "have a 'sizes' config option that generates resized versions" do
-        assert_same_elements @image.class.size_definitions.keys, [:preview, :thumbnail, :icon, :tall]
-        assert_same_elements @image.class.sizes.keys, [:preview, :thumbnail, :icon, :tall]
+        assert_same_elements @image.class.size_definitions.keys, [:preview, :thumbnail, :icon, :tall, :greyscale]
+        assert_same_elements @image.class.sizes.keys, [:preview, :thumbnail, :icon, :tall, :greyscale]
       end
 
       should "serialise attributes" do

@@ -5,7 +5,7 @@ class ProjectImage < Piece
   field :title
 
   field :image do
-  	sizes :thumbnail => { :width => 100 }
+  	size :thumbnail, :width => 100
   end
 
   # must be non-interpolated '' or %q{} or:

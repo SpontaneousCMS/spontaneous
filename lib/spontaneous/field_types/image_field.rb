@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-require 'miso'
+require 'mini_magick'
 
 module Spontaneous
   module FieldTypes
@@ -48,12 +48,12 @@ module Spontaneous
         %w{image/(png|jpeg|gif)}
       end
 
-      def self.sizes(sizes=nil)
-        if sizes
-          @size_definitions = validate_sizes(sizes)
-        else
-          size_definitions
-        end
+      def self.size(name, definition)
+        self.sizes[name.to_sym] = definition
+      end
+
+      def self.sizes
+        size_definitions
       end
 
       def self.validate_sizes(sizes)
@@ -130,24 +130,52 @@ module Spontaneous
 
     class ImageAttributes
       include ImageFieldUtilities
-      attr_reader  :src, :width, :height, :filesize
+
+      attr_reader  :src, :width, :height, :filesize, :filepath
 
       def initialize(params={})
         params ||= {}
-        @src, @width, @height, @filesize = params[:src], params[:width], params[:height], params[:filesize]
+        @src, @width, @height, @filesize, @filepath = params[:src], params[:width], params[:height], params[:filesize], params[:path]
       end
       def serialize
         {
           :src => src,
           :width => width,
           :height => height,
-          :filesize => filesize
+          :filesize => filesize,
+          :path => filepath
         }
       end
     end
 
     class ImageProcessor
       include ImageFieldUtilities
+
+      class MiniMagick::CommandBuilder
+
+        def fit(width, height)
+          self.add(:geometry, "#{width}x#{height}>")
+        end
+
+        def crop(width, height)
+          dimensions = "#{width}x#{height}"
+          self.add(:geometry, "#{dimensions}^")
+          self.add(:gravity, "center")
+          self.add(:crop, "#{dimensions}+0+0!")
+        end
+
+        def width(width)
+          self.add(:geometry, "#{width}x>")
+        end
+
+        def height(height)
+          self.add(:geometry, "x#{height}>")
+        end
+
+        def greyscale
+          self.add(:type, "Grayscale")
+        end
+      end
 
       MAX_DIM = 2 ** ([42].pack('i').size * 8) - 1 unless defined?(MAX_DIM)
 
@@ -183,17 +211,12 @@ module Spontaneous
       end
 
       def resize(name, size)
-        image = Miso::Image.new(path)
-        [:crop, :fit].each do |method|
-          if size.key?(method)
-            image.send(method, *size[method])
+        image = ::MiniMagick::Image.open(path)
+        commands = normalise_commands(size)
+        image.combine_options do |c|
+          commands.each do |cmd|
+            c.send(*cmd)
           end
-        end
-        if size.key?(:width)
-          image.send(:fit, size[:width], MAX_DIM)
-        end
-        if size.key?(:height)
-          image.send(:fit, MAX_DIM, size[:height])
         end
         file_path = filename_for_size(name)
         image.write(file_path)
@@ -201,6 +224,27 @@ module Spontaneous
         ImageProcessor.new(file_path)
       end
 
+      def normalise_commands(input_commands)
+        commands = \
+          case input_commands
+          when Hash
+            input_commands.to_a
+          when String
+            input_commands.split
+          else
+            input_commands
+          end
+        commands.map do |cmd|
+          case cmd
+          when Array
+            # action, *args = cmd
+            # [action, args]
+            cmd.flatten
+          else
+            cmd
+          end
+        end
+      end
       def filename_for_size(name)
         directory = File.dirname(path)
         original_filename = File.basename(path)
@@ -216,7 +260,8 @@ module Spontaneous
           :src => src,
           :width => width,
           :height => height,
-          :filesize => filesize
+          :filesize => filesize,
+          :path => path
         }
       end
     end

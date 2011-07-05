@@ -4,7 +4,7 @@
 class Project < Page
   field :url
   field :image, :image do
-    sizes :thumbnail => { :width => 100 }
+    size :thumbnail, :width => 100
   end
   field :description, :richtext
 
