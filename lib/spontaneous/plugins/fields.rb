@@ -9,7 +9,7 @@ module Spontaneous::Plugins
           type = nil
         end
 
-        prototype = FieldPrototype.new(self, name, type, options, &block)
+        prototype = Spontaneous::Prototypes::FieldPrototype.new(self, name, type, options, &block)
         field_prototypes[name] = prototype
         unless method_defined?(name)
           define_method(name) do |*args|

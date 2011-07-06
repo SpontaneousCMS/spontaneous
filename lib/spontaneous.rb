@@ -54,7 +54,6 @@ module Spontaneous
   autoload :Page, "spontaneous/page"
   autoload :Piece, "spontaneous/piece"
   autoload :Box, "spontaneous/box"
-  autoload :BoxPrototype, "spontaneous/box_prototype"
 
   autoload :FieldTypes, "spontaneous/field_types"
 
@@ -63,6 +62,11 @@ module Spontaneous
   autoload :FieldSet, "spontaneous/field_set"
   autoload :BoxSet, "spontaneous/box_set"
 
+
+  module Prototypes
+    autoload :FieldPrototype, "spontaneous/prototypes/field_prototype"
+    autoload :BoxPrototype, "spontaneous/prototypes/box_prototype"
+  end
 
   autoload :Style, "spontaneous/style"
   autoload :Layout, "spontaneous/layout"
@@ -118,9 +122,6 @@ module Spontaneous
     autoload :Permissions, "spontaneous/plugins/permissions"
     autoload :Controllers, "spontaneous/plugins/controllers"
 
-    module Fields
-      autoload :FieldPrototype, "spontaneous/plugins/fields/field_prototype"
-    end
 
     module Site
       autoload :Publishing, "spontaneous/plugins/site/publishing"

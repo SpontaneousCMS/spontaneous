@@ -6,7 +6,7 @@ module Spontaneous::Plugins
       def box(name, options = {}, &block)
         name = name.to_sym
         unless boxes.key?(name)
-          box_prototypes[name] = Spontaneous::BoxPrototype.new(self, name, options, &block)
+          box_prototypes[name] = Spontaneous::Prototypes::BoxPrototype.new(self, name, options, &block)
           unless method_defined?(name)
             class_eval <<-BOX
               def #{name}

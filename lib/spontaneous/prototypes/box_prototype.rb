@@ -2,7 +2,7 @@
 
 require 'hwia'
 
-module Spontaneous
+module Spontaneous::Prototypes
   class BoxPrototype
 
     attr_reader :name, :options, :owner
