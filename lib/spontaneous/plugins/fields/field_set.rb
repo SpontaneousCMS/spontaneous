@@ -5,7 +5,6 @@ module Spontaneous::Plugins
   module Fields
     class FieldSet < Spontaneous::PrototypeSet
 
-
       attr_reader :owner
 
       def initialize(owner, initial_values)
@@ -22,21 +21,6 @@ module Spontaneous::Plugins
         end
       end
 
-      # def [](name)
-      #   store[name.to_sym]
-      # end
-
-      # def each
-      #   owner.class.field_names.each do |name|
-      #     yield(self[name])
-      #   end
-      # end
-
-      # def find(id)
-      #   self.values.detect { |f| f.schema_id == id }
-      # end
-
-
       def serialize
         self.map { |field| field.serialize }
       end
@@ -52,10 +36,6 @@ module Spontaneous::Plugins
       end
 
       protected
-
-      # def store
-      #   @store
-      # end
 
       def add_field(field)
         field.owner = owner
