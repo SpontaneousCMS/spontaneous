@@ -1,8 +1,6 @@
 source :rubygems
 
-# gemspec :path => '.'
 
-# gem "bundler", "~> 1.0.9"
 gem "rake", "0.8.7"
 gem "activesupport", "~> 3.0.4"
 gem "home_run", "~> 1.0.0"
@@ -11,16 +9,11 @@ gem "yajl-ruby", "~> 0.7"
 gem "erubis", "~> 2.6"
 gem "tenjin", "~> 0.6.1"
 gem "sinatra", "~> 1.1.2"
-# gem "shotgun", "0.6"
-# use specific commit with fixes for 1.8.6 until new version is released
-# gem "rack", :git => "git://github.com/rack/rack.git", :ref => "1598f873c891288954981435e707de26cf49395d" #"~> 1.2"
 gem 'rack', '~> 1.3.beta'
 gem "thin", "~> 1.2"
-# gem "unicorn", "~> 2.0.0"
 gem "less", "~> 1.2"
-gem "sass", "~> 3.1.0.alpha"
+gem "sass", "~> 3.1.4"
 gem "stringex", "~> 1.1"
-# gem 'miso', '~> 0.3.3'
 gem 'mini_magick', '~> 3.3'
 gem 'fire_and_forget', '~> 0.3.2'
 gem 'thor', '~> 0.14.6'
@@ -48,5 +41,6 @@ group :development do
   gem 'johnson',    '2.0.0.pre3', :platforms => [:mri_18]
   gem 'harmony',    '~> 0.5', :platforms => [:mri_18]
   gem 'ruby-debug', :platforms => [:mri_18]
+  gem 'reek'
 end
 
