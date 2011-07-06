@@ -14,7 +14,7 @@ class PrototypeSetTest < MiniTest::Spec
       @one.stubs(:schema_id).returns("one_id")
       @two.stubs(:schema_id).returns("two_id")
       @three.stubs(:schema_id).returns("three_id")
-      @set = Spontaneous::PrototypeSet.new
+      @set = Spontaneous::Collections::PrototypeSet.new
       @set['one'] = @one
       @set[:two] = @two
       @set[:three] = @three
@@ -22,7 +22,7 @@ class PrototypeSetTest < MiniTest::Spec
 
     should "return correct value for empty? test" do
       @set.empty?.should be_false
-      Spontaneous::PrototypeSet.new.empty?.should be_true
+      Spontaneous::Collections::PrototypeSet.new.empty?.should be_true
     end
 
     should "return the last value" do
@@ -97,7 +97,7 @@ class PrototypeSetTest < MiniTest::Spec
         @superset.order = [:three, :one, :two]
         @super = Super.new
         @super.prototypes = @superset
-        @set = Spontaneous::PrototypeSet.new(@super, :prototypes)
+        @set = Spontaneous::Collections::PrototypeSet.new(@super, :prototypes)
         @four = "Four"
         @five = "Five"
         @four.stubs(:schema_id).returns("four_id")
@@ -152,7 +152,7 @@ class PrototypeSetTest < MiniTest::Spec
       end
 
       should "ignore a nil superobject" do
-        set = Spontaneous::PrototypeSet.new(nil, :prototypes)
+        set = Spontaneous::Collections::PrototypeSet.new(nil, :prototypes)
         set[:four] = @four
         set[:five] = @five
         set[:four].should == @four

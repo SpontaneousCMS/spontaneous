@@ -1,8 +1,8 @@
 # encoding: UTF-8
 
 
-module Spontaneous
-  class BoxSet < Spontaneous::PrototypeSet
+module Spontaneous::Collections
+  class BoxSet < PrototypeSet
 
     attr_reader :owner
 

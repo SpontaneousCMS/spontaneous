@@ -29,7 +29,7 @@ module Spontaneous::Plugins
       end
 
       def field_prototypes
-        @field_prototypes ||= Spontaneous::PrototypeSet.new(supertype, :field_prototypes)
+        @field_prototypes ||= Spontaneous::Collections::PrototypeSet.new(supertype, :field_prototypes)
       end
 
       def field_names
@@ -75,7 +75,7 @@ module Spontaneous::Plugins
       end
 
       def fields
-        @field_set ||= Spontaneous::FieldSet.new(self, field_store)
+        @field_set ||= Spontaneous::Collections::FieldSet.new(self, field_store)
       end
 
       def field?(field_name)

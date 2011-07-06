@@ -28,7 +28,7 @@ module Spontaneous
           # publish_all is quicker
           publish_all
         else
-          change_set = S::ChangeSet.new(changes)
+          change_set = Spontaneous::Collections::ChangeSet.new(changes)
           publish(change_set.page_ids)
 
           changes.each do |change|

@@ -76,7 +76,7 @@ module Spontaneous::Plugins
       # alias_method :pieces, :entries
 
       def all_pieces
-        @all_pieces ||= Spontaneous::EntrySet.new(self, entry_store)
+        @all_pieces ||= Spontaneous::Collections::EntrySet.new(self, entry_store)
       end
 
       def visible_pieces

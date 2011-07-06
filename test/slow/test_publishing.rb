@@ -600,7 +600,7 @@ class PublishingTest < MiniTest::Spec
         result.each_with_index do |set, i|
           changes = publish_sets[i].map { |id| Change[id] }
           pages = page_ids[i].map { |id| Content[id] }
-          set.must_be_instance_of(ChangeSet)
+          set.must_be_instance_of(Spontaneous::Collections::ChangeSet)
           set.changes.should == changes
           set.pages.should == pages
         end

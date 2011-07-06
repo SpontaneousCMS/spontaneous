@@ -1,17 +1,17 @@
 # encoding: UTF-8
 
-module Spontaneous
+module Spontaneous::Collections
   class ChangeSet
     attr_reader :changes
 
     def initialize(changes)
       @changes = changes.map do |change_or_id|
-        change_or_id.is_a?(Change) ? change_or_id : Change[change_or_id]
+        change_or_id.is_a?(Spontaneous::Change) ? change_or_id : Spontaneous::Change[change_or_id]
       end
     end
 
     def pages
-      @pages ||= page_ids.map { |id| Content[id] }
+      @pages ||= page_ids.map { |id| Spontaneous::Content[id] }
     end
 
     def page_ids

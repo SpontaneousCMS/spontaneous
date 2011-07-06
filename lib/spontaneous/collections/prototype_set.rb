@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module Spontaneous
+module Spontaneous::Collections
   class PrototypeSet
     include Enumerable
 

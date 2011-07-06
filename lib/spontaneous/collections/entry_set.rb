@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 
-module Spontaneous
+module Spontaneous::Collections
   class EntrySet < Array
     alias_method :array_insert, :insert
     alias_method :array_push,   :push
@@ -15,7 +15,7 @@ module Spontaneous
         entry = \
           if data[:page]
             page = @owner._pieces.detect { |piece| piece.id == data[:page] }
-            PagePiece.new(@owner, page, data[:style_id])
+            Spontaneous::PagePiece.new(@owner, page, data[:style_id])
           else
             @owner._pieces.detect { |piece| piece.id == data[:piece] }
           end

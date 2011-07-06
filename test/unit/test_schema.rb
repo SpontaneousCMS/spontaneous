@@ -301,7 +301,7 @@ class SchemaTest < MiniTest::Spec
       end
 
       should "detect removal of boxes" do
-        boxes = S::PrototypeSet.new
+        boxes = S::Collections::PrototypeSet.new
         boxes[:promotions] = B.boxes[:promotions]
 
         B.stubs(:box_prototypes).returns(boxes)
@@ -603,7 +603,7 @@ class SchemaTest < MiniTest::Spec
 
       should "be done automatically if only boxes have been removed" do
         uid = A.boxes[:posts].schema_id.to_s
-        A.stubs(:box_prototypes).returns(S::PrototypeSet.new)
+        A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
         S::Schema.stubs(:classes).returns([A, B])
         S::Schema.reload!
         S::Schema.validate!
@@ -657,7 +657,7 @@ class SchemaTest < MiniTest::Spec
       should "be done automatically in presence of independent changes to boxes & fields" do
         B.field :crisis
         uid = A.boxes[:posts].schema_id.to_s
-        A.stubs(:box_prototypes).returns(S::PrototypeSet.new)
+        A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
         S::Schema.stubs(:classes).returns([A, B])
         S::Schema.reload!
         S::Schema.validate!
@@ -670,7 +670,7 @@ class SchemaTest < MiniTest::Spec
       should "be done automatically in presence of independent changes to classes, boxes & fields" do
         class ::X < B; end
         uid = A.boxes[:posts].schema_id.to_s
-        A.stubs(:box_prototypes).returns(S::PrototypeSet.new)
+        A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
         B.field :crisis
         B.box :circus
         A.field :crisis
@@ -727,7 +727,7 @@ class SchemaTest < MiniTest::Spec
         instance.posts.pieces.length.should == 2
         Content.count.should == 3
         uid = A.boxes[:posts].schema_id.to_s
-        A.stubs(:box_prototypes).returns(S::PrototypeSet.new)
+        A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
         S::Schema.stubs(:classes).returns([A, B])
         S::Schema.reload!
         S::Schema.validate!

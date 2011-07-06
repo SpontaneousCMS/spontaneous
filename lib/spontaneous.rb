@@ -48,8 +48,6 @@ module Spontaneous
 
   autoload :Config, "spontaneous/config"
 
-  autoload :PrototypeSet, "spontaneous/prototype_set"
-
   autoload :Content, "spontaneous/content"
   autoload :Page, "spontaneous/page"
   autoload :Piece, "spontaneous/piece"
@@ -58,15 +56,7 @@ module Spontaneous
   autoload :FieldTypes, "spontaneous/field_types"
 
   autoload :PagePiece, "spontaneous/page_piece"
-  autoload :EntrySet, "spontaneous/entry_set"
-  autoload :FieldSet, "spontaneous/field_set"
-  autoload :BoxSet, "spontaneous/box_set"
 
-
-  module Prototypes
-    autoload :FieldPrototype, "spontaneous/prototypes/field_prototype"
-    autoload :BoxPrototype, "spontaneous/prototypes/box_prototype"
-  end
 
   autoload :Style, "spontaneous/style"
   autoload :Layout, "spontaneous/layout"
@@ -82,7 +72,6 @@ module Spontaneous
   autoload :Media, "spontaneous/media"
 
   autoload :Change, "spontaneous/change"
-  autoload :ChangeSet, "spontaneous/change_set"
   autoload :Revision, "spontaneous/revision"
   autoload :Publishing, "spontaneous/publishing"
 
@@ -94,6 +83,19 @@ module Spontaneous
   autoload :ContentQuery, "spontaneous/content_query"
 
   autoload :PageController, "spontaneous/page_controller"
+
+  module Prototypes
+    autoload :FieldPrototype, "spontaneous/prototypes/field_prototype"
+    autoload :BoxPrototype, "spontaneous/prototypes/box_prototype"
+  end
+
+  module Collections
+    autoload :PrototypeSet, "spontaneous/collections/prototype_set"
+    autoload :ChangeSet, "spontaneous/collections/change_set"
+    autoload :EntrySet, "spontaneous/collections/entry_set"
+    autoload :FieldSet, "spontaneous/collections/field_set"
+    autoload :BoxSet, "spontaneous/collections/box_set"
+  end
 
   module Plugins
     autoload :Supertype, "spontaneous/plugins/supertype"

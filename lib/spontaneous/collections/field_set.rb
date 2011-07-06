@@ -1,8 +1,8 @@
 # encoding: UTF-8
 
 
-module Spontaneous
-  class FieldSet < Spontaneous::PrototypeSet
+module Spontaneous::Collections
+  class FieldSet < PrototypeSet
 
     attr_reader :owner
 

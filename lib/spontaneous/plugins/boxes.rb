@@ -22,7 +22,7 @@ module Spontaneous::Plugins
       end
 
       def box_prototypes
-        @box_prototypes ||= Spontaneous::PrototypeSet.new(superclass, :box_prototypes)
+        @box_prototypes ||= Spontaneous::Collections::PrototypeSet.new(superclass, :box_prototypes)
       end
 
       def has_boxes?
@@ -46,7 +46,7 @@ module Spontaneous::Plugins
       end
 
       def boxes(*args)
-        @boxes ||= Spontaneous::BoxSet.new(self)
+        @boxes ||= Spontaneous::Collections::BoxSet.new(self)
       end
 
       def iterable

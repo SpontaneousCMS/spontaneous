@@ -34,7 +34,7 @@ module Spontaneous
 
       def outstanding
         dependencies = dependency_map
-        dependencies.map { |d| ChangeSet.new(d) }
+        dependencies.map { |d| Spontaneous::Collections::ChangeSet.new(d) }
       end
 
       def dependency_map
