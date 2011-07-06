@@ -16,7 +16,7 @@ module Spontaneous
     def []=(name, value)
       key = name.to_sym
       @store[key] = value
-      @order << key
+      @order << key unless order.include?(key)
     end
 
     def [](key)
@@ -34,22 +34,22 @@ module Spontaneous
 
     alias_method :has_key?, :key?
 
-    def id(schema_id)
+    def sid(schema_id)
       values.detect { |e| e.schema_id == schema_id }
     end
 
     def each
       order.each do |name|
-        yield(name, named(name)) if block_given?
+        yield(named(name)) if block_given?
       end
     end
 
     def keys
-      map { |name, value| name }
+      order.map { |name| name }
     end
 
     def values
-      map { |name, value| value }
+      map { | value | value }
     end
 
     # overwrites the existing ordering with a custom one
@@ -88,7 +88,7 @@ module Spontaneous
     protected
 
     def indexed(index)
-      @store[order[index]] || (superset? ? superset.indexed(index) : nil)
+      named(order[index])
     end
 
     def named(name)
@@ -103,6 +103,14 @@ module Spontaneous
     # initialised lazily to avoid potential loops
     def superset
       @superset ||= @superobject.send(@superset_name) if superset?
+    end
+
+    def method_missing(method, *args)
+      if key?(method)
+        named(method)
+      else
+        super
+      end
     end
   end # PrototypeSet
 end # Spontaneous

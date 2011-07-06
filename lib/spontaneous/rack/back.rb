@@ -126,7 +126,7 @@ module Spontaneous
         def update_fields(model, field_data)
           if field_data
             field_data.each do |id, values|
-              field = model.fields.find(id)
+              field = model.fields.sid(id)
               if model.field_writable?(field.name.to_sym)
                 field.update(values)
               else
@@ -274,7 +274,7 @@ module Spontaneous
         post '/file/replace/:id' do
           content = content_for_request
           file = params['file']
-          field = content.fields.find(params['field'])
+          field = content.fields.sid(params['field'])
           if content.field_writable?(field.name)
             field.unprocessed_value = file
             content.save

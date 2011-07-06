@@ -3,47 +3,42 @@
 
 module Spontaneous::Plugins
   module Fields
-    class FieldSet
+    class FieldSet < Spontaneous::PrototypeSet
 
-      include Enumerable
+
+      attr_reader :owner
 
       def initialize(owner, initial_values)
+        super()
         @owner = owner
-        @store = Hash.new
         initialize_from_prototypes(initial_values)
       end
 
       def initialize_from_prototypes(initial_values)
         values = Hash[(initial_values || []).map { |value| [Spontaneous::Schema::UID[value[:id]], value] }]
-        prototype_names = []
-        owner.field_prototypes.each do |field_name, field_prototype|
-          # use this to look for orphaned fields in initial_values
-          prototype_names << field_name
+        owner.field_prototypes.each do |field_prototype|
           field = field_prototype.to_field(values[field_prototype.schema_id])
           add_field(field)
         end
       end
 
-      def [](name)
-        store[name.to_sym]
-      end
+      # def [](name)
+      #   store[name.to_sym]
+      # end
 
-      def each
-        owner.class.field_names.each do |name|
-          yield(self[name])
-        end
-      end
+      # def each
+      #   owner.class.field_names.each do |name|
+      #     yield(self[name])
+      #   end
+      # end
 
-      def find(id)
-        store.values.detect { |f| f.schema_id == id }
-      end
+      # def find(id)
+      #   self.values.detect { |f| f.schema_id == id }
+      # end
 
-      def owner
-        @owner
-      end
 
       def serialize
-        store.map { |name, field| field.serialize }
+        self.map { |field| field.serialize }
       end
 
       def to_hash
@@ -53,19 +48,20 @@ module Spontaneous::Plugins
       end
 
       def saved
-        store.each { |name, field| field.mark_unmodified }
+        self.each { |field| field.mark_unmodified }
       end
+
       protected
 
-      def store
-        @store
-      end
+      # def store
+      #   @store
+      # end
 
       def add_field(field)
         field.owner = owner
         getter_name = field.name
         setter_name = "#{field.name}="
-        store[getter_name.to_sym] = field
+        self[field.name.to_sym] = field
         meta.class_eval do
           define_method(getter_name) { |*args| field.tap { |f| f.template_params = args } }
           define_method(setter_name) { |value| field.value = value }

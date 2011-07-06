@@ -44,13 +44,13 @@ class PrototypeSetTest < MiniTest::Spec
     end
 
     should "enable access by schema id" do
-      @set.id("two_id").should == @two
+      @set.sid("two_id").should == @two
     end
 
     should "have externally settable ordering" do
       @set.order = [:three, :two]
       @set.order.should == [:three, :two, :one]
-      @set.map { |name, val| name }.should == [:three, :two, :one]
+      @set.map { |val| val }.should == ['Three', 'Two', 'One']
     end
 
     should "allow multiple setting of the order" do
@@ -61,18 +61,25 @@ class PrototypeSetTest < MiniTest::Spec
     end
 
     should "have a hash-like map function" do
-      @set.map { |name, val| [name, val] }.should == [[:one, "One"], [:two, "Two"], [:three, "Three"]]
+      @set.map { |val| val }.should == ["One", "Two", "Three"]
     end
 
     should "have a hash-like each function" do
       keys = []
-      @set.each { |name, val| keys << name }
-      keys.should == [:one, :two, :three]
+      @set.each { |val| keys << val }
+      keys.should == ["One", "Two", "Three"]
+    end
+
+    should "allow access to values as method calls" do
+      @set.one.should == "One"
+      @set.three.should == "Three"
+      lambda { @set.nine }.must_raise(NoMethodError)
     end
 
     context "with superset" do
       setup do
         @superset = @set.dup
+        # give the superset a custom order to make sure it propagates to the child set
         @superset.order = [:three, :one, :two]
         @super = Super.new
         @super.prototypes = @superset
@@ -84,6 +91,7 @@ class PrototypeSetTest < MiniTest::Spec
         @set[:four] = @four
         @set[:five] = @five
       end
+
       teardown do
       end
 
@@ -108,25 +116,25 @@ class PrototypeSetTest < MiniTest::Spec
       end
 
       should "enable access by schema id" do
-        @set.id("two_id").should == @two
-        @set.id("four_id").should == @four
+        @set.sid("two_id").should == @two
+        @set.sid("four_id").should == @four
       end
 
       should "have externally settable ordering" do
         @set.order = [:five, :three, :two]
         @set.order.should == [:five, :three, :two, :one, :four]
-        @set.map { |name, val| name }.should == [:five, :three, :two, :one, :four]
+        @set.map { |val| val }.should == ['Five', 'Three', 'Two', 'One', 'Four']
         @set.values.should == ['Five', 'Three', 'Two', 'One', 'Four']
       end
 
       should "have a hash-like map function" do
-        @set.map { |name, val| [name, val] }.should == [[:three, "Three"], [:one, "One"], [:two, "Two"], [:four, "Four"], [:five, "Five"]]
+        @set.map { |val| val }.should == ["Three", "One", "Two", "Four", "Five"]
       end
 
       should "have a hash-like each function" do
         keys = []
-        @set.each { |name, val| keys << name }
-        keys.should == [:three, :one, :two, :four, :five]
+        @set.each { |val| keys << val }
+        keys.should == ["Three", "One", "Two", "Four", "Five"]
       end
 
       should "ignore a nil superobject" do
@@ -140,6 +148,20 @@ class PrototypeSetTest < MiniTest::Spec
 
       should "have a list of values" do
         @set.values.should == ['Three', 'One', 'Two', 'Four', 'Five']
+      end
+
+      should "allow access to values as method calls" do
+        @set.two.should == "Two"
+        @set.five.should == "Five"
+      end
+
+      should "intelligently deal with sub-sets over-writing values" do
+        order = @set.order
+        @set.first.should == "Three"
+        @set[:three] = "One Hundred"
+        @set[:three].should == "One Hundred"
+        @set.first.should == "One Hundred"
+        @set.order.should == order
       end
     end
   end

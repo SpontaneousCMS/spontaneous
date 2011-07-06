@@ -11,7 +11,7 @@ module Spontaneous::Plugins
 
         # if the field already exists then don't add it to our list
         # of local fields
-        local_field_order << name unless field?(name)
+        # local_field_order << name unless field?(name)
 
         prototype = FieldPrototype.new(self, name, type, options, &block)
         field_prototypes[name] = prototype
@@ -37,37 +37,40 @@ module Spontaneous::Plugins
       # end
 
       def field_prototypes
-        @field_prototypes ||= (supertype? ? superclass.field_prototypes.dup : {})
+        # @field_prototypes ||= (supertype? ? superclass.field_prototypes.dup : {})
+        @field_prototypes ||= Spontaneous::PrototypeSet.new(supertype, :field_prototypes)
       end
 
       def field_names
-        if @field_order && @field_order.length > 0
-          remaining = default_field_order.reject { |n| @field_order.include?(n) }
-          @field_order + remaining
-        else
-          default_field_order
-        end
+        field_prototypes.order
+        # if @field_order && @field_order.length > 0
+        #   remaining = default_field_order.reject { |n| @field_order.include?(n) }
+        #   @field_order + remaining
+        # else
+        #   default_field_order
+        # end
       end
 
       def fields
-        field_names.map { |n| field_prototypes[n] }
+        # field_names.map { |n| field_prototypes[n] }
+        field_prototypes.values
       end
 
-      def default_field_order
-        (supertype? ? superclass.field_names : []) + local_field_order
-      end
+      # def default_field_order
+      #   (supertype? ? superclass.field_names : []) + local_field_order
+      # end
 
       def field_order(*new_order)
-        @field_order = new_order
+        field_prototypes.order = new_order
       end
 
-      def local_field_order
-        @local_field_order ||= []
-      end
+      # def local_field_order
+      #   @local_field_order ||= []
+      # end
 
       def field?(field_name)
-        field_name = field_name.to_sym
-        field_prototypes.key?(field_name) || (supertype? ? superclass.field?(field_name) : false)
+        # field_name = field_name.to_sym
+        field_prototypes.key?(field_name)# || (supertype? ? superclass.field?(field_name) : false)
       end
 
       def field_for_mime_type(mime_type)
@@ -77,7 +80,7 @@ module Spontaneous::Plugins
       end
 
       def readable_fields
-        field_names.select { |name| field_readable?(name) }
+        field_prototypes.keys.select { |name| field_readable?(name) }
       end
     end
 
