@@ -14,7 +14,7 @@ module Spontaneous::Plugins
         base_class = Spontaneous::FieldTypes[type || name]
         if block_given?
           @field_class = Class.new(base_class, &Proc.new)
-          @field_class.meta.send(:define_method, :name) do
+          @field_class.singleton_class.send(:define_method, :name) do
             base_class.name
           end
         else

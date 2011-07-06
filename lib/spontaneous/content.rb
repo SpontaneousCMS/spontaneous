@@ -87,10 +87,6 @@ module Spontaneous
       !supertype.nil?
     end
 
-    def meta
-      class << self; self; end
-    end
-
     def start_inline_edit_marker
       "spontaneous:previewedit:start:content id:#{id}"
     end

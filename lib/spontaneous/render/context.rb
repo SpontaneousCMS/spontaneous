@@ -92,7 +92,7 @@ module Spontaneous::Render
     # make each key of the params hash into a method call for speed
     def _update(params)
       params.each do |key, val|
-        meta.__send__(:define_method, key) { val }
+        singleton_class.__send__(:define_method, key) { val }
       end
     end
   end

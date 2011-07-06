@@ -55,13 +55,13 @@ module Spontaneous
         box_owner = owner
         box_name = name
         instance_class.instance_eval do
-          meta.__send__(:define_method, :schema_name) do
+          singleton_class.__send__(:define_method, :schema_name) do
             "box/#{box_owner.schema_id}/#{box_name}"
           end
-          meta.__send__(:define_method, :schema_owner) do
+          singleton_class.__send__(:define_method, :schema_owner) do
             box_owner
           end
-          meta.__send__(:define_method, :owner_sid) do
+          singleton_class.__send__(:define_method, :owner_sid) do
             box_owner.schema_id
           end
         end

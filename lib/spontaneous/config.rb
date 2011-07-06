@@ -53,9 +53,7 @@ module Spontaneous
       end
 
       def add_setting(key, value)
-        meta = \
-          class << self; self; end
-        meta.send(:define_method, key) do
+        singleton_class.send(:define_method, key) do
           value
         end
       end

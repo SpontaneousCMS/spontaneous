@@ -62,17 +62,11 @@ module Spontaneous::Plugins
         getter_name = field.name
         setter_name = "#{field.name}="
         self[field.name.to_sym] = field
-        meta.class_eval do
+        singleton_class.class_eval do
           define_method(getter_name) { |*args| field.tap { |f| f.template_params = args } }
           define_method(setter_name) { |value| field.value = value }
         end
       end
-
-      def meta
-        @_meta ||= \
-          class << self; self; end
-      end
-
     end
   end
 end
