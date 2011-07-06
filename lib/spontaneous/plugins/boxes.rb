@@ -4,37 +4,37 @@ module Spontaneous::Plugins
   module Boxes
     module ClassMethods
       def box(name, options = {}, &block)
+        name = name.to_sym
         unless boxes.key?(name)
-          boxes.push(Spontaneous::BoxPrototype.new(self, name, options, &block))
+          boxes[name] = Spontaneous::BoxPrototype.new(self, name, options, &block)
           unless method_defined?(name)
             class_eval <<-BOX
-            def #{name}
-              boxes.named(:#{name})
-            end
+              def #{name}
+                boxes[:#{name}]
+              end
             BOX
           end
         end
       end
 
-      def boxes(*args)
-        @boxes ||= Spontaneous::NamedSet.new(self, :boxes, superclass)
+      def boxes
+        box_prototypes
       end
 
       def box_prototypes
-        Hash[boxes.map { |p| [p.name, p] }]
+        @box_prototypes ||= Spontaneous::PrototypeSet.new(superclass, :boxes)
       end
 
       def has_boxes?
-        !boxes.empty?
+        !box_prototypes.empty?
       end
 
       def box_order(*new_order)
-        new_order.flatten!
-        boxes.set_order(new_order)
+        box_prototypes.order = new_order.flatten
       end
 
       def box?(box_name)
-        !boxes[box_name].nil?
+        box_prototypes.key?(box_name.to_sym)
       end
     end
 
@@ -42,24 +42,17 @@ module Spontaneous::Plugins
 
       def reload
         @boxes = nil
-# require 'ruby-debug'
-# debugger
-
         super
       end
 
       def boxes(*args)
-        @boxes ||= instantiate_boxes
+        @boxes ||= Spontaneous::BoxSet.new(self)
       end
 
-      def instantiate_boxes
-        boxes = Spontaneous::NamedSet.new(self, :boxes)
-        self.class.boxes.each do | box_prototype |
-          box = box_prototype.get_instance(self)
-          boxes.push_with_name(box, box._name)
-        end
-        boxes
-      end
+      # def instantiate_boxes
+      #   boxes = Spontaneous::BoxSet.new(self, :boxes)
+      #   boxes
+      # end
 
       def iterable
         boxes

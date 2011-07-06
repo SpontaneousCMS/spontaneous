@@ -19,7 +19,7 @@ module Spontaneous::Plugins
       end
 
       def box
-        container.boxes.named(box_sid) if container
+        container.boxes.sid(box_sid) if container
       end
 
       def first?

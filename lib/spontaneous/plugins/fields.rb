@@ -75,7 +75,7 @@ module Spontaneous::Plugins
       end
 
       def fields
-        @field_set ||= FieldSet.new(self, field_store)
+        @field_set ||= Spontaneous::FieldSet.new(self, field_store)
       end
 
       def field?(field_name)

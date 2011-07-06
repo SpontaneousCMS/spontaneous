@@ -46,15 +46,6 @@ module Spontaneous::Plugins
         @subclasses ||= []
       end
 
-      # supertype is like superclass but stops at the last instance of a Content class
-      # def supertype=(supertype)
-      #   @supertype = supertype
-      # end
-
-      # def supertype
-      #   @supertype
-      # end
-
       def descendents
         subclasses.map{ |x| [x] + x.descendents}.flatten
       end
@@ -62,7 +53,6 @@ module Spontaneous::Plugins
       def inherited(subclass)
         Spontaneous::Schema.classes << subclass if subclass.schema_class?
         subclasses << subclass
-        # subclass.supertype = self
         super
       end
 

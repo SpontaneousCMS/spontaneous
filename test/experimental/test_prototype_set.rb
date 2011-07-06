@@ -20,8 +20,22 @@ class PrototypeSetTest < MiniTest::Spec
       @set[:three] = @three
     end
 
+    should "return correct value for empty? test" do
+      @set.empty?.should be_false
+      Spontaneous::PrototypeSet.new.empty?.should be_true
+    end
+
+    should "return the last value" do
+      @set.last.should == "Three"
+    end
+
     should "enable hash-like access by name" do
       @set[:three].should == "Three"
+    end
+
+    should "know the number of entries" do
+      @set.length.should == 3
+      @set.count.should == 3
     end
 
     should "enable array-like access by index" do
@@ -162,6 +176,14 @@ class PrototypeSetTest < MiniTest::Spec
         @set[:three].should == "One Hundred"
         @set.first.should == "One Hundred"
         @set.order.should == order
+      end
+
+      should "return the last value" do
+        @set.last.should == "Five"
+      end
+      should "know the number of entries" do
+        @set.length.should == 5
+        @set.count.should == 5
       end
     end
   end

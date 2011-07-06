@@ -8,13 +8,15 @@ class BoxesTest < MiniTest::Spec
   context "Box definitions" do
     setup do
       S::Schema.reset!
+      class ::Piece < Spontaneous::Piece; end
       class ::MyBoxClass < Box; end
-      class ::MyContentClass < Content; end
+      class ::MyContentClass < Piece; end
       class ::MyContentClass2 < MyContentClass; end
       MyContentClass.field :description
     end
 
     teardown do
+      Object.send(:remove_const, :Piece)
       Object.send(:remove_const, :MyContentClass2)
       Object.send(:remove_const, :MyContentClass)
       Object.send(:remove_const, :MyBoxClass)
@@ -187,7 +189,8 @@ class BoxesTest < MiniTest::Spec
     setup do
       Schema.reset!
       Spontaneous.template_root = File.expand_path('../../fixtures/templates/boxes', __FILE__)
-      class ::MyContentClass < Content; end
+      class ::Piece < Spontaneous::Piece; end
+      class ::MyContentClass < ::Piece; end
       class ::MyBoxClass < Box; end
       MyBoxClass.field :title, :string
       MyBoxClass.field :description, :string
@@ -199,6 +202,7 @@ class BoxesTest < MiniTest::Spec
     end
 
     teardown do
+      Object.send(:remove_const, :Piece)
       Object.send(:remove_const, :MyContentClass)
       Object.send(:remove_const, :MyBoxClass)
     end
@@ -315,8 +319,8 @@ class BoxesTest < MiniTest::Spec
 
   context "Box content" do
     setup do
-      class ::BlankContent < Content; end
-      class ::StyledContent < Content; end
+      class ::BlankContent < Spontaneous::Piece; end
+      class ::StyledContent < Spontaneous::Piece; end
 
       BlankContent.style :blank1
       BlankContent.style :blank2

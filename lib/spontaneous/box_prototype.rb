@@ -17,6 +17,7 @@ module Spontaneous
     def field_prototypes
       instance_class.field_prototypes
     end
+
     def style_prototypes
       instance_class.style_prototypes
     end

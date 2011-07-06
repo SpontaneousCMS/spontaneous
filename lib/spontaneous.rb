@@ -61,6 +61,8 @@ module Spontaneous
 
   autoload :PagePiece, "spontaneous/page_piece"
   autoload :EntrySet, "spontaneous/entry_set"
+  autoload :FieldSet, "spontaneous/field_set"
+  autoload :BoxSet, "spontaneous/box_set"
 
 
   autoload :Style, "spontaneous/style"
@@ -119,7 +121,6 @@ module Spontaneous
 
     module Fields
       autoload :FieldPrototype, "spontaneous/plugins/fields/field_prototype"
-      autoload :FieldSet, "spontaneous/plugins/fields/field_set"
     end
 
     module Site

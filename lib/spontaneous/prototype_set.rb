@@ -34,6 +34,20 @@ module Spontaneous
 
     alias_method :has_key?, :key?
 
+    def empty?
+      order.empty?
+    end
+
+    def length
+      order.length
+    end
+
+    alias_method :count, :length
+
+    def last
+      named(order.last)
+    end
+
     def sid(schema_id)
       values.detect { |e| e.schema_id == schema_id }
     end

@@ -118,6 +118,7 @@ module Spontaneous
         @category, @owner_sid, @name = reference.split(REFERENCE_SEP)
         @category = @category.to_sym
       end
+
       class << self
         protected :new
       end
