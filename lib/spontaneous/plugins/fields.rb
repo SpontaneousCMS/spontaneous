@@ -41,7 +41,7 @@ module Spontaneous::Plugins
       end
 
       def field_order(*new_order)
-        field_prototypes.order = new_order if new_order and !new_order.empty?
+        field_prototypes.order = new_order.flatten if new_order and !new_order.empty?
       end
 
       def field?(field_name)

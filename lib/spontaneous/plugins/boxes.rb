@@ -6,7 +6,7 @@ module Spontaneous::Plugins
       def box(name, options = {}, &block)
         name = name.to_sym
         unless boxes.key?(name)
-          boxes[name] = Spontaneous::BoxPrototype.new(self, name, options, &block)
+          box_prototypes[name] = Spontaneous::BoxPrototype.new(self, name, options, &block)
           unless method_defined?(name)
             class_eval <<-BOX
               def #{name}
@@ -22,7 +22,7 @@ module Spontaneous::Plugins
       end
 
       def box_prototypes
-        @box_prototypes ||= Spontaneous::PrototypeSet.new(superclass, :boxes)
+        @box_prototypes ||= Spontaneous::PrototypeSet.new(superclass, :box_prototypes)
       end
 
       def has_boxes?
@@ -48,11 +48,6 @@ module Spontaneous::Plugins
       def boxes(*args)
         @boxes ||= Spontaneous::BoxSet.new(self)
       end
-
-      # def instantiate_boxes
-      #   boxes = Spontaneous::BoxSet.new(self, :boxes)
-      #   boxes
-      # end
 
       def iterable
         boxes

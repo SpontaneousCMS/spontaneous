@@ -319,8 +319,9 @@ class BoxesTest < MiniTest::Spec
 
   context "Box content" do
     setup do
-      class ::BlankContent < Spontaneous::Piece; end
-      class ::StyledContent < Spontaneous::Piece; end
+      class ::Piece < Spontaneous::Piece; end
+      class ::BlankContent < ::Piece; end
+      class ::StyledContent < ::Piece; end
 
       BlankContent.style :blank1
       BlankContent.style :blank2
@@ -340,6 +341,7 @@ class BoxesTest < MiniTest::Spec
     end
 
     teardown do
+      Object.send(:remove_const, :Piece)
       Object.send(:remove_const, :BlankContent)
       Object.send(:remove_const, :StyledContent)
     end

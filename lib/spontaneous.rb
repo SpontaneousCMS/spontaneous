@@ -48,7 +48,6 @@ module Spontaneous
 
   autoload :Config, "spontaneous/config"
 
-  autoload :NamedSet, "spontaneous/named_set"
   autoload :PrototypeSet, "spontaneous/prototype_set"
 
   autoload :Content, "spontaneous/content"
