@@ -4,80 +4,51 @@ module Spontaneous::Plugins
   module Layouts
     module ClassMethods
       def layout(name, options={})
-        layouts << Spontaneous::Layout.new(self, name, options)
-      end
-
-      def layouts
-        @layouts ||= []
-      end
-
-      def all_layouts
-        layouts.concat(supertype_has_layout? ? supertype.all_layouts : [])
+        layout_prototypes[name] = Spontaneous::Prototypes::LayoutPrototype.new(self, name, options)
       end
 
       def layout_prototypes
-        Hash[ all_layouts.map { |s| [s.name, s] } ]
+        @layout_prototypes ||= Spontaneous::Collections::PrototypeSet.new(supertype, :layout_prototypes)
       end
 
-      def resolve_layout(layout_sid, format = :html)
+      alias_method :layouts, :layout_prototypes
+
+      def resolve_layout(layout_sid)
         if layout_sid.nil? #layout_name.blank?
-          default_layout(format)
+          default_layout
         else
-          find_layout(layout_sid, format)
+          find_layout(layout_sid)
         end
       end
 
-      def find_layout(layout_sid, format = :html)
-        # name = layout_name.to_sym
-        unless layout = layouts.detect { |l| l.schema_id == layout_sid }
-          layout = supertype.resolve_layout(layout_sid) if supertype_has_layout?
+      def default_layout
+        if prototype = (layouts.detect { |prototype| prototype.default? } || layouts.first)
+          prototype.layout(self)
+        else
+          Spontaneous::Layout::Default.new(self)
         end
-        layout
+      end
+
+      def find_layout(layout_sid)
+        if prototype = layout_prototypes.sid(layout_sid)
+          prototype.layout(self)
+        end
       end
 
       def find_named_layout(layout_name)
         layout_prototypes[layout_name.to_sym]
       end
-
-      def verify_layout_name(layout_name)
-        # do I want this? instead of checking hierarchy, it should test for existance of template
-        # raise Spontaneous::Errors::UnknownLayoutError.new(self, layout_name) unless find_named_layout(layout_name)
-        if layout = layout_prototypes[layout_name.to_sym]
-          layout.schema_id
-        else
-          nil
-        end
-      end
-
-      def default_layout(format = :html)
-        if layouts.empty?
-          if supertype_has_layout?
-            supertype.default_layout(format)
-          else
-            Spontaneous::Layout.new(self, :standard)
-          end
-        else
-          layouts.detect { |l| l.default? } or layouts.first
-        end
-      end
-
-      def supertype_has_layout?
-        supertype? and supertype.respond_to?(:default_layout)
-      end
     end # ClassMethods
 
     module InstanceMethods
-      def layout(format = :html)
-        resolve_layout(self.style_sid, format)
+      def layout
+        resolve_layout(self.style_sid)
       end
 
-      def resolve_layout(style_sid, format = :html)
-        self.class.resolve_layout(style_sid, format)
+      def resolve_layout(style_sid)
+        self.class.resolve_layout(style_sid)
       end
 
-      # def layout=(layout_name)
-      #   self.style_sid = self.class.verify_layout_name(layout_name)
-      # end
       def layout=(layout)
         self.style_sid = layout_to_schema_id(layout)
       end
@@ -103,7 +74,7 @@ module Spontaneous::Plugins
       end
 
       def template(format = :html)
-        layout(format).template(format)
+        layout.template(format)
       end
 
       def provides_format?(format)

@@ -2,12 +2,6 @@
 
 
 module Spontaneous
-  class UnsupportedFormatException < Exception
-    def initialize(style, unsupported_format)
-      super("'#{unsupported_format}' format not supported by style '#{style.name}'.\nTemplate path: #{style.directory}\n")
-    end
-  end
-
   class Style
     def self.to_directory_name(klass)
       return nil if klass.name.blank?
@@ -142,4 +136,3 @@ module Spontaneous
     end
   end
 end
-

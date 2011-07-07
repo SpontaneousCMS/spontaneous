@@ -29,7 +29,6 @@ end
 module Spontaneous
   extend Plugins
   include Constants
-  include Errors
 
   def self.gem_root
     @gem_root ||= File.expand_path(File.dirname(__FILE__) / '..')
@@ -89,6 +88,7 @@ module Spontaneous
     autoload :FieldPrototype, "spontaneous/prototypes/field_prototype"
     autoload :BoxPrototype, "spontaneous/prototypes/box_prototype"
     autoload :StylePrototype, "spontaneous/prototypes/style_prototype"
+    autoload :LayoutPrototype, "spontaneous/prototypes/layout_prototype"
   end
 
   module Collections

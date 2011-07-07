@@ -108,13 +108,13 @@ module Spontaneous::Plugins
         ""
       end
 
-      def layout(format = :html)
+      def layout
         # if this alias class has no layouts defined, then just use the one set on the target
         if self.class.layouts.empty?
-          target.resolve_layout(self.style_sid, format)
+          target.resolve_layout(self.style_sid)
         else
           # but if it does have layouts defined, use them
-          self.resolve_layout(self.style_sid, format) or target.resolve_layout(self.style_sid, format)
+          self.resolve_layout(self.style_sid) or target.resolve_layout(self.style_sid)
         end
       end
 
@@ -124,5 +124,3 @@ module Spontaneous::Plugins
     end
   end
 end
-
-

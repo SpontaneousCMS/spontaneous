@@ -359,8 +359,10 @@ class SchemaTest < MiniTest::Spec
       end
 
       should "detect removal of layouts" do
-        layouts = [B.layouts.first]
-        B.stubs(:layouts).returns(layouts)
+        layout = B.layouts[:thin]
+        B.layouts.expects(:order).returns([:thin])
+        B.layouts.stubs(:[]).with(:thin).returns(layout)
+        B.layouts.stubs(:[]).with(:fat).returns(nil)
         begin
           Schema.validate_schema
           flunk("Validation should raise an exception if fields are removed")
