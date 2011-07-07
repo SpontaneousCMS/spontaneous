@@ -82,16 +82,16 @@ module Spontaneous::Plugins
         super or target.find_named_style(style_name)
       end
 
-      def style(format = :html)
+      def style
         if self.class.styles.empty?
-          target.resolve_style(style_sid, format)
+          target.resolve_style(style_sid)
         else
-          self.resolve_style(self.style_sid, format) or target.resolve_style(self.style_sid, format)
+          self.resolve_style(self.style_sid) or target.resolve_style(self.style_sid)
         end
       end
 
       def styles
-        target.styles.dup.merge(super)
+        @styles ||= Spontaneous::Collections::PrototypeSet.new(target, :styles)
       end
 
       def to_hash

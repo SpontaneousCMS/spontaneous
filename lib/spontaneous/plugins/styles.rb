@@ -12,14 +12,6 @@ module Spontaneous::Plugins
         styles[name] = Spontaneous::Prototypes::StylePrototype.new(self, name, options)
       end
 
-      # def styles
-      #   @styles ||= []
-      # end
-
-      # def all_styles
-      #   @all_styles ||= styles.concat(supertype_has_styles? ? supertype.all_styles : [])
-      # end
-
       def style_prototypes
         @style_prototypes ||= Spontaneous::Collections::StyleSet.new(self)
       end
@@ -46,26 +38,14 @@ module Spontaneous::Plugins
         Spontaneous::Style
       end
 
-      # def styles_for_format(format)
-      #   styles.select { |s| s.exists?(format) }
-      # end
-
-      # def default_style_class
-      #   Spontaneous::Prototypes::StylePrototype::Default
-      # end
-      # def anonymous_style
-      #   Spontaneous::Style::Anonymous.new
-      # end
 
       def find_style(style_sid)
-        style_prototypes.sid(style_sid).style(self)
+        if prototype = style_prototypes.sid(style_sid)
+          prototype.style(self)
+        end
       end
 
       def find_named_style(style_name)
-        # unless style = styles.detect { |s| s.name == style_name }
-        #   style = supertype.find_named_style(style_name) if supertype_has_styles?
-        # end
-        # style
         style_prototypes[style_name.to_sym]
       end
 
@@ -83,17 +63,6 @@ module Spontaneous::Plugins
         @inline_templates ||= {}
       end
 
-      # Used to determine the name of the directory under template_root
-      # that holds a classe's templates
-      # def style_directory_name
-      #   return nil if self.name.blank?
-      #   self.name.demodulize.underscore
-      # end
-
-      # don't want to go right back to Content class to resolve default styles
-      # def supertype_has_styles?
-      #   supertype? and supertype != Spontaneous::Content
-      # end
     end # ClassMethods
 
     module InstanceMethods

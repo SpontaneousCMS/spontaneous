@@ -9,10 +9,5 @@ module Spontaneous::Collections
       super(owner.supertype, :style_prototypes)
       @owner = owner
     end
-
-    def default
-
-    end
-
   end # StyleSet
 end # Spontaneous::Collections
