@@ -330,8 +330,10 @@ class SchemaTest < MiniTest::Spec
       end
 
       should "detect removal of styles" do
-        styles = [B.styles.detect{ |s| s.name == :inline }]
-        B.stubs(:styles).returns(styles)
+        style = B.styles[:inline]
+        B.styles.expects(:order).returns([:inline])
+        B.styles.stubs(:[]).with(:inline).returns(style)
+        B.styles.stubs(:[]).with(:outline).returns(nil)
         begin
           Schema.validate_schema
           flunk("Validation should raise an exception if styles are removed")
@@ -442,8 +444,11 @@ class SchemaTest < MiniTest::Spec
       end
 
       should "detect removal of styles from anonymous boxes" do
-        styles = [B.boxes[:promotions].instance_class.styles.first]
-        B.boxes[:promotions].instance_class.stubs(:styles).returns(styles)
+        klass = B.boxes[:promotions].instance_class
+        style = klass.styles.first
+        klass.styles.expects(:order).returns([style.name])
+        klass.styles.stubs(:[]).with(style.name).returns(style)
+        klass.styles.stubs(:[]).with(:style2).returns(nil)
         begin
           Schema.validate_schema
           flunk("Validation should raise an exception if styles are removed")

@@ -462,7 +462,7 @@ class BoxesTest < MiniTest::Spec
       a = Allowable.new
       b = Allowed2.new
       a.parents << b
-      a.parents.pieces.first.style.should == Allowed2.get_style(:ringo)
+      a.parents.pieces.first.style.prototype.should == Allowed2.styles[:ringo]
     end
 
     should "know what the available styles are for an entry" do

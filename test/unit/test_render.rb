@@ -48,7 +48,7 @@ class RenderTest < MiniTest::Spec
     end
 
     teardown do
-      Object.send(:remove_const, :TemplateClass)
+      Object.send(:remove_const, :TemplateClass) rescue nil
     end
 
     should "be able to render themselves to HTML" do
@@ -143,7 +143,7 @@ class RenderTest < MiniTest::Spec
       end
 
       teardown do
-        Object.send(:remove_const, :AnImage)
+        Object.send(:remove_const, :AnImage) rescue nil
       end
 
       should "render using anonymous style" do
@@ -173,7 +173,7 @@ class RenderTest < MiniTest::Spec
       end
 
       teardown do
-        Object.send(:remove_const, :AnImage)
+        Object.send(:remove_const, :AnImage) rescue nil
       end
 
       should "render using default style if present" do
@@ -195,7 +195,7 @@ class RenderTest < MiniTest::Spec
       end
 
       teardown do
-        Object.send(:remove_const, :PageClass)
+        Object.send(:remove_const, :PageClass) rescue nil
       end
 
       should "find page styles at root of templates dir" do
@@ -229,7 +229,7 @@ class RenderTest < MiniTest::Spec
       end
 
       teardown do
-        Object.send(:remove_const, :PageClass)
+        Object.send(:remove_const, :PageClass) rescue nil
       end
 
       should "use style assigned by entry" do
@@ -265,7 +265,7 @@ class RenderTest < MiniTest::Spec
         @page = TemplateParams.new
       end
       teardown do
-        Object.send(:remove_const, :TemplateParams)
+        Object.send(:remove_const, :TemplateParams) rescue nil
       end
       should "be passed to the render call" do
         @page.image.value.should == "/images/fromage.jpg"

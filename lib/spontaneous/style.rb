@@ -9,15 +9,16 @@ module Spontaneous
   end
 
   class Style
+    def self.to_directory_name(klass)
+      return nil if klass.name.blank?
+      klass.name.demodulize.underscore
+    end
+
     attr_reader :owner, :prototype
 
     def initialize(owner, prototype = nil)
       @owner, @prototype = owner, prototype
     end
-
-    # TODO: new style class that has a better way of knowing if it's anonymous
-    # or named. Only named styles have schema_ids -- anonymous styles are resolved
-    # according to the files on the disk
 
     def schema_id
       self.prototype.schema_id
@@ -76,11 +77,6 @@ module Spontaneous
       [[owner_directory_name, name], name]
     end
 
-    def self.to_directory_name(klass)
-      return nil if klass.name.blank?
-      klass.name.demodulize.underscore
-    end
-
     def owner_directory_name
       self.class.to_directory_name(owner)
     end
@@ -98,11 +94,15 @@ module Spontaneous
       Spontaneous::Render.formats(self)
     end
 
-    def to_hash
-      {
-        :name => name.to_s,
-        :schema_id => schema_id.to_s
-      }
+    # def to_hash
+    #   {
+    #     :name => name.to_s,
+    #     :schema_id => schema_id.to_s
+    #   }
+    # end
+
+    def ==(other)
+      other.class == self.class && other.prototype == self.prototype && other.owner == self.owner
     end
 
     class Default < Style

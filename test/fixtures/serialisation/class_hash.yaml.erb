@@ -1,0 +1,53 @@
+---
+:type: SerialisedPiece
+:id: <%= SerialisedPiece.schema_id.to_s %>
+:is_page: false
+:is_alias: false
+:title: Type Title
+:styles:
+- :name: tepid
+  :schema_id: <%= @tepid_style.to_s %>
+- :name: freezing
+  :schema_id: <%= @freezing_style.to_s %>
+- :name: boiling
+  :schema_id: <%= @boiling_style.to_s %>
+:fields:
+- :name: title
+  :schema_id: <%= @fp[:title].schema_id.to_s %>
+  :type: Spontaneous.FieldTypes.StringField
+  :title: Title
+  :comment: ""
+  :writable: true
+- :name: location
+  :schema_id: <%= @fp[:location].schema_id.to_s %>
+  :type: Spontaneous.FieldTypes.StringField
+  :title: Where
+  :comment: Fill in the address
+  :writable: true
+- :name: date
+  :schema_id: <%= @fp[:date].schema_id.to_s %>
+  :type: Spontaneous.FieldTypes.DateField
+  :title: Date
+  :comment: ""
+  :writable: true
+- :name: image
+  :schema_id: <%= @fp[:image].schema_id.to_s %>
+  :type: Spontaneous.FieldTypes.ImageField
+  :title: Image
+  :comment: ""
+  :writable: true
+:boxes:
+- :name: things
+  :id: <%= SerialisedPiece.boxes[:things].schema_id.to_s %>
+  :title: My Things
+  :writable: true
+  :allowed_types:
+  - SerialisedPage
+  :fields:
+  - :name: title
+    :schema_id: <%= SerialisedPiece.boxes[:things].field_prototypes[:title].schema_id.to_s %>
+    :type: Spontaneous.FieldTypes.StringField
+    :title: Title
+    :comment: ""
+    :writable: true
+

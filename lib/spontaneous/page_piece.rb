@@ -60,12 +60,12 @@ module Spontaneous
       container.entry_modified!(self)
     end
 
-    def style(format = :html)
-      target.resolve_style(style_id, format)
+    def style
+      target.resolve_style(style_id)
     end
 
     def template(format = :html)
-      style(format).template(format)
+      style.template(format)
     end
 
     def method_missing(method, *args)

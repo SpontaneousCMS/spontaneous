@@ -19,7 +19,7 @@ module Spontaneous::Plugins
       end
 
       def readable_styles
-        all_styles
+        styles
       end
 
       def readable_boxes

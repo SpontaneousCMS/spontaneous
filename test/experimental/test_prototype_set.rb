@@ -31,6 +31,7 @@ class PrototypeSetTest < MiniTest::Spec
 
     should "enable hash-like access by name" do
       @set[:three].should == "Three"
+      @set['three'].should == "Three"
     end
 
     should "know the number of entries" do

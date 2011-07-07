@@ -32,5 +32,11 @@ module Spontaneous::Prototypes
       Spontaneous::Schema.schema_id(self)
     end
 
+    def to_hash
+      {
+        :name => name.to_s,
+        :schema_id => schema_id.to_s
+      }
+    end
   end # StylePrototype
 end # Spontaneous::Prototypes

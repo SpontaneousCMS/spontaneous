@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require 'test_helper'
+require 'erb'
 
 
 class SerialisationTest < MiniTest::Spec
@@ -66,35 +67,8 @@ class SerialisationTest < MiniTest::Spec
 
       @fp = SerialisedPiece.field_prototypes
 
-      @class_hash = {
-        :type => "SerialisedPiece",
-        :id => SerialisedPiece.schema_id.to_s,
-        :is_page => false,
-        :is_alias=>false,
-        :title => "Type Title",
-        :styles => [
-          {:name => 'freezing', :schema_id => @freezing_style.to_s },
-          {:name => 'boiling', :schema_id => @boiling_style.to_s },
-          {:name => 'tepid', :schema_id => @tepid_style.to_s }
-        ],
-
-        :fields => [
-          {:name => "title", :schema_id => @fp[:title].schema_id.to_s, :type => "Spontaneous.FieldTypes.StringField", :title => "Title",  :comment => "" , :writable=>true},
-          {:name => "location", :schema_id => @fp[:location].schema_id.to_s, :type => "Spontaneous.FieldTypes.StringField", :title => "Where",  :comment => "Fill in the address" , :writable=>true},
-          {:name => "date", :schema_id => @fp[:date].schema_id.to_s, :type => "Spontaneous.FieldTypes.DateField", :title => "Date",  :comment => "" , :writable=>true},
-          {:name => "image", :schema_id => @fp[:image].schema_id.to_s, :type => "Spontaneous.FieldTypes.ImageField", :title => "Image",  :comment => "", :writable=>true}
-      ],
-        :boxes => [
-          {
-            :name => "things",
-            :id => SerialisedPiece.boxes[:things].schema_id.to_s,
-            :title => "My Things",
-            :writable => true,
-            :allowed_types => ["SerialisedPage"],
-            :fields => [{:name => "title", :schema_id => SerialisedPiece.boxes[:things].field_prototypes[:title].schema_id.to_s, :type => "Spontaneous.FieldTypes.StringField", :title => "Title",  :comment => "" , :writable=>true}]
-          }
-      ]
-      }
+      template = ERB.new(File.read(File.expand_path('../../fixtures/serialisation/class_hash.yaml.erb', __FILE__)))
+      @class_hash = YAML.load(template.result(binding))
     end
 
     teardown do
@@ -106,10 +80,11 @@ class SerialisationTest < MiniTest::Spec
 
     context "classes" do
       should "generate a hash for JSON serialisation" do
-        # pp SerialisedPiece.to_hash
-        # puts "==================="
-        # pp @class_hash
-        SerialisedPiece.to_hash.should == @class_hash
+        unless @class_hash == SerialisedPiece.to_hash
+          pp SerialisedPiece.to_hash; puts "="*60; pp @class_hash
+        end
+        # SerialisedPiece.to_hash.should == @class_hash
+        assert_hashes_equal(SerialisedPiece.to_hash, @class_hash)
       end
       should "serialise to JSON" do
         SerialisedPiece.to_json.json.should == @class_hash
@@ -122,7 +97,7 @@ class SerialisationTest < MiniTest::Spec
     context "pieces" do
       setup do
 
-        date = Date.today.to_s
+        date = "2011-07-07"
 
         @root = SerialisedPage.new
         @piece1 = SerialisedPiece.new
@@ -170,106 +145,17 @@ class SerialisationTest < MiniTest::Spec
 
         [@root, @child, @piece1, @piece2, @piece3].each { |c| c.save; c.reload }
 
-
-        @root_hash = {
-          :type=>"SerialisedPage",
-          :type_id=> SerialisedPage.schema_id.to_s,
-          :title => @root.page_title,
-          :depth=>0,
-          :uid=>"home",
-          :path=>"/",
-          :hidden => false,
-          :fields=> [
-            {:unprocessed_value=>"Home", :processed_value=>"Home", :id => SerialisedPage.field_prototypes[:title].schema_id.to_s, :name=>"title", :attributes => {}},
-            {:unprocessed_value=>"S", :processed_value=>"South", :id => SerialisedPage.field_prototypes[:direction].schema_id.to_s, :name=>"direction", :attributes => {}},
-            {:unprocessed_value=>"/images/home.jpg", :processed_value=>"/images/home.jpg", :id => SerialisedPage.field_prototypes[:thumbnail].schema_id.to_s, :name=>"thumbnail", :attributes => {}}
-        ],
-          :is_page=>true,
-          :slug=>"",
-          :id=>@root.id,
-          :boxes => [
-            {
-          :id=>@root.insides.schema_id.to_s,
-          :name => "insides",
-          :fields=>[],
-          :entries=> [
-          { # root.boxes.first.entries.first
-          :type=>"SerialisedPiece",
-          :type_id=> SerialisedPiece.schema_id.to_s,
-          :label=>"label1",
-          :depth=>1,
-          :styles=>[@freezing_style.to_s, @boiling_style.to_s, @tepid_style.to_s],
-          :fields=> [
-            {:unprocessed_value=>"Piece 1", :processed_value=>"Piece 1", :id=>SerialisedPiece.field_prototypes[:title].schema_id.to_s, :name => "title", :attributes => {}},
-            {:unprocessed_value=>"Piece 1 Location", :processed_value=>"Piece 1 Location", :id=>SerialisedPiece.field_prototypes[:location].schema_id.to_s, :name => "location", :attributes => {}},
-            {:unprocessed_value=>date, :processed_value=>date, :id=>SerialisedPiece.field_prototypes[:date].schema_id.to_s, :name => "date", :attributes => {}},
-            {:unprocessed_value=>"", :processed_value=>"", :id=>SerialisedPiece.field_prototypes[:image].schema_id.to_s, :name => "image", :attributes => {}}
-        ],
-          :style=>@freezing_style.to_s,
-          :hidden => true,
-          :boxes => [
-            {
-          :fields => [{:unprocessed_value=>"Things title", :processed_value=>"Things title", :id => SerialisedPiece.boxes[:things].field_prototypes[:title].schema_id.to_s, :name=>"title", :attributes => {}}],
-          :id => SerialisedPiece.boxes[:things].schema_id.to_s,
-          :name => "things",
-          :entries=> [
-            { # root.boxes.entries.first.entries.first
-          :type=>"SerialisedPage",
-          :title => @child.page_title,
-          :type_id=> SerialisedPage.schema_id.to_s,
-          :path=>"/about",
-          :depth=>2,
-          :styles=>[@dancing_style.to_s, @sitting_style.to_s, @kneeling_style.to_s],
-          :fields=> [
-            {:unprocessed_value=>"Child Page", :processed_value=>"Child Page", :id=>SerialisedPage.field_prototypes[:title].schema_id.to_s, :name => 'title', :attributes => {}},
-            {:unprocessed_value=>"N", :processed_value=>"North", :id=>SerialisedPage.field_prototypes[:direction].schema_id.to_s, :name => "direction", :attributes => {}},
-            {:unprocessed_value=>"/images/thumb.jpg", :processed_value=>"/images/thumb.jpg", :id=>SerialisedPage.field_prototypes[:thumbnail].schema_id.to_s, :name => "thumbnail", :attributes => {}}
-        ],
-          :uid=>"about",
-          :style=>@sitting_style.to_s,
-          :hidden => true,
-          :is_page=>true,
-          :slug=>"about",
-          :id=>@child.id
-        }
-        ],
-        }
-        ],
-          :is_page=>false,
-          # :name=>"The Pages",
-          :id=>@piece1.id
-        },
-          { # ENTRY
-          :type=>"SerialisedPiece",
-          :type_id=> SerialisedPiece.schema_id.to_s,
-          :label=>"label2",
-          :depth=>1,
-          :styles=>[@freezing_style.to_s, @boiling_style.to_s, @tepid_style.to_s],
-          :fields=> [
-            {:unprocessed_value=>"Piece 2", :processed_value=>"Piece 2", :id => SerialisedPiece.field_prototypes[:title].schema_id.to_s, :name=>"title", :attributes => {}},
-            {:unprocessed_value=>"Piece 2 Location", :processed_value=>"Piece 2 Location", :id => SerialisedPiece.field_prototypes[:location].schema_id.to_s, :name=>"location", :attributes => {}},
-            {:unprocessed_value=>date, :processed_value=>date, :id => SerialisedPiece.field_prototypes[:date].schema_id.to_s, :name=>"date", :attributes => {}},
-            {:unprocessed_value=>"", :processed_value=>"", :id => SerialisedPiece.field_prototypes[:image].schema_id.to_s, :name=>"image", :attributes => {}}
-        ],
-          :style=>@boiling_style.to_s,
-          :hidden => false,
-          :is_page=>false,
-          # :name=>"The Doors",
-          :id=>@piece2.id,
-        :boxes=>[{:entries=>[], :fields=>[{:unprocessed_value=>"", :processed_value=>"", :id => @piece2.things.field_prototypes[:title].schema_id.to_s,:name=>"title", :attributes => {}}],
-                  :id=>@piece2.things.schema_id.to_s,
-                  :name => "things"
-        }]
-        }
-        ]
-        }
-        ]
-        }
+        template = ERB.new(File.read(File.expand_path('../../fixtures/serialisation/root_hash.yaml.erb', __FILE__)))
+        @root_hash = YAML.load(template.result(binding))
         @root = Content[@root.id]
       end
 
       should "generate a hash for JSON serialisation" do
-       # puts; pp @root_hash; pp @root.to_hash
+        unless @root_hash == @root.to_hash
+          # require 'differ'
+          # p Differ.diff_by_line(@root.to_hash.to_yaml, @root_hash.to_yaml)
+          puts; pp @root_hash; puts "="*60; pp @root.to_hash
+        end
         assert_hashes_equal(@root_hash, @root.to_hash)
       end
 
