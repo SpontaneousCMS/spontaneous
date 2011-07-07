@@ -22,17 +22,6 @@ module Spontaneous::Plugins
     module ClassMethods
       @@dataset = nil
       @@revision = nil
-      @@publishable_classes = [Spontaneous::Content]
-
-      def inherited(subclass)
-        super
-        add_publishable_class(subclass)
-      end
-
-
-      def add_publishable_class(klass)
-        @@publishable_classes << klass unless @@publishable_classes.include?(klass)
-      end
 
       def current_revision_table
         revision_table(@@revision)
@@ -181,12 +170,6 @@ module Spontaneous::Plugins
         database.tables.each do |table|
           database.drop_table(table) if revision_table?(table)
         end
-      end
-
-      def activate_dataset(dataset)
-        # @@publishable_classes.each do |content_class|
-        #   content_class.dataset = dataset unless content_class.dataset == dataset
-        # end
       end
 
       def revision_pop

@@ -2,7 +2,6 @@
 
 module Spontaneous::Plugins
   module SchemaHierarchy
-
     module ClassMethods
       def schema_validate
         if schema_id.nil?
@@ -46,20 +45,30 @@ module Spontaneous::Plugins
         @subclasses ||= []
       end
 
+      def __source_file=(path)
+        @__source_file = path
+      end
+
+      protected(:__source_file=)
+
+      def __source_file
+        @__source_file
+      end
+
       def descendents
         subclasses.map{ |x| [x] + x.descendents}.flatten
       end
 
-      def inherited(subclass)
+      def inherited(subclass, real_caller = nil)
+        subclass.__source_file = File.expand_path((real_caller || caller[0]).split(':')[0])
         Spontaneous::Schema.classes << subclass if subclass.schema_class?
         subclasses << subclass
-        super
+        super(subclass)
       end
 
       def schema_class?
         true
       end
-
     end
   end
 end
