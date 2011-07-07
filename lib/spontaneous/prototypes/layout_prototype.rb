@@ -15,4 +15,3 @@ module Spontaneous::Prototypes
     end
   end # LayoutPrototype
 end # Spontaneous::Prototypes
-
