@@ -51,7 +51,9 @@ class StylesTest < MiniTest::Spec
 
         should "return anonymous style if no templates are found" do
           piece = MissingClass.new
-          piece.style.class.should == Spontaneous::Style::Anonymous
+          piece.style.class.should == Spontaneous::Style::Default
+          # piece.style.template.must_be_instance_of(Proc)
+          piece.style.template.call.should == ""
         end
 
         should "derive path from owning class and name" do
@@ -350,9 +352,10 @@ class StylesTest < MiniTest::Spec
           piece = TemplateClass.new
           piece.entities << TemplateClass.new
           piece.entities << TemplateClass.new
-          piece.entities.style.must_be_instance_of(Spontaneous::Style::Anonymous)
           piece.entities.render.should == "template_class.html.cut\n\ntemplate_class.html.cut\n"
+          piece.entities.style.template.call.should == "{{ render_content }}"
         end
+
 
         should "use a named template if given" do
           TemplateClass.box :things do
@@ -394,6 +397,7 @@ class StylesTest < MiniTest::Spec
             BoxA.style :runny
             BoxA.style :walky
           end
+
           should "be configurable to use a specific style" do
             TemplateClass.box :sprinters, :type => :BoxA, :style => :runny
             TemplateClass.box :strollers, :type => :BoxA, :style => :walky

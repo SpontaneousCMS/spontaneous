@@ -8,75 +8,65 @@ module Spontaneous::Plugins
 
     module ClassMethods
       def style(name, options={})
-        s = Spontaneous::Style.new(self, style_directory_name, name, options.merge(:style_id => true))
-        styles << s
-        s
+        name = name.to_sym
+        styles[name] = Spontaneous::Prototypes::StylePrototype.new(self, name, options)
       end
 
-      def styles
-        @styles ||= []
-      end
+      # def styles
+      #   @styles ||= []
+      # end
 
-      def all_styles
-        @all_styles ||= styles.concat(supertype_has_styles? ? supertype.all_styles : [])
-      end
+      # def all_styles
+      #   @all_styles ||= styles.concat(supertype_has_styles? ? supertype.all_styles : [])
+      # end
 
       def style_prototypes
-        Hash[ all_styles.map { |s| [s.name, s] } ]
+        @style_prototypes ||= Spontaneous::Collections::StyleSet.new(self)
       end
 
-      def resolve_style(style_sid, format = :html)
+      alias_method :styles, :style_prototypes
+
+      def resolve_style(style_sid)
         if style_sid.blank?
-          default_style(format)
+          default_style
         else
-          find_style(style_sid, format)
+          find_style(style_sid)
         end
       end
 
-      def default_style(format = :html)
-        if template_string = inline_templates[format.to_sym]
-          Spontaneous::Style::Anonymous.new(template_string)
+      def default_style
+        if styles.empty?
+          style = style_class::Default.new(self)
         else
-          if styles.empty?
-            style = Spontaneous::Style.new(self, nil, style_directory_name)
-            if style.exists?(format)
-              style
-            else
-              if supertype_has_styles?
-                supertype.default_style(format)
-              else
-                # this is the case where no template file can be found
-                anonymous_style
-              end
-            end
-          else
-            usable_styles = styles_for_format(format)
-            usable_styles.detect { |s| s.default? } or usable_styles.first
-          end
+          style = (style_prototypes.detect { |prototype| prototype.default? } || style_prototypes.first).style(self)
         end
       end
 
-      def styles_for_format(format)
-        styles.select { |s| s.exists?(format) }
+      def style_class
+        Spontaneous::Style
       end
 
-      def anonymous_style
-        Spontaneous::Style::Anonymous.new
-      end
+      # def styles_for_format(format)
+      #   styles.select { |s| s.exists?(format) }
+      # end
 
-      def find_style(style_sid, format = :html)
-        # name = style_id#.to_sym
-        unless style = styles.detect { |s| s.schema_id == style_sid }
-          style = supertype.resolve_style(style_sid) if supertype_has_styles?
-        end
-        style
+      # def default_style_class
+      #   Spontaneous::Prototypes::StylePrototype::Default
+      # end
+      # def anonymous_style
+      #   Spontaneous::Style::Anonymous.new
+      # end
+
+      def find_style(style_sid)
+        style_prototypes.sid(style_sid).style(self)
       end
 
       def find_named_style(style_name)
-        unless style = styles.detect { |s| s.name == style_name }
-          style = supertype.find_named_style(style_name) if supertype_has_styles?
-        end
-        style
+        # unless style = styles.detect { |s| s.name == style_name }
+        #   style = supertype.find_named_style(style_name) if supertype_has_styles?
+        # end
+        # style
+        style_prototypes[style_name.to_sym]
       end
 
       alias_method :get_style, :find_named_style
@@ -95,15 +85,15 @@ module Spontaneous::Plugins
 
       # Used to determine the name of the directory under template_root
       # that holds a classe's templates
-      def style_directory_name
-        return nil if self.name.blank?
-        self.name.demodulize.underscore
-      end
+      # def style_directory_name
+      #   return nil if self.name.blank?
+      #   self.name.demodulize.underscore
+      # end
 
       # don't want to go right back to Content class to resolve default styles
-      def supertype_has_styles?
-        supertype? and supertype != Spontaneous::Content
-      end
+      # def supertype_has_styles?
+      #   supertype? and supertype != Spontaneous::Content
+      # end
     end # ClassMethods
 
     module InstanceMethods
@@ -132,24 +122,24 @@ module Spontaneous::Plugins
         self.class.find_named_style(style_name)
       end
 
-      def style(format = :html)
-        resolve_style(self.style_sid, format)
+      def style
+        resolve_style(self.style_sid)
       end
 
-      def default_style(format = :html)
-        self.class.default_style(format)
+      def default_style
+        self.class.default_style
       end
 
-      def resolve_style(style_sid, format = :html)
-        self.class.resolve_style(style_sid, format)
+      def resolve_style(style_sid)
+        self.class.resolve_style(style_sid)
       end
 
       def styles
-        @_styles ||= Hash[self.class.styles.map { |s| [s.name, s]}]
+        self.class.styles
       end
 
       def template(format = :html)
-        style(format).template(format)
+        style.template(format)
       end
 
 

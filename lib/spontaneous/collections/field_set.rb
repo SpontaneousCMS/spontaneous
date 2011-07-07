@@ -1,6 +1,5 @@
 # encoding: UTF-8
 
-
 module Spontaneous::Collections
   class FieldSet < PrototypeSet
 

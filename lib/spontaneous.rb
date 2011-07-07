@@ -59,6 +59,7 @@ module Spontaneous
 
 
   autoload :Style, "spontaneous/style"
+  autoload :BoxStyle, "spontaneous/box_style"
   autoload :Layout, "spontaneous/layout"
 
   autoload :Site, "spontaneous/site"
@@ -87,6 +88,7 @@ module Spontaneous
   module Prototypes
     autoload :FieldPrototype, "spontaneous/prototypes/field_prototype"
     autoload :BoxPrototype, "spontaneous/prototypes/box_prototype"
+    autoload :StylePrototype, "spontaneous/prototypes/style_prototype"
   end
 
   module Collections
@@ -95,6 +97,7 @@ module Spontaneous
     autoload :EntrySet, "spontaneous/collections/entry_set"
     autoload :FieldSet, "spontaneous/collections/field_set"
     autoload :BoxSet, "spontaneous/collections/box_set"
+    autoload :StyleSet, "spontaneous/collections/style_set"
   end
 
   module Plugins

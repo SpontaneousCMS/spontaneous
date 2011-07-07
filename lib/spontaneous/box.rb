@@ -109,7 +109,11 @@ module Spontaneous
       }
     end
 
-    def self.resolve_style(box, format = :html)
+    def self.resolve_style(box)
+      Spontaneous::BoxStyle.new(box)
+    end
+
+    def self.find_style(box)
       prototype = box._prototype
       owner_class = box._owner.class.style_directory_name
       box_class = prototype.box_base_class.style_directory_name
@@ -138,18 +142,22 @@ module Spontaneous
       possible_styles.detect { |s| s.exists? }
     end
 
-    def self.anonymous_style
-      Spontaneous::Style::Anonymous.new("{{ render_content }}")
+    def self.style_class
+      Spontaneous::BoxStyle
     end
 
+    # def self.anonymous_style
+    #   Spontaneous::Style::Anonymous.new("{{ render_content }}")
+    # end
 
-    def self.style_directory_name
-      return nil if self == Spontaneous::Box
-      super
-    end
 
-    def style(format = :html)
-      resolve_style(self, format)
+    # def self.style_directory_name
+    #   return nil if self == Spontaneous::Box
+    #   super
+    # end
+
+    def style
+      resolve_style(self)
     end
 
     def container
