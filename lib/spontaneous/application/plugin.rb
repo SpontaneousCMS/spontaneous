@@ -5,9 +5,7 @@ module Spontaneous
     class Plugin < Spontaneous::Facet
       def load!
         init_file = @root / "init.rb"
-        if File.exist?(init_file)
-          require(init_file)
-        end
+        require(init_file) if File.exist?(init_file)
         super
       end
     end # Plugin

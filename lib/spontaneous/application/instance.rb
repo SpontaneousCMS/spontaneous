@@ -5,13 +5,14 @@ module Spontaneous
     class Instance < Spontaneous::Facet
       def initialize!
         Spontaneous.facets.each do |facet|
-          load_facet_code(facet)
+          load_facet_code(:lib, facet)
+          load_facet_code(:schema, facet)
           load_facet_config(facet)
         end
       end
 
-      def load_facet_code(facet)
-        facet.load!
+      def load_facet_code(category, facet)
+        Spontaneous::Loader.load_classes(facet.paths.expanded(category))
       end
 
       def load_facet_config(facet)
