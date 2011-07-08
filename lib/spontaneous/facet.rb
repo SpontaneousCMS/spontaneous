@@ -8,6 +8,8 @@ module Spontaneous
       paths.add :schema, ["schema", "**/*.rb"]
       paths.add :templates, "templates"
       paths.add :config, "config"
+      paths.add :tasks, ["lib/tasks", "**/*.rake"]
+      paths.add :migrations, ["db/migrations", "**/*.rake"]
     end
 
     def paths

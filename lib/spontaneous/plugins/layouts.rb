@@ -79,7 +79,7 @@ module Spontaneous::Plugins
 
       def provides_format?(format)
         format = (format || :html).to_sym
-        layout.formats.include?(format)
+        self.formats.include?(format)
       end
     end # InstanceMethods
   end # Layouts

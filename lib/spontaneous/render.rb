@@ -118,6 +118,19 @@ module Spontaneous
         ::File.join(template_root, template_name(filename, format))
       end
 
+      # converts relative paths into absolute template paths
+      # e.g. layouts/standard -> /example_com/templates/layouts/standard.html.cut
+      # searches through all available template roots
+      def find_template(filename, format)
+        template_name = template_name(filename, format)
+        return template_name if File.file?(template_name)
+        Spontaneous.template_paths.each do |root|
+          path = root / template_name
+          return path if File.file?(path)
+        end
+        nil
+      end
+
       def template_name(filename, format)
         "#{filename}.#{format}.#{Spontaneous.template_ext}"
       end

@@ -44,15 +44,18 @@ module Spontaneous
     class Configuration
       extend ::Forwardable
 
-      def initialize(name, settings={})
-        @name, @settings = name, settings
+      def initialize(settings={})
+        @settings = {}
+        merge!(settings)
+      end
 
-        @settings.each do |key, value|
+      def merge!(hash)
+        hash.each do |key, value|
           add_setting(key, value)
         end
       end
-
       def add_setting(key, value)
+        @settings[key] = value
         singleton_class.send(:define_method, key) do
           value
         end
@@ -88,33 +91,35 @@ module Spontaneous
     end
 
     @@local = nil
-    @@environment = nil
-    @@base = nil
-    @@defaults = Configuration.new(:defaults, {
+    @@environment = Configuration.new
+    @@base = Configuration.new
+    @@defaults = Configuration.new({
       #TODO: add in sensible default configuration (or do it in the generators)
     })
     @@loaded = false
 
     class << self
-      def load(environment=:development, pwd=Spontaneous.root)
+      def init(environment=:development)
         @environment = environment.to_sym
-        @@base = Configuration.new(:base)
+        @@base = Configuration.new
         @@local = nil
-        default = File.join(pwd, 'config/environment.rb')
+        @@environment = Configuration.new
+      end
+
+      def load(config_root)
+        default = File.join(config_root, 'environment.rb')
         Loader.read(@@base, default) if File.exist?(default)
         store = Hash.new
-        file =  File.join(pwd, "config/environments/#{environment}.rb")
+        file =  File.join(config_root, "environments/#{environment}.rb")
         Loader.read(store, file) if ::File.exists?(file)
-        @@environment = Configuration.new(@environment, store)
-        @@loaded = true
+        @@environment.merge!(store)
       end
 
       def load!
-        load unless @@loaded
+        # load unless @@loaded
       end
 
       def defaults
-        load!
         @@defaults
       end
 
@@ -122,17 +127,17 @@ module Spontaneous
         @environment || Spontaneous.env
       end
 
-      def environment=(env)
-        self.load(env.to_sym)
-      end
+      # def environment=(env)
+      #   self.load(env.to_sym)
+      # end
 
       def configuration
-        load!
+        # load!
         @@environment
       end
 
       def base
-        load!
+        # load!
         @@base
       end
 
@@ -165,8 +170,7 @@ module Spontaneous
       end
 
       def local
-        load!
-        @@local ||= Configuration.new(:local)
+        @@local ||= Configuration.new
       end
     end
   end

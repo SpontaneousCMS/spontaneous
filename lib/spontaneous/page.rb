@@ -32,6 +32,10 @@ module Spontaneous
       :title
     end
 
+    def self.formats
+      [:html]
+    end
+
     def page?
       true
     end
@@ -47,7 +51,7 @@ module Spontaneous
 
     # TODO: configure outputs for each page
     def formats
-      [:html]
+      self.class.formats
     end
 
     def request_redirect(params = nil, request = nil, session = nil)

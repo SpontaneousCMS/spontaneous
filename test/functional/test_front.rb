@@ -84,7 +84,7 @@ class FrontTest < MiniTest::Spec
       `mkdir -p #{@revision_root}`
       Spontaneous.revision_root = @revision_root
 
-      Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
+      self.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
 
       @root = ::SitePage.create
       @about = ::SitePage.create(:slug => "about", :uid => "about")
@@ -142,6 +142,7 @@ class FrontTest < MiniTest::Spec
     end
 
     should "honor the format of the request" do
+      @about.class.stubs(:formats).returns([:html, :pdf])
       get '/about.pdf'
       assert last_response.ok?
       last_response.body.should == "/about.pdf\n"

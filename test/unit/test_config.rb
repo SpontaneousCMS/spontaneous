@@ -34,6 +34,8 @@ class ConfigTest < MiniTest::Spec
 
     context "Config" do
       setup do
+        Config.init(:development)
+        Config.load(Spontaneous.root / 'config')
       end
       should "load the first time its accessed" do
         Config.over_ridden.should == :development_value
@@ -47,7 +49,8 @@ class ConfigTest < MiniTest::Spec
         # defined?(Spontaneous).should be_nil
         # require @lib_dir + '/spontaneous/config.rb'
         # Config.environment = :development
-        Config.load(:development)
+        Config.init(:development)
+        Config.load(Spontaneous.root / 'config')
       end
 
       teardown do
@@ -73,9 +76,11 @@ class ConfigTest < MiniTest::Spec
 
       should "overwrite values depending on environment" do
         Config.over_ridden.should == :development_value
-        Config.load(:production)
+        Config.init(:production)
+        Config.load(Spontaneous.root / 'config')
         Config.over_ridden.should == :production_value
-        Config.load(:staging)
+        Config.init(:staging)
+        Config.load(Spontaneous.root / 'config')
         Config.over_ridden.should == :environment_value
       end
 
@@ -93,9 +98,11 @@ class ConfigTest < MiniTest::Spec
 
       should "dynamically switch values according to the configured env" do
         Config.over_ridden.should == :development_value
-        Config.environment = :production
+        Config.init(:production)
+        Config.load(Spontaneous.root / 'config')
         Config.over_ridden.should == :production_value
-        Config.environment = :staging
+        Config.init(:staging)
+        Config.load(Spontaneous.root / 'config')
         Config.over_ridden.should == :environment_value
       end
 
@@ -129,7 +136,8 @@ class ConfigTest < MiniTest::Spec
       context "Spontaneous :back" do
         setup do
           Spontaneous.mode = :back
-          Config.load(:development)
+          Config.init(:development)
+          Config.load(Spontaneous.root / 'config')
         end
         should "read the correct configuration values" do
           Config.port.should == 9001
@@ -138,7 +146,8 @@ class ConfigTest < MiniTest::Spec
       context "Spontaneous :front" do
         setup do
           Spontaneous.mode = :front
-          Config.load
+          Config.init(:development)
+          Config.load(Spontaneous.root / 'config')
         end
         should "read the correct configuration values" do
           Config.port.should == 9002

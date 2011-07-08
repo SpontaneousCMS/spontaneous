@@ -5,17 +5,24 @@ require 'test_helper'
 
 class TemplatesTest < MiniTest::Spec
   def first_pass(base_dir, filename, context=nil)
-    context ||= @context
-    Cutaneous::FirstPassRenderer.new(template_root(base_dir)).render(filename, context)
+    render_with_renderer(Cutaneous::FirstPassRenderer, base_dir, filename, context)
   end
 
   def second_pass(base_dir, filename, context=nil)
-    context ||= @context
-    Cutaneous::SecondPassRenderer.new(template_root(base_dir)).render(filename, context)
+    render_with_renderer(Cutaneous::SecondPassRenderer, base_dir, filename, context)
   end
 
-  def template_root(base_dir)
-    @template_root ||= File.join(File.dirname(__FILE__), '../fixtures/templates', base_dir)
+  def render_with_renderer(renderer_class, base_dir, filename, context = nil)
+    context ||= @context
+    renderer = renderer_class.new(make_template_root(base_dir))
+    path = template_root / filename
+    renderer.render(path, context)
+  end
+
+  def make_template_root(base_dir)
+    @template_root = File.expand_path(File.join(File.dirname(__FILE__), '../fixtures/templates', base_dir))
+    self.template_root = @template_root
+    @template_root
   end
 
   def setup

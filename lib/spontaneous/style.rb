@@ -22,6 +22,7 @@ module Spontaneous
       unless template = inline_template(format)
         template = find_template(format)
       end
+      template
     end
 
     def find_template(format = :html)
@@ -45,6 +46,7 @@ module Spontaneous
         end
         return (template_root / template_path) if template_path
       end
+      nil
     end
 
     def supertype_template(format)

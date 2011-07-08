@@ -5,21 +5,17 @@ require 'test_helper'
 
 class StylesTest < MiniTest::Spec
 
-  def template_root
-    @@style_root
-  end
 
-  context "template root" do
-    should "be settable" do
-      File.exists?(template_root).should be_true
-      Spontaneous.template_root = template_root
-      Spontaneous.template_root.should == template_root
-    end
-  end
+  # context "template root" do
+  #   should "be settable" do
+  #     File.exists?(template_root).should be_true
+  #     Spontaneous.template_root = template_root
+  #     Spontaneous.template_root.should == template_root
+  #   end
+  # end
 
-  def self.startup
-    @@style_root ||= File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/styles"))
-    Spontaneous.template_root = @@style_root
+  def setup
+    self.template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/styles"))
     Spontaneous::Render.use_development_renderer
   end
 
@@ -57,7 +53,7 @@ class StylesTest < MiniTest::Spec
         end
 
         should "derive path from owning class and name" do
-          @piece.style.template.should == 'template_class'
+          assert_correct_template(@piece, 'template_class')
         end
 
         should "render using correct template" do
@@ -65,6 +61,7 @@ class StylesTest < MiniTest::Spec
         end
 
         should "be able to give a list of available formats" do
+          skip("Need to re-implement the format functionality")
           @piece.style.formats.should == [:epub, :html, :pdf]
         end
 
@@ -79,21 +76,22 @@ class StylesTest < MiniTest::Spec
         should "use template found in class directory if exists" do
           TemplateClass.style :named1
           piece = TemplateClass.new
-          piece.style.template.should == 'template_class/named1'
+          assert_correct_template(piece, 'template_class/named1')
           piece.render.should == "template_class/named1.html.cut\n"
         end
 
         should "use template in template root with correct name if it exists" do
           TemplateClass.style :named2
           piece = TemplateClass.new
-          piece.style.template.should == 'named2'
+          assert_correct_template(piece, 'named2')
           piece.render.should == "named2.html.cut\n"
         end
 
         should "allow passing of directory/stylename" do
           TemplateClass.style :'orange/apple'
           piece = TemplateClass.new
-          piece.style.template.should == 'orange/apple'
+          # piece.style.template.should == 'orange/apple'
+          assert_correct_template(piece, 'orange/apple')
           piece.render.should == "orange/apple.html.cut\n"
         end
 
@@ -101,7 +99,8 @@ class StylesTest < MiniTest::Spec
           TemplateClass.style :named1
           TemplateClass.style :named2, :default => true
           piece = TemplateClass.new
-          piece.style.template.should == 'named2'
+          assert_correct_template(piece, 'named2')
+          # piece.style.template.should == 'named2'
           piece.render.should == "named2.html.cut\n"
         end
       end
@@ -111,13 +110,15 @@ class StylesTest < MiniTest::Spec
           TemplateClass.style :named1
           TemplateClass.style :named2, :default => true
           @piece = TemplateClass.new
-          @piece.style.template.should == 'named2'
+          assert_correct_template(@piece, 'named2')
+          # @piece.style.template.should == 'named2'
           @piece.render.should == "named2.html.cut\n"
         end
 
         should "be possible" do
           @piece.style = :named1
-          @piece.style.template.should == 'template_class/named1'
+          # @piece.style.template.should == 'template_class/named1'
+          assert_correct_template(@piece, 'template_class/named1')
           @piece.render.should == "template_class/named1.html.cut\n"
         end
 
@@ -125,24 +126,27 @@ class StylesTest < MiniTest::Spec
           @piece.style = :named1
           @piece.save
           @piece = Content[@piece.id]
-          @piece.style.template.should == 'template_class/named1'
+          # @piece.style.template.should == 'template_class/named1'
+          assert_correct_template(@piece, 'template_class/named1')
         end
       end
 
       context "inheriting styles" do
         should "use default for sub class if it exists" do
           piece = TemplateSubClass1.new
-          piece.style.template.should == 'template_sub_class1'
+          assert_correct_template(piece, 'template_sub_class1')
         end
 
         should "fall back to default style for superclass if default for class doesn't exist" do
           piece = TemplateSubClass2.new
-          piece.style.template.should == 'template_class'
+          assert_correct_template(piece, 'template_class')
+          # piece.style.template.should == 'template_class'
         end
         should "fall back to defined default style for superclass if default for class doesn't exist" do
           TemplateClass.style :named1
           piece = TemplateSubClass2.new
-          piece.style.template.should == 'template_class/named1'
+          # piece.style.template.should == 'template_class/named1'
+          assert_correct_template(piece, 'template_class/named1')
         end
       end
 
@@ -344,7 +348,7 @@ class StylesTest < MiniTest::Spec
         should "use template with their name inside container class template dir if it exists" do
           piece = TemplateClass.new
           piece.results << TemplateClass.new
-          piece.results.style.template.should == "template_class/results"
+          assert_correct_template(piece.results, 'template_class/results')
           piece.results.render.should == "template_class/results.html.cut\n"
         end
 
@@ -362,14 +366,14 @@ class StylesTest < MiniTest::Spec
             style :named1
           end
           piece = TemplateClass.new
-          piece.things.template.should == "template_class/named1"
+          assert_correct_template(piece.things, 'template_class/named1')
           piece.things.render.should == "template_class/named1.html.cut\n"
 
           TemplateClass.box :dongles do
             style :named2
           end
           piece = TemplateClass.new
-          piece.dongles.template.should == "named2"
+          assert_correct_template(piece.dongles, 'named2')
           piece.dongles.render.should == "named2.html.cut\n"
         end
       end
@@ -382,13 +386,13 @@ class StylesTest < MiniTest::Spec
 
         should "use the box name template if it exists" do
           piece = TemplateClass.new
-          piece.results.style.template.should == "template_class/results"
+          assert_correct_template(piece.results, 'template_class/results')
           piece.results.render.should == "template_class/results.html.cut\n"
         end
 
         should "use the box classes default template if box name template is missing" do
           piece = TemplateClass.new
-          piece.entities.template.should == "box_a"
+          assert_correct_template(piece.entities, 'box_a')
           piece.entities.render.should == "box_a.html.cut\n"
         end
 
@@ -402,8 +406,8 @@ class StylesTest < MiniTest::Spec
             TemplateClass.box :sprinters, :type => :BoxA, :style => :runny
             TemplateClass.box :strollers, :type => :BoxA, :style => :walky
             piece = TemplateClass.new
-            piece.strollers.template.should == "template_class/walky"
-            piece.sprinters.template.should == "box_a/runny"
+            assert_correct_template(piece.strollers, 'template_class/walky')
+            assert_correct_template(piece.sprinters, 'box_a/runny')
           end
         end
       end

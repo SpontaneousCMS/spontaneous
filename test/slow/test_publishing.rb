@@ -904,7 +904,7 @@ class PublishingTest < MiniTest::Spec
         Spontaneous.root = File.expand_path(File.dirname(__FILE__) / "../fixtures/example_application")
 
         @revision_dir = File.expand_path(File.dirname(__FILE__) / "../../tmp/revisions")
-        @template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")
+        self.template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")
         FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
         class ::PublishablePage < Page; end
         PublishablePage.layout :"static"

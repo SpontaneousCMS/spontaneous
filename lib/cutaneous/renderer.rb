@@ -96,10 +96,10 @@ module Cutaneous
     end
 
     def make_path_absolute(path, format)
-      if ::File.exists?(path)
+      if ::File.file?(path)
         path
       else
-        Spontaneous::Render.template_name(path, format)
+        Spontaneous::Render.find_template(path, format)
       end
     end
 

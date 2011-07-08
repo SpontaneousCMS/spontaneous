@@ -103,7 +103,17 @@ class MiniTest::Spec
   include Spontaneous
   include CustomMatchers
 
+  attr_accessor :template_root
   alias :silence_stdout :silence_logger
+
+  def template_root=(template_root)
+    @template_root = template_root
+    Spontaneous.stubs(:template_paths).returns([@template_root])
+  end
+
+  def assert_correct_template(content, expected_path, format = :html)
+    assert_equal(template_root / expected_path, content.template(format))
+  end
 
   def assert_file_exists(*path)
     path = File.join(*path)

@@ -20,8 +20,8 @@ class AliasTest < MiniTest::Spec
       Spot::Schema.reset!
       Content.delete
 
-      @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
-      Spontaneous.template_root = @template_root
+      self.template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
+
       class ::Page < Spontaneous::Page
         field :title
       end
@@ -157,13 +157,13 @@ class AliasTest < MiniTest::Spec
         end
 
         should "have their own styles" do
-          @a_alias.style.template.should == 'a_alias/a_alias_style'
+          assert_correct_template(@a_alias,  'a_alias/a_alias_style')
         end
 
         should "present their target's styles as their own" do
           @a_alias.style = :a_style
 
-          @a_alias.style.template.should == 'a/a_style'
+          assert_correct_template(@a_alias,  'a/a_style')
         end
 
         # should "have an independent style setting"

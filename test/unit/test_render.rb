@@ -8,19 +8,19 @@ class RenderTest < MiniTest::Spec
 
   def setup
     @saved_engine_class = Spontaneous::Render.renderer_class
-        Schema.reset!
+    Schema.reset!
   end
   def teardown
     Spontaneous::Render.renderer_class = @saved_engine_class
   end
 
   def template_root
-    @style_root ||= File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates"))
+    @template_root ||= File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates"))
   end
 
   context "First render step" do
     setup do
-      Spontaneous::Render.template_root = template_root
+      self.template_root = template_root
       Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
 
       class ::TemplateClass < Content
@@ -240,7 +240,7 @@ class RenderTest < MiniTest::Spec
       should "use their default page style when accessed directly" do
         @page = PageClass[@page.id]
         @page.layout.should == PageClass.default_layout
-        @parent.template.should == 'layouts/page_style'
+        assert_correct_template(@parent, 'layouts/page_style')
         @page.render.should == "<html></html>\n"
       end
 
@@ -250,7 +250,7 @@ class RenderTest < MiniTest::Spec
       end
 
       should "render using the inline style" do
-        @parent.pieces.first.template.should == 'page_class/inline_style'
+        assert_correct_template(@parent.pieces.first, 'page_class/inline_style')
         @parent.pieces.first.render.should == "Child\n"
         @parent.things.render.should == "Child\n"
         @parent.render.should == "<html>Child\n</html>\n"
@@ -276,7 +276,7 @@ class RenderTest < MiniTest::Spec
   end
   context "Request rendering" do
     setup do
-      Spontaneous::Render.template_root = template_root
+      self.template_root = template_root
 
       class ::PreviewRender < Page
         field :title, :string

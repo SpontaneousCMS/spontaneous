@@ -38,7 +38,7 @@ class BackTest < MiniTest::Spec
       Spot::Schema.reset!
       Content.delete
       Spontaneous::Permissions::User.delete
-      Spontaneous.template_root = File.expand_path('../../fixtures/back/templates', __FILE__)
+      self.template_root = File.expand_path('../../fixtures/back/templates', __FILE__)
       Spontaneous.root = File.expand_path("../../fixtures/back", __FILE__)
       @app_dir = File.expand_path("../../fixtures/application", __FILE__)
       File.exists?(@app_dir).should be_true
