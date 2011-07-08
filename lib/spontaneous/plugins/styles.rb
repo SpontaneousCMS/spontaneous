@@ -62,7 +62,6 @@ module Spontaneous::Plugins
       def inline_templates
         @inline_templates ||= {}
       end
-
     end # ClassMethods
 
     module InstanceMethods

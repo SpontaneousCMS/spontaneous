@@ -20,9 +20,13 @@ module Spontaneous
 
     def template(format = :html)
       unless template = inline_template(format)
-        unless template = local_template(format)
-          template = supertype_template(format)
-        end
+        template = find_template(format)
+      end
+    end
+
+    def find_template(format = :html)
+      unless template = local_template(format)
+        template = supertype_template(format)
       end
       unless template
         logger.warn("No template file found for style #{owner}/#{name}.#{format}")
@@ -33,12 +37,28 @@ module Spontaneous
 
     alias_method :path, :template
 
+    def local_template(format)
+      template_path = nil
+      Spontaneous.template_paths.each do |template_root|
+        template_path = try_template_paths.detect do |path|
+          Spontaneous::Render.exists?(template_root, path, format)
+        end
+        return (template_root / template_path) if template_path
+      end
+    end
+
     def supertype_template(format)
       supertype = owner.supertype
       if supertype && supertype != Spontaneous::Content
         self.class.new(supertype, prototype).template(format)
       else
         nil
+      end
+    end
+
+    def inline_template(format)
+      if template_string = owner.inline_templates[format.to_sym]
+        Anonymous.new(template_string).template(format)
       end
     end
 
@@ -50,23 +70,11 @@ module Spontaneous
       prototype.name
     end
 
-    def inline_template(format)
-      if template_string = owner.inline_templates[format.to_sym]
-        Anonymous.new(template_string).template(format)
-      end
-    end
-
-    def local_template(format)
-      try_template_paths.detect do |t|
-        Spontaneous::Render.exists?(t, format)
-      end
-    end
-
     def try_template_paths
-      try_templates.map { |path| Array === path ? File.join(path.compact) : path }.uniq
+      try_paths.map { |path| Array === path ? File.join(path.compact) : path }.uniq
     end
 
-    def try_templates
+    def try_paths
       name = prototype.name.to_s
       [[owner_directory_name, name], name]
     end
@@ -79,10 +87,6 @@ module Spontaneous
     def default?
       @options[:default]
     end
-
-    # def exists?(format = :html)
-    #   S::Render.exists?(template, format)
-    # end
 
     def formats
       Spontaneous::Render.formats(self)
@@ -108,7 +112,7 @@ module Spontaneous
         nil
       end
 
-      def try_templates
+      def try_paths
         [owner_directory_name]
       end
     end

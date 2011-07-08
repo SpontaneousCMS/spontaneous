@@ -11,10 +11,11 @@ module Spontaneous
       def use_reloader?
         Spontaneous::Config.reload_classes
       end
+
       def load
         Reloader.run! if use_reloader?
-        Spontaneous.load_paths.each do |component, path|
-          load_classes(path.first / path.last)
+        Spontaneous.load_paths.each do |path|
+          load_classes(path)
         end
       end
 
@@ -230,7 +231,7 @@ module Spontaneous
           #   reject { |path| Padrino::Reloader.exclude.include?(path) || !File.directory?(path) }
           # files  = paths.map { |path| Dir["#{path}/**/*.rb"] }.flatten.uniq
 
-          files = Spontaneous.load_paths.map { |type, path| path.join('/') }.map do |glob|
+          files = Spontaneous.load_paths.map do |glob|
             Dir[glob]
           end.flatten.uniq
 
@@ -276,38 +277,4 @@ module Spontaneous
 
     end
   end # Loader
-
-  class << self
-    attr_accessor :unresolved_load_paths
-
-    def add_path(type, path, file_glob="**/*.rb")
-      unresolved_load_paths[type] = [path, file_glob]
-    end
-
-    def load_paths
-      @load_paths ||= resolve_load_paths
-    end
-
-    def resolve_load_paths
-      resolved = OrderedHash.new
-      unresolved_load_paths.each do |key, path|
-        root = \
-          case path.first
-          when Proc
-            path.first.call
-          else
-            path.first
-          end
-        resolved[key] = [root, path.last]
-      end
-      resolved
-    end
-    unless Spontaneous.unresolved_load_paths.is_a?(OrderedHash)
-      Spontaneous.unresolved_load_paths = OrderedHash.new
-      Spontaneous.add_path(:schema, lambda { Spontaneous.schema_root })
-      Spontaneous.add_path(:lib, lambda { Spontaneous.root / 'lib' })
-    end
-  end
-
 end # Spontaneous
-

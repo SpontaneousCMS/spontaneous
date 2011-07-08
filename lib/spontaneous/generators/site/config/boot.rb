@@ -1,7 +1,7 @@
 SPOT_ENV = (ENV["SPOT_ENV"] ||= ENV["RACK_ENV"] ||= "development").to_sym unless defined?(SPOT_ENV)
 SPOT_MODE = (ENV["SPOT_MODE"] ||= "back").to_sym unless defined?(SPOT_MODE)
 
-Encoding.default_external = "UTF-8" if defined?(Encoding)
+Encoding.default_external = Encoding::UTF_8 if defined?(Encoding)
 
 # Set up gems listed in the Gemfile.
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', __FILE__)

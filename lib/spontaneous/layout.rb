@@ -2,12 +2,12 @@
 
 module Spontaneous
   class Layout < Style
-    def try_templates
+    def try_paths
       [["layouts", prototype.name.to_s]]
     end
 
     class Default < Layout
-      def try_templates
+      def try_paths
         [["layouts", "standard"]]
       end
     end

@@ -99,7 +99,7 @@ module Cutaneous
       if ::File.exists?(path)
         path
       else
-        Spontaneous::Render.template_file_with_root(template_root, path, format)
+        Spontaneous::Render.template_name(path, format)
       end
     end
 

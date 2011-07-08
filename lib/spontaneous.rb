@@ -1,6 +1,13 @@
 # encoding: UTF-8
 
 
+if RUBY_VERSION < '1.9'
+  $KCODE='u'
+else
+  Encoding.default_external = Encoding::UTF_8
+  Encoding.default_internal = Encoding::UTF_8
+end
+
 require "home_run"
 require "stringex"
 require "sequel"
@@ -42,10 +49,13 @@ module Spontaneous
   plugin Plugins::Application::State
   plugin Plugins::Application::Paths
   plugin Plugins::Application::Render
+  plugin Plugins::Application::Facets
 
   autoload :ProxyObject, "spontaneous/proxy_object"
 
   autoload :Config, "spontaneous/config"
+  autoload :Paths, "spontaneous/paths"
+  autoload :Facet, "spontaneous/facet"
 
   autoload :Content, "spontaneous/content"
   autoload :Page, "spontaneous/page"
@@ -83,6 +93,8 @@ module Spontaneous
   autoload :ContentQuery, "spontaneous/content_query"
 
   autoload :PageController, "spontaneous/page_controller"
+
+  autoload :Application, "spontaneous/application"
 
   module Prototypes
     autoload :FieldPrototype, "spontaneous/prototypes/field_prototype"
@@ -152,4 +164,3 @@ require 'spontaneous/version'
 
 
 Spot = S = Spontaneous unless defined?(Spot)
-# Site = Spontaneous::Site

@@ -32,7 +32,7 @@ module Spontaneous
       box._name.to_s
     end
 
-    def try_templates
+    def try_paths
       prototype = box._prototype
       box_directory_name = self.class.to_directory_name(prototype.box_base_class)
       paths = [ [owner_directory_name, box._name.to_s] ]

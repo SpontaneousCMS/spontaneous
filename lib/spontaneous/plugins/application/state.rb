@@ -12,8 +12,9 @@ module Spontaneous::Plugins::Application
         # return false if loaded?
         self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
         self.mode = options.delete(:mode) || ENV["SPOT_MODE"] || :back
+        Spontaneous.instance = Spontaneous::Application::Instance.new(Spontaneous.root)
         Spontaneous::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
-        Spontaneous::Config.load(self.environment, self.root)
+        # Spontaneous::Config.load(self.environment, self.root)
         connect_to_database
         Spontaneous::Loader.load
         Spontaneous::Schema.validate!
