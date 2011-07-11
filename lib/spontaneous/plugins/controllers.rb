@@ -8,15 +8,7 @@ module Spontaneous::Plugins
 
     module ClassMethods
       def controllers
-        if (supertype? and supertype.respond_to?(:controllers))
-          supertype.controllers.dup.merge(local_controllers)
-        else
-          local_controllers
-        end
-      end
-
-      def local_controllers
-        @controllers ||= {}
+        @controllers ||= Spontaneous::Collections::PrototypeSet.new(supertype, :controllers)
       end
 
       def controller_base_class
@@ -29,10 +21,11 @@ module Spontaneous::Plugins
       end
 
       def controller(namespace, base_class = controller_base_class, &block)
+        controller_class_name = "#{namespace.to_s.camelize}Controller"
         controller_class = Class.new(base_class)
         controller_class.class_eval(&block) if block_given?
-        self.const_set("#{namespace.to_s.camelize}Controller", controller_class)
-        local_controllers[namespace.to_sym] = controller_class
+        self.const_set(controller_class_name, controller_class) unless self.const_defined?(controller_class_name)
+        controllers[namespace.to_sym] = controller_class
       end
     end # ClassMethods
 

@@ -330,6 +330,7 @@ class FrontTest < MiniTest::Spec
         end
 
         SitePage.controller :test, ::TestController
+
         SitePage.controller :test2, ::TestController do
           get "/block" do
             "Block"
@@ -341,6 +342,9 @@ class FrontTest < MiniTest::Spec
       end
 
       teardown do
+        SitePage.send(:remove_const, :StatusController) rescue nil
+        SitePage.send(:remove_const, :TestController) rescue nil
+        SitePage.send(:remove_const, :Test2Controller) rescue nil
         Object.send(:remove_const, :TestController)
       end
 
