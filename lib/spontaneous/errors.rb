@@ -19,6 +19,11 @@ module Spontaneous
   end
 
 
+  class UnknownFormatException < Error
+    def initialize(unsupported_format)
+      super("Format '#{unsupported_format}' has no matching mime type")
+    end
+  end
   class UnsupportedFormatException < Error
     def initialize(style, unsupported_format)
       super("'#{unsupported_format}' format not supported by style '#{style.name}'.\nTemplate path: #{style.directory}\n")

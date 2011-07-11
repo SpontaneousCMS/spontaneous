@@ -140,6 +140,10 @@ module Spontaneous
     autoload :Controllers, "spontaneous/plugins/controllers"
 
 
+    module Page
+      autoload :Formats, "spontaneous/plugins/page/formats"
+    end
+
     module Site
       autoload :Publishing, "spontaneous/plugins/site/publishing"
     end

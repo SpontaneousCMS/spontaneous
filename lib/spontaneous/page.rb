@@ -5,6 +5,7 @@ module Spontaneous
   class Page < Content
 
     plugin Plugins::Supertype
+    plugin Plugins::Page::Formats
     plugin Plugins::Layouts
     plugin Plugins::Paths
     plugin Plugins::PageTree
@@ -32,9 +33,9 @@ module Spontaneous
       :title
     end
 
-    def self.formats
-      [:html]
-    end
+    # def self.formats
+    #   [:html]
+    # end
 
     def page?
       true
@@ -50,9 +51,9 @@ module Spontaneous
     end
 
     # TODO: configure outputs for each page
-    def formats
-      self.class.formats
-    end
+    # def formats
+    #   self.class.formats
+    # end
 
     def request_redirect(params = nil, request = nil, session = nil)
       # overwrite and return a Page or a string (containing a path) to cause this page to redirect when accessed

@@ -95,19 +95,17 @@ class LayoutsTest < MiniTest::Spec
       #   page = SubPage.new
       #   lambda { page.layout = :wrong }.must_raise(Spontaneous::Errors::UnknownLayoutError)
       # end
-      should "have a list of formats" do
-        LayoutPage.layout :custom1
-        skip("Need to implement formats correctly")
-        # TODO: re-implement formats
-        # LayoutPage.layouts.first.formats.should == [:html, :pdf, :xml]
-      end
+      # should "have a list of formats" do
+      #   LayoutPage.layout :custom1
+      #   skip("Need to implement formats correctly")
+      # end
 
-      should "be able to test that an instance supports a format" do
-        skip("Need to implement formats correctly")
-        LayoutPage.layout :custom1
-        page = LayoutPage.new
-        # page.provides_format?(:html).should be_true
-      end
+      # should "be able to test that an instance supports a format" do
+      #   skip("Need to implement formats correctly")
+      #   LayoutPage.layout :custom1
+      #   page = LayoutPage.new
+      #   # page.provides_format?(:html).should be_true
+      # end
     end
   end
 end

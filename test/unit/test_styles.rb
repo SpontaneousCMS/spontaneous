@@ -60,10 +60,10 @@ class StylesTest < MiniTest::Spec
           @piece.render.should == "template_class.html.cut\n"
         end
 
-        should "be able to give a list of available formats" do
-          skip("Need to re-implement the format functionality")
-          @piece.style.formats.should == [:epub, :html, :pdf]
-        end
+        # should "be able to give a list of available formats" do
+        #   skip("Need to re-implement the format functionality")
+        #   @piece.style.formats.should == [:epub, :html, :pdf]
+        # end
 
         should "simply render an empty string if no templates are available" do
           piece = InvisibleClass.new

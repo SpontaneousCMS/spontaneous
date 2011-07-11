@@ -29,6 +29,8 @@ module Spontaneous
             end
           end
 
+          format = (format || page.default_format).to_sym if page
+
           if action
             status, headers, result = page.process_action(action, env, format)
             # our 404 page should come from the CMS
@@ -74,13 +76,13 @@ module Spontaneous
         else
           path, format = path.split(DOT)
         end
-        format = (format || :html).to_sym
+        # format = (format || :html).to_sym
         [path, format, action]
       end
 
       def render_page_with_format(page, format)
           if page && page.provides_format?(format)
-            content_type(::Rack::Mime.mime_type("#{DOT}#{format}")) if format
+            content_type(page.mime_type(format))
             render_page(page, format)
           else
             # perhaps we should return the html version if the page exists but

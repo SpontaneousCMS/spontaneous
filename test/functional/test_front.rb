@@ -155,6 +155,23 @@ class FrontTest < MiniTest::Spec
       last_response.content_type.should == "application/pdf"
     end
 
+    should "provide the default format of the page if none is explicitly given" do
+      @about.class.stubs(:formats).returns([:rss, :html])
+      get '/about'
+      assert last_response.ok?
+      last_response.content_type.should == ::Rack::Mime.mime_type('.rss')
+      last_response.body.should == "/about.rss\n"
+    end
+
+    should "return a custom content type if one is defined" do
+      @about.class.formats [{:html => "application/xhtml+xml"}]
+      get '/about'
+      assert last_response.ok?
+      last_response.content_type.should == "application/xhtml+xml;charset=utf-8"
+      last_response.body.should == "/about.html\n"
+    end
+
+
     should "raise a 404 if asked for a format not provided by the page" do
       get '/about.time'
       assert last_response.status == 404
