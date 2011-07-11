@@ -42,5 +42,6 @@ group :development do
   gem 'harmony',    '~> 0.5', :platforms => [:mri_18]
   gem 'ruby-debug', :platforms => [:mri_18]
   gem 'reek'
+  gem 'locat', :path => "/Users/garry/Dropbox/Development/spontaneous3/locat"
 end
 

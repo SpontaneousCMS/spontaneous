@@ -1,0 +1,42 @@
+match 'lib/**.rb' do |file, line|
+  case line
+  when /^\s*#/
+    'Comment'
+  when /^\s*$/
+    'Blank'
+  else
+    'Ruby'
+  end
+end
+
+match 'test/**.rb' do |file, line|
+  case file
+  when /fixtures/i
+    nil
+  else
+    case line
+    when /^\s*#/
+      'Comment'
+    when /^\s*$/
+      'Blank'
+    else
+      'Test'
+    end
+  end
+end
+
+match 'application/js/*.js' do |file, line|
+  case file
+  when /vendor/i
+    nil
+  else
+    case line
+    when /^\s*\/\//
+      'Comment'
+    when /^\s*$/
+      'Blank'
+    else
+      'JavaScript'
+    end
+  end
+end
