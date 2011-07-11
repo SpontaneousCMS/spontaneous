@@ -4,19 +4,29 @@ require 'test_helper'
 
 class PluginsTest < MiniTest::Spec
 
-  class ::Page < Spontaneous::Page; end
-  class ::Piece < Spontaneous::Piece; end
-  class ::LocalPage < ::Page
-    layout :from_plugin
-  end
-  class ::LocalPiece < ::Piece
-    style :from_plugin
-  end
 
   def self.startup
+    klass =  Class.new(Spontaneous::Page)
+    Object.send(:const_set, :Page, klass)
+    klass =  Class.new(Spontaneous::Piece)
+    Object.send(:const_set, :Piece, klass)
+    klass =  Class.new(::Page) do
+      layout :from_plugin
+    end
+    Object.send(:const_set, :LocalPage, klass)
+    klass =  Class.new(::Piece) do
+      style :from_plugin
+    end
+    Object.send(:const_set, :LocalPiece, klass)
     plugin_dir = File.expand_path("../../fixtures/plugins/schema_plugin", __FILE__)
     plugin = Spontaneous.load_plugin plugin_dir
     plugin.load!
+  end
+  def self.shutdown
+    Object.send(:remove_const, :Page)
+    Object.send(:remove_const, :Piece)
+    Object.send(:remove_const, :LocalPage)
+    Object.send(:remove_const, :LocalPiece)
   end
 
   context "Plugins:" do
