@@ -8,18 +8,14 @@ module Spontaneous::Plugins::Application
     end
 
     module ClassMethods
-      attr_accessor :database
 
       def init(options={})
         # return false if loaded?
         self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
         self.mode = options.delete(:mode) || ENV["SPOT_MODE"] || :back
-        Spontaneous.instance = Spontaneous::Application::Instance.new(Spontaneous.root)
+        Spontaneous.instance = Spontaneous::Application::Instance.new(root, environment, mode)
         Spontaneous::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
-        Spontaneous::Config.init(self.environment)
-        connect_to_database
         Spontaneous.instance.initialize!
-        Spontaneous::Loader.load
         Spontaneous::Schema.validate!
         Thread.current[:spontaneous_loaded] = true
       end
@@ -28,23 +24,16 @@ module Spontaneous::Plugins::Application
         Thread.current[:spontaneous_loaded]
       end
 
-      def connect_to_database
-        self.database = Sequel.connect(db_settings)
-      end
 
       def config
-        Spontaneous::Config
+        Spontaneous.instance.config
       end
 
-      def mode_settings
-        config_file = root / "config" / "#{mode}.yml"
-        config = YAML.load_file(config_file)
-        config[environment]
+      def database
+        Spontaneous.instance.database
       end
-
-      def db_settings
-        @db_settings = YAML.load_file(File.join(config_dir, "database.yml"))
-        self.config.db = @db_settings[environment]
+      def database=(database)
+        Spontaneous.instance.database = database
       end
 
       def mode=(mode)

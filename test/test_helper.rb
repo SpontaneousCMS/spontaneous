@@ -42,7 +42,7 @@ require 'support/custom_matchers'
 # require 'support/timing'
 
 
-Spontaneous.database = DB
+# Spontaneous.database = DB
 
 
 class MiniTestWithHooks < MiniTest::Unit

@@ -8,12 +8,6 @@ module Spontaneous::Plugins::Application
     end
 
     module ClassMethods
-      # attr_accessor :unresolved_load_paths
-
-      # def add_path(type, path, file_glob="**/*.rb")
-      #   unresolved_load_paths[type] << [path, file_glob]
-      # end
-
       def load_paths
         paths = []
         Spontaneous.facets.each do |facet|
@@ -29,27 +23,6 @@ module Spontaneous::Plugins::Application
         end
         paths
       end
-
-      # def new_load_path_hash
-      #   Hash.new { |hash, key| hash[key] = [] }
-      # end
-
-      # def resolve_load_paths
-      #   resolved = new_load_path_hash
-      #   unresolved_load_paths.each do |key, paths|
-      #     paths.each do |path|
-      #       root = \\
-      #         case path.first
-      #         when Proc
-      #           path.first.call
-      #         else
-      #           path.first
-      #         end
-      #       resolved[key] << [root, path.last]
-      #     end
-      #   end
-      #   resolved
-      # end
 
       def log_dir(*path)
         relative_dir(root / "log", *path)

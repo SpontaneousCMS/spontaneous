@@ -9,10 +9,10 @@ class ConfigTest < MiniTest::Spec
 
   context "Config" do
     setup do
-      Spontaneous.send(:remove_const, :Config) rescue nil
-      @lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../lib'))
-      load @lib_dir + '/spontaneous/config.rb'
-      Config = ::Spontaneous::Config
+      # Spontaneous.send(:remove_const, :Config) rescue nil
+      # @lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../lib'))
+      # load @lib_dir + '/spontaneous/config.rb'
+      Config ||= ::Spontaneous::Config
       @pwd = Dir.pwd
       Dir.chdir(File.expand_path("../../fixtures/config", __FILE__))
       Spontaneous.root = Dir.pwd
@@ -29,16 +29,16 @@ class ConfigTest < MiniTest::Spec
     teardown do
       Object.send(:remove_const, :TopLevel)
       Dir.chdir(@pwd)
-      self.class.send(:remove_const, :Config) rescue nil
+      # self.class.send(:remove_const, :Config) rescue nil
     end
 
     context "Config" do
       setup do
-        Config.init(:development)
-        Config.load(Spontaneous.root / 'config')
+        @config = Config.new(:development)
+        @config.load(Spontaneous.root / 'config')
       end
       should "load the first time its accessed" do
-        Config.over_ridden.should == :development_value
+        @config.over_ridden.should == :development_value
       end
     end
 
@@ -49,8 +49,8 @@ class ConfigTest < MiniTest::Spec
         # defined?(Spontaneous).should be_nil
         # require @lib_dir + '/spontaneous/config.rb'
         # Config.environment = :development
-        Config.init(:development)
-        Config.load(Spontaneous.root / 'config')
+        @config = Config.new(:development)
+        @config.load(Spontaneous.root / 'config')
       end
 
       teardown do
@@ -61,11 +61,11 @@ class ConfigTest < MiniTest::Spec
       end
 
       should "read from the global environment file" do
-        Config.some_configuration.should == [:some, :values]
+        @config.some_configuration.should == [:some, :values]
       end
 
       should "initialise in development mode" do
-        Config.environment.should == :development
+        @config.environment.should == :development
       end
 
       # should "allow setting of environment" do
@@ -75,55 +75,55 @@ class ConfigTest < MiniTest::Spec
       # end
 
       should "overwrite values depending on environment" do
-        Config.over_ridden.should == :development_value
-        Config.init(:production)
-        Config.load(Spontaneous.root / 'config')
-        Config.over_ridden.should == :production_value
-        Config.init(:staging)
-        Config.load(Spontaneous.root / 'config')
-        Config.over_ridden.should == :environment_value
+        @config.over_ridden.should == :development_value
+        config = Config.new(:production)
+        config.load(Spontaneous.root / 'config')
+        config.over_ridden.should == :production_value
+        config = Config.new(:staging)
+        config.load(Spontaneous.root / 'config')
+        config.over_ridden.should == :environment_value
       end
 
       should "allow setting of env values" do
-        Config.something_else.should be_nil
-        Config[:something_else] = "loud"
-        Config.something_else.should == "loud"
+        @config.something_else.should be_nil
+        @config[:something_else] = "loud"
+        @config.something_else.should == "loud"
       end
 
       should "allow setting of env values through method calls" do
-        Config.something_else2.should be_nil
-        Config.something_else2 = "loud"
-        Config.something_else2.should == "loud"
+        @config.something_else2.should be_nil
+        @config.something_else2 = "loud"
+        @config.something_else2.should == "loud"
       end
 
       should "dynamically switch values according to the configured env" do
-        Config.over_ridden.should == :development_value
-        Config.init(:production)
-        Config.load(Spontaneous.root / 'config')
-        Config.over_ridden.should == :production_value
-        Config.init(:staging)
-        Config.load(Spontaneous.root / 'config')
-        Config.over_ridden.should == :environment_value
+        @config.over_ridden.should == :development_value
+        config = Config.new(:production)
+        config.load(Spontaneous.root / 'config')
+        config.over_ridden.should == :production_value
+        config = Config.new(:staging)
+        config.load(Spontaneous.root / 'config')
+        config.over_ridden.should == :environment_value
       end
 
       should "allow local over-riding of settings" do
-        Config.wobbling.should be_nil
-        Config.wobbling = "badly"
-        Config.wobbling.should == "badly"
+        @config.wobbling.should be_nil
+        @config.wobbling = "badly"
+        @config.wobbling.should == "badly"
       end
 
       should "fallback to defaults" do
-        Config.new_setting.should be_nil
-        Config.defaults[:new_setting] = "new setting"
-        Config.new_setting.should == "new setting"
+        @config.new_setting.should be_nil
+        @config.defaults[:new_setting] = "new setting"
+        @config.new_setting.should == "new setting"
       end
 
       should "accept blocks/procs/lambdas as values" do
         fish = "flying"
-        Config.useful_feature = Proc.new { fish }
-        Config.useful_feature.should == "flying"
-        Config.defaults[:new_dynamic_setting] = Proc.new { fish }
-        Config.new_dynamic_setting.should == "flying"
+        @config.useful_feature = Proc.new { fish }
+        @config.useful_feature.should == "flying"
+        @config.defaults[:new_dynamic_setting] = Proc.new { fish }
+        @config.new_dynamic_setting.should == "flying"
       end
 
       should "allow calling of global methods" do
@@ -135,22 +135,20 @@ class ConfigTest < MiniTest::Spec
       end
       context "Spontaneous :back" do
         setup do
-          Spontaneous.mode = :back
-          Config.init(:development)
-          Config.load(Spontaneous.root / 'config')
+          @config = Config.new(:development, :back)
+          @config.load(Spontaneous.root / 'config')
         end
         should "read the correct configuration values" do
-          Config.port.should == 9001
+          @config.port.should == 9001
         end
       end
       context "Spontaneous :front" do
         setup do
-          Spontaneous.mode = :front
-          Config.init(:development)
-          Config.load(Spontaneous.root / 'config')
+          @config = Config.new(:development, :front)
+          @config.load(Spontaneous.root / 'config')
         end
         should "read the correct configuration values" do
-          Config.port.should == 9002
+          @config.port.should == 9002
         end
       end
     end

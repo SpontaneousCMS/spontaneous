@@ -1,16 +1,16 @@
 require 'forwardable'
 
 module Spontaneous
-  module Config
+  class Config
 
     class Loader
 
-      def self.read(settings, file)
-        self.new(settings, file).load
+      def self.read(settings, file, mode)
+        self.new(settings, file, mode).load
       end
 
-      def initialize(settings, file)
-        @settings, @file = settings, file
+      def initialize(settings, file, mode)
+        @settings, @file, @mode = settings, file, mode
       end
 
       def load
@@ -28,7 +28,7 @@ module Spontaneous
       end
 
       def __mode__(mode, &block)
-        if Spontaneous.mode == mode
+        if @mode == mode
           yield if block_given?
         end
       end
@@ -44,9 +44,9 @@ module Spontaneous
     class Configuration
       extend ::Forwardable
 
-      def initialize(settings={})
+      def initialize(settings = nil)
         @settings = {}
-        merge!(settings)
+        merge!(settings) if settings
       end
 
       def merge!(hash)
@@ -54,6 +54,11 @@ module Spontaneous
           add_setting(key, value)
         end
       end
+
+      def []=(key, value)
+        add_setting(key, value)
+      end
+
       def add_setting(key, value)
         @settings[key] = value
         singleton_class.send(:define_method, key) do
@@ -82,95 +87,68 @@ module Spontaneous
           if @settings.key?(key)
             get_setting(key)
           else
-            Config.base[key]
+            # Config.base[key]
+            nil
           end
         end
       end
 
-      def_delegators :@settings, :key?, :[]=
+      def_delegators :@settings, :key?
     end
 
-    @@local = nil
-    @@environment = Configuration.new
-    @@base = Configuration.new
-    @@defaults = Configuration.new({
+    @@defaults = {
       #TODO: add in sensible default configuration (or do it in the generators)
-    })
-    @@loaded = false
+    }
 
-    class << self
-      def init(environment=:development)
-        @environment = environment.to_sym
-        @@base = Configuration.new
-        @@local = nil
-        @@environment = Configuration.new
+    attr_reader :environment, :mode, :env, :base, :local, :defaults
+
+    def initialize(environment=:development, mode=:back)
+      @environment = environment.to_sym
+      @mode = mode
+      @local = Configuration.new
+      @env = Configuration.new
+      @base = Configuration.new
+      @defaults = Configuration.new(@@defaults)
+    end
+
+    def load(config_root)
+      default = File.join(config_root, 'environment.rb')
+      merge_file(default, @base)
+      file =  File.join(config_root, "environments/#{environment}.rb")
+      merge_file(file, @env)
+    end
+
+    def merge_file(path, configuration)
+      store = Hash.new
+      Loader.read(store, path, mode) if File.exist?(path)
+      configuration.merge!(store)
+    end
+
+    def [](key)
+      if local.key?(key)
+        local[key]
+      elsif env.key?(key)
+        env[key]
+      elsif base.key?(key)
+        base[key]
+      elsif defaults.key?(key)
+        defaults[key]
+      else
+        # acting like a hash and returning nil for an unknown setting
+        nil
       end
+    end
 
-      def load(config_root)
-        default = File.join(config_root, 'environment.rb')
-        Loader.read(@@base, default) if File.exist?(default)
-        store = Hash.new
-        file =  File.join(config_root, "environments/#{environment}.rb")
-        Loader.read(store, file) if ::File.exists?(file)
-        @@environment.merge!(store)
-      end
+    def []=(key, val)
+      local[key] = val
+    end
 
-      def load!
-        # load unless @@loaded
-      end
-
-      def defaults
-        @@defaults
-      end
-
-      def environment
-        @environment || Spontaneous.env
-      end
-
-      # def environment=(env)
-      #   self.load(env.to_sym)
-      # end
-
-      def configuration
-        # load!
-        @@environment
-      end
-
-      def base
-        # load!
-        @@base
-      end
-
-      def [](key)
-        if local.key?(key)
-          local[key]
-        elsif configuration.key?(key)
-          configuration[key]
-        elsif base.key?(key)
-          base[key]
-        elsif defaults.key?(key)
-          defaults[key]
-        else
-          # acting like a hash and returning nil for an unknown setting
-          nil
-        end
-      end
-
-      def []=(key, val)
-        local[key] = val
-      end
-
-      def method_missing(key, *args)
-        if key.to_s =~ /=$/
-          key = key.to_s.gsub(/=$/, '').to_sym
-          self[key] = args[0]
-        else
-          self[key]
-        end
-      end
-
-      def local
-        @@local ||= Configuration.new
+    def method_missing(key, *args)
+      if key.to_s =~ /=$/
+        key = key.to_s.gsub(/=$/, '').to_sym
+        self[key] = args[0]
+      else
+        self[key]
       end
     end
   end

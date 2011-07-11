@@ -175,7 +175,10 @@ class ContentTest < MiniTest::Spec
 
     context "identity map" do
       setup do
-        Spontaneous.database = DB
+        instance = Spontaneous::Application::Instance.new(Spontaneous.root, :test, :back)
+        Spontaneous.instance = instance
+        Spontaneous.instance.database = DB
+
         Content.delete
         Content.delete_all_revisions!
         class ::IdentitySubclass < C; end
@@ -185,9 +188,9 @@ class ContentTest < MiniTest::Spec
         @i2 = IdentitySubclass.create
       end
       teardown do
-        Object.send(:remove_const, :IdentitySubclass)
-        Content.delete
-        Content.delete_all_revisions!
+        Object.send(:remove_const, :IdentitySubclass) rescue nil
+        # Content.delete
+        # Content.delete_all_revisions!
       end
       should "work for Content" do
         Content.with_identity_map do

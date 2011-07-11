@@ -6,14 +6,17 @@ require 'test_helper'
 class PublishingTest < MiniTest::Spec
 
   def self.startup
-    Spontaneous.root = File.expand_path("../../fixtures/example_application", __FILE__)
+    root = File.expand_path("../../fixtures/example_application", __FILE__)
+    Spontaneous.root = root
+    instance = Spontaneous::Application::Instance.new(root, :test, :back)
+    Spontaneous.instance = instance
     Spontaneous.config.publishing_delay = nil
-    Spontaneous.database = DB
+    Spontaneous.instance.database = DB
     Content.delete_all_revisions!
   end
 
   def self.shutdown
-    Spontaneous.database = DB
+    # Spontaneous.database = DB
     Content.delete_all_revisions!
   end
 
@@ -39,7 +42,6 @@ class PublishingTest < MiniTest::Spec
 
     setup do
       Spot::Schema.reset!
-      Spontaneous.database = DB
 
       # DB.logger = Logger.new($stdout)
       Content.delete
@@ -64,7 +66,7 @@ class PublishingTest < MiniTest::Spec
 
     teardown do
       # Content.delete_all_revisions!
-      PublishingTest.send(:remove_const, :Page)
+      PublishingTest.send(:remove_const, :Page) rescue nil
       Content.delete
       DB.logger = nil
     end
@@ -277,9 +279,12 @@ class PublishingTest < MiniTest::Spec
         end
 
         teardown do
+          begin
           Content.delete_revision(@initial_revision)
           Content.delete_revision(@final_revision)
           Content.delete_revision(@final_revision+1)
+          rescue
+          end
           DB.logger = nil
         end
 

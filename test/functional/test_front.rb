@@ -17,8 +17,6 @@ class FrontTest < MiniTest::Spec
   def setup
     @saved_template_root = Spontaneous.template_root
     Site.publishing_method = :immediate
-    # see http://benprew.posterous.com/testing-sessions-with-sinatra
-    app.send(:set, :sessions, false)
   end
 
   def teardown
@@ -59,10 +57,20 @@ class FrontTest < MiniTest::Spec
 
   context "Public pages" do
     setup do
+      Spot::Schema.reset!
+
+      @saved_revision_root = Spontaneous.revision_root
+      @saved_root = Spontaneous.root
+
+      root = File.expand_path('../../fixtures/example_application', __FILE__)
+      Spontaneous.root = root
+
+      Spontaneous.init(:environment => :test, :mode => :front)
+
+      Site.publishing_method = :immediate
       Site.delete
       Content.delete
       Change.delete
-      Spot::Schema.reset!
 
       class ::SitePage < Spontaneous::Page
         layout :default
@@ -74,12 +82,10 @@ class FrontTest < MiniTest::Spec
 
       class ::SubPage < SitePage; end
 
-      Spontaneous.environment = :test
-      Site.publishing_method = :immediate
 
-      @saved_revision_root = Spontaneous.revision_root
-      @saved_root = Spontaneous.root
-      Spontaneous.root = File.expand_path('../../fixtures/example_application', __FILE__)
+      # see http://benprew.posterous.com/testing-sessions-with-sinatra
+      app.send(:set, :sessions, false)
+
       @revision_root = "#{Dir.tmpdir}/spontaneous-tests/#{Time.now.to_i}"
       `mkdir -p #{@revision_root}`
       Spontaneous.revision_root = @revision_root
@@ -106,8 +112,8 @@ class FrontTest < MiniTest::Spec
     end
 
     teardown do
-      Object.send(:remove_const, :SitePage)
-      Object.send(:remove_const, :SubPage)
+      Object.send(:remove_const, :SitePage) rescue nil
+      Object.send(:remove_const, :SubPage) rescue nil
       Content.delete
       Site.delete
       Content.delete_revision(1)
@@ -345,7 +351,7 @@ class FrontTest < MiniTest::Spec
         SitePage.send(:remove_const, :StatusController) rescue nil
         SitePage.send(:remove_const, :TestController) rescue nil
         SitePage.send(:remove_const, :Test2Controller) rescue nil
-        Object.send(:remove_const, :TestController)
+        Object.send(:remove_const, :TestController) rescue nil
       end
 
       should "not be used unless necessary" do

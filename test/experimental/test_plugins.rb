@@ -6,6 +6,10 @@ class PluginsTest < MiniTest::Spec
 
 
   def self.startup
+    instance = Spontaneous::Application::Instance.new(Spontaneous.root, :test, :back)
+    Spontaneous.instance = instance
+    Spontaneous.instance.database = DB
+
     klass =  Class.new(Spontaneous::Page)
     Object.send(:const_set, :Page, klass)
     klass =  Class.new(Spontaneous::Piece)
@@ -19,7 +23,7 @@ class PluginsTest < MiniTest::Spec
     end
     Object.send(:const_set, :LocalPiece, klass)
     plugin_dir = File.expand_path("../../fixtures/plugins/schema_plugin", __FILE__)
-    plugin = Spontaneous.load_plugin plugin_dir
+    plugin = Spontaneous.instance.load_plugin plugin_dir
     plugin.load!
   end
   def self.shutdown

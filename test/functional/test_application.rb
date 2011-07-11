@@ -69,9 +69,9 @@ class ApplicationTest < MiniTest::Spec
 
     should "have correct db settings" do
       Spontaneous.config.db[:adapter].should == "mysql2"
-      Spontaneous.config.db[:database].should == "spontaneous_example"
-      Spontaneous.config.db[:user].should == "spontaneous"
-      Spontaneous.config.db[:password].should == "password"
+      Spontaneous.config.db[:database].should == "spontaneous2_test"
+      Spontaneous.config.db[:user].should == "root"
+      Spontaneous.config.db[:password].should be_nil
       Spontaneous.config.db[:host].should == "localhost"
     end
 

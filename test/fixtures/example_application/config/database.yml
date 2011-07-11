@@ -1,9 +1,9 @@
 ---
 :development: &defaults
   :adapter:    mysql2
-  :database:   spontaneous_example
-  :user:       spontaneous
-  :password:   password
+  :database:   spontaneous2_test
+  :user:       root
+  :password:
   :host:       localhost
 
 :gem:
@@ -11,7 +11,7 @@
 
 :test:
   <<:         *defaults
-  :database:   spontaneous_example_test
+  :database:   spontaneous2_test
 
 :production:
   <<:         *defaults

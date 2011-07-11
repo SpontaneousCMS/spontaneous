@@ -35,11 +35,19 @@ class BackTest < MiniTest::Spec
 
   context "Editing interface" do
     setup do
+      config = mock()
+      config.stubs(:reload_classes).returns(false)
+      config.stubs(:auto_login).returns('root')
+      config.stubs(:publishing_method).returns(:immediate)
+      root = File.expand_path("../../fixtures/back", __FILE__)
+      Spontaneous.root = root
+      instance = Spontaneous::Application::Instance.new(root, :test, :back)
+      instance.stubs(:config).returns(config)
+      Spontaneous.instance = instance
       Spot::Schema.reset!
       Content.delete
       Spontaneous::Permissions::User.delete
       self.template_root = File.expand_path('../../fixtures/back/templates', __FILE__)
-      Spontaneous.root = File.expand_path("../../fixtures/back", __FILE__)
       @app_dir = File.expand_path("../../fixtures/application", __FILE__)
       File.exists?(@app_dir).should be_true
       Spontaneous.stubs(:application_dir).returns(@app_dir)
@@ -111,6 +119,7 @@ class BackTest < MiniTest::Spec
     teardown do
       [:Page, :Piece, :HomePage, :Job, :Project, :Image, :LinkedJob].each { |klass| BackTest.send(:remove_const, klass) rescue nil }
       Spontaneous::Permissions::User.delete
+      Content.delete
     end
 
     context "@spontaneous" do

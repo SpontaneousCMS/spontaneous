@@ -3,22 +3,58 @@
 module Spontaneous
   module Application
     class Instance < Spontaneous::Facet
+      attr_accessor :database
+      attr_reader :environment, :mode
+
+      def initialize(root, env, mode)
+        super(root)
+        @environment, @mode = env, mode
+      end
+
       def initialize!
-        Spontaneous.facets.each do |facet|
-          load_facet_code(:lib, facet)
-          load_facet_code(:schema, facet)
-          load_facet_config(facet)
+        connect_to_database!
+        find_plugins!
+        load_facets!
+      end
+
+      def load_facets!
+        facets.each { |facet| facet.load! }
+      end
+
+      def connect_to_database!
+        self.database = Sequel.connect(db_settings)
+      end
+
+      def db_settings
+        config_dir = paths.expanded(:config).first
+        @db_settings = YAML.load_file(File.join(config_dir, "database.yml"))
+        self.config.db = @db_settings[environment]
+      end
+
+      def config
+        @config ||= Spontaneous::Config.new(environment, mode)
+      end
+
+      def find_plugins!
+        paths.expanded(:plugins).each do |glob|
+          Dir[glob].each do |path|
+            load_plugin(path)
+          end
         end
       end
 
-      def load_facet_code(category, facet)
-        Spontaneous::Loader.load_classes(facet.paths.expanded(category))
+      def plugins
+        @plugins ||= []
       end
 
-      def load_facet_config(facet)
-        facet.paths.expanded(:config).each do |config_path|
-          Spontaneous.config.load(config_path)
-        end
+      def facets
+        [self] + plugins
+      end
+
+      def load_plugin(plugin_root)
+        plugin = Spontaneous::Application::Plugin.new(plugin_root)
+        self.plugins <<  plugin
+        plugin
       end
     end # Instance
   end # Application

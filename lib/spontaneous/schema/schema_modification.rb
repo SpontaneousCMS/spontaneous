@@ -139,6 +139,7 @@ module Spontaneous
       def resolve_simple
         if only_added_items?
           added_items.each do |obj|
+            logger.warn("Adding #{obj} to Schema")
             Spontaneous::Schema.generate_schema_for(obj)
           end
         end

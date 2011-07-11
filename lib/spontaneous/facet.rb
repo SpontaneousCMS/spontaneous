@@ -10,13 +10,22 @@ module Spontaneous
       paths.add :config, "config"
       paths.add :tasks, ["lib/tasks", "**/*.rake"]
       paths.add :migrations, ["db/migrations", "**/*.rake"]
+      paths.add :plugins, ["plugins", "*"]
+      paths.add :features, "features"
     end
 
     def paths
       @paths ||= Spontaneous::Paths.new(@root)
     end
 
+    def config
+      Spontaneous.instance.config
+    end
+
     def load!
+      paths.expanded(:config).each do |config_path|
+        Spontaneous.config.load(config_path)
+      end
       Spontaneous::Loader.load_classes(load_paths)
     end
 
@@ -27,5 +36,6 @@ module Spontaneous
       end
       load_paths
     end
+
   end # Facet
 end # Spontaneous

@@ -99,7 +99,6 @@ module Spontaneous::Collections
 
     alias_method :names, :order
 
-    protected
 
     def indexed(index)
       named(order[index])
@@ -118,6 +117,8 @@ module Spontaneous::Collections
     def superset
       @superset ||= @superobject.send(@superset_name) if superset?
     end
+
+    protected
 
     def method_missing(method, *args)
       if key?(method)
