@@ -18,6 +18,8 @@ module Spontaneous::Plugins
         include PageAliasMethods if page?
       end
 
+      alias_method :aliases, :alias_of
+
       def targets
         targets = []
         target_classes.each do |target_class|
