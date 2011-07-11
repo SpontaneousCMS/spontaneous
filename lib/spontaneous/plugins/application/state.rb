@@ -8,6 +8,8 @@ module Spontaneous::Plugins::Application
     end
 
     module ClassMethods
+      attr_accessor :database
+
       def init(options={})
         # return false if loaded?
         self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
@@ -15,8 +17,8 @@ module Spontaneous::Plugins::Application
         Spontaneous.instance = Spontaneous::Application::Instance.new(Spontaneous.root)
         Spontaneous::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
         Spontaneous::Config.init(self.environment)
-        Spontaneous.instance.initialize!
         connect_to_database
+        Spontaneous.instance.initialize!
         Spontaneous::Loader.load
         Spontaneous::Schema.validate!
         Thread.current[:spontaneous_loaded] = true
@@ -29,8 +31,6 @@ module Spontaneous::Plugins::Application
       def connect_to_database
         self.database = Sequel.connect(db_settings)
       end
-
-      attr_accessor :database
 
       def config
         Spontaneous::Config
