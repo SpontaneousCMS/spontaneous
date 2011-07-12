@@ -26,7 +26,7 @@ module Spontaneous
       paths.expanded(:config).each do |config_path|
         Spontaneous.config.load(config_path)
       end
-      Spontaneous::Loader.load_classes(load_paths)
+      # load_paths
     end
 
     def load_paths

@@ -40,6 +40,7 @@ module Spontaneous
   def self.gem_root
     @gem_root ||= File.expand_path(File.dirname(__FILE__) / '..')
   end
+
   def self.reload!
     Spontaneous::Schema.reload!
     Spontaneous::Loader.reload!

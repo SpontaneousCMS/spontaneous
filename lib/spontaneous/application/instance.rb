@@ -18,7 +18,20 @@ module Spontaneous
       end
 
       def load_facets!
-        facets.each { |facet| facet.load! }
+        facets.each do |facet|
+          facet.load!
+        end
+        Spontaneous::Loader.load!
+      end
+
+      def load_paths
+        load_paths = []
+        [:lib, :schema].each do |category|
+          facets.each do |facet|
+            load_paths += facet.paths.expanded(category)
+          end
+        end
+        load_paths
       end
 
       def connect_to_database!

@@ -12,19 +12,10 @@ module Spontaneous
         Spontaneous.config.reload_classes
       end
 
-      def load
+      def load!
         Reloader.run! if use_reloader?
         Spontaneous.load_paths.each do |path|
           load_classes(path)
-        end
-      end
-
-      def load_file(file)
-        # logger.debug("-- Loaded #{File.basename(file, '.rb')}")
-        if use_reloader?
-          Reloader.safe_load(file)
-        else
-          require(file)
         end
       end
 
@@ -38,7 +29,7 @@ module Spontaneous
         paths.flatten.each do |path|
           Dir[path].sort.each do |file|
             begin
-              load_file file
+              load_file(file)
             rescue NameError => ne
               # puts "Stashed file with missing requirements for later reloading: #{file}"
               # ne.backtrace.each_with_index { |line, idx| puts "[#{idx}]: #{line}" }
@@ -47,6 +38,14 @@ module Spontaneous
           end
         end
         load_classes_with_requirements(orphaned_classes)
+      end
+
+      def load_file(file)
+        if use_reloader?
+          Reloader.safe_load(file)
+        else
+          require(file)
+        end
       end
 
       def load_classes_with_requirements(klasses)
@@ -211,6 +210,7 @@ module Spontaneous
           # !Padrino::Reloader.include_constants.any? { |base| (const.to_s =~ /^#{base}/ || const.superclass.to_s =~ /^#{base}/) }
 
           Spontaneous::Schema.delete(const)
+
           parts = const.to_s.split("::")
           base = parts.size == 1 ? Object : Object.full_const_get(parts[0..-2].join("::"))
           object = parts[-1].to_s

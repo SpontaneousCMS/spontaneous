@@ -9,11 +9,7 @@ module Spontaneous::Plugins::Application
 
     module ClassMethods
       def load_paths
-        paths = []
-        Spontaneous.facets.each do |facet|
-          paths += facet.load_paths
-        end
-        paths
+        Spontaneous.instance.load_paths
       end
 
       def template_paths
