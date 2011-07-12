@@ -88,14 +88,14 @@ module Spontaneous::Prototypes
     end
 
     def to_field(values=nil)
-      from_db = !values.nil?
+      default_values = values.nil?
       values = {
         :name => self.name,
         :unprocessed_value => default
       }.merge(values || {})
-      field = self.field_class.new(values, from_db)
-      field.prototype = self
-      field
+      self.field_class.new(values, !default_values).tap do |field|
+        field.prototype = self
+      end
     end
 
     def to_hash

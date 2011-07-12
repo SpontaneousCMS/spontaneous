@@ -46,6 +46,7 @@ module Spontaneous
       def unprocessed_value=(v)
         set_unprocessed_value(v)
         unless @preprocessed
+          @modified = (@initial_value != v)
           self.processed_value = process(@unprocessed_value)
           owner.field_modified!(self) if owner
         end
@@ -220,9 +221,10 @@ module Spontaneous
         end
       end
 
-      def set_unprocessed_value(value)
-        @modified = (@unprocessed_value != value)
-        @unprocessed_value = value
+      def set_unprocessed_value(new_value)
+        # initial_value should only be set once so that it can act as a test for field modification
+        @initial_value ||= new_value
+        @unprocessed_value = new_value
       end
 
     end

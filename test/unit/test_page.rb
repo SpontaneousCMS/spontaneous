@@ -68,10 +68,17 @@ class PageTest < MiniTest::Spec
         r = Page.create
         slug = Page.generate_default_slug
         Page.stubs(:generate_default_slug).returns(slug)
-        o = Page.create
+        o = Page.create(:title => "New Page")
+        p = Page.create(:title => "New Page")
         o.slug.should == slug
         r << o
-        o.save.reload
+        o.save
+        o = Page[o.id]
+        o.slug.should == slug
+        o << p
+        o.save
+        o = Page[o.id]
+        o.slug.should == slug
         o.title = "New Title"
         o.save
         o.reload
