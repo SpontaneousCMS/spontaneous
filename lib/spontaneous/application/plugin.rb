@@ -3,7 +3,7 @@
 module Spontaneous
   module Application
     class Plugin < Spontaneous::Facet
-      def load!
+      def init!
         init_file = @root / "init.rb"
         require(init_file) if File.exist?(init_file)
         super

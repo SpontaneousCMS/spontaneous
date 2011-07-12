@@ -22,11 +22,14 @@ module Spontaneous
       Spontaneous.instance.config
     end
 
-    def load!
+    def init!
       paths.expanded(:config).each do |config_path|
         Spontaneous.config.load(config_path)
       end
-      # load_paths
+    end
+
+    def load!
+      Spontaneous::Loader.load_classes(load_paths)
     end
 
     def load_paths

@@ -14,13 +14,20 @@ module Spontaneous
       def initialize!
         connect_to_database!
         find_plugins!
+        init_facets!
         load_facets!
       end
 
-      def load_facets!
+      def init_facets!
         facets.each do |facet|
-          facet.load!
+          facet.init!
         end
+      end
+
+      def load_facets!
+        # facets.each do |facet|
+          # facet.load!
+        # end
         Spontaneous::Loader.load!
       end
 

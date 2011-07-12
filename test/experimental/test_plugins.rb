@@ -24,8 +24,10 @@ class PluginsTest < MiniTest::Spec
     Object.send(:const_set, :LocalPiece, klass)
     plugin_dir = File.expand_path("../../fixtures/plugins/schema_plugin", __FILE__)
     plugin = Spontaneous.instance.load_plugin plugin_dir
+    plugin.init!
     plugin.load!
   end
+
   def self.shutdown
     Object.send(:remove_const, :Page)
     Object.send(:remove_const, :Piece)
@@ -52,9 +54,9 @@ class PluginsTest < MiniTest::Spec
 
     context "Schema Plugins" do
       should "make content classes available to rest of app" do
-        defined?(SchemaPlugin).should == "constant"
-        SchemaPlugin::External.fields.length.should == 1
-        piece = SchemaPlugin::External.new(:a => "A Field")
+        defined?(::SchemaPlugin).should == "constant"
+        ::SchemaPlugin::External.fields.length.should == 1
+        piece = ::SchemaPlugin::External.new(:a => "A Field")
         piece.render.should == "plugins/templates/external.html.cut\n"
       end
     end
