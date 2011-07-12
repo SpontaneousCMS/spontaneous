@@ -113,48 +113,9 @@ module Spontaneous
       Spontaneous::BoxStyle.new(box)
     end
 
-    def self.find_style(box)
-      prototype = box._prototype
-      owner_class = box._owner.class.style_directory_name
-      box_class = prototype.box_base_class.style_directory_name
-
-      # you can always over-ride the configured styles by having a template named after the box
-      # in the style directory for its owning class
-      possible_styles = [
-        S::Style.new(self, owner_class, box._name),
-      ]
-
-      if all_styles.empty?
-        possible_styles << S::Style.new(self, nil, box_class) if box_class
-      else
-        if style_name = prototype.default_style
-          possible_styles << S::Style.new(self, owner_class, style_name)
-          possible_styles << S::Style.new(self, box_class, style_name)
-        else
-          styles.each do |style|
-            possible_styles << S::Style.new(self, owner_class, style.name, style.options)
-            possible_styles << S::Style.new(self, box_class, style.name, style.options)
-          end
-        end
-      end
-      # anonymous styles always exist so this will be the result if all else fails
-      possible_styles << anonymous_style
-      possible_styles.detect { |s| s.exists? }
-    end
-
     def self.style_class
       Spontaneous::BoxStyle
     end
-
-    # def self.anonymous_style
-    #   Spontaneous::Style::Anonymous.new("{{ render_content }}")
-    # end
-
-
-    # def self.style_directory_name
-    #   return nil if self == Spontaneous::Box
-    #   super
-    # end
 
     def style
       resolve_style(self)
