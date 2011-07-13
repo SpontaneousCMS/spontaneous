@@ -9,11 +9,12 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Garry Hill"]
-  s.date = %q{2011-07-05}
+  s.date = %q{2011-07-13}
   s.description = %q{TODO: longer description of your gem}
   s.email = %q{garry@magnetised.info}
-  s.executables = ["back", "console", "limit-upload", "nginx", "spot", "unicorn", "unlimit-upload"]
+  s.executables = ["limit-upload", "spot", "unlimit-upload"]
   s.files = [
+    ".locat",
     "Gemfile",
     "Gemfile.lock",
     "Rakefile",
@@ -141,12 +142,8 @@ Gem::Specification.new do |s|
     "application/views/index.erubis",
     "application/views/login.erubis",
     "application/views/unsupported.erubis",
-    "bin/back",
-    "bin/console",
     "bin/limit-upload",
-    "bin/nginx",
     "bin/spot",
-    "bin/unicorn",
     "bin/unlimit-upload",
     "config/nginx.conf",
     "db/migrations/20100610142136_init.rb",
@@ -173,26 +170,36 @@ Gem::Specification.new do |s|
     "lib/sequel/plugins/content_table_inheritance.rb",
     "lib/sequel/plugins/yajl_serialization.rb",
     "lib/spontaneous.rb",
+    "lib/spontaneous/application.rb",
+    "lib/spontaneous/application/feature.rb",
+    "lib/spontaneous/application/instance.rb",
+    "lib/spontaneous/application/plugin.rb",
     "lib/spontaneous/box.rb",
-    "lib/spontaneous/box_prototype.rb",
+    "lib/spontaneous/box_style.rb",
     "lib/spontaneous/change.rb",
-    "lib/spontaneous/change_set.rb",
     "lib/spontaneous/cli/adapter.rb",
     "lib/spontaneous/cli/base.rb",
     "lib/spontaneous/cli/console.rb",
+    "lib/spontaneous/collections/box_set.rb",
+    "lib/spontaneous/collections/change_set.rb",
+    "lib/spontaneous/collections/entry_set.rb",
+    "lib/spontaneous/collections/field_set.rb",
+    "lib/spontaneous/collections/prototype_set.rb",
+    "lib/spontaneous/collections/style_set.rb",
     "lib/spontaneous/config.rb",
     "lib/spontaneous/constants.rb",
     "lib/spontaneous/content.rb",
     "lib/spontaneous/content_query.rb",
-    "lib/spontaneous/entry_set.rb",
     "lib/spontaneous/errors.rb",
     "lib/spontaneous/extensions/array.rb",
     "lib/spontaneous/extensions/class.rb",
     "lib/spontaneous/extensions/hash.rb",
     "lib/spontaneous/extensions/json.rb",
+    "lib/spontaneous/extensions/kernel.rb",
     "lib/spontaneous/extensions/object.rb",
     "lib/spontaneous/extensions/object_space.rb",
     "lib/spontaneous/extensions/string.rb",
+    "lib/spontaneous/facet.rb",
     "lib/spontaneous/field_types.rb",
     "lib/spontaneous/field_types/base.rb",
     "lib/spontaneous/field_types/date_field.rb",
@@ -233,10 +240,10 @@ Gem::Specification.new do |s|
     "lib/spontaneous/loader.rb",
     "lib/spontaneous/logger.rb",
     "lib/spontaneous/media.rb",
-    "lib/spontaneous/named_set.rb",
     "lib/spontaneous/page.rb",
     "lib/spontaneous/page_controller.rb",
     "lib/spontaneous/page_piece.rb",
+    "lib/spontaneous/paths.rb",
     "lib/spontaneous/permissions.rb",
     "lib/spontaneous/permissions/access_group.rb",
     "lib/spontaneous/permissions/access_key.rb",
@@ -246,6 +253,7 @@ Gem::Specification.new do |s|
     "lib/spontaneous/plugins.rb",
     "lib/spontaneous/plugins/aliases.rb",
     "lib/spontaneous/plugins/allowed_types.rb",
+    "lib/spontaneous/plugins/application/facets.rb",
     "lib/spontaneous/plugins/application/paths.rb",
     "lib/spontaneous/plugins/application/render.rb",
     "lib/spontaneous/plugins/application/state.rb",
@@ -254,12 +262,11 @@ Gem::Specification.new do |s|
     "lib/spontaneous/plugins/entries.rb",
     "lib/spontaneous/plugins/entry.rb",
     "lib/spontaneous/plugins/fields.rb",
-    "lib/spontaneous/plugins/fields/field_prototype.rb",
-    "lib/spontaneous/plugins/fields/field_set.rb",
     "lib/spontaneous/plugins/instance_code.rb",
     "lib/spontaneous/plugins/json.rb",
     "lib/spontaneous/plugins/layouts.rb",
     "lib/spontaneous/plugins/media.rb",
+    "lib/spontaneous/plugins/page/formats.rb",
     "lib/spontaneous/plugins/page_search.rb",
     "lib/spontaneous/plugins/page_tree.rb",
     "lib/spontaneous/plugins/paths.rb",
@@ -275,6 +282,10 @@ Gem::Specification.new do |s|
     "lib/spontaneous/plugins/styles.rb",
     "lib/spontaneous/plugins/supertype.rb",
     "lib/spontaneous/plugins/visibility.rb",
+    "lib/spontaneous/prototypes/box_prototype.rb",
+    "lib/spontaneous/prototypes/field_prototype.rb",
+    "lib/spontaneous/prototypes/layout_prototype.rb",
+    "lib/spontaneous/prototypes/style_prototype.rb",
     "lib/spontaneous/proxy_object.rb",
     "lib/spontaneous/publishing.rb",
     "lib/spontaneous/publishing/fire_and_forget.rb",
@@ -312,7 +323,8 @@ Gem::Specification.new do |s|
     "lib/spontaneous/version.rb",
     "spontaneous.gemspec",
     "test/disabled/test_slots.rb",
-    "test/experimental/test_schema.rb",
+    "test/experimental/test_formats.rb",
+    "test/experimental/test_plugins.rb",
     "test/fixtures/application/css/test.less",
     "test/fixtures/application/js/test.js",
     "test/fixtures/application/static/favicon.ico",
@@ -370,6 +382,7 @@ Gem::Specification.new do |s|
     "test/fixtures/example_application/templates/project/inline.html.cut",
     "test/fixtures/example_application/templates/project_image.html.cut",
     "test/fixtures/example_application/templates/text.html.cut",
+    "test/fixtures/images/rose.greyscale.jpg",
     "test/fixtures/images/rose.jpg",
     "test/fixtures/images/size.gif",
     "test/fixtures/images/size.jpg",
@@ -379,17 +392,26 @@ Gem::Specification.new do |s|
     "test/fixtures/layouts/layouts/custom1.pdf.cut",
     "test/fixtures/layouts/layouts/custom1.xml.cut",
     "test/fixtures/layouts/layouts/custom2.html.cut",
+    "test/fixtures/layouts/layouts/custom3.html.cut",
     "test/fixtures/layouts/layouts/standard.html.cut",
     "test/fixtures/media/101/003/rose.jpg",
     "test/fixtures/permissions/config/user_levels.yml",
     "test/fixtures/permissions/media/image.jpg",
+    "test/fixtures/plugins/schema_plugin/init.rb",
+    "test/fixtures/plugins/schema_plugin/schema/external.rb",
+    "test/fixtures/plugins/schema_plugin/templates/external.html.cut",
+    "test/fixtures/plugins/schema_plugin/templates/from_plugin.html.cut",
+    "test/fixtures/plugins/schema_plugin/templates/layouts/from_plugin.html.cut",
     "test/fixtures/public/templates/layouts/default.html.cut",
     "test/fixtures/public/templates/layouts/default.pdf.cut",
+    "test/fixtures/public/templates/layouts/default.rss.cut",
     "test/fixtures/public/templates/layouts/dynamic.html.cut",
     "test/fixtures/public/templates/layouts/standard.html.cut",
     "test/fixtures/schema/before.yml",
     "test/fixtures/schema/resolvable.yml",
     "test/fixtures/schema/schema.yml",
+    "test/fixtures/serialisation/class_hash.yaml.erb",
+    "test/fixtures/serialisation/root_hash.yaml.erb",
     "test/fixtures/styles/box_a.html.cut",
     "test/fixtures/styles/box_a/runny.html.cut",
     "test/fixtures/styles/named2.html.cut",
@@ -477,13 +499,16 @@ Gem::Specification.new do |s|
     "test/unit/test_page.rb",
     "test/unit/test_permissions.rb",
     "test/unit/test_piece.rb",
+    "test/unit/test_prototype_set.rb",
     "test/unit/test_prototypes.rb",
     "test/unit/test_render.rb",
+    "test/unit/test_schema.rb",
     "test/unit/test_serialisation.rb",
     "test/unit/test_site.rb",
     "test/unit/test_structure.rb",
     "test/unit/test_styles.rb",
-    "test/unit/test_templates.rb"
+    "test/unit/test_templates.rb",
+    "test/unit/test_type_hierarchy.rb"
   ]
   s.homepage = %q{http://spontaneouscms.org}
   s.licenses = ["MIT"]
@@ -506,7 +531,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<rack>, ["~> 1.3.beta"])
       s.add_runtime_dependency(%q<thin>, ["~> 1.2"])
       s.add_runtime_dependency(%q<less>, ["~> 1.2"])
-      s.add_runtime_dependency(%q<sass>, ["~> 3.1.0.alpha"])
+      s.add_runtime_dependency(%q<sass>, ["~> 3.1.4"])
       s.add_runtime_dependency(%q<stringex>, ["~> 1.1"])
       s.add_runtime_dependency(%q<mini_magick>, ["~> 3.3"])
       s.add_runtime_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
@@ -529,6 +554,8 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<johnson>, ["= 2.0.0.pre3"])
       s.add_development_dependency(%q<harmony>, ["~> 0.5"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_development_dependency(%q<reek>, [">= 0"])
+      s.add_development_dependency(%q<locat>, [">= 0"])
     else
       s.add_dependency(%q<rake>, ["= 0.8.7"])
       s.add_dependency(%q<activesupport>, ["~> 3.0.4"])
@@ -541,7 +568,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rack>, ["~> 1.3.beta"])
       s.add_dependency(%q<thin>, ["~> 1.2"])
       s.add_dependency(%q<less>, ["~> 1.2"])
-      s.add_dependency(%q<sass>, ["~> 3.1.0.alpha"])
+      s.add_dependency(%q<sass>, ["~> 3.1.4"])
       s.add_dependency(%q<stringex>, ["~> 1.1"])
       s.add_dependency(%q<mini_magick>, ["~> 3.3"])
       s.add_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
@@ -564,6 +591,8 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<johnson>, ["= 2.0.0.pre3"])
       s.add_dependency(%q<harmony>, ["~> 0.5"])
       s.add_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_dependency(%q<reek>, [">= 0"])
+      s.add_dependency(%q<locat>, [">= 0"])
     end
   else
     s.add_dependency(%q<rake>, ["= 0.8.7"])
@@ -577,7 +606,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rack>, ["~> 1.3.beta"])
     s.add_dependency(%q<thin>, ["~> 1.2"])
     s.add_dependency(%q<less>, ["~> 1.2"])
-    s.add_dependency(%q<sass>, ["~> 3.1.0.alpha"])
+    s.add_dependency(%q<sass>, ["~> 3.1.4"])
     s.add_dependency(%q<stringex>, ["~> 1.1"])
     s.add_dependency(%q<mini_magick>, ["~> 3.3"])
     s.add_dependency(%q<fire_and_forget>, ["~> 0.3.2"])
@@ -600,6 +629,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<johnson>, ["= 2.0.0.pre3"])
     s.add_dependency(%q<harmony>, ["~> 0.5"])
     s.add_dependency(%q<ruby-debug>, [">= 0"])
+    s.add_dependency(%q<reek>, [">= 0"])
+    s.add_dependency(%q<locat>, [">= 0"])
   end
 end
 
