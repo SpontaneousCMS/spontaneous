@@ -17,6 +17,10 @@
 	color: white !important;
 }
 
+.button .key-combo {
+  opacity: 0.5;
+}
+
 @mixin down-arrow($image: "/@spontaneous/static/orange-down-arrow.png", $height: 7px) {
 	position: absolute;
 	display: block;

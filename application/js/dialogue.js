@@ -13,7 +13,7 @@ Spontaneous.Dialogue = (function($, S) {
 		},
 
 		html: function() {
-			var el = dom.a(this.css_class()).text(this.label);
+			var el = dom.a(this.css_class()).html(this.label);
 			if (typeof this.action === 'function') {
 				var __button = this;
 				el.click(function() {
@@ -43,7 +43,7 @@ Spontaneous.Dialogue = (function($, S) {
 	});
 	var CancelButton = new JS.Class(Button, {
 		initialize: function(label, is_default) {
-			this.callSuper(label + " (Esc)", function() {
+			this.callSuper(label + ' <span class="key-combo">(Esc)</span>', function() {
 				Spontaneous.Dialogue.cancel();
 			}, is_default);
 		},

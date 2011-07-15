@@ -146,7 +146,6 @@ Spontaneous.Publishing = (function($, S) {
 	var ChangeSet = new JS.Class({
 		initialize: function(id, dialogue, change) {
 			this.id = id;
-			console.log(change)
 			this.dialogue = dialogue;
 			this.change = change;
 			this.selected = false;
