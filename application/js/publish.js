@@ -7,6 +7,15 @@ Spontaneous.Publishing = (function($, S) {
 		initialize: function(content) {
 			this.change_sets = [];
 		},
+		width: function() {
+			return '90%';
+		},
+		title: function() {
+			return "Publish Changes";
+		},
+		class_name: function() {
+			return "publishing";
+		},
 		body: function() {
 			var wrapper = dom.div('#publishing-dialogue').text('publishing')
 			this.wrapper = wrapper;
@@ -35,28 +44,36 @@ Spontaneous.Publishing = (function($, S) {
 			Spontaneous.TopBar.publishing_started();
 			this.close();
 		},
+
 		change_list_loaded: function(change_list) {
 			var w = this.wrapper, __dialogue = this;
 			w.empty();
+			var changed_wrap = dom.div("#changes.change-list"), publish_wrap = dom.div("#to-publish.change-list")
+			w.append(changed_wrap, publish_wrap)
 			if (change_list.length === 0) {
 				var summary = dom.p('.publish-summary').text("The site is up to date");
 				w.append(summary);
 				this.disable_button('Publish');
 			} else {
-				var summary = dom.p('.publish-summary').text(change_list.length + " changes");
-				var cb = dom.input('.checkbox').change(function() {
-					var checked = $(this).is(':checked');
-					__dialogue.set_publish_all(checked);
+				var publish_all = dom.a('.button').text('Publish All').click(function() {
+					alert('publish all');
 				});
-				var label = dom.label('.publish-all').append(cb).append('Publish All');
-				summary.append(label)
-				w.append(summary);
-				this.publish_all_label = label;
+				var clear_all = dom.a('.button').text('Clear All').click(function() {
+					alert('Clear all');
+				});
+				var changed_toolbar = dom.div('.actions').append(dom.div().text("Modified pages")).append(publish_all);
+				var publish_toolbar = dom.div('.actions').append(dom.div().text("Publish pages")).append(clear_all);
+				var changed_entries = dom.div('.change-sets'), publish_entries = dom.div('.change-sets')
+				changed_wrap.append(changed_toolbar, changed_entries);
+				publish_wrap.append(publish_toolbar, publish_entries);
 				for (var i = 0, ii = change_list.length; i < ii; i++) {
-					var cs = new ChangeSet(this, change_list[i]);
+					var cs = new ChangeSet(i, this, change_list[i]);
 					this.change_sets.push(cs);
-					w.append(cs.panel())
+					changed_entries.append(cs.panel())
 				}
+				publish_entries.append(dom.div('.instructions').text('Add pages to publish from the list on the left'));
+				this.changed_entries = changed_entries;
+				this.publish_entries = publish_entries;
 			}
 		},
 		set_publish_all: function(state) {
@@ -82,9 +99,28 @@ Spontaneous.Publishing = (function($, S) {
 			}
 		},
 		change_set_state: function(change_set, state) {
-			if (!state && this.publish_all) {
-				this.publish_all = false;
-				this.update_publish_all_view();
+			// if (!state && this.publish_all) {
+				// this.publish_all = false;
+				// this.update_publish_all_view();
+			// }
+			var id = 'cs-' + change_set.id, panel, __this = this;
+			if (state) {
+				this.publish_entries.find('.instructions').hide();
+				panel = change_set.selected_panel(id).hide();
+				this.publish_entries.prepend(panel);
+				change_set.panel().fadeOut();
+				panel.fadeIn();
+			} else {
+				panel = this.publish_entries.find('#'+id)
+				panel.fadeOut(function() {
+					panel.remove();
+					var entries = __this.publish_entries;
+					if (entries.find('.change-set').length == 0) {
+						entries.find('.instructions').fadeIn();
+					}
+				});
+				change_set.panel().fadeIn();
+
 			}
 		},
 		selected: function() {
@@ -108,26 +144,36 @@ Spontaneous.Publishing = (function($, S) {
 	});
 
 	var ChangeSet = new JS.Class({
-		initialize: function(dialogue, change) {
+		initialize: function(id, dialogue, change) {
+			this.id = id;
+			console.log(change)
 			this.dialogue = dialogue;
 			this.change = change;
 			this.selected = false;
 		},
 		panel: function() {
-			var w = dom.div('.change-set'), pages = this.pages(), titles = dom.div('.titles');
-			for (var i = 0, ii = pages.length; i < ii; i++) {
-				titles.append(dom.a().text(pages[i].title).append(dom.span().text(pages[i].path)));
+			if (!this._panel) {
+				var w = dom.div('.change-set'), page_list = dom.div('.pages'), add = dom.div('.add').append(dom.span().text('+')), pages = this.pages();
+				for (var i = 0, ii = pages.length; i < ii; i++) {
+					page_list.append(dom.div('.title').text(pages[i].title).append(dom.div('.url').text(pages[i].path)));
+				}
+				add.click(function() {
+					this.select_toggle();
+				}.bind(this))
+				w.append(page_list, add)
+				this.wrapper = w;
+				this._panel = w;
 			}
-			w.click(function() {
-				this.select_toggle();
-			}.bind(this))
-			w.append(titles);
-			this.wrapper = w;
-			return w;
+			return this._panel;
+		},
+		selected_panel: function(id) {
+			var panel = this.panel().clone().attr('id', id);
+			panel.find('.add').click(this.select_toggle.bind(this)).find('span').text('-');
+			return panel;
 		},
 		select: function(state) {
 			this.selected = state;
-			this.update_view();
+			// this.update_view();
 			this.dialogue.change_set_state(this, this.selected);
 		},
 		select_toggle: function() {

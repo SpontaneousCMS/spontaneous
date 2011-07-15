@@ -35,7 +35,8 @@ try {
 	docElement.removeChild(c);
 
 	if (w !== 42) {
-		throw "Flexible Box Model not supported"
+		// console.error(w)
+		throw (w) + " Flexible Box Model not supported"
 	}
 
 	///////////////////////////// XHR Uploads

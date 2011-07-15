@@ -58,6 +58,15 @@ Spontaneous.Dialogue = (function($, S) {
 		close: function() {
 			Spontaneous.Dialogue.close(this);
 		},
+		width: function() {
+			return '50%';
+		},
+		title: function() {
+			return "Dialogue";
+		},
+		class_name: function() {
+			return '';
+		},
 		buttons: function() {
 			// return a
 			//   { label : action }
@@ -85,13 +94,13 @@ Spontaneous.Dialogue = (function($, S) {
 		_instance: false,
 
 		open: function(instance) {
-			if (this._open) { return; }
+			if (this._open || !instance) { return; }
 			this._instance = instance;
 			$('body').css("overflow", "hidden");
 			this.overlay().fadeIn(200);
 			var c = this.container(), a = this._actions, b;
 			var buttons = instance.buttons(), button_map = {};
-			a.empty();
+			a.empty().append(dom.div('.spacer'));
 			b = new CancelButton(instance.cancel_label());
 			button_map['cancel'] = b;
 			button_map[instance.cancel_label().toLowerCase()] = b;
@@ -131,11 +140,11 @@ Spontaneous.Dialogue = (function($, S) {
 		close: function() {
 			if (!this._instance || !this._open) { return; }
 			this._instance.cleanup();
-			this.container().hide();
+			this.container().remove();
 			this.overlay().fadeOut(200, function() {
 				$('body').css("overflow", "auto");
 			});
-			this._instance = this._open = false;
+			this._instance = this._container = this._open = false;
 			$(document).unbind('keydown.dialogue');
 		},
 		cancel: function() {
@@ -143,24 +152,26 @@ Spontaneous.Dialogue = (function($, S) {
 		},
 		container: function() {
 			if (!this._container) {
-				var w = dom.div('#dialogue-wrap').css('z-index', this.z_index()).hide();
-				// var cw = $(dom.div, {'id':'dialogue-control-wrap'});
-				var cw = dom.div('#dialogue-control-wrap');
-				// var c = $(dom.div, {'id':'dialogue-controls'});
-				var c = dom.div('#dialogue-controls');
-				// var a = $(dom.div, {'class':'dialogue-actions top'});
-				var a = dom.div('.dialogue-actions.top');
-				// var b = $(dom.div, {'id':'dialogue-body'});
-				var b = dom.div('#dialogue-body');
+				var instance = this._instance;
+				var wrap = dom.div('#dialogue-wrap').css('z-index', this.z_index()).hide();
+				var outline = dom.div('#dialogue-outer').css('width', instance.width()).addClass(instance.class_name());
+				var controls_wrap = dom.div('#dialogue-control-wrap');
+				var controls = dom.div('#dialogue-controls');
+				var actions = dom.div('.dialogue-actions');
+				var body = dom.div('#dialogue-body');
+				var title = dom.div('#dialogue-title').append(instance.title());
 
-				c.append(a);
-				cw.append(c);
-				w.append(cw);
-				w.append(b);
-				$('#content').append(w);
-				this._actions = a;
-				this._container = w;
-				this._body = b;
+				controls.append(actions);
+				controls_wrap.append(controls);
+				outline.append(title);
+				outline.append(body);
+				outline.append(controls_wrap);
+				wrap.append(outline)
+				$('#content').append(wrap);
+				this._actions = actions;
+				this._title = title;
+				this._container = wrap;
+				this._body = body;
 			}
 			return this._container;
 		},

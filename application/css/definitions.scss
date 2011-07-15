@@ -121,6 +121,11 @@ $radius: $corner-radius;
   -webkit-box-align: $aligning;
   -moz-box-align: $aligning;
 }
+@mixin box-flex {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
 .box-flexible {
 	-webkit-box-flex: 1;
 	-moz-box-flex: 1;
@@ -152,17 +157,20 @@ $radius: $corner-radius;
   padding-top: 2px;
   font-weight: bold;
   display: inline-block;
+  text-decoration: none;
+	@include button-color($background-color);
+  color: white;
+}
+
+@mixin button-color($background-color: $action) {
   background-color: $background-color;
 	@include vertical-gradient(lighten($background-color, 5%), darken($background-color, 5%));
-  text-decoration: none;
-  color: white;
 	&:hover {
 		background-color: $highlight !important;
 		@include vertical-gradient($highlight, darken($highlight, 5%));
 		color: white !important;
 	}
 }
-
 @mixin background-size($size-w: 100%, $size-h: 100%) {
 	-moz-background-size: $size-w $size-h;
 	-o-background-size: $size-w $size-h;

@@ -1007,50 +1007,96 @@ img.missing {
 	top: 0;
 	overflow: auto;
 	z-index: 1001;
-	#dialogue-control-wrap {
-		position: fixed;
-		top: 0;
-		right: 0;
-		left: 0;
-		z-index: 1002;
-		#dialogue-controls {
-			@include rounded-bottom;
-			@extend .controls-gradient;
-			@extend .shadow;
-			position: relative;
-			width: $dialogue-width;
-			margin: 0 auto;
-			display: block;
-			height: 46px;
-			.dialogue-actions {
-				.button {
-					width: 128px;
-					margin: 16px 16px 10px 16px;
-				}
-				.cancel {
-					background-color: #6b6b6b;
-				}
-				.save {
-					background-color: $action;
-					float: right;
-				}
-				.disabled, .disabled:hover {
-					background-color: #333333 !important;
-					color: #6b6b6b !important;
-				}
-			}
-		}
-	}
+  $dialogue-frame-width: 2px;
+  #dialogue-outer {
+    @include rounded;
+    @include display-box;
+    @include box-orient($direction: vertical);
+    @extend .shadow;
+    background-color: $chrome-bg;
+    position: relative;
+    top: 50px;
+    // width: $dialogue-width;
+    margin: 0 auto;
+    margin-bottom: 50px;
+    // max-height: 90%;
+    #dialogue-title {
+      $height: 32px;
+      @extend .controls-gradient;
+      @include header;
+      @include rounded-top;
+      height: $height - 6px;
+      color: #fff;
+      padding: 0 $unit 0 ($unit+$dialogue-frame-width);
+      padding-top: 6px;
+    }
+    #dialogue-body {
+      // @extend .box-flexible;
+      // position: absolute;
+      // top: 32px;
+      // right: 2px;
+      // bottom: 32px;
+      // left: 2px;
+      // min-height: 100px;
+      overflow: auto;
+      margin: 0 $dialogue-frame-width;
+      background-color: #fff;
+      // max-height: 70%;
+      // margin-top: 32px;
+      // margin-bottom: 32px;
+    }
+    #dialogue-control-wrap {
+      // position: fixed;
+      // top: 0;
+      // right: 0;
+      // left: 0;
+      // z-index: 1002;
+
+      #dialogue-controls {
+        position: relative;
+        // display: block;
+        // height: 46px;
+        .dialogue-actions {
+          @include display-box;
+          .spacer {
+            @include box-flex;
+          }
+          .button {
+            display: block;
+            width: 128px;
+            margin: $unit 0;
+            & + .button {
+              margin-left: $unit;
+            }
+          }
+          .button:last-child {
+            margin-right: $unit;
+          }
+          .cancel {
+            @include button-color(#6b6b6b);
+          }
+          .save {
+            background-color: $action;
+            float: right;
+          }
+          .disabled, .disabled:hover {
+            background-color: #333333 !important;
+            color: #6b6b6b !important;
+          }
+        }
+      }
+    }
+  }
 }
 
 .dialogue-wrapper {
 	@include rounded;
 	@include box-sizing;
 	position: relative;
-	top: 32px;
+	// top: 32px;
 	background-color: #cccccc;
 	width: $dialogue-width;
-	margin: 32px auto;
+	// margin: 32px auto;
 }
 
 #create-home-dialogue {
@@ -1075,9 +1121,47 @@ img.missing {
 	}
 }
 #publishing-dialogue {
-	@extend .dialogue-wrapper;
-	padding-top: $container-padding / 2;
-	padding-bottom: $container-padding / 2;
+  min-height: 200px;
+  max-height: 90%;
+  @include display-box;
+  @include box-orient(horizontal);
+  .change-list {
+    @include box-flex;
+    width: 50%;
+    &#changes {
+      border-right: solid 2px #000;
+    }
+    .actions {
+      @extend .interface;
+      @include display-box;
+      @include box-orient(horizontal);
+      background-color: #f2f2f2;
+      padding: $unit/2 $unit;
+
+      div {
+        @include box-flex;
+      }
+      .button {
+        padding-left: $unit;
+        padding-right: $unit;
+      }
+    }
+    .change-sets {
+      overflow: auto;
+      .instructions {
+        font-family: $headline-font-family;
+        color: #999;
+        text-align: center;
+        position: relative;
+        padding-top: 50px;
+      }
+    }
+  }
+  // background-color: #fff;
+  // width: 600px;
+	// @extend .dialogue-wrapper;
+	// padding-top: $container-padding / 2;
+	// padding-bottom: $container-padding / 2;
 	.publish-summary {
 		margin: $container-padding / 2;
 		margin-top: 0;
@@ -1101,11 +1185,46 @@ img.missing {
 	}
 	.change-set {
 		@include rounded;
+    @include display-box;
 		cursor: pointer;
 		border: solid 3px transparent;
-		margin: $container-padding / 2;
-		background-color: #eeeeee;
-		padding: $container-padding / 4;
+		margin: $unit;
+		background-color: #fbfbfb;
+    border: solid 1px #f2f2f2;
+    .pages {
+      @include box-flex;
+      .title {
+        padding: $unit/2 $unit;
+        color: #333;
+        & + .title {
+          border-top: solid 1px #f2f2f2;
+        }
+      }
+      .url {
+        font-size: 10px;
+        color: #666;
+      }
+    }
+    .add {
+      @include rounded-right;
+      @include display-box;
+      @include box-pack(center);
+      @include box-align(center);
+      width: $container-padding;
+      background-color: #f2f2f2;
+      position: relative;
+      color: #666;
+      span {
+        @extend .interface;
+        font-size: 40px;
+        position: relative;
+        top: -5px;
+      }
+      &:hover {
+        background-color: $action;
+        color: #fff;
+      }
+    }
 		.titles a {
 			display: block;
 			margin-bottom: 2px;
@@ -1119,8 +1238,6 @@ img.missing {
 		border-color: $action;
 	}
 	.change-set.selected {
-		background-color: $action;
-		color: white;
 	}
 }
 
