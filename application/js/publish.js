@@ -71,7 +71,7 @@ Spontaneous.Publishing = (function($, S) {
 					this.change_sets.push(cs);
 					changed_entries.append(cs.panel())
 				}
-				publish_wrap.append(dom.div('.instructions').text('Add pages to publish from the list on the left'));
+				publish_entries.append(dom.div('.instructions').text('Add pages to publish from the list on the left'));
 				this.changed_entries = changed_entries;
 				this.publish_entries = publish_entries;
 			}
@@ -85,18 +85,18 @@ Spontaneous.Publishing = (function($, S) {
 		change_set_state: function(change_set, state) {
 			var id = 'cs-' + change_set.id, panel, __this = this;
 			if (state) {
-				__this.wrapper.find('.instructions').hide();
+				this.publish_entries.find('.instructions').hide();
 				panel = change_set.selected_panel(id).hide();
-				__this.publish_entries.prepend(panel);
+				this.publish_entries.prepend(panel);
 				change_set.panel().disappear();
 				panel.appear();
 			} else {
-				panel = __this.publish_entries.find('#'+id)
+				panel = this.publish_entries.find('#'+id)
 				panel.disappear(function() {
 					panel.remove();
 					var entries = __this.publish_entries;
 					if (entries.find('.change-set').length == 0) {
-						__this.wrapper.find('.instructions').fadeIn(200);
+						entries.find('.instructions').fadeIn();
 					}
 				});
 				change_set.panel().appear();

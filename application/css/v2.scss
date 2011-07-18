@@ -1162,15 +1162,15 @@ img.missing {
         padding-right: $unit;
       }
     }
-    .instructions {
-      font-family: $headline-font-family;
-      color: #999;
-      text-align: center;
-      position: relative;
-      padding-top: 50px;
-    }
     .change-sets {
       overflow: auto;
+      .instructions {
+        font-family: $headline-font-family;
+        color: #999;
+        text-align: center;
+        position: relative;
+        padding-top: 50px;
+      }
     }
   }
   // background-color: #fff;
