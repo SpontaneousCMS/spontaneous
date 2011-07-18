@@ -216,8 +216,8 @@ Spontaneous.TopBar = (function($, S) {
 			});
 			this.publish_button = new PublishButton();
 			this.wrap.append(this.location);
-			this.wrap.append(this.mode_switch);
 			this.wrap.append(this.publish_button.button());
+			this.wrap.append(this.mode_switch);
 			return this.wrap;
 		},
 		init: function() {

@@ -90,13 +90,15 @@ img.missing {
 	@extend .container-padding;
 	@extend .controls-gradient;
 	@extend .clearfix;
+  @include display-box;
+  @include box-align(center);
 	position: fixed;
 	height: 31px;
 	top: 0;
 	right: 0;
 	left: 0;
-	display: block;
 	#navigation {
+    @include box-flex;
 		font-size: 11px;
 		font-weight: bold;
 		color: #999999;
@@ -162,13 +164,15 @@ img.missing {
 	}
 	#switch-mode, #open-publish {
 		@include button;
-		position: absolute;
-		right: 0;
-		margin: 4px $container-padding 0 0;
+    @include display-box;
+    @include box-orient(vertical);
+    @include box-align(center);
+    margin: 0;
 		width: 64px;
 	}
 	#open-publish {
-		right: 74px;
+    position: relative;
+		margin-right: $unit;
 		#publish-progress {
 			position: absolute;
 			left: 8px;
@@ -1158,15 +1162,15 @@ img.missing {
         padding-right: $unit;
       }
     }
+    .instructions {
+      font-family: $headline-font-family;
+      color: #999;
+      text-align: center;
+      position: relative;
+      padding-top: 50px;
+    }
     .change-sets {
       overflow: auto;
-      .instructions {
-        font-family: $headline-font-family;
-        color: #999;
-        text-align: center;
-        position: relative;
-        padding-top: 50px;
-      }
     }
   }
   // background-color: #fff;
@@ -1227,7 +1231,7 @@ img.missing {
       width: $container-padding;
       background-color: #f2f2f2;
       position: relative;
-      color: #666;
+      color: #999;
       span {
         @extend .interface;
         font-size: 40px;
