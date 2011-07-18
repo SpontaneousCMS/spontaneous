@@ -160,14 +160,15 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		panel: function() {
 			if (!this._panel) {
-				var w = dom.div('.change-set'), page_list = dom.div('.pages'), add = dom.div('.add').append(dom.span().text('+')), pages = this.pages();
+				var w = dom.div('.change-set'), inner = dom.div('.inner'), page_list = dom.div('.pages'), add = dom.div('.add').append(dom.span().text('+')), pages = this.pages();
 				for (var i = 0, ii = pages.length; i < ii; i++) {
 					page_list.append(dom.div('.title').text(pages[i].title).append(dom.div('.url').text(pages[i].path)));
 				}
 				add.click(function() {
 					this.select_toggle();
 				}.bind(this))
-				w.append(page_list, add)
+				inner.append(page_list, add)
+				w.append(inner)
 				this.wrapper = w;
 				this._panel = w;
 			}
