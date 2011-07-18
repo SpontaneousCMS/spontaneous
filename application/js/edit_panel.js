@@ -82,7 +82,6 @@ Spontaneous.EditPanel = (function($, S) {
 				return toolbar;
 			};
 			var editing = dom.form(['.editing-panel', this.content.depth_class()], {'enctype':'multipart/form-data', 'method':'post'})
-			// $(dom.form, {'class':'editing-panel '+ this.content.depth_class(), 'enctype':'multipart/form-data', 'method':'post'});
 			var toolbar = get_toolbar();
 			var outer = dom.div('.editing-fields');
 			var text_field_wrap = dom.div('.field-group.text');
@@ -116,13 +115,24 @@ Spontaneous.EditPanel = (function($, S) {
 			editing.submit(this.save.bind(this));
 			this.form = editing;
 			$(':input', this.form).add(document).bind('keydown.savedialog', function(event) {
-				var s_key = 83;
+				var s_key = 83, esc_key = 27;
 				if ((event.ctrlKey || event.metaKey) && event.keyCode === s_key) {
 					this.save();
 					return false;
+				} else {
+					if (event.keyCode === esc_key) {
+						_cancel_();
+					}
 				}
 			}.bind(this));
 			return this.form;
+		},
+		on_show: function(focus_field) {
+			if (!(focus_field['focus']) || !focus_field.accepts_focus) { focus_field = null; }
+			var focus_field = focus_field || this.content.text_fields()[0];
+			if (focus_field) {
+				focus_field.focus();
+			}
 		},
 		field_focus: function(input) {
 			var text_fields = this.content.text_fields(), active_field = false;

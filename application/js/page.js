@@ -70,7 +70,8 @@ Spontaneous.Page = (function($, S) {
 				var submit = function() {
 					this.save(input.val());
 				}.bind(this);
-				edit.append(dom.a('.button').text('Save').click(submit));
+				edit.append(dom.a('.button.save').text('Save').click(submit));
+				edit.append(dom.a('.button.cancel').text('Cancel').click(this.close.bind(this)));
 				input.keyup(function(event) {
 					if (event.keyCode === 13) {
 						submit();

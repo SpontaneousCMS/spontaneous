@@ -27,16 +27,20 @@ Spontaneous.FieldPreview = (function($, S) {
 				wrapper.mouseout(this.content.mouseout.bind(this.content))
 			}
 			wrapper.click(function() {
-				this.content.edit();
+				console.log(this.field_to_edit.name);
+				this.content.edit(this.field_to_edit);
 			}.bind(this))
 			return wrapper;
 		},
 		fields_panel: function(fields, type) {
-			var wrapper = dom.ul('.fields-preview-'+type);
+			var wrapper = dom.ul('.fields-preview-'+type), __this = this;
 			$.each(fields, function(i, field) {
 				var li = dom.li();
 				var name = dom.div('.name').text(field.title);
 				var value = dom.div('.value').html(field.preview());
+				li.click(function() {
+					__this.field_to_edit = field;
+				})
 				field.activate(value);
 				field.add_listener('value', function(field, v) { $(this).html(field.preview()) }.bind(value, field));
 				li.append(name).append(value);

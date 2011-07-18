@@ -227,7 +227,7 @@ Spontaneous.Content = (function($, S) {
 			return outer;
 		},
 
-		edit: function() {
+		edit: function(focus_field) {
 			var time_to_reveal = 300, back = 10, front = 20,
 				a = this.editing_area, o = a.outer, w = a.write, r = a.read, wi = a.write_inner, ri = a.read_inner;
 			var panel = new Spontaneous.EditPanel(this), view = panel.view();
@@ -240,7 +240,8 @@ Spontaneous.Content = (function($, S) {
 			r.css({'position':'absolute', 'top':0, 'right':0, 'left':0}).animate({'top':h}, { queue: false, duration: time_to_reveal, complete:function() {
 				w.css({'z-index': front, 'position':'relative', 'height':'auto'})
 				r.css({'z-index': back, 'position':'absolute'})
-				o.css('height', 'auto')
+				o.css('height', 'auto');
+				panel.on_show(focus_field);
 			}});
 		},
 		edit_closing: false,

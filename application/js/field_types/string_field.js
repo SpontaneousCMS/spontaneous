@@ -82,6 +82,11 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		footer: function() {
 			return false;
 		},
+		focus: function() {
+			this.input().focus().select();
+		},
+		// true for fields with a text input
+		accepts_focus: true,
 		on_focus: function() {
 			this.input().parents('.field').first().addClass('focus');
 		},

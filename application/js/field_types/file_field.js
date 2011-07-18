@@ -29,6 +29,7 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 			this.input = dom.input({'type':'file', 'name':this.form_name(), 'accept':'image/*'});
 			return this.input;
 		},
+		accepts_focus: false,
 		// called by edit dialogue in order to begin the async upload of files
 		save: function() {
 			if (!this.selected_files) { return; }
