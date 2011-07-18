@@ -664,15 +664,20 @@ img.missing {
 		background-color: white;
 	}
 	.entry-wrap {
-		@extend .clearfix;
-		@include rounded;
+    @extend .clearfix;
 		position: relative;
 		margin-left: $container-padding;
 		margin-right: $container-padding;
-		// margin-bottom: $container-padding/2;
-		background-color: gray;
-		padding: 1px;
-		padding-top: $title-bar-height + 4px;
+
+    .entry-contents {
+      @include rounded;
+      background-color: gray;
+      padding: 1px;
+      padding-top: $title-bar-height + 4px;
+    }
+    .entry-spacer {
+      height: $container-padding/2;
+    }
 		.entry-inner {
 			@extend .clearfix;
 			@include rounded;
@@ -966,7 +971,7 @@ img.missing {
       }
     }
   }
-	.entry-wrap.ui-sortable-helper {
+	.entry-wrap.ui-sortable-helper .entry-contents {
 		@extend .shadow;
 	}
 	.entry-wrap.depth-1 .entry {

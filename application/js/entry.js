@@ -47,6 +47,7 @@ Spontaneous.Entry = (function($, S) {
 		},
 		panel: function() {
 			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class()])
+			var contents = dom.div('.entry-contents');
 			// $(dom.div, {'class':['entry-wrap ', this.depth_class(), this.visibility_class()].join(' ')});
 			var inside = dom.div('.entry-inner');
 			var outline = dom.div('.white-bg').mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
@@ -55,12 +56,12 @@ Spontaneous.Entry = (function($, S) {
 				inside.append(dom.div('.grey-bg'));
 			}
 
-			wrapper.append(this.title_bar(wrapper));
+			contents.append(this.title_bar(contents));
 			if (this.type().is_alias()) {
-				wrapper.append(this.alias_target_panel());
+				contents.append(this.alias_target_panel());
 			}
 			// this.dialogue_box = $(dom.div, {'class':'dialogue', 'style':'display: none'});
-			// wrapper.append(this.dialogue_box);
+			// contents.append(this.dialogue_box);
 			var entry = dom.div('.entry');
 			var fields = new Spontaneous.FieldPreview(this, '');
 			if (fields.has_fields()) {
@@ -71,7 +72,8 @@ Spontaneous.Entry = (function($, S) {
 			inside.append(entry);
 			inside.append(box_container.panel());
 			var preview_area = this.create_edit_wrapper(inside);
-			wrapper.append(preview_area)
+			contents.append(preview_area);
+			wrapper.append(contents, dom.div('.entry-spacer'));
 			this.wrapper = wrapper;
 			this.outline = outline;
 			this.fields_preview = fields_panel;
