@@ -63,17 +63,28 @@ function $A(iterable) {
 	});
 
 	var opacity_change_duration = 200, height_change_duration = 200;
+
 	$.fn.appear = function(callback) {
-		var $this = this;
-		this.hide().css({'opacity': 0}).animate({'height':'show'}, {
-			duration: height_change_duration,
-			complete :function() {
-				$this.animate({'opacity':1}, {
-					duration: opacity_change_duration,
-					complete: callback
-				});
-			}
-		});
+		var $this = this, siblings = $this.siblings(), fade_in = function() {
+			$this.animate({'opacity':1}, {
+				duration: opacity_change_duration,
+				complete: callback
+			});
+		};
+
+		if (siblings.length == 0) {
+			// skip height animation and just fade the element in
+			// otherwise there's this weird gap where nothing seems to be
+			// happening. this only happens when the item being 'appeared' is
+			// the first in the list
+			$this.css({'opacity': 0}).show();
+			fade_in();
+		} else {
+			$this.hide().css({'opacity': 0}).animate({'height':'show'}, {
+				duration: height_change_duration,
+				complete: fade_in
+			});
+		}
 	};
 
 	$.fn.disappear = function(callback) {
