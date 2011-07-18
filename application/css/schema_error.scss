@@ -1,0 +1,36 @@
+@import "definitions";
+
+body {
+	background: url(/@spontaneous/static/texture.png) repeat;
+	color: #fff;
+}
+
+#container {
+	width: 800px;
+	margin: 0 auto;
+	padding-top: 100px;
+
+	h1 {
+		font-size: 24px;
+	}
+	.src {
+		color: #999;
+		font-size: 12px;
+	}
+	.actions {
+		li:before {
+			content: "— ";
+		}
+		li {
+			margin-bottom: $unit/2;
+		}
+		a {
+			cursor: pointer;
+			color: $action;
+			font-weight: bold;
+			&:hover {
+				color: $highlight;
+			}
+		}
+	}
+}

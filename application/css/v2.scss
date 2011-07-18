@@ -8,18 +8,7 @@
 	background-color: #efefef;
 }
 
-.button {
-	@include button;
-}
 
-.button:hover {
-	background-color: $highlight !important;
-	color: white !important;
-}
-
-.button .key-combo {
-  opacity: 0.5;
-}
 
 @mixin down-arrow($image: "/@spontaneous/static/orange-down-arrow.png", $height: 7px) {
 	position: absolute;
@@ -48,31 +37,7 @@
 	padding-left: $container-padding;
 	padding-right: $container-padding;
 }
-.button.cancel {
-  @include button-color(#6b6b6b);
-}
 
-body, h1, h2, h3, h4, h5, h6, dd, dt, ul, ol, li {
-	margin: 0;
-	padding: 0;
-	font-weight: normal;
-	-webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-body {
-	margin-bottom: 300px;
-	background-color: white;
-	font-family: $content-font-family;
-}
-
-ul, ol {
-	list-style-type: none;
-}
-
-a {
-	text-decoration: none;
-}
 
 img.missing {
 	width: 100%;
@@ -85,9 +50,6 @@ img.missing {
 	clear: both;
 }
 
-.controls-gradient {
-	@include vertical-gradient($chrome-accent, $chrome-bg);
-}
 
 #top {
 	@extend .container-padding;

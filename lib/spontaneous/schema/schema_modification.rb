@@ -220,6 +220,12 @@ module Spontaneous
         def category
           @source.category
         end
+
+        def to_hash
+          hash = [@action.to_s, category, source.name]
+          hash << dest.name if dest
+          hash
+        end
       end
 
       def actions
@@ -233,6 +239,12 @@ module Spontaneous
           change = changes_grouped_by_owner.first { |c| !c.simple_change? }
           change.actions
         end
+      end
+      def to_hash
+        actions.map { |action| action.to_hash }
+      end
+      def to_json
+        to_hash.to_json
       end
     end
   end

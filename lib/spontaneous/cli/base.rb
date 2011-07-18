@@ -57,6 +57,7 @@ module Spontaneous
         prepare :publish
         # TODO: set up logging
         boot!
+        Site.publishing_method = :immediate
         Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
         logger.info { "publishing revision #{Site.revision} of site #{options.site}" }
         if options.changes

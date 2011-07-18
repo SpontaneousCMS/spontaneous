@@ -94,6 +94,7 @@ module Spontaneous
 
           map NAMESPACE do
             use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static /js)
+            use Assets
             run EditingInterface
           end
 
@@ -117,6 +118,9 @@ module Spontaneous
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
+        error 412 do
+          "Schema Error"
+        end
         def json(response)
           content_type 'application/json', :charset => 'utf-8'
           response.to_json
@@ -424,6 +428,12 @@ module Spontaneous
         #   send_file(Spontaneous.static_dir / "favicon.ico")
         # end
 
+
+      end # EditingInterface
+
+      # Assets are separata from the main editing handlers so that I can still access them
+      # in the case of a Schema modification error
+      class Assets < ::Sinatra::Base
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)
         end
@@ -454,8 +464,7 @@ module Spontaneous
             send_file(Spontaneous.css_dir / file)
           end
         end
-
-      end # EditingInterface
+      end
 
       class Preview < Spontaneous::Rack::Public
         HTTP_EXPIRES = "Expires".freeze

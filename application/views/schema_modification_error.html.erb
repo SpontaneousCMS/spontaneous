@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="chrome=1" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Spontaneous: Loading...</title>
+		<link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
+
+    <link rel="stylesheet" href="/@spontaneous/css/schema_error.css" type="text/css" media="screen" charset="utf-8" />
+    <script type="text/javascript">
+      function solution(action, source, dest) {
+        console.log(action, source, dest);
+      }
+    </script>
+  </head>
+  <body id="spontaneous">
+    <div id="container">
+    <h1>There are unresolvable changes to the schema type <strong>&lsquo;<%= actions[0].source.owner %>&rsquo;</strong></h1>
+    <p class="src"><%= actions[0].source.owner.__source_file %></p>
+    <p>Please choose one of the following solutions:</p>
+    <ul class="actions">
+      <% actions.each do |action| %>
+        <li><a onclick="solution('<%= action.action %>', '<%= action.source.name %>', '<%= action.dest ? action.dest.name : '' %>')"><%= action.description %></a></li>
+      <% end %>
+    </ul>
+    </div>
+  </body>
+</html>
