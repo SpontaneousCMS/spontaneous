@@ -59,3 +59,32 @@ jQuery.extend(Number.prototype, {
 		return this / (Math.pow(thou, power)) + units[power]
 	}
 });
+
+(function($) {
+	var opacity_change_duration = 200, height_change_duration = 200;
+	$.fn.appear = function(callback) {
+		var $this = this;
+		this.hide().css({'opacity': 0}).animate({'height':'show'}, {
+			duration: height_change_duration,
+			complete :function() {
+				$this.animate({'opacity':1}, {
+					duration: opacity_change_duration,
+					complete: callback
+				});
+			}
+		});
+	};
+
+	$.fn.disappear = function(callback) {
+		var $this = this;
+		this.animate({'opacity':0}, {
+			duration: opacity_change_duration,
+			complete: function() {
+				$this.animate({'height':'hide'}, {
+					duration: height_change_duration,
+					complete:callback
+				});
+			}
+		});
+	};
+}(jQuery));

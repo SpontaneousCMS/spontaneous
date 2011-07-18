@@ -158,7 +158,7 @@ Spontaneous.Entry = (function($, S) {
 			}
 		},
 		destroyed: function() {
-			this.wrapper.slideUp(200, function() {
+			this.wrapper.disappear(function() {
 				this.wrapper.remove();
 			}.bind(this));
 		}

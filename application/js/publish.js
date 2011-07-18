@@ -108,27 +108,18 @@ Spontaneous.Publishing = (function($, S) {
 				this.publish_entries.find('.instructions').hide();
 				panel = change_set.selected_panel(id).hide();
 				this.publish_entries.prepend(panel);
-				change_set.panel().animate({'opacity':0}, function() {
-					change_set.panel().slideUp();
-				});
-				panel.css('opacity', 0).slideDown(function() {
-					panel.animate({'opacity': 1})
-				});
+				change_set.panel().disappear();
+				panel.appear();
 			} else {
 				panel = this.publish_entries.find('#'+id)
-				panel.animate({'opacity':0}, function() {
-					panel.slideUp(function() {
-						panel.remove();
-						var entries = __this.publish_entries;
-						if (entries.find('.change-set').length == 0) {
-							entries.find('.instructions').fadeIn();
-						}
-					});
-				})
-				change_set.panel().hide().css('opacity', 0).slideDown(function() {
-					change_set.panel().animate({'opacity':1})
-				})
-
+				panel.disappear(function() {
+					panel.remove();
+					var entries = __this.publish_entries;
+					if (entries.find('.change-set').length == 0) {
+						entries.find('.instructions').fadeIn();
+					}
+				});
+				change_set.panel().appear();
 			}
 		},
 		selected: function() {

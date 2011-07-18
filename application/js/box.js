@@ -212,7 +212,7 @@ Spontaneous.Box = (function($, S) {
 			} else {
 				this._entry_container.append(e);
 			}
-			e.hide().slideDown(300);
+			e.hide().appear();
 		},
 		entry_wrappers: function() {
 			return this._entry_container.find('> .'+this.entry_class())
