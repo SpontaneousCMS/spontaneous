@@ -134,7 +134,8 @@ Spontaneous.TopBar = (function($, S) {
 		update_status: function(status) {
 			if (status === null || status === '') { return; }
 			var action = status.status, progress = status.progress
-			if (action == this.current_action && progress == this.current_progress) { return; }
+			console.log('status', status, this.in_progress, this.current_action, this.current_progress)
+			if (this.in_progress && (action == this.current_action && progress == this.current_progress)) { return; }
 			this.current_action = action;
 			this.current_progress = progress;
 			if (action === null || action === '' || action === 'complete' || action === 'error') {
@@ -144,6 +145,7 @@ Spontaneous.TopBar = (function($, S) {
 					this.set_interval(this.normal_check);
 					this.set_label("Publish");
 					this.button().switchClass('progress', '')
+					this.current_action = this.current_progress = null;
 				}
 				if (action === 'error') {
 					alert('There was a problem publishing: ' + progress)
@@ -165,6 +167,7 @@ Spontaneous.TopBar = (function($, S) {
 			this.set_interval(this.rapid_check);
 			this.set_label("Publishing");
 			var b = this.button();
+			this.current_action = this.current_progress = null;
 			if (!b.hasClass('progress')) { b.switchClass('', 'progress'); }
 			this.in_progress = true;
 		},
@@ -190,7 +193,7 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		progress: function() {
 			if (!this._progress) {
-				this._progress = Spontaneous.Progress('publish-progress', 16, {
+				this._progress = Spontaneous.Progress('publish-progress', 15, {
 					spinner_fg_color: '#ccc',
 					progress_fg_color: '#666'
 				});

@@ -51,7 +51,7 @@ Spontaneous.Publishing = (function($, S) {
 			var changed_wrap = dom.div("#changes.change-list"), publish_wrap = dom.div("#to-publish.change-list")
 			w.append(changed_wrap, publish_wrap)
 			if (change_list.length === 0) {
-				var summary = dom.p('.publish-summary').text("The site is up to date");
+				var summary = dom.p('.publish-up-to-date').text("The site is up to date");
 				w.append(summary);
 				this.disable_button('Publish');
 			} else {

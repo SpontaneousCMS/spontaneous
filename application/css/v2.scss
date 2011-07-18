@@ -175,16 +175,16 @@ img.missing {
 		margin-right: $unit;
 		#publish-progress {
 			position: absolute;
-			left: 8px;
-			top: 4px;
+			left: 4px;
+			top: 1px;
 		}
 	}
 	#open-publish.progress {
 		padding-left: 20px;
 		padding-right: 20px;
 		width: 124px;
-		background-color: #333333;
-		color: #666666;
+		@include button-color(#666666);
+		color: #999999;
 	}
 }
 
@@ -1137,6 +1137,7 @@ img.missing {
 #publishing-dialogue {
   min-height: 200px;
   max-height: 90%;
+  position: relative;
   @include display-box;
   @include box-orient(horizontal);
   .change-list {
@@ -1178,26 +1179,41 @@ img.missing {
 	// @extend .dialogue-wrapper;
 	// padding-top: $container-padding / 2;
 	// padding-bottom: $container-padding / 2;
-	.publish-summary {
-		margin: $container-padding / 2;
-		margin-top: 0;
-		.publish-all {
-			@include button(#666);
-			@extend .interface;
-			width: 128px;
-			float: right;
-			text-align: left;
-			// background-color: #666666;
-			input {
-				margin: 1px 8px 0 8px;
-				padding: 0;
-				vertical-align: top;
-				position: relative;
-			}
-		}
-		.publish-all.checked {
-			background-color: $action;
-		}
+	.publish-up-to-date {
+    @include rounded;
+    @extend shadow;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 60px 200px 60px 200px;
+    text-align: center;
+    background-color: #333;
+    opacity: 0.95;
+    font-family: $headline-font-family;
+    font-size: 24px;
+    padding-top: 24px;
+    color: #fff;
+		// margin: $container-padding / 2;
+		// margin-top: 0;
+		// .publish-all {
+		// 	@include button(#666);
+		// 	@extend .interface;
+		// 	width: 128px;
+		// 	float: right;
+		// 	text-align: left;
+		// 	// background-color: #666666;
+		// 	input {
+		// 		margin: 1px 8px 0 8px;
+		// 		padding: 0;
+		// 		vertical-align: top;
+		// 		position: relative;
+		// 	}
+		// }
+		// .publish-all.checked {
+		// 	background-color: $action;
+		// }
 	}
 	.change-set {
 		cursor: pointer;
