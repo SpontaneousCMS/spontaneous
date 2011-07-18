@@ -79,6 +79,9 @@ Spontaneous.Dialogue = (function($, S) {
 			// over-ride if you need to do anything before the dialogue is closed
 			// (either by cancel or through other actions)
 		},
+		cancel_button: function() {
+			return new CancelButton(this.cancel_label());
+		},
 		cancel_label: function() {
 			return 'Cancel';
 		},
@@ -101,10 +104,17 @@ Spontaneous.Dialogue = (function($, S) {
 			var c = this.container(), a = this._actions, b;
 			var buttons = instance.buttons(), button_map = {};
 			a.empty().append(dom.div('.spacer'));
-			b = new CancelButton(instance.cancel_label());
-			button_map['cancel'] = b;
-			button_map[instance.cancel_label().toLowerCase()] = b;
-			a.append(b.html());
+			b = instance.cancel_button();
+			if (b) {
+				button_map['cancel'] = b;
+				button_map[instance.cancel_label().toLowerCase()] = b;
+				a.append(b.html());
+				$(document).bind('keydown.dialogue', function(event) {
+					if (event.keyCode === 27) { // escape key
+						this.cancel();
+					}
+				}.bind(this));
+			}
 			if (buttons) {
 				$.each(buttons, function(label, params) {
 					var action, is_default = false;
@@ -125,11 +135,6 @@ Spontaneous.Dialogue = (function($, S) {
 			this.button_map = button_map;
 			this._body.empty().append(instance.body());
 			c.fadeIn(200);
-			$(document).bind('keydown.dialogue', function(event) {
-				if (event.keyCode === 27) { // escape key
-					this.cancel();
-				}
-			}.bind(this));
 			this._open = true;
 		},
 

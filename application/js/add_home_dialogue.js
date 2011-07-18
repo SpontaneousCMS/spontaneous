@@ -4,8 +4,13 @@ Spontaneous.AddHomeDialogue = (function($, S) {
 
 	var AddHomeDialogue = new JS.Class(Dialogue, {
 		initialize: function(types) {
-			console.log(types);
 			this.types = types;
+		},
+		title: function() {
+			return "Create site home page";
+		},
+		width: function() {
+			return '50%';
 		},
 		buttons: function() {
 			var btns = {};
@@ -46,7 +51,10 @@ Spontaneous.AddHomeDialogue = (function($, S) {
 			});
 			editing.append(instructions, outer)
 			return editing;
-		}
+		},
+		cancel_button: function() {
+			return false;
+		},
 	});
 	return AddHomeDialogue;
 })(jQuery, Spontaneous);

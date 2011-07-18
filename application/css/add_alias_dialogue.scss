@@ -1,0 +1,27 @@
+#add-alias-dialogue {
+	.instructions {
+		@extend .interface;
+		margin: 0;
+		background-color: #f2f2f2;
+		color: #666;
+		padding: $unit/2 $unit;
+	}
+	.type {
+		@include rounded;
+		@include display-box;
+		cursor: pointer;
+    padding: $unit/2 $unit;
+		background-color: #fbfbfb;
+		border: solid 1px #f2f2f2;
+		margin: $unit;
+		margin-bottom: 0;
+		&:hover {
+			background-color: #666;
+			color: #fff;
+		}
+		&.selected {
+			background-color: $action;
+			color: #fff;
+		}
+	}
+}

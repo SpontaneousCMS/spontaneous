@@ -8,6 +8,10 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 			this.box = box;
 			this.type = type;
 		},
+		title: function() {
+			console.log('title', this.box.name(), this.type)
+			return 'Add alias to &ldquo;' + this.box.name() + '&rdquo;';
+		},
 		buttons: function() {
 			var btns = {};
 			btns["Add"] = this.add_alias.bind(this);
@@ -23,12 +27,10 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 			}
 		},
 		alias_added: function(data) {
-			console.log('alias_added', data)
 			this.close();
 			this.box.update_pieces(data);
 		},
 		select_target: function(target) {
-			console.log('selected type', target);
 			this.target = target;
 		},
 		body: function() {
