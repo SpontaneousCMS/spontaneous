@@ -6,29 +6,53 @@ body {
 }
 
 #container {
-	width: 800px;
+	@include rounded;
+	background-color: rgba(0, 0, 0, 0.2);
+	width: 700px;
 	margin: 0 auto;
-	padding-top: 100px;
+	margin-top: 100px;
+	padding: $container-padding/2;
+
 
 	h1 {
 		font-size: 24px;
+		margin-top: 0;
 	}
 	.src {
 		color: #999;
 		font-size: 12px;
+		a {
+			color: #999;
+			&:hover, &:hover strong {
+				color: $highlight;
+			}
+		}
 	}
 	.actions {
+		@include rounded;
+		background-color: rgba(0, 0, 0, 0.2);
+		padding: $container-padding/2;
 		li:before {
 			content: "— ";
 		}
 		li {
-			margin-bottom: $unit/2;
+			margin-bottom: $unit;
+		}
+		li:last-child {
+			margin-bottom: 0;
 		}
 		a {
-			cursor: pointer;
 			color: $action;
-			font-weight: bold;
-			&:hover {
+			strong {
+				font-weight: bold;
+				// color: $highlight;
+			}
+			em {
+				// font-weight: bold;
+				font-style: normal;
+			}
+			cursor: pointer;
+			&:hover, &:hover strong {
 				color: $highlight;
 			}
 		}

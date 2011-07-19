@@ -217,6 +217,7 @@ module Spontaneous
           end
         end
 
+
         def category
           @source.category
         end

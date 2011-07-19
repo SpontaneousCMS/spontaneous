@@ -46,6 +46,12 @@ module Spontaneous
 
       desc :back, "Starts Spontaneous in back/CMS mode"
       def back
+        # HACK: see plugins/application/state.rb
+        # SPOT_GUI is used to turn off schema validation at boot time so that the
+        # modification errors can be resolved using the browser GUI rather than
+        # the console
+        # TODO: think through the use cases & formalise this
+        ENV["SPOT_GUI"] = "back"
         start_server(:back)
       end
 

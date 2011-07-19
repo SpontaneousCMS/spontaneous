@@ -16,12 +16,21 @@
   </head>
   <body id="spontaneous">
     <div id="container">
-    <h1>There are unresolvable changes to the schema type <strong>&lsquo;<%= actions[0].source.owner %>&rsquo;</strong></h1>
-    <p class="src"><%= actions[0].source.owner.__source_file %></p>
+      <%
+          types = actions.map { |a| a.source.owner}.uniq
+      %>
+
+    <h1>There are unresolved changes to <%= types.length > 1 ? "s" : "" %> <%= types.map { |o| "<strong>&lsquo;#{o}&rsquo;</strong>"}.join(', ')%></h1>
+    <p class="src"><a href="mvim://open?url=file://<%= actions[0].source.owner.__source_file %>"><%= actions[0].source.owner.__source_file %></a></p>
+
     <p>Please choose one of the following solutions:</p>
+
     <ul class="actions">
       <% actions.each do |action| %>
-        <li><a onclick="solution('<%= action.action %>', '<%= action.source.name %>', '<%= action.dest ? action.dest.name : '' %>')"><%= action.description %></a></li>
+        <li><a onclick="solution('<%= action.action %>', '<%= action.source.name %>', '<%= action.dest ? action.dest.name : '' %>')"><strong><%= action.action.capitalize %></strong> <%= action.category %> &lsquo;<em><%= action.source.name %></em>&rsquo; <% if action.dest %>
+          to &lsquo;<em><%= action.dest.name %></em>&rsquo;
+          <% end %>
+        </a></li>
       <% end %>
     </ul>
     </div>
