@@ -159,7 +159,7 @@ $radius: $corner-radius;
   display: inline-block;
   text-decoration: none;
 	@include button-color($background-color);
-  color: white;
+	color: white !important;
 }
 
 @mixin button-color($background-color: $action) {

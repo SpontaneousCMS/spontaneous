@@ -135,7 +135,8 @@ module Spontaneous
       end
 
       def rewrite!(target)
-        read_reference(target.schema_name)
+        target = target.schema_name if target.respond_to?(:schema_name)
+        read_reference(target)
         @target = nil
       end
 

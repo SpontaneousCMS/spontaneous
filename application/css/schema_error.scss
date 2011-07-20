@@ -3,6 +3,7 @@
 body {
 	background: url(/@spontaneous/static/texture.png) repeat;
 	color: #fff;
+	font-size: 16px;
 }
 
 #container {
@@ -28,18 +29,47 @@ body {
 			}
 		}
 	}
+	.changes {
+		font-size: 14px;
+		li:before {
+			content: "— ";
+		}
+	}
+
 	.actions {
 		@include rounded;
 		background-color: rgba(0, 0, 0, 0.2);
 		padding: $container-padding/2;
+		list-style-position: outside;
 		li:before {
-			content: "— ";
+			// content: "— ";
 		}
 		li {
 			margin-bottom: $unit;
+			form {
+				margin: 0;
+				padding: 0;
+			}
+			p {
+				margin: 0;
+				display: block;
+				margin-left: $container-padding/2;
+				padding: $unit;
+				padding-bottom: $container-padding/2;
+				.button {
+					width: 50px;
+				}
+				button {
+					border: none;
+				}
+			}
+
 		}
 		li:last-child {
 			margin-bottom: 0;
+			p {
+				margin-bottom: 0;
+			}
 		}
 		a {
 			color: $action;

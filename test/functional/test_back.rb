@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require 'test_helper'
+require 'tmpdir'
 
 # set :environment, :test
 
@@ -44,7 +45,7 @@ class BackTest < MiniTest::Spec
       instance = Spontaneous::Application::Instance.new(root, :test, :back)
       instance.stubs(:config).returns(config)
       Spontaneous.instance = instance
-      Spot::Schema.reset!
+      S::Schema.reset!
       Content.delete
       Spontaneous::Permissions::User.delete
       self.template_root = File.expand_path('../../fixtures/back/templates', __FILE__)
@@ -95,6 +96,8 @@ class BackTest < MiniTest::Spec
         end
       end
 
+
+
       @home = HomePage.new(:title => "Home")
       @project1 = Project.new(:title => "Project 1", :slug => "project1")
       @project2 = Project.new(:title => "Project 2", :slug => "project2")
@@ -124,6 +127,7 @@ class BackTest < MiniTest::Spec
 
     context "@spontaneous" do
       setup do
+        Spontaneous.stubs(:reload!)
       end
 
       should "return application page" do
@@ -278,6 +282,7 @@ class BackTest < MiniTest::Spec
 
     context "Visibility" do
       setup do
+        Spontaneous.stubs(:reload!)
         # @home = HomePage.new
         # @piece = Text.new
         # @home.in_progress << @piece
@@ -300,6 +305,7 @@ class BackTest < MiniTest::Spec
 
     context "preview" do
       setup do
+        Spontaneous.stubs(:reload!)
         @now = Time.now
         Time.stubs(:now).returns(@now)
       end
@@ -338,6 +344,9 @@ class BackTest < MiniTest::Spec
     end
 
     context "static files" do
+      setup do
+        Spontaneous.stubs(:reload!)
+      end
       should "work for site" do
         get "/test.html"
         assert last_response.ok?
@@ -359,8 +368,10 @@ class BackTest < MiniTest::Spec
       #   assert_equal File.read(@app_dir / 'static/favicon.ico'), last_response.body
       # end
     end
+
     context "media files" do
       setup do
+        Spontaneous.stubs(:reload!)
         Spontaneous.media_dir = File.join(File.dirname(__FILE__), "../fixtures/media")
       end
       teardown do
@@ -371,8 +382,10 @@ class BackTest < MiniTest::Spec
         last_response.content_type.should == "image/jpeg"
       end
     end
+
     context "file uploads" do
       setup do
+        Spontaneous.stubs(:reload!)
         @src_file = Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg")).realpath.to_s
         @upload_id = 9723
         Time.stubs(:now).returns(Time.at(1288882153))
@@ -427,12 +440,15 @@ class BackTest < MiniTest::Spec
       end
     end
     context "pieces" do
+      setup do
+        Spontaneous.stubs(:reload!)
+      end
       should "be addable" do
         current_count = @home.in_progress.pieces.length
         first_id = @home.in_progress.pieces.first.id
         @home.in_progress.pieces.first.class.name.should_not == "BackTest::Image"
         post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}"
-        assert last_response.ok?
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
         @home.in_progress.pieces.length.should == current_count+1
@@ -455,6 +471,9 @@ class BackTest < MiniTest::Spec
     end
 
     context "Page paths" do
+      setup do
+        Spontaneous.stubs(:reload!)
+      end
       should "be editable" do
         @project1.path.should == '/project1'
         post "/@spontaneous/slug/#{@project1.id}", 'slug' => 'howabout'
@@ -486,6 +505,7 @@ class BackTest < MiniTest::Spec
     end
     context "Request cache" do
       setup do
+        Spontaneous.stubs(:reload!)
         # @home = HomePage.new
         # @piece = Text.new
         # @home.in_progress << @piece
@@ -507,6 +527,7 @@ class BackTest < MiniTest::Spec
 
     context "Publishing" do
       setup do
+        Spontaneous.stubs(:reload!)
         @now = Time.now
         Time.stubs(:now).returns(@now)
         Change.delete
@@ -561,6 +582,7 @@ class BackTest < MiniTest::Spec
 
     context "New sites" do
       setup do
+        Spontaneous.stubs(:reload!)
         @root_class = Site.root.class
         Content.delete
         Change.delete
@@ -592,6 +614,7 @@ class BackTest < MiniTest::Spec
 
     context "Aliases" do
       setup do
+        Spontaneous.stubs(:reload!)
       end
 
       teardown do
@@ -611,7 +634,7 @@ class BackTest < MiniTest::Spec
       should "be able to add an alias to a box" do
         @home.featured_jobs.pieces.length.should == 0
         post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id
-        assert last_response.ok?
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
         @home.featured_jobs.pieces.length.should == 1
@@ -624,6 +647,75 @@ class BackTest < MiniTest::Spec
         }
         last_response.body.json.should == required_response.to_hash
       end
+    end
+
+    context "Schema conflicts" do
+      setup do
+        # enable schema validation errors by creating and using a permanent map file
+        @schema_map = File.join(Dir.tmpdir, "schema.yml")
+        FileUtils.rm(@schema_map) if File.exists?(@schema_map)
+        S::Schema.schema_map_file = @schema_map
+        S::Schema.validate!
+        S::Schema.write_schema
+        S::Schema.schema_loader_class = S::Schema::PersistentMap
+        S::Schema.reload!
+        Job.field :replaced
+        @df1 = Job.field_prototypes[:title]
+        @af1 = Job.field_prototypes[:replaced]
+        @f1  = Job.field_prototypes[:image]
+        @uid = @df1.schema_id.to_s
+        Job.stubs(:field_prototypes).returns({:replaced => @af1, :image => @f1})
+        Job.stubs(:fields).returns([@af1, @f1])
+        S::Schema.reload!
+        lambda { S::Schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
+        # hammer, meet nut
+        S::Rack::Back::EditingInterface.use Spontaneous::Rack::Reloader
+        Spontaneous::Loader.stubs(:reload!)
+      end
+
+      teardown do
+        S::Schema.schema_loader_class = S::Schema::TransientMap
+        FileUtils.rm(@schema_map) if File.exists?(@schema_map)
+      end
+
+      should "raise a 412 error" do
+        get '/@spontaneous/'
+        assert last_response.status == 412, "Schema validation errors should raise a 412 but instead recieved a #{last_response.status}"
+      end
+
+      should "present a dialogue page with possible solutions" do
+        get '/@spontaneous/'
+        assert last_response.status == 412, "Schema validation errors should raise a 412 but instead recieved a #{last_response.status}"
+        last_response.body.should =~ %r{<form action="/@spontaneous/schema/delete" method="post"}
+        last_response.body.should =~ %r{<input type="hidden" name="uid" value="#{@df1.schema_id}"}
+
+        last_response.body.should =~ %r{<form action="/@spontaneous/schema/rename" method="post"}
+        last_response.body.should =~ %r{<input type="hidden" name="ref" value="#{@af1.schema_name}"}
+      end
+
+      should "perform renames via a link" do
+        action ="/@spontaneous/schema/rename"
+        post action, "uid" => @df1.schema_id, "ref" => @af1.schema_name, "origin" => "/@spontaneous"
+        last_response.status.should == 302
+        begin
+          S::Schema.validate!
+        rescue Spontaneous::SchemaModificationError => e
+          flunk("Schema modification link should have resolved schema errors")
+        end
+      end
+
+      should "perform deletions via a link" do
+        action ="/@spontaneous/schema/delete"
+        post action, "uid" => @df1.schema_id, "origin" => "/@spontaneous"
+        last_response.status.should == 302
+        begin
+          S::Schema.validate!
+        rescue Spontaneous::SchemaModificationError => e
+          flunk("Schema modification link should have resolved schema errors")
+        end
+      end
+
+      should "redirect back to original page"
     end
   end
 end

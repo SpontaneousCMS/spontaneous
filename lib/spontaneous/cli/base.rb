@@ -267,6 +267,7 @@ module Spontaneous
       def fix_schema(error)
         modification = error.modification
         actions = modification.actions
+        p modification
         say(actions.description, :red)
         say("Please choose one of the solutions below", :yellow)
         actions.each_with_index do |a, i|
@@ -276,7 +277,7 @@ module Spontaneous
         if choice and choice <= actions.length and choice > 0
           action = actions[choice - 1]
           begin
-            Spontaneous::Schema.apply_fix(action)
+            Spontaneous::Schema.apply(action)
           rescue Spontaneous::SchemaModificationError => error
             fix_schema(error)
           end

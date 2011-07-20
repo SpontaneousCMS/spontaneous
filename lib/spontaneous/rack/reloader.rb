@@ -27,8 +27,8 @@ module Spontaneous
 
         @app.call(env)
       rescue Spontaneous::SchemaModificationError => error
-        template = Tilt::ERBTemplate.new(File.expand_path('../../../../application/views/schema_modification_error.html.erb', __FILE__))
-        html = template.render(error.modification)
+        template = Tilt::ErubisTemplate.new(File.expand_path('../../../../application/views/schema_modification_error.html.erb', __FILE__))
+        html = template.render(error.modification, :env => env)
         [412, {'Content-type' => ::Rack::Mime.mime_type('.html')}, StringIO.new(html)].tap do |response|
         p response
         end
