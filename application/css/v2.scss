@@ -866,19 +866,25 @@ img.missing {
 				padding-top: 8px;
 			}
 			.entry-wrap.depth-2 {
-				padding: $unit/2 $unit/2;
-				padding-top: $title-bar-height + ($unit/2);
+				// padding-top: $title-bar-height + ($unit/2);
 				margin-left: $unit;
 				margin-right: $unit;
 				margin-bottom: $unit;
 				.white-bg {
-					@include rounded;
+          @include rounded(0 0 $radius $radius);
 					width: auto;
 					right: 0;
 				}
 				.grey-bg {
 					display: none;
 				}
+        .entry-contents {
+          // padding: $unit/2 $unit/2;
+          // padding: 0;
+        }
+        .entry-spacer {
+          height: $unit;
+        }
 				.entry {
 					@include rounded;
 					width: 100%;
@@ -889,9 +895,11 @@ img.missing {
 						// background-color: white;
 						// border-color: white;
 						width: 100%;
+            display: block;
 						.fields-preview-text {
 							width: 100%;
 							margin-bottom: 0;
+
 						}
 						.fields-preview-image {
 							float: none;
@@ -922,6 +930,31 @@ img.missing {
         margin-right: $unit;
       }
     }
+    &.no-boxes {
+      .white-bg {
+        @include rounded(0 0 $radius $radius);
+        right: 0;
+      }
+      .grey-bg {
+        display: none;
+      }
+      .entry {
+        // @include box-flex;
+        width: 100%;
+        .fields-preview {
+          @include display-box;
+          .fields-preview-text {
+            @include box-flex;
+            width: 60%;
+            padding-right: 0;
+          }
+          .fields-preview-image {
+            @include box-flex;
+            width: 40%;
+          }
+        }
+      }
+    }
 	}
 	.entry-wrap.hidden {
 		opacity: 0.4;
@@ -950,7 +983,7 @@ img.missing {
 	.entry-wrap.ui-sortable-helper .entry-contents {
 		@extend .shadow;
 	}
-	.entry-wrap.depth-1 .entry {
+	.entry-wrap.boxes.depth-1 .entry {
 		width: 60%;
 		.fields-preview.depth-1 {
 			.fields-preview-text {

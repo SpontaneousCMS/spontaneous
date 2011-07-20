@@ -148,6 +148,10 @@ Spontaneous.Content = (function($, S) {
 			return _boxes;
 		}.cache(),
 
+		has_boxes: function() {
+			return (this.boxes().length > 0)
+		},
+
 		wrap_entry: function(entry) {
 			var entry_class = Spontaneous.Entry;
 			if (entry.is_page) {
@@ -166,8 +170,12 @@ Spontaneous.Content = (function($, S) {
 		depth_class: function() {
 			return 'depth-'+this.depth();
 		},
+
 		visibility_class: function() {
 			return this.content.hidden ? 'hidden' : 'visible';
+		},
+		boxes_class: function() {
+			return this.has_boxes() ? 'boxes' : 'no-boxes';
 		},
 
 

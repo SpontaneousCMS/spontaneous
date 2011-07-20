@@ -46,7 +46,7 @@ Spontaneous.Entry = (function($, S) {
 			// console.log('FacetEntry#new', content, content.depth);
 		},
 		panel: function() {
-			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class()])
+			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class(), this.boxes_class()])
 			var contents = dom.div('.entry-contents');
 			// $(dom.div, {'class':['entry-wrap ', this.depth_class(), this.visibility_class()].join(' ')});
 			var inside = dom.div('.entry-inner');
