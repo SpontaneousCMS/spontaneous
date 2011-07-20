@@ -1,0 +1,90 @@
+@import "definitions";
+
+body {
+	background: url(/@spontaneous/static/texture.png) repeat;
+	color: #fff;
+	font-size: 16px;
+}
+
+#container {
+	@include rounded;
+	background-color: rgba(0, 0, 0, 0.2);
+	width: 700px;
+	margin: 0 auto;
+	margin-top: 100px;
+	padding: $container-padding/2;
+
+
+	h1 {
+		font-size: 24px;
+		margin-top: 0;
+	}
+	.src {
+		color: #999;
+		font-size: 12px;
+		a {
+			color: #999;
+			&:hover, &:hover strong {
+				color: $highlight;
+			}
+		}
+	}
+	.changes {
+		font-size: 14px;
+		li:before {
+			content: "— ";
+		}
+	}
+
+	.actions {
+		@include rounded;
+		background-color: rgba(0, 0, 0, 0.2);
+		padding: $container-padding/2;
+		list-style-position: outside;
+		li:before {
+			// content: "— ";
+		}
+		li {
+			margin-bottom: $unit;
+			form {
+				margin: 0;
+				padding: 0;
+			}
+			p {
+				margin: 0;
+				display: block;
+				margin-left: $container-padding/2;
+				padding: $unit;
+				padding-bottom: $container-padding/2;
+				.button {
+					width: 50px;
+				}
+				button {
+					border: none;
+				}
+			}
+
+		}
+		li:last-child {
+			margin-bottom: 0;
+			p {
+				margin-bottom: 0;
+			}
+		}
+		a {
+			color: $action;
+			strong {
+				font-weight: bold;
+				// color: $highlight;
+			}
+			em {
+				// font-weight: bold;
+				font-style: normal;
+			}
+			cursor: pointer;
+			&:hover, &:hover strong {
+				color: $highlight;
+			}
+		}
+	}
+}

@@ -785,7 +785,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by deleting field from schema" do
             action = @modification.actions[0]
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Deletion of field should have resolved schema error")
             end
@@ -797,7 +797,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by renaming field 'a'" do
             action = @modification.actions[1]
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Renaming of field should have resolved schema error")
             end
@@ -808,7 +808,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by renaming field 'b'" do
             action = @modification.actions[2]
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Renaming of field should have resolved schema error")
             end
@@ -870,7 +870,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by deleting both fields" do
             action = @modification.actions[0]
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
               flunk("Deletion of field should not have resolved schema error")
             rescue Spontaneous::SchemaModificationError => e
               modification = e.modification
@@ -878,7 +878,7 @@ class SchemaTest < MiniTest::Spec
             action = modification.actions[0]
 
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Deletion of field should have resolved schema error")
             end
@@ -890,7 +890,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by deleting one field and renaming other as 'a'" do
             action = @modification.actions[0]
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
               flunk("Deletion of field should not have resolved schema error")
             rescue Spontaneous::SchemaModificationError => e
               modification = e.modification
@@ -898,7 +898,7 @@ class SchemaTest < MiniTest::Spec
             action = modification.actions[1]
 
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Deletion of field should have resolved schema error")
             end
@@ -911,7 +911,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by renaming one field as 'c' and deleting other" do
             action = @modification.actions[3]
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
               flunk("Renaming of field should not have resolved schema error")
             rescue Spontaneous::SchemaModificationError => e
               modification = e.modification
@@ -919,7 +919,7 @@ class SchemaTest < MiniTest::Spec
             action = modification.actions[0]
 
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Deletion of field should have resolved schema error")
             end
@@ -932,7 +932,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by renaming one field as 'c' and renaming other as 'b'" do
             action = @modification.actions[3]
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
               flunk("Renaming of field should not have resolved schema error")
             rescue Spontaneous::SchemaModificationError => e
               modification = e.modification
@@ -940,7 +940,7 @@ class SchemaTest < MiniTest::Spec
             action = modification.actions[2]
 
             begin
-              S::Schema.apply_fix(action)
+              S::Schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Deletion of field should have resolved schema error")
             end
@@ -950,7 +950,57 @@ class SchemaTest < MiniTest::Spec
             m[@uid1].should == @af3.schema_name
             m[@uid2].should == @af2.schema_name
           end
+
+          context "and two boxes removed" do
+            setup do
+              @db1 = A.boxes[:posts]
+              A.box :added1
+              A.box :added2
+              @ab1 =  A.boxes[:added1]
+              @ab2 =  A.boxes[:added2]
+              boxes = S::Collections::PrototypeSet.new
+              boxes[:added1] = @ab1
+              boxes[:added2] = @ab2
+              A.stubs(:box_prototypes).returns(boxes)
+              classes = S::Schema.classes.dup
+              classes.delete(A::PostsBox)
+              S::Schema.stubs(:classes).returns(classes)
+              S::Schema.reload!
+              begin
+                S::Schema.validate!
+                flunk("Validation should raise error when adding & deleting fields")
+              rescue Spontaneous::SchemaModificationError => e
+                @modification = e.modification
+              end
+            end
+            should "enable fixing by deleting both fields and renaming a box" do
+              action = @modification.actions[0]
+              begin
+                S::Schema.apply(action)
+                flunk("Deleting of field should not have resolved schema error")
+              rescue Spontaneous::SchemaModificationError => e
+                modification = e.modification
+              end
+              action = modification.actions[0]
+
+              begin
+                S::Schema.apply(action)
+                flunk("Deleting of field should not have resolved schema error")
+              rescue Spontaneous::SchemaModificationError => e
+                modification = e.modification
+              end
+              action = modification.actions[1]
+
+              begin
+                S::Schema.apply(action)
+              rescue Spontaneous::SchemaModificationError => e
+                flunk("Schema changes should have resolved error")
+              end
+              # p modification.actions
+            end
+          end
         end
+
 
       end
     end

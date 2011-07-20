@@ -128,15 +128,17 @@ module Spontaneous
         end
       end
 
-      def apply_fix(action)
-        case action.action
+      def apply(action)
+        apply_fix(action.action, action.source, action.dest)
+      end
+
+      def apply_fix(action, source, dest=nil)
+        uid = S::Schema::UID[source]
+        case action
         when :delete
-          uid = action.source
           uid.destroy
         when :rename
-          uid = action.source
-          dest = action.dest
-          uid.rewrite!(action.dest)
+          uid.rewrite!(dest)
         end
         write_schema
         reload!
@@ -144,7 +146,7 @@ module Spontaneous
       end
 
       def generate_new_schema
-        logger.info("Generating new schema map at #{Spontaneous.schema_map}")
+        logger.info("Generating new schema map at #{schema_map_file}")
         self.schema_loader_class = TransientMap
         classes.each do | schema_class |
           generate_schema_for(schema_class)
@@ -154,7 +156,7 @@ module Spontaneous
       end
 
       def write_schema
-        File.atomic_write(Spontaneous.schema_map) do |file|
+        File.atomic_write(schema_map_file) do |file|
           file.write(UID.to_hash.to_yaml)
         end
       end

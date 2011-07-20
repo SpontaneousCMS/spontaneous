@@ -57,6 +57,7 @@ module Spontaneous
         prepare :publish
         # TODO: set up logging
         boot!
+        Site.publishing_method = :immediate
         Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
         logger.info { "publishing revision #{Site.revision} of site #{options.site}" }
         if options.changes
@@ -77,9 +78,9 @@ module Spontaneous
 
       desc :console, "Gives you console access to the current site"
       def console
+        ENV["SPOT_MODE"] = "console"
         prepare :console
         ARGV.clear
-        puts "=> Loading #{options.environment} console"
         require 'irb'
         boot!
         IRB.setup(nil)
@@ -266,6 +267,7 @@ module Spontaneous
       def fix_schema(error)
         modification = error.modification
         actions = modification.actions
+        p modification
         say(actions.description, :red)
         say("Please choose one of the solutions below", :yellow)
         actions.each_with_index do |a, i|
@@ -275,7 +277,7 @@ module Spontaneous
         if choice and choice <= actions.length and choice > 0
           action = actions[choice - 1]
           begin
-            Spontaneous::Schema.apply_fix(action)
+            Spontaneous::Schema.apply(action)
           rescue Spontaneous::SchemaModificationError => error
             fix_schema(error)
           end

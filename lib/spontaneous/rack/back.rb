@@ -34,12 +34,6 @@ module Spontaneous
 
           def load_user
             Spontaneous::Permissions.active_user
-            # api_key = request.cookies[AUTH_COOKIE]
-            # if api_key && key = Spontaneous::Permissions::AccessKey.authenticate(api_key)
-            #   key.user
-            # else
-            #   nil
-            # end
           end
         end
 
@@ -63,11 +57,8 @@ module Spontaneous
         def requires_authentication!(options = {})
           exceptions = (options[:except] || []).push("#{NAMESPACE}/login" )
           before do
-            # puts "AUTH: path:#{request.path} user:#{user.inspect}"
-            # p exceptions.detect { |e| e === request.path }
             unless exceptions.detect { |e| e === request.path }
               unless user
-                # halt(401, erubis(:login)) unless user
                 halt(401, erubis(:login, :locals => { :login => '' })) unless user
               end
             end
@@ -79,7 +70,6 @@ module Spontaneous
 
       def self.application
         app = ::Rack::Builder.new do
-          # use ::Rack::CommonLogger, STDERR  if Spontaneous.development?
           use ::Rack::Lint
           use ::Rack::ShowExceptions if Spontaneous.development?
 
@@ -87,13 +77,12 @@ module Spontaneous
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
 
-          # map "#{NAMESPACE}/static" do
-          # use Spontaneous::Rack::Static, :root => Spontaneous.application_dir / "static",
-          #   :urls => %w[/]
-          # end
 
           map NAMESPACE do
             use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static /js)
+            use AssetsHandler
+            use UnsupportedBrowserHandler
+            use SchemaModification
             run EditingInterface
           end
 
@@ -107,13 +96,45 @@ module Spontaneous
         end
       end
 
-      class EditingInterface < ServerBase
-        use Reloader if Spontaneous.config.reload_classes
-        # use ::Rack::Reloader if Spontaneous::Config.reload_classes
+      class EditingBase < ServerBase
+        set :views, Proc.new { Spontaneous.application_dir + '/views' }
+      end
+
+      class UnsupportedBrowserHandler < EditingBase
+        get '/unsupported' do
+          erubis :unsupported
+        end
+      end
+
+      class AuthenticatedHandler < EditingBase
+
         use AroundBack
         register Authentication
+        requires_authentication! :except => %w(unsupported).map{ |p| %r(^#{NAMESPACE}/#{p}) }
+      end
 
-        requires_authentication! :except => %w(unsupported static css js).map{ |p| %r(^#{NAMESPACE}/#{p}) }
+      class SchemaModification < AuthenticatedHandler
+
+        post "/schema/delete" do
+          begin
+            Spontaneous::Schema.apply_fix(:delete, params[:uid])
+          rescue Spot::SchemaModificationError # ignore remaining errors - they will be fixed later
+          end
+          redirect(params[:origin])
+        end
+
+        post "/schema/rename" do
+          begin
+            Spontaneous::Schema.apply_fix(:rename, params[:uid], params[:ref])
+          rescue Spot::SchemaModificationError # ignore remaining errors - they will be fixed later
+          end
+          redirect(params[:origin])
+        end
+
+      end
+
+      class EditingInterface < AuthenticatedHandler
+        use Reloader if Spontaneous.config.reload_classes
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
@@ -167,10 +188,6 @@ module Spontaneous
 
         get '/?' do
           erubis :index
-        end
-
-        get '/unsupported' do
-          erubis :unsupported
         end
 
         get '/root' do
@@ -424,6 +441,14 @@ module Spontaneous
         #   send_file(Spontaneous.static_dir / "favicon.ico")
         # end
 
+
+      end # EditingInterface
+
+
+
+      # Assets are separata from the main editing handlers so that I can still access them
+      # in the case of a Schema modification error
+      class AssetsHandler < ::Sinatra::Base
         get '/static/*' do
           send_file(Spontaneous.static_dir / params[:splat].first)
         end
@@ -454,8 +479,7 @@ module Spontaneous
             send_file(Spontaneous.css_dir / file)
           end
         end
-
-      end # EditingInterface
+      end
 
       class Preview < Spontaneous::Rack::Public
         HTTP_EXPIRES = "Expires".freeze

@@ -16,7 +16,7 @@ module Spontaneous::Plugins::Application
         Spontaneous::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
         Spontaneous.instance = Spontaneous::Application::Instance.new(root, environment, mode)
         Spontaneous.instance.initialize!
-        Spontaneous::Schema.validate!
+        Spontaneous::Schema.validate! if self.mode == :console
         Thread.current[:spontaneous_loaded] = true
       end
 

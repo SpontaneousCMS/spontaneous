@@ -217,8 +217,21 @@ module Spontaneous
           end
         end
 
+
         def category
           @source.category
+        end
+
+        def to_hash
+          hash = [@action.to_s, category, source.name]
+          hash << dest.name if dest
+          hash
+        end
+
+        def path
+          path = ["#{action}?uid=#{source.to_s}"]
+          path << "ref=#{::Rack::Utils.escape(dest.schema_name)}" if action == :rename
+          path.join("&amp;")
         end
       end
 
@@ -230,9 +243,16 @@ module Spontaneous
             Solution.new(removed_items.first, added_items)
           end
         else
-          change = changes_grouped_by_owner.first { |c| !c.simple_change? }
+          change = changes_grouped_by_owner.find { |c| !c.simple_change? }
           change.actions
         end
+      end
+
+      def to_hash
+        actions.map { |action| action.to_hash }
+      end
+      def to_json
+        to_hash.to_json
       end
     end
   end
