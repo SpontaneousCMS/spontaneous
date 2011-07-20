@@ -93,14 +93,18 @@ Spontaneous.EditPanel = (function($, S) {
 				var field = text_fields[i];
 				text_field_wrap.append(this.field_edit(field));
 			}
-			outer.append(text_field_wrap);
+			if (text_fields.length > 0) {
+				outer.append(text_field_wrap);
+			}
 			var image_fields = this.content.image_fields();
 
 			for (var i = 0, ii = image_fields.length; i < ii; i++) {
 				var field = image_fields[i];
 				image_field_wrap.append(this.field_edit(field));
 			}
-			outer.append(image_field_wrap);
+			if (image_fields.length > 0) {
+				outer.append(image_field_wrap);
+			}
 			outer.append(submit);
 			editing.append(outer);
 			editing.append(dom.div('.clear'));

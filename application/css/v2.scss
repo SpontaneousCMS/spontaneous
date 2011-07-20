@@ -361,6 +361,9 @@ img.missing {
 	// border: dotted 1px $action;
 }
 .fields-preview-text {
+  &.empty {
+    display: none;
+  }
 	@include box-sizing;
 	width: $field-text-preview-width;
 	float: left;
@@ -429,6 +432,9 @@ img.missing {
 }
 
 .fields-preview-image {
+  &.empty {
+    display: none;
+  }
 	@extend .clearfix;
 	float: left;
 	width: $field-image-preview-width;
@@ -471,7 +477,7 @@ img.missing {
       }
 			.image-drop {
 				@include rounded;
-				z-index: 2;
+				z-index: 100;
 				position: absolute;
 				top: 0;
 				right: 0;
@@ -853,14 +859,16 @@ img.missing {
 				border: none;
 				background: none;
 				background-color: #565656;
-				height: 31px;
-				padding: 5px 8px 0 8px;
+				height: 33px;
+				padding: $unit 8px 0 8px;
 				a {
 					@include button(#6b6b6b);
 					// background-color: #6b6b6b;
 					padding-left: 8px;
 					padding-right: 8px;
-
+          & + a {
+            margin-left: $unit;
+          }
 				}
         .alias {
           font-style: italic;
@@ -967,7 +975,7 @@ img.missing {
     }
 	}
 	.entry-wrap.hidden {
-		opacity: 0.4;
+		opacity: 0.4 !important;
 	}
   .entry-wrap.page {
     .white-bg {

@@ -33,6 +33,7 @@ Spontaneous.FieldPreview = (function($, S) {
 		},
 		fields_panel: function(fields, type) {
 			var wrapper = dom.ul('.fields-preview-'+type), __this = this;
+			if (fields.length === 0) { wrapper.addClass('empty'); }
 			$.each(fields, function(i, field) {
 				var li = dom.li();
 				var name = dom.div('.name').text(field.title);
