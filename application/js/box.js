@@ -186,11 +186,13 @@ Spontaneous.Box = (function($, S) {
 			var div = entry.panel();
 			return div.attr('id', this.entry_id(entry)).addClass(this.entry_class());
 		},
+
 		entry_id: function(entry) {
 			return "entry-" + entry.id();
 		},
+
 		entry_class: function() {
-			return 'container-'+this.id();
+			return 'container-'+this.schema_id();
 		},
 
 		add_content: function(content_type, position) {
@@ -203,7 +205,7 @@ Spontaneous.Box = (function($, S) {
 		},
 
 		add_entry: function(type, position, callback) {
-			Spontaneous.Ajax.post(['/add', this.container.id(), this.id(), type.schema_id].join('/'), {}, this, this.update_pieces);
+			Spontaneous.Ajax.post(['/add', this.id(), type.schema_id].join('/'), {}, this, this.update_pieces);
 		},
 
 		save_path: function() {
