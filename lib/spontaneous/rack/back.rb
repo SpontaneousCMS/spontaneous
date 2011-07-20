@@ -57,11 +57,8 @@ module Spontaneous
         def requires_authentication!(options = {})
           exceptions = (options[:except] || []).push("#{NAMESPACE}/login" )
           before do
-            # puts "AUTH: path:#{request.path} user:#{user.inspect}"
-            # p exceptions.detect { |e| e === request.path }
             unless exceptions.detect { |e| e === request.path }
               unless user
-                # halt(401, erubis(:login)) unless user
                 halt(401, erubis(:login, :locals => { :login => '' })) unless user
               end
             end
