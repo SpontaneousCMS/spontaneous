@@ -128,7 +128,7 @@ Spontaneous.EditPanel = (function($, S) {
 			return this.form;
 		},
 		on_show: function(focus_field) {
-			if (!(focus_field['focus']) || !focus_field.accepts_focus) { focus_field = null; }
+			if (!focus_field || !(focus_field['focus']) || !focus_field.accepts_focus) { focus_field = null; }
 			var focus_field = focus_field || this.content.text_fields()[0];
 			if (focus_field) {
 				focus_field.focus();
