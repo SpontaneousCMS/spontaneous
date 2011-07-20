@@ -12,6 +12,7 @@ module Spontaneous
     plugin Plugins::Render
     plugin Plugins::AllowedTypes
     plugin Plugins::Permissions
+    plugin Plugins::Media
 
     # use underscores to protect against field name conflicts
     attr_reader :_name, :_prototype, :_owner
@@ -63,6 +64,9 @@ module Spontaneous
     end
 
 
+    def media_id
+      "#{_owner.id}/#{schema_id}"
+    end
 
     def box_name
       _name

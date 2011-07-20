@@ -287,11 +287,27 @@ module Spontaneous
           json({ :id => params[:id], :src => Spontaneous::Media.to_urlpath(media_file), :path => media_file})
         end
 
+
+        # TODO: DRY this up
         post '/file/replace/:id' do
-          content = content_for_request
+          target = content_for_request
           file = params['file']
-          field = content.fields.sid(params['field'])
-          if content.field_writable?(field.name)
+          field = target.fields.sid(params['field'])
+          if target.field_writable?(field.name)
+            field.unprocessed_value = file
+            target.save
+            json({ :id => target.id, :src => field.src})
+          else
+            unauthorised!
+          end
+        end
+
+        post '/file/replace/:id/:box_id' do
+          content, box = content_for_request
+          target = box || content
+          file = params['file']
+          field = target.fields.sid(params['field'])
+          if target.field_writable?(field.name)
             field.unprocessed_value = file
             content.save
             json({ :id => content.id, :src => field.src})

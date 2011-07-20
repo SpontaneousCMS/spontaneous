@@ -45,6 +45,9 @@ class BackTest < MiniTest::Spec
       instance = Spontaneous::Application::Instance.new(root, :test, :back)
       instance.stubs(:config).returns(config)
       Spontaneous.instance = instance
+      app.send(:set, :raise_errors, true)
+      app.send(:set, :dump_errors, true)
+      app.send(:set, :show_exceptions, true)
       S::Schema.reset!
       Content.delete
       Spontaneous::Permissions::User.delete
@@ -74,6 +77,7 @@ class BackTest < MiniTest::Spec
 
         box :images do
           field :title
+          field :image
           allow Image
         end
       end
@@ -413,6 +417,24 @@ class BackTest < MiniTest::Spec
         src.should =~ /^\/media(.+)\/rose\.jpg$/
         last_response.body.should == {
           :id => @image1.id,
+          :src => src
+        }.to_json
+        File.exist?(Media.to_filepath(src)).should be_true
+        get src
+        assert last_response.ok?
+      end
+
+      should "replace values of box file fields" do
+        @job1.images.image.processed_value.should == ""
+        post "@spontaneous/file/replace/#{@job1.id}/#{@job1.images.schema_id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => @job1.images.image.schema_id.to_s
+        puts last_response.body
+        assert last_response.ok?
+        last_response.content_type.should == "application/json;charset=utf-8"
+        @job1 = Content[@job1.id]
+        src = @job1.images.image.src
+        src.should =~ /^\/media(.+)\/rose\.jpg$/
+        last_response.body.should == {
+          :id => @job1.id,
           :src => src
         }.to_json
         File.exist?(Media.to_filepath(src)).should be_true

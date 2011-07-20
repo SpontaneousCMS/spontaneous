@@ -26,6 +26,10 @@ Spontaneous.Box = (function($, S) {
 			return this._type;
 		},
 
+		id: function() {
+			return this.container.id() + "/" + this.schema_id();
+		},
+
 		schema_id: function() {
 			return this.type().data.id;
 		},
@@ -203,7 +207,7 @@ Spontaneous.Box = (function($, S) {
 		},
 
 		save_path: function() {
-			return ['/savebox', this.container.id(), this.id()].join('/');
+			return ['/savebox', this.id()].join('/');
 		},
 		insert_entry: function(entry, position) {
 			var w = this.entry_wrappers(), e = this.claim_entry(entry), h;

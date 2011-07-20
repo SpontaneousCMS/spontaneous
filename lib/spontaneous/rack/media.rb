@@ -7,7 +7,12 @@ module Spontaneous
       # set :public, Proc.new { Spontaneous.root / "public" }
 
       get '*' do
-        send_file(Spontaneous.media_dir / params[:splat].first)
+        media_file = (Spontaneous.media_dir / params[:splat].first)
+        if File.exists?(media_file)
+          send_file(media_file)
+        else
+          redirect("/@spontaneous/static/missing.png")
+        end
       end
     end
   end

@@ -15,8 +15,12 @@ module Spontaneous::Plugins
       end
 
       def padded_id
-        save if id.nil?
-        id.to_s.rjust(5, "0")
+        save if media_id.nil?
+        media_id.to_s.rjust(5, "0")
+      end
+
+      def media_id
+        id
       end
 
       def padded_revision

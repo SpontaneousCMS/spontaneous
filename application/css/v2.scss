@@ -44,6 +44,7 @@ img.missing {
 	height: 50px;
 	background: url("/@spontaneous/static/missing.png") 50% 50% no-repeat;
 	border: none;
+  // display: none;
 }
 
 .clear {
@@ -573,6 +574,7 @@ img.missing {
 	.fields-preview.depth-box {
 		@extend .container-padding;
 		@include vertical-gradient(#eeeeee, #dddddd);
+    @include display-box;
     position:relative;
 		padding-top: 12px;
 		padding-bottom: 5px;
@@ -598,6 +600,14 @@ img.missing {
 		.value {
 			color: #555555;
 		}
+    .fields-preview-text {
+      @include box-flex;
+      width: 60%;
+    }
+    .fields-preview-image {
+      @include box-flex;
+      width: 40%;
+    }
 	}
 	.slot-addable {
 		@extend .container-padding;
