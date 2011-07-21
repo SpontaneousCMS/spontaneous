@@ -217,7 +217,9 @@ $radius: $corner-radius;
 
 .button .key-combo {
   opacity: 0.5;
+	margin-left: $unit/2;
 }
+
 .button.cancel {
   @include button-color(#6b6b6b);
 }

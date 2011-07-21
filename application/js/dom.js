@@ -12,6 +12,15 @@ Spontaneous.Dom = (function($, S) {
 		px: function(dim) {
 			return dim + 'px';
 		},
+		cmd_key_label: function(text, key) {
+			var cmd = ((window.navigator.platform.indexOf("Mac") === 0) ? "Cmd" : "Ctrl");
+			// var alt =  '<span class="key-combo">(' + cmd  + "+"+key+')</span>';
+			return this.key_label(text, cmd  + "+" +key);
+		},
+		key_label: function(text, key) {
+			var alt =  '<span class="key-combo">('+key+')</span>';
+			return text + " " + alt;
+		},
 		parse_selector: function(selector) {
 			var p, id = '', classes = [], result = {};
 			selector = selector || '';

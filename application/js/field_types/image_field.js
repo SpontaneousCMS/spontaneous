@@ -212,8 +212,8 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			var actions = dom.div('.actions');
 			var attr = this.data.attributes.original;
 			// var change = $(dom.a, {'class':'button change'}).text('Change').click(onclick);
-			var clear = dom.a('.button.clear').text('Clear');
-			actions.append(input).append(clear);
+			// var clear = dom.a('.button.clear').text('Clear');
+			actions.append(input)//.append(clear);
 			wrap.append(dropper);
 
 

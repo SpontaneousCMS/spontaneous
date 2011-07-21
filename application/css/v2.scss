@@ -391,9 +391,11 @@ img.missing {
 	}
 	.name {
 		@extend .preview-label;
+    @include box-sizing;
 		width: 100px;
 		right: 100px;
 		margin-left: -100px;
+    padding-right: $unit;
 	}
 	.value {
 		@extend .preview-value;
