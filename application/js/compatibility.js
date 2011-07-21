@@ -76,6 +76,23 @@ try {
 				}
 				// throw "File API not supported";
 			}
+			if (window.revokeBlobURL) {
+				window.URL.createObjectURL = function(file) {
+					return window.revokeBlobURL(file);
+				};
+			} else if (window.revokeObjectURL) {
+				window.URL.revokeObjectURL = function(file) {
+					return window.revokeObjectURL(file);
+				};
+			} else {
+				//// Dont fail this because it's not absolutely essential
+				//// & fails iOS devices (though that might be a good thing in some ways, it
+				//// would seriously limit users ability to make quick changes on the go, for instance)
+				window.URL.createObjectURL = function(file) {
+					return '';
+				}
+				// throw "File API not supported";
+			}
 		}
 	}
 
