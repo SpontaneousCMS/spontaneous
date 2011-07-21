@@ -111,7 +111,6 @@ Spontaneous.Require = {
 		this.progress(event.position);
 	},
 	onreadystatechange: function(event) {
-		console.log(this)
 		var xhr = event.currentTarget;
 		if (xhr.readyState == 4 && xhr.status === 200) {
 			var body = document.body;

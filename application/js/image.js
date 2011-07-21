@@ -65,7 +65,6 @@ Spontaneous.Image = (function($, S) {
 			return this.height() > this.width();
 		},
 		is_empty: function() {
-			console.log(this.field.attributes.original, !this.field.attributes.original);
 			return !this.field.attributes.original;
 		}
 	});

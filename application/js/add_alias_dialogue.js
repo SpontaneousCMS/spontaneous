@@ -4,12 +4,10 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 
 	var AddAliasDialogue = new JS.Class(Dialogue, {
 		initialize: function(box, type) {
-			console.log(type);
 			this.box = box;
 			this.type = type;
 		},
 		title: function() {
-			console.log('title', this.box.name(), this.type)
 			return 'Add alias to &ldquo;' + this.box.name() + '&rdquo;';
 		},
 		buttons: function() {
@@ -43,11 +41,9 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 			return editing;
 		},
 		targets_loaded: function(targets) {
-			console.log('targets loaded', targets)
 			var outer = this._outer, __dialogue = this;
 			this.targets = targets;
 			$.each(targets, function(i, target) {
-				console.log('target', target)
 				var d = dom.div('.type').text(target.title).click(function() {
 					$('.type', outer).removeClass('selected');
 					__dialogue.select_target(target);

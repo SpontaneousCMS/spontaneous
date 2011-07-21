@@ -13,10 +13,8 @@ Spontaneous.PageBrowser = (function($, S) {
 				this.selected = false;
 				this.origin = '/';
 			}
-			console.log('!!!', [origin])
 			this.page_list = this.origin_list();
 			this.ancestor_list = this.origin_ancestors();
-			console.log('PageBrowser for', [this.origin]);
 
 		},
 		origin_list: function() {
@@ -41,7 +39,6 @@ Spontaneous.PageBrowser = (function($, S) {
 		},
 		get_page_list: function() {
 			var path;
-			console.log(typeof origin);
 			if (typeof this.origin === 'string') {
 				path = '/location' + this.origin;
 			} else {
@@ -62,7 +59,6 @@ Spontaneous.PageBrowser = (function($, S) {
 		page_list_loaded: function(page_list, status) {
 			if (status === 'success') {
 				this.table.empty();
-				console.log(status, page_list)
 				this.location = page_list;
 				this.manager.page_list_loaded(this);
 				var g = this.page_list(this.location), table = this.table;
@@ -117,7 +113,6 @@ Spontaneous.PageBrowser = (function($, S) {
 			return row;
 		},
 		ancestor_selected: function(page) {
-			console.log('ancestor', page, page.path);
 			this.page_list = this.origin_list();
 			this.ancestor_list = this.origin_ancestors();
 			this.origin = page;

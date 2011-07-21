@@ -76,9 +76,8 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				if (files.length > 0) {
 					var file = files[0], url = window.URL.createObjectURL(file);
 					this.image.attr('src', url)
-					console.log('revoking url')
+					// see http://www.htmlfivewow.com/slide25
 					window.URL.revokeObjectURL(url);
-					console.log(this.id())
 					S.UploadManager.replace(this, file);
 				}
 				return false;

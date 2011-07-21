@@ -79,7 +79,7 @@ Spontaneous.Location = (function($, S) {
 		load_map: function() {
 		},
 		location_loaded: function(location, status, xhr) {
-			console.log(status)
+			// console.log(status)
 			if (status !== 'success') {
 				if (xhr.status === 406) { // Code returned if site is missing a root page
 					var d = new Spontaneous.AddHomeDialogue(Spontaneous.Types.get('types'));

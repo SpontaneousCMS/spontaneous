@@ -134,7 +134,7 @@ Spontaneous.TopBar = (function($, S) {
 		update_status: function(status) {
 			if (status === null || status === '') { return; }
 			var action = status.status, progress = status.progress
-			console.log('status', status, this.in_progress, this.current_action, this.current_progress)
+			// console.log('status', status, this.in_progress, this.current_action, this.current_progress)
 			if (this.in_progress && (action == this.current_action && progress == this.current_progress)) { return; }
 			this.current_action = action;
 			this.current_progress = progress;

@@ -40,7 +40,6 @@ Spontaneous.Publishing = (function($, S) {
 
 
 		publish_requested: function() {
-			console.log('publish requested')
 			Spontaneous.TopBar.publishing_started();
 			this.close();
 		},

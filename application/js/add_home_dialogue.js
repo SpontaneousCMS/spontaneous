@@ -23,16 +23,13 @@ Spontaneous.AddHomeDialogue = (function($, S) {
 		},
 		create_home: function() {
 			if (this.type) {
-				console.log('creating homepage', this.type)
 				S.Ajax.post('/root', {'type':this.type.schema_id}, this, this.home_created);
 			}
 		},
 		home_created: function(data) {
-			console.log('home created', data);
 			window.location.href = S.Ajax.namespace
 		},
 		select_type: function(type) {
-			console.log('selected type', type);
 			this.type = type;
 		},
 		body: function() {

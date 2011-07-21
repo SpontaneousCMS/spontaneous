@@ -176,11 +176,10 @@ Spontaneous.Box = (function($, S) {
 			// console.log('Slot.sorted', entry);
 		},
 		upload_complete: function(values) {
-			console.log('Box.upload_complete', values);
 			this.insert_entry(this.wrap_entry(values.entry), values.position);
 		},
 		upload_progress: function(position, total) {
-			console.log('Box.upload_progress', position, total);
+			// console.log('Box.upload_progress', position, total);
 		},
 		claim_entry: function(entry) {
 			var div = entry.panel();

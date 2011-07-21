@@ -42,13 +42,10 @@ Spontaneous.Entry = (function($, S) {
 		initialize: function(content, container) {
 			this.container = container;
 			this.callSuper(content);
-			// this.content = content;
-			// console.log('FacetEntry#new', content, content.depth);
 		},
 		panel: function() {
 			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class(), this.boxes_class()])
 			var contents = dom.div('.entry-contents');
-			// $(dom.div, {'class':['entry-wrap ', this.depth_class(), this.visibility_class()].join(' ')});
 			var inside = dom.div('.entry-inner');
 			var outline = dom.div('.white-bg').mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
 			inside.append(outline)
@@ -90,7 +87,7 @@ Spontaneous.Entry = (function($, S) {
 
 			if (icon) {
 				var img = new Spontaneous.Image(icon);
-				console.log(icon, img.is_empty())
+				// console.log(icon, img.is_empty())
 				wrap.append(img.icon(60, 60).click(click))
 			}
 
@@ -98,7 +95,6 @@ Spontaneous.Entry = (function($, S) {
 		},
 		title_bar: function(wrapper) {
 			if (!this._title_bar) {
-				console.log(this.type())
 				var title_bar = dom.div('.title-bar').text(this.type().title);
 				var actions = dom.div('.actions', {'xstyle':'display: none'});
 				var destroy = dom.a('.delete');
@@ -120,7 +116,6 @@ Spontaneous.Entry = (function($, S) {
 			return this._title_bar;
 		},
 		visibility_toggled: function(result) {
-			console.log('visibility_toggled', result)
 			this.wrapper.removeClass('visible hidden');
 			if (result.hidden) {
 				this.wrapper.switchClass('visible', 'hidden', 200);
