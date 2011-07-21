@@ -154,7 +154,7 @@ module Spontaneous
                 connection.run("CREATE DATABASE `#{db}` CHARACTER SET UTF8")
               rescue => e
                 say " >>> Unable to create #{connection_params[:adapter]} database `#{db}`:\n   > #{e}", :red
-                throw :error
+                # throw :error
               end
             end
           end

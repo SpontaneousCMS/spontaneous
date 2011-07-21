@@ -29,9 +29,14 @@ module Spontaneous::Plugins::Application
         Spontaneous.instance.config
       end
 
+      def db_settings
+        YAML.load_file(root /  "config/database.yml")[environment]
+      end
+
       def database
         Spontaneous.instance.database
       end
+
       def database=(database)
         Spontaneous.instance.database = database
       end
