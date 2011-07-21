@@ -25,12 +25,17 @@ Spontaneous.EditPanel = (function($, S) {
 			var values = this.form.serializeArray();
 			var field_data = new FormData();
 			var size = 0;
+			console.log('save', values)
 			$.each(values, function(i, v) {
 				field_data.append(v.name, v.value);
 				size += (v.name.length + v.value.length);
 			});
 			$('> *', this.form).animate({'opacity': 0.3}, 400, function() {
-				Spontaneous.UploadManager.form(this, field_data, size);
+				if (values.length > 0) {
+					Spontaneous.UploadManager.form(this, field_data, size);
+				} else {
+					this.close();
+				}
 				$.each(this.content.file_fields(), function() {
 					this.save();
 				});
@@ -42,10 +47,12 @@ Spontaneous.EditPanel = (function($, S) {
 			console.log('EditPanel.upload_progress', position, total)
 		},
 		upload_complete: function(response) {
-			var fields = response.fields;
-			for (var i = 0, ii = fields.length; i < ii; i++) {
-				var values = fields[i], field = this.content.field(values.name);
-				field.update(values);
+			if (response) {
+				var fields = response.fields;
+				for (var i = 0, ii = fields.length; i < ii; i++) {
+					var values = fields[i], field = this.content.field(values.name);
+					field.update(values);
+				}
 			}
 			this.close();
 		},
