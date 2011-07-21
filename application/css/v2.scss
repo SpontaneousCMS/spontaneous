@@ -679,7 +679,14 @@ img.missing {
 		}
 		.title-bar {
 			@include vertical-gradient(gray + #111111, gray);
+      @include box-sizing;
 			@include rounded-top;
+      @extend .interface;
+      color: rgba(255, 255, 255, 0.4);
+      padding-top: 4px;
+      padding-left: $unit/2 + 2px;
+      // text-transform: none;
+      font-weight: normal;
 			cursor: ns-resize;
 			position: absolute;
 			left: 0;

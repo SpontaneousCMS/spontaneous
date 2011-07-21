@@ -98,7 +98,8 @@ Spontaneous.Entry = (function($, S) {
 		},
 		title_bar: function(wrapper) {
 			if (!this._title_bar) {
-				var title_bar = dom.div('.title-bar');
+				console.log(this.type())
+				var title_bar = dom.div('.title-bar').text(this.type().title);
 				var actions = dom.div('.actions', {'xstyle':'display: none'});
 				var destroy = dom.a('.delete');
 				var visibility = dom.a('.visibility');
