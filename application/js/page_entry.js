@@ -6,7 +6,7 @@ Spontaneous.PageEntry = (function($, S) {
 	var PageEntry = new JS.Class(Spontaneous.Entry, {
 		// will eventually overwrite panel()
 		panel: function() {
-			var wrapper = dom.div(['entry-wrap page', this.depth_class(), this.visibility_class()])
+			var wrapper = dom.div(['entry-wrap page no-boxes', this.depth_class(), this.visibility_class()])
 			var contents = dom.div('.entry-contents');
 			var inside = dom.div('.entry-inner');
 			var outline = dom.div('.white-bg').mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
