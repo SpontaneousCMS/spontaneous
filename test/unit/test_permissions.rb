@@ -67,7 +67,7 @@ class PermissionsTest < MiniTest::Spec
       Permissions::UserLevel.root.should >= Permissions::UserLevel::Root
       Permissions::UserLevel[:root].should == Permissions::UserLevel::Root
     end
-    # should "map id to name"
+
     should "work with > operator" do
       Permissions::UserLevel[:admin].should > Permissions::UserLevel[:editor]
       Permissions::UserLevel[:editor].should > Permissions::UserLevel[:none]
@@ -287,6 +287,10 @@ class PermissionsTest < MiniTest::Spec
       end
 
       should "have a test for developer status" do
+        @user.update(:level => Permissions::UserLevel.editor)
+        @user.developer?.should be_nil
+        @user.update(:level => Permissions::UserLevel.designer)
+        @user.developer?.should be_true
       end
     end
   end

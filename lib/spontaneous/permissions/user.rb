@@ -93,6 +93,10 @@ module Spontaneous::Permissions
       groups.push(group)
     end
 
+    def developer?
+      level.developer?
+    end
+
     protected
 
     def validate

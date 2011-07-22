@@ -39,6 +39,17 @@ module Spontaneous
 
         def self.registered(app)
           app.helpers Authentication::Helpers
+          app.post "/reauthenticate" do
+            if key = Spot::Permissions::AccessKey.authenticate(params[:api_key])
+              response.set_cookie(AUTH_COOKIE, {
+                :value => key.key_id,
+                :path => '/'
+              })
+              redirect NAMESPACE, 302
+            else
+              halt(401, erubis(:login, :locals => { :invalid_key => true }))
+            end
+          end
           app.post "/login" do
             login = params[:user][:login]
             password = params[:user][:password]
@@ -47,7 +58,14 @@ module Spontaneous
                 :value => key.key_id,
                 :path => '/'
               })
-              redirect NAMESPACE, 302
+              if request.xhr?
+                json({
+                  key: key.key_id,
+                  redirect: NAMESPACE
+                })
+              else
+                redirect NAMESPACE, 302
+              end
             else
               halt(401, erubis(:login, :locals => { :login => login, :failed => true }))
             end
@@ -55,7 +73,7 @@ module Spontaneous
         end
 
         def requires_authentication!(options = {})
-          exceptions = (options[:except] || []).push("#{NAMESPACE}/login" )
+          exceptions = (options[:except] || []).concat(["#{NAMESPACE}/login", "#{NAMESPACE}/reauthenticate"] )
           before do
             unless exceptions.detect { |e| e === request.path }
               unless user
@@ -98,6 +116,11 @@ module Spontaneous
 
       class EditingBase < ServerBase
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
+
+        def json(response)
+          content_type 'application/json', :charset => 'utf-8'
+          response.to_json
+        end
       end
 
       class UnsupportedBrowserHandler < EditingBase
@@ -138,10 +161,6 @@ module Spontaneous
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
-        def json(response)
-          content_type 'application/json', :charset => 'utf-8'
-          response.to_json
-        end
 
         def update_fields(model, field_data)
           if field_data

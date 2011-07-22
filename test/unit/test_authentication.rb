@@ -271,6 +271,28 @@ class AuthenticationTest < MiniTest::Spec
           assert last_response.status == 302, "Status was #{last_response.status} not 302"
           last_response.headers["Location"].should =~ %r{/@spontaneous$}
         end
+
+        should "succeed and return an api key value for correct login over XHR" do
+          key = Spontaneous::Permissions::AccessKey.new
+          Spontaneous::Permissions::AccessKey.expects(:new).returns(key)
+          post "/@spontaneous/login", { "user[login]" => "admin", "user[password]" => "admin_password" }, {"HTTP_X_REQUESTED_WITH" => "XMLHttpRequest"}
+          assert last_response.status == 200, "Status was #{last_response.status} not 200"
+          result = last_response.body.json
+          result[:key].should == key.key_id
+          result[:redirect].should == "/@spontaneous"
+        end
+
+        should "accept a valid API key for re-authentication" do
+          key = @admin_user.logged_in!
+          post "/@spontaneous/reauthenticate", "api_key" => key.key_id
+          assert last_response.status == 302, "Status was #{last_response.status} not 302"
+          last_response.headers["Location"].should =~ %r{/@spontaneous$}
+        end
+
+        should "reject invalid API key" do
+          post "/@spontaneous/reauthenticate", "key" => "invalid"
+          assert_login_page("/@spontaneous/reauthenticate", "POST")
+        end
       end
 
       context "Logged in users" do

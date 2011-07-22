@@ -8,7 +8,11 @@
     <link rel="stylesheet" href="/@spontaneous/css/login.css" type="text/css" media="screen" charset="utf-8" />
 
     <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/vendor/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript">
+      var Spontaneous = {};
+    </script>
     <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/compatibility.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/authentication.js"></script>
     <script type="text/javascript">
       $(function() {
         $('#login form input').focus(function() {
@@ -35,19 +39,56 @@
             $('span', $this.parent()).hide();
           }
         });
+        $('#login form').submit(function() {
+          var $this = $(this);
+          $.ajax({
+            url: $this.attr('action'),
+            type: "POST",
+            data:$this.serialize(),
+            success: function(data) {
+              if (data.key) {
+                Spontaneous.Auth.Key.save(data.key);
+                window.location.href = data.redirect;
+              }
+            },
+            error: function() {
+              $('#failure-message').fadeOut(function() {
+                $('#failed-name').text($('#user-login').val());
+                $(this).fadeIn();
+              });
+              $("#error-message:hidden").slideDown(200);
+            },
+            dataType: 'json'
+          });
+          return false;
+        });
+
         $('#login form input#user-login').focus();
+        $(function() {
+          <% if locals[:invalid_key] %>
+            var key = Spontaneous.Auth.Key.delete();
+          <% else %>
+            var key = Spontaneous.Auth.Key.load();
+          <% end %>
+          if (key) {
+            console.log($('#reauthenticate-key').val(key).parent('form'))
+            $('#reauthenticate-key').val(key).parent('form')[0].submit();
+          } else {
+            $('#outer').fadeIn();
+          }
+        })
       });
     </script>
   </head>
   <body id="spontaneous">
-    <div id="outer">
+    <div id="outer" style="display: none">
       <h1>Please Login</h1>
       <div id="login">
         <div id="splash"></div>
-        <form action="/@spontaneous/login" method="post" accept-charset="UTF-8">
-          <% if locals[:failed] %>
-            <p class="error">Login failed for &lsquo;<%= locals[:login] %>&rsquo;</p>
-          <% end %>
+        <form id="login-form" action="/@spontaneous/login" method="post" accept-charset="UTF-8">
+
+            <p id="error-message" class="error" <% unless locals[:failed] %>style="display: none"<% end %>><span id="failure-message">Login failed for &lsquo;<span id="failed-name"><%= locals[:login] %></span>&rsquo;</span></p>
+
           <div class="inputs">
             <p>
             <label><input type="text" id="user-login" name="user[login]" value="<%= locals[:login] %>" /><span>Username</span></label>
@@ -57,6 +98,9 @@
             </p>
             <p class="submit"><button type="submit">Login</button></p>
           </div>
+        </form>
+        <form action="/@spontaneous/reauthenticate" method="post" accept-charset="UTF-8">
+          <input type="hidden" id="reauthenticate-key" name="api_key" value="" />
         </form>
       </div>
     </div>
