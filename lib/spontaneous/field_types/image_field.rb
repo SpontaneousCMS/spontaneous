@@ -266,7 +266,7 @@ module Spontaneous
       end
     end
 
-    ImageField.register
+    ImageField.register(:image, :photo)
 
   end
 end
