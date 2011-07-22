@@ -1,7 +1,7 @@
 // console.log('Loading Entry...')
 
 Spontaneous.Entry = (function($, S) {
-	var dom = S.Dom;
+	var dom = S.Dom, user = S.User;
 	var debug = 0;
 	var ConfirmDeletePopup = new JS.Class(Spontaneous.PopoverView, {
 		initialize: function(entry) {
@@ -95,7 +95,8 @@ Spontaneous.Entry = (function($, S) {
 		},
 		title_bar: function(wrapper) {
 			if (!this._title_bar) {
-				var title_bar = dom.div('.title-bar').text(this.type().title);
+				var label = this.type().title + ( user.is_developer() ? ":"+this.id() : "" )
+				var title_bar = dom.div('.title-bar').text(label);
 				var actions = dom.div('.actions', {'xstyle':'display: none'});
 				var destroy = dom.a('.delete');
 				var visibility = dom.a('.visibility');

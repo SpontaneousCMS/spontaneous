@@ -53,6 +53,7 @@ Spontaneous.EditPanel = (function($, S) {
 					var values = fields[i], field = this.content.field(values.name);
 					field.update(values);
 				}
+				this.content.save_complete(response);
 			}
 			this.close();
 		},

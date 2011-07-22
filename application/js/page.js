@@ -18,12 +18,18 @@ Spontaneous.Page = (function($, S) {
 				this.set_title(t);
 			}.bind(this));
 
-			path_wrap.append($('<h3/>').text(this.page.path).click(function() {
+			var path_text = $()
+			var path_text = $('<h3/>').text(this.page.path).click(function() {
 				if (this.page.path !== '/') {
 					this.open_url_editor();
 				}
-			}.bind(this)));
-			path_wrap.append(dom.div('.edit'));
+			}.bind(this));
+			path_wrap.append(path_text, dom.div('.edit'));
+
+			this.page.add_listener('path', function(path) {
+				path_text.text(path);
+			}.bind(this));
+
 			this.panel.append(path_wrap);
 			this.path_wrap = path_wrap
 			return this.panel;
@@ -49,7 +55,7 @@ Spontaneous.Page = (function($, S) {
 				var view = $('h3', this.panel), edit = $('.edit', this.panel);
 				view.hide();
 				edit.hide().empty();
-				var path = [""], parts = this.page.path.split('/'), slug = parts.pop();
+				var path = [""], parts = this.page.get('path').split('/'), slug = parts.pop();
 				parts.shift(); // remove empty entry caused by leading '/'
 				edit.append(dom.span().text('/'))
 				for (var i = 0, ii = parts.length; i < ii; i++) {
@@ -143,6 +149,10 @@ Spontaneous.Page = (function($, S) {
 			this.path = content.path;
 		},
 
+		save_complete: function(values) {
+			this.set('slug', values.slug);
+			this.set('path', values.path);
+		},
 		panel: function() {
 			this.panel = dom.div('#page-content');
 			this.panel.append(new FunctionBar(this).panel());
