@@ -75,7 +75,7 @@ Spontaneous.UploadManager = (function($, S) {
 		start: function() {
 			var form = new FormData();
 			form.append('file', this.file);
-			this.post(["/file/wrap", this.target.container.id(),this.target_id].join('/'), form);
+			this.post(["/file/wrap", this.target_id].join('/'), form);
 		}
 	});
 	var FormUpload = new JS.Class(Upload, {
