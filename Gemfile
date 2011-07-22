@@ -1,7 +1,6 @@
 source :rubygems
 
 
-gem "rake", "0.8.7"
 gem "activesupport", "~> 3.0.4"
 gem "home_run", "~> 1.0.0"
 gem "sequel", "~> 3.20"
