@@ -97,6 +97,19 @@ module Spontaneous::Permissions
       level.developer?
     end
 
+    def to_hash
+      {
+        :name => name,
+        :email => email,
+        :login => login,
+        :developer => !!developer?
+      }
+    end
+
+    def to_json
+      to_hash.to_json
+    end
+
     protected
 
     def validate

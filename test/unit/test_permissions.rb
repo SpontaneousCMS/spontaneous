@@ -292,6 +292,15 @@ class PermissionsTest < MiniTest::Spec
         @user.update(:level => Permissions::UserLevel.designer)
         @user.developer?.should be_true
       end
+
+      should "serialise to JSON" do
+        @user.to_hash.should == {
+          :name => "A Person",
+          :email => "person@example.org",
+          :login => "person",
+          :developer => false
+        }
+      end
     end
   end
 

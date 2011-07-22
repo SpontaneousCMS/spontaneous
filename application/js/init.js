@@ -35,6 +35,7 @@ Spontaneous.Init = (function($, S) {
 		b.append(content_area.init());
 		b.append(S.StatusBar.init());
 
+		S.User.load();
 		S.Types.init(function() {
 		location.init(function() {
 			top_bar.init();

@@ -212,9 +212,16 @@ class AuthenticationTest < MiniTest::Spec
       end
 
       should "see a login page for all GETs" do
-        %(/root /page/#{root.id} /types /map /map/#{root.id} /location/about).split.each do |path|
+        %(/root /page/#{root.id} /types /map /map/#{root.id} /location/about /user).split.each do |path|
           get "/@spontaneous#{path}"
           assert_login_page path
+        end
+      end
+
+      should "see a login page for all POSTs" do
+        %(/save/#{root.id} /savebox/#{root.id}/#{root.boxes[:editor_level].schema_id} /content/#{root.id}/position/0 /file/upload/#{root.id} /file/replace/#{root.id} /file/wrap/#{root.id}/#{root.boxes[:pages].schema_id} /add/#{root.id}/#{root.boxes[:pages].schema_id}/#{SitePage.schema_id} /destroy/#{root.id} /slug/#{root.id} /slug/#{root.id}/unavailable /toggle/#{root.id} /schema/delete /schema/rename).split.each do |path|
+          post "/@spontaneous#{path}"
+          assert_login_page(path, "POST")
         end
       end
 
@@ -236,13 +243,6 @@ class AuthenticationTest < MiniTest::Spec
       should "get access to media files" do
         get '/media/image.jpg'
         assert last_response.status == 200
-      end
-
-      should "see a login page for all POSTs" do
-        %(/save/#{root.id} /savebox/#{root.id}/#{root.boxes[:editor_level].schema_id} /content/#{root.id}/position/0 /file/upload/#{root.id} /file/replace/#{root.id} /file/wrap/#{root.id}/#{root.boxes[:pages].schema_id} /add/#{root.id}/#{root.boxes[:pages].schema_id}/#{SitePage.schema_id} /destroy/#{root.id} /slug/#{root.id} /slug/#{root.id}/unavailable /toggle/#{root.id} /schema/delete /schema/rename).split.each do |path|
-          post "/@spontaneous#{path}"
-          assert_login_page(path, "POST")
-        end
       end
 
       context "Logging in" do
@@ -312,6 +312,12 @@ class AuthenticationTest < MiniTest::Spec
         should "be able to see previously forbidden fruit" do
           get "/@spontaneous/root"
           assert last_response.ok?
+        end
+
+        should "be able to load info about themselves" do
+          get "/@spontaneous/user"
+          assert last_response.ok?
+          last_response.body.json.should == @editor_user.to_hash
         end
       end
 

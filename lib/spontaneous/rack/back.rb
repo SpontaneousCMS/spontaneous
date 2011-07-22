@@ -9,7 +9,7 @@ module Spontaneous
       NAMESPACE = "/@spontaneous".freeze
       AUTH_COOKIE = "spontaneous_api_key".freeze
 
-      JAVASCRIPT_FILES = %w(vendor/jquery-1.6.2.min vendor/jquery-ui-1.8.9.custom.min vendor/JS.Class-2.1.5/min/core extensions spontaneous properties dom popover popover_view ajax types image content entry page_entry box page field field_types/string_field field_types/file_field field_types/image_field field_types/markdown_field field_types/date_field content_area preview editing location state top_bar field_preview box_container progress status_bar upload_manager dialogue edit_dialogue edit_panel add_home_dialogue page_browser add_alias_dialogue publish init load)
+      JAVASCRIPT_FILES = %w(vendor/jquery-1.6.2.min vendor/jquery-ui-1.8.9.custom.min vendor/JS.Class-2.1.5/min/core extensions spontaneous properties dom authentication user popover popover_view ajax types image content entry page_entry box page field field_types/string_field field_types/file_field field_types/image_field field_types/markdown_field field_types/date_field content_area preview editing location state top_bar field_preview box_container progress status_bar upload_manager dialogue edit_dialogue edit_panel add_home_dialogue page_browser add_alias_dialogue publish init load)
       module Authentication
         module Helpers
           def authorised?
@@ -213,6 +213,9 @@ module Spontaneous
           json Site.root
         end
 
+        get '/user' do
+          json(user)
+        end
         # TODO: check for perms on the particular bit of content
         # and pass user level into returned JSON
         get '/page/:id' do
