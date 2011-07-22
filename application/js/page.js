@@ -147,6 +147,7 @@ Spontaneous.Page = (function($, S) {
 		initialize: function(content) {
 			this.callSuper(content);
 			this.path = content.path;
+			this.set('path', content.path);
 		},
 
 		save_complete: function(values) {
