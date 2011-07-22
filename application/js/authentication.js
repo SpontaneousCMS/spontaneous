@@ -1,17 +1,19 @@
 // console.log('Loading Authentication...')
 
 Spontaneous.Auth = (function($, S) {
-	var api_key_name = "spontaneous_api_key";
 	return {
 		Key: {
-			save: function(key) {
-				localStorage.setItem(api_key_name, key);
+			key: function(site) {
+				return site + '_api_key'
 			},
-			load: function() {
-				return localStorage.getItem(api_key_name);
+			save: function(site, key) {
+				localStorage.setItem(this.key(site), key);
 			},
-			delete: function() {
-				localStorage.removeItem(api_key_name);
+			load: function(site) {
+				return localStorage.getItem(this.key(site));
+			},
+			delete: function(site) {
+				localStorage.removeItem(this.key(site));
 				return false;
 			}
 		}
