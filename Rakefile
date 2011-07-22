@@ -12,8 +12,15 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 
+$test_glob = nil
+if p = ARGV.index('-')
+  filenames = ARGV[(p+1)..-1]
+  ARGV.slice!((p)..-1)
+  $test_glob = filenames.map { |f| "test/**/test_#{f}.rb" }
+end
+
 require 'rubygems'
-require 'rake/dsl_definition'
+# require 'rake/dsl_definition'
 require 'rake'
 require 'jeweler'
 
@@ -34,12 +41,7 @@ Jeweler::RubygemsDotOrgTasks.new
 
 
 require 'rake/testtask'
-$test_glob = nil
 
-if p = ARGV.index('-')
-  filenames = ARGV[(p+1)..-1]
-  $test_glob = filenames.map { |f| "test/**/test_#{f}.rb" }
-end
 
 Rake::TestTask.new(:test) do |test|
   test.libs << 'test'
