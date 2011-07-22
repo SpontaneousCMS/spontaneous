@@ -94,6 +94,13 @@ class PermissionsTest < MiniTest::Spec
       Permissions::UserLevel[:designer].can_publish?.should be_true
       Permissions::UserLevel[:root].can_publish?.should be_true
     end
+    should "Have a developer flag" do
+      Permissions::UserLevel[:none].developer?.should be_false
+      Permissions::UserLevel[:editor].developer?.should be_nil
+      Permissions::UserLevel[:admin].developer?.should be_nil
+      Permissions::UserLevel[:designer].developer?.should be_true
+      Permissions::UserLevel[:root].developer?.should be_true
+    end
   end
 
   context "Users" do
@@ -277,6 +284,9 @@ class PermissionsTest < MiniTest::Spec
         group1.add_member(@user)
         group2.add_member(@user)
         @user.level_for(page).should == Permissions::UserLevel.admin
+      end
+
+      should "have a test for developer status" do
       end
     end
   end

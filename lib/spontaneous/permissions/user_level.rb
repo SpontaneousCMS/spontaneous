@@ -14,6 +14,7 @@ module Spontaneous::Permissions
       def self.to_s; 'root'; end
       def self.to_sym; :root; end
       def self.can_publish?; true; end
+      def self.developer?; true; end
     end
 
     class None
@@ -27,6 +28,7 @@ module Spontaneous::Permissions
       def self.to_s; 'none'; end
       def self.to_sym; :none; end
       def self.can_publish?; false; end
+      def self.developer?; false; end
     end
 
     class Level
@@ -80,6 +82,10 @@ module Spontaneous::Permissions
 
       def can_publish?
         @permissions[:publish]
+      end
+
+      def developer?
+        @permissions[:developer]
       end
 
       def to_s

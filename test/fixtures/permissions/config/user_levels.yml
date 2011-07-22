@@ -5,4 +5,5 @@
   :publish: false
 - :name: designer
   :publish: true
+  :developer: true
 
