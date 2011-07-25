@@ -38,7 +38,7 @@ module Spontaneous
       end
 
       def dependency_map
-        grouped_changes = self.all.map { |c| [c] }
+        grouped_changes = self.valid.map { |c| [c] }
         begin
           modified = false
           grouped_changes.each_with_index do |inner, i|
@@ -56,7 +56,14 @@ module Spontaneous
 
         grouped_changes
       end
+
+      def valid
+        invalid, valid = self.all.partition { |change| change.modified.empty? }
+        self.filter(:id => invalid.map { |change| change.id }).delete
+        valid
+      end
     end
+
 
     def after_initialize
       super
@@ -72,7 +79,7 @@ module Spontaneous
     end
 
     def modified
-      @modified ||= modified_list.map { |id| Content[id] }
+      @modified ||= modified_list.map { |id| Content[id] }.compact
     end
 
     alias_method :pages, :modified

@@ -115,7 +115,8 @@ module Spontaneous::Plugins
           else
             content = content.map do |c|
               c.is_a?(Spontaneous::Content) ? c.reload : Spontaneous::Content[c]
-            end
+            end.compact
+
             first_published = first_published.filter(:id => content.map { |c| c.id })
             published = published.filter(:id => content.map { |c| c.id })
 

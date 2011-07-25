@@ -188,6 +188,7 @@ module Spontaneous
           FileUtils.rm_r(Spontaneous.revision_dir(revision)) if File.exists?(Spontaneous.revision_dir(revision))
           S::Site.send(:pending_revision=, nil)
           S::Content.delete_revision(revision)
+          puts exception.backtrace.join("\n")
           set_status("error", exception)
         end
       end
