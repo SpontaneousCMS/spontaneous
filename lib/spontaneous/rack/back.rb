@@ -411,6 +411,16 @@ module Spontaneous
           json(content.siblings.map { |c| c.slug })
         end
 
+        post '/uid/:id' do
+          if user.developer?
+            content = content_for_request
+            content.uid = params[:uid]
+            content.save
+            json({:uid => content.uid })
+          else
+            unauthorised!
+          end
+        end
 
         get '/targets/:schema_id' do
           klass = Spontaneous::Schema[params[:schema_id]]

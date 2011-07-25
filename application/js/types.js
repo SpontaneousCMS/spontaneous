@@ -65,6 +65,9 @@ Spontaneous.Types = (function($, S) {
 		},
 		is_alias: function() {
 			return this.data.is_alias;
+		},
+		edit_url: function() {
+			return "mvim://open?url=file://"+this.data.source;
 		}
 	});
 	var Types = new JS.Singleton({

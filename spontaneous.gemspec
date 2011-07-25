@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Garry Hill"]
-  s.date = %q{2011-07-13}
+  s.date = %q{2011-07-25}
   s.description = %q{TODO: longer description of your gem}
   s.email = %q{garry@magnetised.info}
   s.executables = ["limit-upload", "spot", "unlimit-upload"]
@@ -18,10 +18,13 @@ Gem::Specification.new do |s|
     "Gemfile",
     "Gemfile.lock",
     "Rakefile",
+    "Readme.markdown",
+    "application/css/add_alias_dialogue.scss",
     "application/css/definitions.scss",
     "application/css/editing.scss",
     "application/css/login.scss",
     "application/css/popover.scss",
+    "application/css/schema_error.scss",
     "application/css/spontaneous.scss",
     "application/css/unsupported.scss",
     "application/css/v2.scss",
@@ -29,6 +32,7 @@ Gem::Specification.new do |s|
     "application/js/add_alias_dialogue.js",
     "application/js/add_home_dialogue.js",
     "application/js/ajax.js",
+    "application/js/authentication.js",
     "application/js/box.js",
     "application/js/box_container.js",
     "application/js/compatibility.js",
@@ -69,6 +73,7 @@ Gem::Specification.new do |s|
     "application/js/top_bar.js",
     "application/js/types.js",
     "application/js/upload_manager.js",
+    "application/js/user.js",
     "application/js/vendor/JS.Class-2.1.5/CHANGELOG",
     "application/js/vendor/JS.Class-2.1.5/MIT-LICENSE",
     "application/js/vendor/JS.Class-2.1.5/README",
@@ -114,6 +119,7 @@ Gem::Specification.new do |s|
     "application/js/vendor/jquery-1.4.3.min.js",
     "application/js/vendor/jquery-1.5.1.min.js",
     "application/js/vendor/jquery-1.5.1rc1.min.js",
+    "application/js/vendor/jquery-1.6.2.min.js",
     "application/js/vendor/jquery-ui-1.8.6.custom.min.js",
     "application/js/vendor/jquery-ui-1.8.9.custom.min.js",
     "application/js/vendor/jquery-ui-1.8.custom.min.js",
@@ -121,12 +127,15 @@ Gem::Specification.new do |s|
     "application/js/vendor/jquery.hotkeys-0.7.9.min.js",
     "application/static/editing-0-noise.png",
     "application/static/editing-1-noise.png",
+    "application/static/editing-texture-1.png",
+    "application/static/editing-texture.png",
     "application/static/editing-toolbar-shadow-bottom.png",
     "application/static/editing-toolbar-shadow-top.png",
     "application/static/favicon.ico",
     "application/static/inner-glow.png",
     "application/static/item-buttons.png",
     "application/static/location-arrow.png",
+    "application/static/logo-400px-transparent.png",
     "application/static/missing.png",
     "application/static/orange-down-arrow.png",
     "application/static/page-browser-next.png",
@@ -139,8 +148,10 @@ Gem::Specification.new do |s|
     "application/static/spontaneous.png",
     "application/static/spot.png",
     "application/static/spot.svg",
+    "application/static/texture.png",
     "application/views/index.erubis",
     "application/views/login.erubis",
+    "application/views/schema_modification_error.html.erb",
     "application/views/unsupported.erubis",
     "bin/limit-upload",
     "bin/spot",
@@ -520,7 +531,7 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<rake>, ["= 0.8.7"])
+      s.add_runtime_dependency(%q<rake>, ["~> 0.8.7"])
       s.add_runtime_dependency(%q<activesupport>, ["~> 3.0.4"])
       s.add_runtime_dependency(%q<home_run>, ["~> 1.0.0"])
       s.add_runtime_dependency(%q<sequel>, ["~> 3.20"])
@@ -539,6 +550,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<hwia>, ["~> 1.0.2"])
       s.add_runtime_dependency(%q<base58>, ["~> 0.1.0"])
       s.add_runtime_dependency(%q<kramdown>, ["~> 0.13.3"])
+      s.add_runtime_dependency(%q<launchy>, ["~> 0.4.0"])
       s.add_development_dependency(%q<minitest>, ["~> 2.1.0"])
       s.add_development_dependency(%q<mysql2>, ["~> 0.2"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5"])
@@ -550,14 +562,13 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<leftright>, ["~> 0.9"])
       s.add_development_dependency(%q<stackdeck>, ["~> 0.2"])
       s.add_development_dependency(%q<selenium-client>, ["~> 1.2.18"])
-      s.add_development_dependency(%q<launchy>, ["~> 0.4.0"])
       s.add_development_dependency(%q<johnson>, ["= 2.0.0.pre3"])
       s.add_development_dependency(%q<harmony>, ["~> 0.5"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
       s.add_development_dependency(%q<reek>, [">= 0"])
       s.add_development_dependency(%q<locat>, [">= 0"])
     else
-      s.add_dependency(%q<rake>, ["= 0.8.7"])
+      s.add_dependency(%q<rake>, ["~> 0.8.7"])
       s.add_dependency(%q<activesupport>, ["~> 3.0.4"])
       s.add_dependency(%q<home_run>, ["~> 1.0.0"])
       s.add_dependency(%q<sequel>, ["~> 3.20"])
@@ -576,6 +587,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<hwia>, ["~> 1.0.2"])
       s.add_dependency(%q<base58>, ["~> 0.1.0"])
       s.add_dependency(%q<kramdown>, ["~> 0.13.3"])
+      s.add_dependency(%q<launchy>, ["~> 0.4.0"])
       s.add_dependency(%q<minitest>, ["~> 2.1.0"])
       s.add_dependency(%q<mysql2>, ["~> 0.2"])
       s.add_dependency(%q<jeweler>, ["~> 1.5"])
@@ -587,7 +599,6 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<leftright>, ["~> 0.9"])
       s.add_dependency(%q<stackdeck>, ["~> 0.2"])
       s.add_dependency(%q<selenium-client>, ["~> 1.2.18"])
-      s.add_dependency(%q<launchy>, ["~> 0.4.0"])
       s.add_dependency(%q<johnson>, ["= 2.0.0.pre3"])
       s.add_dependency(%q<harmony>, ["~> 0.5"])
       s.add_dependency(%q<ruby-debug>, [">= 0"])
@@ -595,7 +606,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<locat>, [">= 0"])
     end
   else
-    s.add_dependency(%q<rake>, ["= 0.8.7"])
+    s.add_dependency(%q<rake>, ["~> 0.8.7"])
     s.add_dependency(%q<activesupport>, ["~> 3.0.4"])
     s.add_dependency(%q<home_run>, ["~> 1.0.0"])
     s.add_dependency(%q<sequel>, ["~> 3.20"])
@@ -614,6 +625,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<hwia>, ["~> 1.0.2"])
     s.add_dependency(%q<base58>, ["~> 0.1.0"])
     s.add_dependency(%q<kramdown>, ["~> 0.13.3"])
+    s.add_dependency(%q<launchy>, ["~> 0.4.0"])
     s.add_dependency(%q<minitest>, ["~> 2.1.0"])
     s.add_dependency(%q<mysql2>, ["~> 0.2"])
     s.add_dependency(%q<jeweler>, ["~> 1.5"])
@@ -625,7 +637,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<leftright>, ["~> 0.9"])
     s.add_dependency(%q<stackdeck>, ["~> 0.2"])
     s.add_dependency(%q<selenium-client>, ["~> 1.2.18"])
-    s.add_dependency(%q<launchy>, ["~> 0.4.0"])
     s.add_dependency(%q<johnson>, ["= 2.0.0.pre3"])
     s.add_dependency(%q<harmony>, ["~> 0.5"])
     s.add_dependency(%q<ruby-debug>, [">= 0"])

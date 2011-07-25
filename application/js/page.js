@@ -1,7 +1,7 @@
 // console.log('Loading Page...')
 
 Spontaneous.Page = (function($, S) {
-	var dom = S.Dom, Slot = S.Slot;
+	var dom = S.Dom, Slot = S.Slot, user = S.User;
 
 	var FunctionBar = function(page) {
 		this.page = page;
@@ -19,12 +19,24 @@ Spontaneous.Page = (function($, S) {
 			}.bind(this));
 
 			var path_text = $()
-			var path_text = $('<h3/>').text(this.page.path).click(function() {
+			var path_text = dom.h3('.path').text(this.page.path).click(function() {
+
 				if (this.page.path !== '/') {
 					this.open_url_editor();
 				}
 			}.bind(this));
-			path_wrap.append(path_text, dom.div('.edit'));
+			path_wrap.append(path_text);
+
+
+			if (user.is_developer()) {
+				var uid_text = dom.h3('.developer.uid' + (!this.page.content.uid ? '.missing' : '')).text('#' + (this.page.content.uid || "----")).click(function() {
+					this.open_uid_editor();
+				}.bind(this));
+				var dev_desc = dom.h3('.developer').append(dom.a().attr('href', this.page.developer_edit_url()).text(this.page.developer_description()));
+				path_wrap.append(uid_text, dev_desc);
+			}
+
+			path_wrap.append(dom.div('.edit'));
 
 			this.page.add_listener('path', function(path) {
 				path_text.text(path);
@@ -47,6 +59,50 @@ Spontaneous.Page = (function($, S) {
 				u[response[i]] = true;
 			}
 			this.unavailable = u;
+		},
+		open_uid_editor: function() {
+			this.panel.animate({'height': '+=14'}, 200, function() {
+				var view = $('h3', this.panel), edit = $('.edit', this.panel);
+				view.hide();
+				edit.hide().empty();
+				var input = dom.input({'type':'text', 'autofocus':'autofocus'}).val(this.page.content.uid).select();
+				var input_and_error = dom.div('.input-error.uid-input');
+				var hash = dom.div('.hash').text('#');
+				var label = dom.label().text('UID');
+				var submit = function() {
+					this.save_uid(input.val());
+				}.bind(this);
+				input_and_error.append(hash, input);
+				edit.append(label, input_and_error);
+				edit.append(dom.a('.button.save').text('Save').click(submit));
+				edit.append(dom.a('.button.cancel').text('Cancel').click(this.close.bind(this)));
+				input.keyup(function(event) {
+					if (event.keyCode === 13) {
+						submit();
+					} else {
+						var v = input.val();
+						// do some basic cleanup -- proper cleanup is done on the server-side
+						v = v.toLowerCase().replace(/['"]/g, '');
+						v = v.replace(/[^a-z0-9_]/g, '_').replace(/(\_+|\s+)/g, '_').replace(/(^\-)/, '');
+						input.val(v);
+					}
+				}.bind(this)).keydown(function(event) {
+					if (event.keyCode === 27) { this.close(); }
+				}.bind(this));
+				edit.fadeIn(200);
+			}.bind(this));
+		},
+		save_uid: function(uid) {
+			Spontaneous.Ajax.post('/uid/'+this.page.id(), {'uid':uid}, this, this.uid_save_complete);
+		},
+		uid_save_complete: function(response, status, xhr) {
+			if (status === 'success') {
+				var view = $('h3.uid', this.panel), edit = $('.edit', this.panel), uid = (response.uid == "" ? "----" : response.uid);
+				// nasty but the value is only used for display
+				this.page.content.uid = response.uid;
+				view.text('#'+uid);
+				this.close();
+			}
 		},
 		open_url_editor: function() {
 			this.unavailable = false;
@@ -121,7 +177,7 @@ Spontaneous.Page = (function($, S) {
 		save_complete: function(response, status, xhr) {
 			if (status === 'success') {
 				this.hide_path_error();
-				var view = $('h3', this.panel), edit = $('.edit', this.panel);
+				var view = $('h3.path', this.panel), edit = $('.edit', this.panel);
 				this.page.path = response.path;
 				view.text(response.path);
 				this.close();

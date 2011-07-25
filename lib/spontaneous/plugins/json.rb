@@ -14,7 +14,8 @@ module Spontaneous::Plugins
           :title=> self.title,
           :fields => readable_fields.map { |name| field_prototypes[name].to_hash },
           :styles => readable_styles.map { |style| style.to_hash },
-          :boxes => readable_boxes.map { |box| box.to_hash }
+          :boxes => readable_boxes.map { |box| box.to_hash },
+          :source => self.__source_file
         }
       end
 

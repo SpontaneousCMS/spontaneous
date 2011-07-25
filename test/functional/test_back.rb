@@ -525,6 +525,25 @@ class BackTest < MiniTest::Spec
         last_response.body.json.should == %w(project2 project3)
       end
     end
+    context "UIDs" do
+      should "be editable" do
+        uid = "fishy"
+        @project1.uid.should_not == uid
+        post "/@spontaneous/uid/#{@project1.id}", 'uid' => uid
+        assert last_response.ok?
+        last_response.body.json.should == {:uid => uid}
+        @project1.reload.uid.should == uid
+      end
+      should "not be editable by non-developer users" do
+        @user.stubs(:developer?).returns(false)
+        uid = "boom"
+        orig = @project1.uid
+        @project1.uid.should_not == uid
+        post "/@spontaneous/uid/#{@project1.id}", 'uid' => uid
+        assert last_response.status == 401
+        @project1.reload.uid.should == orig
+      end
+    end
     context "Request cache" do
       setup do
         Spontaneous.stubs(:reload!)

@@ -16,6 +16,13 @@ Spontaneous.Content = (function($, S) {
 		id: function() {
 			return this.content.id;
 		},
+
+		developer_description: function() {
+			return this.type().type + "["+this.id()+']'
+		},
+		developer_edit_url: function() {
+			return this.type().edit_url()
+		},
 		type: function() {
 			return S.Types.type(this.content.type);
 		}.cache(),
@@ -32,6 +39,7 @@ Spontaneous.Content = (function($, S) {
 			$.each(this.field_list(), function(i, f) { f.unload(); });
 			$.each(this.entries(), function(i, e) { e.unload(); });
 		},
+
 		field_list: function() {
 			var type = this.type(), prototypes = type.field_prototypes, names = type.field_names;
 			var fields = this.fields(), list = [];

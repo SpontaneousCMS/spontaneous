@@ -194,7 +194,7 @@ img.missing {
 				color: #888888;
 			}
 		}
-		.path, .path h3 {
+		.path, .path h3, .path h3.developer a {
 			@extend .interface;
 			cursor: pointer;
 			color: #c1c1c1;
@@ -202,7 +202,18 @@ img.missing {
 			line-height: 12px;
 			text-transform: none;
 		}
+    .path .uid, .path .developer {
+			// @include rounded;
+			// background-color: rgba(0, 0, 0, 0.4);
+			// padding: $unit/2;
+      margin-left: $unit*4;
+      opacity: 0.5;
+      &.missing {
+        opacity: 0.5;
+      }
+    }
 		& > .path {
+      @include display-box;
 			position: absolute;
 			bottom: 12px;
 		}
@@ -242,6 +253,12 @@ img.missing {
 			input[type="text"].error {
 				color: $error;
 			}
+			.input-error.uid-input {
+				input[type="text"] {
+					padding-left: 1.05em;
+					width: 200px;
+				}
+			}
 			.button {
         display: block;
 				margin-left: 8px;
@@ -266,6 +283,13 @@ img.missing {
 			span {
 				color: #bbbbbb;
 				margin-right: 1px;
+			}
+			.hash {
+				color: #666;
+				position: absolute;
+				left: 4px;
+				font-weight: bold;
+				padding-top: ($unit/2)+1;
 			}
 		}
 		.path h3:hover {
@@ -687,7 +711,7 @@ img.missing {
       color: rgba(255, 255, 255, 0.4);
       padding-top: 4px;
       padding-left: $unit/2 + 2px;
-      // text-transform: none;
+      text-transform: none;
       font-weight: normal;
 			cursor: ns-resize;
 			position: absolute;
@@ -1579,3 +1603,4 @@ img.missing {
 @import "popover";
 @import "editing";
 @import "add_alias_dialogue";
+@import "developer";

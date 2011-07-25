@@ -74,7 +74,9 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				this.waiting.show();
 				this.spinner().indeterminate();
 				if (files.length > 0) {
-					var file = files[0], url = window.URL.createObjectURL(file);
+					var file = files[0],
+					url = window.URL.createObjectURL(file);
+
 					this.image.attr('src', url)
 					// see http://www.htmlfivewow.com/slide25
 					window.URL.revokeObjectURL(url);

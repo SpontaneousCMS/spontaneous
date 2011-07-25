@@ -95,8 +95,9 @@ Spontaneous.Entry = (function($, S) {
 		},
 		title_bar: function(wrapper) {
 			if (!this._title_bar) {
-				var label = this.type().title + ( user.is_developer() ? ":"+this.id() : "" )
-				var title_bar = dom.div('.title-bar').text(label);
+				console.log(this.type())
+				var label = user.is_developer() ? dom.a('.developer.source').attr('href', this.developer_edit_url()).text(this.developer_description()) : (this.type().title);
+				var title_bar = dom.div('.title-bar').append(label);
 				var actions = dom.div('.actions', {'xstyle':'display: none'});
 				var destroy = dom.a('.delete');
 				var visibility = dom.a('.visibility');
