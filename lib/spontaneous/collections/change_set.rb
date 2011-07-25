@@ -28,7 +28,7 @@ module Spontaneous::Collections
       h[:pages] = pages.compact.map  do |page|
         {
           :id => page.id,
-          :title => page.title.to_s.escape_js,
+          :title => page.title.to_s,
           :path => page.path,
           :depth => page.depth
         }
