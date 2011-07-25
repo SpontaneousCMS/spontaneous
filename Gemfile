@@ -21,6 +21,7 @@ gem 'hwia', '~> 1.0.2'
 gem 'base58', '~> 0.1.0'
 # markdown
 gem 'kramdown', '~> 0.13.3'
+gem 'launchy', '~> 0.4.0'
 
 group :development do
   gem 'minitest', '~> 2.1.0'
@@ -36,7 +37,6 @@ group :development do
   gem 'leftright',  '~> 0.9'
   gem 'stackdeck',  '~> 0.2'
   gem 'selenium-client', '~> 1.2.18', :platforms => [:mri_18]
-  gem 'launchy', '~> 0.4.0'
   # gem 'Selenium', '~> 1.1.14'
   gem 'johnson',    '2.0.0.pre3', :platforms => [:mri_18]
   gem 'harmony',    '~> 0.5', :platforms => [:mri_18]
