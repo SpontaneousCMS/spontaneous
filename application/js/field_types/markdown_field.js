@@ -72,7 +72,7 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 				start -= m[1].length;
 				selected = m[1] + selected;
 			}
-			m = (new RegExp('^([^('+_post_+')]*?'+_post_+')[^('+_post_+')\w ]*?[ $]?')).exec(state.after)
+			m = (new RegExp('^([^('+_post_+')]*?'+_post_+')[^('+_post_+')\w ]*?[ $]', '')).exec(state.after)
 			if (m) {
 				end += m[1].length;
 				selected += m[1];
@@ -103,12 +103,13 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 				}
 			} else {
 				// expand selection to current word if selection is empty
-				m = (/(?:^|\s)(\w+)$/m).exec(state.before)
+				var exclude = '\\s\\b\\.,';
+				m = (new RegExp('(?:['+exclude+']|^)([^'+exclude+']+)$', '')).exec(state.before)
 				if (m) {
 					start -= m[1].length;
 					selected = m[1] + selected;
 				}
-				m = (/^(\w+)(?:\s|$)/).exec(state.after);
+				m = (new RegExp('^([^'+exclude+']*)(?:['+exclude+']|$)', '')).exec(state.after);
 				if (m) {
 					end += m[1].length;
 					selected += m[1];

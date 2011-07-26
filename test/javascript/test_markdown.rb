@@ -32,7 +32,7 @@ class MarkdownEditorTest < MiniTest::Spec
 
   def style(command, sel_start, sel_end, value)
     state = @page.x(<<-JS)
-      var input = fake_input(#{sel_start}, #{sel_end}, '#{value}')
+      var input = fake_input(#{sel_start}, #{sel_end}, #{value.inspect})
       var command = new Spontaneous.FieldTypes.MarkdownField.#{command}(input)
       command.execute();
       Spontaneous.FieldTypes.MarkdownField.TextCommand.get_state(input)
@@ -54,6 +54,10 @@ class MarkdownEditorTest < MiniTest::Spec
             state = style(style, 7, 7, "Lorem ipsum dolor")
             state["value"].should == "Lorem #{mark}ipsum#{mark} dolor"
           end
+          should "expand to word under cursor at end of text if no selection made" do
+            state = style(style, 14, 14, "Lorem ipsum dolor")
+            state["value"].should == "Lorem ipsum #{mark}dolor#{mark}"
+          end
           should "embolden selected word at start of text" do
             state = style(style, 0, 5, "Lorem ipsum")
             state["value"].should == "#{mark}Lorem#{mark} ipsum"
@@ -66,9 +70,24 @@ class MarkdownEditorTest < MiniTest::Spec
             state = style(style, 2, 2, "#{mark}Lorem#{mark} ipsum")
             state["value"].should == "Lorem ipsum"
           end
+          should "not include fullstops in bold when no selection is made at end of text" do
+            state = style(style, 7, 7, "Lorem ipsum.")
+            state["value"].should == "Lorem #{mark}ipsum#{mark}."
+          end
+          should "not include fullstops in bold when no selection is made" do
+            state = style(style, 7, 7, "Lorem ipsum, dolor.")
+            state["value"].should == "Lorem #{mark}ipsum#{mark}, dolor."
+          end
+          should "be compatible with header tags" do
+            state = style(style, 72, 72, "Lorem ipsum \n=============================================\n\ndolor sit amet")
+            state["value"].should == "Lorem ipsum \n=============================================\n\ndolor sit #{mark}amet#{mark}"
+          end
+          should "work across multiple lines with existing styles" do
+            state = style(style, 8, 8, "Lorem ipsum\n\ndolor sit #{mark}amet#{mark}")
+            state['value'].should == "Lorem #{mark}ipsum#{mark}\n\ndolor sit #{mark}amet#{mark}"
+          end
         end
       end
     end
   end
-
 end
