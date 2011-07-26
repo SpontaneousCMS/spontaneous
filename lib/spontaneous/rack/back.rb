@@ -60,8 +60,8 @@ module Spontaneous
               })
               if request.xhr?
                 json({
-                  key: key.key_id,
-                  redirect: NAMESPACE
+                  :key => key.key_id,
+                  :redirect => NAMESPACE
                 })
               else
                 redirect NAMESPACE, 302
