@@ -2,7 +2,7 @@
 require 'test_helper'
 require 'test_javascript'
 
-class LocationBarTest < MiniTest::Spec
+class DomTest < MiniTest::Spec
   include JavascriptTestBase
 
   def setup

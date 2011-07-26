@@ -21,7 +21,7 @@ Spontaneous.Content = (function($, S) {
 			return this.type().type + "["+this.id()+']'
 		},
 		developer_edit_url: function() {
-			return this.type().edit_url()
+			return this.type().edit_url();
 		},
 		type: function() {
 			return S.Types.type(this.content.type);

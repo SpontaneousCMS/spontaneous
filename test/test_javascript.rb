@@ -9,6 +9,9 @@ module JavascriptTestBase
   end
 
   def page
+    config = mock()
+    config.stubs(:reload_classes).returns(false)
+    Spontaneous.stubs(:config).returns(config)
     page = Harmony::Page.new
     page.x("window.console = {'log': function(){ print.apply(window, arguments)}, 'dir': function() {}};")
     page.x("Spontaneous = {};")

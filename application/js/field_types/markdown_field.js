@@ -9,16 +9,18 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 
 		extend: {
 			get_state: function(input) {
-				var start = input[0].selectionStart, end = input[0].selectionEnd, value = $(input).val(),
-				before = value.substr(0, start), middle = value.substr(start, (end - start)), after = value.substr(end);
-				return {
+				var start = input[0].selectionStart, end = input[0].selectionEnd, value = input.val(),
+				before = value.substr(0, start), middle = value.substr(start, (end - start)), after = value.substr(end), state;
+				state = {
 					start: start,
 					end: end,
 					before: before,
 					middle: middle,
 					selection: middle,
 					after: after
-				}
+				};
+				// console.log(state)
+				return state;
 			}
 		},
 
@@ -31,7 +33,7 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 		wrap: function() {
 			var input = this.input, s = this.fix_selection(), start = s.start, end = s.end,
 				before = s.before, middle = s.selection, after = s.after, wrapped;
-			if ((end - start) <= 0 ) { return; }
+			// if ((end - start) <= 0 ) { return; }
 			if (this.matches_selection(middle)) {
 				wrapped  = this.remove(middle)
 			} else {
@@ -64,6 +66,7 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 			state = this.fix_selection_whitespace(state);
 			var selected = state.selection, m, start = state.start, end = state.end,
 				_pre_ = this.pre.replace(/\*/g, "\\*"), _post_ = this.post.replace(/\*/g, "\\*");
+
 			m = (new RegExp('(?:^| )('+_pre_+'[^('+_pre_+')]*)$', 'm')).exec(state.before)
 			if (m) {
 				start -= m[1].length;
@@ -97,6 +100,18 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 							break;
 						}
 					}
+				}
+			} else {
+				// expand selection to current word if selection is empty
+				m = (/(?:^|\s)(\w+)$/m).exec(state.before)
+				if (m) {
+					start -= m[1].length;
+					selected = m[1] + selected;
+				}
+				m = (/^(\w+)(?:\s|$)/).exec(state.after);
+				if (m) {
+					end += m[1].length;
+					selected += m[1];
 				}
 			}
 			return {start: start, end: end, selection:selected};
@@ -162,10 +177,6 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 		name: 'Bold',
 		pre: '**',
 		post: '**'
-		// fix_selection: function() {
-		// 	var state = this.callSuper();
-		// 	return this.get_state();
-		// }
 	});
 
 	var Italic = new JS.Class(TextCommand, {
@@ -606,6 +617,18 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 		}
 	});
 
+	MarkdownField.extend({
+		TextCommand: TextCommand,
+		Bold: Bold,
+		Italic: Italic,
+		UL: UL,
+		OL: OL,
+		H1: H1,
+		H2: H2,
+		Link: Link
+
+
+	});
 	return MarkdownField;
 })(jQuery, Spontaneous);
 
