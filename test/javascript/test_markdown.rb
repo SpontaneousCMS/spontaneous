@@ -70,6 +70,10 @@ class MarkdownEditorTest < MiniTest::Spec
             state = style(style, 2, 2, "#{mark}Lorem#{mark} ipsum")
             state["value"].should == "Lorem ipsum"
           end
+          should "remove formatting when cursor is within bold word at beginning" do
+            state = style(style, 10, 10, "Lorem #{mark}ipsum#{mark}")
+            state["value"].should == "Lorem ipsum"
+          end
           should "not include fullstops in bold when no selection is made at end of text" do
             state = style(style, 7, 7, "Lorem ipsum.")
             state["value"].should == "Lorem #{mark}ipsum#{mark}."
