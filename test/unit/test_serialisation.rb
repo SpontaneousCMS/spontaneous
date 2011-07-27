@@ -68,6 +68,7 @@ class SerialisationTest < MiniTest::Spec
       @fp = SerialisedPiece.field_prototypes
 
       template = ERB.new(File.read(File.expand_path('../../fixtures/serialisation/class_hash.yaml.erb', __FILE__)))
+      source = File.expand_path(__FILE__)
       @class_hash = YAML.load(template.result(binding))
     end
 
