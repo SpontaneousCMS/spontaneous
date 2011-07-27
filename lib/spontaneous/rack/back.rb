@@ -484,6 +484,57 @@ module Spontaneous
           json(Spontaneous::Site.publishing_status)
         end
 
+        get '/shard/:sha1' do
+          if ::File.file?(Spontaneous.shard_path(params[:sha1]))
+            200
+          else
+            404
+          end
+        end
+
+        post '/shard/:sha1' do
+          file = params['file']
+          uploaded_hash = Spontaneous::Media.digest(file[:tempfile].path)
+          if uploaded_hash == params[:sha1]
+            shard_path = Spontaneous.shard_path(params[:sha1])
+            FileUtils.mv(file[:tempfile].path, shard_path)
+            200
+          else
+            ::Rack::Utils.status_code(:conflict) #409
+          end
+        end
+
+        post '/shard/replace/:id' do
+          target = content_for_request
+          field = target.fields.sid(params['field'])
+          if target.field_writable?(field.name)
+            hashes = params[:shards]
+            shards = hashes.map { |hash| Spontaneous.shard_path(hash) }
+            combined = Tempfile.new('shard')
+            combined.binmode
+            begin
+              shards.each do |shard|
+                File.open(shard, 'rb') do |part|
+                  while data = part.read(8192)
+                    combined.write(data)
+                  end
+                end
+              end
+              combined.flush
+              combined.close
+              field.unprocessed_value = {
+                :filename => params[:filename],
+                :tempfile => combined
+              }
+              target.save
+            ensure
+              combined.close!
+            end
+            json({ :id => target.id, :src => field.src})
+          else
+            unauthorised!
+          end
+        end
         # get "/favicon.ico" do
         #   puts "Editing/favicon"
         #   send_file(Spontaneous.static_dir / "favicon.ico")

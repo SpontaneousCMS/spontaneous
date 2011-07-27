@@ -1,3 +1,4 @@
+require 'digest/sha1'
 
 module Spontaneous
   class Media
@@ -29,7 +30,9 @@ module Spontaneous
       end
 
       def to_filepath(urlpath)
-        urlpath.gsub(%r{^/media}, Spontaneous.media_dir)
+        parts = urlpath.split("/")
+        parts[1] = Spontaneous.media_dir
+        ::File.join(*parts)
       end
 
       def to_filename(input)
@@ -42,6 +45,13 @@ module Spontaneous
         name.gsub!(RE_FLATTEN_TRAILING, EMPTY)
         [name, ext].join(DOT)
       end
+
+
+      def sha1(filepath)
+        Digest::SHA1.file(filepath).hexdigest
+      end
+
+      alias_method :digest, :sha1
     end
   end
 end

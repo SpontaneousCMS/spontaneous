@@ -57,17 +57,21 @@ class GeneratorsTest < MiniTest::Spec
       end
       assert_file_exists(site_root, 'schema')
       assert_file_exists(site_root, 'schema/page.rb')
-      File.read(site_root / 'schema/page.rb') =~ /class Page < Spontaneous::Page/
+      assert File.read(site_root / 'schema/page.rb') =~ /class Page < Spontaneous::Page/
       assert_file_exists(site_root, 'schema/piece.rb')
-      File.read(site_root / 'schema/piece.rb') =~ /class Piece < Spontaneous::Piece/
+      assert File.read(site_root / 'schema/piece.rb') =~ /class Piece < Spontaneous::Piece/
       assert_file_exists(site_root, 'public/js')
       assert_file_exists(site_root, 'public/css')
       assert_file_exists(site_root, 'lib/tasks/example_com.rake')
       assert_file_exists(site_root, 'lib/site.rb')
-      File.read(site_root / 'lib/site.rb') =~ /class Site < Spontaneous::Site/
+      assert File.read(site_root / 'lib/site.rb') =~ /class Site < Spontaneous::Site/
       assert_file_exists(site_root, 'log')
       assert_file_exists(site_root, 'tmp')
+      assert_file_exists(site_root, 'cache/media/tmp')
+      assert_file_exists(site_root, 'cache/revisions')
       assert_file_exists(site_root, '.gitignore')
+      assert File.read(site_root / '.gitignore') =~ /cache\/\*/
+      assert File.read(site_root / 'schema/piece.rb') =~ /class Piece < Spontaneous::Piece/
     end
     should "accept domain names starting with numbers"
     should "accept domain names containing dashes"

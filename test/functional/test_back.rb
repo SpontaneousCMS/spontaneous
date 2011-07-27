@@ -427,7 +427,6 @@ class BackTest < MiniTest::Spec
       should "replace values of box file fields" do
         @job1.images.image.processed_value.should == ""
         post "@spontaneous/file/replace/#{@job1.id}/#{@job1.images.schema_id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => @job1.images.image.schema_id.to_s
-        puts last_response.body
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @job1 = Content[@job1.id]
@@ -757,6 +756,76 @@ class BackTest < MiniTest::Spec
       end
 
       should "redirect back to original page"
+    end
+    context "sharded uploading" do
+      setup do
+        @temp_dir = Dir.mktmpdir
+        @shard_dir = @temp_dir / "tmp"
+        @image = File.expand_path("../../fixtures/sharding/rose.jpg", __FILE__)
+        # read the digest dynamically in case I change that image
+        @image_digest = S::Media.digest(@image)
+        FileUtils.mkdir(@shard_dir)
+        Spontaneous.media_dir = @temp_dir
+      end
+      teardown do
+        FileUtils.rm_rf(@temp_dir)
+      end
+
+      should "have the right setting for shard_dir" do
+        Spontaneous.shard_path.should == @shard_dir
+        Spontaneous.shard_path("abcd").should == @shard_dir/ "abcd"
+      end
+
+      should "know when it already has a shard" do
+        hash = '4d68c8f13459c0edb40504de5003ec2a6b74e613'
+        FileUtils.touch(@shard_dir / hash)
+        get "/@spontaneous/shard/#{hash}"
+        last_response.status.should == 200
+      end
+
+      should "know when it doesn't have a shard" do
+        get "/@spontaneous/shard/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        last_response.status.should == 404
+      end
+
+      should "receive a shard and put it in the right place" do
+        post "@spontaneous/shard/#{@image_digest}", "file" => ::Rack::Test::UploadedFile.new(@image, "image/jpeg")
+        assert last_response.ok?
+        get "/@spontaneous/shard/#{@image_digest}"
+        last_response.status.should == 200
+      end
+
+      should "return an error if the uploaded file has the wrong hash" do
+        S::Media.expects(:digest).with(anything).returns("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+        post "@spontaneous/shard/#{@image_digest}", "file" => ::Rack::Test::UploadedFile.new(@image, "image/jpeg")
+        last_response.status.should == 409
+      end
+
+      should "reassemble multiple parts into a single file and attach it to a content item" do
+        parts = %w(xaa xab xac xad xae xaf xag)
+        paths = parts.map { |part| File.expand_path("../../fixtures/sharding/#{part}", __FILE__) }
+        hashes = paths.map { |path| S::Media.digest(path) }
+        paths.each_with_index do |part, n|
+          post "/@spontaneous/shard/#{hashes[n]}", "file" => ::Rack::Test::UploadedFile.new(part, "application/octet-stream")
+        end
+        hashes.each do |hash|
+          get "/@spontaneous/shard/#{hash}"
+          last_response.status.should == 200
+        end
+        @image1.image.processed_value.should == ""
+        post "/@spontaneous/shard/replace/#{@image1.id}", "filename" => "rose.jpg", "shards" => hashes, "field" => @image1.image.schema_id.to_s
+        assert last_response.ok?
+        last_response.content_type.should == "application/json;charset=utf-8"
+        @image1 = Content[@image1.id]
+        src = @image1.image.src
+        src.should =~ %r{^(.+)/rose\.jpg$}
+        last_response.body.json.should == {
+          :id => @image1.id,
+          :src => src
+        }
+        File.exist?(Media.to_filepath(src)).should be_true
+        S::Media.digest(Media.to_filepath(src)).should == @image_digest
+      end
     end
   end
 end

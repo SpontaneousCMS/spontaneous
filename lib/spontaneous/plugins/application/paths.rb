@@ -62,12 +62,17 @@ module Spontaneous::Plugins::Application
       end
 
       def media_dir(*path)
-        @media_dir ||= File.expand_path(root / "../media")
+        @media_dir ||= File.expand_path(root / "cache/media")
         relative_dir(@media_dir, *path)
       end
 
       def media_path(*args)
         Spontaneous::Media.media_path(*args)
+      end
+
+      def shard_path(*args)
+        path = ['tmp'].concat(args)
+        Spontaneous::Media.media_path(*path)
       end
 
       def root(*path)
@@ -80,7 +85,7 @@ module Spontaneous::Plugins::Application
       end
 
       def revision_root(*path)
-        @revision_dir ||= File.expand_path(root / '../revisions')
+        @revision_dir ||= File.expand_path(root / 'cache/revisions')
         relative_dir(@revision_dir, *path)
       end
 

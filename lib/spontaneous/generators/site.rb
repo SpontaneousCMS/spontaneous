@@ -40,6 +40,8 @@ module Spontaneous
           empty_directory "lib/tasks"
           empty_directory "log"
           empty_directory "tmp"
+          empty_directory "cache/media/tmp"
+          empty_directory "cache/revisions"
           copy_file ".gitignore"
           template "lib/tasks/site.rake.tt", "lib/tasks/#{@site_name}.rake"
         else
