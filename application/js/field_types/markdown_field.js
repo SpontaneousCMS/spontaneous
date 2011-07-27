@@ -25,7 +25,16 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 		},
 
 		initialize: function(input) {
-			this.input = input;
+			this.input = input.bind('keydown.markdown', function(event) {
+				var key = String.fromCharCode(event.keyCode)
+				if ((event.ctrlKey || event.metaKey) && key === this.key_shortcut()) {
+					this.execute(event);
+					return false;
+				}
+			}.bind(this));
+		},
+		key_shortcut: function() {
+			return "";
 		},
 		execute: function(event) {
 			this.wrap();
@@ -177,13 +186,19 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 	var Bold = new JS.Class(TextCommand, {
 		name: 'Bold',
 		pre: '**',
-		post: '**'
+		post: '**',
+		key_shortcut: function() {
+			return "B"; // "b"
+		},
 	});
 
 	var Italic = new JS.Class(TextCommand, {
 		name: 'Italic',
 		pre: '_',
-		post: '_'
+		post: '_',
+		key_shortcut: function() {
+			return "I";
+		},
 	});
 
 	var UL = new JS.Class(TextCommand, {
@@ -251,6 +266,9 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 		pre: '',
 		post: "=",
 		scale: 1.0,
+		key_shortcut: function() {
+			return "1";
+		},
 		surround: function(text) {
 			// remove existing header (which must be different from this version)
 			if (this.matches_removal(text)) { text = this.remove(text); }
@@ -344,7 +362,10 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 	var H2 = new JS.Class(H1, {
 		name: "H2",
 		post: "-",
-		scale: 1.2 // hyphens are narrower than equals and narrower than the average char
+		scale: 1.2, // hyphens are narrower than equals and narrower than the average char
+		key_shortcut: function() {
+			return "2";
+		},
 	});
 
 
