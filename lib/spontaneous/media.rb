@@ -58,6 +58,7 @@ module Spontaneous
         shards = hashes.map { |hash| Spontaneous.shard_path(hash) }
         combined = Tempfile.new('shard')
         combined.binmode
+
         shards.each do |shard|
           File.open(shard, 'rb') do |part|
             while data = part.read(131072)
@@ -65,8 +66,8 @@ module Spontaneous
             end
           end
         end
-        combined.flush
         combined.close
+
         if block_given?
           begin
             yield(combined)
@@ -74,6 +75,7 @@ module Spontaneous
             combined.close!
           end
         else
+          # caller's responsibility to close & delete tempfile
           combined
         end
       end
