@@ -773,13 +773,13 @@ class BackTest < MiniTest::Spec
 
       should "have the right setting for shard_dir" do
         Spontaneous.shard_path.should == @shard_dir
-        Spontaneous.shard_path("abcd").should == @shard_dir/ "abcd"
+        Spontaneous.shard_path("abcdef0123").should == @shard_dir/ "ab/cd/abcdef0123"
       end
 
       should "know when it already has a shard" do
         hash = '4d68c8f13459c0edb40504de5003ec2a6b74e613'
-        FileUtils.touch(@shard_dir / hash)
-        FileUtils.expects(:touch).with(@shard_dir / hash)
+        FileUtils.touch(Spontaneous.shard_path(hash))
+        FileUtils.expects(:touch).with(Spontaneous.shard_path(hash))
         get "/@spontaneous/shard/#{hash}"
         last_response.status.should == 200
       end

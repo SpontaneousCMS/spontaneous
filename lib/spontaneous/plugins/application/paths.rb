@@ -70,9 +70,15 @@ module Spontaneous::Plugins::Application
         Spontaneous::Media.media_path(*args)
       end
 
-      def shard_path(*args)
-        path = ['tmp'].concat(args)
-        Spontaneous::Media.media_path(*path)
+      def shard_path(hash=nil)
+        if hash
+          path = ['tmp', hash[0..1], hash[2..3], hash]
+          Spontaneous::Media.media_path(*path).tap do |path|
+            ::FileUtils.mkdir_p(::File.dirname(path))
+          end
+        else
+          Spontaneous::Media.media_path('tmp')
+        end
       end
 
       def root(*path)

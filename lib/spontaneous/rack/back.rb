@@ -497,9 +497,7 @@ module Spontaneous
         end
 
         post '/shard/:sha1' do
-          p params
-          file = params['file']
-          p file
+          file = params[:file]
           uploaded_hash = Spontaneous::Media.digest(file[:tempfile].path)
           if uploaded_hash == params[:sha1]
             shard_path = Spontaneous.shard_path(params[:sha1])
@@ -511,9 +509,8 @@ module Spontaneous
         end
 
         post '/shard/replace/:id' do
-          p params
           target = content_for_request
-          field = target.fields.sid(params['field'])
+          field = target.fields.sid(params[:field])
           if target.field_writable?(field.name)
             hashes = params[:shards]
             hashes = hashes.split(',') unless hashes.is_a?(Array)
