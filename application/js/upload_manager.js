@@ -24,7 +24,6 @@ Spontaneous.UploadManager = (function($, S) {
 		total: function() {
 			return this._total;
 		},
-		// only for direct image replacement
 		start: function() {
 			var form = new FormData();
 			form.append('file', this.file);
@@ -49,25 +48,19 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		// While loading and sending data.
 		onprogress: function(event) {
-			// console.log("Upload#onprogress", event);
 			var position = event.position;
 			this._position = position;
 			this.time = (new Date()).valueOf() - this.started;
-			// this.target.upload_progress(position, this.total);
 			this.manager.upload_progress(this);
 		},
 		// When the request has successfully completed.
 		onload: function(event) {
-			// console.log("Upload#onload", event);
-			// this.manager.upload_complete(this);
 		},
 		// When the request has completed (either in success or failure).
 		onloadend: function(event) {
-			// console.log("Upload#onloadend", event);
 			this.manager.upload_failed(this);
 		},
 		onreadystatechange: function(event) {
-			// console.log("Upload#onreadystatechange", event);
 			var xhr = event.currentTarget;
 			if (xhr.readyState == 4 && xhr.status === 200) {
 				var result = JSON.parse(xhr.responseText);
@@ -108,12 +101,6 @@ Spontaneous.UploadManager = (function($, S) {
 			this.total_time = 0;
 			this.total_data = 0;
 			this.targets = {};
-			//// show progress bar to make styling easier
-			// this.init_progress_bar();
-			// this.set_bar_length('individual', 1000, 2000)
-			// this.set_bar_length('total', 500, 2000)
-			// this.bars.name.text('Mobile Photo 3 Dec 2009 16 22 33.jpg');
-			// this.bars.stats.text('33Kb/s 3 mins remaining');
 		},
 		// call to append call for image replacement to queue
 		add: function(target, upload) {
@@ -122,7 +109,6 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		register: function(target) {
 			this.targets[target.uid()] = target;
-			// console.log('UploadManger.register', target.uid(), target);
 		},
 		unregister: function(target) {
 			delete this.targets[target.uid()];
@@ -134,7 +120,6 @@ Spontaneous.UploadManager = (function($, S) {
 				console.log('using sharded uploader')
 			}
 			this.add(field, new uploader_class(this, field, file))
-			// console.log("UploadManager#replace", field, file, this.pending);
 			if (!this.current) {
 				this.next();
 			}
@@ -231,7 +216,6 @@ Spontaneous.UploadManager = (function($, S) {
 		update_progress_bars: function() {
 			var total = this.data_total(), completed = this.data_completed();
 
-			// console.log("UploadManager#update_progress_bars", completed, total)
 			this.set_bar_length('total', completed, total);
 			if (this.current) {
 				this.set_bar_length('individual', this.current.position, this.current.total);
@@ -279,7 +263,6 @@ Spontaneous.UploadManager = (function($, S) {
 				target.upload_complete(result);
 			}
 			this.current = null;
-			// console.log("UploadManager#upload_complete", result, this.pending, this.completed)
 			this.next();
 		},
 		upload_failed: function(upload) {
