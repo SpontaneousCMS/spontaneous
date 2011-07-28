@@ -13,31 +13,25 @@ Spontaneous.ShardedUploader = (function($, S) {
 			this.size = this.blob.size;
 		},
 		start: function() {
-			console.log('Shard#start', this.blob, this.blob.size)
 			// first hash the blob, when complete call #hash_complete
 			var reader = new FileReader();
-			console.log('reader', reader)
 			reader.onload = function(event) {
-				console.log('reader complete', event)
 				this.compute_hash(reader.result);
 			}.bind(this);
 			reader.onerror = function(event) {
 				console.error('error', event);
 			};
-			console.log('starting reader')
 			reader.readAsArrayBuffer(this.blob);
 
 		},
 
 		// callback from reader
 		compute_hash: function(array_buffer) {
-			console.log('computing hash', array_buffer)
 			var bytes = new Uint8Array(array_buffer);
 			var sha = Crypto.SHA1(bytes);
-			console.log('computed hash', sha)
 			this.hash = sha
-			// begin upload
 			this.begin_upload();
+			this.failure_count = 0;
 		},
 		remote_path: function() {
 			return [S.Ajax.namespace, 'shard', this.hash].join('/');
@@ -54,7 +48,13 @@ Spontaneous.ShardedUploader = (function($, S) {
 				this.upload();
 			}
 		},
-
+		retry: function() {
+			if (this.hash) {
+				this.upload();
+			} else {
+				this.start();
+			}
+		},
 		upload: function() {
 			// create the form and post it using the calculated hash
 			// assigning the callbacks to myself.
@@ -62,65 +62,77 @@ Spontaneous.ShardedUploader = (function($, S) {
 			var form = new FormData(),
 				path = [S.Ajax.namespace, 'shard', this.hash].join('/');
 			form.append('file', this.blob);
-			this.xhr = new XMLHttpRequest();
-			this.upload = this.xhr.upload;
-			this.xhr.open("POST", path, true);
-			this.upload.onprogress = this.onprogress.bind(this);
-			this.upload.onload = this.onload.bind(this);
-			this.upload.onloadend = this.onloadend.bind(this);
-			this.upload.onerror = this.onerror.bind(this);
-			this.xhr.onreadystatechange = this.onreadystatechange.bind(this);
+			var xhr = new XMLHttpRequest(), upload = xhr.upload;
+			xhr.open("POST", path, true);
+			upload.onprogress = this.onprogress.bind(this);
+			upload.onload = this.onload.bind(this);
+			upload.onloadend = this.onloadend.bind(this);
+			upload.onerror = this.onerror.bind(this);
+			xhr.onreadystatechange = this.onreadystatechange.bind(this);
 			this.started = (new Date()).valueOf();
-			this.xhr.send(form);
+			xhr.send(form);
 		},
 
 		complete: function() {
 			this.blob = null;
 			this.uploader.shard_complete(this);
 		},
+		failed: function() {
+			this.failure_count += 1;
+			this.uploader.shard_failed(this);
+		},
 		onprogress: function(event) {
-			var position = event.position;
-			this.position = position;
+			var progress = event.position;
+			this.progress = progress;
 			this.time = (new Date()).valueOf() - this.started;
-			// this.target.upload_progress(position, this.total);
 			this.uploader.upload_progress(this);
 		},
 		onload: function(event) {
 		},
 		onloadend: function(event) {
-			console.error('shard upload failed', event);
+			console.error('Shard#onloadend: shard upload failed', event);
 		},
 		onreadystatechange: function(event) {
 			var xhr = event.currentTarget;
-			console.log('shard#onreadystatechange', event, xhr)
-			if (xhr.readyState == 4 && xhr.status === 200) {
-				this.complete();
+			if (xhr.readyState == 4) {
+				if (xhr.status === 200) {
+					this.complete();
+				} else {
+					this.failed();
+				}
 			}
 		},
 
 		onerror: function(event) {
+			console.error('Shard#onerror: shard upload error', event);
 		}
 	});
 	var ShardedUploader = new JS.Class(Spontaneous.UploadManager.Upload, {
-		slice_size: 512000,
+		slice_size: 524288,
 		initialize: function(manager, target, file) {
 			this.callSuper();
 			this.completed = [];
+			this.failed = [];
 			this.current = null;
 		},
 		start: function() {
-			console.log('starting sharded upload')
+			this.started = (new Date()).valueOf();
 			this.start_with_index(0);
 		},
 		start_with_index: function(index) {
 			if (index < this.shard_count()) {
 				var shard = new Shard(this, index, this.slice(index));
-				console.log('created shard', shard)
 				this.current = shard;
 				shard.start();
 			} else {
-				console.log('complete')
-				this.finalize();
+				if (this.failed.length === 0) {
+					this.finalize();
+				} else {
+					var shard = this.failed.pop();
+					console.warn('retrying failed shard', shard)
+					this.current = shard;
+					shard.retry();
+				}
 			}
 		},
 		finalize: function() {
@@ -135,13 +147,15 @@ Spontaneous.ShardedUploader = (function($, S) {
 			this.post(path, form);
 		},
 		upload_progress: function(shard) {
-			// console.log('upload_progresss', shard)
+			this.time = (new Date()).valueOf() - this.started;
 			this.manager.upload_progress(this);
 		},
 		position: function() {
 			var _position = 0;
 			for (var i = 0, cc = this.completed, ii = cc.length; i < ii; i++) {
-				_position += cc[i].size;
+				if (cc[i]) { // failed shards will leave a blank space
+					_position += cc[i].size;
+				}
 			}
 			_position += this.current.progress;
 			return _position;
@@ -152,9 +166,13 @@ Spontaneous.ShardedUploader = (function($, S) {
 		shard_complete: function(shard) {
 			// update the progress
 			// and launch the next shard
-			console.log('shard complete', shard);
 			this.manager.upload_progress(this);
-			this.completed.push(shard);
+			this.completed[shard.index] = shard;
+			this.start_with_index(shard.index + 1);
+		},
+		shard_failed: function(shard) {
+			console.error('shard failed', shard, shard.index);
+			this.failed.push(shard);
 			this.start_with_index(shard.index + 1);
 		},
 		shard_count: function() {
@@ -162,7 +180,6 @@ Spontaneous.ShardedUploader = (function($, S) {
 		},
 		slice: function(n) {
 			// file slicing methods have been normalised by compatibility.js
-			console.log(this.file.size, n, n*this.slice_size);
 			return this.file.slice(n * this.slice_size, (n+1) * this.slice_size);
 		}
 

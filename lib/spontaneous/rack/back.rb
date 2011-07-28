@@ -499,7 +499,7 @@ module Spontaneous
         post '/shard/:sha1' do
           file = params[:file]
           uploaded_hash = Spontaneous::Media.digest(file[:tempfile].path)
-          if uploaded_hash == params[:sha1]
+          if uploaded_hash == params[:sha1] # rand(10000) % 2 == 0 # use to test shard re-uploading
             shard_path = Spontaneous.shard_path(params[:sha1])
             FileUtils.mv(file[:tempfile].path, shard_path)
             200
@@ -520,7 +520,7 @@ module Spontaneous
             begin
               shards.each do |shard|
                 File.open(shard, 'rb') do |part|
-                  while data = part.read(8192)
+                  while data = part.read(131072)
                     combined.write(data)
                   end
                 end

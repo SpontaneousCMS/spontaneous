@@ -90,7 +90,7 @@ Spontaneous.UploadManager = (function($, S) {
 		initialize: function(manager, target, form_data, size) {
 			this.callSuper(manager, target, form_data)
 			this.form_data = this.file;
-			this.total = size;
+			this._total = size;
 			this.name = "Saving...";
 		},
 		start: function() {
