@@ -6,16 +6,23 @@ Spontaneous.UploadManager = (function($, S) {
 	var upload_id = (new Date()).valueOf();
 	var Upload = new JS.Class({
 		initialize: function(manager, target, file) {
+			console.log('Upload#initialize', arguments)
 			this.manager = manager;
 			this.field_name = target.schema_id();
 			this.uid = target.uid();
 			this.target = target;
 			this.target_id = target.id();
-			this.position = 0;
+			this._position = 0;
 			this.failure_count = 0;
 			this.file = file;
 			this.name = this.file.fileName;
-			this.total = this.file.fileSize;
+			this._total = this.file.size;
+		},
+		position: function() {
+			return this._position;
+		},
+		total: function() {
+			return this._total;
 		},
 		// only for direct image replacement
 		start: function() {
@@ -24,6 +31,7 @@ Spontaneous.UploadManager = (function($, S) {
 			form.append('field', this.field_name);
 			this.post("/file/replace/"+this.target_id, form);
 		},
+
 		post: function(url, form_data) {
 			this.xhr = new XMLHttpRequest();
 			this.upload = this.xhr.upload;
@@ -43,7 +51,7 @@ Spontaneous.UploadManager = (function($, S) {
 		onprogress: function(event) {
 			// console.log("Upload#onprogress", event);
 			var position = event.position;
-			this.position = position;
+			this._position = position;
 			this.time = (new Date()).valueOf() - this.started;
 			// this.target.upload_progress(position, this.total);
 			this.manager.upload_progress(this);
@@ -120,7 +128,12 @@ Spontaneous.UploadManager = (function($, S) {
 			delete this.targets[target.uid()];
 		},
 		replace: function(field, file) {
-			this.add(field, new Upload(this, field, file))
+			var uploader_class = Upload;
+			if (S.ShardedUploader.supported()) {
+				uploader_class = S.ShardedUploader;
+				console.log('using sharded uploader')
+			}
+			this.add(field, new uploader_class(this, field, file))
 			// console.log("UploadManager#replace", field, file, this.pending);
 			if (!this.current) {
 				this.next();
@@ -195,23 +208,23 @@ Spontaneous.UploadManager = (function($, S) {
 		data_total: function() {
 			var total = 0;
 			for (var i = 0, ii = this.completed.length; i < ii; i++) {
-				total += this.completed[i].total;
+				total += this.completed[i].total();
 			}
 			for (var i = 0, ii = this.pending.length; i < ii; i++) {
-				total += this.pending[i].total;
+				total += this.pending[i].total();
 			}
 			if (this.current) {
-				total += this.current.total;
+				total += this.current.total();
 			}
 			return total;
 		},
 		data_completed: function() {
 			var completed = 0;
 			for (var i = 0, ii = this.completed.length; i < ii; i++) {
-				completed += this.completed[i].total;
+				completed += this.completed[i].total();
 			}
 			if (this.current) {
-				completed += this.current.position;
+				completed += this.current.position();
 			}
 			return completed;
 		},
@@ -231,7 +244,7 @@ Spontaneous.UploadManager = (function($, S) {
 			var t = this.total_time, d = this.total_data;
 			if (this.current) {
 				t += this.current.time;
-				d += this.current.position;
+				d += this.current.position();
 			}
 			return Math.round(((d/1024)/(t/1000)*10)/10);
 		},
@@ -250,7 +263,7 @@ Spontaneous.UploadManager = (function($, S) {
 			}
 			var target = this.targets[upload.uid];
 			if (target) {
-				target.upload_progress(upload.position, upload.total);
+				target.upload_progress(upload.position(), upload.total());
 			}
 			this.update_progress_bars();
 		},
@@ -260,7 +273,7 @@ Spontaneous.UploadManager = (function($, S) {
 			}
 			this.completed.push(this.current);
 			this.total_time += this.current.time;
-			this.total_data += this.current.position;
+			this.total_data += this.current.position();
 			var target = this.targets[upload.uid];
 			if (target) {
 				target.upload_complete(result);
@@ -277,8 +290,11 @@ Spontaneous.UploadManager = (function($, S) {
 			this.current = null;
 			console.error("UploadManager#upload_failed", upload, this.failed)
 			this.next();
-		}
+		},
+		Upload: Upload,
+		FormUpload: FormUpload,
+		WrapUpload: WrapUpload
 	};
 	return UploadManager;
-})(jQuery, Spontaneous);
+}(jQuery, Spontaneous));
 

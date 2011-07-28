@@ -52,6 +52,11 @@ try {
 		throw "FormData not supported";
 	}
 
+	///////////////////////////// File API / File objects
+	if (!window.File) {
+		throw "File API not supported";
+	}
+
 	///////////////////////////// File API / objectURLs
 	// provide consistent API for creating blob/object URLs
 	if (!window.URL) {
@@ -95,6 +100,21 @@ try {
 			}
 		}
 	}
+	///////////////////////////// File API / slices
+	// normalise access to the File#slice method
+	var proto = window.File.prototype;
+	if (!proto.slice) {
+		var methods = ['webkitSlice', 'mozSlice'];
+		for (var i = 0, ii = methods.length; i < ii; i++) {
+			var method = methods[i];
+			if (proto[method]) { proto.slice = proto[method]; }
+		}
+		if (!proto.slice) {
+			// not supporting slice just means we can't use the sharded uploader
+		}
+	}
+
+
 
 	///////////////////////////// localStorage
 	try {
