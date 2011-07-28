@@ -779,6 +779,7 @@ class BackTest < MiniTest::Spec
       should "know when it already has a shard" do
         hash = '4d68c8f13459c0edb40504de5003ec2a6b74e613'
         FileUtils.touch(@shard_dir / hash)
+        FileUtils.expects(:touch).with(@shard_dir / hash)
         get "/@spontaneous/shard/#{hash}"
         last_response.status.should == 200
       end

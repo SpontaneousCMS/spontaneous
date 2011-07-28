@@ -485,7 +485,11 @@ module Spontaneous
         end
 
         get '/shard/:sha1' do
-          if ::File.file?(Spontaneous.shard_path(params[:sha1]))
+          shard = Spontaneous.shard_path(params[:sha1])
+          if ::File.file?(shard)
+            # touch the shard file so that clean up routines can delete unmodified files
+            # without affecting any uploads in progresss
+            FileUtils.touch(shard)
             200
           else
             404
