@@ -814,7 +814,8 @@ class BackTest < MiniTest::Spec
           last_response.status.should == 200
         end
         @image1.image.processed_value.should == ""
-        post "/@spontaneous/shard/replace/#{@image1.id}", "filename" => "rose.jpg", "shards" => hashes, "field" => @image1.image.schema_id.to_s
+        post "/@spontaneous/shard/replace/#{@image1.id}", "filename" => "rose.jpg",
+          "shards" => hashes, "field" => @image1.image.schema_id.to_s
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @image1 = Content[@image1.id]
