@@ -2,18 +2,18 @@ source :rubygems
 
 
 gem 'rake', '~> 0.8.7'
-gem "activesupport", "~> 3.0.4"
-gem "home_run", "~> 1.0.0"
-gem "sequel", "~> 3.20"
-gem "yajl-ruby", "~> 0.7"
-gem "erubis", "~> 2.6"
-gem "tenjin", "~> 0.6.1"
-gem "sinatra", "~> 1.1.2"
+gem 'activesupport', '~> 3.0.4'
+gem 'home_run', '~> 1.0.0'
+gem 'sequel', '~> 3.20'
+gem 'yajl-ruby', '~> 0.7'
+gem 'erubis', '~> 2.6'
+gem 'tenjin', '~> 0.6.1'
+gem 'sinatra', '~> 1.1.2'
 gem 'rack', '~> 1.3.beta'
-gem "thin", "~> 1.2"
-gem "less", "~> 1.2"
-gem "sass", "~> 3.1.4"
-gem "stringex", "~> 1.1"
+gem 'thin', '~> 1.2'
+gem 'less', '~> 1.2'
+gem 'sass', '~> 3.1.4'
+gem 'stringex', '~> 1.1'
 gem 'mini_magick', '~> 3.3'
 gem 'fire_and_forget', '~> 0.3.2'
 gem 'thor', '~> 0.14.6'
@@ -29,7 +29,7 @@ group :development do
   # gem 'pg', '~> 0.9.0'
   gem 'jeweler', '~> 1.5'
   gem 'jnunemaker-matchy', '~> 0.4'
-  gem 'shoulda', :git => "https://github.com/dasch/shoulda.git", :branch => "minitest"
+  gem 'shoulda', :git => 'https://github.com/dasch/shoulda.git', :branch => 'minitest'
   # gem 'mini_shoulda',    '~> 0.3.0'
   gem 'timecop',    '~> 0.3'
   gem 'mocha',      '~> 0.9'
@@ -42,6 +42,6 @@ group :development do
   gem 'harmony',    '~> 0.5', :platforms => [:mri_18]
   gem 'ruby-debug', :platforms => [:mri_18]
   gem 'reek'
-  gem 'locat', :path => "/Users/garry/Dropbox/Development/spontaneous3/locat"
+  gem 'locat', :path => '/Users/garry/Dropbox/Development/spontaneous3/locat'
 end
 
