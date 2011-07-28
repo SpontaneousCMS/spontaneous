@@ -828,6 +828,34 @@ class BackTest < MiniTest::Spec
         File.exist?(Media.to_filepath(src)).should be_true
         S::Media.digest(Media.to_filepath(src)).should == @image_digest
       end
+      should "be able to wrap pieces around files using default addable class" do
+        parts = %w(xaa xab xac xad xae xaf xag)
+        paths = parts.map { |part| File.expand_path("../../fixtures/sharding/#{part}", __FILE__) }
+        hashes = paths.map { |path| S::Media.digest(path) }
+        paths.each_with_index do |part, n|
+          post "/@spontaneous/shard/#{hashes[n]}", "file" => ::Rack::Test::UploadedFile.new(part, "application/octet-stream")
+        end
+        hashes.each do |hash|
+          get "/@spontaneous/shard/#{hash}"
+          last_response.status.should == 200
+        end
+        box = @job1.images
+        current_count = box.pieces.length
+        first_id = box.pieces.first.id.to_s
+
+        post "/@spontaneous/shard/wrap/#{@job1.id}/#{box.schema_id.to_s}", "filename" => "rose.jpg", "shards" => hashes, "mime_type" => "image/jpeg"
+        assert last_response.ok?, "Should have got status 200 but got #{last_response.status}"
+        last_response.content_type.should == "application/json;charset=utf-8"
+        box = @job1.reload.images
+        first = box.pieces.first
+        box.pieces.length.should == current_count+1
+        first.image.src.should =~ %r{^(.+)/rose\.jpg$}
+        required_response = {
+          :position => 0,
+          :entry => first.to_hash
+        }
+        last_response.body.json.should == required_response
+      end
     end
   end
 end

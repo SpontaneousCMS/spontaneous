@@ -79,6 +79,11 @@ Spontaneous.UploadManager = (function($, S) {
 			this.post(["/file/wrap", this.target_id].join('/'), form);
 		}
 	});
+	var ShardedWrapUpload = new JS.Class(S.ShardedUpload, {
+		path: function() {
+			return ["/shard/wrap", this.target_id].join('/');
+		},
+	});
 	var FormUpload = new JS.Class(Upload, {
 		initialize: function(manager, target, form_data, size) {
 			this.callSuper(manager, target, form_data)
@@ -115,8 +120,8 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		replace: function(field, file) {
 			var uploader_class = Upload;
-			if (S.ShardedUploader.supported()) {
-				uploader_class = S.ShardedUploader;
+			if (S.ShardedUpload.supported()) {
+				uploader_class = S.ShardedUpload;
 				console.log('using sharded uploader')
 			}
 			this.add(field, new uploader_class(this, field, file))
@@ -127,8 +132,12 @@ Spontaneous.UploadManager = (function($, S) {
 		// call to wrap files
 		wrap: function(slot, files) {
 			for (var i = 0, ii = files.length; i < ii; i++) {
-				var file = files[i];
-				var upload = new WrapUpload(this, slot, file);
+				var file = files[i], upload;
+				if (S.ShardedUpload.supported()) {
+					upload = new ShardedWrapUpload(this, slot, file);
+				} else {
+					upload = new WrapUpload(this, slot, file);
+				}
 				this.add(slot, upload)
 			}
 			if (!this.current) {
@@ -274,7 +283,6 @@ Spontaneous.UploadManager = (function($, S) {
 			console.error("UploadManager#upload_failed", upload, this.failed)
 			this.next();
 		},
-		Upload: Upload,
 		FormUpload: FormUpload,
 		WrapUpload: WrapUpload
 	};

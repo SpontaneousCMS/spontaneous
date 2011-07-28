@@ -1,7 +1,7 @@
 // console.log("Loading UploadManager...");
 
 
-Spontaneous.ShardedUploader = (function($, S) {
+Spontaneous.ShardedUpload = (function($, S) {
 	var dom = S.Dom;
 	var upload_id = (new Date()).valueOf();
 	var Shard = new JS.Class({
@@ -107,7 +107,8 @@ Spontaneous.ShardedUploader = (function($, S) {
 			console.error('Shard#onerror: shard upload error', event);
 		}
 	});
-	var ShardedUploader = new JS.Class(Spontaneous.UploadManager.Upload, {
+
+	var ShardedUpload = new JS.Class(Spontaneous.Upload, {
 		slice_size: 524288,
 		initialize: function(manager, target, file) {
 			this.callSuper();
@@ -136,15 +137,22 @@ Spontaneous.ShardedUploader = (function($, S) {
 			}
 		},
 		finalize: function() {
-			var path = ["/shard/replace", this.target_id].join('/'), form = new FormData(), shards = [];
-			for (var i = 0, ii = this.completed.length; i < ii; i++) {
-				shards.push(this.completed[i].hash);
-			}
-			console.log(shards);
+			var form = new FormData();
 			form.append('field', this.field_name);
-			form.append('shards', shards.join(','))
+			form.append('shards', this.hashes().join(','));
+			form.append('mime_type', this.mime_type());
 			form.append('filename', this.file.fileName);
-			this.post(path, form);
+			this.post(this.path(), form);
+		},
+		path: function() {
+			return ["/shard/replace", this.target_id].join('/');
+		},
+		hashes: function() {
+			var hashes = [];
+			for (var i = 0, ii = this.completed.length; i < ii; i++) {
+				hashes.push(this.completed[i].hash);
+			}
+			return hashes;
 		},
 		upload_progress: function(shard) {
 			this.time = (new Date()).valueOf() - this.started;
@@ -159,6 +167,9 @@ Spontaneous.ShardedUploader = (function($, S) {
 			}
 			_position += this.current.progress;
 			return _position;
+		},
+		mime_type: function() {
+			return this.file.type;
 		},
 		total: function() {
 			return this.file.size;
@@ -184,12 +195,12 @@ Spontaneous.ShardedUploader = (function($, S) {
 		}
 
 	});
-	ShardedUploader.extend({
+	ShardedUpload.extend({
 		supported: function() {
 			return ((typeof window.File.prototype.slice === 'function') &&
 				(typeof window.FileReader !== 'undefined') &&
 				(typeof window.Uint8Array !== 'undefined'));
 		}
 	});
-	return ShardedUploader;
+	return ShardedUpload;
 }(jQuery, Spontaneous));

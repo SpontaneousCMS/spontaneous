@@ -9,7 +9,7 @@ module Spontaneous
       NAMESPACE = "/@spontaneous".freeze
       AUTH_COOKIE = "spontaneous_api_key".freeze
 
-      JAVASCRIPT_FILES = %w(vendor/jquery-1.6.2.min vendor/jquery-ui-1.8.9.custom.min vendor/JS.Class-2.1.5/min/core vendor/crypto-2.3.0-crypto vendor/crypto-2.3.0-sha1 extensions spontaneous properties dom authentication user popover popover_view ajax types image content entry page_entry box page field field_types/string_field field_types/file_field field_types/image_field field_types/markdown_field field_types/date_field content_area preview editing location state top_bar field_preview box_container progress status_bar upload_manager sharded_uploader dialogue edit_dialogue edit_panel add_home_dialogue page_browser add_alias_dialogue publish init load)
+      JAVASCRIPT_FILES = %w(vendor/jquery-1.6.2.min vendor/jquery-ui-1.8.9.custom.min vendor/JS.Class-2.1.5/min/core vendor/crypto-2.3.0-crypto vendor/crypto-2.3.0-sha1 extensions spontaneous properties dom authentication user popover popover_view ajax types image content entry page_entry box page field field_types/string_field field_types/file_field field_types/image_field field_types/markdown_field field_types/date_field content_area preview editing location state top_bar field_preview box_container progress status_bar upload sharded_upload upload_manager dialogue edit_dialogue edit_panel add_home_dialogue page_browser add_alias_dialogue publish init load)
       module Authentication
         module Helpers
           def authorised?
@@ -522,6 +522,33 @@ module Spontaneous
             json({ :id => target.id, :src => field.src})
           else
             unauthorised!
+          end
+        end
+
+        # TODO: remove duplication here
+        post '/shard/wrap/:id/:box_id' do
+          content, box = content_for_request
+          type = box.type_for_mime_type(params[:mime_type])
+          if type
+            if box.writable?(type)
+              position = 0
+              instance = type.new
+              box.insert(position, instance)
+              field = instance.field_for_mime_type(params[:mime_type])
+              Spontaneous::Media.combine_shards(params[:shards]) do |combined|
+                field.unprocessed_value = {
+                  :filename => params[:filename],
+                  :tempfile => combined
+                }
+                content.save
+              end
+              json({
+                :position => position,
+                :entry => instance.entry.to_hash
+              })
+            else
+              unauthorised!
+            end
           end
         end
         # get "/favicon.ico" do
