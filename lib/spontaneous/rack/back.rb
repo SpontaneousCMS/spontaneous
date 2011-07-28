@@ -512,28 +512,12 @@ module Spontaneous
           target = content_for_request
           field = target.fields.sid(params[:field])
           if target.field_writable?(field.name)
-            hashes = params[:shards]
-            hashes = hashes.split(',') unless hashes.is_a?(Array)
-            shards = hashes.map { |hash| Spontaneous.shard_path(hash) }
-            combined = Tempfile.new('shard')
-            combined.binmode
-            begin
-              shards.each do |shard|
-                File.open(shard, 'rb') do |part|
-                  while data = part.read(131072)
-                    combined.write(data)
-                  end
-                end
-              end
-              combined.flush
-              combined.close
+            Spontaneous::Media.combine_shards(params[:shards]) do |combined|
               field.unprocessed_value = {
                 :filename => params[:filename],
                 :tempfile => combined
               }
               target.save
-            ensure
-              combined.close!
             end
             json({ :id => target.id, :src => field.src})
           else

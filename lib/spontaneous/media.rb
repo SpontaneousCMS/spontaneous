@@ -52,6 +52,31 @@ module Spontaneous
       end
 
       alias_method :digest, :sha1
+
+      def combine_shards(hashes, &block)
+        hashes = hashes.split(',') unless hashes.is_a?(Array)
+        shards = hashes.map { |hash| Spontaneous.shard_path(hash) }
+        combined = Tempfile.new('shard')
+        combined.binmode
+        shards.each do |shard|
+          File.open(shard, 'rb') do |part|
+            while data = part.read(131072)
+              combined.write(data)
+            end
+          end
+        end
+        combined.flush
+        combined.close
+        if block_given?
+          begin
+            yield(combined)
+          ensure
+            combined.close!
+          end
+        else
+          combined
+        end
+      end
     end
   end
 end
