@@ -6,7 +6,6 @@ Spontaneous.UploadManager = (function($, S) {
 	var upload_id = (new Date()).valueOf();
 	var Upload = new JS.Class({
 		initialize: function(manager, target, file) {
-			console.log('Upload#initialize', arguments)
 			this.manager = manager;
 			this.field_name = target.schema_id();
 			this.uid = target.uid();
@@ -121,8 +120,8 @@ Spontaneous.UploadManager = (function($, S) {
 		replace: function(field, file) {
 			var uploader_class = Upload;
 			if (S.ShardedUpload.supported()) {
+				console.log('Using sharded uploader')
 				uploader_class = S.ShardedUpload;
-				console.log('using sharded uploader')
 			}
 			this.add(field, new uploader_class(this, field, file))
 			if (!this.current) {
@@ -132,12 +131,12 @@ Spontaneous.UploadManager = (function($, S) {
 		// call to wrap files
 		wrap: function(slot, files) {
 			for (var i = 0, ii = files.length; i < ii; i++) {
-				var file = files[i], upload;
+				var file = files[i], upload, upload_class = WrapUpload;
 				if (S.ShardedUpload.supported()) {
-					upload = new ShardedWrapUpload(this, slot, file);
-				} else {
-					upload = new WrapUpload(this, slot, file);
+					console.log('Using sharded uploader')
+					upload_class = ShardedWrapUpload;
 				}
+				upload = new upload_class(this, slot, file);
 				this.add(slot, upload)
 			}
 			if (!this.current) {
