@@ -1,4 +1,4 @@
-// console.log("Loading UploadManager...");
+// console.log("Loading ShardedUpload...");
 
 
 Spontaneous.ShardedUpload = (function($, S) {
@@ -13,7 +13,6 @@ Spontaneous.ShardedUpload = (function($, S) {
 			this.size = this.blob.size;
 		},
 		start: function() {
-			// first hash the blob, when complete call #hash_complete
 			var reader = new FileReader();
 			reader.onload = function(event) {
 				this.compute_hash(reader.result);
@@ -22,7 +21,6 @@ Spontaneous.ShardedUpload = (function($, S) {
 				console.error('error', event);
 			};
 			reader.readAsArrayBuffer(this.blob);
-
 		},
 
 		// callback from reader
