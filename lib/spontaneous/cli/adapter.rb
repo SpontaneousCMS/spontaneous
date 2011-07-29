@@ -5,7 +5,7 @@ module Spontaneous
     module Adapter
       class << self
         def start(options)
-          Spontaneous::Server.run!(options)
+          ::Spontaneous::Server.run!(options)
         end
       end
     end # Adapter
