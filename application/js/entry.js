@@ -162,6 +162,7 @@ Spontaneous.Entry = (function($, S) {
 			this.wrapper.disappear(function() {
 				this.wrapper.remove();
 			}.bind(this));
+			this.callSuper();
 		}
 	});
 	return Entry;

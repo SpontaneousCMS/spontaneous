@@ -20,7 +20,6 @@ Spontaneous.Page = (function($, S) {
 
 			var path_text = $()
 			var path_text = dom.h3('.path').text(this.page.path).click(function() {
-
 				if (this.page.path !== '/') {
 					this.open_url_editor();
 				}

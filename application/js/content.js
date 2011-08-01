@@ -191,6 +191,8 @@ Spontaneous.Content = (function($, S) {
 			var position = result.position, e = result.entry, entry = this.wrap_entry(e);
 			this.content.entries.splice(position, 0, e);
 			this.entries().splice(position, 0, entry);
+			var page = S.Editing.get('page');
+			page.set('new_entry', {entry:entry, position:position});
 			callback(entry, position);
 		},
 
@@ -203,7 +205,9 @@ Spontaneous.Content = (function($, S) {
 		visibility_toggled: function(result) {
 		},
 		destroyed: function() {
-
+			console.log('content#destroyed')
+			var page = S.Editing.get('page');
+			page.set('removed_entry', this);
 		},
 		reposition: function(position, callback) {
 			Spontaneous.Ajax.post(['/content', this.content.id, 'position', position].join('/'), {}, this, function() {
