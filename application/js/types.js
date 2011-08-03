@@ -67,7 +67,7 @@ Spontaneous.Types = (function($, S) {
 			return this.data.is_alias;
 		},
 		edit_url: function() {
-			return "mvim://open?url=file://"+this.data.source;
+			return S.editor_protocol + "://open?url=file://"+this.data.source;
 		}
 	});
 	var Types = new JS.Singleton({
@@ -95,5 +95,4 @@ Spontaneous.Types = (function($, S) {
 		}
 	});
 	return Types;
-})(jQuery, Spontaneous);
-
+}(jQuery, Spontaneous));

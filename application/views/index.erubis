@@ -15,6 +15,7 @@
         debug: <%= Spontaneous.development? %>,
         development: <%= Spontaneous.development? %>,
         asynchronous: false,
+				editor_protocol: 'mvim',
         onload: function() {
           jQuery.noConflict();
         }
