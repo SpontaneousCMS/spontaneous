@@ -65,7 +65,7 @@ Spontaneous.Location = (function($, S) {
 			$(window).bind('hashchange', State.restore);
 		},
 		page_loaded: function(page) {
-			// page.add_listener('slot', this, 'slot_changed');
+			// page.watch('slot', this, 'slot_changed');
 		},
 		slot_changed: function(slot) {
 			// console.log('Location.slot_changed', slot, slot.uid(), slot.container.id());

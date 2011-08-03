@@ -36,7 +36,7 @@ Spontaneous.PageEntry = (function($, S) {
 			title = dom.a().text(this.content.title).click(function() {
 				S.Location.load_id(__content.id());
 			});
-			this.title_field().add_listener('value', function(t) {
+			this.title_field().watch('value', function(t) {
 				title.text(t);
 			}.bind(this));
 			wrapper.append(title)

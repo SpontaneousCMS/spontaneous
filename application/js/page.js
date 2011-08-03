@@ -14,7 +14,7 @@ Spontaneous.Page = (function($, S) {
 			this.panel.append(this.title);
 			var path_wrap = dom.div('.path');
 
-			this.page.title_field().add_listener('value', function(t) {
+			this.page.title_field().watch('value', function(t) {
 				this.set_title(t);
 			}.bind(this));
 
@@ -37,7 +37,7 @@ Spontaneous.Page = (function($, S) {
 
 			path_wrap.append(dom.div('.edit'));
 
-			this.page.add_listener('path', function(path) {
+			this.page.watch('path', function(path) {
 				path_text.text(path);
 			}.bind(this));
 

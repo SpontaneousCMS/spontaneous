@@ -99,7 +99,7 @@ Spontaneous.TopBar = (function($, S) {
 			return (a < b ? -1 : 1);
 		});
 		// for (var i = 0, ii = children.length; i < ii; i++) {
-		// 	children[i].title_field().add_listener('value', function(title) {
+		// 	children[i].title_field().watch('value', function(title) {
 		// 		console.log('upating title for page', children[i], title)
 		// 	})
 		// }
@@ -342,16 +342,16 @@ Spontaneous.TopBar = (function($, S) {
 				this.location.append(node.element())
 			}
 			this.navigation_current = current_node;
-			S.Editing.add_listener('page', function(page) {
+			S.Editing.watch('page', function(page) {
 				if (page) {
-					page.add_listener('new_entry', function(new_entry) {
+					page.watch('new_entry', function(new_entry) {
 						var entry = new_entry.entry, position = new_entry.position;
 						if (entry.content.is_page) {
 							console.log('new page', entry.title_field().value(), position);
 							children_node.add_page(entry.content, position);
 						}
 					});
-					page.add_listener('removed_entry', function(content) {
+					page.watch('removed_entry', function(content) {
 						console.log('removed_entry', content)
 						// var content = entry.content;
 						if (content.content.is_page) {
@@ -359,7 +359,7 @@ Spontaneous.TopBar = (function($, S) {
 							children_node.remove_page(content);
 						}
 					});
-					page.title_field().add_listener('value', function(title) {
+					page.title_field().watch('value', function(title) {
 						current_node.set_title(title);
 					});
 				}

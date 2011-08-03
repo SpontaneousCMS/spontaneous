@@ -42,7 +42,7 @@ Spontaneous.FieldPreview = (function($, S) {
 					__this.field_to_edit = field;
 				})
 				field.activate(value);
-				field.add_listener('value', function(field, v) { $(this).html(field.preview()) }.bind(value, field));
+				field.watch('value', function(field, v) { $(this).html(field.preview()) }.bind(value, field));
 				li.append(name).append(value);
 				wrapper.append(li);
 			});
