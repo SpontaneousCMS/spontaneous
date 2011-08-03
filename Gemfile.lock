@@ -98,6 +98,7 @@ GEM
     timecop (0.3.5)
     treetop (1.4.9)
       polyglot (>= 0.3.1)
+    xapian-full (1.2.3)
     yajl-ruby (0.8.2)
 
 PLATFORMS
@@ -139,4 +140,5 @@ DEPENDENCIES
   thin (~> 1.2)
   thor (~> 0.14.6)
   timecop (~> 0.3)
+  xapian-full
   yajl-ruby (~> 0.7)
