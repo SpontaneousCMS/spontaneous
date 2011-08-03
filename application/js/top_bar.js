@@ -290,6 +290,7 @@ Spontaneous.TopBar = (function($, S) {
 				});
 				page.title_field().watch('value', function(title) {
 					this.navigation_current.set_title(title);
+					this.set_browser_title(title);
 				}.bind(this));
 				this.children_node = children_node;
 			}
@@ -311,8 +312,11 @@ Spontaneous.TopBar = (function($, S) {
 		publishing_started: function() {
 			this.publish_button.publishing_started();
 		},
+		set_browser_title: function(page_title) {
+			document.title = "Editing: '{title}'".replace("{title}", page_title);
+		},
 		location_changed: function(new_location) {
-			document.title = "Editing: '{title}'".replace("{title}", new_location.title);
+			this.set_browser_title(new_location.title)
 			this.set('location', new_location);
 			this.update_navigation();
 		},
