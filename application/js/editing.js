@@ -9,7 +9,6 @@ Spontaneous.Editing = (function($, S) {
 		init: function(container) {
 			this.container = dom.div('#data_pane');
 			this.container.hide();
-			this.page = false;
 			container.append(this.container);
 			return this;
 		},
@@ -23,11 +22,12 @@ Spontaneous.Editing = (function($, S) {
 			this.set('location', page);
 		},
 		page_loaded: function(page_data) {
-			if (this.page) { this.page.unload(); }
-			var page = new Page(page_data);
+			var page = this.get('page');
+			if (page) { page.unload(); }
+			page = new Page(page_data);
+			view = new S.Views.PageView(page);
 			this.container.empty();
-			this.container.append(page.panel());
-			this.page = page;
+			this.container.append(view.panel());
 			this.set('page', page);
 			this.container.fadeIn(300);
 		},

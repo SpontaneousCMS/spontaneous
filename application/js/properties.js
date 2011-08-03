@@ -78,10 +78,11 @@ Spontaneous.Properties = (function($, S) {
 			return this._props_add_listener(event_name, callback)
 		},
 		// trigger a particular event
-		trigger: function(event_name) {
-			var listeners = this._props_listeners_for(event_name);
+		trigger: function() {
+			var args = Array.prototype.slice.call(arguments);
+			var event_name = args.shift(), listeners = this._props_listeners_for(event_name);
 			for (var i = 0, ii = listeners.length; i < ii; i++) {
-				listeners[i].callback(this);
+				listeners[i].callback.apply(null, args);
 			}
 		}
 	});

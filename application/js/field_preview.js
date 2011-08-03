@@ -4,30 +4,30 @@ Spontaneous.FieldPreview = (function($, S) {
 	var dom = S.Dom;
 
 	var FieldPreview = new JS.Class({
-		initialize: function(content, wrap_id) {
-			this.content = content;
+		initialize: function(view, wrap_id) {
+			this.view = view;
 			this.wrap_id = wrap_id;
 		},
 
 		depth_class: function() {
-			return 'depth-'+this.content.depth();
+			return 'depth-'+this.view.depth();
 		},
 		has_fields: function() {
-			return this.content.field_list().length > 0;
+			return this.view.has_fields();
 		},
 		panel: function() {
 			var wrapper = dom.div([dom.id(this.wrap_id), 'fields-preview', this.depth_class()])
 			// $(dom.div, {'id':this.wrap_id, 'class':'fields-preview ' + this.depth_class()});
-			wrapper.append(this.fields_panel(this.content.text_fields(), 'text'));
-			wrapper.append(this.fields_panel(this.content.image_fields(), 'image'));
-			if (this.content.mouseover) {
-				wrapper.mouseover(this.content.mouseover.bind(this.content))
+			wrapper.append(this.fields_panel(this.view.text_fields(), 'text'));
+			wrapper.append(this.fields_panel(this.view.image_fields(), 'image'));
+			if (this.view.mouseover) {
+				wrapper.mouseover(this.view.mouseover.bind(this.view))
 			}
-			if (this.content.mouseout) {
-				wrapper.mouseout(this.content.mouseout.bind(this.content))
+			if (this.view.mouseout) {
+				wrapper.mouseout(this.view.mouseout.bind(this.view))
 			}
 			wrapper.click(function() {
-				this.content.edit(this.field_to_edit);
+				this.view.edit(this.field_to_edit);
 			}.bind(this))
 			return wrapper;
 		},

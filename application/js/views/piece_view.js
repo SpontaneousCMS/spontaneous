@@ -1,11 +1,12 @@
-// console.log('Loading Entry...')
+// console.log('Loading PieceView...')
 
-Spontaneous.Entry = (function($, S) {
+Spontaneous.Views.PieceView = (function($, S) {
 	var dom = S.Dom, user = S.User;
 	var debug = 0;
+
 	var ConfirmDeletePopup = new JS.Class(Spontaneous.PopoverView, {
-		initialize: function(entry) {
-			this.entry = entry;
+		initialize: function(parent_view) {
+			this.parent_view = parent_view;
 		},
 		width: function() {
 			return 208;
@@ -16,13 +17,13 @@ Spontaneous.Entry = (function($, S) {
 			return false;
 		},
 		title: function() {
-			return "Delete this " + (this.entry.type().is_page() ? "Page?" : "Piece?");
+			return "Delete this " + (this.parent_view.content.is_page() ? "Page?" : "Piece?");
 		},
 		position_from_event: function(event) {
 			return this.position_from_element(event);
 		},
 		view: function() {
-			var __entry = this.entry;
+			var __entry = this.parent_view;
 			var w = dom.div('#popover-delete').click(function() {
 				__entry.cancel_destroy();
 				return false;
@@ -38,10 +39,10 @@ Spontaneous.Entry = (function($, S) {
 		}
 	});
 
-	var Entry = new JS.Class(Spontaneous.Content, {
+	var PieceView = new JS.Class(S.Views.View, {
 		initialize: function(content, container) {
-			this.container = container;
 			this.callSuper(content);
+			this.container = container;
 		},
 		panel: function() {
 			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class(), this.boxes_class()])
@@ -49,12 +50,12 @@ Spontaneous.Entry = (function($, S) {
 			var inside = dom.div('.entry-inner');
 			var outline = dom.div('.white-bg').mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
 			inside.append(outline)
-			if (this.depth() < 4) {
+			if (this.content.depth() < 4) {
 				inside.append(dom.div('.grey-bg'));
 			}
 
 			contents.append(this.title_bar(contents));
-			if (this.type().is_alias()) {
+			if (this.content.type().is_alias()) {
 				contents.append(this.alias_target_panel());
 			}
 			// this.dialogue_box = $(dom.div, {'class':'dialogue', 'style':'display: none'});
@@ -65,7 +66,7 @@ Spontaneous.Entry = (function($, S) {
 				var fields_panel = fields.panel();
 				entry.append(fields_panel);
 			}
-			var box_container = new Spontaneous.BoxContainer(this);
+			var box_container = new Spontaneous.BoxContainer(this.content);
 			inside.append(entry);
 			inside.append(box_container.panel());
 			var preview_area = this.create_edit_wrapper(inside);
@@ -81,13 +82,12 @@ Spontaneous.Entry = (function($, S) {
 			var content = this.content,
 			wrap = dom.div('.alias-target'),
 			icon = content.alias_icon,
-			click = function() { S.Location.load_id(content.target.id); },
-			title = dom.a().text(content.alias_title).click(click);
+			click = function() { S.Location.load_id(content.target().id); },
+			title = dom.a().text(content.content.alias_title).click(click);
 
 
 			if (icon) {
 				var img = new Spontaneous.Image(icon);
-				// console.log(icon, img.is_empty())
 				wrap.append(img.icon(60, 60).click(click))
 			}
 
@@ -95,8 +95,7 @@ Spontaneous.Entry = (function($, S) {
 		},
 		title_bar: function(wrapper) {
 			if (!this._title_bar) {
-				console.log(this.type())
-				var label = user.is_developer() ? dom.a('.developer.source').attr('href', this.developer_edit_url()).text(this.developer_description()) : (this.type().title);
+				var label = user.is_developer() ? dom.a('.developer.source').attr('href', this.content.developer_edit_url()).text(this.content.developer_description()) : (this.content.type().title);
 				var title_bar = dom.div('.title-bar').append(label);
 				var actions = dom.div('.actions', {'xstyle':'display: none'});
 				var destroy = dom.a('.delete');
@@ -112,10 +111,18 @@ Spontaneous.Entry = (function($, S) {
 				// 	_hide_pause = window.setTimeout(function() { actions.slideUp(100) }, 200);
 				// });
 				destroy.click(this.confirm_destroy.bind(this));
+				this.content.bind('visibility_toggled', this.visibility_toggled.bind(this));
 				visibility.click(this.toggle_visibility.bind(this));
 				this._title_bar = title_bar;
 			}
 			return this._title_bar;
+		},
+		reposition: function(position, callback) {
+			this.content.bind('repositioned', callback);
+			this.content.reposition(position);
+		},
+		toggle_visibility: function() {
+			this.content.toggle_visibility();
 		},
 		visibility_toggled: function(result) {
 			this.wrapper.removeClass('visible hidden');
@@ -147,7 +154,8 @@ Spontaneous.Entry = (function($, S) {
 		},
 		destroy: function() {
 			this.close_destroy_dialogue();
-			this.callSuper();
+			this.content.bind('destroyed', this.destroyed.bind(this));
+			this.content.destroy();
 		},
 		cancel_destroy: function() {
 			this.close_destroy_dialogue();
@@ -158,12 +166,12 @@ Spontaneous.Entry = (function($, S) {
 				this._dialogue = null;
 			}
 		},
-		// destroyed: function() {
-		// 	this.wrapper.disappear(function() {
-		// 		this.wrapper.remove();
-		// 	}.bind(this));
-		// 	this.callSuper();
-		// }
+		destroyed: function() {
+			this.wrapper.disappear(function() {
+				this.wrapper.remove();
+			}.bind(this));
+		}
 	});
-	return Entry;
-})(jQuery, Spontaneous);
+	return PieceView;
+}(jQuery, Spontaneous));
+

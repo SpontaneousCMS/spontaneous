@@ -3,16 +3,15 @@
 Spontaneous.BoxContainer = (function($, S) {
 	var dom = S.Dom;
 
-	var BoxContainer = new JS.Class({
+	var BoxContainer = new JS.Class(S.Views.View, {
 
 		initialize: function(content, wrap_id) {
-			this.content = content;
+			this.callSuper(content);
 			this.wrap_id = wrap_id;
 			this.box_content_container = dom.div();
 		},
 
 		panel: function() {
-			// var wrapper = $(dom.div, {'id':this.wrap_id, 'class':'slots'});
 			var wrapper = dom.div([dom.id(this.wrap_id), 'slots']);
 
 			wrapper.append(this.tab_bar());
@@ -29,7 +28,6 @@ Spontaneous.BoxContainer = (function($, S) {
 					var box = boxes[i];
 					var li = dom.li();
 					li.text(box.name())
-					// li.append($(dom.span, {'class':'down'}));
 					li.append(dom.span('.down'));
 					var click = function(index) {
 						this.activate(index, true);
@@ -70,7 +68,7 @@ Spontaneous.BoxContainer = (function($, S) {
 			if (!this._boxes) {
 				var _boxes = [], content_container = this.box_content_container;
 				var f = function(i, box) {
-					_boxes.push(new Spontaneous.Box(box, this.content, content_container))
+					_boxes.push(new Spontaneous.Views.BoxView(box, content_container))
 				}.bind(this);
 				$.each(this.content.boxes(), f);
 				this._boxes = _boxes;

@@ -1,0 +1,238 @@
+// console.log('Loading Page...')
+
+Spontaneous.Views.PageView = (function($, S) {
+	var dom = S.Dom, user = S.User;
+
+	var FunctionBar = function(page) {
+		this.page = page;
+	};
+	FunctionBar.prototype = {
+		panel: function() {
+			this.panel = dom.div('#page-info');
+			this.title = $('<h1/>');
+			this.set_title();
+			this.panel.append(this.title);
+			var path_wrap = dom.div('.path');
+
+			this.page.title_field().watch('value', function(t) {
+				this.set_title(t);
+			}.bind(this));
+
+			var path_text = dom.h3('.path').text(this.page.get('path')).click(function() {
+				if (this.page.get('path') !== '/') {
+					this.open_url_editor();
+				}
+			}.bind(this));
+			path_wrap.append(path_text);
+
+
+			if (user.is_developer()) {
+				var uid_text = dom.h3('.developer.uid' + (!this.page.content.uid ? '.missing' : '')).text('#' + (this.page.content.uid || "----")).click(function() {
+					this.open_uid_editor();
+				}.bind(this));
+				var dev_desc = dom.h3('.developer').append(dom.a().attr('href', this.page.developer_edit_url()).text(this.page.developer_description()));
+				path_wrap.append(uid_text, dev_desc);
+			}
+
+			path_wrap.append(dom.div('.edit'));
+
+			this.page.watch('path', function(path) {
+				path_text.text(path);
+			}.bind(this));
+
+			this.panel.append(path_wrap);
+			this.path_wrap = path_wrap
+			return this.panel;
+		},
+		set_title: function(title) {
+			title = title || this.page.title();
+			this.title.text(title);
+			if (this.page.content.hidden) {
+				this.title.append(dom.span().text(' (hidden)'));
+			}
+		},
+		unavailable_loaded: function(response) {
+			var u = {};
+			for (var i = 0, ii = response.length; i < ii; i++) {
+				u[response[i]] = true;
+			}
+			this.unavailable = u;
+		},
+		open_uid_editor: function() {
+			this.panel.animate({'height': '+=14'}, 200, function() {
+				var view = $('h3', this.panel), edit = $('.edit', this.panel);
+				view.hide();
+				edit.hide().empty();
+				var input = dom.input({'type':'text', 'autofocus':'autofocus'}).val(this.page.content.uid).select();
+				var input_and_error = dom.div('.input-error.uid-input');
+				var hash = dom.div('.hash').text('#');
+				var label = dom.label().text('UID');
+				var submit = function() {
+					this.save_uid(input.val());
+				}.bind(this);
+				input_and_error.append(hash, input);
+				edit.append(label, input_and_error);
+				edit.append(dom.a('.button.save').text('Save').click(submit));
+				edit.append(dom.a('.button.cancel').text('Cancel').click(this.close.bind(this)));
+				input.keyup(function(event) {
+					if (event.keyCode === 13) {
+						submit();
+					} else {
+						var v = input.val();
+						// do some basic cleanup -- proper cleanup is done on the server-side
+						v = v.toLowerCase().replace(/['"]/g, '');
+						v = v.replace(/[^a-z0-9_]/g, '_').replace(/(\_+|\s+)/g, '_').replace(/(^\-)/, '');
+						input.val(v);
+					}
+				}.bind(this)).keydown(function(event) {
+					if (event.keyCode === 27) { this.close(); }
+				}.bind(this));
+				edit.fadeIn(200);
+			}.bind(this));
+		},
+		save_uid: function(uid) {
+			Spontaneous.Ajax.post('/uid/'+this.page.id(), {'uid':uid}, this.uid_save_complete.bind(this));
+		},
+		uid_save_complete: function(response, status, xhr) {
+			if (status === 'success') {
+				var view = $('h3.uid', this.panel), edit = $('.edit', this.panel), uid = (response.uid == "" ? "----" : response.uid);
+				// nasty but the value is only used for display
+				this.page.content.uid = response.uid;
+				view.text('#'+uid);
+				this.close();
+			}
+		},
+		open_url_editor: function() {
+			this.unavailable = false;
+			Spontaneous.Ajax.get(['/slug', this.page.id(), 'unavailable'].join('/'), this.unavailable_loaded.bind(this));
+			this.panel.animate({'height': '+=14'}, 200, function() {
+				var view = $('h3', this.panel), edit = $('.edit', this.panel);
+				view.hide();
+				edit.hide().empty();
+				var path = [""], parts = this.page.get('path').split('/'), slug = parts.pop();
+				parts.shift(); // remove empty entry caused by leading '/'
+				edit.append(dom.span().text('/'))
+				for (var i = 0, ii = parts.length; i < ii; i++) {
+					var p = parts[i];
+					path.push(p)
+					edit.append(dom.a('.path').text(p).attr('href', path.join('/')).click(function() {
+						S.Location.load_path($(this).attr('href'));
+						return false;
+					}));
+					edit.append(dom.span().text('/'));
+				}
+				var input_and_error = dom.span('.input-error');
+				var input = dom.input({'type':'text', 'autofocus':'autofocus'}).val(slug).select();
+				var error = dom.span().text('Duplicate URL').hide();
+				input_and_error.append(input);
+				input_and_error.append(error);
+				edit.append(input_and_error);
+				var submit = function() {
+					this.save(input.val());
+				}.bind(this);
+				edit.append(dom.a('.button.save').text('Save').click(submit));
+				edit.append(dom.a('.button.cancel').text('Cancel').click(this.close.bind(this)));
+				input.keyup(function(event) {
+					if (event.keyCode === 13) {
+						submit();
+					} else {
+						var v = this.input.val();
+						// do some basic cleanup -- proper cleanup is done on the server-side
+						v = v.toLowerCase().replace(/['"]/g, '').replace(/\&/, 'and');
+						v = v.replace(/[^\w0-9+]/g, '-').replace(/(\-+|\s+)/g, '-').replace(/(^\-)/, '');
+						this.input.val(v);
+						if (v === '') {
+								this.show_path_error('Invalid URL');
+						} else {
+							if (this.unavailable[v]) {
+								this.show_path_error();
+							} else {
+								this.hide_path_error();
+							}
+						}
+					}
+				}.bind(this)).keydown(function(event) {
+					if (event.keyCode === 27) { this.close(); }
+				}.bind(this));
+				this.input = input;
+				this.error = error;
+				edit.fadeIn(200);
+			}.bind(this));
+		},
+		show_path_error: function(error_text) {
+			error_text = (error_text || "Duplicate URL");
+			this.error.text(error_text).fadeIn(100);
+			this.input.addClass('error');
+		},
+		hide_path_error: function(error_text) {
+			this.error.fadeOut(100);
+			if (this.input.hasClass('error')) { this.input.removeClass('error'); }
+		},
+		save: function(slug) {
+			Spontaneous.Ajax.post('/slug/'+this.page.id(), {'slug':slug}, this.save_complete.bind(this));
+		},
+
+		save_complete: function(response, status, xhr) {
+			if (status === 'success') {
+				this.hide_path_error();
+				var view = $('h3.path', this.panel), edit = $('.edit', this.panel);
+				this.page.set('path', response.path);
+				view.text(response.path);
+				this.close();
+				// HACK: see preview.js (Preview.display)
+				Spontaneous.Location.set('path', this.page.get('path'))
+			} else {
+				if (xhr.status === 409) { // duplicate path
+					this.show_path_error();
+				}
+				if (xhr.status === 406) { // empty path
+					this.show_path_error('Invalid URL');
+				}
+			}
+		},
+		close: function() {
+			var view = $('h3', this.panel), edit = $('.edit', this.panel);
+			view.show();
+			edit.hide();
+			this.panel.animate({'height': '-=14'}, 200)
+		}
+	};
+	var PageView = new JS.Class(Spontaneous.Views.View, {
+		initialize: function(page) {
+			this.page = page;
+			this.callSuper(page);
+		},
+
+		panel: function() {
+			this.panel = dom.div('#page-content');
+			this.panel.append(new FunctionBar(this.page).panel());
+
+			var fields = dom.div('#page-fields')
+			var fp = new Spontaneous.FieldPreview(this, '');
+			var p = fp.panel();
+			p.prepend(dom.div('.overlay'))
+
+			var preview_area = this.create_edit_wrapper(p);
+			fields.append(preview_area)
+			this.panel.append(fields);
+			this.panel.append(new Spontaneous.BoxContainer(this.page, 'page-slots').panel());
+			this.fields_preview = p;
+			return this.panel;
+		},
+		mouseover: function() {
+			if (this.fields_preview) {
+				this.fields_preview.addClass('hover');
+			}
+		},
+		mouseout: function() {
+			if (this.fields_preview) {
+				this.fields_preview.removeClass('hover');
+			}
+		},
+		depth: function() {
+			return this.page.depth();
+		}
+	});
+
+	return PageView;
+}(jQuery, Spontaneous));

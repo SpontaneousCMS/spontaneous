@@ -16,6 +16,8 @@ Spontaneous.UploadManager = (function($, S) {
 			this.file = file;
 			this.name = this.file.fileName;
 			this._total = this.file.size;
+			this.complete = false;
+			this.upload_id = upload_id++;
 		},
 		position: function() {
 			return this._position;
@@ -62,10 +64,14 @@ Spontaneous.UploadManager = (function($, S) {
 		onreadystatechange: function(event) {
 			var xhr = event.currentTarget;
 			if (xhr.readyState == 4 && xhr.status === 200) {
-				var result = JSON.parse(xhr.responseText);
-				this.manager.upload_complete(this, result);
+				if (!this.complete) {
+					var result = JSON.parse(xhr.responseText);
+					this.manager.upload_complete(this, result);
+					this.complete = true;
+				}
 			}
 		},
+
 		onerror: function(event) {
 			this.failure_count++;
 			this.manager.upload_failed(this);
@@ -91,7 +97,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.name = "Saving...";
 		},
 		start: function() {
-			this.post(this.target.content.save_path(), this.form_data);
+			this.post(this.target.save_path(), this.form_data);
 		}
 	});
 	var UploadManager = {

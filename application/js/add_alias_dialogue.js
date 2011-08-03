@@ -3,12 +3,13 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 	var dom = S.Dom, Dialogue = Spontaneous.Dialogue;
 
 	var AddAliasDialogue = new JS.Class(Dialogue, {
-		initialize: function(box, type) {
-			this.box = box;
+		initialize: function(box_view, type) {
+			this.box_view = box_view;
+			this.box_view.bind('entry_added', this.alias_added.bind(this))
 			this.type = type;
 		},
 		title: function() {
-			return 'Add alias to &ldquo;' + this.box.name() + '&rdquo;';
+			return 'Add alias to &ldquo;' + this.box_view.name() + '&rdquo;';
 		},
 		buttons: function() {
 			var btns = {};
@@ -21,12 +22,11 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 		},
 		add_alias: function() {
 			if (this.target) {
-				S.Ajax.post(["/alias", this.box.container.id(), this.box.schema_id()].join("/"), {'alias_id':this.type.schema_id, 'target_id':this.target.id}, this.alias_added.bind(this));
+				this.box_view.add_alias(this.target.id, this.type)
 			}
 		},
-		alias_added: function(data) {
+		alias_added: function() {
 			this.close();
-			this.box.update_pieces(data);
 		},
 		select_target: function(target) {
 			this.target = target;

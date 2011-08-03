@@ -16,7 +16,13 @@ Spontaneous.Content = (function($, S) {
 		id: function() {
 			return this.content.id;
 		},
+		is_page: function() {
+			return this.type().is_page();
+		},
 
+		target: function() {
+			return this.content.target;
+		},
 		developer_description: function() {
 			return this.type().type + "["+this.id()+']'
 		},
@@ -120,7 +126,14 @@ Spontaneous.Content = (function($, S) {
 			return ['/save', this.content.id].join('/');
 		},
 
-		save_complete: function() {
+		save_complete: function(response) {
+			if (response) {
+				var fields = response.fields;
+				for (var i = 0, ii = fields.length; i < ii; i++) {
+					var values = fields[i], field = this.field(values.name);
+					field.update(values);
+				}
+			}
 		},
 
 		has_fields: function() {
@@ -141,7 +154,8 @@ Spontaneous.Content = (function($, S) {
 			}
 			var _entries = [];
 			for (var i = 0, ee = this.content.entries, ii = ee.length; i < ii; i++) {
-				_entries.push(this.wrap_entry(ee[i]));
+				var entry = this.wrap_entry(ee[i]);
+				_entries.push(entry);
 			}
 			return _entries;
 		}.cache(),
@@ -150,7 +164,7 @@ Spontaneous.Content = (function($, S) {
 			var _boxes = [];
 			if (this.content.boxes) {
 				for (var i = 0, ee = this.content.boxes, ii = ee.length; i < ii; i++) {
-					_boxes.push(ee[i]);
+					_boxes.push(new S.Box(ee[i], this));
 				}
 			}
 			return _boxes;
@@ -167,33 +181,13 @@ Spontaneous.Content = (function($, S) {
 			}
 			return new entry_class(entry, this);
 		},
+
 		allowed_types: function() {
 			return this.type().allowed_types();
 		},
 
 		depth: function() {
 			return this.content.depth;
-		},
-
-		depth_class: function() {
-			return 'depth-'+this.depth();
-		},
-
-		visibility_class: function() {
-			return this.content.hidden ? 'hidden' : 'visible';
-		},
-		boxes_class: function() {
-			return this.has_boxes() ? 'boxes' : 'no-boxes';
-		},
-
-
-		entry_added: function(result, callback) {
-			var position = result.position, e = result.entry, entry = this.wrap_entry(e);
-			this.content.entries.splice(position, 0, e);
-			this.entries().splice(position, 0, entry);
-			var page = S.Editing.get('page');
-			page.set('new_entry', {entry:entry, position:position});
-			callback(entry, position);
 		},
 
 		destroy: function() {
@@ -203,87 +197,23 @@ Spontaneous.Content = (function($, S) {
 			Spontaneous.Ajax.post(['/toggle', this.content.id].join('/'), {}, this.visibility_toggled.bind(this));
 		},
 		visibility_toggled: function(result) {
+			this.trigger('visibility_toggled', result);
 		},
 		destroyed: function() {
 			console.log('content#destroyed')
 			var page = S.Editing.get('page');
-			page.set('removed_entry', this);
+			this.trigger('destroyed', this);
+			page.trigger('removed_entry', this);
 		},
-		reposition: function(position, callback) {
+		reposition: function(position) {
 			Spontaneous.Ajax.post(['/content', this.content.id, 'position', position].join('/'), {}, function() {
-				this.repositioned(callback);
+				this.repositioned();
 			}.bind(this));
 		},
-		repositioned: function(callback) {
-			if (typeof callback === 'function') {
-				callback(this);
-			}
-		},
-		// edit: function() {
-		// 	return ;
-		// 	// (new Spontaneous.EditDialogue(this)).open();
-		// },
-		//
-		create_edit_wrapper: function(read_content) {
-			var s = {'style':'position: relative; overflow: hidden;'}
-			var outer = dom.div(s);
-			var write = dom.div({'style':'position: absolute; height: 0; overflow: hidden;'})
-			var write_inner = dom.div();
-			var read = dom.div(s);
-			var read_inner = dom.div();
-			write.append(write_inner);
-			read_inner.append(read_content);
-			read.append(read_inner);
-			outer.append(write).append(read);
-			this.editing_area = {
-				outer: outer,
-				write: write,
-				write_inner: write_inner,
-				read: read,
-				read_inner: read_inner
-			};
-			return outer;
-		},
-
-		edit: function(focus_field) {
-			var time_to_reveal = 300, back = 10, front = 20,
-				a = this.editing_area, o = a.outer, w = a.write, r = a.read, wi = a.write_inner, ri = a.read_inner;
-			var panel = new Spontaneous.EditPanel(this), view = panel.view();
-			r.css('z-index', front);
-			w.css('z-index', back).css('height', 'auto').show();
-			wi.append(view);
-			var h = wi.outerHeight();
-			o.add(r).animate({'height':h}, { queue: false, duration: time_to_reveal });
-			w.css({'position':'relative'});
-			r.css({'position':'absolute', 'top':0, 'right':0, 'left':0}).animate({'top':h}, { queue: false, duration: time_to_reveal, complete:function() {
-				w.css({'z-index': front, 'position':'relative', 'height':'auto'})
-				r.css({'z-index': back, 'position':'absolute'})
-				o.css('height', 'auto');
-				panel.on_show(focus_field);
-			}});
-		},
-		edit_closing: false,
-		edit_closed: function() {
-			if (this.edit_closing) { return; }
-			this.edit_closing = true;
-			var time_to_reveal = 300, back = 10, front = 20,
-			  a = this.editing_area, o = a.outer, w = a.write, r = a.read, wi = a.write_inner, ri = a.read_inner,
-				h = ri.outerHeight(), __content = this;
-				o.add(r).animate({'height':h}, { queue: false, duration: time_to_reveal });
-				r.css({'z-index':front, 'height':h, 'top':wi.outerHeight()+'px'}).animate({'top':0}, { queue: true, duration: time_to_reveal, complete: function() {
-					w.css({'position':'absolute', 'z-index':back});
-					r.css({'position':'relative', 'height':'auto', 'z-index':front})
-					o.css('height', 'auto')
-					wi.empty();
-					__content.edit_closing = false;
-				}});
-
-		},
-		// save: function(dialogue, form_data) {
-		// 	// Spontaneous.Ajax.post('/'+this.model_name+'/'+this.id + '/save', $(form).serialize(), this, this.saved);
-		// 	// console.log(form_data);
-		// }
+		repositioned: function() {
+			this.trigger('repositioned');
+		}
 	});
 
 	return Content;
-})(jQuery, Spontaneous);
+}(jQuery, Spontaneous));
