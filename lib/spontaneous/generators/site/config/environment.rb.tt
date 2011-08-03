@@ -1,5 +1,6 @@
 
-site_name '<%= @site_name %>'
+site_domain '<%= @domain %>'
+site_id '<%= @site_name %>'
 
 
 # change this to alter the content-type encoding sent in public HTTP headers

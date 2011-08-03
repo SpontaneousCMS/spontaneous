@@ -313,7 +313,7 @@ Spontaneous.TopBar = (function($, S) {
 			this.publish_button.publishing_started();
 		},
 		set_browser_title: function(page_title) {
-			document.title = "Editing: '{title}'".replace("{title}", page_title);
+			document.title = S.site_domain + " | Editing: '"+page_title+"'";
 		},
 		location_changed: function(new_location) {
 			this.set_browser_title(new_location.title)
