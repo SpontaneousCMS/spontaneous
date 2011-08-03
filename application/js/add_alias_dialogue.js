@@ -21,7 +21,7 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 		},
 		add_alias: function() {
 			if (this.target) {
-				S.Ajax.post(["/alias", this.box.container.id(), this.box.schema_id()].join("/"), {'alias_id':this.type.schema_id, 'target_id':this.target.id}, this, this.alias_added);
+				S.Ajax.post(["/alias", this.box.container.id(), this.box.schema_id()].join("/"), {'alias_id':this.type.schema_id, 'target_id':this.target.id}, this.alias_added.bind(this));
 			}
 		},
 		alias_added: function(data) {
@@ -36,7 +36,7 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 				targets = this.targets, __dialogue = this;
 			instructions.html("Choose a target:")
 			editing.append(instructions, outer)
-			Spontaneous.Ajax.get(['/targets', this.type.schema_id].join('/'), this, this.targets_loaded);
+			Spontaneous.Ajax.get(['/targets', this.type.schema_id].join('/'), this.targets_loaded.bind(this));
 			this._outer = outer;
 			return editing;
 		},

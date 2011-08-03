@@ -31,5 +31,4 @@ Spontaneous.Init = (function($, S) {
 
 
 	};
-})(jQuery, Spontaneous);
-
+}(jQuery, Spontaneous));

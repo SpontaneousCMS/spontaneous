@@ -23,7 +23,7 @@ Spontaneous.AddHomeDialogue = (function($, S) {
 		},
 		create_home: function() {
 			if (this.type) {
-				S.Ajax.post('/root', {'type':this.type.schema_id}, this, this.home_created);
+				S.Ajax.post('/root', {'type':this.type.schema_id}, this.home_created.bind(this));
 			}
 		},
 		home_created: function(data) {

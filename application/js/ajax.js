@@ -9,13 +9,13 @@ Spontaneous.Ajax = (function($, S) {
 	});
 	return {
 		namespace: "/@spontaneous",
-		get: function(url, caller, callback) {
+		get: function(url, callback) {
 			var handle_response = function(data, textStatus, xhr) {
 				if (textStatus !== 'success') {
 					xhr = data;
 					data = {};
 				}
-				callback.call(caller, data, textStatus, xhr);
+				callback(data, textStatus, xhr);
 			};
 			$.ajax({
 				'url': this.request_url(url),
@@ -23,12 +23,12 @@ Spontaneous.Ajax = (function($, S) {
 				'error': handle_response // pass the error to the handler too
 			});
 		},
-		post: function(url, post_data, caller, callback) {
+		post: function(url, post_data, callback) {
 			var success = function(data, textStatus, XMLHttpRequest) {
-				callback.call(caller, data, textStatus, XMLHttpRequest);
+				callback(data, textStatus, XMLHttpRequest);
 			};
 			var error = function(XMLHttpRequest, textStatus, error_thrown) {
-				callback.call(caller, false, textStatus, XMLHttpRequest);
+				callback(false, textStatus, XMLHttpRequest);
 			};
 			$.ajax({
 				'url': this.request_url(url),

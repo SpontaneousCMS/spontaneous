@@ -174,7 +174,7 @@ Spontaneous.TopBar = (function($, S) {
 			this.check_status();
 		},
 		check_status: function() {
-			S.Ajax.get('/publish/status', this, this.status_recieved);
+			S.Ajax.get('/publish/status', this.status_recieved.bind(this));
 		},
 		status_recieved: function(status, response_code) {
 			if (response_code === 'success' && status != this.status) {

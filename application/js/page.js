@@ -92,7 +92,7 @@ Spontaneous.Page = (function($, S) {
 			}.bind(this));
 		},
 		save_uid: function(uid) {
-			Spontaneous.Ajax.post('/uid/'+this.page.id(), {'uid':uid}, this, this.uid_save_complete);
+			Spontaneous.Ajax.post('/uid/'+this.page.id(), {'uid':uid}, this.uid_save_complete.bind(this));
 		},
 		uid_save_complete: function(response, status, xhr) {
 			if (status === 'success') {
@@ -105,7 +105,7 @@ Spontaneous.Page = (function($, S) {
 		},
 		open_url_editor: function() {
 			this.unavailable = false;
-			Spontaneous.Ajax.get(['/slug', this.page.id(), 'unavailable'].join('/'), this, this.unavailable_loaded);
+			Spontaneous.Ajax.get(['/slug', this.page.id(), 'unavailable'].join('/'), this.unavailable_loaded.bind(this));
 			this.panel.animate({'height': '+=14'}, 200, function() {
 				var view = $('h3', this.panel), edit = $('.edit', this.panel);
 				view.hide();
@@ -170,7 +170,7 @@ Spontaneous.Page = (function($, S) {
 			if (this.input.hasClass('error')) { this.input.removeClass('error'); }
 		},
 		save: function(slug) {
-			Spontaneous.Ajax.post('/slug/'+this.page.id(), {'slug':slug}, this, this.save_complete);
+			Spontaneous.Ajax.post('/slug/'+this.page.id(), {'slug':slug}, this.save_complete.bind(this));
 		},
 
 		save_complete: function(response, status, xhr) {

@@ -44,7 +44,7 @@ Spontaneous.PageBrowser = (function($, S) {
 			} else {
 				path = '/map/' + this.origin.id;
 			}
-			S.Ajax.get(path, this, this.page_list_loaded);
+			S.Ajax.get(path, this.page_list_loaded.bind(this));
 		},
 		view: function() {
 			var wrapper = dom.div('.page-browser'), table = dom.div('.page-list');

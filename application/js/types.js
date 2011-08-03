@@ -85,7 +85,7 @@ Spontaneous.Types = (function($, S) {
 					if (callback) { callback.call(type_map); };
 				};
 			})(callback)
-			ajax.get('/types', this, done);
+			ajax.get('/types', done);
 		},
 		type: function(id) {
 			return this.get('types')[id];

@@ -113,7 +113,7 @@ Spontaneous.Content = (function($, S) {
 		save_field: function(field) {
 			var params = { field: {} };
 			params.field[field.name] = {value: field.value()};
-			Spontaneous.Ajax.post(this.save_path(), params, this, this.save_complete);
+			Spontaneous.Ajax.post(this.save_path(), params, this.save_complete.bind(this));
 		},
 
 		save_path: function() {
@@ -197,10 +197,10 @@ Spontaneous.Content = (function($, S) {
 		},
 
 		destroy: function() {
-			Spontaneous.Ajax.post(['/destroy', this.content.id].join('/'), {}, this, this.destroyed);
+			Spontaneous.Ajax.post(['/destroy', this.content.id].join('/'), {}, this.destroyed.bind(this));
 		},
 		toggle_visibility: function() {
-			Spontaneous.Ajax.post(['/toggle', this.content.id].join('/'), {}, this, this.visibility_toggled);
+			Spontaneous.Ajax.post(['/toggle', this.content.id].join('/'), {}, this.visibility_toggled.bind(this));
 		},
 		visibility_toggled: function(result) {
 		},
@@ -210,7 +210,7 @@ Spontaneous.Content = (function($, S) {
 			page.set('removed_entry', this);
 		},
 		reposition: function(position, callback) {
-			Spontaneous.Ajax.post(['/content', this.content.id, 'position', position].join('/'), {}, this, function() {
+			Spontaneous.Ajax.post(['/content', this.content.id, 'position', position].join('/'), {}, function() {
 				this.repositioned(callback);
 			}.bind(this));
 		},
@@ -279,10 +279,10 @@ Spontaneous.Content = (function($, S) {
 				}});
 
 		},
-		save: function(dialogue, form_data) {
-			// Spontaneous.Ajax.post('/'+this.model_name+'/'+this.id + '/save', $(form).serialize(), this, this.saved);
-			// console.log(form_data);
-		}
+		// save: function(dialogue, form_data) {
+		// 	// Spontaneous.Ajax.post('/'+this.model_name+'/'+this.id + '/save', $(form).serialize(), this, this.saved);
+		// 	// console.log(form_data);
+		// }
 	});
 
 	return Content;

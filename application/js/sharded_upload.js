@@ -36,7 +36,7 @@ Spontaneous.ShardedUpload = (function($, S) {
 		},
 		begin_upload: function() {
 			// test for existance of shard on server
-			S.Ajax.get(['/shard', this.hash].join('/'), this, this.status_complete);
+			S.Ajax.get(['/shard', this.hash].join('/'), this.status_complete.bind(this));
 		},
 		status_complete: function(data, status, xhr) {
 			if (status === "success") {

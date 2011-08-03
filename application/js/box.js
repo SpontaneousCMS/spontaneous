@@ -204,7 +204,7 @@ Spontaneous.Box = (function($, S) {
 		},
 
 		add_entry: function(type, position, callback) {
-			Spontaneous.Ajax.post(['/add', this.id(), type.schema_id].join('/'), {}, this, this.update_pieces);
+			Spontaneous.Ajax.post(['/add', this.id(), type.schema_id].join('/'), {}, this.update_pieces.bind(this));
 		},
 
 		save_path: function() {

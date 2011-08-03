@@ -22,7 +22,7 @@ Spontaneous.User = (function($, S) {
 	var instance = new JS.Singleton({
 		include: Spontaneous.Properties,
 		load: function() {
-			S.Ajax.get('/user', this, this.loaded);
+			S.Ajax.get('/user', this.loaded.bind(this));
 		},
 		loaded: function(user_data) {
 			this.user = new User(user_data);

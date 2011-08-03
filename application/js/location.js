@@ -123,13 +123,13 @@ Spontaneous.Location = (function($, S) {
 			if (this.location() && path === this.location().path) {
 				return this.location();
 			}
-			ajax.get('/location'+path, this, this.location_loaded);
+			ajax.get('/location'+path, this.location_loaded.bind(this));
 		},
 		find_id: function(id) {
 			if (this.location() && id === this.location().id) {
 				return this.location();
 			}
-			ajax.get('/map/'+id, this, this.location_loaded);
+			ajax.get('/map/'+id, this.location_loaded.bind(this));
 		},
 		path_from_url: function(url) {
 			var map = this.get('map'),
