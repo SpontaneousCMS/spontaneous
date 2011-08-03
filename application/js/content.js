@@ -200,7 +200,6 @@ Spontaneous.Content = (function($, S) {
 			this.trigger('visibility_toggled', result);
 		},
 		destroyed: function() {
-			console.log('content#destroyed')
 			var page = S.Editing.get('page');
 			this.trigger('destroyed', this);
 			page.trigger('removed_entry', this);

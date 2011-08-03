@@ -93,28 +93,20 @@ Spontaneous.TopBar = (function($, S) {
 	}
 
 	var ChildrenNode = function(children) {
-		this.children = children.sort(function(p1, p2) {
-			var a = p1.title, b = p2.title;
-			if (a == b) return 0;
-			return (a < b ? -1 : 1);
-		});
-		// for (var i = 0, ii = children.length; i < ii; i++) {
-		// 	children[i].title_field().watch('value', function(title) {
-		// 		console.log('upating title for page', children[i], title)
-		// 	})
-		// }
-
+		this.children = children;
 	}
 
 	ChildrenNode.prototype = {
 		element: function() {
 			var li = dom.li();
 			var select = dom.select('.unselected');
+			this.li = li;
+			this.select = select;
 			select.append(dom.option().text(this.status_text()));
 			select.change(function() {
 				var p = $(this.options[this.selectedIndex]).data('page');
 				if (p) {
-					S.Location.load_id(p.id);
+					S.Location.load_id(p.id());
 				}
 				return false;
 			});
@@ -123,15 +115,22 @@ Spontaneous.TopBar = (function($, S) {
 				select.append(this.option_for_entry(p));
 			};
 			li.append(select);
-			this.li = li;
-			this.select = select;
 			return li;
 		},
 		status_text: function() {
+			if (this.children.length === 0) {
+				this.select.hide();
+			} else {
+				this.select.show();
+			}
 			return '('+(this.children.length)+' pages)';
 		},
 		option_for_entry: function(p) {
-			return dom.option({'value': p.id}).text(p.title).data('page', p);
+			var opt = dom.option({'value': p.id()}).text(p.title()).data('page', p);
+			p.title_field().watch('value', function(value) {
+				opt.text(value);
+			}.bind(this));
+			return opt;
 		},
 		update_status: function() {
 			var first = this.select.find('option:first-child');
@@ -147,18 +146,13 @@ Spontaneous.TopBar = (function($, S) {
 		remove_page: function(page) {
 			var index = 0;
 			for (var i = 0, ii = this.children.length; i < ii; i++) {
-				if (this.children[i].id === page.id) {
-					index = i;
-					break;
-				};
+				if (this.children[i].id() === page.id()) { index = i; break; };
 			}
 			this.children.splice(index, 1);
 			this.update_status();
 			var options = this.select.find('option:gt(0)'), remove;
-			console.log(options)
 			options.each(function() {
-				console.log('remove?', $(this).data('page').id ,page.id())
-				if ($(this).data('page').id === page.id()) {
+				if ($(this).data('page').id() === page.id()) {
 					$(this).remove();
 				}
 			});
@@ -277,13 +271,28 @@ Spontaneous.TopBar = (function($, S) {
 			if (!this.get('mode')) {
 				this.set('mode', S.ContentArea.mode);
 			}
-			//// Not working without fixing bubbling of events from editing fields
-			// $(document).keyup(function(event) {
-			// 	console.log('key press', event, event.srcElement)
-			// 	if (event.keyCode === 13 && event.srcElement === window.document) {
-			// 		this.toggle_modes();
-			// 	}
-			// }.bind(this));
+			S.Editing.watch('page', this.page_loaded.bind(this));
+		},
+		page_loaded: function(page) {
+			if (page) {
+				var children_node = new ChildrenNode(page.children());
+				// nodes.push(children_node);
+				this.location.append(children_node.element());
+				page.bind('entry_added', function(entry, position) {
+					if (entry.is_page()) {
+						children_node.add_page(entry, position);
+					}
+				});
+				page.bind('removed_entry', function(entry) {
+					if (entry.is_page()) {
+						children_node.remove_page(entry);
+					}
+				});
+				page.title_field().watch('value', function(title) {
+					this.navigation_current.set_title(title);
+				}.bind(this));
+				this.children_node = children_node;
+			}
 		},
 		set_mode: function(mode) {
 			this.set('mode', mode);
@@ -310,6 +319,7 @@ Spontaneous.TopBar = (function($, S) {
 		update_navigation: function() {
 			var nodes = [];
 			var location = this.get('location');
+			var $location_bar = this.location;
 			var ancestors = location.ancestors;
 			var root, is_root = false, root_node, children_node, current_node;
 			if (ancestors.length === 0) {
@@ -332,38 +342,16 @@ Spontaneous.TopBar = (function($, S) {
 				current_node = root_node;
 			}
 			//if (location.children.length > 0) {
-				children_node = new ChildrenNode(location.children);
-				nodes.push(children_node);
 			//}
-			$('li:gt(0)', this.location).remove();
+			$('li:gt(0)', $location_bar).remove();
 			// this.location.empty();
 			for (var i = 0, ii = nodes.length; i < ii; i++) {
 				var node = nodes[i];
-				this.location.append(node.element())
+				$location_bar.append(node.element())
 			}
 			this.navigation_current = current_node;
-			S.Editing.watch('page', function(page) {
-				if (page) {
-					page.watch('new_entry', function(new_entry) {
-						var entry = new_entry.entry, position = new_entry.position;
-						if (entry.content.is_page) {
-							console.log('new page', entry.title_field().value(), position);
-							children_node.add_page(entry.content, position);
-						}
-					});
-					page.watch('removed_entry', function(content) {
-						console.log('removed_entry', content)
-						// var content = entry.content;
-						if (content.content.is_page) {
-							console.log('removed page', content.title_field().value());
-							children_node.remove_page(content);
-						}
-					});
-					page.title_field().watch('value', function(title) {
-						current_node.set_title(title);
-					});
-				}
-			})
+			this.page_loaded = function(page) {
+			};
 		}
 	});
 	return TopBar;

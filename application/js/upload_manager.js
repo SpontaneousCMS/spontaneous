@@ -179,7 +179,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.current.start();
 		},
 		finished: function() {
-			console.log('UploadManager.finished', this.pending);
+			// console.log('UploadManager.finished', this.pending);
 			this.completed = [];
 			this.status_bar.hide();
 		},

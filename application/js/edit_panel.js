@@ -25,7 +25,6 @@ Spontaneous.EditPanel = (function($, S) {
 			var values = this.form.serializeArray();
 			var field_data = new FormData();
 			var size = 0;
-			console.log('save', values)
 			$.each(values, function(i, v) {
 				field_data.append(v.name, v.value);
 				size += (v.name.length + v.value.length);
@@ -47,7 +46,7 @@ Spontaneous.EditPanel = (function($, S) {
 		},
 
 		upload_progress: function(position, total) {
-			console.log('EditPanel.upload_progress', position, total)
+			// console.log('EditPanel.upload_progress', position, total)
 		},
 
 		upload_complete: function(response) {

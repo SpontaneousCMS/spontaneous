@@ -87,7 +87,7 @@ Spontaneous.Box = (function($, S) {
 			this.content.entries.splice(position, 0, e);
 			this.entries().splice(position, 0, entry);
 			var page = S.Editing.get('page');
-			page.set('new_entry', {entry:entry, position:position});
+			page.trigger('entry_added', entry, position);
 			this.trigger('entry_added', entry, position);
 		},
 
