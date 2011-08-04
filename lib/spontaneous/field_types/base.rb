@@ -115,12 +115,7 @@ module Spontaneous
       end
 
       def serialize
-        {
-          :id => schema_id.to_s,
-          :unprocessed_value => unprocessed_value,
-          :processed_value => processed_value,
-          :attributes => serialized_attributes
-        }
+        S::FieldTypes.serialize_field(self)
       end
 
 

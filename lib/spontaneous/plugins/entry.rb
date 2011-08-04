@@ -43,7 +43,7 @@ module Spontaneous::Plugins
       end
 
       def serialize_entry
-        { :piece => self.id }
+        [self.id]
       end
     end # InstanceMethods
   end # Entry

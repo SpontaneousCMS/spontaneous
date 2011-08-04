@@ -12,12 +12,13 @@ module Spontaneous::Collections
     def initialize(owner, piece_store)
       @owner = owner
       (piece_store || []).each do |data|
+        id = data[0]
         entry = \
-          if data[:page]
-            page = @owner._pieces.detect { |piece| piece.id == data[:page] }
-            Spontaneous::PagePiece.new(@owner, page, data[:style_id])
+          if data.length == 2
+            page = @owner._pieces.detect { |piece| piece.id == id }
+            Spontaneous::PagePiece.new(@owner, page, data[1])
           else
-            @owner._pieces.detect { |piece| piece.id == data[:piece] }
+            @owner._pieces.detect { |piece| piece.id == id }
           end
         # if the piece/page has been deleted or is invisible
         # then we just want to silently skip it

@@ -43,10 +43,7 @@ module Spontaneous
     end
 
     def serialize_entry
-      {
-        :page => target.id,
-        :style_id => @style_id
-      }
+      [target.id, @style_id]
     end
 
     def style=(style)

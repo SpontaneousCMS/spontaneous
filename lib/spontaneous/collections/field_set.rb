@@ -12,7 +12,11 @@ module Spontaneous::Collections
     end
 
     def initialize_from_prototypes(initial_values)
-      values = Hash[(initial_values || []).map { |value| [Spontaneous::Schema::UID[value[:id]], value] }]
+      values = (initial_values || []).map do |value|
+        value = S::FieldTypes.deserialize_field(value)
+        [Spontaneous::Schema::UID[value[:id]], value]
+      end
+      values = Hash[values]
       owner.field_prototypes.each do |field_prototype|
         field = field_prototype.to_field(values[field_prototype.schema_id])
         add_field(field)

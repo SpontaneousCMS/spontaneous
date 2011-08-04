@@ -19,6 +19,19 @@ module Spontaneous
       @@type_map[label.to_sym] || StringField
     end
 
+    def self.serialize_field(field)
+      [field.schema_id.to_s, field.unprocessed_value, field.processed_value, field.serialized_attributes]
+    end
+
+    def self.deserialize_field(serialized_field)
+      {
+        :id => serialized_field[0],
+        :unprocessed_value => serialized_field[1],
+        :processed_value => serialized_field[2],
+        :attributes => serialized_field[3],
+      }
+    end
+
   end
 end
 

@@ -229,8 +229,7 @@ module Spontaneous::Plugins
             if publish and published_copy.entry_store
               pieces_to_delete = published_copy.entry_store - self.entry_store
               pieces_to_delete.each do |entry|
-                id = entry[:piece] || entry[:page]
-                if c = Spontaneous::Content[id]
+                if c = Spontaneous::Content[entry[0]]
                   c.destroy(false)
                 end
               end
