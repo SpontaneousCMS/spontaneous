@@ -19,7 +19,11 @@ Spontaneous.TopBar = (function($, S) {
 				return false;
 			});
 			li.append(link);
+			this.link = link;
 			return li;
+		},
+		set_title: function(new_title) {
+			this.link.text(new_title);
 		}
 	}
 
