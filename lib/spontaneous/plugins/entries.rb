@@ -61,7 +61,7 @@ module Spontaneous::Plugins
       end
 
       def entry_modified!(modified_entry)
-        self.entry_store = all_pieces.serialize
+        self.entry_store = all_pieces.serialize_db
       end
 
       def pieces

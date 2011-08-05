@@ -84,7 +84,7 @@ module Spontaneous::Plugins
 
       # TODO: unify the update mechanism for these two stores
       def field_modified!(modified_field)
-        self.field_store = @field_set.serialize
+        self.field_store = @field_set.serialize_db
       end
 
       def type_for_mime_type(mime_type)

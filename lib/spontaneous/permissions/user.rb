@@ -97,7 +97,7 @@ module Spontaneous::Permissions
       level.developer?
     end
 
-    def to_hash
+    def export
       {
         :name => name,
         :email => email,
@@ -107,7 +107,7 @@ module Spontaneous::Permissions
     end
 
     def to_json
-      to_hash.to_json
+      export.to_json
     end
 
     protected

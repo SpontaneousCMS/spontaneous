@@ -144,7 +144,7 @@ class BackTest < MiniTest::Spec
         get '/@spontaneous/root'
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal Site.root.to_json, last_response.body
+        assert_equal S::JSON.encode(Site.root.export), last_response.body
       end
 
       should "return json for individual pages" do
@@ -152,14 +152,14 @@ class BackTest < MiniTest::Spec
         get "/@spontaneous/page/#{page.id}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal page.to_json, last_response.body
+        assert_equal S::JSON.encode(page.export), last_response.body
       end
 
       should "return json for all types" do
         get "/@spontaneous/types"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal Schema.to_hash.to_json, last_response.body
+        assert_equal Schema.export.to_json, last_response.body
       end
 
       # should "return json for a specific type" do
@@ -455,7 +455,7 @@ class BackTest < MiniTest::Spec
         first.image.src.should =~ /^\/media(.+)\/#{File.basename(@src_file)}$/
           required_response = {
           :position => 0,
-          :entry => first.to_hash
+          :entry => first.export
         }
         last_response.body.json.should == required_response
       end
@@ -477,9 +477,9 @@ class BackTest < MiniTest::Spec
         @home.in_progress.pieces.first.class.name.should == "BackTest::Image"
         required_response = {
           :position => 0,
-          :entry => @home.in_progress.pieces.first.to_hash
+          :entry => @home.in_progress.pieces.first.export
         }
-        last_response.body.json.should == required_response.to_hash
+        last_response.body.json.should == required_response
       end
 
       should "be removable" do
@@ -667,7 +667,7 @@ class BackTest < MiniTest::Spec
           {
             :id => job.id,
             :title => job.title.to_s,
-            :icon => job.image.to_hash
+            :icon => job.image.export
           }
         end
       end
@@ -683,9 +683,9 @@ class BackTest < MiniTest::Spec
         a.target.should == Job.first
         required_response = {
           :position => 0,
-          :entry => @home.featured_jobs.pieces.first.to_hash
+          :entry => @home.featured_jobs.pieces.first.export
         }
-        last_response.body.json.should == required_response.to_hash
+        last_response.body.json.should == required_response
       end
     end
 
@@ -852,7 +852,7 @@ class BackTest < MiniTest::Spec
         first.image.src.should =~ %r{^(.+)/rose\.jpg$}
         required_response = {
           :position => 0,
-          :entry => first.to_hash
+          :entry => first.export
         }
         last_response.body.json.should == required_response
       end

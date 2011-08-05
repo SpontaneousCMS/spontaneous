@@ -53,6 +53,7 @@ module Spontaneous
   plugin Plugins::Application::Facets
 
   autoload :ProxyObject, "spontaneous/proxy_object"
+  autoload :JSON, "spontaneous/json"
 
   autoload :Config, "spontaneous/config"
   autoload :Paths, "spontaneous/paths"
@@ -129,7 +130,7 @@ module Spontaneous
     autoload :Paths, "spontaneous/plugins/paths"
     autoload :PageTree, "spontaneous/plugins/page_tree"
     autoload :AllowedTypes, "spontaneous/plugins/allowed_types"
-    autoload :JSON, "spontaneous/plugins/json"
+    autoload :Serialisation, "spontaneous/plugins/serialisation"
     autoload :SiteMap, "spontaneous/plugins/site_map"
     autoload :PageSearch, "spontaneous/plugins/page_search"
     autoload :Media, "spontaneous/plugins/media"

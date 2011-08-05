@@ -8,7 +8,7 @@ module Spontaneous
     plugin Plugins::SchemaHierarchy
     plugin Plugins::Fields
     plugin Plugins::Styles
-    plugin Plugins::JSON
+    plugin Plugins::Serialisation
     plugin Plugins::Render
     plugin Plugins::AllowedTypes
     plugin Plugins::Permissions
@@ -94,7 +94,7 @@ module Spontaneous
           if self.field?(field_name)
             field = self.class.field_prototypes[field_name].to_field
             field.unprocessed_value = value
-            field_store << field.serialize
+            field_store << field.serialize_db
           end
         end
       end
@@ -106,10 +106,10 @@ module Spontaneous
       _owner.box_modified!(self)
     end
 
-    def serialize
+    def serialize_db
       {
         :box_id => schema_id.to_s,
-        :fields => fields.serialize
+        :fields => fields.serialize_db
       }
     end
 
@@ -178,24 +178,24 @@ module Spontaneous
       pieces
     end
 
-    def to_hash
-      to_shallow_hash.merge({
-        :entries => pieces.map { |p| p.to_hash }
+    def export
+      shallow_export.merge({
+        :entries => pieces.map { |p| p.export }
       })
     end
 
-    def to_shallow_hash
+    def shallow_export
       {
         :name => _prototype.name.to_s,
         :id => _prototype.schema_id.to_s,
-        :fields => self.class.readable_fields.map { |name| fields[name].to_hash }
+        :fields => self.class.readable_fields.map { |name| fields[name].export }
       }
     end
 
     # only called directly after saving a boxes fields so
     # we don't need to return the entries
     def to_json
-      to_shallow_hash.to_json
+      shallow_export.to_json
     end
 
     def writable?(content_type = nil)

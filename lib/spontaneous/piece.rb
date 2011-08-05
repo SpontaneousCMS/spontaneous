@@ -7,11 +7,11 @@ module Spontaneous
 
     set_inheritance_root
 
-    def to_hash
-      super.merge(styles_to_hash)
+    def export
+      super.merge(export_styles)
     end
 
-    def styles_to_hash
+    def export_styles
       h = {
         :style => style_sid.to_s,
       }

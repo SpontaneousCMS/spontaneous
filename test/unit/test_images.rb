@@ -158,7 +158,7 @@ class ImagesTest < MiniTest::Spec
       end
 
       should "serialise attributes" do
-        serialised = S::FieldTypes.deserialize_field(@image.serialize)[:attributes]
+        serialised = S::FieldTypes.deserialize_field(@image.serialize_db)[:attributes]
         [:preview, :thumbnail, :icon, :tall].each do |size|
           serialised.key?(size).should be_true
           serialised[size][:src].should == "/media/00234/0010/rose.#{size}.jpg"
@@ -228,7 +228,7 @@ class ImagesTest < MiniTest::Spec
       end
 
       should "serialise attributes" do
-        serialised = S::FieldTypes.deserialize_field(@image.serialize)[:attributes]
+        serialised = S::FieldTypes.deserialize_field(@image.serialize_db)[:attributes]
         [:preview, :thumbnail, :icon, :tall].each do |size|
           serialised.key?(size).should be_true
           serialised[size][:src].should == "/media/00234/0010/rose.#{size}.jpg"

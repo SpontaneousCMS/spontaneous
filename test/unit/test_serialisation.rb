@@ -81,17 +81,17 @@ class SerialisationTest < MiniTest::Spec
 
     context "classes" do
       should "generate a hash for JSON serialisation" do
-        unless @class_hash == SerialisedPiece.to_hash
-          pp SerialisedPiece.to_hash; puts "="*60; pp @class_hash
+        unless @class_hash == SerialisedPiece.export
+          pp SerialisedPiece.export; puts "="*60; pp @class_hash
         end
-        # SerialisedPiece.to_hash.should == @class_hash
-        assert_hashes_equal(SerialisedPiece.to_hash, @class_hash)
+        # SerialisedPiece.export.should == @class_hash
+        assert_hashes_equal(SerialisedPiece.export, @class_hash)
       end
       should "serialise to JSON" do
         SerialisedPiece.to_json.json.should == @class_hash
       end
       should "include the title field name in the serialisation of page types" do
-        SerialisedPage.to_hash[:title_field].should == 'title'
+        SerialisedPage.export[:title_field].should == 'title'
       end
     end
 
@@ -152,17 +152,17 @@ class SerialisationTest < MiniTest::Spec
       end
 
       should "generate a hash for JSON serialisation" do
-        unless @root_hash == @root.to_hash
+        unless @root_hash == @root.export
           # require 'differ'
-          # p Differ.diff_by_line(@root.to_hash.to_yaml, @root_hash.to_yaml)
-          puts; pp @root_hash; puts "="*60; pp @root.to_hash
+          # p Differ.diff_by_line(@root.export.to_yaml, @root_hash.to_yaml)
+          puts; pp @root_hash; puts "="*60; pp @root.export
         end
-        assert_hashes_equal(@root_hash, @root.to_hash)
+        assert_hashes_equal(@root_hash, @root.export)
       end
 
       should "serialise to JSON" do
         # hard to test this as the serialisation order appears to change
-        @root.to_json.json.should == @root.to_hash
+        @root.to_json.json.should == @root.export
       end
     end
   end

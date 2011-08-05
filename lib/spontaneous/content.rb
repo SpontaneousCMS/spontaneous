@@ -55,7 +55,7 @@ module Spontaneous
     plugin Plugins::Render
     plugin Plugins::SchemaHierarchy
     plugin Plugins::InstanceCode
-    plugin Plugins::JSON
+    plugin Plugins::Serialisation
     plugin Plugins::Media
     plugin Plugins::Publishing
     plugin Plugins::Aliases

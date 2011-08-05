@@ -626,7 +626,7 @@ class PublishingTest < MiniTest::Spec
         change.push(@page2)
         change.save
         result = Change.outstanding
-        result.first.to_hash.should == {
+        result.first.export.should == {
           :changes => [{:id => change.id, :created_at => change.created_at.to_s, :page_ids => [1, 2]}],
           :pages => [
             {:id => 1, :title => "Page \"1\"", :path => "/page-1", :depth => 0},
@@ -647,7 +647,7 @@ class PublishingTest < MiniTest::Spec
         change.save
         @page2.destroy
         result = Change.outstanding
-        result.first.to_hash.must_be_instance_of(Hash)
+        result.first.export.must_be_instance_of(Hash)
       end
     end
 

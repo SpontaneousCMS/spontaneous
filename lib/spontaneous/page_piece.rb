@@ -29,20 +29,20 @@ module Spontaneous
       self
     end
 
-    def to_hash
-      target.to_shallow_hash.merge(styles_to_hash).merge({
+    def export
+      target.shallow_export.merge(export_styles).merge({
         :depth => self.depth
       })
     end
 
-    def styles_to_hash
+    def export_styles
       {
         :style => style_id.to_s,
         :styles => container.available_styles(target).map { |s| s.schema_id.to_s },
       }
     end
 
-    def serialize_entry
+    def serialize_db
       [target.id, @style_id]
     end
 

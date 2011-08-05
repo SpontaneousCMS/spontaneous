@@ -72,7 +72,7 @@ module Spontaneous::Plugins
       end
 
       def serialize_boxes
-        boxes.map { |box| box.serialize }
+        boxes.map { |box| box.serialize_db }
       end
 
       def box_style_id(box_name)

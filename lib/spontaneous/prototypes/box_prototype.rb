@@ -153,7 +153,7 @@ module Spontaneous::Prototypes
       end
     end
 
-    def to_hash
+    def export
       allowed = allowed_types.map { |c| c.json_name }
       {
         :name => name.to_s,
@@ -161,7 +161,7 @@ module Spontaneous::Prototypes
         :title => title,
         :writable => writable?,
         :allowed_types => allowed,
-        :fields => readable_fields.map { |name| instance_class.field_prototypes[name].to_hash },
+        :fields => readable_fields.map { |name| instance_class.field_prototypes[name].export },
       }
     end
   end

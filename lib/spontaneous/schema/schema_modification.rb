@@ -222,7 +222,7 @@ module Spontaneous
           @source.category
         end
 
-        def to_hash
+        def export
           hash = [@action.to_s, category, source.name]
           hash << dest.name if dest
           hash
@@ -248,11 +248,11 @@ module Spontaneous
         end
       end
 
-      def to_hash
-        actions.map { |action| action.to_hash }
+      def export
+        actions.map { |action| action.export }
       end
       def to_json
-        to_hash.to_json
+        export.to_json
       end
     end
   end

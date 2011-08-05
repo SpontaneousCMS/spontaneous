@@ -100,7 +100,7 @@ module Spontaneous
         oid << get_inc.to_s(16).rjust(4, '0')
       end
 
-      def self.to_hash
+      def self.export
         Hash[ @@instances.map { |id, ref| [id, ref.reference] } ]
       end
 

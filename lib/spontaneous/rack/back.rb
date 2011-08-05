@@ -356,7 +356,7 @@ module Spontaneous
               content.save
               json({
                 :position => position,
-                :entry => instance.entry.to_hash
+                :entry => instance.entry.export
               })
             else
               unauthorised!
@@ -374,7 +374,7 @@ module Spontaneous
             content.save
             json({
               :position => position,
-              :entry => instance.entry.to_hash
+              :entry => instance.entry.export
             })
           else
             unauthorised!
@@ -429,7 +429,7 @@ module Spontaneous
               {
                 :id => t.id,
                 :title => t.alias_title,
-                :icon => t.alias_icon_field.to_hash
+                :icon => t.alias_icon_field.export
               }
             end
             json(targets)
@@ -448,7 +448,7 @@ module Spontaneous
               content.save
               json({
                 :position => position,
-                :entry => instance.entry.to_hash
+                :entry => instance.entry.export
               })
             end
           else
@@ -544,7 +544,7 @@ module Spontaneous
               end
               json({
                 :position => position,
-                :entry => instance.entry.to_hash
+                :entry => instance.entry.export
               })
             else
               unauthorised!

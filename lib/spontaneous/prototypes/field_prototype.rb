@@ -98,7 +98,7 @@ module Spontaneous::Prototypes
       end
     end
 
-    def to_hash
+    def export
       {
         :name => name.to_s,
         :schema_id => schema_id.to_s,

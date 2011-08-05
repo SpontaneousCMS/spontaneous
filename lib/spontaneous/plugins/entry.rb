@@ -42,7 +42,7 @@ module Spontaneous::Plugins
         container.pieces.index(self)
       end
 
-      def serialize_entry
+      def serialize_db
         [self.id]
       end
     end # InstanceMethods

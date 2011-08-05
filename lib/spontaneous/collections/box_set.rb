@@ -29,8 +29,8 @@ module Spontaneous::Collections
       end
     end
 
-    def to_hash
-      self.map { |item| item.to_hash }
+    def export
+      self.map { |item| item.export }
     end
 
     protected

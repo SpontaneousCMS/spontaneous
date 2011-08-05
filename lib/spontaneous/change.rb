@@ -88,7 +88,7 @@ module Spontaneous
       self.modified_list & change.modified_list
     end
 
-    def to_hash
+    def export
       {
         :id => self.id,
         :created_at => self.created_at.to_s,

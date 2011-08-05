@@ -157,7 +157,7 @@ module Spontaneous
 
       def write_schema
         File.atomic_write(schema_map_file) do |file|
-          file.write(UID.to_hash.to_yaml)
+          file.write(UID.export.to_yaml)
         end
       end
 
@@ -218,15 +218,15 @@ module Spontaneous
       end
 
 
-      def to_hash
+      def export
         self.content_classes.inject({}) do |hash, klass|
-          hash[klass.name] = klass.to_hash
+          hash[klass.name] = klass.export
           hash
         end
       end
 
       def to_json
-        to_hash.to_json
+        export.to_json
       end
 
       # all classes including boxes

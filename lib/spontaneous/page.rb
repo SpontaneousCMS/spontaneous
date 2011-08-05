@@ -25,7 +25,7 @@ module Spontaneous
       true
     end
 
-    def self.to_hash
+    def self.export
       super.merge(:title_field => self.title_field.to_s)
     end
 
@@ -100,7 +100,7 @@ module Spontaneous
       self.class.title_field
     end
 
-    def to_shallow_hash
+    def shallow_export
       hash = super.merge({
         :path => path,
         :title => page_title,

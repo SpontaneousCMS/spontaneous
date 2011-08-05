@@ -57,8 +57,8 @@ module Spontaneous::Collections
       owner.entry_modified!(nil)
     end
 
-    def serialize
-      self.map { |e| e.serialize_entry }
+    def serialize_db
+      self.map { |e| e.serialize_db }
     end
 
 
@@ -69,9 +69,9 @@ module Spontaneous::Collections
       owner.entry_modified!(piece)
     end
 
-    def to_hash
+    def export
       map do | piece |
-        piece.to_hash
+        piece.export
       end
     end
 

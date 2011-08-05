@@ -114,7 +114,7 @@ module Spontaneous
         schema_owner.schema_id
       end
 
-      def serialize
+      def serialize_db
         S::FieldTypes.serialize_field(self)
       end
 
@@ -162,7 +162,7 @@ module Spontaneous
       #   "spontaneous:previewedit:end:field id:#{owner.id} name:#{self.name}"
       # end
 
-      def to_hash
+      def export
         {
         :name => name.to_s,
         :id => schema_id.to_s,
@@ -173,7 +173,7 @@ module Spontaneous
       end
 
       def inspect
-        %(#<#{self.class.name}:#{self.object_id} #{self.serialize.inspect}>)
+        %(#<#{self.class.name}:#{self.object_id} #{self.serialize_db.inspect}>)
       end
 
       def blank?

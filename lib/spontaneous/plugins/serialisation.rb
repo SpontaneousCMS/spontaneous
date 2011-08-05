@@ -2,19 +2,19 @@
 
 
 module Spontaneous::Plugins
-  module JSON
+  module Serialisation
 
     module ClassMethods
-      def to_hash
+      def export
         {
           :type=> self.json_name,
           :id => self.schema_id.to_s,
           :is_page => self.page?,
           :is_alias => self.alias?,
           :title=> self.title,
-          :fields => readable_fields.map { |name| field_prototypes[name].to_hash },
-          :styles => readable_styles.map { |style| style.to_hash },
-          :boxes => readable_boxes.map { |box| box.to_hash },
+          :fields => readable_fields.map { |name| field_prototypes[name].export },
+          :styles => readable_styles.map { |style| style.export },
+          :boxes => readable_boxes.map { |box| box.export },
           :source => self.__source_file
         }
       end
@@ -32,13 +32,13 @@ module Spontaneous::Plugins
       end
 
       def to_json
-        to_hash.to_json
+        export.to_json
       end
 
     end # ClassMethods
 
     module InstanceMethods
-      def to_shallow_hash
+      def shallow_export
         {
           :id => id,
           :type => self.class.json_name,
@@ -46,22 +46,22 @@ module Spontaneous::Plugins
           :is_page => page?,
           :hidden => (hidden? ? true : false),
           :depth => content_depth,
-          :fields  => fields.to_hash,
+          :fields  => fields.export,
           :label => label
         }
       end
 
-      def to_hash
-        to_shallow_hash.merge({
-          :boxes => self.class.readable_boxes.map { |box| boxes[box.name].to_hash }
+      def export
+        shallow_export.merge({
+          :boxes => self.class.readable_boxes.map { |box| boxes[box.name].export }
         })
       end
 
 
       def to_json
-        to_hash.to_json
+        export.to_json
       end
     end # InstanceMethods
-  end # JSON
+  end # Serialisation
 end # Spontaneous::Plugins
 

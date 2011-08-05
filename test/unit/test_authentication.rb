@@ -317,7 +317,7 @@ class AuthenticationTest < MiniTest::Spec
         should "be able to load info about themselves" do
           get "/@spontaneous/user"
           assert last_response.ok?
-          last_response.body.json.should == @editor_user.to_hash
+          last_response.body.json.should == @editor_user.export
         end
       end
 

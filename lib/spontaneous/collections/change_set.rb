@@ -18,9 +18,9 @@ module Spontaneous::Collections
       @page_ids ||= changes.inject([]) { |a, c| a += c.modified_list; a }.uniq.sort
     end
 
-    def to_hash
+    def export
       h = {
-        :changes => changes.map { |c| c.to_hash },
+        :changes => changes.map { |c| c.export },
       }
       # use compact because it's possible that some pages have been deleted since
       # the change was created and the best way to deal with them is to silently
@@ -36,7 +36,7 @@ module Spontaneous::Collections
       h
     end
     def to_json
-      to_hash.to_json
+      export.to_json
     end
   end
 end

@@ -23,13 +23,13 @@ module Spontaneous::Collections
       end
     end
 
-    def serialize
-      self.map { |field| field.serialize }
+    def serialize_db
+      self.map { |field| field.serialize_db }
     end
 
-    def to_hash
+    def export
       owner.class.field_names.map do |name|
-        self[name].to_hash
+        self[name].export
       end
     end
 
