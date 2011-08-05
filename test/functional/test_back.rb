@@ -298,12 +298,12 @@ class BackTest < MiniTest::Spec
         post "/@spontaneous/toggle/#{@job1.id}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        last_response.body.json.should == {:id => @job1.id, :hidden => true}
+        Spot::JSON.parse(last_response.body).should == {:id => @job1.id, :hidden => true}
         @job1.reload.visible?.should == false
         post "/@spontaneous/toggle/#{@job1.id}"
         assert last_response.ok?
         @job1.reload.visible?.should == true
-        last_response.body.json.should == {:id => @job1.id, :hidden => false}
+        Spot::JSON.parse(last_response.body).should == {:id => @job1.id, :hidden => false}
       end
     end
 
@@ -457,7 +457,7 @@ class BackTest < MiniTest::Spec
           :position => 0,
           :entry => first.export
         }
-        last_response.body.json.should == required_response
+        Spot::JSON.parse(last_response.body).should == required_response
       end
     end
     context "pieces" do
@@ -479,7 +479,7 @@ class BackTest < MiniTest::Spec
           :position => 0,
           :entry => @home.in_progress.pieces.first.export
         }
-        last_response.body.json.should == required_response
+        Spot::JSON.parse(last_response.body).should == required_response
       end
 
       should "be removable" do
@@ -502,7 +502,7 @@ class BackTest < MiniTest::Spec
         last_response.content_type.should == "application/json;charset=utf-8"
         @project1.reload
         @project1.path.should == "/howabout"
-        last_response.body.json.should == {:path => '/howabout' }
+        Spot::JSON.parse(last_response.body).should == {:path => '/howabout' }
       end
       should "raise error when trying to save duplicate path" do
         post "/@spontaneous/slug/#{@project1.id}", 'slug' => 'project2'
@@ -521,7 +521,7 @@ class BackTest < MiniTest::Spec
         get "/@spontaneous/slug/#{@project1.id}/unavailable"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        last_response.body.json.should == %w(project2 project3)
+        Spot::JSON.parse(last_response.body).should == %w(project2 project3)
       end
     end
     context "UIDs" do
@@ -530,7 +530,7 @@ class BackTest < MiniTest::Spec
         @project1.uid.should_not == uid
         post "/@spontaneous/uid/#{@project1.id}", 'uid' => uid
         assert last_response.ok?
-        last_response.body.json.should == {:uid => uid}
+        Spot::JSON.parse(last_response.body).should == {:uid => uid}
         @project1.reload.uid.should == uid
       end
       should "not be editable by non-developer users" do
@@ -663,7 +663,7 @@ class BackTest < MiniTest::Spec
       should "be able to retrieve a list of potential targets" do
         get "/@spontaneous/targets/#{LinkedJob.schema_id}"
         assert last_response.ok?
-        last_response.body.json.should == LinkedJob.targets.map do |job|
+        Spot::JSON.parse(last_response.body).should == LinkedJob.targets.map do |job|
           {
             :id => job.id,
             :title => job.title.to_s,
@@ -685,7 +685,7 @@ class BackTest < MiniTest::Spec
           :position => 0,
           :entry => @home.featured_jobs.pieces.first.export
         }
-        last_response.body.json.should == required_response
+        Spot::JSON.parse(last_response.body).should == required_response
       end
     end
 
@@ -821,13 +821,14 @@ class BackTest < MiniTest::Spec
         @image1 = Content[@image1.id]
         src = @image1.image.src
         src.should =~ %r{^(.+)/rose\.jpg$}
-        last_response.body.json.should == {
+        Spot::JSON.parse(last_response.body).should == {
           :id => @image1.id,
           :src => src
         }
         File.exist?(Media.to_filepath(src)).should be_true
         S::Media.digest(Media.to_filepath(src)).should == @image_digest
       end
+
       should "be able to wrap pieces around files using default addable class" do
         parts = %w(xaa xab xac xad xae xaf xag)
         paths = parts.map { |part| File.expand_path("../../fixtures/sharding/#{part}", __FILE__) }
@@ -854,7 +855,7 @@ class BackTest < MiniTest::Spec
           :position => 0,
           :entry => first.export
         }
-        last_response.body.json.should == required_response
+        Spot::JSON.parse(last_response.body).should == required_response
       end
     end
   end

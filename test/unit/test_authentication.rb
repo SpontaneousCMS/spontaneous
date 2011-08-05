@@ -277,7 +277,7 @@ class AuthenticationTest < MiniTest::Spec
           Spontaneous::Permissions::AccessKey.expects(:new).returns(key)
           post "/@spontaneous/login", { "user[login]" => "admin", "user[password]" => "admin_password" }, {"HTTP_X_REQUESTED_WITH" => "XMLHttpRequest"}
           assert last_response.status == 200, "Status was #{last_response.status} not 200"
-          result = last_response.body.json
+          result = Spot::JSON.parse(last_response.body)
           result[:key].should == key.key_id
           result[:redirect].should == "/@spontaneous"
         end
@@ -317,7 +317,7 @@ class AuthenticationTest < MiniTest::Spec
         should "be able to load info about themselves" do
           get "/@spontaneous/user"
           assert last_response.ok?
-          last_response.body.json.should == @editor_user.export
+          Spot::JSON.parse(last_response.body).should == @editor_user.export
         end
       end
 

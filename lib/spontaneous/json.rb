@@ -4,7 +4,7 @@ module Spontaneous
   module JSON
     module ModuleMethods
       def parser
-        Yajl::Parser.new
+        Yajl::Parser.new(:symbolize_keys => true)
       end
       def encoder
         Yajl::Encoder.new

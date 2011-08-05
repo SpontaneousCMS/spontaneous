@@ -88,7 +88,7 @@ class SerialisationTest < MiniTest::Spec
         assert_hashes_equal(SerialisedPiece.export, @class_hash)
       end
       should "serialise to JSON" do
-        SerialisedPiece.to_json.json.should == @class_hash
+        Spot::JSON.parse(SerialisedPiece.to_json).should == @class_hash
       end
       should "include the title field name in the serialisation of page types" do
         SerialisedPage.export[:title_field].should == 'title'
@@ -162,7 +162,7 @@ class SerialisationTest < MiniTest::Spec
 
       should "serialise to JSON" do
         # hard to test this as the serialisation order appears to change
-        @root.to_json.json.should == @root.export
+        Spot::JSON.parse(@root.to_json).should == @root.export
       end
     end
   end
@@ -198,7 +198,7 @@ class SerialisationTest < MiniTest::Spec
     end
 
     should "serialise outstanding changes" do
-      Change.outstanding.to_json.json.should == [
+      Spot::JSON.parse(Change.outstanding.to_json).should == [
         {
         :pages=> [
           {:path=>"/", :title=>"New Page", :depth => 0, :id=>@page1.id},
