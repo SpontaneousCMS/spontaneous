@@ -66,7 +66,7 @@ class AuthenticationTest < MiniTest::Spec
   end
 
   def setup
-    instance = Spontaneous::Application::Instance.new(Spontaneous.root, :test, :back)
+    instance = Spontaneous::Site.new(Spontaneous.root, :test, :back)
     Spontaneous.instance = instance
     Spontaneous.config.publishing_delay = nil
     Spontaneous.instance.database = DB

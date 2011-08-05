@@ -8,7 +8,7 @@ class PublishingTest < MiniTest::Spec
   def self.startup
     root = File.expand_path("../../fixtures/example_application", __FILE__)
     Spontaneous.root = root
-    instance = Spontaneous::Application::Instance.new(root, :test, :back)
+    instance = Spontaneous::Site.new(root, :test, :back)
     Spontaneous.instance = instance
     Spontaneous.config.publishing_delay = nil
     Spontaneous.instance.database = DB
@@ -749,10 +749,10 @@ class PublishingTest < MiniTest::Spec
         @revision = 3
         @@now = Time.at(Time.now.to_i)
         Time.stubs(:now).returns(@@now)
-        Site.delete
+        State.delete
         Change.delete
-        Site.create(:revision => @revision, :published_revision => 2)
-        Site.revision.should == @revision
+        State.create(:revision => @revision, :published_revision => 2)
+        State.revision.should == @revision
       end
 
       teardown do
@@ -903,8 +903,8 @@ class PublishingTest < MiniTest::Spec
       setup do
         @revision = 2
         Content.delete
-        Site.delete
-        Site.create(:revision => @revision, :published_revision => 2)
+        State.delete
+        State.create(:revision => @revision, :published_revision => 2)
         Site.revision.should == @revision
         Spontaneous.root = File.expand_path(File.dirname(__FILE__) / "../fixtures/example_application")
 
@@ -940,7 +940,7 @@ class PublishingTest < MiniTest::Spec
         # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
         Content.delete_revision(@revision)
         Content.delete
-        Site.delete
+        State.delete
         Object.send(:remove_const, :PublishablePage)
       end
 

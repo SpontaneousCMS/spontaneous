@@ -166,4 +166,3 @@ module Spontaneous::Prototypes
     end
   end
 end
-

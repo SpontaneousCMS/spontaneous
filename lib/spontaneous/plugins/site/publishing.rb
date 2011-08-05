@@ -56,14 +56,14 @@ module Spontaneous::Plugins
         protected
 
         def set_published_revision(revision)
-          instance = S::Site.instance
+          instance = S::State.instance
           instance.published_revision = revision
           instance.revision = revision + 1
           instance.save
         end
 
         def pending_revision=(revision)
-          instance = S::Site.instance
+          instance = S::State.instance
           instance.pending_revision = revision
           instance.save
         end

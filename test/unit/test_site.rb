@@ -44,26 +44,26 @@ class SiteTest < MiniTest::Spec
     teardown do
       Object.send(:remove_const, :Page)
     end
-    context "site instance" do
-      should "be unique" do
-        i = Site.instance
-        j = Site.instance
-        i.should == j
-        Site.count.should == 1
-      end
-      should "be a singleton within a site cache" do
-        o = nil
-        Site.with_cache do
-          i = Site.instance
-          j = Site.instance
-          i.object_id.should == j.object_id
-          o = i.object_id
-        end
-        i = Site.instance
-        i.object_id.should_not == o
-      end
+    # context "site instance" do
+    #   should "be unique" do
+    #     i = Site.instance
+    #     j = Site.instance
+    #     i.should == j
+    #     Site.count.should == 1
+    #   end
+      # should "be a singleton within a site cache" do
+      #   o = nil
+      #   Site.with_cache do
+      #     i = Site.instance
+      #     j = Site.instance
+      #     i.object_id.should == j.object_id
+      #     o = i.object_id
+      #   end
+      #   i = Site.instance
+      #   i.object_id.should_not == o
+      # end
 
-    end
+    # end
     context 'Site mapping' do
       should "include the necessary details in the map" do
         @page3_2.map_entry.should == {

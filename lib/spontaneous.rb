@@ -75,6 +75,7 @@ module Spontaneous
   autoload :Layout, "spontaneous/layout"
 
   autoload :Site, "spontaneous/site"
+  autoload :State, "spontaneous/state"
   autoload :Schema, "spontaneous/schema"
 
   autoload :ImageSize, "spontaneous/image_size"
@@ -149,6 +150,10 @@ module Spontaneous
 
     module Site
       autoload :Publishing, "spontaneous/plugins/site/publishing"
+      autoload :Revisions,  "spontaneous/plugins/site/revisions"
+      autoload :Selectors,  "spontaneous/plugins/site/selectors"
+      autoload :Map,        "spontaneous/plugins/site/map"
+      autoload :Instance,   "spontaneous/plugins/site/instance"
     end
   end
 

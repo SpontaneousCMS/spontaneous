@@ -68,7 +68,7 @@ class FrontTest < MiniTest::Spec
       Spontaneous.init(:environment => :test, :mode => :front)
 
       Site.publishing_method = :immediate
-      Site.delete
+      State.delete
       Content.delete
       Change.delete
 
@@ -115,7 +115,7 @@ class FrontTest < MiniTest::Spec
       Object.send(:remove_const, :SitePage) rescue nil
       Object.send(:remove_const, :SubPage) rescue nil
       Content.delete
-      Site.delete
+      State.delete
       Content.delete_revision(1)
       Spontaneous.revision_root = @saved_revision_root
       Spontaneous.root = @saved_root

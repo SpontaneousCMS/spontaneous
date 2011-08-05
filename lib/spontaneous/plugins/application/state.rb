@@ -14,7 +14,7 @@ module Spontaneous::Plugins::Application
         self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
         self.mode = options.delete(:mode) || ENV["SPOT_MODE"] || :back
         Spontaneous::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
-        Spontaneous.instance = Spontaneous::Application::Instance.new(root, environment, mode)
+        Spontaneous.instance = Spontaneous::Site.instantiate(root, environment, mode)
         Spontaneous.instance.initialize!
         Spontaneous::Schema.validate! if self.mode == :console
         Thread.current[:spontaneous_loaded] = true

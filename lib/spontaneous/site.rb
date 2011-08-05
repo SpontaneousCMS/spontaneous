@@ -1,101 +1,85 @@
 # encoding: UTF-8
 
-
 module Spontaneous
-  class Site <  Sequel::Model(:sites)
-    class << self
-      alias_method :sequel_plugin, :plugin
-    end
-
+  class Site < Spontaneous::Facet
     extend Plugins
 
+    plugin Plugins::Site::Instance
     plugin Plugins::Site::Publishing
+    plugin Plugins::Site::Revisions
+    plugin Plugins::Site::Selectors
+    plugin Plugins::Site::Map
 
-    @@instance = nil
+    attr_accessor :database
+    attr_reader :environment, :mode
 
-    class << self
+    def initialize(root, env, mode)
+      super(root)
+      @environment, @mode = env, mode
+    end
 
-      def instance
-        return @@instance if @@instance
-        unless instance = self.first
-          instance = Site.create(:revision => 1, :published_revision => 0)
-        end
-        instance
-      end
+    def initialize!
+      connect_to_database!
+      find_plugins!
+      load_facets!
+      init_facets!
+    end
 
-      def with_cache(&block)
-        yield if @@instance
-        @@instance = self.instance
-        yield
-      ensure
-        @@instance = nil
-      end
-
-      def map(root_id=nil)
-        page = \
-          if root_id.nil?
-            Page.root
-          else
-            Content[root_id]
-          end
-        return nil unless page
-        page.map_entry
-      end
-
-      def root
-        Page.root
-      end
-
-      def [](path_or_uid)
-        case path_or_uid
-        when /^\//
-          by_path(path_or_uid)
-        when /^#/
-          by_uid(path_or_uid[1..-1])
-        else
-          by_uid(path_or_uid)
-        end
-      end
-
-      def by_path(path)
-        Page.path(path)
-      end
-
-      def by_uid(uid)
-        Page.uid(uid)
-      end
-
-      def method_missing(method, *args)
-        if page = self[method.to_s]
-          page
-        else
-          super
-        end
-      end
-
-      def working_revision
-        instance.revision
-      end
-
-      def revision
-        instance.revision
-      end
-
-      def published_revision
-        if ENV.key?(Spontaneous::SPOT_REVISION_NUMBER)
-          ENV[Spontaneous::SPOT_REVISION_NUMBER]
-        else
-          instance.published_revision
-        end
-      end
-
-      def pending_revision
-        instance.pending_revision
-      end
-
-      def config
-        Spontaneous.config
+    def init_facets!
+      facets.each do |facet|
+        facet.init!
       end
     end
+
+    def load_facets!
+      Spontaneous::Loader.load!
+    end
+
+    def load_paths
+      load_paths = []
+      [:lib, :schema].each do |category|
+        facets.each do |facet|
+          load_paths += facet.paths.expanded(category)
+        end
+      end
+      load_paths
+    end
+
+    def connect_to_database!
+      self.database = Sequel.connect(db_settings)
+    end
+
+    def db_settings
+      config_dir = paths.expanded(:config).first
+      @db_settings = YAML.load_file(File.join(config_dir, "database.yml"))
+      self.config.db = @db_settings[environment]
+    end
+
+    def config
+      @config ||= Spontaneous::Config.new(environment, mode)
+    end
+
+    def find_plugins!
+      paths.expanded(:plugins).each do |glob|
+        Dir[glob].each do |path|
+          load_plugin(path)
+        end
+      end
+    end
+
+    def plugins
+      @plugins ||= []
+    end
+
+    def facets
+      [self] + plugins
+    end
+
+    def load_plugin(plugin_root)
+      plugin = Spontaneous::Application::Plugin.new(plugin_root)
+      self.plugins <<  plugin
+      plugin
+    end
+
   end
 end
