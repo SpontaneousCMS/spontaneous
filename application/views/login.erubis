@@ -47,7 +47,7 @@
             data:$this.serialize(),
             success: function(data) {
               if (data.key) {
-                Spontaneous.Auth.Key.save('<%= Spontaneous.config.site_id %>', data.key);
+                Spontaneous.Auth.Key.save('<%= Spontaneous::Site.config.site_id %>', data.key);
                 window.location.href = data.redirect;
               }
             },
@@ -66,9 +66,9 @@
         $('#login form input#user-login').focus();
         $(function() {
           <% if locals[:invalid_key] %>
-            var key = Spontaneous.Auth.Key.delete('<%= Spontaneous.config.site_id %>');
+            var key = Spontaneous.Auth.Key.delete('<%= Spontaneous::Site.config.site_id %>');
           <% else %>
-            var key = Spontaneous.Auth.Key.load('<%= Spontaneous.config.site_id %>');
+            var key = Spontaneous.Auth.Key.load('<%= Spontaneous::Site.config.site_id %>');
           <% end %>
           if (key) {
             console.log($('#reauthenticate-key').val(key).parent('form'))

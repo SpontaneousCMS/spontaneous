@@ -42,7 +42,7 @@ class BackTest < MiniTest::Spec
       config.stubs(:publishing_method).returns(:immediate)
       root = File.expand_path("../../fixtures/back", __FILE__)
       Spontaneous.root = root
-      instance = Spontaneous::Site.new(root, :test, :back)
+      instance = Spontaneous::Site.instantiate(root, :test, :back)
       instance.stubs(:config).returns(config)
       Spontaneous.instance = instance
       app.send(:set, :raise_errors, true)
