@@ -65,6 +65,20 @@ class AuthenticationTest < MiniTest::Spec
     @disabled_user
   end
 
+  def login_user(user)
+    post "/@spontaneous/login", "user[login]" => user.login, "user[password]" => user.password
+    @user = user
+  end
+
+  def auth_post(path, params={})
+    key = @user.access_keys.first
+    post(path, params.merge("__key" => key.key_id))
+  end
+  def auth_get(path, params={})
+    key = @user.access_keys.first
+    get(path, params.merge("__key" => key.key_id))
+  end
+
   def setup
     instance = Spontaneous::Site.instantiate(Spontaneous.root, :test, :back)
     Site.config.publishing_delay nil
@@ -81,6 +95,14 @@ class AuthenticationTest < MiniTest::Spec
     last_response.body.should =~ %r{<form.+method="post"}
     last_response.body.should =~ %r{<input.+name="user\[login\]"}
     last_response.body.should =~ %r{<input.+name="user\[password\]"}
+  end
+
+  def post_paths
+    %(/save/#{root.id} /savebox/#{root.id}/#{root.boxes[:editor_level].schema_id} /content/#{root.id}/position/0 /file/upload/#{root.id} /file/replace/#{root.id} /file/wrap/#{root.id}/#{root.boxes[:pages].schema_id} /add/#{root.id}/#{root.boxes[:pages].schema_id}/#{SitePage.schema_id} /destroy/#{root.id} /slug/#{root.id} /slug/#{root.id}/unavailable /toggle/#{root.id} /schema/delete /schema/rename)
+  end
+
+  def get_paths
+    %(/root /page/#{root.id} /types /map /map/#{root.id} /location/about /user)
   end
 
   context "Authentication:" do
@@ -211,14 +233,14 @@ class AuthenticationTest < MiniTest::Spec
       end
 
       should "see a login page for all GETs" do
-        %(/root /page/#{root.id} /types /map /map/#{root.id} /location/about /user).split.each do |path|
+        get_paths.split.each do |path|
           get "/@spontaneous#{path}"
           assert_login_page path
         end
       end
 
       should "see a login page for all POSTs" do
-        %(/save/#{root.id} /savebox/#{root.id}/#{root.boxes[:editor_level].schema_id} /content/#{root.id}/position/0 /file/upload/#{root.id} /file/replace/#{root.id} /file/wrap/#{root.id}/#{root.boxes[:pages].schema_id} /add/#{root.id}/#{root.boxes[:pages].schema_id}/#{SitePage.schema_id} /destroy/#{root.id} /slug/#{root.id} /slug/#{root.id}/unavailable /toggle/#{root.id} /schema/delete /schema/rename).split.each do |path|
+        post_paths.split.each do |path|
           post "/@spontaneous#{path}"
           assert_login_page(path, "POST")
         end
@@ -266,7 +288,8 @@ class AuthenticationTest < MiniTest::Spec
         end
 
         should "succeed and redirect to /@spontaneous for correct login & password" do
-          post "/@spontaneous/login", "user[login]" => "admin", "user[password]" => "admin_password"
+          # post "/@spontaneous/login", "user[login]" => "admin", "user[password]" => "admin_password"
+          login_user(@admin_user)
           assert last_response.status == 302, "Status was #{last_response.status} not 302"
           last_response.headers["Location"].should =~ %r{/@spontaneous$}
         end
@@ -296,11 +319,25 @@ class AuthenticationTest < MiniTest::Spec
 
       context "Logged in users" do
         setup do
-          post "/@spontaneous/login", "user[login]" => "editor", "user[password]" => "editor_password"
+          login_user(@editor_user)
         end
 
         teardown do
           clear_cookies
+        end
+
+        should "need to supply API key in params for all POSTs" do
+          post_paths.split.each do |path|
+            post "/@spontaneous#{path}"
+            assert_login_page(path, "POST")
+          end
+        end
+
+        should "need to supply API key in params for all GETs" do
+          get_paths.split.each do |path|
+            get "/@spontaneous#{path}"
+            assert_login_page path
+          end
         end
 
         should "be able to view the preview" do
@@ -308,158 +345,166 @@ class AuthenticationTest < MiniTest::Spec
           assert last_response.ok?
         end
 
-        should "be able to see previously forbidden fruit" do
-          get "/@spontaneous/root"
-          assert last_response.ok?
+        should "be able to view the editing interface" do
+          get "/@spontaneous"
+          assert last_response.ok?, "Expected 200 but got #{last_response.status}"
         end
 
-        should "be able to load info about themselves" do
-          get "/@spontaneous/user"
-          assert last_response.ok?
-          Spot::JSON.parse(last_response.body).should == @editor_user.export
-        end
-      end
+        # context "providing an API key in the request" do
+        #   should "be able to see previously forbidden fruit" do
+        #     get "/@spontaneous/root"
+        #     assert last_response.ok?
+        #   end
 
-      context "User levels" do
-        context "Root access" do
-          setup do
-            post "/@spontaneous/login", "user[login]" => "root", "user[password]" => "root_password"
-          end
-
-          teardown do
-            clear_cookies
-          end
-
-          should "be able to update root level fields" do
-            field = root.fields.root_level
-            post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => "Updated"
-            assert last_response.ok?
-            root.reload.fields[:root_level].value.should == "Updated"
-          end
-
-          should "be able to add to root level box" do
-            klass = AuthenticationTest::C
-            post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].schema_id}/#{klass.schema_id}"
-            assert last_response.ok?
-          end
-        end
-        context "Admin access" do
-          setup do
-            @root_copy = root
-            post "/@spontaneous/login", "user[login]" => "admin", "user[password]" => "admin_password"
-          end
-
-          teardown do
-            clear_cookies
-          end
-
-          should "not be able to update root level fields" do
-            value = "Updated #{version}"
-            field = root.fields[:root_level]
-            post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-            root.reload.fields[:root_level].value.should == @root_copy.root_level.value
-          end
-
-          should "be able to update admin level fields" do
-            value = "Updated #{version}"
-            field = root.fields[:admin_level]
-            post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
-            assert last_response.ok?
-            root.reload.fields[:admin_level].value.should == value
-          end
-
-          should "not be able to add to root level box" do
-            post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].schema_id}/#{AuthenticationTest::C.schema_id}"
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          end
-
-          should "not be able to add root level types to admin level box" do
-            post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{AuthenticationTest::D.schema_id}"
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          end
-
-          should "be able to add to admin level box" do
-            post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{AuthenticationTest::C.schema_id}"
-            # post "/@spontaneous/add/#{root.id}/admin_level/AuthenticationTest::C"
-            assert last_response.ok?
-          end
-          should "not be able to update fields from root level box" do
-            value = "Updated #{version}"
-            field = root.fields[:editor_level]
-            post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          end
-
-          should "not be able to update root level fields from admin level box" do
-            value = "Updated #{version}"
-            field = root.boxes[:admin_level].fields[:root_level]
-            post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:admin_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          end
-
-          should "not be able to delete from root level box" do
-            piece = root.boxes[:root_level].pieces.first
-            pieces = root.reload.boxes[:root_level].pieces.length
-            post "/@spontaneous/destroy/#{piece.id}"
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-            root.reload.boxes[:root_level].pieces.length.should == pieces
-          end
-          should "not be able to wrap files in root level box" do
-            src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-            post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:root_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          end
-          should "not be able to wrap files in box if allow permissions don't permit it" do
-            src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-            # only type with an image field is C
-            # editor_level box allows addition of type C but only by root
-            # so the following should throw a perms error:
-            post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:editor_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          end
-          should "not be able to re-order pieces in root level box" do
-            piece = root.boxes[:root_level].pieces.last
-            post "/@spontaneous/content/#{piece.id}/position/0"
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-            root.reload.boxes[:root_level].pieces.last.id.should == piece.id
-          end
-
-          should "not be able to replace root level fields" do
-            piece = root.boxes[:root_level].pieces.first
-            src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-            field = piece.fields[:photo]
-            post "/@spontaneous/file/replace/#{piece.id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg"), "field" => field.schema_id
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          end
-
-          should "not be able to hide entries in root-level boxes" do
-            piece = root.boxes[:root_level].pieces.first
-            post "/@spontaneous/toggle/#{piece.id}"
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          end
-
-          should "not be allowed to update path of pages without permission"
-        end
-        context "Editor access" do
-          setup do
-            @root_copy = root
-            post "/@spontaneous/login", "user[login]" => "editor", "user[password]" => "editor_password"
-          end
-
-          teardown do
-            clear_cookies
-          end
-
-          should "not be able to retrieve the list of changes" do
-            Change.delete
-            get "/@spontaneous/publish/changes"
-            assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          end
-        end
+        #   should "be able to load info about themselves" do
+        #     get "/@spontaneous/user"
+        #     assert last_response.ok?
+        #     Spot::JSON.parse(last_response.body).should == @editor_user.export
+        #   end
+        # end
       end
 
     end
+
+    context "User levels" do
+      context "Root access" do
+        setup do
+          login_user(@root_user)
+        end
+
+        teardown do
+          clear_cookies
+        end
+
+        should "be able to update root level fields" do
+          field = root.fields.root_level
+          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => "Updated"
+          assert last_response.ok?
+          root.reload.fields[:root_level].value.should == "Updated"
+        end
+
+        should "be able to add to root level box" do
+          klass = AuthenticationTest::C
+          auth_post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].schema_id}/#{klass.schema_id}"
+          assert last_response.ok?
+        end
+      end
+      context "Admin access" do
+        setup do
+          @root_copy = root
+          login_user(@admin_user)
+        end
+
+        teardown do
+          clear_cookies
+        end
+
+        should "not be able to update root level fields" do
+          value = "Updated #{version}"
+          field = root.fields[:root_level]
+          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          root.reload.fields[:root_level].value.should == @root_copy.root_level.value
+        end
+
+        should "be able to update admin level fields" do
+          value = "Updated #{version}"
+          field = root.fields[:admin_level]
+          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
+          assert last_response.ok?
+          root.reload.fields[:admin_level].value.should == value
+        end
+
+        should "not be able to add to root level box" do
+          auth_post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].schema_id}/#{AuthenticationTest::C.schema_id}"
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+
+        should "not be able to add root level types to admin level box" do
+          auth_post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{AuthenticationTest::D.schema_id}"
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+
+        should "be able to add to admin level box" do
+          auth_post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{AuthenticationTest::C.schema_id}"
+          # post "/@spontaneous/add/#{root.id}/admin_level/AuthenticationTest::C"
+          assert last_response.ok?
+        end
+        should "not be able to update fields from root level box" do
+          value = "Updated #{version}"
+          field = root.fields[:editor_level]
+          auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+
+        should "not be able to update root level fields from admin level box" do
+          value = "Updated #{version}"
+          field = root.boxes[:admin_level].fields[:root_level]
+          auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:admin_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+
+        should "not be able to delete from root level box" do
+          piece = root.boxes[:root_level].pieces.first
+          pieces = root.reload.boxes[:root_level].pieces.length
+          auth_post "/@spontaneous/destroy/#{piece.id}"
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          root.reload.boxes[:root_level].pieces.length.should == pieces
+        end
+        should "not be able to wrap files in root level box" do
+          src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+          auth_post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:root_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+        should "not be able to wrap files in box if allow permissions don't permit it" do
+          src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+          # only type with an image field is C
+          # editor_level box allows addition of type C but only by root
+          # so the following should throw a perms error:
+          auth_post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:editor_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+        should "not be able to re-order pieces in root level box" do
+          piece = root.boxes[:root_level].pieces.last
+          auth_post "/@spontaneous/content/#{piece.id}/position/0"
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          root.reload.boxes[:root_level].pieces.last.id.should == piece.id
+        end
+
+        should "not be able to replace root level fields" do
+          piece = root.boxes[:root_level].pieces.first
+          src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+          field = piece.fields[:photo]
+          auth_post "/@spontaneous/file/replace/#{piece.id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg"), "field" => field.schema_id
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+
+        should "not be able to hide entries in root-level boxes" do
+          piece = root.boxes[:root_level].pieces.first
+          auth_post "/@spontaneous/toggle/#{piece.id}"
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+
+        should "not be allowed to update path of pages without permission"
+      end
+      context "Editor access" do
+        setup do
+          @root_copy = root
+          login_user(@editor_user)
+        end
+
+        teardown do
+          clear_cookies
+        end
+
+        should "not be able to retrieve the list of changes" do
+          Change.delete
+          get "/@spontaneous/publish/changes"
+          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+        end
+      end
+    end
+
   end
 end
 

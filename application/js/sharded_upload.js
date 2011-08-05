@@ -32,7 +32,7 @@ Spontaneous.ShardedUpload = (function($, S) {
 			this.failure_count = 0;
 		},
 		remote_path: function() {
-			return [S.Ajax.namespace, 'shard', this.hash].join('/');
+			return S.Ajax.request_url(['shard', this.hash].join('/'), true);
 		},
 		begin_upload: function() {
 			// test for existance of shard on server
@@ -58,7 +58,7 @@ Spontaneous.ShardedUpload = (function($, S) {
 			// assigning the callbacks to myself.
 
 			var form = new FormData(),
-				path = [S.Ajax.namespace, 'shard', this.hash].join('/');
+				path = S.Ajax.request_url(['/shard', this.hash].join('/'), true);
 			form.append('file', this.blob);
 			var xhr = new XMLHttpRequest(), upload = xhr.upload;
 			xhr.open("POST", path, true);

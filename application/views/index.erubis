@@ -11,8 +11,8 @@
     <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/compatibility.js"></script>
     <script type="text/javascript" charset="utf-8">
       Spontaneous = {
-				site_domain: '<%= Site.config.site_domain %>',
-				site_id: '<%= Site.config.site_id %>',
+				site_domain: '<%= Spontaneous::Site.config.site_domain %>',
+				site_id: '<%= Spontaneous::Site.config.site_id %>',
         debug: <%= Spontaneous.development? %>,
         development: <%= Spontaneous.development? %>,
         asynchronous: false,

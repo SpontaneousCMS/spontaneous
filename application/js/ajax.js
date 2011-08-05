@@ -20,6 +20,7 @@ Spontaneous.Ajax = (function($, S) {
 			$.ajax({
 				'url': this.request_url(url),
 				'success': handle_response,
+				'data': this.api_access_key(),
 				'error': handle_response // pass the error to the handler too
 			});
 		},
@@ -30,6 +31,8 @@ Spontaneous.Ajax = (function($, S) {
 			var error = function(XMLHttpRequest, textStatus, error_thrown) {
 				callback(false, textStatus, XMLHttpRequest);
 			};
+			post_data = $.extend(post_data, this.api_access_key());
+			console.log(post_data)
 			$.ajax({
 				'url': this.request_url(url),
 				'type': 'post',
@@ -38,8 +41,15 @@ Spontaneous.Ajax = (function($, S) {
 				'error': error
 			});
 		},
-		request_url: function(url) {
-			return this.namespace + url;
+		api_access_key: function() {
+			return {'__key':Spontaneous.Auth.Key.load(S.site_id)}
+		},
+		request_url: function(url, needs_key) {
+			var path = this.namespace + url;
+			if (needs_key) {
+				path += "?"+$.param(this.api_access_key())
+			}
+			return path
 		}
 	};
 }(jQuery, Spontaneous));

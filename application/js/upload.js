@@ -41,7 +41,7 @@ Spontaneous.Upload = (function($, S) {
 			this.xhr.send(form_data);
 		},
 		namespaced_path: function(path) {
-			return '/@spontaneous' + path;
+			return S.Ajax.request_url(path, true);
 		},
 		// While loading and sending data.
 		onprogress: function(event) {

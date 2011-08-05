@@ -34,6 +34,14 @@ class BackTest < MiniTest::Spec
     ::FileUtils.rm_rf(@media_dir)
   end
 
+  def auth_post(path, params={})
+    post(path, params.merge("__key" => @key))
+  end
+
+  def auth_get(path, params={})
+    get(path, params.merge("__key" => @key))
+  end
+
   context "Editing interface" do
     setup do
       config = mock()
@@ -60,7 +68,9 @@ class BackTest < MiniTest::Spec
       @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
       @user.update(:level => Spontaneous::Permissions.root)
       @user.save
+      @key = "c5AMX3r5kMHX2z9a5ExLKjAmCcnT6PFf22YQxzb4Codj"
       Spontaneous::Permissions.stubs(:active_user).returns(@user)
+      Spontaneous::Permissions::AccessKey.stubs(:valid?).with(@key, @user).returns(true)
 
       class Page < Spot::Page
         field :title
@@ -141,7 +151,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "return json for root page" do
-        get '/@spontaneous/root'
+        auth_get '/@spontaneous/root'
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         assert_equal S::JSON.encode(Site.root.export), last_response.body
@@ -149,14 +159,14 @@ class BackTest < MiniTest::Spec
 
       should "return json for individual pages" do
         page = Site.root.children.first
-        get "/@spontaneous/page/#{page.id}"
+        auth_get "/@spontaneous/page/#{page.id}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         assert_equal S::JSON.encode(page.export), last_response.body
       end
 
       should "return json for all types" do
-        get "/@spontaneous/types"
+        auth_get "/@spontaneous/types"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         assert_equal Schema.serialise_http, last_response.body
@@ -178,14 +188,14 @@ class BackTest < MiniTest::Spec
       end
 
       should "return a site map for root by default" do
-        get '/@spontaneous/map'
+        auth_get '/@spontaneous/map'
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         assert_equal Site.map.to_json, last_response.body
       end
 
       should "return a site map for any page id" do
-        get "/@spontaneous/map/#{@home.id}"
+        auth_get "/@spontaneous/map/#{@home.id}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         assert_equal Site.map(@home.id).to_json, last_response.body
@@ -193,7 +203,7 @@ class BackTest < MiniTest::Spec
 
       should "return a site map for any url" do
         page = @project1
-        get "/@spontaneous/location#{@project1.path}"
+        auth_get "/@spontaneous/location#{@project1.path}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         assert_equal Site.map(@project1.id).to_json, last_response.body
@@ -202,12 +212,12 @@ class BackTest < MiniTest::Spec
       should "return 404 when asked for map of non-existant page" do
         id = '9999'
         S::Content.stubs(:[]).with(id).returns(nil)
-        get "/@spontaneous/map/#{id}"
+        auth_get "/@spontaneous/map/#{id}"
         assert last_response.status == 404
       end
 
       should "reorder pieces" do
-        post "/@spontaneous/content/#{@job2.id}/position/0"
+        auth_post "/@spontaneous/content/#{@job2.id}/position/0"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
@@ -238,7 +248,7 @@ class BackTest < MiniTest::Spec
           params = {
             "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1"
           }
-          post "/@spontaneous/save/#{@job1.id}", params
+          auth_post "/@spontaneous/save/#{@job1.id}", params
           assert last_response.ok?
           last_response.content_type.should == "application/json;charset=utf-8"
           @job1 = Content[@job1.id]
@@ -251,7 +261,7 @@ class BackTest < MiniTest::Spec
             "field[#{@home.fields.title.schema_id.to_s}][value]" => "Updated title",
             "field[#{@home.fields.introduction.schema_id.to_s}][value]" => "Updated intro"
           }
-          post "/@spontaneous/save/#{@home.id}", params
+          auth_post "/@spontaneous/save/#{@home.id}", params
           assert last_response.ok?
           last_response.content_type.should == "application/json;charset=utf-8"
           @home = Content[@home.id]
@@ -265,7 +275,7 @@ class BackTest < MiniTest::Spec
           params = {
             "field[#{box.fields.title.schema_id.to_s}][value]" => "Updated title"
           }
-          post "/@spontaneous/savebox/#{@job1.id}/#{box.schema_id.to_s}", params
+          auth_post "/@spontaneous/savebox/#{@job1.id}/#{box.schema_id.to_s}", params
           assert last_response.ok?
           last_response.content_type.should == "application/json;charset=utf-8"
           @job1 = Content[@job1.id]
@@ -286,12 +296,12 @@ class BackTest < MiniTest::Spec
       end
       should "be toggled" do
         @job1.reload.visible?.should == true
-        post "/@spontaneous/toggle/#{@job1.id}"
+        auth_post "/@spontaneous/toggle/#{@job1.id}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         Spot::JSON.parse(last_response.body).should == {:id => @job1.id, :hidden => true}
         @job1.reload.visible?.should == false
-        post "/@spontaneous/toggle/#{@job1.id}"
+        auth_post "/@spontaneous/toggle/#{@job1.id}"
         assert last_response.ok?
         @job1.reload.visible?.should == true
         Spot::JSON.parse(last_response.body).should == {:id => @job1.id, :hidden => false}
@@ -388,7 +398,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "create a file in a safe subdirectory of media/tmp" do
-        post "@spontaneous/file/upload/9723", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
+        auth_post "@spontaneous/file/upload/9723", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         assert_equal({
@@ -400,7 +410,7 @@ class BackTest < MiniTest::Spec
 
       should "replace values of fields immediately when required" do
         @image1.image.processed_value.should == ""
-        post "@spontaneous/file/replace/#{@image1.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => @image1.image.schema_id.to_s
+        auth_post "@spontaneous/file/replace/#{@image1.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => @image1.image.schema_id.to_s
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @image1 = Content[@image1.id]
@@ -417,7 +427,7 @@ class BackTest < MiniTest::Spec
 
       should "replace values of box file fields" do
         @job1.images.image.processed_value.should == ""
-        post "@spontaneous/file/replace/#{@job1.id}/#{@job1.images.schema_id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => @job1.images.image.schema_id.to_s
+        auth_post "@spontaneous/file/replace/#{@job1.id}/#{@job1.images.schema_id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => @job1.images.image.schema_id.to_s
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @job1 = Content[@job1.id]
@@ -437,7 +447,7 @@ class BackTest < MiniTest::Spec
         current_count = box.pieces.length
         first_id = box.pieces.first.id.to_s
 
-        post "/@spontaneous/file/wrap/#{@job1.id}/#{box.schema_id.to_s}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
+        auth_post "/@spontaneous/file/wrap/#{@job1.id}/#{box.schema_id.to_s}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         box = @job1.reload.images
@@ -459,7 +469,7 @@ class BackTest < MiniTest::Spec
         current_count = @home.in_progress.pieces.length
         first_id = @home.in_progress.pieces.first.id
         @home.in_progress.pieces.first.class.name.should_not == "BackTest::Image"
-        post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}"
+        auth_post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
@@ -475,7 +485,7 @@ class BackTest < MiniTest::Spec
 
       should "be removable" do
         target = @home.in_progress.first
-        post "/@spontaneous/destroy/#{target.id}"
+        auth_post "/@spontaneous/destroy/#{target.id}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         Content[target.id].should be_nil
@@ -488,7 +498,7 @@ class BackTest < MiniTest::Spec
       end
       should "be editable" do
         @project1.path.should == '/project1'
-        post "/@spontaneous/slug/#{@project1.id}", 'slug' => 'howabout'
+        auth_post "/@spontaneous/slug/#{@project1.id}", 'slug' => 'howabout'
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @project1.reload
@@ -496,20 +506,20 @@ class BackTest < MiniTest::Spec
         Spot::JSON.parse(last_response.body).should == {:path => '/howabout' }
       end
       should "raise error when trying to save duplicate path" do
-        post "/@spontaneous/slug/#{@project1.id}", 'slug' => 'project2'
+        auth_post "/@spontaneous/slug/#{@project1.id}", 'slug' => 'project2'
         last_response.status.should == 409
         @project1.reload.path.should == '/project1'
       end
       should "raise error when trying to save empty slug" do
-        post "/@spontaneous/slug/#{@project1.id}", 'slug' => ''
+        auth_post "/@spontaneous/slug/#{@project1.id}", 'slug' => ''
         last_response.status.should == 406
         @project1.reload.path.should == '/project1'
-        post "/@spontaneous/slug/#{@project1.id}"
+        auth_post "/@spontaneous/slug/#{@project1.id}"
         last_response.status.should == 406
         @project1.reload.path.should == '/project1'
       end
       should "provide a list of unavailable slugs for a page" do
-        get "/@spontaneous/slug/#{@project1.id}/unavailable"
+        auth_get "/@spontaneous/slug/#{@project1.id}/unavailable"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         Spot::JSON.parse(last_response.body).should == %w(project2 project3)
@@ -519,7 +529,7 @@ class BackTest < MiniTest::Spec
       should "be editable" do
         uid = "fishy"
         @project1.uid.should_not == uid
-        post "/@spontaneous/uid/#{@project1.id}", 'uid' => uid
+        auth_post "/@spontaneous/uid/#{@project1.id}", 'uid' => uid
         assert last_response.ok?
         Spot::JSON.parse(last_response.body).should == {:uid => uid}
         @project1.reload.uid.should == uid
@@ -529,7 +539,7 @@ class BackTest < MiniTest::Spec
         uid = "boom"
         orig = @project1.uid
         @project1.uid.should_not == uid
-        post "/@spontaneous/uid/#{@project1.id}", 'uid' => uid
+        auth_post "/@spontaneous/uid/#{@project1.id}", 'uid' => uid
         assert last_response.status == 401
         @project1.reload.uid.should == orig
       end
@@ -549,7 +559,7 @@ class BackTest < MiniTest::Spec
           "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1"
         }
         Change.count.should == 0
-        post "/@spontaneous/save/#{@job1.id}", params
+        auth_post "/@spontaneous/save/#{@job1.id}", params
         Change.count.should == 1
         Change.first.modified_list.should == [@home.id]
       end
@@ -577,7 +587,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "be able to retrieve a serialised list of all unpublished changes" do
-        get "/@spontaneous/publish/changes"
+        auth_get "/@spontaneous/publish/changes"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         last_response.body.should == Change.serialise_http
@@ -585,27 +595,27 @@ class BackTest < MiniTest::Spec
 
       should "be able to start a publish with a set of change sets" do
         Site.expects(:publish_changes).with([@c1.id])
-        post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id]
+        auth_post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id]
         assert last_response.ok?
       end
 
       should "not launch publish if list of changes is empty" do
         Site.expects(:publish_changes).with().never
-        post "/@spontaneous/publish/publish", :change_set_ids => ""
+        auth_post "/@spontaneous/publish/publish", :change_set_ids => ""
         assert last_response.status == 400, "Expected 400, recieved #{last_response.status}"
 
-        post "/@spontaneous/publish/publish", :change_set_ids => nil
+        auth_post "/@spontaneous/publish/publish", :change_set_ids => nil
         assert last_response.status == 400
       end
       should "recognise when the list of changes is complete" do
         Site.expects(:publish_changes).with([@c1.id, @c2.id])
-        post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id, @c2.id]
+        auth_post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id, @c2.id]
         assert last_response.ok?
       end
 
       should "be able to retrieve the publishing status" do
         Site.publishing_method.status = "something:50"
-        get "/@spontaneous/publish/status"
+        auth_get "/@spontaneous/publish/status"
         assert last_response.ok?
         last_response.body.should == {:status => "something", :progress => "50"}.to_json
       end
@@ -619,26 +629,26 @@ class BackTest < MiniTest::Spec
         Change.delete
       end
       should "raise a 406 Not Acceptable error when downloading page details" do
-        get "/@spontaneous/location/"
+        auth_get "/@spontaneous/location/"
         last_response.status.should == 406
       end
       should "create a homepage of the specified type" do
-        post "/@spontaneous/root", 'type' => @root_class.schema_id
+        auth_post "/@spontaneous/root", 'type' => @root_class.schema_id
         assert last_response.ok?
         Site.root.must_be_instance_of(@root_class)
         Site.root.title.value.should =~ /Home/
       end
       should "only create one root" do
-        post "/@spontaneous/root", 'type' => @root_class.schema_id
+        auth_post "/@spontaneous/root", 'type' => @root_class.schema_id
         assert last_response.ok?
         Content.count.should == 1
-        post "/@spontaneous/root", 'type' => @root_class.schema_id
+        auth_post "/@spontaneous/root", 'type' => @root_class.schema_id
         assert last_response.status == 403
         Content.count.should == 1
       end
       should "have a change reflecting creation of root" do
         Change.count.should == 0
-        post "/@spontaneous/root", 'type' => @root_class.schema_id
+        auth_post "/@spontaneous/root", 'type' => @root_class.schema_id
         Change.count.should == 1
       end
     end
@@ -652,7 +662,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "be able to retrieve a list of potential targets" do
-        get "/@spontaneous/targets/#{LinkedJob.schema_id}"
+        auth_get "/@spontaneous/targets/#{LinkedJob.schema_id}"
         assert last_response.ok?
         Spot::JSON.parse(last_response.body).should == LinkedJob.targets.map do |job|
           {
@@ -664,7 +674,7 @@ class BackTest < MiniTest::Spec
       end
       should "be able to add an alias to a box" do
         @home.featured_jobs.pieces.length.should == 0
-        post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id
+        auth_post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
@@ -726,7 +736,7 @@ class BackTest < MiniTest::Spec
 
       should "perform renames via a link" do
         action ="/@spontaneous/schema/rename"
-        post action, "uid" => @df1.schema_id, "ref" => @af1.schema_name, "origin" => "/@spontaneous"
+        auth_post action, "uid" => @df1.schema_id, "ref" => @af1.schema_name, "origin" => "/@spontaneous"
         last_response.status.should == 302
         begin
           S::Schema.validate!
@@ -737,7 +747,7 @@ class BackTest < MiniTest::Spec
 
       should "perform deletions via a link" do
         action ="/@spontaneous/schema/delete"
-        post action, "uid" => @df1.schema_id, "origin" => "/@spontaneous"
+        auth_post action, "uid" => @df1.schema_id, "origin" => "/@spontaneous"
         last_response.status.should == 302
         begin
           S::Schema.validate!
@@ -771,25 +781,25 @@ class BackTest < MiniTest::Spec
         hash = '4d68c8f13459c0edb40504de5003ec2a6b74e613'
         FileUtils.touch(Spontaneous.shard_path(hash))
         FileUtils.expects(:touch).with(Spontaneous.shard_path(hash))
-        get "/@spontaneous/shard/#{hash}"
+        auth_get "/@spontaneous/shard/#{hash}"
         last_response.status.should == 200
       end
 
       should "know when it doesn't have a shard" do
-        get "/@spontaneous/shard/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        auth_get "/@spontaneous/shard/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         last_response.status.should == 404
       end
 
       should "receive a shard and put it in the right place" do
-        post "@spontaneous/shard/#{@image_digest}", "file" => ::Rack::Test::UploadedFile.new(@image, "image/jpeg")
+        auth_post "@spontaneous/shard/#{@image_digest}", "file" => ::Rack::Test::UploadedFile.new(@image, "image/jpeg")
         assert last_response.ok?
-        get "/@spontaneous/shard/#{@image_digest}"
+        auth_get "/@spontaneous/shard/#{@image_digest}"
         last_response.status.should == 200
       end
 
       should "return an error if the uploaded file has the wrong hash" do
         S::Media.expects(:digest).with(anything).returns("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-        post "@spontaneous/shard/#{@image_digest}", "file" => ::Rack::Test::UploadedFile.new(@image, "image/jpeg")
+        auth_post "@spontaneous/shard/#{@image_digest}", "file" => ::Rack::Test::UploadedFile.new(@image, "image/jpeg")
         last_response.status.should == 409
       end
 
@@ -798,14 +808,14 @@ class BackTest < MiniTest::Spec
         paths = parts.map { |part| File.expand_path("../../fixtures/sharding/#{part}", __FILE__) }
         hashes = paths.map { |path| S::Media.digest(path) }
         paths.each_with_index do |part, n|
-          post "/@spontaneous/shard/#{hashes[n]}", "file" => ::Rack::Test::UploadedFile.new(part, "application/octet-stream")
+          auth_post "/@spontaneous/shard/#{hashes[n]}", "file" => ::Rack::Test::UploadedFile.new(part, "application/octet-stream")
         end
         hashes.each do |hash|
-          get "/@spontaneous/shard/#{hash}"
+          auth_get "/@spontaneous/shard/#{hash}"
           last_response.status.should == 200
         end
         @image1.image.processed_value.should == ""
-        post "/@spontaneous/shard/replace/#{@image1.id}", "filename" => "rose.jpg",
+        auth_post "/@spontaneous/shard/replace/#{@image1.id}", "filename" => "rose.jpg",
           "shards" => hashes, "field" => @image1.image.schema_id.to_s
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
@@ -825,17 +835,17 @@ class BackTest < MiniTest::Spec
         paths = parts.map { |part| File.expand_path("../../fixtures/sharding/#{part}", __FILE__) }
         hashes = paths.map { |path| S::Media.digest(path) }
         paths.each_with_index do |part, n|
-          post "/@spontaneous/shard/#{hashes[n]}", "file" => ::Rack::Test::UploadedFile.new(part, "application/octet-stream")
+          auth_post "/@spontaneous/shard/#{hashes[n]}", "file" => ::Rack::Test::UploadedFile.new(part, "application/octet-stream")
         end
         hashes.each do |hash|
-          get "/@spontaneous/shard/#{hash}"
+          auth_get "/@spontaneous/shard/#{hash}"
           last_response.status.should == 200
         end
         box = @job1.images
         current_count = box.pieces.length
         first_id = box.pieces.first.id.to_s
 
-        post "/@spontaneous/shard/wrap/#{@job1.id}/#{box.schema_id.to_s}", "filename" => "rose.jpg", "shards" => hashes, "mime_type" => "image/jpeg"
+        auth_post "/@spontaneous/shard/wrap/#{@job1.id}/#{box.schema_id.to_s}", "filename" => "rose.jpg", "shards" => hashes, "mime_type" => "image/jpeg"
         assert last_response.ok?, "Should have got status 200 but got #{last_response.status}"
         last_response.content_type.should == "application/json;charset=utf-8"
         box = @job1.reload.images

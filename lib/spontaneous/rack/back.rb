@@ -10,6 +10,7 @@ module Spontaneous
       AUTH_COOKIE = "spontaneous_api_key".freeze
 
       JAVASCRIPT_FILES = %w(vendor/jquery-1.6.2.min vendor/jquery-ui-1.8.9.custom.min vendor/JS.Class-2.1.5/min/core vendor/crypto-2.3.0-crypto vendor/crypto-2.3.0-sha1 extensions spontaneous properties dom authentication user popover popover_view ajax types image content views views/box_view views/page_view views/piece_view views/page_piece_view entry page_entry box page field field_types/string_field field_types/file_field field_types/image_field field_types/markdown_field field_types/date_field content_area preview editing location state top_bar field_preview box_container progress status_bar upload sharded_upload upload_manager dialogue edit_dialogue edit_panel add_home_dialogue page_browser add_alias_dialogue  publish init load)
+
       module Authentication
         module Helpers
           def authorised?
@@ -72,12 +73,17 @@ module Spontaneous
           end
         end
 
+        KEY_PARAM = "__key".freeze
+
         def requires_authentication!(options = {})
-          exceptions = (options[:except] || []).concat(["#{NAMESPACE}/login", "#{NAMESPACE}/reauthenticate"] )
+          first_level_exceptions = (options[:except_all] || []).concat(["#{NAMESPACE}/login", "#{NAMESPACE}/reauthenticate"] )
+          second_level_exceptions = (options[:except_key] || [])
           before do
-            unless exceptions.detect { |e| e === request.path }
-              unless user
-                halt(401, erubis(:login, :locals => { :login => '' })) unless user
+            unless first_level_exceptions.any? { |e| e === request.path }
+              ignore_key = second_level_exceptions.any? { |e| e === request.path }
+              valid_key = ignore_key || Spontaneous::Permissions::AccessKey.valid?(params[KEY_PARAM], user)
+              unless (user and valid_key)
+                halt(401, erubis(:login, :locals => { :login => '' }))
               end
             end
           end
@@ -132,7 +138,7 @@ module Spontaneous
 
         use AroundBack
         register Authentication
-        requires_authentication! :except => %w(unsupported).map{ |p| %r(^#{NAMESPACE}/#{p}) }
+        requires_authentication! :except_all => [%r(^#{NAMESPACE}/unsupported)], :except_key => [%r(^#{NAMESPACE}/?$)]
       end
 
       class SchemaModification < AuthenticatedHandler
