@@ -102,7 +102,7 @@ module Spontaneous::Prototypes
       {
         :name => name.to_s,
         :schema_id => schema_id.to_s,
-        :type => field_class.json_name,
+        :type => field_class.ui_class,
         :title => title,
         :comment => comment || "",
         :writable => Spontaneous::Permissions.has_level?(write_level)

@@ -159,17 +159,8 @@ class BackTest < MiniTest::Spec
         get "/@spontaneous/types"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal Schema.export.to_json, last_response.body
+        assert_equal Schema.serialise_http, last_response.body
       end
-
-      # should "return json for a specific type" do
-      #   type = InfoPage
-      #   get "/@spontaneous/type/#{type.json_name}"
-      #   puts last_response.body
-      #   assert last_response.ok?
-      #   last_response.content_type.should == "application/json;charset=utf-8"
-      #   assert_equal type.to_json, last_response.body
-      # end
 
       should "return scripts from js dir" do
         get '/@spontaneous/js/test.js'
@@ -251,7 +242,7 @@ class BackTest < MiniTest::Spec
           assert last_response.ok?
           last_response.content_type.should == "application/json;charset=utf-8"
           @job1 = Content[@job1.id]
-          last_response.body.should == @job1.to_json
+          last_response.body.should == @job1.serialise_http
           @job1.fields.title.value.should ==  "Updated field_name_1"
         end
 
@@ -264,7 +255,7 @@ class BackTest < MiniTest::Spec
           assert last_response.ok?
           last_response.content_type.should == "application/json;charset=utf-8"
           @home = Content[@home.id]
-          last_response.body.should == @home.to_json
+          last_response.body.should == @home.serialise_http
           @home.fields.title.value.should ==  "Updated title"
           @home.fields.introduction.value.should ==  "<p>Updated intro</p>\n"
         end
@@ -589,7 +580,7 @@ class BackTest < MiniTest::Spec
         get "/@spontaneous/publish/changes"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        last_response.body.should == Change.outstanding.to_json
+        last_response.body.should == Change.serialise_http
       end
 
       should "be able to start a publish with a set of change sets" do

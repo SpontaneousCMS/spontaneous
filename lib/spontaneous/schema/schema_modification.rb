@@ -251,8 +251,9 @@ module Spontaneous
       def export
         actions.map { |action| action.export }
       end
-      def to_json
-        export.to_json
+
+      def serialise_http
+        Spontaneous.serialise_http(export)
       end
     end
   end

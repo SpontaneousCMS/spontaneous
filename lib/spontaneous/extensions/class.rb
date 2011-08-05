@@ -3,7 +3,7 @@
 module Spontaneous
   module Extensions
     module Class
-      def json_name
+      def ui_class
         name.gsub(/::/, ".")
       end
     end

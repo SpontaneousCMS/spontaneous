@@ -154,7 +154,7 @@ module Spontaneous::Prototypes
     end
 
     def export
-      allowed = allowed_types.map { |c| c.json_name }
+      allowed = allowed_types.map { |c| c.ui_class }
       {
         :name => name.to_s,
         :id => schema_id.to_s,

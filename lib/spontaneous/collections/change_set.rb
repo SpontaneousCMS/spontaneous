@@ -35,9 +35,9 @@ module Spontaneous::Collections
       end
       h
     end
-    def to_json
-      export.to_json
-    end
+    # def serialise_http
+    #   Spontaneous.serialise_http(export)
+    # end
   end
 end
 

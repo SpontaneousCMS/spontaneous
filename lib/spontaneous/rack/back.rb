@@ -82,7 +82,6 @@ module Spontaneous
             end
           end
         end
-
       end
 
 
@@ -119,7 +118,7 @@ module Spontaneous
 
         def json(response)
           content_type 'application/json', :charset => 'utf-8'
-          response.to_json
+          response.serialise_http
         end
       end
 
@@ -458,7 +457,7 @@ module Spontaneous
 
         get '/publish/changes' do
           if user.level.can_publish?
-            json(Change.outstanding)
+            json(Change)
           else
             unauthorised!
           end

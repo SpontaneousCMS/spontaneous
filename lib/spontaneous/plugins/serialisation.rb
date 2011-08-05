@@ -7,7 +7,7 @@ module Spontaneous::Plugins
     module ClassMethods
       def export
         {
-          :type=> self.json_name,
+          :type=> self.ui_class,
           :id => self.schema_id.to_s,
           :is_page => self.page?,
           :is_alias => self.alias?,
@@ -31,8 +31,8 @@ module Spontaneous::Plugins
         field_names.select { |name| field_readable?(name) }
       end
 
-      def to_json
-        export.to_json
+      def serialise_http
+        Spontaneous.serialise_http(export)
       end
 
     end # ClassMethods
@@ -41,7 +41,7 @@ module Spontaneous::Plugins
       def shallow_export
         {
           :id => id,
-          :type => self.class.json_name,
+          :type => self.class.ui_class,
           :type_id => self.class.schema_id.to_s,
           :is_page => page?,
           :hidden => (hidden? ? true : false),
@@ -58,8 +58,8 @@ module Spontaneous::Plugins
       end
 
 
-      def to_json
-        export.to_json
+      def serialise_http
+        Spontaneous.serialise_http(export)
       end
     end # InstanceMethods
   end # Serialisation

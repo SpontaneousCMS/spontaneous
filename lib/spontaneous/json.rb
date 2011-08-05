@@ -24,6 +24,7 @@ module Spontaneous
     def parse_json(json_string)
       Spontaneous::JSON.parse(json_string)
     end
+    alias_method :decode_json, :parse_json
 
     def encode_json(object)
       Spontaneous::JSON.encode(object)

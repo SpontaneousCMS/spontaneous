@@ -847,11 +847,11 @@ class PublishingTest < MiniTest::Spec
         Content.expects(:publish).at_least_once.raises(Exception)
         Change.count.should == 2
         begin
-          Site.publish_all
+          silence_logger { Site.publish_all }
         rescue Exception; end
         Change.count.should == 2
         begin
-          Site.publish_changes([change1])
+          silence_logger { Site.publish_changes([change1]) }
         rescue Exception; end
         Change.count.should == 2
       end
@@ -872,7 +872,7 @@ class PublishingTest < MiniTest::Spec
         # Content.delete_all_revisions!
         S::Render.expects(:render_pages).raises(Exception)
         begin
-          Site.publish_all
+          silence_logger { Site.publish_all }
         rescue Exception; end
         Content.with_editable do
           Content.first.first_published_at.should be_nil
@@ -887,12 +887,12 @@ class PublishingTest < MiniTest::Spec
         # to simulate the right error
         S::Render.expects(:render_pages).raises(Exception)
         begin
-          Site.publish_all
+          silence_logger { Site.publish_all }
         rescue Exception; end
         Site.pending_revision.should be_nil
         Content.revision_exists?(@revision).should be_false
         begin
-          Site.publish_changes([change1])
+          silence_logger { Site.publish_changes([change1]) }
         rescue Exception; end
         Site.pending_revision.should be_nil
         Content.revision_exists?(@revision).should be_false

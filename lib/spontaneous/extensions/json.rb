@@ -5,7 +5,10 @@ module Spontaneous
   module Extensions
     module JSON
       def to_json
-        Yajl::Encoder.new.encode(self)
+        Spontaneous::JSON.encode(self)
+      end
+      def serialise_http
+        Spontaneous.serialise_http(self)
       end
     end
   end

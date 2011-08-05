@@ -23,7 +23,7 @@ module Spontaneous::Plugins
           :id => id,
           :title => fields.title.value,
           :path => path,
-          :type => self.class.json_name,
+          :type => self.class.ui_class,
           :type_id => self.class.schema_id,
           :children => self.children.length,
           :depth => depth

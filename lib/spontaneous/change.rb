@@ -62,6 +62,14 @@ module Spontaneous
         self.filter(:id => invalid.map { |change| change.id }).delete
         valid
       end
+
+      def export
+        outstanding.map { |change_set| change_set.export }
+      end
+
+      def serialise_http
+        Spontaneous.serialise_http(export)
+      end
     end
 
 

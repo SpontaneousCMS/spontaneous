@@ -194,8 +194,8 @@ module Spontaneous
 
     # only called directly after saving a boxes fields so
     # we don't need to return the entries
-    def to_json
-      shallow_export.to_json
+    def serialise_http
+      Spontaneous.serialise_http(shallow_export)
     end
 
     def writable?(content_type = nil)

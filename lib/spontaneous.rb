@@ -28,6 +28,7 @@ require 'spontaneous/logger'
 require 'spontaneous/plugins'
 require 'spontaneous/constants'
 require 'spontaneous/errors'
+require 'spontaneous/json'
 
 Dir[File.expand_path('../spontaneous/plugins/application/*.rb', __FILE__)].each do |file|
   require file
@@ -51,9 +52,9 @@ module Spontaneous
   plugin Plugins::Application::Paths
   plugin Plugins::Application::Render
   plugin Plugins::Application::Facets
+  plugin Plugins::Application::Serialisation
 
   autoload :ProxyObject, "spontaneous/proxy_object"
-  autoload :JSON, "spontaneous/json"
 
   autoload :Config, "spontaneous/config"
   autoload :Paths, "spontaneous/paths"

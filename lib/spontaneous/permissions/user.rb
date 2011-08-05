@@ -106,8 +106,8 @@ module Spontaneous::Permissions
       }
     end
 
-    def to_json
-      export.to_json
+    def serialise_http
+      Spontaneous.serialise_http(export)
     end
 
     protected
