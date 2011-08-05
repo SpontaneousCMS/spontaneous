@@ -2,21 +2,25 @@
 
 module Spontaneous
   module Rack
+    POWERED_BY = {
+      "X-Powered-By" => "Spontaneous CMS v#{Spontaneous::VERSION}"
+    }
+
     class AroundFront
       def initialize(app)
         @app = app
       end
 
       def call(env)
-        response = nil
+        status = headers = body = nil
         Content.with_identity_map do
           S::Render.with_published_renderer do
             Site.with_published do
-              response = @app.call(env)
+              status, headers, body = @app.call(env)
             end
           end
         end
-        response
+        [status, headers.merge(POWERED_BY), body]
       end
     end
 
