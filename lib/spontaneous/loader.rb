@@ -9,7 +9,7 @@ module Spontaneous
     class << self
 
       def use_reloader?
-        Spontaneous.config.reload_classes
+        Site.config.reload_classes
       end
 
       def load!

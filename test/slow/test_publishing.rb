@@ -8,10 +8,9 @@ class PublishingTest < MiniTest::Spec
   def self.startup
     root = File.expand_path("../../fixtures/example_application", __FILE__)
     Spontaneous.root = root
-    instance = Spontaneous::Site.new(root, :test, :back)
-    Spontaneous.instance = instance
-    Spontaneous.config.publishing_delay = nil
-    Spontaneous.instance.database = DB
+    instance = Spontaneous::Site.instantiate(root, :test, :back)
+    Site.config.publishing_delay = nil
+    Site.instance.database = DB
     Content.delete_all_revisions!
   end
 

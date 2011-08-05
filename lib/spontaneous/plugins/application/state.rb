@@ -26,7 +26,7 @@ module Spontaneous::Plugins::Application
 
 
       def config
-        Spontaneous.instance.config
+        Spontaneous::Site.instance.config
       end
 
       def db_settings
@@ -34,11 +34,11 @@ module Spontaneous::Plugins::Application
       end
 
       def database
-        Spontaneous.instance.database
+        Spontaneous::Site.instance.database
       end
 
       def database=(database)
-        Spontaneous.instance.database = database
+        Spontaneous::Site.instance.database = database
       end
 
       def mode=(mode)

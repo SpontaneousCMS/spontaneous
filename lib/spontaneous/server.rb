@@ -11,9 +11,9 @@ module Spontaneous
 
 
     def self.run!(options={})
-      host = options["host"] || Spontaneous.config.host || "0.0.0.0"
-      port = options["port"] || Spontaneous.config.port || 2012
-      adapter = options["adapter"] || Spontaneous.config.adapter
+      host = options["host"] || Site.config.host || "0.0.0.0"
+      port = options["port"] || Site.config.port || 2012
+      adapter = options["adapter"] || Site.config.adapter
 
       handler = nil
 

@@ -156,7 +156,7 @@ module Spontaneous
       end
 
       class EditingInterface < AuthenticatedHandler
-        use Reloader if Spontaneous.config.reload_classes
+        use Reloader if Site.config.reload_classes
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 

@@ -31,6 +31,9 @@ class ApplicationTest < MiniTest::Spec
   end
 
   context "Site" do
+    setup do
+      Spontaneous.init(:mode => :back, :environment => :development)
+    end
     should "have the same config as Spontaneous" do
       Site.config.should == Spontaneous.config
     end
@@ -68,11 +71,11 @@ class ApplicationTest < MiniTest::Spec
     end
 
     should "have correct db settings" do
-      Spontaneous.config.db[:adapter].should == "mysql2"
-      Spontaneous.config.db[:database].should == "spontaneous2_test"
-      Spontaneous.config.db[:user].should == "root"
-      Spontaneous.config.db[:password].should be_nil
-      Spontaneous.config.db[:host].should == "localhost"
+      Site.config.db[:adapter].should == "mysql2"
+      Site.config.db[:database].should == "spontaneous2_test"
+      Site.config.db[:user].should == "root"
+      Site.config.db[:password].should be_nil
+      Site.config.db[:host].should == "localhost"
     end
 
     should "configure the datamapper connection" do
@@ -131,15 +134,15 @@ class ApplicationTest < MiniTest::Spec
       Spontaneous.environment.should == :production
       Spontaneous.development?.should be_false
       Spontaneous.production?.should be_true
-      # Spontaneous.config.environment.should == :production
+      # Site.config.environment.should == :production
     end
 
     should "have correct db settings" do
-      Spontaneous.config.db[:adapter].should == "mysql2"
-      Spontaneous.config.db[:database].should == "spontaneous_example_production"
-      Spontaneous.config.db[:user].should == "spontaneous_prod"
-      Spontaneous.config.db[:password].should == "Passw0rd"
-      Spontaneous.config.db[:host].should == "localhost"
+      Site.config.db[:adapter].should == "mysql2"
+      Site.config.db[:database].should == "spontaneous_example_production"
+      Site.config.db[:user].should == "spontaneous_prod"
+      Site.config.db[:password].should == "Passw0rd"
+      Site.config.db[:host].should == "localhost"
     end
 
     should "have the right rack port" do

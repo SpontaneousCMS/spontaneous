@@ -10,7 +10,7 @@ module Spontaneous
       end
 
       def user(env)
-        if login = Spontaneous.config.auto_login
+        if login = Site.config.auto_login
           user = Spontaneous::Permissions::User[:login => login]
         else
           request = ::Rack::Request.new(env)

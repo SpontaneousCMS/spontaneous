@@ -16,7 +16,7 @@ module Spontaneous::Plugins::Application
       end
 
       def facets
-        instance.facets
+        Spontaneous::Site.instance.facets
       end
 
     end

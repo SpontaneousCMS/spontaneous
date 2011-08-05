@@ -17,7 +17,7 @@ module Spontaneous
       end
 
       def port
-        Spontaneous.config.port
+        Site.config.port
       end
     end
 

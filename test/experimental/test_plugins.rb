@@ -6,7 +6,7 @@ class PluginsTest < MiniTest::Spec
 
 
   def self.startup
-    instance = Spontaneous::Site.new(Spontaneous.root, :test, :back)
+    instance = Spontaneous::Site.instantiate(Spontaneous.root, :test, :back)
     Spontaneous.instance = instance
     Spontaneous.instance.database = DB
 

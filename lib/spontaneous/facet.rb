@@ -19,12 +19,12 @@ module Spontaneous
     end
 
     def config
-      Spontaneous.instance.config
+      Site.instance.config
     end
 
     def init!
       paths.expanded(:config).each do |config_path|
-        Spontaneous.config.load(config_path)
+        Site.config.load(config_path)
       end
     end
 

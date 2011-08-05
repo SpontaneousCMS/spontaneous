@@ -75,7 +75,7 @@ module Spontaneous
         prepare :browse
         require 'launchy'
         boot!
-        ::Launchy::Browser.run("http://localhost:#{Spontaneous.config.port}/@spontaneous")
+        ::Launchy::Browser.run("http://localhost:#{Site.config.port}/@spontaneous")
       end
 
 

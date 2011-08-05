@@ -4,7 +4,7 @@
 module Spontaneous
   module Rack
     class Public < ServerBase
-      use Reloader if Spontaneous.config.reload_classes
+      use Reloader if Site.config.reload_classes
 
       get "/" do
         render_page(Site.root)

@@ -7,7 +7,7 @@ module Spontaneous::Plugins
       module ClassMethods
 
         def default_publishing_method
-          resolve_publishing_method(Spontaneous.config.publishing_method || :immediate)
+          resolve_publishing_method(Site.config.publishing_method || :immediate)
         end
 
         def publishing_method
