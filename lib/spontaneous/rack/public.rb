@@ -12,10 +12,15 @@ module Spontaneous
       HEADER_CONTENT_LENGTH = "Content-Length".freeze
 
       attr_reader :response, :request
+      attr_accessor :page
+
+      def initialize
+      end
 
       def call(env)
         @response = ::Rack::Response.new
         @request = ::Rack::Request.new(env)
+        find_page!
 
         response = catch(:halt) do
           case @request.request_method
@@ -26,7 +31,9 @@ module Spontaneous
           end
         end
 
-        status, header, body = finish(response)
+        parse_response(response)
+        status, header, body = @response.finish
+
 
         # Never produce a body on HEAD requests. Do retain the Content-Length
         # unless it's "0", in which case we assume it was calculated erroneously
@@ -45,9 +52,12 @@ module Spontaneous
       end
 
 
+
       # stolen from Sinatra
-      def finish(response)
+      def parse_response(response)
         case
+        when response.respond_to?(:spontaneous_content?)
+          @page = response
         when response.respond_to?(:to_str)
           @response.body = [response]
         when response.respond_to?(:to_ary)
@@ -71,70 +81,103 @@ module Spontaneous
         when (100..599) === response
           @response.status = response
         end
-
-        @response.finish
       end
 
       DOT = '.'.freeze
       ACTION = "/#{S::Plugins::Controllers::ACTION_SEPARATOR}".freeze
 
+      def show(page, status=200)
+        page = Spontaneous::Site[page] if String === page
+        @page = page
+        status(status)
+      end
+
+      def redirect(redirection, redirect_code=:temporary)
+        redirection = Spontaneous::Site[redirection] if String === redirection
+        redirect_code = REDIRECTS[redirect_code] if Symbol === redirect_code
+        redirect_code ||= REDIRECTS[:temporary]
+        # let Sinatra's helper method set up the Location headers for us
+        catch(:halt) { super(redirection.path) }
+        status(redirect_code)
+        # then re-throw the :halt
+        halt
+      end
+
+      def content_type(type, params={})
+        default = params.delete :default
+        mime_type = mime_type(type) || default
+        fail "Unknown media type: %p" % type if mime_type.nil?
+        mime_type = mime_type.dup
+        unless params.include? :charset# or settings.add_charset.all? { |p| not p === mime_type }
+          params[:charset] = params.delete('charset')# || settings.default_encoding
+        end
+        mime_type << ";#{params.map { |kv| kv.join('=') }.join(', ')}" unless params.empty?
+        response['Content-Type'] = mime_type
+      end
+
+      def find_page!
+        @path, @format, @action = parse_path
+        @page = Site[@path]
+      end
+
+      def format
+        @format
+      end
+
+      def action
+        @action
+      end
+
       def get
-        if request.path_info == "/"
-          render_page(Site.root)
-        else
-          path, format, action = parse_path
-          page = Site[path]
-          return not_found! unless page
-          if destination = redirect?(page)
-            redirect(*destination)
+        return not_found! unless @page
+
+        @format = (@format || @page.default_format).to_sym if @page
+
+        if @action
+          status, headers, result = @page.process_action(action, request.env, format)
+          # our 404 page should come from the CMS
+          if status == 404
+            not_found!
           else
-            if show = page.request_show(request.params, request, request.session)
-              case show
-              when String
-                page = Site[show]
-              else
-                page = show
-              end
-            end
-
-            format = (format || page.default_format).to_sym if page
-
-            if action
-              status, headers, result = page.process_action(action, request.env, format)
-              # our 404 page should come from the CMS
-              if status == 404
-                not_found!
-              else
-                if result.respond_to?(:spontaneous_content?)
-                  render_page_with_format(result, format)
-                else
-                  [status, headers, result]
-                end
-              end
+            if result.respond_to?(:spontaneous_content?)
+              render_page_with_format(result, format)
             else
-              render_page_with_format(page, format)
+              [status, headers, result]
             end
           end
+        else
+          block = page.request_block(request)
+          parse_response(instance_eval(&block)) if (block)
+
+          @format = (@format || @page.default_format).to_sym if @page
+          render_page_with_format(@page, @format)
         end
       end
 
       # non-action urls shouldn't respond to post requests
       def post
-        path, format, action = parse_path
-        return not_found! unless action
-        page = Site[path]
-        return not_found! unless page
-        status, headers, result = page.process_action(action, request.env, format)
-        # our 404 page should come from the CMS
-        if status == 404
-          not_found!
-        else
-          if result.respond_to?(:spontaneous_content?)
-            render_page_with_format(result, format)
+        return not_found! unless @page
+        block = page.request_block(request)
+        return not_found! unless (block or action)
+
+        if @action
+          status, headers, result = page.process_action(action, request.env, format)
+          if status == 404
+            not_found!
           else
-            [status, headers, result]
+            if result.respond_to?(:spontaneous_content?)
+              render_page_with_format(result, format)
+            else
+              [status, headers, result]
+            end
           end
+        else
+          parse_response(instance_eval(&block)) if (block)
+
+          @format = (@format || @page.default_format).to_sym if @page
+          render_page_with_format(@page, @format)
         end
+        # our 404 page should come from the CMS
       end
 
       def parse_path
@@ -191,4 +234,3 @@ module Spontaneous
     end
   end
 end
-

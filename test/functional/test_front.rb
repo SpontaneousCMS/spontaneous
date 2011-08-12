@@ -181,42 +181,97 @@ class FrontTest < MiniTest::Spec
       setup do
         Page.stubs(:path).with("/about").returns(about)
         Page.stubs(:path).with("/news").returns(news)
+        # puts ">"*50
+      end
+      teardown do
+        # puts "<"*50
       end
 
       should "render an alternate page if passed a page" do
-        about.stubs(:request_show).returns(news)
+        # about.stubs(:request_show).returns(news)
+        SitePage.request do
+          show Site['/news']
+        end
         get '/about'
         assert last_response.ok?
         last_response.body.should == "/news.html\n"
       end
 
       should "render an alternate page if passed a path" do
-        about.stubs(:request_show).returns("/news")
+        # about.stubs(:request_show).returns("/news")
+        SitePage.request do
+          show "/news"
+        end
         get '/about'
         assert last_response.ok?
         last_response.body.should == "/news.html\n"
       end
 
       should "render an alternate page if passed a uid with a #" do
-        about.stubs(:request_show).returns("#news")
+        # about.stubs(:request_show).returns("#news")
+        SitePage.request do
+          show "#news"
+        end
         get '/about'
         assert last_response.ok?
         last_response.body.should == "/news.html\n"
       end
 
       should "render an alternate page if passed a uid" do
-        about.stubs(:request_show).returns("news")
+        # about.stubs(:request_show).returns("news")
+        SitePage.request do
+          show "news"
+        end
         get '/about'
         assert last_response.ok?
         last_response.body.should == "/news.html\n"
       end
 
       should "return not found of #request_show returns an invalid uid or path" do
-        about.stubs(:request_show).returns("caterpillars")
+        # about.stubs(:request_show).returns("caterpillars")
+        SitePage.request do
+          show "caterpillars"
+        end
         get '/about'
         assert last_response.status == 404
       end
 
+      should "return the right status code" do
+        SitePage.request do
+          show "#news", 404
+        end
+        get '/about'
+        assert last_response.status == 404
+        last_response.body.should == "/news.html\n"
+      end
+
+      should "allow handing POST requests" do
+        SitePage.request :post do
+          show "#news"
+        end
+        post '/about'
+        assert last_response.status == 200
+        last_response.body.should == "/news.html\n"
+      end
+
+      should "allow returning of any status code without altering content" do
+        SitePage.request do
+          404
+        end
+        get '/about'
+        assert last_response.status == 404
+        last_response.body.should == "/about.html\n"
+      end
+
+      should "allow altering of headers" do
+        SitePage.request do
+          headers["X-Works"] = "Yes"
+        end
+        get '/about'
+        assert last_response.status == 200
+        last_response.body.should == "/about.html\n"
+        last_response.headers["X-Works"].should == "Yes"
+      end
       # should "handle anything that responds to #render(format)" do
       #   show = mock()
       #   show.stubs(:render).returns("mocked")
@@ -229,35 +284,67 @@ class FrontTest < MiniTest::Spec
     context "Redirects" do
       setup do
         Page.stubs(:path).with("/about").returns(about)
+        Page.stubs(:path).with("/news").returns(news)
       end
 
       should "respond appropriatly to redirects to path" do
-        about.stubs(:request_redirect).returns("/news")
+        # about.stubs(:request_redirect).returns("/news")
+        SitePage.request do
+          redirect "/news"
+        end
+        get '/about'
+        assert last_response.status == 302
+        last_response.headers["Location"].should == "http://example.org/news"
+      end
+
+      should "respond appropriately to redirects to a Page instance" do
+        SitePage.request do
+          redirect Page.path("/news")
+        end
+        get '/about'
+        assert last_response.status == 302
+        last_response.headers["Location"].should == "http://example.org/news"
+      end
+
+      should "respond appropriately to redirects to a UID" do
+        SitePage.request do
+          redirect "#news"
+        end
         get '/about'
         assert last_response.status == 302
         last_response.headers["Location"].should == "http://example.org/news"
       end
 
       should "recognise a :temporary redirect" do
-        about.stubs(:request_redirect).returns([ "/news", :temporary ])
+        # about.stubs(:request_redirect).returns([ "/news", :temporary ])
+        SitePage.request do
+          redirect "/news", :temporary
+        end
         get '/about'
         assert last_response.status == 302
         last_response.headers["Location"].should == "http://example.org/news"
       end
 
       should "recognise a :permanent redirect" do
-        about.stubs(:request_redirect).returns([ "/news", :permanent ])
+        # about.stubs(:request_redirect).returns([ "/news", :permanent ])
+        SitePage.request do
+          redirect "/news", :permanent
+        end
         get '/about'
         assert last_response.status == 301
         last_response.headers["Location"].should == "http://example.org/news"
       end
 
       should "correctly apply numeric status codes" do
-        about.stubs(:request_redirect).returns([ "/news", 307 ])
+        # about.stubs(:request_redirect).returns([ "/news", 307 ])
+        SitePage.request do
+          redirect "/news", 307
+        end
         get '/about'
         last_response.headers["Location"].should == "http://example.org/news"
         assert last_response.status == 307
       end
+
     end
 
     context "Templates" do

@@ -146,6 +146,7 @@ module Spontaneous
 
     module Page
       autoload :Formats, "spontaneous/plugins/page/formats"
+      autoload :Request, "spontaneous/plugins/page/request"
     end
 
     module Site

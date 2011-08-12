@@ -12,6 +12,7 @@ module Spontaneous
     plugin Plugins::SiteMap
     plugin Plugins::PageSearch
     plugin Plugins::Controllers
+    plugin Plugins::Page::Request
 
     many_to_one :parent,   :class => Content, :reciprocal => :children
     one_to_many :children, :class => Content, :key => :parent_id, :reciprocal => :parent
@@ -54,21 +55,6 @@ module Spontaneous
     # def formats
     #   self.class.formats
     # end
-
-    def request_redirect(params = nil, request = nil, session = nil)
-      # overwrite and return a Page or a string (containing a path) to cause this page to redirect when accessed
-      # if you return a [ location, code ] array then the supplied code will be used in the redirection
-      # the code can be either a numeric value (301, 302, ...) or one of :permanent (301) or :temporary (302)
-    end
-
-    def request_show(params = nil, request = nil, session = nil)
-      # use this to let a call to render this page actually render the content of another
-      # the response can be:
-      #   a uid: in the form 'uid' or '#uid' to have requests to this page show the content from the page (recommended)
-      #   a path: "/path/to/page" (not recommended as paths change!)
-      #   a Content instance: either a Page or a Piece
-      #   anything that responds to #render(format)
-    end
 
 
     def page
