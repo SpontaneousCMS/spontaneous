@@ -35,13 +35,15 @@ function $A(iterable) {
 
 	var function_id = 0;
 
-	$.extend(Function.prototype, {
-		bind: function() {
+	if (!(typeof Function.prototype.bind === 'function')) {
+		Function.prototype.bind = function() {
 			var __method = this, args = $A(arguments), object = args.shift();
 			return function() {
 				return __method.apply(object, args.concat($A(arguments)));
 			};
-		},
+		};
+	}
+	$.extend(Function.prototype, {
 		cache: function(name) {
 			var __method = this, id = name || ('__cached__'+(++function_id)), _undefined_;
 			return function() {
