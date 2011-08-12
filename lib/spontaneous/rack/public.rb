@@ -3,7 +3,7 @@
 
 module Spontaneous
   module Rack
-    class Public #< ServerBase
+    class Public
       include Sinatra::Helpers
 
       METHOD_GET = "GET".freeze
@@ -132,9 +132,6 @@ module Spontaneous
           if result.respond_to?(:spontaneous_content?)
             render_page_with_format(result, format)
           else
-            # response.status = status
-            # response.headers.merge!(headers)
-            # response.body = result
             [status, headers, result]
           end
         end
@@ -189,7 +186,7 @@ module Spontaneous
       end
 
       def not_found!
-        response.status = 404
+        404
       end
     end
   end
