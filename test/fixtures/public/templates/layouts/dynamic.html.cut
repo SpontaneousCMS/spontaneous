@@ -1,1 +1,1 @@
-#{session['user_id']}/#{params[:wendy]}/#{request.env["SERVER_NAME"]}
+#{session['user_id']}/#{params['wendy']}/#{request.env["SERVER_NAME"]}
