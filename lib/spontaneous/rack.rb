@@ -30,13 +30,13 @@ module Spontaneous
       # mime_type :js,  'text/javascript; charset=utf-8'
       # mime_type :css, 'text/css; charset=utf-8'
 
-      before do
-        ## globally setting this screws up auto content type setting by send_file
-        # content_type 'text/html', :charset => 'utf-8'
-        if Spontaneous.development?
-          # Templates.clear_cache!
-        end
-      end
+      # before do
+      #   ## globally setting this screws up auto content type setting by send_file
+      #   # content_type 'text/html', :charset => 'utf-8'
+      #   if Spontaneous.development?
+      #     # Templates.clear_cache!
+      #   end
+      # end
     end
 
     autoload :Back, 'spontaneous/rack/back'
