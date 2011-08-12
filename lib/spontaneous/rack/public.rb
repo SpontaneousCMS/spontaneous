@@ -21,9 +21,8 @@ module Spontaneous
           case @request.request_method
           when METHOD_GET
             get
-          when METHOD_POST
-            post
           else
+            post
           end
         end
 
@@ -46,6 +45,7 @@ module Spontaneous
       end
 
 
+      # stolen from Sinatra
       def finish(response)
         case
         when response.respond_to?(:to_str)
@@ -74,9 +74,6 @@ module Spontaneous
 
         @response.finish
       end
-      # get "/" do
-      #   render_page(Site.root)
-      # end
 
       DOT = '.'.freeze
       ACTION = "/#{S::Plugins::Controllers::ACTION_SEPARATOR}".freeze
