@@ -7,9 +7,6 @@ module Spontaneous
       default_task :back
 
       # desc :start, "Starts Spontaneous"
-      # method_option :adapter, :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
-      # method_option :host, :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
-      # method_option :port, :type => :numeric, :aliases => "-p", :desc => "Use PORT"
 
       # def both
       #   pids = []
@@ -22,6 +19,9 @@ module Spontaneous
 
 
       desc "#{namespace}:front", "Starts Spontaneous in front/public mode"
+      method_option :adapter, :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
+      method_option :host, :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
+      method_option :port, :type => :numeric, :aliases => "-p", :desc => "Use PORT"
       def front
         start_server(:front)
       end
