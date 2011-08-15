@@ -39,6 +39,7 @@ module Spontaneous
       # end
     end
 
+    autoload :HTTP, 'spontaneous/rack/http'
     autoload :Back, 'spontaneous/rack/back'
     autoload :Front, 'spontaneous/rack/front'
     autoload :Public, 'spontaneous/rack/public'

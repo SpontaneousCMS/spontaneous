@@ -110,7 +110,7 @@ module Spontaneous
           end
 
           map "/media" do
-            run Spontaneous::Rack::Media
+            run Spontaneous::Rack::Media.new
           end
 
           map "/" do

@@ -4,16 +4,9 @@
 module Spontaneous
   module Rack
     module Public
+      include HTTP
       include Sinatra::Helpers unless method_defined?(:redirect)
 
-      METHOD_GET = "GET".freeze
-      METHOD_POST = "POST".freeze
-      METHOD_HEAD = "HEAD".freeze
-      HTTP_CONTENT_LENGTH = "Content-Length".freeze
-      HTTP_EXPIRES = "Expires".freeze
-      HTTP_CACHE_CONTROL = "Cache-Control".freeze
-      HTTP_LAST_MODIFIED = "Last-Modified".freeze
-      HTTP_NO_CACHE = "max-age=0, must-revalidate, no-cache, no-store".freeze
 
       attr_reader :response, :request
       attr_accessor :page
