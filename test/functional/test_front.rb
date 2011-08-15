@@ -152,14 +152,14 @@ class FrontTest < MiniTest::Spec
       get '/about.pdf'
       assert last_response.ok?
       last_response.body.should == "/about.pdf\n"
-      last_response.content_type.should == "application/pdf"
+      last_response.content_type.should == "application/pdf;charset=utf-8"
     end
 
     should "provide the default format of the page if none is explicitly given" do
       @about.class.stubs(:formats).returns([:rss, :html])
       get '/about'
       assert last_response.ok?
-      last_response.content_type.should == ::Rack::Mime.mime_type('.rss')
+      last_response.content_type.should == ::Rack::Mime.mime_type('.rss') + ";charset=utf-8"
       last_response.body.should == "/about.rss\n"
     end
 

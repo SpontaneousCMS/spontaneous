@@ -601,11 +601,8 @@ module Spontaneous
         end
       end
 
-      class Preview < Spontaneous::Rack::Public
-        HTTP_EXPIRES = "Expires".freeze
-        HTTP_CACHE_CONTROL = "Cache-Control".freeze
-        HTTP_LAST_MODIFIED = "Last-Modified".freeze
-        HTTP_NO_CACHE = "max-age=0, must-revalidate, no-cache, no-store".freeze
+      class Preview < Sinatra::Base
+        include Spontaneous::Rack::Public
 
         use AroundPreview
         register Authentication
@@ -623,6 +620,12 @@ module Spontaneous
           end
         end
 
+
+        get '*' do
+          path = params[:splat][0]
+
+          render_path(path)
+        end
 
         def render_page(page, format = :html, local_params = {})
           now = Time.now.to_formatted_s(:rfc822)

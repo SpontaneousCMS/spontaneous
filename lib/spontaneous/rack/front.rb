@@ -25,12 +25,14 @@ module Spontaneous
           end
         end
       end
-      class Server < Spontaneous::Rack::Public
+      class Server# < Spontaneous::Rack::Public
+        include Spontaneous::Rack::Public
 
-
-        # before do
-        #   content_type 'text/html', :charset => (Site.config.default_charset || 'utf-8')
-        # end
+        def call(env)
+          @response = ::Rack::Response.new
+          @request = ::Rack::Request.new(env)
+          render_path(@request.path_info)
+        end
       end
     end
   end

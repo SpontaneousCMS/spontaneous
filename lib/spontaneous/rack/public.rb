@@ -3,44 +3,46 @@
 
 module Spontaneous
   module Rack
-    class Public
-      include Sinatra::Helpers
+    module Public
+      include Sinatra::Helpers unless method_defined?(:redirect)
 
       METHOD_GET = "GET".freeze
       METHOD_POST = "POST".freeze
       METHOD_HEAD = "HEAD".freeze
-      HEADER_CONTENT_LENGTH = "Content-Length".freeze
+      HTTP_CONTENT_LENGTH = "Content-Length".freeze
+      HTTP_EXPIRES = "Expires".freeze
+      HTTP_CACHE_CONTROL = "Cache-Control".freeze
+      HTTP_LAST_MODIFIED = "Last-Modified".freeze
+      HTTP_NO_CACHE = "max-age=0, must-revalidate, no-cache, no-store".freeze
 
       attr_reader :response, :request
       attr_accessor :page
 
-      def initialize
-      end
-
-      def call(env)
-        @response = ::Rack::Response.new
-        @request = ::Rack::Request.new(env)
-        find_page!
+      def render_path(path)
+        find_page!(path)
 
         response = catch(:halt) do
-          case @request.request_method
-          when METHOD_GET
-            get
+          if @page
+            case @request.request_method
+            when METHOD_GET
+              render_get
+            else
+              render_post
+            end
           else
-            post
+            not_found!
           end
         end
 
         parse_response(response)
         status, header, body = @response.finish
 
-
         # Never produce a body on HEAD requests. Do retain the Content-Length
         # unless it's "0", in which case we assume it was calculated erroneously
         # for a manual HEAD response and remove it entirely.
         if request.request_method == METHOD_HEAD
           body = []
-          header.delete(HEADER_CONTENT_LENGTH) if header[HEADER_CONTENT_LENGTH] == '0'
+          header.delete(HTTP_CONTENT_LENGTH) if header[HTTP_CONTENT_LENGTH] == '0'
         end
 
         [status, header, body]
@@ -93,11 +95,12 @@ module Spontaneous
       end
 
       def redirect(redirection, redirect_code=:temporary)
-        redirection = Spontaneous::Site[redirection] if String === redirection
+        page = Spontaneous::Site[redirection] if String === redirection
+        redirection = redirection.path if (page)
         redirect_code = REDIRECTS[redirect_code] if Symbol === redirect_code
         redirect_code ||= REDIRECTS[:temporary]
         # let Sinatra's helper method set up the Location headers for us
-        catch(:halt) { super(redirection.path) }
+        catch(:halt) { super(redirection) }
         status(redirect_code)
         # then re-throw the :halt
         halt
@@ -108,15 +111,15 @@ module Spontaneous
         mime_type = mime_type(type) || default
         fail "Unknown media type: %p" % type if mime_type.nil?
         mime_type = mime_type.dup
-        unless params.include? :charset# or settings.add_charset.all? { |p| not p === mime_type }
-          params[:charset] = params.delete('charset')# || settings.default_encoding
+        unless params.include? :charset
+          params[:charset] = params.delete('charset') || ::Spontaneous.config.default_charset || 'utf-8'
         end
         mime_type << ";#{params.map { |kv| kv.join('=') }.join(', ')}" unless params.empty?
         response['Content-Type'] = mime_type
       end
 
-      def find_page!
-        @path, @format, @action = parse_path
+      def find_page!(path)
+        @path, @format, @action = parse_path(path)
         @page = Site[@path]
       end
 
@@ -128,23 +131,13 @@ module Spontaneous
         @action
       end
 
-      def get
-        return not_found! unless @page
+      def render_get
+        # return not_found! unless @page
 
         @format = (@format || @page.default_format).to_sym if @page
 
         if @action
-          status, headers, result = @page.process_action(action, request.env, format)
-          # our 404 page should come from the CMS
-          if status == 404
-            not_found!
-          else
-            if result.respond_to?(:spontaneous_content?)
-              render_page_with_format(result, format)
-            else
-              [status, headers, result]
-            end
-          end
+          call_action!
         else
           block = page.request_block(request)
           parse_response(instance_eval(&block)) if (block)
@@ -155,33 +148,38 @@ module Spontaneous
       end
 
       # non-action urls shouldn't respond to post requests
-      def post
-        return not_found! unless @page
+      def render_post
+        # return not_found! unless @page
+
         block = page.request_block(request)
-        return not_found! unless (block or action)
+        return not_found! unless (block or @action)
 
         if @action
-          status, headers, result = page.process_action(action, request.env, format)
-          if status == 404
-            not_found!
-          else
-            if result.respond_to?(:spontaneous_content?)
-              render_page_with_format(result, format)
-            else
-              [status, headers, result]
-            end
-          end
+          call_action!
         else
           parse_response(instance_eval(&block)) if (block)
 
           @format = (@format || @page.default_format).to_sym if @page
           render_page_with_format(@page, @format)
         end
-        # our 404 page should come from the CMS
       end
 
-      def parse_path
-        path = request.path_info
+      def call_action!
+        # get
+        status, headers, result = @page.process_action(action, request.env, format)
+        # our 404 page should come from the CMS
+        if status == 404
+          not_found!
+        else
+          if result.respond_to?(:spontaneous_content?)
+            render_page_with_format(result, format)
+          else
+            [status, headers, result]
+          end
+        end
+      end
+
+      def parse_path(path)
         if path =~ %r(#{ACTION})
           path, action = path.split(ACTION)
           action, format = action.split(DOT)

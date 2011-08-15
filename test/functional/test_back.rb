@@ -47,6 +47,7 @@ class BackTest < MiniTest::Spec
       config = mock()
       config.stubs(:reload_classes).returns(false)
       config.stubs(:auto_login).returns('root')
+      config.stubs(:default_charset).returns('utf-8')
       config.stubs(:publishing_method).returns(:immediate)
       root = File.expand_path("../../fixtures/back", __FILE__)
       Spontaneous.root = root
