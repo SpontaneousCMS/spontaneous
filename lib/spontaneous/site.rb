@@ -19,6 +19,7 @@ module Spontaneous
     end
 
     def initialize!
+      load_config!
       connect_to_database!
       find_plugins!
       load_facets!
@@ -47,6 +48,7 @@ module Spontaneous
 
     def connect_to_database!
       self.database = Sequel.connect(db_settings)
+      self.database.logger = logger if config.log_queries
     end
 
     def db_settings

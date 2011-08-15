@@ -22,10 +22,13 @@ module Spontaneous
       Site.instance.config
     end
 
-    def init!
+    def load_config!
       paths.expanded(:config).each do |config_path|
         Site.config.load(config_path)
       end
+    end
+
+    def init!
     end
 
     def load!

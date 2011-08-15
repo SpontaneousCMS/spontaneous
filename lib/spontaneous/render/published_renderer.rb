@@ -6,7 +6,7 @@ module Spontaneous
     class PublishedRenderer < Renderer
       def render_content(content, format=:html, params = {})
         render = nil
-        if Spontaneous.development?
+        if Spontaneous.development? and Spontaneous.config.rerender_pages
           # in dev mode we just want to render the page dynamically, skipping the cached version
           render = rerender(content, format, params)
         else
