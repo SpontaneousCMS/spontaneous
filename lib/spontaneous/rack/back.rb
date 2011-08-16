@@ -175,12 +175,12 @@ module Spontaneous
             field_data.each do |id, values|
               field = model.fields.sid(id)
               if model.field_writable?(field.name.to_sym)
-                version = values.delete("version").to_i
-                if version == field.version
+                # version = values.delete("version").to_i
+                # if version == field.version
                   field.update(values)
-                else
-                  conflicts << [field, values]
-                end
+                # else
+                #   conflicts << [field, values]
+                # end
               else
                 unauthorised!
               end
@@ -285,6 +285,27 @@ module Spontaneous
           end
         end
 
+        post '/version/:id' do
+          content, box = content_for_request
+          content = box if box
+          field_versions = params[:fields]
+          conflicts = []
+          field_versions.each do |schema_id, version|
+            field = content.fields.sid(schema_id)
+            unless field.version == version.to_i
+              conflicts << field
+            end
+          end
+          if conflicts.empty?
+            200
+          else
+            errors = conflicts.map  do |field|
+              [field.schema_id.to_s, [field.version, field.conflicted_value]]
+            end
+            [409, json(Hash[errors])]
+          end
+        end
+
         post '/save/:id' do
           update_fields(content_for_request, params[:field])
         end
@@ -336,9 +357,15 @@ module Spontaneous
           file = params['file']
           field = target.fields.sid(params['field'])
           if target.field_writable?(field.name)
-            field.unprocessed_value = file
-            target.save
-            json({ :id => target.id, :src => field.src})
+            # version = params[:version].to_i
+            # if version == field.version
+              field.unprocessed_value = file
+              target.save
+              json({ :id => target.id, :src => field.src})
+            # else
+            #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
+            #   [409, json(Hash[errors])]
+            # end
           else
             unauthorised!
           end
@@ -347,12 +374,18 @@ module Spontaneous
         post '/file/replace/:id/:box_id' do
           content, box = content_for_request
           target = box || content
-          file = params['file']
+          file = params[:file]
           field = target.fields.sid(params['field'])
           if target.field_writable?(field.name)
-            field.unprocessed_value = file
-            content.save
-            json({ :id => content.id, :src => field.src})
+            # version = params[:version].to_i
+            # if version == field.version
+              field.unprocessed_value = file
+              content.save
+              json({ :id => content.id, :src => field.src})
+            # else
+            #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
+            #   [409, json(Hash[errors])]
+            # end
           else
             unauthorised!
           end
@@ -532,14 +565,20 @@ module Spontaneous
           target = content_for_request
           field = target.fields.sid(params[:field])
           if target.field_writable?(field.name)
-            Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-              field.unprocessed_value = {
-                :filename => params[:filename],
-                :tempfile => combined
-              }
-              target.save
-            end
-            json({ :id => target.id, :src => field.src})
+            # version = params[:version].to_i
+            # if version == field.version
+              Spontaneous::Media.combine_shards(params[:shards]) do |combined|
+                field.unprocessed_value = {
+                  :filename => params[:filename],
+                  :tempfile => combined
+                }
+                target.save
+              end
+              json({ :id => target.id, :src => field.src})
+            # else
+            #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
+            #   [409, json(Hash[errors])]
+            # end
           else
             unauthorised!
           end

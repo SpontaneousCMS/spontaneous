@@ -3,7 +3,6 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 	var dom = S.Dom;
 	var StringFieldConflictView = new JS.Class({
 		initialize: function(dialogue, conflict) {
-			console.log('StringFieldConflictView.new', conflict)
 			this.dialogue = dialogue;
 			this.conflict = conflict;
 			this.server_version = conflict.server_version;
@@ -18,7 +17,6 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			var local_change = this.diff(this.values.local_original, this.values.local_edited);
 			var merge = this.differ.patch_apply(local_change.patches, this.values.server_original);
 			var merge_change = this.diff(this.values.local_original, merge[0]);
-			console.log(merge);
 			var local_mods = this.differ.diff_prettyHtml(server_change.diff);
 			var merge_mods = this.differ.diff_prettyHtml(merge_change.diff);
 
@@ -50,7 +48,6 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			};
 		},
 		useValue: function(value) {
-			console.log('using value', value)
 			this.use_value = value;
 			this.dialogue.resolve_value(this.conflict, value);
 		}
@@ -120,6 +117,12 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		schema_id: function() {
 			return this.type.schema_id;
 		},
+		version: function() {
+			return this.data.version;
+		},
+		set_version: function(version) {
+			this.data.version = version;
+		},
 		label: function() {
 			return this.title;
 		},
@@ -129,11 +132,20 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			}
 			return this._input;
 		},
-		version_input: function() {
-			if (!this._version_input) {
-				this._version_input = dom.input({'type':'hidden', 'name':this.input_name('version'), 'value':this.data.version});
-			}
-			return this._version_input;
+
+		edited_value: function() {
+			return this.input().val();
+		},
+		is_modified: function() {
+			// always returns true because the ui value will always be sent and would override the server
+			// version in the case of a conflict
+			return true;
+		},
+		original_value: function() {
+			return this.unprocessed_value();
+		},
+		set_edited_value: function(value) {
+			this.input().val(value);
 		},
 		cancel_edit: function() {
 		},
@@ -164,8 +176,9 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		conflict_view: function(dialogue, conflict) {
 			return new StringFieldConflictView(dialogue, conflict);
 		}
-
 	});
+
+	StringField.ConflictView = StringFieldConflictView;
 
 	return StringField;
 })(jQuery, Spontaneous);

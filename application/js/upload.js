@@ -2,6 +2,7 @@
 
 
 Spontaneous.Upload = (function($, S) {
+	var upload_id = (new Date()).valueOf();
 	var Upload = new JS.Class({
 		initialize: function(manager, target, file) {
 			this.manager = manager;
@@ -9,11 +10,15 @@ Spontaneous.Upload = (function($, S) {
 			this.uid = target.uid();
 			this.target = target;
 			this.target_id = target.id();
+			if (target.version) {
+				this.target_version = target.version();
+			}
 			this._position = 0;
 			this.failure_count = 0;
 			this.file = file;
 			this.name = this.file.fileName;
 			this._total = this.file.size;
+			this.upload_id = upload_id++;
 		},
 		position: function() {
 			return this._position;
@@ -25,6 +30,9 @@ Spontaneous.Upload = (function($, S) {
 			var form = new FormData();
 			form.append('file', this.file);
 			form.append('field', this.field_name);
+			if (this.target_version) {
+				form.append('version', this.target_version);
+			}
 			this.post("/file/replace/"+this.target_id, form);
 		},
 
@@ -59,9 +67,16 @@ Spontaneous.Upload = (function($, S) {
 		},
 		onreadystatechange: function(event) {
 			var xhr = event.currentTarget;
-			if (xhr.readyState == 4 && xhr.status === 200) {
-				var result = JSON.parse(xhr.responseText);
-				this.manager.upload_complete(this, result);
+			if (xhr.readyState == 4) {
+				if (xhr.status === 200) {
+					if (!this.complete) {
+						var result = JSON.parse(xhr.responseText);
+						this.manager.upload_complete(this, result);
+						this.complete = true;
+					}
+				} else if (xhr.status === 409) {
+					this.manager.upload_conflict(this, event);
+				}
 			}
 		},
 		onerror: function(event) {

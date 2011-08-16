@@ -42,6 +42,21 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 				S.UploadManager.replace(this, file);
 			}
 			this.selected_files = false;
+		},
+		is_modified: function() {
+			var files = this.selected_files; //this.input[0].files;
+			return (files && files.length > 0);
+		},
+		original_value: function() {
+			this.processed_value();
+		},
+		set_edited_value: function(value) {
+			console.log('set_edited_value', value, this.edited_value(), this.original_value())
+			if (value === this.edited_value()) {
+				// do nothing
+			} else {
+				this.selected_files = null;
+			}
 		}
 	});
 	return FileField;

@@ -29,10 +29,13 @@ Spontaneous.Ajax = (function($, S) {
 				callback(data, textStatus, XMLHttpRequest);
 			};
 			var error = function(XMLHttpRequest, textStatus, error_thrown) {
-				callback(false, textStatus, XMLHttpRequest);
+				var data = false;
+				try {
+					data = $.parseJSON(XMLHttpRequest.responseText);
+				} catch (e) { }
+				callback(data, textStatus, XMLHttpRequest);
 			};
 			post_data = $.extend(post_data, this.api_access_key());
-			console.log(post_data)
 			$.ajax({
 				'url': this.request_url(url),
 				'type': 'post',

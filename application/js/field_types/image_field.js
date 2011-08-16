@@ -1,6 +1,31 @@
 // console.log('Loading ImageField...')
 Spontaneous.FieldTypes.ImageField = (function($, S) {
 	var dom = S.Dom;
+	var ImageFieldConflictView = new JS.Class(S.FieldTypes.StringField.ConflictView, {
+
+		panel: function() {
+			var labels = dom.div('.string-field-conflict.labels.differences'), outer = dom.div(), image_outer = dom.div('.image-field-conflict.changes.differences'), original = dom.div('.original.diff'), edited = dom.div('.final.diff');
+			var local_label = dom.div('.diff').text("Server version");
+			var server_label = dom.div('.diff').text("Your version");
+			console.log('values', this.values);
+			original.append(dom.img().attr('src', this.values.server_original)).click(function() {
+				this.useValue(this.values.server_original);
+				edited.add(original).removeClass('selected');
+				original.addClass('selected');
+			}.bind(this));
+
+			edited.append(dom.img().attr('src', this.values.local_edited)).click(function() {
+				this.useValue(this.values.local_edited);
+				edited.add(original).removeClass('selected');
+				edited.addClass('selected');
+			}.bind(this));
+			labels.append(local_label, server_label);
+			image_outer.append(original, edited)
+			outer.append(labels, image_outer);
+			return outer;
+		}
+	});
+
 	var ImageField = new JS.Class(Spontaneous.FieldTypes.FileField, {
 		is_image: function() {
 			return true;
@@ -108,6 +133,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			dropper.get(0).addEventListener('drop', drop, true);
 			dropper.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
 			this.drop_target = dropper;
+			this.preview_img = img;
 			return outer;
 		},
 
@@ -192,6 +218,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 					img.attr('src', url).removeClass('empty');
 					this.selected_files = files;
 					img.attr('src', url)
+					this._edited_value = url;
 					this.image.attr('src', url)
 					window.URL.revokeObjectURL(url);
 					set_info(file.fileName, file.fileSize, null, null)
@@ -259,13 +286,32 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				var s = attr.src.split('/'), filename = s[s.length - 1];
 				set_info(filename, attr.filesize, attr.width, attr.height);
 			}
+			this.preview_img = img;
 			return wrap;
+		},
+
+		edited_value: function() {
+			return this.input().val();
 		},
 		cancel_edit: function() {
 			this.image.attr('src', this.get('value'));
+		},
+		conflict_view: function(dialogue, conflict) {
+			return new ImageFieldConflictView(dialogue, conflict);
+		},
+		original_value: function() {
+			return this.value();
+		},
+		edited_value: function() {
+			return this._edited_value;
+		},
+		set_edited_value: function(value) {
+			this.preview_img.attr('src', value);
+			this.callSuper(value);
 		}
 	});
 
+	ImageField.ConflictView = ImageFieldConflictView;
+
 	return ImageField;
 })(jQuery, Spontaneous);
-

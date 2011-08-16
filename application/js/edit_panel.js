@@ -12,16 +12,43 @@ Spontaneous.EditPanel = (function($, S) {
 			btns[save_label] = this.save.bind(this);
 			return btns;
 		},
+
 		id: function() {
 			return this.parent_view.id();
 		},
+
 		schema_id: function() {
 
 		},
+
 		uid: function() {
 			return this.parent_view.uid() + '!editing';
 		},
+
 		save: function() {
+			var version_data = {};
+			var fields = this.parent_view.field_list();
+			for (var i = 0, ii = fields.length; i < ii; i++) {
+				var field = fields[i], key = "[fields]["+field.schema_id()+"]";
+				if (field.is_modified()) {
+					version_data[key] = field.version();
+				}
+			}
+			S.Ajax.post(['/version', this.parent_view.id()].join('/'), version_data, function(data, textStatus, xhr) {
+				console.log('version', data, textStatus, xhr);
+				if (textStatus === 'success') {
+					this.upload_values();
+				} else {
+					if (xhr.status === 409) {
+						this.upload_conflict(data);
+					}
+				}
+			}.bind(this));
+
+			return false;
+		},
+
+		upload_values: function() {
 			var values = this.form.serializeArray();
 			var field_data = new FormData();
 			var size = 0;
@@ -38,7 +65,6 @@ Spontaneous.EditPanel = (function($, S) {
 			$.each(this.parent_view.file_fields(), function() {
 				this.save();
 			});
-			return false;
 		},
 
 		save_path: function() {
@@ -56,11 +82,10 @@ Spontaneous.EditPanel = (function($, S) {
 
 
 		upload_failed: function(event) {
-			console.log("FAILED", event)
+			// console.log("FAILED", event)
 		},
 
 		upload_conflict: function(conflict_data) {
-			console.log("CONFLICT", conflict_data)
 			var ff = this.parent_view.field_list(), fields = {};
 			for (var i = 0, ii = ff.length; i < ii; i++) {
 				var f = ff[i];
@@ -69,42 +94,41 @@ Spontaneous.EditPanel = (function($, S) {
 			var conflicted_fields = [];
 			for (var sid in conflict_data) {
 				if (conflict_data.hasOwnProperty(sid)) {
-					var values = conflict_data[sid];
+					var values = conflict_data[sid], field = fields[sid];
+					console.log('conflict', values, field)
 					conflicted_fields.push({
-						field:fields[sid],
+						field:field,
 						server_version: values[0],
 						values: {
 							server_original: values[1],
-							local_edited:  values[2],
-							local_original:  fields[sid].unprocessed_value()
+							local_edited:  field.edited_value(),
+							local_original:  field.original_value()
 						}
 					});
 				}
 			}
-			console.log(conflicted_fields);
+			console.log('conflicted_fields', conflicted_fields)
 			var dialogue = new S.ConflictedFieldDialogue(this, conflicted_fields);
 			dialogue.open();
 		},
 
 		conflicts_resolved: function(conflict_list) {
-			console.log('conflicts_resolved', conflict_list);
 			var ff = this.parent_view.field_list(), conflicts = {};
 			for (var i =0, ii = conflict_list.length; i < ii; i++) {
 				var conflict = conflict_list[i];
 				conflicts[conflict.field.schema_id()] = conflict;
 			}
-			console.log('conflicts', conflicts)
 			for (var i = 0, ii = ff.length; i < ii; i++) {
 				var field = ff[i], conflict = conflicts[field.schema_id()];
 				if (conflict) {
-					console.log('field', field, 'conflict', conflict)
-					field.input().val(conflict.value);
-					field.version_input().val(conflict.server_version);
+					field.set_edited_value(conflict.value);
+					field.set_version(conflict.version);
 				}
 			}
 			// no need to animate as the dialog is over the top
-			$('> *', this.form).css({'opacity': 1});
+			// $('> *', this.form).css({'opacity': 1});
 		},
+
 		cancel: function() {
 			var fields = this.parent_view.field_list();
 			for (var i = 0, ii = fields.length; i < ii; i++) {
@@ -228,8 +252,7 @@ Spontaneous.EditPanel = (function($, S) {
 				d.append(dom.div('.toolbar').html(toolbar));
 			}
 			var edit = field.edit();
-			d.append(dom.div('.value').append(edit).append(field.version_input()));
-			// d.append(field.version_input());
+			d.append(dom.div('.value').append(edit));
 			var footer = field.footer();
 			if (footer) {
 				d.append(dom.div('.footer').html(footer));
