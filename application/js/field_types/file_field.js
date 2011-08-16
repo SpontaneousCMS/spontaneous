@@ -14,6 +14,12 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 			Spontaneous.UploadManager.unregister(this);
 		},
 		upload_complete: function(values) {
+			console.log('upload complete', values)
+			this.set_version(values.version);
+			this.selected_files = null;
+			this.disable_progress();
+		},
+		disable_progress: function() {
 			this.progress_bar().parent().hide();
 			this.drop_target.removeClass('uploading')
 		},
@@ -56,6 +62,7 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 				// do nothing
 			} else {
 				this.selected_files = null;
+				this.set('value', value);
 			}
 		}
 	});

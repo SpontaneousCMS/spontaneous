@@ -48,7 +48,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		},
 
 		upload_complete: function(values) {
-			this.callSuper();
+			this.callSuper(values);
 		},
 
 		upload_progress: function(position, total) {
@@ -98,14 +98,16 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				var files = event.dataTransfer.files;
 				this.waiting.show();
 				this.spinner().indeterminate();
+
 				if (files.length > 0) {
+					this.selected_files = files;
 					var file = files[0],
 					url = window.URL.createObjectURL(file);
-
+					this._edited_value = url;
 					this.image.attr('src', url)
 					// see http://www.htmlfivewow.com/slide25
 					window.URL.revokeObjectURL(url);
-					S.UploadManager.replace(this, file);
+					S.Ajax.test_field_versions(this.content, [this], this.upload_values.bind(this), this.upload_conflict.bind(this));
 				}
 				return false;
 			}.bind(this);
@@ -136,7 +138,30 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			this.preview_img = img;
 			return outer;
 		},
-
+		upload_values: function() {
+			var file = this.selected_files[0];
+			S.UploadManager.replace(this, file);
+		},
+		upload_conflict: function(conflict_data) {
+			console.log('conflicted_fields', conflict_data)
+			var dialogue = new S.ConflictedFieldDialogue(this, conflict_data);
+			dialogue.open();
+		},
+		conflicts_resolved: function(resolution_list) {
+			console.log('conflicts_resolved', resolution_list)
+			var resolution = resolution_list[0];
+			this.set_edited_value(resolution.value);
+			this.set_version(resolution.version);
+			if (this.is_modified()) {
+				this.upload_values();
+			} else {
+				this.disable_progress();
+			}
+		},
+		disable_progress: function() {
+			this.spinner().stop();
+			this.callSuper();
+		},
 		spinner: function() {
 			if (!this._spinner) {
 				this._spinner = Spontaneous.Progress(this.waiting[0], 16, {
@@ -149,9 +174,11 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		},
 		upload_complete: function(values) {
 			this.callSuper(values)
-			this.set('value', values.src);
-			if (this.image) {
-				this.image.attr('src', values.src);
+			if (values) {
+				this.set('value', values.src);
+				if (this.image) {
+					this.image.attr('src', values.src);
+				}
 			}
 		},
 		// upload_progress: function(position, total) {

@@ -44,6 +44,46 @@ Spontaneous.Ajax = (function($, S) {
 				'error': error
 			});
 		},
+		test_field_versions: function(target, fields, success, failure) {
+			var version_data = {};
+			for (var i = 0, ii = fields.length; i < ii; i++) {
+				var field = fields[i], key = "[fields]["+field.schema_id()+"]";
+				if (field.is_modified()) {
+					version_data[key] = field.version();
+				}
+			}
+			this.post(['/version', target.id()].join('/'), version_data, function(data, textStatus, xhr) {
+				console.log('version', data, textStatus, xhr);
+				if (textStatus === 'success') {
+					success();
+				} else {
+					if (xhr.status === 409) {
+						var field_map = {};
+						for (var i = 0, ii = fields.length; i < ii; i++) {
+							var f = fields[i];
+							field_map[f.schema_id()] = f;
+						}
+						var conflicted_fields = [];
+						for (var sid in data) {
+							if (data.hasOwnProperty(sid)) {
+								var values = data[sid], field = field_map[sid];
+								console.log('conflict', values, field)
+								conflicted_fields.push({
+									field:field,
+									server_version: values[0],
+									values: {
+										server_original: values[1],
+										local_edited:  field.edited_value(),
+										local_original:  field.original_value()
+									}
+								});
+							}
+						}
+						failure(conflicted_fields)
+					}
+				}
+			});
+		},
 		api_access_key: function() {
 			return {'__key':Spontaneous.Auth.Key.load(S.site_id)}
 		},

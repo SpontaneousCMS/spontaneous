@@ -361,7 +361,7 @@ module Spontaneous
             # if version == field.version
               field.unprocessed_value = file
               target.save
-              json({ :id => target.id, :src => field.src})
+              json({ :id => target.id, :src => field.src, :version => field.version})
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]
@@ -381,7 +381,7 @@ module Spontaneous
             # if version == field.version
               field.unprocessed_value = file
               content.save
-              json({ :id => content.id, :src => field.src})
+              json({ :id => content.id, :src => field.src, :version => field.version})
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]
@@ -574,7 +574,7 @@ module Spontaneous
                 }
                 target.save
               end
-              json({ :id => target.id, :src => field.src})
+              json({ :id => target.id, :src => field.src, :version => field.version})
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]

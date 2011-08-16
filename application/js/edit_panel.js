@@ -26,24 +26,8 @@ Spontaneous.EditPanel = (function($, S) {
 		},
 
 		save: function() {
-			var version_data = {};
 			var fields = this.parent_view.field_list();
-			for (var i = 0, ii = fields.length; i < ii; i++) {
-				var field = fields[i], key = "[fields]["+field.schema_id()+"]";
-				if (field.is_modified()) {
-					version_data[key] = field.version();
-				}
-			}
-			S.Ajax.post(['/version', this.parent_view.id()].join('/'), version_data, function(data, textStatus, xhr) {
-				console.log('version', data, textStatus, xhr);
-				if (textStatus === 'success') {
-					this.upload_values();
-				} else {
-					if (xhr.status === 409) {
-						this.upload_conflict(data);
-					}
-				}
-			}.bind(this));
+			S.Ajax.test_field_versions(this.parent_view, fields, this.upload_values.bind(this), this.upload_conflict.bind(this));
 
 			return false;
 		},
@@ -86,29 +70,8 @@ Spontaneous.EditPanel = (function($, S) {
 		},
 
 		upload_conflict: function(conflict_data) {
-			var ff = this.parent_view.field_list(), fields = {};
-			for (var i = 0, ii = ff.length; i < ii; i++) {
-				var f = ff[i];
-				fields[f.schema_id()] = f;
-			}
-			var conflicted_fields = [];
-			for (var sid in conflict_data) {
-				if (conflict_data.hasOwnProperty(sid)) {
-					var values = conflict_data[sid], field = fields[sid];
-					console.log('conflict', values, field)
-					conflicted_fields.push({
-						field:field,
-						server_version: values[0],
-						values: {
-							server_original: values[1],
-							local_edited:  field.edited_value(),
-							local_original:  field.original_value()
-						}
-					});
-				}
-			}
-			console.log('conflicted_fields', conflicted_fields)
-			var dialogue = new S.ConflictedFieldDialogue(this, conflicted_fields);
+			console.log('conflicted_fields', conflict_data)
+			var dialogue = new S.ConflictedFieldDialogue(this, conflict_data);
 			dialogue.open();
 		},
 
