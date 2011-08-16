@@ -586,6 +586,14 @@ $text-edit-width: 621px;
 }
 
 #conflicted-fields-dialogue {
+  .instructions {
+		@extend .interface;
+		text-transform: none;
+		margin: 0;
+		background-color: #f2f2f2;
+		color: #666;
+		padding: $unit;
+  }
 	.differences {
 		@include display-box;
 	}
@@ -596,8 +604,8 @@ $text-edit-width: 621px;
 		@include box-sizing;
 		font-size: $field-preview-font-size;
 		width: 50%;
-		padding: $padding;
-		border: solid 2px transparent;
+		padding: $unit $unit;
+		border: solid 2px #f2f2f2;
 		cursor: pointer;
 
 		&.selected {
@@ -617,10 +625,25 @@ $text-edit-width: 621px;
 	}
 	.labels {
 		.diff {
+			border: none;
+			background-color: #fbfbfb;
       @extend .interface;
       @extend .no-select;
 			padding-top: $padding/2;
 			padding-bottom: $padding/2;
+		}
+	}
+	.image-field-conflict.changes {
+		.diff {
+			@include display-box;
+			@include box-orient(horizontal);
+			@include box-pack(center);
+			@include box-align(center);
+			img {
+				max-height: 500px;
+				max-width: 100%;
+				display: block;
+			}
 		}
 	}
 }
