@@ -4,7 +4,6 @@ Spontaneous.Views.BoxView = (function($, S) {
 	var dom = S.Dom;
 
 	var BoxView = new JS.Class(Spontaneous.Views.View, {
-		include: Spontaneous.Properties,
 
 		initialize: function(box, dom_container) {
 			this.callSuper(box);

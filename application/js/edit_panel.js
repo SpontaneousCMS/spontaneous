@@ -27,6 +27,7 @@ Spontaneous.EditPanel = (function($, S) {
 
 		save: function() {
 			var fields = this.parent_view.field_list();
+			console.log('save', fields)
 			S.Ajax.test_field_versions(this.parent_view, fields, this.upload_values.bind(this), this.upload_conflict.bind(this));
 
 			return false;
@@ -76,6 +77,7 @@ Spontaneous.EditPanel = (function($, S) {
 		},
 
 		conflicts_resolved: function(conflict_list) {
+			console.log('conflicts resolved', conflict_list)
 			var ff = this.parent_view.field_list(), conflicts = {};
 			for (var i =0, ii = conflict_list.length; i < ii; i++) {
 				var conflict = conflict_list[i];
@@ -84,6 +86,7 @@ Spontaneous.EditPanel = (function($, S) {
 			for (var i = 0, ii = ff.length; i < ii; i++) {
 				var field = ff[i], conflict = conflicts[field.schema_id()];
 				if (conflict) {
+					console.log(">>> conflicts_resolved", field, conflict.version)
 					field.set_edited_value(conflict.value);
 					field.set_version(conflict.version);
 				}

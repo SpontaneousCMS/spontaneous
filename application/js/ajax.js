@@ -45,6 +45,7 @@ Spontaneous.Ajax = (function($, S) {
 			});
 		},
 		test_field_versions: function(target, fields, success, failure) {
+			console.log('test_field_versions', target, fields)
 			var version_data = {};
 			for (var i = 0, ii = fields.length; i < ii; i++) {
 				var field = fields[i], key = "[fields]["+field.schema_id()+"]";
@@ -52,6 +53,7 @@ Spontaneous.Ajax = (function($, S) {
 					version_data[key] = field.version();
 				}
 			}
+			console.log('test_field_versions', version_data)
 			this.post(['/version', target.id()].join('/'), version_data, function(data, textStatus, xhr) {
 				console.log('version', data, textStatus, xhr);
 				if (textStatus === 'success') {
@@ -70,7 +72,7 @@ Spontaneous.Ajax = (function($, S) {
 								console.log('conflict', values, field)
 								conflicted_fields.push({
 									field:field,
-									server_version: values[0],
+									version: values[0],
 									values: {
 										server_original: values[1],
 										local_edited:  field.edited_value(),

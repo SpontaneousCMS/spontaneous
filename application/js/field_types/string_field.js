@@ -5,7 +5,7 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		initialize: function(dialogue, conflict) {
 			this.dialogue = dialogue;
 			this.conflict = conflict;
-			this.server_version = conflict.server_version;
+			this.server_version = conflict.version;
 			this.values = conflict.values;
 			this.differ = new S.Diff();
 		},

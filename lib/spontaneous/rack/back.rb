@@ -286,8 +286,16 @@ module Spontaneous
         end
 
         post '/version/:id' do
+          content = content_for_request
+          generate_conflict_list(content)
+        end
+
+        post '/version/:id/:box_id' do
           content, box = content_for_request
-          content = box if box
+          generate_conflict_list(box)
+        end
+
+        def generate_conflict_list(content)
           field_versions = params[:fields]
           conflicts = []
           field_versions.each do |schema_id, version|
@@ -562,7 +570,16 @@ module Spontaneous
         end
 
         post '/shard/replace/:id' do
-          target = content_for_request
+          content = content_for_request
+          replace_with_shard(content, content.id)
+        end
+
+        post '/shard/replace/:id/:box_id' do
+          content, box = content_for_request
+          replace_with_shard(box, content.id)
+        end
+
+        def replace_with_shard(target, target_id)
           field = target.fields.sid(params[:field])
           if target.field_writable?(field.name)
             # version = params[:version].to_i
@@ -574,7 +591,7 @@ module Spontaneous
                 }
                 target.save
               end
-              json({ :id => target.id, :src => field.src, :version => field.version})
+              json({ :id => target_id, :src => field.src, :version => field.version})
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]

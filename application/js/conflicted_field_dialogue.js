@@ -76,6 +76,7 @@ Spontaneous.ConflictedFieldDialogue = (function($, S) {
 			if (conflict) {
 				this.conflict_panel(this.wrap);
 			} else {
+				console.log('closing conflict view', this.conflicted_fields);
 				this.parent_view.conflicts_resolved(this.conflicted_fields);
 				this.close();
 			}
