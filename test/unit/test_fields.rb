@@ -280,7 +280,44 @@ class FieldsTest < MiniTest::Spec
       instance = ::PersistedField[id]
       instance.fields.title.value.should == "Changed"
     end
+  end
 
+  context "Value version" do
+    setup do
+      class ::PersistedField < Piece
+        field :title, :default => "Magic"
+      end
+    end
+    teardown do
+      Object.send(:remove_const, :PersistedField)
+    end
+
+    should "be increased after a change" do
+      instance = ::PersistedField.new
+      instance.fields.title.version.should == 0
+      instance.fields.title.value = "Changed"
+      instance.save
+      instance = ::PersistedField[instance.id]
+      instance.fields.title.value.should == "Changed"
+      instance.fields.title.version.should == 1
+    end
+
+    should "not be increased if the value remains constant" do
+      instance = ::PersistedField.new
+      instance.fields.title.version.should == 0
+      instance.fields.title.value = "Changed"
+      instance.save
+      instance = ::PersistedField[instance.id]
+      instance.fields.title.value = "Changed"
+      instance.save
+      instance = ::PersistedField[instance.id]
+      instance.fields.title.value.should == "Changed"
+      instance.fields.title.version.should == 1
+      instance.fields.title.value = "Changed!"
+      instance.save
+      instance = ::PersistedField[instance.id]
+      instance.fields.title.version.should == 2
+    end
   end
 
   context "Available output formats" do

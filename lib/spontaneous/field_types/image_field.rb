@@ -79,6 +79,11 @@ module Spontaneous
         end
       end
 
+      # value used to show conflicts between the current value and the value they're attempting to enter
+      def conflicted_value
+        value
+      end
+
       # original is special and should always be defined
       def original
         @original ||= (attributes.key?(:original) ? attribute_get(:original) : ImageAttributes.new(:src => value))

@@ -20,15 +20,16 @@ module Spontaneous
     end
 
     def self.serialize_field(field)
-      [field.schema_id.to_s, field.unprocessed_value, field.processed_value, field.serialized_attributes]
+      [field.schema_id.to_s, field.version, field.unprocessed_value, field.processed_value, field.serialized_attributes]
     end
 
     def self.deserialize_field(serialized_field)
       {
         :id => serialized_field[0],
-        :unprocessed_value => serialized_field[1],
-        :processed_value => serialized_field[2],
-        :attributes => serialized_field[3],
+        :version => serialized_field[1],
+        :unprocessed_value => serialized_field[2],
+        :processed_value => serialized_field[3],
+        :attributes => serialized_field[4],
       }
     end
 

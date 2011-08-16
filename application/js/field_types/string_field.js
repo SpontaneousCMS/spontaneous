@@ -1,6 +1,61 @@
 // console.log('Loading StringField...')
 Spontaneous.FieldTypes.StringField = (function($, S) {
 	var dom = S.Dom;
+	var StringFieldConflictView = new JS.Class({
+		initialize: function(dialogue, conflict) {
+			console.log('StringFieldConflictView.new', conflict)
+			this.dialogue = dialogue;
+			this.conflict = conflict;
+			this.server_version = conflict.server_version;
+			this.values = conflict.values;
+			this.differ = new S.Diff();
+		},
+		panel: function() {
+			var labels = dom.div('.string-field-conflict.labels.differences'), outer = dom.div(), diff_outer = dom.div('.string-field-conflict.changes.differences'), local_diff = dom.div('.original.diff'), computed_diff = dom.div('.final.diff');
+			var local_diff_label = dom.div('.diff').text("Changes made by other person");
+			var final_diff_label = dom.div('.diff').text("Their changes merged with yours");
+			var server_change = this.diff(this.values.local_original, this.values.server_original);
+			var local_change = this.diff(this.values.local_original, this.values.local_edited);
+			var merge = this.differ.patch_apply(local_change.patches, this.values.server_original);
+			var merge_change = this.diff(this.values.local_original, merge[0]);
+			console.log(merge);
+			var local_mods = this.differ.diff_prettyHtml(server_change.diff);
+			var merge_mods = this.differ.diff_prettyHtml(merge_change.diff);
+
+			local_diff.append(local_mods).click(function() {
+				this.useValue(this.values.server_original);
+				local_diff.add(computed_diff).removeClass('selected');
+				local_diff.addClass('selected');
+			}.bind(this));
+
+			computed_diff.append(merge_mods).click(function() {
+				this.useValue(merge[0]);
+				local_diff.add(computed_diff).removeClass('selected');
+				computed_diff.addClass('selected');
+			}.bind(this));
+
+			labels.append(local_diff_label, final_diff_label);
+			diff_outer.append(local_diff, computed_diff);
+			outer.append(labels, diff_outer);
+			return outer;
+		},
+
+		diff: function(original, edited) {
+			var diff = this.differ.diff_main(original, edited, false);
+			this.differ.diff_cleanupSemantic(diff);
+			var patches = this.differ.patch_make(original, edited, diff);
+			return {
+				diff: diff,
+				patches: patches
+			};
+		},
+		useValue: function(value) {
+			console.log('using value', value)
+			this.use_value = value;
+			this.dialogue.resolve_value(this.conflict, value);
+		}
+	});
+
 	var StringField = new JS.Class({
 		include: Spontaneous.Properties,
 
@@ -54,7 +109,13 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			return 'field-'+this.name+'-'+this.id();
 		},
 		form_name: function() {
-			return 'field['+this.schema_id()+'][unprocessed_value]';
+			return this.input_name('unprocessed_value');
+		},
+		version_name: function() {
+			return this.input_name('version');
+		},
+		input_name: function(name) {
+			return 'field['+this.schema_id()+']['+name+']';
 		},
 		schema_id: function() {
 			return this.type.schema_id;
@@ -68,10 +129,17 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 			}
 			return this._input;
 		},
+		version_input: function() {
+			if (!this._version_input) {
+				this._version_input = dom.input({'type':'hidden', 'name':this.input_name('version'), 'value':this.data.version});
+			}
+			return this._version_input;
+		},
 		cancel_edit: function() {
 		},
 		close_edit: function() {
 			this._input = null;
+			this._version_input = null;
 		},
 		edit: function() {
 			return this.input();
@@ -92,7 +160,11 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		},
 		on_blur: function() {
 			this.input().parents('.field').first().removeClass('focus');
+		},
+		conflict_view: function(dialogue, conflict) {
+			return new StringFieldConflictView(dialogue, conflict);
 		}
+
 	});
 
 	return StringField;

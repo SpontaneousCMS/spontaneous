@@ -12,18 +12,21 @@
 :fields:
 - :unprocessed_value: Home
   :processed_value: Home
+  :version: 1
   :id: <%= SerialisedPage.field_prototypes[:title].schema_id.to_s %>
   :name: title
   :attributes: {}
 
 - :unprocessed_value: S
   :processed_value: South
+  :version: 1
   :id: <%= SerialisedPage.field_prototypes[:direction].schema_id.to_s %>
   :name: direction
   :attributes: {}
 
 - :unprocessed_value: /images/home.jpg
   :processed_value: /images/home.jpg
+  :version: 1
   :id: <%= SerialisedPage.field_prototypes[:thumbnail].schema_id.to_s %>
   :name: thumbnail
   :attributes: {}
@@ -46,23 +49,27 @@
     - :unprocessed_value: Piece 1
       :name: title
       :processed_value: Piece 1
+      :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:title].schema_id.to_s %>
       :attributes: {}
 
     - :unprocessed_value: Piece 1 Location
       :name: location
       :processed_value: Piece 1 Location
+      :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:location].schema_id.to_s %>
       :attributes: {}
 
     - :unprocessed_value: "2011-07-07"
       :processed_value: "2011-07-07"
+      :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:date].schema_id.to_s %>
       :name: date
       :attributes: {}
 
     - :unprocessed_value: ""
       :processed_value: ""
+      :version: 0
       :id: <%= SerialisedPiece.field_prototypes[:image].schema_id.to_s %>
       :name: image
       :attributes: {}
@@ -73,6 +80,7 @@
     - :fields:
       - :unprocessed_value: Things title
         :processed_value: Things title
+        :version: 1
         :id: <%= SerialisedPiece.boxes[:things].field_prototypes[:title].schema_id.to_s %>
         :name: title
         :attributes: {}
@@ -98,18 +106,21 @@
         :fields:
         - :unprocessed_value: Child Page
           :processed_value: Child Page
+          :version: 1
           :id: <%= SerialisedPage.field_prototypes[:title].schema_id.to_s %>
           :name: title
           :attributes: {}
 
         - :unprocessed_value: N
           :processed_value: North
+          :version: 1
           :id: <%= SerialisedPage.field_prototypes[:direction].schema_id.to_s %>
           :name: direction
           :attributes: {}
 
         - :unprocessed_value: /images/thumb.jpg
           :processed_value: /images/thumb.jpg
+          :version: 1
           :id: <%= SerialisedPage.field_prototypes[:thumbnail].schema_id.to_s %>
           :name: thumbnail
           :attributes: {}
@@ -127,24 +138,28 @@
     :fields:
     - :unprocessed_value: Piece 2
       :processed_value: Piece 2
+      :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:title].schema_id.to_s %>
       :name: title
       :attributes: {}
 
     - :unprocessed_value: Piece 2 Location
       :processed_value: Piece 2 Location
+      :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:location].schema_id.to_s %>
       :name: location
       :attributes: {}
 
     - :unprocessed_value: "2011-07-07"
       :processed_value: "2011-07-07"
+      :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:date].schema_id.to_s %>
       :name: date
       :attributes: {}
 
     - :unprocessed_value: ""
       :processed_value: ""
+      :version: 0
       :id: <%= SerialisedPiece.field_prototypes[:image].schema_id.to_s %>
       :name: image
       :attributes: {}
@@ -159,6 +174,7 @@
       :fields:
       - :unprocessed_value: ""
         :processed_value: ""
+        :version: 0
         :id: <%= @piece2.things.field_prototypes[:title].schema_id.to_s %>
         :name: title
         :attributes: {}

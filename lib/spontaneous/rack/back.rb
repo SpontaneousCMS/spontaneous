@@ -9,7 +9,7 @@ module Spontaneous
       NAMESPACE = "/@spontaneous".freeze
       AUTH_COOKIE = "spontaneous_api_key".freeze
 
-      JAVASCRIPT_FILES = %w(vendor/jquery-1.6.2.min vendor/jquery-ui-1.8.9.custom.min vendor/JS.Class-2.1.5/min/core vendor/crypto-2.3.0-crypto vendor/crypto-2.3.0-sha1 extensions spontaneous properties dom authentication user popover popover_view ajax types image content views views/box_view views/page_view views/piece_view views/page_piece_view entry page_entry box page field field_types/string_field field_types/file_field field_types/image_field field_types/markdown_field field_types/date_field content_area preview editing location state top_bar field_preview box_container progress status_bar upload sharded_upload upload_manager dialogue edit_dialogue edit_panel add_home_dialogue page_browser add_alias_dialogue  publish init load)
+      JAVASCRIPT_FILES = %w(vendor/jquery-1.6.2.min vendor/jquery-ui-1.8.9.custom.min vendor/JS.Class-2.1.5/min/core vendor/crypto-2.3.0-crypto vendor/crypto-2.3.0-sha1 vendor/diff_match_patch extensions spontaneous properties dom authentication user popover popover_view ajax types image content views views/box_view views/page_view views/piece_view views/page_piece_view entry page_entry box page field field_types/string_field field_types/file_field field_types/image_field field_types/markdown_field field_types/date_field content_area preview editing location state top_bar field_preview box_container progress status_bar upload sharded_upload upload_manager dialogue edit_dialogue edit_panel add_home_dialogue page_browser add_alias_dialogue conflicted_field_dialogue  publish init load)
 
       module Authentication
         module Helpers
@@ -40,6 +40,7 @@ module Spontaneous
 
         def self.registered(app)
           app.helpers Authentication::Helpers
+
           app.post "/reauthenticate" do
             if key = Spot::Permissions::AccessKey.authenticate(params[:api_key])
               response.set_cookie(AUTH_COOKIE, {
@@ -51,6 +52,7 @@ module Spontaneous
               halt(401, erubis(:login, :locals => { :invalid_key => true }))
             end
           end
+
           app.post "/login" do
             login = params[:user][:login]
             password = params[:user][:password]
@@ -168,18 +170,31 @@ module Spontaneous
 
 
         def update_fields(model, field_data)
+          conflicts = []
           if field_data
             field_data.each do |id, values|
               field = model.fields.sid(id)
               if model.field_writable?(field.name.to_sym)
-                field.update(values)
+                version = values.delete("version").to_i
+                if version == field.version
+                  field.update(values)
+                else
+                  conflicts << [field, values]
+                end
               else
                 unauthorised!
               end
             end
           end
-          if model.save
-            json(model)
+          if conflicts.empty?
+            if model.save
+              json(model)
+            end
+          else
+            errors = conflicts.map  do |field, new_value|
+              [field.schema_id.to_s, [field.version, field.conflicted_value, new_value["unprocessed_value"]]]
+            end
+            [409, json(Hash[errors])]
           end
         end
 

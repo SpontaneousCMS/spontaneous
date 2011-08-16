@@ -585,3 +585,42 @@ $text-edit-width: 621px;
 
 }
 
+#conflicted-fields-dialogue {
+	.differences {
+		@include display-box;
+	}
+	.changes {
+
+	}
+	.diff {
+		@include box-sizing;
+		font-size: $field-preview-font-size;
+		width: 50%;
+		padding: $padding;
+		border: solid 2px transparent;
+		cursor: pointer;
+
+		&.selected {
+			border-color: $action;
+		}
+		ins {
+			background-color: #deffdd;
+			text-decoration: none;
+		}
+		del {
+			background-color: #fedddd;
+			text-decoration: line-through;
+		}
+		.para {
+			color: #ccc;
+		}
+	}
+	.labels {
+		.diff {
+      @extend .interface;
+      @extend .no-select;
+			padding-top: $padding/2;
+			padding-bottom: $padding/2;
+		}
+	}
+}

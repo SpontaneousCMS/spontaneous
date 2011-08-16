@@ -33,9 +33,8 @@ module Spontaneous
         end
       end
 
-      attr_accessor :owner, :name, :unprocessed_value, :template_params
+      attr_accessor :owner, :name, :unprocessed_value, :template_params, :version
       attr_reader   :processed_value
-
 
 
       def initialize(attributes={}, from_db=false)
@@ -47,9 +46,23 @@ module Spontaneous
         set_unprocessed_value(v)
         unless @preprocessed
           @modified = (@initial_value != v)
+          increment_version if @modified
           self.processed_value = process(@unprocessed_value)
           owner.field_modified!(self) if owner
         end
+      end
+
+      def increment_version
+        self.version += 1
+      end
+
+      def version
+        @version ||= 0
+      end
+
+      # value used to show conflicts between the current value and the value they're attempting to enter
+      def conflicted_value
+        unprocessed_value
       end
 
       # should be overwritten in subclasses that actually do something
@@ -168,6 +181,7 @@ module Spontaneous
         :id => schema_id.to_s,
         :unprocessed_value => unprocessed_value,
         :processed_value => processed_value,
+        :version => version,
         :attributes => attributes
         }
       end

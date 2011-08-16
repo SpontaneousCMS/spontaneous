@@ -87,6 +87,11 @@ module Spontaneous
         status(status)
       end
 
+      REDIRECTS = {
+        :permanent => 301,
+        :temporary => 302
+      }
+
       def redirect(redirection, redirect_code=:temporary)
         page = Spontaneous::Site[redirection] if String === redirection
         redirection = redirection.path if (page)
@@ -194,6 +199,7 @@ module Spontaneous
           not_found!
         end
       end
+
       def render_page(page, format = :html, local_params = {})
         response.body = page.render(format, local_params.merge({
           :params => request.params,
@@ -202,22 +208,17 @@ module Spontaneous
         }))
       end
 
-      REDIRECTS = {
-        :permanent => 301,
-        :temporary => 302
-      }
-
-      def redirect?(page)
-        redirection, redirect_code = page.request_redirect(request.params, request, request.session)
-        if redirection
-          redirection = redirection.path if redirection.respond_to?(:path)
-          redirect_code = REDIRECTS[redirect_code] if Symbol === redirect_code
-          redirect_code ||= REDIRECTS[:temporary]
-          [redirection.to_s, redirect_code]
-        else
-          nil
-        end
-      end
+      # def redirect?(page)
+      #   redirection, redirect_code = page.request_redirect(request.params, request, request.session)
+      #   if redirection
+      #     redirection = redirection.path if redirection.respond_to?(:path)
+      #     redirect_code = REDIRECTS[redirect_code] if Symbol === redirect_code
+      #     redirect_code ||= REDIRECTS[:temporary]
+      #     [redirection.to_s, redirect_code]
+      #   else
+      #     nil
+      #   end
+      # end
 
       def not_found!
         404

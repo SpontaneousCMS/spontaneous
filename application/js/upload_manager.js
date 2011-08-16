@@ -59,22 +59,26 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		// When the request has completed (either in success or failure).
 		onloadend: function(event) {
-			this.manager.upload_failed(this);
+			this.manager.upload_failed(this, event);
 		},
 		onreadystatechange: function(event) {
 			var xhr = event.currentTarget;
-			if (xhr.readyState == 4 && xhr.status === 200) {
-				if (!this.complete) {
-					var result = JSON.parse(xhr.responseText);
-					this.manager.upload_complete(this, result);
-					this.complete = true;
+			if (xhr.readyState == 4) {
+				if (xhr.status === 200) {
+					if (!this.complete) {
+						var result = JSON.parse(xhr.responseText);
+						this.manager.upload_complete(this, result);
+						this.complete = true;
+					}
+				} else if (xhr.status === 409) {
+					this.manager.upload_conflict(this, event);
 				}
 			}
 		},
 
 		onerror: function(event) {
 			this.failure_count++;
-			this.manager.upload_failed(this);
+			this.manager.upload_failed(this, event);
 		}
 	});
 	var WrapUpload = new JS.Class(Upload, {
@@ -279,13 +283,29 @@ Spontaneous.UploadManager = (function($, S) {
 			this.current = null;
 			this.next();
 		},
-		upload_failed: function(upload) {
+		upload_failed: function(upload, event) {
 			if (upload !== this.current) {
 				console.warn("UploadManager#upload_complete", "completed upload does not match current")
 			}
 			this.failed.push(this.current);
+			var target = this.targets[upload.uid];
+			if (target) {
+				target.upload_failed(event);
+			}
 			this.current = null;
 			console.error("UploadManager#upload_failed", upload, this.failed)
+			this.next();
+		},
+		upload_conflict: function(upload, event) {
+			if (upload !== this.current) {
+				console.warn("UploadManager#upload_complete", "completed upload does not match current")
+			}
+			var target = this.targets[upload.uid];
+			if (target) {
+				target.upload_conflict($.parseJSON(event.currentTarget.response));
+			}
+			this.current = null;
+			console.error("UploadManager#upload_conflict", upload, event)
 			this.next();
 		},
 		FormUpload: FormUpload,

@@ -54,6 +54,57 @@ Spontaneous.EditPanel = (function($, S) {
 			this.close();
 		},
 
+
+		upload_failed: function(event) {
+			console.log("FAILED", event)
+		},
+
+		upload_conflict: function(conflict_data) {
+			console.log("CONFLICT", conflict_data)
+			var ff = this.parent_view.field_list(), fields = {};
+			for (var i = 0, ii = ff.length; i < ii; i++) {
+				var f = ff[i];
+				fields[f.schema_id()] = f;
+			}
+			var conflicted_fields = [];
+			for (var sid in conflict_data) {
+				if (conflict_data.hasOwnProperty(sid)) {
+					var values = conflict_data[sid];
+					conflicted_fields.push({
+						field:fields[sid],
+						server_version: values[0],
+						values: {
+							server_original: values[1],
+							local_edited:  values[2],
+							local_original:  fields[sid].unprocessed_value()
+						}
+					});
+				}
+			}
+			console.log(conflicted_fields);
+			var dialogue = new S.ConflictedFieldDialogue(this, conflicted_fields);
+			dialogue.open();
+		},
+
+		conflicts_resolved: function(conflict_list) {
+			console.log('conflicts_resolved', conflict_list);
+			var ff = this.parent_view.field_list(), conflicts = {};
+			for (var i =0, ii = conflict_list.length; i < ii; i++) {
+				var conflict = conflict_list[i];
+				conflicts[conflict.field.schema_id()] = conflict;
+			}
+			console.log('conflicts', conflicts)
+			for (var i = 0, ii = ff.length; i < ii; i++) {
+				var field = ff[i], conflict = conflicts[field.schema_id()];
+				if (conflict) {
+					console.log('field', field, 'conflict', conflict)
+					field.input().val(conflict.value);
+					field.version_input().val(conflict.server_version);
+				}
+			}
+			// no need to animate as the dialog is over the top
+			$('> *', this.form).css({'opacity': 1});
+		},
 		cancel: function() {
 			var fields = this.parent_view.field_list();
 			for (var i = 0, ii = fields.length; i < ii; i++) {
@@ -177,7 +228,8 @@ Spontaneous.EditPanel = (function($, S) {
 				d.append(dom.div('.toolbar').html(toolbar));
 			}
 			var edit = field.edit();
-			d.append(dom.div('.value').html(edit));
+			d.append(dom.div('.value').append(edit).append(field.version_input()));
+			// d.append(field.version_input());
 			var footer = field.footer();
 			if (footer) {
 				d.append(dom.div('.footer').html(footer));
