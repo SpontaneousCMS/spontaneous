@@ -74,8 +74,6 @@ module Spontaneous
         unprocessed_value
       end
 
-      # should be overwritten in subclasses that actually do something
-      # with the field value
       def process_formats(value)
         values = {}
         value = preprocess(value)
@@ -89,6 +87,8 @@ module Spontaneous
         values
       end
 
+      # should be overwritten in subclasses that actually do something
+      # with the field value
       def preprocess(value)
         value
       end

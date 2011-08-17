@@ -60,6 +60,14 @@ module Spontaneous
 
       def self.size(name, &process)
         self.sizes[name.to_sym] = process
+
+        unless method_defined?(name)
+          class_eval <<-IMAGE
+            def #{name}
+              sizes[:#{name}]
+            end
+            IMAGE
+        end
       end
 
       def self.sizes
@@ -78,15 +86,8 @@ module Spontaneous
         true
       end
 
-      def has_attribute?(attribute_name)
-        super || self.class.size_definitions.key?(attribute_name)
-      end
-
-      def attribute_get(attribute, *args)
-        @sizes ||= Hash.new { |hash, key| hash[key] = ImageAttributes.new(attributes[key]) }
-        @sizes[attribute].tap do |size|
-          size.template_params = args
-        end
+      def sizes
+        @sizes ||= Hash.new { |hash, key| hash[key] = ImageAttributes.new(processed_values[key]) }
       end
 
       # value used to show conflicts between the current value and the value they're attempting to enter
@@ -96,7 +97,7 @@ module Spontaneous
 
       # original is special and should always be defined
       def original
-        @original ||= (attributes.key?(:original) ? attribute_get(:original) : ImageAttributes.new(:src => value))
+        @original ||= sizes[:original]
       end
 
       def width
@@ -115,40 +116,50 @@ module Spontaneous
         original.src
       end
 
-
       def filepath
         unprocessed_value
       end
 
       # formats are irrelevant to image/file fields
       def formats
-        [:all]
+        self.class.size_definitions.map { |name, process| name }
       end
 
-      def value(format=:html, *args)
-        super(:all)
+      def value(format=:original, *args)
+        sizes[:original].src
       end
 
+      def process_formats(value)
+        original_path = preprocess(value)
+        image = ImageProcessor.new(original_path)
+        values = {}
 
-      def process_all(image_path)
+        # if the value doesn't map to a real file then it's a URL
+        if File.exist?(original_path)
+          set_unprocessed_value(File.expand_path(original_path))
+          image = ImageProcessor.new(original_path)
+          values[:original] = image.serialize
+          self.class.size_definitions.each do |name, process|
+            values[name] = image.process(name, process).serialize
+          end
+        else
+          values[:original] = {
+            :src => original_path
+          }
+        end
+        values
+      end
+
+      def preprocess(image_path)
         filename = nil
         case image_path
         when Hash
           filename = image_path[:filename]
           image_path = image_path[:tempfile].path
         when String
-          attributes.clear
           return image_path unless File.exist?(image_path)
-        else
         end
-        image_path = owner.make_media_file(image_path, filename)
-        image = ImageProcessor.new(image_path)
-        attribute_set(:original, image.serialize)
-        self.class.size_definitions.each do |name, process|
-          attribute_set(name, image.resize(name, process).serialize)
-        end
-        set_unprocessed_value(File.expand_path(image_path))
-        image.src
+        owner.make_media_file(image_path, filename)
       end
     end
 
@@ -162,6 +173,7 @@ module Spontaneous
         params ||= {}
         @src, @width, @height, @filesize, @filepath = params[:src], params[:width], params[:height], params[:filesize], params[:path]
       end
+
       def serialize
         {
           :src => src,
@@ -171,6 +183,7 @@ module Spontaneous
           :path => filepath
         }
       end
+
     end
 
     class ImageProcessor
@@ -184,8 +197,13 @@ module Spontaneous
           @image = image
         end
 
-        def __getobj__; @image; end
-        def __setobj__(obj); @image = obj; end
+        def __getobj__
+          @image
+        end
+
+        def __setobj__(obj)
+          @image = obj
+        end
 
         def __run__(process)
           combine_options do |c|
@@ -196,13 +214,18 @@ module Spontaneous
       end
 
       class CommandDelegator < Delegator
-        def initialize(cb)
+        def initialize(command_builder)
           super
-          @cb = cb
+          @command_builder = command_builder
         end
 
-        def __getobj__; @cb; end
-        def __setobj__(obj); @cb = obj; end
+        def __getobj__
+          @command_builder
+        end
+
+        def __setobj__(obj)
+          @command_builder = obj
+        end
 
         def __run__(process)
           instance_eval(&process)
@@ -269,7 +292,7 @@ module Spontaneous
         @dimensions ||= Spontaneous::ImageSize.read(path)
       end
 
-      def resize(name, process)
+      def process(name, process)
         image = ::MiniMagick::Image.open(path)
         processor = ImageProcessor::ImageDelegator.new(image)
         processor.__run__(process)

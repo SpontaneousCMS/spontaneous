@@ -55,8 +55,8 @@ class FieldsTest < MiniTest::Spec
       @class2.fields.first.name.should == :title
       @class2.fields.last.name.should == :date
       @class2.fields.length.should == 2
-      @instance.title.value.should == "Two"
       @instance.title.class.should == Spontaneous::FieldTypes::ImageField
+      @instance.title.value.to_s.should == "Two"
     end
   end
   context "Field Prototypes" do
