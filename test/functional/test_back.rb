@@ -64,6 +64,7 @@ class BackTest < MiniTest::Spec
       @app_dir = File.expand_path("../../fixtures/application", __FILE__)
       File.exists?(@app_dir).should be_true
       Spontaneous.stubs(:application_dir).returns(@app_dir)
+      Spontaneous::Rack::Back.application.send :set, :show_exceptions, false
       # setup_site_fixture
       # annoying to have to do this, but there you go
       @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
@@ -247,8 +248,7 @@ class BackTest < MiniTest::Spec
 
         should "update content field values" do
           params = {
-            "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1",
-            "field[#{@job1.fields.title.schema_id.to_s}][version]" => @job1.fields.title.version.to_s
+            "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1"
           }
           auth_post "/@spontaneous/save/#{@job1.id}", params
           assert last_response.ok?
@@ -261,9 +261,7 @@ class BackTest < MiniTest::Spec
         should "update page field values" do
           params = {
             "field[#{@home.fields.title.schema_id.to_s}][value]" => "Updated title",
-            "field[#{@home.fields.title.schema_id.to_s}][version]" => @home.fields.title.version.to_s,
-            "field[#{@home.fields.introduction.schema_id.to_s}][value]" => "Updated intro",
-            "field[#{@home.fields.introduction.schema_id.to_s}][version]" => @home.fields.introduction.version.to_s
+            "field[#{@home.fields.introduction.schema_id.to_s}][value]" => "Updated intro"
           }
           auth_post "/@spontaneous/save/#{@home.id}", params
           assert last_response.ok?
@@ -277,8 +275,7 @@ class BackTest < MiniTest::Spec
           box = @job1.images
           box.fields.title.to_s.should_not == "Updated title"
           params = {
-            "field[#{box.fields.title.schema_id.to_s}][value]" => "Updated title",
-            "field[#{box.fields.title.schema_id.to_s}][version]" => box.fields.title.version.to_s
+            "field[#{box.fields.title.schema_id.to_s}][value]" => "Updated title"
           }
           auth_post "/@spontaneous/savebox/#{@job1.id}/#{box.schema_id.to_s}", params
           assert last_response.ok?
@@ -289,19 +286,34 @@ class BackTest < MiniTest::Spec
 
         should "generate an error if there is a field version conflict" do
           field = @job1.fields.title
-          value = @job1.fields.title.value
-          params = {
-            "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1",
-            "field[#{@job1.fields.title.schema_id.to_s}][version]" => "2"
-          }
+          sid = field.schema_id.to_s
+          params = { "fields" => {sid => "2"} }
           field.stubs(:version).returns(3)
-          auth_post "/@spontaneous/save/#{@job1.id}", params
+          Content.stubs(:[]).with(@job1.id.to_s).returns(@job1)
+
+          auth_post "/@spontaneous/version/#{@job1.id}", params
           assert last_response.status == 409, "Should have recieved a 409 conflict but instead received a #{last_response.status}"
           last_response.content_type.should == "application/json;charset=utf-8"
-          @job1.reload.fields.title.value.should == value
           result = Spontaneous.deserialise_http(last_response.body)
           result.should == {
-            @job1.fields.title.schema_id.to_s.to_sym => [ value, "Updated field_name_1" ]
+            sid.to_sym => [ field.version, field.value ]
+          }
+        end
+
+        should "generate an error if there is a field version conflict for boxes" do
+          box = @job1.images
+          field = box.fields.title
+          sid = field.schema_id.to_s
+          params = { "fields" => {sid => "2"} }
+          field.stubs(:version).returns(3)
+          Content.stubs(:[]).with(@job1.id.to_s).returns(@job1)
+
+          auth_post "/@spontaneous/version/#{@job1.id}/#{box.schema_id.to_s}", params
+          assert last_response.status == 409, "Should have recieved a 409 conflict but instead received a #{last_response.status}"
+          last_response.content_type.should == "application/json;charset=utf-8"
+          result = Spontaneous.deserialise_http(last_response.body)
+          result.should == {
+            sid.to_sym => [ field.version, field.value ]
           }
         end
 
@@ -441,7 +453,8 @@ class BackTest < MiniTest::Spec
         src.should =~ /^\/media(.+)\/rose\.jpg$/
         last_response.body.should == {
           :id => @image1.id,
-          :src => src
+          :src => src,
+          :version => 1
         }.to_json
         File.exist?(Media.to_filepath(src)).should be_true
         get src
@@ -458,7 +471,8 @@ class BackTest < MiniTest::Spec
         src.should =~ /^\/media(.+)\/rose\.jpg$/
         last_response.body.should == {
           :id => @job1.id,
-          :src => src
+          :src => src,
+          :version => 1
         }.to_json
         File.exist?(Media.to_filepath(src)).should be_true
         get src
@@ -579,8 +593,7 @@ class BackTest < MiniTest::Spec
       end
       should "wrap all updates in a Change.record" do
         params = {
-          "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1",
-          "field[#{@job1.fields.title.schema_id.to_s}][version]" => @job1.fields.title.version.to_s
+          "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1"
         }
         Change.count.should == 0
         auth_post "/@spontaneous/save/#{@job1.id}", params
@@ -848,7 +861,8 @@ class BackTest < MiniTest::Spec
         src.should =~ %r{^(.+)/rose\.jpg$}
         Spot::JSON.parse(last_response.body).should == {
           :id => @image1.id,
-          :src => src
+          :src => src,
+          :version => 1
         }
         File.exist?(Media.to_filepath(src)).should be_true
         S::Media.digest(Media.to_filepath(src)).should == @image_digest
