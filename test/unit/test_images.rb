@@ -48,11 +48,23 @@ class ImagesTest < MiniTest::Spec
       # p @digest
 
       class ::ResizingImageField < FieldTypes::ImageField
-        size :preview, :width => 200
-        size :tall, :height => 200
-        size :thumbnail, :fit => [50, 50]
-        size :icon, :crop => [50, 50]
-        size :greyscale, [[:fit, 50, 50], :greyscale, [:gaussian_blur, 10]]
+        size :preview do
+          width 200
+        end
+        size :tall do
+          height 200
+        end
+        size :thumbnail do
+          fit 50, 50
+        end
+        size :icon do
+          crop 50, 50
+        end
+        size :greyscale do
+          fit 50, 50
+          greyscale
+          gaussian_blur 10
+        end
       end
 
       ResizingImageField.register

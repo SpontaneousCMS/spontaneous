@@ -1,12 +1,22 @@
 # encoding: UTF-8
 
 require 'mini_magick'
+require 'delegate'
 
 module Spontaneous
   module FieldTypes
 
     module ImageFieldUtilities
       attr_accessor :template_params
+
+      def render(format=:html, *args)
+        case format
+        when :html
+          to_html(*args)
+        else
+          value
+        end
+      end
 
       def to_html(attr={})
         default_attr = {
@@ -48,8 +58,8 @@ module Spontaneous
         %w{image/(png|jpeg|gif)}
       end
 
-      def self.size(name, definition)
-        self.sizes[name.to_sym] = definition
+      def self.size(name, &process)
+        self.sizes[name.to_sym] = process
       end
 
       def self.sizes
@@ -124,8 +134,8 @@ module Spontaneous
         image_path = owner.make_media_file(image_path, filename)
         image = ImageProcessor.new(image_path)
         attribute_set(:original, image.serialize)
-        self.class.size_definitions.each do |name, size|
-          attribute_set(name, image.resize(name, size).serialize)
+        self.class.size_definitions.each do |name, process|
+          attribute_set(name, image.resize(name, process).serialize)
         end
         set_unprocessed_value(File.expand_path(image_path))
         image.src
@@ -156,29 +166,63 @@ module Spontaneous
     class ImageProcessor
       include ImageFieldUtilities
 
-      class MiniMagick::CommandBuilder
+      class ImageDelegator < Delegator
+        attr_reader :image
+
+        def initialize(image)
+          super
+          @image = image
+        end
+
+        def __getobj__; @image; end
+        def __setobj__(obj); @image = obj; end
+
+        def __run__(process)
+          combine_options do |c|
+            cb = CommandDelegator.new(c)
+            cb.__run__(process)
+          end
+        end
+      end
+
+      class CommandDelegator < Delegator
+        def initialize(cb)
+          super
+          @cb = cb
+        end
+
+        def __getobj__; @cb; end
+        def __setobj__(obj); @cb = obj; end
+
+        def __run__(process)
+          instance_eval(&process)
+        end
 
         def fit(width, height)
-          self.add(:geometry, "#{width}x#{height}>")
+          add(:geometry, "#{width}x#{height}>")
         end
 
         def crop(width, height)
           dimensions = "#{width}x#{height}"
-          self.add(:geometry, "#{dimensions}^")
-          self.add(:gravity, "center")
-          self.add(:crop, "#{dimensions}+0+0!")
+          add(:geometry, "#{dimensions}^")
+          add(:gravity, "center")
+          add(:crop, "#{dimensions}+0+0!")
         end
 
         def width(width)
-          self.add(:geometry, "#{width}x>")
+          add(:geometry, "#{width}x>")
         end
 
         def height(height)
-          self.add(:geometry, "x#{height}>")
+          add(:geometry, "x#{height}>")
         end
 
         def greyscale
-          self.add(:type, "Grayscale")
+          add(:type, "Grayscale")
+        end
+
+        def method_missing(method, *args, &block)
+          __getobj__.send(method, *args, &block)
         end
       end
 
@@ -215,41 +259,16 @@ module Spontaneous
         @dimensions ||= Spontaneous::ImageSize.read(path)
       end
 
-      def resize(name, size)
+      def resize(name, process)
         image = ::MiniMagick::Image.open(path)
-        commands = normalise_commands(size)
-        image.combine_options do |c|
-          commands.each do |cmd|
-            c.send(*cmd)
-          end
-        end
+        processor = ImageProcessor::ImageDelegator.new(image)
+        processor.__run__(process)
         file_path = filename_for_size(name)
         image.write(file_path)
 
         ImageProcessor.new(file_path)
       end
 
-      def normalise_commands(input_commands)
-        commands = \
-          case input_commands
-          when Hash
-            input_commands.to_a
-          when String
-            input_commands.split
-          else
-            input_commands
-          end
-        commands.map do |cmd|
-          case cmd
-          when Array
-            # action, *args = cmd
-            # [action, args]
-            cmd.flatten
-          else
-            cmd
-          end
-        end
-      end
       def filename_for_size(name)
         directory = File.dirname(path)
         original_filename = File.basename(path)

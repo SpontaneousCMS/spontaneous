@@ -4,8 +4,11 @@
 class Project < Page
   field :url
   field :image, :image do
-    size :thumbnail, :width => 100
+    size :thumbnail do
+      width 100
+    end
   end
+
   field :description, :richtext
 
   box :text do

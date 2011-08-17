@@ -4,6 +4,8 @@
 class InlineImage < Piece
   field :title
   field :image, :image do
-    size :inline, :width => 300
+    size :inline do
+      width 300
+    end
   end
 end

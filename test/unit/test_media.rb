@@ -17,6 +17,7 @@ class MediaTest < MiniTest::Spec
       @instance = Content.new
       @instance.stubs(:id).returns(101)
     end
+
     should "be able to generate a revision and id based media path" do
       @instance.media_filepath("something.jpg").should == File.join(@media_dir, "00101/0074/something.jpg")
       @instance.media_urlpath("something.jpg").should == "/media/00101/0074/something.jpg"
@@ -43,7 +44,7 @@ class MediaTest < MiniTest::Spec
         dest_image.exist?.should be_true
       end
 
-      should "take honour the filename parameter when creating media files" do
+      should "honour the filename parameter when creating media files" do
         @instance.make_media_file(@origin_image, 'crysanthemum.jpg')
         @origin_image.exist?.should be_true
         dest_image = @tmp_dir + "00101/0074/crysanthemum.jpg"

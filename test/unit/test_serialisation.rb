@@ -44,7 +44,9 @@ class SerialisationTest < MiniTest::Spec
         field :location, :string, :title => "Where", :comment => "Fill in the address"
         field :date, :date
         field :image do
-          size :thumbnail, :width => 50
+          size :thumbnail do
+            width 50
+          end
         end
 
         style :freezing

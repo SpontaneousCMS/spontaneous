@@ -85,12 +85,16 @@ module Spontaneous
         value.to_s
       end
 
-      def to_html(*args)
+      def render(format=:html, *args)
         value
       end
 
+      def to_html(*args)
+        render(:html, *args)
+      end
+
       def to_pdf(*args)
-        value
+        render(:pdf, *args)
       end
 
       def value=(value)
