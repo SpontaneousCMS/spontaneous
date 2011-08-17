@@ -187,7 +187,7 @@ class FieldsTest < MiniTest::Spec
 
   context "Values" do
     setup do
-      @field_class = Class.new(FieldTypes::Base) do
+      @field_class = Class.new(FieldTypes::Field) do
         def process(value)
           "<#{value}>"
         end
@@ -322,7 +322,7 @@ class FieldsTest < MiniTest::Spec
 
   context "Available output formats" do
     should "include HTML & PDF and default to default value" do
-      f = FieldTypes::Base.new
+      f = FieldTypes::Field.new
       f.value = "Value"
       f.to_html.should == "Value"
       f.to_pdf.should == "Value"

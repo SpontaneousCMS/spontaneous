@@ -9,6 +9,8 @@ module Spontaneous
 
       def render_content(content, format=:html, params = {})
         request = params[:request]
+        response = params[:response]
+        headers = request.env
         render = nil
         if Spontaneous.development? and Spontaneous.config.rerender_pages
           # in dev mode we just want to render the page dynamically, skipping the cached version
@@ -28,9 +30,9 @@ module Spontaneous
 
             if File.exists?(template)
               # first check to see if we're behind an nginx proxy
-              if request.headers.key?(NGINX_DETECT_HEADER)
+              if headers.key?(NGINX_DETECT_HEADER)
                 # if so, then use nginx's sendfile mechanism to return the file
-                request.headers[NGINX_ACCEL_REDIRECT] = Spontaneous::Render.redirect_path(Content.revision, content, format)
+                response.headers[NGINX_ACCEL_REDIRECT] = Spontaneous::Render.redirect_path(Content.revision, content, format)
               else
                 # if not, then return the file ourselves
                 render = File.read(template)

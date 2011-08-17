@@ -5,7 +5,7 @@
 module Spontaneous
   module FieldTypes
 
-    autoload :Base, "spontaneous/field_types/base"
+    autoload :Field, "spontaneous/field_types/field"
 
     @@type_map = {}
 
