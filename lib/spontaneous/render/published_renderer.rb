@@ -1,6 +1,5 @@
 # encoding: UTF-8
 
-
 module Spontaneous
   module Render
     class PublishedRenderer < Renderer
@@ -53,4 +52,3 @@ module Spontaneous
     end # PublishedRenderer
   end # Render
 end # Spontaneous
-
