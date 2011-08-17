@@ -288,7 +288,6 @@ class FrontTest < MiniTest::Spec
       end
 
       should "respond appropriatly to redirects to path" do
-        # about.stubs(:request_redirect).returns("/news")
         SitePage.request do
           redirect "/news"
         end
@@ -316,7 +315,6 @@ class FrontTest < MiniTest::Spec
       end
 
       should "recognise a :temporary redirect" do
-        # about.stubs(:request_redirect).returns([ "/news", :temporary ])
         SitePage.request do
           redirect "/news", :temporary
         end
@@ -326,7 +324,6 @@ class FrontTest < MiniTest::Spec
       end
 
       should "recognise a :permanent redirect" do
-        # about.stubs(:request_redirect).returns([ "/news", :permanent ])
         SitePage.request do
           redirect "/news", :permanent
         end
@@ -336,7 +333,6 @@ class FrontTest < MiniTest::Spec
       end
 
       should "correctly apply numeric status codes" do
-        # about.stubs(:request_redirect).returns([ "/news", 307 ])
         SitePage.request do
           redirect "/news", 307
         end
