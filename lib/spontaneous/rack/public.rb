@@ -92,13 +92,17 @@ module Spontaneous
         :temporary => 302
       }
 
-      def redirect(redirection, redirect_code=:temporary)
-        page = Spontaneous::Site[redirection] if String === redirection
-        redirection = redirection.path if (page)
+      def redirect(location, redirect_code=:temporary)
+        if String === location
+          destination = Site[location]
+          location = destination.path if destination and destination.respond_to?(:path)
+        else
+          location = location.path if location.respond_to?(:path)
+        end
         redirect_code = REDIRECTS[redirect_code] if Symbol === redirect_code
         redirect_code ||= REDIRECTS[:temporary]
-        # let Sinatra's helper method set up the Location headers for us
-        catch(:halt) { super(redirection) }
+        # let Sinatra's helper method set up the proper Location headers for us
+        catch(:halt) { super(location) }
         status(redirect_code)
         # then re-throw the :halt
         halt
