@@ -63,6 +63,9 @@ module Spontaneous
       nil
     end
 
+    def formats
+      _owner.formats
+    end
 
     def media_id
       "#{_owner.padded_id}/#{schema_id}"

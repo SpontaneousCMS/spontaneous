@@ -104,5 +104,10 @@ module Spontaneous
         yield i if block_given?
       end
     end
+
+    def formats
+      return page.formats if page
+      [:html]
+    end
   end
 end

@@ -5,11 +5,11 @@ require 'kramdown'
 module Spontaneous
   module FieldTypes
     class MarkdownField < Field
-      def process(input)
-        Kramdown::Document.new(preprocess(input)).to_html
+      def process_html(input)
+        Kramdown::Document.new(preprocess_markdown(input)).to_html
       end
 
-      def preprocess(input)
+      def preprocess_markdown(input)
         # convert lines ending with newlines into a <br/>
         # as official Markdown syntax isn't suitable for
         # casual users

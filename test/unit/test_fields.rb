@@ -188,29 +188,60 @@ class FieldsTest < MiniTest::Spec
   context "Values" do
     setup do
       @field_class = Class.new(FieldTypes::Field) do
-        def process(value)
+        def process_html(value)
           "<#{value}>"
         end
+        def process_plain(value)
+          "*#{value}*"
+        end
       end
-      @field = @field_class.new()
+      @owner = Object.new
+      @owner.stubs(:page).returns(@owner)
+      @owner.stubs(:formats).returns([:html, :plain, :plastic])
+      @owner.stubs(:field_modified!)
+      @field = @field_class.new
+      @field.owner = @owner
+    end
+
+    should "derive a list of formats from their owner" do
+      @field.formats.should == [:html, :plain, :plastic]
+    end
+
+    should "default to html format" do
+      field = @field_class.new
+      field.formats.should == [:html]
     end
 
     should "be transformed by the update method" do
       @field.value = "Hello"
       @field.value.should == "<Hello>"
+      @field.value(:html).should == "<Hello>"
+      @field.value(:plain).should == "*Hello*"
+      @field.value(:plastic).should == "Hello"
       @field.unprocessed_value.should == "Hello"
     end
 
     should "appear in the to_s method" do
       @field.value = "String"
       @field.to_s.should == "<String>"
+      @field.to_s(:html).should == "<String>"
+      @field.to_s(:plain).should == "*String*"
+    end
+
+    should "escape ampersands by default" do
+      field_class = Class.new(FieldTypes::StringField) do
+      end
+      field = field_class.new
+      field.value = "Hello & Welcome"
+      field.value(:html).should == "Hello &amp; Welcome"
+      field.value(:plain).should == "Hello & Welcome"
     end
 
     should "not process values coming from db" do
       content_class = Class.new(Piece)
 
       content_class.field :title do
-        def process(value)
+        def process_html(value)
           "<#{value}>"
         end
       end
@@ -220,7 +251,7 @@ class FieldsTest < MiniTest::Spec
 
       new_content_class = Class.new(Piece)
       new_content_class.field :title do
-        def process(value)
+        def process_html(value)
           "*#{value}*"
         end
       end
@@ -233,7 +264,7 @@ class FieldsTest < MiniTest::Spec
     setup do
       ::CC = Class.new(Piece) do
         field :title, :default => "Magic" do
-          def process(value)
+          def process_html(value)
             "*#{value}*"
           end
         end

@@ -34,10 +34,6 @@ module Spontaneous
       :title
     end
 
-    # def self.formats
-    #   [:html]
-    # end
-
     def page?
       true
     end
@@ -50,12 +46,6 @@ module Spontaneous
       end
       super
     end
-
-    # TODO: configure outputs for each page
-    # def formats
-    #   self.class.formats
-    # end
-
 
     def page
       self

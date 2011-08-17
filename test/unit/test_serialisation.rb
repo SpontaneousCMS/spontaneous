@@ -20,7 +20,7 @@ class SerialisationTest < MiniTest::Spec
 
       class ::SerialisedPage < ::Page
         field :direction, :title => "Pointing Direction", :comment => "NSEW" do
-          def process(value)
+          def preprocess(value)
             ({
               "N" => "North",
               "S" => "South",

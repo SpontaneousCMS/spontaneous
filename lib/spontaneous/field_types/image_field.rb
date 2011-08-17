@@ -120,7 +120,17 @@ module Spontaneous
         unprocessed_value
       end
 
-      def process(image_path)
+      # formats are irrelevant to image/file fields
+      def formats
+        [:all]
+      end
+
+      def value(format=:html, *args)
+        super(:all)
+      end
+
+
+      def process_all(image_path)
         filename = nil
         case image_path
         when Hash

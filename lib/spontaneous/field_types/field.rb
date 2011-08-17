@@ -34,20 +34,29 @@ module Spontaneous
       end
 
       attr_accessor :owner, :name, :unprocessed_value, :template_params, :version
-      attr_reader   :processed_value
+      attr_reader   :processed_values
 
 
       def initialize(attributes={}, from_db=false)
+        @processed_values = {}
         load(attributes, from_db)
       end
 
+
+      def formats
+        if owner
+          owner.formats
+        else
+          [:html]
+        end
+      end
 
       def unprocessed_value=(v)
         set_unprocessed_value(v)
         unless @preprocessed
           @modified = (@initial_value != v)
           increment_version if @modified
-          self.processed_value = process(@unprocessed_value)
+          self.processed_values = process_formats(@unprocessed_value)
           owner.field_modified!(self) if owner
         end
       end
@@ -67,26 +76,54 @@ module Spontaneous
 
       # should be overwritten in subclasses that actually do something
       # with the field value
+      def process_formats(value)
+        values = {}
+        value = preprocess(value)
+        formats.each do |format|
+          process_method = "process_#{format}"
+          unless respond_to?(process_method)
+            process_method = :process
+          end
+          values[format] = send(process_method, value)
+        end
+        values
+      end
+
+      def preprocess(value)
+        value
+      end
+
+      HTML_ESCAPE_TABLE = {
+        '&' => '&amp;'
+      }
+
+      def escape_html(value)
+        value.to_s.gsub(%r{[#{HTML_ESCAPE_TABLE.keys.join}]}) { |s| HTML_ESCAPE_TABLE[s] }
+      end
+
       def process(value)
         value
       end
 
+      # attr_accessor :values
+
       # override this to return custom values derived from (un)processed_value
-      alias_method :value, :processed_value
-      # def value
-      #   processed_value
-      # end
+      # alias_method :value, :processed_value
+      def value(format=:html)
+        processed_values[format] || unprocessed_value
+      end
+      alias_method :processed_value, :value
 
       def image?
         false
       end
 
-      def to_s
-        value.to_s
+      def to_s(format = :html)
+        value(format).to_s
       end
 
       def render(format=:html, *args)
-        value
+        value(format)
       end
 
       def to_html(*args)
@@ -184,7 +221,7 @@ module Spontaneous
         :name => name.to_s,
         :id => schema_id.to_s,
         :unprocessed_value => unprocessed_value,
-        :processed_value => processed_value,
+        :processed_value => value(:html),
         :version => version,
         :attributes => attributes
         }
@@ -215,8 +252,8 @@ module Spontaneous
         end
       end
 
-      def processed_value=(value)
-        @processed_value = value
+      def processed_values=(values)
+        @processed_values = values
       end
 
       def with_preprocessed_values(state=true)
