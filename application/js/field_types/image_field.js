@@ -103,8 +103,12 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 					var file = files[0],
 					url = window.URL.createObjectURL(file);
 					this._edited_value = url;
+					this.image.__start_upload = true;
 					this.image.bind('load', function() {
-						S.Ajax.test_field_versions(this.content, [this], this.upload_values.bind(this), this.upload_conflict.bind(this));
+						if (this.image.__start_upload) {
+							this.image.__start_upload = false;
+							S.Ajax.test_field_versions(this.content, [this], this.upload_values.bind(this), this.upload_conflict.bind(this));
+						}
 					}.bind(this))
 					this.image.attr('src', url)
 					// see http://www.htmlfivewow.com/slide25
@@ -178,7 +182,11 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			if (values) {
 				this.set('value', values.src);
 				if (this.image) {
-					this.image.attr('src', values.src);
+					var img = new Image()
+					img.onload = function() {
+						this.image.attr('src', values.src);
+					}.bind(this);
+					img.src = values.src;
 				}
 			}
 		},

@@ -19,7 +19,7 @@ Spontaneous.FieldPreview = (function($, S) {
 			var wrapper = dom.div([dom.id(this.wrap_id), 'fields-preview', this.depth_class()])
 			// $(dom.div, {'id':this.wrap_id, 'class':'fields-preview ' + this.depth_class()});
 			wrapper.append(this.fields_panel(this.view.text_fields(), 'text'));
-			wrapper.append(this.fields_panel(this.view.image_fields(), 'image'));
+			wrapper.append(this.fields_panel(this.view.image_fields(), 'image', true));
 			if (this.view.mouseover) {
 				wrapper.mouseover(this.view.mouseover.bind(this.view))
 			}
@@ -31,7 +31,7 @@ Spontaneous.FieldPreview = (function($, S) {
 			}.bind(this))
 			return wrapper;
 		},
-		fields_panel: function(fields, type) {
+		fields_panel: function(fields, type, ignore_changes) {
 			var wrapper = dom.ul('.fields-preview-'+type), __this = this;
 			if (fields.length === 0) { wrapper.addClass('empty'); }
 			$.each(fields, function(i, field) {
@@ -42,7 +42,9 @@ Spontaneous.FieldPreview = (function($, S) {
 					__this.field_to_edit = field;
 				})
 				field.activate(value);
-				field.watch('value', function(field, v) { $(this).html(field.preview()) }.bind(value, field));
+				if (!ignore_changes) {
+					field.watch('value', function(field, v) { $(this).html(field.preview()) }.bind(value, field));
+				}
 				li.append(name).append(value);
 				wrapper.append(li);
 			});

@@ -45,17 +45,17 @@ Spontaneous.Ajax = (function($, S) {
 			});
 		},
 		test_field_versions: function(target, fields, success, failure) {
-			console.log('test_field_versions', target, fields)
-			var version_data = {};
+			var version_data = {}, modified = 0;
 			for (var i = 0, ii = fields.length; i < ii; i++) {
 				var field = fields[i], key = "[fields]["+field.schema_id()+"]";
 				if (field.is_modified()) {
 					version_data[key] = field.version();
+					modified++;
 				}
 			}
-			console.log('test_field_versions', version_data)
+			if (modified === 0) { success(); }
+
 			this.post(['/version', target.id()].join('/'), version_data, function(data, textStatus, xhr) {
-				console.log('version', data, textStatus, xhr);
 				if (textStatus === 'success') {
 					success();
 				} else {
@@ -69,7 +69,6 @@ Spontaneous.Ajax = (function($, S) {
 						for (var sid in data) {
 							if (data.hasOwnProperty(sid)) {
 								var values = data[sid], field = field_map[sid];
-								console.log('conflict', values, field)
 								conflicted_fields.push({
 									field:field,
 									version: values[0],
