@@ -3,7 +3,7 @@
 
 module Spontaneous
   module FieldTypes
-    class Base
+    class Field
 
       def self.register(*labels)
         labels = self.labels if labels.empty?

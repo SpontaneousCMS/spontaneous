@@ -51,7 +51,7 @@ module Spontaneous
       end
     end
 
-    class ImageField < Base
+    class ImageField < Field
       include ImageFieldUtilities
 
       def self.accepts

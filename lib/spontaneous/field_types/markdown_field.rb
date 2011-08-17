@@ -4,7 +4,7 @@ require 'kramdown'
 
 module Spontaneous
   module FieldTypes
-    class MarkdownField < Base
+    class MarkdownField < Field
       def process(input)
         Kramdown::Document.new(preprocess(input)).to_html
       end
