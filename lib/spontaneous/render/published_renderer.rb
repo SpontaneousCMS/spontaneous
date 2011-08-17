@@ -4,6 +4,9 @@
 module Spontaneous
   module Render
     class PublishedRenderer < Renderer
+      NGINX_DETECT_HEADER = "X-Nginx"
+      NGINX_ACCEL_REDIRECT = "X-Accel-Redirect"
+
       def render_content(content, format=:html, params = {})
         request = params[:request]
         render = nil
@@ -24,7 +27,14 @@ module Spontaneous
             template = Spontaneous::Render.output_path(Content.revision, content, format)
 
             if File.exists?(template)
-              render = File.read(template)
+              # first check to see if we're behind an nginx proxy
+              if request.headers.key?(NGINX_DETECT_HEADER)
+                # if so, then use nginx's sendfile mechanism to return the file
+                request.headers[NGINX_ACCEL_REDIRECT] = Spontaneous::Render.redirect_path(Content.revision, content, format)
+              else
+                # if not, then return the file ourselves
+                render = File.read(template)
+              end
             else
               # and if all else fails, just re-render the damn thing
               render = rerender(content, format, params)

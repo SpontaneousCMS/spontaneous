@@ -99,9 +99,9 @@ module Spontaneous::Plugins::Application
         @revision_dir = File.expand_path(revision_dir)
       end
 
-      def revision_dir(revision=nil)
-        return revision_root / 'current' if revision.nil?
-        revision_root / revision.to_s.rjust(5, "0")
+      def revision_dir(revision=nil, root = revision_root)
+        return root / 'current' if revision.nil?
+        root / revision.to_s.rjust(5, "0")
       end
 
       def gem_dir(*path)

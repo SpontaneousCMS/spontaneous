@@ -6,12 +6,20 @@ module Spontaneous
 
     class << self
       def output_path(revision, page, format, extension = nil)
+        output_path_with_root(revision_root(revision), revision, page, format, extension)
+      end
+
+      def output_path_with_root(root, revision, page, format, extension = nil)
         ext = ".#{format}"
         ext += ".#{extension}" if extension
 
-        dir = revision_root(revision) / format / page.path
+        dir = root / format / page.path
         path = dir / "/index#{ext}"
         path
+      end
+
+      def redirect_path(revision, page, format)
+        output_path_with_root(Spontaneous.revision_dir(revision, "/"), revision, page, format)
       end
 
 

@@ -79,6 +79,10 @@ module Spontaneous::Plugins::Page
         method = request.request_method.downcase.to_sym
         self.class.request_blocks[method]
       end
+
+      def is_dynamic?
+        self.class.request_blocks.key?(:get)
+      end
     end
   end # Request
 end
