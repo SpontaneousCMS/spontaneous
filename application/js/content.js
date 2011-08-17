@@ -148,6 +148,10 @@ Spontaneous.Content = (function($, S) {
 			return this.fields()[this.type().title_field_name];
 		},
 
+		hidden: function() {
+			return this.content.hidden;
+		},
+
 		entries: function() {
 			if (!this.content.entries) {
 				return [];
@@ -197,7 +201,9 @@ Spontaneous.Content = (function($, S) {
 			Spontaneous.Ajax.post(['/toggle', this.content.id].join('/'), {}, this.visibility_toggled.bind(this));
 		},
 		visibility_toggled: function(result) {
-			this.trigger('visibility_toggled', result);
+			console.log('visibility_toggled', result)
+			this.set('hidden', result.hidden);
+			// this.trigger('visibility_toggled', result);
 		},
 		destroyed: function() {
 			var page = S.Editing.get('page');

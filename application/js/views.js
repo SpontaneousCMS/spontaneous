@@ -18,7 +18,7 @@ Spontaneous.Views = (function($, S) {
 			return this.content.depth();
 		},
 		visibility_class: function() {
-			return this.content.hidden ? 'hidden' : 'visible';
+			return this.content.hidden() ? 'hidden' : 'visible';
 		},
 		boxes_class: function() {
 			return this.content.has_boxes() ? 'boxes' : 'no-boxes';

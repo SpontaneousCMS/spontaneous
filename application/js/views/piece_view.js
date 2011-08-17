@@ -111,7 +111,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 				// 	_hide_pause = window.setTimeout(function() { actions.slideUp(100) }, 200);
 				// });
 				destroy.click(this.confirm_destroy.bind(this));
-				this.content.bind('visibility_toggled', this.visibility_toggled.bind(this));
+				this.content.watch('hidden', this.visibility_changed.bind(this));
 				visibility.click(this.toggle_visibility.bind(this));
 				this._title_bar = title_bar;
 			}
@@ -124,12 +124,13 @@ Spontaneous.Views.PieceView = (function($, S) {
 		toggle_visibility: function() {
 			this.content.toggle_visibility();
 		},
-		visibility_toggled: function(result) {
+		visibility_changed: function(hidden) {
+			var duration = 200;
 			this.wrapper.removeClass('visible hidden');
-			if (result.hidden) {
-				this.wrapper.switchClass('visible', 'hidden', 200);
+			if (hidden) {
+				this.wrapper.switchClass('visible', 'hidden', duration);
 			} else {
-				this.wrapper.switchClass('hidden', 'visible', 200);
+				this.wrapper.switchClass('hidden', 'visible', duration);
 			}
 		},
 		mouseover: function() {
