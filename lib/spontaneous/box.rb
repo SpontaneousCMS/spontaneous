@@ -65,7 +65,7 @@ module Spontaneous
 
 
     def media_id
-      "#{_owner.id}/#{schema_id}"
+      "#{_owner.padded_id}/#{schema_id}"
     end
 
     def box_name
