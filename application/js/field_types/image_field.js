@@ -4,7 +4,11 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 	var ImageFieldConflictView = new JS.Class(S.FieldTypes.StringField.ConflictView, {
 
 		panel: function() {
-			var labels = dom.div('.image-field-conflict.labels.differences'), outer = dom.div(), image_outer = dom.div('.image-field-conflict.changes.differences'), original = dom.div('.original.diff'), edited = dom.div('.final.diff');
+			var labels = dom.div('.image-field-conflict.labels.differences'),
+				outer = dom.div(),
+				image_outer = dom.div('.image-field-conflict.changes.differences'),
+				original = dom.div('.original.diff'),
+				edited = dom.div('.final.diff');
 			var local_label = dom.div('.diff').text("Server version");
 			var server_label = dom.div('.diff').text("Your version");
 			original.append(dom.img().attr('src', this.values.server_original)).click(function() {
