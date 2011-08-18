@@ -18,7 +18,7 @@ Spontaneous.ContentArea = (function($, S) {
 		},
 
 		location_changed: function(location) {
-			this.goto(location);
+			this.goto_page(location);
 		},
 		display: function(mode) {
 			this.mode = mode;
@@ -35,8 +35,8 @@ Spontaneous.ContentArea = (function($, S) {
 				return this.editing;
 			}
 		},
-		goto: function(page) {
-			this.current().goto(page);
+		goto_page: function(page) {
+			this.current().goto_page(page);
 		}
 	});
 	return ContentArea;

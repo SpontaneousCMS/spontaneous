@@ -13,9 +13,9 @@ Spontaneous.Editing = (function($, S) {
 			return this;
 		},
 		display: function(page) {
-			this.goto(page);
+			this.goto_page(page);
 		},
-		goto: function(page) {
+		goto_page: function(page) {
 			if (!page) { return; }
 			this.container.show().fadeOut(0)
 			S.Ajax.get('/page/{id}'.replace('{id}', page.id), this.page_loaded.bind(this));

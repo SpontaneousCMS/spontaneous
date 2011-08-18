@@ -48,7 +48,7 @@ Spontaneous.Preview = (function($, S) {
 				this.iframe[0].contentWindow.location.href = path;
 			}
 		},
-		goto: function(page) {
+		goto_page: function(page) {
 			if (page) {
 				this.goto_path(page.path);
 			}

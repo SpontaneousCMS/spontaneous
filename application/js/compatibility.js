@@ -7,123 +7,126 @@
 
 // many thanks to modernizer for working a lot of this out
 // should probably just use it instead...
-var prefixes = ' -webkit- -moz- -o- -ms- -khtml- '.split(' ');
-try {
+(function() {
+	var _window = window, _document = document;
+	var prefixes = ' -webkit- -moz- -o- -ms- -khtml- '.split(' ');
+	try {
 
-	///////////////////////////// Flexible Box model
-	function set_prefixed_property_css(element, property, value, extra) {
-		element.style.cssText = prefixes.join(property + ':' + value + ';') + (extra || '');
-	}
+		///////////////////////////// Flexible Box model
+		function set_prefixed_property_css(element, property, value, extra) {
+			element.style.cssText = prefixes.join(property + ':' + value + ';') + (extra || '');
+		}
 
-	function set_prefixed_value_css(element, property, value, extra) {
-		property += ':';
-		element.style.cssText = (property + prefixes.join(value + ';' + property)).slice(0, -property.length) + (extra || '');
-	}
+		function set_prefixed_value_css(element, property, value, extra) {
+			property += ':';
+			element.style.cssText = (property + prefixes.join(value + ';' + property)).slice(0, -property.length) + (extra || '');
+		}
 
-	var docElement = document.documentElement,
-		c = document.createElement('div'),
-		elem = document.createElement('div'),
+		var docElement = _document.documentElement,
+		c = _document.createElement('div'),
+		elem = _document.createElement('div'),
 		w;
 
-	set_prefixed_value_css(c, 'display', 'box', 'width:42px;padding:0;');
-	set_prefixed_property_css(elem, 'box-flex', '1', 'width:10px;');
+		set_prefixed_value_css(c, 'display', 'box', 'width:42px;padding:0;');
+		set_prefixed_property_css(elem, 'box-flex', '1', 'width:10px;');
 
-	c.appendChild(elem);
-	docElement.appendChild(c);
-	w = elem.offsetWidth
-	c.removeChild(elem);
-	docElement.removeChild(c);
+		c.appendChild(elem);
+		docElement.appendChild(c);
+		w = elem.offsetWidth
+		c.removeChild(elem);
+		docElement.removeChild(c);
 
-	if (w !== 42) {
-		// console.error(w)
-		throw (w) + " Flexible Box Model not supported"
-	}
+		if (w !== 42) {
+			// console.error(w)
+			throw (w) + " Flexible Box Model not supported"
+		}
 
-	///////////////////////////// XHR Uploads
-	var xhr = new XMLHttpRequest();
-	if (!xhr.upload) {
-		throw "XMLHttpRequestUpload not supported";
-	}
+		///////////////////////////// XHR Uploads
+		var xhr = new XMLHttpRequest();
+		if (!xhr.upload) {
+			throw "XMLHttpRequestUpload not supported";
+		}
 
-	///////////////////////////// FormData
-	try {
-		var f = new FormData();
-	} catch (e) {
-		throw "FormData not supported";
-	}
+		///////////////////////////// FormData
+		try {
+			var f = new FormData();
+		} catch (e) {
+			throw "FormData not supported";
+		}
 
-	///////////////////////////// File API / File objects
-	if (!window.File) {
-		throw "File API not supported";
-	}
+		///////////////////////////// File API / File objects
+		if (!_window.File) {
+			throw "File API not supported";
+		}
 
-	///////////////////////////// File API / objectURLs
-	// provide consistent API for creating blob/object URLs
-	if (!window.URL) {
-		if (window.webkitURL) {
-			window.URL = window.webkitURL;
-		} else {
-			window.URL = {};
-			if (window.createBlobURL) {
-				window.URL.createObjectURL = function(file) {
-					return window.createBlobURL(file);
-				};
-			} else if (window.createObjectURL) {
-				window.URL.createObjectURL = function(file) {
-					return window.createObjectURL(file);
-				};
+		///////////////////////////// File API / objectURLs
+		// provide consistent API for creating blob/object URLs
+		var createObjectURL = 'createObjectURL', revokeObjectURL = 'revokeObjectURL';
+		if (!_window.URL) {
+			if (_window.webkitURL) {
+				_window.URL = _window.webkitURL;
 			} else {
-				//// Dont fail this because it's not absolutely essential
-				//// & fails iOS devices (though that might be a good thing in some ways, it
-				//// would seriously limit users ability to make quick changes on the go, for instance)
-				window.URL.createObjectURL = function(file) {
-					return '';
+				_window.URL = {};
+				if (_window.createBlobURL) {
+					_window.URL[createObjectURL] = function(file) {
+						return _window.createBlobURL(file);
+					};
+				} else if (_window[createObjectURL]) {
+					_window.URL[createObjectURL] = function(file) {
+						return _window[createObjectURL](file);
+					};
+				} else {
+					//// Dont fail this because it's not absolutely essential
+					//// & fails iOS devices (though that might be a good thing in some ways, it
+					//// would seriously limit users ability to make quick changes on the go, for instance)
+					_window.URL[createObjectURL] = function(file) {
+						return '';
+					}
+					// throw "File API not supported";
 				}
-				// throw "File API not supported";
-			}
-			if (window.revokeBlobURL) {
-				window.URL.revokeObjectURL = function(file) {
-					return window.revokeBlobURL(file);
-				};
-			} else if (window.revokeObjectURL) {
-				window.URL.revokeObjectURL = function(file) {
-					return window.revokeObjectURL(file);
-				};
-			} else {
-				//// Dont fail this because it's not absolutely essential
-				//// & fails iOS devices (though that might be a good thing in some ways, it
-				//// would seriously limit users ability to make quick changes on the go, for instance)
-				window.URL.revokeObjectURL = function(file) {
-					return '';
+				if (_window.revokeBlobURL) {
+					_window.URL[revokeObjectURL] = function(file) {
+						return _window.revokeBlobURL(file);
+					};
+				} else if (_window[revokeObjectURL]) {
+					_window.URL[revokeObjectURL] = function(file) {
+						return _window[revokeObjectURL](file);
+					};
+				} else {
+					//// Dont fail this because it's not absolutely essential
+					//// & fails iOS devices (though that might be a good thing in some ways, it
+					//// would seriously limit users ability to make quick changes on the go, for instance)
+					_window.URL[revokeObjectURL] = function(file) {
+						return '';
+					}
+					// throw "File API not supported";
 				}
-				// throw "File API not supported";
 			}
 		}
-	}
-	///////////////////////////// File API / slices
-	// normalise access to the File#slice method
-	var proto = window.File.prototype;
-	if (!proto.slice) {
-		var methods = ['webkitSlice', 'mozSlice'];
-		for (var i = 0, ii = methods.length; i < ii; i++) {
-			var method = methods[i];
-			if (proto[method]) { proto.slice = proto[method]; }
-		}
+		///////////////////////////// File API / slices
+		// normalise access to the File#slice method
+		var proto = _window.File.prototype;
 		if (!proto.slice) {
-			// not supporting slice just means we can't use the sharded uploader
+			var methods = ['webkitSlice', 'mozSlice'];
+			for (var i = 0, ii = methods.length; i < ii; i++) {
+				var method = methods[i];
+				if (proto[method]) { proto.slice = proto[method]; }
+			}
+			if (!proto.slice) {
+				// not supporting slice just means we can't use the sharded uploader
+			}
 		}
+
+
+
+		///////////////////////////// localStorage
+		try {
+			var i = localStorage.getItem;
+		} catch(e) {
+			throw "Local Storage not supported"
+		}
+
+	} catch (e) {
+		_window.location.href = "/@spontaneous/unsupported?msg=" + _window.encodeURI(e);
 	}
-
-
-
-	///////////////////////////// localStorage
-	try {
-		var i = localStorage.getItem;
-	} catch(e) {
-		throw "Local Storage not supported"
-	}
-
-} catch (e) {
-	window.location.href = "/@spontaneous/unsupported?msg=" + window.encodeURI(e);
-}
-
+}());
