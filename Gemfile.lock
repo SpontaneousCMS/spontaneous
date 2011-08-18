@@ -12,12 +12,6 @@ PATH
       ansi
       grit
 
-PATH
-  remote: /Users/garry/Dropbox/Development/spontaneous3/shine
-  specs:
-    shine (0.6)
-      multipart-post (>= 1.0)
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -89,6 +83,8 @@ GEM
     selenium-client (1.2.18)
     sequel (3.24.1)
     sexp_processor (3.0.5)
+    shine (0.6)
+      multipart-post (>= 1.0)
     sinatra (1.1.4)
       rack (~> 1.1)
       tilt (< 2.0, >= 1.2.2)
@@ -138,7 +134,7 @@ DEPENDENCIES
   sass (~> 3.1.4)
   selenium-client (~> 1.2.18)
   sequel (~> 3.20)
-  shine (~> 0.5)!
+  shine (~> 0.6)
   shoulda!
   sinatra (~> 1.1.2)
   stackdeck (~> 0.2)
