@@ -184,6 +184,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		upload_complete: function(values) {
 			this.callSuper(values)
 			if (values) {
+				console.log('upload complete', values)
 				this.set('value', values.src);
 				if (this.image) {
 					var img = new Image()
@@ -202,14 +203,14 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		// 	}
 		// },
 		width: function() {
-			if (this.data.attributes && this.data.attributes.original) {
-				return this.data.attributes.original.width;
+			if (this.data.values && this.data.values.original) {
+				return this.data.values.original.width;
 			}
 			return 0;
 		},
 		height: function() {
-			if (this.data.attributes && this.data.attributes.original) {
-				return this.data.attributes.original.height;
+			if (this.data.values && this.data.values.original) {
+				return this.data.values.original.height;
 			}
 			return 0;
 		},
@@ -281,7 +282,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			var dropper = dom.div('.image-drop').click(onclick);
 
 			var actions = dom.div('.actions');
-			var attr = this.data.attributes.original;
+			var attr = this.data.values.original;
 			// var change = $(dom.a, {'class':'button change'}).text('Change').click(onclick);
 			// var clear = dom.a('.button.clear').text('Clear');
 			actions.append(input)//.append(clear);

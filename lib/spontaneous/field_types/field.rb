@@ -192,6 +192,7 @@ module Spontaneous
         :id => schema_id.to_s,
         :unprocessed_value => unprocessed_value,
         :processed_value => value(:html),
+        :values => processed_values,
         :version => version
         }
       end
