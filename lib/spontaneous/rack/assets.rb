@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require 'shine'
+require 'sass'
 
 module Spontaneous
   module Rack
@@ -8,20 +9,36 @@ module Spontaneous
 
       module Bundling
         def compress_js(filelist, options={})
-          compress_files(filelist, :js, options)
+          shine_compress_files(filelist, :js, options)
         end
 
         def compress_css(filelist, options={})
-          compress_files(filelist, :css, options)
+          # compress_files(filelist, :css, options)
+          options = {
+            :load_paths => [Spontaneous.css_dir],
+            # :filename => sass_template,
+            :cache => false,
+            :style => :compressed
+          }
+          paths = paths(filelist)
+          css = paths.map do |path|
+            Sass::Engine.for_file(path, options).render
+          end.join("\n")
+          hash = digest(css)
+          [css, hash]
         end
 
-        def compress_files(filelist, format, options = {})
+        def shine_compress_files(filelist, format, options = {})
           paths = paths(filelist)
           original_size = filesize(paths)
           compressed = Shine::compress_files(paths, format, options)
           logger.info("Compressed #{filelist.length} files. Original size #{original_size}, compressed size #{compressed.length}, ratio #{(100*compressed.length.to_f/original_size.to_f).round}%")
-          hash = Digest::SHA1.new.update(compressed).hexdigest
+          hash = digest(compressed)
           [compressed, hash]
+        end
+
+        def digest(str)
+          hash = Digest::SHA1.new.update(str).hexdigest
         end
 
         def paths(filelist)
@@ -31,7 +48,7 @@ module Spontaneous
         end
 
         def filepath(file)
-          File.join(Spontaneous.application_dir, filetype, "#{file}.#{filetype}")
+          File.join(Spontaneous.application_dir, filetype, "#{file}.#{extension}")
         end
 
         def filesize(paths)
@@ -42,6 +59,9 @@ module Spontaneous
         extend Spontaneous::Rack::Assets::Bundling
 
         def self.filetype
+          "js"
+        end
+        def self.extension
           "js"
         end
         def self.compress(filelist)
@@ -61,9 +81,12 @@ module Spontaneous
         def self.filetype
           "css"
         end
+        def self.extension
+          "scss"
+        end
 
         def self.compress(filelist)
-          # compress_css(filelist)
+          compress_css(filelist)
         end
 
         LOGIN_CSS = %w(login)

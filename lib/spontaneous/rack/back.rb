@@ -667,15 +667,20 @@ module Spontaneous
           # as long as I release pre-compliled CSS files
           file = params[:splat].first
           if file =~ /\.css$/
-            content_type :css
-            sass_template = Spontaneous.css_dir / File.basename(file, ".css") + ".scss"
-            less_template = Spontaneous.css_dir / File.basename(file, ".css") + ".less"
-            if File.exists?(sass_template)
-              Sass::Engine.for_file(sass_template, :load_paths => [Spontaneous.css_dir], :filename => sass_template, :cache => false).render
-            elsif File.exists?(less_template)
-              Less::Engine.new(File.new(less_template)).to_css
+            css_file = Spontaneous.css_dir / file
+            if File.exists?(css_file)
+              send_file(css_file)
             else
-              raise Sinatra::NotFound
+              content_type :css
+              sass_template = Spontaneous.css_dir / File.basename(file, ".css") + ".scss"
+              less_template = Spontaneous.css_dir / File.basename(file, ".css") + ".less"
+              if File.exists?(sass_template)
+                Sass::Engine.for_file(sass_template, :load_paths => [Spontaneous.css_dir], :filename => sass_template, :cache => false).render
+              elsif File.exists?(less_template)
+                Less::Engine.new(File.new(less_template)).to_css
+              else
+                raise Sinatra::NotFound
+              end
             end
           else
             send_file(Spontaneous.css_dir / file)
