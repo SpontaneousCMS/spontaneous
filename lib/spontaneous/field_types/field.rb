@@ -233,14 +233,6 @@ module Spontaneous
         @preprocessed = nil
       end
 
-      def method_missing(method_name, *args)
-        if self.has_attribute?(method_name)
-          attribute_get(method_name, *args)
-        else
-          super
-        end
-      end
-
       def set_unprocessed_value(new_value)
         # initial_value should only be set once so that it can act as a test for field modification
         @initial_value ||= new_value
