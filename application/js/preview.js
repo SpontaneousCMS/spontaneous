@@ -62,5 +62,3 @@ Spontaneous.Preview = (function($, S) {
 	});
 	return Preview;
 })(jQuery, Spontaneous);
-
-
