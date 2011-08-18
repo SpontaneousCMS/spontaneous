@@ -37,18 +37,14 @@ module Spontaneous
       attr_reader   :processed_values
 
 
-      def initialize(attributes={}, from_db=false)
+      def initialize(params={}, from_db=false)
         @processed_values = {}
-        load(attributes, from_db)
+        load(params, from_db)
       end
 
 
-      def formats
-        if owner
-          owner.formats
-        else
-          [:html]
-        end
+      def outputs
+        [:html]
       end
 
       def unprocessed_value=(v)
@@ -56,7 +52,7 @@ module Spontaneous
         unless @preprocessed
           @modified = (@initial_value != v)
           increment_version if @modified
-          self.processed_values = process_formats(@unprocessed_value)
+          self.processed_values = generate_outputs(@unprocessed_value)
           owner.field_modified!(self) if owner
         end
       end
@@ -74,15 +70,17 @@ module Spontaneous
         unprocessed_value
       end
 
-      def process_formats(value)
+      def generate_outputs(value)
         values = {}
         value = preprocess(value)
-        formats.each do |format|
-          process_method = "process_#{format}"
-          unless respond_to?(process_method)
-            process_method = :process
-          end
-          values[format] = send(process_method, value)
+        outputs.each do |output|
+          process_method = "generate_#{output}"
+          values[output] = \
+            if respond_to?(process_method)
+              send(process_method, value)
+            else
+              generate(output, value)
+            end
         end
         values
       end
@@ -101,7 +99,7 @@ module Spontaneous
         value.to_s.gsub(%r{[#{HTML_ESCAPE_TABLE.keys.join}]}) { |s| HTML_ESCAPE_TABLE[s] }
       end
 
-      def process(value)
+      def generate(output, value)
         value
       end
 
@@ -172,36 +170,8 @@ module Spontaneous
         S::FieldTypes.serialize_field(self)
       end
 
-
-      def serialized_attributes
-        self.attributes.keys.inject({}) do |hash, attribute|
-          hash[attribute] = attributes[attribute]
-          hash
-        end
-      end
-
-      def attributes
-        @attributes ||= {}
-      end
-
-      def attributes=(attr)
-        @attributes = attr
-      end
-
-      def attribute_get(attribute, *args)
-        attributes[attribute.to_sym]
-      end
-
-      def attribute_set(attribute, value)
-        attributes[attribute.to_sym] = value
-      end
-
-      def has_attribute?(attribute_name)
-        attributes.key?(attribute_name.to_sym)
-      end
-
-      def update(attributes={})
-        attributes.each do |property, value|
+      def update(params={})
+        params.each do |property, value|
           setter = "#{property}=".to_sym
           if respond_to?(setter)
             self.send(setter, value)
@@ -222,8 +192,7 @@ module Spontaneous
         :id => schema_id.to_s,
         :unprocessed_value => unprocessed_value,
         :processed_value => value(:html),
-        :version => version,
-        :attributes => attributes
+        :version => version
         }
       end
 
@@ -241,9 +210,9 @@ module Spontaneous
 
       protected
 
-      def load(attributes={}, from_db=false)
+      def load(params={}, from_db=false)
         with_preprocessed_values(from_db) do
-          attributes.each do |property, value|
+          params.each do |property, value|
             setter = "#{property}=".to_sym
             if respond_to?(setter)
               self.send(setter, value)

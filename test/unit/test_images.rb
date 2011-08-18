@@ -191,10 +191,10 @@ class ImagesTest < MiniTest::Spec
         @instance.photo.original.src.should == "/media/00234/0010/rose.jpg"
       end
 
-      should "not throw errors when accessing size before value assigned" do
+      should "not throw errors when accessing size before value has been assigned" do
         instance = ContentWithImage.new
         instance.photo.thumbnail.should_not be_nil
-        instance.photo.thumbnail.src.should be_nil
+        instance.photo.thumbnail.src.should == ""
       end
     end
 

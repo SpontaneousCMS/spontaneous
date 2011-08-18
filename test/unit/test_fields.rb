@@ -188,28 +188,26 @@ class FieldsTest < MiniTest::Spec
   context "Values" do
     setup do
       @field_class = Class.new(FieldTypes::Field) do
-        def process_html(value)
+        def outputs
+          [:html, :plain, :fancy]
+        end
+        def generate_html(value)
           "<#{value}>"
         end
-        def process_plain(value)
+        def generate_plain(value)
           "*#{value}*"
         end
+
+        def generate(output, value)
+          case output
+          when :fancy
+            "#{value}!"
+          else
+            value
+          end
+        end
       end
-      @owner = Object.new
-      @owner.stubs(:page).returns(@owner)
-      @owner.stubs(:formats).returns([:html, :plain, :plastic])
-      @owner.stubs(:field_modified!)
       @field = @field_class.new
-      @field.owner = @owner
-    end
-
-    should "derive a list of formats from their owner" do
-      @field.formats.should == [:html, :plain, :plastic]
-    end
-
-    should "default to html format" do
-      field = @field_class.new
-      field.formats.should == [:html]
     end
 
     should "be transformed by the update method" do
@@ -217,7 +215,7 @@ class FieldsTest < MiniTest::Spec
       @field.value.should == "<Hello>"
       @field.value(:html).should == "<Hello>"
       @field.value(:plain).should == "*Hello*"
-      @field.value(:plastic).should == "Hello"
+      @field.value(:fancy).should == "Hello!"
       @field.unprocessed_value.should == "Hello"
     end
 
@@ -241,7 +239,7 @@ class FieldsTest < MiniTest::Spec
       content_class = Class.new(Piece)
 
       content_class.field :title do
-        def process_html(value)
+        def generate_html(value)
           "<#{value}>"
         end
       end
@@ -251,7 +249,7 @@ class FieldsTest < MiniTest::Spec
 
       new_content_class = Class.new(Piece)
       new_content_class.field :title do
-        def process_html(value)
+        def generate_html(value)
           "*#{value}*"
         end
       end
@@ -264,7 +262,7 @@ class FieldsTest < MiniTest::Spec
     setup do
       ::CC = Class.new(Piece) do
         field :title, :default => "Magic" do
-          def process_html(value)
+          def generate_html(value)
             "*#{value}*"
           end
         end

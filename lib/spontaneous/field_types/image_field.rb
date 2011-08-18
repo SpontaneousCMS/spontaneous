@@ -121,33 +121,26 @@ module Spontaneous
       end
 
       # formats are irrelevant to image/file fields
-      def formats
-        self.class.size_definitions.map { |name, process| name }
+      def outputs
+        [:original].concat(self.class.size_definitions.map { |name, process| name })
       end
 
-      def value(format=:original, *args)
+      def value(format=:html, *args)
         sizes[:original].src
       end
 
-      def process_formats(value)
-        original_path = preprocess(value)
-        image = ImageProcessor.new(original_path)
-        values = {}
-
-        # if the value doesn't map to a real file then it's a URL
-        if File.exist?(original_path)
-          set_unprocessed_value(File.expand_path(original_path))
-          image = ImageProcessor.new(original_path)
-          values[:original] = image.serialize
-          self.class.size_definitions.each do |name, process|
-            values[name] = image.process(name, process).serialize
+      def generate(output, image_path)
+        return { :src => image_path } unless File.exist?(image_path)
+        image = ImageProcessor.new(image_path)
+        result = \
+          case output
+          when :original
+            image
+          else
+            process = self.class.size_definitions[output]
+            image.apply(process, output)
           end
-        else
-          values[:original] = {
-            :src => original_path
-          }
-        end
-        values
+        result.serialize
       end
 
       def preprocess(image_path)
@@ -157,9 +150,12 @@ module Spontaneous
           filename = image_path[:filename]
           image_path = image_path[:tempfile].path
         when String
-          return image_path unless File.exist?(image_path)
+          # return image_path unless File.exist?(image_path)
         end
-        owner.make_media_file(image_path, filename)
+        return image_path unless File.exist?(image_path)
+        media_path = owner.make_media_file(image_path, filename)
+        set_unprocessed_value(File.expand_path(media_path))
+        media_path
       end
     end
 
@@ -184,6 +180,9 @@ module Spontaneous
         }
       end
 
+      def inspect
+        %(<#{self.class.name}: src=#{src.inspect} width="#{width}" height="#{height}">)
+      end
     end
 
     class ImageProcessor
@@ -292,7 +291,7 @@ module Spontaneous
         @dimensions ||= Spontaneous::ImageSize.read(path)
       end
 
-      def process(name, process)
+      def apply(process, name)
         image = ::MiniMagick::Image.open(path)
         processor = ImageProcessor::ImageDelegator.new(image)
         processor.__run__(process)

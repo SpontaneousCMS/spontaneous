@@ -5,11 +5,15 @@ require 'kramdown'
 module Spontaneous
   module FieldTypes
     class MarkdownField < Field
-      def process_html(input)
-        Kramdown::Document.new(preprocess_markdown(input)).to_html
+      def outputs
+        [:html]
       end
 
-      def preprocess_markdown(input)
+      def generate_html(input)
+        input.to_html
+      end
+
+      def preprocess(input)
         # convert lines ending with newlines into a <br/>
         # as official Markdown syntax isn't suitable for
         # casual users
@@ -23,7 +27,7 @@ module Spontaneous
         output.gsub!(/(^(?! {4}|\t)\w+_\w+_\w[\w_]*)/) do |x|
           x.gsub('_', '\_') if x.split('').sort.to_s[0..1] == '__'
         end
-        output
+        Kramdown::Document.new(output)
       end
     end
 
