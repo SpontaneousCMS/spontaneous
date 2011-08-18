@@ -15,21 +15,25 @@
   :version: 1
   :id: <%= SerialisedPage.field_prototypes[:title].schema_id.to_s %>
   :name: title
-  :attributes: {}
+  :values:
+    :html: Home
 
 - :unprocessed_value: S
   :processed_value: South
   :version: 1
   :id: <%= SerialisedPage.field_prototypes[:direction].schema_id.to_s %>
   :name: direction
-  :attributes: {}
+  :values:
+    :html: South
 
 - :unprocessed_value: /images/home.jpg
   :processed_value: /images/home.jpg
   :version: 1
   :id: <%= SerialisedPage.field_prototypes[:thumbnail].schema_id.to_s %>
   :name: thumbnail
-  :attributes: {}
+  :values:
+    :original:
+      :src: /images/home.jpg
 
 :boxes:
 - :id: <%= @root.insides.schema_id.to_s %>
@@ -51,28 +55,35 @@
       :processed_value: Piece 1
       :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:title].schema_id.to_s %>
-      :attributes: {}
+      :values:
+        :html: Piece 1
 
     - :unprocessed_value: Piece 1 Location
       :name: location
       :processed_value: Piece 1 Location
       :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:location].schema_id.to_s %>
-      :attributes: {}
+      :values:
+        :html: Piece 1 Location
 
     - :unprocessed_value: "2011-07-07"
       :processed_value: "2011-07-07"
       :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:date].schema_id.to_s %>
       :name: date
-      :attributes: {}
+      :values:
+        :html: "2011-07-07"
 
     - :unprocessed_value: ""
       :processed_value: ""
       :version: 0
       :id: <%= SerialisedPiece.field_prototypes[:image].schema_id.to_s %>
       :name: image
-      :attributes: {}
+      :values:
+        :original:
+          :src: ""
+        :thumbnail:
+          :src: ""
 
     :style: <%= @freezing_style.to_s %>
     :hidden: true
@@ -83,7 +94,8 @@
         :version: 1
         :id: <%= SerialisedPiece.boxes[:things].field_prototypes[:title].schema_id.to_s %>
         :name: title
-        :attributes: {}
+        :values:
+          :html: Things title
 
       :id: <%= SerialisedPiece.boxes[:things].schema_id.to_s %>
       :name: things
@@ -109,21 +121,25 @@
           :version: 1
           :id: <%= SerialisedPage.field_prototypes[:title].schema_id.to_s %>
           :name: title
-          :attributes: {}
+          :values:
+            :html: Child Page
 
         - :unprocessed_value: N
           :processed_value: North
           :version: 1
           :id: <%= SerialisedPage.field_prototypes[:direction].schema_id.to_s %>
           :name: direction
-          :attributes: {}
+          :values:
+            :html: North
 
         - :unprocessed_value: /images/thumb.jpg
           :processed_value: /images/thumb.jpg
           :version: 1
           :id: <%= SerialisedPage.field_prototypes[:thumbnail].schema_id.to_s %>
           :name: thumbnail
-          :attributes: {}
+          :values:
+            :original:
+              :src: /images/thumb.jpg
 
     :is_page: false
     :id: <%= @piece1.id %>
@@ -141,28 +157,35 @@
       :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:title].schema_id.to_s %>
       :name: title
-      :attributes: {}
+      :values:
+        :html: Piece 2
 
     - :unprocessed_value: Piece 2 Location
       :processed_value: Piece 2 Location
       :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:location].schema_id.to_s %>
       :name: location
-      :attributes: {}
+      :values:
+        :html: Piece 2 Location
 
     - :unprocessed_value: "2011-07-07"
       :processed_value: "2011-07-07"
       :version: 1
       :id: <%= SerialisedPiece.field_prototypes[:date].schema_id.to_s %>
       :name: date
-      :attributes: {}
+      :values:
+        :html: "2011-07-07"
 
     - :unprocessed_value: ""
       :processed_value: ""
       :version: 0
       :id: <%= SerialisedPiece.field_prototypes[:image].schema_id.to_s %>
       :name: image
-      :attributes: {}
+      :values:
+        :original:
+          :src: ""
+        :thumbnail:
+          :src: ""
 
     :style: <%= @boiling_style.to_s %>
     :hidden: false
@@ -177,7 +200,8 @@
         :version: 0
         :id: <%= @piece2.things.field_prototypes[:title].schema_id.to_s %>
         :name: title
-        :attributes: {}
+        :values:
+          :html: ""
 
       :id: <%= @piece2.things.schema_id.to_s %>
       :name: things
