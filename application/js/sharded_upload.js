@@ -165,6 +165,7 @@ Spontaneous.ShardedUpload = (function($, S) {
 				}
 			}
 			_position += this.current.progress;
+			_position = Math.min(_position, this.total());
 			return _position;
 		},
 		mime_type: function() {

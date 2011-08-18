@@ -235,6 +235,7 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		update_progress_bars: function() {
 			var total = this.data_total(), completed = this.data_completed();
+			completed = Math.min(total, completed);
 
 			this.set_bar_length('total', completed, total);
 			if (this.current) {

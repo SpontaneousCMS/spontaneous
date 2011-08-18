@@ -21,7 +21,7 @@ Spontaneous.Upload = (function($, S) {
 			this.upload_id = upload_id++;
 		},
 		position: function() {
-			return this._position;
+			return Math.min(this._total, this._position);
 		},
 		total: function() {
 			return this._total;
