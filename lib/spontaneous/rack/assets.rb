@@ -1,0 +1,75 @@
+# encoding: UTF-8
+
+require 'shine'
+
+module Spontaneous
+  module Rack
+    module Assets
+
+      module Bundling
+        def compress_js(filelist, options={})
+          compress_files(filelist, :js, options)
+        end
+
+        def compress_css(filelist, options={})
+          compress_files(filelist, :css, options)
+        end
+
+        def compress_files(filelist, format, options = {})
+          paths = paths(filelist)
+          original_size = filesize(paths)
+          compressed = Shine::compress_files(paths, format, options)
+          logger.info("Compressed #{filelist.length} files. Original size #{original_size}, compressed size #{compressed.length}, ratio #{(100*compressed.length.to_f/original_size.to_f).round}%")
+          hash = Digest::SHA1.new.update(compressed).hexdigest
+          [compressed, hash]
+        end
+
+        def paths(filelist)
+          filelist.map { |file| filepath(file) }.tap do |paths|
+            logger.info("Bundling #{paths.length} files")
+          end
+        end
+
+        def filepath(file)
+          File.join(Spontaneous.application_dir, filetype, "#{file}.#{filetype}")
+        end
+
+        def filesize(paths)
+          paths.inject(0) { |sum, path| sum += File.size(path) }
+        end
+      end
+      module JavaScript
+        extend Spontaneous::Rack::Assets::Bundling
+
+        def self.filetype
+          "js"
+        end
+        def self.compress(filelist)
+          compress_js(filelist)
+        end
+
+        JQUERY = %w(vendor/jquery-1.6.2.min)
+        COMPATIBILITY = %w(compatibility)
+        REQUIRE = %w(require)
+        LOGIN_JS = %w(authentication login)
+        EDITING_JS = %w(vendor/jquery-ui-1.8.9.custom.min vendor/JS.Class-2.1.5/min/core vendor/crypto-2.3.0-crypto vendor/crypto-2.3.0-sha1 vendor/diff_match_patch extensions spontaneous properties dom authentication user popover popover_view ajax types image content views views/box_view views/page_view views/piece_view views/page_piece_view entry page_entry box page field field_types/string_field field_types/file_field field_types/image_field field_types/markdown_field field_types/date_field content_area preview editing location state top_bar field_preview box_container progress status_bar upload sharded_upload upload_manager dialogue edit_dialogue edit_panel add_home_dialogue page_browser add_alias_dialogue conflicted_field_dialogue  publish init load)
+      end
+
+      module CSS
+        extend Spontaneous::Rack::Assets::Bundling
+
+        def self.filetype
+          "css"
+        end
+
+        def self.compress(filelist)
+          # compress_css(filelist)
+        end
+
+        LOGIN_CSS = %w(login)
+        EDITING_CSS = %w(v2)
+      end
+
+    end # Assets
+  end # Rack
+end # Spontaneous

@@ -6,10 +6,11 @@ require 'less'
 module Spontaneous
   module Rack
     module Back
+      include Assets
+
       NAMESPACE = "/@spontaneous".freeze
       AUTH_COOKIE = "spontaneous_api_key".freeze
 
-      JAVASCRIPT_FILES = %w(vendor/jquery-1.6.2.min vendor/jquery-ui-1.8.9.custom.min vendor/JS.Class-2.1.5/min/core vendor/crypto-2.3.0-crypto vendor/crypto-2.3.0-sha1 vendor/diff_match_patch extensions spontaneous properties dom authentication user popover popover_view ajax types image content views views/box_view views/page_view views/piece_view views/page_piece_view entry page_entry box page field field_types/string_field field_types/file_field field_types/image_field field_types/markdown_field field_types/date_field content_area preview editing location state top_bar field_preview box_container progress status_bar upload sharded_upload upload_manager dialogue edit_dialogue edit_panel add_home_dialogue page_browser add_alias_dialogue conflicted_field_dialogue  publish init load)
 
       module Authentication
         module Helpers
@@ -124,6 +125,31 @@ module Spontaneous
       class EditingBase < ServerBase
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
+        helpers do
+
+          def style_url(style)
+            "#{NAMESPACE}/css/#{style}.css"
+          end
+
+          def script_url(script)
+            "#{NAMESPACE}/js/#{script}.js"
+          end
+
+          def script_list(scripts)
+            if Spontaneous.development?
+              scripts.map do |script|
+                src = "/js/#{script}.js"
+                path = Spontaneous.application_dir(src)
+                size = File.size(path)
+                ["#{NAMESPACE}#{src}", size]
+                # %(<script src="#{NAMESPACE}/js/#{script}.js" type="text/javascript"></script>)
+              end.to_json
+            else
+              # script bundling + compression
+            end
+          end
+        end
+
         def json(response)
           content_type 'application/json', :charset => 'utf-8'
           response.serialise_http
@@ -209,21 +235,6 @@ module Spontaneous
           end
         end
 
-        helpers do
-          def scripts(scripts)
-            if Spontaneous.development?
-              scripts.map do |script|
-                src = "/js/#{script}.js"
-                path = Spontaneous.application_dir(src)
-                size = File.size(path)
-                ["#{NAMESPACE}#{src}", size]
-                # %(<script src="#{NAMESPACE}/js/#{script}.js" type="text/javascript"></script>)
-              end.to_json
-            else
-              # script bundling + compression
-            end
-          end
-        end
 
         get '/?' do
           erubis :index

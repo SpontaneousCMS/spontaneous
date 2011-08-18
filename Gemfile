@@ -22,6 +22,7 @@ gem 'base58', '~> 0.1.0'
 # markdown
 gem 'kramdown', '~> 0.13.3'
 gem 'launchy', '~> 0.4.0'
+gem 'shine', '~> 0.5', :path => '/Users/garry/Dropbox/Development/spontaneous3/shine'
 #gem 'xapian-full', '~> 1.2.3'
 
 group :development do

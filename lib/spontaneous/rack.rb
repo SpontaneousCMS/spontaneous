@@ -40,6 +40,7 @@ module Spontaneous
     end
 
     autoload :HTTP, 'spontaneous/rack/http'
+    autoload :Assets, 'spontaneous/rack/assets'
     autoload :Back, 'spontaneous/rack/back'
     autoload :Front, 'spontaneous/rack/front'
     autoload :Public, 'spontaneous/rack/public'

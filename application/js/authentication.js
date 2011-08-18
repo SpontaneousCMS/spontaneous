@@ -12,7 +12,7 @@ Spontaneous.Auth = (function($, S) {
 			load: function(site) {
 				return localStorage.getItem(this.key(site));
 			},
-			delete: function(site) {
+			remove: function(site) {
 				localStorage.removeItem(this.key(site));
 				return false;
 			}
