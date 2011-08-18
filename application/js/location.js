@@ -103,6 +103,9 @@ Spontaneous.Location = (function($, S) {
 		load_path: function(path) {
 			this.find_path(path);
 		},
+		path_changed: function(path) {
+			this.set('path', path);
+		},
 		url: function() {
 			var l = this.location();
 			return (l ? l.url : "/about");

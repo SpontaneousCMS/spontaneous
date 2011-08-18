@@ -14,6 +14,7 @@ Spontaneous.Init = (function($, S) {
 		top_bar.watch('mode',       location.view_mode_changed.bind(location));
 
 		S.Editing.watch('page', location.page_loaded.bind(location));
+		S.Editing.watch('path', location.path_changed.bind(location));
 
 		b.append(top_bar.panel());
 		b.append(content_area.init());
