@@ -14,7 +14,8 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 			Spontaneous.UploadManager.unregister(this);
 		},
 		upload_complete: function(values) {
-			console.log('upload complete', values)
+			console.log('FileField#upload_complete', values)
+			this.set('value', values.processed_value);
 			this.set_version(values.version);
 			this.selected_files = null;
 			this.disable_progress();

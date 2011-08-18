@@ -360,16 +360,6 @@ module Spontaneous
         end
 
 
-        # Don't think this is actually used
-        post '/file/upload/:id' do
-          file = params['file']
-          media_file = Spontaneous::Media.upload_path(file[:filename])
-          FileUtils.mkdir_p(File.dirname(media_file))
-          FileUtils.mv(file[:tempfile].path, media_file)
-          json({ :id => params[:id], :src => Spontaneous::Media.to_urlpath(media_file), :path => media_file})
-        end
-
-
         # TODO: DRY this up
         post '/file/replace/:id' do
           target = content_for_request
@@ -380,7 +370,7 @@ module Spontaneous
             # if version == field.version
               field.unprocessed_value = file
               target.save
-              json({ :id => target.id, :src => field.src, :version => field.version})
+              json(field.export)
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]
@@ -400,7 +390,7 @@ module Spontaneous
             # if version == field.version
               field.unprocessed_value = file
               content.save
-              json({ :id => content.id, :src => field.src, :version => field.version})
+              json(field.export)
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]
@@ -602,7 +592,7 @@ module Spontaneous
                 }
                 target.save
               end
-              json({ :id => target_id, :src => field.src, :version => field.version})
+              json(field.export)
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]

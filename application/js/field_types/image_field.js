@@ -50,9 +50,6 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return this._progress_bar;
 		},
 
-		upload_complete: function(values) {
-			this.callSuper(values);
-		},
 
 		upload_progress: function(position, total) {
 			this.spinner().stop();
@@ -62,26 +59,26 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 
 		preview: function() {
 			Spontaneous.UploadManager.register(this);
+			var value = this.get('value').original, src = value.src, img = null, dim = 45;
 
-			var value = this.get('value'), img = null, dim = 45;
-
-			if (value === "") {
+			if (src === "") {
 				img = dom.img('.missing-image', {'src':'/@spontaneous/static/px.gif'});
 			} else {
-				img = dom.img({'src':value});
+				img = dom.img();
+				img.load(function() {
+					var r = this.width/this.height, $this = $(this), h = $this.height(), dh = 0;
+					if (r >= 1 && h <= dim) { // landscape -- fit image vertically
+						var dh = (dim - h)/2;
+					}
+					$this.css('top', dom.px(dh));
+				});
+				img.attr({'src':src});
 			}
 
 			img.error(function() {
 				$(this).addClass('missing');
 			});
 
-			img.load(function() {
-				var r = this.width/this.height, $this = $(this), h = $this.height(), dh = 0;
-				if (r >= 1 && h <= dim) { // landscape -- fit image vertically
-					var dh = (dim - h)/2;
-				}
-				$this.css('top', dom.px(dh));
-			});
 			this.image = img;
 
 			var outer = dom.div('.image-outer');
@@ -152,7 +149,6 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			S.UploadManager.replace(this, file);
 		},
 		upload_conflict: function(conflict_data) {
-			console.log('conflicted_fields', conflict_data)
 			var dialogue = new S.ConflictedFieldDialogue(this, conflict_data);
 			dialogue.open();
 		},
@@ -184,24 +180,17 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		upload_complete: function(values) {
 			this.callSuper(values)
 			if (values) {
-				console.log('upload complete', values)
-				this.set('value', values.src);
+				var value = this.value().original;
 				if (this.image) {
 					var img = new Image()
 					img.onload = function() {
-						this.image.attr('src', values.src);
+						this.image.attr('src', value.src);
 					}.bind(this);
-					img.src = values.src;
+					img.src = value.src;
 				}
 			}
 		},
-		// upload_progress: function(position, total) {
-		// 	this.progress_bar.css('width', ((position/total)*100) + '%');
-		// 	if (position === total) {
-		// 		this.drop_target.removeClass('uploading')
-		// 		this.progress_bar.parent().remove();
-		// 	}
-		// },
+
 		width: function() {
 			if (this.data.values && this.data.values.original) {
 				return this.data.values.original.width;
@@ -215,21 +204,18 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return 0;
 		},
 		edit: function() {
-			var wrap = dom.div({'style':'position:relative;'});
-			var src = this.value();
-			var img = dom.img({'src':src}).load(function() {
-				// doesn't work because it returns the size of the HTML element
-				// (as constrained by CSS)
-				// rather than the size of the source image
-				// set_dimensions(this.width, this.height);
-				if (this.width >= this.height) {
-					wrap.addClass('landscape');
-				} else {
-					wrap.removeClass('landscape');
-				}
-			});
+			var wrap = dom.div({'style':'position:relative;'}),
+				value = this.value().original,
+				src = value.src,
+				img = dom.img({'src':src}),
+				info, sizes, filename_info, filesize_info, dimensions_info;
 
-			var info, sizes, filesize_info, dimensions_info;
+			if (value.width >= value.height) {
+				wrap.addClass('landscape');
+			} else {
+				wrap.removeClass('landscape');
+			}
+
 			info = dom.div('.info');
 			sizes = dom.div('.sizes');
 			filename_info = dom.div('.filename');
@@ -282,8 +268,6 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			var dropper = dom.div('.image-drop').click(onclick);
 
 			var actions = dom.div('.actions');
-			var attr = this.data.values.original;
-			// var change = $(dom.a, {'class':'button change'}).text('Change').click(onclick);
 			// var clear = dom.a('.button.clear').text('Clear');
 			actions.append(input)//.append(clear);
 			wrap.append(dropper);
@@ -323,9 +307,9 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 
 			wrap.append(img, actions, info);
 
-			if (attr) {
-				var s = attr.src.split('/'), filename = s[s.length - 1];
-				set_info(filename, attr.filesize, attr.width, attr.height);
+			if (value) {
+				var s = value.src.split('/'), filename = s[s.length - 1];
+				set_info(filename, value.filesize, value.width, value.height);
 			}
 			this.preview_img = img;
 			return wrap;

@@ -157,6 +157,12 @@ module Spontaneous
         set_unprocessed_value(File.expand_path(media_path))
         media_path
       end
+
+      def export
+        super.merge({
+          :processed_value => processed_values
+        })
+      end
     end
 
 
