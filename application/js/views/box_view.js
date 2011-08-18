@@ -16,6 +16,9 @@ Spontaneous.Views.BoxView = (function($, S) {
 		name: function() {
 			return this.box.name();
 		},
+		schema_id: function() {
+			return this.box.schema_id();
+		},
 
 		activate: function() {
 			$('> .slot-content', this.dom_container).hide();
@@ -158,7 +161,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 		sorted: function(entry) {
 		},
 		upload_complete: function(values) {
-			this.insert_entry(this.wrap_entry(values.entry), values.position);
+			this.box.entry_added(values);
 		},
 		upload_progress: function(position, total) {
 		},
