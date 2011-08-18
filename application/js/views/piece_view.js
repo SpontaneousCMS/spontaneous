@@ -77,7 +77,14 @@ Spontaneous.Views.PieceView = (function($, S) {
 			this.fields_preview = fields_panel;
 			return wrapper;
 		},
-
+		edit: function(focus_field) {
+			this.wrapper.addClass('editing')
+			this.callSuper(focus_field);
+		},
+		edit_closed: function() {
+			this.wrapper.removeClass('editing');
+			this.callSuper();
+		},
 		alias_target_panel: function() {
 			var content = this.content,
 			wrap = dom.div('.alias-target'),

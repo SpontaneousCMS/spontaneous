@@ -1013,6 +1013,9 @@ img.missing {
 	.entry-wrap.hidden {
 		opacity: 0.4 !important;
 	}
+	.entry-wrap.editing.hidden {
+		opacity: 1 !important;
+	}
   .entry-wrap.page {
     .white-bg {
 			@include corners(0, 0, $corner-radius, $corner-radius);
