@@ -74,6 +74,13 @@ Spontaneous.Views.PageView = (function($, S) {
 				edit.append(label, input_and_error);
 				edit.append(dom.a('.button.save').text('Save').click(submit));
 				edit.append(dom.a('.button.cancel').text('Cancel').click(this.close.bind(this)));
+				input.bind('keydown.uideditor', function(event) {
+					var s_key = 83, esc_key = 27;
+					if ((event.ctrlKey || event.metaKey) && event.keyCode === s_key) {
+						submit();
+						return false;
+					}
+				}.bind(this));
 				input.keyup(function(event) {
 					if (event.keyCode === 13) {
 						submit();
@@ -130,8 +137,18 @@ Spontaneous.Views.PageView = (function($, S) {
 				var submit = function() {
 					this.save(input.val());
 				}.bind(this);
+
+				var close = function() { this.close(); }.bind(this);
+
 				edit.append(dom.a('.button.save').text('Save').click(submit));
-				edit.append(dom.a('.button.cancel').text('Cancel').click(this.close.bind(this)));
+				edit.append(dom.a('.button.cancel').text('Cancel').click(close));
+				input.bind('keydown.urleditor', function(event) {
+					var s_key = 83, esc_key = 27;
+					if ((event.ctrlKey || event.metaKey) && event.keyCode === s_key) {
+						submit();
+						return false;
+					}
+				}.bind(this));
 				input.keyup(function(event) {
 					if (event.keyCode === 13) {
 						submit();
@@ -152,7 +169,7 @@ Spontaneous.Views.PageView = (function($, S) {
 						}
 					}
 				}.bind(this)).keydown(function(event) {
-					if (event.keyCode === 27) { this.close(); }
+					if (event.keyCode === 27) { close(); }
 				}.bind(this));
 				this.input = input;
 				this.error = error;
