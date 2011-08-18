@@ -174,7 +174,7 @@ namespace :gem do
 
 
   desc "Generate #{gemspec_file}"
-  task :gemspec => :validate do
+  task :gemspec => :assets do
     # read spec file and split out manifest section
     spec = File.read(gemspec_file)
     head, manifest, tail = spec.split("  # = MANIFEST =\n")
@@ -202,40 +202,11 @@ namespace :gem do
     spec = [head, manifest, tail].join("  # = MANIFEST =\n")
     File.open(gemspec_file, 'w') { |io| io.write(spec) }
     puts "Updated #{gemspec_file}"
-  end
-
-  desc "Validate #{gemspec_file}"
-  task :validate => :generate do
-    libfiles = Dir['lib/*'] - ["lib/#{name}.rb", "lib/#{name}"]
-    unless libfiles.empty?
-      puts "Directory `lib` should only contain a `#{name}.rb` file and `#{name}` dir."
-      # exit!
-    end
-    unless Dir['VERSION*'].empty?
-      puts "A `VERSION` file at root level violates Gem best practices."
-      # exit!
-    end
-  end
-
-  desc "Generate the gemspec file from a template"
-  task :generate => :assets do
-    template = File.read('spontaneous.gemspec.tmpl')
-    require 'bundler'
-
-    File.open('spontaneous.gemspec', 'w') do |gemspec|
-      bundler = Bundler.load
-      dependencies = bundler.dependencies_for(:default, :runtime).map do |dependency|
-        %{s.add_dependency('#{dependency.name}', [#{dependency.requirement.as_list.map { |d| d.inspect }.join(', ')}])}
-      end
-      development_dependencies = bundler.dependencies_for(:development).map do |dependency|
-        %{s.add_development_dependency('#{dependency.name}', [#{dependency.requirement.as_list.map { |d| d.inspect }.join(', ')}])}
-      end
-      gemspec.write(template % [dependencies.join("\n  "), development_dependencies.join("\n  ")])
-    end
+    FileUtils.cp('spontaneous.gemspec', @project_dir)
   end
 
   desc "Bundle & compress assets"
-  task :assets => :setup do
+  task :assets => :validate do
     app_dir = Spontaneous.application_dir
     bundles = {}
     [Spontaneous::Rack::Assets::JavaScript, Spontaneous::Rack::Assets::CSS].each do |mod|
@@ -271,6 +242,37 @@ namespace :gem do
     end
     File.open(module_path, 'w') { |file| file.write(converted.join) }
   end
+
+  desc "Validate #{gemspec_file}"
+  task :validate => :generate do
+    libfiles = Dir['lib/*'] - ["lib/#{name}.rb", "lib/#{name}"]
+    unless libfiles.empty?
+      puts "Directory `lib` should only contain a `#{name}.rb` file and `#{name}` dir."
+      # exit!
+    end
+    unless Dir['VERSION*'].empty?
+      puts "A `VERSION` file at root level violates Gem best practices."
+      # exit!
+    end
+  end
+
+  desc "Generate the gemspec file from a template"
+  task :generate => :setup do
+    template = File.read('spontaneous.gemspec.tmpl')
+    require 'bundler'
+
+    File.open('spontaneous.gemspec', 'w') do |gemspec|
+      bundler = Bundler.load
+      dependencies = bundler.dependencies_for(:default, :runtime).map do |dependency|
+        %{s.add_dependency('#{dependency.name}', [#{dependency.requirement.as_list.map { |d| d.inspect }.join(', ')}])}
+      end
+      development_dependencies = bundler.dependencies_for(:development).map do |dependency|
+        %{s.add_development_dependency('#{dependency.name}', [#{dependency.requirement.as_list.map { |d| d.inspect }.join(', ')}])}
+      end
+      gemspec.write(template % [dependencies.join("\n  "), development_dependencies.join("\n  ")])
+    end
+  end
+
 
   task :setup do
     @build_dir = Dir.tmpdir + "/spontaneous"
