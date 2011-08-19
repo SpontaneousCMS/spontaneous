@@ -367,7 +367,7 @@ PAGE <p>DESCRIPTION</p>
       end
 
       should "be passed to page content" do
-        @page.render.should == "<variable>\n\n"
+        @page.render.should == "<variable/>\n\nlocal\n"
       end
     end
   end
