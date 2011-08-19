@@ -4,11 +4,11 @@
 module Spontaneous::Render
   module Context
 
-    attr_reader :_format, :_target
+    attr_reader :_format, :_target, :_locals
 
-    def initialize(target, format, params={})
-      @_target, @_format, @_params = target, format, params
-      _update(params)
+    def initialize(target, format, parent={})
+      @_target, @_format = target, format
+      _update(parent)
     end
 
     alias_method :format, :_format
@@ -92,16 +92,21 @@ module Spontaneous::Render
     end
 
     # make each key of the params hash into a method call for speed
-    def _update(params)
-      if params.is_a?(Hash)
-        params.each do |key, val|
-          singleton_class.__send__(:define_method, key) { val }
-        end
+    def _update(parent)
+      if parent.is_a?(Hash)
+        _update_with_hash(parent)
       else
-        params.instance_variables.reject { |var| /^@_/ === var.to_s }.each do |variable|
-          # puts "setting #{variable.inspect} #{self.instance_variable_defined?(variable)}"
-          instance_variable_set(variable, params.instance_variable_get(variable))
+        parent.instance_variables.reject { |var| /^@_/ === var.to_s }.each do |variable|
+          instance_variable_set(variable, parent.instance_variable_get(variable))
         end
+        _update_with_hash(parent._locals) if parent.respond_to?(:_locals)
+      end
+    end
+
+    def _update_with_hash(hash)
+      @_locals = hash
+      hash.each do |key, val|
+        singleton_class.__send__(:define_method, key) { val }
       end
     end
   end

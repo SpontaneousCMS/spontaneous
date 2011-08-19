@@ -367,7 +367,7 @@ PAGE <p>DESCRIPTION</p>
       end
 
       should "be passed to page content" do
-        @page.render.should == "<variable/>\n\nlocal\n"
+        @page.render(:html, :param => "param").should == "param\n<variable/param/>\n\nlocal\n"
       end
     end
   end
