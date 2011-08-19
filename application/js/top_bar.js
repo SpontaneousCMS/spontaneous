@@ -7,7 +7,7 @@ Spontaneous.TopBar = (function($, S) {
 		this.page = page;
 		this.id = page.id;
 		this.url = page.url;
-		this.title = page.title;
+		this.title = S.site_domain;
 	}
 	RootNode.prototype = {
 		element: function() {
@@ -30,7 +30,7 @@ Spontaneous.TopBar = (function($, S) {
 	var AncestorNode = function(page) {
 		this.page = page;
 		this.id = page.id;
-		this.title = page.title;
+		this.title = page.slug;
 		this.path = page.path;
 	};
 	AncestorNode.prototype = {
@@ -47,7 +47,7 @@ Spontaneous.TopBar = (function($, S) {
 		this.page = page;
 		this.id = page.id;
 		this.path = page.path;
-		this.title = page.title;
+		this.title = page.slug;
 		this.pages = page.generation.sort(function(p1, p2) {
 			var a = p1.title, b = p2.title;
 			if (a == b) return 0;
@@ -73,7 +73,7 @@ Spontaneous.TopBar = (function($, S) {
 			});
 			for (var i = 0, ii = this.pages.length; i < ii; i++) {
 				var p = this.pages[i],
-				option = dom.option({'value': p.id, 'selected':(i == this.selected) }).text(p.title).data('page', p);
+				option = dom.option({'value': p.id, 'selected':(i == this.selected) }).text(p.slug).data('page', p);
 				if (p.id === this.id) {
 					this.title_option = option;
 				}
@@ -131,9 +131,9 @@ Spontaneous.TopBar = (function($, S) {
 			return '('+(this.children.length)+' pages)';
 		},
 		option_for_entry: function(p) {
-			var opt = dom.option({'value': p.id()}).text(p.title()).data('page', p);
-			if (p.title_field) {
-				p.title_field().watch('value', function(value) {
+			var opt = dom.option({'value': p.id()}).text(p.slug()).data('page', p);
+			if (p.watch) {
+				p.watch('slug', function(value) {
 					opt.text(value);
 				}.bind(this));
 			}
@@ -262,6 +262,7 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		id: function() { return this.child.id; },
 		title: function() { return this.child.title; },
+		slug: function() { return this.child.slug; }
 	})
 	var TopBar = new JS.Singleton({
 		include: Spontaneous.Properties,
@@ -318,10 +319,15 @@ Spontaneous.TopBar = (function($, S) {
 						children_node.remove_page(entry);
 					}
 				});
-				page.title_field().watch('value', function(title) {
+
+				page.watch('slug', function(title) {
 					this.navigation_current.set_title(title);
+				}.bind(this));
+
+				page.title_field().watch('value', function(title) {
 					this.set_browser_title(title);
 				}.bind(this));
+
 				this.children_node = children_node;
 			}
 		},

@@ -70,18 +70,19 @@ class SiteTest < MiniTest::Spec
           :id => @page3_2.id,
           :title => "Page 3 2",
           :path => '/page1-1/page2-1/page3-2',
+          :slug => 'page3-2',
           :type => 'Page',
           :type_id => ::Page.schema_id,
           :depth => 3,
           :children => [],
           :ancestors => [
-            { :id => @root.id, :title => "Homepage", :path => '/', :type => 'Page', :type_id => ::Page.schema_id, :depth => 0, :children => 2 },
-            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 1, :children => 1 },
-            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 2, :children => 2 }
+            { :id => @root.id, :title => "Homepage", :path => '/', :slug => '', :type => 'Page', :type_id => ::Page.schema_id, :depth => 0, :children => 2 },
+            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :slug => 'page1-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 1, :children => 1 },
+            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :slug => 'page2-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 2, :children => 2 }
         ],
           :generation => [
-            { :id => @page3_1.id, :title => "Page 3 1", :path => '/page1-1/page2-1/page3-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 3, :children => 0 },
-            { :id => @page3_2.id, :title => "Page 3 2", :path => '/page1-1/page2-1/page3-2', :type => 'Page', :type_id => ::Page.schema_id, :depth => 3, :children => 0 }
+            { :id => @page3_1.id, :title => "Page 3 1", :path => '/page1-1/page2-1/page3-1', :slug => 'page3-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 3, :children => 0 },
+            { :id => @page3_2.id, :title => "Page 3 2", :path => '/page1-1/page2-1/page3-2', :slug => 'page3-2', :type => 'Page', :type_id => ::Page.schema_id, :depth => 3, :children => 0 }
         ],
           :children => []
         }
@@ -90,29 +91,32 @@ class SiteTest < MiniTest::Spec
           :id => @page2_1.id,
           :title => "Page 2 1",
           :path => '/page1-1/page2-1',
+          :slug => 'page2-1',
           :type => 'Page',
-          :type_id => ::Page.schema_id,
+          :type_id => ::Page.schema_id.to_s,
           :depth => 2,
           :children => [{:depth=>3,
                          :type=>"Page",
-          :type_id => ::Page.schema_id,
+          :type_id => ::Page.schema_id.to_s,
                          :children=>0,
                          :path=>"/page1-1/page2-1/page3-1",
+                          :slug => 'page3-1',
                          :title=>"Page 3 1",
                          :id=>@page3_1.id},
                          {:depth=>3,
                           :type=>"Page",
-          :type_id => ::Page.schema_id,
+          :type_id => ::Page.schema_id.to_s,
                           :children=>0,
                           :path=>"/page1-1/page2-1/page3-2",
+                          :slug => 'page3-2',
                           :title=>"Page 3 2",
                           :id=>@page3_2.id}],
                           :ancestors => [
-                            { :id => @root.id, :title => "Homepage", :path => '/', :type => 'Page', :type_id => ::Page.schema_id, :depth => 0, :children => 2 },
-                            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 1, :children => 1 }
+                            { :id => @root.id, :title => "Homepage", :path => '/', :slug => '',:type => 'Page', :type_id => ::Page.schema_id, :depth => 0, :children => 2 },
+                            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :slug => 'page1-1',:type => 'Page', :type_id => ::Page.schema_id, :depth => 1, :children => 1 }
         ],
           :generation => [
-            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 2, :children => 2 }
+            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :slug => 'page2-1',:type => 'Page', :type_id => ::Page.schema_id, :depth => 2, :children => 2 }
         ]
         }
       end

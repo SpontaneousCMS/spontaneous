@@ -49,6 +49,7 @@ class BackTest < MiniTest::Spec
       config.stubs(:auto_login).returns('root')
       config.stubs(:default_charset).returns('utf-8')
       config.stubs(:publishing_method).returns(:immediate)
+      config.stubs(:site_domain).returns('example.org')
       root = File.expand_path("../../fixtures/back", __FILE__)
       Spontaneous.root = root
       instance = Spontaneous::Site.instantiate(root, :test, :back)
@@ -529,7 +530,7 @@ class BackTest < MiniTest::Spec
         last_response.content_type.should == "application/json;charset=utf-8"
         @project1.reload
         @project1.path.should == "/howabout"
-        Spot::JSON.parse(last_response.body).should == {:path => '/howabout' }
+        Spot::JSON.parse(last_response.body).should == {:path => '/howabout', :slug => 'howabout' }
       end
       should "raise error when trying to save duplicate path" do
         auth_post "/@spontaneous/slug/#{@project1.id}", 'slug' => 'project2'
@@ -751,7 +752,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "present a dialogue page with possible solutions" do
-        get '/@spontaneous/'
+        auth_get '/@spontaneous/'
         assert last_response.status == 412, "Schema validation errors should raise a 412 but instead recieved a #{last_response.status}"
         last_response.body.should =~ %r{<form action="/@spontaneous/schema/delete" method="post"}
         last_response.body.should =~ %r{<input type="hidden" name="uid" value="#{@df1.schema_id}"}

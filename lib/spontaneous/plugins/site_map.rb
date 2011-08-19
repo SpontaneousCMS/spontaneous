@@ -23,6 +23,7 @@ module Spontaneous::Plugins
           :id => id,
           :title => fields.title.value,
           :path => path,
+          :slug => slug,
           :type => self.class.ui_class,
           :type_id => self.class.schema_id,
           :children => self.children.length,

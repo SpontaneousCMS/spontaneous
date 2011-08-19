@@ -27,9 +27,7 @@ Spontaneous.EditPanel = (function($, S) {
 
 		save: function() {
 			var fields = this.parent_view.field_list();
-			console.log('save', fields)
 			S.Ajax.test_field_versions(this.parent_view, fields, this.upload_values.bind(this), this.upload_conflict.bind(this));
-
 			return false;
 		},
 

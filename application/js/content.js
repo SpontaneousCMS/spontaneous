@@ -33,6 +33,10 @@ Spontaneous.Content = (function($, S) {
 			return S.Types.type(this.content.type);
 		}.cache(),
 
+		slug: function() {
+			return this.content.slug;
+		},
+
 		constantize: function(type) {
 			var parts = type.split(/\./), obj = window;
 			for (var i = 0, ii = parts.length; i < ii; i++) {

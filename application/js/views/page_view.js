@@ -194,7 +194,7 @@ Spontaneous.Views.PageView = (function($, S) {
 				this.hide_path_error();
 				var view = $('h3.path', this.panel), edit = $('.edit', this.panel);
 				this.page.set('path', response.path);
-				view.text(response.path);
+				this.page.set('slug', response.slug);
 				this.close();
 				// HACK: see preview.js (Preview.display)
 				Spontaneous.Location.set('path', this.page.get('path'))
