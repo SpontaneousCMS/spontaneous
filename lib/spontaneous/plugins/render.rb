@@ -12,7 +12,7 @@ module Spontaneous::Plugins
           params = format
           format = :html
         end
-        Spontaneous::Render.render(self, format, params)
+        Spontaneous::Render.render(self, format, params, *args)
       end
 
       # [:html].each do |format|

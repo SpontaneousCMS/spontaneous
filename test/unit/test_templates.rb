@@ -176,21 +176,21 @@ class TemplatesTest < MiniTest::Spec
 
         def field
           @klass ||= Class.new(Object) do
-            attr_accessor :format
+            attr_accessor :_format
             def to_html
-              "(#{format})"
+              "(#{_format})"
             end
 
             def to_s
-              "'#{format}'"
+              "'#{_format}'"
             end
           end
-          @klass.new.tap { |i| i.format = format }
+          @klass.new.tap { |i| i._format = _format }
         end
 
         def slot
           @klass ||= Class.new(Object) do
-            def render(format)
+            def render(format, *args)
               "(#{format})"
             end
           end

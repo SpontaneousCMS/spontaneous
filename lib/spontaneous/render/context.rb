@@ -4,19 +4,21 @@
 module Spontaneous::Render
   module Context
 
-    attr_reader :format, :target
+    attr_reader :_format, :_target
 
     def initialize(target, format, params={})
-      @target, @format, @params = target, format, params
-      _update(params) if params.is_a?(Hash)
+      @_target, @_format, @_params = target, format, params
+      _update(params)
     end
 
+    alias_method :format, :_format
+
     def page
-      target.page
+      _target.page
     end
 
     def template
-      target.template(format)
+      _target.template(_format)
     end
 
     def each
@@ -32,7 +34,7 @@ module Spontaneous::Render
     end
 
     def content
-      target.iterable
+      _target.iterable
     end
 
     def pieces
@@ -48,34 +50,34 @@ module Spontaneous::Render
     end
 
     def first?
-      target.container.pieces.first == self
+      _target.container.pieces.first == self
     end
 
     def last?
-      target.container.pieces.last == self
+      _target.container.pieces.last == self
     end
 
     def render_content
-      target.map do |c|
-        c.render(format)
+      _target.map do |c|
+        c.render(_format, self)
       end.join("\n")
     end
 
     def render(format, *args)
-      target.render(format, *args)
+      _target.render(format, self, *args)
     end
 
     def respond_to?(method)
-      super || target.respond_to?(method)
+      super || _target.respond_to?(method)
     end
 
     protected
 
     def method_missing(method, *args)
       if block_given?
-        target.__send__(method, *args, &Proc.new)
+        _target.__send__(method, *args, &Proc.new)
       else
-        target.__send__(method, *args)
+        _target.__send__(method, *args)
       end
     rescue => e
       # TODO: sensible, configurable fallback for when template calls non-existant method
@@ -84,15 +86,22 @@ module Spontaneous::Render
       # - an inline comment when in dev mode?
       # - some placeholder text, perhaps the name of the missing method and line no.
       logger.error(e)
-      # logger.error(target)
+      # logger.error(_target)
       # logger.error(e.backtrace.join("\\n"))
       nil
     end
 
     # make each key of the params hash into a method call for speed
     def _update(params)
-      params.each do |key, val|
-        singleton_class.__send__(:define_method, key) { val }
+      if params.is_a?(Hash)
+        params.each do |key, val|
+          singleton_class.__send__(:define_method, key) { val }
+        end
+      else
+        params.instance_variables.reject { |var| /^@_/ === var.to_s }.each do |variable|
+          # puts "setting #{variable.inspect} #{self.instance_variable_defined?(variable)}"
+          instance_variable_set(variable, params.instance_variable_get(variable))
+        end
       end
     end
   end

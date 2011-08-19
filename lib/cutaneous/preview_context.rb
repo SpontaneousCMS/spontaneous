@@ -18,7 +18,7 @@ module Cutaneous
     end
 
     def _comment(text)
-      @_comment_method ||= "_comment_#{format}".to_sym
+      @_comment_method ||= "_comment_#{_format}".to_sym
       if (respond_to?(@_comment_method))
         self.send(@_comment_method, text)
       end

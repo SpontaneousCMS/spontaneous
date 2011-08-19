@@ -354,6 +354,23 @@ PAGE <p>DESCRIPTION</p>
       end
     end
 
+    context "variables in templates" do
+      setup do
+        Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
+        PreviewRender.layout :variables
+        PreviewRender.style :variables
+
+        @page.layout = :variables
+        @first = PreviewRender.new(:title => "first")
+        @page.images << @first
+        @page.images.first.style = :variables
+      end
+
+      should "be passed to page content" do
+        @page.render.should == "<variable>\n\n"
+      end
+    end
   end
+
 end
 

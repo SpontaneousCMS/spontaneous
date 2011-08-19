@@ -152,22 +152,20 @@ module Spontaneous
         end
       end
 
-      def render(content, format=:html, params={})
+      def render(content, format=:html, params={}, *args)
         Content.with_visible do
-          renderer.render_content(content, format || :html, params)
+          renderer.render_content(content, format || :html, params, *args)
         end
       end
     end
+
     autoload :Engine, "spontaneous/render/engine"
-
     autoload :Context, "spontaneous/render/context"
-
     autoload :Renderer, "spontaneous/render/renderer"
     autoload :PreviewRenderer, "spontaneous/render/preview_renderer"
     autoload :PublishingRenderer, "spontaneous/render/publishing_renderer"
     autoload :PublishedRenderer, "spontaneous/render/published_renderer"
     autoload :DevelopmentRenderer, "spontaneous/render/development_renderer"
-
     autoload :Format, "spontaneous/render/format"
   end
 end

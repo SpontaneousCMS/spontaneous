@@ -68,12 +68,12 @@ module Cutaneous
 
     def _decode_params(param, *args)
       unless param.is_a?(String)
-        @_render_method ||= "to_#{format}".to_sym
+        @_render_method ||= "to_#{_format}".to_sym
         if param.respond_to?(@_render_method)
           param = param.send(@_render_method, *args)
         end
         if param.respond_to?(:render)
-          param = param.render(format, *args)
+          param = param.render(_format, self, *args)
         end
       end
       super(param)
