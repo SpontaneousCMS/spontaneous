@@ -432,17 +432,6 @@ class BackTest < MiniTest::Spec
         Spontaneous::Media.stubs(:upload_index).returns(23)
       end
 
-      should "create a file in a safe subdirectory of media/tmp" do
-        auth_post "@spontaneous/file/upload/9723", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
-        assert last_response.ok?
-        last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal({
-          :id => '9723',
-          :src => "/media/tmp/1288882153.23/rose.jpg",
-          :path => "#{Spontaneous.media_dir}/tmp/1288882153.23/rose.jpg"
-        }.to_json, last_response.body)
-      end
-
       should "replace values of fields immediately when required" do
         @image1.image.processed_value.should == ""
         auth_post "@spontaneous/file/replace/#{@image1.id}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg"), "field" => @image1.image.schema_id.to_s
@@ -451,11 +440,11 @@ class BackTest < MiniTest::Spec
         @image1 = Content[@image1.id]
         src = @image1.image.src
         src.should =~ /^\/media(.+)\/rose\.jpg$/
-        last_response.body.should == {
-          :id => @image1.id,
-          :src => src,
-          :version => 1
-        }.to_json
+        Spot::JSON.parse(last_response.body).should == @image1.image.export
+        #   :id => @image1.id,
+        #   :src => src,
+        #   :version => 1
+        # }.to_json
         File.exist?(Media.to_filepath(src)).should be_true
         get src
         assert last_response.ok?
@@ -469,11 +458,11 @@ class BackTest < MiniTest::Spec
         @job1 = Content[@job1.id]
         src = @job1.images.image.src
         src.should =~ /^\/media(.+)\/rose\.jpg$/
-        last_response.body.should == {
-          :id => @job1.id,
-          :src => src,
-          :version => 1
-        }.to_json
+        Spot::JSON.parse(last_response.body).should == @job1.images.image.export
+        #   :id => @job1.id,
+        #   :src => src,
+        #   :version => 1
+        # }.to_json
         File.exist?(Media.to_filepath(src)).should be_true
         get src
         assert last_response.ok?
@@ -859,11 +848,7 @@ class BackTest < MiniTest::Spec
         @image1 = Content[@image1.id]
         src = @image1.image.src
         src.should =~ %r{^(.+)/rose\.jpg$}
-        Spot::JSON.parse(last_response.body).should == {
-          :id => @image1.id,
-          :src => src,
-          :version => 1
-        }
+        Spot::JSON.parse(last_response.body).should == @image1.image.export
         File.exist?(Media.to_filepath(src)).should be_true
         S::Media.digest(Media.to_filepath(src)).should == @image_digest
       end
