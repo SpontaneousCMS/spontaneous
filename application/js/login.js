@@ -1,6 +1,6 @@
 (function($) {
 	$(function() {
-		$('#login form input').focus(function() {
+		$('#login-form input.text').focus(function() {
 			var $this = $(this);
 			$('span', $this.parent()).addClass('faded');
 		}).blur(function() {
@@ -48,6 +48,6 @@
 			return false;
 		});
 
-		$('#login form input#user-login').focus();
+		$('#login-form input#user-login').focus();
 	});
 }(jQuery));

@@ -35,7 +35,9 @@
           if (key) {
             $('#reauthenticate-key').val(key).parent('form')[0].submit();
           } else {
-            $('#outer').fadeIn();
+            $('#outer').fadeIn(function() {
+              $('#login-form input#user-login').focus();
+          });
           }
         });
       }(jQuery));
@@ -53,19 +55,19 @@
           <div class="inputs">
             <input type="hidden" name="origin" value="<%= request.path_info %>" />
             <p>
-            <label><input type="text" id="user-login" name="user[login]" value="<%= locals[:login] %>" /><span>Username</span></label>
+            <label><input type="text" class="text" id="user-login" name="user[login]" value="<%= locals[:login] %>" /><span>Username</span></label>
             </p>
             <p>
-            <label><input type="password" name="user[password]" value="" /><span>Password</span></label>
+            <label><input type="password" class="text" name="user[password]" value="" /><span>Password</span></label>
             </p>
             <p class="submit"><button type="submit">Login</button></p>
           </div>
         </form>
-        <form action="/@spontaneous/reauthenticate" method="post" accept-charset="UTF-8">
-          <input type="hidden" id="reauthenticate-key" name="api_key" value="" />
-          <input type="hidden" id="reauthenticate-origin" name="origin" value="<%= request.path_info %>" />
-        </form>
       </div>
     </div>
+      <form action="/@spontaneous/reauthenticate" method="post" accept-charset="UTF-8">
+        <input type="hidden" id="reauthenticate-key" name="api_key" value="" />
+        <input type="hidden" id="reauthenticate-origin" name="origin" value="<%= request.path_info %>" />
+      </form>
   </body>
 </html>
