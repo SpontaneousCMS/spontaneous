@@ -1,1 +1,1 @@
-<{{ @variable }}/{{ local }}>
+<#{ @variable }/#{ local }>

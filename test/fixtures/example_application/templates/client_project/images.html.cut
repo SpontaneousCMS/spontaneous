@@ -1,1 +1,1 @@
-<ul>{{ render_content  }}</ul>
+<ul>#{ render_content }</ul>

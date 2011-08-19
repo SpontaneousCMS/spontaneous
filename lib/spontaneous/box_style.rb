@@ -57,7 +57,7 @@ module Spontaneous
     end
 
     def anonymous_template
-      Proc.new { "{{ render_content }}" }
+      Proc.new { '#{ render_content }' }
     end
   end
 end

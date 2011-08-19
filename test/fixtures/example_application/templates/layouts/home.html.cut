@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>{{ title }}</title>
+	<title>#{ title }</title>
 </head>
 <body>
-	<h2>{{ welcome_title }}</h2>
-	{{ introduction }}
-	{{ in_progress }}
-	{{ completed }}
-	
-	{{ archived }}
+	<h2>#{ welcome_title }</h2>
+	#{ introduction }
+	#{ in_progress }
+	#{ completed }
+
+	#{ archived }
 </body>
 </html>

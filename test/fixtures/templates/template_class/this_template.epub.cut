@@ -1,1 +1,1 @@
-<EPUB><title>{{ title }}</title><body>{{ description }}</body></EPUB>
+<EPUB><title>#{ title }</title><body>#{ description }</body></EPUB>

@@ -5,9 +5,9 @@
 	<title></title>
 </head>
 <body>
-	
-  <h2>Project: {{ title }}</h2>
-  {{ description }}
-  {{ render_content }}
+
+  <h2>Project: #{ title }</h2>
+  #{ description }
+  #{ render_content }
 </body>
 </html>

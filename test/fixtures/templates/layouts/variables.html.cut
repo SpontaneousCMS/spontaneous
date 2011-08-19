@@ -1,6 +1,6 @@
-{%
+%{
 local = "local"
 @variable = "variable"
-%}
-{{ images }}
-{{ local }}
+}
+#{ images }
+#{ local }

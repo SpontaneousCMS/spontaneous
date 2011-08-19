@@ -1,6 +1,6 @@
 <complex>
-{{ title }}
-{% content.each do |piece| %}
-<piece>{{ piece }}</piece>
-{% end %}
+#{ title }
+%{ content.each do |piece| }
+<piece>#{ piece }</piece>
+%{ end }
 </complex>

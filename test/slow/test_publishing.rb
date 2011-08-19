@@ -961,7 +961,7 @@ class PublishingTest < MiniTest::Spec
         @pages.each do |page|
           if page.root?
             file = revision_dir / "index.html.cut"
-            result = "Page: '#{page.title}' \#{Time.now.to_i}\n"
+            result = "Page: '#{page.title}' {{Time.now.to_i}}\n"
           else
             file = revision_dir / "#{page.path}/index.html"
             result = "Page: '#{page.title}'\n"

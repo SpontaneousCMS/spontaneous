@@ -1,1 +1,1 @@
-<html>{% include 'included' %}</html>
+<html>%{ include 'included' }</html>

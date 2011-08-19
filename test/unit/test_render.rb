@@ -130,7 +130,7 @@ class RenderTest < MiniTest::Spec
 
         class ::AnImage < Content; end
         AnImage.field :title
-        AnImage.template '<img>{{title}}</img>'
+        AnImage.template '<img>#{title}</img>'
 
         @root = TemplateClass.new
         @root.images.introduction = "Images below:"
@@ -160,7 +160,7 @@ class RenderTest < MiniTest::Spec
 
         class ::AnImage < Content; end
         AnImage.field :title
-        AnImage.template '<img>{{title}}</img>'
+        AnImage.template '<img>#{title}</img>'
 
         @root = TemplateClass.new
         @root.images_with_template.introduction = "Images below:"

@@ -1,1 +1,1 @@
-Page: '{{ title }}' #{Time.now.to_i}
+Page: '#{ title }' {{Time.now.to_i}}

@@ -1,1 +1,1 @@
-<html><title>{{ title }}</title>#{bell}</html>
+<html><title>#{ title }</title>{{bell}}</html>

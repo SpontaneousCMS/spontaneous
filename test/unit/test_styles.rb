@@ -357,7 +357,7 @@ class StylesTest < MiniTest::Spec
           piece.entities << TemplateClass.new
           piece.entities << TemplateClass.new
           piece.entities.render.should == "template_class.html.cut\n\ntemplate_class.html.cut\n"
-          piece.entities.style.template.call.should == "{{ render_content }}"
+          piece.entities.style.template.call.should == '#{ render_content }'
         end
 
 

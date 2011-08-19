@@ -53,26 +53,26 @@ class TemplatesTest < MiniTest::Spec
     end
 
     should "ignore second level statements" do
-      input = '<html><title>#{title}</title>#{unsafe}</html>'
+      input = '<html><title>{{title}}</title>{{unsafe}}</html>'
       @template.convert(input)
       output = @template.render(@context)
-      output.should ==  '<html><title>#{title}</title>#{unsafe}</html>'
+      output.should ==  '<html><title>{{title}}</title>{{unsafe}}</html>'
     end
 
     should "evaluate first level expressions" do
-      @template.convert('<html><title>{{title}}</title>#{unsafe}</html>')
+      @template.convert('<html><title>#{title}</title>{{unsafe}}</html>')
       output = @template.render(@context)
-      output.should == '<html><title>THE TITLE</title>#{unsafe}</html>'
+      output.should == '<html><title>THE TITLE</title>{{unsafe}}</html>'
     end
 
     should "evaluate first level statements" do
-      @template.convert("<html><title>{{title}}</title>{% 2.times do %}\#{unsafe}{% end %}</html>")
+      @template.convert('<html><title>#{title}</title>%{ 2.times do }{{unsafe}}%{ end }</html>')
       output = @template.render(@context)
-      output.should == '<html><title>THE TITLE</title>#{unsafe}#{unsafe}</html>'
+      output.should == '<html><title>THE TITLE</title>{{unsafe}}{{unsafe}}</html>'
     end
 
     should "generate 2nd render templates" do
-      @template.convert("<html><title>{{title}}</title>{% 2.times do %}\#{bell}\n{% end %}</html>")
+      @template.convert("<html><title>\#{title}</title>%{ 2.times do }{{bell}}\n%{ end }</html>")
       output = @template.render(@context)
       second = Cutaneous::SecondPassParser.new
       second.convert(output)
@@ -87,19 +87,19 @@ class TemplatesTest < MiniTest::Spec
     end
 
     should "a render unescaped expressions" do
-      @template.convert('<html><title>#{title}</title>#{unsafe}</html>')
+      @template.convert('<html><title>{{title}}</title>{{unsafe}}</html>')
       output = @template.render(@context)
       output.should == "<html><title>THE TITLE</title><script>alert('bad')</script></html>"
     end
 
     should "render escaped expressions" do
-      @template.convert('<html><title>${unsafe}</title></html>')
+      @template.convert('<html><title>{$ unsafe $}</title></html>')
       output = @template.render(@context)
       output.should == "<html><title>&lt;script&gt;alert('bad')&lt;/script&gt;</title></html>"
     end
 
     should "evaluate expressions" do
-      @template.convert('<html>%{ 2.times do }<title>#{title}</title>%{ end }</html>')
+      @template.convert('<html>{% 2.times do %}<title>{{title}}</title>{% end %}</html>')
       output = @template.render(@context)
       output.should == "<html><title>THE TITLE</title><title>THE TITLE</title></html>"
     end
@@ -122,24 +122,24 @@ class TemplatesTest < MiniTest::Spec
 
     should "preprocess" do
       output = first_pass('content', 'preprocess')
-      output.should == "<html><title>THE TITLE</title>\#{bell}</html>\n"
+      output.should == "<html><title>THE TITLE</title>{{bell}}</html>\n"
     end
 
     should "include imports" do
       output = first_pass('content', 'include')
-      output.should == "<html>\#{bell}ding\n</html>\n"
+      output.should == "<html>{{bell}}ding\n</html>\n"
     end
 
     should "include imports in sub-directories" do
       output = first_pass('content', 'include_dir')
-      output.should == "<html>\#{bell}ding\n</html>\n"
+      output.should == "<html>{{ bell }}ding\n</html>\n"
     end
 
     should "preserve the format across includes" do
       context = @klass.new(nil, :epub)
       context.format.should == :epub
       output = first_pass('content', 'template', context)
-      output.should == "<epub><epub>\#{bell}ding</epub>\n</epub>\n"
+      output.should == "<epub><epub>{{ bell }}ding</epub>\n</epub>\n"
     end
 
     should "render a second pass" do
@@ -156,7 +156,7 @@ class TemplatesTest < MiniTest::Spec
 
     should "work" do
       output = first_pass('extended', 'main')
-      output.should == "Main Title \#{page.title}\nGrandparent Nav\nMain Body\nParent Body\nGrandparent Body\nGrandparent Footer\nParent Footer\n"
+      output.should == "Main Title {{page.title}}Grandparent Nav\nMain Body\nParent Body\nGrandparent Body\nGrandparent Footer\nParent Footer\n"
     end
   end
 
@@ -202,21 +202,21 @@ class TemplatesTest < MiniTest::Spec
 
     should "call #render(format) if context responds to it" do
       context = @context_class.new(nil, :html)
-      @template.convert('{{slot}} {{ monkey }}')
+      @template.convert('#{slot} #{ monkey }')
       output = @template.render(context)
       output.should == "(html) magic"
     end
 
     should "call to_format on non-strings" do
       context = @context_class.new(nil, :html)
-      @template.convert('{{field}} {{ monkey }}')
+      @template.convert('#{field} #{ monkey }')
       output = @template.render(context)
       output.should == "(html) magic"
     end
 
     should "call to_s on non-strings that have no specific handler" do
       context = @context_class.new(nil, :weird)
-      @template.convert('{{field}} {{ monkey }}')
+      @template.convert('#{field} #{ monkey }')
       output = @template.render(context)
       output.should == "'weird' magic"
     end
