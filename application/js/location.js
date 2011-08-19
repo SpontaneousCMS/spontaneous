@@ -4,24 +4,17 @@ Spontaneous.Location = (function($, S) {
 	var ajax = S.Ajax;
 
 	var State = new JS.Class({
-		initialize: function(hash) {
+		initialize: function(path) {
 			this.page_id = false;
 			this.mode = null;
-			if (hash) {
-				this.hash = hash.substr(1);
-				this.parse_hash();
+			if (path) {
+				path = path.substr(ajax.namespace.length+1);
+				this.parse_path(path);
 			}
 		},
-		// make this more sophisticated to deal with more complex state
-		// currently:
-		// #/page_id@view_mode
-		parse_hash: function() {
-			var areas = this.hash.split('@'), path = areas[0], mode = areas[1];
-			var parts = path.split('/')
-			parts.shift();
-			if (parts.length > 0) {
-				this.page_id = parts[0];
-			}
+		parse_path: function(path) {
+			var areas = path.split('/'), id = areas[0], mode = areas[1];
+			this.page_id = id;
 			this.mode = mode;
 		},
 		restore: function() {
@@ -37,19 +30,34 @@ Spontaneous.Location = (function($, S) {
 		},
 		to_hash: function() {
 			return '#/'+(this.page_id || '') + (this.mode ? ('@' + this.mode) : '');
+		},
+		to_path: function() {
+			return [ajax.namespace, (this.page_id || ''), this.mode].join("/")
+		},
+		to_obj: function() {
+			return {
+				page_id: this.page_id,
+				mode: this.mode
+			}
 		}
 	});
 
 	State.extend({
-		restore: function() {
-			var state = new State(window.location.hash)
+		// currently just produces some kind of loop
+		popstate: function(event) {
+			State.restore(event)
+			return false;
+		},
+		restore: function(event) {
+			var state = new State(window.location.pathname)
 			state.restore();
 		},
+
 		page: function(location, mode) {
 			var s = new State
 			s.page_id = location.id;
 			s.mode = mode;
-			window.location.hash = s.to_hash();
+			window.history.replaceState(s.to_obj(), ''+s.page_id, s.to_path());
 		}
 	});
 
@@ -62,7 +70,7 @@ Spontaneous.Location = (function($, S) {
 			}.bind(this);
 			callback();
 			State.restore();
-			$(window).bind('hashchange', State.restore);
+			// $(window).bind('hashchange', State.restore);
 		},
 		page_loaded: function(page) {
 			// page.watch('slot', this, 'slot_changed');
@@ -153,6 +161,7 @@ Spontaneous.Location = (function($, S) {
 			return path;
 		}
 	});
+	// $(window).bind('popstate', State.popstate);
 	return Location;
 })(jQuery, Spontaneous);
 

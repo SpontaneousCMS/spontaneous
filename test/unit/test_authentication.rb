@@ -65,8 +65,8 @@ class AuthenticationTest < MiniTest::Spec
     @disabled_user
   end
 
-  def login_user(user)
-    post "/@spontaneous/login", "user[login]" => user.login, "user[password]" => user.password
+  def login_user(user, params={})
+    post "/@spontaneous/login", {"user[login]" => user.login, "user[password]" => user.password}.merge(params)
     @user = user
   end
 
@@ -289,9 +289,9 @@ class AuthenticationTest < MiniTest::Spec
 
         should "succeed and redirect to /@spontaneous for correct login & password" do
           # post "/@spontaneous/login", "user[login]" => "admin", "user[password]" => "admin_password"
-          login_user(@admin_user)
+          login_user(@admin_user, "origin" => "/103/preview")
           assert last_response.status == 302, "Status was #{last_response.status} not 302"
-          last_response.headers["Location"].should =~ %r{/@spontaneous$}
+          last_response.headers["Location"].should =~ %r{/@spontaneous/103/preview$}
         end
 
         should "succeed and return an api key value for correct login over XHR" do
@@ -306,9 +306,9 @@ class AuthenticationTest < MiniTest::Spec
 
         should "accept a valid API key for re-authentication" do
           key = @admin_user.logged_in!
-          post "/@spontaneous/reauthenticate", "api_key" => key.key_id
+          post "/@spontaneous/reauthenticate", "api_key" => key.key_id, "origin" => "/99/edit"
           assert last_response.status == 302, "Status was #{last_response.status} not 302"
-          last_response.headers["Location"].should =~ %r{/@spontaneous$}
+          last_response.headers["Location"].should =~ %r{/@spontaneous/99/edit$}
         end
 
         should "reject invalid API key" do

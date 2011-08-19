@@ -51,6 +51,7 @@
           <p id="error-message" class="error" <% unless locals[:failed] %>style="display: none"<% end %>><span id="failure-message">Login failed for &lsquo;<span id="failed-name"><%= locals[:login] %></span>&rsquo;</span></p>
 
           <div class="inputs">
+            <input type="hidden" name="origin" value="<%= request.path_info %>" />
             <p>
             <label><input type="text" id="user-login" name="user[login]" value="<%= locals[:login] %>" /><span>Username</span></label>
             </p>
@@ -62,6 +63,7 @@
         </form>
         <form action="/@spontaneous/reauthenticate" method="post" accept-charset="UTF-8">
           <input type="hidden" id="reauthenticate-key" name="api_key" value="" />
+          <input type="hidden" id="reauthenticate-origin" name="origin" value="<%= request.path_info %>" />
         </form>
       </div>
     </div>

@@ -43,12 +43,14 @@ module Spontaneous
           app.helpers Authentication::Helpers
 
           app.post "/reauthenticate" do
+            p params
             if key = Spot::Permissions::AccessKey.authenticate(params[:api_key])
               response.set_cookie(AUTH_COOKIE, {
                 :value => key.key_id,
                 :path => '/'
               })
-              redirect NAMESPACE, 302
+              origin = "#{NAMESPACE}#{params[:origin]}"
+              redirect origin, 302
             else
               halt(401, erubis(:login, :locals => { :invalid_key => true }))
             end
@@ -57,6 +59,7 @@ module Spontaneous
           app.post "/login" do
             login = params[:user][:login]
             password = params[:user][:password]
+            origin = "#{NAMESPACE}#{params[:origin]}"
             if key = Spontaneous::Permissions::User.authenticate(login, password)
               response.set_cookie(AUTH_COOKIE, {
                 :value => key.key_id,
@@ -65,10 +68,10 @@ module Spontaneous
               if request.xhr?
                 json({
                   :key => key.key_id,
-                  :redirect => NAMESPACE
+                  :redirect => origin
                 })
               else
-                redirect NAMESPACE, 302
+                redirect origin, 302
               end
             else
               halt(401, erubis(:login, :locals => { :login => login, :failed => true }))
@@ -166,7 +169,7 @@ module Spontaneous
 
         use AroundBack
         register Authentication
-        requires_authentication! :except_all => [%r(^#{NAMESPACE}/unsupported)], :except_key => [%r(^#{NAMESPACE}/?$)]
+        requires_authentication! :except_all => [%r(^#{NAMESPACE}/unsupported)], :except_key => [%r(^#{NAMESPACE}(/\d+/?.*)?$)]
       end
 
       class SchemaModification < AuthenticatedHandler
@@ -237,6 +240,12 @@ module Spontaneous
 
 
         get '/?' do
+          erubis :index
+        end
+
+        get %r{^/(\d+/?.*)?$} do
+          puts "index"
+          p params
           erubis :index
         end
 
