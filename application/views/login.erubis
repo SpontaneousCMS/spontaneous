@@ -37,7 +37,7 @@
           } else {
             $('#outer').fadeIn(function() {
               $('#login-form input#user-login').focus();
-          });
+            });
           }
         });
       }(jQuery));
