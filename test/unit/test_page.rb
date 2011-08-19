@@ -217,6 +217,21 @@ class PageTest < MiniTest::Spec
         @t.ancestor(-1).should == @s
         @t.ancestor(-2).should == @q
       end
+
+      should "test for ancestry" do
+        @t.ancestor?(@s).should be_true
+        @t.ancestor?(@q).should be_true
+        @t.ancestor?(@p).should be_true
+        @q.ancestor?(@t).should be_false
+      end
+
+      should "know if it's in the current path" do
+        @t.active?(@s).should be_true
+        @t.active?(@t).should be_true
+        @t.active?(@q).should be_true
+        @t.active?(@p).should be_true
+        @q.active?(@t).should be_false
+      end
     end
 
     context "page pieces" do

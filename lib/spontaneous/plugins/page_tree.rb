@@ -5,11 +5,19 @@ module Spontaneous::Plugins
 
     module InstanceMethods
       def ancestors
-        ancestor_path.map { |id| Spontaneous::Content[id] }
+        @ancestors ||= ancestor_path.map { |id| Spontaneous::Content[id] }
       end
 
       def ancestor(depth)
         ancestors[depth]
+      end
+
+      def ancestor?(page)
+        ancestor_path.include?(page.id)
+      end
+
+      def active?(page)
+        page.id == self.id or ancestor?(page)
       end
 
       def generation

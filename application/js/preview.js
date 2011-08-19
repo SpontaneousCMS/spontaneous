@@ -26,8 +26,6 @@ Spontaneous.Preview = (function($, S) {
 			// HACK: must be a better way of making sure that updates to the path are
 			// propagated throughout entrie interface
 			var path = S.Location.get('path');
-			console.log('display', page)
-			console.log('>>> path', S.Location.get('path'))
 			this.iframe.show().fadeOut(0)
 			this.iframe.bind('load.preview', function() {
 				var _iframe = this;
@@ -49,7 +47,8 @@ Spontaneous.Preview = (function($, S) {
 			}
 		},
 		goto_page: function(page) {
-			if (page) {
+			var current = this.get('path');
+			if (!current || (page && (page.path !== current))) {
 				this.goto_path(page.path);
 			}
 		},

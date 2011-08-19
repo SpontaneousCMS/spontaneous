@@ -102,7 +102,7 @@ Spontaneous.TopBar = (function($, S) {
 
 	ChildrenNode.prototype = {
 		element: function() {
-			var li = dom.li();
+			var li = dom.li('.children');
 			var select = dom.select('.unselected');
 			this.li = li;
 			this.select = select;
@@ -120,7 +120,8 @@ Spontaneous.TopBar = (function($, S) {
 			};
 			li.append(select);
 			return li;
-		},
+		}.cache(),
+
 		status_text: function() {
 			if (this.children.length === 0) {
 				this.select.hide();
@@ -131,9 +132,11 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		option_for_entry: function(p) {
 			var opt = dom.option({'value': p.id()}).text(p.title()).data('page', p);
-			p.title_field().watch('value', function(value) {
-				opt.text(value);
-			}.bind(this));
+			if (p.title_field) {
+				p.title_field().watch('value', function(value) {
+					opt.text(value);
+				}.bind(this));
+			}
 			return opt;
 		},
 		update_status: function() {
@@ -253,6 +256,13 @@ Spontaneous.TopBar = (function($, S) {
 			this.timer_interval = milliseconds;
 		}
 	});
+	var LocationChildProxy = new JS.Class({
+		initialize: function(child) {
+			this.child = child;
+		},
+		id: function() { return this.child.id; },
+		title: function() { return this.child.title; },
+	})
 	var TopBar = new JS.Singleton({
 		include: Spontaneous.Properties,
 		location: "/",
@@ -276,11 +286,27 @@ Spontaneous.TopBar = (function($, S) {
 				this.set('mode', S.ContentArea.mode);
 			}
 			S.Editing.watch('page', this.page_loaded.bind(this));
+			S.Location.watch('location', this.location_loaded.bind(this));
+		},
+		location_loaded: function(location) {
+			// clear the loaded page so that it forces a reload of the nav when we switch back to edit mode
+			this.set('page', undefined);
+			var children = [];
+			for (var i = 0, cc = location.children, ii = cc.length; i < ii; i++) {
+				children.push(new LocationChildProxy(cc[i]));
+			}
+			var children_node = new ChildrenNode(children);
+			this.location.append(children_node.element());
+			this.children_node = children_node;
 		},
 		page_loaded: function(page) {
-			if (page) {
+			var loaded_page = this.get('page'), loaded_id = (loaded_page ? loaded_page.id() : undefined);
+			if (page && (page.id() !== loaded_id)) {
+				if (this.children_node) {
+					this.children_node.element().remove();
+				}
+				this.set('page', page);
 				var children_node = new ChildrenNode(page.children());
-				// nodes.push(children_node);
 				this.location.append(children_node.element());
 				page.bind('entry_added', function(entry, position) {
 					if (entry.is_page()) {
@@ -349,10 +375,12 @@ Spontaneous.TopBar = (function($, S) {
 			} else {
 				current_node = root_node;
 			}
-			//if (location.children.length > 0) {
-			//}
 			$('li:gt(0)', $location_bar).remove();
-			// this.location.empty();
+			var children_node;
+			if (location.children.length > 0) {
+				//  children_node = new ChildrenNode(location.children);
+				// $location_bar.append(children_node.element())
+			}
 			for (var i = 0, ii = nodes.length; i < ii; i++) {
 				var node = nodes[i];
 				$location_bar.append(node.element())
