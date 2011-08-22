@@ -57,7 +57,7 @@ Spontaneous.EditDialogue = (function($, S) {
 			$(':input', this.form).add(document).unbind('keydown.savedialog');
 		},
 		body: function() {
-			var editing = dom.form('#editing', {'enctype':'multipart/form-data', 'method':'post'});
+			var editing = dom.form('#editing', {'enctype':'multipart/form-data', 'accept-charset':'UTF-8', 'method':'post'});
 			var outer = dom.div();
 			outer.append(dom.div('.field-group-bg.text'));
 			outer.append(dom.div('.field-group-bg.image'));

@@ -127,7 +127,7 @@ Spontaneous.EditPanel = (function($, S) {
 				if (class_name) { toolbar.addClass(class_name); }
 				return toolbar;
 			};
-			var editing = dom.form(['.editing-panel', this.parent_view.depth_class()], {'enctype':'multipart/form-data', 'method':'post'})
+			var editing = dom.form(['.editing-panel', this.parent_view.depth_class()], {'enctype':'multipart/form-data', 'accept-charset':'UTF-8', 'method':'post'})
 			var toolbar = get_toolbar();
 			var outer = dom.div('.editing-fields');
 			var text_field_wrap = dom.div('.field-group.text');
