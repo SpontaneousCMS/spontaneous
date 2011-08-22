@@ -7,6 +7,10 @@
 
 // many thanks to modernizer for working a lot of this out
 // should probably just use it instead...
+// this does two things:
+// 1. Check that the current browser supports the core HTML5 feature set,
+// 2. Regularise access to the various APIs, removing vendor prefixes and providing the spec defined methods
+// 3. Add some useful CSS-visible attributes to the HTML element
 (function() {
 	var _window = window, _document = document;
 	var prefixes = ' -webkit- -moz- -o- -ms- -khtml- '.split(' ');
@@ -126,6 +130,9 @@
 			throw "Local Storage not supported"
 		}
 
+		var b = _document.documentElement;
+		b.setAttribute('data-useragent',  navigator.userAgent);
+		b.setAttribute('data-platform', navigator.platform );
 	} catch (e) {
 		_window.location.href = "/@spontaneous/unsupported?msg=" + _window.encodeURI(e);
 	}
