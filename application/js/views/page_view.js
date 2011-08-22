@@ -134,14 +134,17 @@ Spontaneous.Views.PageView = (function($, S) {
 				input_and_error.append(input);
 				input_and_error.append(error);
 				edit.append(input_and_error);
+
 				var submit = function() {
 					this.save(input.val());
 				}.bind(this);
 
+				var last_slug = slug;
 				var close = function() { this.close(); }.bind(this);
 
 				edit.append(dom.a('.button.save').text('Save').click(submit));
 				edit.append(dom.a('.button.cancel').text('Cancel').click(close));
+
 				input.bind('keydown.urleditor', function(event) {
 					var s_key = 83, esc_key = 27;
 					if ((event.ctrlKey || event.metaKey) && event.keyCode === s_key) {
@@ -149,31 +152,42 @@ Spontaneous.Views.PageView = (function($, S) {
 						return false;
 					}
 				}.bind(this));
+
 				input.keyup(function(event) {
 					if (event.keyCode === 13) {
 						submit();
 					} else {
-						var v = this.input.val();
-						// do some basic cleanup -- proper cleanup is done on the server-side
-						v = v.toLowerCase().replace(/['"]/g, '').replace(/\&/, 'and');
-						v = v.replace(/[^\w0-9+]/g, '-').replace(/(\-+|\s+)/g, '-').replace(/(^\-)/, '');
-						this.input.val(v);
-						if (v === '') {
+						var i = this.input, v = i.val(), i0 = i[0], se = i0.selectionEnd;
+						if (v !== last_slug) {
+							// do some basic cleanup -- proper cleanup is done on the server-side
+							v = v.toLowerCase().replace(/['"]/g, '').replace(/\&/, 'and');
+							v = v.replace(/[^\w0-9+]/g, '-').replace(/(\-+|\s+)/g, '-').replace(/(^\-)/, '');
+							if (last_slug.length === v.length) {
+								se -= 1;
+							}
+							i.val(v);
+							i0.selectionStart = i0.selectionEnd = se;
+							last_slug = v;
+							if (v === '') {
 								this.show_path_error('Invalid URL');
-						} else {
-							if (this.unavailable[v]) {
-								this.show_path_error();
 							} else {
-								this.hide_path_error();
+								if (this.unavailable[v]) {
+									this.show_path_error();
+								} else {
+									this.hide_path_error();
+								}
 							}
 						}
 					}
 				}.bind(this)).keydown(function(event) {
 					if (event.keyCode === 27) { close(); }
 				}.bind(this));
+
+				edit.fadeIn(200, function() {
+					input.focus();
+				});
 				this.input = input;
 				this.error = error;
-				edit.fadeIn(200);
 			}.bind(this));
 		},
 		show_path_error: function(error_text) {
