@@ -587,7 +587,7 @@ img.missing {
 			border-right-color: $highlight;
 			.down {
 				@include down-arrow("/@spontaneous/static/orange-down-arrow.png", 7px);
-				z-index: 1;
+				z-index: 100;
 			}
 		}
 		li:first-child {
@@ -607,6 +607,7 @@ img.missing {
 		@extend .container-padding;
 		@include vertical-gradient(#eeeeee, #dddddd);
     @include display-box;
+		border-top: solid 1px #CCC;
     position:relative;
 		padding-top: 12px;
 		padding-bottom: 5px;
@@ -614,7 +615,7 @@ img.missing {
       position: absolute;
       left: 0;
       right: 0;
-      top: 0;
+      top: -1px;
       bottom: 0;
       border-style: solid;
       border-width: 2px;
