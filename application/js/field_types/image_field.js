@@ -178,6 +178,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return this._spinner;
 		},
 		upload_complete: function(values) {
+
 			this.callSuper(values)
 			if (values) {
 				var value = this.value().original;
@@ -319,13 +320,13 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return this.input().val();
 		},
 		cancel_edit: function() {
-			this.image.attr('src', this.get('value'));
+			this.image.attr('src', this.original_value().src);
 		},
 		conflict_view: function(dialogue, conflict) {
 			return new ImageFieldConflictView(dialogue, conflict);
 		},
 		original_value: function() {
-			return this.value();
+			return this.value().original;
 		},
 		edited_value: function() {
 			return this._edited_value;
