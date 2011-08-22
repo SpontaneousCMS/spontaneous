@@ -48,6 +48,5 @@
 			return false;
 		});
 
-		$('#login-form input#user-login').focus();
 	});
 }(jQuery));
