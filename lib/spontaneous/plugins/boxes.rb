@@ -7,9 +7,16 @@ module Spontaneous::Plugins
       def box(name, options = {}, &block)
         name = name.to_sym
         unless boxes.key?(name)
+          group_name = options.delete(:group)
           prototype = Spontaneous::Prototypes::BoxPrototype.new(self, name, options, &block)
           box_prototypes[name] = prototype
-          @box_group.push(prototype) if @box_group
+          if @box_group
+            @box_group.push(prototype)
+          else
+            if group_name and (box_group = box_groups[group_name])
+              box_group.push(prototype)
+            end
+          end
           unless method_defined?(name)
             class_eval <<-BOX
               def #{name}

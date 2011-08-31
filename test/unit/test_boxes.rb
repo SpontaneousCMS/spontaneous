@@ -514,15 +514,21 @@ class BoxesTest < MiniTest::Spec
         end
       end
 
+      class ::C < ::B
+        box :f, :group => :inner
+      end
+
       @a = ::A.new
       @b = ::B.new
-      [@a, @b].each do |instance|
+      @c = ::C.new
+      [@a, @b, @c].each do |instance|
         instance.boxes[:a].stubs(:render).with(anything).returns("[a]")
         instance.boxes[:b].stubs(:render).with(anything).returns("[b]")
         instance.boxes[:c].stubs(:render).with(anything).returns("[c]")
         instance.boxes[:d].stubs(:render).with(anything).returns("[d]")
       end
       @b.boxes[:e].stubs(:render).with(anything).returns("[e]")
+      @c.boxes[:f].stubs(:render).with(anything).returns("[f]")
     end
 
     teardown do
@@ -534,6 +540,7 @@ class BoxesTest < MiniTest::Spec
       @a.boxes.outer.render.should == "[c][d]"
       @b.boxes.inner.render.should == "[a][b]"
       @b.boxes.outer.render.should == "[c][d][e]"
+      @c.boxes.inner.render.should == "[a][b][f]"
     end
   end
 end
