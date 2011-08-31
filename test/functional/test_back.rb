@@ -50,6 +50,7 @@ class BackTest < MiniTest::Spec
       config.stubs(:default_charset).returns('utf-8')
       config.stubs(:publishing_method).returns(:immediate)
       config.stubs(:site_domain).returns('example.org')
+      config.stubs(:site_id).returns('example_org')
       root = File.expand_path("../../fixtures/back", __FILE__)
       Spontaneous.root = root
       instance = Spontaneous::Site.instantiate(root, :test, :back)

@@ -533,6 +533,8 @@ class BoxesTest < MiniTest::Spec
 
     teardown do
       Object.send(:remove_const, :A)
+      Object.send(:remove_const, :B)
+      Object.send(:remove_const, :C)
     end
 
     should "successfully allocate boxes" do
