@@ -2,11 +2,14 @@
 
 module Spontaneous::Plugins
   module Boxes
+
     module ClassMethods
       def box(name, options = {}, &block)
         name = name.to_sym
         unless boxes.key?(name)
-          box_prototypes[name] = Spontaneous::Prototypes::BoxPrototype.new(self, name, options, &block)
+          prototype = Spontaneous::Prototypes::BoxPrototype.new(self, name, options, &block)
+          box_prototypes[name] = prototype
+          @box_group.push(prototype) if @box_group
           unless method_defined?(name)
             class_eval <<-BOX
               def #{name}
@@ -36,6 +39,23 @@ module Spontaneous::Plugins
       def box?(box_name)
         box_prototypes.key?(box_name.to_sym)
       end
+
+      def box_group(name, &block)
+        @box_group = box_groups[name.to_sym]
+        yield if block_given?
+      ensure
+        @box_group = nil
+      end
+
+      def box_groups
+        @box_groups ||= initialize_box_groups
+      end
+
+      def initialize_box_groups
+        box_groups = Hash.new { |hash, key| hash[key] = [] }
+        supertype.box_groups.each { |name, group| box_groups[name] = group } if supertype?
+        box_groups
+      end
     end
 
     module InstanceMethods
@@ -52,6 +72,7 @@ module Spontaneous::Plugins
       def iterable
         boxes
       end
+
 
       def box?(box_name)
         self.class.box?(box_name.to_sym)
@@ -81,4 +102,3 @@ module Spontaneous::Plugins
     end
   end
 end
-

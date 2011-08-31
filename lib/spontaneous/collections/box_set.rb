@@ -51,6 +51,19 @@ module Spontaneous::Collections
         define_method(getter_name) { |*args| box.tap { |b| b.template_params = args } }
       end
     end
+
+    def box_groups
+      owner.class.box_groups
+    end
+
+    def method_missing(method, *args)
+      # allow access by group name e.g. instance.boxes.group_name
+      if box_groups.key?(method)
+        names = box_groups[method].map { |prototype| prototype.name }
+        self[*names]
+      else
+        super
+      end
+    end
   end
 end
-

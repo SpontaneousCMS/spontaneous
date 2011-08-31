@@ -3,8 +3,8 @@
 module Spontaneous
   module Extensions
     module Array
-      def render(format = :html)
-        self.map { |e| e.respond_to?(:render) ? e.render(format) : nil }.join
+      def render(*args)
+        self.map { |e| e.respond_to?(:render) ? e.render(*args) : nil }.join
       end
     end
   end

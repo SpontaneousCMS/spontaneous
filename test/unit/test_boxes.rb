@@ -386,6 +386,7 @@ class BoxesTest < MiniTest::Spec
     should "allow selection of subclasses" do
     end
   end
+
   context "Allowed types" do
     setup do
       class ::Allowed1 < Content
@@ -491,6 +492,48 @@ class BoxesTest < MiniTest::Spec
 
     should "correctly allow addition of subclasses" do
       Mixed.allowed_types.should == [Allowed11, Allowed111]
+    end
+  end
+
+  context "Box groups" do
+    setup do
+      class ::A < S::Piece
+        box_group :inner do
+          box :a
+          box :b
+        end
+        box_group :outer do
+          box :c
+          box :d
+        end
+      end
+
+      class ::B < ::A
+        box_group :outer do
+          box :e
+        end
+      end
+
+      @a = ::A.new
+      @b = ::B.new
+      [@a, @b].each do |instance|
+        instance.boxes[:a].stubs(:render).with(anything).returns("[a]")
+        instance.boxes[:b].stubs(:render).with(anything).returns("[b]")
+        instance.boxes[:c].stubs(:render).with(anything).returns("[c]")
+        instance.boxes[:d].stubs(:render).with(anything).returns("[d]")
+      end
+      @b.boxes[:e].stubs(:render).with(anything).returns("[e]")
+    end
+
+    teardown do
+      Object.send(:remove_const, :A)
+    end
+
+    should "successfully allocate boxes" do
+      @a.boxes.inner.render.should == "[a][b]"
+      @a.boxes.outer.render.should == "[c][d]"
+      @b.boxes.inner.render.should == "[a][b]"
+      @b.boxes.outer.render.should == "[c][d][e]"
     end
   end
 end

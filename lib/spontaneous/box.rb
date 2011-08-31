@@ -16,6 +16,7 @@ module Spontaneous
 
     # use underscores to protect against field name conflicts
     attr_reader :_name, :_prototype, :_owner
+    attr_accessor :template_params
 
 
     def initialize(name, prototype, owner)
