@@ -47,6 +47,10 @@ module Spontaneous::Prototypes
       @options[:fields]
     end
 
+    def group
+      @options[:group]
+    end
+
     def instance_class
       @_instance_class ||= create_instance_class
     end

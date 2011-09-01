@@ -7,16 +7,9 @@ module Spontaneous::Plugins
       def box(name, options = {}, &block)
         name = name.to_sym
         unless boxes.key?(name)
-          group_name = options.delete(:group)
+          options[:group] = @box_group if @box_group
           prototype = Spontaneous::Prototypes::BoxPrototype.new(self, name, options, &block)
           box_prototypes[name] = prototype
-          if @box_group
-            @box_group.push(prototype)
-          else
-            if group_name and (box_group = box_groups[group_name])
-              box_group.push(prototype)
-            end
-          end
           unless method_defined?(name)
             class_eval <<-BOX
               def #{name}
@@ -48,20 +41,10 @@ module Spontaneous::Plugins
       end
 
       def box_group(name, &block)
-        @box_group = box_groups[name.to_sym]
+        @box_group = name #box_groups[name.to_sym]
         yield if block_given?
       ensure
         @box_group = nil
-      end
-
-      def box_groups
-        @box_groups ||= initialize_box_groups
-      end
-
-      def initialize_box_groups
-        box_groups = Hash.new { |hash, key| hash[key] = [] }
-        supertype.box_groups.each { |name, group| box_groups[name] = group } if supertype?
-        box_groups
       end
     end
 
