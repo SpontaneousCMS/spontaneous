@@ -528,6 +528,7 @@ class BoxesTest < MiniTest::Spec
         instance.boxes[:d].stubs(:render).with(anything).returns("[d]")
       end
       @b.boxes[:e].stubs(:render).with(anything).returns("[e]")
+      @c.boxes[:e].stubs(:render).with(anything).returns("[e]")
       @c.boxes[:f].stubs(:render).with(anything).returns("[f]")
     end
 
@@ -540,9 +541,12 @@ class BoxesTest < MiniTest::Spec
     should "successfully allocate boxes" do
       @a.boxes.inner.render.should == "[a][b]"
       @a.boxes.outer.render.should == "[c][d]"
+
       @b.boxes.inner.render.should == "[a][b]"
       @b.boxes.outer.render.should == "[c][d][e]"
+
       @c.boxes.inner.render.should == "[a][b][f]"
+      @c.boxes.outer.render.should == "[c][d][e]"
     end
   end
 end
