@@ -9,7 +9,7 @@ module Spontaneous::Collections
 
     attr_reader :owner
 
-    def initialize(owner, piece_store)
+    def initialize(owner, piece_store = [])
       @owner = owner
       (piece_store || []).each do |data|
         id = data[0]
@@ -75,9 +75,18 @@ module Spontaneous::Collections
       end
     end
 
+    # Returns a frozen version of this set containing only entries that are visible
     def visible!
-      self.dup.reject { |e| e.nil? or e.hidden? }.freeze
+      entries = self.dup.reject { |e| e.nil? or e.hidden? }
+      # In 1.9.3 #reject does not return this subclass of Array but instead
+      # returns a direct Array instance
+      if Array === entries
+        set = EntrySet.new(owner)
+        set.concat(entries).freeze
+        set
+      else
+        entries
+      end
     end
-
   end
 end
