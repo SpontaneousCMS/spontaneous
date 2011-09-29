@@ -417,10 +417,8 @@ module Spontaneous
               instance = type.new
               box.insert(position, instance)
               field = instance.field_for_mime_type(file[:type])
-              media_file = Spontaneous::Media.upload_path(file[:filename])
-              FileUtils.mkdir_p(File.dirname(media_file))
-              FileUtils.mv(file[:tempfile].path, media_file)
-              field.unprocessed_value = media_file
+              field.unprocessed_value = file
+              instance.save
               content.save
               json({
                 :position => position,

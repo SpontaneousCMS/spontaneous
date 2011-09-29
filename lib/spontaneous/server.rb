@@ -3,11 +3,13 @@
 # Rack::Handler.register('unicorn', 'Unicorn') if defined?(Unicorn)
 
 ## thanks again to the stirling work of the Padrino guys & gals.
+require 'rack'
+
 module Spontaneous
 
   module Server
 
-    Handlers = %w[thin mongrel webrick] unless const_defined?(:Handlers)
+    Handlers = %w[thin] unless const_defined?(:Handlers)
 
 
     def self.run!(options={})

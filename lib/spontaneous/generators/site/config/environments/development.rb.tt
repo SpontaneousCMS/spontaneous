@@ -1,5 +1,7 @@
 
-publishing_method :threaded
+publishing_method :simultaneous
+
+simultaneous_connection "/tmp/simultaneous.<%= @site_name %>.sock"
 
 # ensures that schema classes are reloaded with every request
 reload_classes true

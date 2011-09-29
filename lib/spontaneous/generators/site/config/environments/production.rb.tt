@@ -1,5 +1,7 @@
 
-publishing_method :fire_and_forget
+publishing_method :simultaneous
+
+simultaneous_connection "/tmp/simultaneous.sock"
 
 # used by publishing mech to determine a restart strategy
 handler :unicorn

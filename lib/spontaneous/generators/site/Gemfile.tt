@@ -11,10 +11,8 @@ gem 'mysql2', '~> 0.2'
 ## TODO: replace this path based gem with a version once the gem is live
 #gem 'spontaneous', '<%= Spontaneous::VERSION %>'
 gem 'spontaneous', :path => "/Users/garry/Dropbox/Development/spontaneous3/working"
-
-# Choose a Rack handler
-gem 'thin'
-# gem 'mongrel'
+## TODO: Remove this line when Simultaneous is published
+gem 'simultaneous', :path => "/Users/garry/Dropbox/Development/spontaneous3/simultaneous"
 
 # group :development, :test do
 #   gem 'webrat'
