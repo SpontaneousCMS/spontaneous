@@ -1,6 +1,5 @@
 # encoding: UTF-8
 
-require 'hwia'
 require 'yaml'
 
 module Spontaneous::Permissions
@@ -107,7 +106,7 @@ module Spontaneous::Permissions
       end
 
       def get(level)
-        store[level]
+        store[level.to_sym]
       end
 
       def all(base_level = nil)
@@ -158,7 +157,7 @@ module Spontaneous::Permissions
 
       def store
         if !@store
-          @store = StrHash.new
+          @store = Hash.new
           init!
         end
         @store

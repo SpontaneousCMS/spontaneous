@@ -1,6 +1,5 @@
 # encoding: UTF-8
 
-require 'hwia'
 
 module Spontaneous::Prototypes
   class BoxPrototype

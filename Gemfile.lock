@@ -1,4 +1,10 @@
 GIT
+  remote: git://github.com/matsadler/rack-async.git
+  revision: a1ddee4ff5edd178c0dd134ba4634fc71baa6241
+  specs:
+    rack-async (0.0.1)
+
+GIT
   remote: https://github.com/dasch/shoulda.git
   revision: 16984cacbbff26413f83f19ca2f5c7aa1326cd27
   branch: minitest
@@ -12,21 +18,32 @@ PATH
       ansi
       grit
 
+PATH
+  remote: /Users/garry/Dropbox/Development/spontaneous3/simultaneous
+  specs:
+    simultaneous (0.1.0)
+      eventmachine (>= 1.0.0.beta.4, < 2.0)
+      rack (>= 1.0, < 2.0)
+      rack-async (>= 0.0.1, < 2.0)
+
 GEM
   remote: http://rubygems.org/
   specs:
-    activesupport (3.0.7)
+    activesupport (3.0.10)
     ansi (1.3.0)
     base58 (0.1.0)
-    columnize (0.3.2)
-    configuration (1.2.0)
-    daemons (1.1.3)
-    diff-lcs (1.1.2)
+    columnize (0.3.4)
+    configuration (1.3.1)
+    daemons (1.1.4)
+    diff-lcs (1.1.3)
     envjs (0.3.7)
       johnson (>= 2.0.0.pre3)
     erubis (2.7.0)
-    eventmachine (0.12.10)
+    eventmachine (1.0.0.beta.4)
     fire_and_forget (0.3.3)
+    foreman (0.22.0)
+      term-ansicolor (~> 1.0.5)
+      thor (>= 0.13.6)
     git (1.2.5)
     grit (2.4.1)
       diff-lcs (~> 1.1)
@@ -34,10 +51,9 @@ GEM
     harmony (0.5.6)
       envjs (= 0.3.7)
       johnson (= 2.0.0.pre3)
-    home_run (1.0.2)
-    hwia (1.0.2)
-    jeweler (1.6.0)
-      bundler (~> 1.0.0)
+    home_run (1.0.4)
+    jeweler (1.6.4)
+      bundler (~> 1.0)
       git (>= 1.2.5)
       rake
     jnunemaker-matchy (0.4.0)
@@ -51,20 +67,24 @@ GEM
     less (1.2.21)
       mutter (>= 0.4.2)
       treetop (>= 1.4.2)
-    linecache (0.43)
+    linecache (0.46)
+      rbx-require-relative (> 0.0.4)
+    metaclass (0.0.1)
     mime-types (1.16)
     mini_magick (3.3)
       subexec (~> 0.1.0)
     minitest (2.1.0)
-    mocha (0.9.12)
+    mocha (0.10.0)
+      metaclass (~> 0.0.1)
     multipart-post (1.1.3)
     mutter (0.5.3)
-    mysql2 (0.3.2)
-    polyglot (0.3.1)
-    rack (1.3.0.beta2)
-    rack-test (0.6.0)
+    mysql2 (0.3.7)
+    polyglot (0.3.2)
+    rack (1.3.3)
+    rack-test (0.6.1)
       rack (>= 1.0)
     rake (0.8.7)
+    rbx-require-relative (0.0.5)
     reek (1.2.8)
       ruby2ruby (~> 1.2)
       ruby_parser (~> 2.0)
@@ -74,34 +94,36 @@ GEM
       ruby-debug-base (~> 0.10.4.0)
     ruby-debug-base (0.10.4)
       linecache (>= 0.3)
-    ruby2ruby (1.2.5)
+    ruby2ruby (1.3.1)
       ruby_parser (~> 2.0)
       sexp_processor (~> 3.0)
-    ruby_parser (2.0.6)
+    ruby_parser (2.3.1)
       sexp_processor (~> 3.0)
-    sass (3.1.4)
+    sass (3.1.7)
     selenium-client (1.2.18)
-    sequel (3.24.1)
-    sexp_processor (3.0.5)
+    sequel (3.27.0)
+    sexp_processor (3.0.7)
     shine (0.6)
       multipart-post (>= 1.0)
     sinatra (1.1.4)
       rack (~> 1.1)
       tilt (< 2.0, >= 1.2.2)
     stackdeck (0.2.0)
-    stringex (1.2.1)
+    stringex (1.3.0)
     subexec (0.1.0)
     tenjin (0.6.1)
+    term-ansicolor (1.0.6)
     thin (1.2.11)
       daemons (>= 1.0.9)
       eventmachine (>= 0.12.6)
       rack (>= 1.0.0)
     thor (0.14.6)
-    tilt (1.3.1)
+    tilt (1.3.3)
     timecop (0.3.5)
-    treetop (1.4.9)
+    treetop (1.4.10)
+      polyglot
       polyglot (>= 0.3.1)
-    yajl-ruby (0.8.2)
+    yajl-ruby (0.8.3)
 
 PLATFORMS
   ruby
@@ -111,9 +133,9 @@ DEPENDENCIES
   base58 (~> 0.1.0)
   erubis (~> 2.6)
   fire_and_forget (~> 0.3.2)
+  foreman (~> 0.22.0)
   harmony (~> 0.5)
   home_run (~> 1.0.0)
-  hwia (~> 1.0.2)
   jeweler (~> 1.5)
   jnunemaker-matchy (~> 0.4)
   johnson (= 2.0.0.pre3)
@@ -127,6 +149,7 @@ DEPENDENCIES
   mocha (~> 0.9)
   mysql2 (~> 0.2)
   rack (~> 1.3.beta)
+  rack-async!
   rack-test (~> 0.5)
   rake (~> 0.8.7)
   reek
@@ -136,6 +159,7 @@ DEPENDENCIES
   sequel (~> 3.20)
   shine (~> 0.6)
   shoulda!
+  simultaneous!
   sinatra (~> 1.1.2)
   stackdeck (~> 0.2)
   stringex (~> 1.1)
