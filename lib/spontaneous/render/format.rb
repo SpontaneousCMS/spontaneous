@@ -24,7 +24,7 @@ module Spontaneous::Render
       @pages.each_with_index do |page, n|
         render_page(page) if page.formats.include?(format)
         after_page_rendered(page)
-        # sleep(delay) if delay
+        sleep(delay) if delay
         # sleep(3)
       end
       after_render

@@ -172,8 +172,13 @@ Spontaneous.TopBar = (function($, S) {
 		initialize: function() {
 			this.status = false;
 			this.set_interval(this.normal_check);
-			this.check_status();
+			// this.check_status();
+			var update_status = this.update_status.bind(this);
+			S.EventSource.addEventListener('publish_progress', function(event) {
+				update_status($.parseJSON(event.data))
+			});
 		},
+
 		check_status: function() {
 			S.Ajax.get('/publish/status', this.status_recieved.bind(this));
 		},
@@ -185,25 +190,25 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		update_status: function(status) {
 			if (status === null || status === '') { return; }
-			var action = status.status, progress = status.progress
-			if (this.in_progress && (action == this.current_action && progress == this.current_progress)) { return; }
-			this.current_action = action;
+			var state = status.state, progress = status.progress
+			// if (this.in_progress && (state == this.current_action && progress == this.current_progress)) { return; }
+			this.current_action = state;
 			this.current_progress = progress;
-			if (action === null || action === '' || action === 'complete' || action === 'error') {
-				if (this.in_progress) {
+			if (state === 'complete' || state === 'error') {
+				// if (this.in_progress) {
 					this.in_progress = false;
 					this.progress().stop();
-					this.set_interval(this.normal_check);
+					// this.set_interval(this.normal_check);
 					this.set_label("Publish");
 					this.button().switchClass('progress', '')
 					this.current_action = this.current_progress = null;
-				}
-				if (action === 'error') {
+				// }
+				if (state === 'error') {
 					alert('There was a problem publishing: ' + progress)
 				}
 			} else {
 				this.publishing_state();
-				if (action === 'rendering') {
+				if (state === 'rendering') {
 					this.progress().update(progress);
 				} else {
 					this.progress().indeterminate();
@@ -215,7 +220,7 @@ Spontaneous.TopBar = (function($, S) {
 			this.progress().indeterminate();
 		},
 		publishing_state: function() {
-			this.set_interval(this.rapid_check);
+			// this.set_interval(this.rapid_check);
 			this.set_label("Publishing");
 			var b = this.button();
 			this.current_action = this.current_progress = null;
@@ -246,7 +251,7 @@ Spontaneous.TopBar = (function($, S) {
 			if (!this._progress) {
 				this._progress = Spontaneous.Progress('publish-progress', 15, {
 					spinner_fg_color: '#ccc',
-					progress_fg_color: '#666'
+					progress_fg_color: '#fff'
 				});
 				this._progress.init();
 			}

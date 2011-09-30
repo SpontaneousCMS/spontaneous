@@ -6,6 +6,11 @@ require 'sinatra/base'
 
 module Spontaneous
   module Rack
+    NAMESPACE = "/@spontaneous".freeze
+    ACTIVE_USER = "SPONTANEOUS_USER".freeze
+    AUTH_COOKIE = "spontaneous_api_key".freeze
+    KEY_PARAM = "__key".freeze
+
     class << self
       def application
         case Spontaneous.mode
@@ -44,12 +49,15 @@ module Spontaneous
     autoload :Back, 'spontaneous/rack/back'
     autoload :Front, 'spontaneous/rack/front'
     autoload :Public, 'spontaneous/rack/public'
+    autoload :Authentication, 'spontaneous/rack/authentication'
     autoload :Media, 'spontaneous/rack/media'
     autoload :Static, 'spontaneous/rack/static'
+    autoload :CookieAuthentication, 'spontaneous/rack/cookie_authentication'
+    autoload :QueryAuthentication, 'spontaneous/rack/query_authentication'
     autoload :AroundBack, 'spontaneous/rack/around_back'
     autoload :AroundFront, 'spontaneous/rack/around_front'
     autoload :AroundPreview, 'spontaneous/rack/around_preview'
     autoload :Reloader, 'spontaneous/rack/reloader'
+    autoload :EventSource, 'spontaneous/rack/event_source'
   end
 end
-

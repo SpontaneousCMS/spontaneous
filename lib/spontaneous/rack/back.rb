@@ -8,105 +8,34 @@ module Spontaneous
     module Back
       include Assets
 
-      NAMESPACE = "/@spontaneous".freeze
-      AUTH_COOKIE = "spontaneous_api_key".freeze
-
-
-      module Authentication
-        module Helpers
-          def authorised?
-            if cookie = request.cookies[AUTH_COOKIE]
-              true
-            else
-              false
-            end
-          end
-
-          def unauthorised!
-            halt 401#, "You do not have the necessary permissions to update the '#{name}' field"
-          end
-
-          def api_key
-            request.cookies[AUTH_COOKIE]
-          end
-
-          def user
-            @user ||= load_user
-          end
-
-          def load_user
-            Spontaneous::Permissions.active_user
-          end
-        end
-
-        def self.registered(app)
-          app.helpers Authentication::Helpers
-
-          app.post "/reauthenticate" do
-            if key = Spot::Permissions::AccessKey.authenticate(params[:api_key])
-              response.set_cookie(AUTH_COOKIE, {
-                :value => key.key_id,
-                :path => '/'
-              })
-              origin = "#{NAMESPACE}#{params[:origin]}"
-              redirect origin, 302
-            else
-              halt(401, erubis(:login, :locals => { :invalid_key => true }))
-            end
-          end
-
-          app.post "/login" do
-            login = params[:user][:login]
-            password = params[:user][:password]
-            origin = "#{NAMESPACE}#{params[:origin]}"
-            if key = Spontaneous::Permissions::User.authenticate(login, password)
-              response.set_cookie(AUTH_COOKIE, {
-                :value => key.key_id,
-                :path => '/'
-              })
-              if request.xhr?
-                json({
-                  :key => key.key_id,
-                  :redirect => origin
-                })
-              else
-                redirect origin, 302
-              end
-            else
-              halt(401, erubis(:login, :locals => { :login => login, :failed => true }))
-            end
-          end
-        end
-
-        KEY_PARAM = "__key".freeze
-
-        def requires_authentication!(options = {})
-          first_level_exceptions = (options[:except_all] || []).concat(["#{NAMESPACE}/login", "#{NAMESPACE}/reauthenticate"] )
-          second_level_exceptions = (options[:except_key] || [])
-          before do
-            unless first_level_exceptions.any? { |e| e === request.path }
-              ignore_key = second_level_exceptions.any? { |e| e === request.path }
-              valid_key = ignore_key || Spontaneous::Permissions::AccessKey.valid?(params[KEY_PARAM], user)
-              unless (user and valid_key)
-                halt(401, erubis(:login, :locals => { :login => '' }))
-              end
-            end
-          end
-        end
+      def self.messenger
+        @messenger ||= ::Spontaneous::Rack::EventSource.new
+        # Find a way to move this into a more de-centralised place
+        # at some point we are going to want to have some configurable, extendable
+        # list of event handlers
+        Simultaneous.on_event("publish_progress") { |event|
+          @messenger.deliver_event(event)
+        }
+        @messenger
       end
 
-
       def self.application
+        messenger = self.messenger
         app = ::Rack::Builder.new do
-          use ::Rack::Lint
           use ::Rack::ShowExceptions if Spontaneous.development?
 
           use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
 
+          map "#{NAMESPACE}/events" do
+            use CookieAuthentication
+            use QueryAuthentication
+            run messenger.app
+          end
 
           map NAMESPACE do
+            use ::Rack::Lint
             use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static /js)
             use AssetsHandler
             use UnsupportedBrowserHandler
@@ -115,10 +44,12 @@ module Spontaneous
           end
 
           map "/media" do
+            use ::Rack::Lint
             run Spontaneous::Rack::Media.new
           end
 
           map "/" do
+            use ::Rack::Lint
             run Preview
           end
         end
@@ -165,7 +96,6 @@ module Spontaneous
       end
 
       class AuthenticatedHandler < EditingBase
-
         use AroundBack
         register Authentication
         requires_authentication! :except_all => [%r(^#{NAMESPACE}/unsupported)], :except_key => [%r(^#{NAMESPACE}/?(/\d+/?.*)?$)]
@@ -205,7 +135,7 @@ module Spontaneous
               if model.field_writable?(field.name.to_sym)
                 # version = values.delete("version").to_i
                 # if version == field.version
-                  field.update(values)
+                field.update(values)
                 # else
                 #   conflicts << [field, values]
                 # end
@@ -374,9 +304,9 @@ module Spontaneous
           if target.field_writable?(field.name)
             # version = params[:version].to_i
             # if version == field.version
-              field.unprocessed_value = file
-              target.save
-              json(field.export)
+            field.unprocessed_value = file
+            target.save
+            json(field.export)
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]
@@ -394,9 +324,9 @@ module Spontaneous
           if target.field_writable?(field.name)
             # version = params[:version].to_i
             # if version == field.version
-              field.unprocessed_value = file
-              content.save
-              json(field.export)
+            field.unprocessed_value = file
+            content.save
+            json(field.export)
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]
@@ -589,14 +519,14 @@ module Spontaneous
           if target.field_writable?(field.name)
             # version = params[:version].to_i
             # if version == field.version
-              Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-                field.unprocessed_value = {
-                  :filename => params[:filename],
-                  :tempfile => combined
-                }
-                target.save
-              end
-              json(field.export)
+            Spontaneous::Media.combine_shards(params[:shards]) do |combined|
+              field.unprocessed_value = {
+                :filename => params[:filename],
+                :tempfile => combined
+              }
+              target.save
+            end
+            json(field.export)
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]
@@ -720,4 +650,3 @@ module Spontaneous
     end
   end
 end
-

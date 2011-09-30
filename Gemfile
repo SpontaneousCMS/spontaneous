@@ -15,7 +15,6 @@ gem 'less', '~> 1.2'
 gem 'sass', '~> 3.1.4'
 gem 'stringex', '~> 1.1'
 gem 'mini_magick', '~> 3.3'
-gem 'fire_and_forget', '~> 0.3.2'
 gem 'thor', '~> 0.14.6'
 gem 'base58', '~> 0.1.0'
 # markdown

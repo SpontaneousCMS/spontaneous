@@ -60,8 +60,8 @@ module Spontaneous
         boot!
         connection = options[:connection] || ::Spontaneous.config.simultaneous_connection
         fork {
-          puts("#{Simultaneous.server_binary} -c #{connection}")
-          exec("#{Simultaneous.server_binary} -c #{connection}")
+          puts("#{Simultaneous.server_binary} -c #{connection} --debug")
+          exec("#{Simultaneous.server_binary} -c #{connection} --debug")
         }
         Process.wait
       end

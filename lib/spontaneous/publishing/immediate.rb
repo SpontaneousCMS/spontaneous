@@ -1,16 +1,20 @@
 # encoding: UTF-8
 
+require 'simultaneous'
+
 module Spontaneous
   module Publishing
     class Immediate
 
-      def self.status
-        @status ||= ""
-      end
+      # def self.status
+      #   @status ||= ""
+      # end
 
-      def self.status=(status)
-        @status = status
-      end
+      # def self.status=(status)
+      #   @status = status
+      # end
+
+      include ::Simultaneous::Task
 
       attr_reader :revision
 
@@ -53,7 +57,7 @@ module Spontaneous
       # Called from the Format#render method to provide progress reports
       def page_rendered(page)
         @pages_rendered += 1
-        set_status("rendering", percent_complete)
+        update_progress("rendering", percent_complete)
         logger.info { "Rendered page #{page.path}" }
       end
 
@@ -93,15 +97,15 @@ module Spontaneous
         @pages_rendered = 0
         S::Content.with_identity_map do
           S::Render.with_publishing_renderer do
-            set_status("rendering:0")
+            update_progress("rendering:0")
             formats.each do |format|
               S::Render.render_pages(revision, pages, format, self)
             end
             # only set this after indexing is complete (if any)
-            set_status("rendering:100")
+            update_progress("rendering:100")
           end
         end
-        set_status("copying_files")
+        update_progress("copying_files")
         copy_static_files
         generate_rackup_file
       end
@@ -117,8 +121,10 @@ module Spontaneous
         ((@pages_rendered || 0).to_f / (total_pages_to_render * render_stages).to_f) * 100.0
       end
 
-      def set_status(state, progress='*')
-        self.class.status = "#{state}:#{progress}"
+      def update_progress(state, progress='*')
+        # self.class.status = "#{state}:#{progress}"
+        p(['publish_progress', {:state => state, :progress => progress}.to_json])
+        simultaneous_event('publish_progress', {:state => state, :progress => progress}.to_json)
       end
 
       def generate_rackup_file
@@ -163,19 +169,19 @@ module Spontaneous
       end
 
       def before_publish
-        set_status("initialising")
+        update_progress("initialising")
         S::Site.send(:pending_revision=, revision)
       end
 
       def after_publish
-        set_status("finalising")
+        update_progress("finalising")
         S::Revision.create(:revision => revision, :published_at => Time.now)
         S::Site.send(:set_published_revision, revision)
         S::Site.send(:pending_revision=, nil)
         tmp = Spontaneous.revision_dir(revision) / "tmp"
         FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
         system("ln -nsf #{Spontaneous.revision_dir(revision)} #{Spontaneous.revision_dir}")
-        set_status("complete")
+        update_progress("complete")
       end
 
       def abort_publish_at_exit
@@ -184,12 +190,12 @@ module Spontaneous
 
       def abort_publish(exception)
         if r = S::Site.pending_revision
-          set_status("aborting")
+          update_progress("aborting")
           FileUtils.rm_r(Spontaneous.revision_dir(revision)) if File.exists?(Spontaneous.revision_dir(revision))
           S::Site.send(:pending_revision=, nil)
           S::Content.delete_revision(revision)
           puts exception.backtrace.join("\n")
-          set_status("error", exception)
+          update_progress("error", exception)
         end
       end
     end # Immediate
