@@ -32,8 +32,6 @@ module Spontaneous
 
       def self.simultaneous_setup
         ::Simultaneous.connection = ::Spontaneous.config.simultaneous_connection
-        puts "simultaneous_setup"
-        p ::Simultaneous.connection
         ::Simultaneous.domain = ::Spontaneous.config.site_domain
       end
 

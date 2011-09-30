@@ -122,8 +122,6 @@ module Spontaneous
       end
 
       def update_progress(state, progress='*')
-        # self.class.status = "#{state}:#{progress}"
-        p(['publish_progress', {:state => state, :progress => progress}.to_json])
         simultaneous_event('publish_progress', {:state => state, :progress => progress}.to_json)
       end
 
