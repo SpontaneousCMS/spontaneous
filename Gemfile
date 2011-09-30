@@ -4,7 +4,8 @@ source :rubygems
 gem 'rake', '~> 0.8.7'
 gem 'activesupport', '~> 3.0.4'
 gem 'home_run', '~> 1.0.0'
-gem 'sequel', '~> 3.20'
+# sequel 3.27's native prepared statements don't work
+gem 'sequel', '= 3.26'
 gem 'yajl-ruby', '~> 0.7'
 gem 'erubis', '~> 2.6'
 gem 'tenjin', '~> 0.6.1'
@@ -29,7 +30,7 @@ gem 'rack-async', :git => "git://github.com/matsadler/rack-async.git"
 
 group :development do
   gem 'minitest', '~> 2.1.0'
-  gem 'mysql2', '~> 0.2'
+  gem 'mysql2', '~> 0.3'
   # gem 'pg', '~> 0.9.0'
   gem 'jeweler', '~> 1.5'
   gem 'jnunemaker-matchy', '~> 0.4'
