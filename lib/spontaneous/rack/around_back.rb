@@ -6,7 +6,7 @@ module Spontaneous
   module Rack
     class AroundBack
       def initialize(app)
-        @app = CookieAuthentication.new(app)
+        @app = app
       end
 
 

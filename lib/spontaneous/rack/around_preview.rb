@@ -3,7 +3,7 @@
 
 module Spontaneous
   module Rack
-    class AroundPreview < AroundBack
+    class AroundPreview
       def initialize(app)
         @app = app
       end
@@ -11,15 +11,12 @@ module Spontaneous
       def call(env)
         response = nil
         Content.with_identity_map do
-          Spontaneous::Permissions.with_user(user(env)) do
-            S::Render.with_preview_renderer do
-              response = @app.call(env)
-            end
+          S::Render.with_preview_renderer do
+            response = @app.call(env)
           end
         end
         response
       end
-
     end
   end
 end

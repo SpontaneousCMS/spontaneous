@@ -58,7 +58,9 @@ class BackTest < MiniTest::Spec
       Spontaneous.instance = instance
       app.send(:set, :raise_errors, true)
       app.send(:set, :dump_errors, true)
-      app.send(:set, :show_exceptions, true)
+      app.send(:set, :show_exceptions, false)
+
+
       S::Schema.reset!
       Content.delete
       Spontaneous::Permissions::User.delete
@@ -73,12 +75,17 @@ class BackTest < MiniTest::Spec
       @user.update(:level => Spontaneous::Permissions.root)
       @user.save
       @key = "c5AMX3r5kMHX2z9a5ExLKjAmCcnT6PFf22YQxzb4Codj"
-      Spontaneous::Permissions.stubs(:active_user).returns(@user)
+      @key.stubs(:user).returns(@user)
+
+      Spontaneous::Permissions::User.stubs(:[]).with(:login => 'root').returns(@user)
+      Spontaneous::Permissions::AccessKey.stubs(:authenticate).with(@key).returns(@key)
+      # Spontaneous::Permissions.stubs(:active_user).returns(@user)
       Spontaneous::Permissions::AccessKey.stubs(:valid?).with(@key, @user).returns(true)
 
       class Page < Spot::Page
         field :title
       end
+
       class Piece < Spot::Piece; end
       class Project < Page; end
       class Image < Piece
@@ -562,6 +569,7 @@ class BackTest < MiniTest::Spec
         Spot::JSON.parse(last_response.body).should == {:uid => uid}
         @project1.reload.uid.should == uid
       end
+
       should "not be editable by non-developer users" do
         @user.stubs(:developer?).returns(false)
         uid = "boom"
@@ -639,13 +647,6 @@ class BackTest < MiniTest::Spec
         Site.expects(:publish_changes).with([@c1.id, @c2.id])
         auth_post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id, @c2.id]
         assert last_response.ok?
-      end
-
-      should "be able to retrieve the publishing status" do
-        Site.publishing_method.status = "something:50"
-        auth_get "/@spontaneous/publish/status"
-        assert last_response.ok?
-        last_response.body.should == {:status => "something", :progress => "50"}.to_json
       end
     end
 

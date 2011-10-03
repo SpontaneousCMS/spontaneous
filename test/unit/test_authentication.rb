@@ -430,10 +430,12 @@ class AuthenticationTest < MiniTest::Spec
           # post "/@spontaneous/add/#{root.id}/admin_level/AuthenticationTest::C"
           assert last_response.ok?
         end
+
         should "not be able to update fields from root level box" do
           value = "Updated #{version}"
           field = root.fields[:editor_level]
           auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
+          puts last_response.body
           assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
         end
 

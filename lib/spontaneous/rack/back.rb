@@ -22,7 +22,7 @@ module Spontaneous
       def self.application
         messenger = self.messenger
         app = ::Rack::Builder.new do
-          use ::Rack::ShowExceptions if Spontaneous.development?
+          # use ::Rack::ShowExceptions if Spontaneous.development?
 
           use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
             :urls => %w[/],
@@ -96,6 +96,7 @@ module Spontaneous
       end
 
       class AuthenticatedHandler < EditingBase
+        use CookieAuthentication
         use AroundBack
         register Authentication
         requires_authentication! :except_all => [%r(^#{NAMESPACE}/unsupported)], :except_key => [%r(^#{NAMESPACE}/?(/\d+/?.*)?$)]
@@ -476,10 +477,6 @@ module Spontaneous
           end
         end
 
-        get '/publish/status' do
-          json(Spontaneous::Site.publishing_status)
-        end
-
         get '/shard/:sha1' do
           shard = Spontaneous.shard_path(params[:sha1])
           if ::File.file?(shard)
@@ -615,6 +612,7 @@ module Spontaneous
       class Preview < Sinatra::Base
         include Spontaneous::Rack::Public
 
+        use CookieAuthentication
         use AroundPreview
         register Authentication
 

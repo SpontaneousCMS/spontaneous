@@ -28,7 +28,7 @@ module Spontaneous
         end
 
         def load_user
-          Spontaneous::Permissions.active_user
+          env[ACTIVE_USER]
         end
       end
 
