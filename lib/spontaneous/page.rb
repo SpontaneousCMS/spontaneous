@@ -1,6 +1,5 @@
 # encoding: UTF-8
 
-
 module Spontaneous
   class Page < Content
 

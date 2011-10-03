@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 ## Adapted from Padrino::Logger
 #
 # Defines our SPOT_LOG_LEVEL
@@ -366,4 +368,3 @@ module Kernel #:nodoc:
     Spontaneous.logger
   end
 end # Kernel
-

@@ -25,6 +25,5 @@ module Spontaneous
         end
       end.compact
     end
-
   end # Paths
 end # Spontaneous

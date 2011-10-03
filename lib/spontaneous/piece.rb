@@ -23,6 +23,5 @@ module Spontaneous
         })
       end
     end
-
   end
 end

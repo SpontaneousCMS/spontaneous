@@ -32,7 +32,6 @@ module Spontaneous
         string = Base58.encode(OpenSSL::Random.random_bytes(bytes).unpack("h*").first.to_i(16))
         string[0...(length)]
       end
-
     end
   end
 end
