@@ -7,7 +7,7 @@ module Spontaneous
       def to_json
         Spontaneous::JSON.encode(self)
       end
-      def serialise_http
+      def serialise_http(user)
         Spontaneous.serialise_http(self)
       end
     end

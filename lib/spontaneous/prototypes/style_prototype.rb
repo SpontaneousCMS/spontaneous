@@ -32,7 +32,7 @@ module Spontaneous::Prototypes
       Spontaneous::Schema.schema_id(self)
     end
 
-    def export
+    def export(user)
       {
         :name => name.to_s,
         :schema_id => schema_id.to_s

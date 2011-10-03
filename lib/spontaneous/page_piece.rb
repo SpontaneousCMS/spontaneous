@@ -29,8 +29,8 @@ module Spontaneous
       self
     end
 
-    def export
-      target.shallow_export.merge(export_styles).merge({
+    def export(user)
+      target.shallow_export(user).merge(export_styles).merge({
         :depth => self.depth
       })
     end

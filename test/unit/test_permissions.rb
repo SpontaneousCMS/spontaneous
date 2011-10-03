@@ -503,152 +503,133 @@ class PermissionsTest < MiniTest::Spec
     should "protect field reads" do
       # without user (e.g. terminal/console access) everything is always
       # possible
-      @i.field_readable?(:editor_level).should be_true
-      @i.field_readable?(:admin_level).should be_true
-      @i.field_readable?(:root_level).should be_true
-      @i.field_readable?(:mixed_level).should be_true
-      @i.field_readable?(:default_level).should be_true
+      @i.field_readable?(nil, :editor_level).should be_true
+      @i.field_readable?(nil, :admin_level).should be_true
+      @i.field_readable?(nil, :root_level).should be_true
+      @i.field_readable?(nil, :mixed_level).should be_true
+      @i.field_readable?(nil, :default_level).should be_true
 
-      Permissions.with_user(@visitor) do
-        @i.field_readable?(:editor_level).should be_false
-        @i.field_readable?(:admin_level).should be_false
-        @i.field_readable?(:root_level).should be_false
-        @i.field_readable?(:mixed_level).should be_false
-        @i.field_readable?(:default_level).should be_true
-      end
-      Permissions.with_user(@editor) do
-        @i.field_readable?(:editor_level).should be_true
-        @i.field_readable?(:admin_level).should be_false
-        @i.field_readable?(:root_level).should be_false
-        @i.field_readable?(:mixed_level).should be_true
-        @i.field_readable?(:default_level).should be_true
-      end
-      Permissions.with_user(@admin) do
-        @i.field_readable?(:editor_level).should be_true
-        @i.field_readable?(:admin_level).should be_true
-        @i.field_readable?(:root_level).should be_false
-        @i.field_readable?(:mixed_level).should be_true
-        @i.field_readable?(:default_level).should be_true
-      end
-      Permissions.with_user(@root) do
-        @i.field_readable?(:editor_level).should be_true
-        @i.field_readable?(:admin_level).should be_true
-        @i.field_readable?(:root_level).should be_true
-        @i.field_readable?(:mixed_level).should be_true
-        @i.field_readable?(:default_level).should be_true
-      end
+      @i.field_readable?(@visitor, :editor_level).should be_false
+      @i.field_readable?(@visitor, :admin_level).should be_false
+      @i.field_readable?(@visitor, :root_level).should be_false
+      @i.field_readable?(@visitor, :mixed_level).should be_false
+      @i.field_readable?(@visitor, :default_level).should be_true
+
+      @i.field_readable?(@editor, :editor_level).should be_true
+      @i.field_readable?(@editor, :admin_level).should be_false
+      @i.field_readable?(@editor, :root_level).should be_false
+      @i.field_readable?(@editor, :mixed_level).should be_true
+      @i.field_readable?(@editor, :default_level).should be_true
+
+      @i.field_readable?(@admin, :editor_level).should be_true
+      @i.field_readable?(@admin, :admin_level).should be_true
+      @i.field_readable?(@admin, :root_level).should be_false
+      @i.field_readable?(@admin, :mixed_level).should be_true
+      @i.field_readable?(@admin, :default_level).should be_true
+
+      @i.field_readable?(@root, :editor_level).should be_true
+      @i.field_readable?(@root, :admin_level).should be_true
+      @i.field_readable?(@root, :root_level).should be_true
+      @i.field_readable?(@root, :mixed_level).should be_true
+      @i.field_readable?(@root, :default_level).should be_true
     end
 
     should "protect field writes" do
       # without user (e.g. terminal/console access) everything is always
       # possible
-      @i.field_writable?(:editor_level).should be_true
-      @i.field_writable?(:admin_level).should be_true
-      @i.field_writable?(:root_level).should be_true
-      @i.field_writable?(:mixed_level).should be_true
-      @i.field_writable?(:default_level).should be_true
+      @i.field_writable?(nil, :editor_level).should be_true
+      @i.field_writable?(nil, :admin_level).should be_true
+      @i.field_writable?(nil, :root_level).should be_true
+      @i.field_writable?(nil, :mixed_level).should be_true
+      @i.field_writable?(nil, :default_level).should be_true
 
-      Permissions.with_user(@visitor) do
-        @i.field_writable?(:editor_level).should be_false
-        @i.field_writable?(:admin_level).should be_false
-        @i.field_writable?(:root_level).should be_false
-        @i.field_writable?(:mixed_level).should be_false
-        @i.field_writable?(:default_level).should be_false
-      end
-      Permissions.with_user(@editor) do
-        @i.field_writable?(:editor_level).should be_true
-        @i.field_writable?(:admin_level).should be_false
-        @i.field_writable?(:root_level).should be_false
-        @i.field_writable?(:mixed_level).should be_false
-        @i.field_writable?(:default_level).should be_true
-      end
-      Permissions.with_user(@admin) do
-        @i.field_writable?(:editor_level).should be_true
-        @i.field_writable?(:admin_level).should be_true
-        @i.field_writable?(:root_level).should be_false
-        @i.field_writable?(:mixed_level).should be_false
-        @i.field_writable?(:default_level).should be_true
-      end
-      Permissions.with_user(@root) do
-        @i.field_writable?(:editor_level).should be_true
-        @i.field_writable?(:admin_level).should be_true
-        @i.field_writable?(:root_level).should be_true
-        @i.field_writable?(:mixed_level).should be_true
-        @i.field_writable?(:default_level).should be_true
-      end
+      @i.field_writable?(@visitor, :editor_level).should be_false
+      @i.field_writable?(@visitor, :admin_level).should be_false
+      @i.field_writable?(@visitor, :root_level).should be_false
+      @i.field_writable?(@visitor, :mixed_level).should be_false
+      @i.field_writable?(@visitor, :default_level).should be_false
+
+      @i.field_writable?(@editor, :editor_level).should be_true
+      @i.field_writable?(@editor, :admin_level).should be_false
+      @i.field_writable?(@editor, :root_level).should be_false
+      @i.field_writable?(@editor, :mixed_level).should be_false
+      @i.field_writable?(@editor, :default_level).should be_true
+
+      @i.field_writable?(@admin, :editor_level).should be_true
+      @i.field_writable?(@admin, :admin_level).should be_true
+      @i.field_writable?(@admin, :root_level).should be_false
+      @i.field_writable?(@admin, :mixed_level).should be_false
+      @i.field_writable?(@admin, :default_level).should be_true
+
+      @i.field_writable?(@root, :editor_level).should be_true
+      @i.field_writable?(@root, :admin_level).should be_true
+      @i.field_writable?(@root, :root_level).should be_true
+      @i.field_writable?(@root, :mixed_level).should be_true
+      @i.field_writable?(@root, :default_level).should be_true
     end
 
     should "protect box reads" do
-      @i.box_readable?(:editor_level).should be_true
-      @i.box_readable?(:admin_level).should be_true
-      @i.box_readable?(:root_level).should be_true
-      @i.box_readable?(:mixed_level).should be_true
-      @i.box_readable?(:default_level).should be_true
+      @i.box_readable?(nil, :editor_level).should be_true
+      @i.box_readable?(nil, :admin_level).should be_true
+      @i.box_readable?(nil, :root_level).should be_true
+      @i.box_readable?(nil, :mixed_level).should be_true
+      @i.box_readable?(nil, :default_level).should be_true
 
-      Permissions.with_user(@visitor) do
-        @i.box_readable?(:editor_level).should be_false
-        @i.box_readable?(:admin_level).should be_false
-        @i.box_readable?(:root_level).should be_false
-        @i.box_readable?(:mixed_level).should be_false
-        @i.box_readable?(:default_level).should be_true
-      end
-      Permissions.with_user(@editor) do
-        @i.box_readable?(:editor_level).should be_true
-        @i.box_readable?(:admin_level).should be_false
-        @i.box_readable?(:root_level).should be_false
-        @i.box_readable?(:mixed_level).should be_true
-        @i.box_readable?(:default_level).should be_true
-      end
-      Permissions.with_user(@admin) do
-        @i.box_readable?(:editor_level).should be_true
-        @i.box_readable?(:admin_level).should be_true
-        @i.box_readable?(:root_level).should be_false
-        @i.box_readable?(:mixed_level).should be_true
-        @i.box_readable?(:default_level).should be_true
-      end
-      Permissions.with_user(@root) do
-        @i.box_readable?(:editor_level).should be_true
-        @i.box_readable?(:admin_level).should be_true
-        @i.box_readable?(:root_level).should be_true
-        @i.box_readable?(:mixed_level).should be_true
-        @i.box_readable?(:default_level).should be_true
-      end
+      @i.box_readable?(@visitor, :editor_level).should be_false
+      @i.box_readable?(@visitor, :admin_level).should be_false
+      @i.box_readable?(@visitor, :root_level).should be_false
+      @i.box_readable?(@visitor, :mixed_level).should be_false
+      @i.box_readable?(@visitor, :default_level).should be_true
+
+      @i.box_readable?(@editor, :editor_level).should be_true
+      @i.box_readable?(@editor, :admin_level).should be_false
+      @i.box_readable?(@editor, :root_level).should be_false
+      @i.box_readable?(@editor, :mixed_level).should be_true
+      @i.box_readable?(@editor, :default_level).should be_true
+
+      @i.box_readable?(@admin, :editor_level).should be_true
+      @i.box_readable?(@admin, :admin_level).should be_true
+      @i.box_readable?(@admin, :root_level).should be_false
+      @i.box_readable?(@admin, :mixed_level).should be_true
+      @i.box_readable?(@admin, :default_level).should be_true
+
+      @i.box_readable?(@root, :editor_level).should be_true
+      @i.box_readable?(@root, :admin_level).should be_true
+      @i.box_readable?(@root, :root_level).should be_true
+      @i.box_readable?(@root, :mixed_level).should be_true
+      @i.box_readable?(@root, :default_level).should be_true
     end
     should "protect box writes" do
-      @i.box_writable?(:editor_level).should be_true
-      @i.box_writable?(:admin_level).should be_true
-      @i.box_writable?(:root_level).should be_true
-      @i.box_writable?(:mixed_level).should be_true
-      @i.box_writable?(:default_level).should be_true
+      @i.box_writable?(nil, :editor_level).should be_true
+      @i.box_writable?(nil, :admin_level).should be_true
+      @i.box_writable?(nil, :root_level).should be_true
+      @i.box_writable?(nil, :mixed_level).should be_true
+      @i.box_writable?(nil, :default_level).should be_true
 
-      Permissions.with_user(@visitor) do
-        @i.box_writable?(:editor_level).should be_false
-        @i.box_writable?(:admin_level).should be_false
-        @i.box_writable?(:root_level).should be_false
-        @i.box_writable?(:mixed_level).should be_false
-        @i.box_writable?(:default_level).should be_false
-      end
-      Permissions.with_user(@editor) do
-        @i.box_writable?(:editor_level).should be_true
-        @i.box_writable?(:admin_level).should be_false
-        @i.box_writable?(:root_level).should be_false
-        @i.box_writable?(:mixed_level).should be_false
-        @i.box_writable?(:default_level).should be_true
-      end
-      Permissions.with_user(@admin) do
-        @i.box_writable?(:editor_level).should be_true
-        @i.box_writable?(:admin_level).should be_true
-        @i.box_writable?(:root_level).should be_false
-        @i.box_writable?(:mixed_level).should be_false
-        @i.box_writable?(:default_level).should be_true
-      end
-      Permissions.with_user(@root) do
-        @i.box_writable?(:editor_level).should be_true
-        @i.box_writable?(:admin_level).should be_true
-        @i.box_writable?(:root_level).should be_true
-        @i.box_writable?(:mixed_level).should be_true
-        @i.box_writable?(:default_level).should be_true
-      end
+      @i.box_writable?(@visitor, :editor_level).should be_false
+      @i.box_writable?(@visitor, :admin_level).should be_false
+      @i.box_writable?(@visitor, :root_level).should be_false
+      @i.box_writable?(@visitor, :mixed_level).should be_false
+      @i.box_writable?(@visitor, :default_level).should be_false
+
+      @i.box_writable?(@editor, :editor_level).should be_true
+      @i.box_writable?(@editor, :admin_level).should be_false
+      @i.box_writable?(@editor, :root_level).should be_false
+      @i.box_writable?(@editor, :mixed_level).should be_false
+      @i.box_writable?(@editor, :default_level).should be_true
+
+      @i.box_writable?(@admin, :editor_level).should be_true
+      @i.box_writable?(@admin, :admin_level).should be_true
+      @i.box_writable?(@admin, :root_level).should be_false
+      @i.box_writable?(@admin, :mixed_level).should be_false
+      @i.box_writable?(@admin, :default_level).should be_true
+
+
+      @i.box_writable?(@root, :editor_level).should be_true
+      @i.box_writable?(@root, :admin_level).should be_true
+      @i.box_writable?(@root, :root_level).should be_true
+      @i.box_writable?(@root, :mixed_level).should be_true
+      @i.box_writable?(@root, :default_level).should be_true
     end
 
     should "serialise only things in class viewable by the current user" do
@@ -669,60 +650,60 @@ class PermissionsTest < MiniTest::Spec
         ["default_level", expected]
       ]
 
-      Permissions.with_user(@root) do
-        C.export[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
-        C.export[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
-        C.export[:boxes].map { |b| [b[:name], b[:fields].map {|f| [f[:name], f[:writable]]}] }.should == [
+      # Permissions.with_user(@root) do
+        C.export(@root)[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.export(@root)[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.export(@root)[:boxes].map { |b| [b[:name], b[:fields].map {|f| [f[:name], f[:writable]]}] }.should == [
           ["editor_level", expected],
           ["admin_level", expected],
           ["root_level", expected],
           ["mixed_level", expected],
           ["default_level", expected]
         ]
-      end
+      # end
 
-      Permissions.with_user(@visitor) do
+      # Permissions.with_user(@visitor) do
         expected = [
           ["default_level", false]
         ]
-        C.export[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
-        C.export[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
-        C.export[:boxes].map { |b| [b[:name], b[:fields].map {|f| [f[:name], f[:writable]]}] }.should == [
+        C.export(@visitor)[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.export(@visitor)[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.export(@visitor)[:boxes].map { |b| [b[:name], b[:fields].map {|f| [f[:name], f[:writable]]}] }.should == [
           ["default_level", expected ]
         ]
-      end
+      # end
 
-      Permissions.with_user(@editor) do
+      # Permissions.with_user(@editor) do
         expected = [
           ["editor_level", true],
           ["mixed_level", false],
           ["default_level", true]
         ]
-        C.export[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
-        C.export[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
-        C.export[:boxes].map { |b| [b[:name], b[:fields].map {|f| [f[:name], f[:writable]]}] }.should == [
+        C.export(@editor)[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.export(@editor)[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.export(@editor)[:boxes].map { |b| [b[:name], b[:fields].map {|f| [f[:name], f[:writable]]}] }.should == [
           ["editor_level", expected],
           ["mixed_level", expected],
           ["default_level", expected]
         ]
-      end
+      # end
 
-      Permissions.with_user(@admin) do
+      # Permissions.with_user(@admin) do
         expected = [
           ["editor_level", true],
           ["admin_level", true],
           ["mixed_level", false],
           ["default_level", true]
         ]
-        C.export[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
-        C.export[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
-        C.export[:boxes].map { |b| [b[:name], b[:fields].map {|f| [f[:name], f[:writable]]}] }.should == [
+        C.export(@admin)[:fields].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.export(@admin)[:boxes].map { |f| [f[:name], f[:writable]] }.should == expected
+        C.export(@admin)[:boxes].map { |b| [b[:name], b[:fields].map {|f| [f[:name], f[:writable]]}] }.should == [
           ["editor_level", expected],
           ["admin_level", expected],
           ["mixed_level", expected],
           ["default_level", expected]
         ]
-      end
+      # end
     end
 
     should "only list allowed types addable by the user" do
@@ -735,32 +716,32 @@ class PermissionsTest < MiniTest::Spec
       ]
       C.export[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
 
-      Permissions.with_user(@root) do
-        C.export[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
-      end
-      Permissions.with_user(@visitor) do
+      # Permissions.with_user(@root) do
+        C.export(@root)[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
+      # end
+      # Permissions.with_user(@visitor) do
         expected = [
           ["default_level", []]
         ]
-        C.export[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
-      end
-      Permissions.with_user(@editor) do
+        C.export(@visitor)[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
+      # end
+      # Permissions.with_user(@editor) do
         expected = [
           ["editor_level", ["D"]],
           ["mixed_level", []],
           ["default_level", ["C"]]
         ]
-        C.export[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
-      end
-      Permissions.with_user(@admin) do
+        C.export(@editor)[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
+      # end
+      # Permissions.with_user(@admin) do
         expected = [
           ["editor_level", ["D", "C"]],
           ["admin_level", ["C"]],
           ["mixed_level", []],
           ["default_level", ["C"]]
         ]
-        C.export[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
-      end
+        C.export(@admin)[:boxes].map { |b| [b[:name], b[:allowed_types]] }.should == expected
+      # end
     end
 
     should "serialise only things in instance viewable by the current user" do
@@ -779,55 +760,55 @@ class PermissionsTest < MiniTest::Spec
         ["mixed_level", expected],
         ["default_level", expected]
       ]
-      Permissions.with_user(@root) do
-        @i.export[:boxes].map { |f| f[:name] }.should == expected
-        @i.export[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
+      # Permissions.with_user(@root) do
+        @i.export(@root)[:boxes].map { |f| f[:name] }.should == expected
+        @i.export(@root)[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
           ["editor_level", expected],
           ["admin_level", expected],
           ["root_level", expected],
           ["mixed_level", expected],
           ["default_level", expected]
         ]
-      end
+      # end
 
-      Permissions.with_user(@visitor) do
-        @i.export[:boxes].map { |f| f[:name] }.should == [
+      # Permissions.with_user(@visitor) do
+        @i.export(@visitor)[:boxes].map { |f| f[:name] }.should == [
           "default_level"
         ]
-        @i.export[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
+        @i.export(@visitor)[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
           ["default_level", ["default_level"]]
         ]
-      end
+      # end
 
-      Permissions.with_user(@editor) do
+      # Permissions.with_user(@editor) do
         expected = [
           "editor_level",
           "mixed_level",
           "default_level"
         ]
-        @i.export[:boxes].map { |f| f[:name] }.should == expected
-        @i.export[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
+        @i.export(@editor)[:boxes].map { |f| f[:name] }.should == expected
+        @i.export(@editor)[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
           ["editor_level", expected],
           ["mixed_level", expected],
           ["default_level", expected]
         ]
-      end
+      # end
 
-      Permissions.with_user(@admin) do
+      # Permissions.with_user(@admin) do
         expected = [
           "editor_level",
           "admin_level",
           "mixed_level",
           "default_level"
         ]
-        @i.export[:boxes].map { |f| f[:name] }.should == expected
-        @i.export[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
+        @i.export(@admin)[:boxes].map { |f| f[:name] }.should == expected
+        @i.export(@admin)[:boxes].map { |b| [b[:name], b[:fields].map {|f| f[:name]}] }.should == [
           ["editor_level", expected],
           ["admin_level", expected],
           ["mixed_level", expected],
           ["default_level", expected]
         ]
-      end
+      # end
 
     end
   end

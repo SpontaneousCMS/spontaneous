@@ -85,7 +85,7 @@ module Spontaneous
 
         def json(response)
           content_type 'application/json', :charset => 'utf-8'
-          response.serialise_http
+          response.serialise_http(user)
         end
       end
 
@@ -133,7 +133,7 @@ module Spontaneous
           if field_data
             field_data.each do |id, values|
               field = model.fields.sid(id)
-              if model.field_writable?(field.name.to_sym)
+              if model.field_writable?(user, field.name.to_sym)
                 # version = values.delete("version").to_i
                 # if version == field.version
                 field.update(values)
@@ -268,7 +268,7 @@ module Spontaneous
 
         post '/savebox/:id/:box_id' do
           content, box = content_for_request
-          if box.writable?
+          if box.writable?(user)
             update_fields(box, params[:field])
           else
             unauthorised!
@@ -278,7 +278,7 @@ module Spontaneous
 
         post '/content/:id/position/:position' do
           content = content_for_request
-          if content.box.writable?
+          if content.box.writable?(user)
             content.update_position(params[:position].to_i)
             json( {:message => 'OK'} )
           else
@@ -288,7 +288,7 @@ module Spontaneous
 
         post '/toggle/:id' do
           content = content_for_request
-          if content.box && content.box.writable?
+          if content.box && content.box.writable?(user)
             content.toggle_visibility!
             json({:id => content.id, :hidden => (content.hidden? ? true : false) })
           else
@@ -302,12 +302,12 @@ module Spontaneous
           target = content_for_request
           file = params['file']
           field = target.fields.sid(params['field'])
-          if target.field_writable?(field.name)
+          if target.field_writable?(user, field.name)
             # version = params[:version].to_i
             # if version == field.version
             field.unprocessed_value = file
             target.save
-            json(field.export)
+            json(field.export(user))
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]
@@ -322,12 +322,12 @@ module Spontaneous
           target = box || content
           file = params[:file]
           field = target.fields.sid(params['field'])
-          if target.field_writable?(field.name)
+          if target.field_writable?(user, field.name)
             # version = params[:version].to_i
             # if version == field.version
             field.unprocessed_value = file
             content.save
-            json(field.export)
+            json(field.export(user))
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]
@@ -343,7 +343,7 @@ module Spontaneous
           file = params['file']
           type = box.type_for_mime_type(file[:type])
           if type
-            if box.writable?(type)
+            if box.writable?(user, type)
               position = 0
               instance = type.new
               box.insert(position, instance)
@@ -353,7 +353,7 @@ module Spontaneous
               content.save
               json({
                 :position => position,
-                :entry => instance.entry.export
+                :entry => instance.entry.export(user)
               })
             else
               unauthorised!
@@ -365,13 +365,13 @@ module Spontaneous
           content, box = content_for_request
           position = 0
           type = Spontaneous::Schema[params[:type_name]]#.constantize
-          if box.writable?(type)
+          if box.writable?(user, type)
             instance = type.new
             box.insert(position, instance)
             content.save
             json({
               :position => position,
-              :entry => instance.entry.export
+              :entry => instance.entry.export(user)
             })
           else
             unauthorised!
@@ -380,7 +380,7 @@ module Spontaneous
 
         post '/destroy/:id' do
           content = content_for_request
-          if content.box.writable?
+          if content.box.writable?(user)
             content.destroy
             json({})
           else
@@ -437,7 +437,7 @@ module Spontaneous
           content, box = content_for_request
           type = Spontaneous::Schema[params[:alias_id]]
           position = 0
-          if box.writable?(type)
+          if box.writable?(user, type)
             target = Spontaneous::Content[params[:target_id]]
             if target
               instance = type.create(:target => target)
@@ -445,7 +445,7 @@ module Spontaneous
               content.save
               json({
                 :position => position,
-                :entry => instance.entry.export
+                :entry => instance.entry.export(user)
               })
             end
           else
@@ -513,7 +513,7 @@ module Spontaneous
 
         def replace_with_shard(target, target_id)
           field = target.fields.sid(params[:field])
-          if target.field_writable?(field.name)
+          if target.field_writable?(user, field.name)
             # version = params[:version].to_i
             # if version == field.version
             Spontaneous::Media.combine_shards(params[:shards]) do |combined|
@@ -523,7 +523,7 @@ module Spontaneous
               }
               target.save
             end
-            json(field.export)
+            json(field.export(user))
             # else
             #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
             #   [409, json(Hash[errors])]
@@ -538,7 +538,7 @@ module Spontaneous
           content, box = content_for_request
           type = box.type_for_mime_type(params[:mime_type])
           if type
-            if box.writable?(type)
+            if box.writable?(user, type)
               position = 0
               instance = type.new
               box.insert(position, instance)
@@ -552,7 +552,7 @@ module Spontaneous
               end
               json({
                 :position => position,
-                :entry => instance.entry.export
+                :entry => instance.entry.export(user)
               })
             else
               unauthorised!

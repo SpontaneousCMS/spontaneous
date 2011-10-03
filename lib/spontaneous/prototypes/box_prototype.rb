@@ -128,26 +128,26 @@ module Spontaneous::Prototypes
     end
 
     # TODO: must be able to make these into a module
-    def readable?
-      Spontaneous::Permissions.has_level?(read_level)
+    def readable?(user)
+      Spontaneous::Permissions.has_level?(user, read_level)
     end
 
-    def writable?
-      Spontaneous::Permissions.has_level?(write_level)
+    def writable?(user)
+      Spontaneous::Permissions.has_level?(user, write_level)
     end
 
     def style
       @options[:style]# || name
     end
 
-    def readable_fields
-      instance_class.readable_fields
+    def readable_fields(user)
+      instance_class.readable_fields(user)
     end
 
-    def allowed_types
-      if writable?
+    def allowed_types(user)
+      if writable?(user)
         types = []
-        instance_class.allowed.select { |a| a.readable? }.each do  |a|
+        instance_class.allowed.select { |a| a.readable?(user) }.each do  |a|
           types.concat(a.instance_classes)
         end
         types
@@ -156,15 +156,15 @@ module Spontaneous::Prototypes
       end
     end
 
-    def export
-      allowed = allowed_types.map { |c| c.ui_class }
+    def export(user)
+      allowed = allowed_types(user).map { |c| c.ui_class }
       {
         :name => name.to_s,
         :id => schema_id.to_s,
         :title => title,
-        :writable => writable?,
+        :writable => writable?(user),
         :allowed_types => allowed,
-        :fields => readable_fields.map { |name| instance_class.field_prototypes[name].export },
+        :fields => readable_fields(user).map { |name| instance_class.field_prototypes[name].export(user) },
       }
     end
   end

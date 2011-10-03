@@ -225,7 +225,7 @@ module Spontaneous
         end
       end
 
-      def serialise_http
+      def serialise_http(user = nil)
         Spontaneous.serialise_http(export)
       end
 

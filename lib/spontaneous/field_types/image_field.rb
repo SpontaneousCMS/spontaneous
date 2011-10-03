@@ -158,8 +158,8 @@ module Spontaneous
         media_path
       end
 
-      def export
-        super.merge({
+      def export(user = nil)
+        super(user).merge({
           :processed_value => processed_values
         })
       end

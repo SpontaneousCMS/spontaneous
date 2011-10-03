@@ -81,8 +81,8 @@ module Spontaneous::Plugins
         Spontaneous::Permissions[level]
       end
 
-      def readable?
-        Spontaneous::Permissions.has_level?(user_level)
+      def readable?(user)
+        Spontaneous::Permissions.has_level?(user, user_level)
       end
       alias_method :addable?, :readable?
     end

@@ -96,8 +96,8 @@ module Spontaneous::Plugins
         @styles ||= Spontaneous::Collections::PrototypeSet.new(target, :styles)
       end
 
-      def export
-        super.merge(:target => target.shallow_export, :alias_title => target.alias_title, :alias_icon => target.alias_icon_field.export)
+      def export(user = nil)
+        super.merge(:target => target.shallow_export(user), :alias_title => target.alias_title, :alias_icon => target.alias_icon_field.export)
       end
     end
 

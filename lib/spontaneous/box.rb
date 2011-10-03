@@ -182,39 +182,39 @@ module Spontaneous
       pieces
     end
 
-    def export
-      shallow_export.merge({
-        :entries => pieces.map { |p| p.export }
+    def export(user = nil)
+      shallow_export(user).merge({
+        :entries => pieces.map { |p| p.export(user) }
       })
     end
 
-    def shallow_export
+    def shallow_export(user)
       {
         :name => _prototype.name.to_s,
         :id => _prototype.schema_id.to_s,
-        :fields => self.class.readable_fields.map { |name| fields[name].export }
+        :fields => self.class.readable_fields(user).map { |name| fields[name].export(user) }
       }
     end
 
     # only called directly after saving a boxes fields so
     # we don't need to return the entries
-    def serialise_http
-      Spontaneous.serialise_http(shallow_export)
+    def serialise_http(user)
+      Spontaneous.serialise_http(shallow_export(user))
     end
 
-    def writable?(content_type = nil)
-      return true if Spontaneous::Permissions.has_level?(Spontaneous::Permissions.root)
-      box_writable = self._owner.box_writable?(_name)
+    def writable?(user, content_type = nil)
+      return true if Spontaneous::Permissions.has_level?(user, Spontaneous::Permissions.root)
+      box_writable = self._owner.box_writable?(user, _name)
       if content_type
         allowed = self.allowed_type(content_type)
-        box_writable && allowed && allowed.addable?
+        box_writable && allowed && allowed.addable?(user)
       else
         box_writable
       end
     end
 
-    def readable?
-      self._owner.box_readable?(_name)
+    def readable?(user)
+      self._owner.box_readable?(user, _name)
     end
 
     def start_inline_edit_marker

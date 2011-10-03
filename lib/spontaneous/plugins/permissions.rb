@@ -5,23 +5,23 @@ module Spontaneous::Plugins
   module Permissions
 
     module ClassMethods
-      def box_readable?(box_name)
-        box_permission(box_name, :read_level)
+      def box_readable?(user, box_name)
+        box_permission(user, box_name, :read_level)
       end
-      def box_writable?(box_name)
-        box_permission(box_name, :write_level)
-      end
-
-      def field_readable?(field_name)
-        field_permission(field_name, :read_level)
+      def box_writable?(user, box_name)
+        box_permission(user, box_name, :write_level)
       end
 
-      def field_writable?(field_name)
-        field_permission(field_name, :write_level)
+      def field_readable?(user, field_name)
+        field_permission(user, field_name, :read_level)
       end
 
-      def field_permission(field_name, test)
-        return true unless user = Spontaneous::Permissions.active_user
+      def field_writable?(user, field_name)
+        field_permission(user, field_name, :write_level)
+      end
+
+      def field_permission(user, field_name, test)
+        return true unless user# = Spontaneous::Permissions.active_user
         if field = field_prototypes[field_name.to_sym]
           user.level >= field.__send__(test)
         else
@@ -29,8 +29,8 @@ module Spontaneous::Plugins
         end
       end
 
-      def box_permission(box_name, test)
-        return true unless user = Spontaneous::Permissions.active_user
+      def box_permission(user, box_name, test)
+        return true unless user# = Spontaneous::Permissions.active_user
         if box = boxes[box_name.to_sym]
           user.level >= box.__send__(test)
         else
@@ -41,20 +41,20 @@ module Spontaneous::Plugins
 
 
     module InstanceMethods
-      def field_readable?(field_name)
-        self.class.field_readable?(field_name)
+      def field_readable?(user, field_name)
+        self.class.field_readable?(user, field_name)
       end
 
-      def field_writable?(field_name)
-        self.class.field_writable?(field_name)
+      def field_writable?(user, field_name)
+        self.class.field_writable?(user, field_name)
       end
 
-      def box_writable?(box_name)
-        self.class.box_writable?(box_name)
+      def box_writable?(user, box_name)
+        self.class.box_writable?(user, box_name)
       end
 
-      def box_readable?(box_name)
-        self.class.box_readable?(box_name)
+      def box_readable?(user, box_name)
+        self.class.box_readable?(user, box_name)
       end
     end # InstanceMethods
 

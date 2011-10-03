@@ -98,14 +98,14 @@ module Spontaneous::Prototypes
       end
     end
 
-    def export
+    def export(user)
       {
         :name => name.to_s,
         :schema_id => schema_id.to_s,
         :type => field_class.ui_class,
         :title => title,
         :comment => comment || "",
-        :writable => Spontaneous::Permissions.has_level?(write_level)
+        :writable => Spontaneous::Permissions.has_level?(user, write_level)
       }
     end
   end

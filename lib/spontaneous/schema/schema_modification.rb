@@ -252,7 +252,7 @@ module Spontaneous
         actions.map { |action| action.export }
       end
 
-      def serialise_http
+      def serialise_http(user)
         Spontaneous.serialise_http(export)
       end
     end

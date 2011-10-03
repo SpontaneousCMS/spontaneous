@@ -263,7 +263,7 @@ class BackTest < MiniTest::Spec
           assert last_response.ok?
           last_response.content_type.should == "application/json;charset=utf-8"
           @job1 = Content[@job1.id]
-          last_response.body.should == @job1.serialise_http
+          last_response.body.should == @job1.serialise_http(@user)
           @job1.fields.title.value.should ==  "Updated field_name_1"
         end
 
@@ -276,7 +276,7 @@ class BackTest < MiniTest::Spec
           assert last_response.ok?
           last_response.content_type.should == "application/json;charset=utf-8"
           @home = Content[@home.id]
-          last_response.body.should == @home.serialise_http
+          last_response.body.should == @home.serialise_http(@user)
           @home.fields.title.value.should ==  "Updated title"
           @home.fields.introduction.value.should ==  "<p>Updated intro</p>\n"
         end
@@ -713,7 +713,7 @@ class BackTest < MiniTest::Spec
         a.target.should == Job.first
         required_response = {
           :position => 0,
-          :entry => @home.featured_jobs.pieces.first.export
+          :entry => @home.featured_jobs.pieces.first.export(@user)
         }
         Spot::JSON.parse(last_response.body).should == required_response
       end

@@ -24,9 +24,7 @@ module Spontaneous
       def call(env)
         response = nil
         user = env[S::Rack::ACTIVE_USER] = current_user(env)
-        Spontaneous::Permissions.with_user(user) {
-          response = @app.call(env)
-        }
+        response = @app.call(env)
         response
       end
     end

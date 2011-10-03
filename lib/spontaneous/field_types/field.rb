@@ -186,7 +186,7 @@ module Spontaneous
       #   "spontaneous:previewedit:end:field id:#{owner.id} name:#{self.name}"
       # end
 
-      def export
+      def export(user)
         {
         :name => name.to_s,
         :id => schema_id.to_s,

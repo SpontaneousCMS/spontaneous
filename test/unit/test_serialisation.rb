@@ -93,7 +93,7 @@ class SerialisationTest < MiniTest::Spec
         Spot::deserialise_http(SerialisedPiece.serialise_http).should == @class_hash
       end
       should "include the title field name in the serialisation of page types" do
-        SerialisedPage.export[:title_field].should == 'title'
+        SerialisedPage.export(nil)[:title_field].should == 'title'
       end
     end
 

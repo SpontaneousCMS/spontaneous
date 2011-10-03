@@ -67,7 +67,7 @@ module Spontaneous
         outstanding.map { |change_set| change_set.export }
       end
 
-      def serialise_http
+      def serialise_http(user = nil)
         Spontaneous.serialise_http(export)
       end
     end

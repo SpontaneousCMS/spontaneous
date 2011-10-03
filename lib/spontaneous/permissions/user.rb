@@ -106,7 +106,7 @@ module Spontaneous::Permissions
       }
     end
 
-    def serialise_http
+    def serialise_http(user)
       Spontaneous.serialise_http(export)
     end
 

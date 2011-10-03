@@ -177,7 +177,7 @@ class AliasTest < MiniTest::Spec
         end
 
         should "include target values in serialisation" do
-          @a_alias.export[:target].should == @a.shallow_export
+          @a_alias.export[:target].should == @a.shallow_export(nil)
         end
 
         should "include alias title & icon in serialisation" do

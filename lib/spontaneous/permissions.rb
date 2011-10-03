@@ -22,27 +22,10 @@ module Spontaneous
         UserLevel.root
       end
 
-      def has_level?(level)
-        return true unless active_user
-        active_user.level >= level
+      def has_level?(user, level)
+        return true unless user
+        user.level >= level
       end
-
-      def with_user(user)
-        self.active_user = user
-        yield if block_given?
-      ensure
-        self.active_user = nil
-      end
-
-      def active_user
-        Thread.current[:_permissions_active_user]
-      end
-
-      def active_user=(user)
-        Thread.current[:_permissions_active_user] = user
-      end
-
-      protected(:active_user=)
 
       def random_string(length)
         bytes = ((length * Math.log10(58))/(8 * Math.log10(2))).ceil + 2

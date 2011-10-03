@@ -26,8 +26,8 @@ module Spontaneous
       true
     end
 
-    def self.export
-      super.merge(:title_field => self.title_field.to_s)
+    def self.export(user = nil)
+      super(user).merge(:title_field => self.title_field.to_s)
     end
 
     def self.title_field
@@ -76,8 +76,8 @@ module Spontaneous
       self.class.title_field
     end
 
-    def shallow_export
-      hash = super.merge({
+    def shallow_export(user)
+      hash = super(user).merge({
         :path => path,
         :title => page_title,
         :slug => slug,

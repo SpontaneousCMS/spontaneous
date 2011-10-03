@@ -27,9 +27,9 @@ module Spontaneous::Collections
       self.map { |field| field.serialize_db }
     end
 
-    def export
+    def export(user)
       owner.class.field_names.map do |name|
-        self[name].export
+        self[name].export(user)
       end
     end
 
