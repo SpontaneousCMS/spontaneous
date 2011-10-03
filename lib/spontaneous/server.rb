@@ -4,6 +4,7 @@
 
 ## thanks again to the stirling work of the Padrino guys & gals.
 require 'rack'
+require 'launchy'
 
 module Spontaneous
 
@@ -40,6 +41,7 @@ module Spontaneous
         end
         trap(:INT, &term)
         trap(:TERM, &term)
+        ::Launchy::Browser.run("http://localhost:#{port}/@spontaneous") if Spontaneous.mode == :back
       end
     rescue RuntimeError => e
       if e.message =~ /no acceptor/

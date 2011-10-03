@@ -31,7 +31,6 @@ module Spontaneous
           procfile.write(%(front: #{binary} server:front\n))
           procfile.write(%(simultaneous: #{binary} server:simultaneous\n))
           procfile.flush
-          puts File.read(procfile.path)
           engine = ::Foreman::Engine.new(procfile.path)
           engine.start
         end
