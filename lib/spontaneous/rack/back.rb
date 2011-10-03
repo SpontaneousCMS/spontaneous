@@ -22,8 +22,6 @@ module Spontaneous
       def self.application
         messenger = self.messenger
         app = ::Rack::Builder.new do
-          # use ::Rack::ShowExceptions if Spontaneous.development?
-
           use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
@@ -49,6 +47,12 @@ module Spontaneous
           end
 
           map "/" do
+            # use ::Rack::ShowExceptions if Spontaneous.development?
+            # AFAIK the only non-thread-safe part of the stack are the renderer calls
+            # because they rely on the global values of renderer and also Content.with_visible
+            # I'm not sure that using Rack::Lock here would fix any problems that this causes,
+            # or even if there are any problems that would be caused
+            # use ::Rack::Lock
             use ::Rack::Lint
             run Preview
           end
