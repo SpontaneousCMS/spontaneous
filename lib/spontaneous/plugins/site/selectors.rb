@@ -10,6 +10,8 @@ module Spontaneous::Plugins
 
         def [](path_or_uid)
           case path_or_uid
+          when Fixnum, /\A\d+\z/
+            by_id(path_or_uid)
           when /^\//
             by_path(path_or_uid)
           when /^#/
@@ -17,6 +19,10 @@ module Spontaneous::Plugins
           else
             by_uid(path_or_uid)
           end
+        end
+
+        def by_id(id)
+          Spontaneous::Page[id]
         end
 
         def by_path(path)

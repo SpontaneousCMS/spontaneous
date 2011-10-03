@@ -25,6 +25,10 @@ module Spontaneous
     end
 
 
+    def self.page?
+      false
+    end
+
     def self.schema_id
       Spontaneous::Schema.schema_id(self)
     end

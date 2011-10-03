@@ -100,6 +100,9 @@ module Spontaneous
 
   autoload :Application, "spontaneous/application"
 
+  autoload :Index, "spontaneous/index"
+
+
   module Prototypes
     autoload :FieldPrototype, "spontaneous/prototypes/field_prototype"
     autoload :BoxPrototype, "spontaneous/prototypes/box_prototype"

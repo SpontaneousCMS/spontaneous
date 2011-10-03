@@ -27,6 +27,14 @@ module Spontaneous::Plugins
       def siblings
         generation.reject { |p| p === self }
       end
+
+      def >(page)
+        page.ancestors.include?(self)
+      end
+
+      def >=(page)
+        page == self or self.>(page)
+      end
     end
   end
 end
