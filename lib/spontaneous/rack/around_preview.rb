@@ -1,6 +1,5 @@
 # encoding: UTF-8
 
-
 module Spontaneous
   module Rack
     class AroundPreview
@@ -20,4 +19,3 @@ module Spontaneous
     end
   end
 end
-
