@@ -87,10 +87,10 @@ module Spontaneous
         false
       end
     end
+
     def resolve_page_list(pages)
       pages.map { |p| S::Site[p] }
     end
-
 
     def base_search_classes
       all_classes
