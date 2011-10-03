@@ -53,7 +53,7 @@ module Spontaneous::Plugins
         params.merge!(:c3__hidden => false) if visible_only
 
         query = S::Content._unfiltered_dataset.select(Sequel::LiteralString.new("c2.*")).from(:content___c1, :content___c2, :content___c3).where(params)
-        query.prepare(:first)
+        query.prepare(:first, :aliased_page)
       end
     end
 

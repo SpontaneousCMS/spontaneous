@@ -5,7 +5,7 @@ gem 'rake', '~> 0.8.7'
 gem 'activesupport', '~> 3.0.4'
 gem 'home_run', '~> 1.0.0'
 # sequel 3.27's native prepared statements don't work
-gem 'sequel', '= 3.26'
+gem 'sequel', '= 3.27'
 gem 'yajl-ruby', '~> 0.7'
 gem 'erubis', '~> 2.6'
 gem 'tenjin', '~> 0.6.1'
