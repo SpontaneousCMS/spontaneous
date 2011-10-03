@@ -33,10 +33,7 @@ module Spontaneous
       self.instance_eval(&definition) if definition
     end
 
-    def include?(page)
-      include_class?(page.class) and include_page?(page)
-    end
-
+    # Index DSL methods
     def select_pages(*page_list)
       @include_pages = page_list
     end
@@ -51,6 +48,11 @@ module Spontaneous
 
     def reject_classes(*classes)
       @search_classes -= resolve_class_list(classes)
+    end
+    # end Index DSL methods
+
+    def include?(page)
+      include_class?(page.class) and include_page?(page)
     end
 
     protected
