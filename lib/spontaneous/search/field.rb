@@ -46,8 +46,6 @@ module Spontaneous::Search
         defn.merge!({
           :weight => WEIGHTINGS[opts[:weight]] || 1
         })
-      else
-        # check for symbol shortcuts to weight
       end
       defn
     end
