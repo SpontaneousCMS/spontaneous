@@ -160,7 +160,8 @@ class SearchTest < MiniTest::Spec
           select_pages id, "#page11", path
         end
 
-        @all_pages.map{ |page| index.include?(page) }.should == [true,false,false,false,false,false,false,false,true,false,false,true,false]
+        @all_pages.map{ |page| index.include?(page) }.should ==
+          [true,false,false,false,false,false,false,false,true,false,false,true,false]
       end
 
       should "allow restriction to a page and its children" do
@@ -168,7 +169,8 @@ class SearchTest < MiniTest::Spec
           select_pages ">= #page8"
         end
 
-        @all_pages.map{ |page| index.include?(page) }.should == [false,false,false,false,false,false,false,false,true,true,true,true,true]
+        @all_pages.map{ |page| index.include?(page) }.should ==
+          [false,false,false,false,false,false,false,false,true,true,true,true,true]
       end
 
       should "allow restriction to a page's children" do
@@ -176,7 +178,8 @@ class SearchTest < MiniTest::Spec
           select_pages "> #page8"
         end
 
-        @all_pages.map{ |page| index.include?(page) }.should == [false,false,false,false,false,false,false,false,false,true,true,true,true]
+        @all_pages.map{ |page| index.include?(page) }.should ==
+          [false,false,false,false,false,false,false,false,false,true,true,true,true]
       end
 
       should "allow removal of specific pages" do
@@ -184,7 +187,8 @@ class SearchTest < MiniTest::Spec
           reject_pages "#page8", "/page1"
         end
 
-        @all_pages.map{ |page| index.include?(page) }.should == [true,false,true,true,true,true,true,true,false,true,true,true,true]
+        @all_pages.map{ |page| index.include?(page) }.should ==
+          [true,false,true,true,true,true,true,true,false,true,true,true,true]
       end
 
       should "allow removal of a page and its children" do
@@ -192,7 +196,8 @@ class SearchTest < MiniTest::Spec
           reject_pages "/page1", ">= #page8"
         end
 
-        @all_pages.map{ |page| index.include?(page) }.should == [true,false,true,true,true,true,true,true,false,false,false,false,false]
+        @all_pages.map{ |page| index.include?(page) }.should ==
+          [true,false,true,true,true,true,true,true,false,false,false,false,false]
       end
 
       should "allow removal of a page's children" do
@@ -200,7 +205,8 @@ class SearchTest < MiniTest::Spec
           reject_pages "/page1", "> #page8"
         end
 
-        @all_pages.map{ |page| index.include?(page) }.should == [true,false,true,true,true,true,true,true,true,false,false,false,false]
+        @all_pages.map{ |page| index.include?(page) }.should ==
+          [true,false,true,true,true,true,true,true,true,false,false,false,false]
       end
 
       should "allow multiple, mixed, page restrictions" do
@@ -208,7 +214,8 @@ class SearchTest < MiniTest::Spec
           select_pages "#page1", "> #page8"
         end
 
-        @all_pages.map{ |page| index.include?(page) }.should == [false,true,false,false,false,false,false,false,false,true,true,true,true]
+        @all_pages.map{ |page| index.include?(page) }.should ==
+          [false,true,false,false,false,false,false,false,false,true,true,true,true]
       end
 
       should "allow combining of class and page restrictions" do
@@ -217,7 +224,8 @@ class SearchTest < MiniTest::Spec
           select_pages "#page1", "> #page8"
           reject_pages "#page10"
         end
-        @all_pages.map{ |page| index.include?(page) }.should == [false,true,false,false,false,false,false,false,false,true,false,false,false]
+        @all_pages.map{ |page| index.include?(page) }.should ==
+          [false,true,false,false,false,false,false,false,false,true,false,false,false]
       end
     end
 
