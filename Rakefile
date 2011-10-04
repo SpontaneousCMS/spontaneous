@@ -49,18 +49,10 @@ task :default => :test
 
 require 'rake/testtask'
 
-$test_glob = nil
-if p = ARGV.index('-')
-  filenames = ARGV[(p+1)..-1]
-  ARGV.slice!((p)..-1)
-  $test_glob = filenames.map { |f| "test/**/test_#{f}.rb" }
-end
-
 Rake::TestTask.new(:test) do |test|
   test.libs << 'test'
   test.ruby_opts << '-rubygems'
-  test.pattern = $test_glob || 'test/{unit,slow,functional,experimental}/test_*.rb'
-  # test.pattern = $test_glob || 'test/**/test_*.rb'
+  test.pattern = 'test/{unit,slow,functional,experimental}/test_*.rb'
   test.verbose = false
 end
 
@@ -121,7 +113,8 @@ task :coverage do
 end
 
 require 'rdoc/task'
-Rake::RDocTask.new do |rdoc|
+
+RDoc::Task.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "#{name} #{version}"
   rdoc.rdoc_files.include('README*')

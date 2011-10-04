@@ -10,6 +10,12 @@ Bundler.setup(:default, :development)
 
 Bundler.require
 
+# include these paths to enable the direct running of a test file
+test_path = File.expand_path('..', __FILE__)
+spot_path = File.expand_path('../../lib', __FILE__)
+$:.unshift(test_path) if File.directory?(test_path) && !$:.include?(test_path)
+$:.unshift(spot_path) if File.directory?(spot_path) && !$:.include?(spot_path)
+
 require 'rack'
 require 'logger'
 

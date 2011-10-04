@@ -1,7 +1,8 @@
 source :rubygems
 
 
-gem 'rake', '~> 0.8.7'
+gem 'rake', '~> 0.9.2'
+gem 'rdoc', '~> 3.9.4'
 gem 'activesupport', '~> 3.0.4'
 gem 'home_run', '~> 1.0.0'
 gem 'sequel', '~> 3.27'
