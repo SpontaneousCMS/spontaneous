@@ -100,7 +100,7 @@ module Spontaneous
 
   autoload :Application, "spontaneous/application"
 
-  autoload :Index, "spontaneous/index"
+  autoload :Search, "spontaneous/search"
 
 
   module Prototypes
@@ -158,6 +158,7 @@ module Spontaneous
       autoload :Selectors,  "spontaneous/plugins/site/selectors"
       autoload :Map,        "spontaneous/plugins/site/map"
       autoload :Instance,   "spontaneous/plugins/site/instance"
+      autoload :Search,     "spontaneous/plugins/site/search"
     end
   end
 

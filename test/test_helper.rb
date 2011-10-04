@@ -38,6 +38,8 @@ require 'shoulda'
 require 'timecop'
 require 'mocha'
 require 'pp'
+require 'tmpdir'
+
 begin
   require 'leftright'
 rescue LoadError

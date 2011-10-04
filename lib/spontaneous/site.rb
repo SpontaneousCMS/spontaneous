@@ -9,6 +9,7 @@ module Spontaneous
     plugin Plugins::Site::Revisions
     plugin Plugins::Site::Selectors
     plugin Plugins::Site::Map
+    plugin Plugins::Site::Search
 
     attr_accessor :database
     attr_reader :environment, :mode

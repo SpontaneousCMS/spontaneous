@@ -18,7 +18,7 @@ class SearchTest < MiniTest::Spec
   # Fields should be included in indexes
   # - Default is to add field to all indexes
   # - Should be able to include on a per index basis
-  # - Should be able to set the boost factor globally & per-index
+  # - Should be able to set the weight factor globally & per-index
   # - Should be able to partition fields into groups so that in search query you can specify that query is in particular group of fields
   #
   # - Indexing is done by page
@@ -36,15 +36,21 @@ class SearchTest < MiniTest::Spec
     setup do
       S::Schema.reset!
       Content.delete
+
+      @root = Dir.tmpdir
+      @site = S::Site.instantiate(@root, nil, nil)
+
       class ::Piece < S::Piece; end
       class ::Page < S::Page; end
       Page.box :pages
+
       class ::PageClass1 < ::Page; end
       class ::PageClass2 < ::Page; end
       class ::PageClass3 < ::PageClass1; end
       class ::PageClass4 < ::PageClass2; end
       class ::PageClass5 < ::PageClass3; end
       class ::PageClass6 < ::PageClass5; end
+
       @all_page_classes = [::Page, ::PageClass1, ::PageClass2, ::PageClass3, ::PageClass4, ::PageClass5, ::PageClass6]
 
       @root0 = ::Page.create(:uid => "root")
@@ -80,68 +86,68 @@ class SearchTest < MiniTest::Spec
     end
 
     teardown do
-      ([:Piece] + @all_page_classes.map { |k| k.name.to_sym }).each { |klass| Object.send(:remove_const, klass) rescue nil }
+      ([:Piece] + @all_page_classes.map { |k| k.name.to_sym }).each { |klass| Object.send(:remove_const, klass) rescue nil } rescue nil
       Content.delete
     end
 
-    context "Index definitions" do
+    context "indexes" do
 
       should "be retrievable by name" do
-        index = Spontaneous::Index.create :arthur
-        Spontaneous::Index[:arthur].must_be_instance_of Spontaneous::Index
-        Spontaneous::Index[:arthur].name.should == :arthur
-        Spontaneous::Index[:arthur].should == index
+        index = S::Site.index :arthur
+        S::Site.indexes[:arthur].must_be_instance_of Spontaneous::Search::Index
+        S::Site.indexes[:arthur].name.should == :arthur
+        S::Site.indexes[:arthur].should == index
       end
 
       should "default to indexing all content classes" do
-        index = Spontaneous::Index.create :all
-        assert_same_elements (@all_page_classes), index.search_classes
+        index = S::Site.index :all
+        assert_same_elements (@all_page_classes), index.search_types
       end
 
       should "allow restriction to particular classes" do
-        index = Spontaneous::Index.create :all do
-          select_classes ::PageClass1, "PageClass2"
+        index = S::Site.index :all do
+          select_types ::PageClass1, "PageClass2"
         end
-        assert_same_elements [::PageClass1, ::PageClass2], index.search_classes
+        assert_same_elements [::PageClass1, ::PageClass2], index.search_types
       end
 
       should "allow restriction to a class & its subclasses" do
-        index = Spontaneous::Index.create :all do
-          select_classes ">= PageClass1"
+        index = S::Site.index :all do
+          select_types ">= PageClass1"
         end
-        assert_same_elements [::PageClass1, ::PageClass3, ::PageClass5, ::PageClass6], index.search_classes
+        assert_same_elements [::PageClass1, ::PageClass3, ::PageClass5, ::PageClass6], index.search_types
       end
 
       should "allow restriction to a class's subclasses" do
-        index = Spontaneous::Index.create :all do
-          select_classes "> PageClass1"
+        index = S::Site.index :all do
+          select_types "> PageClass1"
         end
-        assert_same_elements [::PageClass3, ::PageClass5, ::PageClass6], index.search_classes
+        assert_same_elements [::PageClass3, ::PageClass5, ::PageClass6], index.search_types
       end
 
       should "allow removal of particular classes" do
-        index = Spontaneous::Index.create :all do
-          reject_classes ::PageClass1, "PageClass2"
+        index = S::Site.index :all do
+          reject_types ::PageClass1, "PageClass2"
         end
-        assert_same_elements (@all_page_classes - [PageClass1, PageClass2]), index.search_classes
+        assert_same_elements (@all_page_classes - [PageClass1, PageClass2]), index.search_types
       end
 
       should "allow removal of a class and its subclasses" do
-        index = Spontaneous::Index.create :all do
-          reject_classes ">= PageClass1"
+        index = S::Site.index :all do
+          reject_types ">= PageClass1"
         end
-        assert_same_elements (@all_page_classes - [::PageClass1, ::PageClass3, ::PageClass5, ::PageClass6]), index.search_classes
+        assert_same_elements (@all_page_classes - [::PageClass1, ::PageClass3, ::PageClass5, ::PageClass6]), index.search_types
       end
 
       should "allow removal of a class's subclasses" do
-        index = Spontaneous::Index.create :all do
-          reject_classes "> PageClass1"
+        index = S::Site.index :all do
+          reject_types "> PageClass1"
         end
-        assert_same_elements (@all_page_classes - [::PageClass3, ::PageClass5, ::PageClass6]), index.search_classes
+        assert_same_elements (@all_page_classes - [::PageClass3, ::PageClass5, ::PageClass6]), index.search_types
       end
 
       should "default to including all content" do
-        index = Spontaneous::Index.create :all
+        index = S::Site.index :all
         @all_pages.each do |page|
           index.include?(page).should be_true
         end
@@ -150,7 +156,7 @@ class SearchTest < MiniTest::Spec
       should "allow restriction to a set of specific pages" do
         id = @root0.id
         path = @page8.path
-        index = Spontaneous::Index.create :all do
+        index = S::Site.index :all do
           select_pages id, "#page11", path
         end
 
@@ -158,7 +164,7 @@ class SearchTest < MiniTest::Spec
       end
 
       should "allow restriction to a page and its children" do
-        index = Spontaneous::Index.create :all do
+        index = S::Site.index :all do
           select_pages ">= #page8"
         end
 
@@ -166,7 +172,7 @@ class SearchTest < MiniTest::Spec
       end
 
       should "allow restriction to a page's children" do
-        index = Spontaneous::Index.create :all do
+        index = S::Site.index :all do
           select_pages "> #page8"
         end
 
@@ -174,7 +180,7 @@ class SearchTest < MiniTest::Spec
       end
 
       should "allow removal of specific pages" do
-        index = Spontaneous::Index.create :all do
+        index = S::Site.index :all do
           reject_pages "#page8", "/page1"
         end
 
@@ -182,7 +188,7 @@ class SearchTest < MiniTest::Spec
       end
 
       should "allow removal of a page and its children" do
-        index = Spontaneous::Index.create :all do
+        index = S::Site.index :all do
           reject_pages "/page1", ">= #page8"
         end
 
@@ -190,7 +196,7 @@ class SearchTest < MiniTest::Spec
       end
 
       should "allow removal of a page's children" do
-        index = Spontaneous::Index.create :all do
+        index = S::Site.index :all do
           reject_pages "/page1", "> #page8"
         end
 
@@ -198,7 +204,7 @@ class SearchTest < MiniTest::Spec
       end
 
       should "allow multiple, mixed, page restrictions" do
-        index = Spontaneous::Index.create :all do
+        index = S::Site.index :all do
           select_pages "#page1", "> #page8"
         end
 
@@ -206,8 +212,8 @@ class SearchTest < MiniTest::Spec
       end
 
       should "allow combining of class and page restrictions" do
-        index = Spontaneous::Index.create :all do
-          reject_classes PageClass3, PageClass4
+        index = S::Site.index :all do
+          reject_types PageClass3, PageClass4
           select_pages "#page1", "> #page8"
           reject_pages "#page10"
         end
@@ -217,6 +223,130 @@ class SearchTest < MiniTest::Spec
 
     context "Indexes" do
       should "correctly filter by type"
+    end
+
+    context "Fields definitions" do
+      setup do
+        @index1 = S::Site.index(:one)
+        @index2 = S::Site.index(:two)
+        @index3 = S::Site.index(:three) do
+          select_types PageClass1
+        end
+      end
+
+      teardown do
+      end
+
+      should "be included in all indexes if :index is set to true" do
+        prototype_a = PageClass1.field :a, :index => true
+        prototype_a.in_index?(@index1).should be_true
+        prototype_a.in_index?(@index2).should be_true
+        prototype_a.in_index?(@index3).should be_true
+      end
+
+      should "be included in indexes referenced by name" do
+        prototype_a = PageClass1.field :a, :index => [:one, :two]
+        prototype_a.in_index?(@index1).should be_true
+        prototype_a.in_index?(@index2).should be_true
+        prototype_a.in_index?(@index3).should be_false
+      end
+
+      should "be included in indexes referenced as hash" do
+        prototype_a = PageClass1.field :a, :index => {:name => :two}
+        prototype_a.in_index?(@index1).should be_false
+        prototype_a.in_index?(@index2).should be_true
+        prototype_a.in_index?(@index3).should be_false
+      end
+
+      should "be included in indexes listed in hash" do
+        prototype_a = PageClass1.field :a, :index => [{:name => :one}, {:name => :two}]
+        prototype_a.in_index?(@index1).should be_true
+        prototype_a.in_index?(@index2).should be_true
+        prototype_a.in_index?(@index3).should be_false
+      end
+
+      should "return the field's schema id as its index name by default" do
+        prototype_a = PageClass1.field :a, :index => [{:name => :one}, {:name => :two, :group => :a}]
+        prototype_a.index_id(@index1).should == prototype_a.schema_id.to_s
+        prototype_a.index_id(@index2).should == :a
+      end
+
+      should "produce a field list in a xapian-fu compatible format" do
+        a = PageClass1.field :a, :index => [{:name => :one, :weight => :store}, {:name => :two, :group => :a, :weight => 2}]
+        b = PageClass2.field :b, :index => :one
+        c = ::Piece.field :c, :index => [{:name => :one, :weight => 4}, {:name => :two, :group => :a}]
+        d = ::Piece.field :d, :index => :three
+        e = ::PageClass1.field :e, :index => :three
+        f = ::PageClass2.field :f, :index => :three
+
+        S::Site.indexes[:one].fields.should == {
+          a.schema_id.to_s => { :type => String, :store => true, :index => false},
+          b.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true},
+          c.schema_id.to_s => { :type => String, :store => true, :weight => 4, :index => true}
+        }
+
+        S::Site.indexes[:two].fields.should == {
+          :a => { :type => String, :store => true, :weight => 2, :index => true}
+        }
+
+        S::Site.indexes[:three].fields.should == {
+          d.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true},
+          e.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true}
+        }
+      end
+
+
+      # Inclusion of field in indexes.
+      # Default is not to include field
+      # By adding the following clause:
+      #
+      #   field :title, :index => true
+      #
+      # you include the :title field in all indexes with a search weight of 1. this is equivalent to the following:
+      #
+      #   field :title, :index => { :name => :*, :weight => 1, :group => nil }
+      #
+      # If you only want to include this field in a specific index, then you do the following:
+      #
+      #   field :title, :index => :tags
+      #
+      # this is equivalent to
+      #
+      #   field :title, :index => { :name => :tags, :weight => 1, :group => nil }
+      #
+      # or if you want to include it into more than one index:
+      #
+      #   field :title, :index => [:tags, :content]
+      #
+      # this is equivalent to
+      #
+      #   field :title, :index => [
+      #     { :name => :tags, :weight => 1, :group => nil },
+      #     { :name => :content, :weight => 1, :group => nil }]
+      #
+      # Groups:
+      #
+      # Normally field values are grouped by content types. Indexes are generated from a page by iterating through
+      # all it's pieces and creating a single aggregate value for each field of each type found
+      #
+      # Groups are a way of joining disparate fields from different types into a single, addressable/searchable
+      # index
+      #
+      # weight:
+      #
+      # weight defines how much priority is given to a field. I.e. if your search term occurs in a field
+      # with a high weight value then it will apear higher in the results list than in a page where the
+      # term appears in a lower weight field
+      #
+      # :store   = 0 : store but don't index (makes value available to results lister without loading page from db)
+      # :normal  = 1 : default weight
+      # :high    = 2 : high weight
+      # :higher  = 4 : higher weight
+      # :highest = 8 : higest
+      #
+      # actual weight are powers of 10: 10, 100, 10000, 100000000 (unless this is different from Ferret)
+      #
+      #
     end
   end
 end

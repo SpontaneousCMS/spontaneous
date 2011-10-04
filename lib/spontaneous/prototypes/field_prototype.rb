@@ -87,6 +87,22 @@ module Spontaneous::Prototypes
       Spontaneous::Permissions[level_name]
     end
 
+    def in_index?(index)
+      search.in_index?(index)
+    end
+
+    def index_id(index)
+      search.index_id(index)
+    end
+
+    def options_for_index(index)
+      search.field_definition(index)
+    end
+
+    def search
+      @search ||= S::Search::Field.new(self, @options[:index])
+    end
+
     def to_field(values=nil)
       default_values = values.nil?
       values = {
