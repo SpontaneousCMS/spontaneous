@@ -29,8 +29,12 @@ module Spontaneous
         include Spontaneous::Rack::Public
 
         def call(env)
-          @response = ::Rack::Response.new
-          @request = ::Rack::Request.new(env)
+          self.dup.call!(env)
+        end
+        def call!(env)
+          @env = env
+          @response = ::Sinatra::Response.new
+          @request = ::Sinatra::Request.new(env)
           render_path(@request.path_info)
         end
       end

@@ -8,7 +8,8 @@ module Spontaneous
       include Sinatra::Helpers unless method_defined?(:redirect)
 
 
-      attr_reader :response, :request
+
+      attr_reader :env, :response, :request
       attr_accessor :page
 
       def render_path(path)

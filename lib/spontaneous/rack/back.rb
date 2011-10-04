@@ -96,7 +96,7 @@ module Spontaneous
 
       class UnsupportedBrowserHandler < EditingBase
         get '/unsupported' do
-          erubis :unsupported
+          erb :unsupported
         end
       end
 
@@ -175,11 +175,11 @@ module Spontaneous
 
 
         get '/?' do
-          erubis :index
+          erb :index
         end
 
         get %r{^/(\d+/?.*)?$} do
-          erubis :index
+          erb :index
         end
 
         get '/root' do

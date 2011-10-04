@@ -44,7 +44,7 @@ module Spontaneous
             origin = "#{NAMESPACE}#{params[:origin]}"
             redirect origin, 302
           else
-            halt(401, erubis(:login, :locals => { :invalid_key => true }))
+            halt(401, erb(:login, :locals => { :invalid_key => true }))
           end
         end
 
@@ -66,7 +66,7 @@ module Spontaneous
               redirect origin, 302
             end
           else
-            halt(401, erubis(:login, :locals => { :login => login, :failed => true }))
+            halt(401, erb(:login, :locals => { :login => login, :failed => true }))
           end
         end
       end
@@ -80,7 +80,7 @@ module Spontaneous
             ignore_key = second_level_exceptions.any? { |e| e === request.path }
             valid_key = ignore_key || Spontaneous::Permissions::AccessKey.valid?(params[KEY_PARAM], user)
             unless (user and valid_key)
-              halt(401, erubis(:login, :locals => { :login => '' }))
+              halt(401, erb(:login, :locals => { :login => '' }))
             end
           end
         end
