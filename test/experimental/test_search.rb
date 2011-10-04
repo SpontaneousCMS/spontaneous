@@ -287,20 +287,24 @@ class SearchTest < MiniTest::Spec
         d = ::Piece.field :d, :index => :three
         e = ::PageClass1.field :e, :index => :three
         f = ::PageClass2.field :f, :index => :three
+        g = ::Piece.field :g, :index => {:weight => 9}
 
         S::Site.indexes[:one].fields.should == {
           a.schema_id.to_s => { :type => String, :store => true, :index => false},
           b.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true},
-          c.schema_id.to_s => { :type => String, :store => true, :weight => 4, :index => true}
+          c.schema_id.to_s => { :type => String, :store => true, :weight => 4, :index => true},
+          g.schema_id.to_s => { :type => String, :store => true, :weight => 9, :index => true}
         }
 
         S::Site.indexes[:two].fields.should == {
-          :a => { :type => String, :store => true, :weight => 2, :index => true}
+          :a => { :type => String, :store => true, :weight => 2, :index => true},
+          g.schema_id.to_s => { :type => String, :store => true, :weight => 9, :index => true}
         }
 
         S::Site.indexes[:three].fields.should == {
           d.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true},
-          e.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true}
+          e.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true},
+          g.schema_id.to_s => { :type => String, :store => true, :weight => 9, :index => true}
         }
       end
 

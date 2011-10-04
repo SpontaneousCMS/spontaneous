@@ -46,15 +46,19 @@ module Spontaneous::Search
     end
 
     def parse_indexes(opts)
+      all_indexes = S::Site.indexes.values
       case opts
       when  true
-        S::Site.indexes.values.map { |index| default_index_options(index) }
+        all_indexes.map { |index| default_index_options(index) }
       when Symbol
         index = find_index(opts)
-        logger.warn("Invalid index :#{opts}") unless index
         [default_index_options(index)]
       when Hash
-        [ opts.merge(:index => find_index(opts[:name])) ]
+        if (index_name = opts[:name])
+          [ opts.merge(:index => find_index(index_name)) ]
+        else
+          all_indexes.map { |index| default_index_options(index).merge(opts) }
+        end
       when Array
         opts.map { |o| parse_indexes(o) }.flatten
       else
@@ -71,7 +75,9 @@ module Spontaneous::Search
     end
 
     def find_index(name)
-      S::Site.indexes[name]
+      index = S::Site.indexes[name]
+      logger.warn("Invalid index :#{opts} for field #{@prototype.owner}.#{@prototype.name}") unless index
+      index
     end
   end
 end
