@@ -22,6 +22,13 @@ module Spontaneous::Search
       indexes.detect { |opts| opts[:index] == index }
     end
 
+    WEIGHTINGS = {
+      :normal  => 1,
+      :high    => 4,
+      :higher  => 8,
+      :highest => 16
+    }.freeze unless defined?(WEIGHTINGS)
+
     def field_definition(index)
       defn = {:type => String, :store => true, :weight => 1, :index => true}
       opts = options_for_index(index)
@@ -35,6 +42,10 @@ module Spontaneous::Search
         defn.merge!({
           :weight => opts[:weight]
         })
+      when Symbol
+        defn.merge!({
+          :weight => WEIGHTINGS[opts[:weight]] || 1
+        })
       else
         # check for symbol shortcuts to weight
       end
@@ -45,6 +56,9 @@ module Spontaneous::Search
       @indexes ||= parse_indexes(options)
     end
 
+    # convert the options passed to :index in a field definition to a list of
+    # options. Each entry contains the index to which it pertains and then
+    # the options that should be applied to this field within that index
     def parse_indexes(opts)
       all_indexes = S::Site.indexes.values
       case opts
