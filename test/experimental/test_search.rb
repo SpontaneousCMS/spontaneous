@@ -272,7 +272,8 @@ class SearchTest < MiniTest::Spec
       end
 
       should "produce a field list in a xapian-fu compatible format" do
-        a = PageClass1.field :a, :index => [{:name => :one, :weight => :store}, {:name => :two, :group => :a, :weight => 2}]
+        a = PageClass1.field :a, :index => [{:name => :one, :weight => :store},
+                                            {:name => :two, :group => :a, :weight => 2}]
         b = PageClass2.field :b, :index => :one
         c = ::Piece.field :c, :index => [{:name => :one, :weight => 4}, {:name => :two, :group => :a}]
         d = ::Piece.field :d, :index => :three
