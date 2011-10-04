@@ -9,24 +9,24 @@ module Spontaneous::Search
       @name = name
       @search_types = base_search_types
       @include_pages = nil
-      @reject_pages = nil
+      @exclude_pages = nil
       self.instance_eval(&definition) if definition
     end
 
     # Index DSL methods
-    def select_pages(*page_list)
+    def include_pages(*page_list)
       @include_pages = page_list
     end
 
-    def reject_pages(*page_list)
-      @reject_pages = page_list
+    def exclude_pages(*page_list)
+      @exclude_pages = page_list
     end
 
-    def select_types(*types)
+    def include_types(*types)
       @search_types = resolve_type_list(types)
     end
 
-    def reject_types(*types)
+    def exclude_types(*types)
       @search_types -= resolve_type_list(types)
     end
     # end Index DSL methods
@@ -72,8 +72,8 @@ module Spontaneous::Search
     end
 
     def include_page?(page)
-      unless @reject_pages.nil?
-        rejected = @reject_pages.any? { |selector| match_page(selector, page) }
+      unless @exclude_pages.nil?
+        rejected = @exclude_pages.any? { |selector| match_page(selector, page) }
         return false if rejected
       end
       unless @include_pages.nil?

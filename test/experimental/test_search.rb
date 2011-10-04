@@ -106,42 +106,42 @@ class SearchTest < MiniTest::Spec
 
       should "allow restriction to particular classes" do
         index = S::Site.index :all do
-          select_types ::PageClass1, "PageClass2"
+          include_types ::PageClass1, "PageClass2"
         end
         assert_same_elements [::PageClass1, ::PageClass2], index.search_types
       end
 
       should "allow restriction to a class & its subclasses" do
         index = S::Site.index :all do
-          select_types ">= PageClass1"
+          include_types ">= PageClass1"
         end
         assert_same_elements [::PageClass1, ::PageClass3, ::PageClass5, ::PageClass6], index.search_types
       end
 
       should "allow restriction to a class's subclasses" do
         index = S::Site.index :all do
-          select_types "> PageClass1"
+          include_types "> PageClass1"
         end
         assert_same_elements [::PageClass3, ::PageClass5, ::PageClass6], index.search_types
       end
 
       should "allow removal of particular classes" do
         index = S::Site.index :all do
-          reject_types ::PageClass1, "PageClass2"
+          exclude_types ::PageClass1, "PageClass2"
         end
         assert_same_elements (@all_page_classes - [PageClass1, PageClass2]), index.search_types
       end
 
       should "allow removal of a class and its subclasses" do
         index = S::Site.index :all do
-          reject_types ">= PageClass1"
+          exclude_types ">= PageClass1"
         end
         assert_same_elements (@all_page_classes - [::PageClass1, ::PageClass3, ::PageClass5, ::PageClass6]), index.search_types
       end
 
       should "allow removal of a class's subclasses" do
         index = S::Site.index :all do
-          reject_types "> PageClass1"
+          exclude_types "> PageClass1"
         end
         assert_same_elements (@all_page_classes - [::PageClass3, ::PageClass5, ::PageClass6]), index.search_types
       end
@@ -157,7 +157,7 @@ class SearchTest < MiniTest::Spec
         id = @root0.id
         path = @page8.path
         index = S::Site.index :all do
-          select_pages id, "#page11", path
+          include_pages id, "#page11", path
         end
 
         @all_pages.map{ |page| index.include?(page) }.should ==
@@ -166,7 +166,7 @@ class SearchTest < MiniTest::Spec
 
       should "allow restriction to a page and its children" do
         index = S::Site.index :all do
-          select_pages ">= #page8"
+          include_pages ">= #page8"
         end
 
         @all_pages.map{ |page| index.include?(page) }.should ==
@@ -175,7 +175,7 @@ class SearchTest < MiniTest::Spec
 
       should "allow restriction to a page's children" do
         index = S::Site.index :all do
-          select_pages "> #page8"
+          include_pages "> #page8"
         end
 
         @all_pages.map{ |page| index.include?(page) }.should ==
@@ -184,7 +184,7 @@ class SearchTest < MiniTest::Spec
 
       should "allow removal of specific pages" do
         index = S::Site.index :all do
-          reject_pages "#page8", "/page1"
+          exclude_pages "#page8", "/page1"
         end
 
         @all_pages.map{ |page| index.include?(page) }.should ==
@@ -193,7 +193,7 @@ class SearchTest < MiniTest::Spec
 
       should "allow removal of a page and its children" do
         index = S::Site.index :all do
-          reject_pages "/page1", ">= #page8"
+          exclude_pages "/page1", ">= #page8"
         end
 
         @all_pages.map{ |page| index.include?(page) }.should ==
@@ -202,7 +202,7 @@ class SearchTest < MiniTest::Spec
 
       should "allow removal of a page's children" do
         index = S::Site.index :all do
-          reject_pages "/page1", "> #page8"
+          exclude_pages "/page1", "> #page8"
         end
 
         @all_pages.map{ |page| index.include?(page) }.should ==
@@ -211,7 +211,7 @@ class SearchTest < MiniTest::Spec
 
       should "allow multiple, mixed, page restrictions" do
         index = S::Site.index :all do
-          select_pages "#page1", "> #page8"
+          include_pages "#page1", "> #page8"
         end
 
         @all_pages.map{ |page| index.include?(page) }.should ==
@@ -220,9 +220,9 @@ class SearchTest < MiniTest::Spec
 
       should "allow combining of class and page restrictions" do
         index = S::Site.index :all do
-          reject_types PageClass3, PageClass4
-          select_pages "#page1", "> #page8"
-          reject_pages "#page10"
+          exclude_types PageClass3, PageClass4
+          include_pages "#page1", "> #page8"
+          exclude_pages "#page10"
         end
         @all_pages.map{ |page| index.include?(page) }.should ==
           [false,true,false,false,false,false,false,false,false,true,false,false,false]
@@ -238,7 +238,7 @@ class SearchTest < MiniTest::Spec
         @index1 = S::Site.index(:one)
         @index2 = S::Site.index(:two)
         @index3 = S::Site.index(:three) do
-          select_types PageClass1
+          include_types PageClass1
         end
       end
 
