@@ -6,5 +6,6 @@ module Spontaneous
     autoload :Field,    'spontaneous/search/field'
     autoload :Database, 'spontaneous/search/database'
     autoload :Results,  'spontaneous/search/results'
+    autoload :CompoundIndexer, 'spontaneous/search/compound_indexer'
   end
 end

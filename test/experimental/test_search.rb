@@ -369,6 +369,8 @@ class SearchTest < MiniTest::Spec
         @index1 = S::Site.index :one do
           exclude_types PageClass3
         end
+        @index2 = S::Site.index :two
+
         @a = PageClass1.field  :a, :index => true
         @b = PageClass2.field  :b, :index => true
         @c = PageClass3.field  :c, :index => true
@@ -408,9 +410,10 @@ class SearchTest < MiniTest::Spec
       end
 
       should "correctly extract content from pages" do
+        @page1.a.expects(:indexable_value).returns("(a value 1)")
         @index1.indexable_content(@page1).should == {
           :id => @page1.id,
-          @a.schema_id.to_s => "a value 1",
+          @a.schema_id.to_s => "(a value 1)",
           @g.schema_id.to_s => "g value 1\ng value 2\ng value 3",
           @h.schema_id.to_s => "h value 1\nh value 2",
           :i                => "i value 1\nj value 1\ni value 2\nj value 2"
@@ -474,6 +477,20 @@ class SearchTest < MiniTest::Spec
         results.total_entries.should == 2
 
         FileUtils.rm_r(db_path)
+      end
+
+      should "provide a convenient way to add documents to multiple indexes" do
+        db1 = mock()
+        db2 = mock()
+        @index1.expects(:create_db).with(@revision).returns(db1)
+        @index2.expects(:create_db).with(@revision).returns(db2)
+        db1.expects(:<<).with(@page1)
+        db2.expects(:<<).with(@page1)
+        db1.expects(:close)
+        db2.expects(:close)
+        S::Site.indexer(@revision) do |indexer|
+          indexer << @page1
+        end
       end
     end
   end

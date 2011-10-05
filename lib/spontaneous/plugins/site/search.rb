@@ -12,6 +12,15 @@ module Spontaneous::Plugins
         def indexes
           instance.indexes
         end
+
+        def indexer(revision)
+          indexer = S::Search::CompoundIndexer.new(revision, indexes.values)
+          begin
+            yield(indexer)
+          ensure
+            indexer.close
+          end
+        end
       end
 
       module InstanceMethods

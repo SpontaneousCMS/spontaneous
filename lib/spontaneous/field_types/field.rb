@@ -116,6 +116,10 @@ module Spontaneous
         false
       end
 
+      def indexable_value
+        unprocessed_value
+      end
+
       def to_s(format = :html)
         value(format).to_s
       end

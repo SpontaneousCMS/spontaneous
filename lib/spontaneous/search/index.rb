@@ -60,7 +60,7 @@ module Spontaneous::Search
       pieces.each do |content|
         content.fields.each do |field|
           prototype = field.prototype
-          values[prototype.index_id(self)] << field.unprocessed_value if prototype.in_index?(self)
+          values[prototype.index_id(self)] << field.indexable_value if prototype.in_index?(self)
         end
       end
       result = Hash[ values.map { |id, values| [id, values.join("\n")] } ]
