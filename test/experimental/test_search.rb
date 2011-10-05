@@ -457,7 +457,7 @@ class SearchTest < MiniTest::Spec
         db << @page3
         db.close
 
-        results = @index1.search('+valeu', :limit => 1)
+        results = @index1.search('+valeu', :limit => 1, :autocorrect => true)
         results.must_be_instance_of S::Search::Results
         results.each do |result|
           result.class.should < S::Page
@@ -471,6 +471,10 @@ class SearchTest < MiniTest::Spec
         results.offset.should == 0
         results.previous_page.should == nil
         results.total_entries.should == 2
+
+        results = @index1.search('valeu', :limit => 1, :autocorrect => false)
+        results.corrected_query.should == 'value'
+        results.total_entries.should == 0
 
         results = @index1.search('value', :limit => 1)
         results.corrected_query.should == ''

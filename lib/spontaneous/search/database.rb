@@ -49,11 +49,12 @@ module Spontaneous::Search
 
     def search(query, options = {})
       xapian_results = database.search(query, options)
+      autocorrect = options.delete(:autocorrect)
       corrected_query = xapian_results.corrected_query
       # don't know if this is the right way to deal with the corrected query suggestion
       # but I would prefer that any searches act more like google and return a set of
       # results for a spelling correction if none have been found with the current query
-      if xapian_results and xapian_results.empty? and !corrected_query.blank?
+      if autocorrect and xapian_results and xapian_results.empty? and !corrected_query.blank?
         xapian_results = database.search(corrected_query, options)
       end
       Results.new(xapian_results, corrected_query)
