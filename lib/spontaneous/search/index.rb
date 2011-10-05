@@ -35,7 +35,9 @@ module Spontaneous::Search
     # or across field index groups
     def indexable_content(page)
       values = Hash.new { |h, k| h[k] = [] }
-      pieces = [page].concat(page.content)#.select { |content| include?(content) }
+      # not sure that I need the include? test here as page.content only returns Pieces
+      # and I'm not sure that there is a particular need to exclude Pieces from indexes
+      pieces = [page].concat(page.content).select { |content| include?(content) }
       pieces.each do |content|
         content.fields.each do |field|
           prototype = field.prototype
