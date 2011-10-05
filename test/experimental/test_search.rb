@@ -25,10 +25,9 @@ class SearchTest < MiniTest::Spec
 
 
 
-  # make sure that S::Piece & S::Page are removed from the schema
   def self.startup
-    Object.const_set(:P, Class.new(S::Piece))
-    Object.send(:remove_const, :P) rescue nil
+    # make sure that S::Piece & S::Page are removed from the schema
+    *ids = S::Page.schema_id, S::Piece.schema_id
     S::Schema.reset!
   end
 
