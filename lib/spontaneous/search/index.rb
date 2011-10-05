@@ -31,6 +31,20 @@ module Spontaneous::Search
     end
     # end Index DSL methods
 
+    # Extract all indexable content from a page. Values are grouped across fields
+    # or across field index groups
+    def indexable_content(page)
+      values = Hash.new { |h, k| h[k] = [] }
+      pieces = [page].concat(page.content)#.select { |content| include?(content) }
+      pieces.each do |content|
+        content.fields.each do |field|
+          prototype = field.prototype
+          values[prototype.index_id(self)] << field.unprocessed_value if prototype.in_index?(self)
+        end
+      end
+      result = Hash[ values.map { |id, values| [id, values.join("\n")] } ]
+    end
+
     def fields
       field_lists = Hash.new { |h, k| h[k] = [] }
       # collect all the definitions for a particular field or group
@@ -72,6 +86,7 @@ module Spontaneous::Search
     end
 
     def include_page?(page)
+      return true unless page.page?
       unless @exclude_pages.nil?
         rejected = @exclude_pages.any? { |selector| match_page(selector, page) }
         return false if rejected

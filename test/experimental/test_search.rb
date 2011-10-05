@@ -50,6 +50,10 @@ class SearchTest < MiniTest::Spec
       class ::PageClass5 < ::PageClass3; end
       class ::PageClass6 < ::PageClass5; end
 
+      class ::PieceClass1 < ::Piece; end
+      class ::PieceClass2 < ::Piece; end
+      class ::PieceClass3 < ::Piece; end
+
       @all_page_classes = [::Page, ::PageClass1, ::PageClass2, ::PageClass3, ::PageClass4, ::PageClass5, ::PageClass6]
 
       @root0 = ::Page.create(:uid => "root")
@@ -85,7 +89,9 @@ class SearchTest < MiniTest::Spec
     end
 
     teardown do
-      ([:Piece] + @all_page_classes.map { |k| k.name.to_sym }).each { |klass| Object.send(:remove_const, klass) rescue nil } rescue nil
+      ([:Piece, :PieceClass1, :PieceClass2, :PieceClass3] + @all_page_classes.map { |k| k.name.to_sym }).each { |klass|
+        Object.send(:remove_const, klass) rescue nil
+      } rescue nil
       Content.delete
     end
 
@@ -228,11 +234,58 @@ class SearchTest < MiniTest::Spec
       end
     end
 
-    context "Indexes" do
-      should "correctly filter by type"
-    end
-
     context "Fields definitions" do
+      # Inclusion of field in indexes.
+      # Default is not to include field
+      # By adding the following clause:
+      #
+      #   field :title, :index => true
+      #
+      # you include the :title field in all indexes with a search weight of 1. this is equivalent to the following:
+      #
+      #   field :title, :index => { :name => :*, :weight => 1, :group => nil }
+      #
+      # If you only want to include this field in a specific index, then you do the following:
+      #
+      #   field :title, :index => :tags
+      #
+      # this is equivalent to
+      #
+      #   field :title, :index => { :name => :tags, :weight => 1, :group => nil }
+      #
+      # or if you want to include it into more than one index:
+      #
+      #   field :title, :index => [:tags, :content]
+      #
+      # this is equivalent to
+      #
+      #   field :title, :index => [
+      #     { :name => :tags, :weight => 1, :group => nil },
+      #     { :name => :content, :weight => 1, :group => nil }]
+      #
+      # Groups:
+      #
+      # Normally field values are grouped by content types. Indexes are generated from a page by iterating through
+      # all it's pieces and creating a single aggregate value for each field of each type found
+      #
+      # Groups are a way of joining disparate fields from different types into a single, addressable/searchable
+      # index
+      #
+      # weight:
+      #
+      # weight defines how much priority is given to a field. I.e. if your search term occurs in a field
+      # with a high weight value then it will apear higher in the results list than in a page where the
+      # term appears in a lower weight field
+      #
+      # :store   = 0 : store but don't index (makes value available to results lister without loading page from db)
+      # :normal  = 1 : default weight
+      # :high    = 2 : high weight
+      # :higher  = 4 : higher weight
+      # :highest = 8 : higest
+      #
+      # actual weight are powers of 10: 10, 100, 10000, 100000000 (unless this is different from Ferret)
+      #
+      #
       setup do
         @index1 = S::Site.index(:one)
         @index2 = S::Site.index(:two)
@@ -306,59 +359,57 @@ class SearchTest < MiniTest::Spec
           g.schema_id.to_s => { :type => String, :store => true, :weight => 16, :index => true}
         }
       end
-
-
-      # Inclusion of field in indexes.
-      # Default is not to include field
-      # By adding the following clause:
-      #
-      #   field :title, :index => true
-      #
-      # you include the :title field in all indexes with a search weight of 1. this is equivalent to the following:
-      #
-      #   field :title, :index => { :name => :*, :weight => 1, :group => nil }
-      #
-      # If you only want to include this field in a specific index, then you do the following:
-      #
-      #   field :title, :index => :tags
-      #
-      # this is equivalent to
-      #
-      #   field :title, :index => { :name => :tags, :weight => 1, :group => nil }
-      #
-      # or if you want to include it into more than one index:
-      #
-      #   field :title, :index => [:tags, :content]
-      #
-      # this is equivalent to
-      #
-      #   field :title, :index => [
-      #     { :name => :tags, :weight => 1, :group => nil },
-      #     { :name => :content, :weight => 1, :group => nil }]
-      #
-      # Groups:
-      #
-      # Normally field values are grouped by content types. Indexes are generated from a page by iterating through
-      # all it's pieces and creating a single aggregate value for each field of each type found
-      #
-      # Groups are a way of joining disparate fields from different types into a single, addressable/searchable
-      # index
-      #
-      # weight:
-      #
-      # weight defines how much priority is given to a field. I.e. if your search term occurs in a field
-      # with a high weight value then it will apear higher in the results list than in a page where the
-      # term appears in a lower weight field
-      #
-      # :store   = 0 : store but don't index (makes value available to results lister without loading page from db)
-      # :normal  = 1 : default weight
-      # :high    = 2 : high weight
-      # :higher  = 4 : higher weight
-      # :highest = 8 : higest
-      #
-      # actual weight are powers of 10: 10, 100, 10000, 100000000 (unless this is different from Ferret)
-      #
-      #
     end
+
+    context "Indexes" do
+      setup do
+        @index1 = S::Site.index :one
+        @a = PageClass1.field  :a, :index => true
+        @b = PageClass2.field  :b, :index => true
+        @c = PageClass3.field  :c, :index => true
+        @d = PageClass4.field  :d, :index => true
+        @e = PageClass5.field  :e, :index => true
+        @f = PageClass6.field  :f, :index => true
+        @g = PieceClass1.field :g, :index => true
+        @h = PieceClass2.field :h, :index => true
+        @i = PieceClass3.field :i, :index => {:group => :i}
+        @j = PieceClass3.field :j, :index => {:group => :i}
+        @k = PieceClass3.field :k
+
+        @page1.a = "a value 1"
+        @page1.pages.first.a =  "a value 2"
+
+        @piece1 = PieceClass1.new(:g => "g value 1")
+        @page1.pages << @piece1
+        @piece2 = PieceClass1.new(:g => "g value 2")
+        @page1.pages << @piece2
+        @piece3 = PieceClass1.new(:g => "g value 3")
+        @page1.pages << @piece3
+        @piece4 = PieceClass2.new(:h => "h value 1")
+        @page1.pages << @piece4
+        @piece5 = PieceClass2.new(:h => "h value 2")
+        @page1.pages << @piece5
+        @piece6 = PieceClass3.new(:i => "i value 1", :j => "j value 1", :k => "k value 1")
+        @page1.pages << @piece6
+        @piece7 = PieceClass3.new(:i => "i value 2", :j => "j value 2", :k => "k value 2")
+        @page1.pages << @piece7
+
+        @page2.b = "b value"
+        @page3.c = "c value"
+        @page1.save
+      end
+      teardown do
+      end
+
+      should "correctly extract content from pages" do
+        @index1.indexable_content(@page1).should == {
+          @a.schema_id.to_s => "a value 1",
+          @g.schema_id.to_s => "g value 1\ng value 2\ng value 3",
+          @h.schema_id.to_s => "h value 1\nh value 2",
+          :i               => "i value 1\nj value 1\ni value 2\nj value 2"
+        }
+      end
+    end
+
   end
 end
