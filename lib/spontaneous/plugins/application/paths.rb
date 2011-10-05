@@ -126,8 +126,6 @@ module Spontaneous::Plugins::Application
         relative_dir(application_dir / "css", *path)
       end
 
-      private
-
       def relative_dir(root, *path)
         File.join(root, *path)
       end

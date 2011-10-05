@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'xapian-fu'
+
 module Spontaneous::Search
   class Index
 
@@ -31,6 +33,23 @@ module Spontaneous::Search
     end
     # end Index DSL methods
 
+    def create_db(revision)
+      Database.create(self, revision)
+    end
+
+    def search(query, options = {})
+      database.search(query, options)
+    end
+
+    def database(revision = Spontaneous::Site.published_revision)
+      Database.new(self, revision)
+    end
+
+    # TODO: make setting the language part of the config
+    def language
+      :english
+    end
+
     # Extract all indexable content from a page. Values are grouped across fields
     # or across field index groups
     def indexable_content(page)
@@ -45,6 +64,8 @@ module Spontaneous::Search
         end
       end
       result = Hash[ values.map { |id, values| [id, values.join("\n")] } ]
+      result[:id] = page.id
+      result
     end
 
     def fields

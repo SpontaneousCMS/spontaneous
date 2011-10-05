@@ -93,6 +93,7 @@ class SearchTest < MiniTest::Spec
         Object.send(:remove_const, klass) rescue nil
       } rescue nil
       Content.delete
+      # FileUtils.rm_r(@root)
     end
 
     context "indexes" do
@@ -363,7 +364,11 @@ class SearchTest < MiniTest::Spec
 
     context "Indexes" do
       setup do
-        @index1 = S::Site.index :one
+        @revision = 99
+
+        @index1 = S::Site.index :one do
+          exclude_types PageClass3
+        end
         @a = PageClass1.field  :a, :index => true
         @b = PageClass2.field  :b, :index => true
         @c = PageClass3.field  :c, :index => true
@@ -394,22 +399,82 @@ class SearchTest < MiniTest::Spec
         @piece7 = PieceClass3.new(:i => "i value 2", :j => "j value 2", :k => "k value 2")
         @page1.pages << @piece7
 
-        @page2.b = "b value"
-        @page3.c = "c value"
+        @page2.b = "b value 1"
+        @page3.c = "c value 1"
         @page1.save
       end
+
       teardown do
       end
 
       should "correctly extract content from pages" do
         @index1.indexable_content(@page1).should == {
+          :id => @page1.id,
           @a.schema_id.to_s => "a value 1",
           @g.schema_id.to_s => "g value 1\ng value 2\ng value 3",
           @h.schema_id.to_s => "h value 1\nh value 2",
-          :i               => "i value 1\nj value 1\ni value 2\nj value 2"
+          :i                => "i value 1\nj value 1\ni value 2\nj value 2"
         }
       end
-    end
 
+      should "create database in the right directory" do
+        db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
+        Site.stubs(:published_revision).returns(@revision)
+        mset = mock()
+        mset.stubs(:matches).returns([])
+        xapian = mock()
+        xapian.expects(:<<).with(@index1.indexable_content(@page1))
+        xapian.expects(:search).with('"value 2"', {}).returns(XapianFu::ResultSet.new(:mset => mset))
+        xapian.expects(:flush)
+
+        XapianFu::XapianDb.expects(:new).with({
+          :dir => db_path,
+          :create => true,
+          :overwrite => true,
+          :language => :english,
+          :fields => @index1.fields,
+          :spelling => true
+        }).returns(xapian)
+
+        db = @index1.create_db(@revision)
+        assert File.directory?(db_path)
+        db << @page1
+        db << @page3
+        db.close
+        db.search('"value 2"')
+        FileUtils.rm_r(db_path)
+      end
+
+      should "return (reasonable) results to searches" do
+        db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
+        Site.stubs(:published_revision).returns(@revision)
+        db = @index1.create_db(@revision)
+        db << @page1
+        db << @page2
+        db << @page3
+        db.close
+
+        results = @index1.search('+valeu', :limit => 1)
+        results.must_be_instance_of S::Search::Results
+        results.each do |result|
+          result.class.should < S::Page
+        end
+
+        results.corrected_query.should == '+value'
+        results.current_page.should == 1
+        results.per_page.should == 1
+        results.total_pages.should == 2
+        results.next_page.should == 2
+        results.offset.should == 0
+        results.previous_page.should == nil
+        results.total_entries.should == 2
+
+        results = @index1.search('value', :limit => 1)
+        results.corrected_query.should == ''
+        results.total_entries.should == 2
+
+        FileUtils.rm_r(db_path)
+      end
+    end
   end
 end
