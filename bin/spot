@@ -1,21 +1,20 @@
-#!/usr/bin/env ruby -U -KU
+#!/usr/bin/env ruby -KU
 
 require 'rubygems' unless defined?(Gem) # Useful only on --dev mode
-# Set up gems listed in the Gemfile.
-# gemfile = File.expand_path('../../Gemfile', __FILE__)
-# puts gemfile
-# begin
-#   ENV['BUNDLE_GEMFILE'] = gemfile
-#   require 'bundler'
-#   Bundler.setup(:default)
-# rescue Bundler::GemNotFound => e
-#   STDERR.puts e.message
-#   STDERR.puts "Try running `bundle install`."
-#   exit!
-# end if File.exist?(gemfile)
-
 require 'bundler'
-Bundler.setup(:default)
+
+begin
+	Bundler.setup(:default)
+rescue Bundler::GemfileNotFound
+	# We're operating outside of a site dir, probably generating a site
+	# so load the Spontaneous gem Gemfile
+  ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
+	retry
+rescue Bundler::GemNotFound => e
+  STDERR.puts e.message
+  STDERR.puts "Try running `bundle install`."
+  exit!
+end
 
 spot_path = File.expand_path('../../lib', __FILE__)
 $:.unshift(spot_path) if File.directory?(spot_path) && !$:.include?(spot_path)
