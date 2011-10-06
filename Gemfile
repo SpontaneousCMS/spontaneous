@@ -36,7 +36,7 @@ group :development do
   # # gem 'pg', '~> 0.9.0'
   # gem 'jeweler', '~> 1.5'
   # gem 'jnunemaker-matchy', '~> 0.4'
-  gem 'shoulda', :git => 'https://github.com/dasch/shoulda.git', :branch => 'minitest'
+  gem 'shoulda', '~> 2.11.3', :git => 'https://github.com/dasch/shoulda.git', :branch => 'minitest'
   # gem 'mini_shoulda',    '~> 0.3.0'
   # gem 'timecop',    '~> 0.3'
   # gem 'mocha',      '~> 0.9'
