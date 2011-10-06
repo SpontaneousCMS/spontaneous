@@ -30,7 +30,8 @@ module Spontaneous
 
     def load_indexes!
       paths.expanded(:config).each do |config_path|
-        load(config_path / "indexes.rb" )
+        index_file = config_path / "indexes.rb"
+        load(index_file) if File.exists?(index_file)
       end
     end
 
