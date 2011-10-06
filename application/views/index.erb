@@ -7,13 +7,13 @@
 		<title>Spontaneous: Loading...</title>
 		<link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
 
-	<%- Spontaneous::Rack::Assets::CSS::EDITING_CSS.each do |css_file| %>
+	<% Spontaneous::Rack::Assets::CSS::EDITING_CSS.each do |css_file| %>
 		<link rel="stylesheet" href="<%= style_url(css_file) %>" type="text/css" media="screen" charset="utf-8" />
 	<% end %>
-    <%- Spontaneous::Rack::Assets::JavaScript::JQUERY.each do |js_file| %>
+    <% Spontaneous::Rack::Assets::JavaScript::JQUERY.each do |js_file| %>
       <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
     <% end %>
-	<%- Spontaneous::Rack::Assets::JavaScript::COMPATIBILITY.each do |js_file| %>
+	<% Spontaneous::Rack::Assets::JavaScript::COMPATIBILITY.each do |js_file| %>
 		<script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
 	<% end %>
 		<script type="text/javascript" charset="utf-8">
@@ -29,9 +29,9 @@
 				}
 			};
 		</script>
-	<%- Spontaneous::Rack::Assets::JavaScript::REQUIRE.each do |js_file| %>
+	<% Spontaneous::Rack::Assets::JavaScript::REQUIRE.each do |js_file| %>
 		<script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
-	<% end -%>
+	<% end %>
 	</head>
 	<body id="spontaneous">
 		<script type="text/javascript" charset="utf-8">

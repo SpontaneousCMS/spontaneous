@@ -25,7 +25,7 @@ module Spontaneous
           end
         end
       end
-      class Server# < Spontaneous::Rack::Public
+      class Server < Sinatra::Base
         include Spontaneous::Rack::Public
 
         def call(env)

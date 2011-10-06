@@ -56,10 +56,14 @@ class BackTest < MiniTest::Spec
       instance = Spontaneous::Site.instantiate(root, :test, :back)
       instance.stubs(:config).returns(config)
       Spontaneous.instance = instance
-      app.send(:set, :raise_errors, true)
-      app.send(:set, :dump_errors, true)
-      app.send(:set, :show_exceptions, false)
+      # p app.to_app
+      # app.to_app.send(:set, :raise_errors, true)
+      # app.send(:set, :dump_errors, true)
+      # app.send(:set, :show_exceptions, false)
 
+      S::Rack::Back::EditingInterface.set :raise_errors, true
+      S::Rack::Back::EditingInterface.set :dump_errors, true
+      S::Rack::Back::EditingInterface.set :show_exceptions, false
 
       S::Schema.reset!
       Content.delete
@@ -68,7 +72,7 @@ class BackTest < MiniTest::Spec
       @app_dir = File.expand_path("../../fixtures/application", __FILE__)
       File.exists?(@app_dir).should be_true
       Spontaneous.stubs(:application_dir).returns(@app_dir)
-      Spontaneous::Rack::Back.application.send :set, :show_exceptions, false
+      # Spontaneous::Rack::Back.application.send :set, :show_exceptions, false
       # setup_site_fixture
       # annoying to have to do this, but there you go
       @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
@@ -844,6 +848,9 @@ class BackTest < MiniTest::Spec
           last_response.status.should == 200
         end
         @image1.image.processed_value.should == ""
+
+        S::Content.stubs(:[]).with(@image1.id.to_s).returns(@image1)
+        S::Content.stubs(:[]).with(@image1.id).returns(@image1)
         auth_post "/@spontaneous/shard/replace/#{@image1.id}", "filename" => "rose.jpg",
           "shards" => hashes, "field" => @image1.image.schema_id.to_s
         assert last_response.ok?

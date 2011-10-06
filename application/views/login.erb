@@ -5,13 +5,13 @@
     <title><%= Spontaneous::Site.config.site_domain %>: Please Login</title>
     <link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
     <link rel="apple-touch-icon" href="/@spontaneous/static/spot.png" />
-    <%- Spontaneous::Rack::Assets::CSS::LOGIN_CSS.each do |css_file| %>
+    <% Spontaneous::Rack::Assets::CSS::LOGIN_CSS.each do |css_file| %>
       <link rel="stylesheet" href="<%= style_url(css_file) %>" type="text/css" media="screen" charset="utf-8" />
     <% end %>
-    <%- Spontaneous::Rack::Assets::JavaScript::JQUERY.each do |js_file| %>
+    <% Spontaneous::Rack::Assets::JavaScript::JQUERY.each do |js_file| %>
       <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
     <% end %>
-    <%- Spontaneous::Rack::Assets::JavaScript::COMPATIBILITY.each do |js_file| %>
+    <% Spontaneous::Rack::Assets::JavaScript::COMPATIBILITY.each do |js_file| %>
       <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
     <% end %>
 
@@ -21,7 +21,7 @@
         site_id: '<%= Spontaneous::Site.config.site_id %>',
       };
     </script>
-    <%- Spontaneous::Rack::Assets::JavaScript::LOGIN_JS.each do |js_file| %>
+    <% Spontaneous::Rack::Assets::JavaScript::LOGIN_JS.each do |js_file| %>
       <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
     <% end %>
     <script type="text/javascript">

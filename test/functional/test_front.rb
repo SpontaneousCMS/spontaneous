@@ -84,9 +84,10 @@ class FrontTest < MiniTest::Spec
 
 
       # see http://benprew.posterous.com/testing-sessions-with-sinatra
-      app.send(:set, :sessions, false)
+      # app.send(:set, :sessions, false)
+      # S::Rack::Front::Server.send(:set, :sessions, false)
 
-      @revision_root = "#{Dir.tmpdir}/spontaneous-tests/#{Time.now.to_i}"
+      @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
       `mkdir -p #{@revision_root}`
       Spontaneous.revision_root = @revision_root
 
@@ -119,7 +120,7 @@ class FrontTest < MiniTest::Spec
       Content.delete_revision(1)
       Spontaneous.revision_root = @saved_revision_root
       Spontaneous.root = @saved_root
-      FileUtils.rm_rf(@revision_root)
+      FileUtils.rm_rf(@revision_root) rescue nil
     end
 
     should "return a 404 if asked for a non-existant page" do

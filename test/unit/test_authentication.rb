@@ -83,10 +83,14 @@ class AuthenticationTest < MiniTest::Spec
   def setup
     instance = Spontaneous::Site.instantiate(Spontaneous.root, :test, :back)
     Site.config.publishing_delay nil
+    Site.config.site_domain "example.com"
+    Site.config.site_id "example_com"
+
     Site.database = DB
     Site.instance.paths.add :templates, File.expand_path("../../fixtures/public/templates", __FILE__)
     # see http://benprew.posterous.com/testing-sessions-with-sinatra
-    app.send(:set, :sessions, false)
+    # app.send(:set, :sessions, false)
+    S::Rack::Back::EditingInterface.set :sessions, false
     Spontaneous.media_dir = File.expand_path('../../fixtures/permissions/media', __FILE__)
   end
 
