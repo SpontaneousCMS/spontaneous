@@ -255,14 +255,14 @@ namespace :gem do
     require 'bundler'
 
     File.open('spontaneous.gemspec', 'w') do |gemspec|
-      bundler = Bundler.load
-      dependencies = bundler.dependencies_for(:default, :runtime).map do |dependency|
-        %{s.add_dependency('#{dependency.name}', [#{dependency.requirement.as_list.map { |d| d.inspect }.join(', ')}])}
-      end
-      development_dependencies = bundler.dependencies_for(:development).map do |dependency|
-        %{s.add_development_dependency('#{dependency.name}', [#{dependency.requirement.as_list.map { |d| d.inspect }.join(', ')}])}
-      end
-      gemspec.write(template % [dependencies.join("\n  "), development_dependencies.join("\n  ")])
+      # bundler = Bundler.load
+      # dependencies = bundler.dependencies_for(:default, :runtime).map do |dependency|
+      #   %{s.add_dependency('#{dependency.name}', [#{dependency.requirement.as_list.map { |d| d.inspect }.join(', ')}])}
+      # end
+      # development_dependencies = bundler.dependencies_for(:development).map do |dependency|
+      #   %{s.add_development_dependency('#{dependency.name}', [#{dependency.requirement.as_list.map { |d| d.inspect }.join(', ')}])}
+      # end
+      gemspec.write(template)
     end
   end
 
