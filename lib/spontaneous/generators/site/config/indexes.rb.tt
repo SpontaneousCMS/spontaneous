@@ -8,7 +8,7 @@
 # Additional control over what appears in each index is provided in
 # the field definitions. See the documentation there for more details.
 #
-# Site.index do :blog do
+# Site.index :blog do
 #   include_types :BlogPost, "Text"
 #   exclude_types :Image, Video
 #   language :english
@@ -19,5 +19,5 @@
 # To create an index purely for tags, specify the index here
 # and then include only the tag field in the values to be indexed
 #
-# Site.index do :tags do
+# Site.index :tags do
 # end
