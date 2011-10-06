@@ -97,12 +97,12 @@ module Spontaneous
         @pages_rendered = 0
         S::Content.with_identity_map do
           S::Render.with_publishing_renderer do
-            update_progress("rendering:0")
+            update_progress("rendering", 0)
             formats.each do |format|
               S::Render.render_pages(revision, pages, format, self)
             end
             # only set this after indexing is complete (if any)
-            update_progress("rendering:100")
+            update_progress("rendering", 100)
           end
         end
         update_progress("copying_files")
