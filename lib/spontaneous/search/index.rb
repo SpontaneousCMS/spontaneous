@@ -12,6 +12,7 @@ module Spontaneous::Search
       @search_types = base_search_types
       @include_pages = nil
       @exclude_pages = nil
+      @stemmer = @stopper = nil
       self.instance_eval(&definition) if definition
     end
 
@@ -45,9 +46,19 @@ module Spontaneous::Search
       Database.new(self, revision)
     end
 
-    # TODO: make setting the language part of the config
-    def language
-      :english
+    def language(set_language = nil)
+      @language = set_language unless set_language.nil?
+      @language ||= :english
+    end
+
+    def stemmer(set_stemmer = nil)
+      @stemmer = set_stemmer unless set_stemmer.nil?
+      @stemmer
+    end
+
+    def stopper(set_stopper = nil)
+      @stopper = set_stopper unless set_stopper.nil?
+      @stopper
     end
 
     # Extract all indexable content from a page. Values are grouped across fields

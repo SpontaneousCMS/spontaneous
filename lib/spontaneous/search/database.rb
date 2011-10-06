@@ -23,10 +23,13 @@ module Spontaneous::Search
     end
 
     def xapian_options
-      { :dir => directory,
+      options = { :dir => directory,
         :language => @index.language,
         :fields => @index.fields,
         :spelling => true }
+      options[:stemmer] = @index.stemmer unless @index.stemmer.nil?
+      options[:stopper] = @index.stopper unless @index.stopper.nil?
+      options
     end
 
     def database

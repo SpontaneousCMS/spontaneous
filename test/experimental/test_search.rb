@@ -475,6 +475,46 @@ class SearchTest < MiniTest::Spec
         FileUtils.rm_r(db_path)
       end
 
+      should "pass on index configuration to the xapian db" do
+        db_path = @site.revision_dir(@revision) / 'indexes' / 'name'
+
+        index = Site.index :name do
+          language :italian
+        end
+
+        XapianFu::XapianDb.expects(:new).with({
+          :dir => db_path,
+          :create => true,
+          :overwrite => true,
+          :language => :italian,
+          :fields => index.fields,
+          :spelling => true
+        })
+
+        db = index.create_db(@revision)
+
+        index = Site.index :name do
+          language :french
+          stopper  false
+          stemmer  false
+        end
+
+        XapianFu::XapianDb.expects(:new).with({
+          :dir => db_path,
+          :create => true,
+          :overwrite => true,
+          :language => :french,
+          :stemmer => false,
+          :stopper => false,
+          :fields => index.fields,
+          :spelling => true
+        })
+
+        db = index.create_db(@revision)
+
+        FileUtils.rm_r(db_path)
+      end
+
       should "return (reasonable) results to searches" do
         db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
         Site.stubs(:published_revision).returns(@revision)
