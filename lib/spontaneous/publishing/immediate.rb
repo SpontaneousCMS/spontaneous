@@ -55,10 +55,10 @@ module Spontaneous
       end
 
       # Called from the Format#render method to provide progress reports
-      def page_rendered(page)
+      def page_rendered(page, event = "rendering")
         @pages_rendered += 1
-        update_progress("rendering", percent_complete)
-        logger.info { "Rendered page #{page.path}" }
+        update_progress(event, percent_complete)
+        logger.info { "Done: #{event} page #{page.path} #{percent_complete.round(1)}%" }
       end
 
       protected
@@ -77,13 +77,13 @@ module Spontaneous
         1
       end
 
-      def publish(pages)
+      def publish(modified_page_list)
         at_exit {
           abort_publish_at_exit
         }
         before_publish
         begin
-          S::Content.publish(revision, pages) do
+          S::Content.publish(revision, modified_page_list) do
             render_revision
           end
           after_publish
@@ -96,13 +96,10 @@ module Spontaneous
       def render_revision
         @pages_rendered = 0
         S::Content.with_identity_map do
+          update_progress("rendering", 0)
           S::Render.with_publishing_renderer do
-            update_progress("rendering", 0)
-            formats.each do |format|
-              S::Render.render_pages(revision, pages, format, self)
-            end
-            # only set this after indexing is complete (if any)
-            update_progress("rendering", 100)
+            render_pages
+            index_pages
           end
         end
         update_progress("copying_files")
@@ -110,9 +107,26 @@ module Spontaneous
         generate_rackup_file
       end
 
+      def render_pages
+        formats.each do |format|
+          S::Render.render_pages(revision, pages, format, self)
+        end
+      end
+
+      def index_pages
+        S::Site.indexer(revision) do |indexer|
+          pages.each { |page|
+            indexer << page
+            page_rendered(page, 'indexing')
+          }
+        end
+      end
+
       # Used to calculate the progress percentage
+      # Calculated by (formats + indexes) * pages
+      # although not all pages are included by a format
       def total_pages_to_render
-        @total_pages ||= formats.inject(0) do |total, format|
+        @total_pages ||= formats.inject(S::Site.indexes.length * pages.count) do |total, format|
           total += pages.find_all { |page| page.formats.include?(format) }.count
         end
       end
@@ -149,7 +163,7 @@ module Spontaneous
         RACKUP
         rack_file = Spontaneous.revision_dir(revision) / 'config.ru'
         File.open(rack_file, 'w') { |f| f.write(template) }
-        end
+      end
 
       def copy_static_files
         public_dest = Pathname.new(Spontaneous.revision_dir(revision) / 'public')
