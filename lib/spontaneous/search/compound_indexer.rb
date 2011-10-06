@@ -7,6 +7,12 @@ module Spontaneous::Search
       @revision, @indexes, @dbs = revision, indexes, indexes.map { |index| index.create_db(revision) }
     end
 
+    def length
+      @indexes.length
+    end
+    alias_method :count, :length
+    alias_method :size,  :length
+
     def add(page)
       @dbs.each { |db| db << page }
     end

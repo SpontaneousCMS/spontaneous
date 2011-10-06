@@ -560,6 +560,7 @@ class SearchTest < MiniTest::Spec
         db1.expects(:close)
         db2.expects(:close)
         S::Site.indexer(@revision) do |indexer|
+          indexer.length.should == 2
           indexer << @page1
         end
       end
