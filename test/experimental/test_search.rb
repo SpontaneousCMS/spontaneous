@@ -29,6 +29,11 @@ class SearchTest < MiniTest::Spec
     # make sure that S::Piece & S::Page are removed from the schema
     *ids = S::Page.schema_id, S::Piece.schema_id
     S::Schema.reset!
+    Object.const_set(:Site, Class.new(S::Site))
+  end
+
+  def self.shutdown
+    Object.send(:remove_const, :Site) rescue nil
   end
 
   context "Search" do
@@ -36,8 +41,8 @@ class SearchTest < MiniTest::Spec
       S::Schema.reset!
       Content.delete
 
-      @root = Dir.tmpdir
-      @site = S::Site.instantiate(@root, nil, nil)
+      @site_root = Dir.mktmpdir
+      @site = ::Site.instantiate(@site_root, :development, :back)
 
       class ::Piece < S::Piece; end
       class ::Page < S::Page; end
@@ -98,7 +103,7 @@ class SearchTest < MiniTest::Spec
         Object.send(:remove_const, klass) rescue nil
       } rescue nil
       Content.delete
-      # FileUtils.rm_r(@root)
+      FileUtils.rm_r(@site_root)
     end
 
     context "indexes" do
@@ -117,9 +122,9 @@ class SearchTest < MiniTest::Spec
 
       should "allow restriction to particular classes" do
         index = S::Site.index :all do
-          include_types ::PageClass1, "PageClass2"
+          include_types ::PageClass1, "PageClass2", :PageClass3
         end
-        assert_same_elements [::PageClass1, ::PageClass2], index.search_types
+        assert_same_elements [::PageClass1, ::PageClass2, ::PageClass3], index.search_types
       end
 
       should "allow restriction to a class & its subclasses" do
@@ -517,6 +522,22 @@ class SearchTest < MiniTest::Spec
         S::Site.indexer(@revision) do |indexer|
           indexer << @page1
         end
+      end
+    end
+
+    context "initialization" do
+      setup do
+        S.instance = @site
+        FileUtils.cp_r(File.expand_path("../../fixtures/search/config", __FILE__), @site_root)
+      end
+
+      should "load the config/indexes.rb file" do
+        @site.expects(:connect_to_database!)
+        @site.initialize!
+        index = @site.indexes[:fast]
+        index.must_be_instance_of S::Search::Index
+        index.name.should == :fast
+        index.search_types.should == [PageClass1, PageClass2, PageClass3]
       end
     end
   end

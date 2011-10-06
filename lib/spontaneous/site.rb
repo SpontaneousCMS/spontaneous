@@ -25,11 +25,18 @@ module Spontaneous
       find_plugins!
       load_facets!
       init_facets!
+      init_indexes!
     end
 
     def init_facets!
       facets.each do |facet|
         facet.init!
+      end
+    end
+
+    def init_indexes!
+      facets.each do |facet|
+        facet.load_indexes!
       end
     end
 

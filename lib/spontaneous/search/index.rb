@@ -153,6 +153,7 @@ module Spontaneous::Search
 
     def find_type(type_definition)
       return type_definition if type_definition.is_a?(Class)
+      type_definition = type_definition.to_s if Symbol === type_definition
       if type_definition.is_a?(String)
         scope, base = type_definition.split(/\s+/).map { |s| s.strip }
         return scope.constantize if base.nil?

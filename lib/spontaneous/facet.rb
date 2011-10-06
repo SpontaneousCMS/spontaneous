@@ -28,6 +28,12 @@ module Spontaneous
       end
     end
 
+    def load_indexes!
+      paths.expanded(:config).each do |config_path|
+        load(config_path / "indexes.rb" )
+      end
+    end
+
     def init!
     end
 
