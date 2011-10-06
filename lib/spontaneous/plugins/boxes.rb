@@ -6,6 +6,7 @@ module Spontaneous::Plugins
     module ClassMethods
       def box(name, options = {}, &block)
         name = name.to_sym
+        prototype = nil
         unless boxes.key?(name)
           options[:group] = @box_group if @box_group
           prototype = Spontaneous::Prototypes::BoxPrototype.new(self, name, options, &block)
@@ -18,6 +19,7 @@ module Spontaneous::Plugins
             BOX
           end
         end
+        prototype
       end
 
       def boxes

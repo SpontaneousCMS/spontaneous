@@ -41,7 +41,9 @@ class SearchTest < MiniTest::Spec
 
       class ::Piece < S::Piece; end
       class ::Page < S::Page; end
-      Page.box :pages
+      b = ::Page.box :pages
+      # instantiate box instance class to it gets added to schema
+      ::Page.boxes.pages.instance_class.schema_id
 
       class ::PageClass1 < ::Page; end
       class ::PageClass2 < ::Page; end
@@ -55,6 +57,9 @@ class SearchTest < MiniTest::Spec
       class ::PieceClass3 < ::Piece; end
 
       @all_page_classes = [::Page, ::PageClass1, ::PageClass2, ::PageClass3, ::PageClass4, ::PageClass5, ::PageClass6]
+      @all_piece_classes = [::Piece, ::PieceClass1, ::PieceClass2, ::PieceClass3]
+      @all_box_classes = [ ::Page::PagesBox ]
+      @all_classes = @all_page_classes + @all_piece_classes + @all_box_classes
 
       @root0 = ::Page.create(:uid => "root")
       @page1 = ::PageClass1.create(:slug => "page1", :uid => "page1")
@@ -89,7 +94,7 @@ class SearchTest < MiniTest::Spec
     end
 
     teardown do
-      ([:Piece, :PieceClass1, :PieceClass2, :PieceClass3] + @all_page_classes.map { |k| k.name.to_sym }).each { |klass|
+      (@all_classes.map { |k| k.name.to_sym }).each { |klass|
         Object.send(:remove_const, klass) rescue nil
       } rescue nil
       Content.delete
@@ -107,7 +112,7 @@ class SearchTest < MiniTest::Spec
 
       should "default to indexing all content classes" do
         index = S::Site.index :all
-        assert_same_elements (@all_page_classes), index.search_types
+        assert_same_elements (@all_classes), index.search_types
       end
 
       should "allow restriction to particular classes" do
@@ -135,21 +140,21 @@ class SearchTest < MiniTest::Spec
         index = S::Site.index :all do
           exclude_types ::PageClass1, "PageClass2"
         end
-        assert_same_elements (@all_page_classes - [PageClass1, PageClass2]), index.search_types
+        assert_same_elements (@all_classes - [PageClass1, PageClass2]), index.search_types
       end
 
       should "allow removal of a class and its subclasses" do
         index = S::Site.index :all do
-          exclude_types ">= PageClass1"
+          exclude_types ">= PageClass1", PieceClass1
         end
-        assert_same_elements (@all_page_classes - [::PageClass1, ::PageClass3, ::PageClass5, ::PageClass6]), index.search_types
+        assert_same_elements (@all_classes - [::PageClass1, ::PageClass3, ::PageClass5, ::PageClass6, PieceClass1]), index.search_types
       end
 
       should "allow removal of a class's subclasses" do
         index = S::Site.index :all do
           exclude_types "> PageClass1"
         end
-        assert_same_elements (@all_page_classes - [::PageClass3, ::PageClass5, ::PageClass6]), index.search_types
+        assert_same_elements (@all_classes - [::PageClass3, ::PageClass5, ::PageClass6]), index.search_types
       end
 
       should "default to including all content" do
@@ -342,6 +347,8 @@ class SearchTest < MiniTest::Spec
         f = ::PageClass2.field :f, :index => :three
         g = ::Piece.field :g, :index => {:weight => :highest}
 
+        h = ::PageClass1.boxes.pages.instance_class.field :h, :index => :two
+
         S::Site.indexes[:one].fields.should == {
           a.schema_id.to_s => { :type => String, :store => true, :index => false},
           b.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true},
@@ -351,13 +358,12 @@ class SearchTest < MiniTest::Spec
 
         S::Site.indexes[:two].fields.should == {
           :a => { :type => String, :store => true, :weight => 2, :index => true},
-          g.schema_id.to_s => { :type => String, :store => true, :weight => 16, :index => true}
+          g.schema_id.to_s => { :type => String, :store => true, :weight => 16, :index => true},
+          h.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true}
         }
 
         S::Site.indexes[:three].fields.should == {
-          d.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true},
-          e.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true},
-          g.schema_id.to_s => { :type => String, :store => true, :weight => 16, :index => true}
+          e.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true}
         }
       end
     end
@@ -383,8 +389,11 @@ class SearchTest < MiniTest::Spec
         @j = PieceClass3.field :j, :index => {:group => :i}
         @k = PieceClass3.field :k
 
+        @l = ::PageClass1.boxes.pages.instance_class.field :l, :index => true
+
         @page1.a = "a value 1"
         @page1.pages.first.a =  "a value 2"
+        @page1.pages.l =  "l value 1"
 
         @piece1 = PieceClass1.new(:g => "g value 1")
         @page1.pages << @piece1
@@ -416,7 +425,20 @@ class SearchTest < MiniTest::Spec
           @a.schema_id.to_s => "(a value 1)",
           @g.schema_id.to_s => "g value 1\ng value 2\ng value 3",
           @h.schema_id.to_s => "h value 1\nh value 2",
-          :i                => "i value 1\nj value 1\ni value 2\nj value 2"
+          :i                => "i value 1\nj value 1\ni value 2\nj value 2",
+          @l.schema_id.to_s => "l value 1",
+        }
+      end
+
+      should "only include specified pieces" do
+        index = S::Site.index :four do
+          include_types PageClass1, PieceClass1
+        end
+
+        index.indexable_content(@page1).should == {
+          :id => @page1.id,
+          @a.schema_id.to_s => "a value 1",
+          @g.schema_id.to_s => "g value 1\ng value 2\ng value 3",
         }
       end
 

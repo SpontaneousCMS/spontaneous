@@ -57,6 +57,7 @@ module Spontaneous::Search
       # not sure that I need the include? test here as page.content only returns Pieces
       # and I'm not sure that there is a particular need to exclude Pieces from indexes
       pieces = [page].concat(page.content).select { |content| include?(content) }
+      pieces += page.boxes.select { |box| include?(box) }
       pieces.each do |content|
         content.fields.each do |field|
           prototype = field.prototype
@@ -98,14 +99,14 @@ module Spontaneous::Search
       fields
     end
 
-    def include?(page)
-      include_type?(page.class) and include_page?(page)
+    def include?(content)
+      include_type?(content.class) and include_page?(content.page)
     end
 
-    protected
+  protected
 
-    def include_type?(page_type)
-      !page_type.page? or search_types.include?(page_type)
+    def include_type?(type)
+      search_types.include?(type)
     end
 
     def include_page?(page)
@@ -143,12 +144,11 @@ module Spontaneous::Search
     end
 
     def base_search_types
-      all_page_types
+      all_types
     end
 
     def resolve_type_list(types)
-      types.map { |klass| find_type(klass) }.
-        flatten
+      types.map { |klass| find_type(klass) }.flatten
     end
 
     def find_type(type_definition)
@@ -157,7 +157,7 @@ module Spontaneous::Search
         scope, base = type_definition.split(/\s+/).map { |s| s.strip }
         return scope.constantize if base.nil?
         base_type = base.constantize
-        all_page_types.select { |klass| base_type.send(scope, klass) }
+        all_types.select { |klass| base_type.send(scope, klass) }
       end
     end
 
