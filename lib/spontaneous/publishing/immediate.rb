@@ -143,9 +143,11 @@ module Spontaneous
         # use the real path to the app rather than the symlink in order to sandbox the live site
         # not sure that this is a good idea: it would force a publish for every deploy
         # which is only sometimes appropriate/desirable
+        # UPDATE: What was I on about there? The true downside to this is that it would force a restart/HUP for
+        # every publish. Not sure that the comment above this one is based on truth or some mad momentary fantasy
         path = Pathname.new(Spontaneous.root).realpath.to_s
-        # TODO: enable custom rack middleware by changing config/front into a proper rackup file
         rackup = 'config/front.ru'
+
         template = (<<-RACKUP).gsub(/^ +/, '')
           # This is an automatically generated file *DO NOT EDIT*
           # To configure your Rack application make your changes in
@@ -159,7 +161,6 @@ module Spontaneous
           root = '#{path}'
           Dir.chdir(root)
           eval(::File.read('#{rackup}'), binding, ::File.join(root, '#{rackup}'), __LINE__)
-
         RACKUP
         rack_file = Spontaneous.revision_dir(revision) / 'config.ru'
         File.open(rack_file, 'w') { |f| f.write(template) }
