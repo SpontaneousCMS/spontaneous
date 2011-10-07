@@ -94,15 +94,14 @@ module Spontaneous
       end
 
       def render_revision
+        update_progress("rendering", 0)
         @pages_rendered = 0
         S::Content.with_identity_map do
-          update_progress("rendering", 0)
           S::Render.with_publishing_renderer do
             render_pages
             index_pages
           end
         end
-        update_progress("copying_files")
         copy_static_files
         generate_rackup_file
       end
@@ -124,9 +123,10 @@ module Spontaneous
 
       # Used to calculate the progress percentage
       # Calculated by (formats + indexes) * pages
+      # where indexes = Site.indexes.length > 0 ? 1 : 0
       # although not all pages are included by a format
       def total_pages_to_render
-        @total_pages ||= formats.inject(S::Site.indexes.length * pages.count) do |total, format|
+        @total_pages ||= formats.inject([1, S::Site.indexes.length].min * pages.count) do |total, format|
           total += pages.find_all { |page| page.formats.include?(format) }.count
         end
       end
@@ -166,6 +166,7 @@ module Spontaneous
       end
 
       def copy_static_files
+        update_progress("copying_files")
         public_dest = Pathname.new(Spontaneous.revision_dir(revision) / 'public')
         public_src = Pathname.new(Spontaneous.root / 'public').realpath
         FileUtils.mkdir_p(public_dest) unless File.exists?(public_dest)
