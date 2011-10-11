@@ -33,6 +33,21 @@ module Spontaneous
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
 
+          map "#{NAMESPACE}/lock" do
+            run proc {
+              Spontaneous.database.transaction do
+                Spontaneous.database.run("LOCK TABLES content WRITE, spontaneous_access_keys READ")
+                Spontaneous.database.run("SELECT SLEEP(10)")
+                puts S::Content.first
+                Spontaneous.database.run("UNLOCK TABLES")
+              end
+            }
+          end
+          map "#{NAMESPACE}/unlock" do
+            run proc { Spontaneous.database.run("UNLOCK TABLES") }
+          end
+
+
           map "#{NAMESPACE}/events" do
             use CookieAuthentication
             use QueryAuthentication
@@ -162,15 +177,19 @@ module Spontaneous
           end
         end
 
-        def content_for_request
-          content = Content[params[:id]]
-          halt 404 if content.nil?
-          if box_id = Spontaneous::Schema::UID[params[:box_id]]
-            box = content.boxes.detect { |b| b.schema_id == box_id }
-            [content, box]
-          else
-            content
-          end
+        def content_for_request(lock = false)
+          Spontaneous.database.transaction {
+            dataset = lock ? Content.for_update : Content
+            content = dataset.first(:id => params[:id])
+            # content = dataset[params[:id]]
+            halt 404 if content.nil?
+            if box_id = Spontaneous::Schema::UID[params[:box_id]]
+              box = content.boxes.detect { |b| b.schema_id == box_id }
+              yield(content, box)
+            else
+              yield(content)
+            end
+          }
         end
 
 
@@ -192,7 +211,7 @@ module Spontaneous
         # TODO: check for perms on the particular bit of content
         # and pass user level into returned JSON
         get '/page/:id' do
-          json(content_for_request)
+          content_for_request { |content| json(content)}
         end
 
         get '/types' do
@@ -239,13 +258,15 @@ module Spontaneous
         end
 
         post '/version/:id' do
-          content = content_for_request
-          generate_conflict_list(content)
+          content_for_request(true) do |content|
+            generate_conflict_list(content)
+          end
         end
 
         post '/version/:id/:box_id' do
-          content, box = content_for_request
-          generate_conflict_list(box)
+          content_for_request(true) do |content, box|
+            generate_conflict_list(box)
+          end
         end
 
         def generate_conflict_list(content)
@@ -268,93 +289,119 @@ module Spontaneous
         end
 
         post '/save/:id' do
-          update_fields(content_for_request, params[:field])
+          content_for_request(true) do |content|
+            update_fields(content, params[:field])
+          end
         end
 
         post '/savebox/:id/:box_id' do
-          content, box = content_for_request
-          if box.writable?(user)
-            update_fields(box, params[:field])
-          else
-            unauthorised!
+          content_for_request(true) do |content, box|
+            if box.writable?(user)
+              update_fields(box, params[:field])
+            else
+              unauthorised!
+            end
           end
         end
 
 
         post '/content/:id/position/:position' do
-          content = content_for_request
-          if content.box.writable?(user)
-            content.update_position(params[:position].to_i)
-            json( {:message => 'OK'} )
-          else
-            unauthorised!
+          content_for_request(true) do |content|
+            if content.box.writable?(user)
+              content.update_position(params[:position].to_i)
+              json( {:message => 'OK'} )
+            else
+              unauthorised!
+            end
           end
         end
 
         post '/toggle/:id' do
-          content = content_for_request
-          if content.box && content.box.writable?(user)
-            content.toggle_visibility!
-            json({:id => content.id, :hidden => (content.hidden? ? true : false) })
-          else
-            unauthorised!
+          content_for_request(true) do |content|
+            if content.box && content.box.writable?(user)
+              content.toggle_visibility!
+              json({:id => content.id, :hidden => (content.hidden? ? true : false) })
+            else
+              unauthorised!
+            end
           end
         end
 
 
         # TODO: DRY this up
         post '/file/replace/:id' do
-          target = content_for_request
-          file = params['file']
-          field = target.fields.sid(params['field'])
-          if target.field_writable?(user, field.name)
-            # version = params[:version].to_i
-            # if version == field.version
-            field.unprocessed_value = file
-            target.save
-            json(field.export(user))
-            # else
-            #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
-            #   [409, json(Hash[errors])]
-            # end
-          else
-            unauthorised!
+          content_for_request(true) do |target|
+            file = params['file']
+            field = target.fields.sid(params['field'])
+            if target.field_writable?(user, field.name)
+              # version = params[:version].to_i
+              # if version == field.version
+              field.unprocessed_value = file
+              target.save
+              json(field.export(user))
+              # else
+              #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
+              #   [409, json(Hash[errors])]
+              # end
+            else
+              unauthorised!
+            end
           end
         end
 
         post '/file/replace/:id/:box_id' do
-          content, box = content_for_request
-          target = box || content
-          file = params[:file]
-          field = target.fields.sid(params['field'])
-          if target.field_writable?(user, field.name)
-            # version = params[:version].to_i
-            # if version == field.version
-            field.unprocessed_value = file
-            content.save
-            json(field.export(user))
-            # else
-            #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
-            #   [409, json(Hash[errors])]
-            # end
-          else
-            unauthorised!
+          content_for_request(true) do |content, box|
+            target = box || content
+            file = params[:file]
+            field = target.fields.sid(params['field'])
+            if target.field_writable?(user, field.name)
+              # version = params[:version].to_i
+              # if version == field.version
+              field.unprocessed_value = file
+              content.save
+              json(field.export(user))
+              # else
+              #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
+              #   [409, json(Hash[errors])]
+              # end
+            else
+              unauthorised!
+            end
           end
         end
 
 
         post '/file/wrap/:id/:box_id' do
-          content, box = content_for_request
-          file = params['file']
-          type = box.type_for_mime_type(file[:type])
-          if type
+          content_for_request(true) do |content, box|
+            file = params['file']
+            type = box.type_for_mime_type(file[:type])
+            if type
+              if box.writable?(user, type)
+                position = 0
+                instance = type.new
+                box.insert(position, instance)
+                field = instance.field_for_mime_type(file[:type])
+                field.unprocessed_value = file
+                instance.save
+                content.save
+                json({
+                  :position => position,
+                  :entry => instance.entry.export(user)
+                })
+              else
+                unauthorised!
+              end
+            end
+          end
+        end
+
+        post '/add/:id/:box_id/:type_name' do
+          content_for_request(true) do |content, box|
+            position = 0
+            type = Spontaneous::Schema[params[:type_name]]#.constantize
             if box.writable?(user, type)
-              position = 0
               instance = type.new
               box.insert(position, instance)
-              field = instance.field_for_mime_type(file[:type])
-              field.unprocessed_value = file
-              instance.save
               content.save
               json({
                 :position => position,
@@ -366,59 +413,46 @@ module Spontaneous
           end
         end
 
-        post '/add/:id/:box_id/:type_name' do
-          content, box = content_for_request
-          position = 0
-          type = Spontaneous::Schema[params[:type_name]]#.constantize
-          if box.writable?(user, type)
-            instance = type.new
-            box.insert(position, instance)
-            content.save
-            json({
-              :position => position,
-              :entry => instance.entry.export(user)
-            })
-          else
-            unauthorised!
-          end
-        end
-
         post '/destroy/:id' do
-          content = content_for_request
-          if content.box.writable?(user)
-            content.destroy
-            json({})
-          else
-            unauthorised!
+          content_for_request(true) do |content|
+            if content.box.writable?(user)
+              content.destroy
+              json({})
+            else
+              unauthorised!
+            end
           end
         end
 
         post '/slug/:id' do
-          content = content_for_request
-          if params[:slug].nil? or params[:slug].empty?
-            406 # Not Acceptable
-          else
-            content.slug = params[:slug]
-            if content.siblings.detect { |s| s.slug == content.slug }
-              409 # Conflict
+          content_for_request(true) do |content|
+            if params[:slug].nil? or params[:slug].empty?
+              406 # Not Acceptable
             else
-              content.save
-              json({:path => content.path, :slug => content.slug })
+              content.slug = params[:slug]
+              if content.siblings.detect { |s| s.slug == content.slug }
+                409 # Conflict
+              else
+                content.save
+                json({:path => content.path, :slug => content.slug })
+              end
             end
           end
         end
 
         get '/slug/:id/unavailable' do
-          content = content_for_request
-          json(content.siblings.map { |c| c.slug })
+          content_for_request do |content|
+            json(content.siblings.map { |c| c.slug })
+          end
         end
 
         post '/uid/:id' do
           if user.developer?
-            content = content_for_request
-            content.uid = params[:uid]
-            content.save
-            json({:uid => content.uid })
+            content_for_request(true) do |content|
+              content.uid = params[:uid]
+              content.save
+              json({:uid => content.uid })
+            end
           else
             unauthorised!
           end
@@ -439,22 +473,23 @@ module Spontaneous
         end
 
         post '/alias/:id/:box_id' do
-          content, box = content_for_request
-          type = Spontaneous::Schema[params[:alias_id]]
-          position = 0
-          if box.writable?(user, type)
-            target = Spontaneous::Content[params[:target_id]]
-            if target
-              instance = type.create(:target => target)
-              box.insert(position, instance)
-              content.save
-              json({
-                :position => position,
-                :entry => instance.entry.export(user)
-              })
+          content_for_request(true) do |content, box|
+            type = Spontaneous::Schema[params[:alias_id]]
+            position = 0
+            if box.writable?(user, type)
+              target = Spontaneous::Content[params[:target_id]]
+              if target
+                instance = type.create(:target => target)
+                box.insert(position, instance)
+                content.save
+                json({
+                  :position => position,
+                  :entry => instance.entry.export(user)
+                })
+              end
+            else
+              unauthorised!
             end
-          else
-            unauthorised!
           end
         end
 
@@ -507,13 +542,15 @@ module Spontaneous
         end
 
         post '/shard/replace/:id' do
-          content = content_for_request
-          replace_with_shard(content, content.id)
+          content_for_request(true) do |content|
+            replace_with_shard(content, content.id)
+          end
         end
 
         post '/shard/replace/:id/:box_id' do
-          content, box = content_for_request
-          replace_with_shard(box, content.id)
+          content_for_request(true) do |content, box|
+            replace_with_shard(box, content.id)
+          end
         end
 
         def replace_with_shard(target, target_id)
@@ -540,27 +577,28 @@ module Spontaneous
 
         # TODO: remove duplication here
         post '/shard/wrap/:id/:box_id' do
-          content, box = content_for_request
-          type = box.type_for_mime_type(params[:mime_type])
-          if type
-            if box.writable?(user, type)
-              position = 0
-              instance = type.new
-              box.insert(position, instance)
-              field = instance.field_for_mime_type(params[:mime_type])
-              Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-                field.unprocessed_value = {
-                  :filename => params[:filename],
-                  :tempfile => combined
-                }
-                content.save
+          content_for_request(true) do |content, box|
+            type = box.type_for_mime_type(params[:mime_type])
+            if type
+              if box.writable?(user, type)
+                position = 0
+                instance = type.new
+                box.insert(position, instance)
+                field = instance.field_for_mime_type(params[:mime_type])
+                Spontaneous::Media.combine_shards(params[:shards]) do |combined|
+                  field.unprocessed_value = {
+                    :filename => params[:filename],
+                    :tempfile => combined
+                  }
+                  content.save
+                end
+                json({
+                  :position => position,
+                  :entry => instance.entry.export(user)
+                })
+              else
+                unauthorised!
               end
-              json({
-                :position => position,
-                :entry => instance.entry.export(user)
-              })
-            else
-              unauthorised!
             end
           end
         end

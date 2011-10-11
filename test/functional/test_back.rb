@@ -56,6 +56,7 @@ class BackTest < MiniTest::Spec
       instance = Spontaneous::Site.instantiate(root, :test, :back)
       instance.stubs(:config).returns(config)
       Spontaneous.instance = instance
+      Spontaneous.database = DB
       # p app.to_app
       # app.to_app.send(:set, :raise_errors, true)
       # app.send(:set, :dump_errors, true)
@@ -291,6 +292,7 @@ class BackTest < MiniTest::Spec
             "field[#{box.fields.title.schema_id.to_s}][value]" => "Updated title"
           }
           auth_post "/@spontaneous/savebox/#{@job1.id}/#{box.schema_id.to_s}", params
+          # puts last_response.body
           assert last_response.ok?
           last_response.content_type.should == "application/json;charset=utf-8"
           @job1 = Content[@job1.id]
@@ -299,10 +301,11 @@ class BackTest < MiniTest::Spec
 
         should "generate an error if there is a field version conflict" do
           field = @job1.fields.title
+          field.version = 3
+          @job1.save.reload
+          field = @job1.fields.title
           sid = field.schema_id.to_s
           params = { "fields" => {sid => "2"} }
-          field.stubs(:version).returns(3)
-          Content.stubs(:[]).with(@job1.id.to_s).returns(@job1)
 
           auth_post "/@spontaneous/version/#{@job1.id}", params
           assert last_response.status == 409, "Should have recieved a 409 conflict but instead received a #{last_response.status}"
@@ -316,10 +319,12 @@ class BackTest < MiniTest::Spec
         should "generate an error if there is a field version conflict for boxes" do
           box = @job1.images
           field = box.fields.title
+          field.version = 3
+          @job1.save.reload
+          box = @job1.images
+          field = box.fields.title
           sid = field.schema_id.to_s
           params = { "fields" => {sid => "2"} }
-          field.stubs(:version).returns(3)
-          Content.stubs(:[]).with(@job1.id.to_s).returns(@job1)
 
           auth_post "/@spontaneous/version/#{@job1.id}/#{box.schema_id.to_s}", params
           assert last_response.status == 409, "Should have recieved a 409 conflict but instead received a #{last_response.status}"
@@ -848,9 +853,12 @@ class BackTest < MiniTest::Spec
           last_response.status.should == 200
         end
         @image1.image.processed_value.should == ""
-
-        S::Content.stubs(:[]).with(@image1.id.to_s).returns(@image1)
-        S::Content.stubs(:[]).with(@image1.id).returns(@image1)
+        dataset = mock()
+        S::Content.stubs(:for_update).returns(dataset)
+        dataset.stubs(:first).with(:id => @image1.id.to_s).returns(@image1)
+        dataset.stubs(:first).with(:id => @image1.id).returns(@image1)
+        # S::Content.stubs(:[]).with(@image1.id.to_s).returns(@image1)
+        # S::Content.stubs(:[]).with(@image1.id).returns(@image1)
         auth_post "/@spontaneous/shard/replace/#{@image1.id}", "filename" => "rose.jpg",
           "shards" => hashes, "field" => @image1.image.schema_id.to_s
         assert last_response.ok?
