@@ -178,10 +178,9 @@ module Spontaneous
         end
 
         def content_for_request(lock = false)
-          Spontaneous.database.transaction {
+          Content.db.transaction {
             dataset = lock ? Content.for_update : Content
             content = dataset.first(:id => params[:id])
-            # content = dataset[params[:id]]
             halt 404 if content.nil?
             if box_id = Spontaneous::Schema::UID[params[:box_id]]
               box = content.boxes.detect { |b| b.schema_id == box_id }
