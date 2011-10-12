@@ -163,7 +163,7 @@ class BackTest < MiniTest::Spec
       should "return application page" do
         get '/@spontaneous/'
         assert last_response.ok?, "Should have returned 200 but got #{last_response.status}"
-        last_response.body.should =~ /<title>Spontaneous<\/title>/
+        last_response.body.should =~ /<title>Spontaneous/
       end
 
       should "return json for root page" do
