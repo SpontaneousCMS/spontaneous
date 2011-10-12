@@ -292,7 +292,6 @@ class BackTest < MiniTest::Spec
             "field[#{box.fields.title.schema_id.to_s}][value]" => "Updated title"
           }
           auth_post "/@spontaneous/savebox/#{@job1.id}/#{box.schema_id.to_s}", params
-          # puts last_response.body
           assert last_response.ok?
           last_response.content_type.should == "application/json;charset=utf-8"
           @job1 = Content[@job1.id]
@@ -798,6 +797,7 @@ class BackTest < MiniTest::Spec
     end
     context "sharded uploading" do
       setup do
+        Spontaneous.stubs(:reload!)
         @temp_dir = Dir.mktmpdir
         @shard_dir = @temp_dir / "tmp"
         @image = File.expand_path("../../fixtures/sharding/rose.jpg", __FILE__)
