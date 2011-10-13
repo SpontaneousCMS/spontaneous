@@ -27,7 +27,23 @@ module Spontaneous
           # because they rely on the global values of renderer and also Content.with_visible
           # I'm not sure that using Rack::Lock here would fix any problems that this causes,
           # or even if there are any problems that would be caused
+          #
           # use ::Rack::Lock
+          # ###################
+          # Looking at the three Around* middlewares, there shouldn't actually be a problem with
+          # the renderers, as the only conflict would come from the back server which provides two
+          # outputs: the preview and the editing interface. Luckily both the preview and the editing
+          # interface share the same renderer.
+          # The real problem is the Content::with_visible wrapper as the editing interface and the preview
+          # renderer use different values for this. As the only way to solve this would be using a global
+          # to replace the model class (as we need to be able to issue thread save Model.select calls)
+          # I don't know how to fix this.
+          # One solution would be to always use the Content::_unfiltered_dataset call within the editing interface
+          # and then we'd be free (I think) to wrap it in the with_visible call, though I don't know how this would
+          # affect the loading of content within the page.
+          #
+          # Needs testing...
+          # ###################
 
           use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
             :urls => %w[/],
@@ -37,8 +53,8 @@ module Spontaneous
             run proc {
               Spontaneous.database.transaction do
                 Spontaneous.database.run("LOCK TABLES content WRITE, spontaneous_access_keys READ")
-                Spontaneous.database.run("SELECT SLEEP(10)")
                 puts S::Content.first
+                Spontaneous.database.run("SELECT SLEEP(10)")
                 Spontaneous.database.run("UNLOCK TABLES")
               end
             }
