@@ -49,6 +49,7 @@ module Spontaneous
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
 
+          ################### REMOVE THIS
           map "#{NAMESPACE}/lock" do
             run proc {
               Spontaneous.database.transaction do
@@ -62,7 +63,13 @@ module Spontaneous
           map "#{NAMESPACE}/unlock" do
             run proc { Spontaneous.database.run("UNLOCK TABLES") }
           end
+          ################### END REMOVE THIS
 
+          Spontaneous.instance.back_controllers.each do |namespace, controller_class|
+            map namespace do
+              run controller_class
+            end
+          end if Spontaneous.instance
 
           map "#{NAMESPACE}/events" do
             use CookieAuthentication
@@ -94,30 +101,8 @@ module Spontaneous
       class EditingBase < ServerBase
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
-        helpers do
-
-          def style_url(style)
-            "#{NAMESPACE}/css/#{style}.css"
-          end
-
-          def script_url(script)
-            "#{NAMESPACE}/js/#{script}.js"
-          end
-
-          def script_list(scripts)
-            if Spontaneous.development?
-              scripts.map do |script|
-                src = "/js/#{script}.js"
-                path = Spontaneous.application_dir(src)
-                size = File.size(path)
-                ["#{NAMESPACE}#{src}", size]
-                # %(<script src="#{NAMESPACE}/js/#{script}.js" type="text/javascript"></script>)
-              end.to_json
-            else
-              # script bundling + compression
-            end
-          end
-        end
+        helpers Spontaneous::Rack::UserHelpers
+        helpers Spontaneous::Rack::Helpers
 
         def json(response)
           content_type 'application/json', :charset => 'utf-8'
@@ -131,10 +116,14 @@ module Spontaneous
         end
       end
 
-      class AuthenticatedHandler < EditingBase
-        use CookieAuthentication
-        use AroundBack
-        register Authentication
+      class BackControllerBase < EditingBase
+        # use CookieAuthentication
+        # use AroundBack
+        # register Authentication
+      end
+      Spontaneous::Rack.make_back_controller(BackControllerBase)
+
+      class AuthenticatedHandler < BackControllerBase
         requires_authentication! :except_all => [%r(^#{NAMESPACE}/unsupported)], :except_key => [%r(^#{NAMESPACE}/?(/\d+/?.*)?$)]
       end
 
@@ -207,6 +196,40 @@ module Spontaneous
           }
         end
 
+        post "/reauthenticate" do
+          if key = Spot::Permissions::AccessKey.authenticate(params[:api_key])
+            response.set_cookie(AUTH_COOKIE, {
+              :value => key.key_id,
+              :path => '/'
+            })
+            origin = "#{NAMESPACE}#{params[:origin]}"
+            redirect origin, 302
+          else
+            show_login_page( :invalid_key => true )
+          end
+        end
+
+        post "/login" do
+          login = params[:user][:login]
+          password = params[:user][:password]
+          origin = "#{NAMESPACE}#{params[:origin]}"
+          if key = Spontaneous::Permissions::User.authenticate(login, password)
+            response.set_cookie(AUTH_COOKIE, {
+              :value => key.key_id,
+              :path => '/'
+            })
+            if request.xhr?
+              json({
+                :key => key.key_id,
+                :redirect => origin
+              })
+            else
+              redirect origin, 302
+            end
+          else
+            show_login_page( :login => login, :failed => true )
+          end
+        end
 
         get '/?' do
           erb :index
@@ -669,23 +692,17 @@ module Spontaneous
 
       class Preview < Sinatra::Base
         include Spontaneous::Rack::Public
+        helpers Spontaneous::Rack::UserHelpers
 
         use CookieAuthentication
         use AroundPreview
-        register Authentication
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
-        # I don't want this because I'm redirecting everything to /@spontaneous unless
-        # we're logged in
-        # requires_authentication! :except => ['/', '/favicon.ico']
-
         # redirect to /@spontaneous unless we're logged in
-        before do
-          unless user
-            redirect NAMESPACE, 302
-          end
-        end
+        before {
+          redirect NAMESPACE, 302 unless user
+        }
 
 
         get '*' do

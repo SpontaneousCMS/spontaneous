@@ -24,6 +24,18 @@ module Spontaneous
       def port
         Site.config.port
       end
+
+      def make_front_controller(controller_class)
+        controller_class.use(Spontaneous::Rack::AroundFront)
+      end
+
+      def make_back_controller(controller_class)
+        controller_class.helpers Spontaneous::Rack::Helpers
+        controller_class.helpers Spontaneous::Rack::UserHelpers
+        controller_class.use Spontaneous::Rack::CookieAuthentication
+        controller_class.use Spontaneous::Rack::AroundBack
+        controller_class.register Spontaneous::Rack::Authentication
+      end
     end
 
     class ServerBase < ::Sinatra::Base
@@ -52,6 +64,8 @@ module Spontaneous
     autoload :Authentication, 'spontaneous/rack/authentication'
     autoload :Media, 'spontaneous/rack/media'
     autoload :Static, 'spontaneous/rack/static'
+    autoload :UserHelpers, 'spontaneous/rack/user_helpers'
+    autoload :Helpers, 'spontaneous/rack/helpers'
     autoload :CookieAuthentication, 'spontaneous/rack/cookie_authentication'
     autoload :QueryAuthentication, 'spontaneous/rack/query_authentication'
     autoload :AroundBack, 'spontaneous/rack/around_back'

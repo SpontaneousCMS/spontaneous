@@ -14,6 +14,13 @@ module Spontaneous
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
 
+
+          Spontaneous.instance.front_controllers.each do |namespace, controller_class|
+            map namespace do
+              run controller_class
+            end
+          end if Spontaneous.instance
+
           map "/media" do
             run Spontaneous::Rack::Media.new
           end
@@ -28,9 +35,10 @@ module Spontaneous
       class Server < Sinatra::Base
         include Spontaneous::Rack::Public
 
-        def call(env)
-          self.dup.call!(env)
-        end
+        # def call(env)
+        #   self.dup.call!(env)
+        # end
+
         def call!(env)
           @env = env
           @response = ::Sinatra::Response.new

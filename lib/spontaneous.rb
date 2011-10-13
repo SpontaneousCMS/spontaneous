@@ -53,6 +53,7 @@ module Spontaneous
   plugin Plugins::Application::Render
   plugin Plugins::Application::Facets
   plugin Plugins::Application::Serialisation
+  plugin Plugins::Application::Features
 
   autoload :ProxyObject, "spontaneous/proxy_object"
 
@@ -159,6 +160,7 @@ module Spontaneous
       autoload :Map,        "spontaneous/plugins/site/map"
       autoload :Instance,   "spontaneous/plugins/site/instance"
       autoload :Search,     "spontaneous/plugins/site/search"
+      autoload :Features,   "spontaneous/plugins/site/features"
     end
   end
 
