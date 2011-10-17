@@ -5,49 +5,50 @@ require File.expand_path('../../test_helper', __FILE__)
 class PrototypesTest < MiniTest::Spec
   context "Prototypes" do
     setup do
-      class ::ImageClass < Spontaneous::Content
+      class ::ImageClass < Spontaneous::Piece
         field :image
         field :description
 
-        def prototype
-          self.description = "An Image"
+        prototype do |piece|
+          piece.description = "An Image"
         end
 
-        def complex_prototype
-          self.description = "Complex"
+        prototype :complex do |piece|
+          piece.description = "Complex"
         end
       end
 
-      class ::PrototypeClass < Spontaneous::Content
+      class ::PrototypeClass < Spontaneous::Piece
         field :title, :string
         field :date,  :string
         field :something, :string, :default => "Here"
 
         box :images
 
-        def prototype
-          self.title = "Naughty"
-          self.date  = "Yesterday"
-          self.something = self.something.value * 2
-          self.images << ImageClass.new
+        prototype do |piece|
+          piece.title = "Naughty"
+          piece.date  = "Yesterday"
+          piece.something = piece.something.value * 2
+          piece.images << ImageClass.new
         end
 
-        def careless_prototype
-          self.title = "Careless"
-          self.date  = "Whisper"
+        prototype :careless do |piece|
+          piece.title = "Careless"
+          piece.date  = "Whisper"
         end
 
-        def witless_prototype
-          self.title = "Witless"
-          self.date  = "Witness"
+        prototype :witless do |piece|
+          piece.title = "Witless"
+          piece.date  = "Witness"
         end
       end
+
 
     end
     teardown do
       Content.delete
-      Object.send(:remove_const, :ImageClass)
-      Object.send(:remove_const, :PrototypeClass)
+      Object.send(:remove_const, :ImageClass) rescue nil
+      Object.send(:remove_const, :PrototypeClass) rescue nil
     end
 
     should "call #prototype after creation of an object" do
@@ -96,6 +97,16 @@ class PrototypesTest < MiniTest::Spec
       content = PrototypeClass.create_without_prototype
       content.title.value.should == ""
       content.date.value.should == ""
+    end
+
+    should "inherit prototypes from supertype" do
+      class ::Prototype2Class < ::PrototypeClass; end
+
+      content = Prototype2Class.create(:witless)
+      content.title.value.should == "Witless"
+      content.date.value.should == "Witness"
+
+      Object.send(:remove_const, :ImageClass) rescue nil
     end
   end
 end
