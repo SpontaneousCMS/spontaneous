@@ -106,7 +106,37 @@ class PrototypesTest < MiniTest::Spec
       content.title.value.should == "Witless"
       content.date.value.should == "Witness"
 
-      Object.send(:remove_const, :ImageClass) rescue nil
+      Object.send(:remove_const, :Prototype2Class) rescue nil
+    end
+
+    should "allow overwriting of prototypes in subclasses" do
+      class ::Prototype2Class < ::PrototypeClass
+        prototype :witless do |piece|
+          piece.title = "Witless2"
+          piece.date  = "Witness2"
+        end
+      end
+
+      content = Prototype2Class.create(:witless)
+      content.title.value.should == "Witless2"
+      content.date.value.should == "Witness2"
+
+      Object.send(:remove_const, :Prototype2Class) rescue nil
+    end
+
+    should "allow calling of supertype prototype from within overridden prototype" do
+      class ::Prototype2Class < ::PrototypeClass
+        prototype :witless do |piece|
+          super(piece)
+          piece.date  = "Witness2"
+        end
+      end
+
+      content = Prototype2Class.create(:witless)
+      content.title.value.should == "Witless"
+      content.date.value.should == "Witness2"
+
+      Object.send(:remove_const, :Prototype2Class) rescue nil
     end
   end
 end

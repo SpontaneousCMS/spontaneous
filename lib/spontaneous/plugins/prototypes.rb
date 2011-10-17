@@ -39,12 +39,15 @@ module Spontaneous::Plugins
       end
 
 
-      def prototypes
-        @prototypes ||= Spontaneous::Collections::PrototypeSet.new(supertype, :prototypes)
+      # Blocks passed to the prototype call are used to create instance methods on the class
+      # This enables the use of `super` within the blocks and solves the otherwise tricky
+      # inheritance implications.
+      def prototype(name = Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME, &block)
+        define_method(prototype_method_name(name), &block)# do |content|
       end
 
-      def prototype(name = Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME, &block)
-        prototypes[name] = block
+      def prototype_method_name(name)
+        "_apply_prototype_#{name}"
       end
     end # ClassMethods
 
@@ -61,11 +64,10 @@ module Spontaneous::Plugins
       def apply_prototype
         return if _prototype == false
 
-        block = self.class.prototypes[_prototype || Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME]
+        method = self.class.prototype_method_name(_prototype || Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME)
 
-        if block
-          block.call(self)
-          save
+        if respond_to?(method)
+          self.send(method, self)
         else
           logger.warn {
             "Invalid prototype name '#{_prototype}' being passed to class #{self.class}."
