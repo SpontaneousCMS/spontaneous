@@ -43,7 +43,9 @@ module Spontaneous::Plugins
       # This enables the use of `super` within the blocks and solves the otherwise tricky
       # inheritance implications.
       def prototype(name = Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME, &block)
-        raise Spontaneous::InvalidPrototypeDefinitionError.new("Prototype definitions must accept one parameter - the content instance which the prototype is about to be applied.") unless block.arity == 1
+        raise Spontaneous::InvalidPrototypeDefinitionError.new(
+          "Prototype definitions must accept one parameter - the content instance which the prototype is about to be applied."
+        ) unless block.arity == 1
         define_method(prototype_method_name(name), &block)# do |content|
       end
 
