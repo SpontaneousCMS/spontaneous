@@ -138,6 +138,18 @@ class PrototypesTest < MiniTest::Spec
 
       Object.send(:remove_const, :Prototype2Class) rescue nil
     end
+
+    should "raise error if definition does not accept exactly 1 argument" do
+      begin
+        class ::Prototype3Class < ::S::Piece
+          prototype {}
+        end
+        flunk("Defining prototypes with no arguments should raise error")
+      rescue => e
+        e.must_be_instance_of(Spontaneous::InvalidPrototypeDefinitionError)
+      end
+      Object.send(:remove_const, :Prototype3Class) rescue nil
+    end
   end
 end
 

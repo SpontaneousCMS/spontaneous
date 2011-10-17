@@ -24,11 +24,14 @@ module Spontaneous
       super("Format '#{unsupported_format}' has no matching mime type")
     end
   end
+
   class UnsupportedFormatException < Error
     def initialize(style, unsupported_format)
       super("'#{unsupported_format}' format not supported by style '#{style.name}'.\nTemplate path: #{style.directory}\n")
     end
   end
+
+  class InvalidPrototypeDefinitionError < Error; end
 
   class SchemaModificationError < Error
     extend Forwardable
