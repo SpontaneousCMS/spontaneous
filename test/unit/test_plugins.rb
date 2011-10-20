@@ -7,7 +7,9 @@ class PluginsTest < MiniTest::Spec
 
 
   def self.startup
-    instance = Spontaneous::Site.instantiate(Spontaneous.root, :test, :back)
+    @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
+    `mkdir -p #{@revision_root}/public`
+    instance = Spontaneous::Site.instantiate(@revision_root, :test, :back)
     Spontaneous.instance = instance
     Spontaneous.instance.database = DB
 
@@ -23,6 +25,7 @@ class PluginsTest < MiniTest::Spec
       style :from_plugin
     end
     Object.send(:const_set, :LocalPiece, klass)
+
     plugin_dir = File.expand_path("../../fixtures/plugins/schema_plugin", __FILE__)
     plugin = Spontaneous.instance.load_plugin plugin_dir
     plugin.init!
@@ -30,6 +33,7 @@ class PluginsTest < MiniTest::Spec
   end
 
   def self.shutdown
+    FileUtils.rm_rf(@revision_root) rescue nil
     Object.send(:remove_const, :Page)
     Object.send(:remove_const, :Piece)
     Object.send(:remove_const, :LocalPage)
@@ -83,14 +87,46 @@ class PluginsTest < MiniTest::Spec
         last_response.body.should =~ /^\s+padding: 42px;/
       end
 
-      should "have their public files copied into the revision sandbox as part of publishing" do
-        flunk("Write this")
-      end
+      context "during publishing" do
+        setup do
+          Spontaneous.root = Spontaneous.instance.root
+          @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
+          `mkdir -p #{@revision_root}/public`
+          Spontaneous.revision_root = @revision_root
 
-      should "have their SASS & Less templates rendered to static css as part of publishing" do
-        flunk "Write this"
+          Content.delete_revision(1) rescue nil
+
+          Spontaneous.logger.silent! {
+            Site.publish_all
+          }
+        end
+
+        teardown do
+          FileUtils.rm_rf(@revision_root) rescue nil
+          Content.delete
+          State.delete
+          Content.delete_revision(1)
+        end
+
+        should "have their public files copied into the revision sandbox" do
+          @static.each do |file|
+            path = File.join(@revision_root, '00001', 'public', file)
+            assert File.exists?(path), "File '#{path}' should exist"
+          end
+        end
+
+        should "have their SASS & Less templates rendered to static css" do
+          sass_files =['subdir/sass.css']
+          sass_files.each do |file|
+            path = File.join(@revision_root, '00001', 'public', file)
+            css = File.read(path)
+            css.should =~ /color:#005a55;?/
+            css.should =~ /padding:42px;?/
+          end
+        end
       end
     end
+
 
     # context "Functional plugins" do
     #   # do I need anything here?

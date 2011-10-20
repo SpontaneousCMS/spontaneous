@@ -82,6 +82,7 @@ module Spontaneous::Plugins::Application
       end
 
       def root(*path)
+        return Spontaneous.instance.root if Spontaneous.instance
         @root ||= File.expand_path(ENV[Spontaneous::SPOT_ROOT] || Dir.pwd)
         relative_dir(@root, *path)
       end

@@ -9,6 +9,8 @@ class ApplicationTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
   def setup
+    instance = Spontaneous::Site.instantiate(File.expand_path("../../fixtures/example_application", __FILE__), :test, :back)
+    Spontaneous.instance = instance
     @saved_schema_root = Spontaneous.schema_root
     Spontaneous.schema_root = nil
     Spontaneous.root = File.expand_path("../../fixtures/example_application", __FILE__)
@@ -43,6 +45,7 @@ class ApplicationTest < MiniTest::Spec
       Site.config.butter.should == "yummy"
     end
   end
+
   context "back, development" do
 
     setup do

@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require 'simultaneous'
+require 'sass'
 
 module Spontaneous
   module Publishing
@@ -171,13 +172,47 @@ module Spontaneous
         public_dest = Pathname.new(Spontaneous.revision_dir(revision) / 'public')
         public_src = Pathname.new(Spontaneous.root / 'public').realpath
         FileUtils.mkdir_p(public_dest) unless File.exists?(public_dest)
-        Dir[public_src.to_s / "**/*"].each do |src|
-          src = Pathname.new(src)
-          dest = (public_dest + src.relative_path_from(public_src))
-          if src.directory?
-            dest.mkpath
-          else
-            FileUtils.ln(src, dest, :force => true)
+        facets = Spontaneous.instance.facets
+        public_dirs = facets.map { |facet| facet.paths.expanded(:public) }.flatten
+        public_dirs.map { |dir| Pathname.new(dir) }.each do |public_src|
+          Dir[public_src.to_s / "**/*"].each do |src|
+            src = Pathname.new(src)
+            dest = (public_dest + src.relative_path_from(public_src))
+            if src.directory?
+              dest.mkpath
+            else
+              case src.extname
+              when ".scss"
+                render_sass_template(src, dest)
+              else
+                FileUtils.ln(src, dest, :force => true)
+              end
+            end
+          end
+        end
+      end
+
+      def render_sass_template(template, dest)
+        dest_css = [dest.basename('.scss'), "css"].join(".")
+        dest = (dest.dirname + dest_css)
+
+        dir = File.dirname(template)
+        load_paths = [dir, File.join(dir, "sass")]
+
+        File.open(dest, 'w') do |file|
+          begin
+            engine = Sass::Engine.for_file(template.to_s, {
+              :filename => template.to_s,
+              :load_paths => load_paths,
+              :cache => false,
+              :style => :compressed
+            })
+            file.write(engine.render)
+          rescue Sass::SyntaxError => e
+            # it's likely that the error is coming from rendering an include file that isn't designed to
+            # be rendered singly (i.e. it depends on another include file)
+            # but let's show an error anyway
+            logger.warn(e)
           end
         end
       end
