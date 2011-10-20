@@ -43,9 +43,9 @@ module Spontaneous
   end
 
   def self.reload!
-    Spontaneous::Schema.reload!
+    Spontaneous.schema.reload!
     Spontaneous::Loader.reload!
-    Spontaneous::Schema.validate!
+    Spontaneous.schema.validate!
   end
 
   plugin Plugins::Application::State
@@ -161,6 +161,7 @@ module Spontaneous
       autoload :Instance,   "spontaneous/plugins/site/instance"
       autoload :Search,     "spontaneous/plugins/site/search"
       autoload :Features,   "spontaneous/plugins/site/features"
+      autoload :Schema,     "spontaneous/plugins/site/schema"
     end
   end
 

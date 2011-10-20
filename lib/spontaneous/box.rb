@@ -30,7 +30,7 @@ module Spontaneous
     end
 
     def self.schema_id
-      Spontaneous::Schema.schema_id(self)
+      Spontaneous.schema.schema_id(self)
     end
 
     def self.schema_name
@@ -51,8 +51,6 @@ module Spontaneous
     end
 
     def schema_id
-      # Spontaneous::Schema.schema_id(_owner.class, :box, _name.to_s)
-      # _prototype.schema_id
       self.class.schema_id
     end
 

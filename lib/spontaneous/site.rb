@@ -11,6 +11,7 @@ module Spontaneous
     plugin Plugins::Site::Map
     plugin Plugins::Site::Search
     plugin Plugins::Site::Features
+    plugin Plugins::Site::Schema
 
     attr_accessor :database
     attr_reader :environment, :mode
@@ -28,6 +29,7 @@ module Spontaneous
       init_facets!
       init_indexes!
     end
+
 
     def init_facets!
       facets.each do |facet|

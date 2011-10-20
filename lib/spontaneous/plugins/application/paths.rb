@@ -50,11 +50,11 @@ module Spontaneous::Plugins::Application
       end
 
       def schema_map
-        Spontaneous::Schema.schema_map_file
+        Spontaneous.schema.schema_map_file
       end
 
       def schema_map=(path)
-        Spontaneous::Schema.schema_map_file = path
+        Spontaneous.schema.schema_map_file = path
       end
 
       def media_dir=(dir)
@@ -82,14 +82,12 @@ module Spontaneous::Plugins::Application
       end
 
       def root(*path)
-        return Spontaneous.instance.root if Spontaneous.instance
-        @root ||= File.expand_path(ENV[Spontaneous::SPOT_ROOT] || Dir.pwd)
-        relative_dir(@root, *path)
+        Spontaneous.instance.root(*path)
       end
 
-      def root=(root)
-        @root = File.expand_path(root)
-      end
+      # def root=(root)
+      #   @root = File.expand_path(root)
+      # end
 
       def revision_root(*path)
         @revision_dir ||= File.expand_path(root / 'cache/revisions')

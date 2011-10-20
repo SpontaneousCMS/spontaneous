@@ -209,7 +209,7 @@ module Spontaneous
           # return if Padrino::Reloader.exclude_constants.any? { |base| (const.to_s =~ /^#{base}/ || const.superclass.to_s =~ /^#{base}/) } &&
           # !Padrino::Reloader.include_constants.any? { |base| (const.to_s =~ /^#{base}/ || const.superclass.to_s =~ /^#{base}/) }
 
-          Spontaneous::Schema.delete(const)
+          Spontaneous.schema.delete(const)
 
           parts = const.to_s.split("::")
           base = parts.size == 1 ? Object : Object.full_const_get(parts[0..-2].join("::"))

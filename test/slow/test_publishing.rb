@@ -7,8 +7,9 @@ class PublishingTest < MiniTest::Spec
 
   def self.startup
     root = File.expand_path("../../fixtures/example_application", __FILE__)
-    Spontaneous.root = root
     instance = Spontaneous::Site.instantiate(root, :test, :back)
+    # Spontaneous.root = root
+    Spontaneous.instance = instance
     Site.config.publishing_delay = nil
     Site.instance.database = DB
     Content.delete_all_revisions!
@@ -909,7 +910,7 @@ class PublishingTest < MiniTest::Spec
         State.delete
         State.create(:revision => @revision, :published_revision => 2)
         Site.revision.should == @revision
-        Spontaneous.root = File.expand_path(File.dirname(__FILE__) / "../fixtures/example_application")
+        # Spontaneous.root = File.expand_path(File.dirname(__FILE__) / "../fixtures/example_application")
 
         @revision_dir = File.expand_path(File.dirname(__FILE__) / "../../tmp/revisions")
         self.template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")

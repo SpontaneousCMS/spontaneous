@@ -5,18 +5,22 @@ module Spontaneous::Plugins::Application
   module Facets
     module ClassMethods
       def instance
-        @instance ||= nil
+        Spontaneous::Site.instance
       end
 
-      def instance=(instance)
-        # unless @instance
-        @instance = instance
-          # facets << instance
-        # end
-      end
+      # def instance=(instance)
+      #   # unless @instance
+      #   @instance = instance
+      #     # facets << instance
+      #   # end
+      # end
 
       def facets
-        Spontaneous::Site.instance.facets
+        instance.facets
+      end
+
+      def schema
+        instance.schema
       end
 
     end

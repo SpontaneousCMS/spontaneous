@@ -5,7 +5,7 @@ module Spontaneous::Plugins
 
     module ClassMethods
       def schema_id
-        Spontaneous::Schema.schema_id(self)
+        Spontaneous.instance.schema_id(self)
       end
 
       def schema_name
@@ -26,11 +26,11 @@ module Spontaneous::Plugins
         column = "#{c}_sid"
         self.class_eval(<<-RUBY)
           def #{column}
-            @_#{column} ||= Spontaneous::Schema::UID[@values[:#{column}]]
+            @_#{column} ||= Spontaneous.schema.uids[@values[:#{column}]]
           end
 
           def #{column}=(sid)
-            @_#{column} = Spontaneous::Schema::UID[sid]
+            @_#{column} = Spontaneous.schema.uids[sid]
             @values[:#{column}] = @_#{column}.to_s
             @_#{column}
           end

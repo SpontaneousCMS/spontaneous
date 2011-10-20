@@ -140,7 +140,7 @@ module Spontaneous
         if only_added_items?
           added_items.each do |obj|
             logger.warn("Adding #{obj} to Schema")
-            Spontaneous::Schema.generate_schema_for(obj)
+            Spontaneous.schema.generate_schema_for(obj)
           end
         end
 

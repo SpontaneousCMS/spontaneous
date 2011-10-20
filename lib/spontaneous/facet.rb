@@ -2,10 +2,9 @@
 
 module Spontaneous
   class Facet
-    attr_reader :root
 
     def initialize(root)
-      @root = root
+      @root = File.expand_path(root)
       paths.add :lib, ["lib", "**/*.rb"]
       paths.add :schema, ["schema", "**/*.rb"]
       paths.add :templates, "templates"
@@ -17,6 +16,11 @@ module Spontaneous
       paths.add :features, "features"
     end
 
+
+    def root(*path)
+      return @root if path.empty?
+      File.join(@root, path)
+    end
 
     def name
       File.basename(root)

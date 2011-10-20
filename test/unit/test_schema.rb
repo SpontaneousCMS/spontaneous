@@ -10,11 +10,21 @@ class SchemaTest < MiniTest::Spec
 
   # declare these early so that Piece & Page get loaded
   # and are then cleared early by the Schema.reset! call
-  class X < Spontaneous::Piece; end
-  class Y < Spontaneous::Page; end
+  # class X < Spontaneous::Piece; end
+  # class Y < Spontaneous::Page; end
   def setup
-    Spontaneous::Schema.schema_loader_class = Spontaneous::Schema::PersistentMap
-    Spontaneous::Schema.reset!
+    root = Dir.mktmpdir
+    instance = Spontaneous::Site.instantiate(root, :test, :back)
+    instance.schema_loader_class = Spontaneous::Schema::TransientMap
+    instance.logger.silent!
+    # Spontaneous.instance = instance
+    @site = instance
+    @site.schema_loader_class = Spontaneous::Schema::PersistentMap
+    # Spontaneous::Schema.reset!
+  end
+
+  def teardown
+    FileUtils.rm_r(Spontaneous.instance.root) rescue nil
   end
 
   context "Configurable names" do
@@ -62,7 +72,7 @@ class SchemaTest < MiniTest::Spec
   context "Persistent maps" do
     context "Schema UIDs" do
       setup do
-        Spontaneous.schema_map = File.expand_path('../../fixtures/schema/schema.yml', __FILE__)
+        @site.schema.schema_map_file = File.expand_path('../../fixtures/schema/schema.yml', __FILE__)
         class SchemaClass < Page
           field :description
           style :simple
@@ -70,6 +80,7 @@ class SchemaTest < MiniTest::Spec
           box :posts
         end
         @instance = SchemaClass.new
+        @uids = @site.uid
       end
 
       teardown do
@@ -81,84 +92,85 @@ class SchemaTest < MiniTest::Spec
       # end
 
       should "be unique" do
-        ids = (0..10000).map { Schema::UID.generate }
+        ids = (0..10000).map { Schema::UIDMap.generate }
         ids.uniq.length.should == ids.length
       end
 
+
       should "be singletons" do
-        a = UID["xxxxxxxxxxxx"]
-        b = UID["xxxxxxxxxxxx"]
-        c = UID["ffffffffffff"]
+        a = @uids["xxxxxxxxxxxx"]
+        b = @uids["xxxxxxxxxxxx"]
+        c = @uids["ffffffffffff"]
         a.object_id.should == b.object_id
         a.should == b
         c.object_id.should_not == b.object_id
         c.should_not == b
       end
 
-      should "not be creatable" do
-        lambda { UID.new('sadf') }.must_raise(NoMethodError)
-      end
+      # should "not be creatable" do
+      #   lambda { UID.new('sadf') }.must_raise(NoMethodError)
+      # end
 
       should "return nil if passed nil" do
-        UID[nil].should be_nil
+        @uids[nil].should be_nil
       end
 
       should "return nil if passed an empty string" do
-        UID[""].should be_nil
+        @uids[""].should be_nil
       end
 
       should "return the same UID if passed one" do
-        a = UID["xxxxxxxxxxxx"]
-        UID[a].should == a
+        a = @uids["xxxxxxxxxxxx"]
+        @uids[a].should == a
       end
 
       should "test as equal to its string representation" do
-        UID["llllllllllll"].should == "llllllllllll"
+        @uids["llllllllllll"].should == "llllllllllll"
       end
 
       should "be readable by content classes" do
-        SchemaClass.schema_id.should == UID["xxxxxxxxxxxx"]
+        SchemaClass.schema_id.should == @uids["xxxxxxxxxxxx"]
       end
 
       should "be readable by fields" do
-        @instance.fields[:description].schema_id.should == UID["ffffffffffff"]
+        @instance.fields[:description].schema_id.should == @uids["ffffffffffff"]
       end
 
       should "be readable by boxes" do
-        @instance.boxes[:posts].schema_id.should == UID["bbbbbbbbbbbb"]
+        @instance.boxes[:posts].schema_id.should == @uids["bbbbbbbbbbbb"]
       end
 
       should "be readable by styles" do
-        @instance.styles[:simple].schema_id.should == UID["ssssssssssss"]
+        @instance.styles[:simple].schema_id.should == @uids["ssssssssssss"]
       end
 
       should "be readable by layouts" do
         @instance.layout.name.should == :clean
-        @instance.layout.schema_id.should == UID["llllllllllll"]
+        @instance.layout.schema_id.should == @uids["llllllllllll"]
       end
 
       context "lookups" do
         should "return classes" do
-          Schema["xxxxxxxxxxxx"].should == SchemaClass
+          Site.schema["xxxxxxxxxxxx"].should == SchemaClass
         end
         should "return fields" do
-          Schema["ffffffffffff"].should == SchemaClass.field_prototypes[:description]
+          Site.schema["ffffffffffff"].should == SchemaClass.field_prototypes[:description]
         end
         should "return boxes" do
-          Schema["bbbbbbbbbbbb"].should == SchemaClass.box_prototypes[:posts]
+          Site.schema["bbbbbbbbbbbb"].should == SchemaClass.box_prototypes[:posts]
         end
         should "return styles" do
-          Schema["ssssssssssss"].should == SchemaClass.style_prototypes[:simple]
+          Site.schema["ssssssssssss"].should == SchemaClass.style_prototypes[:simple]
         end
         should "return layouts" do
-          Schema["llllllllllll"].should == SchemaClass.layout_prototypes[:clean]
+          Site.schema["llllllllllll"].should == SchemaClass.layout_prototypes[:clean]
         end
       end
     end
 
     context "schema verification" do
       setup do
-        Spontaneous.schema_map = File.expand_path('../../fixtures/schema/before.yml', __FILE__)
+        @site.schema.schema_map_file = File.expand_path('../../fixtures/schema/before.yml', __FILE__)
         class ::Page < Spontaneous::Page
           field :title
         end
@@ -191,11 +203,12 @@ class SchemaTest < MiniTest::Spec
         #       between tests
         # Schema.stubs(:classes).returns([B, C, D, O])
         # Schema.classes.should == [B, C, D, O]
-        ::Page.schema_id.should == UID["tttttttttttt"]
-        B.schema_id.should == UID["bbbbbbbbbbbb"]
-        C.schema_id.should == UID["cccccccccccc"]
-        D.schema_id.should == UID["dddddddddddd"]
-        O.schema_id.should == UID["oooooooooooo"]
+        @uids = @site.schema.uids
+        ::Page.schema_id.should == @uids["tttttttttttt"]
+        B.schema_id.should == @uids["bbbbbbbbbbbb"]
+        C.schema_id.should == @uids["cccccccccccc"]
+        D.schema_id.should == @uids["dddddddddddd"]
+        O.schema_id.should == @uids["oooooooooooo"]
       end
 
       teardown do
@@ -216,10 +229,10 @@ class SchemaTest < MiniTest::Spec
 
       should "detect addition of classes" do
         class E < Content; end
-        Schema.stubs(:classes).returns([B, C, D, E])
+        @site.schema.stubs(:classes).returns([B, C, D, E])
         exception = nil
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -233,9 +246,9 @@ class SchemaTest < MiniTest::Spec
       should "detect removal of classes" do
         SchemaTest.send(:remove_const, :C) rescue nil
         SchemaTest.send(:remove_const, :D) rescue nil
-        Schema.stubs(:classes).returns([::Page, B, O])
+        @site.schema.stubs(:classes).returns([::Page, B, O])
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -248,9 +261,9 @@ class SchemaTest < MiniTest::Spec
         SchemaTest.send(:remove_const, :D) rescue nil
         class E < Content; end
         class F < Content; end
-        Schema.stubs(:classes).returns([::Page, B, E, F, O])
+        @site.schema.stubs(:classes).returns([::Page, B, E, F, O])
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if schema is modified")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -264,7 +277,7 @@ class SchemaTest < MiniTest::Spec
         C.field :location
         C.field :description
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if new fields are added")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -277,7 +290,7 @@ class SchemaTest < MiniTest::Spec
         B.stubs(:field_prototypes).returns({:author => field})
         B.stubs(:fields).returns([field])
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if fields are removed")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -292,7 +305,7 @@ class SchemaTest < MiniTest::Spec
         B.box :changes
         B.box :updates
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if new boxes are added")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -306,7 +319,7 @@ class SchemaTest < MiniTest::Spec
 
         B.stubs(:box_prototypes).returns(boxes)
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if fields are removed")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -321,7 +334,7 @@ class SchemaTest < MiniTest::Spec
         B.style :fancy
         B.style :dirty
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if new styles are added")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -335,7 +348,7 @@ class SchemaTest < MiniTest::Spec
         B.styles.stubs(:[]).with(:inline).returns(style)
         B.styles.stubs(:[]).with(:outline).returns(nil)
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if styles are removed")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -350,7 +363,7 @@ class SchemaTest < MiniTest::Spec
         B.layout :fancy
         B.layout :dirty
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if new layouts are added")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -364,7 +377,7 @@ class SchemaTest < MiniTest::Spec
         B.layouts.stubs(:[]).with(:thin).returns(layout)
         B.layouts.stubs(:[]).with(:fat).returns(nil)
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if fields are removed")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -379,7 +392,7 @@ class SchemaTest < MiniTest::Spec
         f1 = B.boxes[:publishers].instance_class.field :field3
         f2 = B.boxes[:promotions].instance_class.field :field3
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if new fields are added to anonymous boxes")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -392,7 +405,7 @@ class SchemaTest < MiniTest::Spec
         B.boxes[:promotions].instance_class.stubs(:field_prototypes).returns({:field2 => f2})
         B.boxes[:promotions].instance_class.stubs(:fields).returns([f2])
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if fields are removed from anonymous boxes")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -406,7 +419,7 @@ class SchemaTest < MiniTest::Spec
       should "detect addition of fields to box types" do
         O.field :name
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if new fields are added to boxes")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -419,7 +432,7 @@ class SchemaTest < MiniTest::Spec
       #   fields = [O.field_prototypes[:ofield1]]
       #   O.stubs(:fields).returns(fields)
       #   begin
-      #     Schema.validate_schema
+      #     @site.schema.validate_schema
       #     flunk("Validation should raise an exception if fields are removed")
       #   rescue Spontaneous::SchemaModificationError => e
       #     exception = e
@@ -437,7 +450,7 @@ class SchemaTest < MiniTest::Spec
         s1 = B.boxes[:publishers].instance_class.style :style3
         s2 = B.boxes[:promotions].instance_class.style :style3
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if new fields are added to anonymous boxes")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -452,7 +465,7 @@ class SchemaTest < MiniTest::Spec
         klass.styles.stubs(:[]).with(style.name).returns(style)
         klass.styles.stubs(:[]).with(:style2).returns(nil)
         begin
-          Schema.validate_schema
+          @site.schema.validate_schema
           flunk("Validation should raise an exception if styles are removed")
         rescue Spontaneous::SchemaModificationError => e
           exception = e
@@ -466,8 +479,7 @@ class SchemaTest < MiniTest::Spec
   end
   context "Transient (testing) maps" do
     setup do
-      Spontaneous::Schema.schema_loader_class = Spontaneous::Schema::TransientMap
-      Spontaneous::Schema.reset!
+      @site.schema.schema_loader_class = Spontaneous::Schema::TransientMap
       class V < Spontaneous::Piece; end
       class W < Spontaneous::Piece; end
     end
@@ -496,10 +508,9 @@ class SchemaTest < MiniTest::Spec
   context "Map writing" do
     context "Non-existant maps" do
       setup do
-        S::Schema.reset!
         @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)
         ::File.exists?(@map_file).should be_false
-        Spontaneous.schema_map = @map_file
+        @site.schema.schema_map_file = @map_file
         class ::A < Spontaneous::Page
           field :title
           field :introduction
@@ -519,7 +530,7 @@ class SchemaTest < MiniTest::Spec
         FileUtils.rm(@map_file) if ::File.exists?(@map_file)
       end
       should "get created with verification" do
-        S::Schema.validate!
+        S.schema.validate!
         classes = [ ::A, ::B]
         # would like to do all of this using mocks, but don't know how to do that
         # without fecking up the whole schema id creation process
@@ -539,11 +550,10 @@ class SchemaTest < MiniTest::Spec
     end
     context "change resolution" do
       setup do
-        S::Schema.reset!
         @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)
         FileUtils.mkdir_p(File.dirname(@map_file))
         FileUtils.cp(File.expand_path('../../fixtures/schema/resolvable.yml', __FILE__), @map_file)
-        Spontaneous.schema_map = @map_file
+        @site.schema.schema_map_file = @map_file
         class ::A < Spontaneous::Page
           field :title
           field :introduction
@@ -557,8 +567,8 @@ class SchemaTest < MiniTest::Spec
           field :duration
           style :daring
         end
-        S::Schema.validate!
-        A.schema_id.should == S::Schema::UID["qLcxinA008"]
+        @site.schema.validate!
+        A.schema_id.should == S.schema.uids["qLcxinA008"]
       end
 
       teardown do
@@ -567,7 +577,7 @@ class SchemaTest < MiniTest::Spec
         Object.send(:remove_const, :X) rescue nil
         Object.send(:remove_const, :Y) rescue nil
         S::Content.delete
-        FileUtils.rm(@map_file) if ::File.exists?(@map_file)
+        FileUtils.rm(@map_file) if ::File.exists?(@map_file) rescue nil
       end
 
       should "be done automatically if only additions are found" do
@@ -582,7 +592,7 @@ class SchemaTest < MiniTest::Spec
         class ::Y < ::B
           style :risky
         end
-        S::Schema.validate!
+        S.schema.validate!
         ::X.schema_id.should_not be_nil
         ::Y.schema_id.should_not be_nil
         ::A.field_prototypes[:moose].schema_id.should_not be_nil
@@ -601,9 +611,9 @@ class SchemaTest < MiniTest::Spec
       should "be done automatically if only classes have been removed" do
         uid = B.schema_id.to_s
         Object.send(:remove_const, :B)
-        S::Schema.stubs(:classes).returns([::A])
-        S::Schema.reload!
-        S::Schema.validate!
+        S.schema.stubs(:classes).returns([::A])
+        S.schema.reload!
+        S.schema.validate!
         m = YAML.load_file(@map_file)
         m.key?(uid).should be_false
       end
@@ -611,9 +621,9 @@ class SchemaTest < MiniTest::Spec
       should "be done automatically if only boxes have been removed" do
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
-        S::Schema.stubs(:classes).returns([A, B])
-        S::Schema.reload!
-        S::Schema.validate!
+        S.schema.stubs(:classes).returns([A, B])
+        S.schema.reload!
+        S.schema.validate!
         m = YAML.load_file(@map_file)
         m.key?(uid).should be_false
       end
@@ -624,8 +634,8 @@ class SchemaTest < MiniTest::Spec
         f2 = A.field_prototypes[:introduction]
         A.stubs(:field_prototypes).returns({:introduction => f2})
         A.stubs(:fields).returns([f2])
-        S::Schema.reload!
-        S::Schema.validate!
+        S.schema.reload!
+        S.schema.validate!
         m = YAML.load_file(@map_file)
         m.key?(uid).should be_false
       end
@@ -634,9 +644,9 @@ class SchemaTest < MiniTest::Spec
         A.field :moose
         uid = B.schema_id.to_s
         Object.send(:remove_const, :B)
-        S::Schema.stubs(:classes).returns([::A])
-        S::Schema.reload!
-        S::Schema.validate!
+        S.schema.stubs(:classes).returns([::A])
+        S.schema.reload!
+        S.schema.validate!
         ::A.field_prototypes[:moose].schema_id.should_not be_nil
 
         m = YAML.load_file(@map_file)
@@ -651,8 +661,8 @@ class SchemaTest < MiniTest::Spec
         f2 = B.field_prototypes[:duration]
         B.stubs(:field_prototypes).returns({:duration => f2})
         B.stubs(:fields).returns([f2])
-        S::Schema.reload!
-        S::Schema.validate!
+        S.schema.reload!
+        S.schema.validate!
 
         ::A.field_prototypes[:moose].schema_id.should_not be_nil
 
@@ -665,9 +675,9 @@ class SchemaTest < MiniTest::Spec
         B.field :crisis
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
-        S::Schema.stubs(:classes).returns([A, B])
-        S::Schema.reload!
-        S::Schema.validate!
+        S.schema.stubs(:classes).returns([A, B])
+        S.schema.reload!
+        S.schema.validate!
 
         ::B.field_prototypes[:crisis].schema_id.should_not be_nil
         m = YAML.load_file(@map_file)
@@ -681,9 +691,9 @@ class SchemaTest < MiniTest::Spec
         B.field :crisis
         B.box :circus
         A.field :crisis
-        S::Schema.stubs(:classes).returns([::A, ::B, ::X])
-        S::Schema.reload!
-        S::Schema.validate!
+        S.schema.stubs(:classes).returns([::A, ::B, ::X])
+        S.schema.reload!
+        S.schema.validate!
 
         ::A.field_prototypes[:crisis].schema_id.should_not be_nil
         m = YAML.load_file(@map_file)
@@ -710,17 +720,17 @@ class SchemaTest < MiniTest::Spec
         f3 = A.field_prototypes[:introduction]
         A.stubs(:field_prototypes).returns({:added => f2, :introduction => f3})
         A.stubs(:fields).returns([f2, f3])
-        S::Schema.reload!
-        lambda { S::Schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
+        S.schema.reload!
+        lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
       end
 
       should "still raise error in case of addition & deletion of classes" do
         class ::X < A; end
         uid = B.schema_id.to_s
         Object.send(:remove_const, :B)
-        S::Schema.stubs(:classes).returns([::A, ::X])
-        S::Schema.reload!
-        lambda { S::Schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
+        S.schema.stubs(:classes).returns([::A, ::X])
+        S.schema.reload!
+        lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
       end
 
       should "delete box content when a box is removed" do
@@ -735,9 +745,9 @@ class SchemaTest < MiniTest::Spec
         Content.count.should == 3
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
-        S::Schema.stubs(:classes).returns([A, B])
-        S::Schema.reload!
-        S::Schema.validate!
+        S.schema.stubs(:classes).returns([A, B])
+        S.schema.reload!
+        S.schema.validate!
         Content.count.should == 1
         S::Content[instance.id].should == instance
       end
@@ -754,9 +764,9 @@ class SchemaTest < MiniTest::Spec
             @f3 = A.field_prototypes[:introduction]
             A.stubs(:field_prototypes).returns({:a => @af1, :b => @af2, :introduction => @f3})
             A.stubs(:fields).returns([@af1, @af2, @f3])
-            S::Schema.reload!
+            S.schema.reload!
             begin
-              S::Schema.validate!
+              S.schema.validate!
               flunk("Validation should raise error when adding & deleting fields")
             rescue Spontaneous::SchemaModificationError => e
               @modification = e.modification
@@ -785,7 +795,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by deleting field from schema" do
             action = @modification.actions[0]
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Deletion of field should have resolved schema error")
             end
@@ -797,7 +807,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by renaming field 'a'" do
             action = @modification.actions[1]
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Renaming of field should have resolved schema error")
             end
@@ -808,7 +818,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by renaming field 'b'" do
             action = @modification.actions[2]
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Renaming of field should have resolved schema error")
             end
@@ -831,9 +841,9 @@ class SchemaTest < MiniTest::Spec
             @uid2 = @df2.schema_id.to_s
             A.stubs(:field_prototypes).returns({:a => @af1, :b => @af2, :c => @af3})
             A.stubs(:fields).returns([@af1, @af2, @af3])
-            S::Schema.reload!
+            S.schema.reload!
             begin
-              S::Schema.validate!
+              S.schema.validate!
               flunk("Validation should raise error when adding & deleting fields")
             rescue Spontaneous::SchemaModificationError => e
               @modification = e.modification
@@ -870,7 +880,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by deleting both fields" do
             action = @modification.actions[0]
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
               flunk("Deletion of field should not have resolved schema error")
             rescue Spontaneous::SchemaModificationError => e
               modification = e.modification
@@ -878,7 +888,7 @@ class SchemaTest < MiniTest::Spec
             action = modification.actions[0]
 
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Deletion of field should have resolved schema error")
             end
@@ -890,7 +900,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by deleting one field and renaming other as 'a'" do
             action = @modification.actions[0]
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
               flunk("Deletion of field should not have resolved schema error")
             rescue Spontaneous::SchemaModificationError => e
               modification = e.modification
@@ -898,7 +908,7 @@ class SchemaTest < MiniTest::Spec
             action = modification.actions[1]
 
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Deletion of field should have resolved schema error")
             end
@@ -911,7 +921,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by renaming one field as 'c' and deleting other" do
             action = @modification.actions[3]
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
               flunk("Renaming of field should not have resolved schema error")
             rescue Spontaneous::SchemaModificationError => e
               modification = e.modification
@@ -919,7 +929,7 @@ class SchemaTest < MiniTest::Spec
             action = modification.actions[0]
 
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Deletion of field should have resolved schema error")
             end
@@ -932,7 +942,7 @@ class SchemaTest < MiniTest::Spec
           should "enable fixing the problem by renaming one field as 'c' and renaming other as 'b'" do
             action = @modification.actions[3]
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
               flunk("Renaming of field should not have resolved schema error")
             rescue Spontaneous::SchemaModificationError => e
               modification = e.modification
@@ -940,7 +950,7 @@ class SchemaTest < MiniTest::Spec
             action = modification.actions[2]
 
             begin
-              S::Schema.apply(action)
+              S.schema.apply(action)
             rescue Spontaneous::SchemaModificationError => e
               flunk("Deletion of field should have resolved schema error")
             end
@@ -962,12 +972,12 @@ class SchemaTest < MiniTest::Spec
               boxes[:added1] = @ab1
               boxes[:added2] = @ab2
               A.stubs(:box_prototypes).returns(boxes)
-              classes = S::Schema.classes.dup
+              classes = S.schema.classes.dup
               classes.delete(A::PostsBox)
-              S::Schema.stubs(:classes).returns(classes)
-              S::Schema.reload!
+              S.schema.stubs(:classes).returns(classes)
+              S.schema.reload!
               begin
-                S::Schema.validate!
+                S.schema.validate!
                 flunk("Validation should raise error when adding & deleting fields")
               rescue Spontaneous::SchemaModificationError => e
                 @modification = e.modification
@@ -976,7 +986,7 @@ class SchemaTest < MiniTest::Spec
             should "enable fixing by deleting both fields and renaming a box" do
               action = @modification.actions[0]
               begin
-                S::Schema.apply(action)
+                S.schema.apply(action)
                 flunk("Deleting of field should not have resolved schema error")
               rescue Spontaneous::SchemaModificationError => e
                 modification = e.modification
@@ -984,7 +994,7 @@ class SchemaTest < MiniTest::Spec
               action = modification.actions[0]
 
               begin
-                S::Schema.apply(action)
+                S.schema.apply(action)
                 flunk("Deleting of field should not have resolved schema error")
               rescue Spontaneous::SchemaModificationError => e
                 modification = e.modification
@@ -992,7 +1002,7 @@ class SchemaTest < MiniTest::Spec
               action = modification.actions[1]
 
               begin
-                S::Schema.apply(action)
+                S.schema.apply(action)
               rescue Spontaneous::SchemaModificationError => e
                 flunk("Schema changes should have resolved error")
               end
@@ -1000,10 +1010,7 @@ class SchemaTest < MiniTest::Spec
             end
           end
         end
-
-
       end
     end
   end
 end
-

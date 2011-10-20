@@ -11,7 +11,7 @@ module Spontaneous::Plugins
       end
 
       def box_sid
-        @box_sid ||= Spot::Schema::UID[self[:box_sid]]
+        @box_sid ||= Spontaneous.schema.uids[self[:box_sid]]
       end
 
       def box_sid=(sid)

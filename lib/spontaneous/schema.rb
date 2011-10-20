@@ -5,13 +5,14 @@
 module Spontaneous
   module Schema
     autoload :UID, 'spontaneous/schema/uid'
+    autoload :UIDMap, 'spontaneous/schema/uid_map'
     autoload :SchemaModification, 'spontaneous/schema/schema_modification'
     # schema class <=> uid map backed by a file
     class PersistentMap
-      attr_reader :map, :inverse_map
+      attr_reader :map, :inverse_map, :uids
 
-      def initialize(path)
-        @path = path
+      def initialize(uids, path)
+        @uids, @path = uids, path
         load_map
       end
 
@@ -20,11 +21,11 @@ module Spontaneous
       end
 
       def reference_to_id(reference)
-        UID.get_id(reference)
+        uids.get_id(reference)
       end
 
       def [](id)
-        if uid = UID[id]
+        if uid = uids[id]
           uid.target
         else
           nil
@@ -35,7 +36,7 @@ module Spontaneous
         if exists?
           map = YAML.load_file(@path)
           map.each do | uid, reference |
-            UID.load(uid, reference)
+            uids.load(uid, reference)
           end
         end
       end
@@ -53,7 +54,7 @@ module Spontaneous
       # end
 
       def orphaned_ids
-        UID.select { |uid| uid.orphaned? }
+        uids.select { |uid| uid.orphaned? }
       end
 
       def reload!
@@ -66,14 +67,15 @@ module Spontaneous
     # used for tests
     class TransientMap < PersistentMap
 
-      def initialize(path)
+      def initialize(uids, path)
+        @uids = uids
       end
 
       def schema_id(obj)
         if id = super
           id
         else
-          UID.create(obj.schema_name)
+          uids.create(obj.schema_name)
         end
       end
 
@@ -86,13 +88,17 @@ module Spontaneous
       end
     end
 
-    class << self
-      def schema_loader_class
-        @schema_loader_class ||= PersistentMap
+    class Schema
+      attr_reader :schema_loader_class, :uids
+
+      def initialize(root, schema_loader_class = Spontaneous::Schema::PersistentMap)
+        @root = root
+        @schema_loader_class = schema_loader_class
+        initialize_uid_map
       end
 
       def schema_loader_class=(klass)
-        UID.clear!
+        initialize_uid_map
         @map = nil
         @schema_loader_class = klass
       end
@@ -133,10 +139,10 @@ module Spontaneous
       end
 
       def apply_fix(action, source, dest=nil)
-        uid = S::Schema::UID[source]
+        uid = uids[source]
         case action
         when :delete
-          uid.destroy
+          uids.destroy(uid)
         when :rename
           uid.rewrite!(dest)
         end
@@ -157,12 +163,12 @@ module Spontaneous
 
       def write_schema
         File.atomic_write(schema_map_file) do |file|
-          file.write(UID.export.to_yaml)
+          file.write(uids.export.to_yaml)
         end
       end
 
       def generate_schema_for(obj)
-        UID.create_for(obj)
+        uids.create_for(obj)
         [:boxes, :fields, :styles, :layouts].each do |category|
           if obj.respond_to?(category)
             objects = obj.send(category)
@@ -261,7 +267,11 @@ module Spontaneous
 
       def reload!
         @map = nil
-        UID.clear!
+        initialize_uid_map
+      end
+
+      def initialize_uid_map
+        @uids = Spontaneous::Schema::UIDMap.new
       end
 
       def delete(klass)
@@ -269,7 +279,7 @@ module Spontaneous
       end
 
       def schema_map_file
-        @schema_map_file ||= Spontaneous.root / "config" / "schema.yml"
+        @schema_map_file ||= @root / "config" / "schema.yml"
       end
 
       def schema_map_file=(path)
@@ -279,7 +289,7 @@ module Spontaneous
       end
 
       def map
-        @map ||= self.schema_loader_class.new(schema_map_file)
+        @map ||= self.schema_loader_class.new(@uids, schema_map_file)
       end
 
       def schema_id(obj)

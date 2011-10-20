@@ -27,7 +27,7 @@ module Spontaneous
             map "/#{plugin.name}" do
               run ::Rack::File.new(plugin.paths.expanded(:public))
             end
-          end
+          end if Spontaneous.instance
 
           map "/media" do
             run Spontaneous::Rack::Media.new

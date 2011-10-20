@@ -79,7 +79,7 @@ module Spontaneous
               use Spontaneous::Rack::CSS, :root => root
               run ::Rack::File.new(root)
             end
-          end
+          end if Spontaneous.instance
 
           map "#{NAMESPACE}/events" do
             use CookieAuthentication
@@ -141,7 +141,7 @@ module Spontaneous
 
         post "/schema/delete" do
           begin
-            Spontaneous::Schema.apply_fix(:delete, params[:uid])
+            Spontaneous.schema.apply_fix(:delete, params[:uid])
           rescue Spot::SchemaModificationError # ignore remaining errors - they will be fixed later
           end
           redirect(params[:origin])
@@ -149,7 +149,7 @@ module Spontaneous
 
         post "/schema/rename" do
           begin
-            Spontaneous::Schema.apply_fix(:rename, params[:uid], params[:ref])
+            Spontaneous.schema.apply_fix(:rename, params[:uid], params[:ref])
           rescue Spot::SchemaModificationError # ignore remaining errors - they will be fixed later
           end
           redirect(params[:origin])
@@ -197,7 +197,7 @@ module Spontaneous
             dataset = lock ? Content.for_update : Content
             content = dataset.first(:id => params[:id])
             halt 404 if content.nil?
-            if box_id = Spontaneous::Schema::UID[params[:box_id]]
+            if box_id = Spontaneous.schema.uids[params[:box_id]]
               box = content.boxes.detect { |b| b.schema_id == box_id }
               yield(content, box)
             else
@@ -296,7 +296,7 @@ module Spontaneous
 
         post '/root' do
           if Site.root.nil?
-            type = Spontaneous::Schema[params[:type]]
+            type = Spontaneous.schema[params[:type]]
             root = type.create(:title => "Home")
             Spontaneous::Change.push(root)
             json({:id => root.id})
@@ -446,7 +446,7 @@ module Spontaneous
         post '/add/:id/:box_id/:type_name' do
           content_for_request(true) do |content, box|
             position = 0
-            type = Spontaneous::Schema[params[:type_name]]#.constantize
+            type = Spontaneous.schema[params[:type_name]]#.constantize
             if box.writable?(user, type)
               instance = type.new
               box.insert(position, instance)
@@ -507,7 +507,7 @@ module Spontaneous
         end
 
         get '/targets/:schema_id' do
-          klass = Spontaneous::Schema[params[:schema_id]]
+          klass = Spontaneous.schema[params[:schema_id]]
           if klass.alias?
             targets = klass.targets.map do |t|
               {
@@ -522,7 +522,7 @@ module Spontaneous
 
         post '/alias/:id/:box_id' do
           content_for_request(true) do |content, box|
-            type = Spontaneous::Schema[params[:alias_id]]
+            type = Spontaneous.schema[params[:alias_id]]
             position = 0
             if box.writable?(user, type)
               target = Spontaneous::Content[params[:target_id]]

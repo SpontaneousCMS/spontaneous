@@ -77,9 +77,6 @@ class MiniTestWithHooks < MiniTest::Unit
 
   def _run_suite(suite, type)
     begin
-      Spontaneous::Schema.schema_loader_class = Spontaneous::Schema::TransientMap
-      Spontaneous::Schema.reset!
-      Spontaneous.logger.silent!
       unless exclude?(suite)
         print "\n#{suite.to_s.gsub(/Test$/, '').ljust(@max_name_length, " ")}  "
       end
