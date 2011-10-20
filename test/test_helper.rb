@@ -111,6 +111,14 @@ class MiniTest::Spec
   attr_accessor :template_root
   alias :silence_stdout :silence_logger
 
+  def instantiate_site(root = nil)
+    root ||= Dir.mktmpdir
+    instance = Spontaneous::Site.instantiate(root, :test, :back)
+    instance.schema_loader_class = Spontaneous::Schema::TransientMap
+    instance.logger.silent!
+    instance
+  end
+
   def template_root=(template_root)
     @template_root = template_root
     Spontaneous.stubs(:template_paths).returns([@template_root])

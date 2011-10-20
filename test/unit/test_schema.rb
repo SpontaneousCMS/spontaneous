@@ -6,21 +6,10 @@ require File.expand_path('../../test_helper', __FILE__)
 class SchemaTest < MiniTest::Spec
   include Spontaneous
 
-  UID = Spontaneous::Schema::UID
 
-  # declare these early so that Piece & Page get loaded
-  # and are then cleared early by the Schema.reset! call
-  # class X < Spontaneous::Piece; end
-  # class Y < Spontaneous::Page; end
   def setup
-    root = Dir.mktmpdir
-    instance = Spontaneous::Site.instantiate(root, :test, :back)
-    instance.schema_loader_class = Spontaneous::Schema::TransientMap
-    instance.logger.silent!
-    # Spontaneous.instance = instance
-    @site = instance
+    @site = instantiate_site
     @site.schema_loader_class = Spontaneous::Schema::PersistentMap
-    # Spontaneous::Schema.reset!
   end
 
   def teardown
