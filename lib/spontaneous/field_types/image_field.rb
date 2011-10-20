@@ -212,16 +212,16 @@ module Spontaneous
 
         def __run__(process)
           combine_options do |c|
-            cb = CommandDelegator.new(c)
+            cb = CommandDelegator.new(c, @image)
             cb.__run__(process)
           end
         end
       end
 
       class CommandDelegator < Delegator
-        def initialize(command_builder)
-          super
-          @command_builder = command_builder
+        def initialize(command_builder, image)
+          super(command_builder)
+          @command_builder, @image = command_builder, image
         end
 
         def __getobj__
@@ -257,6 +257,33 @@ module Spontaneous
 
         def greyscale
           add(:type, "Grayscale")
+        end
+
+        def border_radius(radius)
+          @image.format('PNG32')
+          c = MiniMagick::CommandBuilder.new('convert')
+
+          c << @image.path
+          c.add(:format, "roundrectangle 0,0 %[fx:w-1],%[fx:h-1], #{radius},#{radius}")
+          c.add(:write, "info:tmp.mvg")
+          c.add(:matte)
+          c.add(:bordercolor, "none")
+          c.add(:border, "0")
+          c.push('\\(')
+          c.push("+clone")
+          c.add(:alpha, 'transparent')
+          c.add(:background, 'white')
+          c.add(:fill, 'white')
+          c.add(:stroke, 'none')
+          c.add(:strokewidth, '0')
+          c.add(:draw, "@tmp.mvg")
+          c.push('\\)')
+          c.add(:compose, 'DstIn')
+          c.add(:composite)
+          c << @image.path
+          puts c.command
+          @image.run(c)
+
         end
 
         def method_missing(method, *args, &block)

@@ -3,6 +3,7 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class PluginsTest < MiniTest::Spec
+  include ::Rack::Test::Methods
 
 
   def self.startup
@@ -35,6 +36,10 @@ class PluginsTest < MiniTest::Spec
     Object.send(:remove_const, :LocalPiece)
   end
 
+  def app
+    Spontaneous::Rack.application
+  end
+
   context "Plugins:" do
 
     setup do
@@ -43,16 +48,55 @@ class PluginsTest < MiniTest::Spec
     teardown do
     end
 
-    context "all plugins" do
-      should "load their init.rb file" do
-        $set_in_init.should be_true
+    should "load their init.rb file" do
+      $set_in_init.should be_true
+    end
+
+    context "with static files" do
+      setup do
+        @static = %w(css/plugin.css js/plugin.js subdir/image.gif static.html)
+      end
+
+      should "be able to provide them under their namespace in editing mode" do
+        Spontaneous.mode = :back
+        @static.each do |file|
+          get "/schema_plugin/#{file}"
+          assert last_response.ok?, "Static file /schema_plugin/#{file} returned error code #{last_response.status}"
+          last_response.body.should == File.basename(file) + "\n"
+        end
+      end
+
+      should "be able to provide them under their namespace in public mode" do
+        Spontaneous.mode = :front
+        @static.each do |file|
+          get "/schema_plugin/#{file}"
+          assert last_response.ok?, "Static file /schema_plugin/#{file} returned error code #{last_response.status}"
+          last_response.body.should == File.basename(file) + "\n"
+        end
+      end
+
+      should "look for and parse sass templates" do
+        Spontaneous.mode = :back
+        get "/schema_plugin/subdir/sass.css"
+        assert last_response.ok?, "Static file /schema_plugin/subdir/sass.css returned error code #{last_response.status}"
+        last_response.body.should =~ /^\s+color: #005a55;/
+        last_response.body.should =~ /^\s+padding: 42px;/
+      end
+
+      should "have their public files copied into the revision sandbox as part of publishing" do
+        flunk("Write this")
+      end
+
+      should "have their SASS & Less templates rendered to static css as part of publishing" do
+        flunk "Write this"
       end
     end
 
-    context "Functional plugins" do
-    end
+    # context "Functional plugins" do
+    #   # do I need anything here?
+    # end
 
-    context "Schema Plugins" do
+    context "with schemas" do
       should "make content classes available to rest of app" do
         defined?(::SchemaPlugin).should == "constant"
         ::SchemaPlugin::External.fields.length.should == 1

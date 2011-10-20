@@ -50,19 +50,19 @@ module Spontaneous
             :try => ['.html', 'index.html', '/index.html']
 
           ################### REMOVE THIS
-          map "#{NAMESPACE}/lock" do
-            run proc {
-              Spontaneous.database.transaction do
-                Spontaneous.database.run("LOCK TABLES content WRITE, spontaneous_access_keys READ")
-                puts S::Content.first
-                Spontaneous.database.run("SELECT SLEEP(10)")
-                Spontaneous.database.run("UNLOCK TABLES")
-              end
-            }
-          end
-          map "#{NAMESPACE}/unlock" do
-            run proc { Spontaneous.database.run("UNLOCK TABLES") }
-          end
+          # map "#{NAMESPACE}/lock" do
+          #   run proc {
+          #     Spontaneous.database.transaction do
+          #       Spontaneous.database.run("LOCK TABLES content WRITE, spontaneous_access_keys READ")
+          #       puts S::Content.first
+          #       Spontaneous.database.run("SELECT SLEEP(10)")
+          #       Spontaneous.database.run("UNLOCK TABLES")
+          #     end
+          #   }
+          # end
+          # map "#{NAMESPACE}/unlock" do
+          #   run proc { Spontaneous.database.run("UNLOCK TABLES") }
+          # end
           ################### END REMOVE THIS
 
           Spontaneous.instance.back_controllers.each do |namespace, controller_class|
@@ -70,6 +70,16 @@ module Spontaneous
               run controller_class
             end
           end if Spontaneous.instance
+
+          # Make all the files available under plugin_name/public/**
+          # available under the URL /plugin_name/**
+          Spontaneous.instance.plugins.each do |plugin|
+            root = plugin.paths.expanded(:public)
+            map "/#{plugin.name}" do
+              use Spontaneous::Rack::CSS, :root => root
+              run ::Rack::File.new(root)
+            end
+          end
 
           map "#{NAMESPACE}/events" do
             use CookieAuthentication

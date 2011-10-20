@@ -1,7 +1,5 @@
 # encoding: UTF-8
 
-require 'less'
-
 module Spontaneous
   module Rack
     class AroundBack

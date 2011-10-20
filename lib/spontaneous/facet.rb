@@ -2,16 +2,24 @@
 
 module Spontaneous
   class Facet
+    attr_reader :root
+
     def initialize(root)
       @root = root
       paths.add :lib, ["lib", "**/*.rb"]
       paths.add :schema, ["schema", "**/*.rb"]
       paths.add :templates, "templates"
       paths.add :config, "config"
+      paths.add :public, "public"
       paths.add :tasks, ["lib/tasks", "**/*.rake"]
       paths.add :migrations, ["db/migrations", "**/*.rake"]
       paths.add :plugins, ["plugins", "*"]
       paths.add :features, "features"
+    end
+
+
+    def name
+      File.basename(root)
     end
 
     def paths

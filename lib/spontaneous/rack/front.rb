@@ -21,6 +21,14 @@ module Spontaneous
             end
           end if Spontaneous.instance
 
+          # Make all the files available under plugin_name/public/**
+          # available under the URL /plugin_name/**
+          Spontaneous.instance.plugins.each do |plugin|
+            map "/#{plugin.name}" do
+              run ::Rack::File.new(plugin.paths.expanded(:public))
+            end
+          end
+
           map "/media" do
             run Spontaneous::Rack::Media.new
           end
@@ -34,10 +42,6 @@ module Spontaneous
       end
       class Server < Sinatra::Base
         include Spontaneous::Rack::Public
-
-        # def call(env)
-        #   self.dup.call!(env)
-        # end
 
         def call!(env)
           @env = env
