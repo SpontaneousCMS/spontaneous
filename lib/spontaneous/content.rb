@@ -78,6 +78,7 @@ module Spontaneous
     alias_method :is_page?, :page?
 
 
+
     # terminate the supertype chain here
     def self.supertype
       nil

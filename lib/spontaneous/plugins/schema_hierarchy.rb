@@ -61,7 +61,7 @@ module Spontaneous::Plugins
 
       def inherited(subclass, real_caller = nil)
         subclass.__source_file = File.expand_path((real_caller || caller[0]).split(':')[0])
-        Spontaneous.schema.classes << subclass if subclass.schema_class?
+        Spontaneous.schema.classes << subclass# if subclass.schema_class?
         subclasses << subclass
         super(subclass)
       end

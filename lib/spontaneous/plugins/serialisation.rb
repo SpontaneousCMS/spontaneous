@@ -5,6 +5,7 @@ module Spontaneous::Plugins
   module Serialisation
 
     module ClassMethods
+
       def export(user = nil)
         {
           :type=> self.ui_class,

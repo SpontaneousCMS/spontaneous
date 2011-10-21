@@ -8,23 +8,24 @@ class ApplicationTest < MiniTest::Spec
   include Spontaneous
   include ::Rack::Test::Methods
 
-  def setup
-    instance = Spontaneous::Site.instantiate(File.expand_path("../../fixtures/example_application", __FILE__), :test, :back)
-    Spontaneous.instance = instance
-    @saved_schema_root = Spontaneous.schema_root
-    Spontaneous.schema_root = nil
-    Spontaneous.root = File.expand_path("../../fixtures/example_application", __FILE__)
-    File.exists?(Spontaneous.root).should be_true
+  def self.site_root
+    @site_root
   end
 
-  def teardown
-    # to keep other tests working
-    Spontaneous.schema_root = @saved_schema_root
+  def self.startup
+    @site_root = Dir.mktmpdir
+    app_root = File.expand_path('../../fixtures/example_application', __FILE__)
+    FileUtils.cp_r(app_root, @site_root)
+    @site_root += "/example_application"
+  end
+
+  def self.shutdown
+    teardown_site
   end
 
   context "schema" do
     setup do
-      Spontaneous.init(:mode => :back, :environment => :development)
+      Spontaneous.init(:root => self.class.site_root, :mode => :back, :environment => :development)
     end
 
     should "load" do
@@ -34,7 +35,7 @@ class ApplicationTest < MiniTest::Spec
 
   context "Site" do
     setup do
-      Spontaneous.init(:mode => :back, :environment => :development)
+      Spontaneous.init(:root => self.class.site_root, :mode => :back, :environment => :development)
     end
     should "have the same config as Spontaneous" do
       Site.config.should == Spontaneous.config
@@ -49,7 +50,7 @@ class ApplicationTest < MiniTest::Spec
   context "back, development" do
 
     setup do
-      Spontaneous.init(:mode => :back, :environment => :development)
+      Spontaneous.init(:root => self.class.site_root, :mode => :back, :environment => :development)
       Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
     end
 
@@ -101,7 +102,7 @@ class ApplicationTest < MiniTest::Spec
   context "front, development" do
 
     setup do
-      Spontaneous.init(:mode => :front, :environment => :development)
+      Spontaneous.init(:root => self.class.site_root, :mode => :front, :environment => :development)
     end
 
     should "have the right mode setting" do
@@ -124,7 +125,7 @@ class ApplicationTest < MiniTest::Spec
 
   context "back, production" do
     setup do
-      Spontaneous.init(:mode => :back, :environment => :production)
+      Spontaneous.init(:root => self.class.site_root, :mode => :back, :environment => :production)
     end
 
     should "have the right mode setting" do
@@ -156,7 +157,7 @@ class ApplicationTest < MiniTest::Spec
   context "front, production" do
 
     setup do
-      Spontaneous.init(:mode => :front, :environment => :production)
+      Spontaneous.init(:root => self.class.site_root, :mode => :front, :environment => :production)
     end
 
     should "have the right mode setting" do

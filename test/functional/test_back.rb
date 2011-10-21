@@ -10,29 +10,31 @@ class BackTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
 
+  def self.site_root
+    @site_root
+  end
+
   def self.startup
-    # Spontaneous.logger = nil
-    Spontaneous.logger.silent!
+    @site_root = Dir.mktmpdir
+    app_root = File.expand_path('../../fixtures/back', __FILE__)
+    FileUtils.cp_r(app_root, @site_root)
+    @site_root += "/back"
+    FileUtils.mkdir_p(@site_root / "cache")
+    FileUtils.cp_r(File.join(File.dirname(__FILE__), "../fixtures/media"), @site_root / "cache")
   end
 
   def self.shutdown
+    teardown_site
   end
 
   def app
     Spontaneous::Rack::Back.application
   end
 
-  def teardown
-    # teardown_site_fixture
+  def setup
+    @site = setup_site(self.class.site_root)
   end
 
-  def setup
-    @media_dir = File.expand_path('../../../tmp/media', __FILE__)
-    Spontaneous.media_dir = @media_dir
-  end
-  def teardown
-    ::FileUtils.rm_rf(@media_dir)
-  end
 
   def auth_post(path, params={})
     post(path, params.merge("__key" => @key))
@@ -51,22 +53,12 @@ class BackTest < MiniTest::Spec
       config.stubs(:publishing_method).returns(:immediate)
       config.stubs(:site_domain).returns('example.org')
       config.stubs(:site_id).returns('example_org')
-      root = File.expand_path("../../fixtures/back", __FILE__)
-      Spontaneous.root = root
-      instance = Spontaneous::Site.instantiate(root, :test, :back)
-      instance.stubs(:config).returns(config)
-      Spontaneous.instance = instance
-      Spontaneous.database = DB
-      # p app.to_app
-      # app.to_app.send(:set, :raise_errors, true)
-      # app.send(:set, :dump_errors, true)
-      # app.send(:set, :show_exceptions, false)
+      @site.stubs(:config).returns(config)
 
       S::Rack::Back::EditingInterface.set :raise_errors, true
       S::Rack::Back::EditingInterface.set :dump_errors, true
       S::Rack::Back::EditingInterface.set :show_exceptions, false
 
-      S::Schema.reset!
       Content.delete
       Spontaneous::Permissions::User.delete
       self.template_root = File.expand_path('../../fixtures/back/templates', __FILE__)
@@ -74,7 +66,7 @@ class BackTest < MiniTest::Spec
       File.exists?(@app_dir).should be_true
       Spontaneous.stubs(:application_dir).returns(@app_dir)
       # Spontaneous::Rack::Back.application.send :set, :show_exceptions, false
-      # setup_site_fixture
+
       # annoying to have to do this, but there you go
       @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
       @user.update(:level => Spontaneous::Permissions.root)
@@ -84,7 +76,6 @@ class BackTest < MiniTest::Spec
 
       Spontaneous::Permissions::User.stubs(:[]).with(:login => 'root').returns(@user)
       Spontaneous::Permissions::AccessKey.stubs(:authenticate).with(@key).returns(@key)
-      # Spontaneous::Permissions.stubs(:active_user).returns(@user)
       Spontaneous::Permissions::AccessKey.stubs(:valid?).with(@key, @user).returns(true)
 
       class Page < Spot::Page
@@ -185,7 +176,7 @@ class BackTest < MiniTest::Spec
         auth_get "/@spontaneous/types"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal Schema.serialise_http, last_response.body
+        assert_equal Site.schema.serialise_http, last_response.body
       end
 
       should "return scripts from js dir" do
@@ -429,7 +420,7 @@ class BackTest < MiniTest::Spec
     context "media files" do
       setup do
         Spontaneous.stubs(:reload!)
-        Spontaneous.media_dir = File.join(File.dirname(__FILE__), "../fixtures/media")
+        # Spontaneous.media_dir = File.join(File.dirname(__FILE__), "../fixtures/media")
       end
       teardown do
       end
@@ -591,11 +582,6 @@ class BackTest < MiniTest::Spec
     context "Request cache" do
       setup do
         Spontaneous.stubs(:reload!)
-        # @home = HomePage.new
-        # @piece = Text.new
-        # @home.in_progress << @piece
-        # @home.save
-        # @piece.save
         Change.delete
       end
       should "wrap all updates in a Change.record" do
@@ -732,11 +718,10 @@ class BackTest < MiniTest::Spec
         # enable schema validation errors by creating and using a permanent map file
         @schema_map = File.join(Dir.tmpdir, "schema.yml")
         FileUtils.rm(@schema_map) if File.exists?(@schema_map)
-        S::Schema.schema_map_file = @schema_map
-        S::Schema.validate!
-        S::Schema.write_schema
-        S::Schema.schema_loader_class = S::Schema::PersistentMap
-        S::Schema.reload!
+        S.schema.schema_map_file = @schema_map
+        S.schema.validate!
+        S.schema.write_schema
+        S.schema.schema_loader_class = S::Schema::PersistentMap
         Job.field :replaced
         @df1 = Job.field_prototypes[:title]
         @af1 = Job.field_prototypes[:replaced]
@@ -744,15 +729,14 @@ class BackTest < MiniTest::Spec
         @uid = @df1.schema_id.to_s
         Job.stubs(:field_prototypes).returns({:replaced => @af1, :image => @f1})
         Job.stubs(:fields).returns([@af1, @f1])
-        S::Schema.reload!
-        lambda { S::Schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
+        lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
         # hammer, meet nut
         S::Rack::Back::EditingInterface.use Spontaneous::Rack::Reloader
         Spontaneous::Loader.stubs(:reload!)
       end
 
       teardown do
-        S::Schema.schema_loader_class = S::Schema::TransientMap
+        S.schema.schema_loader_class = S::Schema::TransientMap
         FileUtils.rm(@schema_map) if File.exists?(@schema_map)
       end
 
@@ -776,7 +760,7 @@ class BackTest < MiniTest::Spec
         auth_post action, "uid" => @df1.schema_id, "ref" => @af1.schema_name, "origin" => "/@spontaneous"
         last_response.status.should == 302
         begin
-          S::Schema.validate!
+          S.schema.validate!
         rescue Spontaneous::SchemaModificationError => e
           flunk("Schema modification link should have resolved schema errors")
         end
@@ -787,7 +771,7 @@ class BackTest < MiniTest::Spec
         auth_post action, "uid" => @df1.schema_id, "origin" => "/@spontaneous"
         last_response.status.should == 302
         begin
-          S::Schema.validate!
+          S.schema.validate!
         rescue Spontaneous::SchemaModificationError => e
           flunk("Schema modification link should have resolved schema errors")
         end
@@ -798,21 +782,18 @@ class BackTest < MiniTest::Spec
     context "sharded uploading" do
       setup do
         Spontaneous.stubs(:reload!)
-        @temp_dir = Dir.mktmpdir
-        @shard_dir = @temp_dir / "tmp"
         @image = File.expand_path("../../fixtures/sharding/rose.jpg", __FILE__)
         # read the digest dynamically in case I change that image
         @image_digest = S::Media.digest(@image)
-        FileUtils.mkdir(@shard_dir)
-        Spontaneous.media_dir = @temp_dir
       end
+
       teardown do
-        FileUtils.rm_rf(@temp_dir)
       end
 
       should "have the right setting for shard_dir" do
-        Spontaneous.shard_path.should == @shard_dir
-        Spontaneous.shard_path("abcdef0123").should == @shard_dir/ "ab/cd/abcdef0123"
+        shard_path = File.join(@site.root / 'cache/media/tmp')
+        Spontaneous.shard_path.should == shard_path
+        Spontaneous.shard_path("abcdef0123").should == shard_path/ "ab/cd/abcdef0123"
       end
 
       should "know when it already has a shard" do

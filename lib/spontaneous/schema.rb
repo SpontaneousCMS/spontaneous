@@ -244,7 +244,7 @@ module Spontaneous
       # only need this for the serialisation (which doesn't include boxes)
       def content_classes
         classes = []
-        Content.subclasses.each do |klass|
+        self.classes.reject { |k| k.is_box? }.each do |klass|
           classes << klass unless [Spontaneous::Page, Spontaneous::Piece].include?(klass)
           recurse_classes(klass, classes)
         end

@@ -263,7 +263,7 @@ module Spontaneous
         end
 
         get '/types' do
-          json Schema
+          json Site.schema
         end
 
         # get '/type/:type' do

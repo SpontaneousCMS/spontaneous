@@ -8,19 +8,6 @@ require File.expand_path('../../test_helper', __FILE__)
 class AuthenticationTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
-  def self.site_root
-    @site_root
-  end
-
-  def self.startup
-    @site_root = Dir.mktmpdir
-    app_root = File.expand_path('../../fixtures/example_application', __FILE__)
-    FileUtils.cp_r(app_root, @site_root)
-  end
-
-  def self.shutdown
-    teardown_site
-  end
 
   def create_user(name, level)
     user = Permissions::User.create({
@@ -88,20 +75,23 @@ class AuthenticationTest < MiniTest::Spec
   end
 
   def setup
-    @site = setup_site(self.class.site_root)
-    # instance = Spontaneous::Site.instantiate(Spontaneous.root, :test, :back)
-    Site.config.publishing_delay nil
-    Site.config.site_domain "example.com"
-    Site.config.site_id "example_com"
+    @site = setup_site
+
+    @site.config.publishing_delay nil
+    @site.config.site_domain "example.com"
+    @site.config.site_id "example_com"
 
     # Site.database = DB
-    Site.instance.paths.add :templates, File.expand_path("../../fixtures/public/templates", __FILE__)
+    @site.paths.add :templates, File.expand_path("../../fixtures/public/templates", __FILE__)
     # see http://benprew.posterous.com/testing-sessions-with-sinatra
     # app.send(:set, :sessions, false)
     S::Rack::Back::EditingInterface.set :sessions, false
     Spontaneous.stubs(:media_dir).returns(File.expand_path('../../fixtures/permissions/media', __FILE__))
   end
 
+  def teardown
+    teardown_site
+  end
   def assert_login_page(path = nil, method = "GET")
     assert last_response.status == 401, "#{method} #{path} should have status 401 but has #{last_response.status}"
     last_response.body.should =~ %r{<form.+action="/@spontaneous/login"}

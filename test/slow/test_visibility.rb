@@ -5,10 +5,17 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class VisibilityTest < MiniTest::Spec
 
+
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
+  end
+
   context "Content" do
     setup do
-      Spontaneous.database = DB
-      Spontaneous::Schema.reset!
       Content.delete
       class ::R < Page; end
       R.box :pages

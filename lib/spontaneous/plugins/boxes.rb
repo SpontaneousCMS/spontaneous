@@ -42,6 +42,10 @@ module Spontaneous::Plugins
         box_prototypes.key?(box_name.to_sym)
       end
 
+      def is_box?
+        false
+      end
+
       def box_group(name, &block)
         @box_group = name #box_groups[name.to_sym]
         yield if block_given?

@@ -9,9 +9,17 @@ class FeaturesTest < MiniTest::Spec
 
   def self.startup
     # make sure that S::Piece & S::Page are removed from the schema
+    @site = setup_site
     *ids = S::Page.schema_id, S::Piece.schema_id
-    S::Schema.reset!
     Object.const_set(:Site, Class.new(S::Site))
+  end
+
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
   end
 
   def app
@@ -28,14 +36,9 @@ class FeaturesTest < MiniTest::Spec
 
   context "Feature" do
     setup do
-      S::Schema.reset!
       Content.delete
       Spontaneous::Permissions::User.delete
 
-      @site_root = Dir.mktmpdir
-      @site = ::Site.instantiate(@site_root, :development, :back)
-      Spontaneous.instance = @site
-      Spontaneous.database = DB
 
       config = mock()
       config.stubs(:reload_classes).returns(false)
@@ -64,7 +67,6 @@ class FeaturesTest < MiniTest::Spec
       #   Object.send(:remove_const, klass) rescue nil
       # } rescue nil
       Content.delete
-      FileUtils.rm_r(@site_root)
     end
 
     context "controllers" do

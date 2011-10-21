@@ -5,24 +5,28 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class PublishingTest < MiniTest::Spec
 
+  def self.site_root
+    @site_root
+  end
+
   def self.startup
-    root = File.expand_path("../../fixtures/example_application", __FILE__)
-    instance = Spontaneous::Site.instantiate(root, :test, :back)
-    # Spontaneous.root = root
-    Spontaneous.instance = instance
-    Site.config.publishing_delay = nil
-    Site.instance.database = DB
-    Content.delete_all_revisions!
+    @site_root = Dir.mktmpdir
+    FileUtils.cp_r(File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing/templates"), @site_root)
+  end
+
+  def self.shutdown
+    teardown_site
   end
 
   def self.shutdown
     # Spontaneous.database = DB
-    Content.delete_all_revisions!
+    S::Content.delete_all_revisions! rescue nil
   end
 
   @@now = Time.now
 
   def setup
+    @site = setup_site(self.class.site_root)
     Site.publishing_method = :immediate
   end
 
@@ -43,7 +47,6 @@ class PublishingTest < MiniTest::Spec
     setup do
       Sequel.datetime_class.stubs(:now).returns(@@now)
       Time.stubs(:now).returns(@@now)
-      Spot::Schema.reset!
 
       # DB.logger = Logger.new($stdout)
       Content.delete
@@ -278,14 +281,16 @@ class PublishingTest < MiniTest::Spec
           @initial_revision = 1
           @final_revision = 2
           Content.create_revision(@initial_revision)
+          Content.delete_revision(@final_revision) rescue nil
+          Content.delete_revision(@final_revision+1) rescue nil
           # DB.logger = Logger.new($stdout)
         end
 
         teardown do
           begin
-          Content.delete_revision(@initial_revision)
-          Content.delete_revision(@final_revision)
-          Content.delete_revision(@final_revision+1)
+            Content.delete_revision(@initial_revision)
+            Content.delete_revision(@final_revision)
+            Content.delete_revision(@final_revision+1)
           rescue
           end
           DB.logger = nil
@@ -912,14 +917,14 @@ class PublishingTest < MiniTest::Spec
         Site.revision.should == @revision
         # Spontaneous.root = File.expand_path(File.dirname(__FILE__) / "../fixtures/example_application")
 
-        @revision_dir = File.expand_path(File.dirname(__FILE__) / "../../tmp/revisions")
-        self.template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")
-        FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
+        # @revision_dir = File.expand_path(File.dirname(__FILE__) / "../../tmp/revisions")
+        # self.template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")
+        # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
         class ::PublishablePage < Page; end
         PublishablePage.layout :"static"
         PublishablePage.layout :"dynamic"
-        Spontaneous.revision_root = @revision_dir
-        Spontaneous.template_root = @template_root
+        # Spontaneous.revision_root = @revision_dir
+        # Spontaneous.template_root = @template_root
         # Cutaneous::PreviewRenderEngine.context_class = Cutaneous::PublishContext
         Spontaneous::Render.renderer_class = Spontaneous::Render::PublishedRenderer
 
@@ -945,23 +950,23 @@ class PublishingTest < MiniTest::Spec
         Content.delete_revision(@revision)
         Content.delete
         State.delete
-        Object.send(:remove_const, :PublishablePage)
+        Object.send(:remove_const, :PublishablePage) rescue nil
       end
 
       should "put its files into a numbered revision directory" do
-        Spontaneous.revision_dir(2).should == @revision_dir / "00002"
+        Spontaneous.revision_dir(2).should == @site.root / 'cache/revisions' / "00002"
       end
 
       should "symlink the latest revision to 'current'" do
-        revision_dir = @revision_dir / "00002"
-        current_dir = @revision_dir / "current"
+        revision_dir = @site.revision_root / "00002"
+        current_dir = @site.revision_root / "current"
         File.exists?(current_dir).should be_true
         File.symlink?(current_dir).should be_true
         File.readlink(current_dir).should == revision_dir
       end
 
       should "produce rendered versions of each page" do
-        revision_dir = @revision_dir / "00002/html"
+        revision_dir = @site.revision_root / "00002/html"
         file = result = nil
         @pages.each do |page|
           if page.root?
@@ -974,7 +979,7 @@ class PublishingTest < MiniTest::Spec
           File.exists?(file).should be_true
           File.read(file).should == result
         end
-        revision_dir = @revision_dir / "00002"
+        revision_dir = @site.revision_root / "00002"
         Dir[S.root / "public/**/*"].each do |public_file|
           site_file = public_file.gsub(%r(^#{S.root}/), '')
           publish_file = revision_dir / site_file
@@ -983,7 +988,7 @@ class PublishingTest < MiniTest::Spec
       end
 
       should "generate a config.ru file pointing to the current root" do
-        config_file = @revision_dir / "00002/config.ru"
+        config_file = @site.revision_root / "00002/config.ru"
         File.exists?(config_file).should be_true
         File.read(config_file).should =~ %r(#{Spontaneous.root})
       end

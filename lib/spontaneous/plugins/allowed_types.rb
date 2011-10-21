@@ -33,7 +33,11 @@ module Spontaneous::Plugins
         when Class
           @type
         when Symbol, String
+          # begin
           @type.to_s.constantize
+          # rescue  => e
+          #   p self
+          # end
         end
       end
 

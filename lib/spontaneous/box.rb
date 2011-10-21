@@ -29,6 +29,10 @@ module Spontaneous
       false
     end
 
+    def self.is_box?
+      true
+    end
+
     def self.schema_id
       Spontaneous.schema.schema_id(self)
     end
@@ -86,6 +90,7 @@ module Spontaneous
     def box?(box_name)
       false
     end
+
 
     def field_store
       _owner.box_field_store(self) || initialize_fields

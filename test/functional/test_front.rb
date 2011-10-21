@@ -8,19 +8,22 @@ ENV['RACK_ENV'] = 'test'
 class FrontTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
+  def self.site_root
+    @site_root
+  end
+
   def self.startup
+    @site_root = Dir.mktmpdir
+    FileUtils.cp_r(File.expand_path("../../fixtures/public/templates", __FILE__), @site_root)
   end
 
   def self.shutdown
+    teardown_site
   end
 
   def setup
-    @saved_template_root = Spontaneous.template_root
+    @site = setup_site(self.class.site_root)
     Site.publishing_method = :immediate
-  end
-
-  def teardown
-    Spontaneous.template_root = @saved_template_root
   end
 
   def app
@@ -57,15 +60,7 @@ class FrontTest < MiniTest::Spec
 
   context "Public pages" do
     setup do
-      Spot::Schema.reset!
 
-      @saved_revision_root = Spontaneous.revision_root
-      @saved_root = Spontaneous.root
-
-      root = File.expand_path('../../fixtures/example_application', __FILE__)
-      Spontaneous.root = root
-
-      Spontaneous.init(:environment => :test, :mode => :front)
 
       Site.publishing_method = :immediate
       State.delete
@@ -87,11 +82,12 @@ class FrontTest < MiniTest::Spec
       # app.send(:set, :sessions, false)
       # S::Rack::Front::Server.send(:set, :sessions, false)
 
-      @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
-      `mkdir -p #{@revision_root}`
-      Spontaneous.revision_root = @revision_root
+      # @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
+      # `mkdir -p #{@revision_root}`
+      # Spontaneous.revision_root = @revision_root
 
-      self.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
+      # @site.stubs(:template_root).returns(File.expand_path("../../fixtures/public/templates", __FILE__))
+      # self.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
 
       @root = ::SitePage.create
       @about = ::SitePage.create(:slug => "about", :uid => "about")
@@ -118,9 +114,7 @@ class FrontTest < MiniTest::Spec
       Content.delete
       State.delete
       Content.delete_revision(1)
-      Spontaneous.revision_root = @saved_revision_root
-      Spontaneous.root = @saved_root
-      FileUtils.rm_rf(@revision_root) rescue nil
+      # FileUtils.rm_rf(@revision_root) rescue nil
     end
 
     should "return a 404 if asked for a non-existant page" do
@@ -374,7 +368,7 @@ class FrontTest < MiniTest::Spec
 
         should "use pre-rendered versions of the templates" do
           dummy_content = 'cached-version/#{session[\'user_id\']}'
-          dummy_template = File.join(revision_root, "dummy.html.cut")
+          dummy_template = File.join(@site.revision_root, "dummy.html.cut")
           File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
           Spontaneous::Render.stubs(:output_path).returns(dummy_template)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
