@@ -7,7 +7,8 @@ class ContentInheritanceTest < MiniTest::Spec
 
   context "Single table inheritance" do
     setup do
-      Spot::Schema.reset!
+      @site = setup_site
+
       Content.delete
       class ::Page < Spontaneous::Page; end
       class ::PageClass1 < ::Page; end
@@ -44,6 +45,7 @@ class ContentInheritanceTest < MiniTest::Spec
       ].each do |klass|
         Object.send(:remove_const, klass)
       end
+      teardown_site
     end
 
     should "aaa correctly type subclasses found via Content" do

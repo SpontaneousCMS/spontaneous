@@ -4,10 +4,18 @@ require File.expand_path('../../test_helper', __FILE__)
 
 
 class StructureTest < MiniTest::Spec
+
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
+  end
+
   context "content building" do
     setup do
       Content.delete
-      Spot::Schema.reset!
       class Page < Spot::Page
         field :title
       end

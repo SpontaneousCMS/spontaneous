@@ -3,6 +3,14 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class MediaTest < MiniTest::Spec
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
+  end
+
   context "Utilitity methods" do
     should "be able to sanitise filenames" do
       filename = "Something with-dodgy 'characters'.many.jpg"
@@ -11,21 +19,21 @@ class MediaTest < MiniTest::Spec
   end
   context "Content items" do
     setup do
-      @media_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/media"))
-      Spontaneous.media_dir = @media_dir
+      # @media_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/media"))
+      # Spontaneous.media_dir = @media_dir
       Site.stubs(:working_revision).returns(74)
       @instance = Content.new
       @instance.stubs(:id).returns(101)
     end
 
     should "be able to generate a revision and id based media path" do
-      @instance.media_filepath("something.jpg").should == File.join(@media_dir, "00101/0074/something.jpg")
+      @instance.media_filepath("something.jpg").should == File.join(@site.media_dir, "00101/0074/something.jpg")
       @instance.media_urlpath("something.jpg").should == "/media/00101/0074/something.jpg"
     end
 
     context "file manipulation" do
       setup do
-        @tmp_dir = Pathname.new(@media_dir)
+        @tmp_dir = Pathname.new(Spontaneous.media_dir)
         @src_image =  Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg")).realpath
         @upload_dir = @tmp_dir + "tmp/1234"
         @upload_dir.mkpath
@@ -34,7 +42,7 @@ class MediaTest < MiniTest::Spec
       end
 
       teardown do
-        (@tmp_dir + "..").rmtree
+        # (@tmp_dir + "..").rmtree
       end
 
       should "be able to move a file into the media path" do

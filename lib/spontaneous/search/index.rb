@@ -174,11 +174,11 @@ module Spontaneous::Search
     end
 
     def all_types
-      S::Schema.classes
+      S.schema.classes
     end
 
     def all_page_types
-      S::Schema.classes.select { |klass| klass.page? }
+      S.schema.classes.select { |klass| klass.page? }
     end
   end # Index
 end # Spontaneous

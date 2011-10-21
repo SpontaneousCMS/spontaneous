@@ -5,8 +5,14 @@ require File.expand_path('../../test_helper', __FILE__)
 class FieldsTest < MiniTest::Spec
 
   def setup
+    @site = setup_site
     Site.publishing_method = :immediate
   end
+
+  def teardown
+    teardown_site
+  end
+
   context "New content instances" do
     setup do
       @content_class = Class.new(Piece) do

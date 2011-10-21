@@ -111,5 +111,11 @@ module Spontaneous
       return root / 'current' if revision.nil?
       root / revision.to_s.rjust(5, "0")
     end
+
+    def media_dir(*path)
+      media_root = root / "cache/media"
+      return media_root if path.empty?
+      File.join(media_root, *path)
+    end
   end
 end

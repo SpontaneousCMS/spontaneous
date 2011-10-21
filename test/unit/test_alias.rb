@@ -17,7 +17,7 @@ class AliasTest < MiniTest::Spec
 
   context "Aliases:" do
     setup do
-      Spot::Schema.reset!
+      @site = setup_site
       Content.delete
 
       self.template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
@@ -106,7 +106,8 @@ class AliasTest < MiniTest::Spec
       [:Page, :Piece, :A, :AA, :AAA, :B, :BB, :AAlias, :AAAlias, :AAAAlias, :BBAlias, :BAlias, :MultipleAlias].each do |c|
         Object.send(:remove_const, c) rescue nil
       end
-      # Content.delete
+      Content.delete
+      FileUtils.rm_r(@site.root)
     end
 
     context "All alias" do

@@ -5,12 +5,18 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class SiteTest < MiniTest::Spec
   include Spontaneous
+
   def setup
+    @site = setup_site
   end
+
+  def teardown
+    teardown_site
+  end
+
   context "Site:" do
     setup do
       Content.delete
-      Spot::Schema.reset!
       class ::Page < Spontaneous::Page
         field :title
       end

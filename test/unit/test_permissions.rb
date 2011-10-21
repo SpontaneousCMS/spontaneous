@@ -6,13 +6,14 @@ require File.expand_path('../../test_helper', __FILE__)
 class PermissionsTest < MiniTest::Spec
 
   def setup
-    Spontaneous::Schema.reset!
+    @site = setup_site
     Spontaneous::Content.delete
     Permissions::UserLevel.reset!
-    Permissions::UserLevel.level_file = File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml'
+    Permissions::UserLevel.stubs(:level_file).returns(File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml')
   end
 
   def teardown
+    teardown_site
     Permissions::AccessGroup.delete
     Permissions::AccessKey.delete
     Permissions::User.delete

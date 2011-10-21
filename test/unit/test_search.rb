@@ -27,8 +27,8 @@ class SearchTest < MiniTest::Spec
 
   def self.startup
     # make sure that S::Piece & S::Page are removed from the schema
+    setup_site
     *ids = S::Page.schema_id, S::Piece.schema_id
-    S::Schema.reset!
     Object.const_set(:Site, Class.new(S::Site))
   end
 
@@ -36,13 +36,18 @@ class SearchTest < MiniTest::Spec
     Object.send(:remove_const, :Site) rescue nil
   end
 
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
+  end
+
   context "Search" do
     setup do
-      S::Schema.reset!
       Content.delete
 
-      @site_root = Dir.mktmpdir
-      @site = ::Site.instantiate(@site_root, :development, :back)
 
       class ::Piece < S::Piece; end
       class ::Page < S::Page; end
@@ -103,7 +108,6 @@ class SearchTest < MiniTest::Spec
         Object.send(:remove_const, klass) rescue nil
       } rescue nil
       Content.delete
-      FileUtils.rm_r(@site_root)
     end
 
     context "indexes" do
@@ -568,8 +572,7 @@ class SearchTest < MiniTest::Spec
 
     context "initialization" do
       setup do
-        S.instance = @site
-        FileUtils.cp_r(File.expand_path("../../fixtures/search/config", __FILE__), @site_root)
+        FileUtils.cp_r(File.expand_path("../../fixtures/search/config", __FILE__), @site.root)
       end
 
       should "load the config/indexes.rb file" do

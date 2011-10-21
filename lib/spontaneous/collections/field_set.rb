@@ -14,7 +14,7 @@ module Spontaneous::Collections
     def initialize_from_prototypes(initial_values)
       values = (initial_values || []).map do |value|
         value = S::FieldTypes.deserialize_field(value)
-        [Spontaneous.schema.uid[value[:id]], value]
+        [Spontaneous.schema.uids[value[:id]], value]
       end
       values = Hash[values]
       owner.field_prototypes.each do |field_prototype|

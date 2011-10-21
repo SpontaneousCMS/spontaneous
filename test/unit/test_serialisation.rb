@@ -6,10 +6,18 @@ require 'erb'
 
 class SerialisationTest < MiniTest::Spec
   include Spontaneous
+
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
+  end
+
   context "Content" do
     setup do
       Content.delete
-      Spot::Schema.reset!
       class ::Page < Spontaneous::Page
         field :title, :string, :default => "New Page"
       end
@@ -171,7 +179,6 @@ class SerialisationTest < MiniTest::Spec
 
   context "Publishing" do
     setup do
-      Spot::Schema.reset!
       class ::Page < Spontaneous::Page
         field :title, :string, :default => "New Page"
       end
@@ -194,7 +201,7 @@ class SerialisationTest < MiniTest::Spec
     end
 
     teardown do
-      Object.send(:remove_const, :Page)
+      Object.send(:remove_const, :Page) rescue nil
       Content.delete
       Change.delete
     end

@@ -6,11 +6,13 @@ require File.expand_path('../../test_helper', __FILE__)
 class ContentTest < MiniTest::Spec
   context "Content:" do
     setup do
-      Spot::Schema.reset!
+      @site = setup_site
       class C < Content; end
     end
+
     teardown do
-      ContentTest.send(:remove_const, :C)
+      teardown_site
+      ContentTest.send(:remove_const, :C) rescue nil
     end
     context "Content instances" do
       should "evaluate instance code" do
@@ -175,9 +177,6 @@ class ContentTest < MiniTest::Spec
 
     context "identity map" do
       setup do
-        instance = Spontaneous::Site.instantiate(Spontaneous.root, :test, :back)
-        Spontaneous.instance = instance
-        Spontaneous.instance.database = DB
 
         Content.delete
         Content.delete_all_revisions!

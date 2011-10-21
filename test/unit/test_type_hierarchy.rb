@@ -6,6 +6,14 @@ require File.expand_path('../../test_helper', __FILE__)
 class TypeHierarchyTest < MiniTest::Spec
 
 
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
+  end
+
   context "Content" do
     should "have an empty supertype" do
       S::Content.supertype.should be_nil

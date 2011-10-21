@@ -9,7 +9,7 @@ class PluginsTest < MiniTest::Spec
   def self.startup
     # @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
     # `mkdir -p #{@revision_root}/public`
-    @site = instantiate_site
+    @site = setup_site
 
     klass =  Class.new(Spontaneous::Page)
     Object.send(:const_set, :Page, klass)
@@ -31,7 +31,7 @@ class PluginsTest < MiniTest::Spec
   end
 
   def self.shutdown
-    FileUtils.rm_rf(@site.root) rescue nil
+    teardown_site
     Object.send(:remove_const, :Page) rescue nil
     Object.send(:remove_const, :Piece) rescue nil
     Object.send(:remove_const, :LocalPage) rescue nil

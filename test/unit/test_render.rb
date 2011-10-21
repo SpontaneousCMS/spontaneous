@@ -2,15 +2,18 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 
+require 'sinatra/base'
 
 class RenderTest < MiniTest::Spec
   include Spontaneous
 
   def setup
+    @site = setup_site
     @saved_engine_class = Spontaneous::Render.renderer_class
-    Schema.reset!
   end
+
   def teardown
+    teardown_site
     Spontaneous::Render.renderer_class = @saved_engine_class
   end
 
@@ -287,7 +290,7 @@ class RenderTest < MiniTest::Spec
       @page = PreviewRender.new(:title => "PAGE", :description => "DESCRIPTION")
       # @page.stubs(:id).returns(24)
       @page.save
-      @session = ::Rack::MockSession.new(Sinatra::Application)
+      @session = ::Rack::MockSession.new(::Sinatra::Application)
     end
 
     teardown do

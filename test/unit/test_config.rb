@@ -5,17 +5,17 @@ require File.expand_path('../../test_helper', __FILE__)
 class ConfigTest < MiniTest::Spec
   include CustomMatchers
   def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
   end
 
   context "Config" do
     setup do
-      # Spontaneous.send(:remove_const, :Config) rescue nil
-      # @lib_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../lib'))
-      # load @lib_dir + '/spontaneous/config.rb'
-      Config ||= ::Spontaneous::Config
-      @pwd = Dir.pwd
-      Dir.chdir(File.expand_path("../../fixtures/config", __FILE__))
-      Spontaneous.root = Dir.pwd
+      @config_dir = File.expand_path("../../fixtures/config/config", __FILE__)
+
       class ::TopLevel
         def self.parameter=(something)
           @parameter = something
@@ -26,16 +26,15 @@ class ConfigTest < MiniTest::Spec
         end
       end
     end
+
     teardown do
-      Object.send(:remove_const, :TopLevel)
-      Dir.chdir(@pwd)
-      # self.class.send(:remove_const, :Config) rescue nil
+      Object.send(:remove_const, :TopLevel) rescue nil
     end
 
     context "Config" do
       setup do
         @config = Config.new(:development)
-        @config.load(Spontaneous.root / 'config')
+        @config.load(@config_dir)
       end
       should "load the first time its accessed" do
         @config.over_ridden.should == :development_value
@@ -50,7 +49,7 @@ class ConfigTest < MiniTest::Spec
         # require @lib_dir + '/spontaneous/config.rb'
         # Config.environment = :development
         @config = Config.new(:development)
-        @config.load(Spontaneous.root / 'config')
+        @config.load(@config_dir)
       end
 
       teardown do
@@ -77,10 +76,10 @@ class ConfigTest < MiniTest::Spec
       should "overwrite values depending on environment" do
         @config.over_ridden.should == :development_value
         config = Config.new(:production)
-        config.load(Spontaneous.root / 'config')
+        config.load(@config_dir)
         config.over_ridden.should == :production_value
         config = Config.new(:staging)
-        config.load(Spontaneous.root / 'config')
+        config.load(@config_dir)
         config.over_ridden.should == :environment_value
       end
 
@@ -99,10 +98,10 @@ class ConfigTest < MiniTest::Spec
       should "dynamically switch values according to the configured env" do
         @config.over_ridden.should == :development_value
         config = Config.new(:production)
-        config.load(Spontaneous.root / 'config')
+        config.load(@config_dir)
         config.over_ridden.should == :production_value
         config = Config.new(:staging)
-        config.load(Spontaneous.root / 'config')
+        config.load(@config_dir)
         config.over_ridden.should == :environment_value
       end
 
@@ -131,12 +130,12 @@ class ConfigTest < MiniTest::Spec
       end
 
       teardown do
-        Dir.chdir(@pwd)
       end
+
       context "Spontaneous :back" do
         setup do
           @config = Config.new(:development, :back)
-          @config.load(Spontaneous.root / 'config')
+          @config.load(@config_dir)
         end
         should "read the correct configuration values" do
           @config.port.should == 9001
@@ -145,7 +144,7 @@ class ConfigTest < MiniTest::Spec
       context "Spontaneous :front" do
         setup do
           @config = Config.new(:development, :front)
-          @config.load(Spontaneous.root / 'config')
+          @config.load(@config_dir)
         end
         should "read the correct configuration values" do
           @config.port.should == 9002

@@ -5,9 +5,17 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class BoxesTest < MiniTest::Spec
 
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
+  end
+
   context "Box definitions" do
     setup do
-      S::Schema.reset!
+
       class ::Piece < Spontaneous::Piece; end
       class ::MyBoxClass < Box; end
       class ::MyContentClass < Piece; end
@@ -187,8 +195,7 @@ class BoxesTest < MiniTest::Spec
 
   context "Box classes" do
     setup do
-      Schema.reset!
-      Spontaneous.template_root = File.expand_path('../../fixtures/templates/boxes', __FILE__)
+      @site.stubs(:template_root).returns(File.expand_path('../../fixtures/templates/boxes', __FILE__))
       class ::Piece < Spontaneous::Piece; end
       class ::MyContentClass < ::Piece; end
       class ::MyBoxClass < Box; end

@@ -111,7 +111,7 @@ class MiniTest::Spec
   attr_accessor :template_root
   alias :silence_stdout :silence_logger
 
-  def self.instantiate_site(root = nil)
+  def self.setup_site(root = nil)
     root ||= Dir.mktmpdir
     instance = Spontaneous::Site.instantiate(root, :test, :back)
     instance.schema_loader_class = Spontaneous::Schema::TransientMap
@@ -120,8 +120,16 @@ class MiniTest::Spec
     instance
   end
 
-  def instantiate_site(root = nil)
-    self.class.instantiate_site(root)
+  def self.teardown_site
+    FileUtils.rm_r(Spontaneous.instance.root) rescue nil
+  end
+
+  def setup_site(root = nil)
+    self.class.setup_site(root)
+  end
+
+  def teardown_site
+    self.class.teardown_site
   end
 
   def template_root=(template_root)

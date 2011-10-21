@@ -6,6 +6,13 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class ImagesTest < MiniTest::Spec
   include Spontaneous
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
+  end
 
   context "Image fields set using absolute values" do
     setup do
@@ -30,8 +37,8 @@ class ImagesTest < MiniTest::Spec
 
   context "Image fields" do
     setup do
-      tmp = File.join(File.dirname(__FILE__), "../../tmp/media")
-      Spontaneous.media_dir = tmp
+      tmp = File.join(@site.root, "tmp/media")
+      # Spontaneous.media_dir = tmp
       @tmp_dir = Pathname.new(tmp)
       @upload_dir = @tmp_dir + "tmp/1234"
       @upload_dir.mkpath
@@ -44,8 +51,6 @@ class ImagesTest < MiniTest::Spec
       # @origin_image.make_link(@src_image.to_s) unless @origin_image.exist?
       FileUtils.cp(@src_image.to_s, @origin_image.to_s)
       @origin_image = @origin_image.realpath.to_s
-      # @digest = OpenSSL::Digest::MD5.new.file(@origin_image).hexdigest
-      # p @digest
 
       class ::ResizingImageField < FieldTypes::ImageField
         size :preview do
@@ -85,9 +90,9 @@ class ImagesTest < MiniTest::Spec
     end
 
     teardown do
-      Object.send(:remove_const, :ContentWithImage)
-      Object.send(:remove_const, :ResizingImageField)
-      (@tmp_dir + "..").rmtree
+      Object.send(:remove_const, :ContentWithImage) rescue nil
+      Object.send(:remove_const, :ResizingImageField) rescue nil
+      # (@tmp_dir + "..").rmtree
     end
 
     context "with defined sizes" do

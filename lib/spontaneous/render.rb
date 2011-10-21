@@ -105,10 +105,10 @@ module Spontaneous
         ::File.join(template_root, *path)
       end
 
-      def template_root=(root)
-        @template_root = root
-        @renderer = nil
-      end
+      # def template_root=(root)
+      #   @template_root = root
+      #   @renderer = nil
+      # end
 
       def extension
         Spontaneous.template_ext

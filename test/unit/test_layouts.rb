@@ -7,12 +7,16 @@ class LayoutsTest < MiniTest::Spec
   def setup
     Spontaneous::Render.use_development_renderer
     self.template_root = ::File.expand_path('../../fixtures/layouts', __FILE__)
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
   end
 
   context "layouts" do
 
     setup do
-      Spontaneous::Schema.reset!
       class ::LayoutPage < Spontaneous::Page; end
       class ::ABoxClass < Spontaneous::Box; end
       class ::SubPage < LayoutPage; end

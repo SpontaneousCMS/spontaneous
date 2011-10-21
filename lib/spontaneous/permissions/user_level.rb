@@ -124,12 +124,12 @@ module Spontaneous::Permissions
       end
 
       def level_file
-        @level_file ||= 'config/user_levels.yml'
+        Spontaneous.root / 'config/user_levels.yml'
       end
 
-      def level_file=(file)
-        @level_file = file
-      end
+      # def level_file=(file)
+      #   @level_file = file
+      # end
 
       def reset!
         @initialised = false

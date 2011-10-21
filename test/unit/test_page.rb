@@ -6,6 +6,14 @@ require File.expand_path('../../test_helper', __FILE__)
 class PageTest < MiniTest::Spec
   include Spontaneous
 
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
+  end
+
   context "All pages" do
     # should "have a pre-defined 'title' field" do
     #   p = Page.new
@@ -16,7 +24,6 @@ class PageTest < MiniTest::Spec
   context "Pages:" do
     setup do
       Content.delete
-      S::Schema.reset!
       class Page < Spot::Page
         field :title, :string
       end

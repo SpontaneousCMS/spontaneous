@@ -8,8 +8,18 @@ require File.expand_path('../../test_helper', __FILE__)
 class AuthenticationTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
+  def self.site_root
+    @site_root
+  end
 
   def self.startup
+    @site_root = Dir.mktmpdir
+    app_root = File.expand_path('../../fixtures/example_application', __FILE__)
+    FileUtils.cp_r(app_root, @site_root)
+  end
+
+  def self.shutdown
+    teardown_site
   end
 
   def create_user(name, level)
@@ -22,9 +32,6 @@ class AuthenticationTest < MiniTest::Spec
     })
     user.update(:level => level)
     user
-  end
-
-  def self.shutdown
   end
 
   @@version = 0
@@ -81,17 +88,18 @@ class AuthenticationTest < MiniTest::Spec
   end
 
   def setup
-    instance = Spontaneous::Site.instantiate(Spontaneous.root, :test, :back)
+    @site = setup_site(self.class.site_root)
+    # instance = Spontaneous::Site.instantiate(Spontaneous.root, :test, :back)
     Site.config.publishing_delay nil
     Site.config.site_domain "example.com"
     Site.config.site_id "example_com"
 
-    Site.database = DB
+    # Site.database = DB
     Site.instance.paths.add :templates, File.expand_path("../../fixtures/public/templates", __FILE__)
     # see http://benprew.posterous.com/testing-sessions-with-sinatra
     # app.send(:set, :sessions, false)
     S::Rack::Back::EditingInterface.set :sessions, false
-    Spontaneous.media_dir = File.expand_path('../../fixtures/permissions/media', __FILE__)
+    Spontaneous.stubs(:media_dir).returns(File.expand_path('../../fixtures/permissions/media', __FILE__))
   end
 
   def assert_login_page(path = nil, method = "GET")
@@ -112,7 +120,7 @@ class AuthenticationTest < MiniTest::Spec
 
   context "Authentication:" do
     setup do
-      Spontaneous::Schema.reset!
+      # Spontaneous::Schema.reset!
 
       class C < Spontaneous::Piece
         field :photo, :image, :write_level => :root
@@ -185,12 +193,7 @@ class AuthenticationTest < MiniTest::Spec
       Permissions::User.delete
       Permissions::AccessKey.delete
       Spontaneous.environment = :test
-      Permissions::UserLevel.level_file = File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml'
-
-      @saved_root = Spontaneous.root
-      Spontaneous.root = File.expand_path('../../fixtures/example_application', __FILE__)
-
-      # Spontaneous.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
+      Permissions::UserLevel.stubs(:level_file).returns(File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml')
 
       @root = SitePage.create
       @root.save
@@ -212,11 +215,10 @@ class AuthenticationTest < MiniTest::Spec
     end
 
     teardown do
-      [:C, :D, :SitePage].each { |k| AuthenticationTest.send(:remove_const, k)}
+      [:C, :D, :SitePage].each { |k| AuthenticationTest.send(:remove_const, k) rescue nil }
       Content.delete
       Permissions::User.delete
       Permissions::AccessKey.delete
-      Spontaneous.root = @saved_root
     end
 
     context "Unauthorised sessions" do

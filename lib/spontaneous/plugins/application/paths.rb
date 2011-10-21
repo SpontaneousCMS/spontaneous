@@ -28,9 +28,9 @@ module Spontaneous::Plugins::Application
         relative_dir(root / "config", *path)
       end
 
-      def template_root=(template_root)
-        Spot::Render.template_root = template_root.nil? ? nil : File.expand_path(template_root)
-      end
+      # def template_root=(template_root)
+      #   Spot::Render.template_root = template_root.nil? ? nil : File.expand_path(template_root)
+      # end
 
       def template_root(*path)
         relative_dir(Spot::Render.template_root, *path)
@@ -57,13 +57,12 @@ module Spontaneous::Plugins::Application
         Spontaneous.schema.schema_map_file = path
       end
 
-      def media_dir=(dir)
-        @media_dir = File.expand_path(dir)
-      end
+      # def media_dir=(dir)
+      #   @media_dir = File.expand_path(dir)
+      # end
 
       def media_dir(*path)
-        @media_dir ||= File.expand_path(root / "cache/media")
-        relative_dir(@media_dir, *path)
+        Spontaneous.instance.media_dir(*path)
       end
 
       def media_path(*args)

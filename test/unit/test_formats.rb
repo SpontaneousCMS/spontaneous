@@ -5,11 +5,15 @@ require File.expand_path('../../test_helper', __FILE__)
 class FormatsTest < MiniTest::Spec
   context "Pages" do
     setup do
+      @site = setup_site
       class FPage < Spontaneous::Page; end
     end
+
     teardown do
-      self.class.send(:remove_const, :FPage)
+      self.class.send(:remove_const, :FPage) rescue nil
+      teardown_site
     end
+
     should "default to a single :html format" do
       FPage.formats.should == [:html]
     end

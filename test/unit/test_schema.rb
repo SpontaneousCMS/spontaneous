@@ -8,12 +8,12 @@ class SchemaTest < MiniTest::Spec
 
 
   def setup
-    @site = instantiate_site
+    @site = setup_site
     @site.schema_loader_class = Spontaneous::Schema::PersistentMap
   end
 
   def teardown
-    FileUtils.rm_r(Spontaneous.instance.root) rescue nil
+    teardown_site
   end
 
   context "Configurable names" do

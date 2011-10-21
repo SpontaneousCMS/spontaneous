@@ -14,7 +14,13 @@ class StylesTest < MiniTest::Spec
   #   end
   # end
 
+
+  def teardown
+    teardown_site
+  end
+
   def setup
+    @site = setup_site
     self.template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/styles"))
     Spontaneous::Render.use_development_renderer
   end
@@ -22,7 +28,6 @@ class StylesTest < MiniTest::Spec
   context "styles for" do
 
     setup do
-      Spot::Schema.reset!
       class ::MissingClass < Piece; end
       class ::TemplateClass < Piece; end
       class ::TemplateSubClass1 < TemplateClass; end

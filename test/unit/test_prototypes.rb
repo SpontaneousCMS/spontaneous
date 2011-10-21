@@ -3,6 +3,14 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class PrototypesTest < MiniTest::Spec
+  def setup
+    @site = setup_site
+  end
+
+  def teardown
+    teardown_site
+  end
+
   context "Prototypes" do
     setup do
       class ::ImageClass < Spontaneous::Piece
