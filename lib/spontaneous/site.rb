@@ -94,12 +94,20 @@ module Spontaneous
       plugin
     end
 
+    # used by publishing mechanism to place files into the appropriate subdirectories
+    # in the public folder.
+    # Site#file_namespace returns nil so that it's files are placed at the root
+    def file_namespace
+      nil
+    end
+
     def revision_root(*path)
       @revision_dir ||= File.expand_path(@root / 'cache/revisions')
       Spontaneous.relative_dir(@revision_dir, *path)
     end
 
     def revision_dir(revision=nil, root = revision_root)
+      root ||= revision_root
       return root / 'current' if revision.nil?
       root / revision.to_s.rjust(5, "0")
     end

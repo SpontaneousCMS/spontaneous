@@ -170,22 +170,34 @@ module Spontaneous
       def copy_static_files
         update_progress("copying_files")
         public_dest = Pathname.new(Spontaneous.revision_dir(revision) / 'public')
-        public_src = Pathname.new(Spontaneous.root / 'public').realpath
         FileUtils.mkdir_p(public_dest) unless File.exists?(public_dest)
         facets = Spontaneous.instance.facets
         public_dirs = facets.map { |facet| facet.paths.expanded(:public) }.flatten
-        public_dirs.map { |dir| Pathname.new(dir) }.each do |public_src|
-          Dir[public_src.to_s / "**/*"].each do |src|
-            src = Pathname.new(src)
-            dest = (public_dest + src.relative_path_from(public_src))
-            if src.directory?
-              dest.mkpath
-            else
-              case src.extname
-              when ".scss"
-                render_sass_template(src, dest)
+        facets.each do |facet|
+          copy_facet_public_files(facet, public_dest)
+        end
+      end
+
+      def copy_facet_public_files(facet, public_dest)
+        public_dirs = facet.paths.expanded(:public).map { |dir| Pathname.new(dir) }
+        public_dirs.each do |public_src|
+          if public_src.exist?
+            public_src = public_src.realpath
+            Dir[public_src.to_s / "**/*"].each do |src|
+              src = Pathname.new(src)
+              # insert facet namespace in front of path to keep URLs consistent across
+              # the back & front servers
+              dest = [facet.file_namespace, src.relative_path_from(public_src).to_s].compact
+              dest = (public_dest + File.join(dest))
+              if src.directory?
+                dest.mkpath
               else
-                FileUtils.ln(src, dest, :force => true)
+                case src.extname
+                when ".scss"
+                  render_sass_template(src, dest)
+                else
+                  FileUtils.ln(src, dest, :force => true)
+                end
               end
             end
           end

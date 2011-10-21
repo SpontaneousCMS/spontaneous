@@ -26,6 +26,12 @@ module Spontaneous
       File.basename(root)
     end
 
+    # used by publishing mechanism to place files into the appropriate subdirectories
+    # in the public folder.
+    def file_namespace
+      name
+    end
+
     def paths
       @paths ||= Spontaneous::Paths.new(@root)
     end

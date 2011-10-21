@@ -21,8 +21,11 @@ module Spontaneous::Plugins
           Spontaneous::State.pending_revision
         end
 
+        def revision_root(*path)
+          instance.revision_root(*path)
+        end
+
         def revision_dir(revision=nil, root = nil)
-          root ||= instance.revision_root
           instance.revision_dir(revision, root)
         end
       end

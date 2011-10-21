@@ -7,11 +7,9 @@ class PluginsTest < MiniTest::Spec
 
 
   def self.startup
-    @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
-    `mkdir -p #{@revision_root}/public`
-    instance = Spontaneous::Site.instantiate(@revision_root, :test, :back)
-    Spontaneous.instance = instance
-    Spontaneous.instance.database = DB
+    # @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
+    # `mkdir -p #{@revision_root}/public`
+    @site = instantiate_site
 
     klass =  Class.new(Spontaneous::Page)
     Object.send(:const_set, :Page, klass)
@@ -33,11 +31,11 @@ class PluginsTest < MiniTest::Spec
   end
 
   def self.shutdown
-    FileUtils.rm_rf(@revision_root) rescue nil
-    Object.send(:remove_const, :Page)
-    Object.send(:remove_const, :Piece)
-    Object.send(:remove_const, :LocalPage)
-    Object.send(:remove_const, :LocalPiece)
+    FileUtils.rm_rf(@site.root) rescue nil
+    Object.send(:remove_const, :Page) rescue nil
+    Object.send(:remove_const, :Piece) rescue nil
+    Object.send(:remove_const, :LocalPage) rescue nil
+    Object.send(:remove_const, :LocalPiece) rescue nil
   end
 
   def app
@@ -47,6 +45,7 @@ class PluginsTest < MiniTest::Spec
   context "Plugins:" do
 
     setup do
+      @site = Spontaneous.instance
     end
 
     teardown do
@@ -89,10 +88,6 @@ class PluginsTest < MiniTest::Spec
 
       context "during publishing" do
         setup do
-          Spontaneous.root = Spontaneous.instance.root
-          @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
-          `mkdir -p #{@revision_root}/public`
-          Spontaneous.revision_root = @revision_root
 
           Content.delete_revision(1) rescue nil
 
@@ -110,7 +105,7 @@ class PluginsTest < MiniTest::Spec
 
         should "have their public files copied into the revision sandbox" do
           @static.each do |file|
-            path = File.join(@revision_root, '00001', 'public', file)
+            path = File.join(@site.revision_root, '00001', 'public', 'schema_plugin', file)
             assert File.exists?(path), "File '#{path}' should exist"
           end
         end
@@ -118,7 +113,8 @@ class PluginsTest < MiniTest::Spec
         should "have their SASS & Less templates rendered to static css" do
           sass_files =['subdir/sass.css']
           sass_files.each do |file|
-            path = File.join(@revision_root, '00001', 'public', file)
+            path = File.join(@site.revision_root, '00001', 'public', 'schema_plugin', file)
+            assert File.exists?(path), "File '#{path}' should exist"
             css = File.read(path)
             css.should =~ /color:#005a55;?/
             css.should =~ /padding:42px;?/

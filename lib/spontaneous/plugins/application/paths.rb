@@ -90,17 +90,15 @@ module Spontaneous::Plugins::Application
       # end
 
       def revision_root(*path)
-        @revision_dir ||= File.expand_path(root / 'cache/revisions')
-        relative_dir(@revision_dir, *path)
+        Spontaneous.instance.revision_root(*path)
       end
 
-      def revision_root=(revision_dir)
-        @revision_dir = File.expand_path(revision_dir)
-      end
+      # def revision_root=(revision_dir)
+      #   @revision_dir = File.expand_path(revision_dir)
+      # end
 
-      def revision_dir(revision=nil, root = revision_root)
-        return root / 'current' if revision.nil?
-        root / revision.to_s.rjust(5, "0")
+      def revision_dir(revision=nil, root = nil)
+        Spontaneous.instance.revision_dir(revision, root)
       end
 
       def gem_dir(*path)

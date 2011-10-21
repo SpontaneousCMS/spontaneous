@@ -26,7 +26,7 @@ module Spontaneous::Plugins
       end
 
       def _content_classes
-        [Spontaneous::Content, Spontaneous::Page, Spontaneous::Piece] + Spontaneous::Schema.content_classes
+        [Spontaneous::Content, Spontaneous::Page, Spontaneous::Piece] + Spontaneous.schema.content_classes
       end
 
       def _unfiltered_dataset
