@@ -19,7 +19,6 @@ class PublishingTest < MiniTest::Spec
   end
 
   def self.shutdown
-    # Spontaneous.database = DB
     S::Content.delete_all_revisions! rescue nil
   end
 
@@ -34,7 +33,6 @@ class PublishingTest < MiniTest::Spec
     serialised_columns = [:field_store, :entry_store]
     columns = Content.columns - serialised_columns
     columns.each do |col|
-      # result[col].should == compare[col]
       assert_equal(result[col], compare[col], "Column '#{col}' should be equal")
     end
     serialised_columns.each do |col|
@@ -70,7 +68,6 @@ class PublishingTest < MiniTest::Spec
     end
 
     teardown do
-      # Content.delete_all_revisions!
       PublishingTest.send(:remove_const, :Page) rescue nil
       Content.delete
       Change.delete
@@ -195,8 +192,6 @@ class PublishingTest < MiniTest::Spec
     context "content revisions" do
       setup do
         @revision = 1
-        # @now = Sequel.datetime_class.now
-        # Sequel.datetime_class.stubs(:now).returns(@@now)
       end
       teardown do
         Content.delete_revision(@revision)
@@ -421,7 +416,6 @@ class PublishingTest < MiniTest::Spec
 
     context "modification timestamps" do
       setup do
-        # Sequel.datetime_class.stubs(:now).returns(@@now)
       end
       should "register creation date of all content" do
         c = Content.create
@@ -467,9 +461,6 @@ class PublishingTest < MiniTest::Spec
     context "change sets" do
       setup do
         Change.delete
-        # @@now = Sequel.datetime_class.now
-        # Sequel.datetime_class.stubs(:now).returns(@@now)
-        # Time.stubs(:now).returns(@@now)
       end
 
       should "have a testable state" do
@@ -663,8 +654,6 @@ class PublishingTest < MiniTest::Spec
     context "publication timestamps" do
       setup do
         @revision = 1
-        # @@now = Sequel.datetime_class.now
-        # Sequel.datetime_class.stubs(:now).returns(@@now)
       end
       teardown do
         Content.delete_revision(@revision)
@@ -756,8 +745,6 @@ class PublishingTest < MiniTest::Spec
       setup do
         Content.delete
         @revision = 3
-        # @@now = Time.at(Time.now.to_i)
-        # Time.stubs(:now).returns(@@now)
         State.delete
         Change.delete
         State.create(:revision => @revision, :published_revision => 2)
@@ -878,7 +865,6 @@ class PublishingTest < MiniTest::Spec
       should "not update first_published or last_published if rendering fails" do
         c = Content.create
         Content.first.first_published_at.should be_nil
-        # Content.delete_all_revisions!
         S::Render.expects(:render_pages).raises(Exception)
         begin
           silence_logger { Site.publish_all }
@@ -889,7 +875,6 @@ class PublishingTest < MiniTest::Spec
       end
 
       should "clean up state on publishing failure" do
-        # Content.delete_all_revisions!
         Site.pending_revision.should be_nil
         Content.revision_exists?(@revision).should be_false
         # don't like peeking into implementation here but don't know how else
@@ -911,21 +896,17 @@ class PublishingTest < MiniTest::Spec
     context "rendering" do
       setup do
         @revision = 2
+        Content.delete_revision(@revision)
         Content.delete
         State.delete
         State.create(:revision => @revision, :published_revision => 2)
         Site.revision.should == @revision
-        # Spontaneous.root = File.expand_path(File.dirname(__FILE__) / "../fixtures/example_application")
 
-        # @revision_dir = File.expand_path(File.dirname(__FILE__) / "../../tmp/revisions")
-        # self.template_root = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing")
-        # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
+
         class ::PublishablePage < Page; end
         PublishablePage.layout :"static"
         PublishablePage.layout :"dynamic"
-        # Spontaneous.revision_root = @revision_dir
-        # Spontaneous.template_root = @template_root
-        # Cutaneous::PreviewRenderEngine.context_class = Cutaneous::PublishContext
+
         Spontaneous::Render.renderer_class = Spontaneous::Render::PublishedRenderer
 
         @home = PublishablePage.create(:title => 'Home')
@@ -946,7 +927,6 @@ class PublishingTest < MiniTest::Spec
       end
 
       teardown do
-        # FileUtils.rm_r(@revision_dir) if File.exists?(@revision_dir)
         Content.delete_revision(@revision)
         Content.delete
         State.delete
