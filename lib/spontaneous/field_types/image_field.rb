@@ -194,78 +194,67 @@ module Spontaneous
     class ImageProcessor
       include ImageFieldUtilities
 
-      class ImageDelegator < Delegator
+      class ImageDelegator < Spontaneous::ProxyObject
         attr_reader :image
 
         def initialize(image)
-          super
           @image = image
         end
 
-        def __getobj__
-          @image
-        end
-
-        def __setobj__(obj)
-          @image = obj
-        end
-
-        def __run__(process)
-          combine_options do |c|
-            cb = CommandDelegator.new(c, @image)
-            cb.__run__(process)
-          end
-        end
-      end
-
-      class CommandDelegator < Delegator
-        def initialize(command_builder, image)
-          super(command_builder)
-          @command_builder, @image = command_builder, image
-        end
-
-        def __getobj__
-          @command_builder
-        end
-
-        def __setobj__(obj)
-          @command_builder = obj
-        end
-
-        def __run__(process)
-          instance_eval(&process)
+        def format(*args, &block)
+          image.format(*args, &block)
         end
 
         def fit(width, height)
-          add(:geometry, "#{width}x#{height}>")
+          image.combine_options do |c|
+            c.add(:geometry, "#{width}x#{height}>")
+          end
         end
 
         def crop(width, height)
-          dimensions = "#{width}x#{height}"
-          add(:geometry, "#{dimensions}^")
-          add(:gravity, "center")
-          add(:crop, "#{dimensions}+0+0!")
+          image.combine_options do |c|
+            dimensions = "#{width}x#{height}"
+            c.add(:geometry, "#{dimensions}^")
+            c.add(:gravity, "center")
+            c.add(:crop, "#{dimensions}+0+0!")
+          end
         end
 
         def width(width)
-          add(:geometry, "#{width}x>")
+          image.combine_options do |c|
+            c.add(:geometry, "#{width}x>")
+          end
         end
 
         def height(height)
-          add(:geometry, "x#{height}>")
+          image.combine_options do |c|
+            c.add(:geometry, "x#{height}>")
+          end
         end
 
         def greyscale
-          add(:type, "Grayscale")
+          image.combine_options do |c|
+            c.add(:type, "Grayscale")
+          end
         end
 
-        def border_radius(radius)
-          @image.format('PNG32')
+        def border_radius(radius, bg_color = nil)
+          @image.format('png') if bg_color.nil? or bg_color == 'transparent'
+          puts @image.path
+          c = MiniMagick::CommandBuilder.new('convert')
+          c << @image.path
+          c.add(:format, "roundrectangle 0,0 %[fx:w-1],%[fx:h-1], 10,10")
+          c.add(:write, "info:tmp.mvg")
+          c << @image.path
+
+          puts c.command
+          # @image.run(c)
+          sub = Subexec.run(c.command, :timeout => MiniMagick.timeout)
+
           c = MiniMagick::CommandBuilder.new('convert')
 
           c << @image.path
-          c.add(:format, "roundrectangle 0,0 %[fx:w-1],%[fx:h-1], #{radius},#{radius}")
-          c.add(:write, "info:tmp.mvg")
+          # c.add(:write, "info:tmp.mvg")
           c.add(:matte)
           c.add(:bordercolor, "none")
           c.add(:border, "0")
@@ -286,8 +275,17 @@ module Spontaneous
 
         end
 
+
+        def __run__(process)
+          instance_eval(&process)
+        end
+
         def method_missing(method, *args, &block)
-          __getobj__.send(method, *args, &block)
+          if image.respond_to?(method)
+            image.__send__(method, *args, &block)
+          else
+            image.method_missing(method, *args, &block)
+          end
         end
       end
 
@@ -328,17 +326,18 @@ module Spontaneous
         image = ::MiniMagick::Image.open(path)
         processor = ImageProcessor::ImageDelegator.new(image)
         processor.__run__(process)
-        file_path = filename_for_size(name)
+        file_path = filename_for_size(name, image)
         image.write(file_path)
 
         ImageProcessor.new(file_path)
       end
 
-      def filename_for_size(name)
+      def filename_for_size(name, image)
         directory = File.dirname(path)
         original_filename = File.basename(path)
         parts = original_filename.split('.')
-        ext = parts[-1]
+        ext = File.extname(image.path)[1..-1]
+        # ext = parts[-1]
         base = parts[0..-2].join('.')
         filename = [base, name, ext].join('.')
         File.join(directory, filename)
@@ -359,4 +358,3 @@ module Spontaneous
 
   end
 end
-

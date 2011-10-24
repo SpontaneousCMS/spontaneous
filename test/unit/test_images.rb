@@ -70,6 +70,9 @@ class ImagesTest < MiniTest::Spec
           greyscale
           gaussian_blur 10
         end
+        size :reformatted do
+          format 'png'
+        end
       end
 
       ResizingImageField.register
@@ -105,6 +108,10 @@ class ImagesTest < MiniTest::Spec
         ImageSize.read(@image.thumbnail.filepath).should == [38, 50]
         ImageSize.read(@image.icon.filepath).should == [50, 50]
         ImageSize.read(@image.greyscale.filepath).should == [38, 50]
+      end
+
+      should "preserve new format if processing has altered it" do
+        @image.reformatted.src.should =~ /\.png$/
       end
     end
     context "in templates" do
@@ -171,7 +178,7 @@ class ImagesTest < MiniTest::Spec
 
 
       should "have a 'sizes' config option that generates resized versions" do
-        assert_same_elements ResizingImageField.size_definitions.keys, [:preview, :thumbnail, :icon, :tall, :greyscale]
+        assert_same_elements ResizingImageField.size_definitions.keys, [:preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
       end
 
       should "serialise attributes" do
@@ -186,7 +193,6 @@ class ImagesTest < MiniTest::Spec
         serialised[:thumbnail][:height].should == 50
         serialised[:icon][:width].should == 50
         serialised[:icon][:height].should == 50
-        # pp serialised
       end
 
       should "persist attributes" do
@@ -240,8 +246,8 @@ class ImagesTest < MiniTest::Spec
         @image.original.filesize.should == @image.filesize
       end
       should "have a 'sizes' config option that generates resized versions" do
-        assert_same_elements @image.class.size_definitions.keys, [:preview, :thumbnail, :icon, :tall, :greyscale]
-        assert_same_elements @image.class.sizes.keys, [:preview, :thumbnail, :icon, :tall, :greyscale]
+        assert_same_elements @image.class.size_definitions.keys, [:preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
+        assert_same_elements @image.class.sizes.keys, [:preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
       end
 
       should "serialise attributes" do
