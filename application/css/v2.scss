@@ -687,12 +687,12 @@ img.missing {
 		position: relative;
 		margin-left: $container-padding;
 		margin-right: $container-padding;
-
+		$entry-background-colour: #eee;
     .entry-contents {
       @include rounded;
-      background-color: gray;
-      padding: 1px;
-      padding-top: $title-bar-height + 4px;
+      background-color: $entry-background-colour;
+      padding: 2px;
+      // padding-top: $title-bar-height + 4px;
     }
     .entry-spacer {
       height: $container-padding/2;
@@ -705,48 +705,56 @@ img.missing {
 			position: relative;
 		}
 		.title-bar {
-			@include vertical-gradient(gray + #111111, gray);
+			// @include vertical-gradient(gray + #111111, gray);
       @include box-sizing;
-			@include rounded-top;
+			@include rounded-right;
       @extend .interface;
+			$title-bar-width: 20px;
+
+			background-color: $entry-background-colour;
+
+			width: $title-bar-width;
       color: rgba(255, 255, 255, 0.4);
       padding-top: 4px;
-      padding-left: $unit/2 + 2px;
+      // padding-left: $unit/2 + 2px;
       text-transform: none;
       font-weight: normal;
 			cursor: ns-resize;
 			position: absolute;
-			left: 0;
-			right: 0;
-			top: 0;
-			height: $title-bar-height;
+			left: auto;
+			right: -$title-bar-width;
+			top: $unit;
+			// height: $title-bar-height;
+			height: auto;
 			.actions {
+				@include display-box;
+				@include box-orient(vertical);
 				@include rounded-bottom;
-				background-color: rgba(0, 0, 0, 0.2);
-				position: absolute;
-				top: 0;
-				right: $unit/2;
+				// background-color: rgba(0, 0, 0, 0.2);
+				// position: absolute;
+				top: $unit/2;
+				// right: $unit/2;
 				a {
 					background: url("/@spontaneous/static/item-buttons.png") 0 0 no-repeat;
-					display: inline-block;
+					display: block;
 					width: 15px;
 					height: 15px;
-					position: relative;
-					top: 4px;
+					// position: relative;
+					// top: 4px;
 					cursor: pointer;
-					padding: 0 10px;
+					// padding: 0 10px;
 				}
 				.delete {
-					background-position: -54px 0;
+					background-position: -61px 0;
 				}
 				.delete:hover {
-					background-position: -54px -20px;
+					background-position: -61px -20px;
 				}
 				.visibility {
-					background-position: -25px 0;
+					background-position: -32px 0;
 				}
 				.visibility:hover {
-					background-position: -25px -20px;
+					background-position: -32px -20px;
 				}
 			}
 		}
@@ -790,7 +798,7 @@ img.missing {
 			z-index: 1;
 		}
 		.white-bg {
-			@include corners(0, 0, 0, $corner-radius);
+			@include corners($corner-radius - 1, 0, 0, $corner-radius - 1);
 			border-width: 2px;
 			border-color: transparent;
 			border-style: solid;
@@ -923,7 +931,7 @@ img.missing {
 				margin-right: $unit;
 				margin-bottom: $unit;
 				.white-bg {
-          @include rounded(0 0 $radius $radius);
+          @include corners(0,  0,  ($radius - 1), ($radius - 1));
 					width: auto;
 					right: 0;
 				}
@@ -987,7 +995,8 @@ img.missing {
     }
     &.no-boxes {
       .white-bg {
-        @include rounded(0 0 $radius $radius);
+        // @include rounded(0 0 $radius $radius);
+				@include rounded($radius - 1);
         right: 0;
       }
       .grey-bg {
@@ -1023,6 +1032,7 @@ img.missing {
       right: 0;
     }
     .page-title {
+			@include rounded-top;
       background-color: #444;
       padding: $unit/2;
       a {
