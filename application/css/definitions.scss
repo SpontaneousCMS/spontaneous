@@ -36,6 +36,9 @@ $dialogue-width: 980px;
 $corner-radius: 4px;
 $radius: $corner-radius;
 
+$slot-addable-colour: #ddd;
+$entry-background-colour: #eee;
+
 @mixin rounded($radius: 4px) {
   -webkit-border-radius: $radius;
   -moz-border-radius: $radius;
