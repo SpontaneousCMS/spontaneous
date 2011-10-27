@@ -48,8 +48,11 @@ Spontaneous.Views.PieceView = (function($, S) {
 			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class(), this.boxes_class()])
 			var contents = dom.div('.entry-contents');
 			var inside = dom.div('.entry-inner');
-			var outline = dom.div('.white-bg').mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
-			inside.append(outline)
+			var outline = dom.div('.white-bg').
+				mouseover(this.mouseover.bind(this)).
+				mouseout(this.mouseout.bind(this)).
+				click(this.edit.bind(this));
+			inside.append(outline);
 			if (this.content.depth() < 4) {
 				inside.append(dom.div('.grey-bg'));
 			}
@@ -103,7 +106,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 		title_bar: function(wrapper) {
 			if (!this._title_bar) {
 				var label = user.is_developer() ? dom.a('.developer.source').attr('href', this.content.developer_edit_url()).text(this.content.developer_description()) : (this.content.type().title);
-				var title_bar = dom.div('.title-bar').append(label);
+				var title_bar = dom.div('.title-bar')//.append(label);
 				var actions = dom.div('.actions', {'xstyle':'display: none'});
 				var destroy = dom.a('.delete');
 				var visibility = dom.a('.visibility');

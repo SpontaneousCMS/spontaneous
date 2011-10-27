@@ -126,10 +126,11 @@ Spontaneous.Views.BoxView = (function($, S) {
 				}
 				entries.sortable({
 					items:'> .'+this.entry_class(),
-					handle: '.title-bar',
+					// handle: '.title-bar',
 					axis:'y',
 					distance: 5,
 					tolerance: 'pointer',
+					// tolerance: 'intersect',
 					scrollSpeed: 40,
 					containment: 'parent',
 					stop: function(event, ui) {
