@@ -11,7 +11,9 @@ module Spontaneous::Plugins
     end
 
     module ClassMethods
-      def alias_of(*class_list)
+      def alias_of(*args)
+        options_list, class_list = args.partition { |e| e.is_a?(Hash) }
+        @alias_options = options_list.first || {}
         @alias_classes = class_list
         extend  ClassAliasMethods
         include AliasMethods
@@ -22,14 +24,38 @@ module Spontaneous::Plugins
 
       def targets
         targets = []
-        target_classes.each do |target_class|
-          targets += target_class.sti_subclasses_array
+        classes = []
+        @alias_classes.each do |source|
+          case source
+          when Proc
+            targets.concat(source.call)
+          else
+            classes.concat(source.to_s.constantize.sti_subclasses_array)
+          end
         end
-        S::Content.filter(sti_key => targets.map { |t| t.to_s }).all
+        query = S::Content.filter(sti_key => classes.map { |c| c.to_s })
+        if container_procs = @alias_options[:container]
+          containers = [container_procs].flatten.map { |p| p.call }.flatten
+          params = []
+          containers.each do |container|
+            if container.is_page?
+              params << [:page_id, container.id]
+            else
+              params << [:box_sid, container.id]
+            end
+          end
+          query = query.and(Sequel::SQL::BooleanExpression.from_value_pairs(params, :OR))
+        end
+        targets.concat(query.all)
+        if filter = @alias_options[:filter] and filter.is_a?(Proc)
+          targets.select(&filter)
+        else
+          targets
+        end
       end
 
-      def target_classes
-        @target_classes ||= @alias_classes.map { |c| c.to_s.constantize }
+      def target_class(class_definition)
+
       end
 
       def alias?

@@ -24,6 +24,8 @@ class AliasTest < MiniTest::Spec
 
       class ::Page < Spontaneous::Page
         field :title
+        box :box1
+        box :box2
       end
 
       class ::Piece < Spontaneous::Piece; end
@@ -59,6 +61,8 @@ class AliasTest < MiniTest::Spec
 
       class ::BB < ::B
         field :bb_field1
+
+        box :box1
       end
 
       class ::AAlias < ::Piece
@@ -88,6 +92,11 @@ class AliasTest < MiniTest::Spec
       class ::MultipleAlias < ::Piece
         alias_of :AA, :B
       end
+
+      class ::ProcAlias < ::Piece
+        alias_of proc { Spontaneous::Site.root.children }
+      end
+
       @root = ::Page.create
       @aliases = ::Page.create(:slug => "aliases").reload
       @root << @aliases
@@ -103,7 +112,7 @@ class AliasTest < MiniTest::Spec
     end
 
     teardown do
-      [:Page, :Piece, :A, :AA, :AAA, :B, :BB, :AAlias, :AAAlias, :AAAAlias, :BBAlias, :BAlias, :MultipleAlias].each do |c|
+      [:Page, :Piece, :A, :AA, :AAA, :B, :BB, :AAlias, :AAAlias, :AAAAlias, :BBAlias, :BAlias, :MultipleAlias, :ProcAlias].each do |c|
         Object.send(:remove_const, c) rescue nil
       end
       Content.delete
@@ -131,6 +140,91 @@ class AliasTest < MiniTest::Spec
           instance1 = AAlias.create(:target => @a).reload
           instance2 = AAlias.create(:target => @a).reload
           assert_same_content @a.aliases, [instance1, instance2]
+        end
+
+        should "accept a proc that returns an array as a target list generator" do
+          assert_same_content ProcAlias.targets, @root.children
+        end
+
+        context "with container options" do
+          setup do
+            @page = ::Page.new(:uid => "thepage")
+            4.times { |n|
+              @page.box1 << A.new
+              @page.box1 << AA.new
+              @page.box2 << A.new
+              @page.box2 << AA.new
+            }
+            @page.save.reload
+          end
+
+          teardown do
+            Object.send(:remove_const, 'X') rescue nil
+            Object.send(:remove_const, 'XX') rescue nil
+          end
+
+          should "allow for selecting only content from within one box" do
+            class ::X < ::Piece
+              alias_of :A, :container => Proc.new { S::Site['#thepage'].box1 }
+            end
+            class ::XX < ::Piece
+              alias_of :AA, :container => Proc.new { S::Site['#thepage'].box1 }
+            end
+            X.targets.should == @page.box1.select { |p| A === p }
+            XX.targets.should == @page.box1.select { |p| AA === p }
+          end
+
+          should "allow for selecting only content from a range of boxes" do
+            class ::X < ::Piece
+              alias_of :A, :container => Proc.new { [S::Site['#thepage'].box1, S::Site['#thepage'].box2] }
+            end
+            class ::XX < ::Piece
+              alias_of :AA, :container => Proc.new { [S::Site['#thepage'].box1, S::Site['#thepage'].box2] }
+            end
+            assert_same_content X.targets, @page.box1.select { |p| A === p } + @page.box2.select { |p| A === p }
+            assert_same_content XX.targets, @page.box1.select { |p| AA === p } + @page.box2.select { |p| AA === p }
+          end
+
+          should "allow for selecting only content from within one page" do
+            class ::X < ::Piece
+              alias_of :A, :container => Proc.new { S::Site['#thepage'] }
+            end
+            class ::XX < ::Piece
+              alias_of :AA, :container => Proc.new { S::Site['#thepage'] }
+            end
+            assert_same_content X.targets, @page.content.select { |p| A === p }
+            assert_same_content XX.targets, @page.content.select { |p| AA === p }
+          end
+
+          should "allow for selecting only content from a range of pages & boxes" do
+            page2 = ::Page.new(:uid => "thepage2")
+            4.times { |n|
+              page2.box1 << A.new
+              page2.box1 << AA.new
+              page2.box2 << A.new
+              page2.box2 << AA.new
+            }
+            page2.save.reload
+            class ::X < ::Piece
+              alias_of :A, :AA, :container => Proc.new { [S::Site['#thepage'].box1, S::Site['#thepage2']] }
+            end
+            class ::XX < ::Piece
+              alias_of :AA, :container => Proc.new { [S::Site['#thepage'], S::Site['#thepage2'].box2] }
+            end
+            assert_same_content X.targets, @page.box1.content + page2.content
+            assert_same_content XX.targets, @page.content.select { |p| AA === p } + page2.box2.select { |p| AA === p }
+          end
+
+          should "allow for filtering instances according to some arbitrary proc" do
+            pieces = [@page.box1.entries.first, @page.box2.entries.first]
+            _filter = lambda { |c|
+              pieces.map(&:id).include?(c.id)
+            }
+            ::X  = Class.new(::Piece) do
+              alias_of :A, :filter => _filter
+            end
+            assert_same_content pieces, X.targets
+          end
         end
       end
 
@@ -186,6 +280,8 @@ class AliasTest < MiniTest::Spec
           @a_alias.export[:alias_icon].should == @a.alias_icon_field.export
         end
       end
+
+
     end
 
     context "Piece aliases" do

@@ -54,8 +54,22 @@ module Spontaneous
       !supertype.nil? #&& supertype.respond_to?(:field_prototypes)
     end
 
+    def page?
+      false
+    end
+
+    alias_method :is_page?, :page?
+
+    def is_box?
+      true
+    end
+
     def schema_id
       self.class.schema_id
+    end
+
+    def id
+      schema_id.to_s
     end
 
     def schema_name
@@ -179,6 +193,10 @@ module Spontaneous
       pieces.each do |piece|
         yield piece if block_given?
       end
+    end
+
+    def content
+      entries
     end
 
     def last
