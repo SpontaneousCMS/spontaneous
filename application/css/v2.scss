@@ -711,7 +711,8 @@ img.missing {
       @extend .interface;
 			$title-bar-width: 20px;
 
-			background-color: rgba($entry-background-colour, 0.6);
+			// background-color: rgba($entry-background-colour, 0.6);
+			background-color: transparent;
 
 
 			width: $title-bar-width;
@@ -724,7 +725,8 @@ img.missing {
 			position: absolute;
 			left: auto;
 			right: -$title-bar-width;
-			top: $unit/2;
+			// top: $unit/2;
+			top: 0;
 			// height: $title-bar-height;
 			height: auto;
 			.actions {
