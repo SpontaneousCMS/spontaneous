@@ -133,6 +133,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 					// tolerance: 'intersect',
 					scrollSpeed: 40,
 					containment: 'parent',
+					cursor: 'move',
 					stop: function(event, ui) {
 						this.re_sort(ui.item);
 					}.bind(this)
