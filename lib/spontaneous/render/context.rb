@@ -11,6 +11,10 @@ module Spontaneous::Render
       _update(parent)
     end
 
+    def show_errors?
+      Spontaneous.development?
+    end
+
     alias_method :format, :_format
 
     def page

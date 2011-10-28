@@ -13,6 +13,18 @@ module Cutaneous
       @format = format
       super(filepath)
     end
+
+    def render(_context=Context.new)
+      begin
+        super
+      rescue => e
+        if _context.show_errors?
+          raise e
+        else
+          logger.warn(e)
+          ""
+        end
+      end
+    end
   end
 end
-

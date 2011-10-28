@@ -63,16 +63,17 @@ module Cutaneous
           cache_path = filepath[0...(-Cutaneous.extension.length)] + 'rb'
           if test(?f, cache_path)
             # puts "Using cached template #{cache_path}"
+            template.filename = cache_path
             template.script = File.read(cache_path)
           else
-            template.convert(File.read(filepath))
+            template.convert(File.read(filepath), filepath)
             File.open(cache_path, 'w') do |f|
               f.flock(File::LOCK_EX)
               f.write(template.script)
             end
           end
         else
-          template.convert(File.read(filepath))
+          template.convert(File.read(filepath), filepath)
         end
       when Proc
         template = template_class.new(nil, format)

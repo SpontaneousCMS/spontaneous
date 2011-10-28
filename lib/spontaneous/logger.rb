@@ -225,10 +225,14 @@ module Spontaneous
     #
     def push(message = nil, level = nil)
       unless @silent
-      self << @format_message % [colored_level(level), set_color(Time.now.strftime(@format_datetime), :yellow), message.to_s.strip]
+        message = format_backtrace(message) if message.class < Error
+        self << @format_message % [colored_level(level), set_color(Time.now.strftime(@format_datetime), :yellow), message.to_s.strip]
       end
     end
 
+    def format_backtrace(error)
+      [error.message].concat(error.backtrace).join("\n")
+    end
     ##
     # Directly append message to the log.
     #

@@ -110,6 +110,7 @@ module Spontaneous
 
       class EditingBase < ServerBase
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
+        set :environment, Proc.new { Spontaneous.env }
 
         helpers Spontaneous::Rack::UserHelpers
         helpers Spontaneous::Rack::Helpers

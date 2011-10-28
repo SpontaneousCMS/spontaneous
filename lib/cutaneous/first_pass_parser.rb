@@ -19,5 +19,3 @@ module Cutaneous
     end
   end
 end
-
-
