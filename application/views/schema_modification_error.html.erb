@@ -7,8 +7,15 @@
     <title>Spontaneous: Loading...</title>
 		<link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
 
-    <link rel="stylesheet" href="/@spontaneous/css/schema_error.css" type="text/css" media="screen" charset="utf-8" />
-    <script type="text/javascript" charset="utf-8" src="/@spontaneous/js/vendor/jquery-1.5.1.min.js"></script>
+    <% Spontaneous::Rack::Assets::CSS::SCHEMA_MODIFICATION_CSS.each do |css_file| %>
+      <link rel="stylesheet" href="<%= style_url(css_file) %>" type="text/css" media="screen" charset="utf-8" />
+    <% end %>
+    <% Spontaneous::Rack::Assets::JavaScript::JQUERY.each do |js_file| %>
+      <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
+    <% end %>
+    <% Spontaneous::Rack::Assets::JavaScript::LOGIN_JS.each do |js_file| %>
+      <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
+    <% end %>
     <script type="text/javascript">
       function _confirm(id) {
         var t = 200;
@@ -27,21 +34,22 @@
     <div id="container">
 
       <%
-          types = actions.map { |a| a.source.owner}.uniq
+          types = modification.actions.map { |a| a.source.owner}.uniq
       %>
 
     <h1>There are unresolved changes to <%= types.length > 1 ? "s" : "" %> <%= types.map { |o| "<strong>&lsquo;#{o}&rsquo;</strong>"}.join(', ')%></h1>
-    <p class="src"><a href="mvim://open?url=file://<%= actions[0].source.owner.__source_file %>"><%= actions[0].source.owner.__source_file %></a></p>
+    <p class="src"><a href="mvim://open?url=file://<%= modification.actions[0].source.owner.__source_file %>"><%= modification.actions[0].source.owner.__source_file %></a></p>
 
     <p>Please choose one of the following solutions:</p>
 
     <ul class="actions">
-      <% actions.each do |action|
+      <% modification.actions.each do |action|
         id = "#{action.action}-#{action.source.name}#{action.dest ? "-#{action.dest.name}" : ""}"
       %>
     <li>
     <form action="/@spontaneous/schema/<%= action.action %>" method="post">
       <input type="hidden" name="origin" value="<%= env['SCRIPT_NAME'] %>" />
+      <input type="hidden" name="__key" value="<%= env[S::Rack::ACTIVE_KEY].key_id %>" />
       <input type="hidden" name="uid" value="<%= action.source.to_s %>" />
       <% if action.dest %>
         <input type="hidden" name="ref" value="<%= action.dest.schema_name %>" />

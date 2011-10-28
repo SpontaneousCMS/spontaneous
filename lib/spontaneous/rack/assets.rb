@@ -91,6 +91,7 @@ module Spontaneous
 
         LOGIN_CSS = %w(login)
         EDITING_CSS = %w(v2)
+        SCHEMA_MODIFICATION_CSS = %w(schema_error)
       end
 
     end # Assets

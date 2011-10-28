@@ -8,6 +8,7 @@ module Spontaneous
   module Rack
     NAMESPACE = "/@spontaneous".freeze
     ACTIVE_USER = "SPONTANEOUS_USER".freeze
+    ACTIVE_KEY  = "SPONTANEOUS_KEY".freeze
     AUTH_COOKIE = "spontaneous_api_key".freeze
     KEY_PARAM = "__key".freeze
 
