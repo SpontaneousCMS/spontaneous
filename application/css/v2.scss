@@ -711,7 +711,8 @@ img.missing {
       @extend .interface;
 			$title-bar-width: 20px;
 
-			background-color: $entry-background-colour;
+			background-color: rgba($entry-background-colour, 0.6);
+
 
 			width: $title-bar-width;
       color: rgba(255, 255, 255, 0.4);
@@ -950,11 +951,15 @@ img.missing {
 				}
         .entry-contents {
           // padding: $unit/2 $unit/2;
-          // padding: 0;
+          padding: 0;
         }
         .entry-spacer {
           height: $unit;
         }
+				&:last-child .entry-spacer {
+					outline: solid 1px red;
+					display: none;
+				}
 				.entry {
 					@include rounded;
 					width: 100%;
