@@ -726,7 +726,7 @@ img.missing {
 			left: auto;
 			right: -$title-bar-width;
 			// top: $unit/2;
-			top: 0;
+			top: -3px;
 			// height: $title-bar-height;
 			height: auto;
 			.actions {
@@ -1065,7 +1065,7 @@ img.missing {
       }
     }
   }
-	.entry-wrap.ui-sortable-helper .entry-contents {
+	.entry-wrap.ui-sortable-helper > .entry-contents {
 		@extend .shadow;
 	}
 	.entry-wrap.boxes.depth-1 .entry {
