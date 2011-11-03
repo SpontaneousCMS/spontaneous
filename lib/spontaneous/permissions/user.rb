@@ -45,6 +45,10 @@ module Spontaneous::Permissions
 
     def logged_in!
       self.last_login_at = Time.now
+      generate_access_key
+    end
+
+    def generate_access_key
       key = AccessKey.new
       self.add_access_key(key)
       self.save

@@ -7,9 +7,14 @@ module Spontaneous
         @app = app
       end
 
-      def current_user(env)
+      def access_key(env)
         if login = Site.config.auto_login
           user = Spontaneous::Permissions::User[:login => login]
+          if user.access_keys.empty?
+            user.generate_access_key
+          else
+            user.access_keys.first
+          end
         else
           request = ::Rack::Request.new(env)
           api_key = request.cookies[Spontaneous::Rack::AUTH_COOKIE]
@@ -23,7 +28,7 @@ module Spontaneous
 
       def call(env)
         response = nil
-        key = env[S::Rack::ACTIVE_KEY] = current_user(env)
+        key = env[S::Rack::ACTIVE_KEY] = access_key(env)
         user = env[S::Rack::ACTIVE_USER] = key.user
         response = @app.call(env)
         response

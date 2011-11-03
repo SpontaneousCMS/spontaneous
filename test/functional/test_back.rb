@@ -73,6 +73,8 @@ class BackTest < MiniTest::Spec
       @user.save
       @key = "c5AMX3r5kMHX2z9a5ExLKjAmCcnT6PFf22YQxzb4Codj"
       @key.stubs(:user).returns(@user)
+      @key.stubs(:key_id).returns(@key)
+      @user.stubs(:access_keys).returns([@key])
 
       Spontaneous::Permissions::User.stubs(:[]).with(:login => 'root').returns(@user)
       Spontaneous::Permissions::AccessKey.stubs(:authenticate).with(@key).returns(@key)
