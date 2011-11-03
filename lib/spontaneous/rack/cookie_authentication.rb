@@ -29,7 +29,7 @@ module Spontaneous
       def call(env)
         response = nil
         key = env[S::Rack::ACTIVE_KEY] = access_key(env)
-        user = env[S::Rack::ACTIVE_USER] = key.user
+        user = env[S::Rack::ACTIVE_USER] = key.user if key
         response = @app.call(env)
         response
       end

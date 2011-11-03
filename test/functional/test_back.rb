@@ -391,6 +391,12 @@ class BackTest < MiniTest::Spec
           end
         end
       end
+
+      should "render SASS templates" do
+        get "/css/sass_template.css"
+        assert last_response.ok?, "Should return 200 but got #{last_response.status}"
+        last_response.body.should =~ /color: #ffeeff/
+      end
     end
 
     context "static files" do

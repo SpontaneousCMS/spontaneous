@@ -1,0 +1,5 @@
+$color: #fef;
+
+@mixin coloured {
+  color: $color;
+}

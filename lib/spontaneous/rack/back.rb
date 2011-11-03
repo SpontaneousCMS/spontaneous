@@ -75,7 +75,7 @@ module Spontaneous
           # available under the URL /plugin_name/**
           Spontaneous.instance.plugins.each do |plugin|
             root = plugin.paths.expanded(:public)
-            map "/#{plugin.name}" do
+            map "/#{plugin.file_namespace}" do
               use Spontaneous::Rack::CSS, :root => root
               run ::Rack::File.new(root)
             end
@@ -103,6 +103,7 @@ module Spontaneous
 
           map "/" do
             use ::Rack::Lint
+            use Spontaneous::Rack::CSS, :root => Spontaneous.instance.paths.expanded(:public)
             run Preview
           end
         end

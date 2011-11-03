@@ -15,20 +15,24 @@ module Spontaneous::Rack
       if path =~ /\.css$/ and !File.exists?(File.join(@root, path))
         template = template_root_path(path) + ".scss"
         if File.exists?(template)
-          load_paths = [Spontaneous.css_dir, File.dirname(template), File.join(File.dirname(template), "sass")]
-          engine = Sass::Engine.for_file(template, {
-            :load_paths => load_paths,
-            :filename => template,
-            :cache => false,
-            :style => :expanded
-          })
-          [200, {'Content-type' => 'text/css'}, [engine.render]]
+          render_sass_template(template)
         else
           raise Sinatra::NotFound
         end
       else
         @app.call(env)
       end
+    end
+
+    def render_sass_template(template)
+      load_paths = [Spontaneous.css_dir, File.dirname(template), File.join(File.dirname(template), "sass")]
+      engine = Sass::Engine.for_file(template, {
+        :load_paths => load_paths,
+        :filename => template,
+        :cache => false,
+        :style => :expanded
+      })
+      [200, {'Content-type' => 'text/css'}, [engine.render]]
     end
 
     def template_root_path(path)
