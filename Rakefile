@@ -162,6 +162,8 @@ namespace :gem do
   task :build => :gemspec do
     sh "mkdir -p pkg"
     sh "gem build #{gemspec_file}"
+    sh "mkdir -p #{@project_dir}/pkg"
+    sh "cp #{gem_file} #{@project_dir}/pkg"
     sh "mv #{gem_file} pkg"
   end
 
@@ -251,10 +253,10 @@ namespace :gem do
 
   desc "Generate the gemspec file from a template"
   task :generate => :setup do
-    template = File.read('spontaneous.gemspec.tmpl')
-    require 'bundler'
+    # template = File.read('spontaneous.gemspec.tmpl')
+    # require 'bundler'
 
-    File.open('spontaneous.gemspec', 'w') do |gemspec|
+    # File.open('spontaneous.gemspec', 'w') do |gemspec|
       # bundler = Bundler.load
       # dependencies = bundler.dependencies_for(:default, :runtime).map do |dependency|
       #   %{s.add_dependency('#{dependency.name}', [#{dependency.requirement.as_list.map { |d| d.inspect }.join(', ')}])}
@@ -262,8 +264,8 @@ namespace :gem do
       # development_dependencies = bundler.dependencies_for(:development).map do |dependency|
       #   %{s.add_development_dependency('#{dependency.name}', [#{dependency.requirement.as_list.map { |d| d.inspect }.join(', ')}])}
       # end
-      gemspec.write(template)
-    end
+    #   gemspec.write(template)
+    # end
   end
 
 
