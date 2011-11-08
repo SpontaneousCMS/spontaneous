@@ -96,6 +96,13 @@ module Spontaneous
         FILES_LOADED         = {}
         LOADED_CLASSES       = {}
 
+        # reset state, mostly used in tests
+        def reset!
+          CACHE.clear
+          MTIMES.clear
+          FILES_LOADED.clear
+          LOADED_CLASSES.clear
+        end
         ##
         # Reload all files with changes detected.
         #

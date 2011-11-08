@@ -1,0 +1,1 @@
+class CustomBox < Box; end
