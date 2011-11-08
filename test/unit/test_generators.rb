@@ -59,6 +59,7 @@ class GeneratorsTest < MiniTest::Spec
       assert_file_exists(site_root, 'schema/page.rb')
       assert File.read(site_root / 'schema/page.rb') =~ /class Page < Spontaneous::Page/
       assert_file_exists(site_root, 'schema/piece.rb')
+      assert_file_exists(site_root, 'schema/box.rb')
       assert File.read(site_root / 'schema/piece.rb') =~ /class Piece < Spontaneous::Piece/
       assert_file_exists(site_root, 'public/js')
       assert_file_exists(site_root, 'public/css')
