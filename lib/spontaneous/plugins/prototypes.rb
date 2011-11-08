@@ -61,12 +61,14 @@ module Spontaneous::Plugins
         apply_prototype
       end
 
+      # Add in an empty default prototype method for subclasses to override
+      define_method(Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME) { }
+
       protected
 
 
       def apply_prototype
-        return if _prototype == false
-
+        return if _prototype == false# or _prototype == ''
         method = self.class.prototype_method_name(_prototype || Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME)
 
         if respond_to?(method)
