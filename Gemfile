@@ -25,7 +25,7 @@ gemspec
 # gem 'shine', '~> 0.6'
 # gem 'foreman', '~> 0.22.0'
 gem 'simultaneous', :path => "/Users/garry/Dropbox/Development/spontaneous3/simultaneous"
-gem 'rack-async', :git => "git://github.com/matsadler/rack-async.git"
+# gem 'rack-async', :git => "git://github.com/matsadler/rack-async.git"
 
 # gem 'xapian-full', '~> 1.2.3'
 # gem 'xapian-fu', '~> 1.3'

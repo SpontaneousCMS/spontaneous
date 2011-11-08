@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.specification_version = 2 if s.respond_to? :specification_version=
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.rubygems_version = '1.3.5'
+  s.required_ruby_version = ">= 1.9.2"
 
   ## Leave these as is they will be modified for you by the rake gemspec task.
   ## If your rubyforge_project name is different, then edit it and comment out
@@ -70,7 +71,7 @@ Gem::Specification.new do |s|
   s.add_dependency('shine', ["~> 0.6"])
   s.add_dependency('foreman', ["~> 0.22.0"])
   s.add_dependency('simultaneous', ["~> 0.2"])
-  s.add_dependency('rack-async', [">= 0"])
+  s.add_dependency('rack-async', ["~> 0.1.0"])
   s.add_dependency('xapian-full', ["~> 1.2.3"])
   s.add_dependency('xapian-fu', ["~> 1.3"])
 
