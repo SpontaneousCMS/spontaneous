@@ -37,7 +37,7 @@ Spontaneous.Ajax = (function($, S) {
 			};
 			post_data = $.extend(post_data, this.api_access_key());
 			$.ajax({
-				'url': this.request_url(url),
+				'url': this.request_url(url, true),
 				'type': 'post',
 				'data': post_data,
 				'success': success,
