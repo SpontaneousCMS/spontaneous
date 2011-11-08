@@ -82,6 +82,7 @@ module Spontaneous
       desc :init, "Creates databases and initialises a new Spontaneous site"
       def init
         prepare :init
+        site = Spontaneous::Site.instantiate(Dir.pwd, options.environment, :back)
         require File.expand_path('../../../spontaneous', __FILE__)
         Sequel.extension :migration
         connection_params = Spontaneous.db_settings
