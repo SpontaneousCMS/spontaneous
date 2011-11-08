@@ -9,9 +9,10 @@ module Spontaneous
     class Reloader
       include Spontaneous::Rack::Helpers
 
-      def initialize(app)
+      def initialize(app, *args)
         @app = app
-        @cooldown = 3
+        config = args.first || {}
+        @cooldown = config[:cooldown] || 3
         @last = (Time.now - @cooldown)
       end
 

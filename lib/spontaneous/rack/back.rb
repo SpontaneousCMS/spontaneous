@@ -152,7 +152,7 @@ module Spontaneous
         post "/schema/rename" do
           begin
             Spontaneous.schema.apply_fix(:rename, params[:uid], params[:ref])
-          rescue Spot::SchemaModificationError # ignore remaining errors - they will be fixed later
+          rescue Spot::SchemaModificationError => e # ignore remaining errors - they will be fixed later
           end
           redirect(params[:origin])
         end

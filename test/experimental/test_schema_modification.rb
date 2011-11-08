@@ -9,6 +9,7 @@ class SchemaModificationTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
   def self.startup
+    Spontaneous::Loader::Reloader.reset!
   end
 
   def self.site_root
@@ -16,7 +17,6 @@ class SchemaModificationTest < MiniTest::Spec
   end
 
   def setup
-    Spontaneous::Loader::Reloader.reset!
     @site_root = Dir.mktmpdir
     app_root = File.expand_path('../../fixtures/schema_modification', __FILE__)
     FileUtils.cp_r(app_root, @site_root)
@@ -54,8 +54,7 @@ class SchemaModificationTest < MiniTest::Spec
 
     @homepage = ::Page.create(:title => "Home", :uid => "home")
     @homepage.reload
-      S::Rack::Back::EditingInterface.use Spontaneous::Rack::Reloader
-        # Spontaneous::Loader.stubs(:reload!)
+    S::Rack::Back::EditingInterface.use Spontaneous::Rack::Reloader, :cooldown => 0
   end
 
 
@@ -94,28 +93,12 @@ class SchemaModificationTest < MiniTest::Spec
           end
         RB
       }
-      S.schema.reset!
-      Spontaneous::Loader::Reloader.reload!
 
-      lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
-
-      begin
-        S.schema.validate!
-      rescue => e
-        action = e.modification.actions.detect { |a| a.action == :rename }
-      end
-
-      # keep using this middleware to avoid problems with the cooldown setting
-      S::Rack::Back::EditingInterface.use Spontaneous::Rack::Reloader
       auth_get "/@spontaneous/types"
       last_response.status.should == 412
 
-      # keep using this middleware to avoid problems with the cooldown setting
-      S::Rack::Back::EditingInterface.use Spontaneous::Rack::Reloader
-      auth_post "/@spontaneous/schema/rename", {:origin => "/@spontaneous", :uid => action.source.to_s, :ref => action.dest.schema_name}
+      auth_post "/@spontaneous/schema/rename", {:origin => "/@spontaneous", :uid => box_uid.to_s, :ref => "box/#{::Page.schema_id}/renamed"}
 
-      # keep using this middleware to avoid problems with the cooldown setting
-      S::Rack::Back::EditingInterface.use Spontaneous::Rack::Reloader
       auth_get "/@spontaneous"
       assert last_response.ok?
       ::Page.boxes.renamed.schema_id.should == box_uid

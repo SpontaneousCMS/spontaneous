@@ -11,6 +11,8 @@ module Spontaneous::Prototypes
       @name = name.to_sym
       @options = options
       @extend = block
+      instance_class
+      self
     end
 
     def field_prototypes
