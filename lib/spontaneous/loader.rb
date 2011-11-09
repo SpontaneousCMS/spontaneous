@@ -314,6 +314,16 @@ module Spontaneous
         end
       end
 
+      # Because the schema classes are so tied up together reloading
+      # must be done in the right order.
+      # This method works by finding all the modified files then
+      # mapping those to modified classes. Using the Schema, we find
+      # all the subclasses affected by the modified file and map those
+      # to files.
+      # To reload these we must first reload the superclass, otherwise
+      # the subclasses will re-load but load schema definitions from the
+      # already loaded but out-of-date superclass and we'll end up
+      # with orphaned box and field definitions
       def reload!
         changed_files = []
         rotation do |file, mtime|
