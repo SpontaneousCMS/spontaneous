@@ -69,6 +69,10 @@ module Spontaneous::Plugins::Application
         Spontaneous::Media.media_path(*args)
       end
 
+      def cache_dir(*path)
+        Spontaneous.instance.cache_dir(*path)
+      end
+
       def shard_path(hash=nil)
         if hash
           path = ['tmp', hash[0..1], hash[2..3], hash]

@@ -117,5 +117,11 @@ module Spontaneous
       return media_root if path.empty?
       File.join(media_root, *path)
     end
+
+    def cache_dir(*path)
+      cache_root = root / "cache"
+      return cache_root if path.empty?
+      File.join(cache_root, *path)
+    end
   end
 end

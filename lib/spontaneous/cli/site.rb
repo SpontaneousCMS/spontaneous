@@ -7,10 +7,184 @@ module Spontaneous
 
       default_task :browse
 
+
+      class MySQL
+        def initialize(database)
+          @database = database
+        end
+
+        def load(path)
+          options = [
+            "mysql",
+            option(:password),
+            option(:user),
+            option(:default_character_set),
+            database_name
+          ]
+          if path =~ /\.gz$/
+            options = ["gunzip", "<", path, "|"].concat(options)
+          end
+
+          command = options.join(" ")
+          system(command)
+        end
+
+        def dump(path, tables = nil)
+          options = [
+            option(:password),
+            option(:user),
+            option(:default_character_set),
+            database_name
+          ]
+          unless tables.nil?
+            options.push(tables.join(" "))
+          end
+
+          options.push( "| gzip") if path =~ /\.gz$/
+
+          command = %(mysqldump #{options.join(" ")} > #{path} )
+          system(command)
+        end
+
+        def database_name
+          @database.opts[:database]
+        end
+
+        def user
+          @database.opts[:user]
+        end
+
+        def password
+          @database.opts[:password]
+        end
+
+        def default_character_set
+          "UTF8"
+        end
+
+        def option(option, add_if_nil=false)
+          value = self.send(option)
+          if !value.nil? or add_if_nil
+            "--#{option.to_s.gsub(/_/, '-')}=#{value}"
+          else
+            ""
+          end
+        end
+      end
+
+      class DumpTask < ::Thor::Group
+        protected
+
+        def db_adapter
+          dumper_class = \
+            case database
+            when ::Sequel::Mysql2::Database
+              MySQL
+            else
+              raise "Unsupported adapter #{database.class}"
+            end
+
+          unless dumper_class.nil?
+            dumper = dumper_class.new(database)
+          end
+        end
+
+        def sqldump(path)
+          db_adapter.dump(path)
+        end
+
+        def sqlload(path)
+          db_adapter.load(path)
+        end
+
+        def id
+          @id ||= Time.now.strftime("%Y%m%d%H%M%S")
+        end
+
+        def media_archive
+          dump_path / "media.tgz"
+        end
+
+        def database_dumpfile
+          dump_path / "database.mysql.gz"
+        end
+
+        def database
+          Spontaneous.database
+        end
+
+        def dump_path
+          dump_root / id
+        end
+
+        def dump_root
+          Spontaneous.cache_dir('dump')
+        end
+
+        def relative_dir(path)
+          path = Pathname.new(path)
+          path.relative_path_from(Pathname.new(Spontaneous.root)).to_s
+        end
+      end
+
+      class Dump < DumpTask
+        def create_dump_dir
+          ::FileUtils.mkdir_p(dump_path)
+        end
+
+        def dump_database
+          say "Creating media archive at '#{relative_dir(database_dumpfile)}'", :green
+          sqldump(database_dumpfile)
+        end
+
+        def archive_media
+          tmp = relative_dir(Spontaneous.media_dir('tmp'))
+          src = relative_dir(Spontaneous.media_dir)
+          say "Creating media archive at '#{relative_dir(media_archive)}'", :green
+          cmd = %(tar czf #{media_archive} --exclude #{tmp} #{src})
+          system(cmd)
+        end
+      end
+
+      class Load < DumpTask
+        def find_latest_dump
+          root = Pathname.new(dump_root)
+          @id = root.entries.
+            reject { |dir| dir.file? or dir.basename.to_s =~ /^\./ }.
+            map { |p| p.to_s }.
+            sort.
+            last
+        end
+
+        def import_db_data
+          say "Importing database from '#{relative_dir(database_dumpfile)}'", :green
+          sqlload(database_dumpfile)
+        end
+
+        def extract_media
+          say "Extracting media from '#{relative_dir(media_archive)}'", :green
+          cmd = %(tar xzf #{media_archive})
+          system(cmd)
+        end
+      end
+
+      desc "#{namespace}:dump", "Dumps the current site to an archive on the local machine"
+      def dump
+        prepare :dump
+        boot!
+        Dump.start
+      end
+
+      desc "#{namespace}:load", "Uploads a dump of the current site to a remote server"
+      def load
+        prepare :load
+        boot!
+        Load.start
+      end
+
       desc "#{namespace}:publish", "Publishes the site"
       method_option :changes, :type => :array, :desc => "List of changesets to include"
       method_option :logfile, :type => :string, :desc => "Location of logfile"
-
       def publish
         prepare :publish
         # TODO: set up logging
