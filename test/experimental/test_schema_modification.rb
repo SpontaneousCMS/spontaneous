@@ -9,7 +9,7 @@ class SchemaModificationTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
   def self.startup
-    Spontaneous::Loader::Reloader.reset!
+    # Spontaneous::Loader::Reloader.reset!
   end
 
   def self.site_root
