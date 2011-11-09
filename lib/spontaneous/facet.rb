@@ -49,7 +49,7 @@ module Spontaneous
     def load_indexes!
       paths.expanded(:config).each do |config_path|
         index_file = config_path / "indexes.rb"
-        load(index_file) if File.exists?(index_file)
+        Kernel.load(index_file) if File.exists?(index_file)
       end
     end
 
@@ -57,15 +57,22 @@ module Spontaneous
     end
 
     def load!
-      loaders.each_value { |loader| loader.load! }
+      load_order.each { |category| load_files(category) }
+    end
+
+    def load_files(category)
+      loaders[category].load!
     end
 
 
     def reload_all!
-      loaders.each_value { |loader| loader.reload! }
+      load_order.each { |category| loaders[category].reload! }
     end
     alias_method :reload!, :reload_all!
 
+    def load_order
+      [:lib, :schema]
+    end
 
     def loaders
       @loaders ||= \

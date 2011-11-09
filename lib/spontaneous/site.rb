@@ -44,7 +44,9 @@ module Spontaneous
     end
 
     def load_facets!
-      facets.each { |facet| facet.load! }
+      load_order.each do |category|
+        facets.each { |facet| facet.load_files(category) }
+      end
     end
 
 
