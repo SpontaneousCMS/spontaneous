@@ -216,8 +216,7 @@ module Spontaneous
 
         # And finally reload the specified file
         begin
-          puts "requiring #{file}"
-          puts require(file)
+          require(file)
         rescue SyntaxError => ex
           logger.error "Cannot require #{file} because of syntax error: #{ex.message}"
         ensure
@@ -244,7 +243,6 @@ module Spontaneous
         begin
           base = parts.size == 1 ? Object : Object.full_const_get(parts[0..-2].join("::"))
           object = parts[-1].to_s
-          puts "remove_constant #{base}::#{object}"
           base.send(:remove_const, object)
         rescue NameError => e
           # logger.warn(e)
@@ -318,7 +316,6 @@ module Spontaneous
 
       def reload!
         changed_files = []
-        # puts "============ schema loader reload!"
         rotation do |file, mtime|
           # Retrive the last modified time
           new_file = mtimes[file].nil?
@@ -333,11 +330,6 @@ module Spontaneous
         modified_classes = changed_files.map do |file, mtime|
           schema_classes_for_file(file)
         end.flatten
-        puts "all classes::::::::"
-        p all_classes
-
-        puts "modified classes::::::::"
-        p modified_classes
 
         affected_subclasses = modified_classes.map do |modified_class|
           all_classes.select { |schema_class|
@@ -345,20 +337,13 @@ module Spontaneous
           }
         end.flatten
 
-        puts "affected subclasses::::::::"
-        p affected_subclasses
-
-        # affected_subclasses.each { |subclass| remove_constant(subclass) }
 
         subclass_files_to_reload = affected_subclasses.map do |subclass|
           file_for_class(subclass)
         end.flatten
-        puts "subclass_files_to_reload::::::::"
-        p subclass_files_to_reload
+
         changed_files.each { |file, mtime| safe_load(file, mtime) }
         subclass_files_to_reload.each { |file| safe_load(file) }
-        # puts "***** Safe load #{file}"
-        # safe_load(file, mtime)
       end
 
       def schema
@@ -378,11 +363,6 @@ module Spontaneous
       def dependency_file?(file)
         path = ::File.expand_path(file)
         tests = load_paths.map { |load_path| ::File.fnmatch?(load_path, path) }
-        puts ">>"*20
-        p load_paths
-        p path
-        p tests
-        puts '<<'*20
         tests.any? { |t| t }
       end
     end

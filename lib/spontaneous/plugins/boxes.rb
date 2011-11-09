@@ -5,8 +5,6 @@ module Spontaneous::Plugins
 
     module ClassMethods
       def box(name, options = {}, &block)
-        puts "Adding box #{self}##{self.object_id} // #{name} #{box_prototypes.map { |p| p.name }}"
-        puts "Using supertype #{superclass.inspect}##{superclass.object_id}" if superclass
         name = name.to_sym
         prototype = nil
         unless boxes.key?(name)

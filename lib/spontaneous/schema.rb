@@ -120,13 +120,11 @@ module Spontaneous
               logger.warn("Schema changed...")
               attempts = 0
               while changes and changes.resolvable? do
-                p changes
                 logger.warn("Fixing automatically")
                 changes.resolve!
                 map.reload!
                 changes = perform_validation
-                attempts += 1
-                raise "Infinite loop" if attempts >= 3
+                raise "Infinite loop in schema resolution" if (attempts += 1) >= 5
               end
               write_schema
               reload!
@@ -208,7 +206,6 @@ module Spontaneous
       def validate_classes
         # will check that each of the classes in the schema has a
         # corresponding id
-        p self.classes.map { |k| [k, k.object_id]}
         self.classes.each do | schema_class |
           schema_class.schema_validate
         end
@@ -284,9 +281,7 @@ module Spontaneous
       end
 
       def delete(klass)
-        puts "============ deleting #{klass}"
         classes.delete(klass)
-        # classes.delete_if { |content_class| content_class < klass }
       end
 
       def schema_map_file

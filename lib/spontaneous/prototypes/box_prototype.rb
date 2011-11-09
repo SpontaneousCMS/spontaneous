@@ -24,9 +24,6 @@ module Spontaneous::Prototypes
     end
 
     def schema_id
-      puts "BoxPrototype#schema_id"
-      p instance_class
-      p instance_class.schema_id
       instance_class.schema_id
     end
 

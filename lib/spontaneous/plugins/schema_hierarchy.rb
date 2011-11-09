@@ -16,11 +16,7 @@ module Spontaneous::Plugins
           # boxes don't have boxes
           if respond_to?(:boxes)
             boxes.each do |box|
-              puts "???? #{box.owner == self}"
-              puts "#### #{self}:#{self.object_id} trying box #{box.name}"
-              puts "#### supertype #{supertype}:#{supertype.object_id}" if supertype
               if box.owner == self and box.schema_id.nil?
-                p "missing box #{box} #{box.instance_class}"
                 Spontaneous.schema.missing_id!(:box, box)
               end
             end
