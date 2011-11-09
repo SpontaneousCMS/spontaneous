@@ -1,9 +1,5 @@
+# encoding: UTF-8
 
 class <%= class_name %> < Page
-  # see 'templates/<%= disk_name.underscore %>/page.html.cut'
-  page_style :page
 
-  # see 'templates/<%= disk_name.underscore %>/inline.html.cut'
-  inline_style :inline
 end
-
