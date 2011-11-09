@@ -33,6 +33,10 @@ module Spontaneous
         end
       end
 
+      def self.editor_class
+        ui_class
+      end
+
       attr_accessor :owner, :name, :unprocessed_value, :template_params, :version
       attr_reader   :processed_values
 

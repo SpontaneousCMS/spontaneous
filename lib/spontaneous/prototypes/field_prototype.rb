@@ -13,9 +13,12 @@ module Spontaneous::Prototypes
       base_class = Spontaneous::FieldTypes[type || name]
       if block_given?
         @field_class = Class.new(base_class, &Proc.new)
-        # @field_class.singleton_class.send(:define_method, :name) do
-        #   base_class.name
-        # end
+        # although we're subclassing the base field class, we don't want the ui
+        # to use a different editor. FieldClass::editor_class is used in the serialisation
+        # routine
+        @field_class.singleton_class.send(:define_method, :editor_class) do
+          base_class.ui_class
+        end
       else
         @field_class = base_class
       end
@@ -120,7 +123,7 @@ module Spontaneous::Prototypes
       {
         :name => name.to_s,
         :schema_id => schema_id.to_s,
-        :type => field_class.ui_class,
+        :type => field_class.editor_class,
         :title => title,
         :comment => comment || "",
         :writable => Spontaneous::Permissions.has_level?(user, write_level)
