@@ -4,6 +4,7 @@
 module Spontaneous
   module FieldTypes
     class StringField < Field
+      plugin Spontaneous::Plugins::Field::EditorClass
       def generate_html(value)
         escape_html(value)
       end

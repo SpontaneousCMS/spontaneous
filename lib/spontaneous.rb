@@ -20,6 +20,7 @@ require 'active_support/core_ext/file'
 
 Sequel.extension :inflector
 
+
 Dir[File.join(File.dirname(__FILE__), 'spontaneous/extensions/*.rb')].each { |file|
   require file
 }
@@ -145,6 +146,10 @@ module Spontaneous
     autoload :Permissions, "spontaneous/plugins/permissions"
     autoload :Controllers, "spontaneous/plugins/controllers"
 
+
+    module Field
+      autoload :EditorClass, "spontaneous/plugins/field/editor_class"
+    end
 
     module Page
       autoload :Formats, "spontaneous/plugins/page/formats"

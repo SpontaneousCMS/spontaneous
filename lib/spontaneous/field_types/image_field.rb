@@ -52,6 +52,8 @@ module Spontaneous
     end
 
     class ImageField < Field
+      plugin Spontaneous::Plugins::Field::EditorClass
+
       include ImageFieldUtilities
 
       def self.accepts

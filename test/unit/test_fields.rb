@@ -395,4 +395,27 @@ class FieldsTest < MiniTest::Spec
       @instance.text2.value.should == "<p>With<br />\nLinebreak</p>\n"
     end
   end
+
+  context "Editor classes" do
+    should "be defined in base types" do
+      base_class = Spontaneous::FieldTypes::ImageField
+      base_class.editor_class.should == "Spontaneous.FieldTypes.ImageField"
+      base_class = Spontaneous::FieldTypes::DateField
+      base_class.editor_class.should == "Spontaneous.FieldTypes.DateField"
+      base_class = Spontaneous::FieldTypes::MarkdownField
+      base_class.editor_class.should == "Spontaneous.FieldTypes.MarkdownField"
+      base_class = Spontaneous::FieldTypes::StringField
+      base_class.editor_class.should == "Spontaneous.FieldTypes.StringField"
+    end
+
+    should "be inherited in subclasses" do
+      base_class = Spontaneous::FieldTypes::ImageField
+      @field_class = Class.new(base_class)
+      @field_class.stubs(:name).returns("CustomField")
+      @field_class.editor_class.should == base_class.editor_class
+      @field_class2 = Class.new(@field_class)
+      @field_class2.stubs(:name).returns("CustomField2")
+      @field_class2.editor_class.should == base_class.editor_class
+    end
+  end
 end

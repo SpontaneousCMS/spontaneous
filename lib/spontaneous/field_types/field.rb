@@ -4,9 +4,11 @@
 module Spontaneous
   module FieldTypes
     class Field
+      extend Plugins
 
       def self.register(*labels)
         labels = self.labels if labels.empty?
+        logger.debug("Registering #{self} as #{labels.join(", ")}")
         FieldTypes.register(self, *labels)
         self
       end
@@ -15,6 +17,14 @@ module Spontaneous
         [self.name.demodulize.gsub(/Field$/, '').underscore]
       end
 
+      def self.inherited(subclass, real_caller = nil)
+        if self.respond_to?(:editor_class)
+          editor_class = self.editor_class
+          subclass.singleton_class.send(:define_method, :editor_class) do
+            editor_class
+          end
+        end
+      end
       # def self.prototype=(prototype)
       #   @prototype = prototype
       # end
@@ -33,9 +43,6 @@ module Spontaneous
         end
       end
 
-      def self.editor_class
-        ui_class
-      end
 
       attr_accessor :owner, :name, :unprocessed_value, :template_params, :version
       attr_reader   :processed_values
