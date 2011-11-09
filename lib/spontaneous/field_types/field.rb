@@ -8,7 +8,7 @@ module Spontaneous
 
       def self.register(*labels)
         labels = self.labels if labels.empty?
-        logger.debug("Registering #{self} as #{labels.join(", ")}")
+        # logger.debug("Registering #{self} as #{labels.join(", ")}")
         FieldTypes.register(self, *labels)
         self
       end
