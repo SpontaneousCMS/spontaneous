@@ -151,6 +151,7 @@ module Spontaneous
         write_schema
         reload!
         validate!
+        logger.info("✓ Schema updated successfully")
       end
 
       def generate_new_schema
