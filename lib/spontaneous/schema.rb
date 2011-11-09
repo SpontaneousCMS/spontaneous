@@ -118,11 +118,15 @@ module Spontaneous
           else
             if changes.resolvable?
               logger.warn("Schema changed...")
+              attempts = 0
               while changes and changes.resolvable? do
+                p changes
                 logger.warn("Fixing automatically")
                 changes.resolve!
                 map.reload!
                 changes = perform_validation
+                attempts += 1
+                raise "Infinite loop" if attempts >= 3
               end
               write_schema
               reload!
@@ -204,6 +208,7 @@ module Spontaneous
       def validate_classes
         # will check that each of the classes in the schema has a
         # corresponding id
+        p self.classes.map { |k| [k, k.object_id]}
         self.classes.each do | schema_class |
           schema_class.schema_validate
         end
@@ -240,13 +245,17 @@ module Spontaneous
         @classes ||= []
       end
 
+      def add_class(klass)
+        classes << klass unless classes.include?(klass)
+      end
+
       # just subclasses of Content (excluding boxes)
       # only need this for the serialisation (which doesn't include boxes)
       def content_classes
         classes = []
         self.classes.reject { |k| k.is_box? }.each do |klass|
           classes << klass unless [Spontaneous::Page, Spontaneous::Piece].include?(klass)
-          recurse_classes(klass, classes)
+          # recurse_classes(klass, classes)
         end
         classes.uniq
       end
@@ -275,7 +284,9 @@ module Spontaneous
       end
 
       def delete(klass)
+        puts "============ deleting #{klass}"
         classes.delete(klass)
+        # classes.delete_if { |content_class| content_class < klass }
       end
 
       def schema_map_file

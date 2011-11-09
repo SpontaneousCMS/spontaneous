@@ -56,14 +56,34 @@ module Spontaneous
     def init!
     end
 
-    def load!
-      Spontaneous::Loader.load_classes(load_paths)
+    # def load!
+    #   puts "Facet#load!"
+    #   Spontaneous::Loader.load_classes(load_paths)
+    # end
+
+    def loaders
+      @loaders ||= \
+        begin
+          use_reloader = config.reload_classes
+          {
+            :schema => Spontaneous::SchemaLoader.new(schema_load_paths, use_reloader),
+            :lib => Spontaneous::Loader.new(load_paths, use_reloader)
+          }
+        end
     end
 
     def load_paths
+      load_paths_for_category(:lib)
+    end
+
+    def schema_load_paths
+      load_paths_for_category(:schema)
+    end
+
+    def load_paths_for_category(category)
       load_paths = []
-      [:lib, :schema].each do |category|
-        load_paths += paths.expanded(category)
+      facets.each do |facet|
+        load_paths += facet.paths.expanded(category)
       end
       load_paths
     end

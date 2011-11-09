@@ -89,6 +89,7 @@ class SchemaModificationTest < MiniTest::Spec
           class Page < Spontaneous::Page
             field :title
             box :renamed, :type => :CustomBox do
+              field :introduction
             end
           end
         RB
@@ -102,6 +103,7 @@ class SchemaModificationTest < MiniTest::Spec
       auth_get "/@spontaneous"
       assert last_response.ok?
       ::Page.boxes.renamed.schema_id.should == box_uid
+
     end
   end
 end

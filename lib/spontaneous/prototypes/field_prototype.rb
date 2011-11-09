@@ -13,12 +13,14 @@ module Spontaneous::Prototypes
       base_class = Spontaneous::FieldTypes[type || name]
       if block_given?
         @field_class = Class.new(base_class, &Proc.new)
-        @field_class.singleton_class.send(:define_method, :name) do
-          base_class.name
-        end
+        # @field_class.singleton_class.send(:define_method, :name) do
+        #   base_class.name
+        # end
       else
         @field_class = base_class
       end
+
+      owner.const_set("#{name.to_s.camelize}Field", @field_class)
 
       # @field_class.prototype = self
       parse_options(options)

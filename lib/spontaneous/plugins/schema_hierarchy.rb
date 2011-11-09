@@ -16,7 +16,10 @@ module Spontaneous::Plugins
           # boxes don't have boxes
           if respond_to?(:boxes)
             boxes.each do |box|
+              puts "#### #{self}:#{self.object_id} trying box #{box.name}"
+              puts "#### supertype #{supertype}:#{supertype.object_id}" if supertype
               if box.schema_id.nil?
+                p "missing box #{box} #{box.instance_class}"
                 Spontaneous.schema.missing_id!(:box, box)
               end
             end
@@ -61,7 +64,7 @@ module Spontaneous::Plugins
 
       def inherited(subclass, real_caller = nil)
         subclass.__source_file = File.expand_path((real_caller || caller[0]).split(':')[0])
-        Spontaneous.schema.classes << subclass# if subclass.schema_class?
+        Spontaneous.schema.add_class(subclass)# if subclass.schema_class?
         subclasses << subclass
         super(subclass)
       end

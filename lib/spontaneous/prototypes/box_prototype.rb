@@ -24,6 +24,9 @@ module Spontaneous::Prototypes
     end
 
     def schema_id
+      puts "BoxPrototype#schema_id"
+      p instance_class
+      p instance_class.schema_id
       instance_class.schema_id
     end
 
@@ -58,6 +61,8 @@ module Spontaneous::Prototypes
 
     def create_instance_class
       Class.new(box_base_class).tap do |instance_class|
+        # doing this means we get proper names for the anonymous box classes
+        owner.const_set("#{name.to_s.camelize}Box", instance_class)
         box_owner = owner
         box_name = name
         instance_class.instance_eval do
@@ -75,13 +80,12 @@ module Spontaneous::Prototypes
           instance_class.class_eval(&@extend)
         end
       end.tap do |klass|
-        # doing this means we get proper names for the anonymous box classes
-        owner.const_set("#{name.to_s.camelize}Box", klass)
+        # Spontaneous.schema.classes << klass# if subclass.schema_class?
       end
     end
 
     def box_base_class
-      box_class = Spontaneous::Box # AnonymousBox
+      box_class = default_box_class
       class_name = @options[:type] || @options[:class]
       box_class = class_name.to_s.constantize if class_name
       # box_class = Class.new(box_class) do
@@ -90,6 +94,10 @@ module Spontaneous::Prototypes
       #   end
       # end
       box_class
+    end
+
+    def default_box_class
+      defined?(::Box) ? ::Box : Spontaneous::Box
     end
 
     ## failed attempt to exclude anonymous boxes from the list of schema classes

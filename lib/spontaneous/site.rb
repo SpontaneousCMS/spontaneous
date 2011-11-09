@@ -44,18 +44,16 @@ module Spontaneous
     end
 
     def load_facets!
-      Spontaneous::Loader.load!
+      loaders.each_value { |loader| loader.load! }
     end
 
-    def load_paths
-      load_paths = []
-      [:lib, :schema].each do |category|
-        facets.each do |facet|
-          load_paths += facet.paths.expanded(category)
-        end
-      end
-      load_paths
+
+    def reload!
+      schema.reload!
+      loaders.each_value { |loader| loader.reload! }
+      schema.validate!
     end
+
 
     def connect_to_database!
       self.database = Sequel.connect(db_settings)
