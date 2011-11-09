@@ -13,14 +13,14 @@ Sequel.migration do
     add_column :content, :first_published_revision,  Integer
 
     # keeps track of publication dates
-    create_table(:revisions) do
+    create_table(:revisions, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
       integer     :revision
       timestamp   :published_at
     end
 
     # keeps track of all pages changed by a set of actions
-    create_table(:changes) do
+    create_table(:changes, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
       varchar     :title
       timestamp   :created_at

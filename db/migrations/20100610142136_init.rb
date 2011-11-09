@@ -3,7 +3,7 @@
 Sequel.migration do
   up do
     adapter_scheme =  self.adapter_scheme
-    create_table(:content) do
+    create_table(:content, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
       varchar :type_id, :index => true
       text    :instance_code
@@ -50,7 +50,7 @@ Sequel.migration do
 
     end
 
-    create_table(:sites) do
+    create_table(:sites, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
       integer :revision, :default => 1
       integer :published_revision, :default => 0

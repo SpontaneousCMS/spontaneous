@@ -3,7 +3,7 @@
 Sequel.migration do
   up do
     adapter_scheme =  self.adapter_scheme
-    create_table!(:spontaneous_users) do
+    create_table!(:spontaneous_users, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
       varchar     :name
       varchar     :login, :size => 32, :index => true, :unique => true
@@ -18,9 +18,9 @@ Sequel.migration do
       index       [:login, :disabled], :name => "enabled_login_index"
     end
 
-    create_table!(:spontaneous_groups) do
+    create_table!(:spontaneous_groups, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
-      foreign_key :user_id, :spontaneous_users, :on_delete => :cascade # test for being a single user group is user_id.nil?
+      foreign_key :user_id, :spontaneous_users, :key => :id, :on_delete => :cascade # test for being a single user group is user_id.nil?
       index       :user_id
       varchar     :name
       varchar     :level_name, :default => 'none'
@@ -29,15 +29,15 @@ Sequel.migration do
     end
 
 
-    create_table!(:spontaneous_groups_users) do
+    create_table!(:spontaneous_groups_users, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
-      foreign_key :user_id, :spontaneous_users
-      foreign_key :group_id, :spontaneous_groups
+      foreign_key :user_id, :spontaneous_users, :key => :id
+      foreign_key :group_id, :spontaneous_groups, :key => :id
     end
 
-    create_table!(:spontaneous_access_keys) do
+    create_table!(:spontaneous_access_keys, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
-      foreign_key :user_id, :spontaneous_users, :on_delete => :cascade
+      foreign_key :user_id, :spontaneous_users, :key => :id, :on_delete => :cascade
       index       :user_id
       char        :key_id, :size => 44, :index => true, :unique => true
       datetime    :last_access_at
@@ -48,10 +48,10 @@ Sequel.migration do
   end
 
   down do
-    drop_table :spontaneous_users
-    drop_table :spontaneous_groups
-    drop_table :spontaneous_groups_users
     drop_table :spontaneous_access_keys
+    drop_table :spontaneous_groups_users
+    drop_table :spontaneous_groups
+    drop_table :spontaneous_users
   end
 end
 
