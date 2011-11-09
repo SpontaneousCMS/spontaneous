@@ -15,6 +15,10 @@ module Spontaneous::Prototypes
       self
     end
 
+    def __source_file
+      owner.__source_file
+    end
+
     def field_prototypes
       instance_class.field_prototypes
     end
