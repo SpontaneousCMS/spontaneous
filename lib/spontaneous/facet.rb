@@ -56,10 +56,16 @@ module Spontaneous
     def init!
     end
 
-    # def load!
-    #   puts "Facet#load!"
-    #   Spontaneous::Loader.load_classes(load_paths)
-    # end
+    def load!
+      loaders.each_value { |loader| loader.load! }
+    end
+
+
+    def reload_all!
+      loaders.each_value { |loader| loader.reload! }
+    end
+    alias_method :reload!, :reload_all!
+
 
     def loaders
       @loaders ||= \
@@ -81,11 +87,7 @@ module Spontaneous
     end
 
     def load_paths_for_category(category)
-      load_paths = []
-      facets.each do |facet|
-        load_paths += facet.paths.expanded(category)
-      end
-      load_paths
+      self.paths.expanded(category)
     end
 
   end # Facet

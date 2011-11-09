@@ -44,13 +44,13 @@ module Spontaneous
     end
 
     def load_facets!
-      loaders.each_value { |loader| loader.load! }
+      facets.each { |facet| facet.load! }
     end
 
 
     def reload!
       schema.reload!
-      loaders.each_value { |loader| loader.reload! }
+      facets.each { |facet| facet.reload_all! }
       schema.validate!
     end
 
