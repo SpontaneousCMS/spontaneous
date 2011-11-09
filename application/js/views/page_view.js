@@ -46,7 +46,7 @@ Spontaneous.Views.PageView = (function($, S) {
 		},
 		set_title: function(title) {
 			title = title || this.page.title();
-			this.title.text(title);
+			this.title.html(title);
 			if (this.page.content.hidden) {
 				this.title.append(dom.span().text(' (hidden)'));
 			}

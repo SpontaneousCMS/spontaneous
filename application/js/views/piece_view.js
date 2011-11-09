@@ -93,7 +93,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			wrap = dom.div('.alias-target'),
 			icon = content.alias_icon,
 			click = function() { S.Location.load_id(content.target().id); },
-			title = dom.a().text(content.content.alias_title).click(click);
+			title = dom.a().html(content.content.alias_title).click(click);
 
 
 			if (icon) {

@@ -33,7 +33,7 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 		page_title_panel: function() {
 			var wrapper = dom.div('.page-title'),
 			__content = this,
-			title = dom.a().text(this.content.title()).click(function() {
+			title = dom.a().html(this.content.title()).click(function() {
 				S.Location.load_id(__content.id());
 			});
 			this.content.title_field().watch('value', function(t) { title.text(t); }.bind(this));
