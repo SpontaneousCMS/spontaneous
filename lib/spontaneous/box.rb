@@ -54,9 +54,9 @@ module Spontaneous
       !supertype.nil? #&& supertype.respond_to?(:field_prototypes)
     end
 
-    # def self.owner_sid
-    #   nil
-    # end
+    def self.owner_sid
+      nil
+    end
 
     def page?
       false
