@@ -295,6 +295,21 @@ class FieldsTest < MiniTest::Spec
       f = @instance.fields.title
       f.prototype.should == CC.field_prototypes[:title]
     end
+
+    should "return the item which isnt empty when using the / method" do
+      a = CC.new(:title => "")
+      b = CC.new(:title => "b")
+      (a.title / b.title).should == b.title
+      a.title = "a"
+      (a.title / b.title).should == a.title
+    end
+    should "return the item which isnt empty when using the | method" do
+      a = CC.new(:title => "")
+      b = CC.new(:title => "b")
+      (a.title | b.title).should == b.title
+      a.title = "a"
+      (a.title | b.title).should == a.title
+    end
   end
 
   context "Field value persistence" do
