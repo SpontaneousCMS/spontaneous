@@ -10,7 +10,14 @@ Spontaneous.Auth = (function($, S) {
 				localStorage.setItem(this.key(site), key);
 			},
 			load: function(site) {
-				return localStorage.getItem(this.key(site));
+				return localStorage.getItem(this.key(site)) || this.loadAutoLogin();
+			},
+			loadAutoLogin: function() {
+				if (!this._autoLoginKey) {
+					console.warn("Using auto login key for user", "'"+S.auto_login+"'");
+					this._autoLoginKey = S.user_key;
+				}
+				return this._autoLoginKey;
 			},
 			remove: function(site) {
 				localStorage.removeItem(this.key(site));
