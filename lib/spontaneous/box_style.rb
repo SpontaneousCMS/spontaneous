@@ -5,8 +5,14 @@ module Spontaneous
   class BoxStyle < Style
     attr_reader :box
 
+    def self.excluded_classes
+      [Spontaneous::Box].tap do |classes|
+        classes.push(::Box) if defined?(::Box)
+      end
+    end
+
     def self.to_directory_name(klass)
-      return nil if klass == Spontaneous::Box
+      return nil if excluded_classes.include?(klass)
       super
     end
 
@@ -21,7 +27,7 @@ module Spontaneous
 
     def supertype_template(format)
       supertype = box.class.supertype
-      if supertype && supertype != Spontaneous::Box
+      if supertype && supertype != Spontaneous::Box && supertype != ::Box
         self.class.new(supertype).template(format)
       else
         nil
@@ -35,19 +41,25 @@ module Spontaneous
     def try_paths
       prototype = box._prototype
       box_directory_name = self.class.to_directory_name(prototype.box_base_class)
-      paths = [ [owner_directory_name, box._name.to_s] ]
+      box_name = box._name.to_s
+
+      paths = owner_directory_paths(box_name)
+
+
+      if style_name = prototype.default_style
+        name = style_name.to_s
+        paths.concat(owner_directory_paths(name))
+        paths.push([box_directory_name, name])
+      end
 
       if box.styles.empty?
         paths.push(box_directory_name)
       else
-        if style_name = prototype.default_style
-          name = style_name.to_s
-          paths.push([owner_directory_name, name])
-          paths.push([box_directory_name, name])
-        else
+        unless style_name = prototype.default_style
           box.styles.each do |style|
             name = style.name.to_s
-            paths.push([owner_directory_name, name])
+            paths.concat(owner_directory_paths(name))
+            # paths.push([owner_directory_name, name])
             paths.push([box_directory_name, name])
           end
         end

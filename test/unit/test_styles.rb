@@ -28,6 +28,11 @@ class StylesTest < MiniTest::Spec
   context "styles for" do
 
     setup do
+
+      class ::Page < Spontaneous::Page; end
+      class ::Piece < Spontaneous::Piece; end
+      class ::Box < Spontaneous::Box; end
+
       class ::MissingClass < Piece; end
       class ::TemplateClass < Piece; end
       class ::TemplateSubClass1 < TemplateClass; end
@@ -380,6 +385,44 @@ class StylesTest < MiniTest::Spec
           piece = TemplateClass.new
           assert_correct_template(piece.dongles, 'named2')
           piece.dongles.render.should == "named2.html.cut\n"
+        end
+
+        should "use styles assigned in a subclass" do
+          saved_template_root = self.template_root
+          self.template_root = Spontaneous.template_root
+          ::TemplateSubClass = Class.new(TemplateClass)
+          ::TemplateSubSubClass = Class.new(TemplateSubClass)
+
+          TemplateSubClass.box :bananas
+          TemplateSubClass.box :apples, :style => :apples
+          TemplateSubClass.box :oranges do
+            style :oranges
+          end
+
+          # FileUtils.mkdir_p(Spontaneous.template_root)
+
+          piece = TemplateSubSubClass.new
+          assert Proc === piece.bananas.template
+
+          [[piece.bananas, %w(template_sub_sub_class/bananas template_sub_class/bananas)],
+           [piece.apples, %w(template_sub_sub_class/apples template_sub_class/apples apples)],
+           [piece.oranges, %w(template_sub_sub_class/oranges template_sub_class/oranges oranges)]
+          ].each do |box, test_templates|
+            test_templates.each do |test_template|
+              FileUtils.mkdir_p(File.dirname(Spontaneous.template_root(test_template)))
+              FileUtils.touch(Spontaneous.template_root(test_template) + '.html.cut')
+
+              assert_correct_template(box, test_template)
+
+              FileUtils.rm_r(::File.dirname(Spontaneous.template_root(test_template)))
+            end
+          end
+
+
+          Object.send(:remove_const, :TemplateSubClass)
+          Object.send(:remove_const, :TemplateSubSubClass)
+          FileUtils.rm_r(Spontaneous.template_root) rescue nil
+          self.template_root = saved_template_root
         end
       end
 

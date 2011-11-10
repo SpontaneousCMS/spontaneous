@@ -78,13 +78,19 @@ module Spontaneous
 
     def try_paths
       name = prototype.name.to_s
-      [[owner_directory_name, name], name]
+      # [[owner_directory_name, name], name]
+      # owner_directory_names.map { |dir| [dir, name] }.push(name)
+      owner_directory_paths(name).push(name)
     end
 
-    def owner_directory_name
-      self.class.to_directory_name(owner)
+    def owner_directory_names
+      classes = [owner].concat(owner.ancestors.take_while { |klass| klass < Spontaneous::Page or klass < Spontaneous::Piece })
+      classes.map { |klass| self.class.to_directory_name(klass) }
     end
 
+    def owner_directory_paths(basename)
+      owner_directory_names.map { |dir| [dir, basename] }
+    end
 
     def default?
       @options[:default]
@@ -115,7 +121,7 @@ module Spontaneous
       end
 
       def try_paths
-        [owner_directory_name]
+        owner_directory_names
       end
     end
 
