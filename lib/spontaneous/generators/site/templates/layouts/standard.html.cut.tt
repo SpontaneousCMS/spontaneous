@@ -6,8 +6,8 @@
 </head>
 <body>
 
-  {% block :content %}
+  %{ block :content }
     <h2>Welcome to <%= @domain %></h2>
-  {% endblock :content %}
+  %{ endblock :content }
 </body>
 </html>
