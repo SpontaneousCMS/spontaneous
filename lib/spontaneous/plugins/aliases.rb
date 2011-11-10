@@ -125,6 +125,10 @@ module Spontaneous::Plugins
       def export(user = nil)
         super.merge(:target => target.shallow_export(user), :alias_title => target.alias_title, :alias_icon => target.alias_icon_field.export)
       end
+
+      def path
+        target.path
+      end
     end
 
     module PageAliasMethods
