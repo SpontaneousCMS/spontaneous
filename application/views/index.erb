@@ -24,9 +24,9 @@
 				development: <%= Spontaneous.development? %>,
 				asynchronous: false,
 				editor_protocol: 'mvim',
-				<% if Site.config.auto_login; %>
+				<% if Spontaneous.config.auto_login; %>
 				auto_login: 'garry',
-				user_key: '<%= env[S::Rack::ACTIVE_KEY].key_id %>',
+				user_key: '<%= env[Spontaneous::Rack::ACTIVE_KEY].key_id %>',
 				<% end %>
 				onload: function() {
 					jQuery.noConflict();
