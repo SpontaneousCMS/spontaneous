@@ -296,6 +296,10 @@ class AliasTest < MiniTest::Spec
         @aliases.save
         Site["/aliases/bb"].should be_nil
       end
+      should "have their target's path attribute if they alias to a page type" do
+        a = BBAlias.create(:target => @bb)
+        a.path.should == @bb.path
+      end
     end
 
     context "Page aliases" do
