@@ -17,6 +17,7 @@ require 'logger'
 require 'fileutils'
 require 'active_support/core_ext/date_time/conversions'
 require 'active_support/core_ext/array/grouping'
+require 'active_support/core_ext/array/extract_options'
 require 'active_support/core_ext/file'
 
 Sequel.extension :inflector
