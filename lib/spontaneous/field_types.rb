@@ -33,6 +33,6 @@ module Spontaneous
   end
 end
 
-[:string, :image, :date, :markdown].each do |type|
+[:string, :image, :date, :markdown, :youtube, :vimeo].each do |type|
   require "spontaneous/field_types/#{type}_field"
 end
