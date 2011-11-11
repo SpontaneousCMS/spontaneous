@@ -3,7 +3,7 @@
 
 module Spontaneous::Prototypes
   class FieldPrototype
-    attr_reader :owner, :name
+    attr_reader :owner, :name, :options
 
     def initialize(owner, name, type, options={})
       @owner = owner
