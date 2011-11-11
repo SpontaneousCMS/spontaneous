@@ -445,79 +445,89 @@ class FieldsTest < MiniTest::Spec
       end
     end
 
-    context "YouTube fields" do
+    context "WebVideo fields" do
       setup do
         @content_class = Class.new(::Piece) do
-          field :video, :youtube
+          field :video, :webvideo
         end
+        @content_class.stubs(:name).returns("ContentClass")
         @instance = @content_class.new
       end
 
-      should "translate YouTube urls into ids" do
+      should "have their own editor type" do
+        @content_class.fields.video.export(nil)[:type].should == "Spontaneous.FieldTypes.WebVideoField"
         @instance.video = "http://www.youtube.com/watch?v=_0jroAM_pO4&feature=feedrec_grec_index"
-        @instance.video.value.should == "_0jroAM_pO4"
-        @instance.video = "http://youtu.be/blz4ihcjNY0"
-        @instance.video.value.should == "blz4ihcjNY0"
+        fields  = @instance.export(nil)[:fields]
+        fields[0][:processed_value].should == @instance.video.render(:html, :width => 480, :height => 270)
       end
 
-      should "return an iframe player from a render(:html) call" do
+      should "recognise youtube URLs" do
         @instance.video = "http://www.youtube.com/watch?v=_0jroAM_pO4&feature=feedrec_grec_index"
-        opts = {
-          :width => 680,
-          :height => 384,
-          :theme => "light",
-          :hd => true,
-          :fullscreen => true,
-          :controls => false,
-          :autoplay => false,
-          :showinfo => false,
-          :showsearch => false
-        }
-        @instance.video.render(:html, opts).should =~ /^<iframe/
-        @instance.video.render(:html, opts).should =~ /src="http:\/\/www.youtube.com\/embed\/_0jroAM_pO4/
-        @instance.video.render(:html, opts).should =~ /width="680"/
-        @instance.video.render(:html, opts).should =~ /height="384"/
-        @instance.video.render(:html, opts).should =~ /theme=light/
-        @instance.video.render(:html, opts).should =~ /hd=1/
-        @instance.video.render(:html, opts).should =~ /fs=1/
-        @instance.video.render(:html, opts).should =~ /controls=0/
-        @instance.video.render(:html, opts).should =~ /autoplay=0/
-        @instance.video.render(:html, opts).should =~ /showinfo=0/
-        @instance.video.render(:html, opts).should =~ /showsearch=0/
+        @instance.video.value.should == "http://www.youtube.com/watch?v=_0jroAM_pO4&amp;feature=feedrec_grec_index"
+        @instance.video.id.should == "_0jroAM_pO4"
+        @instance.video.video_type.should == "youtube"
       end
-    end
-    context "Vimeo fields" do
-      setup do
-        @content_class = Class.new(::Piece) do
-          field :video, :vimeo
+
+      should "recognise Vimeo URLs" do
+        @instance.video = "http://vimeo.com/31836285"
+        @instance.video.value.should == "http://vimeo.com/31836285"
+        @instance.video.id.should == "31836285"
+        @instance.video.video_type.should == "vimeo"
+      end
+
+      context "with player settings" do
+        setup do
+          @content_class.field :video2, :webvideo, :player => {
+            :width => 680, :height => 384,
+            :fullscreen => true, :autoplay => true, :loop => true,
+            :showinfo => false,
+            :youtube => { :theme => 'light', :hd => true, :controls => false },
+            :vimeo => { :color => "ccc" }
+          }
+          @instance = @content_class.new
+          @field = @instance.video2
         end
-        @instance = @content_class.new
+
+        should "use the configuration in the youtube player HTML" do
+          @field.value = "http://www.youtube.com/watch?v=_0jroAM_pO4&feature=feedrec_grec_index"
+          html = @field.render(:html)
+          html.should =~ /^<iframe/
+          html.should =~ %r{src="http://www\.youtube\.com/embed/_0jroAM_pO4}
+          html.should =~ /width="680"/
+          html.should =~ /height="384"/
+          html.should =~ /theme=light/
+          html.should =~ /hd=1/
+          html.should =~ /fs=1/
+          html.should =~ /controls=0/
+          html.should =~ /autoplay=1/
+          html.should =~ /showinfo=0/
+          html.should =~ /showsearch=0/
+          @field.render(:html, :youtube => {:showsearch => 1}).should =~ /showsearch=1/
+          @field.render(:html, :youtube => {:theme => 'dark'}).should =~ /theme=dark/
+          @field.render(:html, :width => 100).should =~ /width="100"/
+          @field.render(:html, :loop => true).should =~ /loop=1"/
+        end
+
+        should "use the configuration in the Vimeo player HTML" do
+          @field.value = "http://vimeo.com/31836285"
+          html = @field.render(:html)
+          html.should =~ /^<iframe/
+          html.should =~ %r{src="http://player\.vimeo\.com/video/31836285}
+          html.should =~ /width="680"/
+          html.should =~ /height="384"/
+          html.should =~ /color=ccc/
+          html.should =~ /webkitAllowFullScreen allowFullScreen/
+          html.should =~ /autoplay=1/
+          html.should =~ /title=0/
+          html.should =~ /byline=0/
+          html.should =~ /portrait=0/
+          @field.render(:html, :vimeo => {:color => 'f0abcd'}).should =~ /color=f0abcd/
+          @field.render(:html, :loop => true).should =~ /loop=1/
+          @field.render(:html, :title => true).should =~ /title=1/
+          @field.render(:html, :title => true).should =~ /byline=0/
+        end
       end
 
-      should "translate Vimeo urls into ids" do
-        @instance.video = "http://vimeo.com/31836285"
-        @instance.video.value.should == "31836285"
-      end
-
-      should "return an iframe player from a render(:html) call" do
-        @instance.video = "http://vimeo.com/31836285"
-        opts = {
-          :width => 680,
-          :height => 384,
-          :title => true,
-          :byline => true,
-          :portrait => false,
-          :fullscreen => true
-        }
-        @instance.video.render(:html, opts).should =~ /^<iframe/
-        @instance.video.render(:html, opts).should =~ /src="http:\/\/player.vimeo.com\/video\/31836285/
-        @instance.video.render(:html, opts).should =~ /width="680"/
-        @instance.video.render(:html, opts).should =~ /height="384"/
-        @instance.video.render(:html, opts).should =~ /title=1/
-        @instance.video.render(:html, opts).should =~ /byline=1/
-        @instance.video.render(:html, opts).should =~ /portrait=0/
-        @instance.video.render(:html, opts).should =~ /webkitAllowFullScreen allowFullScreen/
-      end
     end
   end
 end

@@ -206,9 +206,13 @@ module Spontaneous
         :name => name.to_s,
         :id => schema_id.to_s,
         :unprocessed_value => unprocessed_value,
-        :processed_value => value(:html),
+        :processed_value => ui_preview_value,
         :version => version
         }
+      end
+
+      def ui_preview_value
+        value(:html)
       end
 
       def inspect

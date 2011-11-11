@@ -66,6 +66,12 @@ module Spontaneous
         end
       end
 
+
+      def ui_preview_value
+        render(:html, :width => 480, :height => 270)
+      end
+
+
       def default_player_options
         {
           :width => 640,
@@ -74,8 +80,9 @@ module Spontaneous
           :autoplay => false,
           :loop => false,
           :showinfo => true
-        }.merge(prototype.options[:player])
+        }.merge(prototype.options[:player] || {})
       end
+
 
       def to_vimeo_html(options = {})
         o  = default_player_options
