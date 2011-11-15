@@ -20,9 +20,10 @@ module Spontaneous
 
       def generate_outputs(input)
         values = {}
-        id = nil
         values[:html] = escape_html(input)
         case input
+        when "", nil
+          # ignore this
         when /youtube\.com.*\?.*v=([^&]+)/, /youtu.be\/([^&]+)/
           values[:id] = $1
           values[:type] = "youtube"
@@ -34,16 +35,6 @@ module Spontaneous
         end
         values
       end
-      # def preprocess(input)
-      #   id = nil
-      #   case input
-      #   when /youtube\\.com.*\\?.*v=([^&]+)/, /youtu.be\\/([^&]+)/
-      #     id = $1
-      #     type = "youtube"
-      #   else
-      #     input
-      #   end
-      # end
 
       def render(format=:html, *args)
         case format
