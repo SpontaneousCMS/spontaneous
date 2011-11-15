@@ -49,6 +49,10 @@ module Spontaneous
         template = publishing_renderer.render_file(content.template(format), content, format)
         request_renderer.render_string(template, content, format, params)
       end
+
+      def render_string(template_string, content, format=:html, params = {})
+        request_renderer.render_string(template_string, content, format, params)
+      end
     end # PublishedRenderer
   end # Render
 end # Spontaneous

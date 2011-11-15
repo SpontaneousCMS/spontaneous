@@ -2,6 +2,7 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 
+require 'cgi'
 
 class TemplatesTest < MiniTest::Spec
   def first_pass(base_dir, filename, context=nil)
@@ -28,9 +29,10 @@ class TemplatesTest < MiniTest::Spec
   def setup
     @klass = Class.new(Object) do
       include Cutaneous::ContextHelper
+      include Spontaneous::Render::PreviewContext
 
       def escape(val)
-        CGI.escapeHTML(val)
+        ::CGI.escapeHTML(val)
       end
       def title
         "THE TITLE"
@@ -42,6 +44,10 @@ class TemplatesTest < MiniTest::Spec
 
       def bell
         'ding'
+      end
+
+      def show_errors?
+        true
       end
     end
     @context = @klass.new(nil, :html)
@@ -165,6 +171,7 @@ class TemplatesTest < MiniTest::Spec
 
       @context_class = Class.new(Object) do
         include Cutaneous::ContextHelper
+        include Spontaneous::Render::PreviewContext
 
         def escape(val)
           CGI.escapeHTML(val)

@@ -15,6 +15,10 @@ module Spontaneous
         # overwrite in subclasses
       end
 
+      def render_string(template_string, content, format=:html, params = {})
+        # overwrite in subclasses
+      end
+
       def template_file(filename, format)
         Render.template_file(template_root, filename, format)
       end
@@ -23,7 +27,7 @@ module Spontaneous
         Spontaneous.template_engine.extension
       end
 
-      protected
+      # protected
 
       def preview_renderer
         Spontaneous.template_engine.preview_renderer.new(template_root, cache?)

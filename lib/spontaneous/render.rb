@@ -157,15 +157,25 @@ module Spontaneous
           renderer.render_content(content, format || :html, params, *args)
         end
       end
+      def render_string(template_string, content, format=:html, params={}, *args)
+        Content.with_visible do
+          renderer.render_string(template_string, content, format || :html, params, *args)
+        end
+      end
     end
 
-    autoload :Engine, "spontaneous/render/engine"
-    autoload :Context, "spontaneous/render/context"
-    autoload :Renderer, "spontaneous/render/renderer"
-    autoload :PreviewRenderer, "spontaneous/render/preview_renderer"
-    autoload :PublishingRenderer, "spontaneous/render/publishing_renderer"
-    autoload :PublishedRenderer, "spontaneous/render/published_renderer"
-    autoload :DevelopmentRenderer, "spontaneous/render/development_renderer"
-    autoload :Format, "spontaneous/render/format"
+    autoload :Engine,               "spontaneous/render/engine"
+    autoload :ContextBase,          "spontaneous/render/context_base"
+    autoload :PreviewContext,       "spontaneous/render/preview_context"
+    autoload :PublishContext,       "spontaneous/render/publish_context"
+    autoload :RequestContext,       "spontaneous/render/request_context"
+    autoload :RenderCache,          "spontaneous/render/render_cache"
+    autoload :Renderer,             "spontaneous/render/renderer"
+    autoload :PreviewRenderer,      "spontaneous/render/preview_renderer"
+    autoload :PublishingRenderer,   "spontaneous/render/publishing_renderer"
+    autoload :PublishedRenderer,    "spontaneous/render/published_renderer"
+    autoload :DevelopmentRenderer,  "spontaneous/render/development_renderer"
+    autoload :Format,               "spontaneous/render/format"
+    autoload :Helpers,              "spontaneous/render/helpers"
   end
 end

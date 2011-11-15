@@ -19,6 +19,7 @@ class SiteTest < MiniTest::Spec
       Content.delete
       class ::Page < Spontaneous::Page
         field :title
+        box :subpages
       end
       Content.delete
       @root = ::Page.new
@@ -35,17 +36,17 @@ class SiteTest < MiniTest::Spec
       @page3_2.title = "Page 3 2"
       @page3_2.uid = "page3_2"
 
-      @root << @page1_1
-      @root << @page1_2
-      @page1_1 << @page2_1
-      @page2_1 << @page3_1
-      @page2_1 << @page3_2
-      @root.save
-      @page1_1.save
-      @page1_2.save
-      @page2_1.save
-      @page3_1.save
-      @page3_2.save
+      @root.subpages << @page1_1
+      @root.subpages << @page1_2
+      @page1_1.subpages << @page2_1
+      @page2_1.subpages << @page3_1
+      @page2_1.subpages << @page3_2
+      @root.save.reload
+      @page1_1.save.reload
+      @page1_2.save.reload
+      @page2_1.save.reload
+      @page3_1.save.reload
+      @page3_2.save.reload
     end
     teardown do
       Object.send(:remove_const, :Page)
@@ -127,7 +128,6 @@ class SiteTest < MiniTest::Spec
         }
       end
 
-      should ""
 
       should "retrieve details of the root by default" do
         Site.map.should == Page.root.map_entry
@@ -149,6 +149,13 @@ class SiteTest < MiniTest::Spec
 
       should "have a shortcut direct method on Site" do
         Site.page3_2.should == @page3_2.reload
+      end
+
+      should "return section pages in the right order" do
+        Site.at_depth(0).should == @root
+        Site.at_depth(:root).should == @root
+        Site.at_depth(1).should == [@page1_1, @page1_2]
+        Site.at_depth(:section).should == [@page1_1, @page1_2]
       end
     end
   end

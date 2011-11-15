@@ -239,6 +239,12 @@ class PageTest < MiniTest::Spec
         @t.active?(@p).should be_true
         @q.active?(@t).should be_false
       end
+
+      should "provide a list of pages at any depth" do
+        @t.at_depth(2).should == [@r, @s]
+        @p.at_depth(1).should == [@q]
+        lambda { @p.at_depth(2) }.must_raise(ArgumentError)
+      end
     end
 
     context "page pieces" do

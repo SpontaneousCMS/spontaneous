@@ -167,6 +167,7 @@ module Spontaneous
       autoload :Search,     "spontaneous/plugins/site/search"
       autoload :Features,   "spontaneous/plugins/site/features"
       autoload :Schema,     "spontaneous/plugins/site/schema"
+      autoload :Level,      "spontaneous/plugins/site/level"
     end
   end
 

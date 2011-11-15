@@ -12,6 +12,7 @@ module Spontaneous
     plugin Plugins::Site::Search
     plugin Plugins::Site::Features
     plugin Plugins::Site::Schema
+    plugin Plugins::Site::Level
 
     attr_accessor :database
     attr_reader :environment, :mode

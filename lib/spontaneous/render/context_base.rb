@@ -2,7 +2,8 @@
 
 
 module Spontaneous::Render
-  module Context
+  module ContextBase
+    include Spontaneous::Render::Helpers
 
     attr_reader :_format, :_target, :_locals
 
@@ -16,6 +17,29 @@ module Spontaneous::Render
     end
 
     alias_method :format, :_format
+
+    def root
+      Spontaneous::Site.root
+    end
+
+    def navigation(depth = 1, &block)
+      case depth
+      when 0, :root
+        root
+      when 1, :section
+        navigation_at_depth(1, &block)
+      end
+    end
+
+    def navigation_at_depth(depth = 1)
+      _pages_at_depth(self.page, depth).each do |p|
+        yield(p, self.page.active?(p))
+      end
+    end
+
+    def _pages_at_depth(origin_page, depth)
+      origin_page.at_depth(depth)
+    end
 
     def page
       _target.page

@@ -21,11 +21,17 @@ class RenderTest < MiniTest::Spec
     @template_root ||= File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates"))
   end
 
-  context "First render step" do
+  context "Publish rendering step" do
     setup do
+      Content.delete
       self.template_root = template_root
       Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
 
+      class ::Page < Spontaneous::Page
+        field :title
+        box :sections1
+        box :sections2
+      end
       class ::TemplateClass < Content
         field :title do
           def to_epub
@@ -48,10 +54,49 @@ class RenderTest < MiniTest::Spec
       @content.style.should == TemplateClass.default_style
       @content.title = "The Title"
       @content.description = "The Description"
+      @root = ::Page.create(:title => "Home")
+      @section1 = ::Page.new(:title => "Section 1")
+      @section2 = ::Page.new(:title => "Section 2")
+      @section3 = ::Page.new(:title => "Section 3")
+      @section4 = ::Page.new(:title => "Section 4")
+      @root.sections1 << @section1
+      @root.sections1 << @section2
+      @root.sections2 << @section3
+      @root.sections2 << @section4
+
+      @root.sections2.entries.last.set_position(0)
+      @root.save.reload
     end
 
     teardown do
       Object.send(:remove_const, :TemplateClass) rescue nil
+      Object.send(:remove_const, :Page) rescue nil
+    end
+
+    should "render strings correctly" do
+      S::Render.render_string('#{title} {{ Time.now }}', @content, :html, {}).should == "The Title {{ Time.now }}"
+    end
+
+    should "use a cache for the site root" do
+      a = S::Render.render_string('#{root.object_id} #{root.object_id}', @content, :html, {})
+      a.should_not == "#{nil.object_id} #{nil.object_id}"
+      a.split.uniq.length.should == 1
+    end
+
+    should "iterate through the sections" do
+      template = '%%{ navigation(%s) do |section, active| }#{section.title}/#{active} %%{ end }'
+      a = S::Render.render_string(template % "", @section1, :html, {})
+      a.should == "Section 1/true Section 2/false Section 4/false Section 3/false "
+      a = S::Render.render_string(template % "1", @section2, :html, {})
+      a.should == "Section 1/false Section 2/true Section 4/false Section 3/false "
+      a = S::Render.render_string(template % ":section", @section1, :html, {})
+      a.should == "Section 1/true Section 2/false Section 4/false Section 3/false "
+    end
+
+    should "use a cache for navigation pages" do
+      template = '%{ navigation do |section, active| }#{section.object_id} %{ end }'
+      a = S::Render.render_string(template + template, @section1, :html, {})
+      puts a
     end
 
     should "be able to render themselves to HTML" do
@@ -277,6 +322,7 @@ class RenderTest < MiniTest::Spec
       end
     end
   end
+
   context "Request rendering" do
     setup do
       self.template_root = template_root
@@ -301,6 +347,12 @@ class RenderTest < MiniTest::Spec
       setup do
         Spontaneous::Render.renderer_class = Spontaneous::Render::PreviewRenderer
         PreviewRender.layout :preview_render
+      end
+
+      should "something" do
+        @now = Time.now
+        ::Time.stubs(:now).returns(@now)
+        S::Render.render_string('#{title} {{ Time.now }}', @page, :html, {}).should == "PAGE #{@now.to_s}"
       end
 
       should "render all tags & include preview edit markers" do

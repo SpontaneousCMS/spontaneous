@@ -4,7 +4,6 @@
 module Cutaneous
   module ContextHelper
     include Tenjin::ContextHelper
-    include Spontaneous::Render::Context
     include Spontaneous
 
 

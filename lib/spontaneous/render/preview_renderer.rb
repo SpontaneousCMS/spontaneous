@@ -12,6 +12,12 @@ module Spontaneous
 
         result
       end
+
+      def render_string(template_string, content, format=:html, params = {})
+        template = preview_renderer.render_string(template_string, content, format, params)
+        result = request_renderer.render_string(template, content, format, params)
+        result
+      end
     end # PreviewRenderer
   end # Render
 end # Spontaneous
