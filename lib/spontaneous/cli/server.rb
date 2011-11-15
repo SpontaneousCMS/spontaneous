@@ -9,20 +9,9 @@ module Spontaneous
   module Cli
     class Server < ::Spontaneous::Cli::Thor
       namespace :server
-
       default_task :start
 
-      # desc :start, "Starts Spontaneous"
-
-      # def both
-      #   pids = []
-      #   trap(:INT) { }
-      #   pids << fork { front }
-      #   pids << fork { back }
-      #   Process.wait
-      #   pids.each { | pid | Process.kill(:TERM, pid) rescue nil }
-      # end
-
+      class_option :no_browser, :type => :boolean, :default => false, :aliases => "-b", :desc => "Don't launch browser"
 
       desc "#{namespace}:start", "Starts Spntaneous in development mode"
       def start

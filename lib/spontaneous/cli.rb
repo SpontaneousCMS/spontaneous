@@ -9,6 +9,7 @@ module Spontaneous
       class_option :environment, :type => :string,  :aliases => "-e", :required => true, :default => :development, :desc => "Spontaneous Environment"
       class_option :mode, :type => :string,  :aliases => "-m", :default => :back, :desc => "Spontaneous mode ('front' or 'back')"
       class_option :help, :type => :boolean, :desc => "Show help usage"
+
       protected
 
       def boot!
