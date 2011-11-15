@@ -58,12 +58,15 @@ module Spontaneous
         @renderer ||= renderer_class.new(template_root)
       end
 
+
       def with_preview_renderer(&block)
         with_renderer(PreviewRenderer, &block)
       end
 
       def with_publishing_renderer(&block)
-        with_renderer(PublishingRenderer, &block)
+        with_render_cache {
+          with_renderer(PublishingRenderer, &block)
+        }
       end
 
       def with_published_renderer(&block)
@@ -96,6 +99,36 @@ module Spontaneous
         self.renderer_class = @@renderer_stack.pop
       end
 
+
+      def with_render_cache
+        Thread.current[:_render_cache] = {}
+        yield if block_given?
+      ensure
+        Thread.current[:_render_cache] = nil
+      end
+
+      def render_cache
+        Thread.current[:_render_cache]
+      end
+
+      def render_cache_active?
+        !render_cache.nil?
+      end
+
+      def render_cache_key?(key)
+        return false unless render_cache_active?
+        render_cache.key?(key)
+      end
+
+      def render_cache_value(key)
+        return nil unless render_cache_active?
+        render_cache[key]
+      end
+
+      def render_cache_set_value(key, value)
+        return value unless render_cache_active?
+        render_cache[key] = value
+      end
 
       def template_root
         @template_root ||= Spontaneous.root / "templates"

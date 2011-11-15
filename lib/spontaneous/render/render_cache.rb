@@ -4,15 +4,15 @@
 module Spontaneous::Render
   module RenderCache
     def _render_cache_value(key)
-      Thread.current[key]
+      Spontaneous::Render.render_cache_value(key)
     end
 
     def _render_cache_set_value(key, value)
-      Thread.current[key] = value
+      Spontaneous::Render.render_cache_set_value(key, value)
     end
 
     def _render_cache_key?(key)
-      Thread.current.key?(key)
+      Spontaneous::Render.render_cache_key?(key)
     end
 
     def _with_render_cache(key, &value_block)

@@ -78,9 +78,11 @@ class RenderTest < MiniTest::Spec
     end
 
     should "use a cache for the site root" do
-      a = S::Render.render_string('#{root.object_id} #{root.object_id}', @content, :html, {})
-      a.should_not == "#{nil.object_id} #{nil.object_id}"
-      a.split.uniq.length.should == 1
+      S::Render.with_publishing_renderer do
+        a = S::Render.render_string('#{root.object_id} #{root.object_id}', @content, :html, {})
+        a.should_not == "#{nil.object_id} #{nil.object_id}"
+        a.split.uniq.length.should == 1
+      end
     end
 
     should "iterate through the sections" do
@@ -94,9 +96,23 @@ class RenderTest < MiniTest::Spec
     end
 
     should "use a cache for navigation pages" do
+      a = b = c = nil
       template = '%{ navigation do |section, active| }#{section.object_id} %{ end }'
-      a = S::Render.render_string(template + template, @section1, :html, {})
-      puts a
+      a = S::Render.render_string(template, S::Content[@section1.id], :html, {}).strip
+      b = S::Render.render_string(template, S::Content[@section1.id], :html, {}).strip
+      a.should_not == b
+
+      S::Render.with_publishing_renderer do
+        template = '%{ navigation do |section, active| }#{section.object_id} %{ end }'
+        a = S::Render.render_string(template, S::Content[@section1.id], :html, {}).strip
+        b = S::Render.render_string(template, S::Content[@section1.id], :html, {}).strip
+        a.should == b
+      end
+      S::Render.with_publishing_renderer do
+        template = '%{ navigation do |section, active| }#{section.object_id} %{ end }'
+        c = S::Render.render_string(template, S::Content[@section1.id], :html, {}).strip
+      end
+      a.should_not == c
     end
 
     should "be able to render themselves to HTML" do
