@@ -52,6 +52,10 @@ module Spontaneous::Plugins
       ensure
         @box_group = nil
       end
+
+      def box_position(box_prototype)
+        box_prototypes.index(box_prototype)
+      end
     end
 
     module InstanceMethods

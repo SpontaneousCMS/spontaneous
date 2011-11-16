@@ -37,13 +37,25 @@ class VisibilityTest < MiniTest::Spec
             2.times do |l|
               e.things << E.new(:uid => "#{i}.#{j}.#{k}.#{l}")
             end
-            d.save
+            e.save
           end
+          # puts "-->"
+          # puts d.id
+          # p [:things, d.class, d.pages.schema_id.to_s, P.boxes.things.schema_id.to_s]
+          # p c.unordered_children.map { |p| [p.parent_id, p.box_sid.to_s, p.uid] }
+          # p c.children.map { |p| p.box_sid.to_s }
+          # puts "--<"
+          # c.save
+          # d.save
         end
-        c.save
       end
       @root.save
       @root.reload
+      # puts "-->"
+      # p [:things, @root.pages.first.class, @root.pages.first.things.schema_id.to_s, P.boxes.things.schema_id.to_s]
+      # p @root.pages.first.unordered_children.map { |p| [p.box_sid.to_s, p.uid] }
+      # p @root.pages.first.children.map { |p| p.box_sid.to_s }
+      # puts "--<"
       @child = Page.uid("0")
     end
 
@@ -244,13 +256,10 @@ class VisibilityTest < MiniTest::Spec
         @root.reload
         @root.children.first.children.length.should == 8
         @root.children.first.pieces.first.hide!
-        # p @root.children.first.children.map { |c| c.visible? }
         @root.reload
         Content.with_visible do
           @root.children.first.children.length.should == 6
         end
-        # p @root.children.map { |c| c.uid }
-        # p @root.children.first.children.length
       end
     end
   end

@@ -108,6 +108,10 @@ module Spontaneous::Collections
       @store[name.to_sym] || (superset? ? superset.named(name) : nil)
     end
 
+    def index(entry)
+      order.index(entry.name)
+    end
+
     def superset?
       @has_superset
     end

@@ -96,6 +96,10 @@ module Spontaneous
       "#{_owner.padded_id}/#{schema_id}"
     end
 
+    def position
+      _prototype.position
+    end
+
     def box_name
       _name
     end
@@ -158,6 +162,8 @@ module Spontaneous
       _owner
     end
 
+    alias_method :content_wrapper, :container
+
     def page
       container.page
     end
@@ -192,6 +198,9 @@ module Spontaneous
       @pieces ||= _owner.pieces.for_box(self)
     end
 
+    def index(entry)
+      pieces.index(entry)
+    end
 
     def each
       pieces.each do |piece|
@@ -256,6 +265,10 @@ module Spontaneous
 
     def save
       _owner.save
+    end
+
+    def ==(obj)
+      super or ((self._prototype == obj._prototype) and (self._owner == obj._owner))
     end
   end
 

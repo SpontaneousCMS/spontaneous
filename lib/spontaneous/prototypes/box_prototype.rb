@@ -15,6 +15,9 @@ module Spontaneous::Prototypes
       self
     end
 
+    def position
+      owner.box_position(self)
+    end
     def __source_file
       owner.__source_file
     end

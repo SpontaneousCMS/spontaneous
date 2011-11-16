@@ -6,8 +6,8 @@ class AliasTest < MiniTest::Spec
 
   def assert_same_content(c1, c2)
     assert_equal c1.length, c2.length
-    c1.sort! { |a, b| a.id <=> b.id }
-    c2.sort! { |a, b| a.id <=> b.id }
+    c1 = c1.dup.sort { |a, b| a.id <=> b.id }
+    c2 = c2.dup.sort { |a, b| a.id <=> b.id }
     c1.each_with_index do |a, i|
       b = c2[i]
       assert_equal a.id, b.id
@@ -108,7 +108,7 @@ class AliasTest < MiniTest::Spec
       @root << @b
       @bb = BB.new(:slug => "bb", :bb_field1 => "BB")
       @root << @bb
-      @root.save
+      @root.save.reload
     end
 
     teardown do

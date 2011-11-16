@@ -88,6 +88,11 @@ module Spontaneous
       !supertype.nil?
     end
 
+    def content_wrapper
+      return nil if entry.nil?
+      entry.box
+    end
+
     def start_inline_edit_marker
       "spontaneous:previewedit:start:content id:#{id}"
     end

@@ -119,6 +119,20 @@ class BoxesTest < MiniTest::Spec
       instance.boxes.length.should == 2
     end
 
+    should "know their ordering in the container" do
+      MyContentClass.box :box1
+      MyContentClass.box :box2
+      MyContentClass.box :box3
+      MyContentClass.box_order :box3, :box2, :box1
+      MyContentClass.boxes.box3.position.should == 0
+      MyContentClass.boxes.box2.position.should == 1
+      MyContentClass.boxes.box1.position.should == 2
+      instance = MyContentClass.new
+      instance.box3.position.should == 0
+      instance.box2.position.should == 1
+      instance.box1.position.should == 2
+    end
+
     context "ranges" do
       setup do
         MyContentClass.box :images1

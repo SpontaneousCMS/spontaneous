@@ -39,6 +39,7 @@ module Spontaneous::Plugins
       end
 
       def position
+        return box.index(self) if box
         container.pieces.index(self)
       end
 

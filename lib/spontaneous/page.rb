@@ -39,6 +39,38 @@ module Spontaneous
 
     alias_method :is_page?, :page?
 
+    alias_method :unordered_children, :children
+
+    def children
+      @ordered_children ||= generate_ordered_children(super)
+    end
+
+    def generate_ordered_children(unordered_children)
+      return unordered_children if self.boxes.empty?
+      ordered_pages = unordered_children.sort { |a, b| a.page_order_string <=> b.page_order_string }
+      ordered_pages.freeze
+    end
+
+    def page_order_string
+      @page_order_string ||= (content_ancestors[1..-1].push(self)).map { |a| a.position.to_s.rjust(5, "0") }.join('.')
+    end
+
+    def content_ancestors
+      obj = self
+      ancestors = []
+      begin
+        obj = obj.content_wrapper
+        ancestors.unshift obj
+      end until obj.nil? or obj.is_page?
+
+      ancestors
+    end
+
+    def reload
+      @ordered_children = @page_order_string = nil
+      super
+    end
+
     def before_save
       if parent
         self.depth = parent.depth+1

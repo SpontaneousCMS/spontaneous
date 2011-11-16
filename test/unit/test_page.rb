@@ -27,9 +27,11 @@ class PageTest < MiniTest::Spec
       class Page < Spot::Page
         field :title, :string
       end
+      class Piece < Spontaneous::Piece; end
     end
     teardown do
       PageTest.send(:remove_const, :Page)
+      PageTest.send(:remove_const, :Piece)
     end
     context "Root page" do
       setup do
@@ -161,6 +163,53 @@ class PageTest < MiniTest::Spec
         @t.depth.should == 3
       end
 
+      should "have the correct page hierarchy" do
+        Page.box :things1
+        Page.box :things2
+        a = Page.new
+        c = Page.new
+        d = Page.new
+        e = Page.new
+        a.things1 << c
+        a.things2 << d
+        a.things2 << e
+        a.save
+        a.reload
+        c.reload
+        d.reload
+        e.reload
+        c.parent.should == a
+        d.parent.should == a
+        e.parent.should == a
+        c.content_ancestors.should == [a, a.things1]
+        d.content_ancestors.should == [a, a.things2]
+        e.content_ancestors.should == [a, a.things2]
+        c.page_order_string.should == "00000.00000"
+        d.page_order_string.should == "00001.00000"
+        e.page_order_string.should == "00001.00001"
+      end
+
+      should "have the correct page hierarchy for pages within pieces" do
+        Page.box :things
+        Piece.box :pages
+        a = Page.new
+        b = Piece.new
+        a.things << b
+        c = Page.new
+        d = Page.new
+        b.pages << c
+        b.pages << d
+        a.save
+        a.reload
+        b.reload
+        c.reload
+        d.reload
+        c.parent.should == a
+        c.content_ancestors.should == [a, a.things, b, b.pages]
+        c.page_order_string.should == "00000.00000.00000.00000"
+        d.page_order_string.should == "00000.00000.00000.00001"
+      end
+
       should "have correct paths" do
         @p.path.should == "/"
         @q.path.should == "/#{@q.slug}"
@@ -264,6 +313,7 @@ class PageTest < MiniTest::Spec
         @parent.pieces.first.depth.should == 1
         @parent.pieces.first.pieces.first.depth.should == 2
       end
+
     end
   end
 

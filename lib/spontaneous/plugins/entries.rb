@@ -117,7 +117,7 @@ module Spontaneous::Plugins
         child_page.container = self
         if page
           child_page.depth = page.depth + 1
-          page.children << child_page
+          page.unordered_children << child_page
           child_page.parent = page
           child_page.update_path
         end
