@@ -296,6 +296,7 @@ class AliasTest < MiniTest::Spec
         @aliases.save
         Site["/aliases/bb"].should be_nil
       end
+
       should "have their target's path attribute if they alias to a page type" do
         a = BBAlias.create(:target => @bb)
         a.path.should == @bb.path
@@ -312,6 +313,12 @@ class AliasTest < MiniTest::Spec
         c = CAlias.new(:target => @aaa1)
         c.render.should == "aaa1\n"
       end
+
+      should "respond as a page" do
+        a = BAlias.create(:target => @b, :slug => "balias")
+        a.page?.should be_true
+      end
+
       should "be discoverable via their compound path" do
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases << a
@@ -321,6 +328,54 @@ class AliasTest < MiniTest::Spec
         a.path.should == "/aliases/b"
         Site["/aliases/balias"].should be_nil
         Site["/aliases/b"].should == a
+      end
+
+      should "update their path if their target's slug changes" do
+        a = BAlias.create(:target => @b, :slug => "balias")
+        b = BAlias.create(:target => @b, :slug => "balias")
+        @aliases << a
+        a << b
+        @aliases.save
+
+        a.save
+        a.reload
+        a.path.should == "/aliases/b"
+        b.path.should == "/aliases/b/b"
+        @b.slug = "newb"
+        @b.save
+        a.reload
+        b.reload
+        a.path.should == "/aliases/newb"
+        b.path.should == "/aliases/newb/newb"
+      end
+
+      should "update their path if their parent's path changes" do
+        a = BAlias.create(:target => @b, :slug => "balias")
+        b = BAlias.create(:target => @b, :slug => "balias")
+        @aliases << a
+        a << b
+        @aliases.save
+        a.save
+        a.reload
+        a.path.should == "/aliases/b"
+        b.path.should == "/aliases/b/b"
+        @aliases.slug = "newaliases"
+        @aliases.save
+        a.reload
+        b.reload
+        a.path.should == "/newaliases/b"
+        b.path.should == "/newaliases/b/b"
+      end
+
+      should "show in the parent's list of children" do
+        a = BAlias.create(:target => @b, :slug => "balias")
+        @aliases << a
+        @aliases.save
+        a.save
+        a.reload
+        @aliases.reload
+        @aliases.children.should == [a]
+        a.parent.should == @aliases
       end
 
       should "render the using target's layout when accessed via the path and no local layouts defined" do

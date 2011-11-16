@@ -17,6 +17,7 @@ module Spontaneous::Plugins
         @alias_classes = class_list
         extend  ClassAliasMethods
         include AliasMethods
+        include PieceAliasMethods unless page?
         include PageAliasMethods if page?
       end
 
@@ -126,19 +127,36 @@ module Spontaneous::Plugins
         super.merge(:target => target.shallow_export(user), :alias_title => target.alias_title, :alias_icon => target.alias_icon_field.export)
       end
 
+    end
+
+    module PieceAliasMethods
       def path
         target.path
       end
     end
-
     module PageAliasMethods
-      def path
-        @_path ||= [parent.path, target.slug].join(S::SLASH)
+      # def path
+      #   @_path ||= [parent.path, target.slug].join(S::SLASH)
+      # end
+
+      # def calculate_path
+      #   ""
+      # end
+
+      def slug
+        target.slug
       end
 
-      def calculate_path
-        ""
-      end
+      # def update_path
+      #   puts "alias update page #{slug}"
+      #   super
+      # end
+
+      # alias_method :path, :unaliased_path
+      # def before_create
+      #   super
+      #   self.slug = target.slug
+      # end
 
       def layout
         # if this alias class has no layouts defined, then just use the one set on the target

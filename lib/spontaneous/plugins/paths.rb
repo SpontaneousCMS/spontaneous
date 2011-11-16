@@ -110,6 +110,9 @@ module Spontaneous::Plugins
           children.each do |child|
             child.propagate_path_changes
           end
+          aliases.each do |link|
+            link.propagate_path_changes if link.page?
+          end
         end
       end
 
