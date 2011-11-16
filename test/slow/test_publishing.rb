@@ -654,6 +654,7 @@ class PublishingTest < MiniTest::Spec
     context "publication timestamps" do
       setup do
         @revision = 1
+        Content.delete_revision(@revision+1)
       end
       teardown do
         Content.delete_revision(@revision)
