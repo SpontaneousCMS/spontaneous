@@ -6,11 +6,11 @@ module Spontaneous::Prototypes
 
     attr_reader :name, :options, :owner
 
-    def initialize(owner, name, options, &block)
+    def initialize(owner, name, options, blocks = [], &block)
       @owner = owner
       @name = name.to_sym
       @options = options
-      @extend = block
+      @extend = [blocks].flatten.push(block).compact
       instance_class
       self
     end
@@ -18,6 +18,7 @@ module Spontaneous::Prototypes
     def position
       owner.box_position(self)
     end
+
     def __source_file
       owner.__source_file
     end
@@ -63,6 +64,12 @@ module Spontaneous::Prototypes
       @_instance_class ||= create_instance_class
     end
 
+
+    def merge(subclass_owner, subclass_options, &subclass_block)
+      options = @options.merge(subclass_options)
+      Spontaneous::Prototypes::BoxPrototype.new(subclass_owner, name, options, @extend, &subclass_block)
+    end
+
     def create_instance_class
       Class.new(box_base_class).tap do |instance_class|
         # doing this means we get proper names for the anonymous box classes
@@ -80,9 +87,9 @@ module Spontaneous::Prototypes
             box_owner.schema_id
           end
         end
-        if @extend
-          instance_class.class_eval(&@extend)
-        end
+        @extend.each { |block|
+          instance_class.class_eval(&block) if block
+        }
       end.tap do |klass|
         # Spontaneous.schema.classes << klass# if subclass.schema_class?
       end

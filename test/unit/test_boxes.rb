@@ -445,6 +445,8 @@ class BoxesTest < MiniTest::Spec
       class ::Mixed < Box
         allow_subclasses :Allowed1
       end
+
+
     end
 
     teardown do
@@ -499,6 +501,24 @@ class BoxesTest < MiniTest::Spec
 
     should "inherit allowed types from superclass" do
       ChildClass.allowed.should == Parent.allowed
+      Allowable.boxes.parents.allowed_types(nil).should == [Allowed1, Allowed2, Allowed3]
+      class ::AChild < Allowable
+        box :parents do
+          allow :Allowed11
+        end
+      end
+      class ::AChild2 < AChild
+        box :parents, :title => "Things" do
+          allow :Allowed111
+        end
+      end
+      box = AChild.boxes.parents
+      box.allowed_types(nil).should == [Allowed1, Allowed2, Allowed3, Allowed11]
+      box = AChild2.boxes.parents
+      box.title.should == "Things"
+      box.allowed_types(nil).should == [Allowed1, Allowed2, Allowed3, Allowed11, Allowed111]
+      Object.send(:remove_const, :AChild)
+      Object.send(:remove_const, :AChild2)
     end
 
     should "include a subtype's allowed list as well as the supertype's" do

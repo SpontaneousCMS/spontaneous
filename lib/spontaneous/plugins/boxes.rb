@@ -7,17 +7,22 @@ module Spontaneous::Plugins
       def box(name, options = {}, &block)
         name = name.to_sym
         prototype = nil
-        unless boxes.key?(name)
-          options[:group] = @box_group if @box_group
+        options[:group] = @box_group if @box_group
+
+        if existing_prototype = boxes[name]
+          prototype = existing_prototype.merge(self, options, &block)
+        else
           prototype = Spontaneous::Prototypes::BoxPrototype.new(self, name, options, &block)
-          box_prototypes[name] = prototype
-          unless method_defined?(name)
-            class_eval <<-BOX
-              def #{name}
-                boxes[:#{name}]
-              end
-            BOX
-          end
+        end
+
+        box_prototypes[name] = prototype
+
+        unless method_defined?(name)
+          class_eval <<-BOX
+            def #{name}
+              boxes[:#{name}]
+            end
+          BOX
         end
         prototype
       end
