@@ -134,6 +134,7 @@ module Spontaneous::Plugins
         target.path
       end
     end
+
     module PageAliasMethods
       # def path
       #   @_path ||= [parent.path, target.slug].join(S::SLASH)
