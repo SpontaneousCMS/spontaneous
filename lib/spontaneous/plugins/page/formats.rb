@@ -39,7 +39,7 @@ module Spontaneous::Plugins::Page
           format = format.keys.first
           mime_types[format.to_sym] = mime_type
         else
-          mime_type = ::Rack::Mime.mime_type("#{Spontaneous::DOT}#{format}", nil)
+          mime_type = ::Rack::Mime.mime_type(".#{format}", nil)
         end
         raise Spontaneous::UnknownFormatException.new(format) unless mime_type
         format.to_sym
@@ -66,7 +66,7 @@ module Spontaneous::Plugins::Page
         if mime_types && mime_types.key?(format)
           mime_types[format]
         else
-          ::Rack::Mime.mime_type("#{Spontaneous::DOT}#{format}")
+          ::Rack::Mime.mime_type(".#{format}")
         end
       end
     end
