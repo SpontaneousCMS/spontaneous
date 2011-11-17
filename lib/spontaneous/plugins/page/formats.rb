@@ -1,30 +1,44 @@
 # encoding: UTF-8
 
+require 'rack'
 
 module Spontaneous::Plugins::Page
   module Formats
     module ClassMethods
       def formats(*formats)
-        @formats ||= [:html]
+        @formats ||= supertype_formats
         return @formats if formats.nil? or formats.empty?
         set_formats(formats)
+      end
+
+      def add_format(new_format)
+        format = define_format(new_format)
+        @formats.push(format)
       end
 
       def set_formats(formats)
         @mime_types = {}
         formats = formats.flatten
-        mime_type = nil
         @formats = formats.map do |format|
-          if format.is_a?(Hash)
-            mime_type = format.values.first
-            format = format.keys.first
-            @mime_types[format.to_sym] = mime_type
-          else
-            mime_type = ::Rack::Mime.mime_type("#{Spontaneous::DOT}#{format}", nil)
-          end
-          raise Spontaneous::UnknownFormatException.new(format) unless mime_type
-          format.to_sym
+          define_format(format)
         end
+      end
+
+      def define_format(format)
+        mime_type = nil
+        if format.is_a?(Hash)
+          mime_type = format.values.first
+          format = format.keys.first
+          @mime_types[format.to_sym] = mime_type
+        else
+          mime_type = ::Rack::Mime.mime_type("#{Spontaneous::DOT}#{format}", nil)
+        end
+        raise Spontaneous::UnknownFormatException.new(format) unless mime_type
+        format.to_sym
+      end
+
+      def supertype_formats
+        supertype? && supertype.respond_to?(:formats) ? supertype.formats : [:html]
       end
 
       def default_format

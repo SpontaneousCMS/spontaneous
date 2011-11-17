@@ -32,6 +32,7 @@ class FormatsTest < MiniTest::Spec
       FPage.mime_type(:atom).should == "application/atom+xml"
     end
 
+
     context "instances" do
       setup do
         @page = FPage.new
@@ -70,6 +71,11 @@ class FormatsTest < MiniTest::Spec
       should "accept new formats when accompanied by a mime-type" do
         FPage.formats [{:xyz => "application/xyz"}]
       end
+
+      should "allow addition of a single format" do
+        FPage.add_format :atom
+        FPage.formats.should == [:rss, :html, :json, :atom]
+      end
     end
 
     context "with custom mime-types" do
@@ -90,6 +96,24 @@ class FormatsTest < MiniTest::Spec
       should "return mime-type values from instances" do
         page = FPage.new
         page.mime_type(:html).should == "application/xhtml+xml"
+      end
+
+      should "allow addition of a single custom format" do
+        FPage.add_format :ddd => "application/ddd"
+        FPage.formats.should == [:html, :js, :ddd]
+        page = FPage.new
+        page.mime_type(:ddd).should == "application/ddd"
+      end
+    end
+
+    context "with subclasses" do
+      setup do
+        FPage.formats :html, :rss
+        class FSubPage < FPage
+        end
+      end
+      should "inherit the list of provided formats" do
+        FSubPage.formats.should == FPage.formats
       end
     end
   end
