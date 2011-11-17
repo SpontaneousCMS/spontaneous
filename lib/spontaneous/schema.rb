@@ -243,8 +243,22 @@ module Spontaneous
         @classes ||= []
       end
 
-      def add_class(klass)
-        classes << klass unless classes.include?(klass)
+      def add_class(supertype, type)
+        inheritance_map[supertype] << type
+        classes << type unless classes.include?(type)
+      end
+
+      def inheritance_map
+        @inheritance_map ||= Hash.new { |h, k| h[k] = [] }
+      end
+
+
+      def subclasses_of(type)
+        inheritance_map[type]
+      end
+
+      def descendents_of(type)
+        subclasses_of(type).map{ |x| [x] + descendents_of(x) }.flatten
       end
 
       # just subclasses of Content (excluding boxes)

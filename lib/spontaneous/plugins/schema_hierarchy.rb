@@ -38,11 +38,7 @@ module Spontaneous::Plugins
       end
 
       def schema_reset!
-        @subclasses = nil
-      end
-
-      def subclasses
-        @subclasses ||= []
+        # @subclasses = nil
       end
 
       def __source_file=(path)
@@ -55,14 +51,17 @@ module Spontaneous::Plugins
         @__source_file
       end
 
+      def subclasses
+        Spontaneous.schema.subclasses_of(self)
+      end
+
       def descendents
-        subclasses.map{ |x| [x] + x.descendents}.flatten
+        Spontaneous.schema.descendents_of(self)
       end
 
       def inherited(subclass, real_caller = nil)
         subclass.__source_file = File.expand_path((real_caller || caller[0]).split(':')[0])
-        Spontaneous.schema.add_class(subclass)# if subclass.schema_class?
-        subclasses << subclass
+        Spontaneous.schema.add_class(self, subclass)# if subclass.schema_class?
         super(subclass)
       end
 
