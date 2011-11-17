@@ -32,9 +32,8 @@ module Spontaneous::Prototypes
     end
 
     def schema_id
-      instance_class.schema_id
+      @_inherited_schema_id || instance_class.schema_id
     end
-
 
     def schema_name
       instance_class.schema_name
@@ -64,10 +63,20 @@ module Spontaneous::Prototypes
       @_instance_class ||= create_instance_class
     end
 
+    def inherit_schema_id(schema_id)
+      @_inherited_schema_id = schema_id
+      instance_class.schema_id = schema_id
+    end
 
     def merge(subclass_owner, subclass_options, &subclass_block)
       options = @options.merge(subclass_options)
-      Spontaneous::Prototypes::BoxPrototype.new(subclass_owner, name, options, @extend, &subclass_block)
+      Spontaneous::Prototypes::BoxPrototype.new(subclass_owner, name, options, @extend, &subclass_block).tap do |prototype|
+        # We want merged boxes, which are essentially monkey-patched box definitions
+        # to use the same schema id as the supertype version because otherwise removing the
+        # subtype version and falling back to the original supertype definition would remove
+        # all the content from the box while the box itself would still remain visible in the UI
+        prototype.inherit_schema_id self.schema_id
+      end
     end
 
     def create_instance_class
@@ -90,8 +99,6 @@ module Spontaneous::Prototypes
         @extend.each { |block|
           instance_class.class_eval(&block) if block
         }
-      end.tap do |klass|
-        # Spontaneous.schema.classes << klass# if subclass.schema_class?
       end
     end
 

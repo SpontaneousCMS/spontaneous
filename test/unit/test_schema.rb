@@ -155,6 +155,7 @@ class SchemaTest < MiniTest::Spec
           Site.schema["llllllllllll"].should == SchemaClass.layout_prototypes[:clean]
         end
       end
+
     end
 
     context "schema verification" do
@@ -466,6 +467,7 @@ class SchemaTest < MiniTest::Spec
       end
     end
   end
+
   context "Transient (testing) maps" do
     setup do
       @site.schema.schema_loader_class = Spontaneous::Schema::TransientMap
@@ -491,6 +493,30 @@ class SchemaTest < MiniTest::Spec
 
     should "return UID objects" do
       V.schema_id.must_be_instance_of(Spontaneous::Schema::UID)
+    end
+
+    context "for inherited boxes" do
+      should "be the same as the box in the supertype" do
+        class ::A < Spontaneous::Piece
+          box :a
+        end
+        class ::B < ::A
+          box :a
+        end
+        class ::C < ::B
+          box :a
+        end
+
+
+        B.boxes[:a].schema_id.should == A.boxes[:a].schema_id
+        C.boxes[:a].schema_id.should == A.boxes[:a].schema_id
+        B.boxes[:a].instance_class.schema_id.should == A.boxes[:a].instance_class.schema_id
+        C.boxes[:a].instance_class.schema_id.should == A.boxes[:a].instance_class.schema_id
+
+        Object.send(:remove_const, :A) rescue nil
+        Object.send(:remove_const, :B) rescue nil
+        Object.send(:remove_const, :C) rescue nil
+      end
     end
   end
 
@@ -537,6 +563,7 @@ class SchemaTest < MiniTest::Spec
         YAML.load_file(@map_file).should == expected
       end
     end
+
     context "change resolution" do
       setup do
         @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)

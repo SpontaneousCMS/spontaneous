@@ -19,12 +19,6 @@ module Spontaneous
     attr_accessor :template_params
 
 
-    def initialize(name, prototype, owner)
-      @_name, @_prototype, @_owner = name.to_sym, prototype, owner
-      @field_initialization = false
-    end
-
-
     def self.page?
       false
     end
@@ -33,10 +27,21 @@ module Spontaneous
       true
     end
 
-    def self.schema_id
-      Spontaneous.schema.schema_id(self)
+    # Used in the instance that a subclass is re-opening a box definition
+    # In that case the box prototype is created by a BoxPrototype#merge
+    # call and at that point we force the box instance class to use the same
+    # schema id as its parent so that content is always connected to the originating
+    # definition in the supertype rather than the customised version in the subclass
+    def self.schema_id=(schema_id)
+      @schema_id = schema_id
     end
 
+    def self.schema_id
+      @schema_id || Spontaneous.schema.schema_id(self)
+    end
+
+    # This is overridden by anonymous classes defined by box prototypes
+    # See BoxPrototype#create_instance_class
     def self.schema_name
       "type//#{self.name}"
     end
@@ -51,12 +56,18 @@ module Spontaneous
     end
 
     def self.supertype?
-      !supertype.nil? #&& supertype.respond_to?(:field_prototypes)
+      !supertype.nil?
     end
 
     def self.owner_sid
       nil
     end
+
+    def initialize(name, prototype, owner)
+      @_name, @_prototype, @_owner = name.to_sym, prototype, owner
+      @field_initialization = false
+    end
+
 
     def page?
       false
