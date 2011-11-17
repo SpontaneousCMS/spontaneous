@@ -6,10 +6,12 @@ class FormatsTest < MiniTest::Spec
   context "Pages" do
     setup do
       @site = setup_site
-      class FPage < Spontaneous::Page; end
+      class Page < Spontaneous::Page; end
+      class FPage < Page; end
     end
 
     teardown do
+      self.class.send(:remove_const, :Page) rescue nil
       self.class.send(:remove_const, :FPage) rescue nil
       teardown_site
     end
@@ -112,6 +114,11 @@ class FormatsTest < MiniTest::Spec
         class FSubPage < FPage
         end
       end
+
+      teardown do
+        self.class.send(:remove_const, :FSubPage) rescue nil
+      end
+
       should "inherit the list of provided formats" do
         FSubPage.formats.should == FPage.formats
       end

@@ -6,21 +6,25 @@ module Spontaneous::Plugins::Page
   module Formats
     module ClassMethods
       def formats(*formats)
-        @formats ||= supertype_formats
-        return @formats if formats.nil? or formats.empty?
+        return format_list if formats.nil? or formats.empty?
         set_formats(formats)
+      end
+
+      def format_list
+        @formats ||= supertype_formats
       end
 
       def add_format(new_format)
         format = define_format(new_format)
-        @formats.push(format)
+        format_list.push(format)
       end
 
       def set_formats(formats)
         @mime_types = {}
         formats = formats.flatten
-        @formats = formats.map do |format|
-          define_format(format)
+        format_list.clear
+        formats.map do |format|
+          format_list.push define_format(format)
         end
       end
 
@@ -38,7 +42,7 @@ module Spontaneous::Plugins::Page
       end
 
       def supertype_formats
-        supertype? && supertype.respond_to?(:formats) ? supertype.formats : [:html]
+        supertype? && supertype.respond_to?(:formats) ? supertype.formats.dup : [:html]
       end
 
       def default_format
