@@ -110,7 +110,7 @@ class FormatsTest < MiniTest::Spec
 
     context "with subclasses" do
       setup do
-        FPage.formats :html, :rss
+        FPage.formats :html, :rss, { :xxx => "application/xxx" }
         class FSubPage < FPage
         end
       end
@@ -121,6 +121,10 @@ class FormatsTest < MiniTest::Spec
 
       should "inherit the list of provided formats" do
         FSubPage.formats.should == FPage.formats
+      end
+      should "inherit any custom mimetypes" do
+        FPage.mime_type(:xxx).should == "application/xxx"
+        FSubPage.mime_type(:xxx).should == "application/xxx"
       end
     end
   end

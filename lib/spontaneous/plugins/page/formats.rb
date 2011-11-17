@@ -14,14 +14,18 @@ module Spontaneous::Plugins::Page
         @formats ||= supertype_formats
       end
 
+      def mime_types
+        @mime_types ||= supertype_mimetypes
+      end
+
       def add_format(new_format)
         format = define_format(new_format)
         format_list.push(format)
       end
 
       def set_formats(formats)
-        @mime_types = {}
         formats = formats.flatten
+        mime_types.clear
         format_list.clear
         formats.map do |format|
           format_list.push define_format(format)
@@ -33,7 +37,7 @@ module Spontaneous::Plugins::Page
         if format.is_a?(Hash)
           mime_type = format.values.first
           format = format.keys.first
-          @mime_types[format.to_sym] = mime_type
+          mime_types[format.to_sym] = mime_type
         else
           mime_type = ::Rack::Mime.mime_type("#{Spontaneous::DOT}#{format}", nil)
         end
@@ -43,6 +47,10 @@ module Spontaneous::Plugins::Page
 
       def supertype_formats
         supertype? && supertype.respond_to?(:formats) ? supertype.formats.dup : [:html]
+      end
+
+      def supertype_mimetypes
+        supertype? && supertype.respond_to?(:mime_types) ? supertype.mime_types.dup : {}
       end
 
       def default_format
@@ -55,8 +63,8 @@ module Spontaneous::Plugins::Page
       end
 
       def mime_type(format)
-        if @mime_types && @mime_types.key?(format)
-          @mime_types[format]
+        if mime_types && mime_types.key?(format)
+          mime_types[format]
         else
           ::Rack::Mime.mime_type("#{Spontaneous::DOT}#{format}")
         end
