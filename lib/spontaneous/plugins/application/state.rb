@@ -18,7 +18,7 @@ module Spontaneous::Plugins::Application
         Spontaneous::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
         site.initialize!
         site.schema.validate! if self.mode == :console
-        logger.warn "Auto login is enabled and set to '#{site.config.auto_login}'. Please ensure this is disabled in production mode by removing the 'auto_login' setting from your environment file." if site.config.auto_login
+        logger.warn "Auto login is enabled and set to '#{site.config.auto_login}'. Please ensure this is disabled in production mode by removing the 'auto_login' setting from your environment file." if site.config.auto_login and mode == :back
         Thread.current[:spontaneous_loaded] = true
       end
 
