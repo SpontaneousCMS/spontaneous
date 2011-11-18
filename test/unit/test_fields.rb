@@ -482,7 +482,7 @@ class FieldsTest < MiniTest::Spec
             :fullscreen => true, :autoplay => true, :loop => true,
             :showinfo => false,
             :youtube => { :theme => 'light', :hd => true, :controls => false },
-            :vimeo => { :color => "ccc" }
+            :vimeo => { :color => "ccc", :api => true }
           }
           @instance = @content_class.new
           @field = @instance.video2
@@ -505,7 +505,7 @@ class FieldsTest < MiniTest::Spec
           @field.render(:html, :youtube => {:showsearch => 1}).should =~ /showsearch=1/
           @field.render(:html, :youtube => {:theme => 'dark'}).should =~ /theme=dark/
           @field.render(:html, :width => 100).should =~ /width="100"/
-          @field.render(:html, :loop => true).should =~ /loop=1"/
+          @field.render(:html, :loop => true).should =~ /loop=1/
         end
 
         should "use the configuration in the Vimeo player HTML" do
@@ -516,15 +516,59 @@ class FieldsTest < MiniTest::Spec
           html.should =~ /width="680"/
           html.should =~ /height="384"/
           html.should =~ /color=ccc/
-          html.should =~ /webkitAllowFullScreen allowFullScreen/
+          html.should =~ /webkitAllowFullScreen="yes"/
+          html.should =~ /allowFullScreen="yes"/
           html.should =~ /autoplay=1/
           html.should =~ /title=0/
           html.should =~ /byline=0/
           html.should =~ /portrait=0/
+          html.should =~ /api=1/
           @field.render(:html, :vimeo => {:color => 'f0abcd'}).should =~ /color=f0abcd/
           @field.render(:html, :loop => true).should =~ /loop=1/
           @field.render(:html, :title => true).should =~ /title=1/
           @field.render(:html, :title => true).should =~ /byline=0/
+        end
+
+        should "provide a version of the YouTube player params in JSON/JS format" do
+          @field.value = "http://www.youtube.com/watch?v=_0jroAM_pO4&feature=feedrec_grec_index"
+          json = JSON.parse(@field.render(:json))
+          json[:"tagname"].should == "iframe"
+          json[:"tag"].should == "<iframe/>"
+          attr = json[:"attr"]
+          attr.must_be_instance_of(Hash)
+          attr[:"src"].should =~ %r{^http://www\.youtube\.com/embed/_0jroAM_pO4}
+          attr[:"src"].should =~ /theme=light/
+          attr[:"src"].should =~ /hd=1/
+          attr[:"src"].should =~ /fs=1/
+          attr[:"src"].should =~ /controls=0/
+          attr[:"src"].should =~ /autoplay=1/
+          attr[:"src"].should =~ /showinfo=0/
+          attr[:"src"].should =~ /showsearch=0/
+          attr[:"width"].should == 680
+          attr[:"height"].should == 384
+          attr[:"frameborder"].should == "0"
+          attr[:"type"].should == "text/html"
+        end
+
+        should "provide a version of the Vimeo player params in JSON/JS format" do
+          @field.value = "http://vimeo.com/31836285"
+          json = JSON.parse(@field.render(:json))
+          json[:"tagname"].should == "iframe"
+          json[:"tag"].should == "<iframe/>"
+          attr = json[:"attr"]
+          attr.must_be_instance_of(Hash)
+          attr[:"src"].should =~ /color=ccc/
+          attr[:"src"].should =~ /autoplay=1/
+          attr[:"src"].should =~ /title=0/
+          attr[:"src"].should =~ /byline=0/
+          attr[:"src"].should =~ /portrait=0/
+          attr[:"src"].should =~ /api=1/
+          attr[:"webkitAllowFullScreen"].should == "yes"
+          attr[:"allowFullScreen"].should == "yes"
+          attr[:"width"].should == 680
+          attr[:"height"].should == 384
+          attr[:"frameborder"].should == "0"
+          attr[:"type"].should == "text/html"
         end
       end
 

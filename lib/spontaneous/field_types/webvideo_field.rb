@@ -18,6 +18,7 @@ module Spontaneous
         value(:type)
       end
 
+
       def generate_outputs(input)
         values = {}
         values[:html] = escape_html(input)
@@ -36,14 +37,18 @@ module Spontaneous
         values
       end
 
+
       def render(format=:html, *args)
         case format
         when :html
           to_html(*args)
+        when :json
+          to_json(*args)
         else
           value(format)
         end
       end
+
 
       def to_html(*args)
         opts = args.extract_options!
@@ -58,6 +63,21 @@ module Spontaneous
       end
 
 
+      def to_json(*args)
+        opts = args.extract_options!
+        params = \
+          case video_type
+          when "youtube"
+            youtube_attributes(opts)
+          when "vimeo"
+            vimeo_attributes(opts)
+          else
+            {:tagname => "iframe", :tag => "<iframe/>", :attr => {:src => value(:html)}}
+          end
+        Spontaneous.encode_json(params)
+      end
+
+
       def ui_preview_value
         render(:html, :width => 480, :height => 270)
       end
@@ -68,6 +88,7 @@ module Spontaneous
           :width => 640,
           :height => 360,
           :fullscreen => true,
+          :api => false,
           :autoplay => false,
           :loop => false,
           :showinfo => true
@@ -76,6 +97,14 @@ module Spontaneous
 
 
       def to_vimeo_html(options = {})
+        params = vimeo_attributes(options)
+
+        attributes = make_html_attributes(params[:attr])
+        %(<iframe #{attributes}></iframe>)
+      end
+
+      def vimeo_attributes(options = {})
+
         o  = default_player_options
         vimeo_options = o.delete(:vimeo) || {}
 
@@ -96,15 +125,36 @@ module Spontaneous
         o = {
           :portrait => true,
           :title => true,
-          :byline => true
-        }.merge(o).merge(options).merge(vimeo_options)
+          :byline => true,
+          :player_id => "vimeo#{owner.id}id#{value(:id)}"
+        }.merge(o).merge(vimeo_options).merge(options)
+
+        attributes = {
+          :type => "text/html",
+          :frameborder => "0",
+          :width => o.delete(:width),
+          :height => o.delete(:height)
+        }
+        attributes.update(:webkitAllowFullScreen => "yes", :allowFullScreen => "yes") if o[:fullscreen]
 
         make_query_options!(o)
 
-        %(<iframe src="http://player.vimeo.com/video/#{value(:id)}?title=#{o[:title]}&amp;byline=#{o[:byline]}&amp;portrait=#{o[:portrait]}&amp;autoplay=#{o[:autoplay]}&amp;loop=#{o[:loop]}#{o.key?(:color) ? "&amp;color=#{o[:color]}" : ""}" width="#{o[:width]}" height="#{o[:height]}" frameborder="0" #{o[:fullscreen] == 1 ? "webkitAllowFullScreen allowFullScreen" : ""}></iframe>)
+        attributes[:src] = "http://player.vimeo.com/video/#{value(:id)}?title=#{o[:title]}&byline=#{o[:byline]}&portrait=#{o[:portrait]}&autoplay=#{o[:autoplay]}&loop=#{o[:loop]}&api=#{o[:api]}&player_id=#{o[:player_id]}#{o.key?(:color) ? "&color=#{o[:color]}" : ""}"
+
+        {:tagname => "iframe", :tag => "<iframe/>", :attr => attributes}
+
       end
 
+
       def to_youtube_html(options = {})
+        params = youtube_attributes(options)
+        attributes = make_html_attributes(params[:attr])
+        %(<iframe #{attributes}></iframe>)
+      end
+
+
+      def youtube_attributes(options = {})
+
         o  = default_player_options
         youtube_options = o.delete(:youtube) || {}
 
@@ -124,13 +174,32 @@ module Spontaneous
           :hd => true,
           :controls => true,
           :showinfo => true,
-          :showsearch => true
-        }.merge(o).merge(options).merge(youtube_options)
+          :showsearch => true,
+          :autohide => 2,
+          :rel => true
+        }.merge(o).merge(youtube_options).merge(options)
+
+        attributes = {
+          :type => "text/html",
+          :frameborder => "0",
+          :width => o.delete(:width),
+          :height => o.delete(:height)
+        }
 
         make_query_options!(o)
 
-        %(<iframe id="youtube-#{owner.id}" type="text/html" width="#{o[:width]}" height="#{o[:height]}" src="http://www.youtube.com/embed/#{value(:id)}?modestbranding=1&amp;theme=#{o[:theme]}&amp;hd=#{o[:hd]}&amp;fs=#{o[:fullscreen]}&amp;controls=#{o[:controls]}&amp;autoplay=#{o[:autoplay]}&amp;showinfo=#{o[:showinfo]}&amp;showsearch=#{o[:showsearch]}&amp;loop=#{o[:loop]}" frameborder="0"></iframe>)
+        attributes[:src] = "http://www.youtube.com/embed/#{value(:id)}?modestbranding=1&theme=#{o[:theme]}&hd=#{o[:hd]}&fs=#{o[:fullscreen]}&controls=#{o[:controls]}&autoplay=#{o[:autoplay]}&showinfo=#{o[:showinfo]}&showsearch=#{o[:showsearch]}&loop=#{o[:loop]}&autohide=#{o[:autohide]}&rel=#{o[:rel]}&enablejsapi=#{o[:api]}"
+        attributes.update(:webkitAllowFullScreen => "yes", :allowFullScreen => "yes") if o[:fullscreen]
+
+
+        {:tagname => "iframe", :tag => "<iframe/>", :attr => attributes}
       end
+
+
+      def make_html_attributes(attributes)
+        attributes.to_a.map { |name, value| "#{name}=\"#{escape_html(value)}\"" }.join(" ")
+      end
+
 
       def make_query_options!(hash)
         hash.each { |k, v|
@@ -138,6 +207,7 @@ module Spontaneous
           hash[k] = 0 if v == false
         }
       end
+
       self.register(:webvideo)
     end
 
