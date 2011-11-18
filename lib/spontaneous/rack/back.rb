@@ -703,6 +703,7 @@ module Spontaneous
       end
 
       class Preview < Sinatra::Base
+        use Reloader if Site.config.reload_classes
         include Spontaneous::Rack::Public
         helpers Spontaneous::Rack::UserHelpers
 
