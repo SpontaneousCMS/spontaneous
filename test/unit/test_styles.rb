@@ -444,6 +444,19 @@ class StylesTest < MiniTest::Spec
           piece.entities.render.should == "box_a.html.cut\n"
         end
 
+        should "find templates for box subclasses with specified types defined in a supertype" do
+          Object.send(:remove_const, :TemplateSubClass) rescue nil
+          Object.send(:remove_const, :BoxASubclass) rescue nil
+          class ::BoxASubclass < BoxA; end
+          TemplateClass.box :lastly, :type => :BoxASubclass
+          class ::TemplateSubClass < TemplateClass
+          end
+          piece = TemplateSubClass.new
+          assert_correct_template(piece.lastly, 'box_a')
+          Object.send(:remove_const, :BoxASubclass)
+          Object.send(:remove_const, :TemplateSubClass)
+        end
+
         context "with configured styles" do
           setup do
             BoxA.style :runny

@@ -50,12 +50,26 @@ module Spontaneous
     end
 
     def supertype_template(format)
-      supertype = owner.supertype
-      if supertype && supertype != Spontaneous::Content
-        self.class.new(supertype, prototype).template(format)
-      else
-        nil
+      template = try_supertype_styles.each { |style|
+        template = style.template(format)
+        return template unless template.nil?
+      }
+      nil
+    end
+
+    def try_supertype_styles
+      class_ancestors(owner).take_while { |a| a and a < Spontaneous::Content }.
+        map { |s| self.class.new(s, prototype) }
+    end
+
+    def class_ancestors(klass)
+      ancestors = []
+      obj = klass
+      while obj
+        obj = obj.supertype
+        ancestors << obj if obj
       end
+      ancestors
     end
 
     def inline_template(format)
@@ -78,8 +92,6 @@ module Spontaneous
 
     def try_paths
       name = prototype.name.to_s
-      # [[owner_directory_name, name], name]
-      # owner_directory_names.map { |dir| [dir, name] }.push(name)
       owner_directory_paths(name).push(name)
     end
 
