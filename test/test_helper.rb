@@ -39,6 +39,7 @@ require 'timecop'
 require 'mocha'
 require 'pp'
 require 'tmpdir'
+require 'json'
 
 begin
   require 'leftright'
