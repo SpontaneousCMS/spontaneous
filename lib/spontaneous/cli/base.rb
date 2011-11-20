@@ -101,13 +101,18 @@ module Spontaneous
                 say " >>> Unable to create #{connection_params[:adapter]} database `#{db}`:\n   > #{e}", :red
                 # throw :error
               end
+              begin
+                connection.run("USE `#{db}`")
+                connection.logger = nil
+                say "  >> Running migrations..."
+                Sequel::Migrator.apply(connection, Spontaneous.gem_dir('db/migrations'))
+                say "  >> Done"
+              rescue => e
+                say " >>> Error running migrations on database `#{db}`:\n   > #{e}", :red
+              end
             end
           end
           boot!
-          Spontaneous.database.logger = nil
-          say "  >> Running migrations..."
-          Sequel::Migrator.apply(Spontaneous.database, Spontaneous.gem_dir('db/migrations'))
-          say "  >> Done"
         end
       end
 
