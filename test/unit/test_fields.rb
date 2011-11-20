@@ -35,7 +35,7 @@ class FieldsTest < MiniTest::Spec
 
       should "have fields with values defined by prototypes" do
         f = @instance.fields[:title]
-        f.class.should == Spontaneous::FieldTypes::StringField
+        assert f.class < Spontaneous::FieldTypes::StringField
         f.value.should == "Magic"
       end
 
@@ -63,7 +63,10 @@ class FieldsTest < MiniTest::Spec
           field :date, :string
         end
         @class2 = Class.new(@class1) do
-          field :title, :image, :default => "Two"
+          field :title, :image, :default => "Two", :title => "Two"
+        end
+        @class3 = Class.new(@class2) do
+          field :date, :image, :default => "Three", :title => "Three"
         end
         @instance = @class2.new
       end
@@ -72,8 +75,17 @@ class FieldsTest < MiniTest::Spec
         @class2.fields.first.name.should == :title
         @class2.fields.last.name.should == :date
         @class2.fields.length.should == 2
-        @instance.title.class.should == Spontaneous::FieldTypes::ImageField
+        @class2.fields.title.schema_id.should == @class1.fields.title.schema_id
+        @class2.fields.title.title.should == "Two"
+        @class2.fields.title.title.should == "Two"
+        @class3.fields.date.title.should == "Three"
+        @class3.fields.date.schema_id.should == @class1.fields.date.schema_id
+        assert @instance.title.class < Spontaneous::FieldTypes::ImageField
         @instance.title.value.to_s.should == "Two"
+        instance1 = @class1.new
+        instance3 = @class3.new
+        @instance.title.schema_id.should == instance1.title.schema_id
+        instance1.title.schema_id.should == instance3.title.schema_id
       end
     end
     context "Field Prototypes" do
@@ -96,7 +108,7 @@ class FieldsTest < MiniTest::Spec
         @content_class.field_prototypes[:minimal].default.should == "Small"
       end
       should "map :string type to FieldTypes::Text" do
-        @content_class.field_prototypes[:synopsis].field_class.should == Spontaneous::FieldTypes::StringField
+        assert @content_class.field_prototypes[:synopsis].instance_class < Spontaneous::FieldTypes::StringField
       end
 
       should "be listable" do
@@ -119,7 +131,7 @@ class FieldsTest < MiniTest::Spec
         end
 
         should "default to basic string class" do
-          @prototype.field_class.should == Spontaneous::FieldTypes::StringField
+          assert @prototype.field_class < Spontaneous::FieldTypes::StringField
         end
 
         should "default to a value of ''" do
@@ -133,9 +145,9 @@ class FieldsTest < MiniTest::Spec
             field :chunky
           end
 
-          content_class.field_prototypes[:image].field_class.should == Spontaneous::FieldTypes::ImageField
-          content_class.field_prototypes[:date].field_class.should == Spontaneous::FieldTypes::DateField
-          content_class.field_prototypes[:chunky].field_class.should == Spontaneous::FieldTypes::StringField
+          assert content_class.field_prototypes[:image].field_class < Spontaneous::FieldTypes::ImageField
+          assert content_class.field_prototypes[:date].field_class < Spontaneous::FieldTypes::DateField
+          assert content_class.field_prototypes[:chunky].field_class < Spontaneous::FieldTypes::StringField
         end
       end
 
@@ -166,7 +178,7 @@ class FieldsTest < MiniTest::Spec
         end
 
         should "parse field class" do
-          @prototype.field_class.should == Spontaneous::FieldTypes::ImageField
+          assert @prototype.field_class < Spontaneous::FieldTypes::ImageField
         end
 
         should "parse default value" do
@@ -403,10 +415,10 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "be available as the :markdown type" do
-        MarkdownContent.field_prototypes[:text1].field_class.should == Spontaneous::FieldTypes::MarkdownField
+        assert MarkdownContent.field_prototypes[:text1].field_class < Spontaneous::FieldTypes::MarkdownField
       end
       should "be available as the :text type" do
-        MarkdownContent.field_prototypes[:text2].field_class.should == Spontaneous::FieldTypes::MarkdownField
+        assert MarkdownContent.field_prototypes[:text2].field_class < Spontaneous::FieldTypes::MarkdownField
       end
 
       should "process input into HTML" do

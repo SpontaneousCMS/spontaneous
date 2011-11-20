@@ -258,7 +258,7 @@ class BoxesTest < MiniTest::Spec
         field :description, :string
       end
       instance = MyContentClass.new
-      instance.partners.name.must_be_instance_of(Spontaneous::FieldTypes::StringField)
+      assert instance.partners.name.class < Spontaneous::FieldTypes::StringField
       instance.partners.name = "Howard"
       instance.partners.description = "Here is Howard"
       instance.save

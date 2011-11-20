@@ -5,36 +5,31 @@ module Spontaneous::Prototypes
   class FieldPrototype
     attr_reader :owner, :name, :options
 
-    def initialize(owner, name, type, options={})
+    def initialize(owner, name, type, options={}, blocks = [], &block)
       @owner = owner
       @name = name
+      @extend = [blocks].flatten.push(block).compact
+
+      parse_options(options)
+
       # if the type is nil then try the name, this will assign sensible defaults
       # to fields like 'image' or 'date'
-      base_class = Spontaneous::FieldTypes[type || name]
-      if block_given?
-        @field_class = Class.new(base_class, &Proc.new)
-        # although we're subclassing the base field class, we don't want the ui
-        # to use a different editor. FieldClass::editor_class is used in the serialisation
-        # routine
-        @field_class.singleton_class.send(:define_method, :editor_class) do
-          base_class.ui_class
-        end
-      else
-        @field_class = base_class
-      end
+      @base_class = Spontaneous::FieldTypes[type || name]
 
-      owner.const_set("#{name.to_s.camelize}Field", @field_class)
+      owner.const_set("#{name.to_s.camelize}Field", instance_class)
 
-      # @field_class.prototype = self
-      parse_options(options)
+      self
     end
 
     def schema_name
       "field/#{owner.schema_id}/#{name}"
     end
 
+    # def schema_id
+    #   Spontaneous.schema.schema_id(self)
+    # end
     def schema_id
-      Spontaneous.schema.schema_id(self)
+      @_inherited_schema_id || Spontaneous.schema.schema_id(self)
     end
 
     def schema_owner
@@ -67,8 +62,27 @@ module Spontaneous::Prototypes
       }.merge(options)
     end
 
+    def instance_class
+      @_instance_class ||= create_instance_class
+    end
+
+    def create_instance_class
+      base_class = @base_class
+      Class.new(@base_class).tap do |instance_class|
+        # although we're subclassing the base field class, we don't want the ui
+        # to use a different editor. FieldClass::editor_class is used in the serialisation
+        # routine
+        instance_class.singleton_class.send(:define_method, :editor_class) do
+          base_class.ui_class
+        end
+        @extend.each { |block|
+          instance_class.class_eval(&block) if block
+        }
+      end
+    end
+
     def field_class
-      @field_class
+      instance_class
     end
 
     def default
@@ -108,13 +122,25 @@ module Spontaneous::Prototypes
       @search ||= S::Search::Field.new(self, @options[:index])
     end
 
+    def inherit_schema_id(schema_id)
+      @_inherited_schema_id = schema_id
+      # instance_class.schema_id = schema_id
+    end
+
+    def merge(subclass_owner, field_type, subclass_options, &subclass_block)
+      options = @options.merge(subclass_options)
+      self.class.new(subclass_owner, name, field_type, options, @extend, &subclass_block).tap do |prototype|
+        prototype.inherit_schema_id self.schema_id
+      end
+    end
+
     def to_field(values=nil)
       default_values = values.nil?
       values = {
         :name => self.name,
         :unprocessed_value => default
       }.merge(values || {})
-      self.field_class.new(values, !default_values).tap do |field|
+      self.instance_class.new(values, !default_values).tap do |field|
         field.prototype = self
       end
     end
@@ -123,7 +149,7 @@ module Spontaneous::Prototypes
       {
         :name => name.to_s,
         :schema_id => schema_id.to_s,
-        :type => field_class.editor_class,
+        :type => instance_class.editor_class,
         :title => title,
         :comment => comment || "",
         :writable => Spontaneous::Permissions.has_level?(user, write_level)

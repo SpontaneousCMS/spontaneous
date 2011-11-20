@@ -68,7 +68,7 @@ module Spontaneous
             def #{name}
               sizes[:#{name}]
             end
-            IMAGE
+          IMAGE
         end
       end
 
@@ -81,7 +81,7 @@ module Spontaneous
       end
 
       def self.size_definitions
-        @size_definitions ||= {}
+        @size_definitions ||= superclass.respond_to?(:size_definitions) ? superclass.size_definitions.dup : {}
       end
 
       def image?

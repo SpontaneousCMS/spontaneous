@@ -8,8 +8,15 @@ module Spontaneous::Plugins
           options = type
           type = nil
         end
+        prototype = nil
+        name = name.to_sym
 
-        prototype = Spontaneous::Prototypes::FieldPrototype.new(self, name, type, options, &block)
+        if (existing_prototype = field_prototypes[name])
+          prototype = existing_prototype.merge(self, type, options, &block)
+        else
+          prototype = Spontaneous::Prototypes::FieldPrototype.new(self, name, type, options, &block)
+        end
+
         field_prototypes[name] = prototype
         unless method_defined?(name)
           define_method(name) do |*args|

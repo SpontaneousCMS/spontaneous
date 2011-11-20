@@ -119,7 +119,7 @@ module Spontaneous
       # override this to return custom values derived from (un)processed_value
       # alias_method :value, :processed_value
       def value(format=:html)
-        processed_values[format] || unprocessed_value
+        processed_values[format.to_sym] || unprocessed_value
       end
       alias_method :processed_value, :value
 
