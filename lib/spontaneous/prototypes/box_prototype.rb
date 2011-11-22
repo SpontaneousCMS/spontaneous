@@ -64,8 +64,7 @@ module Spontaneous::Prototypes
     end
 
     def inherit_schema_id(schema_id)
-      @_inherited_schema_id = schema_id
-      instance_class.schema_id = schema_id
+      @_inherited_schema_id = instance_class.schema_id = schema_id.to_s
     end
 
     def merge(subclass_owner, subclass_options, &subclass_block)

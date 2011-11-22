@@ -37,7 +37,7 @@ module Spontaneous
     end
 
     def self.schema_id
-      @schema_id || Spontaneous.schema.schema_id(self)
+      Spontaneous.schema.uids[@schema_id] || Spontaneous.schema.schema_id(self)
     end
 
     # This is overridden by anonymous classes defined by box prototypes

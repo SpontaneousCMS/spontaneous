@@ -99,7 +99,7 @@ module Spontaneous
       end
 
       def ==(obj)
-        super or obj == @id
+        super or (obj == @id)
       end
 
       def hash

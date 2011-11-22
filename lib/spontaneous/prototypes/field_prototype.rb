@@ -29,7 +29,7 @@ module Spontaneous::Prototypes
     #   Spontaneous.schema.schema_id(self)
     # end
     def schema_id
-      @_inherited_schema_id || Spontaneous.schema.schema_id(self)
+      Spontaneous.schema.uids[@_inherited_schema_id] || Spontaneous.schema.schema_id(self)
     end
 
     def schema_owner
@@ -123,7 +123,7 @@ module Spontaneous::Prototypes
     end
 
     def inherit_schema_id(schema_id)
-      @_inherited_schema_id = schema_id
+      @_inherited_schema_id = schema_id.to_s
       # instance_class.schema_id = schema_id
     end
 
