@@ -44,8 +44,8 @@ module Cutaneous
           position = super_calls.pop
           result = result[0...position] << output << (result[(position)..-1] || "")
           if _layout
-            if @_block_super_calls[block_name].last
-              @_block_super_calls[block_name][-1] = @_block_super_calls[block_name].last + position
+            if (super_call_position = @_block_super_calls[block_name].last)
+              @_block_super_calls[block_name][-1] = super_call_position + position
               @_block_content[block_name] = result
             end
           end
