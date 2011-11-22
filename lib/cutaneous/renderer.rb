@@ -36,6 +36,7 @@ module Cutaneous
         context._buf = _buf
         unless context._layout.nil?
           layout = context._layout
+          # context._clean!
           context._layout = nil
         end
         break unless layout

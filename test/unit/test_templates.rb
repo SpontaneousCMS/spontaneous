@@ -164,6 +164,28 @@ class TemplatesTest < MiniTest::Spec
       output = first_pass('extended', 'main')
       output.should == "Main Title {{page.title}}Grandparent Nav\nMain Body\nParent Body\nGrandparent Body\nGrandparent Footer\nParent Footer\n"
     end
+
+    should "allow the use of includes" do
+      output = first_pass('extended', 'with_includes')
+      output.should == (<<-RENDER)
+Parent Title
+INCLUDE
+PARTIAL
+Grandparent Footer
+Parent Footer
+      RENDER
+    end
+
+    should "allow passing of local variables to included templates" do
+      output = first_pass('extended', 'with_includes_and_locals')
+      output.should == (<<-RENDER)
+Parent Title
+INCLUDE
+local title
+Grandparent Footer
+Parent Footer
+      RENDER
+    end
   end
 
   context "Output conversion" do

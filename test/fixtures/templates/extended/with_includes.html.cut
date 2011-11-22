@@ -1,0 +1,9 @@
+%{ extends 'parent' }
+%{ block :navigation }
+
+%{ endblock }
+%{ block :body }
+INCLUDE
+%{ include 'partial' }
+%{ endblock }
+

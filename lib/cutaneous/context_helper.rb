@@ -44,8 +44,10 @@ module Cutaneous
           position = super_calls.pop
           result = result[0...position] << output << (result[(position)..-1] || "")
           if _layout
-            @_block_super_calls[block_name][-1] = @_block_super_calls[block_name].last + position
-            @_block_content[block_name] = result
+            if @_block_super_calls[block_name].last
+              @_block_super_calls[block_name][-1] = @_block_super_calls[block_name].last + position
+              @_block_content[block_name] = result
+            end
           end
         end
         @_buf << result
@@ -59,11 +61,24 @@ module Cutaneous
       output
     end
 
-    def include(filename)
-      import(filename)
+    def include(filename, locals = {})
+      import(filename, true, locals)
+    end
+
+    ## include template. 'template_name' can be filename or short name.
+    def import(template_name, _append_to_buf=true, locals={})
+      _buf = self._buf
+      context=self._dup_with_locals(locals)
+      output = self._engine.render(template_name, context, layout=false)
+      _buf << output if _append_to_buf
+      output
     end
 
     protected
+
+    def _dup_with_locals(locals = {})
+      self.dup.tap { |context| context._update(locals) }
+    end
 
     def _decode_params(param, *args)
       unless param.is_a?(String)

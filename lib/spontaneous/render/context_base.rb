@@ -129,6 +129,7 @@ module Spontaneous::Render
         end
         _update_with_hash(parent._locals) if parent.respond_to?(:_locals)
       end
+      self
     end
 
     def _update_with_hash(hash)
