@@ -4,9 +4,10 @@ module Spontaneous::FieldTypes
   class LongStringField < Field
     plugin Spontaneous::Plugins::Field::EditorClass
 
-      def generate_html(value)
-        escape_html(value).gsub(/[\r\n]+/, "<br />")
-      end
+    def generate_html(value)
+      escape_html(value).gsub(/[\r\n]+/, "<br />")
+    end
+
     self.register
   end # LongStringField
 end
