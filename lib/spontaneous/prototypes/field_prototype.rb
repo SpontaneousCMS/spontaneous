@@ -72,9 +72,9 @@ module Spontaneous::Prototypes
         # although we're subclassing the base field class, we don't want the ui
         # to use a different editor. FieldClass::editor_class is used in the serialisation
         # routine
-        instance_class.singleton_class.send(:define_method, :editor_class) do
-          base_class.ui_class
-        end
+        # instance_class.singleton_class.send(:define_method, :editor_class) do
+        #   base_class.editor_class
+        # end
         @extend.each { |block|
           instance_class.class_eval(&block) if block
         }

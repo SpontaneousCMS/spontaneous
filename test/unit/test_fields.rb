@@ -455,6 +455,22 @@ class FieldsTest < MiniTest::Spec
         @field_class2.stubs(:name).returns("CustomField2")
         @field_class2.editor_class.should == base_class.editor_class
       end
+      should "correctly defined by field prototypes" do
+        base_class = Spontaneous::FieldTypes::ImageField
+        class ::CustomField < Spontaneous::FieldTypes::ImageField
+          self.register(:custom)
+        end
+
+        class ::CustomContent < Spontaneous::Piece
+          field :custom
+        end
+        assert CustomContent.fields.custom.instance_class < CustomField
+
+        CustomContent.fields.custom.instance_class.editor_class.should == Spontaneous::FieldTypes::ImageField.editor_class
+
+        Object.send(:remove_const, :CustomContent)
+        Object.send(:remove_const, :CustomField)
+      end
     end
 
     context "WebVideo fields" do
