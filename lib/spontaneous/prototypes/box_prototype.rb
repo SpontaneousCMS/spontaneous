@@ -32,7 +32,7 @@ module Spontaneous::Prototypes
     end
 
     def schema_id
-      @_inherited_schema_id || instance_class.schema_id
+      Spontaneous.schema.uids[@_inherited_schema_id] || instance_class.schema_id
     end
 
     def schema_name
