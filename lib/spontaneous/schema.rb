@@ -283,6 +283,7 @@ module Spontaneous
       def reset!
         Content.schema_reset!
         @classes = []
+        @inheritance_map = nil
         reload!
       end
 
