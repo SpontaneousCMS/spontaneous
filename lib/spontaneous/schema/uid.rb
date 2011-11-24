@@ -102,6 +102,10 @@ module Spontaneous
         super or (obj == @id)
       end
 
+      def eql?(obj)
+        super or (obj.is_a?(Spontaneous::Schema::UID) and obj.to_s == @id)
+      end
+
       def hash
         @id.hash
       end

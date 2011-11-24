@@ -117,6 +117,12 @@ class SchemaTest < MiniTest::Spec
         @uids["llllllllllll"].should == "llllllllllll"
       end
 
+      should "test as eql? if they have the same id" do
+        a = @uids["llllllllllll"]
+        b = a.dup
+        assert a.eql?(b), "Identical IDs should pass eql? test"
+      end
+
       should "be readable by content classes" do
         SchemaClass.schema_id.should == @uids["xxxxxxxxxxxx"]
       end
@@ -496,7 +502,7 @@ class SchemaTest < MiniTest::Spec
     end
 
     context "for inherited boxes" do
-      should "be the same as the box in the supertype" do
+      setup do
         class ::A < Spontaneous::Piece
           box :a
         end
@@ -506,16 +512,17 @@ class SchemaTest < MiniTest::Spec
         class ::C < ::B
           box :a
         end
-
-
+      end
+      teardown do
+        Object.send(:remove_const, :A) rescue nil
+        Object.send(:remove_const, :B) rescue nil
+        Object.send(:remove_const, :C) rescue nil
+      end
+      should "be the same as the box in the supertype" do
         B.boxes[:a].schema_id.should == A.boxes[:a].schema_id
         C.boxes[:a].schema_id.should == A.boxes[:a].schema_id
         B.boxes[:a].instance_class.schema_id.should == A.boxes[:a].instance_class.schema_id
         C.boxes[:a].instance_class.schema_id.should == A.boxes[:a].instance_class.schema_id
-
-        Object.send(:remove_const, :A) rescue nil
-        Object.send(:remove_const, :B) rescue nil
-        Object.send(:remove_const, :C) rescue nil
       end
     end
   end
@@ -547,6 +554,7 @@ class SchemaTest < MiniTest::Spec
       should "get created with verification" do
         S.schema.validate!
         classes = [ ::A, ::B]
+        @inheritance_map = nil
         # would like to do all of this using mocks, but don't know how to do that
         # without fecking up the whole schema id creation process
         expected = Hash[ classes.map { |klass| [ klass.schema_id.to_s, klass.schema_name ] } ]
