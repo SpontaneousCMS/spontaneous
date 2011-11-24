@@ -162,7 +162,7 @@ class TemplatesTest < MiniTest::Spec
 
     should "work" do
       output = first_pass('extended', 'main')
-      output.should == "Main Title {{page.title}}Grandparent Nav\nMain Body\nParent Body\nGrandparent Body\nGrandparent Footer\nParent Footer\n"
+      output.should == "Main Title {{page.title}}Grandparent Nav\nMain Body\nParent Body\nGrandparent Body\nGrandparent Footer\nParent Footer\n\n"
     end
 
     should "allow the use of includes" do
@@ -173,6 +173,7 @@ INCLUDE
 PARTIAL
 Grandparent Footer
 Parent Footer
+
       RENDER
     end
 
@@ -184,7 +185,17 @@ INCLUDE
 local title
 Grandparent Footer
 Parent Footer
+
       RENDER
+    end
+    should "handle multiline statements" do
+      output = first_pass('engine', 'multiline')
+      output.should == "12\n"
+    end
+
+    should "correctly handle braces within statements" do
+      output = first_pass('engine', 'braces')
+      output.should == "ab\n"
     end
   end
 

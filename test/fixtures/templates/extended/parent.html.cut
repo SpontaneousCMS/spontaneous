@@ -1,5 +1,6 @@
 %{ extends 'grandparent' }
-%{ block :title  }Parent Title%{ endblock }
+%{ block :title  }Parent Title
+%{ endblock }
 
 %{ block :body  }
 Parent Body

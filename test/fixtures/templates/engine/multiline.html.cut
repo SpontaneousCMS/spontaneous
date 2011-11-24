@@ -1,0 +1,5 @@
+%{
+ something = 3
+ nothing = 4; another = 5
+}
+#{ something + nothing + another }
