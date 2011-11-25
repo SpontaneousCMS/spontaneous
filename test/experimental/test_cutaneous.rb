@@ -4,10 +4,8 @@ require File.expand_path('../../test_helper', __FILE__)
 
 
 class CutaneousTest < MiniTest::Spec
-  context "publishing parser" do
-    setup do
-      @lexer = Cutaneous::PublishTokenParser.new((<<-TEMPLATE))
-Text here
+  PUBLISH_TEMPLATE = (<<-TEMPLATE)
+Text here {{ preview_tag }}
 
 
 !{ comment which should be ignored }
@@ -15,13 +13,17 @@ Text `problem`
 ${ "<div>" }
 $${ "<div>" }
   %{
-  a = {:key => "value"}
+  a = {:key => title}
   b = a.map { |k, v| "\#{k}=\#{v}" }
   }
 Text \\problem
   ${ b }
 Text
-      TEMPLATE
+TEMPLATE
+
+  context "publishing parser" do
+    setup do
+      @lexer = Cutaneous::PublishTokenParser.new(PUBLISH_TEMPLATE)
     end
 
     should "tokenize a single statement" do
@@ -74,14 +76,14 @@ Text
 
     should "correctly collect the expressions" do
       @lexer.tokens.map { |token| token.raw_expression }.should == [
-        "Text here\n\n\n",
+        "Text here {{ preview_tag }}\n\n\n",
         " comment which should be ignored ",
         "\nText `problem`\n",
         " \"<div>\" ",
         "\n",
         " \"<div>\" ",
         "\n  ",
-        "\n  a = {:key => \"value\"}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }\n  ",
+        "\n  a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }\n  ",
         "\nText \\problem\n  ",
         " b ",
         "\nText\n"
@@ -91,14 +93,14 @@ Text
     should "correctly post process the expressions" do
       expressions = @lexer.tokens.map { |token| token.expression }
       expected = [
-        "Text here\n\n\n",
+        "Text here {{ preview_tag }}\n\n\n",
         " comment which should be ignored ",
         "\nText `problem`\n",
         %("<div>"),
         "\n",
         %("<div>"),
         "\n  ",
-        "a = {:key => \"value\"}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }",
+        "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }",
         "\nText \\problem\n  ",
         "b",
         "\nText\n"
@@ -113,14 +115,14 @@ Text
       scripts =  @lexer.tokens.map { |token| token.script }
 
       expected = [
-        "Text here\n\n\n",
+        "Text here {{ preview_tag }}\n\n\n",
         nil,
         "\nText \\`problem\\`\n",
         '#{"<div>"}',
         "\n",
         '#{escape(("<div>").to_s)}',
         "\n  ",
-        "a = {:key => \"value\"}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" };",
+        "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" };",
         "\nText \\\\problem\n  ",
         '#{b}',
         "\nText\n"
@@ -132,9 +134,64 @@ Text
     end
 
     should "correctly generate the template script" do
-      expected = %Q/ _buf << %Q`Text here\n\n\nText \\`problem\\`\n\#{"<div>"}\n\#{escape(("<div>").to_s)}\n  `;a = {:key => \"value\"}\n  b = a.map { |k, v| "\#{k}=\#{v}" }; _buf << %Q`Text \\\\problem\n  \#{b}\nText\n`;/
+      expected = %Q/ _buf << %Q`Text here {{ preview_tag }}\n\n\nText \\`problem\\`\n\#{"<div>"}\n\#{escape(("<div>").to_s)}\n  `;a = {:key => title}\n  b = a.map { |k, v| "\#{k}=\#{v}" }; _buf << %Q`Text \\\\problem\n  \#{b}\nText\n`;/
       script = @lexer.script
       script.should == expected
+    end
+  end
+
+  context "publish templates" do
+    setup do
+    end
+    context "from files" do
+      setup do
+        @tmp = Dir.mktmpdir
+        @template_path = File.join(@tmp, "template.html.cut")
+        File.open(@template_path, "w") do |file|
+          file.write(PUBLISH_TEMPLATE)
+        end
+
+      end
+      should "just be empty if created empty" do
+        template = Cutaneous::PublishTemplate.new
+        template.filename.should be_nil
+        template.script.should be_nil
+      end
+
+      should "convert a string" do
+        template = Cutaneous::PublishTemplate.new
+        template.convert("!{ comment }${ title }", "/path/to/template.html.cut")
+        template.filename.should == "/path/to/template.html.cut"
+        context = Cutaneous::PublishContext.new(nil, :html, {:title => "title"})
+        template.render(context).should == "title"
+      end
+
+      should "parse the file if created with one" do
+        template = Cutaneous::PublishTemplate.new(@template_path)
+        template.filename.should == @template_path
+        template.script.should =~ /^\s*_buf/
+        context = Cutaneous::PublishContext.new(nil, :html, {:title => "title"})
+        template.render(context).should == (<<-HTML)
+Text here {{ preview_tag }}
+
+
+Text `problem`
+<div>
+<div>
+  Text \\problem
+  ["key=title"]
+Text
+        HTML
+      end
+
+      should "reset if given a different string" do
+        template = Cutaneous::PublishTemplate.new
+        template.convert("${ title }")
+        context = Cutaneous::PublishContext.new(nil, :html, {:title => "title"})
+        template.render(context).should == "title"
+        template.convert("${ title }!")
+        template.render(context).should == "title!"
+      end
     end
   end
 end

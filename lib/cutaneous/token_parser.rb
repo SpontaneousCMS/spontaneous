@@ -149,6 +149,15 @@ module Cutaneous
       @template = template
     end
 
+    def tokens
+      @tokens ||= lex
+    end
+
+    def script
+      @script ||= compile
+    end
+
+    protected
 
     def lex
       tokens = []
@@ -190,11 +199,7 @@ module Cutaneous
       tokens
     end
 
-    def tokens
-      @tokens ||= lex
-    end
-
-    def script
+    def compile
       pos = 0
       prev = token = nil
       script = []

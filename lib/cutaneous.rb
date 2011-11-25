@@ -46,5 +46,6 @@ module Cutaneous
 
   autoload :TokenParser, "cutaneous/token_parser"
   autoload :PublishTokenParser, "cutaneous/publish_token_parser"
+  autoload :PublishTemplate, "cutaneous/publish_template"
 end
 
