@@ -44,6 +44,6 @@ module Cutaneous
   autoload :SecondPassRenderer, "cutaneous/second_pass_renderer"
   autoload :PreviewRenderer, "cutaneous/preview_renderer"
 
-  autoload :Lexer, "cutaneous/lexer"
+  autoload :TokenParser, "cutaneous/token_parser"
 end
 

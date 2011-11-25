@@ -1,5 +1,5 @@
 module Cutaneous
-  class Lexer
+  class TokenParser
 
 
     class Token

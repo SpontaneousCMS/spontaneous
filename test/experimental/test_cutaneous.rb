@@ -6,7 +6,7 @@ require File.expand_path('../../test_helper', __FILE__)
 class CutaneousTest < MiniTest::Spec
   context "publishing lexer" do
     setup do
-      @lexer = Cutaneous::Lexer.new((<<-TEMPLATE))
+      @lexer = Cutaneous::TokenParser.new((<<-TEMPLATE))
 Text here
 
 
@@ -25,50 +25,50 @@ Text
     end
 
     should "tokenize a single statement" do
-      lexer = Cutaneous::Lexer.new("%{ a = {:a => \"a\" }}")
+      lexer = Cutaneous::TokenParser.new("%{ a = {:a => \"a\" }}")
       tokens = lexer.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::Lexer::StatementToken)
+      tokens.first.must_be_instance_of(Cutaneous::TokenParser::StatementToken)
       tokens.first.expression.should == 'a = {:a => "a" }'
     end
 
     should "tokenize a single expression" do
-      lexer = Cutaneous::Lexer.new("${ a }")
+      lexer = Cutaneous::TokenParser.new("${ a }")
       tokens = lexer.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::Lexer::ExpressionToken)
+      tokens.first.must_be_instance_of(Cutaneous::TokenParser::ExpressionToken)
       tokens.first.expression.should == 'a'
     end
 
     should "tokenize plain text" do
-      lexer = Cutaneous::Lexer.new("Hello there")
+      lexer = Cutaneous::TokenParser.new("Hello there")
       tokens = lexer.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::Lexer::TextToken)
+      tokens.first.must_be_instance_of(Cutaneous::TokenParser::TextToken)
       tokens.first.expression.should == 'Hello there'
     end
 
     should "tokenize a single comment" do
-      lexer = Cutaneous::Lexer.new("!{ comment }")
+      lexer = Cutaneous::TokenParser.new("!{ comment }")
       tokens = lexer.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::Lexer::CommentToken)
+      tokens.first.must_be_instance_of(Cutaneous::TokenParser::CommentToken)
       tokens.first.expression.should == ' comment '
     end
 
     should "correctly tokenize a complex template string" do
       @lexer.tokens.map { |token| token.class }.should == [
-        Cutaneous::Lexer::TextToken,
-        Cutaneous::Lexer::CommentToken,
-        Cutaneous::Lexer::TextToken,
-        Cutaneous::Lexer::ExpressionToken,
-        Cutaneous::Lexer::TextToken,
-        Cutaneous::Lexer::EscapedExpressionToken,
-        Cutaneous::Lexer::TextToken,
-        Cutaneous::Lexer::StatementToken,
-        Cutaneous::Lexer::TextToken,
-        Cutaneous::Lexer::ExpressionToken,
-        Cutaneous::Lexer::TextToken
+        Cutaneous::TokenParser::TextToken,
+        Cutaneous::TokenParser::CommentToken,
+        Cutaneous::TokenParser::TextToken,
+        Cutaneous::TokenParser::ExpressionToken,
+        Cutaneous::TokenParser::TextToken,
+        Cutaneous::TokenParser::EscapedExpressionToken,
+        Cutaneous::TokenParser::TextToken,
+        Cutaneous::TokenParser::StatementToken,
+        Cutaneous::TokenParser::TextToken,
+        Cutaneous::TokenParser::ExpressionToken,
+        Cutaneous::TokenParser::TextToken
       ]
     end
 
