@@ -2,9 +2,11 @@
 
 module Cutaneous
   class PublishTemplate
-    attr_reader :filename, :parser
+    attr_accessor :timestamp, :filename
+    attr_reader   :parser
 
-    def initialize(template_file = nil)
+    def initialize(template_file = nil, format=:html)
+      @format = format
       convert_file(template_file) if template_file
     end
 
@@ -26,7 +28,16 @@ module Cutaneous
 
     # I'm not doing any type checking here as I know exactly where the calls are coming from
     def render(context)
-      context.instance_eval(&template_proc)
+      begin
+        context.instance_eval(&template_proc)
+      rescue => e
+        if context.show_errors?
+          raise e
+        else
+          logger.warn(e)
+          ""
+        end
+      end
     end
 
     protected

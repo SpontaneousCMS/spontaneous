@@ -19,7 +19,7 @@ module Cutaneous
           self.token_classes << token_class
           self.const_set(class_name, token_class)
         end
-        self.const_set("TextToken", TextToken)
+        # self.const_set("TextToken", TextToken)
       end
       @parser_class
     end
@@ -126,13 +126,13 @@ module Cutaneous
       end
 
       def script
-        %(_buf << (#{expression}).to_s\n)
+        %(_buf << _decode_params((#{expression}))\n)
       end
     end
 
     class EscapedExpressionToken < ExpressionToken
       def script
-        %(_buf << escape((#{expression}).to_s)\n)
+        %(_buf << escape(_decode_params((#{expression})))\n)
       end
     end
 
@@ -224,7 +224,7 @@ module Cutaneous
       end
       if pos < @template.length
         rest = ((pos > 0) ? @template[pos..-1] : @template)
-        tokens << TextToken.new(rest)
+        tokens << TextToken.bracket(rest, previous_token ? previous_token.class : nil, nil)
       end
       tokens
     end

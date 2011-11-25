@@ -4,7 +4,7 @@ module Spontaneous
   module Extensions
     module Array
       def render(*args)
-        self.map { |e| e.respond_to?(:render) ? e.render(*args) : nil }.join
+        self.map { |e| e.respond_to?(:render) ? e.render(*args) : e }.join
       end
     end
   end

@@ -1,4 +1,4 @@
 <root>
-#{ images_with_template.introduction }
-#{ images_with_template }
+${ images_with_template.introduction }
+${ images_with_template }
 </root>

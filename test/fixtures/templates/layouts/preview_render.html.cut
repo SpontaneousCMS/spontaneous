@@ -1,2 +1,2 @@
-#{ title } {{ description }}
-#{ images }
+${ title } {{ description }}
+${ images }

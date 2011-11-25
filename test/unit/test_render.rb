@@ -241,7 +241,6 @@ class RenderTest < MiniTest::Spec
       end
 
       should "render using default style if present" do
-        puts @root.render
         @root.render.should == "<root>\nImages below:\n<images>\n  <img>Image 1</img>\n  <img>Image 2</img>\n</images>\n\n</root>\n"
       end
     end

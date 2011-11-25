@@ -66,19 +66,19 @@ class TemplatesTest < MiniTest::Spec
     end
 
     should "evaluate first level expressions" do
-      @template.convert('<html><title>#{title}</title>{{unsafe}}</html>')
+      @template.convert('<html><title>${title}</title>{{unsafe}}</html>')
       output = @template.render(@context)
       output.should == '<html><title>THE TITLE</title>{{unsafe}}</html>'
     end
 
     should "evaluate first level statements" do
-      @template.convert('<html><title>#{title}</title>%{ 2.times do }{{unsafe}}%{ end }</html>')
+      @template.convert('<html><title>${title}</title>%{ 2.times do }{{unsafe}}%{ end }</html>')
       output = @template.render(@context)
       output.should == '<html><title>THE TITLE</title>{{unsafe}}{{unsafe}}</html>'
     end
 
     should "generate 2nd render templates" do
-      @template.convert("<html><title>\#{title}</title>%{ 2.times do }{{bell}}\n%{ end }</html>")
+      @template.convert("<html><title>${title}</title>%{ 2.times do }{{bell}}\n%{ end }</html>")
       output = @template.render(@context)
       second = Cutaneous::SecondPassParser.new
       second.convert(output)
@@ -162,7 +162,7 @@ class TemplatesTest < MiniTest::Spec
 
     should "work" do
       output = first_pass('extended', 'main')
-      output.should == "Main Title {{page.title}}Grandparent Nav\nMain Body\nParent Body\nGrandparent Body\nGrandparent Footer\nParent Footer\n\n"
+      output.should == "Main Title {{page.title}}Grandparent Nav\nMain Body\nParent Body\nGrandparent Body\nGrandparent Footer\nParent Footer\n"
     end
 
     should "allow the use of includes" do
@@ -173,7 +173,6 @@ INCLUDE
 PARTIAL
 Grandparent Footer
 Parent Footer
-
       RENDER
     end
 
@@ -185,7 +184,6 @@ INCLUDE
 local title
 Grandparent Footer
 Parent Footer
-
       RENDER
     end
     should "handle multiline statements" do
@@ -242,21 +240,21 @@ Parent Footer
 
     should "call #render(format) if context responds to it" do
       context = @context_class.new(nil, :html)
-      @template.convert('#{slot} #{ monkey }')
+      @template.convert('${slot} ${ monkey }')
       output = @template.render(context)
       output.should == "(html) magic"
     end
 
     should "call to_format on non-strings" do
       context = @context_class.new(nil, :html)
-      @template.convert('#{field} #{ monkey }')
+      @template.convert('${field} ${ monkey }')
       output = @template.render(context)
       output.should == "(html) magic"
     end
 
     should "call to_s on non-strings that have no specific handler" do
       context = @context_class.new(nil, :weird)
-      @template.convert('#{field} #{ monkey }')
+      @template.convert('${field} ${ monkey }')
       output = @template.render(context)
       output.should == "'weird' magic"
     end

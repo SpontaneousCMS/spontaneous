@@ -4,7 +4,7 @@ module Cutaneous
   class FirstPassRenderer < Renderer
 
     def template_class
-      Cutaneous::FirstPassParser
+      Cutaneous::PublishTemplate
     end
 
     def context_class

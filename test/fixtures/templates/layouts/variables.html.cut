@@ -2,6 +2,6 @@
 local = "local"
 @variable = "variable"
 }
-#{ param }
-#{ images }
-#{ local }
+${ param }
+${ images }
+${ local }

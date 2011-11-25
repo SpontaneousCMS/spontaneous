@@ -123,13 +123,13 @@ TEMPLATE
         %(_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n),
         nil,
         %(_buf << %Q`Text \\`problem\\`\n`\n),
-        %(_buf << ("<div>").to_s\n),
+        %(_buf << _decode_params(("<div>"))\n),
         %(_buf << %Q`\n`\n),
-        %(_buf << escape(("<div>").to_s)\n),
+        %(_buf << escape(_decode_params(("<div>")))\n),
         %(_buf << %Q`\n`\n),
         "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }\n",
         %(_buf << %Q`Text \\\\problem\n  `\n),
-        "_buf << (b).to_s\n",
+        "_buf << _decode_params((b))\n",
         %(_buf << %Q`\nText\n`\n),
       ]
       scripts.each_with_index do |s, i|
@@ -139,7 +139,7 @@ TEMPLATE
     end
 
     should "correctly generate the template script" do
-      expected = %Q/_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n_buf << %Q`Text \\`problem\\`\n`\n_buf << ("<div>").to_s\n_buf << %Q`\n`\n_buf << escape(("<div>").to_s)\n_buf << %Q`\n`\na = {:key => title}\n  b = a.map { |k, v| "\#{k}=\#{v}" }\n_buf << %Q`Text \\\\problem\n  `\n_buf << (b).to_s\n_buf << %Q`\nText\n`\n/
+      expected = %Q/_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n_buf << %Q`Text \\`problem\\`\n`\n_buf << _decode_params(("<div>"))\n_buf << %Q`\n`\n_buf << escape(_decode_params(("<div>")))\n_buf << %Q`\n`\na = {:key => title}\n  b = a.map { |k, v| "\#{k}=\#{v}" }\n_buf << %Q`Text \\\\problem\n  `\n_buf << _decode_params((b))\n_buf << %Q`\nText\n`\n/
       script = @lexer.script
       # puts expected
       # puts "================================"
@@ -159,8 +159,11 @@ TEMPLATE
         File.open(@template_path, "w") do |file|
           file.write(PUBLISH_TEMPLATE)
         end
-
       end
+      teardown do
+        FileUtils.rm_r(@tmp)
+      end
+
       should "just be empty if created empty" do
         template = Cutaneous::PublishTemplate.new
         template.filename.should be_nil
@@ -189,7 +192,7 @@ Text `problem`
 <div>
 <div>
 Text \\problem
-  ["key=title"]
+  key=title
 Text
         HTML
       end

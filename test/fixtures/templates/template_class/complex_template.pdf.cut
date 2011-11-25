@@ -1,6 +1,6 @@
 <pdf>
-#{ title }
+${ title }
 %{ content.each do |piece| }
-<piece>#{ piece }</piece>
+<piece>${ piece }</piece>
 %{ end }
 </pdf>

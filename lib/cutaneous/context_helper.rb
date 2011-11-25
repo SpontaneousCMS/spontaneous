@@ -4,7 +4,7 @@
 module Cutaneous
   module ContextHelper
     include Tenjin::ContextHelper
-    include Spontaneous
+    # include Spontaneous
 
 
     def extends(parent)
@@ -90,7 +90,8 @@ module Cutaneous
           param = param.render(_format, self, *args)
         end
       end
-      super(param)
+      # super(param)
+      param.to_s
     end
   end
 end

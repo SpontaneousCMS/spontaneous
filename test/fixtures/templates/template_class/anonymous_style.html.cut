@@ -1,4 +1,4 @@
 <root>
-#{ images.introduction }
-#{ images }
+${ images.introduction }
+${ images }
 </root>
