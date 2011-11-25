@@ -671,6 +671,14 @@ img.missing {
 			@include down-arrow("/@spontaneous/static/slot-down-arrow.png", 18px);
 		}
 	}
+	.slot-addable.bottom {
+		margin-top: 10px;
+		.down {
+			background-image: url("/@spontaneous/static/slot-up-arrow.png");
+			bottom: auto;
+			top: -18px;
+		}
+	}
 	.slot-addable.drop-active {
 		outline: solid 2px $action;
 	}

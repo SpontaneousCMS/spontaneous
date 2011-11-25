@@ -53,70 +53,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 					this.fields_preview = fields_preview;
 				}
 
-				var allowed = this.box.allowed_types();
-				// var allowed_bar = $(dom.div, {'class':'slot-addable'});
-				var allowed_bar = dom.div('.slot-addable');
-				var dropper = allowed_bar;
-				var drop = function(event) {
-					dropper.removeClass('drop-active').addClass('uploading');
-					// var progress_outer = $(dom.div, {'class':'drop-upload-outer'});
-					// var progress_inner = $(dom.div, {'class':'drop-upload-inner'}).css('width', 0);
-					// progress_outer.append(progress_inner);
-					// dropper.append(progress_outer);
-					// this.progress_bar = progress_inner;
-					event.stopPropagation();
-					event.preventDefault();
-					var files = event.dataTransfer.files;
-					if (files.length > 0) {
-						S.UploadManager.wrap(this, files);
-					}
-					return false;
-				}.bind(this);
-
-				var drag_enter = function(event) {
-					// var files = event.originalEvent.dataTransfer.files;
-					// console.log(event.originalEvent.dataTransfer, files)
-					$(this).addClass('drop-active');
-					event.stopPropagation();
-					event.preventDefault();
-					return false;
-				}.bind(dropper);
-
-				var drag_over = function(event) {
-					event.stopPropagation();
-					event.preventDefault();
-					return false;
-				}.bind(dropper);
-
-				var drag_leave = function(event) {
-					$(this).removeClass('drop-active');
-					event.stopPropagation();
-					event.preventDefault();
-					return false;
-				}.bind(dropper);
-
-				dropper.get(0).addEventListener('drop', drop, true);
-				dropper.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
-
-				var _box = this;
-				$.each(allowed, function(i, type) {
-					var a = dom.a().text(type.title), add_allowed;
-					if (type.is_alias()) {
-						a.addClass('alias')
-						add_allowed = function(type) {
-							var d = new Spontaneous.AddAliasDialogue(_box, type);
-							d.open();
-						}.bind(_box, type);
-					} else {
-						add_allowed = function(type) {
-							this.add_content(type, 0);
-						}.bind(_box, type);
-					}
-					a.click(add_allowed);
-					allowed_bar.append(a)
-				});
-				allowed_bar.append(dom.span('.down'));
-				panel.append(allowed_bar);
+				panel.append(this.add_allowed_types_bar('top', 0));
 				// var entries = $(dom.div, {'class':'slot-entries'});
 				var entries = dom.div('.slot-entries');
 				// panel.append();
@@ -139,12 +76,81 @@ Spontaneous.Views.BoxView = (function($, S) {
 					}.bind(this)
 				})
 				panel.append(entries);
+				panel.append(this.add_allowed_types_bar('bottom', -1));
 				panel.hide();
 				this.dom_container.append(panel)
 				this._panel = panel;
 				this._entry_container = entries;
 			}
 			return this._panel;
+		},
+		add_allowed_types_bar: function(position, insert_at) {
+			var allowed = this.box.allowed_types()
+			// var allowed_bar = $(dom.div, {'class':'slot-addable'});
+			, _box = this
+			, allowed_bar = dom.div('.slot-addable')
+			, dropper = allowed_bar
+			, drop = function(event) {
+				dropper.removeClass('drop-active').addClass('uploading');
+				// var progress_outer = $(dom.div, {'class':'drop-upload-outer'});
+				// var progress_inner = $(dom.div, {'class':'drop-upload-inner'}).css('width', 0);
+				// progress_outer.append(progress_inner);
+				// dropper.append(progress_outer);
+				// this.progress_bar = progress_inner;
+				event.stopPropagation();
+				event.preventDefault();
+				var files = event.dataTransfer.files;
+				if (files.length > 0) {
+					S.UploadManager.wrap(this, files);
+				}
+				return false;
+			}.bind(this)
+
+			, drag_enter = function(event) {
+				// var files = event.originalEvent.dataTransfer.files;
+				// console.log(event.originalEvent.dataTransfer, files)
+				$(this).addClass('drop-active');
+				event.stopPropagation();
+				event.preventDefault();
+				return false;
+			}.bind(dropper)
+
+			, drag_over = function(event) {
+				event.stopPropagation();
+				event.preventDefault();
+				return false;
+			}.bind(dropper)
+
+			, drag_leave = function(event) {
+				$(this).removeClass('drop-active');
+				event.stopPropagation();
+				event.preventDefault();
+				return false;
+			}.bind(dropper);
+
+			allowed_bar.addClass(position);
+			dropper.get(0).addEventListener('drop', drop, true);
+			dropper.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
+
+			$.each(allowed, function(i, type) {
+				var a = dom.a().text(type.title), add_allowed;
+				if (type.is_alias()) {
+					a.addClass('alias')
+					add_allowed = function(type) {
+						var d = new Spontaneous.AddAliasDialogue(_box, type);
+						d.open();
+					}.bind(_box, type);
+				} else {
+					add_allowed = function(type) {
+						this.add_content(type, insert_at);
+					}.bind(_box, type);
+				}
+				a.click(add_allowed);
+				allowed_bar.append(a)
+			});
+			allowed_bar.append(dom.span('.down'));
+
+			return allowed_bar;
 		},
 		re_sort: function(item) {
 			var order = this._entry_container.sortable('toArray'), css_id = item.attr('id'), position = 0;
@@ -210,13 +216,24 @@ Spontaneous.Views.BoxView = (function($, S) {
 		},
 
 		insert_entry: function(entry, position) {
-			this.trigger('entry_added', entry);
-			var entries = this.entries(), w = this.entry_wrappers(), e = this.view_for_entry(entry), h = this.claim_entry(e);
-			entries.splice(position, 0, e);
-			if (w.length > 0) {
-				this.entry_wrappers().slice(position, position+1).before(h);
+			this.trigger('entry_added', entry, position);
+			var entries = this.entries()
+			, w = this.entry_wrappers()
+			, e = this.view_for_entry(entry)
+			, h = this.claim_entry(e)
+			, container = this.dom_container;
+			if (position === -1) {
+				entries.push(e);
 			} else {
+				entries.splice(position, 0, e);
+			}
+			if (position === -1 || w.length === 0) {
 				this._entry_container.append(h);
+			} else {
+				this.entry_wrappers().slice(position, position+1).before(h);
+			}
+			if (position === -1) {
+				S.ContentArea.scroll_to_bottom($.fn.appear.height_change_duration);
 			}
 			h.hide().appear();
 		},

@@ -145,9 +145,15 @@ Spontaneous.TopBar = (function($, S) {
 			return first;
 		},
 		add_page: function(page, position) {
-			this.children.splice(0, 0, page)
-			var first = this.update_status();
-			first.after(this.option_for_entry(page));
+			var option = this.option_for_entry(page);
+			if (position === -1) {
+				this.children.push(page)
+				this.select.append(option);
+			} else {
+				this.children.splice(0, 0, page)
+				var first = this.update_status();
+				first.after(option);
+			}
 		},
 
 		remove_page: function(page) {

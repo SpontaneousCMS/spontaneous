@@ -506,7 +506,7 @@ class BackTest < MiniTest::Spec
       setup do
         Spontaneous.stubs(:reload!)
       end
-      should "be addable" do
+      should "default to being added at the top" do
         current_count = @home.in_progress.pieces.length
         first_id = @home.in_progress.pieces.first.id
         @home.in_progress.pieces.first.class.name.should_not == "BackTest::Image"
@@ -530,6 +530,25 @@ class BackTest < MiniTest::Spec
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         Content[target.id].should be_nil
+      end
+
+      should "be addable at the bottom" do
+        current_count = @home.in_progress.pieces.length
+        last_id = @home.in_progress.pieces.last.id
+        @home.in_progress.pieces.last.class.name.should_not == "BackTest::Image"
+        auth_post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => -1
+        puts last_response.body
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        last_response.content_type.should == "application/json;charset=utf-8"
+        @home.reload
+        @home.in_progress.pieces.length.should == current_count+1
+        @home.in_progress.pieces.last.id.should_not == last_id
+        @home.in_progress.pieces.last.class.name.should == "BackTest::Image"
+        required_response = {
+          :position => -1,
+          :entry => @home.in_progress.pieces.last.export
+        }
+        Spot::JSON.parse(last_response.body).should == required_response
       end
     end
 

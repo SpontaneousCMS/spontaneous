@@ -75,7 +75,7 @@ Spontaneous.Box = (function($, S) {
 		},
 
 		add_entry: function(type, position) {
-			Spontaneous.Ajax.post(['/add', this.id(), type.schema_id].join('/'), {}, this.entry_added.bind(this));
+			Spontaneous.Ajax.post(['/add', this.id(), type.schema_id].join('/'), {position: position}, this.entry_added.bind(this));
 		},
 
 		add_alias: function(alias_target_id, type) {
@@ -84,8 +84,13 @@ Spontaneous.Box = (function($, S) {
 
 		entry_added: function(result) {
 			var position = result.position, e = result.entry, entry = this.wrap_entry(e);
-			this.content.entries.splice(position, 0, e);
-			this.entries().splice(position, 0, entry);
+			if (position === -1) {
+				this.content.entries.push(e);
+				this.entries().push(entry);
+			} else {
+				this.content.entries.splice(position, 0, e);
+				this.entries().splice(position, 0, entry);
+			}
 			var page = S.Editing.get('page');
 			page.trigger('entry_added', entry, position);
 			this.trigger('entry_added', entry, position);

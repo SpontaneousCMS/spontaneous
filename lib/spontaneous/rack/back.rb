@@ -447,7 +447,7 @@ module Spontaneous
 
         post '/add/:id/:box_id/:type_name' do
           content_for_request(true) do |content, box|
-            position = 0
+            position = (params[:position] || 0).to_i
             type = Spontaneous.schema[params[:type_name]]#.constantize
             if box.writable?(user, type)
               instance = type.new

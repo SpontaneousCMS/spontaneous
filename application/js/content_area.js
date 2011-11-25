@@ -37,6 +37,10 @@ Spontaneous.ContentArea = (function($, S) {
 		},
 		goto_page: function(page) {
 			this.current().goto_page(page);
+		},
+		scroll_to_bottom: function(duration, delay) {
+
+			this.wrap.delay(delay || 0).animate({ scrollTop:this.wrap[0].scrollHeight }, (duration || 1000));
 		}
 	});
 	return ContentArea;

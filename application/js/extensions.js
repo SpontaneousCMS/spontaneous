@@ -89,6 +89,8 @@ function $A(iterable) {
 		}
 	};
 
+	$.fn.appear.height_change_duration = height_change_duration;
+
 	$.fn.disappear = function(callback) {
 		var $this = this;
 		this.animate({'opacity':0}, {
