@@ -2,6 +2,8 @@
 
 module Spontaneous::Render::Helpers
   module ScriptHelper
+    extend self
+
     def script(*args)
       scripts = args.flatten
       scripts.map do |script|

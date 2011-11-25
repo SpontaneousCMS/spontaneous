@@ -2,6 +2,8 @@
 
 module Spontaneous::Render::Helpers
   module StylesheetHelper
+    extend self
+
     def stylesheet(*args)
       stylesheets = args
       stylesheets.map do |stylesheet|
