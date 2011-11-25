@@ -236,7 +236,9 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 
 			var set_info = function(filename, filesize, width, height) {
 				filename_info.text(filename);
-				filesize_info.text(parseFloat(filesize, 10).to_filesize());
+				if (filesize) {
+					filesize_info.text(parseFloat(filesize, 10).to_filesize());
+				}
 				set_dimensions(width, height);
 			};
 
