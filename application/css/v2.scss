@@ -679,7 +679,9 @@ img.missing {
 		margin-left: $container-padding;
 		margin-right: $container-padding;
 		border-top: 0;
-		// padding-top: 8px;
+		padding-left: 10px;
+		padding-right: 10px;
+		text-align: center;
 
 		.down {
 			background-image: url("/@spontaneous/static/slot-up-arrow.png");
