@@ -115,17 +115,17 @@ TEMPLATE
       scripts =  @lexer.tokens.map { |token| token.script }
 
       expected = [
-        "Text here {{ preview_tag }}\n\n\n",
+        %(_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n),
         nil,
-        "\nText \\`problem\\`\n",
-        '#{"<div>"}',
-        "\n",
-        '#{escape(("<div>").to_s)}',
-        "\n  ",
-        "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" };",
-        "\nText \\\\problem\n  ",
-        '#{b}',
-        "\nText\n"
+        %(_buf << %Q`\nText \\`problem\\`\n`\n),
+        %(_buf << ("<div>").to_s\n),
+        %(_buf << %Q`\n`\n),
+        %(_buf << escape(("<div>").to_s)\n),
+        %(_buf << %Q`\n  `\n),
+        "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }\n",
+        %(_buf << %Q`\nText \\\\problem\n  `\n),
+        "_buf << (b).to_s\n",
+        %(_buf << %Q`\nText\n`\n),
       ]
       scripts.each_with_index do |s, i|
         s.should == expected[i]
@@ -134,8 +134,12 @@ TEMPLATE
     end
 
     should "correctly generate the template script" do
-      expected = %Q/ _buf << %Q`Text here {{ preview_tag }}\n\n\nText \\`problem\\`\n\#{"<div>"}\n\#{escape(("<div>").to_s)}\n  `;a = {:key => title}\n  b = a.map { |k, v| "\#{k}=\#{v}" }; _buf << %Q`Text \\\\problem\n  \#{b}\nText\n`;/
+      expected = %Q/_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n_buf << %Q`Text \\`problem\\`\n`\n_buf << ("<div>").to_s\n_buf << %Q`\n`\n_buf << escape(("<div>").to_s)\n_buf << %Q`\n  `\na = {:key => title}\n  b = a.map { |k, v| "\#{k}=\#{v}" }\n_buf << %Q`Text \\\\problem\n  `\n_buf << (b).to_s\n_buf << %Q`\nText\n`\n/
       script = @lexer.script
+      # puts expected
+      # puts "================================"
+      # puts script
+      # puts "================================"
       script.should == expected
     end
   end
