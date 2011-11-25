@@ -180,6 +180,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 		destroyed: function() {
 			this.wrapper.disappear(function() {
 				this.wrapper.remove();
+				this.trigger('removed', this);
 			}.bind(this));
 		}
 	});

@@ -11,6 +11,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			this.box = box;
 			this.dom_container = dom_container;
 			this.box.bind('entry_added', this.insert_entry.bind(this));
+			this.box.bind('entry_removed', this.remove_entry.bind(this));
 		},
 
 		name: function() {
@@ -41,6 +42,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			if (!this._panel) {
 				// var panel = $(dom.div, {'class': 'slot-content'});
 				var panel = dom.div('.slot-content');
+				panel.addClass('empty')
 				if (this.box.has_fields()) {
 					var w = dom.div('.box-fields');
 					var fields = new Spontaneous.FieldPreview(this, '');
@@ -56,6 +58,8 @@ Spontaneous.Views.BoxView = (function($, S) {
 				panel.append(this.add_allowed_types_bar('top', 0));
 				// var entries = $(dom.div, {'class':'slot-entries'});
 				var entries = dom.div('.slot-entries');
+				var instructions = dom.div('.slot-instructions').text("Add items using the buttons above");
+				entries.append(instructions);
 				// panel.append();
 				for (var i = 0, ee = this.entries(), ii = ee.length;i < ii; i++) {
 					var entry = ee[i];
@@ -76,13 +80,28 @@ Spontaneous.Views.BoxView = (function($, S) {
 					}.bind(this)
 				})
 				panel.append(entries);
-				panel.append(this.add_allowed_types_bar('bottom', -1));
-				panel.hide();
-				this.dom_container.append(panel)
-				this._panel = panel;
+			var _bottom_add_bar = this.add_allowed_types_bar('bottom', -1).hide();
+			panel.append(_bottom_add_bar);
+			panel.hide();
+			this.dom_container.append(panel)
+			this._panel = panel;
 				this._entry_container = entries;
+				this._bottom_add_bar = _bottom_add_bar;
 			}
+			this.check_if_empty();
 			return this._panel;
+		},
+		check_if_empty: function() {
+			var _view = this, _panel = this._panel;
+			if (_view.box.entries().length == 0) {
+				_panel.addClass('empty');
+				_view._bottom_add_bar.fadeOut($.fn.appear.height_change_duration/2, function() {
+				})
+			} else {
+				_panel.removeClass('empty');
+				_view._bottom_add_bar.fadeIn(function() {
+				})
+			}
 		},
 		add_allowed_types_bar: function(position, insert_at) {
 			var allowed = this.box.allowed_types()
@@ -192,6 +211,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 		},
 		claim_entry: function(entry) {
 			var div = entry.panel();
+			entry.bind('removed', this.entry_removed.bind(this));
 			return div.attr('id', this.entry_id(entry)).addClass(this.entry_class());
 		},
 
@@ -221,7 +241,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			, w = this.entry_wrappers()
 			, e = this.view_for_entry(entry)
 			, h = this.claim_entry(e)
-			, container = this.dom_container;
+			, view = this;
 			if (position === -1) {
 				entries.push(e);
 			} else {
@@ -235,7 +255,14 @@ Spontaneous.Views.BoxView = (function($, S) {
 			if (position === -1) {
 				S.ContentArea.scroll_to_bottom($.fn.appear.height_change_duration);
 			}
+			view.check_if_empty();
 			h.hide().appear();
+		},
+
+		remove_entry: function(entry) {
+		},
+		entry_removed: function(entry) {
+			this.check_if_empty();
 		},
 		entry_wrappers: function() {
 			return this._entry_container.find('> .'+this.entry_class())

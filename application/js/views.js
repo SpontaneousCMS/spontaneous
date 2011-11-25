@@ -2,6 +2,7 @@
 Spontaneous.Views = (function($, S) {
 	var dom = S.Dom;
 	var View = new JS.Class({
+		include: Spontaneous.Properties,
 		initialize: function(content) {
 			this.content = content;
 		},

@@ -8,6 +8,12 @@ Spontaneous.Box = (function($, S) {
 		initialize: function(content, container) {
 			this.callSuper(content);
 			this.container = container;
+			var box = this;
+			$.each(this.entries(), function(index, entry) {
+				entry.bind('destroyed', function(entry) {
+					box.entry_removed(entry);
+				});
+			});
 		},
 
 		name: function() {
@@ -36,7 +42,7 @@ Spontaneous.Box = (function($, S) {
 		mouseover: function() {
 			if (this.fields_preview) {
 				this.fields_preview.addClass('hover');
-			}
+			};
 		},
 		mouseout: function() {
 			if (this.fields_preview) {
@@ -83,7 +89,14 @@ Spontaneous.Box = (function($, S) {
 		},
 
 		entry_added: function(result) {
-			var position = result.position, e = result.entry, entry = this.wrap_entry(e);
+			var box = this
+			,position = result.position
+			, e = result.entry
+			, entry = this.wrap_entry(e);
+
+			entry.bind('destroyed', function(entry) {
+				box.entry_removed(entry);
+		 	});
 			if (position === -1) {
 				this.content.entries.push(e);
 				this.entries().push(entry);
@@ -94,6 +107,18 @@ Spontaneous.Box = (function($, S) {
 			var page = S.Editing.get('page');
 			page.trigger('entry_added', entry, position);
 			this.trigger('entry_added', entry, position);
+		},
+
+		entry_removed: function(entry) {
+			var entries = this.entries(), position = 0;
+			for (var i = 0, ii = entries.length; i < ii; i++) {
+				if (entries[i].id() == entry.id()) {
+					position = i;
+					break;
+				}
+			}
+			entries.splice(position, 1);
+			this.trigger('entry_removed', entry);
 		},
 
 		save_path: function() {
