@@ -19,6 +19,7 @@ module Cutaneous
           self.token_classes << token_class
           self.const_set(class_name, token_class)
         end
+        self.const_set("TextToken", TextToken)
       end
       @parser_class
     end
