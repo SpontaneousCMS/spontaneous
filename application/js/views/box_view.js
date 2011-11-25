@@ -256,7 +256,9 @@ Spontaneous.Views.BoxView = (function($, S) {
 				S.ContentArea.scroll_to_bottom($.fn.appear.height_change_duration);
 			}
 			view.check_if_empty();
-			h.hide().appear();
+			h.hide().appear(function() {
+				e.edit();
+			});
 		},
 
 		remove_entry: function(entry) {
