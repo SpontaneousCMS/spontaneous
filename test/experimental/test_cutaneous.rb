@@ -4,7 +4,7 @@ require File.expand_path('../../test_helper', __FILE__)
 
 
 class CutaneousTest < MiniTest::Spec
-  context "lexer" do
+  context "publishing lexer" do
     setup do
       @lexer = Cutaneous::Lexer.new((<<-TEMPLATE))
 Text here
@@ -26,7 +26,7 @@ Text
 
     should "tokenize a single statement" do
       lexer = Cutaneous::Lexer.new("%{ a = {:a => \"a\" }}")
-      tokens = lexer.lex
+      tokens = lexer.tokens
       tokens.length.should == 1
       tokens.first.must_be_instance_of(Cutaneous::Lexer::StatementToken)
       tokens.first.expression.should == 'a = {:a => "a" }'
@@ -34,7 +34,7 @@ Text
 
     should "tokenize a single expression" do
       lexer = Cutaneous::Lexer.new("${ a }")
-      tokens = lexer.lex
+      tokens = lexer.tokens
       tokens.length.should == 1
       tokens.first.must_be_instance_of(Cutaneous::Lexer::ExpressionToken)
       tokens.first.expression.should == 'a'
@@ -42,7 +42,7 @@ Text
 
     should "tokenize plain text" do
       lexer = Cutaneous::Lexer.new("Hello there")
-      tokens = lexer.lex
+      tokens = lexer.tokens
       tokens.length.should == 1
       tokens.first.must_be_instance_of(Cutaneous::Lexer::TextToken)
       tokens.first.expression.should == 'Hello there'
@@ -50,14 +50,14 @@ Text
 
     should "tokenize a single comment" do
       lexer = Cutaneous::Lexer.new("!{ comment }")
-      tokens = lexer.lex
+      tokens = lexer.tokens
       tokens.length.should == 1
       tokens.first.must_be_instance_of(Cutaneous::Lexer::CommentToken)
       tokens.first.expression.should == ' comment '
     end
 
     should "correctly tokenize a complex template string" do
-      @lexer.lex.map { |token| token.class }.should == [
+      @lexer.tokens.map { |token| token.class }.should == [
         Cutaneous::Lexer::TextToken,
         Cutaneous::Lexer::CommentToken,
         Cutaneous::Lexer::TextToken,
@@ -73,7 +73,7 @@ Text
     end
 
     should "correctly collect the expressions" do
-      @lexer.lex.map { |token| token.raw_expression }.should == [
+      @lexer.tokens.map { |token| token.raw_expression }.should == [
         "Text here\n\n\n",
         " comment which should be ignored ",
         "\nText `problem`\n",
@@ -89,7 +89,7 @@ Text
     end
 
     should "correctly post process the expressions" do
-      expressions = @lexer.lex.map { |token| token.expression }
+      expressions = @lexer.tokens.map { |token| token.expression }
       expected = [
         "Text here\n\n\n",
         " comment which should be ignored ",
@@ -110,7 +110,7 @@ Text
     end
 
     should "correctly convert the expressions to template script code" do
-      scripts =  @lexer.lex.map { |token| token.script }
+      scripts =  @lexer.tokens.map { |token| token.script }
 
       expected = [
         "Text here\n\n\n",
@@ -129,6 +129,12 @@ Text
         s.should == expected[i]
       end
       scripts.should == expected
+    end
+
+    should "correctly generate the template script" do
+      expected = %Q/ _buf << %Q`Text here\n\n\nText \\`problem\\`\n\#{"<div>"}\n\#{escape(("<div>").to_s)}\n  `;a = {:key => \"value\"}\n  b = a.map { |k, v| "\#{k}=\#{v}" }; _buf << %Q`Text \\\\problem\n  \#{b}\nText\n`;/
+      script = @lexer.script
+      script.should == expected
     end
   end
 end
