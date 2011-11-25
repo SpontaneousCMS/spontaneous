@@ -36,6 +36,18 @@ module Cutaneous
         @tag_open
       end
 
+      def self.before(raw_expression, following_token_class)
+        self.new(raw_expression)
+      end
+
+      def self.after(raw_expression, preceding_token_class)
+        self.new(raw_expression)
+      end
+
+      def self.type
+        :token
+      end
+
       attr_reader :raw_expression
 
       def initialize(raw_expression)
@@ -56,14 +68,13 @@ module Cutaneous
       def text_token?
         true
       end
-
-      def after(preceeding_token)
-        # return self if preceeding_token.nil?
-        self
-      end
     end
 
     class CommentToken < Token
+      def self.type
+        :comment
+      end
+
       def script
         nil
       end
@@ -74,6 +85,26 @@ module Cutaneous
     end
 
     class TextToken < Token
+      def self.type
+        :text
+      end
+
+      def self.bracket(raw_expression, preceeding_token_class, following_token_class)
+        expression = raw_expression
+        if preceeding_token_class
+          case preceeding_token_class.type
+          when :comment, :statement
+            expression.gsub!(/\A\s*?[\r\n]+/, '')
+          end
+        end
+        if following_token_class
+          case following_token_class.type
+          when :comment, :statement
+            expression.gsub!(/(\r?\n)[ \t]*\z/, '\1')
+          end
+        end
+        self.new(expression)
+      end
 
       def escape(str)
         str.gsub(/[`\\]/, '\\\\\&')
@@ -82,20 +113,12 @@ module Cutaneous
       def script
         %(_buf << %Q`#{escape(expression)}`\n)
       end
-
-      def after(preceeding_token)
-        case preceeding_token
-        when nil
-          self
-        when CommentToken, StatementToken
-          self.class.new(raw_expression.gsub(/\A\s*?[\r\n]+/, ''))
-        else
-          self
-        end
-      end
     end
 
     class ExpressionToken < TextToken
+      def self.type
+        :expression
+      end
 
       def expression
         @expression ||= raw_expression.strip
@@ -107,13 +130,15 @@ module Cutaneous
     end
 
     class EscapedExpressionToken < ExpressionToken
-
       def script
         %(_buf << escape((#{expression}).to_s)\n)
       end
     end
 
     class StatementToken < Token
+      def self.type
+        :statement
+      end
 
       def expression
         @expression ||= raw_expression.strip
@@ -162,10 +187,11 @@ module Cutaneous
     def parse
       tokens = []
       pos = 0
+      previous_token = nil
       while (start = @template.index(self.class.tag_start_pattern, pos))
+        text = text_token = nil
         if (start > pos)
           text = @template[pos, start - pos]
-          tokens << TextToken.new(text)
         end
         pos = start
         offset = 0
@@ -188,8 +214,11 @@ module Cutaneous
           offset += 1
         end
         code = @template[pos, offset - 1]
-        token = token_class.new(code)
+        text_token = TextToken.bracket(text, previous_token ? previous_token.class : nil, token_class) if text
+        token = token_class.after(code, text_token ? TextToken : nil)
+        tokens << text_token if text_token
         tokens << token
+        previous_token = token
         pos += offset
       end
       if pos < @template.length
@@ -200,14 +229,6 @@ module Cutaneous
     end
 
     def compile
-      prev = nil
-
-      tokens = self.tokens.map { |token|
-        new_token = token.after(prev)
-        prev = token
-        new_token
-      }
-
       tokens.map(&:script).join
     end
   end

@@ -75,19 +75,24 @@ TEMPLATE
     end
 
     should "correctly collect the expressions" do
-      @lexer.tokens.map { |token| token.raw_expression }.should == [
+      expected = [
         "Text here {{ preview_tag }}\n\n\n",
         " comment which should be ignored ",
-        "\nText `problem`\n",
+        "Text `problem`\n",
         " \"<div>\" ",
         "\n",
         " \"<div>\" ",
-        "\n  ",
+        "\n",
         "\n  a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }\n  ",
-        "\nText \\problem\n  ",
+        "Text \\problem\n  ",
         " b ",
         "\nText\n"
       ]
+      expressions = @lexer.tokens.map { |token| token.raw_expression }
+      expressions.each_with_index do |e, i|
+        e.should == expected[i]
+      end
+      expressions.should == expected
     end
 
     should "correctly post process the expressions" do
@@ -95,13 +100,13 @@ TEMPLATE
       expected = [
         "Text here {{ preview_tag }}\n\n\n",
         " comment which should be ignored ",
-        "\nText `problem`\n",
+        "Text `problem`\n",
         %("<div>"),
         "\n",
         %("<div>"),
-        "\n  ",
+        "\n",
         "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }",
-        "\nText \\problem\n  ",
+        "Text \\problem\n  ",
         "b",
         "\nText\n"
       ]
@@ -117,13 +122,13 @@ TEMPLATE
       expected = [
         %(_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n),
         nil,
-        %(_buf << %Q`\nText \\`problem\\`\n`\n),
+        %(_buf << %Q`Text \\`problem\\`\n`\n),
         %(_buf << ("<div>").to_s\n),
         %(_buf << %Q`\n`\n),
         %(_buf << escape(("<div>").to_s)\n),
-        %(_buf << %Q`\n  `\n),
+        %(_buf << %Q`\n`\n),
         "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }\n",
-        %(_buf << %Q`\nText \\\\problem\n  `\n),
+        %(_buf << %Q`Text \\\\problem\n  `\n),
         "_buf << (b).to_s\n",
         %(_buf << %Q`\nText\n`\n),
       ]
@@ -134,7 +139,7 @@ TEMPLATE
     end
 
     should "correctly generate the template script" do
-      expected = %Q/_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n_buf << %Q`Text \\`problem\\`\n`\n_buf << ("<div>").to_s\n_buf << %Q`\n`\n_buf << escape(("<div>").to_s)\n_buf << %Q`\n  `\na = {:key => title}\n  b = a.map { |k, v| "\#{k}=\#{v}" }\n_buf << %Q`Text \\\\problem\n  `\n_buf << (b).to_s\n_buf << %Q`\nText\n`\n/
+      expected = %Q/_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n_buf << %Q`Text \\`problem\\`\n`\n_buf << ("<div>").to_s\n_buf << %Q`\n`\n_buf << escape(("<div>").to_s)\n_buf << %Q`\n`\na = {:key => title}\n  b = a.map { |k, v| "\#{k}=\#{v}" }\n_buf << %Q`Text \\\\problem\n  `\n_buf << (b).to_s\n_buf << %Q`\nText\n`\n/
       script = @lexer.script
       # puts expected
       # puts "================================"
@@ -175,6 +180,7 @@ TEMPLATE
         template.filename.should == @template_path
         template.script.should =~ /^\s*_buf/
         context = Cutaneous::PublishContext.new(nil, :html, {:title => "title"})
+        # puts template.render(context)
         template.render(context).should == (<<-HTML)
 Text here {{ preview_tag }}
 
@@ -182,7 +188,7 @@ Text here {{ preview_tag }}
 Text `problem`
 <div>
 <div>
-  Text \\problem
+Text \\problem
   ["key=title"]
 Text
         HTML
