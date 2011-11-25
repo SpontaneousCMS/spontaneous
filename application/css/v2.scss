@@ -558,6 +558,7 @@ img.missing {
 .fields-preview-text + .fields-preview-image {}
 
 #page-slots.slots {
+	height: 100%;
 	.slot-tabs {
 		@extend .clearfix;
 		height: 32px;
@@ -672,7 +673,14 @@ img.missing {
 		}
 	}
 	.slot-addable.bottom {
+		@include vertical-gradient($entry-background-colour, $slot-addable-colour);
+		@include corners;
 		margin-top: 10px;
+		margin-left: $container-padding;
+		margin-right: $container-padding;
+		border-top: 0;
+		// padding-top: 8px;
+
 		.down {
 			background-image: url("/@spontaneous/static/slot-up-arrow.png");
 			bottom: auto;

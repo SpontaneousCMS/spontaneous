@@ -8,7 +8,7 @@ Spontaneous.BoxContainer = (function($, S) {
 		initialize: function(content, wrap_id) {
 			this.callSuper(content);
 			this.wrap_id = wrap_id;
-			this.box_content_container = dom.div();
+			this.box_content_container = dom.div('.slot-content-wrapper');
 		},
 
 		panel: function() {
