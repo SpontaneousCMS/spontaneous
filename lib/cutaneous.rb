@@ -45,5 +45,6 @@ module Cutaneous
   autoload :PreviewRenderer, "cutaneous/preview_renderer"
 
   autoload :TokenParser, "cutaneous/token_parser"
+  autoload :PublishTokenParser, "cutaneous/publish_token_parser"
 end
 

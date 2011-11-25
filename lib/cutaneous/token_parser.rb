@@ -2,8 +2,42 @@ module Cutaneous
   class TokenParser
 
 
+    def self.generate(tag_definitions)
+      @parser_class = Class.new(Cutaneous::TokenParser) do
+        class_map = {
+          :comment => "CommentToken",
+          :expression => "ExpressionToken",
+          :escaped_expression => "EscapedExpressionToken",
+          :statement => "StatementToken"
+        }
+        tag_definitions.each do |type, tag|
+          tag_open, tag_close = tag
+          class_name = class_map[type]
+          token_base_class = Cutaneous::TokenParser.const_get(class_name)
+          token_class = Class.new(token_base_class)
+          token_class.define_tag(tag_open, tag_close)
+          self.token_classes << token_class
+          self.const_set(class_name, token_class)
+        end
+      end
+      @parser_class
+    end
+
     class Token
+      def self.define_tag(open, close)
+        @tag_open, @tag_close = open, close
+      end
+
+      def self.tag_close
+        @tag_close
+      end
+
+      def self.tag_open
+        @tag_open
+      end
+
       attr_reader :raw_expression
+
       def initialize(raw_expression)
         @raw_expression = raw_expression
       end
@@ -11,8 +45,12 @@ module Cutaneous
       alias_method :expression, :raw_expression
       alias_method :script, :expression
 
-      def start_token
-        TOKEN_START
+      def tag_close
+        self.class.tag_close
+      end
+
+      def tag_open
+        self.class.tag_open
       end
 
       def text_token?
@@ -26,7 +64,6 @@ module Cutaneous
     end
 
     class CommentToken < Token
-      TOKEN_START = "!{".freeze
       def script
         nil
       end
@@ -37,7 +74,6 @@ module Cutaneous
     end
 
     class TextToken < Token
-      TOKEN_START = nil
 
       def escape(str)
         str.gsub(/[`\\]/, '\\\\\&')
@@ -60,7 +96,6 @@ module Cutaneous
     end
 
     class ExpressionToken < TextToken
-      TOKEN_START = "${".freeze
 
       def expression
         @expression ||= raw_expression.strip
@@ -72,7 +107,6 @@ module Cutaneous
     end
 
     class EscapedExpressionToken < ExpressionToken
-      TOKEN_START = "$${".freeze
 
       def script
         %(\#{escape((#{expression}).to_s)})
@@ -80,7 +114,6 @@ module Cutaneous
     end
 
     class StatementToken < Token
-      TOKEN_START = "%{".freeze
 
       def expression
         @expression ||= raw_expression.strip
@@ -95,15 +128,22 @@ module Cutaneous
       end
     end
 
-    def self.compile_start_pattern
-      tags = TAG_TOKENS.map { |token_class| Regexp.escape(token_class::TOKEN_START) }.join("|")
-      Regexp.new("(#{tags})")
+    def self.token_classes
+      @token_classes ||= []
     end
 
-    TAG_TOKENS ||= [CommentToken, ExpressionToken, EscapedExpressionToken, StatementToken]
-    TAG_START_PATTERN ||= compile_start_pattern
-    TOKEN_MAP ||= Hash[TAG_TOKENS.map { | token_class | [token_class::TOKEN_START, token_class] }]
+    def self.tag_start_pattern
+      @tag_start_pattern ||= compile_start_pattern
+    end
 
+    def self.compile_start_pattern
+      tags = token_classes.map { |token_class| Regexp.escape(token_class::tag_open) }
+      Regexp.new("(#{ tags.join("|") })")
+    end
+
+    def self.token_map
+      @token_map ||= Hash[token_classes.map { | token_class | [token_class::tag_open, token_class] }]
+    end
 
     def initialize(template)
       @template = template
@@ -113,7 +153,7 @@ module Cutaneous
     def lex
       tokens = []
       pos = 0
-      while (start = @template.index(TAG_START_PATTERN, pos))
+      while (start = @template.index(self.class.tag_start_pattern, pos))
         if (start > pos)
           text = @template[pos, start - pos]
           tokens << TextToken.new(text)
@@ -122,7 +162,7 @@ module Cutaneous
         offset = 0
         begin
           offset += 1
-        end until (token_class = TOKEN_MAP[@template[pos, offset]])
+        end until (token_class = self.class.token_map[@template[pos, offset]])
         pos += offset
         offset = 0
         opening_braces = 1
