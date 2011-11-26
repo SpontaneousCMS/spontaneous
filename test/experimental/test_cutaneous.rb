@@ -42,85 +42,60 @@ TEMPLATE
       lexer = Cutaneous::PublishTokenParser.new("%{ a = {:a => \"a\" }}")
       tokens = lexer.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::PublishTokenParser::StatementToken)
-      tokens.first.expression.should == 'a = {:a => "a" }'
+      tokens.first.should == [:statement, 'a = {:a => "a" }']
     end
 
     should "tokenize a single expression" do
       lexer = Cutaneous::PublishTokenParser.new("${ a }")
       tokens = lexer.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::PublishTokenParser::ExpressionToken)
-      tokens.first.expression.should == 'a'
+      tokens.first.should == [:expression, 'a']
     end
 
     should "tokenize plain text" do
       lexer = Cutaneous::PublishTokenParser.new("Hello there")
       tokens = lexer.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::PublishTokenParser::TextToken)
-      tokens.first.expression.should == 'Hello there'
+      tokens.first.should == [:text, 'Hello there']
     end
 
     should "tokenize a single comment" do
       lexer = Cutaneous::PublishTokenParser.new("!{ comment }")
       tokens = lexer.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::PublishTokenParser::CommentToken)
-      tokens.first.expression.should == ' comment '
+      tokens.first.should == [:comment,  ' comment ']
     end
 
     should "correctly tokenize a complex template string" do
-      @parser.tokens.map { |token| token.class }.should == [
-        Cutaneous::PublishTokenParser::TextToken,
-        Cutaneous::PublishTokenParser::CommentToken,
-        Cutaneous::PublishTokenParser::TextToken,
-        Cutaneous::PublishTokenParser::ExpressionToken,
-        Cutaneous::PublishTokenParser::TextToken,
-        Cutaneous::PublishTokenParser::EscapedExpressionToken,
-        Cutaneous::PublishTokenParser::TextToken,
-        Cutaneous::PublishTokenParser::StatementToken,
-        Cutaneous::PublishTokenParser::TextToken,
-        Cutaneous::PublishTokenParser::ExpressionToken,
-        Cutaneous::PublishTokenParser::TextToken
+      @parser.tokens.map { |token| token[0] }.should == [
+        :text,
+        :comment,
+        :text,
+        :expression,
+        :text,
+        :escaped_expression,
+        :text,
+        :statement,
+        :text,
+        :expression,
+        :text
       ]
-    end
-
-    should "correctly collect the expressions" do
-      expected = [
-        "Text here {{ preview_tag }}\n\n\n",
-        " comment which should be ignored ",
-        "Text `problem`\n",
-        " \"<div>\" ",
-        "\n",
-        " \"<div>\" ",
-        "\n",
-        "\n  a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }\n  ",
-        "Text \\problem\n  ",
-        " b ",
-        "\nText\n"
-      ]
-      expressions = @parser.tokens.map { |token| token.raw_expression }
-      expressions.each_with_index do |e, i|
-        e.should == expected[i]
-      end
-      expressions.should == expected
     end
 
     should "correctly post process the expressions" do
-      expressions = @parser.tokens.map { |token| token.expression }
+      expressions = @parser.tokens
       expected = [
-        "Text here {{ preview_tag }}\n\n\n",
-        " comment which should be ignored ",
-        "Text `problem`\n",
-        %("<div>"),
-        "\n",
-        %("<div>"),
-        "\n",
-        "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }",
-        "Text \\problem\n  ",
-        "b",
-        "\nText\n"
+        [:text, "Text here {{ preview_tag }}\n\n\n"],
+        [:comment, " comment which should be ignored "],
+        [:text, "Text `problem`\n"],
+        [:expression, %("<div>")],
+        [:text, "\n"],
+        [:escaped_expression, %("<div>")],
+        [:text, "\n"],
+        [:statement, "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }"],
+        [:text, "Text \\problem\n  "],
+        [:expression, "b"],
+        [:text, "\nText\n"]
       ]
       expressions.each_with_index do |s, i|
         s.should == expected[i]
@@ -128,35 +103,20 @@ TEMPLATE
       expressions.should == expected
     end
 
-    should "correctly convert the expressions to template script code" do
-      scripts =  @parser.tokens.map { |token| token.script }
-
-      expected = [
-        %(_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n),
-        nil,
-        %(_buf << %Q`Text \\`problem\\`\n`\n),
-        %(_buf << _decode_params(("<div>"))\n),
-        %(_buf << %Q`\n`\n),
-        %(_buf << escape(_decode_params(("<div>")))\n),
-        %(_buf << %Q`\n`\n),
-        "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }\n",
-        %(_buf << %Q`Text \\\\problem\n  `\n),
-        "_buf << _decode_params((b))\n",
-        %(_buf << %Q`\nText\n`\n),
-      ]
-      scripts.each_with_index do |s, i|
-        s.should == expected[i]
-      end
-      scripts.should == expected
-    end
-
     should "correctly generate the template script" do
-      expected = %Q/_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n_buf << %Q`Text \\`problem\\`\n`\n_buf << _decode_params(("<div>"))\n_buf << %Q`\n`\n_buf << escape(_decode_params(("<div>")))\n_buf << %Q`\n`\na = {:key => title}\n  b = a.map { |k, v| "\#{k}=\#{v}" }\n_buf << %Q`Text \\\\problem\n  `\n_buf << _decode_params((b))\n_buf << %Q`\nText\n`\n/
+      expected = [
+        %(_buf << %Q`Text here {{ preview_tag }}\n\n\n`),
+        %(_buf << %Q`Text \\`problem\\`\n`),
+        %(_buf << _decode_params(("<div>"))),
+        %(_buf << %Q`\n`),
+        %(_buf << escape(_decode_params(("<div>")))),
+        %(_buf << %Q`\n`),
+        "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }",
+        %(_buf << %Q`Text \\\\problem\n  `),
+        "_buf << _decode_params((b))",
+        %(_buf << %Q`\nText\n`),
+      ].join("\n") + "\n"
       script = @parser.script
-      # puts expected
-      # puts "================================"
-      # puts script
-      # puts "================================"
       script.should == expected
     end
   end
@@ -168,65 +128,65 @@ TEMPLATE
       parser = Cutaneous::RequestTokenParser.new("{% a = {:a => \"a\" } %}")
       tokens = parser.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::RequestTokenParser::StatementToken)
-      tokens.first.expression.should == 'a = {:a => "a" }'
+      tokens.first[0].should == :statement
+      tokens.first[1].should == 'a = {:a => "a" }'
     end
 
     should "tokenize a single expression" do
       parser = Cutaneous::RequestTokenParser.new("{{ a }}")
       tokens = parser.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::RequestTokenParser::ExpressionToken)
-      tokens.first.expression.should == 'a'
+      tokens.first[0].should == :expression
+      tokens.first[1].should == 'a'
     end
 
     should "tokenize a single escaped expression" do
       parser = Cutaneous::RequestTokenParser.new("{$ a $}")
       tokens = parser.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::RequestTokenParser::EscapedExpressionToken)
-      tokens.first.expression.should == 'a'
+      tokens.first[0].should == :escaped_expression
+      tokens.first[1].should == 'a'
     end
 
     should "tokenize plain text" do
       parser = Cutaneous::RequestTokenParser.new("Hello there")
       tokens = parser.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::RequestTokenParser::TextToken)
-      tokens.first.expression.should == 'Hello there'
+      tokens.first[0].should == :text
+      tokens.first[1].should == 'Hello there'
     end
 
     should "tokenize a single comment" do
       parser = Cutaneous::RequestTokenParser.new("!{ comment }")
       tokens = parser.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::RequestTokenParser::CommentToken)
-      tokens.first.expression.should == ' comment '
+      tokens.first[0].should == :comment
+      tokens.first[1].should == ' comment '
     end
 
     should "tokenize a mixed template" do
       parser = Cutaneous::RequestTokenParser.new("{% a = [1,2].map { |x| x } %}!{ comment }{{ a }}")
       tokens = parser.tokens
       tokens.length.should == 3
-      tokens[0].must_be_instance_of(Cutaneous::RequestTokenParser::StatementToken)
-      tokens[1].must_be_instance_of(Cutaneous::RequestTokenParser::CommentToken)
-      tokens[2].must_be_instance_of(Cutaneous::RequestTokenParser::ExpressionToken)
-      tokens[0].expression.should == 'a = [1,2].map { |x| x }'
-      tokens[1].expression.should == ' comment '
-      tokens[2].expression.should == 'a'
+      tokens[0][0].should == :statement
+      tokens[1][0].should == :comment
+      tokens[2][0].should == :expression
+      tokens[0][1].should == 'a = [1,2].map { |x| x }'
+      tokens[1][1].should == ' comment '
+      tokens[2][1].should == 'a'
     end
     should "tokenize a mixed publish & view template" do
       parser = Cutaneous::RequestTokenParser.new(PUBLISH_TEMPLATE)
       tokens = parser.tokens
       tokens.length.should == 5
-      tokens.map { |t| t.class }.should == [
-        Cutaneous::RequestTokenParser::TextToken,
-        Cutaneous::RequestTokenParser::ExpressionToken,
-        Cutaneous::RequestTokenParser::TextToken,
-        Cutaneous::RequestTokenParser::CommentToken,
-        Cutaneous::RequestTokenParser::TextToken
+      tokens.map { |t| t[0] }.should == [
+        :text,
+        :expression,
+        :text,
+        :comment,
+        :text
       ]
-      tokens[1].expression.should == 'preview_tag'
+      tokens[1][1].should == 'preview_tag'
     end
   end
 
