@@ -18,16 +18,15 @@ module Cutaneous
   end
 
   def self.publishing_renderer
-    FirstPassRenderer
+    PublishRenderer
   end
 
   def self.request_renderer
-    SecondPassRenderer
+    RequestRenderer
   end
 
   def self.is_dynamic?(render)
     RequestTokenParser.is_dynamic?(render)
-    # SecondPassParser::STMT_PATTERN === render || SecondPassParser::EXPR_PATTERN === render
   end
 
 
@@ -37,9 +36,8 @@ module Cutaneous
   autoload :RequestContext, "cutaneous/request_context"
 
   autoload :Renderer, "cutaneous/renderer"
-  autoload :ParserCore, "cutaneous/parser_core"
-  autoload :FirstPassRenderer, "cutaneous/first_pass_renderer"
-  autoload :SecondPassRenderer, "cutaneous/second_pass_renderer"
+  autoload :PublishRenderer, "cutaneous/publish_renderer"
+  autoload :RequestRenderer, "cutaneous/request_renderer"
   autoload :PreviewRenderer, "cutaneous/preview_renderer"
 
   autoload :TokenParser, "cutaneous/token_parser"

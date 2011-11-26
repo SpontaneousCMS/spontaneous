@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 module Cutaneous
-  class SecondPassRenderer < Renderer
+  class RequestRenderer < Renderer
 
     def template_class
       Cutaneous::RequestTemplate
@@ -13,6 +13,3 @@ module Cutaneous
 
   end
 end
-
-
-

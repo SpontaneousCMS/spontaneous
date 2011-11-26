@@ -1,15 +1,10 @@
 # encoding: UTF-8
 
 module Cutaneous
-  class PreviewRenderer < FirstPassRenderer
+  class PreviewRenderer < PublishRenderer
 
     def context_class
       Cutaneous::PreviewContext
     end
   end
 end
-
-
-
-
-

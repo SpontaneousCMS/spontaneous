@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 module Cutaneous
-  class FirstPassRenderer < Renderer
+  class PublishRenderer < Renderer
 
     def template_class
       Cutaneous::PublishTemplate
@@ -12,7 +12,3 @@ module Cutaneous
     end
   end
 end
-
-
-
-

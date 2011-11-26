@@ -6,11 +6,11 @@ require 'cgi'
 
 class TemplatesTest < MiniTest::Spec
   def first_pass(base_dir, filename, context=nil)
-    render_with_renderer(Cutaneous::FirstPassRenderer, base_dir, filename, context)
+    render_with_renderer(Cutaneous::PublishRenderer, base_dir, filename, context)
   end
 
   def second_pass(base_dir, filename, context=nil)
-    render_with_renderer(Cutaneous::SecondPassRenderer, base_dir, filename, context)
+    render_with_renderer(Cutaneous::RequestRenderer, base_dir, filename, context)
   end
 
   def render_with_renderer(renderer_class, base_dir, filename, context = nil)
