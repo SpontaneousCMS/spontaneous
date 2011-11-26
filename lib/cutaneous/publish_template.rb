@@ -16,7 +16,7 @@ module Cutaneous
     end
 
     def convert(template_string, filepath = nil)
-      @template_proc = nil
+      @template_proc = @script = nil
       @filename = filepath
       @parser = create_parser(template_string)
       script

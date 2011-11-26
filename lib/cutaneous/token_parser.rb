@@ -150,6 +150,10 @@ module Cutaneous
       @token_map ||= Hash[token_classes.map { | token_class | [token_class::tag_open, token_class] }]
     end
 
+    def self.is_dynamic?(text)
+      !text.index(tag_start_pattern).nil?
+    end
+
     def initialize(template)
       @template = template
     end

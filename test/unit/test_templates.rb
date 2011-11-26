@@ -55,7 +55,7 @@ class TemplatesTest < MiniTest::Spec
 
   context "First render" do
     setup do
-      @template = Cutaneous::FirstPassParser.new
+      @template = Cutaneous::PublishTemplate.new
     end
 
     should "ignore second level statements" do
@@ -80,7 +80,7 @@ class TemplatesTest < MiniTest::Spec
     should "generate 2nd render templates" do
       @template.convert("<html><title>${title}</title>%{ 2.times do }{{bell}}\n%{ end }</html>")
       output = @template.render(@context)
-      second = Cutaneous::SecondPassParser.new
+      second = Cutaneous::RequestTemplate.new
       second.convert(output)
       output = second.render(@context)
       output.should == "<html><title>THE TITLE</title>ding\nding\n</html>"
@@ -89,7 +89,7 @@ class TemplatesTest < MiniTest::Spec
 
   context "Second render" do
     setup do
-      @template = Cutaneous::SecondPassParser.new
+      @template = Cutaneous::RequestTemplate.new
     end
 
     should "a render unescaped expressions" do
@@ -235,7 +235,7 @@ Parent Footer
           @klass.new
         end
       end
-      @template = Cutaneous::FirstPassParser.new
+      @template = Cutaneous::PublishTemplate.new
     end
 
     should "call #render(format) if context responds to it" do

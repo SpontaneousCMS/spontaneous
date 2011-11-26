@@ -5,7 +5,7 @@ module Cutaneous
     protected
 
     def parser_class
-      Cutaneous::ViewTokenParser
+      Cutaneous::RequestTokenParser
     end
   end
 end

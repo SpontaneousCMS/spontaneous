@@ -1,4 +1,3 @@
-require "tenjin"
 
 module Cutaneous
   def self.template_path(filename, format)
@@ -27,7 +26,8 @@ module Cutaneous
   end
 
   def self.is_dynamic?(render)
-    SecondPassParser::STMT_PATTERN === render || SecondPassParser::EXPR_PATTERN === render
+    RequestTokenParser.is_dynamic?(render)
+    # SecondPassParser::STMT_PATTERN === render || SecondPassParser::EXPR_PATTERN === render
   end
 
 
@@ -38,16 +38,13 @@ module Cutaneous
 
   autoload :Renderer, "cutaneous/renderer"
   autoload :ParserCore, "cutaneous/parser_core"
-  autoload :FirstPassParser, "cutaneous/first_pass_parser"
   autoload :FirstPassRenderer, "cutaneous/first_pass_renderer"
-  autoload :SecondPassParser, "cutaneous/second_pass_parser"
   autoload :SecondPassRenderer, "cutaneous/second_pass_renderer"
   autoload :PreviewRenderer, "cutaneous/preview_renderer"
 
   autoload :TokenParser, "cutaneous/token_parser"
   autoload :PublishTokenParser, "cutaneous/publish_token_parser"
-  autoload :ViewTokenParser, "cutaneous/view_token_parser"
+  autoload :RequestTokenParser, "cutaneous/request_token_parser"
   autoload :PublishTemplate, "cutaneous/publish_template"
   autoload :RequestTemplate, "cutaneous/request_template"
 end
-

@@ -3,8 +3,97 @@
 
 module Cutaneous
   module ContextHelper
-    include Tenjin::ContextHelper
     # include Spontaneous
+    attr_accessor :_buf, :_engine, :_layout
+
+    ## escape value. this method should be overrided in subclass.
+    def escape(val)
+      return val
+    end
+
+    ## include template. 'template_name' can be filename or short name.
+    def import(template_name, _append_to_buf=true)
+      _buf = self._buf
+      output = self._engine.render(template_name, context=self, layout=false)
+      _buf << output if _append_to_buf
+      return output
+    end
+
+    ## add value into _buf. this is equivarent to '#{value}'.
+    def echo(value)
+      self._buf << value
+    end
+
+    ##
+    ## start capturing.
+    ## returns captured string if block given, else return nil.
+    ## if block is not given, calling stop_capture() is required.
+    ##
+    ## ex. list.rbhtml
+    ##   <html><body>
+    ##     <h1><?rb start_capture(:title) do ?>Document Title<?rb end ?></h1>
+    ##     <?rb start_capture(:content) ?>
+    ##     <ul>
+    ##      <?rb for item in list do ?>
+    ##       <li>${item}</li>
+    ##      <?rb end ?>
+    ##     </ul>
+    ##     <?rb stop_capture() ?>
+    ##   </body></html>
+    ##
+    ## ex. layout.rbhtml
+    ##   <?xml version="1.0" ?>
+    ##   <html xml:lang="en">
+    ##    <head>
+    ##     <title>${@title}</title>
+    ##    </head>
+    ##    <body>
+    ##     <h1>${@title}</h1>
+    ##     <div id="content">
+    ##      <?rb echo(@content) ?>
+    ##     </div>
+    ##    </body>
+    ##   </html>
+    ##
+    def start_capture(varname=nil)
+      @_capture_varname = varname
+      @_start_position = self._buf.length
+      if block_given?
+        yield
+        output = stop_capture()
+        return output
+      else
+        return nil
+      end
+    end
+
+    ##
+    ## stop capturing.
+    ## returns captured string.
+    ## see start_capture()'s document.
+    ##
+    def stop_capture(store_to_context=true)
+      output = self._buf[@_start_position..-1]
+      self._buf[@_start_position..-1] = ''
+      @_start_position = nil
+      if @_capture_varname
+        self.instance_variable_set("@#{@_capture_varname}", output) if store_to_context
+        @_capture_varname = nil
+      end
+      return output
+    end
+
+    ##
+    ## if captured string is found then add it to _buf and return true,
+    ## else return false.
+    ## this is a helper method for layout template.
+    ##
+    def captured_as(name)
+      str = self.instance_variable_get("@#{name}")
+      return false unless str
+      @_buf << str
+      return true
+    end
 
 
     def extends(parent)

@@ -165,66 +165,66 @@ TEMPLATE
     setup do
     end
     should "tokenize a single statement" do
-      parser = Cutaneous::ViewTokenParser.new("{% a = {:a => \"a\" } %}")
+      parser = Cutaneous::RequestTokenParser.new("{% a = {:a => \"a\" } %}")
       tokens = parser.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::ViewTokenParser::StatementToken)
+      tokens.first.must_be_instance_of(Cutaneous::RequestTokenParser::StatementToken)
       tokens.first.expression.should == 'a = {:a => "a" }'
     end
 
     should "tokenize a single expression" do
-      parser = Cutaneous::ViewTokenParser.new("{{ a }}")
+      parser = Cutaneous::RequestTokenParser.new("{{ a }}")
       tokens = parser.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::ViewTokenParser::ExpressionToken)
+      tokens.first.must_be_instance_of(Cutaneous::RequestTokenParser::ExpressionToken)
       tokens.first.expression.should == 'a'
     end
 
     should "tokenize a single escaped expression" do
-      parser = Cutaneous::ViewTokenParser.new("{$ a $}")
+      parser = Cutaneous::RequestTokenParser.new("{$ a $}")
       tokens = parser.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::ViewTokenParser::EscapedExpressionToken)
+      tokens.first.must_be_instance_of(Cutaneous::RequestTokenParser::EscapedExpressionToken)
       tokens.first.expression.should == 'a'
     end
 
     should "tokenize plain text" do
-      parser = Cutaneous::ViewTokenParser.new("Hello there")
+      parser = Cutaneous::RequestTokenParser.new("Hello there")
       tokens = parser.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::ViewTokenParser::TextToken)
+      tokens.first.must_be_instance_of(Cutaneous::RequestTokenParser::TextToken)
       tokens.first.expression.should == 'Hello there'
     end
 
     should "tokenize a single comment" do
-      parser = Cutaneous::ViewTokenParser.new("!{ comment }")
+      parser = Cutaneous::RequestTokenParser.new("!{ comment }")
       tokens = parser.tokens
       tokens.length.should == 1
-      tokens.first.must_be_instance_of(Cutaneous::ViewTokenParser::CommentToken)
+      tokens.first.must_be_instance_of(Cutaneous::RequestTokenParser::CommentToken)
       tokens.first.expression.should == ' comment '
     end
 
     should "tokenize a mixed template" do
-      parser = Cutaneous::ViewTokenParser.new("{% a = [1,2].map { |x| x } %}!{ comment }{{ a }}")
+      parser = Cutaneous::RequestTokenParser.new("{% a = [1,2].map { |x| x } %}!{ comment }{{ a }}")
       tokens = parser.tokens
       tokens.length.should == 3
-      tokens[0].must_be_instance_of(Cutaneous::ViewTokenParser::StatementToken)
-      tokens[1].must_be_instance_of(Cutaneous::ViewTokenParser::CommentToken)
-      tokens[2].must_be_instance_of(Cutaneous::ViewTokenParser::ExpressionToken)
+      tokens[0].must_be_instance_of(Cutaneous::RequestTokenParser::StatementToken)
+      tokens[1].must_be_instance_of(Cutaneous::RequestTokenParser::CommentToken)
+      tokens[2].must_be_instance_of(Cutaneous::RequestTokenParser::ExpressionToken)
       tokens[0].expression.should == 'a = [1,2].map { |x| x }'
       tokens[1].expression.should == ' comment '
       tokens[2].expression.should == 'a'
     end
     should "tokenize a mixed publish & view template" do
-      parser = Cutaneous::ViewTokenParser.new(PUBLISH_TEMPLATE)
+      parser = Cutaneous::RequestTokenParser.new(PUBLISH_TEMPLATE)
       tokens = parser.tokens
       tokens.length.should == 5
       tokens.map { |t| t.class }.should == [
-        Cutaneous::ViewTokenParser::TextToken,
-        Cutaneous::ViewTokenParser::ExpressionToken,
-        Cutaneous::ViewTokenParser::TextToken,
-        Cutaneous::ViewTokenParser::CommentToken,
-        Cutaneous::ViewTokenParser::TextToken
+        Cutaneous::RequestTokenParser::TextToken,
+        Cutaneous::RequestTokenParser::ExpressionToken,
+        Cutaneous::RequestTokenParser::TextToken,
+        Cutaneous::RequestTokenParser::CommentToken,
+        Cutaneous::RequestTokenParser::TextToken
       ]
       tokens[1].expression.should == 'preview_tag'
     end
