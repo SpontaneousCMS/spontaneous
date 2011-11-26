@@ -57,10 +57,6 @@ module Cutaneous
       def tag_open
         self.class.tag_open
       end
-
-      def text_token?
-        true
-      end
     end
 
     class CommentToken < Token
@@ -70,10 +66,6 @@ module Cutaneous
 
       def script
         nil
-      end
-
-      def text_token?
-        true
       end
     end
 
@@ -139,10 +131,6 @@ module Cutaneous
       def script
         expression + "\n"
       end
-
-      def text_token?
-        false
-      end
     end
 
     def self.token_classes
@@ -181,8 +169,9 @@ module Cutaneous
       pos = 0
       previous_token = nil
       token_map = self.class.token_map
+      tag_start_pattern = self.class.tag_start_pattern
 
-      while (start = @template.index(self.class.tag_start_pattern, pos))
+      while (start = @template.index(tag_start_pattern, pos))
         text = nil
         text = @template[pos, start - pos] if (start > pos)
         pos = start
@@ -191,7 +180,7 @@ module Cutaneous
         pos += tag.length
 
         offset = 0
-        opening_braces = 1
+        opening_braces = tag.count(?{)
         closing_braces = 0
 
         while opening_braces > closing_braces
@@ -211,8 +200,8 @@ module Cutaneous
         pos += offset
       end
       if pos < @template.length
-        rest = ((pos > 0) ? @template[pos..-1] : @template)
-        tokens << TextToken.place(rest, previous_token, nil)
+        text = ((pos > 0) ? @template[pos..-1] : @template)
+        tokens << TextToken.place(text, previous_token, nil)
       end
       tokens
     end
