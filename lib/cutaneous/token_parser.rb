@@ -37,14 +37,6 @@ module Cutaneous
         @tag_open
       end
 
-      def self.before(raw_expression, following_token_class)
-        self.new(raw_expression)
-      end
-
-      def self.after(raw_expression, preceding_token_class)
-        self.new(raw_expression)
-      end
-
       def self.type
         :token
       end
@@ -90,8 +82,7 @@ module Cutaneous
         :text
       end
 
-      def self.bracket(raw_expression, preceeding_token_class, following_token_class)
-        expression = raw_expression
+      def self.place(expression, preceeding_token_class, following_token_class)
         if preceeding_token_class
           case preceeding_token_class.type
           when :comment, :statement
@@ -189,42 +180,39 @@ module Cutaneous
       tokens = []
       pos = 0
       previous_token = nil
+      token_map = self.class.token_map
+
       while (start = @template.index(self.class.tag_start_pattern, pos))
-        text = text_token = nil
-        if (start > pos)
-          text = @template[pos, start - pos]
-        end
+        text = nil
+        text = @template[pos, start - pos] if (start > pos)
         pos = start
-        offset = 0
-        begin
-          offset += 1
-        end until (token_class = self.class.token_map[@template[pos, offset]])
-        pos += offset
+
+        tag, token_class = token_map.detect { |tag, token| @template[pos, tag.length] == tag }
+        pos += tag.length
+
         offset = 0
         opening_braces = 1
         closing_braces = 0
 
         while opening_braces > closing_braces
-          char = @template[pos + offset]
-          case char
-          when "{"
+          case @template[pos + offset]
+          when ?{
             opening_braces += 1
-          when "}"
+          when ?}
             closing_braces += 1
           end
           offset += 1
         end
-        code = @template[pos, offset - 1]
-        text_token = TextToken.bracket(text, previous_token ? previous_token.class : nil, token_class) if text
-        token = token_class.after(code, text_token ? TextToken : nil)
-        tokens << text_token if text_token
+
+        tokens << TextToken.place(text, previous_token, token_class) if text
+        token = token_class.new(@template[pos, offset - 1])
         tokens << token
-        previous_token = token
+        previous_token = token_class
         pos += offset
       end
       if pos < @template.length
         rest = ((pos > 0) ? @template[pos..-1] : @template)
-        tokens << TextToken.bracket(rest, previous_token ? previous_token.class : nil, nil)
+        tokens << TextToken.place(rest, previous_token, nil)
       end
       tokens
     end
