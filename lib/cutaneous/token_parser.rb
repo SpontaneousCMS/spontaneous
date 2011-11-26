@@ -194,7 +194,7 @@ module Cutaneous
         end
 
         tokens << TextToken.place(text, previous_token, token_class) if text
-        token = token_class.new(@template[pos, offset - 1])
+        token = token_class.new(@template[pos, offset - token_class.tag_close.length])
         tokens << token
         previous_token = token_class
         pos += offset

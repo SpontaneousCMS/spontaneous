@@ -537,7 +537,6 @@ class BackTest < MiniTest::Spec
         last_id = @home.in_progress.pieces.last.id
         @home.in_progress.pieces.last.class.name.should_not == "BackTest::Image"
         auth_post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => -1
-        puts last_response.body
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload

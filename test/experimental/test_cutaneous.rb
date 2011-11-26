@@ -21,9 +21,21 @@ Text \\problem
 Text
 TEMPLATE
 
+  VIEW_TEMPLATE = (<<-TEMPLATE)
+<title>{{ title }}</title>
+
+!{ comment }
+Welome
+
+{% 2.times do |n| %}
+  {{ names[n] }}
+{% end %}
+
+TEMPLATE
+
   context "publishing parser" do
     setup do
-      @lexer = Cutaneous::PublishTokenParser.new(PUBLISH_TEMPLATE)
+      @parser = Cutaneous::PublishTokenParser.new(PUBLISH_TEMPLATE)
     end
 
     should "tokenize a single statement" do
@@ -59,7 +71,7 @@ TEMPLATE
     end
 
     should "correctly tokenize a complex template string" do
-      @lexer.tokens.map { |token| token.class }.should == [
+      @parser.tokens.map { |token| token.class }.should == [
         Cutaneous::PublishTokenParser::TextToken,
         Cutaneous::PublishTokenParser::CommentToken,
         Cutaneous::PublishTokenParser::TextToken,
@@ -88,7 +100,7 @@ TEMPLATE
         " b ",
         "\nText\n"
       ]
-      expressions = @lexer.tokens.map { |token| token.raw_expression }
+      expressions = @parser.tokens.map { |token| token.raw_expression }
       expressions.each_with_index do |e, i|
         e.should == expected[i]
       end
@@ -96,7 +108,7 @@ TEMPLATE
     end
 
     should "correctly post process the expressions" do
-      expressions = @lexer.tokens.map { |token| token.expression }
+      expressions = @parser.tokens.map { |token| token.expression }
       expected = [
         "Text here {{ preview_tag }}\n\n\n",
         " comment which should be ignored ",
@@ -117,7 +129,7 @@ TEMPLATE
     end
 
     should "correctly convert the expressions to template script code" do
-      scripts =  @lexer.tokens.map { |token| token.script }
+      scripts =  @parser.tokens.map { |token| token.script }
 
       expected = [
         %(_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n),
@@ -140,7 +152,7 @@ TEMPLATE
 
     should "correctly generate the template script" do
       expected = %Q/_buf << %Q`Text here {{ preview_tag }}\n\n\n`\n_buf << %Q`Text \\`problem\\`\n`\n_buf << _decode_params(("<div>"))\n_buf << %Q`\n`\n_buf << escape(_decode_params(("<div>")))\n_buf << %Q`\n`\na = {:key => title}\n  b = a.map { |k, v| "\#{k}=\#{v}" }\n_buf << %Q`Text \\\\problem\n  `\n_buf << _decode_params((b))\n_buf << %Q`\nText\n`\n/
-      script = @lexer.script
+      script = @parser.script
       # puts expected
       # puts "================================"
       # puts script
@@ -149,9 +161,77 @@ TEMPLATE
     end
   end
 
-  context "publish templates" do
+  context "view parser" do
     setup do
     end
+    should "tokenize a single statement" do
+      parser = Cutaneous::ViewTokenParser.new("{% a = {:a => \"a\" } %}")
+      tokens = parser.tokens
+      tokens.length.should == 1
+      tokens.first.must_be_instance_of(Cutaneous::ViewTokenParser::StatementToken)
+      tokens.first.expression.should == 'a = {:a => "a" }'
+    end
+
+    should "tokenize a single expression" do
+      parser = Cutaneous::ViewTokenParser.new("{{ a }}")
+      tokens = parser.tokens
+      tokens.length.should == 1
+      tokens.first.must_be_instance_of(Cutaneous::ViewTokenParser::ExpressionToken)
+      tokens.first.expression.should == 'a'
+    end
+
+    should "tokenize a single escaped expression" do
+      parser = Cutaneous::ViewTokenParser.new("{$ a $}")
+      tokens = parser.tokens
+      tokens.length.should == 1
+      tokens.first.must_be_instance_of(Cutaneous::ViewTokenParser::EscapedExpressionToken)
+      tokens.first.expression.should == 'a'
+    end
+
+    should "tokenize plain text" do
+      parser = Cutaneous::ViewTokenParser.new("Hello there")
+      tokens = parser.tokens
+      tokens.length.should == 1
+      tokens.first.must_be_instance_of(Cutaneous::ViewTokenParser::TextToken)
+      tokens.first.expression.should == 'Hello there'
+    end
+
+    should "tokenize a single comment" do
+      parser = Cutaneous::ViewTokenParser.new("!{ comment }")
+      tokens = parser.tokens
+      tokens.length.should == 1
+      tokens.first.must_be_instance_of(Cutaneous::ViewTokenParser::CommentToken)
+      tokens.first.expression.should == ' comment '
+    end
+
+    should "tokenize a mixed template" do
+      parser = Cutaneous::ViewTokenParser.new("{% a = [1,2].map { |x| x } %}!{ comment }{{ a }}")
+      tokens = parser.tokens
+      tokens.length.should == 3
+      tokens[0].must_be_instance_of(Cutaneous::ViewTokenParser::StatementToken)
+      tokens[1].must_be_instance_of(Cutaneous::ViewTokenParser::CommentToken)
+      tokens[2].must_be_instance_of(Cutaneous::ViewTokenParser::ExpressionToken)
+      tokens[0].expression.should == 'a = [1,2].map { |x| x }'
+      tokens[1].expression.should == ' comment '
+      tokens[2].expression.should == 'a'
+    end
+    should "tokenize a mixed publish & view template" do
+      parser = Cutaneous::ViewTokenParser.new(PUBLISH_TEMPLATE)
+      tokens = parser.tokens
+      tokens.length.should == 5
+      tokens.map { |t| t.class }.should == [
+        Cutaneous::ViewTokenParser::TextToken,
+        Cutaneous::ViewTokenParser::ExpressionToken,
+        Cutaneous::ViewTokenParser::TextToken,
+        Cutaneous::ViewTokenParser::CommentToken,
+        Cutaneous::ViewTokenParser::TextToken
+      ]
+      tokens[1].expression.should == 'preview_tag'
+    end
+  end
+
+
+  context "publish templates" do
     context "from files" do
       setup do
         @tmp = Dir.mktmpdir
@@ -203,6 +283,59 @@ Text
         context = Cutaneous::PublishContext.new(nil, :html, {:title => "title"})
         template.render(context).should == "title"
         template.convert("${ title }!")
+        template.render(context).should == "title!"
+      end
+    end
+  end
+  context "view templates" do
+    context "from files" do
+      setup do
+        @tmp = Dir.mktmpdir
+        @template_path = File.join(@tmp, "template.html.cut")
+        File.open(@template_path, "w") do |file|
+          file.write(VIEW_TEMPLATE)
+        end
+      end
+      teardown do
+        FileUtils.rm_r(@tmp)
+      end
+
+      should "just be empty if created empty" do
+        template = Cutaneous::RequestTemplate.new
+        template.filename.should be_nil
+        template.script.should be_nil
+      end
+
+      should "convert a string" do
+        template = Cutaneous::RequestTemplate.new
+        template.convert("!{ comment }{{ title }}", "/path/to/template.html.cut")
+        template.filename.should == "/path/to/template.html.cut"
+        context = Cutaneous::RequestContext.new(nil, :html, {:title => "title"})
+        template.render(context).should == "title"
+      end
+
+      should "parse the file if created with one" do
+        template = Cutaneous::RequestTemplate.new(@template_path)
+        template.filename.should == @template_path
+        template.script.should =~ /^\s*_buf/
+        context = Cutaneous::RequestContext.new(nil, :html, {:title => "title", :names => ["george", "mary"]})
+        # puts template.render(context)
+        template.render(context).should == (<<-HTML)
+<title>title</title>
+
+Welome
+
+  george
+  mary
+        HTML
+      end
+
+      should "reset if given a different string" do
+        template = Cutaneous::RequestTemplate.new
+        template.convert("{{ title }}")
+        context = Cutaneous::RequestContext.new(nil, :html, {:title => "title"})
+        template.render(context).should == "title"
+        template.convert("{{ title }}!")
         template.render(context).should == "title!"
       end
     end

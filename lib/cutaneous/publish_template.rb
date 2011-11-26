@@ -2,8 +2,9 @@
 
 module Cutaneous
   class PublishTemplate
-    attr_accessor :timestamp, :filename
     attr_reader   :parser
+    attr_writer   :script
+    attr_accessor :timestamp, :filename
 
     def initialize(template_file = nil, format=:html)
       @format = format
@@ -22,8 +23,8 @@ module Cutaneous
     end
 
     def script
-      return nil unless @parser
-      @parser.script
+      return nil unless @parser or @script
+      @script ||= @parser.script
     end
 
     # I'm not doing any type checking here as I know exactly where the calls are coming from

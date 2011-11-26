@@ -4,7 +4,7 @@ module Cutaneous
   class SecondPassRenderer < Renderer
 
     def template_class
-      Cutaneous::SecondPassParser
+      Cutaneous::RequestTemplate
     end
 
     def context_class
