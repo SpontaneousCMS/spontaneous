@@ -169,14 +169,15 @@ module Cutaneous
       self.dup.tap { |context| context._update(locals) }
     end
 
-    def _decode_params(param, *args)
+    def _decode_params(param)
       unless param.is_a?(String)
         @_render_method ||= "to_#{_format}".to_sym
         if param.respond_to?(@_render_method)
-          param = param.send(@_render_method, *args)
-        end
-        if param.respond_to?(:render)
-          param = param.render(_format, self, *args)
+          param = param.send(@_render_method)
+        else
+          if param.respond_to?(:render)
+            param = param.render(_format, self)
+          end
         end
       end
       # super(param)

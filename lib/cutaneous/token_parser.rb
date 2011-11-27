@@ -1,3 +1,7 @@
+# encoding: UTF-8
+
+require 'strscan'
+
 module Cutaneous
   class TokenParser
 
@@ -47,45 +51,33 @@ module Cutaneous
     protected
 
     def parse
-      tokens = []
-      pos = 0
-      previous_token = nil
-      token_map = self.class.token_map
+      tokens            = []
+      scanner           = StringScanner.new(@template)
       tag_start_pattern = self.class.tag_start_pattern
-      tags = self.class.tags
+      token_map         = self.class.token_map
+      tags              = self.class.tags
+      braces            = /\{|\}/
+      previous_token    = nil
+      endtags_length    = Hash[tags.map { |type, tags| [type, tags[1].length ]}]
 
-      while (start = @template.index(tag_start_pattern, pos))
-        text = nil
-        text = @template[pos, start - pos] if (start > pos)
-        pos = start
+      while (match = scanner.scan_until(tag_start_pattern))
+        tag = scanner.matched
+        text = match[0, match.length-tag.length]
+        token_type = token_map[tag]
+        expression = ""
+        brace_count = tag.count(?{)
 
-        tag, token_type = token_map.detect { |tag, type| @template[pos, tag.length] == tag }
-        pos += tag.length
-
-        offset = 0
-        opening_braces = tag.count(?{)
-        closing_braces = 0
-
-        while opening_braces > closing_braces
-          case @template[pos + offset]
-          when ?{
-            opening_braces += 1
-          when ?}
-            closing_braces += 1
-          end
-          offset += 1
+        while brace_count > 0
+          expression << scanner.scan_until(braces)
+          brace = scanner.matched
+          brace_count += ((123 - brace.ord)+1)
         end
-
-        tokens << place_text_token(text, previous_token, token_type) if text
-        token = create_token(token_type, @template[pos, offset - tags[token_type][1].length])
+        tokens << place_text_token(text, previous_token, token_type) if text.length > 0
+        token = create_token(token_type, expression[0, expression.length-(endtags_length[token_type])])
         tokens << token
         previous_token = token_type
-        pos += offset
       end
-      if pos < @template.length
-        text = ((pos > 0) ? @template[pos..-1] : @template)
-        tokens << place_text_token(text, previous_token, nil) if text
-      end
+      tokens << place_text_token(scanner.rest, previous_token, nil) unless scanner.eos?
       tokens
     end
 
