@@ -82,20 +82,15 @@ module Cutaneous
     end
 
     def create_token(type, expression)
-      case type
-      when :expression, :escaped_expression, :statement
-        expression.strip!
-      end
+      expression.strip! if type == :expression || type == :escaped_expression || type == :statement
       [type, expression]
     end
 
     def place_text_token(expression, preceeding_type, following_type)
-      case preceeding_type
-      when :comment, :statement
+      if preceeding_type == :comment || preceeding_type == :statement
         expression.gsub!(/\A\s*?[\r\n]+/, '')
       end
-      case following_type
-      when :comment, :statement
+      if following_type == :comment || following_type == :statement
         expression.gsub!(/(\r?\n)[ \t]*\z/, '\1')
       end
       [:text, expression]
