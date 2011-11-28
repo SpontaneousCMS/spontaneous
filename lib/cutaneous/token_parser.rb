@@ -25,7 +25,7 @@ module Cutaneous
 
     def self.compile_start_pattern
       openings = self.tags.map { |type, tags| Regexp.escape(tags[0]) }
-      Regexp.new("(#{ openings.join("|") })")
+      Regexp.new("#{ openings.join("|") }")
     end
 
     def self.token_map
@@ -67,11 +67,12 @@ module Cutaneous
         expression = ""
         brace_count = tag.count(?{)
 
-        while brace_count > 0
+        begin
           expression << scanner.scan_until(braces)
           brace = scanner.matched
           brace_count += ((123 - brace.ord)+1)
-        end
+        end while (brace_count > 0)
+
         tokens << place_text_token(text, previous_token, token_type) if text.length > 0
         token = create_token(token_type, expression[0, expression.length-(endtags_length[token_type])])
         tokens << token
@@ -86,35 +87,36 @@ module Cutaneous
       [type, expression]
     end
 
+    BEGINNING_WHITESPACE ||= /\A\s*?[\r\n]+/
+    ENDING_WHITESPACE    ||= /(\r?\n)[ \t]*\z/
+    ESCAPE_STRING        ||= /[`\\]/
+
     def place_text_token(expression, preceeding_type, following_type)
-      if preceeding_type == :comment || preceeding_type == :statement
-        expression.gsub!(/\A\s*?[\r\n]+/, '')
+      if preceeding_type == :statement || preceeding_type == :comment
+        expression.gsub!(BEGINNING_WHITESPACE, '')
       end
-      if following_type == :comment || following_type == :statement
-        expression.gsub!(/(\r?\n)[ \t]*\z/, '\1')
+      if following_type == :statement || following_type == :comment
+        expression.gsub!(ENDING_WHITESPACE, '\1')
       end
+      expression.gsub!(ESCAPE_STRING, '\\\\\&')
       [:text, expression]
     end
 
     def compile
       script = ""
-      tokens.map do |type, expression|
+      tokens.each do |type, expression|
         case type
-        when :text
-          script << %(_buf << %Q`#{escape_text(expression)}`\n)
         when :expression
-          script << %(_buf << _decode_params((#{expression}))\n)
-        when :escaped_expression
-          script << %(_buf << escape(_decode_params((#{expression})))\n)
+          script << %{_buf << _decode_params((} << expression << %{))\n}
+        when :text
+          script << %(_buf << %Q`) << expression << %(`\n)
         when :statement
-          script << expression + "\n"
+          script << expression << "\n"
+        when :escaped_expression
+          script << %{_buf << escape(_decode_params((} << expression << %{)))\n}
         end
       end
       script
-    end
-
-    def escape_text(str)
-      str.gsub(/[`\\]/, '\\\\\&')
     end
   end
 end

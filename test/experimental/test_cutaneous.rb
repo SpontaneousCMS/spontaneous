@@ -87,13 +87,13 @@ TEMPLATE
       expected = [
         [:text, "Text here {{ preview_tag }}\n\n\n"],
         [:comment, " comment which should be ignored "],
-        [:text, "Text `problem`\n"],
+        [:text, "Text \\`problem\\`\n"],
         [:expression, %("<div>")],
         [:text, "\n"],
         [:escaped_expression, %("<div>")],
         [:text, "\n"],
         [:statement, "a = {:key => title}\n  b = a.map { |k, v| \"\#{k}=\#{v}\" }"],
-        [:text, "Text \\problem\n  "],
+        [:text, "Text \\\\problem\n  "],
         [:expression, "b"],
         [:text, "\nText\n"]
       ]
