@@ -5,36 +5,39 @@ require 'strscan'
 module Cutaneous
   class TokenParser
 
-    def self.generate(tag_definitions)
-      Class.new(Cutaneous::TokenParser).tap do |parser_class|
-        parser_class.tags = tag_definitions
-      end
-    end
-
     class << self
       attr_accessor :tags
     end
 
-    def self.token_classes
-      @token_classes ||= []
+    module ClassMethods
+      def generate(tag_definitions)
+        parser_class = Class.new(Cutaneous::TokenParser)
+        parser_class.tags = tag_definitions
+        parser_class
+      end
+
+      def is_dynamic?(text)
+        !text.index(tag_start_pattern).nil?
+      end
+
+
+      def tag_start_pattern
+        @tag_start_pattern ||= compile_start_pattern
+      end
+
+      def compile_start_pattern
+        openings = self.tags.map { |type, tags| Regexp.escape(tags[0]) }
+        Regexp.new("#{ openings.join("|") }")
+      end
+
+      # map the set of tags into a hash used by the parse routine that converts an opening tag into a
+      # list of: tag type, the number of opening braces in the tag and the length of the closing tag
+      def token_map
+        @token_map ||= Hash[tags.map { |type, tags| [tags[0], [type, tags[0].count(?{), tags[1].length]] }]
+      end
     end
 
-    def self.tag_start_pattern
-      @tag_start_pattern ||= compile_start_pattern
-    end
-
-    def self.compile_start_pattern
-      openings = self.tags.map { |type, tags| Regexp.escape(tags[0]) }
-      Regexp.new("#{ openings.join("|") }")
-    end
-
-    def self.token_map
-      @token_map ||= Hash[tags.map { | type, tags | [tags[0], type] }]
-    end
-
-    def self.is_dynamic?(text)
-      !text.index(tag_start_pattern).nil?
-    end
+    extend ClassMethods
 
     def initialize(template)
       @template = template
@@ -50,35 +53,35 @@ module Cutaneous
 
     protected
 
-    def parse
-      tokens            = []
-      scanner           = StringScanner.new(@template)
-      tag_start_pattern = self.class.tag_start_pattern
-      token_map         = self.class.token_map
-      tags              = self.class.tags
-      braces            = /\{|\}/
-      previous_token    = nil
-      endtags_length    = Hash[tags.map { |type, tags| [type, tags[1].length ]}]
+    BRACES ||= /\{|\}/
 
-      while (match = scanner.scan_until(tag_start_pattern))
+    def parse
+      tokens    = []
+      scanner   = StringScanner.new(@template)
+      tag_start = self.class.tag_start_pattern
+      tags      = self.class.tags
+      token_map = self.class.token_map
+      previous  = nil
+
+      while (text = scanner.scan_until(tag_start))
         tag = scanner.matched
-        text = match[0, match.length-tag.length]
-        token_type = token_map[tag]
+        type, brace_count, endtag_length = token_map[tag]
+        text.slice!(text.length - tag.length, text.length)
         expression = ""
-        brace_count = tag.count(?{)
 
         begin
-          expression << scanner.scan_until(braces)
+          expression << scanner.scan_until(BRACES)
           brace = scanner.matched
           brace_count += ((123 - brace.ord)+1)
         end while (brace_count > 0)
 
-        tokens << place_text_token(text, previous_token, token_type) if text.length > 0
-        token = create_token(token_type, expression[0, expression.length-(endtags_length[token_type])])
-        tokens << token
-        previous_token = token_type
+        expression.slice!(expression.length - endtag_length, expression.length)
+
+        tokens << place_text_token(text, previous, type) if text.length > 0
+        tokens << create_token(type, expression)
+        previous = type
       end
-      tokens << place_text_token(scanner.rest, previous_token, nil) unless scanner.eos?
+      tokens << place_text_token(scanner.rest, previous, nil) unless scanner.eos?
       tokens
     end
 
