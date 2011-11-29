@@ -1,5 +1,5 @@
 module Cutaneous
-  RequestTokenParser ||= Cutaneous::TokenParser.generate({
+  RequestTokenParser = Cutaneous::TokenParser.generate({
     :comment => %w(!{ }),
     :expression => %w({{ }}),
     :escaped_expression => %w({$ $}),

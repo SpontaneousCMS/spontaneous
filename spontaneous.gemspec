@@ -54,7 +54,7 @@ Gem::Specification.new do |s|
   s.add_dependency('activesupport', ["~> 3.0.4"])
   s.add_dependency('home_run', ["~> 1.0.0"])
   s.add_dependency('sequel', ["~> 3.27"])
-  s.add_dependency('yajl-ruby', ["~> 0.7"])
+  s.add_dependency('yajl-ruby', ["~> 1.1"])
   s.add_dependency('erubis', ["~> 2.6"])
   s.add_dependency('sinatra', ["~> 1.3.0"])
   s.add_dependency('rack', ["~> 1.3.4"])
