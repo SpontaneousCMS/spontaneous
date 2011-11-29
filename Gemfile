@@ -30,8 +30,8 @@ gem 'simultaneous', :path => "/Users/garry/Dropbox/Development/spontaneous3/simu
 # gem 'xapian-full', '~> 1.2.3'
 # gem 'xapian-fu', '~> 1.3'
 
+gem "mysql2", "~> 0.3.7", :git => "git://github.com/brianmario/mysql2.git", :ref => "d3a96b8"
 group :development do
-  gem "mysql2", "~> 0.3.7", :git => "git://github.com/brianmario/mysql2.git", :ref => "d3a96b8"
   # gem 'minitest', '~> 2.1.0'
   # # gem 'pg', '~> 0.9.0'
   # gem 'jeweler', '~> 1.5'
