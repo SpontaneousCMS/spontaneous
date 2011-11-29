@@ -47,6 +47,8 @@ module Spontaneous
       attr_accessor :owner, :name, :unprocessed_value, :template_params, :version
       attr_reader   :processed_values
 
+      alias_method :values, :processed_values
+
 
       def initialize(params={}, from_db=false)
         @processed_values = {}

@@ -49,6 +49,12 @@ module Spontaneous
       def to_s
         src
       end
+
+      def /(value)
+        return self unless value.respond_to?(:empty?)
+        return value if self.empty?
+        self
+      end
     end
 
     class ImageField < Field
@@ -190,6 +196,10 @@ module Spontaneous
 
       def inspect
         %(<#{self.class.name}: src=#{src.inspect} width="#{width}" height="#{height}">)
+      end
+
+      def empty?
+        src.blank?
       end
     end
 

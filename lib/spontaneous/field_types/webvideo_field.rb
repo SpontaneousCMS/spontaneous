@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'open-uri'
+require 'nokogiri'
 
 module Spontaneous
   module FieldTypes
@@ -26,11 +28,15 @@ module Spontaneous
         when "", nil
           # ignore this
         when /youtube\.com.*\?.*v=([^&]+)/, /youtu.be\/([^&]+)/
-          values[:id] = $1
+          id = $1
+          values.update(retrieve_youtube_metadata(id))
+          values[:id] = id
           values[:type] = "youtube"
         when /vimeo\.com\/(\d+)/
-          values[:id] = $1
+          id = $1
           values[:type] = "vimeo"
+          values.update(retrieve_vimeo_metadata(id))
+          values[:id] = id.to_s
         else
           logger.warn "WebVideo field doesn't recognise the URL '#{input}'"
         end
@@ -82,6 +88,34 @@ module Spontaneous
         render(:html, :width => 480, :height => 270)
       end
 
+      def retrieve_vimeo_metadata(id)
+        url = "http://vimeo.com/api/v2/video/%s.json" % id
+        response = open(url).read rescue "[{}]"
+        metadata = Spontaneous.parse_json(response) rescue [{}]
+        metadata = metadata.first
+      end
+
+      def retrieve_youtube_metadata(id)
+        url = "http://gdata.youtube.com/feeds/api/videos/%s?v=2" % id
+        begin
+        doc = Nokogiri::XML(open(url))
+        entry = doc.xpath("xmlns:entry")
+
+        { "title" => entry.xpath("xmlns:title").text.strip,
+          "description" => entry.xpath("media:group/media:description").text.strip,
+          "thumbnail_large" => entry.xpath('media:group/media:thumbnail[@yt:name="hqdefault"]').first["url"].strip,
+          "thumbnail_small" => entry.xpath('media:group/media:thumbnail[@yt:name="default"]').first["url"].strip,
+          "user_name" => entry.xpath("xmlns:author/xmlns:name").text.strip,
+          "upload_date" => Time.parse(entry.xpath("xmlns:published").text.strip).strftime("%Y-%m-%d %H:%M:%S"),
+          "tags" => entry.xpath("media:group/media:keywords").text.strip,
+          "duration" => entry.xpath("media:group/yt:duration").first['seconds'].to_i,
+          "stats_number_of_likes" => entry.xpath("yt:rating").first['numLikes'].to_i,
+          "stats_number_of_plays" => entry.xpath("yt:statistics").first['viewCount'].to_i,
+          "stats_number_of_comments" => entry.xpath("gd:comments/gd:feedLink").first['countHint'].to_i }
+        rescue
+          {}
+        end
+      end
 
       def default_player_options
         {
