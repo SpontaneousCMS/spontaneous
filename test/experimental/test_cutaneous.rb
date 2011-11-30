@@ -66,6 +66,12 @@ TEMPLATE
       tokens.first.should == [:comment,  ' comment ']
     end
 
+    should "correctly tokenize tags within a comment" do
+      lexer = Cutaneous::PublishTokenParser.new("!{ %{ a = true } ${ value } !{ nested comment }}")
+      tokens = lexer.tokens
+      tokens.length.should == 1
+      tokens.first.should == [:comment,  ' %{ a = true } ${ value } !{ nested comment }']
+    end
     should "correctly tokenize a complex template string" do
       @parser.tokens.map { |token| token[0] }.should == [
         :text,
