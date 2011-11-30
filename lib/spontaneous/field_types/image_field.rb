@@ -51,8 +51,7 @@ module Spontaneous
       end
 
       def /(value)
-        return self unless value.respond_to?(:empty?)
-        return value if self.empty?
+        return value if self.blank?
         self
       end
     end
@@ -198,9 +197,11 @@ module Spontaneous
         %(<#{self.class.name}: src=#{src.inspect} width="#{width}" height="#{height}">)
       end
 
-      def empty?
+      def blank?
         src.blank?
       end
+
+      alias_method :empty?, :blank?
     end
 
     class ImageProcessor

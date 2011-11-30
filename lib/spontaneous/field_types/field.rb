@@ -225,13 +225,11 @@ module Spontaneous
         unprocessed_value.blank?
       end
 
-      def empty?
-        unprocessed_value.empty?
-      end
+      alias_method :empty?, :blank?
+
 
       def /(field)
-        return self unless field.respond_to?(:empty?)
-        return field if self.empty?
+        return field if self.blank?
         self
       end
       alias_method :'|', :/

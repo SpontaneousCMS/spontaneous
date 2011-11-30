@@ -10,5 +10,11 @@ class ExtensionsTest < MiniTest::Spec
       ("/this" / "/that").should == "/this/that"
     end
   end
+
+  context "Nil" do
+    should "always return the argument for the slash switch" do
+      (nil / "something").should == "something"
+    end
+  end
 end
 
