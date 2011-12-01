@@ -98,7 +98,7 @@ module Spontaneous
 
           map "/media" do
             use ::Rack::Lint
-            run Spontaneous::Rack::Media.new
+            run Spontaneous::Rack::CacheableFile.new(Spontaneous.media_dir)
           end
 
           map "/" do
