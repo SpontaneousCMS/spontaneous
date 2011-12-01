@@ -41,6 +41,29 @@ class ConfigTest < MiniTest::Spec
       end
     end
 
+    context "containing blocks" do
+      setup do
+        @settings = {}
+        @config = Config::Loader.new(@settings)
+      end
+      should "add a hash to the settings under the defined key" do
+        @config.storage :key1 do |config|
+          config[:a] = "a"
+          config[:b] = "b"
+        end
+        @config.storage :key2 do |config|
+          config[:c] = "c"
+          config[:d] = "d"
+        end
+        @config.storage :key1 do |config|
+          config[:e] = "e"
+        end
+        @config.settings[:storage].should == {
+          :key1 => { :a => "a", :b => "b", :e => "e" },
+          :key2 => { :c => "c", :d => "d" }
+        }
+      end
+    end
     context "Independent configuration loading" do
       setup do
         # defined?(Spontaneous).should be_nil

@@ -4,17 +4,18 @@ module Spontaneous
   class Config
 
     class Loader
+      attr_reader :settings
 
       def self.read(settings, file, mode)
         self.new(settings, file, mode).load
       end
 
-      def initialize(settings, file, mode)
+      def initialize(settings, file = nil, mode = nil)
         @settings, @file, @mode = settings, file, mode
       end
 
       def load
-        instance_eval(File.read(@file))
+        instance_eval(File.read(@file)) if @file
         @settings
       end
 
@@ -33,11 +34,19 @@ module Spontaneous
         end
       end
 
-      def method_missing(parameter, *args)
+      def method_missing(parameter, *args, &block)
+        setting = args
         if args.length == 1
-          args = args[0]
+          setting = args[0]
+          if block_given?
+            key_name = setting
+            setting = @settings[parameter] || {}
+            values = setting[key_name] || {}
+            block.call(values)
+            setting.update({ key_name => values })
+          end
         end
-        @settings[parameter] = args
+        @settings[parameter] = setting
       end
     end
 
