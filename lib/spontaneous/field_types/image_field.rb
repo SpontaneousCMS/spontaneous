@@ -207,12 +207,13 @@ module Spontaneous
     class ImageProcessor
       include ImageFieldUtilities
 
-      class ImageDelegator < Spontaneous::ProxyObject
-        attr_reader :image
+      class ImageDelegator < SimpleDelegator
 
         def initialize(image)
-          @image = image
+          super(image)
         end
+
+        alias_method :image, :__getobj__
 
         def format(*args, &block)
           image.format(*args, &block)

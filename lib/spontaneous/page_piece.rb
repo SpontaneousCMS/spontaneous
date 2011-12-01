@@ -1,17 +1,21 @@
 # encoding: UTF-8
 
+require 'delegate'
 
 module Spontaneous
-  class PagePiece < ProxyObject
+  class PagePiece < DelegateClass(Page)
     extend Plugins
     plugin Plugins::Render
 
     attr_accessor :container
-    attr_reader :target, :style_id
+    attr_reader :style_id
 
     def initialize(container, target, style_id)
-      @container, @target, @style_id = container, target, style_id
+      super(target)
+      @container, @style_id = container, style_id
     end
+
+    alias_method :target, :__getobj__
 
     def id
       target.id
@@ -63,14 +67,6 @@ module Spontaneous
 
     def template(format = :html)
       style.template(format)
-    end
-
-    def method_missing(method, *args)
-      if block_given?
-        self.target.__send__(method, *args, &Proc.new)
-      else
-        self.target.__send__(method, *args)
-      end
     end
   end
 end

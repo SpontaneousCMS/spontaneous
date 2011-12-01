@@ -57,8 +57,6 @@ module Spontaneous
   plugin Plugins::Application::Serialisation
   plugin Plugins::Application::Features
 
-  autoload :ProxyObject, "spontaneous/proxy_object"
-
   autoload :Config, "spontaneous/config"
   autoload :Paths, "spontaneous/paths"
   autoload :Facet, "spontaneous/facet"

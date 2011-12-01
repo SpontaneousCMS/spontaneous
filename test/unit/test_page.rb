@@ -125,12 +125,6 @@ class PageTest < MiniTest::Spec
         @t = Page[@t.id]
       end
 
-      should "have the right entry classes" do
-        @p.pieces.first.proxy_class.should == Spontaneous::PagePiece
-        @q.pieces.first.proxy_class.should == Spontaneous::PagePiece
-        @s.pieces.first.proxy_class.should == Spontaneous::PagePiece
-      end
-
       should "have a reference to their parent" do
         @p.parent.should be_nil
         @q.parent.should === @p
