@@ -307,15 +307,9 @@ module Spontaneous
           end
         end
 
-        post '/version/:id' do
-          content_for_request(true) do |content|
-            generate_conflict_list(content)
-          end
-        end
-
-        post '/version/:id/:box_id' do
+        post '/version/:id/?:box_id?' do
           content_for_request(true) do |content, box|
-            generate_conflict_list(box)
+            generate_conflict_list(box || content)
           end
         end
 
@@ -377,29 +371,7 @@ module Spontaneous
           end
         end
 
-
-        # TODO: DRY this up
-        post '/file/replace/:id' do
-          content_for_request(true) do |target|
-            file = params['file']
-            field = target.fields.sid(params['field'])
-            if target.field_writable?(user, field.name)
-              # version = params[:version].to_i
-              # if version == field.version
-              field.unprocessed_value = file
-              target.save
-              json(field.export(user))
-              # else
-              #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
-              #   [409, json(Hash[errors])]
-              # end
-            else
-              unauthorised!
-            end
-          end
-        end
-
-        post '/file/replace/:id/:box_id' do
+        post '/file/replace/:id/?:box_id?' do
           content_for_request(true) do |content, box|
             target = box || content
             file = params[:file]
@@ -591,15 +563,10 @@ module Spontaneous
           end
         end
 
-        post '/shard/replace/:id' do
-          content_for_request(true) do |content|
-            replace_with_shard(content, content.id)
-          end
-        end
-
-        post '/shard/replace/:id/:box_id' do
+        post '/shard/replace/:id/?:box_id?' do
           content_for_request(true) do |content, box|
-            replace_with_shard(box, content.id)
+            target = box || content
+            replace_with_shard(target, content.id)
           end
         end
 
