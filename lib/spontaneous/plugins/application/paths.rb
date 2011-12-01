@@ -127,7 +127,7 @@ module Spontaneous::Plugins::Application
       end
 
       def relative_dir(root, *path)
-        File.join(root, *path)
+        File.join(root, *path.map { |p| p.to_s })
       end
     end # ClassMethods
   end # Paths

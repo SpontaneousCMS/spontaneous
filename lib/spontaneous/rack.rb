@@ -12,6 +12,8 @@ module Spontaneous
     AUTH_COOKIE = "spontaneous_api_key".freeze
     KEY_PARAM = "__key".freeze
 
+    EXPIRES_MAX = DateTime.parse("Thu, 31 Dec 2037 23:55:55 GMT").httpdate
+
     class << self
       def application
         case Spontaneous.mode

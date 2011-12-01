@@ -102,9 +102,9 @@ module Spontaneous
       nil
     end
 
-    def revision_root(*path)
+    def revision_root
       @revision_dir ||= File.expand_path(@root / 'cache/revisions')
-      Spontaneous.relative_dir(@revision_dir, *path)
+      # Spontaneous.relative_dir(@revision_dir, *path)
     end
 
     def revision_dir(revision=nil, root = revision_root)

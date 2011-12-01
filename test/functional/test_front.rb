@@ -562,5 +562,31 @@ class FrontTest < MiniTest::Spec
         end
       end
     end
+    context "Static files" do
+      setup do
+        @public_dir = Spontaneous.instance.revision_dir(1) / "public"
+      end
+
+      should "should be sourced from the published revision directory" do
+        test_string = "#{Time.now}\n"
+        test_file = "#{Time.now.to_i}.txt"
+        File.open(@public_dir / test_file, 'w') { |f| f.write(test_string) }
+        get "/#{test_file}"
+        assert last_response.ok?
+        last_response.body.should == test_string
+      end
+
+      should "pass far-future expires headers for media" do
+        test_string = "#{Time.now}\n"
+        test_file_url = "#{Time.now.to_i}.txt"
+        test_file = Spontaneous.media_dir / test_file_url
+        FileUtils.mkdir_p(File.dirname(test_file))
+        File.open(test_file, 'w') { |f| f.write(test_string) }
+        get "/media/#{test_file_url}"
+        assert last_response.ok?
+        expiry = DateTime.parse last_response.headers["Expires"]
+        expiry.year.should > Date.new.year
+      end
+    end
   end
 end

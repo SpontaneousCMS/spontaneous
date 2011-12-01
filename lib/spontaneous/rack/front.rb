@@ -10,7 +10,7 @@ module Spontaneous
           # use ::Rack::CommonLogger, STDERR  #unless server.name =~ /CGI/
           # use ::Rack::ShowExceptions
 
-          use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
+          use Spontaneous::Rack::Static, :root => Spontaneous.revision_dir / "public",
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
 
