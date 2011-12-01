@@ -244,7 +244,7 @@ module Spontaneous
       end
 
       def add_class(supertype, type)
-        inheritance_map[supertype] << type
+        inheritance_map[supertype.to_s] << type
         classes << type unless classes.include?(type)
       end
 
@@ -254,7 +254,7 @@ module Spontaneous
 
 
       def subclasses_of(type)
-        inheritance_map[type]
+        inheritance_map[type.to_s].map { |subclass| subclass }
       end
 
       def descendents_of(type)
