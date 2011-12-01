@@ -73,9 +73,11 @@ module Spontaneous
         [:html]
       end
 
-      def render_stages
-        # TODO: when search infrastructure is in place modify this to include the indexing steps
-        1
+      # The number of times the publisher has to run through the site's pages
+      # in order to generate the search indexes.
+      # Returns either 0 or 1
+      def index_stages
+        [1, S::Site.indexes.length].min
       end
 
       def publish(modified_page_list)
@@ -100,7 +102,7 @@ module Spontaneous
         S::Content.with_identity_map do
           S::Render.with_publishing_renderer do
             render_pages
-            index_pages
+            index_pages unless index_stages == 0
           end
         end
         copy_static_files
@@ -127,13 +129,14 @@ module Spontaneous
       # where indexes = Site.indexes.length > 0 ? 1 : 0
       # although not all pages are included by a format
       def total_pages_to_render
-        @total_pages ||= formats.inject([1, S::Site.indexes.length].min * pages.count) do |total, format|
-          total += pages.find_all { |page| page.formats.include?(format) }.count
+        @total_pages ||= (index_stages * pages.count) + formats.inject(0) do |total, format|
+          p format
+          total += pages.count { |page| page.formats.include?(format) }
         end
       end
 
       def percent_complete
-        ((@pages_rendered || 0).to_f / (total_pages_to_render * render_stages).to_f) * 100.0
+        ((@pages_rendered || 0).to_f / (total_pages_to_render).to_f) * 100.0
       end
 
       def update_progress(state, progress='*')
