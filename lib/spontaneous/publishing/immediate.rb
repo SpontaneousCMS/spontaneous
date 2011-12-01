@@ -130,7 +130,6 @@ module Spontaneous
       # although not all pages are included by a format
       def total_pages_to_render
         @total_pages ||= (index_stages * pages.count) + formats.inject(0) do |total, format|
-          p format
           total += pages.count { |page| page.formats.include?(format) }
         end
       end
