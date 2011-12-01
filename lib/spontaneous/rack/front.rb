@@ -10,9 +10,11 @@ module Spontaneous
           # use ::Rack::CommonLogger, STDERR  #unless server.name =~ /CGI/
           # use ::Rack::ShowExceptions
 
+
           use Spontaneous::Rack::Static, :root => Spontaneous.revision_dir / "public",
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
+
 
 
           Spontaneous.instance.front_controllers.each do |namespace, controller_class|
@@ -23,14 +25,18 @@ module Spontaneous
 
           # Make all the files available under plugin_name/public/**
           # available under the URL /plugin_name/**
-          Spontaneous.instance.plugins.each do |plugin|
-            map "/#{plugin.name}" do
-              run ::Rack::File.new(plugin.paths.expanded(:public))
-            end
-          end if Spontaneous.instance
+          # Spontaneous.instance.plugins.each do |plugin|
+          #   map "/#{plugin.name}" do
+          #     run ::Rack::File.new(plugin.paths.expanded(:public))
+          #   end
+          # end if Spontaneous.instance
+
+          map "/rev" do
+            run Spontaneous::Rack::CacheableFile.new(Spontaneous.revision_dir / "rev")
+          end
 
           map "/media" do
-            run Spontaneous::Rack::Media.new
+            run Spontaneous::Rack::CacheableFile.new(Spontaneous.media_dir)
           end
 
           map "/" do

@@ -1,9 +1,6 @@
-# encoding: UTF-8
-
-require 'rack'
 
 module Spontaneous::Rack
-  class XXX < ::Rack::File
+  class CacheableFile < ::Rack::File
     include HTTP
 
     TEN_YEARS = 10*365*24*3600
@@ -18,8 +15,8 @@ module Spontaneous::Rack
       [status, caching_headers(headers), body]
     end
 
-    # media is never over-written so we can make sure clients
-    # never make the same request twice
+    # Send a far future Expires header and make sure that
+    # the cache control is public
     def caching_headers(headers)
       headers.merge({
         HTTP_CACHE_CONTROL => MAX_AGE,

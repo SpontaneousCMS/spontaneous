@@ -6,11 +6,11 @@ require 'sinatra/base'
 
 module Spontaneous
   module Rack
-    NAMESPACE = "/@spontaneous".freeze
+    NAMESPACE   = "/@spontaneous".freeze
     ACTIVE_USER = "SPONTANEOUS_USER".freeze
     ACTIVE_KEY  = "SPONTANEOUS_KEY".freeze
     AUTH_COOKIE = "spontaneous_api_key".freeze
-    KEY_PARAM = "__key".freeze
+    KEY_PARAM   = "__key".freeze
 
     EXPIRES_MAX = DateTime.parse("Thu, 31 Dec 2037 23:55:55 GMT").httpdate
 
@@ -43,20 +43,6 @@ module Spontaneous
 
     class ServerBase < ::Sinatra::Base
       set :environment, Proc.new { Spontaneous.environment }
-
-      # serve static files from the app's public dir
-
-      ## removed these as sinatra now sets utf-8 by default
-      # mime_type :js,  'text/javascript; charset=utf-8'
-      # mime_type :css, 'text/css; charset=utf-8'
-
-      # before do
-      #   ## globally setting this screws up auto content type setting by send_file
-      #   # content_type 'text/html', :charset => 'utf-8'
-      #   if Spontaneous.development?
-      #     # Templates.clear_cache!
-      #   end
-      # end
     end
 
     autoload :HTTP,                 'spontaneous/rack/http'
@@ -65,7 +51,7 @@ module Spontaneous
     autoload :Front,                'spontaneous/rack/front'
     autoload :Public,               'spontaneous/rack/public'
     autoload :Authentication,       'spontaneous/rack/authentication'
-    autoload :Media,                'spontaneous/rack/media'
+    autoload :CacheableFile,        'spontaneous/rack/cacheable_file'
     autoload :Static,               'spontaneous/rack/static'
     autoload :UserHelpers,          'spontaneous/rack/user_helpers'
     autoload :Helpers,              'spontaneous/rack/helpers'
