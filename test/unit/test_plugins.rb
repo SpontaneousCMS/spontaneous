@@ -9,7 +9,9 @@ class PluginsTest < MiniTest::Spec
   def self.startup
     # @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
     # `mkdir -p #{@revision_root}/public`
+
     @site = setup_site
+
 
     klass =  Class.new(Spontaneous::Page)
     Object.send(:const_set, :Page, klass)
@@ -28,6 +30,7 @@ class PluginsTest < MiniTest::Spec
     plugin = Spontaneous.instance.load_plugin plugin_dir
     plugin.init!
     plugin.load!
+
   end
 
   def self.shutdown
@@ -45,10 +48,20 @@ class PluginsTest < MiniTest::Spec
   context "Plugins:" do
 
     setup do
+      Site.publishing_method = :immediate
+      State.delete
+      Content.delete
+      Change.delete
       @site = Spontaneous.instance
+      page = ::Page.new
+      page.save
+
     end
 
     teardown do
+      State.delete
+      Content.delete
+      Change.delete
     end
 
     should "load their init.rb file" do

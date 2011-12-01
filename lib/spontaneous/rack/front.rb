@@ -23,13 +23,15 @@ module Spontaneous
             end
           end if Spontaneous.instance
 
+
           # Make all the files available under plugin_name/public/**
           # available under the URL /plugin_name/**
-          # Spontaneous.instance.plugins.each do |plugin|
-          #   map "/#{plugin.name}" do
-          #     run ::Rack::File.new(plugin.paths.expanded(:public))
-          #   end
-          # end if Spontaneous.instance
+          # Only used in preview mode
+          Spontaneous.instance.plugins.each do |plugin|
+            map "/#{plugin.name}" do
+              run ::Rack::File.new(plugin.paths.expanded(:public))
+            end
+          end if Spontaneous.instance
 
           map "/rev" do
             run Spontaneous::Rack::CacheableFile.new(Spontaneous.revision_dir / "rev")
