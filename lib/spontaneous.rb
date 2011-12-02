@@ -102,6 +102,7 @@ module Spontaneous
   autoload :Application, "spontaneous/application"
 
   autoload :Search, "spontaneous/search"
+  autoload :Storage, "spontaneous/storage"
 
 
   module Prototypes
@@ -167,6 +168,7 @@ module Spontaneous
       autoload :Features,   "spontaneous/plugins/site/features"
       autoload :Schema,     "spontaneous/plugins/site/schema"
       autoload :Level,      "spontaneous/plugins/site/level"
+      autoload :Storage,    "spontaneous/plugins/site/storage"
     end
   end
 

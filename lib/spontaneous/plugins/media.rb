@@ -2,6 +2,7 @@
 
 module Spontaneous::Plugins
   module Media
+
     module ClassMethods
     end
 

@@ -56,6 +56,7 @@ Gem::Specification.new do |s|
   s.add_dependency('sequel', ["~> 3.27"])
   s.add_dependency('yajl-ruby', ["~> 1.1"])
   s.add_dependency('erubis', ["~> 2.6"])
+  s.add_dependency('fog', ["~> 1.1.1"])
   s.add_dependency('sinatra', ["~> 1.3.0"])
   s.add_dependency('rack', ["~> 1.3.4"])
   s.add_dependency('thin', ["~> 1.2"])
