@@ -12,7 +12,7 @@ module Spontaneous
     extend self
 
     def media_path(*args)
-      File.join(Spontaneous.media_dir, *args)
+      ::File.join(Spontaneous.media_dir, *args)
     end
 
     @@upload_uid_lock  = Mutex.new
@@ -65,7 +65,7 @@ module Spontaneous
       combined.binmode
 
       shards.each do |shard|
-        File.open(shard, 'rb') do |part|
+        ::File.open(shard, 'rb') do |part|
           while data = part.read(131072)
             combined.write(data)
           end

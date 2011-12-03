@@ -9,8 +9,7 @@ module Spontaneous::Storage
     end
 
     def copy(existing_file, media_path, mimetype)
-      dest_path = File.join(root, media_path)
-      FileUtils.mkdir_p(File.dirname(dest_path)) unless File.exist?(File.dirname(dest_path))
+      dest_path = create_absolute_path(media_path)
       if existing_file.respond_to?(:read)
         File.open(dest_path, "wb") do |f|
           f.binmode
@@ -23,8 +22,27 @@ module Spontaneous::Storage
       end
     end
 
-    def url
-      @url_path
+    def open(relative_path, mimetype, mode, &block)
+      dest_path = create_absolute_path(relative_path)
+      File.open(dest_path, mode) do |f|
+        f.binmode
+        block.call(f)
+      end
+    end
+
+    def create_absolute_path(relative_path)
+      absolute_path = File.join(root, join_path(relative_path))
+      absolute_dir = File.dirname(absolute_path)
+      FileUtils.mkdir_p(absolute_dir) unless File.exist?(absolute_dir)
+      absolute_path
+    end
+
+    def join_path(path)
+      File.join(*path)
+    end
+
+    def public_url(path)
+      File.join(@url_path, join_path(path))
     end
 
     def local?

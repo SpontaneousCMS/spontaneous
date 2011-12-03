@@ -16,8 +16,16 @@ module Spontaneous::Media
       self.class.new(owner, new_filename, mimetype)
     end
 
+    def open(mode = 'wb', &block)
+      storage.open(storage_path, mimetype, mode, &block)
+    end
+
     def copy(existing_file)
-      storage.copy(existing_file, relative_path, mimetype)
+      storage.copy(existing_file, storage_path, mimetype)
+    end
+
+    def url
+      storage.public_url(storage_path)
     end
 
     def mimetype
@@ -44,12 +52,12 @@ module Spontaneous::Media
       F.join(padded_id, padded_revision)
     end
 
-    def relative_path
-      F.join(media_dir, filename)
+    def storage_path
+      [padded_id, padded_revision, filename]
     end
 
-    def url
-      F.join(storage.url, relative_path)
+    def relative_path
+      F.join(*storage_path)
     end
 
     def path

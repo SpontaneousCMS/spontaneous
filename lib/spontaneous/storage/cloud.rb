@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require 'fog'
+require 'tempfile'
 
 module Spontaneous::Storage
   class Cloud < Backend
@@ -32,5 +33,67 @@ module Spontaneous::Storage
     # p storage.get_object_acl(bucket.key, large.key).body['AccessControlList']
     # p large.public_url
     #
+    attr_reader :bucket_name
+
+    def initialize(config, bucket_name, accepts = nil)
+      @config, @bucket_name, @accepts = config, bucket_name, accepts
+      @public_host = @config.delete(:public_host)
+    end
+
+    def open(relative_path, mimetype, mode, &block)
+      Tempfile.open("spontaneous-cloud") do |tempfile|
+        tempfile.binmode
+        block.call(tempfile)
+        tempfile.rewind
+        self.copy(tempfile, relative_path, mimetype)
+      end
+    end
+
+    def copy(existing_file, media_path, mimetype)
+      params = {
+        :key => join_path(media_path),
+        :idempotent => false,
+        :body => existing_file,
+        :public => true
+      }
+      params[:body] = File.open(existing_file) if existing_file.is_a?(String)
+      bucket.files.create(params)
+    end
+
+    def join_path(path)
+      path.join("-")
+    end
+
+    def local?
+      false
+    end
+
+    def secure?
+      @config[:secure]
+    end
+
+    def scheme
+      secure? ? "https" : "http"
+    end
+
+    def backend
+      @backend ||= Fog::Storage.new(@config)
+    end
+
+    def hostname
+      config[:host] || bucket_public_url
+    end
+
+    def bucket
+      @bucket ||= backend.directories.get(@bucket_name)
+    end
+
+    def public_url(path)
+      if @public_host
+        "#{@public_host}/#{join_path(path)}"
+      else
+        bucket.files.new(:key => join_path(path)).public_url
+      end
+    end
   end
 end
