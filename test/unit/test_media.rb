@@ -58,7 +58,7 @@ class MediaTest < MiniTest::Spec
       file1 = Spontaneous::Media::File.new(@content, "file name.txt")
       file2 = file1.rename("another.jpg")
       file2.owner.should == file1.owner
-      file2.mimetype.should == file1.mimetype
+      file2.mimetype.should == "image/jpeg"
       file2.url.should == "http://media.example.com/00099-0853-another.jpg"
     end
 
@@ -127,7 +127,7 @@ class MediaTest < MiniTest::Spec
       file1 = Spontaneous::Media::File.new(@content, "file name.txt")
       file2 = file1.rename("another.jpg")
       file2.owner.should == file1.owner
-      file2.mimetype.should == file1.mimetype
+      file2.mimetype.should == "image/jpeg"
       file2.url.should == "/media/00099/0853/another.jpg"
     end
 
@@ -139,6 +139,7 @@ class MediaTest < MiniTest::Spec
       file = Spontaneous::Media::File.new(@content, "file name.txt")
       file.copy(existing_file)
       ::File.exist?(file_path).should be_true
+      file.source.should == existing_file
     end
 
     should "be able to copy a file into place if passed the handle of an existing file" do
@@ -151,6 +152,7 @@ class MediaTest < MiniTest::Spec
         file.copy(f)
       end
       ::File.exist?(file_path).should be_true
+      file.source.should == existing_file
     end
 
     should "provide an open method that writes files to the correct location" do

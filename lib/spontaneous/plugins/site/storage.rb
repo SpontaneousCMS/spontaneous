@@ -56,7 +56,7 @@ module Spontaneous::Plugins
         end
 
         def default_storage
-          Spontaneous::Storage::Local.new(Spontaneous.media_dir, '/media', accepts=nil)
+          @default_storage ||= Spontaneous::Storage::Local.new(Spontaneous.media_dir, '/media', accepts=nil)
         end
       end
     end

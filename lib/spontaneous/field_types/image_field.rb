@@ -136,9 +136,9 @@ module Spontaneous
         sizes[:original].src
       end
 
-      def generate(output, image_path)
-        return { :src => image_path } unless File.exist?(image_path)
-        image = ImageProcessor.new(image_path)
+      def generate(output, media_file)
+        return { :src => media_file } if media_file.is_a?(String)#File.exist?(image_path)
+        image = ImageProcessor.new(media_file)
         result = \
           case output
           when :original
@@ -151,18 +151,24 @@ module Spontaneous
       end
 
       def preprocess(image_path)
-        filename = nil
+        filename = mimetype = nil
         case image_path
         when Hash
+          mimetype = image_path[:type]
           filename = image_path[:filename]
           image_path = image_path[:tempfile].path
         when String
           # return image_path unless File.exist?(image_path)
+          filename = ::File.basename(image_path)
         end
         return image_path unless File.exist?(image_path)
-        media_path = owner.make_media_file(image_path, filename)
-        set_unprocessed_value(File.expand_path(media_path))
-        media_path
+        # media_path = owner.make_media_file(image_path, filename)
+        media_file = Spontaneous::Media::File.new(owner, filename, mimetype)
+        media_file.copy(image_path)
+        set_unprocessed_value(File.expand_path(media_file.filepath))
+        # media_path
+        # image_path
+        media_file
       end
 
       def export(user = nil)
@@ -307,17 +313,13 @@ module Spontaneous
 
       attr_reader :path
 
-      def initialize(path)
-        @path = File.expand_path(path)
+      def initialize(media_file)
+        @media_file = media_file
+        @path = media_file.source
       end
 
       def src
-        @src ||= \
-          begin
-            media_dir = Spontaneous.media_dir
-            src = path.sub(%r{^#{media_dir}}, '')
-            File.join("/#{File.basename(media_dir)}", src)
-          end
+        @media_file.url
       end
 
       def filesize
@@ -340,21 +342,22 @@ module Spontaneous
         image = ::MiniMagick::Image.open(path)
         processor = ImageProcessor::ImageDelegator.new(image)
         processor.__run__(process)
-        file_path = filename_for_size(name, image)
-        image.write(file_path)
+        file = @media_file.rename(filename_for_size(name, image))
+        file.copy(image.path)
 
-        ImageProcessor.new(file_path)
+        ImageProcessor.new(file)
       end
 
       def filename_for_size(name, image)
         directory = File.dirname(path)
-        original_filename = File.basename(path)
+        original_filename = @media_file.filename#File.basename(path)
         parts = original_filename.split('.')
         ext = File.extname(image.path)[1..-1]
         # ext = parts[-1]
         base = parts[0..-2].join('.')
         filename = [base, name, ext].join('.')
-        File.join(directory, filename)
+        # File.join(directory, filename)
+        filename
       end
 
       def serialize
@@ -365,6 +368,10 @@ module Spontaneous
           :filesize => filesize,
           :path => path
         }
+      end
+
+      def inspect
+        %(#<ImageProcessor:#{self.object_id} @media_file=#{@media_file.inspect}>)
       end
     end
 

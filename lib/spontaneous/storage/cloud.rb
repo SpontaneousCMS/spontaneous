@@ -95,5 +95,9 @@ module Spontaneous::Storage
         bucket.files.new(:key => join_path(path)).public_url
       end
     end
+
+    def root
+     "/"
+    end
   end
 end

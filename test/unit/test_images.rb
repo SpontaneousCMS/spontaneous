@@ -2,7 +2,7 @@
 
 
 require File.expand_path('../../test_helper', __FILE__)
-# require 'openssl'
+require 'fog'
 
 class ImagesTest < MiniTest::Spec
   include Spontaneous
@@ -88,7 +88,7 @@ class ImagesTest < MiniTest::Spec
       @image = @instance.photo
       @image.owner.should == @instance
       # silence_logger {
-        @image.value = @origin_image.to_s
+      @image.value = @origin_image.to_s
       # }
     end
 
@@ -271,6 +271,30 @@ class ImagesTest < MiniTest::Spec
         @instance.photo.original.src.should == "/media/00234/0010/rose.jpg"
       end
 
+    end
+    context "with cloud storage" do
+      setup do
+        @bucket_name = "media.example.com"
+        @aws_credentials = {
+          :provider=>"AWS",
+          :aws_secret_access_key=>"SECRET_ACCESS_KEY",
+          :aws_access_key_id=>"ACCESS_KEY_ID",
+          :public_host => "http://media.example.com"
+        }
+        ::Fog.mock!
+        @storage = Spontaneous::Storage::Cloud.new(@aws_credentials, 'media.example.com')
+        @storage.backend.directories.create(:key => @bucket_name)
+        @site.stubs(:storage).with(anything).returns(@storage)
+        @image.value = @origin_image.to_s
+      end
+      teardown do
+        ::Fog::Mock.reset
+      end
+
+      should "have full urls for all the src attributes" do
+        @image.original.src.should == "http://media.example.com/00234-0010-rose.jpg"
+        @image.thumbnail.src.should == "http://media.example.com/00234-0010-rose.thumbnail.jpg"
+      end
     end
   end
 end

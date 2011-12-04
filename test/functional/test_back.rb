@@ -45,12 +45,15 @@ class BackTest < MiniTest::Spec
 
   context "Editing interface" do
     setup do
+      @storage = @site.default_storage
+      @site.stubs(:storage).with(anything).returns(@storage)
       config = mock()
       config.stubs(:reload_classes).returns(false)
       config.stubs(:auto_login).returns('root')
       config.stubs(:default_charset).returns('utf-8')
       config.stubs(:publishing_method).returns(:immediate)
       config.stubs(:site_domain).returns('example.org')
+      config.stubs(:site_id).returns('example_org')
       config.stubs(:site_id).returns('example_org')
       @site.stubs(:config).returns(config)
 

@@ -6,14 +6,14 @@ module Spontaneous::Media
   class File
     F = ::File
 
-    attr_reader :filename, :owner
+    attr_reader :filename, :owner, :source
 
     def initialize(owner, filename, mimetype = nil)
       @owner, @filename, @mimetype = owner, Spontaneous::Media.to_filename(filename), mimetype
     end
 
     def rename(new_filename)
-      self.class.new(owner, new_filename, mimetype)
+      self.class.new(owner, new_filename, nil)
     end
 
     def open(mode = 'wb', &block)
@@ -21,6 +21,7 @@ module Spontaneous::Media
     end
 
     def copy(existing_file)
+      @source = existing_file.respond_to?(:path) ? existing_file.path : existing_file
       storage.copy(existing_file, storage_path, mimetype)
     end
 
