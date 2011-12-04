@@ -54,7 +54,8 @@ module Spontaneous::Storage
         :key => join_path(media_path),
         :idempotent => false,
         :body => existing_file,
-        :public => true
+        :public => true,
+        :content_type => mimetype
       }
       params[:body] = File.open(existing_file) if existing_file.is_a?(String)
       bucket.files.create(params)
