@@ -7,7 +7,7 @@ module Cutaneous
 
     def include(filename, locals={})
       _comment(filename)
-      import(filename)
+      import(filename, true, locals)
     end
 
     def _decode_params(param, *args)
