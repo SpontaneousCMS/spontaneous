@@ -181,9 +181,32 @@ class PrototypeSetTest < MiniTest::Spec
       should "return the last value" do
         @set.last.should == "Five"
       end
+
       should "know the number of entries" do
         @set.length.should == 5
         @set.count.should == 5
+      end
+
+      should "return the first item in the local set" do
+        @set.local_first.should == "Four"
+      end
+
+      should "traverse the object list until it finds a local_first" do
+        a = Super.new
+        a.prototypes = @set
+        set1 = Spontaneous::Collections::PrototypeSet.new(a, :prototypes)
+        b = Super.new
+        b.prototypes = set1
+        set2 = Spontaneous::Collections::PrototypeSet.new(b, :prototypes)
+        set1.local_first.should == "Four"
+        set2.local_first.should == "Four"
+      end
+
+      should "return nil for local first if empty" do
+        a = Super.new
+        a.prototypes = Spontaneous::Collections::PrototypeSet.new(nil, :prototypes)
+        set1 = Spontaneous::Collections::PrototypeSet.new(a, :prototypes)
+        set1.local_first.should be_nil
       end
     end
   end

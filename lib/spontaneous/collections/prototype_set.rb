@@ -48,6 +48,14 @@ module Spontaneous::Collections
       named(order.last)
     end
 
+    def local_first
+      if (key = @order.first)
+        named(key)
+      else
+        superset? ? superset.local_first : nil
+      end
+    end
+
     def sid(schema_id)
       values.detect { |e| e.schema_id == schema_id }
     end
