@@ -261,6 +261,14 @@ class VisibilityTest < MiniTest::Spec
           @root.children.first.children.length.should == 6
         end
       end
+
+      should "hide pages without error" do
+        @root.pages.first.hide!
+        @root.reload
+        Content.with_visible do
+          pieces = @root.pages.pieces.map { |p| p }
+        end
+      end
     end
   end
 end

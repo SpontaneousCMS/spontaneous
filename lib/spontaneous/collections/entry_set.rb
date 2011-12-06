@@ -16,7 +16,11 @@ module Spontaneous::Collections
         entry = \
           if data.length == 2
             page = @owner._pieces.detect { |piece| piece.id == id }
-            Spontaneous::PagePiece.new(@owner, page, data[1])
+            if page
+              Spontaneous::PagePiece.new(@owner, page, data[1])
+            else
+              nil
+            end
           else
             @owner._pieces.detect { |piece| piece.id == id }
           end
@@ -77,7 +81,7 @@ module Spontaneous::Collections
 
     # Returns a frozen version of this set containing only entries that are visible
     def visible!
-      entries = self.dup.reject { |e| e.nil? or e.hidden? }
+      entries = self.dup.reject { |e|  e.nil? || e.hidden? }
       # In 1.9.3 #reject does not return this subclass of Array but instead
       # returns a direct Array instance
       if Array === entries
