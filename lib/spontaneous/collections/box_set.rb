@@ -33,6 +33,10 @@ module Spontaneous::Collections
       self.map { |item| item.export }
     end
 
+    def group(group_name)
+      self.select { |box| box._prototype.group == group_name }
+    end
+
     protected
 
     def get_single(index)
@@ -56,10 +60,12 @@ module Spontaneous::Collections
       owner.class.box_prototypes.map { |prototype| prototype.group }.compact
     end
 
+
     def method_missing(method, *args)
       # allow access by group name e.g. instance.boxes.group_name
       if box_groups.include?(method)
-        self.select { |box| box._prototype.group == method }
+        group(method)
+        # self.select { |box| box._prototype.group == method }
       else
         super
       end
