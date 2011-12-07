@@ -22,7 +22,7 @@ module Spontaneous::Plugins
       end
 
       def default_layout
-        if prototype = (layouts.detect { |prototype| prototype.default? } || layouts.first)
+        if prototype = (layouts.hierarchy_detect { |prototype| prototype.default? } || layouts.local_first)
           prototype.layout(self)
         else
           Spontaneous::Layout::Default.new(self)

@@ -83,15 +83,28 @@ class LayoutsTest < MiniTest::Spec
         # page.layout.template.should == 'layouts/custom2'
       end
 
-      should "allow setting of layout in sub-classes" do
+      should "use the last definied layout in sub-classes" do
         LayoutPage.layout :custom1
         LayoutPage.layout :custom2
-        SubPage.layout :custom3, :default => true
+        SubPage.layout :custom3
+        SubPage.layout :custom4
         page = SubPage.new
         assert_correct_template(page, 'layouts/custom3')
         page.layout = :custom2
         assert_correct_template(page, 'layouts/custom2')
       end
+
+      should "allow defining of default layout in sub-classes" do
+        LayoutPage.layout :custom1
+        LayoutPage.layout :custom2, :default => true
+        SubPage.layout :custom3
+        SubPage.layout :custom4, :default => true
+        page = SubPage.new
+        assert_correct_template(page, 'layouts/custom4')
+        page.layout = :custom3
+        assert_correct_template(page, 'layouts/custom3')
+      end
+
       # should "raise error when setting unknown layout" do
       #   LayoutPage.layout :custom1
       #   LayoutPage.layout :custom2

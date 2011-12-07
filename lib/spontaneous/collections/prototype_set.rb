@@ -56,6 +56,22 @@ module Spontaneous::Collections
       end
     end
 
+    def hierarchy_detect(&block)
+      if (found = local_detect(&block))
+        found
+      else
+        superset? ? superset.hierarchy_detect(&block) : nil
+      end
+    end
+
+    def local_detect(&block)
+      local_values.detect(&block)
+    end
+
+    def local_values
+      @order.map { |name| named(name) }
+    end
+
     def sid(schema_id)
       values.detect { |e| e.schema_id == schema_id }
     end

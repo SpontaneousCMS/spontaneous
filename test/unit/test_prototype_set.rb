@@ -208,6 +208,42 @@ class PrototypeSetTest < MiniTest::Spec
         set1 = Spontaneous::Collections::PrototypeSet.new(a, :prototypes)
         set1.local_first.should be_nil
       end
+
+      should "correctly search the hierarchy" do
+        one = "One"
+        one.stubs(:default?).returns(false)
+        two = "Two"
+        two.stubs(:default?).returns(true)
+        three = "Three"
+        three.stubs(:default?).returns(false)
+        four = "Four"
+        four.stubs(:default?).returns(false)
+        five = "Five"
+        five.stubs(:default?).returns(false)
+        six = "Six"
+        six.stubs(:default?).returns(true)
+        a = Super.new
+        a.prototypes = Spontaneous::Collections::PrototypeSet.new(nil, :prototypes)
+        a.prototypes[:one] = one
+        a.prototypes[:two] = two
+        b = Super.new
+        b.prototypes = Spontaneous::Collections::PrototypeSet.new(a, :prototypes)
+        a.prototypes[:three] = three
+        a.prototypes[:four] = four
+        c = Super.new
+        c.prototypes = Spontaneous::Collections::PrototypeSet.new(b, :prototypes)
+
+        test = proc { |value|
+          value.default?
+        }
+
+        c.prototypes.hierarchy_detect(&test).should == "Two"
+
+        c.prototypes[:five] = five
+        c.prototypes[:six] = six
+
+        c.prototypes.hierarchy_detect(&test).should == "Six"
+      end
     end
   end
 end
