@@ -112,6 +112,7 @@ module Spontaneous
       class EditingBase < ServerBase
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
         set :environment, Proc.new { Spontaneous.env }
+        enable :dump_errors, :raise_errors, :show_exceptions if Spontaneous.development?
 
         helpers Spontaneous::Rack::UserHelpers
         helpers Spontaneous::Rack::Helpers

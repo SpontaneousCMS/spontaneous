@@ -83,16 +83,23 @@ module Spontaneous
         if klasses.size == size_at_start && klasses.size != 0
           # Write all remaining failed classes and their exceptions to the log
           messages = error_map.map do |klass, e|
-            ["Could not load #{klass}:\n\n#{e.message} - (#{e.class})",
-             "#{(e.backtrace || []).join("\n")}"]
+            backtrace = (e.backtrace.select { |line| is_site_page?(line) } || []).join("\n") << "\n..."
+            ["Could not load #{klass}:\n\n#{e.message} - (#{e.class})", "#{ backtrace }"]
           end
-          messages.each { |msg, trace| puts("#{msg}\n\n#{trace}") }
-          puts "#{failed_classes.join(", ")} failed to load."
+          messages.each { |msg, trace| logger.fatal("#{msg}\n\n#{trace}") }
+          abort("\n#{failed_classes.join(", ")} failed to load.")
         end
         break if(klasses.size == size_at_start || klasses.size == 0)
       end
 
       nil
+    end
+
+    def is_site_page?(backtrace)
+      path, line, context = backtrace.split(":")
+      path = File.expand_path(path)
+      root = Site.instance.root
+      path.start_with?(root)
     end
 
     class Reloader
@@ -217,8 +224,9 @@ module Spontaneous
         # And finally reload the specified file
         begin
           require(file)
-        rescue SyntaxError => ex
-          logger.error "Cannot require #{file} because of syntax error: #{ex.message}"
+        # rescue => ex
+        #   logger.fatal "Cannot require #{file}\\\\\\\\n#{ex.message}"
+        #   raise ex
         ensure
           mtimes[file] = mtime if mtime
         end
@@ -352,7 +360,16 @@ module Spontaneous
           file_for_class(subclass)
         end.flatten
 
-        changed_files.each { |file, mtime| safe_load(file, mtime) }
+        changed_files.each { |file, mtime|
+          begin
+            safe_load(file, mtime)
+          rescue => boom
+            # remove the file so that it gets reloaded next time, this stops errors in the schema files
+            # from resulting in a schema map change...
+            mtimes.delete(file)
+            raise boom
+          end
+        }
         subclass_files_to_reload.each { |file| safe_load(file) }
       end
 
