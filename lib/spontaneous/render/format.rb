@@ -1,17 +1,22 @@
 
 module Spontaneous::Render
-  module Format; end
+  module Format
+    def self.for(format)
+      self.const_get("#{format.to_s.camelize}")
+    end
+
+    def self.formats
+      self.constants.map { |const| const.to_s.downcase.to_sym }
+    end
+  end
 
   class FormatBase
     def self.format
       @format ||= self.name.demodulize.downcase.to_sym
     end
 
-
-    attr_reader :progress
-
-    def initialize(revision, pages, progress=nil)
-      @revision, @pages, @progress = revision, pages.find_all { |page| page.formats.include?(format) }, progress
+    def initialize(revision, page)
+      @revision, @page = revision, page
     end
 
     def format
@@ -20,18 +25,8 @@ module Spontaneous::Render
 
     def render
       before_render
-      delay = Spontaneous::Site.config.publishing_delay
-      @pages.each_with_index do |page, n|
-        render_page(page) if page.formats.include?(format)
-        after_page_rendered(page)
-        sleep(delay) if delay
-        # sleep(3)
-      end
+      render_page(@page)
       after_render
-    end
-
-    def after_page_rendered(page)
-      progress.page_rendered(page) if progress
     end
 
     def before_render; end

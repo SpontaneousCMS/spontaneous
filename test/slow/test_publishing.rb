@@ -866,7 +866,8 @@ class PublishingTest < MiniTest::Spec
       should "not update first_published or last_published if rendering fails" do
         c = Content.create
         Content.first.first_published_at.should be_nil
-        S::Render.expects(:render_pages).raises(Exception)
+        Spontaneous::Page.expects(:order).returns([c])
+        c.expects(:render).raises(Exception)
         begin
           silence_logger { Site.publish_all }
         rescue Exception; end
@@ -880,7 +881,9 @@ class PublishingTest < MiniTest::Spec
         Content.revision_exists?(@revision).should be_false
         # don't like peeking into implementation here but don't know how else
         # to simulate the right error
-        S::Render.expects(:render_pages).raises(Exception)
+        root = Page.create()
+        Spontaneous::Page.expects(:order).returns([root])
+        root.expects(:render).raises(Exception)
         begin
           silence_logger { Site.publish_all }
         rescue Exception; end

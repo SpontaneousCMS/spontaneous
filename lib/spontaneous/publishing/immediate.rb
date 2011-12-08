@@ -55,22 +55,17 @@ module Spontaneous
         end
       end
 
-      # Called from the Format#render method to provide progress reports
+      protected
+
       def page_rendered(page, event = "rendering")
         @pages_rendered += 1
         update_progress(event, percent_complete)
         logger.info { "Done: #{event} page #{page.path} #{percent_complete.round(1)}%" }
       end
 
-      protected
 
       def pages
         @pages ||= S::Page.order(:depth)
-      end
-
-      def formats
-        # TODO: read the actual config for the available formats
-        [:html]
       end
 
       # The number of times the publisher has to run through the site's pages
@@ -110,9 +105,21 @@ module Spontaneous
       end
 
       def render_pages
-        formats.each do |format|
-          S::Render.render_pages(revision, pages, format, self)
+        # the delay is purely used in interface testing
+        delay = Spontaneous::Site.config.publishing_delay
+        pages.each do |page|
+          page.formats.each do |format|
+            render_page(page, format)
+          end
+          sleep(delay) if delay
         end
+      end
+
+      def render_page(page, format)
+        formatter = Spontaneous::Render::Format.for(format)
+        renderer = formatter.new(revision, page)
+        renderer.render
+        page_rendered(page)
       end
 
       def index_pages
@@ -125,12 +132,12 @@ module Spontaneous
       end
 
       # Used to calculate the progress percentage
-      # Calculated by (formats + indexes) * pages
+      # Calculated by (pages * indexes) * (pages * formats)
       # where indexes = Site.indexes.length > 0 ? 1 : 0
       # although not all pages are included by a format
       def total_pages_to_render
-        @total_pages ||= (index_stages * pages.count) + formats.inject(0) do |total, format|
-          total += pages.count { |page| page.formats.include?(format) }
+        @total_pages ||= (index_stages * pages.count) + pages.inject(0) do |total, page|
+          total += page.formats.length#count { |page| page.formats.include?(format) }
         end
       end
 
