@@ -911,8 +911,6 @@ class PublishingTest < MiniTest::Spec
         PublishablePage.layout :"static"
         PublishablePage.layout :"dynamic"
 
-        Spontaneous::Render.renderer_class = Spontaneous::Render::PublishedRenderer
-
         @home = PublishablePage.create(:title => 'Home')
         @home.layout = :"dynamic"
         @about = PublishablePage.create(:title => "About", :slug => "about")
@@ -932,6 +930,7 @@ class PublishingTest < MiniTest::Spec
 
       teardown do
         Content.delete_revision(@revision)
+        Content.delete_revision(@revision+1)
         Content.delete
         State.delete
         Object.send(:remove_const, :PublishablePage) rescue nil
@@ -975,6 +974,13 @@ class PublishingTest < MiniTest::Spec
         config_file = @site.revision_root / "00002/config.ru"
         File.exists?(config_file).should be_true
         File.read(config_file).should =~ %r(#{Spontaneous.root})
+      end
+
+      should "transparently support previously unknown formats by assuming a simple HTML like rendering model" do
+        PublishablePage.add_format :rtf
+        Content.delete_revision(@revision+1)
+        Site.publish_all
+        File.read("#{@site.revision_root}/00003/rtf/index.rtf").should == "RICH!\n"
       end
     end
   end

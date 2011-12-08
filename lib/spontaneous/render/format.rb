@@ -2,7 +2,17 @@
 module Spontaneous::Render
   module Format
     def self.for(format)
-      self.const_get("#{format.to_s.camelize}")
+      format_class = nil
+      begin
+        format_class = self.const_get("#{format.to_s.camelize}")
+      rescue NameError => e
+        # Assume that the missing format is compatilble with the standard HTML
+        # format in that each page generates a separate, self contained, file
+        # .. probably true in most cases
+        format_class = Class.new(Spontaneous::Render::FormatBase)
+        self.const_set(format.to_s.camelize, format_class)
+      end
+      format_class
     end
 
     def self.formats
