@@ -16,7 +16,7 @@ module Spontaneous
           render = rerender(content, format, params)
         else
           # first test for dynamic template
-          template = Spontaneous::Render.output_path(Content.revision, content, format, extension)
+          template = Spontaneous::Render.output_path(Content.revision, content, format, extension, true)
 
           if File.exists?(template)
             render = request_renderer.render_file(template, content, format, params)

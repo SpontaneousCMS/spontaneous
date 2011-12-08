@@ -5,15 +5,15 @@ module Spontaneous
   module Render
 
     class << self
-      def output_path(revision, page, format, extension = nil)
-        output_path_with_root(revision_root(revision), revision, page, format, extension)
+      def output_path(revision, page, format, extension = nil, dynamic = false)
+        output_path_with_root(revision_root(revision), revision, page, format, extension, dynamic)
       end
 
-      def output_path_with_root(root, revision, page, format, extension = nil)
+      def output_path_with_root(root, revision, page, format, extension = nil, dynamic = false)
         ext = ".#{format}"
-        ext += ".#{extension}" if extension
-
-        dir = root / format / page.path
+        ext += ".#{extension}" if extension && dynamic
+        segment = dynamic ? "dynamic" : "static"
+        dir = root / segment / page.path
         path = dir / "/index#{ext}"
         path
       end

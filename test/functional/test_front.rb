@@ -376,7 +376,7 @@ class FrontTest < MiniTest::Spec
         end
 
         should "cache templates as ruby files" do
-          @cache_file = "#{Spontaneous.revision_dir(1)}/html/dynamic/index.html.rb"
+          @cache_file = "#{Spontaneous.revision_dir(1)}/dynamic/dynamic/index.html.rb"
           FileUtils.rm(@cache_file) if File.exists?(@cache_file)
           File.exists?(@cache_file).should be_false
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }

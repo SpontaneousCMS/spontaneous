@@ -949,14 +949,14 @@ class PublishingTest < MiniTest::Spec
       end
 
       should "produce rendered versions of each page" do
-        revision_dir = @site.revision_root / "00002/html"
+        revision_dir = @site.revision_root / "00002"
         file = result = nil
         @pages.each do |page|
           if page.root?
-            file = revision_dir / "index.html.cut"
+            file = revision_dir / "dynamic/index.html.cut"
             result = "Page: '#{page.title}' {{Time.now.to_i}}\n"
           else
-            file = revision_dir / "#{page.path}/index.html"
+            file = revision_dir / "static/#{page.path}/index.html"
             result = "Page: '#{page.title}'\n"
           end
           File.exists?(file).should be_true
@@ -980,7 +980,7 @@ class PublishingTest < MiniTest::Spec
         PublishablePage.add_format :rtf
         Content.delete_revision(@revision+1)
         Site.publish_all
-        File.read("#{@site.revision_root}/00003/rtf/index.rtf").should == "RICH!\n"
+        File.read("#{@site.revision_root}/00003/static/index.rtf").should == "RICH!\n"
       end
     end
   end
