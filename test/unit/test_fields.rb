@@ -623,5 +623,36 @@ class FieldsTest < MiniTest::Spec
       end
 
     end
+
+    context "Location fields" do
+      setup do
+        @content_class = Class.new(::Piece) do
+          field :location
+        end
+        @content_class.stubs(:name).returns("ContentClass")
+        @instance = @content_class.new
+        @field = @instance.location
+      end
+
+      should "use a standard string editor" do
+        @content_class.fields.location.export(nil)[:type].should == "Spontaneous.FieldTypes.StringField"
+      end
+
+      should "successfullt geolocate an address" do
+        @field.value = "Cambridge, England"
+        @field.value(:lat).should == 52.2053370
+        @field.value(:lng).should == 0.1218170
+        @field.value(:country).should == "United Kingdom"
+        @field.value(:formatted_address).should == "Cambridge, UK"
+
+        @field.latitude.should == 52.2053370
+        @field.longitude.should == 0.1218170
+        @field.lat.should == 52.2053370
+        @field.lng.should == 0.1218170
+
+        @field.country.should == "United Kingdom"
+        @field.formatted_address.should == "Cambridge, UK"
+      end
+    end
   end
 end
