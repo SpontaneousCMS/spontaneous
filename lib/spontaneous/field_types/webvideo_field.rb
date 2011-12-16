@@ -90,9 +90,15 @@ module Spontaneous
 
       def retrieve_vimeo_metadata(id)
         url = "http://vimeo.com/api/v2/video/%s.json" % id
-        response = open(url).read rescue "[{}]"
+        response = \
+          begin
+            open(url).read
+          rescue => e
+            logger.error("Unable to retrieve metadata for video ##{id} from Vimeo: '#{e}'")
+            "[{}]"
+          end
         metadata = Spontaneous.parse_json(response) rescue [{}]
-        metadata = metadata.first
+        metadata = metadata.first || {}
       end
 
       def retrieve_youtube_metadata(id)
