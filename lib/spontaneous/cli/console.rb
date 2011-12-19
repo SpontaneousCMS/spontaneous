@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'watchr'
+
 module Spontaneous::Cli
   class Console < ::Spontaneous::Cli::Thor
     Spontaneous = ::Spontaneous
@@ -10,6 +12,13 @@ module Spontaneous::Cli
 
     desc "#{namespace}:open", "Gives you console access to the current site"
     def open
+      # script = Watchr::Script.new
+      # script.watch('(lib|schema)/.*\\.rb') { puts 'reload!' } # doesn't block
+      # Thread.new do
+      #   Watchr::Controller.new(script, Watchr.handler.new).run
+      # end
+
+
       ENV["SPOT_MODE"] = "console"
       prepare :console
       ARGV.clear
