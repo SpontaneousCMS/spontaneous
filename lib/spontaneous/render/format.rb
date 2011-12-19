@@ -52,9 +52,8 @@ module Spontaneous::Render
 
     def output_path(page, output)
       ext = nil
-      dynamic = Spontaneous.template_engine.is_dynamic?(output)
-      # ext = renderer.extension if Spontaneous.template_engine.is_dynamic?(output)
-      path = Spontaneous::Render.output_path(@revision, page, format, renderer.extension, dynamic)
+      template_dynamic = Spontaneous.template_engine.is_dynamic?(output)
+      path = Spontaneous::Render.output_path(@revision, page, format, renderer.extension, template_dynamic)
 
       dir = File.dirname(path)
       FileUtils.mkdir_p(dir) unless File.exist?(dir)

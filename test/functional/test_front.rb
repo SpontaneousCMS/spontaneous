@@ -114,7 +114,6 @@ class FrontTest < MiniTest::Spec
       Content.delete
       State.delete
       Content.delete_revision(1)
-      # FileUtils.rm_rf(@revision_root) rescue nil
     end
 
     should "return a 404 if asked for a non-existant page" do
@@ -172,14 +171,24 @@ class FrontTest < MiniTest::Spec
       assert last_response.status == 404
     end
 
-    context "Showing alternate content" do
+    context "Dynamic pages" do
       setup do
         Page.stubs(:path).with("/about").returns(about)
         Page.stubs(:path).with("/news").returns(news)
-        # puts ">"*50
       end
-      teardown do
-        # puts "<"*50
+
+      should "default to static behaviour" do
+        SitePage.dynamic?.should be_false
+        page = SitePage.new
+        page.dynamic?.should be_false
+      end
+      should "correctly show a dynamic behaviour" do
+        SitePage.request do
+          show "/news"
+        end
+        SitePage.dynamic?.should be_true
+        page = SitePage.new
+        page.dynamic?.should be_true
       end
 
       should "render an alternate page if passed a page" do

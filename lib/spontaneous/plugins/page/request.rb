@@ -61,6 +61,13 @@ module Spontaneous::Plugins::Page
         @request_blocks ||= {}
       end
 
+      # Tests for existance of a request handler for a method
+      # Used by the publishing mechanism to determine which template bucket a
+      # published page should be placed in.
+      def dynamic?(method = :get)
+        request_blocks.has_key?(method) && !request_blocks[method].nil?
+      end
+
       # unused at present
       def _request_response(instance, request, response, format)
         method = request.request_method.downcase.to_sym
@@ -71,6 +78,7 @@ module Spontaneous::Plugins::Page
           nil
         end
       end
+
     end # ClassMethods
 
 
@@ -80,8 +88,8 @@ module Spontaneous::Plugins::Page
         self.class.request_blocks[method]
       end
 
-      def is_dynamic?
-        self.class.request_blocks.key?(:get)
+      def dynamic?(method = :get)
+        self.class.dynamic?(method)
       end
     end
   end # Request

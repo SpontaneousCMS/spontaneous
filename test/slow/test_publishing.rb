@@ -908,8 +908,14 @@ class PublishingTest < MiniTest::Spec
 
 
         class ::PublishablePage < Page; end
+        class ::DynamicPublishablePage < Page; end
         PublishablePage.layout :"static"
         PublishablePage.layout :"dynamic"
+
+        DynamicPublishablePage.layout :"static"
+        DynamicPublishablePage.layout :"dynamic"
+
+        DynamicPublishablePage.request { show "/about" }
 
         @home = PublishablePage.create(:title => 'Home')
         @home.layout = :"dynamic"
@@ -918,12 +924,17 @@ class PublishingTest < MiniTest::Spec
         @post1 = PublishablePage.create(:title => "Post 1", :slug => "post-1")
         @post2 = PublishablePage.create(:title => "Post 2", :slug => "post-2")
         @post3 = PublishablePage.create(:title => "Post 3", :slug => "post-3")
+        @news = DynamicPublishablePage.create(:title => "News", :slug => "news")
+        @contact = DynamicPublishablePage.create(:title => "Contact", :slug => "contact")
+        @contact.layout = :dynamic
         @home << @about
         @home << @blog
+        @home << @news
+        @home << @contact
         @blog << @post1
         @blog << @post2
         @blog << @post3
-        @pages = [@home, @about, @blog, @post1, @post2, @post3]
+        @pages = [@home, @about, @blog, @news, @post1, @post2, @post3]
         @pages.each { |p| p.save }
         Site.publish_all
       end
@@ -934,6 +945,7 @@ class PublishingTest < MiniTest::Spec
         Content.delete
         State.delete
         Object.send(:remove_const, :PublishablePage) rescue nil
+        Object.send(:remove_const, :DynamicPublishablePage) rescue nil
       end
 
       should "put its files into a numbered revision directory" do
@@ -952,14 +964,21 @@ class PublishingTest < MiniTest::Spec
         revision_dir = @site.revision_root / "00002"
         file = result = nil
         @pages.each do |page|
-          if page.root?
+          case page.slug
+          when "" # root is a dynamic page with no request handler
             file = revision_dir / "dynamic/index.html.cut"
             result = "Page: '#{page.title}' {{Time.now.to_i}}\n"
-          else
+          when "news" # news produces a static template but has a request handler
+            file = revision_dir / "protected/news/index.html"
+            result = "Page: 'News'\n"
+          when "contact" # contact is both dynamic and has a request handler
+            file = revision_dir / "dynamic/contact/index.html.cut"
+            result = "Page: 'Contact' {{Time.now.to_i}}\n"
+          else # the other pages are static
             file = revision_dir / "static/#{page.path}/index.html"
             result = "Page: '#{page.title}'\n"
           end
-          File.exists?(file).should be_true
+          assert File.exists?(file), "File '#{file}' should exist"
           File.read(file).should == result
         end
         revision_dir = @site.revision_root / "00002"
