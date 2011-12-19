@@ -30,9 +30,9 @@ module Spontaneous
       Spontaneous.media_path("tmp", dir, filename)
     end
 
-    def to_urlpath(filepath)
-      filepath.gsub(%r{^#{Spontaneous.media_dir}}, "/media")
-    end
+    # def to_urlpath(filepath)
+    #   filepath.gsub(%r{^#{Spontaneous.media_dir}}, "/media")
+    # end
 
     def to_filepath(urlpath)
       parts = urlpath.split("/")
