@@ -87,15 +87,14 @@ class ImagesTest < MiniTest::Spec
       @instance.stubs(:id).returns(@content_id)
       @image = @instance.photo
       @image.owner.should == @instance
-      # silence_logger {
       @image.value = @origin_image.to_s
-      # }
+
+      @instance.save
     end
 
     teardown do
       Object.send(:remove_const, :ContentWithImage) rescue nil
       Object.send(:remove_const, :ResizingImageField) rescue nil
-      # (@tmp_dir + "..").rmtree
     end
 
     context "with defined sizes" do
@@ -210,29 +209,6 @@ class ImagesTest < MiniTest::Spec
     end
 
     context "defined anonymously" do
-      setup do
-        # class ::ContentWithImage < Content
-        #   field :photo, :image do
-        #     sizes :preview => { :width => 200 },
-        #       :tall => { :height => 200 },
-        #       :thumbnail => { :fit => [50, 50] },
-        #       :icon => { :crop => [50, 50] }
-        #   end
-        # end
-        # @instance = ContentWithImage.new
-
-        # @content_id = 234
-        # @instance.stubs(:id).returns(@content_id)
-        # @image = @instance.photo
-        # @image.owner.should == @instance
-        # @image.value = @origin_image.to_s
-      end
-
-      teardown do
-        # Object.send(:remove_const, :ContentWithImage)
-        # (@tmp_dir + "..").rmtree
-      end
-
       should "have image dimension and filesize information" do
         @image.src.should == "/media/00234/0010/rose.jpg"
         @image.filesize.should == 54746
@@ -262,16 +238,16 @@ class ImagesTest < MiniTest::Spec
         serialised[:thumbnail][:height].should == 50
         serialised[:icon][:width].should == 50
         serialised[:icon][:height].should == 50
-        # pp serialised
       end
+
       should "persist attributes" do
         @instance.save
         @instance = ContentWithImage[@instance[:id]]
         @instance.photo.thumbnail.src.should == "/media/00234/0010/rose.thumbnail.jpg"
         @instance.photo.original.src.should == "/media/00234/0010/rose.jpg"
       end
-
     end
+
     context "with cloud storage" do
       setup do
         @bucket_name = "media.example.com"
