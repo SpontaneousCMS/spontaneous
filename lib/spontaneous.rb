@@ -8,13 +8,13 @@ else
   Encoding.default_internal = Encoding::UTF_8
 end
 
+require 'fileutils'
 require "home_run"
 require "stringex"
 require "sequel"
 require "yajl"
-
 require 'logger'
-require 'fileutils'
+
 require 'active_support/core_ext/hash/keys'
 require 'active_support/core_ext/date_time/conversions'
 require 'active_support/core_ext/array/grouping'
@@ -23,20 +23,15 @@ require 'active_support/core_ext/file'
 
 Sequel.extension :inflector
 
+spontaneous = File.join(File.dirname(__FILE__), 'spontaneous')
 
-Dir[File.join(File.dirname(__FILE__), 'spontaneous/extensions/*.rb')].each { |file|
-  require file
-}
+Dir["#{spontaneous}/extensions/*.rb"].each { |file| require file }
 
-require 'spontaneous/logger'
 require 'spontaneous/plugins'
+require 'spontaneous/logger'
 require 'spontaneous/constants'
 require 'spontaneous/errors'
 require 'spontaneous/json'
-
-Dir[File.expand_path('../spontaneous/plugins/application/*.rb', __FILE__)].each do |file|
-  require file
-end
 
 module Spontaneous
   extend Plugins
@@ -49,13 +44,6 @@ module Spontaneous
   def self.reload!
     instance.reload!
   end
-
-  plugin Plugins::Application::State
-  plugin Plugins::Application::Paths
-  plugin Plugins::Application::Render
-  plugin Plugins::Application::Facets
-  plugin Plugins::Application::Serialisation
-  plugin Plugins::Application::Features
 
   autoload :Config,           "spontaneous/config"
   autoload :Paths,            "spontaneous/paths"
@@ -87,7 +75,6 @@ module Spontaneous
   autoload :Application,      "spontaneous/application"
   autoload :Search,           "spontaneous/search"
   autoload :Storage,          "spontaneous/storage"
-
 
   module Prototypes
     autoload :FieldPrototype,   "spontaneous/prototypes/field_prototype"
@@ -132,7 +119,6 @@ module Spontaneous
     autoload :Permissions,      "spontaneous/plugins/permissions"
     autoload :Controllers,      "spontaneous/plugins/controllers"
 
-
     module Field
       autoload :EditorClass,    "spontaneous/plugins/field/editor_class"
     end
@@ -154,7 +140,23 @@ module Spontaneous
       autoload :Level,          "spontaneous/plugins/site/level"
       autoload :Storage,        "spontaneous/plugins/site/storage"
     end
+
+    module Application
+      autoload :State,          "spontaneous/plugins/application/state"
+      autoload :Paths,          "spontaneous/plugins/application/paths"
+      autoload :Render,         "spontaneous/plugins/application/render"
+      autoload :Facets,         "spontaneous/plugins/application/facets"
+      autoload :Serialisation,  "spontaneous/plugins/application/serialisation"
+      autoload :Features,       "spontaneous/plugins/application/features"
+    end
   end
+
+  plugin Plugins::Application::State
+  plugin Plugins::Application::Paths
+  plugin Plugins::Application::Render
+  plugin Plugins::Application::Facets
+  plugin Plugins::Application::Serialisation
+  plugin Plugins::Application::Features
 
 
   class UnknownTypeException < Exception
