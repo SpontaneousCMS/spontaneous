@@ -53,7 +53,7 @@ Gem::Specification.new do |s|
   s.add_dependency('rdoc', ["~> 3.9.4"])
   s.add_dependency('activesupport', ["~> 3.0.4"])
   s.add_dependency('home_run', ["~> 1.0.0"])
-  s.add_dependency('sequel', ["~> 3.27"])
+  s.add_dependency('sequel', ["~> 3.30"])
   s.add_dependency('yajl-ruby', ["~> 1.1"])
   s.add_dependency('erubis', ["~> 2.6"])
   s.add_dependency('fog', ["~> 1.1.1"])
@@ -75,6 +75,7 @@ Gem::Specification.new do |s|
   s.add_dependency('xapian-full', ["~> 1.2.3"])
   s.add_dependency('xapian-fu', ["~> 1.3"])
   s.add_dependency('nokogiri', ["~> 1.5.0"])
+  s.add_dependency('watchr', ["~> 0.7"])
 
   ## List your development dependencies here. Development dependencies are
   ## those that are only needed during development
