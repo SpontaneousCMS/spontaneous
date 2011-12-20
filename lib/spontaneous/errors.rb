@@ -1,8 +1,21 @@
 # encoding: UTF-8
 
-require 'forwardable'
+require "forwardable"
+
 module Spontaneous
   class Error < StandardError; end
+
+  class UnknownTypeException < Error
+    def initialize(parent, type)
+      super("Unknown content type '#{type}' requested in class #{parent}")
+    end
+  end
+
+  class UnknownStyleException < Error
+    def initialize(style_name, klass)
+      super("Unknown style '#{style_name}' for class #{klass}")
+    end
+  end
 
   # raised when trying to show something that is not showable due to
   # ancestor being hidden
@@ -43,9 +56,9 @@ module Spontaneous
     end
 
     def_delegators :@modification, :added_classes, :removed_classes
-    def_delegators :@modification, :added_fields, :removed_fields
-    def_delegators :@modification, :added_boxes, :removed_boxes
-    def_delegators :@modification, :added_styles, :removed_styles
+    def_delegators :@modification, :added_fields,  :removed_fields
+    def_delegators :@modification, :added_boxes,   :removed_boxes
+    def_delegators :@modification, :added_styles,  :removed_styles
     def_delegators :@modification, :added_layouts, :removed_layouts
   end
 end

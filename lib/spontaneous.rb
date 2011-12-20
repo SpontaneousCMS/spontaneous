@@ -8,37 +8,37 @@ else
   Encoding.default_internal = Encoding::UTF_8
 end
 
-require 'fileutils'
+require "fileutils"
 require "home_run"
 require "stringex"
 require "sequel"
 require "yajl"
-require 'logger'
+require "logger"
 
-require 'active_support/core_ext/hash/keys'
-require 'active_support/core_ext/date_time/conversions'
-require 'active_support/core_ext/array/grouping'
-require 'active_support/core_ext/array/extract_options'
-require 'active_support/core_ext/file'
+require "active_support/core_ext/hash/keys"
+require "active_support/core_ext/date_time/conversions"
+require "active_support/core_ext/array/grouping"
+require "active_support/core_ext/array/extract_options"
+require "active_support/core_ext/file"
 
 Sequel.extension :inflector
 
-spontaneous = File.join(File.dirname(__FILE__), 'spontaneous')
+spontaneous = File.join(File.dirname(__FILE__), "spontaneous")
 
 Dir["#{spontaneous}/extensions/*.rb"].each { |file| require file }
 
-require 'spontaneous/plugins'
-require 'spontaneous/logger'
-require 'spontaneous/constants'
-require 'spontaneous/errors'
-require 'spontaneous/json'
+require "spontaneous/plugins"
+require "spontaneous/logger"
+require "spontaneous/constants"
+require "spontaneous/errors"
+require "spontaneous/json"
 
 module Spontaneous
-  extend Plugins
+  extend  Plugins
   include Constants
 
   def self.gem_root
-    @gem_root ||= File.expand_path(File.dirname(__FILE__) / '..')
+    @gem_root ||= File.expand_path(File.dirname(__FILE__) / "..")
   end
 
   def self.reload!
@@ -157,23 +157,10 @@ module Spontaneous
   plugin Plugins::Application::Facets
   plugin Plugins::Application::Serialisation
   plugin Plugins::Application::Features
-
-
-  class UnknownTypeException < Exception
-    def initialize(parent, type)
-      super("Unknown content type '#{type}' requested in class #{parent}")
-    end
-  end
-  class UnknownStyleException < Exception
-    def initialize(style_name, klass)
-      super("Unknown style '#{style_name}' for class #{klass}")
-    end
-  end
-
 end
 
-require 'spontaneous/loader'
-require 'spontaneous/version'
+require "spontaneous/loader"
+require "spontaneous/version"
 
 
 Spot = S = Spontaneous unless defined?(Spot)
