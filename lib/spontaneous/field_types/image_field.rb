@@ -257,6 +257,13 @@ module Spontaneous
           end
         end
 
+        def composite(other_image_path, output_extension = "jpg", &block)
+          File.open(other_image_path) do |other_image|
+            new_image = image.composite(other_image, output_extension, &block)
+            image.path = new_image.path
+          end
+        end
+
         def border_radius(radius, bg_color = nil)
           @image.format('png') if bg_color.nil? or bg_color == 'transparent'
           puts @image.path
