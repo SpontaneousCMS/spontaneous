@@ -42,14 +42,16 @@ module Spontaneous::Plugins
       # Blocks passed to the prototype call are used to create instance methods on the class
       # This enables the use of `super` within the blocks and solves the otherwise tricky
       # inheritance implications.
-      def prototype(name = Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME, &block)
-        raise Spontaneous::InvalidPrototypeDefinitionError.new(
-          "Prototype definitions must accept one parameter - the content instance which the prototype is about to be applied."
-        ) unless block.arity == 1
-        define_method(prototype_method_name(name), &block)# do |content|
+      def prototype(name = nil, &block)
+        raise Spontaneous::InvalidPrototypeDefinitionError.new \
+          "Prototype definitions must accept one parameter - " \
+          "the content instance which the prototype is about to be applied." \
+          unless block.arity == 1
+        define_method(prototype_method_name(name), &block)
       end
 
       def prototype_method_name(name)
+        return Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME if name.blank?
         "_apply_prototype_#{name}"
       end
     end # ClassMethods
@@ -62,14 +64,14 @@ module Spontaneous::Plugins
       end
 
       # Add in an empty default prototype method for subclasses to override
-      define_method(Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME) { }
+      define_method(Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME) { |instance| }
 
       protected
 
-
       def apply_prototype
-        return if _prototype == false# or _prototype == ''
-        method = self.class.prototype_method_name(_prototype || Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME)
+        # passing _prototype => false to the initialisation skips the prototype
+        return if _prototype == false
+        method = self.class.prototype_method_name(_prototype)
 
         if respond_to?(method)
           self.send(method, self)
@@ -87,12 +89,6 @@ module Spontaneous::Plugins
       def _prototype
         @_prototype
       end
-
     end # InstanceMethods
-
   end
 end
-
-
-
-
