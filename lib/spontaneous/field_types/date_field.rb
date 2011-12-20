@@ -4,7 +4,7 @@
 module Spontaneous
   module FieldTypes
     class DateField < Field
-      plugin Spontaneous::Plugins::Field::EditorClass
+      include Spontaneous::Plugins::Field::EditorClass
     end
 
     DateField.register

@@ -1,10 +1,10 @@
 # encoding: UTF-8
 
-
 module Spontaneous::Plugins
   module Controllers
-    ACTION_SEPARATOR = "@".freeze
+    extend ActiveSupport::Concern
 
+    ACTION_SEPARATOR = "@".freeze
 
     module ClassMethods
       def controllers
@@ -29,24 +29,24 @@ module Spontaneous::Plugins
       end
     end # ClassMethods
 
-    module InstanceMethods
-      # resolve and call the relevant action handler and return the results to the controller
-      def process_action(action_path, env, format)
-        env = env.dup
-        namespace, *p = action_path.split(S::Constants::SLASH)
-        path = [S::Constants::EMPTY].concat(p).join(S::Constants::SLASH)
-        env[S::Constants::PATH_INFO] = path
-        controller_class = self.class.controllers[namespace.to_sym]
-        return 404 unless controller_class
-        app = controller_class.new(self, format)
-        app.call(env)
-      end
+    # InstanceMethods
 
-      # generate an action URL of the form
-      # <path to page>/@<action namespace>/<action path>
-      def action_url(namespace, path)
-        [self.path, "#{ACTION_SEPARATOR}#{namespace}", path].join(S::Constants::SLASH).gsub(%r{//}, '/')
-      end
-    end # InstanceMethods
-  end # Actions
+    # resolve and call the relevant action handler and return the results to the controller
+    def process_action(action_path, env, format)
+      env = env.dup
+      namespace, *p = action_path.split(S::Constants::SLASH)
+      path = [S::Constants::EMPTY].concat(p).join(S::Constants::SLASH)
+      env[S::Constants::PATH_INFO] = path
+      controller_class = self.class.controllers[namespace.to_sym]
+      return 404 unless controller_class
+      app = controller_class.new(self, format)
+      app.call(env)
+    end
+
+    # generate an action URL of the form
+    # <path to page>/@<action namespace>/<action path>
+    def action_url(namespace, path)
+      [self.path, "#{ACTION_SEPARATOR}#{namespace}", path].join(S::Constants::SLASH).gsub(%r{//}, '/')
+    end
+  end # Controllers
 end

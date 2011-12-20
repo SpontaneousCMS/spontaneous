@@ -2,6 +2,7 @@
 
 module Spontaneous::Plugins
   module SchemaTitle
+    extend ActiveSupport::Concern
 
     module ClassMethods
       def class_name_with_fallback
@@ -26,8 +27,6 @@ module Spontaneous::Plugins
       def title=(title)
         @title = title
       end
-    end
-
-  end
+    end # ClassMethods
+  end # SchemaTitle
 end
-

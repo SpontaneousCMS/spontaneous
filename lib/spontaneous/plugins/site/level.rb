@@ -2,6 +2,8 @@
 
 module Spontaneous::Plugins::Site
   module Level
+    extend ActiveSupport::Concern
+
     module ClassMethods
       def at_depth(level)
         case level

@@ -2,6 +2,8 @@
 
 module Spontaneous::Plugins
   module PageSearch
+    extend ActiveSupport::Concern
+
     module ClassMethods
       def root
         first_visible(:path => Spontaneous::SLASH)
@@ -56,10 +58,6 @@ module Spontaneous::Plugins
       #   query = S::Content._unfiltered_dataset.select(Sequel::LiteralString.new("c2.*")).from(:content___c1, :content___c2, :content___c3).where(params)
       #   query.prepare(:first, :aliased_page)
       # end
-    end
-
-    # module InstanceMethods
-    # end
+    end # ClassMethods
   end
 end
-

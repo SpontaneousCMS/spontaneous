@@ -13,7 +13,7 @@ module Spontaneous
     alias_method :each_attribute, :each
 
     # need to load this first because it's used by the ContentTableInheritance plugin
-    plugin Plugins::SchemaId
+    include Plugins::SchemaId
 
     sequel_plugin :content_table_inheritance, :type_sid
     sequel_plugin :yajl_serialization, :field_store, :entry_store, :box_store
@@ -43,25 +43,24 @@ module Spontaneous
     one_to_many :_pieces,    :key => :container_id, :class => self, :reciprocal => :container
     many_to_one :page, :class => Content, :key => :page_id, :reciprocal => :content
 
-    extend Plugins
     include Enumerable
 
-    plugin Plugins::Entry
-    plugin Plugins::Boxes
-    plugin Plugins::Fields
-    plugin Plugins::Entries
-    plugin Plugins::Styles
-    plugin Plugins::SchemaTitle
-    plugin Plugins::Render
-    plugin Plugins::SchemaHierarchy
-    plugin Plugins::InstanceCode
-    plugin Plugins::Serialisation
-    plugin Plugins::Media
-    plugin Plugins::Publishing
-    plugin Plugins::Aliases
-    plugin Plugins::Visibility
-    plugin Plugins::Prototypes
-    plugin Plugins::Permissions
+    include Plugins::Entry
+    include Plugins::Boxes
+    include Plugins::Fields
+    include Plugins::Entries
+    include Plugins::Styles
+    include Plugins::SchemaTitle
+    include Plugins::Render
+    include Plugins::SchemaHierarchy
+    include Plugins::InstanceCode
+    include Plugins::Serialisation
+    include Plugins::Media
+    include Plugins::Publishing
+    include Plugins::Aliases
+    include Plugins::Visibility
+    include Plugins::Prototypes
+    include Plugins::Permissions
 
     # marker method enabling a simple test for "cms content" vs "everything else"
     def spontaneous_content?

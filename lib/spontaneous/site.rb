@@ -2,18 +2,16 @@
 
 module Spontaneous
   class Site < Spontaneous::Facet
-    extend Plugins
-
-    plugin Plugins::Site::Instance
-    plugin Plugins::Site::Publishing
-    plugin Plugins::Site::Revisions
-    plugin Plugins::Site::Selectors
-    plugin Plugins::Site::Map
-    plugin Plugins::Site::Search
-    plugin Plugins::Site::Features
-    plugin Plugins::Site::Schema
-    plugin Plugins::Site::Level
-    plugin Plugins::Site::Storage
+    include Plugins::Site::Instance
+    include Plugins::Site::Publishing
+    include Plugins::Site::Revisions
+    include Plugins::Site::Selectors
+    include Plugins::Site::Map
+    include Plugins::Site::Search
+    include Plugins::Site::Features
+    include Plugins::Site::Schema
+    include Plugins::Site::Level
+    include Plugins::Site::Storage
 
     attr_accessor :database
     attr_reader :environment, :mode

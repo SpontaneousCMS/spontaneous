@@ -2,6 +2,7 @@
 
 module Spontaneous::Plugins
   module Boxes
+    extend ActiveSupport::Concern
 
     module ClassMethods
       def box(name, options = {}, &block)
@@ -61,49 +62,48 @@ module Spontaneous::Plugins
       def box_position(box_prototype)
         box_prototypes.index(box_prototype)
       end
+    end # ClassMethods
+
+    # InstanceMethods
+
+    def reload
+      @boxes = nil
+      super
     end
 
-    module InstanceMethods
+    def boxes(*args)
+      @boxes ||= Spontaneous::Collections::BoxSet.new(self)
+    end
 
-      def reload
-        @boxes = nil
-        super
-      end
-
-      def boxes(*args)
-        @boxes ||= Spontaneous::Collections::BoxSet.new(self)
-      end
-
-      def iterable
-        boxes
-      end
+    def iterable
+      boxes
+    end
 
 
-      def box?(box_name)
-        self.class.box?(box_name.to_sym)
-      end
+    def box?(box_name)
+      self.class.box?(box_name.to_sym)
+    end
 
-      def box_data(box)
-        # TODO: use schema id to retrieve box data
-        box_id = box.schema_id.to_s
-        (self.box_store || []).detect { |data| data[:box_id] == box_id } || {}
-      end
+    def box_data(box)
+      # TODO: use schema id to retrieve box data
+      box_id = box.schema_id.to_s
+      (self.box_store || []).detect { |data| data[:box_id] == box_id } || {}
+    end
 
-      def box_field_store(box)
-        box_data(box)[:fields]
-      end
+    def box_field_store(box)
+      box_data(box)[:fields]
+    end
 
-      def box_modified!(modified_box)
-        self.box_store = serialize_boxes
-      end
+    def box_modified!(modified_box)
+      self.box_store = serialize_boxes
+    end
 
-      def serialize_boxes
-        boxes.map { |box| box.serialize_db }
-      end
+    def serialize_boxes
+      boxes.map { |box| box.serialize_db }
+    end
 
-      def box_style_id(box_name)
-        nil
-      end
+    def box_style_id(box_name)
+      nil
     end
   end
 end

@@ -1,11 +1,8 @@
 # encoding: UTF-8
 
-# is this unforgivable?
-# i think it's kinda neat, if a tad fragile (to columns named 'content'...)
 module Sequel
   class Dataset
     alias_method :sequel_quote_identifier_append, :quote_identifier_append
-
 
     def quote_identifier_append(sql, name)
       if name == :content or name == "content"
@@ -18,6 +15,7 @@ end
 
 module Spontaneous::Plugins
   module Publishing
+    extend ActiveSupport::Concern
 
     module ClassMethods
       @@dataset = nil
@@ -108,7 +106,7 @@ module Spontaneous::Plugins
           published = self.filter
 
           must_publish_all = (content.nil? || (!revision_exists?(revision-1)) || \
-            (content.is_a?(Array) && content.empty?))
+                              (content.is_a?(Array) && content.empty?))
 
           if must_publish_all
             create_revision(revision)
@@ -185,71 +183,65 @@ module Spontaneous::Plugins
       def revision_dataset(revision=nil)
         Spontaneous.database.dataset.from(revision_table(revision))
       end
+    end # ClassMethods
+
+    # InstanceMethods
+
+    def after_update
+      super
+      page.modified!(page?) if page
     end
 
-    module InstanceMethods
-      def after_update
-        super
-        page.modified!(page?) if page
+    def modified!(caller_is_page)
+      unless caller_is_page
+        self.model.where(:id => self.id).update(:modified_at => Sequel.datetime_class.now)
       end
+      push_page_change
+    end
 
-      # def after_create
-      #   super
-      #   push_page_change
-      # end
+    def push_page_change
+      Spontaneous::Change.push(self) if page?
+    end
 
-      def modified!(caller_is_page)
-        unless caller_is_page
-          self.model.where(:id => self.id).update(:modified_at => Sequel.datetime_class.now)
+
+    def with_revision(revision, &block)
+      self.class.with_revision(revision, &block)
+    end
+    def with_editable(&block)
+      self.class.with_editable(&block)
+    end
+
+    def sync_to_revision(revision, origin=true)
+      # 'publish' is a lock to make sure the duplication doesn't cross
+      # page boundaries unless that's necessary (such as in the case
+      # of a page addition)
+      publish = origin || !self.page?
+
+      with_revision(revision) do
+        published_copy = Spontaneous::Content[self.id]
+        if published_copy
+          if publish and published_copy.entry_store
+            pieces_to_delete = published_copy.entry_store - self.entry_store
+            pieces_to_delete.each do |entry|
+              if c = Spontaneous::Content[entry[0]]
+                c.destroy(false)
+              end
+            end
+          end
+        else # missing content (so force a publish)
+          Spontaneous::Content.insert({:id => self.id})
+          publish = true
         end
-        push_page_change
-      end
 
-      def push_page_change
-        Spontaneous::Change.push(self) if page?
-      end
-
-
-      def with_revision(revision, &block)
-        self.class.with_revision(revision, &block)
-      end
-      def with_editable(&block)
-        self.class.with_editable(&block)
-      end
-
-      def sync_to_revision(revision, origin=true)
-        # 'publish' is a lock to make sure the duplication doesn't cross
-        # page boundaries unless that's necessary (such as in the case
-        # of a page addition)
-        publish = origin || !self.page?
-
-        with_revision(revision) do
-          published_copy = Spontaneous::Content[self.id]
-          if published_copy
-            if publish and published_copy.entry_store
-              pieces_to_delete = published_copy.entry_store - self.entry_store
-              pieces_to_delete.each do |entry|
-                if c = Spontaneous::Content[entry[0]]
-                  c.destroy(false)
-                end
-              end
+        if publish
+          with_editable do
+            self.pieces.each do |entry|
+              entry.sync_to_revision(revision, false)
             end
-          else # missing content (so force a publish)
-            Spontaneous::Content.insert({:id => self.id})
-            publish = true
           end
-
-          if publish
-            with_editable do
-              self.pieces.each do |entry|
-                entry.sync_to_revision(revision, false)
-              end
-            end
-            Spontaneous::Content.where(:id => self.id).update(self.values)
-          end
+          Spontaneous::Content.where(:id => self.id).update(self.values)
         end
       end
     end
   end
 end
-

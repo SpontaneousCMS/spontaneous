@@ -2,9 +2,7 @@
 
 module Spontaneous::Plugins
   module Styles
-
-    def self.configure(base)
-    end
+    extend ActiveSupport::Concern
 
     module ClassMethods
       def style(name, options={})
@@ -38,7 +36,6 @@ module Spontaneous::Plugins
         Spontaneous::Style
       end
 
-
       def find_style(style_sid)
         if prototype = style_prototypes.sid(style_sid)
           prototype.style(self)
@@ -64,56 +61,51 @@ module Spontaneous::Plugins
       end
     end # ClassMethods
 
-    module InstanceMethods
+    # InstanceMethods
 
-      def style=(style)
-        self.style_sid = style_to_schema_id(style)
-      end
+    def style=(style)
+      self.style_sid = style_to_schema_id(style)
+    end
 
-      # converts a symbol or string into a Schema::UID instance
-      def style_to_schema_id(style)
-        return nil if style.nil?
-        sid = nil
-        if style.respond_to?(:schema_id)
-          sid = style.schema_id
+    # converts a symbol or string into a Schema::UID instance
+    def style_to_schema_id(style)
+      return nil if style.nil?
+      sid = nil
+      if style.respond_to?(:schema_id)
+        sid = style.schema_id
+      else
+        if Spontaneous::Schema::UID === style
+          sid = style
         else
-          if Spontaneous::Schema::UID === style
-            sid = style
-          else
-            if s = self.find_named_style(style)
-              sid = s.schema_id
-            end
+          if s = self.find_named_style(style)
+            sid = s.schema_id
           end
         end
       end
+    end
 
-      def find_named_style(style_name)
-        self.class.find_named_style(style_name)
-      end
+    def find_named_style(style_name)
+      self.class.find_named_style(style_name)
+    end
 
-      def style
-        resolve_style(self.style_sid)
-      end
+    def style
+      resolve_style(self.style_sid)
+    end
 
-      def default_style
-        self.class.default_style
-      end
+    def default_style
+      self.class.default_style
+    end
 
-      def resolve_style(style_sid)
-        self.class.resolve_style(style_sid)
-      end
+    def resolve_style(style_sid)
+      self.class.resolve_style(style_sid)
+    end
 
-      def styles
-        self.class.styles
-      end
+    def styles
+      self.class.styles
+    end
 
-      def template(format = :html)
-        style.template(format)
-      end
-
-
-    end # InstanceMethods
-
+    def template(format = :html)
+      style.template(format)
+    end
   end
 end
-

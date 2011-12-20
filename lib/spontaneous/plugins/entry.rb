@@ -2,51 +2,51 @@
 
 module Spontaneous::Plugins
   module Entry
-    module InstanceMethods
+    extend ActiveSupport::Concern
 
-      # kept to allow access to pages & pieces as they would be seen when
-      # accessed as an entry in a box
-      def entry
-        self
-      end
+    # InstanceMethods
 
-      def box_sid
-        @box_sid ||= Spontaneous.schema.uids[self[:box_sid]]
-      end
+    # kept to allow access to pages & pieces as they would be seen when
+    # accessed as an entry in a box
+    def entry
+      self
+    end
 
-      def box_sid=(sid)
-        self[:box_sid] = sid.to_s
-      end
+    def box_sid
+      @box_sid ||= Spontaneous.schema.uids[self[:box_sid]]
+    end
 
-      def box
-        container.boxes.sid(box_sid) if container
-      end
+    def box_sid=(sid)
+      self[:box_sid] = sid.to_s
+    end
 
-      def first?
-        container.pieces.first == self
-      end
+    def box
+      container.boxes.sid(box_sid) if container
+    end
 
-      def last?
-        container.pieces.last == self
-      end
+    def first?
+      container.pieces.first == self
+    end
 
-      def set_position(new_position)
-        if box
-          box.set_position(self, new_position)
-        else
-          container.pieces.set_position(self, new_position)
-        end
-      end
+    def last?
+      container.pieces.last == self
+    end
 
-      def position
-        return box.index(self) if box
-        container.pieces.index(self)
+    def set_position(new_position)
+      if box
+        box.set_position(self, new_position)
+      else
+        container.pieces.set_position(self, new_position)
       end
+    end
 
-      def serialize_db
-        [self.id]
-      end
-    end # InstanceMethods
+    def position
+      return box.index(self) if box
+      container.pieces.index(self)
+    end
+
+    def serialize_db
+      [self.id]
+    end
   end # Entry
 end # Spontaneous::Plugins
-

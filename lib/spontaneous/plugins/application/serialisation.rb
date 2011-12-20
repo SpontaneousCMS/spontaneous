@@ -2,6 +2,8 @@
 
 module Spontaneous::Plugins::Application
   module Serialisation
+    extend ActiveSupport::Concern
+
     module ClassMethods
       include Spontaneous::JSON
       def serialise_http(object)

@@ -1,16 +1,15 @@
 # encoding: UTF-8
 
-
 module Spontaneous::Plugins
   module AllowedTypes
+    extend ActiveSupport::Concern
+
     class AllowedType
       attr_accessor :allow_subclasses
 
       def initialize(type, options={})
         @type = type
         @options = options
-        # check_instance_class
-        # check_styles
       end
 
       def check_instance_class
@@ -33,11 +32,7 @@ module Spontaneous::Plugins
         when Class
           @type
         when Symbol, String
-          # begin
           @type.to_s.constantize
-          # rescue  => e
-          #   p self
-          # end
         end
       end
 
@@ -126,52 +121,52 @@ module Spontaneous::Plugins
       def allowed
         (supertype ? supertype.allowed : []).concat(allowed_types_config)
       end
+
       def allowed_types
         types = []
         allowed.each { |a| types.concat(a.instance_classes) }
         types
       end
+    end # ClassMethods
+
+    # InstanceMethods
+
+    def allowed
+      self.class.allowed
     end
 
-    module InstanceMethods
-      def allowed
-        self.class.allowed
-      end
+    def allowed_types
+      self.class.allowed_types
+    end
 
-      def allowed_types
-        self.class.allowed_types
-      end
+    def allowed_type(content)
+      klass = content.is_a?(Class) ? content : content.class
+      self.class.allowed.find { |a| a.includes?(klass) }
+    end
 
-      def allowed_type(content)
-        klass = content.is_a?(Class) ? content : content.class
-        self.class.allowed.find { |a| a.includes?(klass) }
+    def prototype_for_content(content, box = nil)
+      if allowed = allowed_type(content)
+        allowed.prototype
+      else
+        nil
       end
+    end
 
-      def prototype_for_content(content, box = nil)
-        if allowed = allowed_type(content)
-          allowed.prototype
-        else
-          nil
-        end
+    # TODO: BOXES remove box reference here
+    def style_for_content(content, box = nil)
+      if allowed = allowed_type(content)
+        allowed.default_style
+      else
+        content.default_style
       end
+    end
 
-      # TODO: BOXES remove box reference here
-      def style_for_content(content, box = nil)
-        if allowed = allowed_type(content)
-          allowed.default_style
-        else
-          content.default_style
-        end
-      end
-
-      def available_styles(content)
-        if allowed = allowed_type(content)
-          allowed.styles
-        else
-          super
-        end
+    def available_styles(content)
+      if allowed = allowed_type(content)
+        allowed.styles
+      else
+        super
       end
     end
   end
 end
-

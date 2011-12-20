@@ -2,6 +2,8 @@
 
 module Spontaneous::Plugins
   module SchemaHierarchy
+    extend ActiveSupport::Concern
+
     module ClassMethods
       def schema_validate
         if schema_id.nil?
@@ -37,8 +39,8 @@ module Spontaneous::Plugins
         end
       end
 
+      # TODO: Delete this?
       def schema_reset!
-        # @subclasses = nil
       end
 
       def __source_file=(path)
@@ -68,8 +70,6 @@ module Spontaneous::Plugins
       def schema_class?
         true
       end
-    end
-  end
+    end # ClassMethods
+  end # SchemaHierarchy
 end
-
-

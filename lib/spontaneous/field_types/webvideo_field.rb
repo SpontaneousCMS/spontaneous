@@ -6,7 +6,7 @@ require 'nokogiri'
 module Spontaneous
   module FieldTypes
     class WebVideoField < Field
-      plugin Spontaneous::Plugins::Field::EditorClass
+      include Spontaneous::Plugins::Field::EditorClass
 
       def outputs
         [:type, :id]
@@ -253,4 +253,3 @@ module Spontaneous
 
   end
 end
-

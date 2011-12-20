@@ -4,6 +4,8 @@ require 'rack'
 
 module Spontaneous::Plugins::Page
   module Formats
+    extend ActiveSupport::Concern
+
     module ClassMethods
       def formats(*formats)
         return format_list if formats.nil? or formats.empty?
@@ -69,25 +71,22 @@ module Spontaneous::Plugins::Page
           ::Rack::Mime.mime_type(".#{format}")
         end
       end
+    end # ClassMethods
+
+    def formats
+      self.class.formats
     end
 
-    module InstanceMethods
-      def formats
-        self.class.formats
-      end
+    def default_format
+      self.class.default_format
+    end
 
-      def default_format
-        self.class.default_format
-      end
+    def provides_format?(format)
+      self.class.provides_format?(format)
+    end
 
-      def provides_format?(format)
-        self.class.provides_format?(format)
-      end
-
-      def mime_type(format)
-        self.class.mime_type(format)
-      end
+    def mime_type(format)
+      self.class.mime_type(format)
     end
   end # Formats
 end # Spontaneous::Plugins::Page
-

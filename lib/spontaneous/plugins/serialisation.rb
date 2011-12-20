@@ -1,11 +1,10 @@
 # encoding: UTF-8
 
-
 module Spontaneous::Plugins
   module Serialisation
+    extend ActiveSupport::Concern
 
     module ClassMethods
-
       def export(user = nil)
         {
           :type=> self.ui_class,
@@ -38,31 +37,28 @@ module Spontaneous::Plugins
 
     end # ClassMethods
 
-    module InstanceMethods
-      def shallow_export(user)
-        {
-          :id => id,
-          :type => self.class.ui_class,
-          :type_id => self.class.schema_id.to_s,
-          :is_page => page?,
-          :hidden => (hidden? ? true : false),
-          :depth => content_depth,
-          :fields  => fields.export(user),
-          :label => label
-        }
-      end
+    # InstanceMethods
 
-      def export(user = nil)
-        shallow_export(user).merge({
-          :boxes => self.class.readable_boxes(user).map { |box| boxes[box.name].export(user) }
-        })
-      end
+    def shallow_export(user)
+      { :id => id,
+        :type => self.class.ui_class,
+        :type_id => self.class.schema_id.to_s,
+        :is_page => page?,
+        :hidden => (hidden? ? true : false),
+        :depth => content_depth,
+        :fields  => fields.export(user),
+        :label => label }
+    end
+
+    def export(user = nil)
+      shallow_export(user).merge({
+        :boxes => self.class.readable_boxes(user).map { |box| boxes[box.name].export(user) }
+      })
+    end
 
 
-      def serialise_http(user = nil)
-        Spontaneous.serialise_http(export(user))
-      end
-    end # InstanceMethods
+    def serialise_http(user = nil)
+      Spontaneous.serialise_http(export(user))
+    end
   end # Serialisation
 end # Spontaneous::Plugins
-

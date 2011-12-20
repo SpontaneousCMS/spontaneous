@@ -2,6 +2,8 @@
 
 module Spontaneous::Plugins::Page
   module Request
+    extend ActiveSupport::Concern
+
     # liked this but it didn't work particularly well so wasn't used in the end
     # perhaps, when I re-write the bloody Public handler i can use it
     class PageResponse
@@ -78,20 +80,16 @@ module Spontaneous::Plugins::Page
           nil
         end
       end
-
     end # ClassMethods
 
 
-    module InstanceMethods
-      def request_block(request)
-        method = request.request_method.downcase.to_sym
-        self.class.request_blocks[method]
-      end
+    def request_block(request)
+      method = request.request_method.downcase.to_sym
+      self.class.request_blocks[method]
+    end
 
-      def dynamic?(method = :get)
-        self.class.dynamic?(method)
-      end
+    def dynamic?(method = :get)
+      self.class.dynamic?(method)
     end
   end # Request
 end
-

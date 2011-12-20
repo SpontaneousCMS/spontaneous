@@ -15,6 +15,8 @@ require "sequel"
 require "yajl"
 require "logger"
 
+require "active_support/concern"
+require "active_support/deprecation"
 require "active_support/core_ext/hash/keys"
 require "active_support/core_ext/date_time/conversions"
 require "active_support/core_ext/array/grouping"
@@ -27,14 +29,12 @@ spontaneous = File.join(File.dirname(__FILE__), "spontaneous")
 
 Dir["#{spontaneous}/extensions/*.rb"].each { |file| require file }
 
-require "spontaneous/plugins"
 require "spontaneous/logger"
 require "spontaneous/constants"
 require "spontaneous/errors"
 require "spontaneous/json"
 
 module Spontaneous
-  extend  Plugins
   include Constants
 
   def self.gem_root
@@ -151,12 +151,12 @@ module Spontaneous
     end
   end
 
-  plugin Plugins::Application::State
-  plugin Plugins::Application::Paths
-  plugin Plugins::Application::Render
-  plugin Plugins::Application::Facets
-  plugin Plugins::Application::Serialisation
-  plugin Plugins::Application::Features
+  include Plugins::Application::State
+  include Plugins::Application::Paths
+  include Plugins::Application::Render
+  include Plugins::Application::Facets
+  include Plugins::Application::Serialisation
+  include Plugins::Application::Features
 end
 
 require "spontaneous/loader"

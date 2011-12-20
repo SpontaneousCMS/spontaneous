@@ -2,6 +2,8 @@
 
 module Spontaneous::Plugins::Site
   module Instance
+    extend ActiveSupport::Concern
+
     module ClassMethods
       extend Forwardable
 
@@ -17,6 +19,5 @@ module Spontaneous::Plugins::Site
 
       def_delegators :instance, :config, :database, :database=
     end # ClassMethods
-  end # Map
+  end # Instance
 end
-

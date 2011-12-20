@@ -2,17 +2,17 @@
 
 module Spontaneous::Plugins
   module InstanceCode
+    extend ActiveSupport::Concern
 
-    module InstanceMethods
-      def after_initialize
-        super
-        mixin_instance_code
-      end
+    # InstanceMethods
 
-      def mixin_instance_code
-        self.instance_eval(self.instance_code) unless self.instance_code.nil?
-      end
+    def after_initialize
+      super
+      mixin_instance_code
+    end
+
+    def mixin_instance_code
+      self.instance_eval(self.instance_code) unless self.instance_code.nil?
     end
   end
 end
-

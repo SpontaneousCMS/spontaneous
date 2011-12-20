@@ -1,11 +1,8 @@
 # encoding: UTF-8
 
-
 module Spontaneous::Plugins::Application
   module Paths
-
-    def self.configure(base)
-    end
+    extend ActiveSupport::Concern
 
     module ClassMethods
       def load_paths
@@ -132,4 +129,3 @@ module Spontaneous::Plugins::Application
     end # ClassMethods
   end # Paths
 end
-

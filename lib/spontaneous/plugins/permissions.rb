@@ -1,8 +1,8 @@
 # encoding: UTF-8
 
-
 module Spontaneous::Plugins
   module Permissions
+    extend ActiveSupport::Concern
 
     module ClassMethods
       def box_readable?(user, box_name)
@@ -40,24 +40,22 @@ module Spontaneous::Plugins
     end # ClassMethods
 
 
-    module InstanceMethods
-      def field_readable?(user, field_name)
-        self.class.field_readable?(user, field_name)
-      end
+    # InstanceMethods
 
-      def field_writable?(user, field_name)
-        self.class.field_writable?(user, field_name)
-      end
+    def field_readable?(user, field_name)
+      self.class.field_readable?(user, field_name)
+    end
 
-      def box_writable?(user, box_name)
-        self.class.box_writable?(user, box_name)
-      end
+    def field_writable?(user, field_name)
+      self.class.field_writable?(user, field_name)
+    end
 
-      def box_readable?(user, box_name)
-        self.class.box_readable?(user, box_name)
-      end
-    end # InstanceMethods
+    def box_writable?(user, box_name)
+      self.class.box_writable?(user, box_name)
+    end
 
+    def box_readable?(user, box_name)
+      self.class.box_readable?(user, box_name)
+    end
   end # Permissions
 end # Spontaneous::Plugins
-

@@ -3,12 +3,15 @@
 
 module Spontaneous::Plugins
   module Aliases
+    extend ActiveSupport::Concern
 
-    def self.configure(base)
-      base.many_to_one :target, :class => base, :reciprocal => :aliases
-      base.one_to_many :aliases, :class => base, :key => :target_id, :reciprocal => :target
-      base.add_association_dependencies :aliases => :destroy
+    included do
+      many_to_one :target, :class => self, :reciprocal => :aliases
+      one_to_many :aliases, :class => self, :key => :target_id, :reciprocal => :target
+      add_association_dependencies :aliases => :destroy
     end
+    # def self.configure(base)
+    # end
 
     module ClassMethods
       def alias_of(*args)
@@ -62,21 +65,8 @@ module Spontaneous::Plugins
       def alias?
         false
       end
-    end
+    end # ClassMethods
 
-    module InstanceMethods
-      def alias_title
-        fields[:title].to_s
-      end
-
-      def alias_icon_field
-        if field = fields.detect { |f| f.image? }
-          field
-        else
-          nil
-        end
-      end
-    end
 
     module ClassAliasMethods
       def alias?
@@ -136,28 +126,9 @@ module Spontaneous::Plugins
     end
 
     module PageAliasMethods
-      # def path
-      #   @_path ||= [parent.path, target.slug].join(S::SLASH)
-      # end
-
-      # def calculate_path
-      #   ""
-      # end
-
       def slug
         target.slug
       end
-
-      # def update_path
-      #   puts "alias update page #{slug}"
-      #   super
-      # end
-
-      # alias_method :path, :unaliased_path
-      # def before_create
-      #   super
-      #   self.slug = target.slug
-      # end
 
       def layout
         # if this alias class has no layouts defined, then just use the one set on the target
@@ -171,6 +142,20 @@ module Spontaneous::Plugins
 
       def find_named_layout(layout_name)
         super or target.find_named_layout(layout_name)
+      end
+    end
+
+    # InstanceMethods
+
+    def alias_title
+      fields[:title].to_s
+    end
+
+    def alias_icon_field
+      if field = fields.detect { |f| f.image? }
+        field
+      else
+        nil
       end
     end
   end

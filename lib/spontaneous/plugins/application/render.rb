@@ -1,13 +1,10 @@
 # encoding: UTF-8
 
-
 require 'cutaneous'
 
 module Spontaneous::Plugins::Application
   module Render
-
-    def self.configure(base)
-    end
+    extend ActiveSupport::Concern
 
     module ClassMethods
       attr_accessor :render_engine
@@ -26,4 +23,3 @@ module Spontaneous::Plugins::Application
     end # ClassMethods
   end # Render
 end # Spontaneous::Plugins::Application
-

@@ -1,8 +1,8 @@
 # encoding: UTF-8
 
-
 module Spontaneous::Plugins
   module Paths
+    extend ActiveSupport::Concern
 
     module ClassMethods
       def generate_default_slug
@@ -14,114 +14,114 @@ module Spontaneous::Plugins
       end
     end
 
-    module InstanceMethods
-      ANCESTOR_SEP = "."
+    # InstanceMethods
 
-      def after_initialize
-        super
-        self.slug = default_slug if slug.nil?
-      end
+    ANCESTOR_SEP = "."
 
-      def before_create
-        place_in_page_tree
-        super
-      end
+    def after_initialize
+      super
+      self.slug = default_slug if slug.nil?
+    end
 
-      def before_save
-        unless new?
-          if title = self.fields[:title]
-            if title.modified? and !title.blank? and self.class.is_default_slug?(slug)
-              self.slug = title.value
-            end
-          end
-        end
-        super
-      end
+    def before_create
+      place_in_page_tree
+      super
+    end
 
-      def after_save
-        super
-        check_for_path_changes
-      end
-
-      def default_slug
-        self.class.generate_default_slug
-      end
-
-      def parent=(parent)
-        super
-      end
-
-      def place_in_page_tree
-        if self.parent_id.nil?
-          if Spontaneous::Page.root.nil?
-            make_root
-          end
-        else
-          update_path
-        end
-      end
-
-      def make_root
-        self[:path] = "/"
-        self[:slug] = ""
-        self[:ancestor_path] = ""
-      end
-
-      def ancestor_path
-        (self[:ancestor_path] || "").split(ANCESTOR_SEP).map { |id| id.to_i }
-      end
-
-      def root?
-        path == Spontaneous::SLASH
-      end
-      alias_method :is_root?, :root?
-
-      def root
-        Spontaneous::Page.root
-      end
-
-      def update_path
-        self.path = calculate_path
-        if parent
-          self[:ancestor_path] = parent.ancestor_path.push(parent.id).join(ANCESTOR_SEP)
-        end
-      end
-
-
-      def calculate_path
-        if parent.nil?
-          root? ? Spontaneous::SLASH : '' # bad case, no parent but not root
-        else
-          File.join(parent.path, slug)
-        end
-      end
-
-      def slug=(s)
-        if (new_slug = s.to_url) != self.slug
-          @__slug_changed = true
-          self[:slug] = new_slug
-          self.update_path
-        end
-      end
-
-      def check_for_path_changes
-        if @__slug_changed
-          @__slug_changed = false
-          children.each do |child|
-            child.propagate_path_changes
-          end
-          aliases.each do |link|
-            link.propagate_path_changes if link.page?
+    def before_save
+      unless new?
+        if title = self.fields[:title]
+          if title.modified? and !title.blank? and self.class.is_default_slug?(slug)
+            self.slug = title.value
           end
         end
       end
+      super
+    end
 
-      def propagate_path_changes
+    def after_save
+      super
+      check_for_path_changes
+    end
+
+    def default_slug
+      self.class.generate_default_slug
+    end
+
+    def parent=(parent)
+      super
+    end
+
+    def place_in_page_tree
+      if self.parent_id.nil?
+        if Spontaneous::Page.root.nil?
+          make_root
+        end
+      else
+        update_path
+      end
+    end
+
+    def make_root
+      self[:path] = "/"
+      self[:slug] = ""
+      self[:ancestor_path] = ""
+    end
+
+    def ancestor_path
+      (self[:ancestor_path] || "").split(ANCESTOR_SEP).map { |id| id.to_i }
+    end
+
+    def root?
+      path == Spontaneous::SLASH
+    end
+    alias_method :is_root?, :root?
+
+    def root
+      Spontaneous::Page.root
+    end
+
+    def update_path
+      self.path = calculate_path
+      if parent
+        self[:ancestor_path] = parent.ancestor_path.push(parent.id).join(ANCESTOR_SEP)
+      end
+    end
+
+
+    def calculate_path
+      if parent.nil?
+        root? ? Spontaneous::SLASH : '' # bad case, no parent but not root
+      else
+        File.join(parent.path, slug)
+      end
+    end
+
+    def slug=(s)
+      if (new_slug = s.to_url) != self.slug
+        @__slug_changed = true
+        self[:slug] = new_slug
         self.update_path
-        self.save
+      end
+    end
+
+    def check_for_path_changes
+      if @__slug_changed
+        @__slug_changed = false
         children.each do |child|
           child.propagate_path_changes
         end
+        aliases.each do |link|
+          link.propagate_path_changes if link.page?
+        end
+      end
+    end
+
+    def propagate_path_changes
+      self.update_path
+      self.save
+      children.each do |child|
+        child.propagate_path_changes
       end
     end
   end

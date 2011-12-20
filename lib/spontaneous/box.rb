@@ -2,17 +2,16 @@
 
 module Spontaneous
   class Box
-    extend Plugins
     include Enumerable
 
-    plugin Plugins::SchemaHierarchy
-    plugin Plugins::Fields
-    plugin Plugins::Styles
-    plugin Plugins::Serialisation
-    plugin Plugins::Render
-    plugin Plugins::AllowedTypes
-    plugin Plugins::Permissions
-    plugin Plugins::Media
+    include Plugins::SchemaHierarchy
+    include Plugins::Fields
+    include Plugins::Styles
+    include Plugins::Serialisation
+    include Plugins::Render
+    include Plugins::AllowedTypes
+    include Plugins::Permissions
+    include Plugins::Media
 
     # use underscores to protect against field name conflicts
     attr_reader :_name, :_prototype, :_owner

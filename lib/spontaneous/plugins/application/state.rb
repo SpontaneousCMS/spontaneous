@@ -1,14 +1,10 @@
 # encoding: UTF-8
 
-
 module Spontaneous::Plugins::Application
   module State
-
-    def self.configure(base)
-    end
+    extend ActiveSupport::Concern
 
     module ClassMethods
-
       def init(options={})
         # return false if loaded?
         self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
@@ -85,4 +81,3 @@ module Spontaneous::Plugins::Application
     end # ClassMethods
   end # State
 end
-

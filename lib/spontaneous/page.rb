@@ -2,20 +2,19 @@
 
 module Spontaneous
   class Page < Content
-
-    plugin Plugins::Supertype
-    plugin Plugins::Page::Formats
-    plugin Plugins::Layouts
-    plugin Plugins::Paths
-    plugin Plugins::PageTree
-    plugin Plugins::SiteMap
-    plugin Plugins::PageSearch
-    plugin Plugins::Controllers
-    plugin Plugins::Page::Request
+    include Plugins::Supertype
+    include Plugins::Page::Formats
+    include Plugins::Layouts
+    include Plugins::Paths
+    include Plugins::PageTree
+    include Plugins::SiteMap
+    include Plugins::PageSearch
+    include Plugins::Controllers
+    include Plugins::Page::Request
 
     many_to_one :parent,   :class => Content, :reciprocal => :children
     one_to_many :children, :class => Content, :key => :parent_id, :reciprocal => :parent
-    one_to_many :content,   :class => Content, :key => :page_id, :reciprocal => :page
+    one_to_many :content,  :class => Content, :key => :page_id, :reciprocal => :page
 
     # field :title, :string, :default => "New Page"
 
@@ -118,6 +117,5 @@ module Spontaneous
       hash.delete(:name)
       hash
     end
-
   end
 end

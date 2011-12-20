@@ -1,16 +1,12 @@
 # encoding: UTF-8
 
-
 module Spontaneous::Plugins
   module Prototypes
+    extend ActiveSupport::Concern
 
     DEFAULT_PROTOTYPE_NAME = :__default_prototype unless defined?(DEFAULT_PROTOTYPE_NAME)
 
-    def self.configure(base)
-    end
-
     module ClassMethods
-
       ## this is the Sequel default:
       #
       # def create(values = {}, &block)
@@ -56,39 +52,38 @@ module Spontaneous::Plugins
       end
     end # ClassMethods
 
-    module InstanceMethods
+    # InstanceMethods
 
-      def after_create
-        super
-        apply_prototype
+    def after_create
+      super
+      apply_prototype
+    end
+
+    # Add in an empty default prototype method for subclasses to override
+    define_method(Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME) { |instance| }
+
+    protected
+
+    def apply_prototype
+      # passing _prototype => false to the initialisation skips the prototype
+      return if _prototype == false
+      method = self.class.prototype_method_name(_prototype)
+
+      if respond_to?(method)
+        self.send(method, self)
+      else
+        logger.warn {
+          "Invalid prototype name '#{_prototype}' being passed to class #{self.class}."
+        }
       end
+    end
 
-      # Add in an empty default prototype method for subclasses to override
-      define_method(Spontaneous::Plugins::Prototypes::DEFAULT_PROTOTYPE_NAME) { |instance| }
+    def _prototype=(prototype)
+      @_prototype = prototype
+    end
 
-      protected
-
-      def apply_prototype
-        # passing _prototype => false to the initialisation skips the prototype
-        return if _prototype == false
-        method = self.class.prototype_method_name(_prototype)
-
-        if respond_to?(method)
-          self.send(method, self)
-        else
-          logger.warn {
-            "Invalid prototype name '#{_prototype}' being passed to class #{self.class}."
-          }
-        end
-      end
-
-      def _prototype=(prototype)
-        @_prototype = prototype
-      end
-
-      def _prototype
-        @_prototype
-      end
-    end # InstanceMethods
+    def _prototype
+      @_prototype
+    end
   end
 end

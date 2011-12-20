@@ -2,7 +2,7 @@
 
 module Spontaneous::FieldTypes
   class LongStringField < Field
-    plugin Spontaneous::Plugins::Field::EditorClass
+    include Spontaneous::Plugins::Field::EditorClass
 
     def generate_html(value)
       escape_html(value).gsub(/[\r\n]+/, "<br />")

@@ -2,23 +2,15 @@
 
 module Spontaneous::Plugins
   module Render
+    extend ActiveSupport::Concern
 
-    module ClassMethods
-    end
-
-    module InstanceMethods
-      def render(format=:html, params={}, *args)
-        if format.is_a?(Hash)
-          params = format
-          format = :html
-        end
-        Spontaneous::Render.render(self, format, params, *args)
+    # InstanceMethods
+    def render(format=:html, params={}, *args)
+      if format.is_a?(Hash)
+        params = format
+        format = :html
       end
-
-      # [:html].each do |format|
-      #   module_eval("def to_#{format}(*args); render(:#{format}, *args); end")
-      # end
+      Spontaneous::Render.render(self, format, params, *args)
     end
-  end
+  end # Render
 end
-

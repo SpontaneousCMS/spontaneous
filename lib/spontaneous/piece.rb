@@ -3,7 +3,7 @@
 
 module Spontaneous
   class Piece < Content
-    plugin Plugins::Supertype
+    include Plugins::Supertype
 
     set_inheritance_root
 

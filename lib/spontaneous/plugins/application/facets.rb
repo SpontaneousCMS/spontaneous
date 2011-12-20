@@ -1,19 +1,13 @@
 # encoding: UTF-8
 
-
 module Spontaneous::Plugins::Application
   module Facets
+    extend ActiveSupport::Concern
+
     module ClassMethods
       def instance
         Spontaneous::Site.instance
       end
-
-      # def instance=(instance)
-      #   # unless @instance
-      #   @instance = instance
-      #     # facets << instance
-      #   # end
-      # end
 
       def facets
         instance.facets
@@ -26,4 +20,3 @@ module Spontaneous::Plugins::Application
     end
   end
 end
-

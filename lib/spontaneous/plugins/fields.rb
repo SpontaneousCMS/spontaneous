@@ -2,6 +2,8 @@
 
 module Spontaneous::Plugins
   module Fields
+    extend ActiveSupport::Concern
+
     module ClassMethods
       def field(name, type=nil, options={}, &block)
         if type.is_a?(Hash)
@@ -64,47 +66,46 @@ module Spontaneous::Plugins
       def readable_fields
         field_prototypes.keys.select { |name| field_readable?(name) }
       end
+    end # ClassMethods
+
+    # InstanceMethods
+
+    def after_save
+      super
+      fields.saved
     end
 
-    module InstanceMethods
-      def after_save
-        super
-        fields.saved
-      end
+    def reload
+      @field_set = nil
+      super
+    end
 
-      def reload
-        @field_set = nil
-        super
-      end
+    def field_prototypes
+      self.class.field_prototypes
+    end
 
-      def field_prototypes
-        self.class.field_prototypes
-      end
+    def fields
+      @field_set ||= Spontaneous::Collections::FieldSet.new(self, field_store)
+    end
 
-      def fields
-        @field_set ||= Spontaneous::Collections::FieldSet.new(self, field_store)
-      end
+    def field?(field_name)
+      self.class.field?(field_name)
+    end
 
-      def field?(field_name)
-        self.class.field?(field_name)
-      end
+    # TODO: unify the update mechanism for these two stores
+    def field_modified!(modified_field)
+      self.field_store = @field_set.serialize_db
+    end
 
-      # TODO: unify the update mechanism for these two stores
-      def field_modified!(modified_field)
-        self.field_store = @field_set.serialize_db
+    def type_for_mime_type(mime_type)
+      self.class.allowed_types.find do |t|
+        t.field_for_mime_type(mime_type)
       end
+    end
 
-      def type_for_mime_type(mime_type)
-        self.class.allowed_types.find do |t|
-          t.field_for_mime_type(mime_type)
-        end
-      end
-
-      def field_for_mime_type(mime_type)
-        prototype = self.class.field_for_mime_type(mime_type)
-        self.fields[prototype.name]
-      end
+    def field_for_mime_type(mime_type)
+      prototype = self.class.field_for_mime_type(mime_type)
+      self.fields[prototype.name]
     end
   end
 end
-

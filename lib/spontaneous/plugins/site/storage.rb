@@ -15,50 +15,49 @@
 #     :provider => "Local"
 #   })
 # end
-module Spontaneous::Plugins
-  module Site
-    module Storage
-      module ClassMethods
-        def storage(mimetype = nil)
-          instance.storage(mimetype)
-        end
 
-        def local_storage
-          instance.local_storage
-        end
+module Spontaneous::Plugins::Site
+  module Storage
+    extend ActiveSupport::Concern
+
+    module ClassMethods
+      def storage(mimetype = nil)
+        instance.storage(mimetype)
       end
 
-      module InstanceMethods
-        def storage(mimetype = nil)
-          storage_for_mimetype(mimetype)
-        end
-
-        def storage_for_mimetype(mimetype)
-          storage_backends.detect { |storage| storage.accepts?(mimetype) }
-        end
-
-        def local_storage
-          storage_backends.select { |storage| storage.local? }
-        end
-
-        def storage_backends
-          @storage_backends ||= configure_storage
-        end
-
-        def configure_storage
-          storage_backends = []
-          storage_settings = config[:storage] || []
-          storage_settings.each do |name, config|
-            backend = Spontaneous::Storage.create(config)
-            storage_backends << backend
-          end
-          storage_backends << default_storage
-        end
-
-        def default_storage
-          @default_storage ||= Spontaneous::Storage::Local.new(Spontaneous.media_dir, '/media', accepts=nil)
-        end
+      def local_storage
+        instance.local_storage
       end
+    end # ClassMethods
+
+    def storage(mimetype = nil)
+      storage_for_mimetype(mimetype)
+    end
+
+    def storage_for_mimetype(mimetype)
+      storage_backends.detect { |storage| storage.accepts?(mimetype) }
+    end
+
+    def local_storage
+      storage_backends.select { |storage| storage.local? }
+    end
+
+    def storage_backends
+      @storage_backends ||= configure_storage
+    end
+
+    def configure_storage
+      storage_backends = []
+      storage_settings = config[:storage] || []
+      storage_settings.each do |name, config|
+        backend = Spontaneous::Storage.create(config)
+        storage_backends << backend
+      end
+      storage_backends << default_storage
+    end
+
+    def default_storage
+      @default_storage ||= Spontaneous::Storage::Local.new(Spontaneous.media_dir, '/media', accepts=nil)
     end
   end
 end

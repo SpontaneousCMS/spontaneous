@@ -2,8 +2,9 @@
 
 module Spontaneous::Plugins::Site
   module Map
-    module ClassMethods
+    extend ActiveSupport::Concern
 
+    module ClassMethods
       def map(root_id=nil)
         page = \
           if root_id.nil?
