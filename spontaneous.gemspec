@@ -51,7 +51,7 @@ Gem::Specification.new do |s|
   s.add_dependency('bundler', ["> 1.0.15"])
   s.add_dependency('rake', ["~> 0.9.2"])
   s.add_dependency('rdoc', ["~> 3.9.4"])
-  s.add_dependency('activesupport', ["~> 3.0.4"])
+  s.add_dependency('activesupport', ["~> 3.1.0"])
   s.add_dependency('home_run', ["~> 1.0.0"])
   s.add_dependency('sequel', ["~> 3.30"])
   s.add_dependency('yajl-ruby', ["~> 1.1"])
