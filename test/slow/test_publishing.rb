@@ -104,13 +104,6 @@ class PublishingTest < MiniTest::Spec
         end
       end
 
-      should "be switchable without blocks" do
-        Content.with_revision(23)
-        Content.dataset.should be_content_revision(23)
-        Content.reset_revision
-        Content.dataset.should be_content_revision
-      end
-
       should "understand the with_editable" do
         Content.with_revision(23) do
           Content.dataset.should be_content_revision(23)

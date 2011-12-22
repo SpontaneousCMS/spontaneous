@@ -425,6 +425,7 @@ class PermissionsTest < MiniTest::Spec
 
   context "Guards" do
     setup do
+      Permissions::User.delete
       @visitor = Permissions::User.create(:email => "visitor@example.com", :login => "visitor", :name => "visitor", :password => "visitorpass", :password_confirmation => "visitorpass")
       @editor = Permissions::User.create(:email => "editor@example.com", :login => "editor", :name => "editor", :password => "editorpass", :password_confirmation => "editorpass")
       @admin = Permissions::User.create(:email => "admin@example.com", :login => "admin", :name => "admin", :password => "adminpass", :password_confirmation => "adminpass")

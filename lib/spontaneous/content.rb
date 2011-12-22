@@ -23,6 +23,7 @@ module Spontaneous
     sequel_plugin :identity_map
     sequel_plugin :association_dependencies
     sequel_plugin :defaults_setter
+    sequel_plugin :scoped_table_name
 
     # overwrite the sequel version defined in IdentityMap to support
     # revisions

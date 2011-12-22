@@ -1,17 +1,5 @@
 # encoding: UTF-8
 
-module Sequel
-  class Dataset
-    alias_method :sequel_quote_identifier_append, :quote_identifier_append
-
-    def quote_identifier_append(sql, name)
-      if name == :content or name == "content"
-        name = Spontaneous::Content.current_revision_table
-      end
-      sequel_quote_identifier_append(sql, name)
-    end
-  end
-end
 
 module Spontaneous::Plugins
   module Publishing
@@ -51,18 +39,12 @@ module Spontaneous::Plugins
         @@revision
       end
 
-      def reset_revision
-        @@revision, @@dataset = revision_stack.first
-        revision_stack.clear
-      end
-
-      def with_revision(revision=nil)
-        revision_push(revision)
-        begin
-          yield
-        ensure
-          revision_pop
-        end if block_given?
+      def with_revision(revision=nil, &block)
+        saved_revision = @@revision
+        @@revision = revision
+        self.with_table(revision_table(revision), &block)
+      ensure
+        @@revision = saved_revision
       end
 
       def with_editable(&block)
@@ -72,12 +54,6 @@ module Spontaneous::Plugins
       def with_published(&block)
         revision = Spontaneous::Site.published_revision
         with_revision(revision, &block)
-      end
-
-      def revision_push(revision)
-        revision_stack.push([@@revision, (@@dataset || self.dataset)])
-        @@dataset = revision_dataset(revision)
-        @@revision = revision
       end
 
       def database
@@ -170,18 +146,6 @@ module Spontaneous::Plugins
         database.tables.each do |table|
           database.drop_table(table) if revision_table?(table)
         end
-      end
-
-      def revision_pop
-        @@revision, @@dataset = revision_stack.pop
-      end
-
-      def revision_stack
-        @revision_stack ||= []
-      end
-
-      def revision_dataset(revision=nil)
-        Spontaneous.database.dataset.from(revision_table(revision))
       end
     end # ClassMethods
 
