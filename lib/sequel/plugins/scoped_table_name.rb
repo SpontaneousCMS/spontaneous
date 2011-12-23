@@ -1,73 +1,61 @@
 # encoding: UTF-8
 
-# module Sequel
-#   class Dataset
-#     alias_method :sequel_quote_identifier_append, :quote_identifier_append
-#
-#     def quote_identifier_append(sql, name)
-#       if name == :content or name == "content"
-#         name = Spontaneous::Content.current_revision_table
-#       end
-#       sequel_quote_identifier_append(sql, name)
-#       # super(sql, name)
-#     end
-#   end
-# end
 module Sequel::Plugins
-  module DatasetTableScoping
-    module ClassMethods
-      def with_table(table_name)
-        restore = self.dataset
-        @dataset = self.dataset.from(SQLTableName.new(table_name))
-        yield if block_given?
-      ensure
-        @dataset = restore
+  # Provides models with a mechanism for changing the table name used by the model
+  # within a particular block
+  module ScopedTableName
+    module DatasetClassMethods
+      def table_mappings
+        @table_mappings ||= {}
       end
     end
-    def quote_identifier_append(sql, name)
-      # if name == :content or name == "content"
-      # name = Spontaneous::Content.current_revision_table
-      name = ScopedTableName.scoped_identifier(name)
-      # end
-      sequel_quote_identifier_append(sql, name)
-      # super(sql, name)
+
+    module DatasetInstanceMethods
+      # set up a mapping from the datasets original name to the one that should be used
+      # in the current scope.
+      # called from the model class this
+      def with_table(original_table_name, current_table_name)
+        saved_table_name = table_mappings[original_table_name]
+        table_mappings[original_table_name] = current_table_name.to_s
+        yield if block_given?
+      ensure
+        table_mappings[original_table_name] = saved_table_name
+      end
+
+      # use the table_mappings to convert the original table name to the current version
+      def quote_identifier_append(sql, name)
+        name = (table_mappings[name.to_sym] || name) if name.respond_to?(:to_sym)
+        super(sql, name)
+      end
+
+      # the table name mappings are shared across all dataset instances
+      def table_mappings
+        self.class.table_mappings
+      end
     end
-  end
 
-  module ScopedTableName
-
-    @@table_name = nil
-
-    def current_table_name
-      @@table_name
-    end
-
-
-    def self.configure(*args)
-      # Sequel::Dataset.send(:alias_method, :sequel_quote_identifier_append, :quote_identifier_append)
-      # Sequel::Dataset.send(:include, DatasetTableScoping)
-      Sequel::Dataset.plugin :dataset_table_scoping
+    def self.configure(model)
+      model.unscoped_table_name = model.dataset.opts[:from].first
+      # apply the patch to the dataset class actually used by the model
+      # as (e.g.) the MySQL adapter code overwrites #quote_identifier_append
+      # so making the changes to Sequel::Dataset is pointless
+      dataset_class = model.dataset.class
+      unless dataset_class.method_defined?(:with_table)
+        dataset_class.send :extend,  DatasetClassMethods
+        dataset_class.send :include, DatasetInstanceMethods
+      end
     end
 
     module ClassMethods
-      # class SQLTableName
-      #   def initialize(table_name)
-      #     @table_name = table_name
-      #   end
-      #   def sql_literal(ds)
-      #     "`#{@table_name}`"
-      #   end
-      #   def to_s
-      #     @table_name
-      #   end
-      # end
+      # unscoped table name is constant across sub-classes - hence the class variable
+      @@unscoped_table_name = nil
 
-      def with_table(table_name)
-        restore = self.dataset
-        @dataset = self.dataset.from(SQLTableName.new(table_name))
-        yield if block_given?
-      ensure
-        @dataset = restore
+      def unscoped_table_name=(table_name)
+        @@unscoped_table_name = table_name
+      end
+
+      def with_table(table_name, &block)
+        dataset.with_table(@@unscoped_table_name, table_name, &block)
       end
     end
   end
