@@ -58,5 +58,19 @@ class TableScopingTest < MiniTest::Spec
       rescue; end
       Content.dataset.sql.should == "SELECT * FROM `content`"
     end
+
+    should "Be able to handle scoping multiple models at once" do
+      Spontaneous::Change.plugin :scoped_table_name
+      Content.dataset.sql.should == "SELECT * FROM `content`"
+      Content.with_table("content_1") do
+        Change.with_table("change_1") do
+          Content.dataset.sql.should == "SELECT * FROM `content_1`"
+          Change.dataset.sql.should == "SELECT * FROM `change_1`"
+        end
+      end
+
+      Content.dataset.sql.should == "SELECT * FROM `content`"
+      Change.dataset.sql.should == "SELECT * FROM `changes`"
+    end
   end
 end

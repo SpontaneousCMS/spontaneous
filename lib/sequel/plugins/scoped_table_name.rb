@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'active_support/core_ext/class/attribute'
+
 module Sequel::Plugins
   # Provides models with a mechanism for changing the table name used by the model
   # within a particular block
@@ -35,6 +37,7 @@ module Sequel::Plugins
     end
 
     def self.configure(model)
+      model.class_attribute :unscoped_table_name
       model.unscoped_table_name = model.dataset.opts[:from].first
       # apply the patch to the dataset class actually used by the model
       # as (e.g.) the MySQL adapter code overwrites #quote_identifier_append
@@ -47,15 +50,8 @@ module Sequel::Plugins
     end
 
     module ClassMethods
-      # unscoped table name is constant across sub-classes - hence the class variable
-      @@unscoped_table_name = nil
-
-      def unscoped_table_name=(table_name)
-        @@unscoped_table_name = table_name
-      end
-
       def with_table(table_name, &block)
-        dataset.with_table(@@unscoped_table_name, table_name, &block)
+        dataset.with_table(unscoped_table_name, table_name, &block)
       end
     end
   end
