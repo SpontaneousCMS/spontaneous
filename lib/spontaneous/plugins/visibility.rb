@@ -116,7 +116,7 @@ module Spontaneous::Plugins
     end
 
     def hide_descendents(visible)
-      path_like = :content_path.like("#{self[:content_path]}.#{self.id}%")
+      path_like = :visibility_path.like("#{self[:visibility_path]}.#{self.id}%")
       origin = visible ? nil : self.id
       dataset = Spontaneous::Content.filter(path_like).filter(:hidden => visible)
       # if a child item has been made invisible *before* its parent then it exists

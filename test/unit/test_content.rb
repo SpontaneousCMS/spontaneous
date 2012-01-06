@@ -43,8 +43,8 @@ class ContentTest < MiniTest::Spec
         @instance.pieces.length.should == 1
         @instance.pieces.first.should == e
         @instance.pieces.first.container.should == @instance
-        e.content_path.should == "#{@instance.id}"
-        @instance.pieces.first.content_path.should == "#{@instance.id}"
+        e.visibility_path.should == "#{@instance.id}"
+        @instance.pieces.first.visibility_path.should == "#{@instance.id}"
       end
 
       should "accept addition of multiple children" do
@@ -57,8 +57,8 @@ class ContentTest < MiniTest::Spec
         @instance.pieces.last.should == f
         @instance.pieces.first.container.should == @instance
         @instance.pieces.last.container.should == @instance
-        @instance.pieces.first.content_path.should == "#{@instance.id}"
-        @instance.pieces.last.content_path.should == "#{@instance.id}"
+        @instance.pieces.first.visibility_path.should == "#{@instance.id}"
+        @instance.pieces.last.visibility_path.should == "#{@instance.id}"
       end
 
       should "allow for a deep hierarchy" do
@@ -69,9 +69,9 @@ class ContentTest < MiniTest::Spec
         @instance.pieces.length.should == 1
         @instance.pieces.first.should == e
         e.container.should == @instance
-        e.content_path.should == "#{@instance.id}"
+        e.visibility_path.should == "#{@instance.id}"
         f.container.id.should == e.id
-        f.content_path.should == "#{@instance.id}.#{e.id}"
+        f.visibility_path.should == "#{@instance.id}.#{e.id}"
       end
 
       should "persist hierarchy" do
