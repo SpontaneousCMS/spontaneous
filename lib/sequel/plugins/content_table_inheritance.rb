@@ -53,8 +53,7 @@ module Sequel
       # Setup the necessary STI variables, see the module RDoc for SingleTableInheritance
       def self.configure(model, key, opts={})
         model.instance_eval do
-          # @sti_model_map =  lambda{|v| v if v && v != ''}
-          # @sti_key_map = lambda{|klass| klass.name.to_s}
+          @sti_dataset_root = model
           @sti_model_map = lambda { |id| Spontaneous.schema[id] }
           @sti_key_map = lambda { |klass| klass.schema_id.to_s }
           @sti_key_array = nil
@@ -68,6 +67,8 @@ module Sequel
       end
 
       module ClassMethods
+        attr_reader :sti_dataset_root
+
         # The base dataset for STI, to which filters are added to get
         # only the models for the specific STI subclass.
         attr_reader :sti_dataset
@@ -99,14 +100,11 @@ module Sequel
           super
           sk = sti_key
           sd = sti_dataset
+          sdr = sti_dataset_root
           skm = sti_key_map
           smm = sti_model_map
           key = skm[subclass]
           ska = [key]
-          sti_subclass_added(key, subclass)
-          unless subclass.is_site_inheritance_root
-            subclass.set_dataset(sd.filter(SQL::QualifiedIdentifier.new(table_name, sk)=>ska), :inherited=>true)
-          end
           subclass.instance_eval do
             @sti_key = sk
             @sti_key_array = ska
@@ -115,7 +113,9 @@ module Sequel
             @sti_key_map = skm
             @sti_model_map = smm
             @simple_table = nil
+            @sti_dataset_root = sdr
           end
+          sti_subclass_added(key, subclass)
         end
 
         # used by Page and Piece classes to control the subclasses used in searches
@@ -163,6 +163,11 @@ module Sequel
           end
         end
 
+        def dataset
+          return super if self == sti_dataset_root
+          sti_dataset_root.dataset.filter(SQL::QualifiedIdentifier.new(sti_dataset_root.table_name, sti_key)=>sti_key_array)
+        end
+
         private
 
         # Return a class object.  If a class is given, return it directly.
@@ -181,6 +186,7 @@ module Sequel
             raise(Error, "Invalid class type used: #{v.inspect}")
           end
         end
+
       end
 
       module InstanceMethods
@@ -193,4 +199,3 @@ module Sequel
     end
   end
 end
-

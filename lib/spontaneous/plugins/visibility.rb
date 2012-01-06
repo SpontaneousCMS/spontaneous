@@ -34,12 +34,12 @@ module Spontaneous::Plugins
           yield
         else
           begin
-            _content_classes.each { |content_class| content_class._set_visible_dataset! }
+            Spontaneous::Content._set_visible_dataset!
             @@visible_filter = true
             yield
           ensure
             @@visible_filter = false
-            _content_classes.each { |content_class| content_class._restore_dataset! }
+            Spontaneous::Content._restore_dataset!
           end
         end
       end
