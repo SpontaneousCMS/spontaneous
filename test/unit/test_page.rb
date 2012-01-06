@@ -97,6 +97,14 @@ class PageTest < MiniTest::Spec
         o.reload
         o.slug.should == "new-title"
       end
+
+      should "not be longer than 255 chars" do
+        o = Page.create
+        long_slug = (["bang"]*100)
+        o.slug = long_slug.join(' ')
+        o.slug.length.should == 255
+        o.slug.should == long_slug.join('-')[0..254]
+      end
     end
 
     context "Pages in tree" do

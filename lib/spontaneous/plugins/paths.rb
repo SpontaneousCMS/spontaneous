@@ -100,7 +100,8 @@ module Spontaneous::Plugins
     def slug=(s)
       if (new_slug = s.to_url) != self.slug
         @__slug_changed = true
-        self[:slug] = new_slug
+        # slugs can be max 255 characters long
+        self[:slug] = new_slug[0..254]
         self.update_path
       end
     end
