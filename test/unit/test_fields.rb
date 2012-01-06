@@ -265,25 +265,27 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "not process values coming from db" do
-        content_class = Class.new(Piece)
+        ContentClass1 = Class.new(Piece)
 
-        content_class.field :title do
+        ContentClass1.field :title do
           def generate_html(value)
             "<#{value}>"
           end
         end
-        instance = content_class.new
+        instance = ContentClass1.new
         instance.fields.title = "Monkey"
         instance.save
 
-        new_content_class = Class.new(Piece)
-        new_content_class.field :title do
+        ContentClass2 = Class.new(Piece)
+        ContentClass2.field :title do
           def generate_html(value)
             "*#{value}*"
           end
         end
-        instance = new_content_class[instance.id]
+        instance = ContentClass2[instance.id]
         instance.fields.title.value.should == "<Monkey>"
+        FieldsTest.send(:remove_const, :ContentClass1)
+        FieldsTest.send(:remove_const, :ContentClass2)
       end
     end
 
