@@ -1,17 +1,18 @@
 # encoding: UTF-8
 
-require 'active_support/core_ext/class/attribute'
-
 module Sequel::Plugins
   # Provides models with a mechanism for changing the table name used by queries
   # within a particular block
   module ScopedTableName
     def self.configure(model)
-      model.class_attribute :unscoped_table_name
-      model.unscoped_table_name = model.dataset.opts[:from].first
+      model.class_variable_set :"@@unscoped_table_name", model.dataset.opts[:from].first
     end
 
     module ClassMethods
+      def unscoped_table_name
+        class_variable_get :"@@unscoped_table_name"
+      end
+
       def with_table(table_name, &block)
         dataset.with_table(unscoped_table_name, table_name, &block)
       end
