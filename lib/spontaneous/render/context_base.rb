@@ -78,11 +78,11 @@ module Spontaneous::Render
     end
 
     def first?
-      _target.container.pieces.first == self
+      _target.owner.pieces.first == self
     end
 
     def last?
-      _target.container.pieces.last == self
+      _target.owner.pieces.last == self
     end
 
     def render_content

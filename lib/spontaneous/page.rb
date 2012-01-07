@@ -14,7 +14,7 @@ module Spontaneous
 
     many_to_one :parent,   :class => Content, :reciprocal => :children
     one_to_many :children, :class => Content, :key => :parent_id, :reciprocal => :parent
-    one_to_many :content,  :class => Content, :key => :page_id, :reciprocal => :page
+    one_to_many :content,  :class => Content, :key => :page_id,   :reciprocal => :page
 
     # field :title, :string, :default => "New Page"
 
@@ -58,7 +58,7 @@ module Spontaneous
       obj = self
       ancestors = []
       begin
-        obj = obj.content_wrapper
+        obj = obj.container
         ancestors.unshift obj
       end until obj.nil? or obj.is_page?
 
@@ -86,7 +86,7 @@ module Spontaneous
     end
 
     def resolve_entry
-      container.all_pieces.find { |e| e.id == self.id }
+      owner.all_pieces.find { |e| e.id == self.id }
     end
 
     def page=(page)

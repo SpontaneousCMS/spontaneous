@@ -165,7 +165,7 @@ module Spontaneous::Plugins
       if allowed = allowed_type(content)
         allowed.styles
       else
-        super
+        content.class.styles
       end
     end
   end

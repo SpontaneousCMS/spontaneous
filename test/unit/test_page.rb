@@ -140,7 +140,28 @@ class PageTest < MiniTest::Spec
         @s.parent.should === @q
         @t.parent.should === @s
       end
+      should "have a reference to their owner" do
+        @p.owner.should be_nil
+        @q.owner.should === @p
+        @r.owner.should === @q
+        @s.owner.should === @q
+        @t.owner.should === @s
+      end
 
+      should "return nil for their container" do
+        @p.container.should be_nil
+        @q.container.should be_nil
+        @r.container.should be_nil
+        @s.container.should be_nil
+        @t.container.should be_nil
+      end
+      should "return nil for their box" do
+        @p.box.should be_nil
+        @q.box.should be_nil
+        @r.box.should be_nil
+        @s.box.should be_nil
+        @t.box.should be_nil
+      end
 
       should "have a list of their children" do
         @p.children.should == [@q]
@@ -300,14 +321,17 @@ class PageTest < MiniTest::Spec
 
     context "page pieces" do
       setup do
+        Page.box :things
+        Piece.box :things
         @parent = Page.create
         @piece = Piece.new
         @child = Page.new
-        @parent << @piece
-        @piece << @child
+        @parent.things << @piece
+        @piece.things << @child
         @parent.save
         @piece.save
         @child.save
+        @page_piece = @parent.things.first.things.first
       end
 
       should "report their depth according to their position in the piece tree" do
@@ -316,9 +340,25 @@ class PageTest < MiniTest::Spec
         @parent.pieces.first.pieces.first.depth.should == 2
       end
 
+      should "know their page" do
+        @page_piece.page.should == @parent
+      end
+
+      should "know their container" do
+        @page_piece.container.should == @piece.things
+      end
+
+      should "know their box" do
+        @page_piece.box.should == @piece.things
+      end
+
+      should "know their parent" do
+        @page_piece.parent.should == @piece
+      end
+
+      should "know their owner" do
+        @page_piece.owner.should == @piece
+      end
     end
   end
-
-
-  # context ""
 end

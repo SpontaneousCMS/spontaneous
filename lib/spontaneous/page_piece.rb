@@ -6,22 +6,32 @@ module Spontaneous
   class PagePiece < DelegateClass(Page)
     include Plugins::Render
 
-    attr_accessor :container
-    attr_reader :style_id
+    attr_accessor :owner
+    attr_reader   :style_id
 
-    def initialize(container, target, style_id)
+    def initialize(owner, target, style_id)
       super(target)
-      @container, @style_id = container, style_id
+      @owner, @style_id = owner, style_id
     end
 
     alias_method :target, :__getobj__
+    alias_method :parent, :owner
+
+    # Public: when accessed as inner content, pages return
+    # the page at the top of the inner content tree as their
+    # #page, rather than themselves
+    #
+    # Returns: the owning Page object
+    def page
+      owner.page
+    end
 
     def id
       target.id
     end
 
     def depth
-      container.content_depth + 1
+      owner.content_depth + 1
     end
 
     def style(format = :html)
@@ -39,10 +49,8 @@ module Spontaneous
     end
 
     def export_styles
-      {
-        :style => style_id.to_s,
-        :styles => container.available_styles(target).map { |s| s.schema_id.to_s },
-      }
+      { :style => style_id.to_s,
+        :styles => owner.available_styles(target).map { |s| s.schema_id.to_s } }
     end
 
     def serialize_db
@@ -52,12 +60,12 @@ module Spontaneous
     def style=(style)
       @style_id = style_to_schema_id(style)
       # because it's not obvious that a change to an entry
-      # will affect the fields of the container piece
-      # make sure that the container is saved using an instance hook
+      # will affect the fields of the owner piece
+      # make sure that the owner is saved using an instance hook
       target.after_save_hook do
-        container.save
+        owner.save
       end
-      container.entry_modified!(self)
+      owner.entry_modified!(self)
     end
 
     def style

@@ -40,9 +40,9 @@ module Spontaneous
       page?
     end
 
-    many_to_one :container, :key => :container_id, :class => self, :reciprocal => :_pieces
-    one_to_many :_pieces,    :key => :container_id, :class => self, :reciprocal => :container
-    many_to_one :page, :class => Content, :key => :page_id, :reciprocal => :content
+    many_to_one :owner,   :key => :owner_id, :class => Content, :reciprocal => :_pieces
+    one_to_many :_pieces, :key => :owner_id, :class => Content, :reciprocal => :owner
+    many_to_one :page,    :key => :page_id,  :class => Content, :reciprocal => :content
 
     include Enumerable
 
@@ -86,11 +86,6 @@ module Spontaneous
 
     def self.supertype?
       !supertype.nil?
-    end
-
-    def content_wrapper
-      return nil if entry.nil?
-      entry.box
     end
 
     def start_inline_edit_marker

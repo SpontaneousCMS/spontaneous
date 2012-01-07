@@ -21,28 +21,30 @@ module Spontaneous::Plugins
     end
 
     def box
-      container.boxes.sid(box_sid) if container
+      owner.boxes.sid(box_sid) if owner
     end
 
+    alias_method :container,  :box
+
     def first?
-      container.pieces.first == self
+      owner.pieces.first == self
     end
 
     def last?
-      container.pieces.last == self
+      owner.pieces.last == self
     end
 
     def set_position(new_position)
       if box
         box.set_position(self, new_position)
       else
-        container.pieces.set_position(self, new_position)
+        owner.pieces.set_position(self, new_position)
       end
     end
 
     def position
       return box.index(self) if box
-      container.pieces.index(self)
+      owner.pieces.index(self)
     end
 
     def serialize_db

@@ -34,13 +34,15 @@ class PieceTest < MiniTest::Spec
 
     context "as page content" do
       setup do
+        ::Page.box :things
+        ::Piece.box :things
         @page = ::Page.create
         @f1 = ::Piece.new
-        @page << @f1
+        @page.things << @f1
         @f2 = ::Piece.new
-        @f1 << @f2
+        @f1.things << @f2
         @f3 = ::Fridge.new
-        @f2 << @f3
+        @f2.things << @f3
 
         @page.save
         @f1.save
@@ -59,10 +61,19 @@ class PieceTest < MiniTest::Spec
         @f3.page.should == @page
       end
 
-      should "have a link to their container" do
-        @f1.container.should == @page
-        @f2.container.should == @f1
-        @f3.container.should == @f2
+      should "have a link to their box" do
+        @f1.container.should == @page.things
+        @f2.container.should == @f1.things
+        @f3.container.should == @f2.things
+      end
+
+      should "have a link to their owner" do
+        @f1.owner.should == @page
+        @f2.owner.should == @f1
+        @f3.owner.should == @f2
+        @f1.parent.should == @page
+        @f2.parent.should == @f1
+        @f3.parent.should == @f2
       end
 
       should "know their depth in the piece tree" do

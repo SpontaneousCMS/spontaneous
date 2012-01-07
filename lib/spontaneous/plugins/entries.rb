@@ -19,12 +19,12 @@ module Spontaneous::Plugins
     # because it's possible to build content out of order
     # some relations don't necessarily get created straight away
     def before_save
-      if container
-        self.page = container.page if page.nil?
+      if owner
+        self.page = owner.page if page.nil?
         if page?
           self.depth = parent ? ((parent.depth || 0) + 1) : 0
         else
-          self.depth = (container.content_depth || 0) + 1
+          self.depth = (owner.content_depth || 0) + 1
         end
       end
       super
@@ -37,10 +37,10 @@ module Spontaneous::Plugins
       super
     end
 
-    def destroy(remove_container_entry=true, container=nil)
-      container ||= self.container
-      if container && remove_container_entry
-        container.destroy_entry!(self)
+    def destroy(remove_owner_entry=true, owner=nil)
+      owner ||= self.owner
+      if owner && remove_owner_entry
+        owner.destroy_entry!(self)
       end
       super()
     end
@@ -56,7 +56,7 @@ module Spontaneous::Plugins
 
     def destroy_entry!(entry)
       pieces.remove(entry)
-      # save the container because it won't be obvious to the caller
+      # save the owner because it won't be obvious to the caller
       # that content other than the destroyed object will have been
       # modified
       self.save
@@ -71,11 +71,8 @@ module Spontaneous::Plugins
     end
 
     def pieces
-      if Spontaneous::Content.visible_only?
-        visible_pieces
-      else
-        all_pieces
-      end
+      return visible_pieces if Spontaneous::Content.visible_only?
+      all_pieces
     end
 
     # ensure that all access to pieces is through their corresponding entry
@@ -120,7 +117,7 @@ module Spontaneous::Plugins
 
 
     def insert_page(index, child_page, box = nil)
-      child_page.container = self
+      child_page.owner = self
       if page
         child_page.depth = page.depth + 1
         page.unordered_children << child_page
@@ -131,7 +128,7 @@ module Spontaneous::Plugins
     end
 
     def insert_piece(index, piece, box = nil)
-      piece.container = self
+      piece.owner = self
       piece.page = page if page
       piece.depth = (content_depth || 0) + 1
       insert_with_style(:piece, index, piece, box)
@@ -164,21 +161,20 @@ module Spontaneous::Plugins
 
     def update_position(position)
       entry.set_position(position)
-      container.save
+      owner.save
     end
 
     def set_position(new_position)
       if box
         box.set_position(self, new_position)
       else
-        container.pieces.set_position(self, new_position)
+        owner.pieces.set_position(self, new_position)
       end
     end
 
     def style_for_content(content, box = nil)
       if box
         box.style_for_content(content)
-
       else
         content.default_style
       end
@@ -188,9 +184,9 @@ module Spontaneous::Plugins
       content.class.styles
     end
 
-    def container=(container)
+    def owner=(owner)
       super
-      self[:visibility_path] = [container.visibility_path, container.id].compact.join(VISIBILITY_PATH_SEP)
+      self[:visibility_path] = [owner.visibility_path, owner.id].compact.join(VISIBILITY_PATH_SEP)
     end
   end # Entries
 end # Spontaneous::Plugins

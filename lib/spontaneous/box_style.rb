@@ -18,7 +18,7 @@ module Spontaneous
 
     def initialize(box, owner = nil)
       @box = box
-      @owner = box._owner.class
+      @owner = box.owner.class
     end
 
     def inline_template(format)

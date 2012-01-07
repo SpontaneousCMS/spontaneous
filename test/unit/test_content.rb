@@ -7,11 +7,14 @@ class ContentTest < MiniTest::Spec
   context "Content:" do
     setup do
       @site = setup_site
-      class C < Content; end
+      class Piece < Spontaneous::Piece; end
+      class C < Piece; end
+      C.box :things
     end
 
     teardown do
       teardown_site
+      ContentTest.send(:remove_const, :Piece) rescue nil
       ContentTest.send(:remove_const, :C) rescue nil
     end
     context "Content instances" do
@@ -39,10 +42,13 @@ class ContentTest < MiniTest::Spec
 
       should "accept addition of child content" do
         e = C.new
-        @instance << e
+        @instance.things << e
         @instance.pieces.length.should == 1
+        @instance.things.pieces.length.should == 1
         @instance.pieces.first.should == e
-        @instance.pieces.first.container.should == @instance
+        @instance.pieces.first.container.should == @instance.things
+        @instance.pieces.first.owner.should == @instance
+        @instance.pieces.first.parent.should == @instance
         e.visibility_path.should == "#{@instance.id}"
         @instance.pieces.first.visibility_path.should == "#{@instance.id}"
       end
@@ -50,13 +56,20 @@ class ContentTest < MiniTest::Spec
       should "accept addition of multiple children" do
         e = C.new
         f = C.new
-        @instance << e
-        @instance << f
+        @instance.things << e
+        @instance.things << f
         @instance.pieces.length.should == 2
+        @instance.things.pieces.length.should == 2
         @instance.pieces.first.should == e
+        @instance.things.pieces.first.should == e
         @instance.pieces.last.should == f
-        @instance.pieces.first.container.should == @instance
-        @instance.pieces.last.container.should == @instance
+        @instance.things.pieces.last.should == f
+        @instance.pieces.first.container.should == @instance.things
+        @instance.pieces.last.container.should == @instance.things
+        @instance.pieces.first.parent.should == @instance
+        @instance.pieces.last.parent.should == @instance
+        @instance.pieces.first.owner.should == @instance
+        @instance.pieces.last.owner.should == @instance
         @instance.pieces.first.visibility_path.should == "#{@instance.id}"
         @instance.pieces.last.visibility_path.should == "#{@instance.id}"
       end
@@ -64,21 +77,26 @@ class ContentTest < MiniTest::Spec
       should "allow for a deep hierarchy" do
         e = C.new
         f = C.new
-        @instance << e
-        e << f
+        @instance.things << e
+        e.things << f
         @instance.pieces.length.should == 1
         @instance.pieces.first.should == e
-        e.container.should == @instance
+        e.owner.id.should == @instance.id
+        e.parent.id.should == @instance.id
+        e.container.should == @instance.things
         e.visibility_path.should == "#{@instance.id}"
-        f.container.id.should == e.id
+
+        f.owner.id.should == e.id
+        f.parent.id.should == e.id
+        f.container.should == e.things
         f.visibility_path.should == "#{@instance.id}.#{e.id}"
       end
 
       should "persist hierarchy" do
         e = C.new
         f = C.new
-        e << f
-        @instance << e
+        e.things << f
+        @instance.things << e
         @instance.save
         e.save
         f.save
@@ -90,8 +108,12 @@ class ContentTest < MiniTest::Spec
         i.pieces.length.should == 1
         i.pieces.first.should == e
 
-        e.container.should == i
-        f.container.should == e
+        e.container.should == i.things
+        e.owner.should == i
+        e.parent.should == i
+        f.container.should == e.things
+        f.parent.should == e
+        f.owner.should == e
         e.entry.should == i.pieces.first
         f.entry.should == e.pieces.first
         e.pieces.first.should == f
@@ -100,8 +122,8 @@ class ContentTest < MiniTest::Spec
       should "have a list of child nodes" do
         e = C.new
         f = C.new
-        e << f
-        @instance << e
+        e.things << f
+        @instance.things << e
         @instance.save
         e.save
         f.save
@@ -138,9 +160,9 @@ class ContentTest < MiniTest::Spec
         @b = C.new(:label => 'b')
         @c = C.new(:label => 'c')
         @d = C.new(:label => 'd')
-        @a << @b
-        @a << @d
-        @b << @c
+        @a.things << @b
+        @a.things << @d
+        @b.things << @c
         @a.save
         @b.save
         @c.save

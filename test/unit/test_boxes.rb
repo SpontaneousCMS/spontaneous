@@ -133,6 +133,22 @@ class BoxesTest < MiniTest::Spec
       instance.box1.position.should == 2
     end
 
+    context "instances" do
+      should "have a connection to their owner" do
+        MyContentClass.box :box1
+        instance = MyContentClass.new
+        instance.box1.owner.should == instance
+        instance.box1.parent.should == instance
+      end
+
+      should "have a link to their container (which is their owner)" do
+        MyContentClass.box :box1
+        instance = MyContentClass.new
+        instance.box1.container.should == instance
+        instance.box1.container.should == instance
+      end
+    end
+
     context "ranges" do
       setup do
         MyContentClass.box :images1
@@ -404,8 +420,7 @@ class BoxesTest < MiniTest::Spec
       styled.two.pieces.first.style.name.should == :blank3
     end
 
-    should "allow selection of subclasses" do
-    end
+    should "allow selection of subclasses"
   end
 
   context "Allowed types" do

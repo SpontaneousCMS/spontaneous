@@ -14,9 +14,14 @@ module Spontaneous
     include Plugins::Media
 
     # use underscores to protect against field name conflicts
-    attr_reader :_name, :_prototype, :_owner
+    attr_reader :_name, :_prototype, :owner
     attr_accessor :template_params
 
+    # Public: the parent of a Box is the same as its owner,
+    # i.e. the Content object that contains it.
+    #
+    # Returns: the owning Content object
+    alias_method :parent, :owner
 
     def self.page?
       false
@@ -63,7 +68,7 @@ module Spontaneous
     end
 
     def initialize(name, prototype, owner)
-      @_name, @_prototype, @_owner = name.to_sym, prototype, owner
+      @_name, @_prototype, @owner = name.to_sym, prototype, owner
       @field_initialization = false
     end
 
@@ -99,11 +104,11 @@ module Spontaneous
     end
 
     def formats
-      _owner.formats
+      owner.formats
     end
 
     def media_id
-      "#{_owner.padded_id}/#{schema_id}"
+      "#{owner.padded_id}/#{schema_id}"
     end
 
     def position
@@ -125,7 +130,7 @@ module Spontaneous
 
 
     def field_store
-      _owner.box_field_store(self) || initialize_fields
+      owner.box_field_store(self) || initialize_fields
     end
 
     # don't like this
@@ -146,7 +151,7 @@ module Spontaneous
 
     def field_modified!(modified_field)
       @modified = true
-      _owner.box_modified!(self)
+      owner.box_modified!(self)
     end
 
     def serialize_db
@@ -169,17 +174,15 @@ module Spontaneous
     end
 
     def container
-      _owner
+      owner
     end
 
-    alias_method :content_wrapper, :container
-
     def page
-      container.page
+      owner.page
     end
 
     def depth
-      container.content_depth
+      owner.content_depth
     end
 
     def push(content)
@@ -190,14 +193,14 @@ module Spontaneous
 
     def insert(index, content)
       @modified = true
-      _owner.insert(index, content, self)
+      owner.insert(index, content, self)
     end
 
     def set_position(entry, new_position)
       @modified = true
       piece = pieces[new_position]
-      new_position = container.pieces.index(piece)
-      container.pieces.set_position(entry, new_position)
+      new_position = owner.pieces.index(piece)
+      owner.pieces.set_position(entry, new_position)
     end
 
     def modified?
@@ -205,7 +208,7 @@ module Spontaneous
     end
 
     def pieces
-      @pieces ||= _owner.pieces.for_box(self)
+      @pieces ||= owner.pieces.for_box(self)
     end
 
     def index(entry)
@@ -252,7 +255,7 @@ module Spontaneous
 
     def writable?(user, content_type = nil)
       return true if Spontaneous::Permissions.has_level?(user, Spontaneous::Permissions.root)
-      box_writable = self._owner.box_writable?(user, _name)
+      box_writable = self.owner.box_writable?(user, _name)
       if content_type
         allowed = self.allowed_type(content_type)
         box_writable && allowed && allowed.addable?(user)
@@ -262,7 +265,7 @@ module Spontaneous
     end
 
     def readable?(user)
-      self._owner.box_readable?(user, _name)
+      self.owner.box_readable?(user, _name)
     end
 
     def start_inline_edit_marker
@@ -274,11 +277,11 @@ module Spontaneous
     end
 
     def save
-      _owner.save
+      owner.save
     end
 
     def ==(obj)
-      super or ((self._prototype == obj._prototype) and (self._owner == obj._owner))
+      super or ((self._prototype == obj._prototype) and (self.owner == obj.owner))
     end
   end
 
