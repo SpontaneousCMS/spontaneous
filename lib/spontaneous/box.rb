@@ -185,6 +185,17 @@ module Spontaneous
       owner.content_depth
     end
 
+    def adopt(content, index = -1)
+      content.parent.destroy_entry!(content)
+      insert(index, content)
+      self.save
+      content.save
+      # kinda feel like this should be dealt with internally by the page
+      # but don't care enough to start messing with the path propagation
+      # methods...
+      content.propagate_path_changes if content.is_page?
+    end
+
     def push(content)
       insert(-1, content)
     end
@@ -209,6 +220,10 @@ module Spontaneous
 
     def pieces
       @pieces ||= owner.pieces.for_box(self)
+    end
+
+    def [](index)
+      pieces[index]
     end
 
     def index(entry)

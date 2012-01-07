@@ -110,16 +110,17 @@ class PageTest < MiniTest::Spec
     context "Pages in tree" do
       setup do
         Content.delete
+        Page.box :sub
         @p = Page.create
         @p.root?.should be_true
-        @q = Page.new
-        @r = Page.new
-        @s = Page.new
-        @t = Page.new
-        @p << @q
-        @q << @r
-        @q << @s
-        @s << @t
+        @q = Page.new(:slug => 'q')
+        @r = Page.new(:slug => 'r')
+        @s = Page.new(:slug => 's')
+        @t = Page.new(:slug => 't')
+        @p.sub << @q
+        @q.sub << @r
+        @q.sub << @s
+        @s.sub << @t
         @p.save
         @q.save
         @r.save
@@ -148,19 +149,20 @@ class PageTest < MiniTest::Spec
         @t.owner.should === @s
       end
 
-      should "return nil for their container" do
+      should "know their container" do
         @p.container.should be_nil
-        @q.container.should be_nil
-        @r.container.should be_nil
-        @s.container.should be_nil
-        @t.container.should be_nil
+        @q.container.should == @p.sub
+        @r.container.should == @q.sub
+        @s.container.should == @q.sub
+        @t.container.should == @s.sub
       end
-      should "return nil for their box" do
+
+      should "know their containing box" do
         @p.box.should be_nil
-        @q.box.should be_nil
-        @r.box.should be_nil
-        @s.box.should be_nil
-        @t.box.should be_nil
+        @q.box.should == @p.sub
+        @r.box.should == @q.sub
+        @s.box.should == @q.sub
+        @t.box.should == @s.sub
       end
 
       should "have a list of their children" do
@@ -207,9 +209,10 @@ class PageTest < MiniTest::Spec
         c.content_ancestors.should == [a, a.things1]
         d.content_ancestors.should == [a, a.things2]
         e.content_ancestors.should == [a, a.things2]
-        c.page_order_string.should == "00000.00000"
-        d.page_order_string.should == "00001.00000"
-        e.page_order_string.should == "00001.00001"
+        # the zeroth box is 'sub'
+        c.page_order_string.should == "00001.00000"
+        d.page_order_string.should == "00002.00000"
+        e.page_order_string.should == "00002.00001"
       end
 
       should "have the correct page hierarchy for pages within pieces" do
@@ -229,16 +232,24 @@ class PageTest < MiniTest::Spec
         d.reload
         c.parent.should == a
         c.content_ancestors.should == [a, a.things, b, b.pages]
-        c.page_order_string.should == "00000.00000.00000.00000"
-        d.page_order_string.should == "00000.00000.00000.00001"
+        c.page_order_string.should == "00001.00000.00000.00000"
+        d.page_order_string.should == "00001.00000.00000.00001"
       end
 
       should "have correct paths" do
         @p.path.should == "/"
-        @q.path.should == "/#{@q.slug}"
-        @r.path.should == "/#{@q.slug}/#{@r.slug}"
-        @s.path.should == "/#{@q.slug}/#{@s.slug}"
-        @t.path.should == "/#{@q.slug}/#{@s.slug}/#{@t.slug}"
+        @q.path.should == "/q"
+        @r.path.should == "/q/r"
+        @s.path.should == "/q/s"
+        @t.path.should == "/q/s/t"
+      end
+
+      should "update paths when being adopted" do
+        @p.sub.adopt(@s)
+        @s.reload
+        @t.reload
+        @s.path.should == "/s"
+        @t.path.should == "/s/t"
       end
 
       should "all have a reference to the root node" do

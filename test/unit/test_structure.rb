@@ -85,10 +85,7 @@ class StructureTest < MiniTest::Spec
       should "have a correct ancestor list" do
         @project1.ancestors.should == [@home]
       end
-
     end
+
   end
 end
-
-
-

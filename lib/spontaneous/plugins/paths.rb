@@ -49,6 +49,7 @@ module Spontaneous::Plugins
     end
 
     def parent=(parent)
+      @__parent_changed = true
       super
     end
 

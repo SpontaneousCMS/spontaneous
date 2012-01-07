@@ -196,6 +196,64 @@ class ContentTest < MiniTest::Spec
       end
     end
 
+    context "Moving" do
+      setup do
+        C.delete
+        @r = C.new(:label => 'r')
+        @a = C.new(:label => 'a')
+        @b = C.new(:label => 'b')
+        @c = C.new(:label => 'c')
+        @d = C.new(:label => 'd')
+        @r.things << @a
+        @r.things << @c
+        @a.things << @b
+        @c.things << @d
+        [@r, @a, @b, @c, @d].each { |c| c.save; c.reload }
+      end
+
+      teardown do
+        C.delete
+      end
+
+      should "default to adding at the end" do
+        @b.parent.should == @a
+        @r.things.adopt(@b)
+        @b.reload
+        @r.reload
+        @b.parent.should == @r
+        @b.container.should == @r.things
+        @b.depth.should == 1
+        @a.reload
+        @a.things.count.should == 0
+        @r.reload
+        @r.things.last.should == @b
+      end
+
+      should "allow for adding in any position" do
+        @b.parent.should == @a
+        @r.things.adopt(@b, 1)
+        @b.reload
+        @r.reload
+        @b.parent.should == @r
+        @b.container.should == @r.things
+        @b.depth.should == 1
+        @a.reload
+        @a.things.count.should == 0
+        @r.reload
+        @r.things[1].should == @b
+        @r.things.adopt(@d, 0)
+        @d.reload
+        @r.reload
+        @r.things[0].should == @d
+      end
+
+      should "re-set the visibility path" do
+        @r.things.adopt(@b)
+        @b.reload
+        @b.visibility_path.should == @r.id.to_s
+      end
+    end
+
 
     context "identity map" do
       setup do
