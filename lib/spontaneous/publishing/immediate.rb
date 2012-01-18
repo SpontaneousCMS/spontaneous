@@ -95,9 +95,11 @@ module Spontaneous
         update_progress("rendering", 0)
         @pages_rendered = 0
         S::Content.with_identity_map do
-          S::Render.with_publishing_renderer do
-            render_pages
-            index_pages unless index_stages == 0
+          S::Content.with_visible do
+            S::Render.with_publishing_renderer do
+              render_pages
+              index_pages unless index_stages == 0
+            end
           end
         end
         copy_static_files
@@ -116,6 +118,7 @@ module Spontaneous
       end
 
       def render_page(page, format)
+        logger.info { "#{page.path}" }
         formatter = Spontaneous::Render::Format.for(format)
         renderer = formatter.new(revision, page)
         renderer.render
