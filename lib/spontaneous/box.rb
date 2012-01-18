@@ -299,7 +299,7 @@ module Spontaneous
     end
 
     def ==(obj)
-      super or ((self._prototype == obj._prototype) and (self.owner == obj.owner))
+      super or (obj.is_a?(Box) && (self._prototype == obj._prototype) && (self.owner == obj.owner))
     end
   end
 
