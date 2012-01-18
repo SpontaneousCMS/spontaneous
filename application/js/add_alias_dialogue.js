@@ -31,15 +31,24 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 		select_target: function(target) {
 			this.target = target;
 		},
+		box_owner: function() {
+			return this.box_view.box.container;
+		},
+		box: function() {
+			return this.box_view.box;
+		},
 		body: function() {
-			var editing = dom.div('#add-alias-dialogue'), outer = dom.div(), instructions = dom.p('.instructions'),
-				targets = this.targets, __dialogue = this;
-			instructions.html("Choose a target:")
-			editing.append(instructions, outer)
-			Spontaneous.Ajax.get(['/targets', this.type.schema_id].join('/'), this.targets_loaded.bind(this));
+			var editing = dom.div('#add-alias-dialogue')
+				, outer = dom.div()
+				, instructions = dom.p('.instructions')
+				, __dialogue = this;
+			instructions.html("Choose a target:");
+			editing.append(instructions, outer);
+			Spontaneous.Ajax.get(['/targets', this.type.schema_id, this.box().id()].join('/'), this.targets_loaded.bind(this));
 			this._outer = outer;
 			return editing;
 		},
+
 		targets_loaded: function(targets) {
 			var outer = this._outer, __dialogue = this;
 			this.targets = targets;

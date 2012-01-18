@@ -481,17 +481,19 @@ module Spontaneous
           end
         end
 
-        get '/targets/:schema_id' do
+        get '/targets/:schema_id/:id/:box_id' do
           klass = Spontaneous.schema[params[:schema_id]]
           if klass.alias?
-            targets = klass.targets.map do |t|
-              {
-                :id => t.id,
-                :title => t.alias_title,
-                :icon => t.alias_icon_field.export
-              }
+            content_for_request do |content, box|
+              targets = klass.targets(content, box).map do |t|
+                {
+                  :id => t.id,
+                  :title => t.alias_title,
+                  :icon => t.exported_alias_icon
+                }
+              end
+              json(targets)
             end
-            json(targets)
           end
         end
 

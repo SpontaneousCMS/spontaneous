@@ -104,7 +104,7 @@ class BackTest < MiniTest::Spec
       end
 
       class LinkedJob < Piece
-        alias_of Job
+        alias_of proc { |owner, box| box.contents }
       end
 
       class HomePage < Page
@@ -713,9 +713,9 @@ class BackTest < MiniTest::Spec
       end
 
       should "be able to retrieve a list of potential targets" do
-        auth_get "/@spontaneous/targets/#{LinkedJob.schema_id}"
+        auth_get "/@spontaneous/targets/#{LinkedJob.schema_id}/#{@home.id}/#{@home.in_progress.schema_id}"
         assert last_response.ok?
-        Spot::JSON.parse(last_response.body).should == LinkedJob.targets.map do |job|
+        Spot::JSON.parse(last_response.body).should == LinkedJob.targets(@home, @home.in_progress).map do |job|
           {
             :id => job.id,
             :title => job.title.to_s,

@@ -26,29 +26,35 @@ module Spontaneous::Plugins
 
       alias_method :aliases, :alias_of
 
-      def targets
+      def targets(owner = nil, box = nil)
         targets = []
         classes = []
+        proc_args = [owner, box].compact
         @alias_classes.each do |source|
           case source
           when Proc
-            targets.concat(source.call)
+            targets.concat(source[*proc_args])
           else
             classes.concat(source.to_s.constantize.sti_subclasses_array)
           end
         end
         query = S::Content.filter(sti_key => classes.map { |c| c.to_s })
         if container_procs = @alias_options[:container]
-          containers = [container_procs].flatten.map { |p| p.call }.flatten
+          containers = [container_procs].flatten.map { |p| p[*proc_args] }.flatten
           params = []
           containers.each do |container|
             if container.is_page?
-              params << [:page_id, container.id]
+              params << Sequel::SQL::BooleanExpression.new(:'=', :page_id, container.id)
             else
-              params << [:box_sid, container.id]
+              box_params = [
+                [:box_sid, container.id],
+                [:owner_id, container.owner.id]
+              ]
+              params << Sequel::SQL::BooleanExpression.from_value_pairs(box_params, :AND)
             end
           end
-          query = query.and(Sequel::SQL::BooleanExpression.from_value_pairs(params, :OR))
+          container_query = params[1..-1].inject(params.first) { |q, expr| q = q | expr; q }
+          query = query.and(container_query)
         end
         targets.concat(query.all)
         if filter = @alias_options[:filter] and filter.is_a?(Proc)
@@ -114,7 +120,7 @@ module Spontaneous::Plugins
       end
 
       def export(user = nil)
-        super.merge(:target => target.shallow_export(user), :alias_title => target.alias_title, :alias_icon => target.alias_icon_field.export)
+        super.merge(:target => target.shallow_export(user), :alias_title => target.alias_title, :alias_icon => target.exported_alias_icon)
       end
 
     end
@@ -157,6 +163,11 @@ module Spontaneous::Plugins
       else
         nil
       end
+    end
+
+    def exported_alias_icon
+      return nil unless alias_icon_field
+      alias_icon_field.export
     end
   end
 end

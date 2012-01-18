@@ -161,6 +161,7 @@ class AliasTest < MiniTest::Spec
           teardown do
             Object.send(:remove_const, 'X') rescue nil
             Object.send(:remove_const, 'XX') rescue nil
+            Object.send(:remove_const, 'XXX') rescue nil
           end
 
           should "allow for selecting only content from within one box" do
@@ -211,8 +212,24 @@ class AliasTest < MiniTest::Spec
             class ::XX < ::Piece
               alias_of :AA, :container => Proc.new { [S::Site['#thepage'], S::Site['#thepage2'].box2] }
             end
-            assert_same_content X.targets, @page.box1.content + page2.content
+            assert_same_content X.targets(@page, @page.box1), @page.box1.contents + page2.content
             assert_same_content XX.targets, @page.content.select { |p| AA === p } + page2.box2.select { |p| AA === p }
+          end
+
+          should "allow for selecting content only from the content of the owner of the box" do
+            class ::X < ::Piece
+              alias_of proc { |owner| owner.box1.pieces }
+            end
+            class ::XX < ::Piece
+              alias_of proc { |owner, box| box.pieces }
+            end
+            class ::XXX < ::Piece
+              alias_of :A, :container => proc { |owner, box| box }
+            end
+            assert_same_content X.targets(@page), @page.box1.contents
+            assert_same_content XX.targets(@page, @page.box1), @page.box1.contents
+            assert_same_content XX.targets(@page, @page.box2), @page.box2.contents
+            assert_same_content XXX.targets(@page, @page.box1), @page.box1.contents.select { |p| A === p }
           end
 
           should "allow for filtering instances according to some arbitrary proc" do
@@ -403,6 +420,16 @@ class AliasTest < MiniTest::Spec
         a.reload
         a.layout = :b
         a.render.should == @b.render
+      end
+    end
+
+    context "visibility" do
+      should "be linked to the target's visibility" do
+        a = BAlias.create(:target => @b, :slug => "balias")
+        @b.hide!
+        @b.reload
+        a.reload
+        a.visible?.should be_false
       end
     end
   end
