@@ -103,6 +103,13 @@ class SerialisationTest < MiniTest::Spec
       should "include the title field name in the serialisation of page types" do
         SerialisedPage.export(nil)[:title_field].should == 'title'
       end
+      should "use JS friendly names for type keys" do
+        class ::SerialisedPage
+          class InnerClass < Piece
+          end
+        end
+        Site.schema.export['SerialisedPage.InnerClass'].should ==  ::SerialisedPage::InnerClass.export
+      end
     end
 
     context "pieces" do
@@ -174,6 +181,7 @@ class SerialisationTest < MiniTest::Spec
         # hard to test this as the serialisation order appears to change
         Spot.deserialise_http(@root.serialise_http).should == @root.export
       end
+
     end
   end
 

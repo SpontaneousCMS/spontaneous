@@ -229,7 +229,7 @@ module Spontaneous
 
       def export
         self.content_classes.inject({}) do |hash, klass|
-          hash[klass.name] = klass.export
+          hash[klass.ui_class] = klass.export
           hash
         end
       end
