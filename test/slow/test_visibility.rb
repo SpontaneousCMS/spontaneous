@@ -182,8 +182,10 @@ class VisibilityTest < MiniTest::Spec
       piece1 = Content.first(:uid => "0.0.0.0")
       piece2 = Content.first(:uid => "0.0.0.1")
       parent = Content.first(:uid => "0.0.0")
-      piece1.container.should == parent
-      piece2.container.should == parent
+      piece1.owner.should == parent
+      piece2.owner.should == parent
+      piece1.container.should == parent.things
+      piece2.container.should == parent.things
       piece1.hide!
       parent.hide!
       parent.reload.visible?.should be_false
