@@ -98,6 +98,16 @@ module Spontaneous
         map[@owner_sid]
       end
 
+      def source_file
+        if owner
+          owner.__source_file
+        elsif target
+          target.__source_file
+        else
+          nil
+        end
+      end
+
       def ==(obj)
         super or (obj == @id)
       end

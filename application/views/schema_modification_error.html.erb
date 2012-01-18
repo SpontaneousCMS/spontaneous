@@ -13,6 +13,9 @@
     <% Spontaneous::Rack::Assets::JavaScript::JQUERY.each do |js_file| %>
       <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
     <% end %>
+    <script type="text/javascript">
+      var Spontaneous = {};
+    </script>
     <% Spontaneous::Rack::Assets::JavaScript::LOGIN_JS.each do |js_file| %>
       <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
     <% end %>
@@ -38,13 +41,14 @@
       %>
 
     <h1>There are unresolved changes to <%= types.length > 1 ? "s" : "" %> <%= types.map { |o| "<strong>&lsquo;#{o}&rsquo;</strong>"}.join(', ')%></h1>
-    <p class="src"><a href="mvim://open?url=file://<%= modification.actions[0].source.owner.__source_file %>"><%= modification.actions[0].source.owner.__source_file %></a></p>
+    <% source_file = modification.actions[0].source.source_file %>
+    <p class="src"><a href="mvim://open?url=file://<%= source_file %>"><%= source_file %></a></p>
 
     <p>Please choose one of the following solutions:</p>
 
     <ul class="actions">
       <% modification.actions.each do |action|
-        id = "#{action.action}-#{action.source.name}#{action.dest ? "-#{action.dest.name}" : ""}"
+        id = "#{action.action}-#{action.source.name.to_s.gsub('::', '__')}#{action.dest ? "-#{action.dest.name.to_s.gsub('::', '__')}" : ""}"
       %>
     <li>
     <form action="/@spontaneous/schema/<%= action.action %>" method="post">
