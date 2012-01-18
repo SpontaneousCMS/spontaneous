@@ -204,12 +204,13 @@ module Spontaneous
 
     def insert(index, content)
       @modified = true
+      @contents = nil
       owner.insert(index, content, self)
     end
 
     def set_position(entry, new_position)
       @modified = true
-      piece = pieces[new_position]
+      piece = contents[new_position]
       new_position = owner.pieces.index(piece)
       owner.pieces.set_position(entry, new_position)
     end
@@ -218,39 +219,41 @@ module Spontaneous
       @modified
     end
 
-    def pieces
-      @pieces ||= owner.pieces.for_box(self)
+    def contents
+      @contents ||= owner.pieces.for_box(self)
     end
 
+    alias_method :pieces, :contents
+
     def [](index)
-      pieces[index]
+      contents[index]
     end
 
     def index(entry)
-      pieces.index(entry)
+      contents.index(entry)
     end
 
     def each
-      pieces.each do |piece|
+      contents.each do |piece|
         yield piece if block_given?
       end
     end
 
-    def content
-      entries
+    def empty?
+      contents.count == 0
     end
 
     def last
-      pieces.last
+      contents.last
     end
 
     def iterable
-      pieces
+      contents
     end
 
     def export(user = nil)
       shallow_export(user).merge({
-        :entries => pieces.map { |p| p.export(user) }
+        :entries => contents.map { |p| p.export(user) }
       })
     end
 

@@ -45,6 +45,14 @@ class BoxesTest < MiniTest::Spec
       MyContentClass.has_boxes?.should be_true
     end
 
+    should "have a boolean test for emptiness" do
+      MyContentClass.box :images0
+      instance = MyContentClass.new
+      instance.images0.empty?.should be_true
+      instance.images0 << MyContentClass.new
+      instance.images0.empty?.should be_false
+    end
+
     should "always return a symbol for the name" do
       MyContentClass.box 'images0'
       MyContentClass.boxes.first.name.should == :images0
@@ -396,7 +404,9 @@ class BoxesTest < MiniTest::Spec
       child1.save
       @parent = Content[@parent.id]
       child1.reload; child2.reload; child3.reload
+      @parent.images.contents.should == [child1]
       @parent.images.pieces.should == [child1]
+      @parent.words.contents.should == [child2]
       @parent.words.pieces.should == [child2]
       @parent.pieces.should == [child1, child2]
       child1.images.pieces.should == [child3]
