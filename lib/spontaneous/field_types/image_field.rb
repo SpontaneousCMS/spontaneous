@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'tempfile'
 require 'mini_magick'
 require 'delegate'
 
@@ -138,14 +139,18 @@ module Spontaneous
       def generate(output, media_file)
         return { :src => media_file } if media_file.is_a?(String)#File.exist?(image_path)
         image = ImageProcessor.new(media_file)
-        result = \
+        # Create a tempfile here that will be kept open for the duration of the block
+        # this is used in #apply to hold a copy of the processed image data rather than
+        # rely on the minimagick generated tempfiles which can get closed
+        result = Tempfile.open("image_#{output}") do |tempfile|
           case output
           when :original
             image
           else
             process = self.class.size_definitions[output]
-            image.apply(process, output)
+            image.apply(process, output, tempfile)
           end
+        end
         result.serialize
       end
 
@@ -344,12 +349,16 @@ module Spontaneous
         @dimensions ||= Spontaneous::ImageSize.read(path)
       end
 
-      def apply(process, name)
+      def apply(process, name, tempfile)
         image = ::MiniMagick::Image.open(path)
         processor = ImageProcessor::ImageDelegator.new(image)
         processor.__run__(process)
         file = @media_file.rename(filename_for_size(name, image))
-        file.copy(image.path)
+        # copy the image into the tempfile provided by the parent #generate call
+        # this stops us from using a tempfile that is out of our control and can
+        # be closed before we're done
+        FileUtils.cp(image.path, tempfile.path)
+        file.copy(tempfile)
 
         ImageProcessor.new(file)
       end
