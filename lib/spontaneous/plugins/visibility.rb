@@ -115,8 +115,15 @@ module Spontaneous::Plugins
       super
       if @_visibility_modified
         hide_descendents(self.visible?)
+        hide_aliases(self.visible?)
         @_visibility_modified = false
       end
+    end
+
+    def hide_aliases(visible)
+      dataset = Spontaneous::Content.filter(:target_id => self.id)
+      origin = visible ? nil : self.id
+      dataset.update(:hidden => !visible, :hidden_origin => origin)
     end
 
     def hide_descendents(visible)
@@ -129,6 +136,10 @@ module Spontaneous::Plugins
         dataset = dataset.filter(:hidden_origin => self.id)
       end
       dataset.update(:hidden => !visible, :hidden_origin => origin)
+
+      dataset.each do |content|
+        content.aliases.update(:hidden => !visible, :hidden_origin => origin)
+      end
 
       ## I'm saving these for posterity: I worked out some Sequel magic and I don't want to lose it
       #
