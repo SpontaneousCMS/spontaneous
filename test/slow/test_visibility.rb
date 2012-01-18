@@ -208,6 +208,12 @@ class VisibilityTest < MiniTest::Spec
       end
     end
 
+    context "top-level searches" do
+      should "return a list of visible pages" do
+        @root.pages.first.hide!
+        P.visible.count.should == 9
+      end
+    end
     context "visibility scoping" do
       setup do
         # S.database.logger = ::Logger.new($stdout)

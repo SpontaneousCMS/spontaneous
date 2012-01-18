@@ -47,6 +47,10 @@ module Spontaneous::Plugins
       def visible_only?
         @@visible_filter
       end
+
+      def visible
+        self.dataset.filter(:hidden => false)
+      end
     end # ClassMethods
 
     # InstanceMethods
