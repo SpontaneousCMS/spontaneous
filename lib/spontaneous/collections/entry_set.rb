@@ -47,10 +47,10 @@ module Spontaneous::Collections
     end
 
     alias_method :size, :length
+
     def for_box(box)
       sid = box.schema_id.to_s
       store[sid]
-      # store.select { |e| e.box_sid == sid }
     end
 
     def insert(index, box, entry)

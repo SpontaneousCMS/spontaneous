@@ -40,9 +40,9 @@ Spontaneous.Views.PieceView = (function($, S) {
 	});
 
 	var PieceView = new JS.Class(S.Views.View, {
-		initialize: function(content, container) {
+		initialize: function(content, container_view) {
 			this.callSuper(content);
-			this.container = container;
+			this.container_view = container_view;
 		},
 		panel: function() {
 			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class(), this.boxes_class()])
@@ -74,11 +74,20 @@ Spontaneous.Views.PieceView = (function($, S) {
 			inside.append(box_container.panel());
 			var preview_area = this.create_edit_wrapper(inside);
 			contents.append(preview_area);
-			wrapper.append(contents, dom.div('.entry-spacer'));
+
+			wrapper.append(contents, this.entry_spacer());
 			this.wrapper = wrapper;
 			this.outline = outline;
 			this.fields_preview = fields_panel;
 			return wrapper;
+		},
+		entry_spacer: function() {
+			var entry_spacer = dom.div('.entry-spacer').hover(function() {
+				this.container_view.show_add_after(this, entry_spacer);
+			}.bind(this), function() {
+				this.container_view.hide_add_after(this, entry_spacer);
+			}.bind(this));
+			return entry_spacer;
 		},
 		edit: function(focus_field) {
 			this.wrapper.addClass('editing')

@@ -24,7 +24,7 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 			inside.append(entry);
 			var preview_area = this.create_edit_wrapper(inside);
 			contents.append(preview_area);
-			wrapper.append(contents, dom.div('.entry-spacer'));
+			wrapper.append(contents, this.entry_spacer());
 			this.wrapper = wrapper;
 			this.outline = outline;
 			this.fields_preview = fields_panel;

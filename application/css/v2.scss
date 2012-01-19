@@ -673,10 +673,11 @@ img.missing {
 			@include down-arrow("/@spontaneous/static/slot-down-arrow.png", 18px);
 		}
 	}
-	.slot-addable.bottom {
-		@include vertical-gradient($entry-background-colour, $slot-addable-colour);
-		@include corners;
-		margin-top: 10px;
+	.slot-addable.floating {
+		// @include vertical-gradient($entry-background-colour, $slot-addable-colour);
+		// @include corners;
+		// margin-top: 10px;
+		background: none;
 		margin-left: $container-padding;
 		margin-right: $container-padding;
 		border-top: 0;
@@ -685,9 +686,10 @@ img.missing {
 		text-align: center;
 
 		.down {
-			background-image: url("/@spontaneous/static/slot-up-arrow.png");
-			bottom: auto;
-			top: -18px;
+			display: none;
+			// background-image: url("/@spontaneous/static/slot-up-arrow.png");
+			// bottom: auto;
+			// top: -18px;
 		}
 	}
 	.slot-instructions {
@@ -736,7 +738,13 @@ img.missing {
     }
     .entry-spacer {
       height: $container-padding/2;
+			position: relative;
     }
+		.entry-spacer.add-entry {
+			background: url("/@spontaneous/static/diagonal-texture.png");
+			margin: 0 4px;
+			cursor: pointer;
+		}
 		.entry-inner {
 			@extend .clearfix;
 			@include rounded;

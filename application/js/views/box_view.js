@@ -80,13 +80,14 @@ Spontaneous.Views.BoxView = (function($, S) {
 					}.bind(this)
 				})
 				panel.append(entries);
-			var _bottom_add_bar = this.add_allowed_types_bar('bottom', -1).hide();
-			panel.append(_bottom_add_bar);
+			// this.floating_add_bar = this.add_allowed_types_bar('floating', -1).hide();
+			// var _bottom_add_bar = this.add_allowed_types_bar('bottom', -1).hide();
+			// panel.append(_bottom_add_bar);
 			panel.hide();
 			this.dom_container.append(panel)
 			this._panel = panel;
 				this._entry_container = entries;
-				this._bottom_add_bar = _bottom_add_bar;
+				// this._bottom_add_bar = _bottom_add_bar;
 			}
 			this.check_if_empty();
 			return this._panel;
@@ -95,12 +96,12 @@ Spontaneous.Views.BoxView = (function($, S) {
 			var _view = this, _panel = this._panel;
 			if (_view.box.entries().length == 0) {
 				_panel.addClass('empty');
-				_view._bottom_add_bar.fadeOut($.fn.appear.height_change_duration/2, function() {
-				})
+				// _view._bottom_add_bar.fadeOut($.fn.appear.height_change_duration/2, function() {
+				// })
 			} else {
 				_panel.removeClass('empty');
-				_view._bottom_add_bar.fadeIn(function() {
-				})
+				// _view._bottom_add_bar.fadeIn(function() {
+				// })
 			}
 		},
 		add_allowed_types_bar: function(position, insert_at) {
@@ -172,16 +173,23 @@ Spontaneous.Views.BoxView = (function($, S) {
 			return allowed_bar;
 		},
 		re_sort: function(item) {
-			var order = this._entry_container.sortable('toArray'), css_id = item.attr('id'), position = 0;
+			var entries = this.entries(), order = this._entry_container.sortable('toArray'), css_id = item.attr('id'), new_position = 0;
 			for (var i = 0, ii = order.length; i < ii; i++) {
-				if (order[i] === css_id) { position = i; break; }
+				if (order[i] === css_id) { new_position = i; break; }
 			}
-			var id = css_id.split('-')[1], entry;
+			var id = css_id.split('-')[1], entry, old_position = 0;
 
-			for (var i = 0, entries = this.entries(), ii = entries.length; i < ii; i++) {
-				if (entries[i].id() == id) { entry = entries[i]; break; }
+			for (var i = 0, ii = entries.length; i < ii; i++) {
+				if (entries[i].id() == id) {
+					old_position = i;
+					entry = entries[i];
+					break;
+				}
 			}
-			entry.reposition(position, function(entry) {
+			// move entry inside the array so that we can reliably find its position
+			entries.splice(old_position, 1);
+			entries.splice(new_position, 0, entry);
+			entry.reposition(new_position, function(entry) {
 				this.sorted(entry)
 			}.bind(this));
 		},
@@ -206,7 +214,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			if (entry.is_page()) {
 				view_class = S.Views.PagePieceView;
 			}
-			view = new view_class(entry);
+			view = new view_class(entry, this);
 			return view;
 		},
 		claim_entry: function(entry) {
@@ -249,8 +257,10 @@ Spontaneous.Views.BoxView = (function($, S) {
 			}
 			if (position === -1 || w.length === 0) {
 				this._entry_container.append(h);
+			} else if (position === 0) {
+				this._entry_container.prepend(h);
 			} else {
-				this.entry_wrappers().slice(position, position+1).before(h);
+				this.entry_wrappers().slice(position-1, position).after(h);
 			}
 			if (position === -1) {
 				S.ContentArea.scroll_to_bottom($.fn.appear.height_change_duration);
@@ -264,10 +274,31 @@ Spontaneous.Views.BoxView = (function($, S) {
 		remove_entry: function(entry) {
 		},
 		entry_removed: function(entry) {
+			var entries = this.entries();
+			for (var i = 0, ii = entries.length; i < ii; i++) {
+				if (entries[i] === entry) {
+					entries.splice(i, 1);
+				}
+			}
 			this.check_if_empty();
 		},
 		entry_wrappers: function() {
 			return this._entry_container.find('> .'+this.entry_class())
+		},
+		show_add_after: function(entry, entry_spacer) {
+			var bar, position = 0;
+			for (var i = 0, entries = this.entries(), ii = entries.length; i < ii; i++) {
+				if (entries[i] === entry) {
+					position = i;
+					break;
+				}
+			}
+			bar = this.add_allowed_types_bar('floating', position + 1);
+			entry_spacer.addClass('add-entry').append(bar.show());
+		},
+		hide_add_after: function(entry, entry_spacer) {
+			entry_spacer.empty();
+			entry_spacer.removeClass('add-entry');
 		}
 	});
 
