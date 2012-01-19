@@ -649,7 +649,8 @@ img.missing {
 	.slot-addable {
 		@extend .container-padding;
 		@include box-sizing;
-		@include vertical-gradient($slot-addable-colour, $entry-background-colour);
+		// @include vertical-gradient($slot-addable-colour, $entry-background-colour);
+		background: url("/@spontaneous/static/diagonal-texture.png");
 		border-top: solid 1px #cccccc;
 		text-align: center;
 		height: 40px;
@@ -673,6 +674,7 @@ img.missing {
     }
 		.down {
 			@include down-arrow("/@spontaneous/static/slot-down-arrow.png", 18px);
+			display: none;
 		}
 	}
 	.slot-addable.floating {
@@ -685,9 +687,9 @@ img.missing {
 		border-top: 0;
 		padding-left: 10px;
 		padding-right: 10px;
-		padding-top: 4px;
+		padding-top: 5px;
 		text-align: center;
-		background: url("/@spontaneous/static/plus-box.png") 10px 6px no-repeat;
+		background: url("/@spontaneous/static/plus-box.png") 10px 7px no-repeat;
 
 		.down {
 			display: none;
