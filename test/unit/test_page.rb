@@ -26,6 +26,7 @@ class PageTest < MiniTest::Spec
       Content.delete
       class Page < Spot::Page
         field :title, :string
+        box :sub
       end
       class Piece < Spontaneous::Piece; end
     end
@@ -80,11 +81,11 @@ class PageTest < MiniTest::Spec
         o = Page.create(:title => "New Page")
         p = Page.create(:title => "New Page")
         o.slug.should == slug
-        r << o
+        r.sub << o
         o.save
         o = Page[o.id]
         o.slug.should == slug
-        o << p
+        o.sub << p
         o.save
         o = Page[o.id]
         o.slug.should == slug
@@ -110,7 +111,6 @@ class PageTest < MiniTest::Spec
     context "Pages in tree" do
       setup do
         Content.delete
-        Page.box :sub
         @p = Page.create
         @p.root?.should be_true
         @q = Page.new(:slug => 'q')

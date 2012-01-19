@@ -51,15 +51,19 @@ class PublishingTest < MiniTest::Spec
 
       class Page < Spontaneous::Page
         field :title, :string, :default => "New Page"
+        box :things
+      end
+      class Piece < Spontaneous::Piece
+        box :things
       end
 
       2.times do |i|
         c = Page.new(:uid => i)
         2.times do |j|
-          d = Content.new(:uid => "#{i}.#{j}")
-          c << d
+          d = Piece.new(:uid => "#{i}.#{j}")
+          c.things << d
           2.times do |k|
-            d << Page.new(:uid => "#{i}.#{j}.#{k}")
+            d.things << Page.new(:uid => "#{i}.#{j}.#{k}")
             d.save
           end
         end
@@ -69,6 +73,7 @@ class PublishingTest < MiniTest::Spec
 
     teardown do
       PublishingTest.send(:remove_const, :Page) rescue nil
+      PublishingTest.send(:remove_const, :Piece) rescue nil
       Content.delete
       Change.delete
       DB.logger = nil
@@ -188,7 +193,7 @@ class PublishingTest < MiniTest::Spec
       end
       teardown do
         Content.delete_revision(@revision)
-        Content.delete_revision(@revision+1)
+        Content.delete_revision(@revision+1) rescue nil
       end
       should "be testable for existance" do
         Content.revision_exists?(@revision).should be_false
@@ -310,7 +315,7 @@ class PublishingTest < MiniTest::Spec
           editable1 = Content.first(:uid => '0')
           new_content = Content.new(:uid => "new")
 
-          editable1 << new_content
+          editable1.things << new_content
           editable1.save
           Content.publish(@final_revision, [editable1.id])
           new_content.reload
@@ -343,7 +348,7 @@ class PublishingTest < MiniTest::Spec
           editable1 = Content.first(:uid => '0')
           new_page = Page.new(:uid => "new")
           slot = editable1.pieces.first
-          slot << new_page
+          slot.things << new_page
           editable1.save
           slot.save
           new_page.save
@@ -366,11 +371,11 @@ class PublishingTest < MiniTest::Spec
 
         should "not publish changes to existing pages unless explicitly asked" do
           editable1 = Content.first(:uid => '0')
-          editable1 << Content.new(:uid => "added")
+          editable1.things << Content.new(:uid => "added")
           editable1.save
           editable2 = Content.first(:uid => '0.0.0')
           new_content = Content.new(:uid => "new")
-          editable2 << new_content
+          editable2.things << new_content
           editable2.save
           Content.publish(@final_revision, [editable1.id])
           editable1.reload
@@ -443,7 +448,7 @@ class PublishingTest < MiniTest::Spec
         Sequel.datetime_class.stubs(:now).returns(@@now+3600)
         page = Page.first
         content = Content[page.pieces.first.id]
-        content << Content.new
+        content.things << Piece.new
         content.save
         content.modified_at.to_i.should == @@now.to_i + 3600
         page.reload
@@ -503,7 +508,7 @@ class PublishingTest < MiniTest::Spec
         new_page = nil
         Change.record do
           new_page = Page.new
-          page << new_page
+          page.things << new_page
           page.save
         end
         new_page.reload
@@ -902,6 +907,8 @@ class PublishingTest < MiniTest::Spec
 
         class ::PublishablePage < Page; end
         class ::DynamicPublishablePage < Page; end
+        PublishablePage.box :box1
+        DynamicPublishablePage.box :box1
         PublishablePage.layout :"static"
         PublishablePage.layout :"dynamic"
 
@@ -920,13 +927,13 @@ class PublishingTest < MiniTest::Spec
         @news = DynamicPublishablePage.create(:title => "News", :slug => "news")
         @contact = DynamicPublishablePage.create(:title => "Contact", :slug => "contact")
         @contact.layout = :dynamic
-        @home << @about
-        @home << @blog
-        @home << @news
-        @home << @contact
-        @blog << @post1
-        @blog << @post2
-        @blog << @post3
+        @home.box1 << @about
+        @home.box1 << @blog
+        @home.box1 << @news
+        @home.box1 << @contact
+        @blog.box1 << @post1
+        @blog.box1 << @post2
+        @blog.box1 << @post3
         @pages = [@home, @about, @blog, @news, @post1, @post2, @post3]
         @pages.each { |p| p.save }
         Site.publish_all

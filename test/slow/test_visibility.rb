@@ -126,8 +126,8 @@ class VisibilityTest < MiniTest::Spec
 
     should "hide all descendents of page content" do
       piece = Content.first(:uid => "0.0")
-      f = Piece.new(:uid => "0.0.X")
-      piece << f
+      f = E.new(:uid => "0.0.X")
+      piece.pages << f
       piece.save
       piece.reload
       piece.hide!
@@ -256,7 +256,6 @@ class VisibilityTest < MiniTest::Spec
           # would like to make sure we're raising a predictable error
           # but 1.9 changes the typeerror to a runtime error
           lambda { page.pieces << Piece.new }.must_raise(TypeError, RuntimeError)
-          lambda { page << Piece.new }.must_raise(TypeError, RuntimeError)
         end
       end
 

@@ -189,6 +189,7 @@ class SerialisationTest < MiniTest::Spec
     setup do
       class ::Page < Spontaneous::Page
         field :title, :string, :default => "New Page"
+        box   :box1
       end
       @now = Time.now
       Time.stubs(:now).returns(@now)
@@ -196,7 +197,7 @@ class SerialisationTest < MiniTest::Spec
       Change.delete
       @page1 = ::Page.create
       @page2 = ::Page.create(:slug => "page2")
-      @page1 << @page2
+      @page1.box1 << @page2
       @page2.save
       @c1 = Change.new
       @c1.push(@page1)

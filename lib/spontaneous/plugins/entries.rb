@@ -106,7 +106,7 @@ module Spontaneous::Plugins
       insert(-1, page_or_piece)
     end
 
-    def insert(index, page_or_piece, box = nil)
+    def insert(index, page_or_piece, box)
       save if new?
       if page_or_piece.page?
         insert_page(index, page_or_piece, box)
@@ -116,7 +116,7 @@ module Spontaneous::Plugins
     end
 
 
-    def insert_page(index, child_page, box = nil)
+    def insert_page(index, child_page, box)
       child_page.owner = self
       if page
         child_page.depth = page.depth + 1
@@ -127,14 +127,14 @@ module Spontaneous::Plugins
       insert_with_style(:page, index, child_page, box)
     end
 
-    def insert_piece(index, piece, box = nil)
+    def insert_piece(index, piece, box)
       piece.owner = self
       piece.page = page if page
       piece.depth = (content_depth || 0) + 1
       insert_with_style(:piece, index, piece, box)
     end
 
-    def insert_with_style(type, index, content, box = nil)
+    def insert_with_style(type, index, content, box)
       self._pieces << content
       entry_style = style_for_content(content, box)
       content.box_sid = box.schema_id if box

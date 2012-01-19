@@ -144,8 +144,8 @@ class ContentTest < MiniTest::Spec
         b.depth.should == 0
         c.depth.should == 0
 
-        a << b
-        b << c
+        a.things << b
+        b.things << c
 
         b.depth.should == 1
         c.depth.should == 2

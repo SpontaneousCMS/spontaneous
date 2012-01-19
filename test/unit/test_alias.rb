@@ -83,6 +83,7 @@ class AliasTest < MiniTest::Spec
 
       class ::BAlias < ::Page
         alias_of :B
+        box :box1
       end
 
       class ::BBAlias < ::Piece
@@ -99,15 +100,15 @@ class AliasTest < MiniTest::Spec
 
       @root = ::Page.create
       @aliases = ::Page.create(:slug => "aliases").reload
-      @root << @aliases
+      @root.box1 << @aliases
       @a = A.create(:a_field1 => "@a.a_field1").reload
       @aa = AA.create.reload
       @aaa1 = AAA.create(:aaa_field1 => "aaa1").reload
       @aaa2 = AAA.create.reload
       @b = B.new(:slug => "b")
-      @root << @b
+      @root.box1 << @b
       @bb = BB.new(:slug => "bb", :bb_field1 => "BB")
-      @root << @bb
+      @root.box1 << @bb
       @root.save.reload
     end
 
@@ -309,7 +310,7 @@ class AliasTest < MiniTest::Spec
 
       should "not be loadable via their compound path when linked to a page" do
         a = BBAlias.create(:target => @bb)
-        @aliases << a
+        @aliases.box1 << a
         @aliases.save
         Site["/aliases/bb"].should be_nil
       end
@@ -338,7 +339,7 @@ class AliasTest < MiniTest::Spec
 
       should "be discoverable via their compound path" do
         a = BAlias.create(:target => @b, :slug => "balias")
-        @aliases << a
+        @aliases.box1 << a
         @aliases.save
         a.save
         a.reload
@@ -350,8 +351,8 @@ class AliasTest < MiniTest::Spec
       should "update their path if their target's slug changes" do
         a = BAlias.create(:target => @b, :slug => "balias")
         b = BAlias.create(:target => @b, :slug => "balias")
-        @aliases << a
-        a << b
+        @aliases.box1 << a
+        a.box1 << b
         @aliases.save
 
         a.save
@@ -369,8 +370,8 @@ class AliasTest < MiniTest::Spec
       should "update their path if their parent's path changes" do
         a = BAlias.create(:target => @b, :slug => "balias")
         b = BAlias.create(:target => @b, :slug => "balias")
-        @aliases << a
-        a << b
+        @aliases.box1 << a
+        a.box1 << b
         @aliases.save
         a.save
         a.reload
@@ -386,7 +387,7 @@ class AliasTest < MiniTest::Spec
 
       should "show in the parent's list of children" do
         a = BAlias.create(:target => @b, :slug => "balias")
-        @aliases << a
+        @aliases.box1 << a
         @aliases.save
         a.save
         a.reload
@@ -397,7 +398,7 @@ class AliasTest < MiniTest::Spec
 
       should "render the using target's layout when accessed via the path and no local layouts defined" do
         a = BAlias.create(:target => @b, :slug => "balias")
-        @aliases << a
+        @aliases.box1 << a
         @aliases.save
         a.reload
         a.render.should == @b.render
@@ -406,7 +407,7 @@ class AliasTest < MiniTest::Spec
       should "render with locally defined style when available" do
         BAlias.layout :b_alias
         a = BAlias.create(:target => @b, :slug => "balias")
-        @aliases << a
+        @aliases.box1 << a
         @aliases.save
         a.reload
         a.render.should == "alternate\n"
@@ -415,7 +416,7 @@ class AliasTest < MiniTest::Spec
       should "have access to their target's page styles" do
         BAlias.layout :b_alias
         a = BAlias.create(:target => @b, :slug => "balias")
-        @aliases << a
+        @aliases.box1 << a
         @aliases.save
         a.reload
         a.layout = :b
