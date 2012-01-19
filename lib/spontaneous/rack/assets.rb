@@ -68,7 +68,7 @@ module Spontaneous
           compress_js(filelist)
         end
 
-        JQUERY = %w(vendor/jquery-1.6.2.min)
+        JQUERY = %w(vendor/jquery-1.7.1.min)
         COMPATIBILITY = %w(compatibility)
         REQUIRE = %w(require)
         LOGIN_JS = %w(authentication login)
