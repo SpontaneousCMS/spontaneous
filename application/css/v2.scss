@@ -397,7 +397,7 @@ img.missing {
 	margin-right: 16px;
 	li {
 		@extend .clearfix;
-		border-bottom: solid 1px #cccccc;
+		border-bottom: solid 1px $entry-background-colour;
 		padding-top: 3px;
 		padding-bottom: 3px;
 		display: block;
