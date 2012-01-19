@@ -50,6 +50,9 @@ Spontaneous.Content = (function($, S) {
 			$.each(this.entries(), function(i, e) { e.unload(); });
 		},
 
+		has_fields: function() {
+			return this.field_list().length > 0;
+		},
 		field_list: function() {
 			var type = this.type(), prototypes = type.field_prototypes, names = type.field_names;
 			var fields = this.fields(), list = [];

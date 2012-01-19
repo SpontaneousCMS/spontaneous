@@ -267,7 +267,9 @@ Spontaneous.Views.BoxView = (function($, S) {
 			}
 			view.check_if_empty();
 			h.hide().appear(function() {
-				e.edit();
+				if (e.content.has_fields()) {
+					e.edit();
+				}
 			});
 		},
 
