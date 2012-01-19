@@ -153,10 +153,10 @@ class SerialisationTest < MiniTest::Spec
         @child.direction = "N"
         @child.uid = "about"
 
-        @root.pieces[0].style = :freezing
-        @root.insides.pieces[0].visible = false
-        @root.pieces[1].style = :boiling
-        @root.pieces[0].pieces[0].style = :sitting
+        @root.insides[0].style = :freezing
+        @root.insides[0].visible = false
+        @root.insides[1].style = :boiling
+        @root.insides.first.first.style = :sitting
 
         @child.path.should == "/about"
 

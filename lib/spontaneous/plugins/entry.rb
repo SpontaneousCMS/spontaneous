@@ -27,11 +27,11 @@ module Spontaneous::Plugins
     alias_method :container,  :box
 
     def first?
-      owner.pieces.first == self
+      container.contents.first == self
     end
 
     def last?
-      owner.pieces.last == self
+      container.contents.last == self
     end
 
     def set_position(new_position)

@@ -188,11 +188,11 @@ class ContentTest < MiniTest::Spec
         C.all.map { |c| c.id }.sort.should == [@a, @d].map { |c| c.id }.sort
       end
 
-      ## doesn't work due to
       should "work through pieces" do
-        @a.pieces.first.destroy
+        @a.things.length.should == 2
+        @a.things.first.destroy
         C.count.should == 2
-        @a.pieces.length.should == 1
+        @a.things.length.should == 1
       end
     end
 

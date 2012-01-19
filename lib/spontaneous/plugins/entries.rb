@@ -149,7 +149,7 @@ module Spontaneous::Plugins
         content
       end
       begin
-        pieces.insert(index, entry)
+        pieces.insert(index, box, entry)
       rescue TypeError, RuntimeError => e
         # TODO: raise a custom more helpful error here
         logger.error { "Attempting to modify visible only pieces" }

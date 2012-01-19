@@ -3,17 +3,13 @@
 
 module Spontaneous::Collections
   class EntrySet
-    extend  Forwardable
     include Enumerable
 
-    attr_reader :owner, :store
-
-
-    def_delegators :@store, :each, :[], :index, :<<, :length, :last
+    attr_reader  :owner, :store, :length
 
     def initialize(owner, piece_store = [])
       @owner = owner
-      @store = []
+      @store = Hash.new { |hash, key| hash[key] = [] }
       (piece_store || []).each do |data|
         id = data[0]
         entry = \
@@ -29,23 +25,38 @@ module Spontaneous::Collections
           end
         # if the piece/page has been deleted or is invisible
         # then we just want to silently skip it
-        @store << entry if entry
+        if entry
+          box_id =  entry.box_sid.to_s
+          @store[box_id] << entry
+        end
       end
     end
 
-    def for_box(box)
-      sid = box.schema_id
-      store.select { |e| e.box_sid == sid }
+    def each(&block)
+      owner.boxes.each do |box|
+        store[box.schema_id.to_s].each(&block)
+      end
     end
 
-    def insert(index, piece)
-      # piece.piece_store = self
+    def last
+      owner.boxes.last.last
+    end
 
-      # puts "array_insert #{piece.serialize_db} => #{index}"
-      # p serialize_db
-      store.insert(index, piece)
-      # p serialize_db
-      owner.entry_modified!(piece)
+    def length
+      store.values.inject(0) { |sum, e| sum += e.length }
+    end
+
+    alias_method :size, :length
+    def for_box(box)
+      sid = box.schema_id.to_s
+      store[sid]
+      # store.select { |e| e.box_sid == sid }
+    end
+
+    def insert(index, box, entry)
+      box_id = entry.box_sid.to_s
+      store[box_id].insert(index, entry)
+      owner.entry_modified!(entry)
     end
 
 
@@ -55,7 +66,9 @@ module Spontaneous::Collections
     end
 
     def destroy
-      store.dup.each { |e| e.destroy(false) }
+      store.each do |box_id, entries|
+        entries.dup.each { |e| e.destroy(false) }
+      end
     end
 
     def remove(piece)
@@ -63,53 +76,55 @@ module Spontaneous::Collections
     end
 
 
-    def delete(piece)
-      e = store.delete(piece)
+    def delete(entry)
+      box_id = entry.box_sid.to_s
+      e = store[box_id].delete(entry)
       owner.entry_modified!(nil)
     end
 
     def serialize_db
-      store.map { |e| e.serialize_db }
+      self.map { |e| e.serialize_db }
     end
 
 
     def set_position(content, position)
-      piece = store.detect {|e| e.id == content.id }
-      store.delete(piece)
-      store.insert(position, piece)
+      entries = store[content.box_sid.to_s]
+      piece = entries.detect {|e| e.id == content.id }
+      entries.delete(piece)
+      entries.insert(position, piece)
       owner.entry_modified!(piece)
     end
 
     def export
-      store.map do | piece |
+      self.map do | piece |
         piece.export
       end
     end
 
     def freeze
       super
-      store.freeze
+      store.values.each { |entries| entries.freeze }
       self
     end
 
     # Returns a frozen version of this set containing only entries that are visible
     def visible!
-      entries = store.dup.reject { |e|  e.nil? || e.hidden? }
-      # In 1.9.3 #reject does not return this subclass of Array but instead
-      # returns a direct Array instance
       set = EntrySet.new(owner)
-      set.concat(entries).freeze
-      set
+      store.each do |box_id, entries|
+        visible = entries.reject { |e|  e.nil? || e.hidden? }
+        set.concat(box_id, visible)
+      end
+      set.freeze
     end
 
     def ==(set)
-      super or store == set
+      super or entries == set
     end
 
     protected
 
-    def concat(entries)
-      store.concat(entries)
+    def concat(box_id, entries)
+      store[box_id].concat(entries)
       self
     end
   end

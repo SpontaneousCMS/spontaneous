@@ -241,6 +241,8 @@ class VisibilityTest < MiniTest::Spec
       should "only show visibile pieces" do
         page = Content.first(:uid => "1")
         page.pieces.length.should == 4
+        page.things.pieces.length.should == 4
+        page.things.count.should == 4
         page.pieces.first.hide!
         page.reload
         Content.with_visible do
@@ -255,7 +257,7 @@ class VisibilityTest < MiniTest::Spec
         Content.with_visible do
           # would like to make sure we're raising a predictable error
           # but 1.9 changes the typeerror to a runtime error
-          lambda { page.pieces << Piece.new }.must_raise(TypeError, RuntimeError)
+          lambda { page.things << Piece.new }.must_raise(TypeError, RuntimeError)
         end
       end
 

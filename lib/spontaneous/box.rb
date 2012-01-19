@@ -210,8 +210,8 @@ module Spontaneous
 
     def set_position(entry, new_position)
       @modified = true
-      piece = contents[new_position]
-      new_position = owner.pieces.index(piece)
+      # piece = contents[new_position]
+      # new_position = owner.pieces.index(piece)
       owner.pieces.set_position(entry, new_position)
     end
 
@@ -220,7 +220,7 @@ module Spontaneous
     end
 
     def contents
-      @contents ||= owner.pieces.for_box(self)
+      owner.pieces.for_box(self)
     end
 
     alias_method :pieces, :contents
@@ -246,6 +246,12 @@ module Spontaneous
     def last
       contents.last
     end
+
+    def length
+      contents.length
+    end
+
+    alias_method :size, :length
 
     def iterable
       contents

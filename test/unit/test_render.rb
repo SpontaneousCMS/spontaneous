@@ -157,8 +157,8 @@ class RenderTest < MiniTest::Spec
         child.title = "Child2 Title"
         child.description = "Child2 Description"
         @content.bits << child
-        @content.pieces.last.style = TemplateClass.get_style(:this_template)
-        @content.pieces.last.hide!
+        @content.bits.last.style = TemplateClass.get_style(:this_template)
+        @content.bits.last.hide!
         @content.render.should == "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
       end
     end
