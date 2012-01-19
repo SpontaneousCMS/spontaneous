@@ -1048,11 +1048,15 @@ img.missing {
 			}
 		}
     .alias-target {
+			@include rounded-top;
       padding: $unit/2;
       background-color: #444;
       color: white;
       font-size: 14px;
       font-style: italic;
+			&.no-fields {
+				@include rounded;
+			}
       .icon-wrap, a {
         display: inline-block;
         vertical-align: top;

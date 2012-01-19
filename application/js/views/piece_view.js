@@ -104,6 +104,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			click = function() { S.Location.load_id(content.target().id); },
 			title = dom.a().html(content.content.alias_title).click(click);
 
+			if (!content.has_fields()) { wrap.addClass('no-fields'); }
 
 			if (icon) {
 				var img = new Spontaneous.Image(icon);
