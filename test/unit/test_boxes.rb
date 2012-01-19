@@ -291,75 +291,8 @@ class BoxesTest < MiniTest::Spec
       instance.partners.description.value.should == "Here is Howard"
     end
 
-    should "default to template in root with the same name" do
-    end
-
-    # context "with styles" do
-    #   setup do
-    #     MyBoxClass.field :title, :string
-    #     MyBoxClass.style :christy
-    #     class ::InheritedStyleBox < MyBoxClass; end
-    #     class ::WithTemplateBox < Box; end
-    #     class ::WithoutTemplateBox < Box; end
-    #     class ::BlankContent < Content; end
-    #     @content = MyContentClass.new
-    #     @content.images.title = "whisty"
-    #   end
-
-    #   teardown do
-    #     Object.send(:remove_const, :InheritedStyleBox)
-    #     Object.send(:remove_const, :WithTemplateBox)
-    #     Object.send(:remove_const, :WithoutTemplateBox)
-    #     Object.send(:remove_const, :BlankContent)
-    #   end
-
-    #   should "render using explicit styles" do
-    #     @content.images.render.should == "christy: whisty\\n"
-    #   end
-
-    #   should_eventually "allow defining style in definition" do
-    #     BlankContent.box :images do
-    #       style :inline_style
-    #     end
-    #     instance = BlankContent.new
-    #     instance.images.style.filename.should == "inline_style.html.cut"
-    #   end
-
-    #   should "render using default template style" do
-    #     BlankContent.box :images, :class => :WithTemplateBox
-    #     instance = BlankContent.new
-    #     instance.images.render.should == "with_template_box.html.cut\\n"
-    #   end
-
-    #   should "render using global default box styles" do
-    #     entry = Object.new
-    #     entry.stubs(:render).returns("<entry>")
-    #     BlankContent.box :images, :class => :WithoutTemplateBox
-    #     instance = BlankContent.new
-    #     instance.images.stubs(:pieces).returns([entry])
-    #     instance.images.render.should == "<entry>"
-    #   end
-
-    #   should "find templates named after box in owning classes template dir" do
-    #     BlankContent.box :things
-    #     instance = BlankContent.new
-    #     instance.things.render.should == "blank_content/things.html.cut\\n"
-    #   end
-
-    #   should "not use templates with box name found in root template dir" do
-    #     BlankContent.box :thangs
-    #     instance = BlankContent.new
-    #     instance.thangs.render.should == ""
-    #   end
-
-    #   should "inherit styles from their superclass" do
-    #     BlankContent.box :images, :class => :InheritedStyleBox
-    #     instance = BlankContent.new
-    #     instance.images.title = "ytsirhc"
-    #     instance.images.render.should == "christy: ytsirhc\\n"
-    #   end
-    # end
-
+    # true?
+    should "default to template in root with the same name"
   end
 
   context "Box content" do
@@ -428,6 +361,22 @@ class BoxesTest < MiniTest::Spec
       styled = Content[styled.id]
       styled.one.pieces.first.style.name.should == :blank2
       styled.two.pieces.first.style.name.should == :blank3
+    end
+
+    should "be insertable at any position" do
+      BlankContent.box :box3
+      BlankContent.box :box4
+      instance = BlankContent.new
+      count = 4
+      [:images, :words, :box3, :box4].map { |name| instance.boxes[name] }.each do |box|
+        count.times { |n| box << StyledContent.new(:label => n)}
+      end
+      instance.box4.insert(1, StyledContent.new(:label => "a"))
+      instance.box4.contents.map { |e| e.label }.should == ["0", "a", "1", "2", "3"]
+      instance.box4.insert(5, StyledContent.new(:label => "b"))
+      instance.box4.contents.map { |e| e.label }.should == ["0", "a", "1", "2", "3", "b"]
+      instance.box3.insert(2, StyledContent.new(:label => "c"))
+      instance.box3.contents.map { |e| e.label }.should == ["0", "1", "c", "2", "3"]
     end
 
     should "allow selection of subclasses"

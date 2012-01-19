@@ -54,7 +54,7 @@ module Spontaneous::Collections
     end
 
     def insert(index, box, entry)
-      box_id = entry.box_sid.to_s
+      box_id = box.schema_id.to_s
       store[box_id].insert(index, entry)
       owner.entry_modified!(entry)
     end
