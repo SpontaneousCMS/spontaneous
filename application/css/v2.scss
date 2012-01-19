@@ -592,6 +592,7 @@ img.missing {
 			.down {
 				@include down-arrow("/@spontaneous/static/orange-down-arrow.png", 7px);
 				z-index: 100;
+				display: none;
 			}
 		}
 		li:first-child {
@@ -654,7 +655,7 @@ img.missing {
 		border-top: solid 1px #cccccc;
 		text-align: center;
 		height: 40px;
-		padding-top: 10px;
+		padding-top: 8px;
 		position: relative;
 		a {
 			@include button;
@@ -724,6 +725,7 @@ img.missing {
 
 #page-slots.slots .slot-entries {
 	padding-top: 32px;
+	padding-bottom: 50%;
 	position: relative;
 	.fields-preview {
 		@include rounded;
