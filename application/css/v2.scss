@@ -651,6 +651,7 @@ img.missing {
 		@include box-sizing;
 		@include vertical-gradient($slot-addable-colour, $entry-background-colour);
 		border-top: solid 1px #cccccc;
+		text-align: center;
 		height: 40px;
 		padding-top: 10px;
 		position: relative;
@@ -658,13 +659,14 @@ img.missing {
 			@include button;
 			padding-right: 16px;
 			padding-left: 16px;
+			margin-right: 4px;
+			margin-left: 4px;
 		}
 		// a:hover {
 		//   background-color: $highlight;
 		//   color: white;
 		// }
 		a + a {
-			margin-left: 8px;
 		}
     .alias {
       font-style: italic;
@@ -678,12 +680,14 @@ img.missing {
 		// @include corners;
 		// margin-top: 10px;
 		background: none;
-		margin-left: $container-padding;
-		margin-right: $container-padding;
+		// margin-left: $container-padding;
+		// margin-right: $container-padding;
 		border-top: 0;
 		padding-left: 10px;
 		padding-right: 10px;
+		padding-top: 4px;
 		text-align: center;
+		background: url("/@spontaneous/static/plus-box.png") 10px 6px no-repeat;
 
 		.down {
 			display: none;

@@ -500,7 +500,7 @@ module Spontaneous
         post '/alias/:id/:box_id' do
           content_for_request(true) do |content, box|
             type = Spontaneous.schema[params[:alias_id]]
-            position = 0
+            position = (params[:position] || 0).to_i
             if box.writable?(user, type)
               target = Spontaneous::Content[params[:target_id]]
               if target

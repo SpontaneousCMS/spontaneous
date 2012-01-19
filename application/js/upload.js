@@ -4,7 +4,7 @@
 Spontaneous.Upload = (function($, S) {
 	var upload_id = (new Date()).valueOf();
 	var Upload = new JS.Class({
-		initialize: function(manager, target, file) {
+		initialize: function(manager, target, file, insert_position) {
 			this.manager = manager;
 			this.field_name = target.schema_id();
 			this.uid = target.uid();
@@ -16,6 +16,8 @@ Spontaneous.Upload = (function($, S) {
 			this._position = 0;
 			this.failure_count = 0;
 			this.file = file;
+			this.insert_position = insert_position;
+			console.log('upload insert at', insert_position)
 			this.name = this.file.fileName;
 			this._total = this.file.size;
 			this.upload_id = upload_id++;
@@ -70,6 +72,7 @@ Spontaneous.Upload = (function($, S) {
 			if (xhr.readyState == 4) {
 				if (xhr.status === 200) {
 					if (!this.complete) {
+						console.log(xhr)
 						var result = JSON.parse(xhr.responseText);
 						this.manager.upload_complete(this, result);
 						this.complete = true;

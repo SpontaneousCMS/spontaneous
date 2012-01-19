@@ -725,7 +725,7 @@ class BackTest < MiniTest::Spec
       end
       should "be able to add an alias to a box" do
         @home.featured_jobs.pieces.length.should == 0
-        auth_post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id
+        auth_post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 0
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
@@ -736,6 +736,26 @@ class BackTest < MiniTest::Spec
         required_response = {
           :position => 0,
           :entry => @home.featured_jobs.pieces.first.export(@user)
+        }
+        Spot::JSON.parse(last_response.body).should == required_response
+      end
+      should "be able to add an alias to a box at any position" do
+        @home.featured_jobs << Job.new
+        @home.featured_jobs << Job.new
+        @home.featured_jobs << Job.new
+        @home.save.reload
+        @home.featured_jobs.pieces.length.should == 3
+        auth_post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 2
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        last_response.content_type.should == "application/json;charset=utf-8"
+        @home.reload
+        @home.featured_jobs.pieces.length.should == 4
+        a = @home.featured_jobs[2]
+        a.alias?.should be_true
+        a.target.should == Job.first
+        required_response = {
+          :position => 2,
+          :entry => @home.featured_jobs[2].export(@user)
         }
         Spot::JSON.parse(last_response.body).should == required_response
       end

@@ -121,7 +121,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 				event.preventDefault();
 				var files = event.dataTransfer.files;
 				if (files.length > 0) {
-					S.UploadManager.wrap(this, files);
+					S.UploadManager.wrap(this, files, insert_at);
 				}
 				return false;
 			}.bind(this)
@@ -157,7 +157,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 				if (type.is_alias()) {
 					a.addClass('alias')
 					add_allowed = function(type) {
-						var d = new Spontaneous.AddAliasDialogue(_box, type);
+						var d = new Spontaneous.AddAliasDialogue(_box, type, insert_at);
 						d.open();
 					}.bind(_box, type);
 				} else {
@@ -239,8 +239,8 @@ Spontaneous.Views.BoxView = (function($, S) {
 			this.box.add_entry(content_type, position);
 		},
 
-		add_alias: function(target_id, type) {
-			this.box.add_alias(target_id, type);
+		add_alias: function(target_id, type, position) {
+			this.box.add_alias(target_id, type, position);
 		},
 
 		insert_entry: function(entry, position) {
