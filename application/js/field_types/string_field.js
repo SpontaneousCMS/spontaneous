@@ -126,9 +126,13 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		label: function() {
 			return this.title;
 		},
+		generate_input: function() {
+			return dom.input(dom.id(this.css_id()), {'type':'text', 'name':this.form_name(), 'value':this.unprocessed_value()})
+		},
 		input: function() {
 			if (!this._input) {
-				this._input = dom.input(dom.id(this.css_id()), {'type':'text', 'name':this.form_name(), 'value':this.unprocessed_value()})
+				this._input = this.generate_input();
+				this._input.data('field', this);
 			}
 			return this._input;
 		},

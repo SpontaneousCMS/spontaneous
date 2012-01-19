@@ -25,9 +25,10 @@ $text-edit-width: 621px;
 
 	}
 	.editing-toolbar {
+		@include rounded($radius $radius 0 0);
 		// background-color: $editing-1;
 		// background: $editing-1 url(/@spontaneous/static/editing-1-noise.png) 0 0 repeat;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.2);
 		padding: $unit/2 $unit*2;
 		.indent {
 
@@ -62,9 +63,13 @@ $text-edit-width: 621px;
 				width: 128px;
 			}
 		}
-		&.bottom .buttons {
-			// padding-bottom: $unit/2;
-			padding-top: 0;
+		&.bottom {
+			@include rounded( 0 0 $radius $radius);
+
+			.buttons {
+				// padding-bottom: $unit/2;
+				padding-top: 0;
+			}
 		}
 	}
 	.field-group-bg {

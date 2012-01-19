@@ -134,6 +134,7 @@ Spontaneous.EditPanel = (function($, S) {
 			var image_field_wrap = dom.div('.field-group.image');
 			var text_fields = this.parent_view.text_fields();
 			var submit = dom.input({'type':'submit'});
+			var __dialogue = this;
 			editing.append(toolbar);
 			for (var i = 0, ii = text_fields.length; i < ii; i++) {
 				var field = text_fields[i];
@@ -146,7 +147,7 @@ Spontaneous.EditPanel = (function($, S) {
 
 			for (var i = 0, ii = image_fields.length; i < ii; i++) {
 				var field = image_fields[i];
-				image_field_wrap.append(this.field_edit(field));
+				image_field_wrap.append(this.field_edit(field).click(function() { __dialogue.field_focus(this); }));
 			}
 			if (image_fields.length > 0) {
 				outer.append(image_field_wrap);
@@ -155,16 +156,20 @@ Spontaneous.EditPanel = (function($, S) {
 			editing.append(outer);
 			editing.append(dom.div('.clear'));
 			editing.append(get_toolbar('bottom'));
-			__dialogue = this;
 			// activate the highlighting
 			$('input, textarea', editing).focus(function() {
 				__dialogue.field_focus(this);
 			}).blur(function() {
-				// $(this).parents('.field').first().removeClass('focus');
+				__dialogue.field_blur(this);
 			});
 			editing.submit(this.save.bind(this));
 			this.form = editing;
-			$(':input', this.form).add(document).bind('keydown.savedialog', function(event) {
+			$(':input', this.form).keydown(function(event) {
+				if (event.keyCode === 9) { // TAB
+					__dialogue.tab_to_next(this, event.shiftKey);
+					return false;
+				}
+			}).add(document).bind('keydown.savedialog', function(event) {
 				var s_key = 83, esc_key = 27;
 				if ((event.ctrlKey || event.metaKey) && event.keyCode === s_key) {
 					this.save();
@@ -177,6 +182,21 @@ Spontaneous.EditPanel = (function($, S) {
 			}.bind(this));
 			return this.form;
 		},
+		tab_to_next: function(input, upwards) {
+			var active_field = $(input).data('field')
+			, text_fields = this.parent_view.text_fields(), position = 0, next_position, next_field
+			, direction = upwards ? -1 : 1;
+			for (var i = 0, ii = text_fields.length; i < ii; i++) {
+				if (text_fields[i] === active_field) {
+					position = i;
+					break;
+				}
+			}
+			next_position = (position + direction) % text_fields.length;
+			if (next_position === -1) { next_position = text_fields.length - 1; }
+			next_field = text_fields[next_position];
+			next_field.input().focus();
+		},
 		on_show: function(focus_field) {
 			if (!focus_field || !(focus_field['focus']) || !focus_field.accepts_focus) { focus_field = null; }
 			var focus_field = focus_field || this.parent_view.text_fields()[0];
@@ -185,21 +205,29 @@ Spontaneous.EditPanel = (function($, S) {
 			}
 		},
 		field_focus: function(input) {
-			var text_fields = this.parent_view.text_fields(), active_field = false;
-			for (var i = 0, ii = text_fields.length; i < ii; i++) {
-				var field = text_fields[i];
-				if (field.input()[0] === input) {
-					active_field = field;
-					break;
-				}
-			}
+			var active_field = $(input).data('field')
 			if (active_field === this.active_field) { return; }
-			if (this.active_field) {
-				this.active_field.on_blur();
-			}
 			if (active_field) {
 				this.active_field = active_field;
 				this.active_field.on_focus();
+			}
+		},
+		field_blur: function(input) {
+			var active_field = $(input).data('field')
+			if (active_field) {
+				active_field.on_blur();
+			}
+			if (active_field === this.active_field) {
+				this.active_field = null;
+		 	}
+		},
+		field_from_input: function(input_element) {
+			var text_fields = this.parent_view.text_fields(), active_field = false;
+			for (var i = 0, ii = text_fields.length; i < ii; i++) {
+				var field = text_fields[i];
+				if (field.input()[0] === input_element) {
+					return field;
+				}
 			}
 		},
 		field_edit: function(field) {

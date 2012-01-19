@@ -568,11 +568,8 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 
 	var MarkdownField = new JS.Class(Spontaneous.FieldTypes.StringField, {
 		actions: [Bold, Italic, H1, H2, UL, OL, Link],
-		input: function() {
-			if (!this._input) {
-				this._input = dom.textarea(dom.id(this.css_id()), {'name':this.form_name(), 'rows':10, 'cols':90}).val(this.unprocessed_value());
-			}
-			return this._input;
+		generate_input: function() {
+			return dom.textarea(dom.id(this.css_id()), {'name':this.form_name(), 'rows':10, 'cols':90}).val(this.unprocessed_value());
 		},
 		on_focus: function() {
 			if (!this.expanded) {
