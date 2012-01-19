@@ -1057,6 +1057,9 @@ img.missing {
 			&.no-fields {
 				@include rounded;
 			}
+			&:hover {
+				color: $highlight;
+			}
       .icon-wrap, a {
         display: inline-block;
         vertical-align: top;
