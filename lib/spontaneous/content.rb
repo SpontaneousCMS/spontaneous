@@ -1,7 +1,5 @@
 # encoding: UTF-8
 
-
-require File.expand_path("../../sequel/plugins/yajl_serialization", __FILE__)
 require File.expand_path("../../sequel/plugins/content_table_inheritance", __FILE__)
 
 module Spontaneous
@@ -16,7 +14,7 @@ module Spontaneous
     include Plugins::SchemaId
 
     sequel_plugin :content_table_inheritance, :type_sid
-    sequel_plugin :yajl_serialization, :field_store, :entry_store, :box_store
+    sequel_plugin :serialization, :yajl, :field_store, :entry_store, :box_store
     sequel_plugin :instance_hooks
     sequel_plugin :skip_create_refresh
     sequel_plugin :timestamps, :create=>:created_at, :update=>:modified_at

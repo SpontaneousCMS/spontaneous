@@ -6,7 +6,7 @@ module Spontaneous
       alias_method :sequel_plugin, :plugin
     end
 
-    sequel_plugin :yajl_serialization, :modified_list
+    sequel_plugin :serialization, :yajl, :modified_list
 
     @@instance = nil
 

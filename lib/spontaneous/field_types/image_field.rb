@@ -231,34 +231,34 @@ module Spontaneous
 
         def fit(width, height)
           image.combine_options do |c|
-            c.add(:geometry, "#{width}x#{height}>")
+            c.add_command(:geometry, "#{width}x#{height}>")
           end
         end
 
         def crop(width, height)
           image.combine_options do |c|
             dimensions = "#{width}x#{height}"
-            c.add(:geometry, "#{dimensions}^")
-            c.add(:gravity, "center")
-            c.add(:crop, "#{dimensions}+0+0!")
+            c.add_command(:geometry, "#{dimensions}^")
+            c.add_command(:gravity, "center")
+            c.add_command(:crop, "#{dimensions}+0+0!")
           end
         end
 
         def width(width)
           image.combine_options do |c|
-            c.add(:geometry, "#{width}x>")
+            c.add_command(:geometry, "#{width}x>")
           end
         end
 
         def height(height)
           image.combine_options do |c|
-            c.add(:geometry, "x#{height}>")
+            c.add_command(:geometry, "x#{height}>")
           end
         end
 
         def greyscale
           image.combine_options do |c|
-            c.add(:type, "Grayscale")
+            c.add_command(:type, "Grayscale")
           end
         end
 
@@ -274,8 +274,8 @@ module Spontaneous
           puts @image.path
           c = MiniMagick::CommandBuilder.new('convert')
           c << @image.path
-          c.add(:format, "roundrectangle 0,0 %[fx:w-1],%[fx:h-1], 10,10")
-          c.add(:write, "info:tmp.mvg")
+          c.add_command(:format, "roundrectangle 0,0 %[fx:w-1],%[fx:h-1], 10,10")
+          c.add_command(:write, "info:tmp.mvg")
           c << @image.path
 
           puts c.command
@@ -285,21 +285,21 @@ module Spontaneous
           c = MiniMagick::CommandBuilder.new('convert')
 
           c << @image.path
-          # c.add(:write, "info:tmp.mvg")
-          c.add(:matte)
-          c.add(:bordercolor, "none")
-          c.add(:border, "0")
+          # c.add_command(:write, "info:tmp.mvg")
+          c.add_command(:matte)
+          c.add_command(:bordercolor, "none")
+          c.add_command(:border, "0")
           c.push('\\(')
           c.push("+clone")
-          c.add(:alpha, 'transparent')
-          c.add(:background, 'white')
-          c.add(:fill, 'white')
-          c.add(:stroke, 'none')
-          c.add(:strokewidth, '0')
-          c.add(:draw, "@tmp.mvg")
+          c.add_command(:alpha, 'transparent')
+          c.add_command(:background, 'white')
+          c.add_command(:fill, 'white')
+          c.add_command(:stroke, 'none')
+          c.add_command(:strokewidth, '0')
+          c.add_command(:draw, "@tmp.mvg")
           c.push('\\)')
-          c.add(:compose, 'DstIn')
-          c.add(:composite)
+          c.add_command(:compose, 'DstIn')
+          c.add_command(:composite)
           c << @image.path
           puts c.command
           @image.run(c)
@@ -312,10 +312,11 @@ module Spontaneous
         end
 
         def method_missing(method, *args, &block)
+          params = args.map(&:to_s)
           if image.respond_to?(method)
-            image.__send__(method, *args, &block)
+            image.__send__(method, *params, &block)
           else
-            image.method_missing(method, *args, &block)
+            image.method_missing(method, *params, &block)
           end
         end
       end

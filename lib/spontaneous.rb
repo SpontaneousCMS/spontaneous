@@ -26,6 +26,15 @@ require "active_support/core_ext/file"
 
 Sequel.extension :inflector
 
+require 'sequel/plugins/serialization'
+
+Sequel::Plugins::Serialization.register_format(
+  :yajl,
+  lambda { |v| Yajl::Encoder.new.encode(v) },
+  lambda { |v| Yajl::Parser.new(:symbolize_keys => true).parse(v)   }
+)
+
+
 spontaneous = File.join(File.dirname(__FILE__), "spontaneous")
 
 Dir["#{spontaneous}/extensions/*.rb"].each { |file| require file }

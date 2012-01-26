@@ -53,7 +53,7 @@ Gem::Specification.new do |s|
   s.add_dependency('rdoc', ["~> 3.9.4"])
   s.add_dependency('activesupport', ["~> 3.2.0.rc1"])
   s.add_dependency('home_run', ["~> 1.0.0"])
-  s.add_dependency('sequel', ["~> 3.30"])
+  s.add_dependency('sequel', ["~> 3.31"])
   s.add_dependency('yajl-ruby', ["~> 1.1"])
   s.add_dependency('erubis', ["~> 2.6"])
   s.add_dependency('fog', ["~> 1.1.1"])
