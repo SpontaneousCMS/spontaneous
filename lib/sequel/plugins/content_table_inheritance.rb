@@ -104,7 +104,7 @@ module Sequel
           skm = sti_key_map
           smm = sti_model_map
           key = skm[subclass]
-          ska = [key]
+          ska = [key].reject { |k| k.blank? }
           subclass.instance_eval do
             @sti_key = sk
             @sti_key_array = ska
@@ -155,10 +155,12 @@ module Sequel
                 subclass.set_site_inheritance_root
               end
             end
-            if @is_site_inheritance_root or @is_content_inheritance_root
-              sti_key_array << key unless sti_key_array.include?(key)
+            unless key.blank?
+              if @is_site_inheritance_root or @is_content_inheritance_root
+                sti_key_array << key unless sti_key_array.include?(key)
+              end
+              sti_subclasses_array << key
             end
-            sti_subclasses_array << key
             superclass.sti_subclass_added(key)
           end
         end

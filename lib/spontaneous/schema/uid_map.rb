@@ -78,7 +78,8 @@ module Spontaneous::Schema
     end
 
     def create_for(obj)
-      create(obj.schema_name)
+      id = create(obj.schema_name)
+      obj.update_schema_id(id) if obj.respond_to?(:update_schema_id)
     end
 
     def destroy(uid)

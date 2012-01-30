@@ -20,6 +20,16 @@ module Spontaneous::Plugins
       def owner_sid
         nil
       end
+
+      # In the case where a new class has been added to the schema
+      # the STI values have been set up on a class whose schema id is undefined
+      # so we need to correct this once a new ID has been generated
+      # Bit dodgy, what I should do instead is rewrite the STI code to always defer
+      # to the schema for its values
+      def update_schema_id(new_id)
+        sti_key_array << new_id.to_s
+        superclass.sti_subclass_added(new_id.to_s, self) if superclass
+      end
     end # ClassMethods
 
     # InstanceMethods

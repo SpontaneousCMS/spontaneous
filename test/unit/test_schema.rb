@@ -604,6 +604,22 @@ class SchemaTest < MiniTest::Spec
         FileUtils.rm(@map_file) if ::File.exists?(@map_file) rescue nil
       end
 
+      should "update the STI map after addition of classes" do
+        ::A.sti_subclasses_array.should == [::A.schema_id.to_s]
+        class ::X < ::A
+          field :wild
+          box :monkeys do
+            field :banana
+          end
+          layout :rich
+        end
+        S.schema.validate!
+        ::X.schema_id.should_not be_nil
+        ::X.sti_key_array.should == [::X.schema_id.to_s]
+        ::A.sti_subclasses_array.should == [::A.schema_id.to_s, ::X.schema_id.to_s]
+      end
+
+
       should "be done automatically if only additions are found" do
         A.field :moose
         class ::X < ::A
