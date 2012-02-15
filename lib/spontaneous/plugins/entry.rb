@@ -34,6 +34,18 @@ module Spontaneous::Plugins
       container.contents.last == self
     end
 
+    def next
+      return nil if last?
+      container.contents[position + 1]
+    end
+
+    def previous
+      return nil if first?
+      container.contents[position - 1]
+    end
+
+    alias_method :prev, :previous
+
     def set_position(new_position)
       if box
         box.set_position(self, new_position)

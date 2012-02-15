@@ -135,6 +135,46 @@ class ContentTest < MiniTest::Spec
         e.pieces.should == [f]
       end
 
+      should "allow for testing of position" do
+        e = C.new
+        f = C.new
+        g = C.new
+        @instance.things << e
+        @instance.things << f
+        @instance.things << g
+        e.first?.should be_true
+        f.first?.should be_false
+        g.first?.should be_false
+        e.last?.should be_false
+        f.last?.should be_false
+        g.last?.should be_true
+      end
+
+      should "know their next neighbour" do
+        e = C.new
+        f = C.new
+        g = C.new
+        @instance.things << e
+        @instance.things << f
+        @instance.things << g
+        e.next.should == f
+        f.next.should == g
+        g.next.should be_nil
+      end
+
+      should "know their previous neighbour" do
+        e = C.new
+        f = C.new
+        g = C.new
+        @instance.things << e
+        @instance.things << f
+        @instance.things << g
+        e.previous.should be_nil
+        f.previous.should == e
+        g.previous.should == f
+        g.prev.should == f
+      end
+
       should "record the depth of the nodes" do
         a = C.new
         b = C.new
