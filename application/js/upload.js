@@ -65,7 +65,7 @@ Spontaneous.Upload = (function($, S) {
 		},
 		// When the request has completed (either in success or failure).
 		onloadend: function(event) {
-			this.manager.upload_failed(this);
+			// this.manager.upload_failed(this);
 		},
 		onreadystatechange: function(event) {
 			var xhr = event.currentTarget;
