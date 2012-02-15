@@ -7,7 +7,7 @@ module Spontaneous::Render::Helpers
     def script(*args)
       scripts = args.flatten
       scripts.map do |script|
-        %(<script type="text/javascript" src="#{script}"></script>)
+        %(<script type="text/javascript" src="#{script}.js"></script>)
       end.join("\n")
     end
 
