@@ -15,6 +15,10 @@ module Spontaneous
         end
 
         def load(path)
+          system(load_command(path))
+        end
+
+        def load_command(path)
           options = [
             "mysql",
             option(:password),
@@ -27,7 +31,6 @@ module Spontaneous
           end
 
           command = options.join(" ")
-          system(command)
         end
 
         def dump(path, tables = nil)

@@ -79,6 +79,10 @@ module Spontaneous
         Dir["#{task_dir}/*.rb"]
       end
     end
+
+    autoload :Adapter,  "spontaneous/cli/adapter"
+    autoload :Base,     "spontaneous/cli/base"
+    autoload :Site,     "spontaneous/cli/site"
   end
 end
 

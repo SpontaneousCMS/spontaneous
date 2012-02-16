@@ -20,5 +20,15 @@ namespace :spot do
       dumper = Spontaneous::Cli::Site::MySQL.new(Spontaneous.database)
       dumper.dump(dump_file)
     end
+
+    task :load do
+      dumpfile = ENV['dumpfile']
+      if dumpfilename.nil?
+        $stderr.puts "Usage: rake spot:database:load dumpfile=/path/to/dump.mysql.gz"
+        exit 1
+      end
+      dumper = Spontaneous::Cli::Site::MySQL.new(Spontaneous.database)
+      dumper.load(dumpfile)
+    end
   end
 end
