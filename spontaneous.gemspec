@@ -62,7 +62,7 @@ Gem::Specification.new do |s|
   s.add_dependency('thin', ["~> 1.2"])
   s.add_dependency('less', ["~> 1.2"])
   s.add_dependency('sass', ["~> 3.1.4"])
-  s.add_dependency('stringex', ["~> 1.1"])
+  s.add_dependency('stringex', ["= 1.3"])
   s.add_dependency('mini_magick', ["~> 3.3"])
   s.add_dependency('thor', ["~> 0.14.6"])
   s.add_dependency('base58', ["~> 0.1.0"])
