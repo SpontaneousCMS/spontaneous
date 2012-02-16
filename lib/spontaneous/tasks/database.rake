@@ -24,7 +24,7 @@ namespace :spot do
     desc "Load a database dump into the local database"
     task :load do
       dumpfile = ENV['dumpfile']
-      if dumpfilename.nil?
+      if dumpfile.nil?
         $stderr.puts "Usage: rake spot:database:load dumpfile=/path/to/dump.mysql.gz"
         exit 1
       end
