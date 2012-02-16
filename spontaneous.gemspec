@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
-  s.version           = '0.1.0.alpha1'
-  s.date              = '2011-11-03'
+  s.version           = '0.2.0.alpha1'
+  s.date              = '2012-02-16'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -107,7 +107,7 @@ Gem::Specification.new do |s|
     application/css/login.scss
     application/css/min/565d4c25e82148acb01c45c8d675b37a08676d77.css
     application/css/min/84dbe894ea96eafd321c30823d630817bfc4b03b.css
-    application/css/min/a317fa9c6ef827aac38fe9cadf6294a79233097e.css
+    application/css/min/d1b54ff4847c613618267ca1c15658e2aee0a4e5.css
     application/css/popover.scss
     application/css/schema_error.scss
     application/css/spontaneous.scss
@@ -136,18 +136,20 @@ Gem::Specification.new do |s|
     application/js/field_types/date_field.js
     application/js/field_types/file_field.js
     application/js/field_types/image_field.js
+    application/js/field_types/long_string_field.js
     application/js/field_types/markdown_field.js
     application/js/field_types/string_field.js
+    application/js/field_types/webvideo_field.js
     application/js/image.js
     application/js/init.js
     application/js/load.js
     application/js/location.js
     application/js/login.js
-    application/js/min/492a209de8ee955fa9c729a765377495001e11b1.js
+    application/js/min/2a0c2962537a3181fedfff5c92596ba6d3122dc9.js
     application/js/min/4cf1c493d3379ecba5287758c61238034c0893f9.js
-    application/js/min/6d563ac78aa5e72b21843224223897a60e97f6f4.js
+    application/js/min/78ac6b99d96750bb6b9f9aad4cb9cd91cd03f391.js
     application/js/min/b8abf302a824c35385ff517b34111e1710ff3b37.js
-    application/js/min/cfff834369b492b5e98ca869b85f41dca1cbd2db.js
+    application/js/min/c8efb9b9f7c3f6613fcebc6be60f605b6570a382.js
     application/js/page.js
     application/js/page_browser.js
     application/js/page_entry.js
@@ -194,6 +196,7 @@ Gem::Specification.new do |s|
     application/js/vendor/crypto-2.3.0-sha1.js
     application/js/vendor/diff_match_patch.js
     application/js/vendor/jquery-1.6.2.min.js
+    application/js/vendor/jquery-1.7.1.min.js
     application/js/vendor/jquery-ui-1.8.16.custom.min.js
     application/js/vendor/jquery-ui-1.8.9.custom.min.js
     application/js/views.js
@@ -201,6 +204,7 @@ Gem::Specification.new do |s|
     application/js/views/page_piece_view.js
     application/js/views/page_view.js
     application/js/views/piece_view.js
+    application/static/diagonal-texture.png
     application/static/editing-0-noise.png
     application/static/editing-1-noise.png
     application/static/editing-texture-1.png
@@ -217,10 +221,13 @@ Gem::Specification.new do |s|
     application/static/orange-down-arrow.png
     application/static/page-browser-next.png
     application/static/paper-texture-dark.png
+    application/static/plus-box.png
+    application/static/plus_alt.svg
     application/static/px.gif
     application/static/select-arrow-root.png
     application/static/select-arrow.png
     application/static/slot-down-arrow.png
+    application/static/slot-up-arrow.png
     application/static/splash.png
     application/static/spontaneous.png
     application/static/spot.png
@@ -244,20 +251,25 @@ Gem::Specification.new do |s|
     db/migrations/20110521114145_remove_slots_and_entries.rb
     db/migrations/20110604192145_rename_schema_id_columns.rb
     db/migrations/20110805141925_rename_site_to_state.rb
+    db/migrations/20120106171423_visibility_path.rb
+    db/migrations/20120107124541_owner_id.rb
+    docs/recipe-interface-screenshot.png
     lib/cutaneous.rb
     lib/cutaneous/context_helper.rb
-    lib/cutaneous/first_pass_parser.rb
-    lib/cutaneous/first_pass_renderer.rb
-    lib/cutaneous/parser_core.rb
     lib/cutaneous/preview_context.rb
     lib/cutaneous/preview_renderer.rb
     lib/cutaneous/publish_context.rb
+    lib/cutaneous/publish_renderer.rb
+    lib/cutaneous/publish_template.rb
+    lib/cutaneous/publish_token_parser.rb
     lib/cutaneous/renderer.rb
     lib/cutaneous/request_context.rb
-    lib/cutaneous/second_pass_parser.rb
-    lib/cutaneous/second_pass_renderer.rb
+    lib/cutaneous/request_renderer.rb
+    lib/cutaneous/request_template.rb
+    lib/cutaneous/request_token_parser.rb
+    lib/cutaneous/token_parser.rb
     lib/sequel/plugins/content_table_inheritance.rb
-    lib/sequel/plugins/yajl_serialization.rb
+    lib/sequel/plugins/scoped_table_name.rb
     lib/spontaneous.rb
     lib/spontaneous/application.rb
     lib/spontaneous/application/feature.rb
@@ -290,6 +302,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/extensions/hash.rb
     lib/spontaneous/extensions/json.rb
     lib/spontaneous/extensions/kernel.rb
+    lib/spontaneous/extensions/nil.rb
     lib/spontaneous/extensions/object.rb
     lib/spontaneous/extensions/object_space.rb
     lib/spontaneous/extensions/string.rb
@@ -298,8 +311,11 @@ Gem::Specification.new do |s|
     lib/spontaneous/field_types/date_field.rb
     lib/spontaneous/field_types/field.rb
     lib/spontaneous/field_types/image_field.rb
+    lib/spontaneous/field_types/location_field.rb
+    lib/spontaneous/field_types/long_string_field.rb
     lib/spontaneous/field_types/markdown_field.rb
     lib/spontaneous/field_types/string_field.rb
+    lib/spontaneous/field_types/webvideo_field.rb
     lib/spontaneous/generators.rb
     lib/spontaneous/generators/page.rb
     lib/spontaneous/generators/page/inline.html.cut
@@ -321,12 +337,13 @@ Gem::Specification.new do |s|
     lib/spontaneous/generators/site/config/user_levels.yml
     lib/spontaneous/generators/site/lib/site.rb.tt
     lib/spontaneous/generators/site/lib/tasks/site.rake.tt
-    lib/spontaneous/generators/site/public/css/site.css
+    lib/spontaneous/generators/site/public/css/site.scss
     lib/spontaneous/generators/site/public/favicon.ico
     lib/spontaneous/generators/site/public/js/.empty_directory
     lib/spontaneous/generators/site/public/js/site.js
     lib/spontaneous/generators/site/public/robots.txt
     lib/spontaneous/generators/site/schema/.map
+    lib/spontaneous/generators/site/schema/box.rb.tt
     lib/spontaneous/generators/site/schema/page.rb.tt
     lib/spontaneous/generators/site/schema/piece.rb.tt
     lib/spontaneous/generators/site/templates/layouts/standard.html.cut.tt
@@ -336,6 +353,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/loader.rb
     lib/spontaneous/logger.rb
     lib/spontaneous/media.rb
+    lib/spontaneous/media/file.rb
     lib/spontaneous/page.rb
     lib/spontaneous/page_controller.rb
     lib/spontaneous/page_piece.rb
@@ -346,7 +364,6 @@ Gem::Specification.new do |s|
     lib/spontaneous/permissions/user.rb
     lib/spontaneous/permissions/user_level.rb
     lib/spontaneous/piece.rb
-    lib/spontaneous/plugins.rb
     lib/spontaneous/plugins/aliases.rb
     lib/spontaneous/plugins/allowed_types.rb
     lib/spontaneous/plugins/application/facets.rb
@@ -359,6 +376,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/plugins/controllers.rb
     lib/spontaneous/plugins/entries.rb
     lib/spontaneous/plugins/entry.rb
+    lib/spontaneous/plugins/field/editor_class.rb
     lib/spontaneous/plugins/fields.rb
     lib/spontaneous/plugins/instance_code.rb
     lib/spontaneous/plugins/layouts.rb
@@ -378,12 +396,14 @@ Gem::Specification.new do |s|
     lib/spontaneous/plugins/serialisation.rb
     lib/spontaneous/plugins/site/features.rb
     lib/spontaneous/plugins/site/instance.rb
+    lib/spontaneous/plugins/site/level.rb
     lib/spontaneous/plugins/site/map.rb
     lib/spontaneous/plugins/site/publishing.rb
     lib/spontaneous/plugins/site/revisions.rb
     lib/spontaneous/plugins/site/schema.rb
     lib/spontaneous/plugins/site/search.rb
     lib/spontaneous/plugins/site/selectors.rb
+    lib/spontaneous/plugins/site/storage.rb
     lib/spontaneous/plugins/site_map.rb
     lib/spontaneous/plugins/styles.rb
     lib/spontaneous/plugins/supertype.rb
@@ -392,7 +412,6 @@ Gem::Specification.new do |s|
     lib/spontaneous/prototypes/field_prototype.rb
     lib/spontaneous/prototypes/layout_prototype.rb
     lib/spontaneous/prototypes/style_prototype.rb
-    lib/spontaneous/proxy_object.rb
     lib/spontaneous/publishing.rb
     lib/spontaneous/publishing/immediate.rb
     lib/spontaneous/publishing/simultaneous.rb
@@ -404,6 +423,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/rack/assets.rb
     lib/spontaneous/rack/authentication.rb
     lib/spontaneous/rack/back.rb
+    lib/spontaneous/rack/cacheable_file.rb
     lib/spontaneous/rack/cookie_authentication.rb
     lib/spontaneous/rack/css.rb
     lib/spontaneous/rack/event_source.rb
@@ -417,15 +437,23 @@ Gem::Specification.new do |s|
     lib/spontaneous/rack/static.rb
     lib/spontaneous/rack/user_helpers.rb
     lib/spontaneous/render.rb
-    lib/spontaneous/render/context.rb
+    lib/spontaneous/render/context_base.rb
     lib/spontaneous/render/development_renderer.rb
     lib/spontaneous/render/engine.rb
     lib/spontaneous/render/format.rb
     lib/spontaneous/render/format/html.rb
+    lib/spontaneous/render/helpers.rb
+    lib/spontaneous/render/helpers/html_helper.rb
+    lib/spontaneous/render/helpers/script_helper.rb
+    lib/spontaneous/render/helpers/stylesheet_helper.rb
+    lib/spontaneous/render/preview_context.rb
     lib/spontaneous/render/preview_renderer.rb
+    lib/spontaneous/render/publish_context.rb
     lib/spontaneous/render/published_renderer.rb
     lib/spontaneous/render/publishing_renderer.rb
+    lib/spontaneous/render/render_cache.rb
     lib/spontaneous/render/renderer.rb
+    lib/spontaneous/render/request_context.rb
     lib/spontaneous/revision.rb
     lib/spontaneous/schema.rb
     lib/spontaneous/schema/schema_modification.rb
@@ -440,18 +468,25 @@ Gem::Specification.new do |s|
     lib/spontaneous/server.rb
     lib/spontaneous/site.rb
     lib/spontaneous/state.rb
+    lib/spontaneous/storage.rb
+    lib/spontaneous/storage/backend.rb
+    lib/spontaneous/storage/cloud.rb
+    lib/spontaneous/storage/local.rb
     lib/spontaneous/style.rb
     lib/spontaneous/tasks.rb
     lib/spontaneous/tasks/database.rake
     lib/spontaneous/version.rb
     spontaneous.gemspec
     test/disabled/test_slots.rb
+    test/experimental/test_cutaneous.rb
     test/experimental/test_features.rb
     test/fixtures/application/css/test.less
     test/fixtures/application/js/test.js
     test/fixtures/application/static/favicon.ico
     test/fixtures/application/static/test.html
     test/fixtures/application/views/index.erb
+    test/fixtures/back/public/css/sass_include.scss
+    test/fixtures/back/public/css/sass_template.scss
     test/fixtures/back/public/test.html
     test/fixtures/back/templates/layouts/standard.html.cut
     test/fixtures/config/config/environment.rb
@@ -505,6 +540,7 @@ Gem::Specification.new do |s|
     test/fixtures/example_application/templates/project/inline.html.cut
     test/fixtures/example_application/templates/project_image.html.cut
     test/fixtures/example_application/templates/text.html.cut
+    test/fixtures/fields/youtube_api_response.xml
     test/fixtures/images/rose.greyscale.jpg
     test/fixtures/images/rose.jpg
     test/fixtures/images/size.gif
@@ -516,6 +552,7 @@ Gem::Specification.new do |s|
     test/fixtures/layouts/layouts/custom1.xml.cut
     test/fixtures/layouts/layouts/custom2.html.cut
     test/fixtures/layouts/layouts/custom3.html.cut
+    test/fixtures/layouts/layouts/custom4.html.cut
     test/fixtures/layouts/layouts/standard.html.cut
     test/fixtures/media/101/003/rose.jpg
     test/fixtures/permissions/config/user_levels.yml
@@ -540,6 +577,12 @@ Gem::Specification.new do |s|
     test/fixtures/schema/before.yml
     test/fixtures/schema/resolvable.yml
     test/fixtures/schema/schema.yml
+    test/fixtures/schema_modification/config/database.yml
+    test/fixtures/schema_modification/config/environment.rb
+    test/fixtures/schema_modification/schema/box.rb
+    test/fixtures/schema_modification/schema/custom_box.rb
+    test/fixtures/schema_modification/schema/page.rb
+    test/fixtures/schema_modification/schema/piece.rb
     test/fixtures/search/config/database.yml
     test/fixtures/search/config/indexes.rb
     test/fixtures/serialisation/class_hash.yaml.erb
@@ -552,6 +595,8 @@ Gem::Specification.new do |s|
     test/fixtures/sharding/xae
     test/fixtures/sharding/xaf
     test/fixtures/sharding/xag
+    test/fixtures/storage/cloud/environment.rb
+    test/fixtures/storage/default/environment.rb
     test/fixtures/styles/box_a.html.cut
     test/fixtures/styles/box_a/runny.html.cut
     test/fixtures/styles/named2.html.cut
@@ -584,9 +629,15 @@ Gem::Specification.new do |s|
     test/fixtures/templates/content/template.html.cut
     test/fixtures/templates/default_style_class.html.cut
     test/fixtures/templates/direct.html.cut
+    test/fixtures/templates/engine/braces.html.cut
+    test/fixtures/templates/engine/multiline.html.cut
     test/fixtures/templates/extended/grandparent.html.cut
     test/fixtures/templates/extended/main.html.cut
     test/fixtures/templates/extended/parent.html.cut
+    test/fixtures/templates/extended/partial.html.cut
+    test/fixtures/templates/extended/partial_with_locals.html.cut
+    test/fixtures/templates/extended/with_includes.html.cut
+    test/fixtures/templates/extended/with_includes_and_locals.html.cut
     test/fixtures/templates/layouts/entries.html.cut
     test/fixtures/templates/layouts/page_style.html.cut
     test/fixtures/templates/layouts/params.html.cut
@@ -599,6 +650,7 @@ Gem::Specification.new do |s|
     test/fixtures/templates/preview_render/inline.html.cut
     test/fixtures/templates/preview_render/variables.html.cut
     test/fixtures/templates/publishing/templates/layouts/dynamic.html.cut
+    test/fixtures/templates/publishing/templates/layouts/dynamic.rtf.cut
     test/fixtures/templates/publishing/templates/layouts/static.html.cut
     test/fixtures/templates/template_class/anonymous_style.html.cut
     test/fixtures/templates/template_class/another_template.html.cut
@@ -635,6 +687,7 @@ Gem::Specification.new do |s|
     test/unit/test_fields.rb
     test/unit/test_formats.rb
     test/unit/test_generators.rb
+    test/unit/test_helpers.rb
     test/unit/test_image_size.rb
     test/unit/test_images.rb
     test/unit/test_layouts.rb
@@ -651,8 +704,10 @@ Gem::Specification.new do |s|
     test/unit/test_search.rb
     test/unit/test_serialisation.rb
     test/unit/test_site.rb
+    test/unit/test_storage.rb
     test/unit/test_structure.rb
     test/unit/test_styles.rb
+    test/unit/test_table_scoping.rb
     test/unit/test_templates.rb
     test/unit/test_type_hierarchy.rb
   ]

@@ -5,7 +5,7 @@ source :rubygems
 gem 'mysql2', '~> 0.2'
 
 # Deploy with Capistrano
-# gem 'capistrano'
+gem 'capistrano', '~> 2.9'
 
 
 ## TODO: replace this path based gem with a version once the gem is live
