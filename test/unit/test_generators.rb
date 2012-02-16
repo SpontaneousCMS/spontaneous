@@ -68,7 +68,8 @@ class GeneratorsTest < MiniTest::Spec
       assert File.read(site_root / 'lib/site.rb') =~ /class Site < Spontaneous::Site/
       assert_file_exists(site_root, 'log')
       assert_file_exists(site_root, 'tmp')
-      assert_file_exists(site_root, 'cache/media/tmp')
+      assert_file_exists(site_root, 'cache/media')
+      assert_file_exists(site_root, 'cache/tmp')
       assert_file_exists(site_root, 'cache/revisions')
       assert_file_exists(site_root, '.gitignore')
       assert File.read(site_root / '.gitignore') =~ /cache\/\*/

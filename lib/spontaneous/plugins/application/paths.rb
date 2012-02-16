@@ -70,14 +70,16 @@ module Spontaneous::Plugins::Application
         Spontaneous.instance.cache_dir(*path)
       end
 
+      alias_method :cache_path, :cache_dir
+
       def shard_path(hash=nil)
         if hash
           path = ['tmp', hash[0..1], hash[2..3], hash]
-          Spontaneous::Media.media_path(*path).tap do |path|
+          Spontaneous.cache_path(*path).tap do |path|
             ::FileUtils.mkdir_p(::File.dirname(path))
           end
         else
-          Spontaneous::Media.media_path('tmp')
+          Spontaneous.cache_path('tmp')
         end
       end
 

@@ -27,7 +27,7 @@ module Spontaneous
     def upload_path(filename)
       time = Time.now.to_i
       dir = "#{time}.#{upload_index}"
-      Spontaneous.media_path("tmp", dir, filename)
+      Spontaneous.cache_path("tmp", dir, filename)
     end
 
     # def to_urlpath(filepath)

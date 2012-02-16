@@ -839,7 +839,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "have the right setting for shard_dir" do
-        shard_path = File.join(@site.root / 'cache/media/tmp')
+        shard_path = File.join(@site.root / 'cache/tmp')
         Spontaneous.shard_path.should == shard_path
         Spontaneous.shard_path("abcdef0123").should == shard_path/ "ab/cd/abcdef0123"
       end
