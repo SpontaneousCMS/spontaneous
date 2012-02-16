@@ -21,6 +21,7 @@ namespace :spot do
       dumper.dump(dump_file)
     end
 
+    desc "Load a database dump into the local database"
     task :load do
       dumpfile = ENV['dumpfile']
       if dumpfilename.nil?
