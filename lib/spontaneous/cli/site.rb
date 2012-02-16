@@ -1,3 +1,4 @@
+require 'spontaneous/cli'
 
 module Spontaneous
   module Cli
@@ -30,6 +31,10 @@ module Spontaneous
         end
 
         def dump(path, tables = nil)
+          system(dump_command(path, tables))
+        end
+
+        def dump_command(path, tables = nil)
           options = [
             option(:password),
             option(:user),
@@ -43,9 +48,7 @@ module Spontaneous
           options.push( "| gzip") if path =~ /\.gz$/
 
           command = %(mysqldump #{options.join(" ")} > #{path} )
-          system(command)
         end
-
         def database_name
           @database.opts[:database]
         end
