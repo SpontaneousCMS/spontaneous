@@ -1,4 +1,3 @@
-require 'spontaneous/cli/site'
 
 namespace :spot do
   desc "Migrate the core Spontaneous database"
@@ -17,7 +16,8 @@ namespace :spot do
         dumpfilename = "#{Time.now.to_i}.mysql.gz"
       end
       dump_file = "tmp/#{dumpfilename}"
-      dumper = Spontaneous::Cli::Site::MySQL.new(Spontaneous.database)
+      dumper = Spontaneous::Utils::Database.dumper_for_database
+      # Spontaneous::Cli::Site::MySQL.new(Spontaneous.database)
       dumper.dump(dump_file)
     end
 
@@ -28,7 +28,8 @@ namespace :spot do
         $stderr.puts "Usage: rake spot:database:load dumpfile=/path/to/dump.mysql.gz"
         exit 1
       end
-      dumper = Spontaneous::Cli::Site::MySQL.new(Spontaneous.database)
+      dumper = Spontaneous::Utils::Database.dumper_for_database
+      # dumper = Spontaneous::Cli::Site::MySQL.new(Spontaneous.database)
       dumper.load(dumpfile)
     end
   end
