@@ -86,6 +86,7 @@ module Spontaneous
   autoload :Search,           "spontaneous/search"
   autoload :Storage,          "spontaneous/storage"
   autoload :Cli,              "spontaneous/cli"
+  autoload :Utils,            "spontaneous/utils"
 
   module Prototypes
     autoload :FieldPrototype,   "spontaneous/prototypes/field_prototype"
