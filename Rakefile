@@ -31,12 +31,32 @@ def gemspec_file
   "#{name}.gemspec"
 end
 
+def gem_gemspec_file
+  "#{name}.tmp.gemspec"
+end
+
 def gem_file
   "#{name}-#{version}.gem"
 end
 
 def replace_header(head, header_name)
   head.sub!(/(\.#{header_name}\s*= ').*'/) { "#{$1}#{send(header_name)}'"}
+end
+
+def generate_gemspec(spec, files)
+  head, manifest, tail = spec.split("  # = MANIFEST =\n")
+  # replace name version and date
+  replace_header(head, :name)
+  replace_header(head, :version)
+  replace_header(head, :date)
+  #comment this out if your rubyforge_project has a different name
+  filelist = files.sort.
+      map { |file| "    #{file}" }.
+      join("\n")
+  replace_header(head, :rubyforge_project)
+  manifest = "  s.files = %w[\n#{filelist}\n  ]\n"
+  spec = [head, manifest, tail].join("  # = MANIFEST =\n")
+  spec
 end
 
 #############################################################################
@@ -161,7 +181,7 @@ namespace :gem do
   desc "Build #{gem_file} into the pkg directory"
   task :build => :gemspec do
     sh "mkdir -p pkg"
-    sh "gem build #{gemspec_file}"
+    sh "gem build #{gem_gemspec_file}"
     sh "mkdir -p #{@project_dir}/pkg"
     sh "cp #{gem_file} #{@project_dir}/pkg"
     sh "mv #{gem_file} pkg"
@@ -172,36 +192,36 @@ namespace :gem do
   task :gemspec => :assets do
     # read spec file and split out manifest section
     spec = File.read(gemspec_file)
-    head, manifest, tail = spec.split("  # = MANIFEST =\n")
-
-    # replace name version and date
-    replace_header(head, :name)
-    replace_header(head, :version)
-    replace_header(head, :date)
-    #comment this out if your rubyforge_project has a different name
-    replace_header(head, :rubyforge_project)
+    # head, manifest, tail = spec.split("  # = MANIFEST =\\n")
+    # # replace name version and date
+    # replace_header(head, :name)
+    # replace_header(head, :version)
+    # replace_header(head, :date)
+    # #comment this out if your rubyforge_project has a different name
+    # replace_header(head, :rubyforge_project)
 
     # determine file list from git ls-files
     files = `git ls-files`.
       split("\n").
       reject { |file| file =~ /^\./ }.
       reject { |file| file =~ /^(rdoc|pkg)/ }
+
+    File.open(gemspec_file, 'w') { |io| io.write(generate_gemspec(spec, files)) }
+
     compressed_assets = Dir["application/{css,js}/min/*.*"]
-    files = files.concat(compressed_assets).
-      sort.
-      map { |file| "    #{file}" }.
-      join("\n")
+
+    File.open(gem_gemspec_file, 'w') { |io| io.write(generate_gemspec(spec, files.concat(compressed_assets))) }
 
     # piece file back together and write
-    manifest = "  s.files = %w[\n#{files}\n  ]\n"
-    spec = [head, manifest, tail].join("  # = MANIFEST =\n")
-    File.open(gemspec_file, 'w') { |io| io.write(spec) }
+    # manifest = "  s.files = %w[\\n#{files}\\n  ]\\n"
+    # spec = [head, manifest, tail].join("  # = MANIFEST =\\n")
+    # File.open(gemspec_file, 'w') { |io| io.write(spec) }
     puts "Updated #{gemspec_file}"
-    FileUtils.cp('spontaneous.gemspec', @project_dir)
+    FileUtils.cp(gemspec_file, @project_dir)
   end
 
   desc "Bundle & compress assets"
-  task :assets => :validate do
+  task :assets => :working_copy do
     app_dir = Spontaneous.application_dir
     bundles = {}
     [Spontaneous::Rack::Assets::JavaScript, Spontaneous::Rack::Assets::CSS].each do |mod|
@@ -236,6 +256,10 @@ namespace :gem do
       converted << line
     end
     File.open(module_path, 'w') { |file| file.write(converted.join) }
+  end
+
+  task :working_copy => :validate do
+    # @working_dir = Dir.mktmpdir
   end
 
   desc "Validate #{gemspec_file}"
