@@ -3,7 +3,7 @@ module Spontaneous
   module Utils
     module Database
 
-      def self.dumper_fo_database(database = Spontaneous.database)
+      def self.dumper_for_database(database = Spontaneous.database)
         case database
         when ::Sequel::Mysql2::Database
           Spontaneous::Utils::Database::MySQLDumper
