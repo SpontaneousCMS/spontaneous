@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
-  s.version           = '0.2.0.alpha1'
-  s.date              = '2012-02-16'
+  s.version           = '0.2.0.alpha2'
+  s.date              = '2012-02-17'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -58,7 +58,7 @@ Gem::Specification.new do |s|
   s.add_dependency('erubis', ["~> 2.6"])
   s.add_dependency('fog', ["~> 1.1.1"])
   s.add_dependency('sinatra', ["~> 1.3.0"])
-  s.add_dependency('rack', ["~> 1.3.4"])
+  s.add_dependency('rack', ["~> 1.4.1"])
   s.add_dependency('thin', ["~> 1.2"])
   s.add_dependency('less', ["~> 1.2"])
   s.add_dependency('sass', ["~> 3.1.4"])
@@ -105,9 +105,6 @@ Gem::Specification.new do |s|
     application/css/developer.scss
     application/css/editing.scss
     application/css/login.scss
-    application/css/min/565d4c25e82148acb01c45c8d675b37a08676d77.css
-    application/css/min/84dbe894ea96eafd321c30823d630817bfc4b03b.css
-    application/css/min/d1b54ff4847c613618267ca1c15658e2aee0a4e5.css
     application/css/popover.scss
     application/css/schema_error.scss
     application/css/spontaneous.scss
@@ -145,11 +142,6 @@ Gem::Specification.new do |s|
     application/js/load.js
     application/js/location.js
     application/js/login.js
-    application/js/min/2a0c2962537a3181fedfff5c92596ba6d3122dc9.js
-    application/js/min/4cf1c493d3379ecba5287758c61238034c0893f9.js
-    application/js/min/78ac6b99d96750bb6b9f9aad4cb9cd91cd03f391.js
-    application/js/min/b8abf302a824c35385ff517b34111e1710ff3b37.js
-    application/js/min/c8efb9b9f7c3f6613fcebc6be60f605b6570a382.js
     application/js/page.js
     application/js/page_browser.js
     application/js/page_entry.js
@@ -323,6 +315,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/generators/page/page.rb.tt
     lib/spontaneous/generators/site.rb
     lib/spontaneous/generators/site/.gitignore
+    lib/spontaneous/generators/site/Capfile.tt
     lib/spontaneous/generators/site/Gemfile.tt
     lib/spontaneous/generators/site/Rakefile.tt
     lib/spontaneous/generators/site/config/back.ru
@@ -475,6 +468,9 @@ Gem::Specification.new do |s|
     lib/spontaneous/style.rb
     lib/spontaneous/tasks.rb
     lib/spontaneous/tasks/database.rake
+    lib/spontaneous/utils.rb
+    lib/spontaneous/utils/database.rb
+    lib/spontaneous/utils/database/mysql_dumper.rb
     lib/spontaneous/version.rb
     spontaneous.gemspec
     test/disabled/test_slots.rb
