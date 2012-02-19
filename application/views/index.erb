@@ -25,7 +25,7 @@
 				asynchronous: false,
 				editor_protocol: 'mvim',
 				<% if Spontaneous.config.auto_login; %>
-				auto_login: 'garry',
+				auto_login: '<%= Spontaneous.config.auto_login %>',
 				user_key: '<%= env[Spontaneous::Rack::ACTIVE_KEY].key_id %>',
 				<% end %>
 				onload: function() {
