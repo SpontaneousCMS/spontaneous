@@ -22,7 +22,7 @@
 				site_id: '<%= Spontaneous::Site.config.site_id %>',
 				debug: <%= Spontaneous.development? %>,
 				development: <%= Spontaneous.development? %>,
-				asynchronous: false,
+				asynchronous: <%= Spontaneous.production? %>,
 				editor_protocol: 'mvim',
 				<% if Spontaneous.config.auto_login; %>
 				auto_login: '<%= Spontaneous.config.auto_login %>',
