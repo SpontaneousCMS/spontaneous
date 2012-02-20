@@ -10,6 +10,12 @@ module Spontaneous::Storage
 
     def copy(existing_file, media_path, mimetype)
       dest_path = create_absolute_path(media_path)
+      copy_file(existing_file, dest_path)
+      set_permissions(dest_path)
+      dest_path
+    end
+
+    def copy_file(existing_file, dest_path)
       if existing_file.respond_to?(:read)
         File.open(dest_path, "wb") do |f|
           f.binmode
@@ -28,6 +34,7 @@ module Spontaneous::Storage
         f.binmode
         block.call(f)
       end
+      set_permissions(dest_path)
     end
 
     def create_absolute_path(relative_path)
@@ -47,6 +54,10 @@ module Spontaneous::Storage
 
     def local?
       true
+    end
+
+    def set_permissions(filepath)
+      File.chmod(0644, filepath)
     end
   end
 end
