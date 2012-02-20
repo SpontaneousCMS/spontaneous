@@ -11,8 +11,16 @@ module Spontaneous
         :publish
       end
 
+      def self.spot_binary
+        ::Spontaneous.config.spontaneous_binary || default_spot_binary
+      end
+
+      def self.default_spot_binary
+        (Pathname.new(Spontaneous.gem_dir) + "bin/spot").expand_path.to_s
+      end
+
       def self.register_task
-        publish_binary = (Pathname.new(Spontaneous.gem_dir) + "bin/spot site:publish").expand_path.to_s
+        publish_binary = spot_binary + " site:publish"
         site_root = Pathname.new(Spontaneous.root).expand_path.to_s
         niceness = S.config.publish_niceness || 15
         logfile =  "#{site_root}/log/publish.log"
