@@ -30,17 +30,25 @@ module Spontaneous
           :logfile => logfile,
           :pwd => site_root
         }
+
         task_params = {
           "site" => site_root,
           "logfile" => logfile,
           "environment" => Spontaneous.env
         }
-        ::Simultaneous.add_task(task_name, publish_binary, task_options, task_params, {})
+        env = {
+          "SPOT_SERVER" => server_address
+        }
+        ::Simultaneous.add_task(task_name, publish_binary, task_options, task_params, env)
       end
 
       def self.simultaneous_setup
         ::Simultaneous.connection = ::Spontaneous.config.simultaneous_connection
         ::Simultaneous.domain = ::Spontaneous.config.site_domain
+      end
+
+      def self.server_address
+        Spontaneous.config.server_connection || "#{ ::Spontaneous.config.host || "127.0.0.1" }:#{::Spontaneous.config.port}"
       end
 
       simultaneous_setup

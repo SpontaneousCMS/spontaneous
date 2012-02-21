@@ -87,6 +87,11 @@ module Spontaneous
             run messenger.app
           end
 
+          map "#{NAMESPACE}/event" do
+           run EventListener
+          end
+
+
           map NAMESPACE do
             use ::Rack::Lint
             use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static /js)
@@ -108,6 +113,14 @@ module Spontaneous
           end
         end
       end
+
+      class EventListener < ServerBase
+        put "/" do
+          Back.messenger.deliver_event(SSE.new(params))
+          200
+        end
+      end
+
 
       class EditingBase < ServerBase
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
@@ -243,6 +256,7 @@ module Spontaneous
             show_login_page( :login => login, :failed => true )
           end
         end
+
 
         get '/?' do
           erb :index

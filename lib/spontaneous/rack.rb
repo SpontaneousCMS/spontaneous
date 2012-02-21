@@ -63,5 +63,6 @@ module Spontaneous
     autoload :Reloader,             'spontaneous/rack/reloader'
     autoload :EventSource,          'spontaneous/rack/event_source'
     autoload :CSS,                  'spontaneous/rack/css'
+    autoload :SSE,                  'spontaneous/rack/sse'
   end
 end

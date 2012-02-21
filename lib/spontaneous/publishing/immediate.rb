@@ -15,7 +15,7 @@ module Spontaneous
       #   @status = status
       # end
 
-      include ::Simultaneous::Task
+      #include ::Simultaneous::Task
 
       attr_reader :revision
 
@@ -148,8 +148,14 @@ module Spontaneous
         ((@pages_rendered || 0).to_f / (total_pages_to_render).to_f) * 100.0
       end
 
+      def event_client
+        @event_client ||= Spontaneous::Publishing::EventClient.new(ENV["SPOT_SERVER"])
+      end
+
       def update_progress(state, progress='*')
-        simultaneous_event('publish_progress', {:state => state, :progress => progress}.to_json)
+        puts ENV["SPOT_SERVER"]
+        event_client.send_event('publish_progress', {:state => state, :progress => progress})
+        # simultaneous_event('publish_progress', {:state => state, :progress => progress}.to_json)
       end
 
       def generate_rackup_file
