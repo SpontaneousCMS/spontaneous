@@ -14,7 +14,9 @@ module Spontaneous
         ext += ".#{extension}" if extension && template_dynamic
         segment = template_dynamic ? "dynamic" : (page.dynamic? ? "protected" : "static")
         dir = root / segment / page.path
-        path = dir / "/index#{ext}"
+        path = "#{dir}#{ext}"
+        # root is a special case, as always
+        path = dir / "/index#{ext}" if page.path == "/"
         path
       end
 

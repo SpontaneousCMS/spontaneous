@@ -11,6 +11,8 @@ module Spontaneous
       end
 
       def send_event(event_name, event_message)
+        socket = open_socket
+        return if socket.nil?
         sock = Net::BufferedIO.new(socket)
         request = request(event_name, event_message)
         # Host is a required header, but it doesn't matter to us what it is
@@ -29,7 +31,8 @@ module Spontaneous
       end
 
 
-      def socket
+      def open_socket
+        return nil if @server_address.nil?
         case @server_address
         when /\//
           UNIXSocket.new(@server_address)

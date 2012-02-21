@@ -969,13 +969,13 @@ class PublishingTest < MiniTest::Spec
             file = revision_dir / "dynamic/index.html.cut"
             result = "Page: '#{page.title}' {{Time.now.to_i}}\n"
           when "news" # news produces a static template but has a request handler
-            file = revision_dir / "protected/news/index.html"
+            file = revision_dir / "protected/news.html"
             result = "Page: 'News'\n"
           when "contact" # contact is both dynamic and has a request handler
-            file = revision_dir / "dynamic/contact/index.html.cut"
+            file = revision_dir / "dynamic/contact.html.cut"
             result = "Page: 'Contact' {{Time.now.to_i}}\n"
           else # the other pages are static
-            file = revision_dir / "static/#{page.path}/index.html"
+            file = revision_dir / "static#{page.path}.html"
             result = "Page: '#{page.title}'\n"
           end
           assert File.exists?(file), "File '#{file}' should exist"
