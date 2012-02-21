@@ -21,11 +21,10 @@ module Spontaneous
       end
 
       def request(event_name, event_message)
-        params = {
+        query = ::Rack::Utils.build_nested_query({
           "event" => event_name,
           "data"  => event_message.to_json
-        }
-        query = ::Rack::Utils.build_nested_query(params)
+        })
         Net::HTTP::Put.new("/@spontaneous/event?#{query}")
       end
 

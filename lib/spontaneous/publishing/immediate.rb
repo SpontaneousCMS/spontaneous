@@ -153,9 +153,7 @@ module Spontaneous
       end
 
       def update_progress(state, progress='*')
-        puts ENV["SPOT_SERVER"]
         event_client.send_event('publish_progress', {:state => state, :progress => progress})
-        # simultaneous_event('publish_progress', {:state => state, :progress => progress}.to_json)
       end
 
       def generate_rackup_file
