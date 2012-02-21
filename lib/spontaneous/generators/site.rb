@@ -27,6 +27,7 @@ module Spontaneous
           say "Generating '#{domain}'...", :bold
           @domain = domain
           @site_name = domain.to_s.gsub(/\./, "_")
+          @username  = domain.split(/\./).first
           self.destination_root = options[:root]
           empty_directory(@site_name)
           self.destination_root = self.destination_root / @site_name
