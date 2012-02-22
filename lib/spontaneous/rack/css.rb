@@ -4,24 +4,30 @@ require 'sass'
 
 module Spontaneous::Rack
   class CSS
+    CSS_EXTENSION = /\.css$/o
+
     def initialize(app, options = {})
-      @options = options
-      @root = options.delete(:root)
+      @roots = options[:root]
       @app = app
     end
 
     def call(env)
-      path = env[S::PATH_INFO]
-      if path =~ /\.css$/ and !File.exists?(File.join(@root, path))
-        template = template_root_path(path) + ".scss"
-        if File.exists?(template)
-          render_sass_template(template)
-        else
-          raise Sinatra::NotFound
-        end
-      else
-        @app.call(env)
+      try_sass(env[S::PATH_INFO]) or @app.call(env)
+    end
+
+    def try_sass(request_path)
+      return nil unless request_path =~ CSS_EXTENSION
+      try_paths = @roots.map { |root| File.join(root, request_path) }
+      # if the css file itself exists then we want to use that
+      return nil if try_paths.detect { |file| ::File.exists?(file) }
+
+      try_paths.each do |path|
+        template = template_path(path)
+        return render_sass_template(template) if File.exists?(template)
       end
+      # tried all the possible sass templates and haven't found one that matches
+      # the requested css file
+      raise Sinatra::NotFound
     end
 
     def render_sass_template(template)
@@ -35,9 +41,8 @@ module Spontaneous::Rack
       [200, {'Content-type' => 'text/css'}, [engine.render]]
     end
 
-    def template_root_path(path)
-      basename = File.basename(path, '.css')
-      File.join(@root, File.dirname(path), basename)
+    def template_path(path)
+      path.gsub(CSS_EXTENSION, ".scss")
     end
   end
 end

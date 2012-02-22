@@ -58,7 +58,7 @@ Gem::Specification.new do |s|
   s.add_dependency('erubis', ["~> 2.6"])
   s.add_dependency('fog', ["~> 1.1.1"])
   s.add_dependency('sinatra', ["~> 1.3.0"])
-  s.add_dependency('rack', ["~> 1.3.4"])
+  s.add_dependency('rack', ["~> 1.4.1"])
   s.add_dependency('thin', ["~> 1.2"])
   s.add_dependency('less', ["~> 1.2"])
   s.add_dependency('sass', ["~> 3.1.4"])

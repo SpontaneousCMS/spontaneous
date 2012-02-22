@@ -45,9 +45,6 @@ module Spontaneous
           # Needs testing...
           # ###################
 
-          use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
-            :urls => %w[/],
-            :try => ['.html', 'index.html', '/index.html']
 
           ################### REMOVE THIS
           # map "#{NAMESPACE}/lock" do
@@ -108,9 +105,13 @@ module Spontaneous
 
           map "/" do
             use ::Rack::Lint
+            use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
+              :urls => %w[/],
+              :try => ['.html', 'index.html', '/index.html']
             use Spontaneous::Rack::CSS, :root => Spontaneous.instance.paths.expanded(:public)
             run Preview
           end
+
         end
       end
 

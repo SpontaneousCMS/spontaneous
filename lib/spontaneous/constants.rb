@@ -10,6 +10,7 @@ module Spontaneous
     QUESTION = "?".freeze
     LF = "\n".freeze
     PATH_INFO = "PATH_INFO".freeze
+    REQUEST_METHOD = "REQUEST_METHOD".freeze
 
     SPOT_REVISION_NUMBER = "SPOT_REVISION".freeze
     SPOT_ROOT = "SPOT_ROOT".freeze

@@ -2,6 +2,8 @@
 module Spontaneous
   module Rack
     class Static
+      ALLOWED_METHODS = %w(GET HEAD).freeze
+
       def initialize(app, options)
         @app = app
         @try = ['', *options.delete(:try)].compact
@@ -11,6 +13,7 @@ module Spontaneous
       end
 
       def call(env)
+        return @app.call(env) unless ALLOWED_METHODS.include?(env[S::REQUEST_METHOD])
         orig_path = env['PATH_INFO']
         found = nil
         @try.each do |path|

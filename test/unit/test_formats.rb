@@ -67,7 +67,7 @@ class FormatsTest < MiniTest::Spec
       end
 
       should "raise an error if trying to use an unknown format without specifying a mime-type" do
-        lambda { FPage.formats [:xyz] }.must_raise(Spontaneous::UnknownFormatException)
+        lambda { FPage.formats [:xyzz] }.must_raise(Spontaneous::UnknownFormatException)
       end
 
       should "accept new formats when accompanied by a mime-type" do
