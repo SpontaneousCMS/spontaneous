@@ -223,12 +223,18 @@ module Spontaneous
           }
         end
 
+        def set_authentication_cookie(key)
+          response.set_cookie(AUTH_COOKIE, {
+            :value => key.key_id,
+            :path => '/',
+            :secure => request.ssl?,
+            :httponly => true
+          })
+        end
+
         post "/reauthenticate" do
           if key = Spot::Permissions::AccessKey.authenticate(params[:api_key])
-            response.set_cookie(AUTH_COOKIE, {
-              :value => key.key_id,
-              :path => '/'
-            })
+            set_authentication_cookie(key)
             origin = "#{NAMESPACE}#{params[:origin]}"
             redirect origin, 302
           else
@@ -241,10 +247,7 @@ module Spontaneous
           password = params[:user][:password]
           origin = "#{NAMESPACE}#{params[:origin]}"
           if key = Spontaneous::Permissions::User.authenticate(login, password)
-            response.set_cookie(AUTH_COOKIE, {
-              :value => key.key_id,
-              :path => '/'
-            })
+            set_authentication_cookie(key)
             if request.xhr?
               json({
                 :key => key.key_id,

@@ -291,6 +291,27 @@ class AuthenticationTest < MiniTest::Spec
           last_response.headers["Location"].should =~ %r{/@spontaneous/103/preview$}
         end
 
+        should "set the secure flag for cookies delivered behind https" do
+          clear_cookies
+          rack_mock_session.cookie_jar[S::Rack::AUTH_COOKIE].should be_nil
+          user = @admin_user
+          post "https://example.org/@spontaneous/login", {"user[login]" => user.login, "user[password]" => user.password}
+          cookies = rack_mock_session.cookie_jar.instance_variable_get("@cookies")
+          cookie = cookies.detect { |c| c.name == S::Rack::AUTH_COOKIE }
+          cookie.secure?.should be_true
+        end
+
+        should "set the secure flag for cookies delivered behind https when reauthenticating" do
+          clear_cookies
+          key = @admin_user.logged_in!
+          post "https://example.org/@spontaneous/reauthenticate", "api_key" => key.key_id, "origin" => "/99/edit"
+          cookies = rack_mock_session.cookie_jar.instance_variable_get("@cookies")
+          cookie = cookies.detect { |c| c.name == S::Rack::AUTH_COOKIE }
+          cookie.secure?.should be_true
+          cookie_options = cookie.instance_variable_get("@options")
+          cookie_options.key?("HttpOnly").should be_true
+        end
+
         should "succeed and return an api key value for correct login over XHR" do
           key = Spontaneous::Permissions::AccessKey.new
           Spontaneous::Permissions::AccessKey.expects(:new).returns(key)
