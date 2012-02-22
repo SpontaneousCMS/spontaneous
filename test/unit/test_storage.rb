@@ -65,6 +65,32 @@ class StorageTest < MiniTest::Spec
       @storage.local?.should be_false
     end
 
+    context "remote files" do
+      setup do
+        @existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+        @media_path = %w(0003 0567 rose.jpg)
+      end
+      should "have the correct mimetype" do
+        file = @storage.copy(@existing_file, @media_path, "image/jpeg")
+        file.content_type.should == "image/jpeg"
+      end
+
+      should "be given a far future expiry" do
+        now = Time.now
+        Time.stubs(:now).returns(now)
+        file = @storage.copy(@existing_file, @media_path, "image/jpeg")
+        file.expires.should == (now + 20.years)
+      end
+
+      should "be set as publicly visible" do
+        file = @storage.copy(@existing_file, @media_path, "image/jpeg")
+        acl = file.connection.get_object_acl(file.directory.key, file.key).body['AccessControlList']
+        perms = acl.detect {|grant| grant['Grantee']['URI'] == 'http://acs.amazonaws.com/groups/global/AllUsers' }
+        perms["Permission"].should == "READ"
+      end
+
+    end
+
     context "public urls" do
       setup do
         existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
