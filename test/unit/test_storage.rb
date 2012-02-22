@@ -76,10 +76,10 @@ class StorageTest < MiniTest::Spec
       end
 
       should "be given a far future expiry" do
-        now = Time.now
-        Time.stubs(:now).returns(now)
+        now = DateTime.now
+        DateTime.stubs(:now).returns(now)
         file = @storage.copy(@existing_file, @media_path, "image/jpeg")
-        file.expires.should == (now + 20.years)
+        file.expires.should == (now + 20.years).to_s(:rfc822)
       end
 
       should "be set as publicly visible" do

@@ -55,7 +55,7 @@ module Spontaneous::Storage
         :idempotent => false,
         :body => existing_file,
         :public => true,
-        :expires => (Time.now + 20.years),
+        :expires => (DateTime.now + 20.years).to_s(:rfc822),
         :content_type => mimetype
       }
       params[:body] = File.open(existing_file) if existing_file.is_a?(String)
