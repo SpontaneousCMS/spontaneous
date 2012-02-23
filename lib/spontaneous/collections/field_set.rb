@@ -8,20 +8,10 @@ module Spontaneous::Collections
     def initialize(owner, initial_values)
       super()
       @owner = owner
-      initialize_from_prototypes(initial_values)
+      @field_data = initial_values
+      initialize_from_prototypes
     end
 
-    def initialize_from_prototypes(initial_values)
-      values = (initial_values || []).map do |value|
-        value = S::FieldTypes.deserialize_field(value)
-        [Spontaneous.schema.uids[value[:id]], value]
-      end
-      values = Hash[values]
-      owner.field_prototypes.each do |field_prototype|
-        field = field_prototype.to_field(values[field_prototype.schema_id])
-        add_field(field)
-      end
-    end
 
     def serialize_db
       self.map { |field| field.serialize_db }
@@ -37,16 +27,52 @@ module Spontaneous::Collections
       self.each { |field| field.mark_unmodified }
     end
 
+    # Lazily load fields by name
+    def named(name)
+      super || load_field(owner.field_prototypes[name.to_sym])
+    end
+
     protected
 
-    def add_field(field)
-      field.owner = owner
-      getter_name = field.name
-      setter_name = "#{field.name}="
-      self[field.name.to_sym] = field
+    def initialize_from_prototypes
+      owner.field_prototypes.each do |field_prototype|
+        add_field(field_prototype)
+      end
+    end
+
+    def field_values
+      @field_values ||= parse_field_data(@field_data)
+    end
+
+    def parse_field_data(initial_values)
+      values = (initial_values || []).map do |value|
+        value = S::FieldTypes.deserialize_field(value)
+        [Spontaneous.schema.uids[value[:id]], value]
+      end
+      Hash[values]
+    end
+
+    # overwritten because otherwise the iterators in PrototypeSet don't
+    # know which keys we are supposed to have
+    def local_order
+      owner.field_prototypes.keys
+    end
+
+    def add_field(field_prototype)
+      name = field_prototype.name
+      getter_name = name
+      setter_name = "#{name}="
       singleton_class.class_eval do
-        define_method(getter_name) { |*args| field.tap { |f| f.template_params = args } }
-        define_method(setter_name) { |value| field.value = value }
+        define_method(getter_name) { |*args| named(name).tap { |f| f.template_params = args } }
+        define_method(setter_name) { |value| named(name).value = value }
+      end
+    end
+
+    def load_field(field_prototype)
+      return nil if field_prototype.nil?
+      field_prototype.to_field(owner, field_values[field_prototype.schema_id]).tap do |field|
+        field.owner = owner
+        self[field_prototype.name] = field
       end
     end
   end

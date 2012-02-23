@@ -85,8 +85,13 @@ module Spontaneous::Prototypes
       instance_class
     end
 
-    def default
-      @options[:default]
+    def default(_instance = nil)
+      case default = @options[:default]
+      when Proc
+        default[_instance]
+      else
+        default
+      end
     end
 
     def comment
@@ -134,13 +139,12 @@ module Spontaneous::Prototypes
       end
     end
 
-    def to_field(values=nil)
-      default_values = values.nil?
-      values = {
-        :name => self.name,
-        :unprocessed_value => default
-      }.merge(values || {})
-      self.instance_class.new(values, !default_values).tap do |field|
+    def to_field(instance, database_values=nil)
+      using_default_values = database_values.nil?
+      values = { :name => self.name }
+      values[:unprocessed_value] = default(instance) if using_default_values
+      values.update(database_values || {})
+      self.instance_class.new(values, !using_default_values).tap do |field|
         field.prototype = self
       end
     end

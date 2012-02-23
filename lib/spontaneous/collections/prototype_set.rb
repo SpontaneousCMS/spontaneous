@@ -4,19 +4,19 @@ module Spontaneous::Collections
   class PrototypeSet
     include Enumerable
 
-    attr_reader :store
+    attr_reader :store, :local_order
 
     def initialize(superobject = nil, superset_name = nil)
       @superobject, @superset_name = superobject, superset_name
       @has_superset = !!(@superobject && @superobject.respond_to?(@superset_name))
       @store = {}
-      @order = []
+      @local_order = []
     end
 
     def []=(name, value)
       key = name.to_sym
       @store[key] = value
-      @order << key unless order.include?(key)
+      add_key(key)
     end
 
     def [](key)
@@ -26,6 +26,10 @@ module Spontaneous::Collections
       else
         named(key)
       end
+    end
+
+    def add_key(key)
+      local_order << key unless order.include?(key)
     end
 
     def key?(key)
@@ -49,7 +53,7 @@ module Spontaneous::Collections
     end
 
     def local_first
-      if (key = @order.first)
+      if (key = local_order.first)
         named(key)
       else
         superset? ? superset.local_first : nil
@@ -69,7 +73,7 @@ module Spontaneous::Collections
     end
 
     def local_values
-      @order.map { |name| named(name) }
+      local_order.map { |name| named(name) }
     end
 
     def sid(schema_id)
@@ -99,26 +103,26 @@ module Spontaneous::Collections
     # set.order = [:b, :d]
     # set.order #=> [:b, :d, :a, :c]
     #
-    def order=(new_order)
+    def order=(newlocal_order)
       # clear any previous custom order
       @custom_order = nil
-      old_order = order.dup
+      oldlocal_order = order.dup
       order = []
-      new_order.each do |name|
+      newlocal_order.each do |name|
         key = name.to_sym
-        if old_order.include?(key)
-          old_order.delete(key)
+        if oldlocal_order.include?(key)
+          oldlocal_order.delete(key)
           order << key
         end
       end
-      order += old_order
+      order += oldlocal_order
       @custom_order = order
     end
 
 
     def order
       return @custom_order if @custom_order
-      superset? ? (superset.order + @order) : @order
+      superset? ? (superset.order + local_order) : local_order
     end
 
     alias_method :names, :order
@@ -146,7 +150,7 @@ module Spontaneous::Collections
       @superset ||= @superobject.send(@superset_name) if superset?
     end
 
-    protected
+
 
     def method_missing(method, *args)
       if key?(method)
@@ -155,5 +159,8 @@ module Spontaneous::Collections
         super
       end
     end
+
+    protected :local_order, :method_missing
+
   end # PrototypeSet
 end # Spontaneous

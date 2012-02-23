@@ -140,7 +140,7 @@ module Spontaneous
         field_store = []
         default_values.each do |field_name, value|
           if self.field?(field_name)
-            field = self.class.field_prototypes[field_name].to_field
+            field = self.class.field_prototypes[field_name].to_field(self)
             field.unprocessed_value = value
             field_store << field.serialize_db
           end

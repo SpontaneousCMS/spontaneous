@@ -107,7 +107,12 @@ class FieldsTest < MiniTest::Spec
         @content_class.field_prototypes[:minimal].name.should == :minimal
         @content_class.field_prototypes[:minimal].default.should == "Small"
       end
-      should "map :string type to FieldTypes::Text" do
+
+      should "default to basic string class" do
+        assert @content_class.field_prototypes[:title].instance_class < Spontaneous::FieldTypes::StringField
+      end
+
+      should "map :string type to FieldTypes::StringField" do
         assert @content_class.field_prototypes[:synopsis].instance_class < Spontaneous::FieldTypes::StringField
       end
 
@@ -130,12 +135,24 @@ class FieldsTest < MiniTest::Spec
           @prototype = @content_class.field_prototypes[:title]
         end
 
-        should "default to basic string class" do
-          assert @prototype.field_class < Spontaneous::FieldTypes::StringField
-        end
 
         should "default to a value of ''" do
           @prototype.default.should == ""
+        end
+
+        should "get recieve calculated default values if default is a proc" do
+          n = 0
+          @content_class.field :dynamic, :default => proc { (n += 1) }
+          instance = @content_class.new
+          instance.dynamic.value.should == "1"
+          instance = @content_class.new
+          instance.dynamic.value.should == "2"
+        end
+
+        should "be able to calculate default values based on properties of owner" do
+          @content_class.field :dynamic, :default => proc { |owner| owner.title.value }
+          instance = @content_class.new(:title => "Frog")
+          instance.dynamic.value.should == "Frog"
         end
 
         should "match name to type if sensible" do
@@ -309,6 +326,11 @@ class FieldsTest < MiniTest::Spec
         @instance.fields.title.owner.should == @instance
       end
 
+      should "be created with the right default value" do
+        f = @instance.fields.title
+        f.value.should == "*Magic*"
+      end
+
       should "eval blocks from prototype defn" do
         f = @instance.fields.title
         f.value = "Boo"
@@ -328,6 +350,7 @@ class FieldsTest < MiniTest::Spec
         a.title = "a"
         (a.title / b.title).should == a.title
       end
+
       should "return the item which isnt empty when using the | method" do
         a = CC.new(:title => "")
         b = CC.new(:title => "b")
