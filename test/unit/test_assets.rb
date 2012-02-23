@@ -71,5 +71,17 @@ class AssetTest < MiniTest::Spec
         result.should =~ /src="\/rev\/1458221916fde33ec803fbbae20af8ded0ee2ca1\.js"/
       end
     end
+    should "support UTF8 scripts" do
+      files = [@fixture_root / "public1/js/a.js", @fixture_root / "public2/js/b.js"]
+      Shine.expects(:compress_files).with(files, :js, {}).once.returns("var A = \"\xC2\";\nvar B;\n".force_encoding("ASCII-8BIT"))
+      context = new_context
+      result = context.scripts("/js/a", "/js/b")
+    end
+
+    should "support scripts with full urls" do
+      context = new_context
+      result = context.scripts("http://jquery.com/jquery.js")
+      result.should =~ /src="http:\/\/jquery.com\/jquery.js"/
+    end
   end
 end

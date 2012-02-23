@@ -28,7 +28,7 @@ module Spontaneous
 
         def shine_compress_files(filelist, format, options = {})
           original_size = filesize(filelist)
-          compressed = Shine::compress_files(filelist, format, options)
+          compressed = Shine::compress_files(filelist, format, options).force_encoding("UTF-8")
           logger.info("Compressed #{filelist.length} files. Original size #{original_size}, compressed size #{compressed.length}, ratio #{(100*compressed.length.to_f/original_size.to_f).round}%")
           hash = digest(compressed)
           [compressed, hash]
@@ -40,7 +40,7 @@ module Spontaneous
 
 
         def filesize(paths)
-          paths.inject(0) { |sum, path| sum += File.size(path) }
+          paths.compact.inject(0) { |sum, path| sum += File.size(path) }
         end
       end
     end
