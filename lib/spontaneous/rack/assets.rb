@@ -90,7 +90,7 @@ module Spontaneous
       end
 
       module CSS
-        extend Spontaneous::Rack::Assets::Bundling
+        extend Spontaneous::Render::Assets::Compression
 
         def self.filetype
           "css"
