@@ -43,8 +43,9 @@ module Spontaneous
       end
 
       def self.simultaneous_setup
-        ::Simultaneous.connection = ::Spontaneous.config.simultaneous_connection
-        ::Simultaneous.domain = ::Spontaneous.config.site_domain
+        ::Simultaneous.client_mode  = :sync
+        ::Simultaneous.connection   = ::Spontaneous.config.simultaneous_connection
+        ::Simultaneous.domain       = ::Spontaneous.config.site_domain
       end
 
       def self.server_address
