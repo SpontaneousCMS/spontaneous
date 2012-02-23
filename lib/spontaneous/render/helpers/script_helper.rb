@@ -8,7 +8,7 @@ module Spontaneous::Render::Helpers
 
     def scripts(*args)
       scripts = args.flatten
-      return compressed_scripts(scripts)# if live?
+      return compressed_scripts(scripts) if live?
       scripts.map do |script|
         script_tag(script)
       end.join("\n")
