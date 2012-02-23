@@ -960,6 +960,11 @@ class PublishingTest < MiniTest::Spec
         File.readlink(current_dir).should == revision_dir
       end
 
+      should "have access to the current revision within the templates" do
+        revision_dir = @site.revision_root / "00002"
+        File.read(revision_dir / "static/about.html").should == "Page: 'About' 2\n"
+      end
+
       should "produce rendered versions of each page" do
         revision_dir = @site.revision_root / "00002"
         file = result = nil
@@ -970,13 +975,13 @@ class PublishingTest < MiniTest::Spec
             result = "Page: '#{page.title}' {{Time.now.to_i}}\n"
           when "news" # news produces a static template but has a request handler
             file = revision_dir / "protected/news.html"
-            result = "Page: 'News'\n"
+            result = "Page: 'News' 2\n"
           when "contact" # contact is both dynamic and has a request handler
             file = revision_dir / "dynamic/contact.html.cut"
             result = "Page: 'Contact' {{Time.now.to_i}}\n"
           else # the other pages are static
             file = revision_dir / "static#{page.path}.html"
-            result = "Page: '#{page.title}'\n"
+            result = "Page: '#{page.title}' 2\n"
           end
           assert File.exists?(file), "File '#{file}' should exist"
           File.read(file).should == result

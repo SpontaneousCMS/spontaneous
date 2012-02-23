@@ -43,7 +43,7 @@ module Spontaneous::Render
     def after_render; end
 
     def render_page(page)
-      output = page.render(format)
+      output = page.render(format, {:revision => @revision})
       path = output_path(page, output)
       File.open(path, 'w') do |f|
         f.write(output)

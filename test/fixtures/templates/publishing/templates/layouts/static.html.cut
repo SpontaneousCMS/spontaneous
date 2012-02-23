@@ -1,1 +1,1 @@
-Page: '${ title }'
+Page: '${ title }' ${ revision }

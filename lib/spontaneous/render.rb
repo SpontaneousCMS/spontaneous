@@ -20,10 +20,15 @@ module Spontaneous
         path
       end
 
+
       def redirect_path(revision, page, format)
         output_path_with_root(Spontaneous.revision_dir(revision, "/"), revision, page, format)
       end
 
+
+      def asset_path(revision = nil)
+        Spontaneous.revision_dir(revision) / "rev"
+      end
 
       def revision_root(revision)
         Spontaneous.revision_dir(revision)
@@ -212,5 +217,6 @@ module Spontaneous
     autoload :DevelopmentRenderer,  "spontaneous/render/development_renderer"
     autoload :Format,               "spontaneous/render/format"
     autoload :Helpers,              "spontaneous/render/helpers"
+    autoload :Assets,               "spontaneous/render/assets"
   end
 end

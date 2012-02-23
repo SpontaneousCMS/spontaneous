@@ -7,16 +7,6 @@ module Spontaneous
   module Publishing
     class Immediate
 
-      # def self.status
-      #   @status ||= ""
-      # end
-
-      # def self.status=(status)
-      #   @status = status
-      # end
-
-      #include ::Simultaneous::Task
-
       attr_reader :revision
 
       def initialize(revision)

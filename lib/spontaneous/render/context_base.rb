@@ -99,6 +99,14 @@ module Spontaneous::Render
       super || _target.respond_to?(method)
     end
 
+    def live?
+      Spontaneous.production? && publishing?
+    end
+
+    def publishing?
+      false
+    end
+
     protected
 
     def method_missing(method, *args)
