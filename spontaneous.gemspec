@@ -475,7 +475,6 @@ Gem::Specification.new do |s|
     test/disabled/test_slots.rb
     test/experimental/test_cutaneous.rb
     test/experimental/test_features.rb
-    test/fixtures/application/css/test.less
     test/fixtures/application/js/test.js
     test/fixtures/application/static/favicon.ico
     test/fixtures/application/static/test.html
