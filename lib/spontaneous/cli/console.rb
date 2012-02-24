@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-require 'watchr'
+# require 'watchr'
 
 module Spontaneous::Cli
   class Console < ::Spontaneous::Cli::Thor
