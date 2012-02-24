@@ -83,9 +83,20 @@ module Spontaneous
         Spontaneous.encode_json(params)
       end
 
+      def src(opts = {})
+        case video_type
+        when "youtube"
+          youtube_src(opts)
+        when "vimeo"
+          vimeo_src(opts)
+        else
+          value(:html)
+        end
+      end
 
       def ui_preview_value
-        render(:html, :width => 480, :height => 270)
+        # render(:html, :width => 480, :height => 270)
+        src
       end
 
       def retrieve_vimeo_metadata(id)
@@ -145,6 +156,23 @@ module Spontaneous
 
       def vimeo_attributes(options = {})
 
+        o = make_vimeo_options(options)
+
+        attributes = {
+          :type => "text/html",
+          :frameborder => "0",
+          :width => o.delete(:width),
+          :height => o.delete(:height)
+        }
+        attributes.update(:webkitAllowFullScreen => "yes", :allowFullScreen => "yes") if o[:fullscreen]
+
+        make_query_options!(o)
+        attributes[:src] = vimeo_src_with_options(o)
+
+        {:tagname => "iframe", :tag => "<iframe/>", :attr => attributes}
+      end
+
+      def make_vimeo_options(options = {})
         o  = default_player_options
         vimeo_options = o.delete(:vimeo) || {}
 
@@ -168,23 +196,28 @@ module Spontaneous
           :byline => true,
           :player_id => "vimeo#{owner.id}id#{value(:id)}"
         }.merge(o).merge(vimeo_options).merge(options)
-
-        attributes = {
-          :type => "text/html",
-          :frameborder => "0",
-          :width => o.delete(:width),
-          :height => o.delete(:height)
-        }
-        attributes.update(:webkitAllowFullScreen => "yes", :allowFullScreen => "yes") if o[:fullscreen]
-
-        make_query_options!(o)
-
-        attributes[:src] = "http://player.vimeo.com/video/#{value(:id)}?title=#{o[:title]}&byline=#{o[:byline]}&portrait=#{o[:portrait]}&autoplay=#{o[:autoplay]}&loop=#{o[:loop]}&api=#{o[:api]}&player_id=#{o[:player_id]}#{o.key?(:color) ? "&color=#{o[:color]}" : ""}"
-
-        {:tagname => "iframe", :tag => "<iframe/>", :attr => attributes}
-
+        o
       end
 
+      def vimeo_src(options = {})
+        o = make_vimeo_options(options)
+        make_query_options!(o)
+        vimeo_src_with_options(o)
+      end
+
+      def vimeo_src_with_options(o)
+        params = {
+          "title" => o[:title],
+          "byline" => o[:byline],
+          "portrait" => o[:portrait],
+          "autoplay" => o[:autoplay],
+          "loop" => o[:loop],
+          "api" => o[:api],
+          "player_id" => o[:player_id] }
+        params.update("color" => o[:color]) if o.key?(:color)
+        params = ::Rack::Utils.build_query(params)
+        "http://player.vimeo.com/video/#{value(:id)}?#{params}"
+      end
 
       def to_youtube_html(options = {})
         params = youtube_attributes(options)
@@ -194,7 +227,25 @@ module Spontaneous
 
 
       def youtube_attributes(options = {})
+        o = make_youtube_options(options)
 
+        attributes = {
+          :type => "text/html",
+          :frameborder => "0",
+          :width => o.delete(:width),
+          :height => o.delete(:height)
+        }
+
+        make_query_options!(o)
+
+        attributes[:src] = youtube_src_with_options(o)
+
+        attributes.update(:webkitAllowFullScreen => "yes", :allowFullScreen => "yes") if o[:fullscreen]
+
+        {:tagname => "iframe", :tag => "<iframe/>", :attr => attributes}
+      end
+
+      def make_youtube_options(options = {})
         o  = default_player_options
         youtube_options = o.delete(:youtube) || {}
 
@@ -218,23 +269,30 @@ module Spontaneous
           :autohide => 2,
           :rel => true
         }.merge(o).merge(youtube_options).merge(options)
-
-        attributes = {
-          :type => "text/html",
-          :frameborder => "0",
-          :width => o.delete(:width),
-          :height => o.delete(:height)
-        }
-
-        make_query_options!(o)
-
-        attributes[:src] = "http://www.youtube.com/embed/#{value(:id)}?modestbranding=1&theme=#{o[:theme]}&hd=#{o[:hd]}&fs=#{o[:fullscreen]}&controls=#{o[:controls]}&autoplay=#{o[:autoplay]}&showinfo=#{o[:showinfo]}&showsearch=#{o[:showsearch]}&loop=#{o[:loop]}&autohide=#{o[:autohide]}&rel=#{o[:rel]}&enablejsapi=#{o[:api]}"
-        attributes.update(:webkitAllowFullScreen => "yes", :allowFullScreen => "yes") if o[:fullscreen]
-
-
-        {:tagname => "iframe", :tag => "<iframe/>", :attr => attributes}
       end
 
+      def youtube_src(options = {})
+        o = make_youtube_options(options)
+        make_query_options!(o)
+        youtube_src_with_options(o)
+      end
+
+      def youtube_src_with_options(o)
+        params = ::Rack::Utils.build_query({
+          "modestbranding" => 1,
+          "theme" => o[:theme],
+          "hd" => o[:hd],
+          "fs" => o[:fullscreen],
+          "controls" => o[:controls],
+          "autoplay" => o[:autoplay],
+          "showinfo" => o[:showinfo],
+          "showsearch" => o[:showsearch],
+          "loop" => o[:loop],
+          "autohide" => o[:autohide],
+          "rel" => o[:rel],
+          "enablejsapi" => o[:api] })
+        "http://www.youtube.com/embed/#{value(:id)}?#{params}"
+      end
 
       def make_html_attributes(attributes)
         attributes.to_a.map { |name, value| "#{name}=\"#{escape_html(value)}\"" }.join(" ")

@@ -9,6 +9,10 @@ Spontaneous.FieldTypes.WebVideoField = (function($, S) {
 		// edit: function() {
 		// 	return this.get_input();
 		// }
+		preview: function() {
+			var iframe = dom.iframe({src:this.get('value'), frameborder: 0, border: 0}).css({position: "absolute", top:0, left:0, height: "100%", width: "100%"});
+			return dom.div().css({width: "100%", position: "relative", "padding-bottom":"56.25%", height: 0}).append(iframe)
+		}
 	});
 
 	return WebVideoField;

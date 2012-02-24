@@ -28,7 +28,8 @@
 .preview-value {
 	font-size: $field-preview-font-size;
 	font-family: $content-font-family;
-	line-height: $field-preview-font-size + 2;
+	// line-height: $field-preview-font-size + 4;
+	line-height: 1.4em;
 	color: #666666;
 	font-weight: normal;
 }
@@ -361,6 +362,10 @@ img.missing {
 .fields-preview {
 	@extend .clearfix;
 	@include box-sizing;
+	@include display-box;
+	@include box-orient(horizontal);
+	@include box-align(stretch);
+	@include box-pack(top);
 	background-color: #fff;
 	// border: solid 3px transparent;
 	cursor: pointer;
@@ -381,10 +386,6 @@ img.missing {
 
 .fields-preview .fields-preview-text {
 	@include box-sizing;
-	// border: dotted 1px transparent;
-}
-.fields-preview.hover .fields-preview-text {
-	// border: dotted 1px $action;
 }
 .fields-preview-text {
   &.empty {
@@ -392,24 +393,25 @@ img.missing {
   }
 	@include box-sizing;
 	width: $field-text-preview-width;
-	float: left;
-	padding-right: 100px;
+	// float: left;
 	margin-right: 16px;
 	li {
+		@include display-box;
+		@include box-orient(horizontal);
+		@include box-align(stretch);
+		@include box-pack(top);
 		@extend .clearfix;
 		border-bottom: solid 1px $entry-background-colour;
 		padding-top: 3px;
 		padding-bottom: 3px;
-		display: block;
 		line-height: $field-preview-font-size + 2;
 		font-size: $field-preview-font-size;
 		font-family: $content-font-family;
-		float: left;
 		width: 100%;
 		position: relative;
-		padding-left: 100px;
 		.name, .value {
-			float: left;
+			// float: left;
+			display: block;
 		}
 	}
 	li:last-child {
@@ -418,13 +420,15 @@ img.missing {
 	.name {
 		@extend .preview-label;
     @include box-sizing;
+		// @include
 		width: 100px;
-		right: 100px;
-		margin-left: -100px;
+		// right: 100px;
+		// margin-left: -100px;
     padding-right: $unit;
 	}
 	.value {
 		@extend .preview-value;
+		@include box-flex;
 		a {
 			color: $highlight;
 		}
@@ -464,7 +468,8 @@ img.missing {
     display: none;
   }
 	@extend .clearfix;
-	float: left;
+	@include box-flex;
+	// float: left;
 	width: $field-image-preview-width;
 	li {
 		float: left;
@@ -639,12 +644,12 @@ img.missing {
 			color: #555555;
 		}
     .fields-preview-text {
-      @include box-flex;
-      width: 60%;
+      // @include box-flex;
+      // width: 60%;
     }
     .fields-preview-image {
       @include box-flex;
-      width: 40%;
+      // width: 40%;
     }
 	}
 	.slot-addable {
@@ -736,7 +741,7 @@ img.missing {
 	.entry-wrap {
     @extend .clearfix;
 		position: relative;
-		margin-left: $container-padding;
+		margin-left: $container-padding - 6;
 		margin-right: $container-padding;
     .entry-contents {
       @include rounded;
@@ -993,6 +998,7 @@ img.missing {
 			}
 			.slot-entries {
 				padding-top: 8px;
+				padding-bottom: 8px;
 			}
 			.entry-wrap.depth-2 {
 				// padding-top: $title-bar-height + ($unit/2);
@@ -1088,8 +1094,10 @@ img.missing {
         .fields-preview {
           @include display-box;
           .fields-preview-text {
-            @include box-flex;
-            width: 60%;
+            // @include box-flex;
+            // width: 60%;
+						width: $field-text-preview-width;
+						max-width: $field-text-preview-width;
             padding-right: 0;
           }
           .fields-preview-image {
