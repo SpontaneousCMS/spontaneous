@@ -1,7 +1,6 @@
 # encoding: UTF-8
 
 require 'sass'
-require 'less'
 
 module Spontaneous
   module Rack
@@ -675,11 +674,8 @@ module Spontaneous
             else
               content_type :css
               sass_template = Spontaneous.css_dir / File.basename(file, ".css") + ".scss"
-              less_template = Spontaneous.css_dir / File.basename(file, ".css") + ".less"
               if File.exists?(sass_template)
                 Sass::Engine.for_file(sass_template, :load_paths => [Spontaneous.css_dir], :filename => sass_template, :cache => false).render
-              elsif File.exists?(less_template)
-                Less::Engine.new(File.new(less_template)).to_css
               else
                 raise Sinatra::NotFound
               end
