@@ -2,6 +2,7 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 require 'ostruct'
+require 'shine'
 
 class AssetTest < MiniTest::Spec
 

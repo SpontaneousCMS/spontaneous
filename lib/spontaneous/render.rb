@@ -25,9 +25,12 @@ module Spontaneous
         output_path_with_root(Spontaneous.revision_dir(revision, "/"), revision, page, format)
       end
 
+      def asset_url(file = nil)
+        File.join ["/rev", file].compact
+      end
 
       def asset_path(revision = nil)
-        Spontaneous.revision_dir(revision) / "rev"
+        Spontaneous.revision_dir(revision) / asset_url
       end
 
       def revision_root(revision)
