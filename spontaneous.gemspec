@@ -74,6 +74,7 @@ Gem::Specification.new do |s|
   s.add_dependency('xapian-full', ["~> 1.2.3"])
   s.add_dependency('xapian-fu', ["~> 1.3"])
   s.add_dependency('nokogiri', ["~> 1.5.0"])
+  s.add_dependency('public_suffix', ["~> 1.0"])
 
   ## List your development dependencies here. Development dependencies are
   ## those that are only needed during development
