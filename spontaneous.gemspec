@@ -60,7 +60,6 @@ Gem::Specification.new do |s|
   s.add_dependency('sinatra', ["~> 1.3.0"])
   s.add_dependency('rack', ["~> 1.4.1"])
   s.add_dependency('thin', ["~> 1.2"])
-  #s.add_dependency('less', ["~> 1.2"])
   s.add_dependency('sass', ["~> 3.1.4"])
   s.add_dependency('stringex', ["= 1.3"])
   s.add_dependency('mini_magick', ["~> 3.3"])
@@ -75,7 +74,6 @@ Gem::Specification.new do |s|
   s.add_dependency('xapian-full', ["~> 1.2.3"])
   s.add_dependency('xapian-fu', ["~> 1.3"])
   s.add_dependency('nokogiri', ["~> 1.5.0"])
-  s.add_dependency('watchr', ["~> 0.7"])
 
   ## List your development dependencies here. Development dependencies are
   ## those that are only needed during development

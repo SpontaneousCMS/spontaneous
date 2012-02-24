@@ -191,13 +191,6 @@ class BackTest < MiniTest::Spec
         assert_equal File.read(@app_dir / 'js/test.js'), last_response.body
       end
 
-      # should "return less rendered to css from css dir" do
-      #   get '/@spontaneous/css/test.css'
-      #   assert last_response.ok?
-      #   last_response.content_type.should == "text/css;charset=utf-8"
-      #   assert_equal "h1 { color: #4d926f; }\\n", last_response.body
-      # end
-
       should "return a site map for root by default" do
         auth_get '/@spontaneous/map'
         assert last_response.ok?
