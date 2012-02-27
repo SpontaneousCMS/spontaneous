@@ -35,6 +35,9 @@ module Spontaneous::Storage
     #
     attr_reader :bucket_name
 
+    # Don't verify my ssl certs when uploading images
+    ::Excon.defaults[:ssl_verify_peer] = false
+
     def initialize(config, bucket_name, accepts = nil)
       @config, @bucket_name, @accepts = config, bucket_name, accepts
       @public_host = @config.delete(:public_host)
