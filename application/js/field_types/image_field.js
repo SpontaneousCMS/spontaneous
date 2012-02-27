@@ -57,9 +57,14 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			this.callSuper();
 		},
 
-		preview: function() {
+		preview: function(container) {
 			Spontaneous.UploadManager.register(this);
-			var value = this.get('value').original, src = value.src, img = null, dim = 45;
+			var self = this
+			, value = this.get('value').original
+			, src = value.src
+			, img = null
+			, dim = 45
+			, container = container.parent('li');
 
 			if (src === "") {
 				img = dom.img('.missing-image', {'src':'/@spontaneous/static/px.gif'});
@@ -67,8 +72,12 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				img = dom.img();
 				img.load(function() {
 					var r = this.width/this.height, $this = $(this), h = $this.height(), dh = 0;
-					if (r >= 1 && h <= dim) { // landscape -- fit image vertically
-						var dh = (dim - h)/2;
+					if (r >= 1) { // landscape -- fit image vertically
+						// tag for extra css styles applicable to landscape images
+						container.addClass('landscape');
+						if (h <= dim) {
+							dh = (dim - h)/2;
+						}
 					}
 					$this.css('top', dom.px(dh));
 				});

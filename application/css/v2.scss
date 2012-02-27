@@ -45,7 +45,7 @@ img.missing {
 	height: 50px;
 	background: url("/@spontaneous/static/missing.png") 50% 50% no-repeat;
 	border: none;
-  // display: none;
+	// display: none;
 }
 
 .clear {
@@ -57,15 +57,15 @@ img.missing {
 	@extend .container-padding;
 	@extend .controls-gradient;
 	@extend .clearfix;
-  @include display-box;
-  @include box-align(center);
+	@include display-box;
+	@include box-align(center);
 	position: fixed;
 	height: 31px;
 	top: 0;
 	right: 0;
 	left: 0;
 	#navigation {
-    @include box-flex;
+		@include box-flex;
 		font-size: 11px;
 		font-weight: bold;
 		color: #999999;
@@ -133,14 +133,14 @@ img.missing {
 	}
 	#switch-mode, #open-publish {
 		@include button;
-    @include display-box;
-    @include box-orient(vertical);
-    @include box-align(center);
-    margin: 0;
+		@include display-box;
+		@include box-orient(vertical);
+		@include box-align(center);
+		margin: 0;
 		width: 64px;
 	}
 	#open-publish {
-    position: relative;
+		position: relative;
 		margin-right: $unit;
 		#publish-progress {
 			position: absolute;
@@ -205,27 +205,27 @@ img.missing {
 			line-height: 12px;
 			text-transform: none;
 		}
-    .path .uid, .path .developer {
+		.path .uid, .path .developer {
 			// @include rounded;
 			// background-color: rgba(0, 0, 0, 0.4);
 			// padding: $unit/2;
-      margin-left: $unit*4;
-      opacity: 0.5;
-      &.missing {
-        opacity: 0.5;
-      }
-    }
+			margin-left: $unit*4;
+			opacity: 0.5;
+			&.missing {
+				opacity: 0.5;
+			}
+		}
 		& > .path {
-      @include display-box;
+			@include display-box;
 			position: absolute;
 			bottom: 12px;
 		}
 		.path .edit {
-      @include display-box;
-      @include box-orient(horizontal);
-      @include box-align(center);
+			@include display-box;
+			@include box-orient(horizontal);
+			@include box-align(center);
 			.input-error {
-        display: block;
+				display: block;
 				position: relative;
 				top: 0;
 				vertical-align: top;
@@ -263,17 +263,17 @@ img.missing {
 				}
 			}
 			.button {
-        display: block;
+				display: block;
 				margin-left: 8px;
-        padding-left: 32px;
-        padding-right: 32px;
+				padding-left: 32px;
+				padding-right: 32px;
 			}
 			.button.cancel {
 				padding-left: 10px;
 				padding-right: 10px;
 			}
 			span, a.path {
-        display: block;
+				display: block;
 				position: relative;
 			}
 			a.path {
@@ -339,22 +339,22 @@ img.missing {
 			@extend .container-padding;
 			padding-top: 8px;
 			padding-bottom: 8px;
-      position: relative;
-      .overlay {
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        border-style: solid;
-        border-width: 2px;
-        border-color: transparent;
-      }
-      &.hover {
-        .overlay {
-          border-color: $action;
-        }
-      }
+			position: relative;
+			.overlay {
+				position: absolute;
+				left: 0;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				border-style: solid;
+				border-width: 2px;
+				border-color: transparent;
+			}
+			&.hover {
+				.overlay {
+					border-color: $action;
+				}
+			}
 		}
 	}
 }
@@ -388,9 +388,9 @@ img.missing {
 	@include box-sizing;
 }
 .fields-preview-text {
-  &.empty {
-    display: none;
-  }
+	&.empty {
+		display: none;
+	}
 	@include box-sizing;
 	width: $field-text-preview-width;
 	// float: left;
@@ -419,12 +419,12 @@ img.missing {
 	}
 	.name {
 		@extend .preview-label;
-    @include box-sizing;
+		@include box-sizing;
 		// @include
 		width: 100px;
 		// right: 100px;
 		// margin-left: -100px;
-    padding-right: $unit;
+		padding-right: $unit;
 	}
 	.value {
 		@extend .preview-value;
@@ -464,9 +464,9 @@ img.missing {
 }
 
 .fields-preview-image {
-  &.empty {
-    display: none;
-  }
+	&.empty {
+		display: none;
+	}
 	@extend .clearfix;
 	@include box-flex;
 	// float: left;
@@ -477,6 +477,15 @@ img.missing {
 		margin-right: 4px;
 		margin-bottom: 4px;
 		position: relative;
+		width: 49%;
+		max-width: 150px;
+		min-width: 90px;
+		// size restrictions are mostly to stop the images getting too tall
+		// so for landscape images we can increase the size bounds a bit
+		&.landscape {
+			max-width: 250px;
+			min-width: 179px;
+		}
 		.name {
 			@extend .preview-label;
 			@include image-overlay;
@@ -492,22 +501,22 @@ img.missing {
 		.value {
 			@include rounded;
 			background-color: #efefef;
-			max-height: 90px;
+			// max-height: 90px;
 			min-height: 45px;
 			min-width: 90px;
 			cursor: pointer;
 			text-align: center;
 			position: relative;
-      .waiting {
-        position: absolute;
-        display: block;
-        left: 0;
-        right: 0;
-        text-align: center;
-        top: 30%;
-        height: $unit*2;
+			.waiting {
+				position: absolute;
+				display: block;
+				left: 0;
+				right: 0;
+				text-align: center;
+				top: 30%;
+				height: $unit*2;
 				z-index: 3;
-      }
+			}
 			.image-drop {
 				@include rounded;
 				z-index: 100;
@@ -516,7 +525,7 @@ img.missing {
 				right: 0;
 				bottom: 0;
 				left: 0;
-        text-align: center;
+				text-align: center;
 				.drop-upload-outer {
 					@include rounded(4px);
 					border: solid 1px white;
@@ -549,8 +558,15 @@ img.missing {
 			}
 			img {
 				@extend .no-select;
-        @include rounded;
+				@include rounded;
 				position: relative;
+				max-height: 100%;
+				width: 100%;
+				display: block;
+			}
+			.missing-image {
+				width: 90px;
+				max-width: 90px;
 				max-height: 90px;
 			}
 			img:hover {
@@ -616,26 +632,26 @@ img.missing {
 	.fields-preview.depth-box {
 		@extend .container-padding;
 		@include vertical-gradient(#eeeeee, #dddddd);
-    @include display-box;
+		@include display-box;
 		border-top: solid 1px #CCC;
-    position:relative;
+		position:relative;
 		padding-top: 12px;
 		padding-bottom: 5px;
-    .overlay {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: -1px;
-      bottom: 0;
-      border-style: solid;
-      border-width: 2px;
-      border-color: transparent;
-    }
-    &.hover {
-      .overlay {
-        border-color: $action;
-      }
-    }
+		.overlay {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: -1px;
+			bottom: 0;
+			border-style: solid;
+			border-width: 2px;
+			border-color: transparent;
+		}
+		&.hover {
+			.overlay {
+				border-color: $action;
+			}
+		}
 		&:hover {
 			// border-top-color: $action;
 			// border-bottom-color: $action;
@@ -643,14 +659,14 @@ img.missing {
 		.value {
 			color: #555555;
 		}
-    .fields-preview-text {
-      // @include box-flex;
-      // width: 60%;
-    }
-    .fields-preview-image {
-      @include box-flex;
-      // width: 40%;
-    }
+		.fields-preview-text {
+			// @include box-flex;
+			// width: 60%;
+		}
+		.fields-preview-image {
+			@include box-flex;
+			// width: 40%;
+		}
 	}
 	.slot-addable {
 		@extend .container-padding;
@@ -670,14 +686,14 @@ img.missing {
 			margin-left: 4px;
 		}
 		// a:hover {
-		//   background-color: $highlight;
-		//   color: white;
+			//   background-color: $highlight;
+			//   color: white;
 		// }
 		a + a {
 		}
-    .alias {
-      font-style: italic;
-    }
+		.alias {
+			font-style: italic;
+		}
 		.down {
 			@include down-arrow("/@spontaneous/static/slot-down-arrow.png", 18px);
 			display: none;
@@ -739,20 +755,20 @@ img.missing {
 		background-color: white;
 	}
 	.entry-wrap {
-    @extend .clearfix;
+		@extend .clearfix;
 		position: relative;
 		margin-left: $container-padding - 6;
 		margin-right: $container-padding;
-    .entry-contents {
-      @include rounded;
-      background-color: $entry-background-colour;
-      padding: 2px;
-      // padding-top: $title-bar-height + 4px;
-    }
-    .entry-spacer {
-      height: $container-padding/2;
+		.entry-contents {
+			@include rounded;
+			background-color: $entry-background-colour;
+			padding: 2px;
+			// padding-top: $title-bar-height + 4px;
+		}
+		.entry-spacer {
+			height: $container-padding/2;
 			position: relative;
-    }
+		}
 		.entry-spacer.add-entry {
 			background: url("/@spontaneous/static/diagonal-texture.png");
 			margin: 0 4px;
@@ -767,9 +783,9 @@ img.missing {
 		}
 		.title-bar {
 			// @include vertical-gradient(gray + #111111, gray);
-      @include box-sizing;
+			@include box-sizing;
 			@include rounded-right;
-      @extend .interface;
+			@extend .interface;
 			$title-bar-width: 20px;
 
 			// background-color: rgba($entry-background-colour, 0.6);
@@ -777,11 +793,11 @@ img.missing {
 
 
 			width: $title-bar-width;
-      color: rgba(255, 255, 255, 0.4);
-      padding-top: 4px;
-      // padding-left: $unit/2 + 2px;
-      text-transform: none;
-      font-weight: normal;
+			color: rgba(255, 255, 255, 0.4);
+			padding-top: 4px;
+			// padding-left: $unit/2 + 2px;
+			text-transform: none;
+			font-weight: normal;
 			cursor: ns-resize;
 			position: absolute;
 			left: auto;
@@ -982,15 +998,15 @@ img.missing {
 					// background-color: #6b6b6b;
 					padding-left: 8px;
 					padding-right: 8px;
-          & + a {
-            margin-left: $unit;
-          }
+					& + a {
+						margin-left: $unit;
+					}
 				}
-        .alias {
-          font-style: italic;
-        }
+				.alias {
+					font-style: italic;
+				}
 				// a:hover {
-				//   background-color: $highlight;
+					//   background-color: $highlight;
 				//}
 				.down {
 					display: none;
@@ -1006,20 +1022,20 @@ img.missing {
 				margin-right: 20px;
 				margin-bottom: $unit;
 				.white-bg {
-          @include rounded($radius - 1);
+					@include rounded($radius - 1);
 					width: auto;
 					right: 0;
 				}
 				.grey-bg {
 					display: none;
 				}
-        .entry-contents {
-          // padding: $unit/2 $unit/2;
-          padding: 0;
-        }
-        .entry-spacer {
-          height: $unit;
-        }
+				.entry-contents {
+					// padding: $unit/2 $unit/2;
+					padding: 0;
+				}
+				.entry-spacer {
+					height: $unit;
+				}
 				&:last-child .entry-spacer {
 					outline: solid 1px red;
 					display: none;
@@ -1034,7 +1050,7 @@ img.missing {
 						// background-color: white;
 						// border-color: white;
 						width: 100%;
-            display: block;
+						display: block;
 						.fields-preview-text {
 							width: 100%;
 							margin-bottom: 0;
@@ -1047,9 +1063,9 @@ img.missing {
 							margin-top: $unit/2;
 							padding-top: $unit/2;
 						}
-            .fields-preview-text.empty + .fields-preview-image {
-              margin-top: 0;
-            }
+						.fields-preview-text.empty + .fields-preview-image {
+							margin-top: 0;
+						}
 					}
 				}
 				.entry + .entry {
@@ -1057,56 +1073,56 @@ img.missing {
 				}
 			}
 		}
-    .alias-target {
+		.alias-target {
 			@include rounded-top;
-      padding: $unit/2;
-      background-color: #444;
-      color: white;
-      font-size: 14px;
-      font-style: italic;
+			padding: $unit/2;
+			background-color: #444;
+			color: white;
+			font-size: 14px;
+			font-style: italic;
 			&.no-fields {
 				@include rounded;
 			}
 			&:hover {
 				color: $highlight;
 			}
-      .icon-wrap, a {
-        display: inline-block;
-        vertical-align: top;
-        cursor: pointer;
-      }
-      .icon-wrap {
-        margin-right: $unit;
-      }
-    }
-    &.no-boxes {
-      .white-bg {
-        // @include rounded(0 0 $radius $radius);
+			.icon-wrap, a {
+				display: inline-block;
+				vertical-align: top;
+				cursor: pointer;
+			}
+			.icon-wrap {
+				margin-right: $unit;
+			}
+		}
+		&.no-boxes {
+			.white-bg {
+				// @include rounded(0 0 $radius $radius);
 				@include rounded($radius - 1);
-        right: 0;
-      }
-      .grey-bg {
-        display: none;
-      }
-      .entry {
-        // @include box-flex;
-        width: 100%;
-        .fields-preview {
-          @include display-box;
-          .fields-preview-text {
-            // @include box-flex;
-            // width: 60%;
+				right: 0;
+			}
+			.grey-bg {
+				display: none;
+			}
+			.entry {
+				// @include box-flex;
+				width: 100%;
+				.fields-preview {
+					@include display-box;
+					.fields-preview-text {
+						// @include box-flex;
+						// width: 60%;
 						width: $field-text-preview-width;
 						max-width: $field-text-preview-width;
-            padding-right: 0;
-          }
-          .fields-preview-image {
-            @include box-flex;
-            width: 40%;
-          }
-        }
-      }
-    }
+						padding-right: 0;
+					}
+					.fields-preview-image {
+						@include box-flex;
+						width: 40%;
+					}
+				}
+			}
+		}
 	}
 	.entry-wrap.hidden {
 		opacity: 0.4 !important;
@@ -1114,28 +1130,28 @@ img.missing {
 	.entry-wrap.editing.hidden {
 		opacity: 1 !important;
 	}
-  .entry-wrap.page {
-    .white-bg {
+	.entry-wrap.page {
+		.white-bg {
 			@include corners(0, 0, $corner-radius, $corner-radius);
-      right: 0;
-    }
-    .page-title {
+			right: 0;
+		}
+		.page-title {
 			@include rounded-top;
-      background-color: #444;
-      padding: $unit/2;
-      a {
-        cursor: pointer;
-        font-family: $headline-font-family;
-        font-weight: 100;
-        color: #fff;
-        font-size: 16px;
-        line-height: normal;
-        &:hover {
-          color: $highlight;
-        }
-      }
-    }
-  }
+			background-color: #444;
+			padding: $unit/2;
+			a {
+				cursor: pointer;
+				font-family: $headline-font-family;
+				font-weight: 100;
+				color: #fff;
+				font-size: 16px;
+				line-height: normal;
+				&:hover {
+					color: $highlight;
+				}
+			}
+		}
+	}
 	.entry-wrap.ui-sortable-helper > .entry-contents {
 		@extend .shadow;
 	}
@@ -1181,86 +1197,86 @@ img.missing {
 	top: 0;
 	overflow: auto;
 	z-index: 1001;
-  $dialogue-frame-width: 2px;
-  #dialogue-outer {
-    @include rounded;
-    @include display-box;
-    @include box-orient($direction: vertical);
-    @extend .shadow;
-    background-color: $chrome-bg;
-    position: relative;
-    top: 50px;
-    // width: $dialogue-width;
-    margin: 0 auto;
-    margin-bottom: 50px;
-    // max-height: 90%;
-    #dialogue-title {
-      $height: 32px;
-      @extend .controls-gradient;
-      @include header;
-      @include rounded-top;
-      height: $height - 6px;
-      color: #fff;
-      padding: 0 $unit 0 ($unit+$dialogue-frame-width);
-      padding-top: 6px;
-    }
-    #dialogue-body {
-      // @extend .box-flexible;
-      // position: absolute;
-      // top: 32px;
-      // right: 2px;
-      // bottom: 32px;
-      // left: 2px;
-      // min-height: 100px;
-      overflow: auto;
-      margin: 0 $dialogue-frame-width;
-      background-color: #fff;
-      // max-height: 70%;
-      // margin-top: 32px;
-      // margin-bottom: 32px;
-    }
-    #dialogue-control-wrap {
-      // position: fixed;
-      // top: 0;
-      // right: 0;
-      // left: 0;
-      // z-index: 1002;
+	$dialogue-frame-width: 2px;
+	#dialogue-outer {
+		@include rounded;
+		@include display-box;
+		@include box-orient($direction: vertical);
+		@extend .shadow;
+		background-color: $chrome-bg;
+		position: relative;
+		top: 50px;
+		// width: $dialogue-width;
+		margin: 0 auto;
+		margin-bottom: 50px;
+		// max-height: 90%;
+		#dialogue-title {
+			$height: 32px;
+			@extend .controls-gradient;
+			@include header;
+			@include rounded-top;
+			height: $height - 6px;
+			color: #fff;
+			padding: 0 $unit 0 ($unit+$dialogue-frame-width);
+			padding-top: 6px;
+		}
+		#dialogue-body {
+			// @extend .box-flexible;
+			// position: absolute;
+			// top: 32px;
+			// right: 2px;
+			// bottom: 32px;
+			// left: 2px;
+			// min-height: 100px;
+			overflow: auto;
+			margin: 0 $dialogue-frame-width;
+			background-color: #fff;
+			// max-height: 70%;
+			// margin-top: 32px;
+			// margin-bottom: 32px;
+		}
+		#dialogue-control-wrap {
+			// position: fixed;
+			// top: 0;
+			// right: 0;
+			// left: 0;
+			// z-index: 1002;
 
-      #dialogue-controls {
-        position: relative;
-        // display: block;
-        // height: 46px;
-        .dialogue-actions {
-          @include display-box;
-          .spacer {
-            @include box-flex;
-          }
-          .button {
-            display: block;
-            width: 128px;
-            margin: $unit 0;
-            & + .button {
-              margin-left: $unit;
-            }
-          }
-          .button:last-child {
-            margin-right: $unit;
-          }
-          .cancel {
-            @include button-color(#6b6b6b);
-          }
-          .save {
-            background-color: $action;
-            float: right;
-          }
-          .disabled, .disabled:hover {
-            background-color: #333333 !important;
-            color: #6b6b6b !important;
-          }
-        }
-      }
-    }
-  }
+			#dialogue-controls {
+				position: relative;
+				// display: block;
+				// height: 46px;
+				.dialogue-actions {
+					@include display-box;
+					.spacer {
+						@include box-flex;
+					}
+					.button {
+						display: block;
+						width: 128px;
+						margin: $unit 0;
+						& + .button {
+							margin-left: $unit;
+						}
+					}
+					.button:last-child {
+						margin-right: $unit;
+					}
+					.cancel {
+						@include button-color(#6b6b6b);
+					}
+					.save {
+						background-color: $action;
+						float: right;
+					}
+					.disabled, .disabled:hover {
+						background-color: #333333 !important;
+						color: #6b6b6b !important;
+					}
+				}
+			}
+		}
+	}
 }
 
 .dialogue-wrapper {
@@ -1274,24 +1290,24 @@ img.missing {
 }
 
 #create-home-dialogue {
-  .instructions {
+	.instructions {
 		@extend .interface;
 		margin: 0;
 		background-color: #f2f2f2;
 		color: #666;
 		padding: $unit/2 $unit;
-    margin-bottom: $unit;
-    .button {
-      padding-left: 2px;
-      padding-right: 2px;
-    }
-  }
+		margin-bottom: $unit;
+		.button {
+			padding-left: 2px;
+			padding-right: 2px;
+		}
+	}
 
 	.type {
 		@include rounded;
 		@include display-box;
 		cursor: pointer;
-    padding: $unit/2 $unit;
+		padding: $unit/2 $unit;
 		background-color: #fbfbfb;
 		border: solid 1px #f2f2f2;
 		margin: $unit;
@@ -1308,130 +1324,130 @@ img.missing {
 }
 
 #publishing-dialogue {
-  min-height: 200px;
-  max-height: 90%;
-  position: relative;
-  @include display-box;
-  @include box-orient(horizontal);
-  .change-list {
-    @include box-flex;
-    width: 50%;
-    &#changes {
-      border-right: solid 2px #000;
-    }
-    .actions {
-      @extend .interface;
-      @include display-box;
-      @include box-orient(horizontal);
-      @include box-align(center);
-      color: #666;
-      background-color: #f2f2f2;
-      padding: $unit/2 $unit;
+	min-height: 200px;
+	max-height: 90%;
+	position: relative;
+	@include display-box;
+	@include box-orient(horizontal);
+	.change-list {
+		@include box-flex;
+		width: 50%;
+		&#changes {
+			border-right: solid 2px #000;
+		}
+		.actions {
+			@extend .interface;
+			@include display-box;
+			@include box-orient(horizontal);
+			@include box-align(center);
+			color: #666;
+			background-color: #f2f2f2;
+			padding: $unit/2 $unit;
 
-      div {
-        @include box-flex;
-      }
-      .button {
-        padding-left: $unit;
-        padding-right: $unit;
-      }
-    }
-    .change-sets {
-      overflow: auto;
-      .instructions {
-        font-family: $headline-font-family;
-        color: #999;
-        text-align: center;
-        position: relative;
-        padding-top: 50px;
-      }
-    }
-  }
-  // background-color: #fff;
-  // width: 600px;
+			div {
+				@include box-flex;
+			}
+			.button {
+				padding-left: $unit;
+				padding-right: $unit;
+			}
+		}
+		.change-sets {
+			overflow: auto;
+			.instructions {
+				font-family: $headline-font-family;
+				color: #999;
+				text-align: center;
+				position: relative;
+				padding-top: 50px;
+			}
+		}
+	}
+	// background-color: #fff;
+	// width: 600px;
 	// @extend .dialogue-wrapper;
 	// padding-top: $container-padding / 2;
 	// padding-bottom: $container-padding / 2;
 	.publish-up-to-date {
-    @include rounded;
-    @extend shadow;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    margin: 60px 200px 60px 200px;
-    text-align: center;
-    background-color: #333;
-    opacity: 0.95;
-    font-family: $headline-font-family;
-    font-size: 24px;
-    padding-top: 24px;
-    color: #fff;
+		@include rounded;
+		@extend shadow;
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		margin: 60px 200px 60px 200px;
+		text-align: center;
+		background-color: #333;
+		opacity: 0.95;
+		font-family: $headline-font-family;
+		font-size: 24px;
+		padding-top: 24px;
+		color: #fff;
 		// margin: $container-padding / 2;
 		// margin-top: 0;
 		// .publish-all {
-		// 	@include button(#666);
-		// 	@extend .interface;
-		// 	width: 128px;
-		// 	float: right;
-		// 	text-align: left;
-		// 	// background-color: #666666;
-		// 	input {
-		// 		margin: 1px 8px 0 8px;
-		// 		padding: 0;
-		// 		vertical-align: top;
-		// 		position: relative;
-		// 	}
+			// 	@include button(#666);
+			// 	@extend .interface;
+			// 	width: 128px;
+			// 	float: right;
+			// 	text-align: left;
+			// 	// background-color: #666666;
+			// 	input {
+				// 		margin: 1px 8px 0 8px;
+				// 		padding: 0;
+				// 		vertical-align: top;
+				// 		position: relative;
+			// 	}
 		// }
 		// .publish-all.checked {
-		// 	background-color: $action;
+			// 	background-color: $action;
 		// }
 	}
 	.change-set {
 		cursor: pointer;
-    padding: $unit $unit 0 $unit;
-    .inner {
-      @include rounded;
-      @include display-box;
-      border: solid 3px transparent;
-      background-color: #fbfbfb;
-      border: solid 1px #f2f2f2;
-    }
-    .pages {
-      @include box-flex;
-      .title {
-        padding: $unit/2 $unit;
-        color: #333;
-        & + .title {
-          border-top: solid 1px #f2f2f2;
-        }
-      }
-      .url {
-        font-size: 10px;
-        color: #666;
-      }
-    }
-    .add {
-      @include rounded-right;
-      @include display-box;
-      @include box-pack(center);
-      @include box-align(center);
-      width: $container-padding;
-      background-color: #f2f2f2;
-      position: relative;
-      color: #999;
-      span {
-        @extend .interface;
-        font-size: 40px;
-        position: relative;
-        top: -5px;
-      }
-      &:hover {
-        background-color: $action;
-        color: #fff;
-      }
-    }
+		padding: $unit $unit 0 $unit;
+		.inner {
+			@include rounded;
+			@include display-box;
+			border: solid 3px transparent;
+			background-color: #fbfbfb;
+			border: solid 1px #f2f2f2;
+		}
+		.pages {
+			@include box-flex;
+			.title {
+				padding: $unit/2 $unit;
+				color: #333;
+				& + .title {
+					border-top: solid 1px #f2f2f2;
+				}
+			}
+			.url {
+				font-size: 10px;
+				color: #666;
+			}
+		}
+		.add {
+			@include rounded-right;
+			@include display-box;
+			@include box-pack(center);
+			@include box-align(center);
+			width: $container-padding;
+			background-color: #f2f2f2;
+			position: relative;
+			color: #999;
+			span {
+				@extend .interface;
+				font-size: 40px;
+				position: relative;
+				top: -5px;
+			}
+			&:hover {
+				background-color: $action;
+				color: #fff;
+			}
+		}
 		.titles a {
 			display: block;
 			margin-bottom: 2px;
@@ -1544,8 +1560,8 @@ img.missing {
 		}
 	}
 	// .field-group.text {
-	//   // width: 621px;
-	//   width: 100%;
+		//   // width: 621px;
+		//   width: 100%;
 	// }
 	.field-group.image {
 		width: 327px;
@@ -1631,7 +1647,7 @@ img.missing {
 			.bar {
 				@include rounded;
 				height: 8px;
-        padding: 0;
+				padding: 0;
 				background-color: black;
 				position: absolute;
 				top: 0;
@@ -1642,7 +1658,7 @@ img.missing {
 				opacity: 0.3;
 			}
 			#progress-total {
-        background-color: #fff;
+				background-color: #fff;
 			}
 		}
 		#progress-name {
@@ -1696,11 +1712,11 @@ img.missing {
 }
 
 .icon-wrap {
-  overflow: hidden;
-  position: relative;
-  img {
-    position: relative;
-  }
+	overflow: hidden;
+	position: relative;
+	img {
+		position: relative;
+	}
 }
 @import "popover";
 @import "editing";

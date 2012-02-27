@@ -37,7 +37,7 @@ Spontaneous.FieldPreview = (function($, S) {
 			$.each(fields, function(i, field) {
 				var li = dom.li();
 				var name = dom.div('.name').text(field.title);
-				var value = dom.div('.value').html(field.preview());
+				var value = dom.div('.value');
 				li.click(function() {
 					__this.field_to_edit = field;
 				})
@@ -47,6 +47,7 @@ Spontaneous.FieldPreview = (function($, S) {
 				}
 				li.append(name).append(value);
 				wrapper.append(li);
+				value.html(field.preview(value));
 			});
 			return wrapper;
 		}
