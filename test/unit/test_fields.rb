@@ -511,7 +511,7 @@ class FieldsTest < MiniTest::Spec
         @content_class.fields.video.export(nil)[:type].should == "Spontaneous.FieldTypes.WebVideoField"
         @instance.video = "http://www.youtube.com/watch?v=_0jroAM_pO4&feature=feedrec_grec_index"
         fields  = @instance.export(nil)[:fields]
-        fields[0][:processed_value].should == @instance.video.render(:html, :width => 480, :height => 270)
+        fields[0][:processed_value].should == @instance.video.src
       end
 
       should "recognise youtube URLs" do
