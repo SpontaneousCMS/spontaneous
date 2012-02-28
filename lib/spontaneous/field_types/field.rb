@@ -57,7 +57,7 @@ module Spontaneous
 
 
       def outputs
-        [:html]
+        [:html, :plain]
       end
 
       def unprocessed_value=(v)

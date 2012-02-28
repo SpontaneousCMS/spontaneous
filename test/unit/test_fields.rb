@@ -281,6 +281,14 @@ class FieldsTest < MiniTest::Spec
         field.value(:plain).should == "Hello & Welcome"
       end
 
+      should "educate quotes" do
+        field_class = Class.new(FieldTypes::StringField)
+        field = field_class.new
+        field.value = %("John's first... example")
+        field.value(:html).should == "“John’s first… example”"
+        field.value(:plain).should == "“John’s first… example”"
+      end
+
       should "not process values coming from db" do
         ContentClass1 = Class.new(Piece)
 
