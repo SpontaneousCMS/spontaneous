@@ -101,7 +101,8 @@ Spontaneous.TopBar = (function($, S) {
 			, children = this.children;
 			this.li = li;
 			this.select = select;
-			select.append(dom.option().text(this.status_text()));
+			this.status = dom.option().text(this.status_text());
+			select.append(this.status);
 			select.change(function() {
 				var p = $(this.options[this.selectedIndex]).data('page');
 				if (p) {
@@ -155,35 +156,43 @@ Spontaneous.TopBar = (function($, S) {
 			return opt;
 		},
 		update_status: function() {
-			var first = this.select.find('option:first-child');
-			first.text(this.status_text());
-			return first;
+			this.status.text(this.status_text());
+			return this.status;
 		},
 		add_page: function(page, position) {
-			var option = this.option_for_entry(page);
+			var option = this.option_for_entry(page)
+			, container = page.container
+			, name = container.name()
+			, optgroup = this.select.find('optgroup[label="'+name+'"]')
+			optgroup.prepend(option);
+			// since the navigation lists are ordered differently from the entries, it's
+			// difficult to insert into the right position
+			// TODO: re-sort the this.children entries and use this list to find the position in the select
 			if (position === -1) {
-				this.children.push(page)
-				this.select.append(option);
+				this.children[name].push(page)
 			} else {
-				this.children.splice(0, 0, page)
-				var first = this.update_status();
-				first.after(option);
+				this.children[name].splice(position, 0, page)
 			}
+			this.update_status();
 		},
 
 		remove_page: function(page) {
-			var index = 0;
-			for (var i = 0, ii = this.children.length; i < ii; i++) {
-				if (this.children[i].id() === page.id()) { index = i; break; };
-			}
-			this.children.splice(index, 1);
-			this.update_status();
-			var options = this.select.find('option:gt(0)'), remove;
-			options.each(function() {
-				if ($(this).data('page').id() === page.id()) {
-					$(this).remove();
+			var self = this
+			, container = page.container.name()
+			, index = (function(children) {
+				for (var boxname in children) {
+					if (children.hasOwnProperty(boxname)) {
+						var cc = children[boxname];
+						for (var i = 0, ii = cc.length; i < ii; i++) {
+							if (cc[i].id() === page.id()) { return i; };
+						}
+					}
 				}
-			});
+			}(self.children))
+			, optgroup = this.select.find('optgroup[label="'+container+'"]');
+			optgroup.find('option[value="'+page.id()+'"]').remove();
+			this.children[container].splice(index, 1);
+			this.update_status();
 		}
 	}
 
