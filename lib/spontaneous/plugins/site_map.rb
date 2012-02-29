@@ -10,17 +10,20 @@ module Spontaneous::Plugins
     end
 
     def map_entry
-      children = Hash.new { |hash, key| hash[key] = [] }
-
-      self.children.each do |c|
-        children[c.container._name] << c.shallow_map_entry
-      end
       shallow_map_entry.merge({
-        # :children => self.children.map {|c| c.shallow_map_entry },
-        :children => children,
-        :generation => self.generation.map {|c| c.shallow_map_entry },
-        :ancestors => self.ancestors.map {|c| c.shallow_map_entry },
+        :children => grouped_page_list(self.children),
+        :generation => grouped_page_list(self.generation),
+        :ancestors => self.ancestors.map {|c| c.shallow_map_entry }
       })
+    end
+
+    def grouped_page_list(pages)
+      Hash.new { |hash, key| hash[key] = [] }.tap { |map|
+        pages.each do |p|
+          return [p] if p.container.nil? # guard for site root
+          map[p.container._prototype.title] << p.shallow_map_entry
+        end
+      }
     end
 
     def shallow_map_entry

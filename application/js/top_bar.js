@@ -44,51 +44,45 @@ Spontaneous.TopBar = (function($, S) {
 		}
 	};
 	var CurrentNode = function(page) {
-		this.page = page;
-		this.id = page.id;
-		this.path = page.path;
-		this.title = page.slug;
-		this.pages = page.generation.sort(function(p1, p2) {
-			var a = p1.title, b = p2.title;
-			if (a == b) return 0;
-			return (a < b ? -1 : 1);
-		});
-		for (var i = 0, ii = this.pages.length; i < ii; i++) {
-			var p = this.pages[i];
-			if (p.id === this.id) {
-				this.selected = i;
-				break;
-			}
-		}
+		var self = this;
+		self.page = page;
+		self.id = page.id;
+		self.path = page.path;
+		self.title = page.slug;
+		self.pages = page.generation;
 	}
 
 	CurrentNode.prototype = {
 		element: function() {
-			var li = dom.li();
-			var select = dom.select();
+			var self = this
+			, li = dom.li()
+			, select = dom.select()
+			, comparator = function(a, b) {
+				var at = a.slug, bt = b.slug;
+				if (at > bt) { return 1; }
+				if (at < bt) { return -1; }
+				return 0;
+			};
 			select.change(function() {
 				var page = $(this.options[this.selectedIndex]).data('page');
 				S.Location.load_id(page.id);
 				return false;
 			});
-			for (var i = 0, ii = this.pages.length; i < ii; i++) {
-				var p = this.pages[i],
-				option = dom.option({'value': p.id, 'selected':(i == this.selected) }).text(p.slug).data('page', p);
-				if (p.id === this.id) {
-					this.title_option = option;
-				}
-				select.append(option);
-			};
+
+			$.each(this.pages, function(boxname, pages) {
+				pages.sort(comparator);
+				var optgroup = dom.optgroup().attr('label', boxname);
+				for (var i = 0, ii = pages.length; i < ii; i++) {
+					var p = pages[i],
+					option = dom.option({'value': p.id, 'selected':(p.id == self.id) }).text(p.slug).data('page', p);
+					if (p.id === self.id) {
+						self.title_option = option;
+					}
+					optgroup.append(option);
+				};
+				select.append(optgroup);
+			});
 			li.append(select);
-			// select.hide();
-			// var link = $(dom.li).append($('<a/>').data('page', this.page).click(function() {
-			// 	// var page = $(this).data('page');
-			// 	// S.Location.load_id(page.id);
-			// 	select.toggle().trigger('click');
-			// }).text(this.title));
-			//
-			// link.append(select);
-			// return link;
 			return li;
 		},
 		set_title: function(new_title) {
@@ -326,10 +320,8 @@ Spontaneous.TopBar = (function($, S) {
 			this.set('page', undefined);
 			var children = {};
 
-			console.log('location.children', location.children)
 			for (var boxname in location.children) {
 				if (location.children.hasOwnProperty(boxname)) {
-					console.log(boxname)
 					children[boxname] = [];
 					for (var i = 0, cc = location.children[boxname], ii = cc.length; i < ii; i++) {
 						children[boxname].push(new LocationChildProxy(cc[i]));
