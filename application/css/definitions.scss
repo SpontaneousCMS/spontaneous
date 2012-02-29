@@ -221,6 +221,13 @@ $target-name-size: 14px;
 	-o-user-select: none;
 	user-select: none;
 }
+@mixin fullsize($top: 0, $right: 0, $bottom: 0, $left: 0) {
+	position: absolute;
+	left: $left;
+	right: $right;
+	top: $top;
+	bottom: $bottom;
+}
 
 .button {
 	@include button;

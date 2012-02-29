@@ -134,14 +134,22 @@ $dialogue-title-height: 32px;
 }
 
 
+#dialogue-wrap #dialogue-outer.publishing {
+	left: 5%;
+	right: 5%;
+}
+
 #publishing-dialogue {
-	min-height: 200px;
-	max-height: 90%;
-	position: relative;
+	@include fullsize;
 	@include display-box;
 	@include box-orient(horizontal);
+
 	.change-list {
 		@include box-flex;
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
 		width: 50%;
 		&#changes {
 			border-right: solid 2px #000;
@@ -151,6 +159,13 @@ $dialogue-title-height: 32px;
 			@include display-box;
 			@include box-orient(horizontal);
 			@include box-align(center);
+			@include box-sizing;
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 0;
+			height: 25px;
+
 			color: #666;
 			background-color: #f2f2f2;
 			padding: $unit/2 $unit;
@@ -163,7 +178,16 @@ $dialogue-title-height: 32px;
 				padding-right: $unit;
 			}
 		}
+		&#to-publish {
+			position: absolute;
+			left: auto;
+			right: 0;
+			.actions {
+				left: 2px;
+			}
+		}
 		.change-sets {
+			@include fullsize(25px, 0, 0, 0);
 			overflow: auto;
 			.instructions {
 				font-family: $headline-font-family;
@@ -230,6 +254,7 @@ $dialogue-title-height: 32px;
 			.title {
 				padding: $unit/2 $unit;
 				color: #333;
+				font-size: $target-name-size;
 				& + .title {
 					border-top: solid 1px #f2f2f2;
 				}

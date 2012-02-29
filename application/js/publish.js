@@ -17,7 +17,7 @@ Spontaneous.Publishing = (function($, S) {
 			return "publishing";
 		},
 		body: function() {
-			var wrapper = dom.div('#publishing-dialogue').text('publishing')
+			var wrapper = dom.div('#publishing-dialogue');
 			this.wrapper = wrapper;
 			Spontaneous.Ajax.get(['/publish', 'changes'].join('/'), this.change_list_loaded.bind(this));
 			return wrapper;
