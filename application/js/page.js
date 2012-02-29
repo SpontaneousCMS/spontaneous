@@ -27,12 +27,15 @@ Spontaneous.Page = (function($, S) {
 			}
 			return _entries;
 		},
+		// annoyingly duplicating the version coming from the server, which is
+		// a hash of box_name => [box_entries]
 		children: function() {
-			var _children = [];
+			var _children = {};
 			for (var i = 0, entries = this.entries(), ii = entries.length; i < ii; i++) {
-				var e = entries[i];
+				var e = entries[i], container = e.container, container_name = container.name();
 				if (e.is_page()) {
-					_children.push(e);
+					_children[container_name] = (_children[container_name] || []);
+					_children[container_name].push(e);
 				}
 			}
 			return _children;

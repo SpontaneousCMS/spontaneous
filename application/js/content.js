@@ -96,7 +96,6 @@ Spontaneous.Content = (function($, S) {
 			var fields = {}, type = this.type(), prototypes = type.field_prototypes;
 
 			for (var i = 0, ii = this.content.fields.length; i < ii; i++) {
-				console.log('field', this.content.fields[i].name, this.content.fields[i]);
 				var f = this.content.fields[i], prototype, type_class;
 				prototype = prototypes[f.name];
 				if (f && prototype) {
@@ -211,7 +210,6 @@ Spontaneous.Content = (function($, S) {
 			Spontaneous.Ajax.post(['/toggle', this.content.id].join('/'), {}, this.visibility_toggled.bind(this));
 		},
 		visibility_toggled: function(result) {
-			console.log('visibility_toggled', result)
 			this.set('hidden', result.hidden);
 			// this.trigger('visibility_toggled', result);
 		},

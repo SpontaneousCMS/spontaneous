@@ -102,8 +102,9 @@ Spontaneous.TopBar = (function($, S) {
 
 	ChildrenNode.prototype = {
 		element: function() {
-			var li = dom.li('.children');
-			var select = dom.select('.unselected');
+			var li = dom.li('.children')
+			, select = dom.select('.unselected')
+			, children = this.children;
 			this.li = li;
 			this.select = select;
 			select.append(dom.option().text(this.status_text()));
@@ -114,21 +115,41 @@ Spontaneous.TopBar = (function($, S) {
 				}
 				return false;
 			});
-			for (var i = 0, ii = this.children.length; i < ii; i++) {
-				var p = this.children[i];
-				select.append(this.option_for_entry(p));
-			};
+			for (var boxname in children) {
+				if (children.hasOwnProperty(boxname)) {
+					var optgroup = dom.optgroup().attr('label', boxname), cc = this.sort_children(children[boxname]);
+					for (var i = 0, ii = cc.length; i < ii; i++) {
+						var p = cc[i];
+						optgroup.append(this.option_for_entry(p));
+					};
+					select.append(optgroup)
+				}
+			}
 			li.append(select);
 			return li;
 		}.cache(),
 
+		sort_children: function(children) {
+			var comparator = function(a, b) {
+				var at = a.slug(), bt = b.slug();
+				if (at > bt) { return 1; }
+				if (at < bt) { return -1; }
+				return 0;
+			};
+			return children.sort(comparator);
+		},
+
 		status_text: function() {
-			if (this.children.length === 0) {
+			var children = this.children, count = 0;
+			for (var boxname in children) {
+				if (children.hasOwnProperty(boxname)) { count += children[boxname].length; }
+			}
+			if (count === 0) {
 				this.select.hide();
 			} else {
 				this.select.show();
 			}
-			return '('+(this.children.length)+' pages)';
+			return '('+(count)+' pages)';
 		},
 		option_for_entry: function(p) {
 			var opt = dom.option({'value': p.id()}).text(p.slug()).data('page', p);
@@ -303,9 +324,17 @@ Spontaneous.TopBar = (function($, S) {
 		location_loaded: function(location) {
 			// clear the loaded page so that it forces a reload of the nav when we switch back to edit mode
 			this.set('page', undefined);
-			var children = [];
-			for (var i = 0, cc = location.children, ii = cc.length; i < ii; i++) {
-				children.push(new LocationChildProxy(cc[i]));
+			var children = {};
+
+			console.log('location.children', location.children)
+			for (var boxname in location.children) {
+				if (location.children.hasOwnProperty(boxname)) {
+					console.log(boxname)
+					children[boxname] = [];
+					for (var i = 0, cc = location.children[boxname], ii = cc.length; i < ii; i++) {
+						children[boxname].push(new LocationChildProxy(cc[i]));
+					}
+				}
 			}
 			var children_node = new ChildrenNode(children);
 			this.location.append(children_node.element());

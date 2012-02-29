@@ -10,12 +10,19 @@ module Spontaneous::Plugins
     end
 
     def map_entry
+      children = Hash.new { |hash, key| hash[key] = [] }
+
+      self.children.each do |c|
+        children[c.container._name] << c.shallow_map_entry
+      end
       shallow_map_entry.merge({
-        :children => self.children.map {|c| c.shallow_map_entry },
+        # :children => self.children.map {|c| c.shallow_map_entry },
+        :children => children,
         :generation => self.generation.map {|c| c.shallow_map_entry },
         :ancestors => self.ancestors.map {|c| c.shallow_map_entry },
       })
     end
+
     def shallow_map_entry
       {
         :id => id,
