@@ -276,8 +276,7 @@ module Spontaneous
         get '/user' do
           json(user)
         end
-        # TODO: check for perms on the particular bit of content
-        # and pass user level into returned JSON
+
         get '/page/:id' do
           content_for_request { |content| json(content)}
         end
@@ -285,11 +284,6 @@ module Spontaneous
         get '/types' do
           json Site.schema
         end
-
-        # get '/type/:type' do
-        #   klass = params[:type].gsub(/\\./, "::").constantize
-        #   json klass
-        # end
 
         get '/map' do
           json Site.map
@@ -439,6 +433,7 @@ module Spontaneous
           content_for_request(true) do |content, box|
             position = (params[:position] || 0).to_i
             type = Spontaneous.schema[params[:type_name]]#.constantize
+
             if box.writable?(user, type)
               instance = type.new
               box.insert(position, instance)

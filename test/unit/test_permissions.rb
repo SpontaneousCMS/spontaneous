@@ -813,5 +813,12 @@ class PermissionsTest < MiniTest::Spec
       # end
 
     end
+
+    should "determine what fields are visible in the exoported schema" do
+      schema = Site.schema.export(@editor)
+      c_schema = schema["C"]
+      c_schema[:fields].map { |f| f[:name] }.should == %w(editor_level mixed_level default_level)
+      c_schema[:boxes].map { |b| b[:name] }.should == %w(editor_level mixed_level default_level)
+    end
   end
 end

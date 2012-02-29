@@ -18,9 +18,9 @@ module Spontaneous::Collections
     end
 
     def export(user)
-      owner.class.field_names.map do |name|
-        self[name].export(user)
-      end
+      owner.class.field_names.
+        select { |name| owner.field_writable?(user, name) }.
+        map { |name| self[name].export(user) }
     end
 
     def saved

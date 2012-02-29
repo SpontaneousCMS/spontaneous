@@ -32,6 +32,8 @@ class BackTest < MiniTest::Spec
 
   def setup
     @site = setup_site(self.class.site_root)
+    Spot::Permissions::UserLevel.reset!
+    Spot::Permissions::UserLevel.init!
   end
 
 
@@ -71,7 +73,7 @@ class BackTest < MiniTest::Spec
 
       # annoying to have to do this, but there you go
       @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
-      @user.update(:level => Spontaneous::Permissions.root)
+      @user.update(:level => Spontaneous::Permissions[:editor])
       @user.save
       @key = "c5AMX3r5kMHX2z9a5ExLKjAmCcnT6PFf22YQxzb4Codj"
       @key.stubs(:user).returns(@user)
@@ -114,6 +116,7 @@ class BackTest < MiniTest::Spec
         end
         box :in_progress do
           allow Job
+          allow Image
         end
 
         box :featured_jobs do
@@ -121,6 +124,10 @@ class BackTest < MiniTest::Spec
         end
       end
 
+      class AdminAccess < Page
+        field :title
+        field :private, :user_level => :root
+      end
 
 
       @home = HomePage.new(:title => "Home")
@@ -140,12 +147,14 @@ class BackTest < MiniTest::Spec
       @home.in_progress << @job2
       @home.in_progress << @job3
 
+
       @home.save
       @home = Content[@home.id]
+
     end
 
     teardown do
-      [:Page, :Piece, :HomePage, :Job, :Project, :Image, :LinkedJob].each { |klass| BackTest.send(:remove_const, klass) rescue nil }
+      [:Page, :Piece, :HomePage, :Job, :Project, :Image, :LinkedJob, :AdminAccess].each { |klass| BackTest.send(:remove_const, klass) rescue nil }
       Spontaneous::Permissions::User.delete
       Content.delete
     end
@@ -176,11 +185,25 @@ class BackTest < MiniTest::Spec
         assert_equal S::JSON.encode(page.export), last_response.body
       end
 
+      should "respect user levels in page json" do
+        page = AdminAccess.create
+        auth_get "/@spontaneous/page/#{page.id}"
+        result = Spot::JSON.parse(last_response.body)
+        result[:fields].map { |f| f[:name] }.should == ["title"]
+      end
+
       should "return json for all types" do
         auth_get "/@spontaneous/types"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal Site.schema.serialise_http, last_response.body
+        assert_equal Site.schema.serialise_http(@user), last_response.body
+      end
+
+      should "apply the current user's permissions to the exported schema" do
+        auth_get "/@spontaneous/types"
+        assert last_response.ok?
+        result = Spot::JSON.parse(last_response.body)
+        result[:'BackTest.AdminAccess'][:fields].map { |f| f[:name] }.should == %w(title)
       end
 
       should "return scripts from js dir" do
@@ -581,6 +604,12 @@ class BackTest < MiniTest::Spec
       end
     end
     context "UIDs" do
+      setup do
+        # editing UIDs is a developer only activity
+        @user.update(:level => Spontaneous::Permissions[:root])
+        @user.save
+      end
+
       should "be editable" do
         uid = "fishy"
         @project1.uid.should_not == uid
@@ -620,6 +649,7 @@ class BackTest < MiniTest::Spec
     context "Publishing" do
       setup do
         Spontaneous.stubs(:reload!)
+        S::Permissions::UserLevel[:editor].stubs(:can_publish?).returns(true)
         @now = Time.now
         Time.stubs(:now).returns(@now)
         Change.delete
@@ -639,7 +669,7 @@ class BackTest < MiniTest::Spec
 
       should "be able to retrieve a serialised list of all unpublished changes" do
         auth_get "/@spontaneous/publish/changes"
-        assert last_response.ok?
+        assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
         last_response.content_type.should == "application/json;charset=utf-8"
         last_response.body.should == Change.serialise_http
       end
@@ -647,7 +677,7 @@ class BackTest < MiniTest::Spec
       should "be able to start a publish with a set of change sets" do
         Site.expects(:publish_changes).with([@c1.id])
         auth_post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id]
-        assert last_response.ok?
+        assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
 
       should "not launch publish if list of changes is empty" do
@@ -661,7 +691,7 @@ class BackTest < MiniTest::Spec
       should "recognise when the list of changes is complete" do
         Site.expects(:publish_changes).with([@c1.id, @c2.id])
         auth_post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id, @c2.id]
-        assert last_response.ok?
+        assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
     end
 

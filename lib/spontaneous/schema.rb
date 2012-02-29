@@ -227,15 +227,15 @@ module Spontaneous
       end
 
 
-      def export
+      def export(user = nil)
         self.content_classes.inject({}) do |hash, klass|
-          hash[klass.ui_class] = klass.export
+          hash[klass.ui_class] = klass.export(user)
           hash
         end
       end
 
       def serialise_http(user = nil)
-        Spontaneous.serialise_http(export)
+        Spontaneous.serialise_http(export(user))
       end
 
       # all classes including boxes
