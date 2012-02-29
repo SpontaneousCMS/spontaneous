@@ -40,7 +40,7 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 		},
 		body: function() {
 			var editing = dom.div('#add-alias-dialogue')
-				, outer = dom.div()
+				, outer = dom.div('.typelist')
 				, instructions = dom.p('.instructions')
 				, __dialogue = this;
 			instructions.html("Choose a target:");
@@ -52,7 +52,7 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 
 		targets_loaded: function(targets) {
 			var outer = this._outer, __dialogue = this;
-			this.targets = targets;
+			this.targets = this.sort_targets(targets);
 			$.each(targets, function(i, target) {
 				var d = dom.div('.type').html(target.title).click(function() {
 					$('.type', outer).removeClass('selected');
@@ -62,6 +62,15 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 				outer.append(d)
 			});
 
+		},
+		sort_targets: function(targets) {
+			var comparator = function(a, b) {
+				var at = a.title, bt = b.title;
+				if (at > bt) { return 1; }
+				if (at < bt) { return -1; }
+				return 0;
+			}
+			return targets.sort(comparator);
 		}
 	});
 	return AddAliasDialogue;

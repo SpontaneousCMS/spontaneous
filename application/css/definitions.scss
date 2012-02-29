@@ -39,6 +39,8 @@ $radius: $corner-radius;
 $slot-addable-colour: #ddd;
 $entry-background-colour: #eee;
 
+$target-name-size: 14px;
+
 @mixin rounded($radius: 4px) {
   -webkit-border-radius: $radius;
   -moz-border-radius: $radius;
@@ -208,6 +210,16 @@ $entry-background-colour: #eee;
 	-webkit-transition: $transition;
 	-moz-transition: $transition;
 	transition: $transition;
+}
+
+@mixin disable-text-select {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select: none;
+	user-select: none;
 }
 
 .button {

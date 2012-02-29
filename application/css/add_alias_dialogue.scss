@@ -1,20 +1,36 @@
 #add-alias-dialogue {
+	$instruction-height: 20px;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
 	.instructions {
 		@extend .interface;
+		@include box-sizing;
+		height: $instruction-height;
 		margin: 0;
 		background-color: #f2f2f2;
 		color: #666;
 		padding: $unit/2 $unit;
 	}
+	.typelist {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: $instruction-height;
+		bottom: 0;
+		overflow: auto;
+	}
 	.type {
-		@include rounded;
+		@include disable-text-select;
 		@include display-box;
 		cursor: pointer;
     padding: $unit/2 $unit;
 		background-color: #fbfbfb;
-		border: solid 1px #f2f2f2;
-		margin: $unit;
+		// margin: $unit;
 		margin-bottom: 0;
+		font-size: $target-name-size;
 		&:hover {
 			background-color: #666;
 			color: #fff;
@@ -23,5 +39,8 @@
 			background-color: $action;
 			color: #fff;
 		}
+	}
+	.type + .type {
+		border-top: solid 1px #f2f2f2;
 	}
 }
