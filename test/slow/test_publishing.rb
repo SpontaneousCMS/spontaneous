@@ -627,7 +627,7 @@ class PublishingTest < MiniTest::Spec
         result.first.export.should == {
           :changes => [{:id => change.id, :created_at => change.created_at.to_s, :page_ids => [1, 2]}],
           :pages => [
-            {:id => 1, :title => "Page \"1\"", :path => "/page-1", :depth => 0},
+            {:id => 1, :title => "Page “1”", :path => "/page-1", :depth => 0},
             {:id => 2, :title => "Page 2", :path => "/page-2", :depth => 0}
           ]
         }
