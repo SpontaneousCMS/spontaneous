@@ -75,7 +75,7 @@ module Spontaneous
             render_revision
           end
           after_publish
-        rescue Exception => e
+        rescue => e
           abort_publish(e)
           raise(e)
         end
