@@ -19,7 +19,8 @@ module Spontaneous
           c.is_a?(S::Change) ? c : S::Change[c]
         }
         all_changes = S::Change.all
-        if changes == all_changes
+
+        if (all_changes - changes).empty?
           # publish_all is quicker
           publish_all
         else

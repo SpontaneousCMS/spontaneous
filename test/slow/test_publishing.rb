@@ -770,7 +770,7 @@ class PublishingTest < MiniTest::Spec
         Site.publish_changes([change1.id, change2.id])
       end
 
-      should "issue a publish_all if passed list including all change sets" do
+      should "issue a publish_all if passed list including all change sets (in any order)" do
         change1 = Change.new
         change1.modified_list = [1, 2, 3]
         change1.save
@@ -781,7 +781,7 @@ class PublishingTest < MiniTest::Spec
         change3.modified_list = [8, 9]
         change3.save
         Content.expects(:publish).with(@revision, nil)
-        Site.publish_changes([change1.id, change2.id, change3.id])
+        Site.publish_changes([change3.id, change2.id, change1.id])
       end
 
       should "publish all" do
