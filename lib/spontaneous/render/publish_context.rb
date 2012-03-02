@@ -18,6 +18,12 @@ module Spontaneous::Render
       end
     end
 
+    def compressed_stylesheets(stylesheets)
+      _with_render_cache(stylesheets.join(",")) do
+        super(stylesheets)
+      end
+    end
+
     def _pages_at_depth(origin_page, depth)
       _with_render_cache("pages_at_depth.#{origin_page.id}.#{depth}") do
         super

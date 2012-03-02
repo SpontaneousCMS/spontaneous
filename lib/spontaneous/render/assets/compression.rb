@@ -13,17 +13,23 @@ module Spontaneous
 
         def compress_css(filelist, options={})
           # compress_files(filelist, :css, options)
-          options = {
+          opts = {
             :load_paths => [Spontaneous.css_dir],
             # :filename => sass_template,
             :cache => false,
             :style => :compressed
-          }
+          }.merge(options)
           css = filelist.map do |path|
-            Sass::Engine.for_file(path, options).render
+            Sass::Engine.for_file(path, opts).render
           end.join("\n")
           hash = digest(css)
           [css, hash]
+        end
+
+        def shine_compress_string(string, format, options = {})
+          compressed = Shine::compress_string(string, format, options).force_encoding("UTF-8")
+          hash = digest(compressed)
+          [compressed, hash]
         end
 
         def shine_compress_files(filelist, format, options = {})

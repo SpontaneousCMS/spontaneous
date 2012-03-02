@@ -39,23 +39,10 @@ class VisibilityTest < MiniTest::Spec
             end
             e.save
           end
-          # puts "-->"
-          # puts d.id
-          # p [:things, d.class, d.pages.schema_id.to_s, P.boxes.things.schema_id.to_s]
-          # p c.unordered_children.map { |p| [p.parent_id, p.box_sid.to_s, p.uid] }
-          # p c.children.map { |p| p.box_sid.to_s }
-          # puts "--<"
-          # c.save
-          # d.save
         end
       end
       @root.save
       @root.reload
-      # puts "-->"
-      # p [:things, @root.pages.first.class, @root.pages.first.things.schema_id.to_s, P.boxes.things.schema_id.to_s]
-      # p @root.pages.first.unordered_children.map { |p| [p.box_sid.to_s, p.uid] }
-      # p @root.pages.first.children.map { |p| p.box_sid.to_s }
-      # puts "--<"
       @child = Page.uid("0")
     end
 

@@ -18,7 +18,7 @@ module Spontaneous::Render::Helpers
     end
 
     def compressed_scripts(scripts)
-      file_paths = scripts.map { |script| [script, find_file("#{script}.js")] }
+      file_paths = scripts.map { |script| [script, S::Render::Assets.find_file("#{script}.js")] }
       invalid, file_paths = file_paths.partition { |url, path| path.nil? }
       tags = []
       unless file_paths.empty?
@@ -34,13 +34,6 @@ module Spontaneous::Render::Helpers
       tags.join("\n")
     end
 
-    def find_file(relative_path)
-      Spontaneous.instance.paths.expanded(:public).each do |root|
-        path = root / relative_path
-        return path if ::File.exist?(path)
-      end
-      nil
-    end
   end
 end
 
