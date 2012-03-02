@@ -101,12 +101,12 @@ module Spontaneous::Plugins
       self
     end
 
-    def set_visible(visible)
+    def set_visible(visible, hidden_origin = nil)
       protect_root_visibility!
       if self.visible? != visible
         raise Spontaneous::NotShowable.new(self, hidden_origin) if hidden? && visible && !showable?
         self[:hidden] = !visible
-        self[:hidden_origin] = nil
+        self[:hidden_origin] = hidden_origin
         @_visibility_modified = true
       end
     end

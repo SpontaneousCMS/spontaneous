@@ -199,6 +199,8 @@ class VisibilityTest < MiniTest::Spec
       piece1.reload.visible?.should be_false
     end
 
+
+
     context "root" do
       should "should not be hidable" do
         @root.is_root?.should be_true
@@ -238,7 +240,7 @@ class VisibilityTest < MiniTest::Spec
         end
       end
 
-      should "only show visibile pieces" do
+      should "only show visible pieces" do
         page = Content.first(:uid => "1")
         page.pieces.length.should == 4
         page.things.pieces.length.should == 4
@@ -277,6 +279,33 @@ class VisibilityTest < MiniTest::Spec
         Content.with_visible do
           pieces = @root.pages.pieces.map { |p| p }
         end
+      end
+    end
+
+    context "aliases" do
+      setup do
+        class ::MyAlias < Piece; end
+        MyAlias.alias_of ::E
+      end
+
+      teardown do
+        Object.send(:remove_const, :MyAlias)
+      end
+
+      should "be initalized as invisible if their target is invisible" do
+        target = E.find(:uid => "1.1")
+        target.hide!
+        al = MyAlias.create(:target => target)
+        al.visible?.should be_false
+      end
+
+      should "be made visible along with their target if added when target is hidden" do
+        target = E.find(:uid => "1.1")
+        target.hide!
+        al = MyAlias.create(:target => target)
+        al.reload.visible?.should be_false
+        target.show!
+        al.reload.visible?.should be_true
       end
     end
   end

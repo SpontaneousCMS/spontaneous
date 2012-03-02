@@ -123,6 +123,10 @@ module Spontaneous::Plugins
         super.merge(:target => target.shallow_export(user), :alias_title => target.alias_title, :alias_icon => target.exported_alias_icon)
       end
 
+      def before_create
+        self.set_visible(target.visible?, target.id)
+        super
+      end
     end
 
     module PieceAliasMethods
