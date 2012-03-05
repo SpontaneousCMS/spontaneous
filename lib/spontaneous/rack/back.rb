@@ -285,11 +285,8 @@ module Spontaneous
           json Site.schema
         end
 
-        get '/map' do
-          json Site.map
-        end
-
-        get '/map/:id' do
+        get '/map/?:id?' do
+          last_modified(Site.modified_at)
           map = Site.map(params[:id])
           if map
             json(map)
@@ -299,6 +296,7 @@ module Spontaneous
         end
 
         get '/location*' do
+          last_modified(Site.modified_at)
           if Page.count == 0
             406
           else

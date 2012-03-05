@@ -37,12 +37,12 @@ class BackTest < MiniTest::Spec
   end
 
 
-  def auth_post(path, params={})
-    post(path, params.merge("__key" => @key))
+  def auth_post(path, params={}, env={})
+    post(path, params.merge("__key" => @key), env)
   end
 
-  def auth_get(path, params={})
-    get(path, params.merge("__key" => @key))
+  def auth_get(path, params={}, env={})
+    get(path, params.merge("__key" => @key), env)
   end
 
   context "Editing interface" do
@@ -241,6 +241,38 @@ class BackTest < MiniTest::Spec
         S::Content.stubs(:[]).with(id).returns(nil)
         auth_get "/@spontaneous/map/#{id}"
         assert last_response.status == 404
+      end
+
+      should "return the correct Last-Modified header for the site map" do
+        now = Time.at(Time.now.to_i + 10000)
+        S::Site.stubs(:modified_at).returns(now)
+        auth_get '/@spontaneous/map'
+        Time.httpdate(last_response.headers["Last-Modified"]).should == now
+        auth_get "/@spontaneous/location#{@project1.path}"
+        Time.httpdate(last_response.headers["Last-Modified"]).should == now
+      end
+
+      should "reply with a 304 Not Modified if the site hasn't been updated since last request" do
+        datestring = "Sat, 03 Mar 2012 00:49:44 GMT"
+        now = Time.httpdate(datestring)
+        S::Site.stubs(:modified_at).returns(now)
+        auth_get "/@spontaneous/map/#{@home.id}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
+        last_response.status.should == 304
+        auth_get "/@spontaneous/map", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
+        last_response.status.should == 304
+        auth_get "/@spontaneous/location#{@project1.path}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
+        last_response.status.should == 304
+      end
+
+      should "return the map data if the site has been updated since last request" do
+        datestring1 = "Sat, 03 Mar 2012 00:49:44 GMT"
+        datestring2 = "Sat, 03 Mar 2012 01:49:44 GMT"
+        now = Time.httpdate(datestring2)
+        S::Site.stubs(:modified_at).returns(now)
+        auth_get "/@spontaneous/map/#{@home.id}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring1}
+        last_response.status.should == 200
+        auth_get "/@spontaneous/location#{@project1.path}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring1}
+        last_response.status.should == 200
       end
 
       should "reorder pieces" do
