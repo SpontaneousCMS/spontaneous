@@ -48,6 +48,17 @@ module Spontaneous
         instance.pending_revision
       end
 
+      # Returns the last date at which a Page was added or removed from the site
+      # Used to avoid un-necessary loading of the navigation map during editing
+      def modified_at
+        instance.modified_at || Time.now
+      end
+
+      # Called by Page.after_create and Page.after_destroy in order to update
+      # the Site's modification time
+      def site_modified!
+        instance.update :modified_at => Time.now
+      end
     end
   end
 end

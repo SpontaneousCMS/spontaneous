@@ -4,7 +4,7 @@ module Spontaneous
   class Site < Spontaneous::Facet
     include Plugins::Site::Instance
     include Plugins::Site::Publishing
-    include Plugins::Site::Revisions
+    include Plugins::Site::State
     include Plugins::Site::Selectors
     include Plugins::Site::Map
     include Plugins::Site::Search

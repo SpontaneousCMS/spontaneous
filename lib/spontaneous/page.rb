@@ -11,6 +11,7 @@ module Spontaneous
     include Plugins::PageSearch
     include Plugins::Controllers
     include Plugins::Page::Request
+    include Plugins::Page::SiteTimestamps
 
     many_to_one :parent,   :class => Content, :reciprocal => :children
     one_to_many :children, :class => Content, :key => :parent_id, :reciprocal => :parent

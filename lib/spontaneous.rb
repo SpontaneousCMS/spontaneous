@@ -138,11 +138,12 @@ module Spontaneous
     module Page
       autoload :Formats,        "spontaneous/plugins/page/formats"
       autoload :Request,        "spontaneous/plugins/page/request"
+      autoload :SiteTimestamps, "spontaneous/plugins/page/site_timestamps"
     end
 
     module Site
       autoload :Publishing,     "spontaneous/plugins/site/publishing"
-      autoload :Revisions,      "spontaneous/plugins/site/revisions"
+      autoload :State,          "spontaneous/plugins/site/state"
       autoload :Selectors,      "spontaneous/plugins/site/selectors"
       autoload :Map,            "spontaneous/plugins/site/map"
       autoload :Instance,       "spontaneous/plugins/site/instance"
@@ -151,6 +152,7 @@ module Spontaneous
       autoload :Schema,         "spontaneous/plugins/site/schema"
       autoload :Level,          "spontaneous/plugins/site/level"
       autoload :Storage,        "spontaneous/plugins/site/storage"
+      autoload :Timestamps,     "spontaneous/plugins/site/timestamps"
     end
 
     module Application

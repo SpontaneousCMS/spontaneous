@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 module Spontaneous::Plugins::Site
-  module Revisions
+  module State
     extend ActiveSupport::Concern
 
     module ClassMethods
@@ -19,6 +19,10 @@ module Spontaneous::Plugins::Site
 
       def pending_revision
         Spontaneous::State.pending_revision
+      end
+
+      def modified_at
+        Spontaneous::State.modified_at
       end
 
       def revision_root(*path)
