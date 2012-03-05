@@ -90,7 +90,7 @@ class AssetTest < MiniTest::Spec
     should "be compressed in live environment" do
       files = [@fixture_root / "public1/css/a.scss", @fixture_root / "public2/css/b.scss"]
       context = new_context
-      context.expects(:compress_css_string).with(<<-CSS).returns(["/* compressed */\n", "df3e2b3fa3409d8ca37faac7da80349098f0b28a"])
+      Shine.expects(:compress_string).with(<<-CSS, :css, {}).once.returns("/* compressed */\n")
 .a{width:8px}
 .c { color: #fff; }
 .b{height:42px}
@@ -105,22 +105,14 @@ class AssetTest < MiniTest::Spec
 
     should "use a cache to make sure identical file lists are only compressed once" do
       context = new_context
-      context.expects(:compress_css_string).with(<<-CSS).once.returns(["/* compressed1 */\n", "20aac22ae20e78ef1574a3a6635fa353148e9d9a"])
+      Shine.expects(:compress_string).with(<<-CSS, :css, {}).once.returns("/* compressed1 */\n")
 .a{width:8px}
 .b{height:42px}
       CSS
-      context.expects(:compress_css_string).with(<<-CSS).once.returns(["/* compressed2 */\n", "77ec1b6ee2907c65cf316b99b59c8cf8006dcddf"])
+      Shine.expects(:compress_string).with(<<-CSS, :css, {}).once.returns("/* compressed2 */\n")
 .a{width:8px}
 .c { color: #fff; }
       CSS
-#       Shine.expects(:compress_string).with(<<-CSS, :css, {}).once.returns("/* compressed1 */\\n")
-# .a{width:8px}
-# .b{height:42px}
-#       CSS
-#       Shine.expects(:compress_string).with(<<-CSS, :css, {}).once.returns("/* compressed2 */\\n")
-# .a{width:8px}
-# .c { color: #fff; }
-#       CSS
       S::Render.with_publishing_renderer do
         result = context.stylesheets("/css/a", "/css/b")
         result = context.stylesheets("/css/a", "/css/b")
@@ -133,14 +125,10 @@ class AssetTest < MiniTest::Spec
 
     should "support UTF8 styles" do
       context = new_context
-      context.expects(:compress_css_string).with(<<-CSS).once.returns(["/* \xC2 */\n", "13234"])
+      Shine.expects(:compress_string).with(<<-CSS, :css, {}).once.returns("/* \xC2 */\n".force_encoding("ASCII-8BIT"))
 .a{width:8px}
 .b{height:42px}
       CSS
-#       Shine.expects(:compress_string).with(<<-CSS, :css, {}).once.returns("/* \\xC2 */\\n".force_encoding("ASCII-8BIT"))
-# .a{width:8px}
-# .b{height:42px}
-#       CSS
       result = context.stylesheets("/css/a", "/css/b")
     end
   end

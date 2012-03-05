@@ -49,16 +49,8 @@ module Spontaneous::Render::Helpers
     end
 
     def compress_css_string(css_string)
-      compress_css_string_fake(css_string)
+      Spontaneous::Render::Assets::Compression.shine_compress_string(css_string, :css)
     end
 
-    def compress_css_string_fake(css_string)
-      [css_string.force_encoding("UTF-8"), S::Render::Assets::Compression.digest(css_string)]
-    end
-
-    # shine yui doesn't currently support long data: urls
-    def compress_css_string_shine(css_string)
-      Spontaneous::Render::Assets::Compression.shine_compress_string(css, :css)
-    end
   end
 end
