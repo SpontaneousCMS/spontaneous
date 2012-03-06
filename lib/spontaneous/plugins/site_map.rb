@@ -20,7 +20,7 @@ module Spontaneous::Plugins
     def grouped_page_list(pages)
       Hash.new { |hash, key| hash[key] = [] }.tap { |map|
         pages.each do |p|
-          return [p] if p.container.nil? # guard for site root
+          return {:Root => [p.shallow_map_entry]} if p.container.nil? # guard for site root
           map[p.container._prototype.title] << p.shallow_map_entry
         end
       }

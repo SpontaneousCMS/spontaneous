@@ -2,7 +2,19 @@
 
 
 Spontaneous.PageBrowser = (function($, S) {
-	var dom = S.Dom;
+	var dom = S.Dom
+	, flattenPageList = function(pageList) {
+		var pages = []
+		, comparator = function(a, b) {
+			var at = a.title, bt = b.title;
+			if (at > bt) { return 1; }
+			if (at < bt) { return -1; }
+			return 0;
+		};
+		$.each(pageList, function(key, list) { pages = pages.concat(list); });
+		pages.sort(comparator);
+		return pages;
+	};
 	var PageBrowser = new JS.Class(Spontaneous.PopoverView, {
 		initialize: function(origin) {
 			origin = String(origin || "");
@@ -19,12 +31,12 @@ Spontaneous.PageBrowser = (function($, S) {
 		},
 		origin_list: function() {
 			return function(location) {
-				return location.generation;
+				return flattenPageList(location.generation);
 			}
 		},
 		children_list: function() {
 			return function(location) {
-				return location.children;
+				return flattenPageList(location.children);
 			}
 		},
 		origin_ancestors: function() {
@@ -44,7 +56,7 @@ Spontaneous.PageBrowser = (function($, S) {
 			} else {
 				path = '/map/' + this.origin.id;
 			}
-			S.Ajax.get(path, this.page_list_loaded.bind(this));
+			S.Location.retrieve(path, this.page_list_loaded.bind(this));
 		},
 		view: function() {
 			var wrapper = dom.div('.page-browser'), table = dom.div('.page-list');
@@ -56,37 +68,35 @@ Spontaneous.PageBrowser = (function($, S) {
 			this.get_page_list();
 			return wrapper;
 		},
-		page_list_loaded: function(page_list, status) {
-			if (status === 'success') {
-				this.table.empty();
-				this.location = page_list;
-				this.manager.page_list_loaded(this);
-				var g = this.page_list(this.location), table = this.table;
-				for (var i = 0, ii = g.length; i < ii; i++) {
-					var page = g[i];
-					table.append(this.get_entry(page));
-				}
-
-				this.ancestors.empty();
-				var _browser = this, list = dom.ul(), ancestors = this.ancestor_list(this.location);
-
-				this.depth = ancestors.length;
-				var click = function(p) {
-					return function(event) {
-						_browser.ancestor_selected(p);
-						return false;
-					};
-				};
-
-				for (var i = 0, ii = ancestors.length; i < ii; i++) {
-					var a = ancestors[i], li = dom.li().append(dom.a().text(a.title)).append(dom.span().text("/")).click(click(a));
-					list.append(li);
-				}
-				if (ancestors.length === 0) {
-					list.append(dom.li().append(dom.a().text('Choose a page...')))
-				}
-				this.ancestors.append(list);
+		page_list_loaded: function(page_list, xhr) {
+			this.table.empty();
+			this.location = page_list;
+			this.manager.page_list_loaded(this);
+			var g = this.page_list(this.location), table = this.table;
+			for (var i = 0, ii = g.length; i < ii; i++) {
+				var page = g[i];
+				table.append(this.get_entry(page));
 			}
+
+			this.ancestors.empty();
+			var _browser = this, list = dom.ul(), ancestors = this.ancestor_list(this.location);
+
+			this.depth = ancestors.length;
+			var click = function(p) {
+				return function(event) {
+					_browser.ancestor_selected(p);
+					return false;
+				};
+			};
+
+			for (var i = 0, ii = ancestors.length; i < ii; i++) {
+				var a = ancestors[i], li = dom.li().append(dom.a().text(a.title)).append(dom.span().text("/")).click(click(a));
+				list.append(li);
+			}
+			if (ancestors.length === 0) {
+				list.append(dom.li().append(dom.a().text('Choose a page...')))
+			}
+			this.ancestors.append(list);
 		},
 		get_entry: function(page) {
 			var _browser = this, selected = function(p) {
