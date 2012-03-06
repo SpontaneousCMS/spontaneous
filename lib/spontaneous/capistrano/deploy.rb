@@ -27,6 +27,13 @@ Capistrano::Configuration.instance(:must_exist).load do
     end
   end
 
+  namespace :deploy do
+    task :migrate, :roles => :db do
+      spot_env = fetch(:spot_env, "production")
+      run "cd #{latest_release} && SPOT_ENV=#{spot_env} ./bin/spot migrate"
+    end
+  end
+
   after 'deploy:finalize_update', 'spot:symlink_cache'
   after 'bundle:install', 'spot:symlink_application'
 end
