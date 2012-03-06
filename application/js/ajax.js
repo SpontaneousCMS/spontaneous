@@ -11,15 +11,12 @@ Spontaneous.Ajax = (function($, S) {
 		namespace: "/@spontaneous",
 		get: function(url, callback) {
 			var handle_response = function(data, textStatus, xhr) {
-				if (textStatus !== 'success') {
-					xhr = data;
-					data = {};
-				}
 				callback(data, textStatus, xhr);
 			};
 			$.ajax({
 				'url': this.request_url(url),
 				'success': handle_response,
+				'ifModified': true,
 				'data': this.api_access_key(),
 				'error': handle_response // pass the error to the handler too
 			});

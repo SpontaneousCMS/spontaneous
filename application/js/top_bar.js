@@ -403,7 +403,7 @@ Spontaneous.TopBar = (function($, S) {
 			var nodes = [];
 			var location = this.get('location');
 			var $location_bar = this.location;
-			var ancestors = location.ancestors;
+			var ancestors = location.ancestors.slice(0);
 			var root, is_root = false, root_node, children_node, current_node;
 			if (ancestors.length === 0) {
 				root = location;

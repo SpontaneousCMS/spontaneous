@@ -64,10 +64,7 @@ Spontaneous.Location = (function($, S) {
 	var Location = new JS.Singleton({
 		include: Spontaneous.Properties,
 		init: function(callback) {
-			var complete = function() {
-				callback();
-				this.location_loaded();
-			}.bind(this);
+			this.locationCache = {};
 			callback();
 			State.restore();
 			// $(window).bind('hashchange', State.restore);
@@ -86,12 +83,10 @@ Spontaneous.Location = (function($, S) {
 		},
 		load_map: function() {
 		},
-		location_loaded: function(location, status, xhr) {
-			if (status !== 'success') {
-				if (xhr.status === 406) { // Code returned if site is missing a root page
-					var d = new Spontaneous.AddHomeDialogue(Spontaneous.Types.get('types'));
-					d.open();
-				}
+		location_loaded: function(location, xhr) {
+			if (xhr.status === 406) { // Code returned if site is missing a root page
+				var d = new Spontaneous.AddHomeDialogue(Spontaneous.Types.get('types'));
+				d.open();
 			} else {
 				this.set('location', location);
 				// HACK: see preview.js (Preview.display)
@@ -132,13 +127,13 @@ Spontaneous.Location = (function($, S) {
 			if (this.location() && path === this.location().path) {
 				return this.location();
 			}
-			ajax.get('/location'+path, this.location_loaded.bind(this));
+			this.retrieve('/location'+path, this.location_loaded.bind(this));
 		},
 		find_id: function(id) {
 			if (this.location() && id === this.location().id) {
 				return this.location();
 			}
-			ajax.get('/map/'+id, this.location_loaded.bind(this));
+			this.retrieve('/map/'+id, this.location_loaded.bind(this));
 		},
 		path_from_url: function(url) {
 			var map = this.get('map'),
@@ -159,10 +154,40 @@ Spontaneous.Location = (function($, S) {
 				position += 1;
 			}
 			return path;
+		},
+		// easier to create my own 304 sensitive ajax request
+		// than peg on a content cache to jQuery's
+		retrieve: function(url, callback) {
+			var self = this
+			, req = new XMLHttpRequest()
+			, data;
+			req.open("GET", ajax.request_url(url, true), true)
+			req.setRequestHeader('If-Modified-Since', self.lastModified(url));
+			req.onreadystatechange = function(event) {
+				if (req.readyState === XMLHttpRequest.DONE) {
+					if (req.status === 200) {
+						data = jQuery.parseJSON(req.responseText);
+						self.setLocationCache(url, req.getResponseHeader("Last-Modified"), data)
+					}
+					if (req.status === 304) {
+						data = self.getLocationCache(url)
+					}
+					callback(data, req);
+				}
+			};
+			req.send(null);
+		},
+		lastModified: function(path) {
+			return (this.locationCache[path] || {}).lastModified;
+		},
+		setLocationCache: function(path, lastModified, location) {
+			this.locationCache[path] = { lastModified: lastModified, location: location };
+		},
+		getLocationCache: function(path) {
+			return this.locationCache[path].location;
 		}
 	});
 	// $(window).bind('popstate', State.popstate);
 	return Location;
 })(jQuery, Spontaneous);
-
 
