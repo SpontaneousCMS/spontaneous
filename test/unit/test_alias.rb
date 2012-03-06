@@ -243,6 +243,17 @@ class AliasTest < MiniTest::Spec
             end
             assert_same_content pieces, X.targets
           end
+
+          should "allow for filtering instances according to current page content" do
+            @page.box1 << AAA.create
+            @page.box2 << AAA.create
+            @page.save.reload
+            allowable = AAA.all - @page.box1.contents
+            ::X  = Class.new(::Piece) do
+              alias_of :AAA, :filter => proc { |choice, page, box| !box.include?(choice) }
+            end
+            assert_same_content allowable, X.targets(@page, @page.box1)
+          end
         end
       end
 

@@ -58,7 +58,11 @@ module Spontaneous::Plugins
         end
         targets.concat(query.all)
         if filter = @alias_options[:filter] and filter.is_a?(Proc)
-          targets.select(&filter)
+          filtered = []
+          targets.each { |target|
+            filtered << target if filter[*([target, owner, box][0...(filter.arity)])]
+          }
+          filtered
         else
           targets
         end
