@@ -254,6 +254,16 @@ class AliasTest < MiniTest::Spec
             end
             assert_same_content allowable, X.targets(@page, @page.box1)
           end
+
+          should "allow for ensuring the uniqueness of the entries" do
+            aaa = AAA.all
+            ::X  = Class.new(::Piece) do
+              alias_of :AAA, :unique => true
+            end
+            @page.box1 << aaa.first
+            @page.save.reload
+            assert_same_content [aaa.last], X.targets(@page, @page.box1)
+          end
         end
       end
 

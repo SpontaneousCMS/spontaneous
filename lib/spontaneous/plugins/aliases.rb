@@ -62,10 +62,13 @@ module Spontaneous::Plugins
           targets.each { |target|
             filtered << target if filter[*([target, owner, box][0...(filter.arity)])]
           }
-          filtered
-        else
-          targets
+          targets = filtered
         end
+        if @alias_options[:unique] && box
+          existing = box.map { |entry| entry.target || entry }
+          targets.reject! { |target| existing.include?(target) }
+        end
+        targets
       end
 
       def target_class(class_definition)
