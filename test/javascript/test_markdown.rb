@@ -9,7 +9,7 @@ class MarkdownEditorTest < MiniTest::Spec
 
   def setup
     @page = page
-    @page.x(<<-JS)
+    @page.eval(<<-JS)
       var fake_input = function(start, end, value) {
         var array = [];
         array.value = value;
@@ -25,19 +25,25 @@ class MarkdownEditorTest < MiniTest::Spec
           if (new_value) { this.value = new_value; }
           return this.value;
         };
+        array.focus = function() {};
+        array.bind = function() { return array;  };
         return array;
       }
     JS
   end
 
   def style(command, sel_start, sel_end, value)
-    state = @page.x(<<-JS)
+    state = @page.eval(<<-JS)
       var input = fake_input(#{sel_start}, #{sel_end}, #{value.inspect})
       var command = new Spontaneous.FieldTypes.MarkdownField.#{command}(input)
       command.execute();
       Spontaneous.FieldTypes.MarkdownField.TextCommand.get_state(input)
     JS
-    result = Hash[state.to_ary]
+    result = {
+      "before" => state["before"],
+      "middle" => state["middle"],
+      "after" => state["after"]
+    }
     result["value"] = result["before"] + result["middle"] + result["after"]
     result
   end
@@ -90,6 +96,40 @@ class MarkdownEditorTest < MiniTest::Spec
             state = style(style, 8, 8, "Lorem ipsum\n\ndolor sit #{mark}amet#{mark}")
             state['value'].should == "Lorem #{mark}ipsum#{mark}\n\ndolor sit #{mark}amet#{mark}"
           end
+        end
+      end
+      context "for links" do
+        setup do
+          @page.eval("Spontaneous.Location.retrieve = function() {}")
+          @page.eval("Spontaneous.Popover.open = function() {}")
+        end
+        should "expand selection to full link if cursor inside a link text" do
+          state = style('Link', 8, 8, "Before [link](http://example.com/page?param1=a&param2=b) after")
+          state["middle"].should == "[link](http://example.com/page?param1=a&param2=b)"
+        end
+        should "expand selection to full link if cursor inside a link URL" do
+          state = style('Link', 14, 14, "Before [link](http://example.com/page?param1=a&param2=b) after")
+          state["middle"].should == "[link](http://example.com/page?param1=a&param2=b)"
+        end
+        should "expand selection to full link if cursor inside a link URL with brackets afterwards" do
+          state = style('Link', 14, 14, "Before [link](http://example.com/page?param1=a&param2=b) (after)")
+          state["middle"].should == "[link](http://example.com/page?param1=a&param2=b)"
+        end
+        should "expand selection to full link if cursor between link text & URL" do
+          state = style('Link', 13, 13, "Before [link](http://example.com/page?param1=a&param2=b) after")
+          state["middle"].should == "[link](http://example.com/page?param1=a&param2=b)"
+        end
+        should "not greedily expand forward to other brackets within text" do
+          state = style('Link', 7, 11, "Before link (after)")
+          state["middle"].should == "link"
+        end
+        should "not greedily expand to other brackets within text" do
+          state = style('Link', 9, 13, "(Before) link after")
+          state["middle"].should == "link"
+        end
+        should "properly extract link from surrounding brackets" do
+          state = style('Link', 9, 9, "Before ([link](http://example.com/page?param1=a&param2=b)) after")
+          state["middle"].should == "[link](http://example.com/page?param1=a&param2=b)"
         end
       end
     end

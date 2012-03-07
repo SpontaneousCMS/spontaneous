@@ -486,29 +486,55 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 				text = m[1];
 				url = m[2];
 			}
+			this.open_dialogue(event, text, url);
+			this.input.focus();
+			return false;
+		},
+		open_dialogue: function(event, text, url) {
 			if (!this._dialogue) {
 				this._dialogue = Spontaneous.Popover.open(event, new LinkView(this, text, this.preprocess_url(text, url)));
 			} else {
 				this._dialogue.close();
 				this._dialogue = null;
 			}
-			this.input.focus();
-			return false;
 		},
 		expand_selection: function(state) {
 			state = this.fix_selection_whitespace(state)
-			var selected = state.selection, m, start = state.start, end = state.end;
+			var selected = state.selection, m, n, start = state.start, end = state.end;
 
-			m = /(\[[^\)]*?)$/.exec(state.before);
+			// cursor is either in the [] or in the ()
+			// first test for being in []
+			m = /(\[[^\]]*)$/.exec(state.before);
 			if (m) {
-				start -= m[1].length;
-				selected = m[1] + selected;
+				n = /^(.*\]\(.+?\))/.exec(state.after);
+				if (n) {
+					start -= m[1].length;
+					selected += m[1];
+					end += n[1].length;
+					selected += n[1];
+				}
 			}
-			// TODO: this breaks if ')' in URL...
-			m = /^([^\)\[]*?\))/.exec(state.after);
+			// now test for being in the ()
+			m = /(\[.+?\]\([^\)]*)$/.exec(state.before);
 			if (m) {
-				end += m[1].length;
-				selected += m[1];
+				n = /^(.*?\))/.exec(state.after);
+				if (n) {
+					start -= m[1].length;
+					selected += m[1];
+					end += n[1].length;
+					selected += n[1];
+				}
+			}
+			// finally check for being exactly between the two
+			m = /(\[.+?\])$/.exec(state.before);
+			if (m) {
+				n = /^(\(.+?\))/.exec(state.after);
+				if (n) {
+					start -= m[1].length;
+					selected += m[1];
+					end += n[1].length;
+					selected += n[1];
+				}
 			}
 			return {selection:selected, start:start, end:end};
 		},
@@ -526,7 +552,7 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 					url = 'http://' + url;
 				} else if (/^[^ @]+@([a-z-]+\.)+[a-z]{2,}$/i.exec(url)) { // email addresses
 					url = 'mailto:' + url;
-				} else if (/^@([a-z0-9_]{1,15})$/i.exec(url)) { // email addresses
+				} else if (/^@([a-z0-9_]{1,15})$/i.exec(url)) { // twitter handles
 					url = 'https://twitter.com/' + url.substring(1);
 				} else {
 					// need a flag saying that the string doesn't look like URL because
