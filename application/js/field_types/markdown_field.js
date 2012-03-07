@@ -526,6 +526,8 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 					url = 'http://' + url;
 				} else if (/^[^ @]+@([a-z-]+\.)+[a-z]{2,}$/i.exec(url)) { // email addresses
 					url = 'mailto:' + url;
+				} else if (/^@([a-z0-9_]{1,15})$/i.exec(url)) { // email addresses
+					url = 'https://twitter.com/' + url.substring(1);
 				} else {
 					// need a flag saying that the string doesn't look like URL because
 					// this function is used in two places and each one needs to respond
