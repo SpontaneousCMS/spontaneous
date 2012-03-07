@@ -225,6 +225,15 @@ Spontaneous.Content = (function($, S) {
 		},
 		repositioned: function() {
 			this.trigger('repositioned');
+		},
+		state: function() {
+			return S.State.get(this);
+		},
+		setFieldMetadata: function(field, key, value) {
+			this.state().setFieldMetadata(field, key, value);
+		},
+		getFieldMetadata: function(field, key, value) {
+			return this.state().getFieldMetadata(field, key);
 		}
 	});
 

@@ -166,6 +166,8 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		footer: function() {
 			return false;
 		},
+		on_show: function() {
+		},
 		focus: function() {
 			this.input().focus().select();
 		},

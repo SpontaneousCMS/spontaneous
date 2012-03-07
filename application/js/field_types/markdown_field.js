@@ -569,7 +569,22 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 	var MarkdownField = new JS.Class(Spontaneous.FieldTypes.StringField, {
 		actions: [Bold, Italic, H1, H2, UL, OL, Link],
 		generate_input: function() {
-			return dom.textarea(dom.id(this.css_id()), {'name':this.form_name(), 'rows':10, 'cols':90}).val(this.unprocessed_value());
+			var input = dom.textarea(dom.id(this.css_id()), {'name':this.form_name(), 'rows':10, 'cols':90}).val(this.unprocessed_value()), height = this.content.getFieldMetadata(this, 'height');
+			if (height) {
+				input.css('height', dom.px(height));
+			}
+
+			return input;
+		},
+		on_show: function() {
+			var self = this, input = self.input();
+			input.resizable({
+				handles: 's',
+				minHeight: 100,
+				stop: function(event, ui) {
+					self.content.setFieldMetadata(self, 'height', ui.size.height);
+				}
+			});
 		},
 		on_focus: function() {
 			if (!this.expanded) {
@@ -579,7 +594,7 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 				var text_height = input[0].scrollHeight, max_height = 500, resize_height = Math.min(text_height, max_height);
 				// console.log(resize_height, h)
 				if (Math.abs(resize_height - h) > 20) {
-					input.animate({'height':resize_height});
+					// input.animate({'height':resize_height});
 					this.expanded = true;
 				}
 			}
@@ -588,7 +603,7 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 		on_blur: function() {
 			if (this.expanded) {
 				var input = this.input();
-				input.animate({ 'height':input.data('original-height') });
+				// input.animate({ 'height':input.data('original-height') });
 				this.expanded = false;
 			}
 			this.callSuper();
@@ -606,7 +621,7 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 					this._toolbar.append(cmd.button());
 				}
 				this._wrapper.append(this._toolbar);
-				input.css('height', '');
+				// input.css('height', '');
 			}
 			return this._wrapper;
 		},

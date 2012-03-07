@@ -34,6 +34,17 @@ Spontaneous.State = (function($, S) {
 		},
 		toString: function() {
 			return JSON.stringify(this.state);
+		},
+		setFieldMetadata: function(field, key, value) {
+			var s = this.state;
+			s.fields = s.fields || {};
+			s.fields[field.schema_id()] = s.fields[field.schema_id()] || {};
+			s.fields[field.schema_id()][key] = value;
+			this.save();
+		},
+		getFieldMetadata: function(field, key) {
+			var s = this.state, f = (s.fields || {})[field.schema_id()] || {};
+			return f[key]
 		}
 	});
 	var State = new JS.Singleton({
@@ -50,15 +61,15 @@ Spontaneous.State = (function($, S) {
 			var s = this.get(content);
 			return s.active_box();
 		},
-		activate_slot: function(content, slot) {
-			var s = this.get(content);
-			s.activate_slot(slot);
-			s.save();
-		},
-		active_slot: function(content) {
-			var s = this.get(content);
-			return s.active_slot();
-		}
+		// activate_slot: function(content, slot) {
+		// 	var s = this.get(content);
+		// 	s.activate_slot(slot);
+		// 	s.save();
+		// },
+		// active_slot: function(content) {
+		// 	var s = this.get(content);
+		// 	return s.active_slot();
+		// }
 	});
 	return State;
 }(jQuery, Spontaneous));

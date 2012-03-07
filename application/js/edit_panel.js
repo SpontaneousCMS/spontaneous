@@ -135,19 +135,23 @@ Spontaneous.EditPanel = (function($, S) {
 			var text_fields = this.parent_view.text_fields();
 			var submit = dom.input({'type':'submit'});
 			var __dialogue = this;
+			var fieldViews = [];
 			editing.append(toolbar);
 			for (var i = 0, ii = text_fields.length; i < ii; i++) {
-				var field = text_fields[i];
-				text_field_wrap.append(this.field_edit(field));
+				var field = text_fields[i], view = this.field_edit(field);
+				fieldViews.push(view);
+				text_field_wrap.append(view);
 			}
+
 			if (text_fields.length > 0) {
 				outer.append(text_field_wrap);
 			}
 			var image_fields = this.parent_view.image_fields();
 
 			for (var i = 0, ii = image_fields.length; i < ii; i++) {
-				var field = image_fields[i];
-				image_field_wrap.append(this.field_edit(field).click(function() { __dialogue.field_focus(this); }));
+				var field = image_fields[i], view = this.field_edit(field).click(function() { __dialogue.field_focus(this); });
+				fieldViews.push(view);
+				image_field_wrap.append(view);
 			}
 			if (image_fields.length > 0) {
 				outer.append(image_field_wrap);
@@ -198,6 +202,10 @@ Spontaneous.EditPanel = (function($, S) {
 			next_field.input().focus();
 		},
 		on_show: function(focus_field) {
+			var fields = this.parent_view.field_list();
+			$.each(fields, function(n, f) {
+				f.on_show();
+			})
 			if (!focus_field || !(focus_field['focus']) || !focus_field.accepts_focus) { focus_field = null; }
 			var focus_field = focus_field || this.parent_view.text_fields()[0];
 			if (focus_field) {
