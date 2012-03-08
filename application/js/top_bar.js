@@ -160,20 +160,26 @@ Spontaneous.TopBar = (function($, S) {
 			return this.status;
 		},
 		add_page: function(page, position) {
-			var option = this.option_for_entry(page)
+			var self = this
+			, option = self.option_for_entry(page)
 			, container = page.container
 			, name = container.name()
-			, optgroup = this.select.find('optgroup[label="'+name+'"]')
+			, children = self.children
+			, optgroup = self.select.find('optgroup[label="'+name+'"]')
 			optgroup.prepend(option);
 			// since the navigation lists are ordered differently from the entries, it's
 			// difficult to insert into the right position
 			// TODO: re-sort the this.children entries and use this list to find the position in the select
+
+			// happens when we're adding the first item
+			if (!children[name]) { children[name] = []; }
+
 			if (position === -1) {
-				this.children[name].push(page)
+				children[name].push(page)
 			} else {
-				this.children[name].splice(position, 0, page)
+				children[name].splice(position, 0, page)
 			}
-			this.update_status();
+			self.update_status();
 		},
 
 		remove_page: function(page) {
