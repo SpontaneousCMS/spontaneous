@@ -269,6 +269,10 @@ module Spontaneous
           end
         end
 
+        def smush_it!
+          ::Spontaneous::Utils::SmushIt.smush!(image.path)
+        end
+
         def border_radius(radius, bg_color = nil)
           @image.format('png') if bg_color.nil? or bg_color == 'transparent'
           puts @image.path
