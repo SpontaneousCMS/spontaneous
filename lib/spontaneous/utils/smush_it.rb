@@ -2,8 +2,8 @@ require 'net/http'
 
 module Spontaneous::Utils
   class SmushIt
-    def self.smush!(path)
-      self.new(path).smush!
+    def self.smush!(path, format = nil)
+      self.new(path, format).smush!
     end
     attr_reader :src_file
 
