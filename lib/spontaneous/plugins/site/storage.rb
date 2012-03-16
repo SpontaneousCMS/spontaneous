@@ -28,6 +28,10 @@ module Spontaneous::Plugins::Site
       def local_storage
         instance.local_storage
       end
+
+      def default_storage
+        instance.default_storage
+      end
     end # ClassMethods
 
     def storage(mimetype = nil)

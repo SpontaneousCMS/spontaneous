@@ -153,6 +153,7 @@ module Spontaneous
       autoload :Level,          "spontaneous/plugins/site/level"
       autoload :Storage,        "spontaneous/plugins/site/storage"
       autoload :Timestamps,     "spontaneous/plugins/site/timestamps"
+      autoload :URL,            "spontaneous/plugins/site/url"
     end
 
     module Application

@@ -220,13 +220,23 @@ class SiteTest < MiniTest::Spec
         root = ::Page.create
         now2 = @now + 240
         Time.stubs(:now).returns(now2)
-        piece = Piece.create
+        piece = ::Piece.create
         root.subpages << piece
         Site.modified_at.should == now1
         now3 = @now + 480
         Time.stubs(:now).returns(now3)
-        piece.destroy
+        piece.reload.destroy
         Site.modified_at.should == now1
+      end
+    end
+
+    context "URLs" do
+      should "use the site_domain config value" do
+        @site.config.site_domain = "spontaneouscms.org"
+        @site.public_url.should == "http://spontaneouscms.org/"
+        @site.public_url("/").should == "http://spontaneouscms.org/"
+        @site.public_url("/something").should == "http://spontaneouscms.org/something"
+        Site.public_url("/something").should == "http://spontaneouscms.org/something"
       end
     end
   end
