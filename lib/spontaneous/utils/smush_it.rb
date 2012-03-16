@@ -7,8 +7,9 @@ module Spontaneous::Utils
     end
     attr_reader :src_file
 
-    def initialize(file_path)
+    def initialize(file_path, format = nil)
       @src_file = file_path
+      @format = format
     end
 
     # Smush the source file in-place
@@ -17,12 +18,14 @@ module Spontaneous::Utils
     def smush!
       p src_file
       return if ::Spontaneous.development?
-      ext = File.extname(src_file)
+      ext = @format.nil? ? File.extname(src_file) : ".#{@format}"
       id = [Time.now.to_i, Time.now.usec].join('-')
       public_filepath = File.join(public_path, "%s-smush%s" % [id, ext])
+      p public_filepath
       FileUtils.cp(src_file, public_filepath)
       filename = File.basename(public_filepath)
       url = Site.public_url(public_url(filename))
+      p url
       path = "/ysmush.it/ws.php?img=#{::Rack::Utils.escape(url)}&task=#{id}&id=paste1"
       # resp, data = http.get(path, nil)
       data = Net::HTTP.get('www.smushit.com', path)

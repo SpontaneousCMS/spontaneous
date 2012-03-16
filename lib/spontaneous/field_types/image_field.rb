@@ -270,7 +270,7 @@ module Spontaneous
         end
 
         def smush_it!
-          ::Spontaneous::Utils::SmushIt.smush!(image.path)
+          ::Spontaneous::Utils::SmushIt.smush!(image.path, current_image_format)
         end
 
         def border_radius(radius, bg_color = nil)
@@ -322,6 +322,10 @@ module Spontaneous
           else
             image.method_missing(method, *params, &block)
           end
+        end
+
+        def current_image_format
+          image[:format].downcase.gsub(/^jpeg$/, "jpg")
         end
       end
 
