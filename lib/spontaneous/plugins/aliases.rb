@@ -6,12 +6,12 @@ module Spontaneous::Plugins
     extend ActiveSupport::Concern
 
     included do
-      many_to_one :target, :class => self, :reciprocal => :aliases
-      one_to_many :aliases, :class => self, :key => :target_id, :reciprocal => :target
+      # '__target' rather than 'target' because we want to override the behaviour of the
+      # Content#target method only on classes that are aliases, and this is defined dynamically
+      many_to_one :__target, :class => self, :key => :target_id, :reciprocal => :aliases
+      one_to_many :aliases, :class => self, :key => :target_id, :reciprocal => :__target
       add_association_dependencies :aliases => :destroy
     end
-    # def self.configure(base)
-    # end
 
     module ClassMethods
       def alias_of(*args)
@@ -21,7 +21,9 @@ module Spontaneous::Plugins
         extend  ClassAliasMethods
         include AliasMethods
         include PieceAliasMethods unless page?
-        include PageAliasMethods if page?
+        include PageAliasMethods  if page?
+        alias_method :target,  :__target
+        alias_method :target=, :__target=
       end
 
       alias_method :aliases, :alias_of

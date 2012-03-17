@@ -40,6 +40,10 @@ class ContentTest < MiniTest::Spec
         @instance.pieces.should == []
       end
 
+      should "provide a #target method poiting to itself" do
+        @instance.target.should == @instance
+      end
+
       should "accept addition of child content" do
         e = C.new
         @instance.things << e

@@ -70,6 +70,13 @@ module Spontaneous
       false
     end
 
+    # Provides consistency between aliases & non-aliases
+    # so that a mixed list of both can be treated the same
+    # (for instance when ensuring uniqueness)
+    def target
+      self
+    end
+
     def page?
       false
     end

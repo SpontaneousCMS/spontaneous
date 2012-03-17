@@ -278,6 +278,11 @@ class AliasTest < MiniTest::Spec
           @a_alias.field?(:a_alias_field1).should be_true
         end
 
+        should "provide access to their target" do
+          @a_alias.target.should == @a
+        end
+
+
         # TODO
         should "reference the aliases fields before the targets"
 
