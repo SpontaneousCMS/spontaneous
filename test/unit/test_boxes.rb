@@ -563,6 +563,10 @@ class BoxesTest < MiniTest::Spec
       @c.boxes.inner.render.should == "[a][b][f]"
       @c.boxes.outer.render.should == "[c][d][e]"
     end
+
+    should "return an empty array when asking for an unknown box group" do
+      @a.boxes.group(:nothing).should == []
+    end
   end
 end
 
