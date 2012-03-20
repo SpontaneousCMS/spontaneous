@@ -139,6 +139,7 @@ module Spontaneous::Plugins
       entry_style = style_for_content(content, box)
       content.box_sid = box.schema_id if box
       content._prototype = box.prototype_for_content(content) if box
+      content.set_visible(self.visible?, self.id)
       content.save if content.new?
       entry = \
         case type

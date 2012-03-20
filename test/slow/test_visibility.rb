@@ -187,6 +187,18 @@ class VisibilityTest < MiniTest::Spec
     end
 
 
+    should "add child content with a visibility inherited from their parent" do
+      page = P.first
+      page.hide!
+      page.reload
+      piece = E.new
+      page.things << piece
+      page.save
+      piece.reload
+      piece.hidden?.should be_true
+      page.show!
+      piece.reload.hidden?.should be_false
+    end
 
     context "root" do
       should "should not be hidable" do
@@ -285,6 +297,7 @@ class VisibilityTest < MiniTest::Spec
         al = MyAlias.create(:target => target)
         al.visible?.should be_false
       end
+
 
       should "be made visible along with their target if added when target is hidden" do
         target = E.find(:uid => "1.1")
