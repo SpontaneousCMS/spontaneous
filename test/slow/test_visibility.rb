@@ -294,6 +294,19 @@ class VisibilityTest < MiniTest::Spec
         target.show!
         al.reload.visible?.should be_true
       end
+
+      should "be filtered by visibility when doing reverse lookup" do
+        target = E.find(:uid => "1.1")
+        al1 = MyAlias.create(:target => target)
+        al2 = MyAlias.create(:target => target).reload
+        al1.hide!
+        al1.reload
+        target.aliases.should == [al1, al2]
+        target.reload
+        Content.with_visible do
+          target.aliases.should == [al2]
+        end
+      end
     end
   end
 end
