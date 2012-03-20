@@ -236,6 +236,9 @@ Spontaneous.Views.PageView = (function($, S) {
 
 		panel: function() {
 			this.panel = dom.div('#page-content');
+			if (this.page.hidden()) {
+				this.panel.addClass('hidden')
+			}
 			this.panel.append(new FunctionBar(this.page).panel());
 
 			var fields = dom.div('#page-fields')

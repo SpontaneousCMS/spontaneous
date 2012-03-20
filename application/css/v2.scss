@@ -1178,6 +1178,9 @@ img.missing {
 		}
 	}
 }
+#page-content.hidden .slot-entries .entry-wrap.hidden {
+	opacity: 1.0 !important;
+}
 
 #dialogue-overlay {
 	position: fixed;
