@@ -9,7 +9,7 @@ module Spontaneous::Plugins
 
       def _set_visible_dataset!
         @_saved_dataset ||= self.dataset
-        ds = self.dataset.filter(:hidden => false)
+        ds = filter_visible self.dataset
         @dataset = ds
         # set_dataset clears the row_proc which desroys the STI
         # self.set_dataset(ds)
@@ -49,7 +49,11 @@ module Spontaneous::Plugins
       end
 
       def visible
-        self.dataset.filter(:hidden => false)
+        filter_visible self.dataset
+      end
+
+      def filter_visible(dataset)
+        dataset.filter(:hidden => false)
       end
     end # ClassMethods
 
