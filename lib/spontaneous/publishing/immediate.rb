@@ -249,6 +249,7 @@ module Spontaneous
         tmp = Spontaneous.revision_dir(revision) / "tmp"
         FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
         system("ln -nsf #{Spontaneous.revision_dir(revision)} #{Spontaneous.revision_dir}")
+        S::Site.trigger(:after_publish, revision)
         update_progress("complete")
       end
 

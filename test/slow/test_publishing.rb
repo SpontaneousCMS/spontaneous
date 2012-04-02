@@ -1006,6 +1006,22 @@ class PublishingTest < MiniTest::Spec
         Site.publish_all
         File.read("#{@site.revision_root}/00003/static/index.rtf").should == "RICH!\n"
       end
+
+      context "hooks & triggers" do
+        setup do
+        end
+
+        should "after_publish hook should be fired after publish is complete" do
+          publish = mock
+          publish.expects(:finished).with(@revision+1)
+          Site.after_publish do |revision|
+            publish.finished(revision)
+          end
+          Content.delete_revision(@revision+1)
+          Site.publish_all
+        end
+      end
     end
+
   end
 end

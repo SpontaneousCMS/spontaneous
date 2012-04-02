@@ -154,6 +154,7 @@ module Spontaneous
       autoload :Storage,        "spontaneous/plugins/site/storage"
       autoload :Timestamps,     "spontaneous/plugins/site/timestamps"
       autoload :URL,            "spontaneous/plugins/site/url"
+      autoload :Hooks,          "spontaneous/plugins/site/hooks"
     end
 
     module Application
