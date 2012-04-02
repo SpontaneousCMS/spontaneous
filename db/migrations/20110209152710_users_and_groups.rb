@@ -3,7 +3,7 @@
 Sequel.migration do
   up do
     adapter_scheme =  self.adapter_scheme
-    create_table!(:spontaneous_users, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
+    create_table(:spontaneous_users, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
       varchar     :name
       varchar     :login, :size => 32, :index => true, :unique => true
@@ -12,13 +12,13 @@ Sequel.migration do
       varchar     :crypted_password
       boolean     :disabled, :default => false
 
-      datetime    :last_login_at
-      datetime    :created_at
+      timestamp   :last_login_at
+      timestamp   :created_at
 
       index       [:login, :disabled], :name => "enabled_login_index"
     end
 
-    create_table!(:spontaneous_groups, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
+    create_table(:spontaneous_groups, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
       foreign_key :user_id, :spontaneous_users, :key => :id, :on_delete => :cascade # test for being a single user group is user_id.nil?
       index       :user_id
@@ -29,21 +29,21 @@ Sequel.migration do
     end
 
 
-    create_table!(:spontaneous_groups_users, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
+    create_table(:spontaneous_groups_users, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
       foreign_key :user_id, :spontaneous_users, :key => :id
       foreign_key :group_id, :spontaneous_groups, :key => :id
     end
 
-    create_table!(:spontaneous_access_keys, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
+    create_table(:spontaneous_access_keys, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
       foreign_key :user_id, :spontaneous_users, :key => :id, :on_delete => :cascade
       index       :user_id
       char        :key_id, :size => 44, :index => true, :unique => true
-      datetime    :last_access_at
+      timestamp   :last_access_at
       varchar     :last_access_ip
       varchar     :source_ip
-      datetime    :created_at
+      timestamp   :created_at
     end
   end
 
