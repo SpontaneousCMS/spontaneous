@@ -189,7 +189,7 @@ namespace :gem do
 
 
   desc "Generate #{gemspec_file}"
-  task :gemspec => :assets do
+  task :gemspec => :working_copy do
     # read spec file and split out manifest section
     spec = File.read(gemspec_file)
     # head, manifest, tail = spec.split("  # = MANIFEST =\\n")
