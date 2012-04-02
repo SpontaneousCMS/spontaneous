@@ -1012,10 +1012,15 @@ class PublishingTest < MiniTest::Spec
         end
 
         should "after_publish hook should be fired after publish is complete" do
-          publish = mock
-          publish.expects(:finished).with(@revision+1)
+          publish1 = mock
+          publish1.expects(:finished).with(@revision+1)
+          publish2 = mock
+          publish2.expects(:finished)
           Site.after_publish do |revision|
-            publish.finished(revision)
+            publish1.finished(revision)
+          end
+          Site.after_publish do
+            publish2.finished
           end
           Content.delete_revision(@revision+1)
           Site.publish_all
