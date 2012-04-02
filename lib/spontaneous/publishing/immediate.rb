@@ -48,10 +48,10 @@ module Spontaneous
 
       protected
 
-      def page_rendered(page, event = "rendering")
+      def page_rendered(page, event = "rendering", format = "html")
         @pages_rendered += 1
         update_progress(event, percent_complete)
-        logger.info { "Done: #{event} page #{page.path} #{percent_complete.round(1)}%" }
+        logger.info { "Done: #{event} page #{page.path} (#{format}) #{percent_complete.round(1)}%" }
       end
 
 
@@ -113,7 +113,7 @@ module Spontaneous
         formatter = Spontaneous::Render::Format.for(format)
         renderer = formatter.new(revision, page)
         renderer.render
-        page_rendered(page)
+        page_rendered(page, "rendering", format)
       end
 
       def index_pages
