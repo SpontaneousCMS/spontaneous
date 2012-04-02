@@ -1024,6 +1024,30 @@ class PublishingTest < MiniTest::Spec
           end
           Content.delete_revision(@revision+1)
           Site.publish_all
+          Site.published_revision.should == @revision+1
+        end
+
+        should "abort publish if hook raises error" do
+          published_revision = @revision+1
+          Site.pending_revision.should be_nil
+          Content.revision_exists?(published_revision).should be_false
+
+          Site.after_publish do |revision|
+            raise "Boom"
+          end
+
+          begin
+            silence_logger { Site.publish_all }
+          rescue Exception; end
+
+          Site.pending_revision.should be_nil
+          Site.published_revision.should == @revision
+          Content.revision_exists?(published_revision).should be_false
+          S::Revision.first(:revision => published_revision).should be_nil
+          previous_root = Spontaneous.revision_dir(@revision)
+          published_root = Spontaneous.revision_dir(published_revision)
+          symlink = Pathname.new Spontaneous.revision_dir
+          symlink.realpath.to_s.should == Pathname.new(previous_root).realpath.to_s
         end
       end
     end

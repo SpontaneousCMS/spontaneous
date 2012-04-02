@@ -11,6 +11,7 @@ module Spontaneous
 
       def initialize(revision)
         @revision = revision
+        @previous_revision = Site.published_revision
         logger.info {  "Publishing revision #{@revision}"}
       end
 
@@ -245,12 +246,26 @@ module Spontaneous
         update_progress("finalising")
         S::Revision.create(:revision => revision, :published_at => Time.now)
         S::Site.send(:set_published_revision, revision)
-        S::Site.send(:pending_revision=, nil)
         tmp = Spontaneous.revision_dir(revision) / "tmp"
         FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
-        system("ln -nsf #{Spontaneous.revision_dir(revision)} #{Spontaneous.revision_dir}")
-        S::Site.trigger(:after_publish, revision)
-        update_progress("complete")
+        symlink_revision(revision)
+
+        begin
+          S::Site.trigger(:after_publish, revision)
+          S::Site.send(:pending_revision=, nil)
+          update_progress("complete")
+        rescue Exception => e
+          # if a post publish hook raises an exception then we want to roll everything back
+          S::Revision.filter(:revision => revision).delete
+          S::Site.send(:set_published_revision, @previous_revision)
+          symlink_revision(@previous_revision)
+          abort_publish(e)
+          raise e
+        end
+      end
+
+      def symlink_revision(rev)
+        system("ln -nsf #{Spontaneous.revision_dir(rev)} #{Spontaneous.revision_dir}")
       end
 
       def abort_publish_at_exit
@@ -263,7 +278,7 @@ module Spontaneous
           FileUtils.rm_r(Spontaneous.revision_dir(revision)) if File.exists?(Spontaneous.revision_dir(revision))
           S::Site.send(:pending_revision=, nil)
           S::Content.delete_revision(revision)
-          puts exception.backtrace.join("\n")
+          puts exception.backtrace.join("\n") if exception
           update_progress("error", exception)
         end
       end
