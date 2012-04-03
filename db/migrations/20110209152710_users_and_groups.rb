@@ -31,8 +31,8 @@ Sequel.migration do
 
     create_table(:spontaneous_groups_users, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
       primary_key :id
-      foreign_key :user_id, :spontaneous_users, :key => :id
-      foreign_key :group_id, :spontaneous_groups, :key => :id
+      foreign_key :user_id, :spontaneous_users, :key => :id, :on_delete => :cascade
+      foreign_key :group_id, :spontaneous_groups, :key => :id, :on_delete => :cascade
     end
 
     create_table(:spontaneous_access_keys, :engine => "INNODB", :charset => "UTF8", :collate => "utf8_general_ci") do
