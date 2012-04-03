@@ -12,7 +12,6 @@ module Spontaneous::Plugins::Site
           else
             Spontaneous::Content.first :id => root_id
           end
-        p page
         return nil unless page
         page.map_entry
       end
