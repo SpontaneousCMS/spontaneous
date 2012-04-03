@@ -7,6 +7,7 @@ module Spontaneous
     end
 
     sequel_plugin :serialization, :yajl, :modified_list
+    sequel_plugin :timestamps
 
     @@instance = nil
 
