@@ -66,6 +66,27 @@ TEMPLATE
       tokens.first.should == [:comment,  ' comment ']
     end
 
+    should "tokenize an escaped expresssion" do
+      lexer = Cutaneous::PublishTokenParser.new("\\${ something }")
+      tokens = lexer.tokens
+      tokens.length.should == 1
+      tokens.first.should == [:text, '${ something }']
+    end
+
+    should "tokenize an escaped statement" do
+      lexer = Cutaneous::PublishTokenParser.new("\\%{ something }")
+      tokens = lexer.tokens
+      tokens.length.should == 1
+      tokens.first.should == [:text, '%{ something }']
+    end
+
+    should "tokenize an escaped comment" do
+      lexer = Cutaneous::PublishTokenParser.new("\\!{ something }")
+      tokens = lexer.tokens
+      tokens.length.should == 1
+      tokens.first.should == [:text, '!{ something }']
+    end
+
     should "correctly tokenize tags within a comment" do
       lexer = Cutaneous::PublishTokenParser.new("!{ %{ a = true } ${ value } !{ nested comment }}")
       tokens = lexer.tokens

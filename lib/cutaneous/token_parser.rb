@@ -25,11 +25,19 @@ module Cutaneous
         @tag_start_pattern ||= compile_start_pattern
       end
 
-      def compile_start_pattern
-        openings = self.tags.map { |type, tags| Regexp.escape(tags[0]) }
-        Regexp.new("#{ openings.join("|") }")
+      def escaped_tag_pattern
+        @escaped_tag_pattern ||= compile_start_pattern_with_prefix("\\\\")
       end
 
+      def compile_start_pattern
+        not_escaped = "(?<!\\\\)"
+        compile_start_pattern_with_prefix(not_escaped)
+      end
+
+      def compile_start_pattern_with_prefix(prefix)
+        openings = self.tags.map { |type, tags| Regexp.escape(tags[0]) }
+        Regexp.new("#{prefix}(#{ openings.join("|") })")
+      end
       # map the set of tags into a hash used by the parse routine that converts an opening tag into a
       # list of: tag type, the number of opening braces in the tag and the length of the closing tag
       def token_map
@@ -101,6 +109,7 @@ module Cutaneous
       if following_type == :statement || following_type == :comment
         expression.gsub!(ENDING_WHITESPACE, '\1')
       end
+      expression.gsub!(self.class.escaped_tag_pattern, '\1')
       expression.gsub!(ESCAPE_STRING, '\\\\\&')
       [:text, expression]
     end
