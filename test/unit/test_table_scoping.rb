@@ -12,24 +12,28 @@ class TableScopingTest < MiniTest::Spec
     teardown_site
   end
 
+  def ident(ident)
+    Spontaneous.database.dataset.quote_identifier(ident)
+  end
+
   context "Tablename scoping" do
     should "correctly change the table name within a scope" do
-      Content.dataset.sql.should == "SELECT * FROM `content`"
+      Content.dataset.sql.should == "SELECT * FROM #{ident "content"}"
       Content.with_table("new_content_table") do
-        Content.dataset.sql.should == "SELECT * FROM `new_content_table`"
+        Content.dataset.sql.should == "SELECT * FROM #{ident "new_content_table"}"
       end
-      Content.dataset.sql.should == "SELECT * FROM `content`"
+      Content.dataset.sql.should == "SELECT * FROM #{ident "content"}"
     end
 
     should "allow the nesting of scopes" do
-      Content.dataset.sql.should == "SELECT * FROM `content`"
+      Content.dataset.sql.should == "SELECT * FROM #{ident "content"}"
       Content.with_table("content_1") do
         Content.with_table("content_2") do
-          Content.dataset.sql.should == "SELECT * FROM `content_2`"
+          Content.dataset.sql.should == "SELECT * FROM #{ident "content_2"}"
         end
-        Content.dataset.sql.should == "SELECT * FROM `content_1`"
+        Content.dataset.sql.should == "SELECT * FROM #{ident "content_1"}"
       end
-      Content.dataset.sql.should == "SELECT * FROM `content`"
+      Content.dataset.sql.should == "SELECT * FROM #{ident "content"}"
     end
 
     should "preserve single table inheritance" do
@@ -49,28 +53,28 @@ class TableScopingTest < MiniTest::Spec
     end
 
     should "restore original state if an exception is raised" do
-      Content.dataset.sql.should == "SELECT * FROM `content`"
+      Content.dataset.sql.should == "SELECT * FROM #{ident "content"}"
       begin
         Content.with_table("new_content_table") do
-          Content.dataset.sql.should == "SELECT * FROM `new_content_table`"
+          Content.dataset.sql.should == "SELECT * FROM #{ident "new_content_table"}"
           raise "havoc"
         end
       rescue; end
-      Content.dataset.sql.should == "SELECT * FROM `content`"
+      Content.dataset.sql.should == "SELECT * FROM #{ident "content"}"
     end
 
     should "Be able to handle scoping multiple models at once" do
       Spontaneous::Change.plugin :scoped_table_name
-      Content.dataset.sql.should == "SELECT * FROM `content`"
+      Content.dataset.sql.should == "SELECT * FROM #{ident "content"}"
       Content.with_table("content_1") do
         Change.with_table("change_1") do
-          Content.dataset.sql.should == "SELECT * FROM `content_1`"
-          Change.dataset.sql.should == "SELECT * FROM `change_1`"
+          Content.dataset.sql.should == "SELECT * FROM #{ident "content_1"}"
+          Change.dataset.sql.should == "SELECT * FROM #{ident "change_1"}"
         end
       end
 
-      Content.dataset.sql.should == "SELECT * FROM `content`"
-      Change.dataset.sql.should == "SELECT * FROM `changes`"
+      Content.dataset.sql.should == "SELECT * FROM #{ident "content"}"
+      Change.dataset.sql.should == "SELECT * FROM #{ident "changes"}"
     end
   end
 end
