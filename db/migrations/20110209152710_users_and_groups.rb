@@ -12,7 +12,7 @@ Sequel.migration do
       varchar     :crypted_password
       boolean     :disabled, :default => false
 
-      timestamp   :last_login_at
+      timestamp   :last_login_at, :default => nil, :null => true
       timestamp   :created_at
 
       index       [:login, :disabled], :name => "enabled_login_index"
