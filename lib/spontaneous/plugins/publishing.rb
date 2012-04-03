@@ -88,7 +88,7 @@ module Spontaneous::Plugins
             create_revision(revision)
           else
             content = content.map do |c|
-              c.is_a?(Spontaneous::Content) ? c.reload : Spontaneous::Content[c]
+              c.is_a?(Spontaneous::Content) ? c.reload : Spontaneous::Content.first(:id => c)
             end.compact
 
             first_published = first_published.filter(:id => content.map { |c| c.id })
@@ -182,13 +182,13 @@ module Spontaneous::Plugins
       publish = origin || !self.page?
 
       with_revision(revision) do
-        published_copy = Spontaneous::Content[self.id]
+        published_copy = Spontaneous::Content.first(:id => self.id)
         if published_copy
           if publish and published_copy.entry_store
             pieces_to_delete = published_copy.entry_store - self.entry_store
             pieces_to_delete.each do |entry|
-              if c = Spontaneous::Content[entry[0]]
-                c.destroy(false)
+              if c = Spontaneous::Content.first(:id => entry[0])
+                c.destroy(false) rescue ::Sequel::NoExistingObject
               end
             end
           end

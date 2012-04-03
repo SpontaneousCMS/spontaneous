@@ -40,11 +40,14 @@ class PublishingTest < MiniTest::Spec
     end
   end
 
+  def stub_time(time)
+    Sequel.datetime_class.stubs(:now).returns(time)
+    Time.stubs(:now).returns(time)
+  end
   context "publishing" do
 
     setup do
-      Sequel.datetime_class.stubs(:now).returns(@@now)
-      Time.stubs(:now).returns(@@now)
+      stub_time(@@now)
 
       # DB.logger = Logger.new($stdout)
       Content.delete
@@ -57,14 +60,18 @@ class PublishingTest < MiniTest::Spec
         box :things
       end
 
+      count = 0
       2.times do |i|
         c = Page.new(:uid => i)
+        count += 1
         2.times do |j|
           d = Piece.new(:uid => "#{i}.#{j}")
           c.things << d
+          count += 1
           2.times do |k|
             d.things << Page.new(:uid => "#{i}.#{j}.#{k}")
             d.save
+            count += 1
           end
         end
         c.save
@@ -244,15 +251,16 @@ class PublishingTest < MiniTest::Spec
           source_revision_count = Content.count
         end
 
-        Content.count.should == source_revision_count + 7
+        Content.count.should == source_revision_count - 7
 
         Content.create_revision(revision, source_revision)
 
         Content.with_revision(revision) do
           Content.count.should == source_revision_count
           Content.all.each do |published|
+
             Content.with_revision(source_revision) do
-              e = Content[published.id]
+              e = Content.first :id => published.id
               e.should == published
             end
           end
@@ -382,9 +390,9 @@ class PublishingTest < MiniTest::Spec
           editable2.reload
           new_content.reload
           Content.with_revision(@final_revision) do
-            published1 = Content[editable1.id]
+            published1 = Content.first :id => editable1.id
             Content.first(:uid => "added").should_not be_nil
-            published3 = Content[editable2.id]
+            published3 = Content.first :id => editable2.id
             assert_content_equal(published1, editable1)
             # published1.should == editable1
             published3.should_not == editable2
@@ -395,14 +403,14 @@ class PublishingTest < MiniTest::Spec
           editable2.reload
           new_content.reload
           Content.with_revision(@final_revision+1) do
-            published1 = Content[editable1.id]
+            published1 = Content.first :id => editable1.id
             # published1.should == editable1
             assert_content_equal(published1, editable1)
             assert_content_equal(published1, editable1)
-            published3 = Content[editable2.id]
+            published3 = Content.first :id => editable2.id
             # published3.should == editable2
             assert_content_equal(published3, editable2)
-            published4 = Content[editable2.pieces.first.id]
+            published4 = Content.first :id => editable2.pieces.first.id
             # published4.should == editable2.pieces.first
             assert_content_equal(published4, editable2.pieces.first)
           end
@@ -424,7 +432,7 @@ class PublishingTest < MiniTest::Spec
 
       should "register modification date of all content" do
         now = @@now + 100
-        Time.stubs(:now).returns(now)
+        stub_time(now)
         c = Content.first
         (c.modified_at.to_i - @@now.to_i).abs.should <= 1
         c.label = "changed"
@@ -433,7 +441,8 @@ class PublishingTest < MiniTest::Spec
       end
 
       should "update page timestamps on modification of a piece" do
-        Time.stubs(:now).returns(@@now+3600)
+
+        stub_time(@@now+3600)
         page = Page.first
         (page.modified_at.to_i - @@now.to_i).abs.should <= 1
         content = page.pieces.first
