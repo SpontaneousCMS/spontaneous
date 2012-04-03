@@ -4,6 +4,10 @@ require 'pathname'
 
 module Spontaneous
   class Paths < ::Hash
+    def self.pad_revision_number(revision)
+      revision.to_s.rjust(5, "0")
+    end
+
     def initialize(root)
       @root = File.expand_path(root)
       super()

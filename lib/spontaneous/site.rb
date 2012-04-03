@@ -111,7 +111,7 @@ module Spontaneous
     def revision_dir(revision=nil, root = revision_root)
       root ||= revision_root
       return root / 'current' if revision.nil?
-      root / revision.to_s.rjust(5, "0")
+      root / Spontaneous::Paths.pad_revision_number(revision)
     end
 
     def media_dir(*path)
