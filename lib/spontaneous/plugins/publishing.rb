@@ -151,6 +151,11 @@ module Spontaneous::Plugins
 
     # InstanceMethods
 
+    def after_create
+      super
+      page.modified!(page?) if page
+    end
+
     def after_update
       super
       page.modified!(page?) if page

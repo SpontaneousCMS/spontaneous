@@ -75,16 +75,16 @@ class ApplicationTest < MiniTest::Spec
     end
 
     should "have correct db settings" do
-      Site.config.db[:adapter].should == "mysql2"
+      Site.config.db[:adapter].should == "postgres"
       Site.config.db[:database].should == "spontaneous2_test"
-      Site.config.db[:user].should == "root"
-      Site.config.db[:password].should be_nil
-      Site.config.db[:host].should == "localhost"
+      # Site.config.db[:user].should == "root"
+      # Site.config.db[:password].should be_nil
+      # Site.config.db[:host].should == "localhost"
     end
 
     should "configure the datamapper connection" do
       db = Spontaneous.database
-      db.adapter_scheme.should == :mysql2
+      db.adapter_scheme.should == :postgres
       # opts.should == {"username"=>"spontaneous", "adapter"=>"mysql", "database"=>"spontaneous_example", "host"=>"localhost", "password"=>"password"}
     end
 
@@ -142,11 +142,11 @@ class ApplicationTest < MiniTest::Spec
     end
 
     should "have correct db settings" do
-      Site.config.db[:adapter].should == "mysql2"
+      Site.config.db[:adapter].should == "postgres"
       Site.config.db[:database].should == "spontaneous_example_production"
       Site.config.db[:user].should == "spontaneous_prod"
       Site.config.db[:password].should == "Passw0rd"
-      Site.config.db[:host].should == "localhost"
+      # Site.config.db[:host].should == "localhost"
     end
 
     should "have the right rack port" do

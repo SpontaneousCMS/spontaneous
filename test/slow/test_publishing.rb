@@ -310,8 +310,8 @@ class PublishingTest < MiniTest::Spec
           Content.publish(@final_revision, [editable1.id])
           editable1.reload
           Content.with_revision(@final_revision) do
-            published = Content[editable1.id]
-            unpublished = Content[editable2.id]
+            published = Content.first :id => editable1.id
+            unpublished = Content.first :id => editable2.id
             assert_content_equal(published, editable1)
 
             # published.should == editable1
@@ -443,7 +443,7 @@ class PublishingTest < MiniTest::Spec
       should "update page timestamps on modification of a piece" do
 
         stub_time(@@now+3600)
-        page = Page.first
+        page = Page.first :uid => "0"
         (page.modified_at.to_i - @@now.to_i).abs.should <= 1
         content = page.pieces.first
         content.page.should == page
@@ -455,7 +455,7 @@ class PublishingTest < MiniTest::Spec
 
       should "update page timestamp on addition of piece" do
         Sequel.datetime_class.stubs(:now).returns(@@now+3600)
-        page = Page.first
+        page = Page.first :uid => "0"
         content = Content[page.pieces.first.id]
         content.things << Piece.new
         content.save
@@ -496,7 +496,7 @@ class PublishingTest < MiniTest::Spec
       end
 
       should "be created on updating a page's content" do
-        page = Page.first
+        page = Page.first :uid => "0"
         content = Content[page.pieces.first.id]
         Change.record do
           content.label = "changed"
@@ -512,8 +512,8 @@ class PublishingTest < MiniTest::Spec
       end
 
       should "include newly created pages" do
-        page = Page.first
-        content = Content[page.pieces.first.id]
+        page = Page.first :uid => "0"
+        content = Content.first :id => page.pieces.first.id
         new_page = nil
         Change.record do
           new_page = Page.new
@@ -527,8 +527,8 @@ class PublishingTest < MiniTest::Spec
         change = Change.first
         change.modified_list.must_be_instance_of(Array)
         change.modified_list.length.should == 2
-        change.modified_list.should == [page.id, new_page.id]
-        change.modified.should == [page, new_page]
+        Set.new(change.modified_list).should == Set.new([page.id, new_page.id])
+        Set.new(change.modified).should == Set.new([page, new_page])
       end
 
 
@@ -693,16 +693,17 @@ class PublishingTest < MiniTest::Spec
         Content.first.first_published_at.to_i.should == @@now.to_i
         c = Content.create
         c.first_published_at.should be_nil
-        Sequel.datetime_class.stubs(:now).returns(@@now+100)
+        stub_time(@@now + 100)
+        # Sequel.datetime_class.stubs(:now).returns(@@now+100)
         Content.publish(@revision+1)
         Content.first.first_published_at.to_i.should == @@now.to_i
         Content.first.last_published_at.to_i.should == @@now.to_i + 100
         Content.with_editable do
-          c = Content[c.id]
+          c = Content.first :id => c.id
           c.first_published_at.to_i.should == @@now.to_i + 100
         end
         Content.with_revision(@revision+1) do
-          c = Content[c.id]
+          c = Content.first :id => c.id
           c.first_published_at.to_i.should == @@now.to_i + 100
         end
       end

@@ -18,13 +18,15 @@ $:.unshift(spot_path) if File.directory?(spot_path) && !$:.include?(spot_path)
 
 require 'rack'
 require 'logger'
+require 'pg'
 
 
 Sequel.extension :migration
 
-DB = Sequel.connect('mysql2://root@localhost/spontaneous2_test') unless defined?(DB)
-# DB = Sequel.connect('postgres://postgres@localhost/spontaneous2_test') unless defined?(DB)
+DB = Sequel.connect('postgres:///spontaneous2_test') unless defined?(DB)
+# DB = Sequel.connect('mysql2://root@localhost/spontaneous2_test') unless defined?(DB)
 # DB.logger = Logger.new($stdout)
+
 Sequel::Migrator.apply(DB, 'db/migrations')
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spontaneous')

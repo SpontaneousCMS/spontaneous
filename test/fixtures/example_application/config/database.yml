@@ -1,10 +1,10 @@
 ---
 :development: &defaults
-  :adapter:    mysql2
+  :adapter:    postgres
   :database:   spontaneous2_test
-  :user:       root
-  :password:
-  :host:       localhost
+  # :user:       root
+  # :password:
+  # :host:       localhost
 
 :gem:
   <<:         *defaults

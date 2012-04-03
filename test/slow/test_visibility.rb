@@ -314,7 +314,7 @@ class VisibilityTest < MiniTest::Spec
         al2 = MyAlias.create(:target => target).reload
         al1.hide!
         al1.reload
-        target.aliases.should == [al1, al2]
+        Set.new(target.aliases).should == Set.new([al1, al2])
         target.reload
         Content.with_visible do
           target.aliases.should == [al2]
