@@ -34,6 +34,23 @@ class FormatsTest < MiniTest::Spec
       FPage.mime_type(:atom).should == "application/atom+xml"
     end
 
+    should "default to static output" do
+      FPage.format(:html).dynamic?.should be_false
+    end
+
+    should "return the format wrapper for a format name" do
+      FPage.format(FPage.format(:html)).format.should == :html
+    end
+    should "return the format wrapper for a format name string" do
+      FPage.format("html").should == :html
+    end
+
+    should "give the default format for blank format names" do
+      FPage.format(nil).format.should == :html
+      FPage.format.format.should == :html
+      FPage.format.should == :html
+      FPage.format.ext.should == ".html"
+    end
 
     context "instances" do
       setup do
@@ -125,6 +142,19 @@ class FormatsTest < MiniTest::Spec
       should "inherit any custom mimetypes" do
         FPage.mime_type(:xxx).should == "application/xxx"
         FSubPage.mime_type(:xxx).should == "application/xxx"
+      end
+    end
+
+    context "that generate dynamic outputs" do
+      should "be able to specify that a format is always dynamic" do
+        FPage.add_format :rss, :dynamic => true
+        FPage.format(:rss).dynamic?.should be_true
+      end
+
+      should "be able to specify that a format with custom mimetype is always dynamic" do
+        FPage.add_format :mako => "application/x-mako", :dynamic => true
+        FPage.format(:mako).mime_type.should == "application/x-mako"
+        FPage.format(:mako).dynamic?.should be_true
       end
     end
   end

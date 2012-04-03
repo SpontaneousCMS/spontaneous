@@ -122,8 +122,9 @@ module Spontaneous
       end
 
       def find_page!(path)
-        @path, @format, @action = parse_path(path)
+        @path, format_name, @action = parse_path(path)
         @page = Site[@path]
+        @format = @page.format(format_name) if @page
       end
 
       def format
@@ -137,7 +138,7 @@ module Spontaneous
       def render_get
         # return not_found! unless @page
 
-        @format = (@format || @page.default_format).to_sym if @page
+        @format = (@format || @page.default_format) if @page
 
         if @action
           call_action!
@@ -145,7 +146,7 @@ module Spontaneous
           block = page.request_block(request)
           parse_response(instance_eval(&block)) if (block)
 
-          @format = (@format || @page.default_format).to_sym if @page
+          @format = (@format || @page.default_format) if @page
           render_page_with_format(@page, @format)
         end
       end
@@ -162,7 +163,7 @@ module Spontaneous
         else
           parse_response(instance_eval(&block)) if (block)
 
-          @format = (@format || @page.default_format).to_sym if @page
+          @format = (@format || @page.default_format) if @page
           render_page_with_format(@page, @format)
         end
       end
@@ -196,7 +197,7 @@ module Spontaneous
       def render_page_with_format(page, format)
         if page && page.provides_format?(format)
           content_type(page.mime_type(format))
-          render_page(page, format)
+          render_page(page, page.format(format))
         else
           # perhaps we should return the html version if the page exists but
           # doesn't respond to the requested format?

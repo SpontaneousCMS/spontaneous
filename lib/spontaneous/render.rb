@@ -10,9 +10,10 @@ module Spontaneous
       end
 
       def output_path_with_root(root, revision, page, format, extension = nil, template_dynamic = false)
+        format = page.format(format)
         ext = ".#{format}"
         ext += ".#{extension}" if extension && template_dynamic
-        segment = template_dynamic ? "dynamic" : (page.dynamic? ? "protected" : "static")
+        segment = (template_dynamic || format.dynamic?) ? "dynamic" : (page.dynamic? ? "protected" : "static")
         dir = root / segment / page.path
         path = "#{dir}#{ext}"
         # root is a special case, as always

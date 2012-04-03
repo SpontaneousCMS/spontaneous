@@ -58,6 +58,10 @@ class FrontTest < MiniTest::Spec
     last_request.env['rack.session']
   end
 
+	def formats(format_list)
+		format_list.map { |f| Page.format_for(f) }
+	end
+
   context "Public pages" do
     setup do
 
@@ -142,7 +146,7 @@ class FrontTest < MiniTest::Spec
     end
 
     should "honor the format of the request" do
-      @about.class.stubs(:formats).returns([:html, :pdf])
+      @about.class.formats :html, :pdf
       get '/about.pdf'
       assert last_response.ok?
       last_response.body.should == "/about.pdf\n"
@@ -150,7 +154,8 @@ class FrontTest < MiniTest::Spec
     end
 
     should "provide the default format of the page if none is explicitly given" do
-      @about.class.stubs(:formats).returns([:rss, :html])
+      @about.class.formats :rss, :html
+      # @about.class.stubs(:format_list).returns(formats [:rss, :html])
       get '/about'
       assert last_response.ok?
       last_response.content_type.should == ::Rack::Mime.mime_type('.rss') + ";charset=utf-8"
@@ -512,15 +517,19 @@ class FrontTest < MiniTest::Spec
       end
 
       should "pass the format onto the page if the action returns it to the render call" do
-        about.stubs(:provides_format?).with(:'xml', anything).returns(true)
-        about.expects(:render).with(:'xml', anything).returns("/about.xml")
-        about.expects(:render).with(:'html', anything).never
+				xml = formats([:xml]).first
+				html = formats([:html]).first
+				about.class.formats :html, :xml
+        # about.stubs(:provides_format?).with(xml, anything).returns(true)
+        about.expects(:render).with(xml, anything).returns("/about.xml")
+        about.expects(:render).with(html, anything).never
         get "/about/@comments/page.xml"
         assert last_response.ok?
         last_response.body.should == "/about.xml"
       end
 
       should "use the format within the action if required" do
+				about.class.formats :html, :xml
         get "/about/@comments/format.xml"
         assert last_response.ok?
         last_response.body.should == "xml"

@@ -111,8 +111,8 @@ module Spontaneous
 
       def render_page(page, format)
         logger.info { "#{page.path}" }
-        formatter = Spontaneous::Render::Format.for(format)
-        renderer = formatter.new(revision, page)
+        formatter = format.renderer_class
+        renderer = formatter.new(revision, page, format)
         renderer.render
         page_rendered(page, "rendering", format)
       end

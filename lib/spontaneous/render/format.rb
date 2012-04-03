@@ -21,16 +21,15 @@ module Spontaneous::Render
   end
 
   class FormatBase
+
     def self.format
       @format ||= self.name.demodulize.downcase.to_sym
     end
 
-    def initialize(revision, page)
-      @revision, @page = revision, page
-    end
+    attr_reader :format
 
-    def format
-      self.class.format
+    def initialize(revision, page, format)
+      @revision, @page, @format = revision, page, format
     end
 
     def render
