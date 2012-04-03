@@ -56,9 +56,10 @@ module CustomMatchers
   end
 
   custom_matcher :be_content_revision do |receiver, matcher, args|
+    ident = lambda { |ident| Spontaneous.database.dataset.quote_identifier(ident) }
     revision = args[0]
     types = args[1]
-    table = "`#{Spontaneous::Content.revision_table(revision)}`"
+    table = "#{ident[Spontaneous::Content.revision_table(revision)]}"
     sql = "SELECT \\* FROM #{table}"
     if types
       if types.is_a?(Array)
@@ -66,7 +67,7 @@ module CustomMatchers
       else
         types = "'#{types}'"
       end
-      sql << " WHERE \\(#{table}.`type_sid` IN \\(#{types}"
+      sql << " WHERE \\(#{table}.#{ident["type_sid"]} IN \\(#{types}"
     end
     regexp = %r{^#{sql}}
     matcher.positive_failure_message = "Expected #{receiver.sql} to =~ #{regexp}"
