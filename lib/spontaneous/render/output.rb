@@ -1,7 +1,7 @@
 
 module Spontaneous::Render
-  module Format
-    def self.for(format)
+  class Output
+    def self.renderer_class(format)
       format_class = nil
       begin
         format_class = self.const_get("#{format.to_s.camelize}")
@@ -17,6 +17,75 @@ module Spontaneous::Render
 
     def self.formats
       self.constants.map { |const| const.to_s.downcase.to_sym }
+    end
+
+    attr_reader :format, :mime_type
+
+    def initialize(format, options = {})
+      mime_type = nil
+      case format
+      when String, Symbol
+        @format = format.to_sym
+        @mime_type = ::Rack::Mime.mime_type(".#{format}", nil)
+      when Hash
+        @format = format.keys.first.to_sym
+        @mime_type = format.values.first
+        @dynamic = format[:dynamic]
+        @extension = format[:extension]
+      end
+      @dynamic ||= options[:dynamic] || false
+      @extension ||= options[:extension]
+    end
+
+    def render(revision, page)
+      renderer(revision, page).render
+    end
+
+    def renderer(revision, page)
+      renderer_class.new(revision, page, self)
+    end
+
+    def renderer_class
+      self.class.renderer_class(self)
+    end
+
+    def ==(other)
+      (other.to_sym == self.to_sym) or (other.respond_to?(:format) and (other.format == self.format))
+    end
+
+    def eql?(other)
+      other.is_a?(Output) and (self == other)
+    end
+
+    def hash
+      format.to_s.hash
+    end
+
+    def to_sym
+      format
+    end
+
+    def to_s
+      format.to_s
+    end
+
+    def extension(is_dynamic = false, dynamic_extension = Spontaneous::Render.extension)
+      ext = ".#{format}"
+      ext << ".#{self.dynamic_extension(dynamic_extension)}" if (is_dynamic or self.dynamic?)
+      ext
+    end
+
+    def dynamic_extension(default_extension)
+      return @extension if @extension
+      default_extension
+    end
+
+    def dynamic?
+      @dynamic
+    end
+
+    def inspect
+      %(<Output #{@format}>)
     end
   end
 
@@ -69,6 +138,6 @@ module Spontaneous::Render
   end
 end
 
-Dir[File.join(File.dirname(__FILE__), 'format', '*.rb')].each do |format|
+Dir[File.join(File.dirname(__FILE__), 'output', '*.rb')].each do |format|
   require format
 end

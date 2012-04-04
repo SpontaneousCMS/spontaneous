@@ -102,19 +102,17 @@ module Spontaneous
         # the delay is purely used in interface testing
         delay = Spontaneous::Site.config.publishing_delay
         pages.each do |page|
-          page.formats.each do |format|
-            render_page(page, format)
+          page.outputs.each do |output|
+            render_page(page, output)
           end
           sleep(delay) if delay
         end
       end
 
-      def render_page(page, format)
+      def render_page(page, output)
         logger.info { "#{page.path}" }
-        formatter = format.renderer_class
-        renderer = formatter.new(revision, page, format)
-        renderer.render
-        page_rendered(page, "rendering", format)
+        output.render(revision, page)
+        page_rendered(page, "rendering", output.format)
       end
 
       def index_pages
@@ -132,7 +130,7 @@ module Spontaneous
       # although not all pages are included by a format
       def total_pages_to_render
         @total_pages ||= (index_stages * pages.count) + pages.inject(0) do |total, page|
-          total += page.formats.length#count { |page| page.formats.include?(format) }
+          total += page.outputs.length
         end
       end
 

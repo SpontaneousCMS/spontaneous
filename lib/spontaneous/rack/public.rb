@@ -122,13 +122,13 @@ module Spontaneous
       end
 
       def find_page!(path)
-        @path, format_name, @action = parse_path(path)
+        @path, format, @action = parse_path(path)
         @page = Site[@path]
-        @format = @page.format(format_name) if @page
+        @output = @page.output(format) if @page
       end
 
-      def format
-        @format
+      def output
+        @output
       end
 
       def action
@@ -138,7 +138,7 @@ module Spontaneous
       def render_get
         # return not_found! unless @page
 
-        @format = (@format || @page.default_format) if @page
+        @output = (@output || @page.default_output) if @page
 
         if @action
           call_action!
@@ -146,8 +146,8 @@ module Spontaneous
           block = page.request_block(request)
           parse_response(instance_eval(&block)) if (block)
 
-          @format = (@format || @page.default_format) if @page
-          render_page_with_format(@page, @format)
+          @output = (@output || @page.default_output) if @page
+          render_page_with_output(@page, @output)
         end
       end
 
@@ -163,20 +163,20 @@ module Spontaneous
         else
           parse_response(instance_eval(&block)) if (block)
 
-          @format = (@format || @page.default_format) if @page
-          render_page_with_format(@page, @format)
+          @output = (@output || @page.default_output) if @page
+          render_page_with_output(@page, @output)
         end
       end
 
       def call_action!
         # get
-        status, headers, result = @page.process_action(action, request.env, format)
+        status, headers, result = @page.process_action(action, request.env, output)
         # our 404 page should come from the CMS
         if status == 404
           not_found!
         else
           if result.respond_to?(:spontaneous_content?)
-            render_page_with_format(result, format)
+            render_page_with_output(result, output)
           else
             [status, headers, result]
           end
@@ -194,10 +194,10 @@ module Spontaneous
         [path, format, action]
       end
 
-      def render_page_with_format(page, format)
-        if page && page.provides_format?(format)
-          content_type(page.mime_type(format))
-          render_page(page, page.format(format))
+      def render_page_with_output(page, output)
+        if page && page.provides_format?(output)
+          content_type(output.mime_type)
+          render_page(page, output)
         else
           # perhaps we should return the html version if the page exists but
           # doesn't respond to the requested format?
@@ -206,8 +206,8 @@ module Spontaneous
         end
       end
 
-      def render_page(page, format = :html, local_params = {})
-        response.body = page.render(format, local_params.merge({
+      def render_page(page, output, local_params = {})
+        response.body = page.render(output, local_params.merge({
           :params => request.params,
           :request => request,
           :session => request.session

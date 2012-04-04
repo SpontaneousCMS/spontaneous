@@ -10,10 +10,11 @@ module Spontaneous
       end
 
       def output_path_with_root(root, revision, page, format, extension = nil, template_dynamic = false)
-        format = page.format(format)
-        ext = ".#{format}"
-        ext += ".#{extension}" if extension && template_dynamic
-        segment = (template_dynamic || format.dynamic?) ? "dynamic" : (page.dynamic? ? "protected" : "static")
+        output = page.output(format)
+        # ext = ".#{format}"
+        # ext += ".#{extension}" if extension && template_dynamic
+        ext = output.extension(template_dynamic)
+        segment = (template_dynamic || output.dynamic?) ? "dynamic" : (page.dynamic? ? "protected" : "static")
         dir = root / segment / page.path
         path = "#{dir}#{ext}"
         # root is a special case, as always
@@ -219,7 +220,7 @@ module Spontaneous
     autoload :PublishingRenderer,   "spontaneous/render/publishing_renderer"
     autoload :PublishedRenderer,    "spontaneous/render/published_renderer"
     autoload :DevelopmentRenderer,  "spontaneous/render/development_renderer"
-    autoload :Format,               "spontaneous/render/format"
+    autoload :Output,               "spontaneous/render/output"
     autoload :Helpers,              "spontaneous/render/helpers"
     autoload :Assets,               "spontaneous/render/assets"
   end
