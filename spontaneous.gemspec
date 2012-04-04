@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha2'
-  s.date              = '2012-04-02'
+  s.date              = '2012-04-04'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -396,6 +396,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/plugins/schema_title.rb
     lib/spontaneous/plugins/serialisation.rb
     lib/spontaneous/plugins/site/features.rb
+    lib/spontaneous/plugins/site/hooks.rb
     lib/spontaneous/plugins/site/instance.rb
     lib/spontaneous/plugins/site/level.rb
     lib/spontaneous/plugins/site/map.rb
@@ -446,12 +447,12 @@ Gem::Specification.new do |s|
     lib/spontaneous/render/context_base.rb
     lib/spontaneous/render/development_renderer.rb
     lib/spontaneous/render/engine.rb
-    lib/spontaneous/render/format.rb
-    lib/spontaneous/render/format/html.rb
     lib/spontaneous/render/helpers.rb
     lib/spontaneous/render/helpers/html_helper.rb
     lib/spontaneous/render/helpers/script_helper.rb
     lib/spontaneous/render/helpers/stylesheet_helper.rb
+    lib/spontaneous/render/output.rb
+    lib/spontaneous/render/output/html.rb
     lib/spontaneous/render/preview_context.rb
     lib/spontaneous/render/preview_renderer.rb
     lib/spontaneous/render/publish_context.rb
