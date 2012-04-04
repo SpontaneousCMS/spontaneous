@@ -12,7 +12,7 @@ module Spontaneous
         protected
 
         def db_adapter
-          ::Spontaneous::Utils::Database.dumper_for_database(database)
+          @db_adapter ||= ::Spontaneous::Utils::Database.dumper_for_database(database)
         end
 
         def sqldump(path)
@@ -32,7 +32,7 @@ module Spontaneous
         end
 
         def database_dumpfile
-          dump_path / "database.mysql.gz"
+          dump_path / "database.#{db_adapter.name}.gz"
         end
 
         def database

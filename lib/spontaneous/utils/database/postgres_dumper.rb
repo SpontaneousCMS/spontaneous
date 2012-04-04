@@ -1,14 +1,13 @@
-
 module Spontaneous
   module Utils
     module Database
-      class MySQLDumper
+      class PostgresDumper < MySQLDumper
         def initialize(database)
           @database = database
         end
 
         def name
-          "mysql"
+          "pgsql"
         end
 
         def load(path)
@@ -17,15 +16,19 @@ module Spontaneous
 
         def load_command(path)
           options = [
-            "mysql",
+            "psql",
+            "--quiet",
             option(:password),
-            option(:user),
-            option(:default_character_set),
+            option(:username),
             database_name
           ]
           if path =~ /\.gz$/
             options = ["gunzip", "<", path, "|"].concat(options)
+          else
+            options.concat [ "<", path ]
           end
+
+          options.concat [ ">/dev/null" ]
 
           command = options.join(" ")
         end
@@ -36,9 +39,12 @@ module Spontaneous
 
         def dump_command(path, tables = nil)
           options = [
+            "--clean",
+            "--no-owner",
+            "--no-privileges",
             option(:password),
-            option(:user),
-            option(:default_character_set),
+            option(:username),
+            option(:encoding),
             database_name
           ]
           unless tables.nil?
@@ -47,13 +53,14 @@ module Spontaneous
 
           options.push( "| gzip") if path =~ /\.gz$/
 
-          command = %(mysqldump #{options.join(" ")} > #{path} )
+          command = %(pg_dump #{options.join(" ")} > #{path} )
         end
+
         def database_name
           @database.opts[:database]
         end
 
-        def user
+        def username
           @database.opts[:user]
         end
 
@@ -61,19 +68,11 @@ module Spontaneous
           @database.opts[:password]
         end
 
-        def default_character_set
+        def encoding
           "UTF8"
-        end
-
-        def option(option, add_if_nil=false)
-          value = self.send(option)
-          if !value.nil? or add_if_nil
-            "--#{option.to_s.gsub(/_/, '-')}=#{value}"
-          else
-            ""
-          end
         end
       end
     end
   end
 end
+
