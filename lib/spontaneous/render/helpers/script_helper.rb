@@ -6,7 +6,9 @@ module Spontaneous::Render::Helpers
 
     def scripts(*args)
       scripts = args.flatten
-      return compressed_scripts(scripts) if live?
+      options = scripts.extract_options!
+      compress = (live? or (publishing? and options[:force_compression]))
+      return compressed_scripts(scripts) if compress
       scripts.map { |script| script_tag(script)  }.join("\n")
     end
 
