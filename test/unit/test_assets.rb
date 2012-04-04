@@ -103,6 +103,21 @@ class AssetTest < MiniTest::Spec
       File.read(on_disk).should == "/* compressed */\n"
     end
 
+    should "be compressed if publishing and passed a force option" do
+      files = [@fixture_root / "public1/css/a.scss", @fixture_root / "public2/css/b.scss"]
+      context = new_context
+      context.stubs(:live?).returns(false)
+      context.stubs(:publishing?).returns(true)
+      context.live?.should be_false
+      Shine.expects(:compress_string).with(anything, :css, {}).once.returns("/* compressed */\n")
+      result = context.stylesheets("/css/a", "/css/c", "/css/b", {:force_compression => true})
+
+      context.stubs(:publishing?).returns(false)
+      context.publishing?.should be_false
+      Shine.expects(:compress_string).with(anything, :css, {}).never
+      result = context.stylesheets("/css/a", "/css/c", "/css/b", {:force_compression => true})
+    end
+
     should "use a cache to make sure identical file lists are only compressed once" do
       context = new_context
       Shine.expects(:compress_string).with(<<-CSS, :css, {}).once.returns("/* compressed1 */\n")

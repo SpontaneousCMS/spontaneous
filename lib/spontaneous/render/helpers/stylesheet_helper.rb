@@ -8,7 +8,11 @@ module Spontaneous::Render::Helpers
 
     def stylesheets(*args)
       stylesheets = args.flatten
-      return compressed_stylesheets(stylesheets) if live?
+      options = stylesheets.extract_options!
+      compress_stylesheets = (live? or (publishing? and options[:force_compression]))
+
+      return compressed_stylesheets(stylesheets) if compress_stylesheets
+
       stylesheets.map do |stylesheet|
         stylesheet_tag(stylesheet)
       end.join("\n")
