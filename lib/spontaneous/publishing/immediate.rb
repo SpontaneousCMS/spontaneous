@@ -12,7 +12,6 @@ module Spontaneous
       def initialize(revision)
         @revision = revision
         @previous_revision = Site.published_revision
-        logger.info {  "Publishing revision #{@revision}"}
       end
 
       def publish_changes(change_list)
@@ -47,6 +46,11 @@ module Spontaneous
         end
       end
 
+      def rerender_revision
+        logger.info {  "Re-rendering revision #{@revision}"}
+        render_revision
+      end
+
       protected
 
       def page_rendered(page, event = "rendering", format = "html")
@@ -68,6 +72,7 @@ module Spontaneous
       end
 
       def publish(modified_page_list)
+        logger.info {  "Publishing revision #{@revision}"}
         at_exit {
           abort_publish_at_exit
         }

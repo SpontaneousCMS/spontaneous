@@ -127,6 +127,14 @@ module Spontaneous
         end
       end
 
+      desc "#{namespace}:render", "Re-renders the current content"
+      def render
+        prepare :render
+        boot!
+        ::Site.publishing_method = :immediate
+        ::Site.rerender
+      end
+
       desc "#{namespace}:revision", "Shows the site status"
       def revision
         prepare :revision

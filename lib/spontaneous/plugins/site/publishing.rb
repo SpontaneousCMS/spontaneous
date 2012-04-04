@@ -35,6 +35,10 @@ module Spontaneous::Plugins::Site
         publishing_method.new(self.revision).publish_all
       end
 
+      def rerender
+        publishing_method.new(self.published_revision).rerender_revision
+      end
+
       def publishing_status
         status = rest = nil
         # if r = S::Site.pending_revision
