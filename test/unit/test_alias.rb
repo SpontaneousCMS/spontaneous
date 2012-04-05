@@ -172,8 +172,8 @@ class AliasTest < MiniTest::Spec
             class ::XX < ::Piece
               alias_of :AA, :container => Proc.new { S::Site['#thepage'].box1 }
             end
-            X.targets.should == @page.box1.select { |p| A === p }
-            XX.targets.should == @page.box1.select { |p| AA === p }
+            Set.new(X.targets).should == Set.new(@page.box1.select { |p| A === p })
+            Set.new(XX.targets).should == Set.new(@page.box1.select { |p| AA === p })
           end
 
           should "allow for selecting only content from a range of boxes" do

@@ -358,9 +358,10 @@ class BoxesTest < MiniTest::Spec
       styled.one << child1
       styled.two << child2
       styled.save
-      styled = Content[styled.id]
-      styled.one.pieces.first.style.name.should == :blank2
-      styled.two.pieces.first.style.name.should == :blank3
+      styled = Content.first :id => styled.id
+
+      styled.one.contents.first.style.name.should == :blank2
+      styled.two.contents.first.style.name.should == :blank3
     end
 
     should "be insertable at any position" do

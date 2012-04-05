@@ -84,8 +84,8 @@ class PieceTest < MiniTest::Spec
 
       should "be available from their containing page" do
         @page.content.length.should == 3
-        @page.content.should == [@f1, @f2, @f3]
-        @page.content.last.class.should == Fridge
+        Set.new(@page.content).should == Set.new([@f1, @f2, @f3])
+        Set.new(@page.content.map(&:class)).should == Set.new([::Piece, ::Piece, Fridge])
       end
 
       should "have a link to their pieces" do
