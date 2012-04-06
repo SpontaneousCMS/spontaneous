@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha2'
-  s.date              = '2012-04-04'
+  s.date              = '2012-04-06'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -300,6 +300,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/errors.rb
     lib/spontaneous/extensions/array.rb
     lib/spontaneous/extensions/class.rb
+    lib/spontaneous/extensions/enumerable.rb
     lib/spontaneous/extensions/hash.rb
     lib/spontaneous/extensions/json.rb
     lib/spontaneous/extensions/kernel.rb
@@ -436,6 +437,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/rack/front.rb
     lib/spontaneous/rack/helpers.rb
     lib/spontaneous/rack/http.rb
+    lib/spontaneous/rack/js.rb
     lib/spontaneous/rack/media.rb
     lib/spontaneous/rack/public.rb
     lib/spontaneous/rack/query_authentication.rb
@@ -487,6 +489,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/utils.rb
     lib/spontaneous/utils/database.rb
     lib/spontaneous/utils/database/mysql_dumper.rb
+    lib/spontaneous/utils/database/postgres_dumper.rb
     lib/spontaneous/utils/smart_quotes.rb
     lib/spontaneous/utils/smush_it.rb
     lib/spontaneous/version.rb
@@ -500,13 +503,16 @@ Gem::Specification.new do |s|
     test/fixtures/application/views/index.erb
     test/fixtures/assets/public1/css/a.scss
     test/fixtures/assets/public1/js/a.js
+    test/fixtures/assets/public1/js/m.coffee
     test/fixtures/assets/public2/css/b.scss
     test/fixtures/assets/public2/css/c.css
     test/fixtures/assets/public2/js/b.js
     test/fixtures/assets/public2/js/c.js
+    test/fixtures/assets/public2/js/n.coffee
     test/fixtures/back/config/user_levels.yml
     test/fixtures/back/public/css/sass_include.scss
     test/fixtures/back/public/css/sass_template.scss
+    test/fixtures/back/public/js/coffeescript.coffee
     test/fixtures/back/public/test.html
     test/fixtures/back/templates/layouts/standard.html.cut
     test/fixtures/config/config/environment.rb
