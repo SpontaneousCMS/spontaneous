@@ -451,7 +451,7 @@ class BackTest < MiniTest::Spec
       should "compile CoffeeScript" do
         get "/js/coffeescript.js"
         assert last_response.ok?, "Should return 200 but got #{last_response.status}"
-        last_response.body.should == "(function() {\n  var square;\n\n  square = function(x) {\n    return x * x;\n  };\n\n}).call(this);\n"
+        last_response.body.should =~ /square = function/
       end
     end
 
