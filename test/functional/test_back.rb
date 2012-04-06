@@ -423,6 +423,22 @@ class BackTest < MiniTest::Spec
         assert_equal S::Render.with_preview_renderer { @project1.render }, last_response.body
       end
 
+      should "return alternate formats" do
+        Project.add_output :js
+        get "/project1.js"
+        assert last_response.ok?
+        last_response.content_type.should == "application/javascript;charset=utf-8"
+        assert_equal S::Render.with_preview_renderer { @project1.render(:js) }, last_response.body
+      end
+
+      should "allow pages to have css formats" do
+        Project.add_output :css
+        get "/project1.css"
+        assert last_response.ok?
+        last_response.content_type.should == "text/css;charset=utf-8"
+        assert_equal S::Render.with_preview_renderer { @project1.render(:css) }, last_response.body
+      end
+
       should "return cache-busting headers" do
         ["/project1", "/"].each do |path|
           get path

@@ -25,9 +25,7 @@ module Spontaneous::Rack
         template = template_path(path)
         return render_coffeescript(template) if File.exists?(template)
       end
-      # tried all the possible sass templates and haven't found one that matches
-      # the requested css file
-      raise Sinatra::NotFound
+      nil
     end
 
     def render_coffeescript(template)
