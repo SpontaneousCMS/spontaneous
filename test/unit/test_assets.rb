@@ -49,7 +49,8 @@ class AssetTest < MiniTest::Spec
   context "Javascript assets" do
     should "be compressed in live environment" do
       files = [@fixture_root / "public1/js/a.js", @fixture_root / "public2/js/b.js"]
-      Shine.expects(:compress_files).with(files, :js, {}).once.returns("var A;\nvar B;\n")
+      src = files.map { |p| File.read(p) }.join
+      Shine.expects(:compress_string).with(src, :js, {}).once.returns("var A;\nvar B;\n")
       context = new_context
       result = context.scripts("/js/a", "/js/b")
       result.should =~ /src="\/rev\/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad\.js"/
@@ -61,8 +62,10 @@ class AssetTest < MiniTest::Spec
     should "use a cache to make sure identical file lists are only compressed once" do
       files1 = [@fixture_root / "public1/js/a.js", @fixture_root / "public2/js/b.js"]
       files2 = [@fixture_root / "public2/js/b.js", @fixture_root / "public2/js/c.js"]
-      Shine.expects(:compress_files).with(files1, :js, {}).once.returns("var A;\nvar B;\n")
-      Shine.expects(:compress_files).with(files2, :js, {}).once.returns("var B;\nvar C;\n")
+      src1 = files1.map { |p| File.read(p) }.join
+      src2 = files2.map { |p| File.read(p) }.join
+      Shine.expects(:compress_string).with(src1, :js, {}).once.returns("var A;\nvar B;\n")
+      Shine.expects(:compress_string).with(src2, :js, {}).once.returns("var B;\nvar C;\n")
       context = new_context
       S::Render.with_publishing_renderer do
         result = context.scripts("/js/a", "/js/b")
@@ -75,20 +78,22 @@ class AssetTest < MiniTest::Spec
 
     should "be compressed when publishing & passed a force_compression option" do
       files = [@fixture_root / "public1/js/a.js", @fixture_root / "public2/js/b.js"]
-      Shine.expects(:compress_files).with(files, :js, {}).once.returns("var A;\nvar B;\n")
+      src = files.map { |p| File.read(p) }.join
+      Shine.expects(:compress_string).with(src, :js, {}).once.returns("var A;\nvar B;\n")
       context = new_context
       context.stubs(:live?).returns(false)
       context.stubs(:publishing?).returns(true)
       result = context.scripts("/js/a", "/js/b", :force_compression => true)
 
-      Shine.expects(:compress_files).with(files, :js, {}).never
+      Shine.expects(:compress_string).with(src, :js, {}).never
       context.stubs(:publishing?).returns(false)
       result = context.scripts("/js/a", "/js/b", :force_compression => true)
     end
 
     should "support UTF8 scripts" do
       files = [@fixture_root / "public1/js/a.js", @fixture_root / "public2/js/b.js"]
-      Shine.expects(:compress_files).with(files, :js, {}).once.returns("var A = \"\xC2\";\nvar B;\n".force_encoding("ASCII-8BIT"))
+      src = files.map { |p| File.read(p) }.join
+      Shine.expects(:compress_string).with(src, :js, {}).once.returns("var A = \"\xC2\";\nvar B;\n".force_encoding("ASCII-8BIT"))
       context = new_context
       result = context.scripts("/js/a", "/js/b")
     end
@@ -97,6 +102,49 @@ class AssetTest < MiniTest::Spec
       context = new_context
       result = context.scripts("http://jquery.com/jquery.js")
       result.should =~ /src="http:\/\/jquery.com\/jquery.js"/
+    end
+  end
+
+  context "CoffeeScript assets" do
+    should "be compiled & compressed in live environment" do
+      files = [@fixture_root / "public1/js/m.js", @fixture_root / "public2/js/n.js"]
+      Shine.expects(:compress_string).with((<<-COMPILED), :js, {}).once.returns("var A;\nvar B;\n")
+(function() {
+  var square;
+
+  square = function(x) {
+    return x * x;
+  };
+
+  if (typeof elvis !== "undefined" && elvis !== null) alert("I knew it!");
+
+}).call(this);
+      COMPILED
+      context = new_context
+      result = context.scripts("/js/m", "/js/n")
+      result.should =~ /src="\/rev\/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad\.js"/
+      on_disk = Spontaneous::Render.revision_root(context.revision) / "rev/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad.js"
+      assert File.exist?(on_disk)
+      File.read(on_disk).should == "var A;\nvar B;\n"
+    end
+
+    should "be correctly compiled when mixed with plain js" do
+      Shine.expects(:compress_string).with((<<-COMPILED), :js, {}).once.returns("var A;\nvar B;\n")
+var A;
+(function() {
+  var square;
+
+  square = function(x) {
+    return x * x;
+  };
+
+  if (typeof elvis !== "undefined" && elvis !== null) alert("I knew it!");
+
+}).call(this);
+var B;
+      COMPILED
+      context = new_context
+      result = context.scripts("/js/a", "/js/m", "/js/n", "/js/b")
     end
   end
 

@@ -75,6 +75,8 @@ Gem::Specification.new do |s|
   s.add_dependency('xapian-fu', ["~> 1.3"])
   s.add_dependency('nokogiri', ["~> 1.5.0"])
   s.add_dependency('public_suffix', ["~> 1.0"])
+  s.add_dependency('coffee-script', ["~> 2.2.0"])
+  s.add_dependency('therubyracer', ['~> 0.9.10'])
 
   ## List your development dependencies here. Development dependencies are
   ## those that are only needed during development

@@ -11,6 +11,10 @@ module Spontaneous
           shine_compress_files(filelist, :js, options)
         end
 
+        def compress_js_string(js, options={})
+          shine_compress_string(js, :js, options)
+        end
+
         def compress_css(filelist, options={})
           # compress_files(filelist, :css, options)
           opts = {

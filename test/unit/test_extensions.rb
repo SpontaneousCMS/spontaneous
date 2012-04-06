@@ -16,5 +16,12 @@ class ExtensionsTest < MiniTest::Spec
       (nil / "something").should == "something"
     end
   end
+
+  context "Enumerable" do
+    should "correctly slice_between elements" do
+      result = ["js", "coffee", "coffee", "js", "coffee"].slice_between { |prev, current| prev != current }.to_a
+      result.should == [["js"], ["coffee", "coffee"], ["js"], ["coffee"]]
+    end
+  end
 end
 

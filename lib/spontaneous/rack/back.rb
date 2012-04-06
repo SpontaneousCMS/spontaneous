@@ -108,6 +108,7 @@ module Spontaneous
               :urls => %w[/],
               :try => ['.html', 'index.html', '/index.html']
             use Spontaneous::Rack::CSS, :root => Spontaneous.instance.paths.expanded(:public)
+            use Spontaneous::Rack::JS,  :root => Spontaneous.instance.paths.expanded(:public)
             run Preview
           end
 

@@ -28,6 +28,8 @@ module Spontaneous::Render
         root
       when 1, :section
         navigation_at_depth(1, &block)
+      else
+        navigation_at_depth(depth, &block)
       end
     end
 
