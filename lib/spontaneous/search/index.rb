@@ -67,9 +67,10 @@ module Spontaneous::Search
       values = Hash.new { |h, k| h[k] = [] }
       # not sure that I need the include? test here as page.content only returns Pieces
       # and I'm not sure that there is a particular need to exclude Pieces from indexes
-      pieces = [page].concat(page.content).select { |content| include?(content) }
-      pieces += page.boxes.select { |box| include?(box) }
-      pieces.each do |content|
+      indexable = [page]
+      indexable.concat(page.pieces.select { |content| include?(content) })
+      indexable += page.boxes.select { |box| include?(box) }
+      indexable.each do |content|
         content.fields.each do |field|
           prototype = field.prototype
           values[prototype.index_id(self)] << field.indexable_value if prototype.in_index?(self)
