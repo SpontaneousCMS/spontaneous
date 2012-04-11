@@ -116,7 +116,7 @@ module Spontaneous
 
       def render_page(page, output)
         logger.info { "#{page.path}" }
-        output.render(revision, page)
+        output.publish_page(revision)
         page_rendered(page, "rendering", output.format)
       end
 

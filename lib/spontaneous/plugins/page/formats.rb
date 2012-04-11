@@ -7,71 +7,78 @@ module Spontaneous::Plugins::Page
     extend ActiveSupport::Concern
 
     module ClassMethods
-      def format_for(format_name)
-        Spontaneous::Render::Output.new(format_name)
-      end
+      # def format_for(format_name)
+      #   Spontaneous::Render::Output.new(format_name)
+      # end
 
       def outputs(*outputs)
         return output_list if outputs.nil? or outputs.empty?
         set_outputs(outputs)
       end
 
-      def output_list
+      def output_map
         @outputs ||= supertype_outputs
+      end
+
+      def output_list
+        output_map.values
       end
 
       def add_output(format, *args)
         options = args.extract_options!
-        output = define_output(format, options)
-        if (index = output_list.index { |o| o == output })
-          output_list[index] = output
-        else
-          output_list.push(output)
-        end
+        output = define_and_add_output(format, options)
       end
 
       def set_outputs(outputs)
-        outputs = outputs.flatten
-        output_list.clear
-        outputs.map do |format|
-          output_list.push define_output(format)
+        output_map.clear
+        outputs.each do |definition|
+          define_and_add_output(*definition)
         end
       end
 
+      def define_and_add_output(format, options = {})
+        output = define_output(format, options)
+        output_map[output.name] = output
+      end
+
       def define_output(format, options = {})
-        Spontaneous::Render::Output.new(format, options).tap do |f|
-          raise Spontaneous::UnknownFormatException.new(format) unless f.mime_type
+        o = Spontaneous::Render::Output.create(format, options).tap do |output|
+          silence_warnings { self.const_set("Output#{format.to_s.upcase}", output) }
         end
       end
 
       def supertype_outputs
-        supertype? && supertype.respond_to?(:outputs) ? supertype.outputs.dup : [standard_output]
+        supertype? && supertype.respond_to?(:outputs) ? supertype.output_map.dup : { :html => standard_output }
       end
 
       def standard_output
-        Spontaneous::Render::Output.new(:html)
+        define_output(:html)
       end
 
       def default_output
-        outputs.first
+        output_list.first
       end
 
       def provides_format?(format)
-        format = (format || :html).to_sym
-        outputs.include?(format)
+        format = format.to_s
+        outputs.any? { |output| (output == format) or (output.name.to_s == format) }
       end
 
       alias_method :provides_output?, :provides_format?
 
-      def output(format_name = nil)
-        return format_name if format_name.is_a?(Spontaneous::Render::Output)
-        return default_output if format_name.blank?
-        output_list.detect { |o| o == format_name } || Spontaneous::Render::Output.new(format_name)
+      def output(name = nil)
+        output_without_validation(name) or raise Spontaneous::UnknownOutputException.new(self, name)
+      end
+
+      def output_without_validation(name = nil)
+        return name if name.is_a?(Spontaneous::Render::Output::Format)
+        return default_output if name.blank?
+        output_map[name.to_sym]
       end
 
       def mime_type(format)
         return format.mime_type if format.respond_to?(:mime_type)
-        if (match = output(format))
+        if (match = output_without_validation(format))
           match.mime_type
         else
           ::Rack::Mime.mime_type(".#{format}")
@@ -80,23 +87,34 @@ module Spontaneous::Plugins::Page
     end # ClassMethods
 
     def outputs
-      self.class.outputs
+      self.class.outputs.map { |output| output.new(self) }
     end
 
     def default_output
-      self.class.default_output
+      self.class.default_output.new(self)
     end
 
-    def provides_format?(format)
-      self.class.provides_format?(format)
+    def provides_output?(format)
+      self.class.provides_output?(format)
     end
 
     def output(format)
-      self.class.output(format)
+      return format if format.is_a?(Spontaneous::Render::Output::Format)
+      output_class = self.class.output(format)
+      output_class.new(self)
     end
 
     def mime_type(format)
       self.class.mime_type(format)
+    end
+
+    def render(format=:html, params={}, *args)
+      if format.is_a?(Hash)
+        params = format
+        format = :html
+      end
+      output = output(format)
+      output.render(params, *args)
     end
   end # Formats
 end # Spontaneous::Plugins::Page

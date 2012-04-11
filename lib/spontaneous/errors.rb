@@ -32,9 +32,9 @@ module Spontaneous
   end
 
 
-  class UnknownFormatException < Error
-    def initialize(unsupported_format)
-      super("Format '#{unsupported_format}' has no matching mime type")
+  class UnknownOutputException < Error
+    def initialize(content_class, unsupported_output_name)
+      super("Type '#{content_class}' does not output '#{unsupported_output_name}'")
     end
   end
 

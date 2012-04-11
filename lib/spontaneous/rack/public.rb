@@ -52,7 +52,7 @@ module Spontaneous
       # stolen from Sinatra
       def parse_response(response)
         case
-        when response.respond_to?(:spontaneous_content?)
+        when response.is_a?(Spontaneous::Content)
           @page = response
         when response.respond_to?(:to_str)
           @response.body = [response]
@@ -122,9 +122,8 @@ module Spontaneous
       end
 
       def find_page!(path)
-        @path, format, @action = parse_path(path)
+        @path, @output, @action = parse_path(path)
         @page = Site[@path]
-        @output = @page.output(format) if @page
       end
 
       def output
@@ -136,25 +135,17 @@ module Spontaneous
       end
 
       def render_get
-        # return not_found! unless @page
-
-        @output = (@output || @page.default_output) if @page
-
         if @action
           call_action!
         else
           block = page.request_block(request)
           parse_response(instance_eval(&block)) if (block)
-
-          @output = (@output || @page.default_output) if @page
-          render_page_with_output(@page, @output)
+          render_page_with_output
         end
       end
 
       # non-action urls shouldn't respond to post requests
       def render_post
-        # return not_found! unless @page
-
         block = page.request_block(request)
         return not_found! unless (block or @action)
 
@@ -162,21 +153,18 @@ module Spontaneous
           call_action!
         else
           parse_response(instance_eval(&block)) if (block)
-
-          @output = (@output || @page.default_output) if @page
-          render_page_with_output(@page, @output)
+          render_page_with_output
         end
       end
 
       def call_action!
-        # get
         status, headers, result = @page.process_action(action, request.env, output)
-        # our 404 page should come from the CMS
         if status == 404
           not_found!
         else
-          if result.respond_to?(:spontaneous_content?)
-            render_page_with_output(result, output)
+          if result.is_a?(Spontaneous::Content)
+            @page = result
+            render_page_with_output
           else
             [status, headers, result]
           end
@@ -190,14 +178,18 @@ module Spontaneous
         else
           path, format = path.split(DOT)
         end
-        # format = (format || :html).to_sym
         [path, format, action]
       end
 
-      def render_page_with_output(page, output)
-        if page && page.provides_format?(output)
+      def normalise_output
+        @output = (@output || @page.default_output.to_sym).to_s if @page
+      end
+
+      def render_page_with_output
+        normalise_output
+        if @page && @page.provides_output?(@output) && (output = @page.output(@output)) && output.public?
           content_type(output.mime_type)
-          render_page(page, output)
+          render_page(@page, @output)
         else
           # perhaps we should return the html version if the page exists but
           # doesn't respond to the requested format?
@@ -226,6 +218,7 @@ module Spontaneous
       #   end
       # end
 
+      # our 404 page should come from the CMS
       def not_found!
         404
       end

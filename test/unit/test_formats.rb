@@ -6,6 +6,7 @@ class FormatsTest < MiniTest::Spec
   context "Pages" do
     setup do
       @site = setup_site
+      @site.paths.add :templates, File.expand_path('../../fixtures/outputs/templates', __FILE__)
       class Page < Spontaneous::Page; end
       class FPage < Page; end
     end
@@ -16,17 +17,28 @@ class FormatsTest < MiniTest::Spec
       teardown_site
     end
 
-    should "default to a single :html format" do
-      FPage.outputs.should == [:html]
-    end
+    context "default output" do
+      should "be named :html" do
+        FPage.outputs.map(&:name).should == [:html]
+      end
 
-    should "have a default output of :html" do
-      FPage.default_output.should == :html
+      should "be html format" do
+        FPage.outputs.map(&:format).should == [:html]
+      end
+
+      should "be public" do
+        FPage.outputs.map(&:private?).should == [false]
+        FPage.outputs.map(&:public?).should ==  [true]
+      end
+
+      should "be static" do
+        FPage.outputs.map(&:dynamic?).should == [false]
+      end
     end
 
     should "have tests for supported outputs" do
-      FPage.provides_format?(:html).should be_true
-      FPage.provides_format?(:rss).should be_false
+      FPage.provides_output?(:html).should be_true
+      FPage.provides_output?(:rss).should be_false
     end
 
     should "return the mime-type for a output" do
@@ -34,25 +46,30 @@ class FormatsTest < MiniTest::Spec
       FPage.mime_type(:atom).should == "application/atom+xml"
     end
 
-    should "default to static output" do
-      FPage.output(:html).dynamic?.should be_false
+
+    should "return the output class for a named output" do
+      FPage.output(:html).must_be_instance_of(Class)
+      FPage.output(:html).ancestors.include?(S::Render::Output::HTML).should be_true
     end
 
-    should "return the format wrapper for a format name" do
-      FPage.output(FPage.output(:html)).format.should == :html
+    should "dynamically generate output classes for unknown formats" do
+      FPage.add_output :fish, :format => :unknown
+      FPage.output(:fish).ancestors[1].should == S::Render::Output::UNKNOWN
+      FPage.output(:fish).ancestors[2].should == S::Render::Output::Format
     end
+
     should "return the format wrapper for a format name string" do
-      FPage.output("html").should == :html
+      FPage.output("html").should == FPage.output(:html)
     end
 
     should "give the default format for blank format names" do
-      FPage.output(nil).format.should == :html
-      FPage.output.format.should == :html
-      FPage.output.should == :html
+      html = FPage.output(:html)
+      FPage.output(nil).should == html
+      FPage.output.should == html
     end
 
-    should "provide the correct output extension for static pages" do
-      FPage.output.extension.should == ".html"
+    should "provide a symbol version of the output name" do
+      FPage.output(:html).to_sym.should == :html
     end
 
     should "provide the correct output extension for dynamic pages" do
@@ -71,14 +88,126 @@ class FormatsTest < MiniTest::Spec
       FPage.output(format).dynamic?.should be_true
     end
 
+    should "correctly set the format from the output name if it's recognised" do
+      FPage.add_output :pdf
+      FPage.output(:pdf).format.should == :pdf
+      FPage.output(:pdf).mimetype.should == "application/pdf"
+    end
+
+    should "default to a format of html for unknown output formats" do
+      FPage.outputs [:xyzz]
+      FPage.default_output.format.should == :html
+      FPage.output(:xyzz).format.should == :html
+      FPage.output(:xyzz).mimetype.should == "text/html"
+    end
+
+    should "allow the setting of a default format for an output" do
+      FPage.add_output :rss, :format => :html
+      FPage.output(:rss).format.should == :html
+      FPage.output(:rss).mimetype.should == "text/html"
+    end
+
+    should "allow for custom mimetypes" do
+      FPage.add_output :rss, :format => :html, :mimetype => "application/xhtml+xml"
+      FPage.output(:rss).format.should == :html
+      FPage.output(:rss).mimetype.should == "application/xhtml+xml"
+    end
+
+    should "allow for marking an output as 'private'" do
+      FPage.add_output :rss, :private => true
+      FPage.output(:rss).public?.should be_false
+      FPage.output(:rss).private?.should be_true
+    end
+
+    should "provide the correct output extension for static pages" do
+      FPage.output(:html).extension.should == ".html"
+    end
+
+    should "provide the correct output extension for static pages" do
+      FPage.add_output :pdf
+      FPage.output(:pdf).extension.should == ".pdf"
+    end
+
+    should "name the output according to the format" do
+      FPage.add_output :atom, :format => :html
+      FPage.output(:atom).extension.should == ".atom"
+    end
+
+    should "name the output using the configured extension" do
+      FPage.add_output :atom, :format => :html, :extension => "rss"
+      FPage.output(:atom).extension.should == ".rss"
+    end
+
+    should "allow for complex custom file extensions" do
+      FPage.add_output :rss, :extension => ".rss.xml.php"
+      FPage.output(:rss).extension.should == ".rss.xml.php"
+      FPage.output(:rss).extension(true).should == ".rss.xml.php"
+    end
+
+    # not sure I need this. The dynamic? flag is either set to always true in the output defn
+    # in which case you can use the :extension setting to just absolutely set the final output
+    # extension, or the rendered page is detected as dynamic by the templating system in which
+    # case it's most likely that the output language is the same as the templating system.
+    should "allow for setting a custom dynamic extension" do
+      FPage.add_output :fish, :format => :html, :dynamic => true, :language => "php"
+      FPage.output(:fish).extension.should == ".fish.php"
+      FPage.add_output :foul, :format => :html, :language => "php"
+      FPage.output(:foul).extension(true).should == ".foul.php"
+    end
+
+    # What would be more useful perhaps is a way to define a custom, per output, test for "dynamicness"
+    should "allow for a custom test for dynamicness"
+
+    should "override extension even for dynamic outputs" do
+      FPage.add_output :fish, :dynamic => true, :extension => "php"
+      FPage.output(:fish).extension(true).should == ".php"
+      FPage.add_output :foul, :dynamic => true, :extension => ".php"
+      FPage.output(:foul).extension(true).should == ".php"
+    end
+
     context "instances" do
       setup do
+        FPage.add_output :pdf, :dynamic => true
         @page = FPage.new
       end
-      should "pass on their formats to instances" do
-        @page.outputs.should == [:html]
-        @page.default_output.should == :html
-        @page.provides_format?(:html).should be_true
+
+      should "generate a list of output instances tied to the page" do
+        outputs = @page.outputs
+        outputs.map(&:class).should == [FPage.output(:html), FPage.output(:pdf)]
+      end
+
+      should "generate output instances tied to the page" do
+        @page.outputs.map(&:format).should == [:html, :pdf]
+        @page.default_output.format.should == :html
+
+        output = @page.output(:html)
+        output.must_be_instance_of FPage.output(:html)
+        output.page.should == @page
+        output.format.should == :html
+        output.dynamic?.should be_false
+        output.extension.should == ".html"
+
+        @page.output(:pdf).dynamic?.should be_true
+      end
+
+      should "provide a default output instance" do
+        output = @page.default_output
+        output.must_be_instance_of FPage.output(:html)
+      end
+
+      should "know that they provide a certain format" do
+        @page.provides_output?(:html).should be_true
+        @page.provides_output?(:pdf).should be_true
+        @page.provides_output?(:xyz).should be_false
+      end
+
+      should "provide a symbol version of the output name" do
+        @page.output(:html).to_sym.should == :html
+      end
+
+      should "return the output instance if used as an output request" do
+        output = @page.output(:html)
+        @page.output(output).should == output
       end
     end
 
@@ -88,41 +217,45 @@ class FormatsTest < MiniTest::Spec
       end
 
       should "be able to define their supported formats" do
-        FPage.outputs.should == [:rss, :html, :json]
+        FPage.outputs.map(&:format).should == [:rss, :html, :json]
       end
 
       should "re-define the default format" do
-        FPage.default_output.should == :rss
+        FPage.default_output.format.should == :rss
       end
 
       should "have tests for supported formats" do
-        FPage.provides_format?(:html).should be_true
-        FPage.provides_format?(:rss).should be_true
-        FPage.provides_format?(:json).should be_true
-        FPage.provides_format?(:xyz).should be_false
+        FPage.provides_output?(:html).should be_true
+        FPage.provides_output?(:rss).should be_true
+        FPage.provides_output?(:json).should be_true
+        FPage.provides_output?(:xyz).should be_false
       end
 
-      should "raise an error if trying to use an unknown format without specifying a mime-type" do
-        lambda { FPage.outputs [:xyzz] }.must_raise(Spontaneous::UnknownFormatException)
-      end
 
       should "accept new formats when accompanied by a mime-type" do
-        FPage.outputs [{:xyz => "application/xyz"}]
+        FPage.outputs [:xyz, {:mimetype => "application/xyz"}]
       end
 
       should "allow addition of a single format" do
         FPage.add_output :atom
-        FPage.outputs.should == [:rss, :html, :json, :atom]
+        FPage.outputs.map(&:format).should == [:rss, :html, :json, :atom]
+      end
+
+      should "allow custom post-processing of render" do
+        FPage.add_output :atom, :postprocess => lambda { |page, output| output.gsub(/a/, 'x') }
+        page = FPage.new
+        page.render(:atom).should =~ /<xtom>/
       end
     end
 
     context "with custom mime-types" do
       setup do
-        FPage.outputs [ {:html => "application/xhtml+xml"}, {:js => "application/json"} ]
+        FPage.outputs [ :html, {:mimetype => "application/xhtml+xml"}], [:js, {:mimetype => "application/json"} ]
       end
 
       should "still provide the correct default format" do
-        FPage.default_output.should == :html
+        FPage.default_output.format.should == :html
+        FPage.default_output.name.should == :html
       end
 
       should "return the custom mime-type for a output" do
@@ -137,8 +270,8 @@ class FormatsTest < MiniTest::Spec
       end
 
       should "allow addition of a single custom output" do
-        FPage.add_output :ddd => "application/ddd"
-        FPage.outputs.should == [:html, :js, :ddd]
+        FPage.add_output :ddd, :mimetype => "application/ddd"
+        FPage.outputs.map(&:format).should == [:html, :js, :ddd]
         page = FPage.new
         page.mime_type(:ddd).should == "application/ddd"
       end
@@ -146,7 +279,7 @@ class FormatsTest < MiniTest::Spec
 
     context "with subclasses" do
       setup do
-        FPage.outputs :html, :rss, { :xxx => "application/xxx" }
+        FPage.outputs :html, :rss, [:xxx, { :mimetype => "application/xxx" }]
         class FSubPage < FPage
         end
       end
@@ -158,6 +291,7 @@ class FormatsTest < MiniTest::Spec
       should "inherit the list of provided outputs" do
         FSubPage.outputs.should == FPage.outputs
       end
+
       should "inherit any custom mimetypes" do
         FPage.mime_type(:xxx).should == "application/xxx"
         FSubPage.mime_type(:xxx).should == "application/xxx"
@@ -171,14 +305,14 @@ class FormatsTest < MiniTest::Spec
       end
 
       should "be able to specify that a output with custom mimetype is always dynamic" do
-        FPage.add_output :mako => "application/x-mako", :dynamic => true
+        FPage.add_output :mako, :mimetype => "application/x-mako", :dynamic => true
         FPage.output(:mako).mime_type.should == "application/x-mako"
         FPage.output(:mako).dynamic?.should be_true
       end
 
       should "be able to override the default dynamic extension" do
-        FPage.add_output :html, :dynamic => true, :extension => "mako"
-        FPage.add_output :alternate => "text/html", :dynamic => true, :extension => "mako"
+        FPage.add_output :html, :dynamic => true, :language => "mako"
+        FPage.add_output :alternate, :mimetype => "text/html", :dynamic => true, :language => "mako"
         FPage.output(:html).dynamic?.should be_true
         FPage.output(:html).extension.should == ".html.mako"
         FPage.output(:alternate).extension.should == ".alternate.mako"

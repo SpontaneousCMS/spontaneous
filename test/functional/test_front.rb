@@ -155,7 +155,6 @@ class FrontTest < MiniTest::Spec
 
     should "provide the default format of the page if none is explicitly given" do
       @about.class.outputs :rss, :html
-      # @about.class.stubs(:format_list).returns(formats [:rss, :html])
       get '/about'
       assert last_response.ok?
       last_response.content_type.should == ::Rack::Mime.mime_type('.rss') + ";charset=utf-8"
@@ -163,7 +162,7 @@ class FrontTest < MiniTest::Spec
     end
 
     should "return a custom content type if one is defined" do
-      @about.class.outputs [{:html => "application/xhtml+xml"}]
+      @about.class.outputs [:html, {:mimetype => "application/xhtml+xml"}]
       get '/about'
       assert last_response.ok?
       last_response.content_type.should == "application/xhtml+xml;charset=utf-8"
@@ -173,6 +172,12 @@ class FrontTest < MiniTest::Spec
 
     should "raise a 404 if asked for a format not provided by the page" do
       get '/about.time'
+      assert last_response.status == 404
+    end
+
+    should "raise a 404 when accessing a private format" do
+      @about.class.outputs [:html, {:mimetype => "application/xhtml+xml"}], [:rss, {:private => true}]
+      get '/about.rss'
       assert last_response.status == 404
     end
 
@@ -517,12 +522,12 @@ class FrontTest < MiniTest::Spec
       end
 
       should "pass the format onto the page if the action returns it to the render call" do
-				xml = formats([:xml]).first
-				html = formats([:html]).first
+				# xml = formats([:xml]).first
+				# html = formats([:html]).first
 				about.class.outputs :html, :xml
         # about.stubs(:provides_format?).with(xml, anything).returns(true)
-        about.expects(:render).with(xml, anything).returns("/about.xml")
-        about.expects(:render).with(html, anything).never
+        about.expects(:render).with('xml', anything).returns("/about.xml")
+        about.expects(:render).with('html', anything).never
         get "/about/@comments/page.xml"
         assert last_response.ok?
         last_response.body.should == "/about.xml"
