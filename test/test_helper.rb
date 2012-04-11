@@ -23,8 +23,18 @@ require 'pg'
 
 Sequel.extension :migration
 
-DB = Sequel.connect('postgres:///spontaneous2_test') unless defined?(DB)
-# DB = Sequel.connect('mysql2://root@localhost/spontaneous2_test') unless defined?(DB)
+# for future integration with travis
+ENV["SPOT_ADAPTER"] ||= "postgres"
+
+connection_string = case ENV["SPOT_ADAPTER"]
+                    when "postgres"
+                      'postgres:///spontaneous2_test'
+                    when "mysql"
+                      'mysql2://root@localhost/spontaneous2_test'
+                    end
+
+p connection_string
+DB = Sequel.connect(connection_string) unless defined?(DB)
 # DB.logger = Logger.new($stdout)
 
 Sequel::Migrator.apply(DB, 'db/migrations')
