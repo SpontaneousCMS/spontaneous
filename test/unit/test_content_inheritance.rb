@@ -66,9 +66,9 @@ class ContentInheritanceTest < MiniTest::Spec
       end
 
       should "type subclasses found via Spontaneous::Page" do
-        Spontaneous::Page.all.map { |c| c.class }.should == \
-          [PageClass1, PageClass11, PageClass111, PageClass2, PageClass22]
-        Spontaneous::Page.all.should == [@page1, @page11, @page111, @page2, @page22]
+        Set.new(Spontaneous::Page.all.map { |c| c.class }).should == \
+          Set.new([PageClass1, PageClass11, PageClass111, PageClass2, PageClass22])
+        Set.new(Spontaneous::Page.all).should == Set.new([@page1, @page11, @page111, @page2, @page22])
       end
 
       should "only find instances of a single class when searching via that subclass" do
