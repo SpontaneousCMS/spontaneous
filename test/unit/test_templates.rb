@@ -22,11 +22,12 @@ class TemplatesTest < MiniTest::Spec
 
   def make_template_root(base_dir)
     @template_root = File.expand_path(File.join(File.dirname(__FILE__), '../fixtures/templates', base_dir))
-    self.template_root = @template_root
+    @site.paths.add(:templates, @template_root)
     @template_root
   end
 
   def setup
+    @site = setup_site
     @klass = Class.new(Object) do
       include Cutaneous::ContextHelper
       include Spontaneous::Render::PreviewContext
@@ -51,6 +52,10 @@ class TemplatesTest < MiniTest::Spec
       end
     end
     @context = @klass.new(nil, :html)
+  end
+
+  def teardown
+    teardown_site
   end
 
   context "First render" do
@@ -112,15 +117,6 @@ class TemplatesTest < MiniTest::Spec
   end
 
   context "Content rendering" do
-    # setup do
-    #   @saved_template_root = Spontaneous.template_root
-    #   Spontaneous.template_root = File.join(File.dirname(__FILE__), '../fixtures/templates/content')
-    # end
-
-    # teardown do
-    #   Spontaneous.template_root = @saved_template_root
-    # end
-
     should "render" do
       output = first_pass('content', 'template')
       output.should == "<html><title>THE TITLE</title></html>\n"

@@ -24,10 +24,10 @@ class SiteTest < MiniTest::Spec
       class ::Piece < Spontaneous::Piece; end
     end
 
-      teardown do
-        Object.send(:remove_const, :Page)
-        Object.send(:remove_const, :Piece)
-      end
+    teardown do
+      Object.send(:remove_const, :Page)
+      Object.send(:remove_const, :Piece)
+    end
 
     context "contents" do
       setup do
@@ -145,6 +145,7 @@ class SiteTest < MiniTest::Spec
           Site.map(@page3_2.id).should == @page3_2.map_entry
         end
       end
+
       context "page retrieval" do
         should "work with paths" do
           Site['/page1-1/page2-1'].should == @page2_1.reload
@@ -237,6 +238,25 @@ class SiteTest < MiniTest::Spec
         @site.public_url("/").should == "http://spontaneouscms.org/"
         @site.public_url("/something").should == "http://spontaneouscms.org/something"
         Site.public_url("/something").should == "http://spontaneouscms.org/something"
+      end
+    end
+
+    context "Paths" do
+      setup do
+        FileUtils.mkdir(@site.root / "templates")
+        @template_dir1 = File.expand_path("../../fixtures/templates", __FILE__)
+        @plugin_dir = File.expand_path("../../fixtures/plugins/schema_plugin", __FILE__)
+        @site.paths[:templates] << "non-existant-dir"
+        @site.paths[:templates] << @template_dir1
+
+        plugin = @site.load_plugin @plugin_dir
+        plugin.init!
+        plugin.load!
+      end
+
+      should "include all facet paths for a particular path group" do
+        dirs = [@site.root / "templates", @template_dir1, @plugin_dir / "templates"]
+        Site.paths(:templates).should == dirs
       end
     end
   end

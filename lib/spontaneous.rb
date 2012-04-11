@@ -146,6 +146,7 @@ module Spontaneous
       autoload :State,          "spontaneous/plugins/site/state"
       autoload :Selectors,      "spontaneous/plugins/site/selectors"
       autoload :Map,            "spontaneous/plugins/site/map"
+      autoload :Paths,          "spontaneous/plugins/site/paths"
       autoload :Instance,       "spontaneous/plugins/site/instance"
       autoload :Search,         "spontaneous/plugins/site/search"
       autoload :Features,       "spontaneous/plugins/site/features"

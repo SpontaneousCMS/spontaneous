@@ -40,7 +40,7 @@ module Spontaneous
 
     def local_template(format)
       template_path = nil
-      Spontaneous.template_paths.each do |template_root|
+      Site.paths(:templates).each do |template_root|
         template_path = try_template_paths.detect do |path|
           Spontaneous::Render.exists?(template_root, path, format)
         end

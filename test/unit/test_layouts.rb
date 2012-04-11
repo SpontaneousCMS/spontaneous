@@ -6,8 +6,9 @@ class LayoutsTest < MiniTest::Spec
 
   def setup
     Spontaneous::Render.use_development_renderer
-    self.template_root = ::File.expand_path('../../fixtures/layouts', __FILE__)
+    @template_root = ::File.expand_path('../../fixtures/layouts', __FILE__)
     @site = setup_site
+    @site.paths.add(:templates, @template_root)
   end
 
   def teardown
@@ -37,7 +38,7 @@ class LayoutsTest < MiniTest::Spec
       end
       should "default to layouts/standard.html... if nothing defined" do
         page = LayoutPage.new
-        assert_correct_template(page, 'layouts/standard')
+        assert_correct_template(page, @template_root / 'layouts/standard')
         page.render.should == "layouts/standard.html.cut\n"
       end
 
@@ -45,14 +46,14 @@ class LayoutsTest < MiniTest::Spec
         LayoutPage.layout :custom1
         LayoutPage.layout :custom2
         page = LayoutPage.new
-        assert_correct_template(page, 'layouts/custom1')
+        assert_correct_template(page, @template_root / 'layouts/custom1')
         page.render.should == "layouts/custom1.html.cut\n"
       end
       should "return the layout declared default" do
         LayoutPage.layout :custom1
         LayoutPage.layout :custom2, :default => true
         page = LayoutPage.new
-        assert_correct_template(page, 'layouts/custom2')
+        assert_correct_template(page, @template_root / 'layouts/custom2')
         page.render.should == "layouts/custom2.html.cut\n"
       end
 
@@ -60,7 +61,7 @@ class LayoutsTest < MiniTest::Spec
         LayoutPage.layout :custom1
         LayoutPage.layout :custom2, :default => true
         page = SubPage.new
-        assert_correct_template(page, 'layouts/custom2')
+        assert_correct_template(page, @template_root / 'layouts/custom2')
       end
 
       should "be able to overwrite inherited templates from superclass" do
@@ -69,17 +70,17 @@ class LayoutsTest < MiniTest::Spec
         SubPage.layout :custom3
         page = SubPage.new
         # page.layout.template.should == 'layouts/custom2'
-        assert_correct_template(page, 'layouts/custom2')
+        assert_correct_template(page, @template_root / 'layouts/custom2')
       end
 
       should "allow setting of style used" do
         LayoutPage.layout :custom1
         LayoutPage.layout :custom2
         page = LayoutPage.new
-        assert_correct_template(page, 'layouts/custom1')
+        assert_correct_template(page, @template_root / 'layouts/custom1')
         # page.layout.template.should == 'layouts/custom1'
         page.layout = :custom2
-        assert_correct_template(page, 'layouts/custom2')
+        assert_correct_template(page, @template_root / 'layouts/custom2')
         # page.layout.template.should == 'layouts/custom2'
       end
 
@@ -89,9 +90,9 @@ class LayoutsTest < MiniTest::Spec
         SubPage.layout :custom3
         SubPage.layout :custom4
         page = SubPage.new
-        assert_correct_template(page, 'layouts/custom3')
+        assert_correct_template(page, @template_root / 'layouts/custom3')
         page.layout = :custom2
-        assert_correct_template(page, 'layouts/custom2')
+        assert_correct_template(page, @template_root / 'layouts/custom2')
       end
 
       should "allow defining of default layout in sub-classes" do
@@ -100,9 +101,9 @@ class LayoutsTest < MiniTest::Spec
         SubPage.layout :custom3
         SubPage.layout :custom4, :default => true
         page = SubPage.new
-        assert_correct_template(page, 'layouts/custom4')
+        assert_correct_template(page, @template_root / 'layouts/custom4')
         page.layout = :custom3
-        assert_correct_template(page, 'layouts/custom3')
+        assert_correct_template(page, @template_root / 'layouts/custom3')
       end
 
       # should "raise error when setting unknown layout" do

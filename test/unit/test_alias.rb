@@ -18,9 +18,10 @@ class AliasTest < MiniTest::Spec
   context "Aliases:" do
     setup do
       @site = setup_site
-      Content.delete
+      @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
+      @site.paths.add(:templates, @template_root)
 
-      self.template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
+      Content.delete
 
       class ::Page < Spontaneous::Page
         field :title
@@ -296,13 +297,13 @@ class AliasTest < MiniTest::Spec
         end
 
         should "have their own styles" do
-          assert_correct_template(@a_alias,  'a_alias/a_alias_style')
+          assert_correct_template(@a_alias,  @template_root / 'a_alias/a_alias_style')
         end
 
         should "present their target's styles as their own" do
           @a_alias.style = :a_style
 
-          assert_correct_template(@a_alias,  'a/a_style')
+          assert_correct_template(@a_alias,  @template_root / 'a/a_style')
         end
 
         # should "have an independent style setting"

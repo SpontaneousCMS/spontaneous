@@ -145,13 +145,8 @@ class MiniTest::Spec
     self.class.teardown_site
   end
 
-  def template_root=(template_root)
-    @template_root = template_root
-    Spontaneous.stubs(:template_paths).returns([@template_root])
-  end
-
   def assert_correct_template(content, expected_path, format = :html)
-    assert_equal(template_root / expected_path, content.template(format))
+    assert_equal(expected_path, content.template(format))
   end
 
   def assert_file_exists(*path)

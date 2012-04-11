@@ -14,6 +14,7 @@ module Spontaneous
     include Plugins::Site::Storage
     include Plugins::Site::URL
     include Plugins::Site::Hooks
+    include Plugins::Site::Paths
 
     attr_accessor :database
     attr_reader :environment, :mode

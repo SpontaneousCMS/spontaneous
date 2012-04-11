@@ -177,7 +177,7 @@ module Spontaneous
       def find_template(filename, format)
         template_name = template_name(filename, format)
         return template_name if File.file?(template_name)
-        Spontaneous.template_paths.each do |root|
+        Site.paths(:templates).each do |root|
           path = root / template_name
           return path if File.file?(path)
         end

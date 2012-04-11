@@ -9,28 +9,12 @@ module Spontaneous::Plugins::Application
         Spontaneous.instance.load_paths
       end
 
-      def template_paths
-        paths = []
-        Spontaneous.facets.each do |facet|
-          paths += facet.paths.expanded(:templates)
-        end
-        paths
-      end
-
       def log_dir(*path)
         relative_dir(root / "log", *path)
       end
 
       def config_dir(*path)
         relative_dir(root / "config", *path)
-      end
-
-      # def template_root=(template_root)
-      #   Spot::Render.template_root = template_root.nil? ? nil : File.expand_path(template_root)
-      # end
-
-      def template_root(*path)
-        relative_dir(Spot::Render.template_root, *path)
       end
 
       def template_path(*args)
@@ -53,10 +37,6 @@ module Spontaneous::Plugins::Application
       def schema_map=(path)
         Spontaneous.schema.schema_map_file = path
       end
-
-      # def media_dir=(dir)
-      #   @media_dir = File.expand_path(dir)
-      # end
 
       def media_dir(*path)
         Spontaneous.instance.media_dir(*path)
@@ -87,17 +67,9 @@ module Spontaneous::Plugins::Application
         Spontaneous.instance.root(*path)
       end
 
-      # def root=(root)
-      #   @root = File.expand_path(root)
-      # end
-
       def revision_root(*path)
         Spontaneous.instance.revision_root(*path)
       end
-
-      # def revision_root=(revision_dir)
-      #   @revision_dir = File.expand_path(revision_dir)
-      # end
 
       def revision_dir(revision=nil, root = nil)
         Spontaneous.instance.revision_dir(revision, root)

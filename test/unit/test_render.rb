@@ -24,7 +24,7 @@ class RenderTest < MiniTest::Spec
   context "Publish rendering step" do
     setup do
       Content.delete
-      self.template_root = template_root
+      @site.paths.add(:templates, template_root)
       Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
 
       class ::Page < Spontaneous::Page
@@ -307,7 +307,7 @@ class RenderTest < MiniTest::Spec
       should "use their default page style when accessed directly" do
         @page = PageClass[@page.id]
         @page.layout.should == PageClass.default_layout
-        assert_correct_template(@parent, 'layouts/page_style')
+        assert_correct_template(@parent, template_root / 'layouts/page_style')
         @page.render.should == "<html></html>\n"
       end
 
@@ -317,7 +317,7 @@ class RenderTest < MiniTest::Spec
       end
 
       should "render using the inline style" do
-        assert_correct_template(@parent.contents.first, 'page_class/inline_style')
+        assert_correct_template(@parent.contents.first, template_root / 'page_class/inline_style')
         @parent.contents.first.render.should == "Child\n"
         @parent.things.render.should == "Child\n"
         @parent.render.should == "<html>Child\n</html>\n"
@@ -344,7 +344,7 @@ class RenderTest < MiniTest::Spec
 
   context "Request rendering" do
     setup do
-      self.template_root = template_root
+      @site.paths.add(:templates, template_root)
 
       class ::PreviewRender < Page
         field :title, :string

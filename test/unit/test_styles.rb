@@ -21,7 +21,8 @@ class StylesTest < MiniTest::Spec
 
   def setup
     @site = setup_site
-    self.template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/styles"))
+    @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/styles"))
+    @site.paths.add(:templates, @template_root)
     Spontaneous::Render.use_development_renderer
   end
 
@@ -63,7 +64,7 @@ class StylesTest < MiniTest::Spec
         end
 
         should "derive path from owning class and name" do
-          assert_correct_template(@piece, 'template_class')
+          assert_correct_template(@piece, @template_root / 'template_class')
         end
 
         should "render using correct template" do
@@ -86,14 +87,14 @@ class StylesTest < MiniTest::Spec
         should "use template found in class directory if exists" do
           TemplateClass.style :named1
           piece = TemplateClass.new
-          assert_correct_template(piece, 'template_class/named1')
+          assert_correct_template(piece, @template_root / 'template_class/named1')
           piece.render.should == "template_class/named1.html.cut\n"
         end
 
         should "use template in template root with correct name if it exists" do
           TemplateClass.style :named2
           piece = TemplateClass.new
-          assert_correct_template(piece, 'named2')
+          assert_correct_template(piece, @template_root / 'named2')
           piece.render.should == "named2.html.cut\n"
         end
 
@@ -101,7 +102,7 @@ class StylesTest < MiniTest::Spec
           TemplateClass.style :'orange/apple'
           piece = TemplateClass.new
           # piece.style.template.should == 'orange/apple'
-          assert_correct_template(piece, 'orange/apple')
+          assert_correct_template(piece, @template_root / 'orange/apple')
           piece.render.should == "orange/apple.html.cut\n"
         end
 
@@ -109,7 +110,7 @@ class StylesTest < MiniTest::Spec
           TemplateClass.style :named1
           TemplateClass.style :named2, :default => true
           piece = TemplateClass.new
-          assert_correct_template(piece, 'named2')
+          assert_correct_template(piece, @template_root / 'named2')
           # piece.style.template.should == 'named2'
           piece.render.should == "named2.html.cut\n"
         end
@@ -120,7 +121,7 @@ class StylesTest < MiniTest::Spec
           TemplateClass.style :named1
           TemplateClass.style :named2, :default => true
           @piece = TemplateClass.new
-          assert_correct_template(@piece, 'named2')
+          assert_correct_template(@piece, @template_root / 'named2')
           # @piece.style.template.should == 'named2'
           @piece.render.should == "named2.html.cut\n"
         end
@@ -128,7 +129,7 @@ class StylesTest < MiniTest::Spec
         should "be possible" do
           @piece.style = :named1
           # @piece.style.template.should == 'template_class/named1'
-          assert_correct_template(@piece, 'template_class/named1')
+          assert_correct_template(@piece, @template_root / 'template_class/named1')
           @piece.render.should == "template_class/named1.html.cut\n"
         end
 
@@ -137,26 +138,26 @@ class StylesTest < MiniTest::Spec
           @piece.save
           @piece = Content[@piece.id]
           # @piece.style.template.should == 'template_class/named1'
-          assert_correct_template(@piece, 'template_class/named1')
+          assert_correct_template(@piece, @template_root / 'template_class/named1')
         end
       end
 
       context "inheriting styles" do
         should "use default for sub class if it exists" do
           piece = TemplateSubClass1.new
-          assert_correct_template(piece, 'template_sub_class1')
+          assert_correct_template(piece, @template_root / 'template_sub_class1')
         end
 
         should "fall back to default style for superclass if default for class doesn't exist" do
           piece = TemplateSubClass2.new
-          assert_correct_template(piece, 'template_class')
+          assert_correct_template(piece, @template_root / 'template_class')
           # piece.style.template.should == 'template_class'
         end
         should "fall back to defined default style for superclass if default for class doesn't exist" do
           TemplateClass.style :named1
           piece = TemplateSubClass2.new
           # piece.style.template.should == 'template_class/named1'
-          assert_correct_template(piece, 'template_class/named1')
+          assert_correct_template(piece, @template_root / 'template_class/named1')
         end
       end
 
@@ -358,7 +359,7 @@ class StylesTest < MiniTest::Spec
         should "use template with their name inside container class template dir if it exists" do
           piece = TemplateClass.new
           piece.results << TemplateClass.new
-          assert_correct_template(piece.results, 'template_class/results')
+          assert_correct_template(piece.results, @template_root / 'template_class/results')
           piece.results.render.should == "template_class/results.html.cut\n"
         end
 
@@ -376,20 +377,18 @@ class StylesTest < MiniTest::Spec
             style :named1
           end
           piece = TemplateClass.new
-          assert_correct_template(piece.things, 'template_class/named1')
+          assert_correct_template(piece.things, @template_root / 'template_class/named1')
           piece.things.render.should == "template_class/named1.html.cut\n"
 
           TemplateClass.box :dongles do
             style :named2
           end
           piece = TemplateClass.new
-          assert_correct_template(piece.dongles, 'named2')
+          assert_correct_template(piece.dongles, @template_root / 'named2')
           piece.dongles.render.should == "named2.html.cut\n"
         end
 
         should "use styles assigned in a subclass" do
-          saved_template_root = self.template_root
-          self.template_root = Spontaneous.template_root
           ::TemplateSubClass = Class.new(TemplateClass)
           ::TemplateSubSubClass = Class.new(TemplateSubClass)
 
@@ -399,30 +398,35 @@ class StylesTest < MiniTest::Spec
             style :oranges
           end
 
-          # FileUtils.mkdir_p(Spontaneous.template_root)
+          Dir.mktmpdir do |template_root|
+            @site.paths.add(:templates, template_root / "templates")
 
-          piece = TemplateSubSubClass.new
-          assert Proc === piece.bananas.template
 
-          [[piece.bananas, %w(template_sub_sub_class/bananas template_sub_class/bananas)],
-           [piece.apples, %w(template_sub_sub_class/apples template_sub_class/apples apples)],
-           [piece.oranges, %w(template_sub_sub_class/oranges template_sub_class/oranges oranges)]
-          ].each do |box, test_templates|
-            test_templates.each do |test_template|
-              FileUtils.mkdir_p(File.dirname(Spontaneous.template_root(test_template)))
-              FileUtils.touch(Spontaneous.template_root(test_template) + '.html.cut')
+            piece = TemplateSubSubClass.new
 
-              assert_correct_template(box, test_template)
+            # make sure we're running in a 'virgin' template dir
+            assert Proc === piece.bananas.template, "Expected Proc not #{piece.bananas.template}"
 
-              FileUtils.rm_r(::File.dirname(Spontaneous.template_root(test_template)))
+
+            [[piece.bananas, %w(template_sub_sub_class/bananas template_sub_class/bananas)],
+             [piece.apples, %w(template_sub_sub_class/apples template_sub_class/apples apples)],
+             [piece.oranges, %w(template_sub_sub_class/oranges template_sub_class/oranges oranges)]
+            ].each do |box, test_templates|
+              test_templates.each do |test_template|
+                path = template_root / "templates" / test_template
+                FileUtils.mkdir_p(File.dirname(path))
+                FileUtils.touch(path + '.html.cut')
+
+                assert_correct_template(box, template_root / "templates" / test_template)
+
+                FileUtils.rm_r(template_root / "templates")
+              end
             end
           end
 
 
           Object.send(:remove_const, :TemplateSubClass)
           Object.send(:remove_const, :TemplateSubSubClass)
-          FileUtils.rm_r(Spontaneous.template_root) rescue nil
-          self.template_root = saved_template_root
         end
       end
 
@@ -434,13 +438,13 @@ class StylesTest < MiniTest::Spec
 
         should "use the box name template if it exists" do
           piece = TemplateClass.new
-          assert_correct_template(piece.results, 'template_class/results')
+          assert_correct_template(piece.results, @template_root / 'template_class/results')
           piece.results.render.should == "template_class/results.html.cut\n"
         end
 
         should "use the box classes default template if box name template is missing" do
           piece = TemplateClass.new
-          assert_correct_template(piece.entities, 'box_a')
+          assert_correct_template(piece.entities, @template_root / 'box_a')
           piece.entities.render.should == "box_a.html.cut\n"
         end
 
@@ -452,7 +456,7 @@ class StylesTest < MiniTest::Spec
           class ::TemplateSubClass < TemplateClass
           end
           piece = TemplateSubClass.new
-          assert_correct_template(piece.lastly, 'box_a')
+          assert_correct_template(piece.lastly, @template_root / 'box_a')
           Object.send(:remove_const, :BoxASubclass)
           Object.send(:remove_const, :TemplateSubClass)
         end
@@ -467,8 +471,8 @@ class StylesTest < MiniTest::Spec
             TemplateClass.box :sprinters, :type => :BoxA, :style => :runny
             TemplateClass.box :strollers, :type => :BoxA, :style => :walky
             piece = TemplateClass.new
-            assert_correct_template(piece.strollers, 'template_class/walky')
-            assert_correct_template(piece.sprinters, 'box_a/runny')
+            assert_correct_template(piece.strollers, @template_root / 'template_class/walky')
+            assert_correct_template(piece.sprinters, @template_root / 'box_a/runny')
           end
         end
       end
