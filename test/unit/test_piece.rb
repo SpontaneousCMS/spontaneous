@@ -89,8 +89,8 @@ class PieceTest < MiniTest::Spec
       end
 
       should "have a link to their pieces" do
-        @f1.entry.should == @page.pieces.first
-        @f2.entry.should == @page.pieces.first.pieces.first
+        @f1.entry.should == @page.contents.first
+        @f2.entry.should == @page.contents.first.contents.first
       end
     end
   end

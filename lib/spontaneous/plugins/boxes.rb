@@ -75,6 +75,10 @@ module Spontaneous::Plugins
       @boxes ||= Spontaneous::Collections::BoxSet.new(self)
     end
 
+    def pieces
+      boxes.flat_map { |b| b.pieces }
+    end
+
     def iterable
       boxes
     end

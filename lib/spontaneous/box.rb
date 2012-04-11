@@ -212,7 +212,7 @@ module Spontaneous
       @modified = true
       # piece = contents[new_position]
       # new_position = owner.pieces.index(piece)
-      owner.pieces.set_position(entry, new_position)
+      owner.contents.set_position(entry, new_position)
     end
 
     def modified?
@@ -220,10 +220,12 @@ module Spontaneous
     end
 
     def contents
-      owner.pieces.for_box(self)
+      owner.contents.for_box(self)
     end
 
-    alias_method :pieces, :contents
+    def pieces
+      contents.select { |e| e.is_a?(Spontaneous::Piece) }
+    end
 
     def [](index)
       contents[index]

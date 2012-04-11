@@ -32,7 +32,7 @@ class RenderTest < MiniTest::Spec
         box :sections1
         box :sections2
       end
-      class ::TemplateClass < Content
+      class ::TemplateClass < Spontaneous::Piece
         field :title do
           def to_epub
             to_html
@@ -50,6 +50,9 @@ class RenderTest < MiniTest::Spec
         style :this_template
         style :another_template
       end
+      # TemplateClass.add_output :pdf
+      # TemplateClass.add_output :epub
+
       @content = TemplateClass.new
       @content.style.should == TemplateClass.default_style
       @content.title = "The Title"
@@ -138,7 +141,7 @@ class RenderTest < MiniTest::Spec
         @child.title = "Child Title"
         @child.description = "Child Description"
         @content.bits << @child
-        @content.pieces.first.style = TemplateClass.get_style(:this_template)
+        @content.contents.first.style = TemplateClass.get_style(:this_template)
       end
       teardown do
         Content.delete
@@ -297,7 +300,7 @@ class RenderTest < MiniTest::Spec
       end
 
       should "use style assigned by entry" do
-        @parent.pieces.first.style.should == PageClass.default_style
+        @parent.contents.first.style.should == PageClass.default_style
         @parent.things.first.style.should == PageClass.default_style
       end
 
@@ -310,12 +313,12 @@ class RenderTest < MiniTest::Spec
 
       should "persist sub-page style settings" do
         @parent = Page[@parent.id]
-        @parent.pieces.first.style.should == PageClass.default_style
+        @parent.contents.first.style.should == PageClass.default_style
       end
 
       should "render using the inline style" do
-        assert_correct_template(@parent.pieces.first, 'page_class/inline_style')
-        @parent.pieces.first.render.should == "Child\n"
+        assert_correct_template(@parent.contents.first, 'page_class/inline_style')
+        @parent.contents.first.render.should == "Child\n"
         @parent.things.render.should == "Child\n"
         @parent.render.should == "<html>Child\n</html>\n"
       end
@@ -442,6 +445,4 @@ PAGE <p>DESCRIPTION</p>
       end
     end
   end
-
 end
-

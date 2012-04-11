@@ -204,7 +204,7 @@ module Spontaneous::Plugins
 
         if publish
           with_editable do
-            self.pieces.each do |entry|
+            self.contents.each do |entry|
               entry.sync_to_revision(revision, false)
             end
           end

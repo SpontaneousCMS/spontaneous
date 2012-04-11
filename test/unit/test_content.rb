@@ -8,15 +8,22 @@ class ContentTest < MiniTest::Spec
     setup do
       @site = setup_site
       class Piece < Spontaneous::Piece; end
+      class Page < Spontaneous::Page; end
       class C < Piece; end
+      class P < Page; end
       C.box :things
+      P.box :box1
+      P.box :box2
     end
 
     teardown do
       teardown_site
       ContentTest.send(:remove_const, :Piece) rescue nil
+      ContentTest.send(:remove_const, :Page) rescue nil
       ContentTest.send(:remove_const, :C) rescue nil
+      ContentTest.send(:remove_const, :P) rescue nil
     end
+
     context "Content instances" do
       should "evaluate instance code" do
         @instance = C.create({
@@ -37,7 +44,7 @@ class ContentTest < MiniTest::Spec
         Content.delete
       end
       should "be initialised empty" do
-        @instance.pieces.should == []
+        @instance.contents.should == []
       end
 
       should "provide a #target method poiting to itself" do
@@ -47,14 +54,14 @@ class ContentTest < MiniTest::Spec
       should "accept addition of child content" do
         e = C.new
         @instance.things << e
-        @instance.pieces.length.should == 1
-        @instance.things.pieces.length.should == 1
-        @instance.pieces.first.should == e
-        @instance.pieces.first.container.should == @instance.things
-        @instance.pieces.first.owner.should == @instance
-        @instance.pieces.first.parent.should == @instance
+        @instance.contents.length.should == 1
+        @instance.things.contents.length.should == 1
+        @instance.contents.first.should == e
+        @instance.contents.first.container.should == @instance.things
+        @instance.contents.first.owner.should == @instance
+        @instance.contents.first.parent.should == @instance
         e.visibility_path.should == "#{@instance.id}"
-        @instance.pieces.first.visibility_path.should == "#{@instance.id}"
+        @instance.contents.first.visibility_path.should == "#{@instance.id}"
       end
 
       should "accept addition of multiple children" do
@@ -62,20 +69,20 @@ class ContentTest < MiniTest::Spec
         f = C.new
         @instance.things << e
         @instance.things << f
-        @instance.pieces.length.should == 2
-        @instance.things.pieces.length.should == 2
-        @instance.pieces.first.should == e
-        @instance.things.pieces.first.should == e
-        @instance.pieces.last.should == f
-        @instance.things.pieces.last.should == f
-        @instance.pieces.first.container.should == @instance.things
-        @instance.pieces.last.container.should == @instance.things
-        @instance.pieces.first.parent.should == @instance
-        @instance.pieces.last.parent.should == @instance
-        @instance.pieces.first.owner.should == @instance
-        @instance.pieces.last.owner.should == @instance
-        @instance.pieces.first.visibility_path.should == "#{@instance.id}"
-        @instance.pieces.last.visibility_path.should == "#{@instance.id}"
+        @instance.contents.length.should == 2
+        @instance.things.contents.length.should == 2
+        @instance.contents.first.should == e
+        @instance.things.contents.first.should == e
+        @instance.contents.last.should == f
+        @instance.things.contents.last.should == f
+        @instance.contents.first.container.should == @instance.things
+        @instance.contents.last.container.should == @instance.things
+        @instance.contents.first.parent.should == @instance
+        @instance.contents.last.parent.should == @instance
+        @instance.contents.first.owner.should == @instance
+        @instance.contents.last.owner.should == @instance
+        @instance.contents.first.visibility_path.should == "#{@instance.id}"
+        @instance.contents.last.visibility_path.should == "#{@instance.id}"
       end
 
       should "allow for a deep hierarchy" do
@@ -83,8 +90,8 @@ class ContentTest < MiniTest::Spec
         f = C.new
         @instance.things << e
         e.things << f
-        @instance.pieces.length.should == 1
-        @instance.pieces.first.should == e
+        @instance.contents.length.should == 1
+        @instance.contents.first.should == e
         e.owner.id.should == @instance.id
         e.parent.id.should == @instance.id
         e.container.should == @instance.things
@@ -109,8 +116,8 @@ class ContentTest < MiniTest::Spec
         e = C[e.id]
         f = C[f.id]
 
-        i.pieces.length.should == 1
-        i.pieces.first.should == e
+        i.contents.length.should == 1
+        i.contents.first.should == e
 
         e.container.should == i.things
         e.owner.should == i
@@ -118,9 +125,9 @@ class ContentTest < MiniTest::Spec
         f.container.should == e.things
         f.parent.should == e
         f.owner.should == e
-        e.entry.should == i.pieces.first
-        f.entry.should == e.pieces.first
-        e.pieces.first.should == f
+        e.entry.should == i.contents.first
+        f.entry.should == e.contents.first
+        e.contents.first.should == f
       end
 
       should "have a list of child nodes" do
@@ -135,9 +142,34 @@ class ContentTest < MiniTest::Spec
         i = C[@instance.id]
         e = C[e.id]
         f = C[f.id]
-        i.pieces.should == [e]
-        e.pieces.should == [f]
+        i.contents.should == [e]
+        e.contents.should == [f]
       end
+
+      should "provide a list of non-page contents" do
+        p = P.new
+
+        c1 = C.new
+        c2 = C.new
+        c3 = C.new
+        p1 = P.new
+        p2 = P.new
+        p3 = P.new
+
+        p.box1 << c1
+        p.box1 << c2
+        p.box1 << p1
+
+        p.box2 << p3
+        p.box2 << c3
+
+        [p, c1, c2, c3, p1, p2, p3].each { |c| c.save; c.reload }
+
+        p = P[p.id]
+
+        p.pieces.should == [c1, c2, c3]
+      end
+
 
       should "allow for testing of position" do
         e = C.new
@@ -227,8 +259,8 @@ class ContentTest < MiniTest::Spec
         @b.destroy
         C.count.should == 2
         @a.reload
-        @a.pieces.length.should == 1
-        @a.pieces.first.should == @d.reload
+        @a.contents.length.should == 1
+        @a.contents.first.should == @d.reload
         C.all.map { |c| c.id }.sort.should == [@a, @d].map { |c| c.id }.sort
       end
 

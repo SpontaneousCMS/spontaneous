@@ -781,7 +781,7 @@ class SchemaTest < MiniTest::Spec
         instance.posts << piece2
         instance.save
         instance = S::Content[instance.id]
-        instance.posts.pieces.length.should == 2
+        instance.posts.contents.length.should == 2
         Content.count.should == 3
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)

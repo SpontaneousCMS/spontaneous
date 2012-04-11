@@ -464,11 +464,11 @@ class AuthenticationTest < MiniTest::Spec
         end
 
         should "not be able to delete from root level box" do
-          piece = root.boxes[:root_level].pieces.first
-          pieces = root.reload.boxes[:root_level].pieces.length
+          piece = root.boxes[:root_level].contents.first
+          pieces = root.reload.boxes[:root_level].contents.length
           auth_post "/@spontaneous/destroy/#{piece.id}"
           assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          root.reload.boxes[:root_level].pieces.length.should == pieces
+          root.reload.boxes[:root_level].contents.length.should == pieces
         end
         should "not be able to wrap files in root level box" do
           src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
@@ -484,14 +484,14 @@ class AuthenticationTest < MiniTest::Spec
           assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
         end
         should "not be able to re-order pieces in root level box" do
-          piece = root.boxes[:root_level].pieces.last
+          piece = root.boxes[:root_level].contents.last
           auth_post "/@spontaneous/content/#{piece.id}/position/0"
           assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
-          root.reload.boxes[:root_level].pieces.last.id.should == piece.id
+          root.reload.boxes[:root_level].contents.last.id.should == piece.id
         end
 
         should "not be able to replace root level fields" do
-          piece = root.boxes[:root_level].pieces.first
+          piece = root.boxes[:root_level].contents.first
           src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
           field = piece.fields[:photo]
           auth_post "/@spontaneous/file/replace/#{piece.id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg"), "field" => field.schema_id
@@ -499,7 +499,7 @@ class AuthenticationTest < MiniTest::Spec
         end
 
         should "not be able to hide entries in root-level boxes" do
-          piece = root.boxes[:root_level].pieces.first
+          piece = root.boxes[:root_level].contents.first
           auth_post "/@spontaneous/toggle/#{piece.id}"
           assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
         end

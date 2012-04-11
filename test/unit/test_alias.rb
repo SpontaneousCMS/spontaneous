@@ -219,10 +219,10 @@ class AliasTest < MiniTest::Spec
 
           should "allow for selecting content only from the content of the owner of the box" do
             class ::X < ::Piece
-              alias_of proc { |owner| owner.box1.pieces }
+              alias_of proc { |owner| owner.box1.contents }
             end
             class ::XX < ::Piece
-              alias_of proc { |owner, box| box.pieces }
+              alias_of proc { |owner, box| box.contents }
             end
             class ::XXX < ::Piece
               alias_of :A, :container => proc { |owner, box| box }

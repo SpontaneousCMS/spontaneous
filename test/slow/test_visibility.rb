@@ -241,15 +241,15 @@ class VisibilityTest < MiniTest::Spec
 
       should "only show visible pieces" do
         page = Content.first(:uid => "1")
-        page.pieces.length.should == 4
-        page.things.pieces.length.should == 4
+        page.contents.length.should == 4
+        page.things.contents.length.should == 4
         page.things.count.should == 4
-        page.pieces.first.hide!
+        page.contents.first.hide!
         page.reload
         Content.with_visible do
-          page.pieces.length.should == 3
-          page.pieces.first.id.should_not == page.id
-          page.pieces.first.first?.should be_true
+          page.contents.length.should == 3
+          page.contents.first.id.should_not == page.id
+          page.contents.first.first?.should be_true
         end
       end
 
@@ -265,7 +265,7 @@ class VisibilityTest < MiniTest::Spec
       should "ensure that no hidden content can be returned" do
         @root.reload
         @root.children.first.children.length.should == 8
-        @root.children.first.pieces.first.hide!
+        @root.children.first.contents.first.hide!
         @root.reload
         Content.with_visible do
           @root.children.first.children.length.should == 6
@@ -276,7 +276,7 @@ class VisibilityTest < MiniTest::Spec
         @root.pages.first.hide!
         @root.reload
         Content.with_visible do
-          pieces = @root.pages.pieces.map { |p| p }
+          pieces = @root.pages.contents.map { |p| p }
         end
       end
     end

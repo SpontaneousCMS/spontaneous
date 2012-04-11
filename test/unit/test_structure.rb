@@ -60,8 +60,8 @@ class StructureTest < MiniTest::Spec
       should "contain references to their owning page" do
         @home.in_progress.page.should == @home
 
-        @home.in_progress.pieces.first.page.should == @home
-        @home.in_progress.pieces.first.images.page.should == @home
+        @home.in_progress.contents.first.page.should == @home
+        @home.in_progress.contents.first.images.page.should == @home
       end
       should "have the right depth" do
         @home.in_progress.depth.should == 0

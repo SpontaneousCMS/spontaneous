@@ -347,8 +347,8 @@ class PageTest < MiniTest::Spec
 
       should "report their depth according to their position in the piece tree" do
         @parent.depth.should == 0
-        @parent.pieces.first.depth.should == 1
-        @parent.pieces.first.pieces.first.depth.should == 2
+        @parent.contents.first.depth.should == 1
+        @parent.contents.first.contents.first.depth.should == 2
       end
 
       should "know their page" do

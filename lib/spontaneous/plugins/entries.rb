@@ -31,7 +31,7 @@ module Spontaneous::Plugins
     end
 
     def after_save
-      pieces.each do |entry|
+      contents.each do |entry|
         entry.save if entry.modified?
       end
       super
@@ -51,11 +51,11 @@ module Spontaneous::Plugins
     end
 
     def recursive_destroy
-      all_pieces.destroy
+      all_contents.destroy
     end
 
     def destroy_entry!(entry)
-      pieces.remove(entry)
+      contents.remove(entry)
       # save the owner because it won't be obvious to the caller
       # that content other than the destroyed object will have been
       # modified
@@ -67,39 +67,39 @@ module Spontaneous::Plugins
     end
 
     def entry_modified!(modified_entry)
-      self.entry_store = all_pieces.serialize_db
+      self.entry_store = all_contents.serialize_db
     end
 
-    def pieces
-      return visible_pieces if Spontaneous::Content.visible_only?
-      all_pieces
+    def contents
+      return visible_contents if Spontaneous::Content.visible_only?
+      all_contents
     end
 
     # ensure that all access to pieces is through their corresponding entry
     # alias_method :pieces, :entries
 
-    def all_pieces
-      @all_pieces ||= Spontaneous::Collections::EntrySet.new(self, entry_store)
+    def all_contents
+      @all_contents ||= Spontaneous::Collections::EntrySet.new(self, entry_store)
     end
 
-    def visible_pieces
-      @visible_pieces ||= all_pieces.visible!
+    def visible_contents
+      @visible_contents ||= all_contents.visible!
     end
 
-    protected(:all_pieces, :visible_pieces)
+    protected(:all_contents, :visible_contents)
 
     def reload
-      @all_pieces = @visible_pieces = nil
+      @all_contents = @visible_contents = nil
       super
     end
 
 
     def first
-      pieces.first
+      contents.first
     end
 
     def last
-      pieces.last
+      contents.last
     end
 
     def push(page_or_piece)
@@ -150,7 +150,7 @@ module Spontaneous::Plugins
         content
       end
       begin
-        pieces.insert(index, box, entry)
+        contents.insert(index, box, entry)
       rescue TypeError, RuntimeError => e
         # TODO: raise a custom more helpful error here
         logger.error { "Attempting to modify visible only pieces" }
@@ -169,7 +169,7 @@ module Spontaneous::Plugins
       if box
         box.set_position(self, new_position)
       else
-        owner.pieces.set_position(self, new_position)
+        owner.contents.set_position(self, new_position)
       end
     end
 

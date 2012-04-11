@@ -340,8 +340,8 @@ class PublishingTest < MiniTest::Spec
 
         should "publish deletions to contents of page" do
           editable1 = Content.first(:uid => '0')
-          deleted = editable1.pieces.first
-          editable1.pieces.first.destroy
+          deleted = editable1.contents.first
+          editable1.contents.first.destroy
           Content.publish(@final_revision, [editable1.id])
           editable1.reload
           Content.with_revision(@final_revision) do
@@ -355,7 +355,7 @@ class PublishingTest < MiniTest::Spec
         should "publish page additions" do
           editable1 = Content.first(:uid => '0')
           new_page = Page.new(:uid => "new")
-          slot = editable1.pieces.first
+          slot = editable1.contents.first
           slot.things << new_page
           editable1.save
           slot.save
@@ -410,9 +410,9 @@ class PublishingTest < MiniTest::Spec
             published3 = Content.first :id => editable2.id
             # published3.should == editable2
             assert_content_equal(published3, editable2)
-            published4 = Content.first :id => editable2.pieces.first.id
-            # published4.should == editable2.pieces.first
-            assert_content_equal(published4, editable2.pieces.first)
+            published4 = Content.first :id => editable2.contents.first.id
+            # published4.should == editable2.contents.first
+            assert_content_equal(published4, editable2.contents.first)
           end
         end
       end
@@ -445,7 +445,7 @@ class PublishingTest < MiniTest::Spec
         stub_time(@@now+3600)
         page = Page.first :uid => "0"
         (page.modified_at.to_i - @@now.to_i).abs.should <= 1
-        content = page.pieces.first
+        content = page.contents.first
         content.page.should == page
         content.label = "changed"
         content.save
@@ -456,7 +456,7 @@ class PublishingTest < MiniTest::Spec
       should "update page timestamp on addition of piece" do
         Sequel.datetime_class.stubs(:now).returns(@@now+3600)
         page = Page.first :uid => "0"
-        content = Content[page.pieces.first.id]
+        content = Content[page.contents.first.id]
         content.things << Piece.new
         content.save
         content.modified_at.to_i.should == @@now.to_i + 3600
@@ -497,7 +497,7 @@ class PublishingTest < MiniTest::Spec
 
       should "be created on updating a page's content" do
         page = Page.first :uid => "0"
-        content = Content[page.pieces.first.id]
+        content = Content[page.contents.first.id]
         Change.record do
           content.label = "changed"
           content.save
@@ -513,7 +513,6 @@ class PublishingTest < MiniTest::Spec
 
       should "include newly created pages" do
         page = Page.first :uid => "0"
-        content = Content.first :id => page.pieces.first.id
         new_page = nil
         Change.record do
           new_page = Page.new
@@ -893,7 +892,9 @@ class PublishingTest < MiniTest::Spec
         # to simulate the right error
         root = Page.create()
         Spontaneous::Page.expects(:order).returns([root])
-        root.expects(:render).raises(Exception)
+        output = root.output(:html)
+        output.expects(:render).raises(Exception)
+        root.expects(:outputs).at_least_once.returns([output])
         begin
           silence_logger { Site.publish_all }
         rescue Exception; end

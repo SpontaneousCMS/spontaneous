@@ -338,16 +338,16 @@ class BoxesTest < MiniTest::Spec
       @parent = Content[@parent.id]
       child1.reload; child2.reload; child3.reload
       @parent.images.contents.should == [child1]
-      @parent.images.pieces.should == [child1]
+      @parent.images.contents.should == [child1]
       @parent.words.contents.should == [child2]
-      @parent.words.pieces.should == [child2]
-      @parent.pieces.should == [child1, child2]
-      child1.images.pieces.should == [child3]
-      child1.pieces.should == [child3]
+      @parent.words.contents.should == [child2]
+      @parent.contents.should == [child1, child2]
+      child1.images.contents.should == [child3]
+      child1.contents.should == [child3]
 
-      @parent.images.pieces.first.box.should == @parent.images
-      @parent.words.pieces.first.box.should == @parent.words
-      @parent.pieces.first.box.should == @parent.images
+      @parent.images.contents.first.box.should == @parent.images
+      @parent.words.contents.first.box.should == @parent.words
+      @parent.contents.first.box.should == @parent.images
     end
 
     should "choose correct style" do
@@ -461,7 +461,7 @@ class BoxesTest < MiniTest::Spec
       a = Allowable.new
       b = Allowed2.new
       a.parents << b
-      a.parents.pieces.first.style.prototype.should == Allowed2.styles[:ringo]
+      a.parents.contents.first.style.prototype.should == Allowed2.styles[:ringo]
     end
 
     should "know what the available styles are for an entry" do

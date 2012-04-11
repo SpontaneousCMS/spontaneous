@@ -280,10 +280,10 @@ class BackTest < MiniTest::Spec
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
-        @home.in_progress.pieces.first.id.should == @job2.id
+        @home.in_progress.contents.first.id.should == @job2.id
 
         page = Content[@home.id]
-        page.in_progress.pieces.first.id.should == @job2.id
+        page.in_progress.contents.first.id.should == @job2.id
       end
 
       # should "reorder pages" do
@@ -558,15 +558,15 @@ class BackTest < MiniTest::Spec
 
       should "be able to wrap pieces around files using default addable class" do
         box = @job1.images
-        current_count = box.pieces.length
-        first_id = box.pieces.first.id.to_s
+        current_count = box.contents.length
+        first_id = box.contents.first.id.to_s
 
         auth_post "/@spontaneous/file/wrap/#{@job1.id}/#{box.schema_id.to_s}", "file" => ::Rack::Test::UploadedFile.new(@src_file, "image/jpeg")
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
         box = @job1.reload.images
-        first = box.pieces.first
-        box.pieces.length.should == current_count+1
+        first = box.contents.first
+        box.contents.length.should == current_count+1
         first.image.src.should =~ /^\/media(.+)\/#{File.basename(@src_file)}$/
           required_response = {
           :position => 0,
@@ -580,19 +580,19 @@ class BackTest < MiniTest::Spec
         Spontaneous.stubs(:reload!)
       end
       should "default to being added at the top" do
-        current_count = @home.in_progress.pieces.length
-        first_id = @home.in_progress.pieces.first.id
-        @home.in_progress.pieces.first.class.name.should_not == "BackTest::Image"
+        current_count = @home.in_progress.contents.length
+        first_id = @home.in_progress.contents.first.id
+        @home.in_progress.contents.first.class.name.should_not == "BackTest::Image"
         auth_post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
-        @home.in_progress.pieces.length.should == current_count+1
-        @home.in_progress.pieces.first.id.should_not == first_id
-        @home.in_progress.pieces.first.class.name.should == "BackTest::Image"
+        @home.in_progress.contents.length.should == current_count+1
+        @home.in_progress.contents.first.id.should_not == first_id
+        @home.in_progress.contents.first.class.name.should == "BackTest::Image"
         required_response = {
           :position => 0,
-          :entry => @home.in_progress.pieces.first.export
+          :entry => @home.in_progress.contents.first.export
         }
         Spot::JSON.parse(last_response.body).should == required_response
       end
@@ -606,19 +606,19 @@ class BackTest < MiniTest::Spec
       end
 
       should "be addable at the bottom" do
-        current_count = @home.in_progress.pieces.length
-        last_id = @home.in_progress.pieces.last.id
-        @home.in_progress.pieces.last.class.name.should_not == "BackTest::Image"
+        current_count = @home.in_progress.contents.length
+        last_id = @home.in_progress.contents.last.id
+        @home.in_progress.contents.last.class.name.should_not == "BackTest::Image"
         auth_post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => -1
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
-        @home.in_progress.pieces.length.should == current_count+1
-        @home.in_progress.pieces.last.id.should_not == last_id
-        @home.in_progress.pieces.last.class.name.should == "BackTest::Image"
+        @home.in_progress.contents.length.should == current_count+1
+        @home.in_progress.contents.last.id.should_not == last_id
+        @home.in_progress.contents.last.class.name.should == "BackTest::Image"
         required_response = {
           :position => -1,
-          :entry => @home.in_progress.pieces.last.export
+          :entry => @home.in_progress.contents.last.export
         }
         Spot::JSON.parse(last_response.body).should == required_response
       end
@@ -801,18 +801,18 @@ class BackTest < MiniTest::Spec
         end
       end
       should "be able to add an alias to a box" do
-        @home.featured_jobs.pieces.length.should == 0
+        @home.featured_jobs.contents.length.should == 0
         auth_post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 0
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
-        @home.featured_jobs.pieces.length.should == 1
+        @home.featured_jobs.contents.length.should == 1
         a = @home.featured_jobs.first
         a.alias?.should be_true
         a.target.should == Job.first
         required_response = {
           :position => 0,
-          :entry => @home.featured_jobs.pieces.first.export(@user)
+          :entry => @home.featured_jobs.contents.first.export(@user)
         }
         Spot::JSON.parse(last_response.body).should == required_response
       end
@@ -821,12 +821,12 @@ class BackTest < MiniTest::Spec
         @home.featured_jobs << Job.new
         @home.featured_jobs << Job.new
         @home.save.reload
-        @home.featured_jobs.pieces.length.should == 3
+        @home.featured_jobs.contents.length.should == 3
         auth_post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 2
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.should == "application/json;charset=utf-8"
         @home.reload
-        @home.featured_jobs.pieces.length.should == 4
+        @home.featured_jobs.contents.length.should == 4
         a = @home.featured_jobs[2]
         a.alias?.should be_true
         a.target.should == Job.first
@@ -989,15 +989,15 @@ class BackTest < MiniTest::Spec
           last_response.status.should == 200
         end
         box = @job1.images
-        current_count = box.pieces.length
-        first_id = box.pieces.first.id.to_s
+        current_count = box.contents.length
+        first_id = box.contents.first.id.to_s
 
         auth_post "/@spontaneous/shard/wrap/#{@job1.id}/#{box.schema_id.to_s}", "filename" => "rose.jpg", "shards" => hashes, "mime_type" => "image/jpeg"
         assert last_response.ok?, "Should have got status 200 but got #{last_response.status}"
         last_response.content_type.should == "application/json;charset=utf-8"
         box = @job1.reload.images
-        first = box.pieces.first
-        box.pieces.length.should == current_count+1
+        first = box.contents.first
+        box.contents.length.should == current_count+1
         first.image.src.should =~ %r{^(.+)/rose\.jpg$}
         required_response = {
           :position => 0,
