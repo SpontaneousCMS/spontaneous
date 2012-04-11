@@ -80,7 +80,7 @@ module Spontaneous
     end
 
     def push(page)
-      self.modified_list << page.id
+      self.modified_list << page.id unless self.modified_list.include?(page.id)
     end
 
     def before_update
