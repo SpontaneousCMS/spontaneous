@@ -19,7 +19,8 @@ module Spontaneous
 
     def expanded(category)
       self[category].map do |path, glob|
-        path = Pathname.new(@root) + path
+        path = Pathname.new(path)
+        path = Pathname.new(@root) + path unless (path.absolute? && path.exist?)
         if path.exist?
           path = path.cleanpath
           path += glob if glob
