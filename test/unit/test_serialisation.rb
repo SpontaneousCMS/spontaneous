@@ -116,7 +116,6 @@ class SerialisationTest < MiniTest::Spec
       setup do
 
         date = "2011-07-07"
-
         @root = SerialisedPage.new
         @piece1 = SerialisedPiece.new
         @piece2 = SerialisedPiece.new
@@ -153,6 +152,7 @@ class SerialisationTest < MiniTest::Spec
         @child.direction = "N"
         @child.uid = "about"
 
+        [@child, @piece1, @piece2, @piece3].each { |c| c.save; c.reload }
         @root.insides[0].style = :freezing
         @root.insides[0].visible = false
         @root.insides[1].style = :boiling
@@ -160,8 +160,7 @@ class SerialisationTest < MiniTest::Spec
 
         @child.path.should == "/about"
 
-
-        [@root, @child, @piece1, @piece2, @piece3].each { |c| c.save; c.reload }
+        @root.save
 
         template = ERB.new(File.read(File.expand_path('../../fixtures/serialisation/root_hash.yaml.erb', __FILE__)))
         @root_hash = YAML.load(template.result(binding))
