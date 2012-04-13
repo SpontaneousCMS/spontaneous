@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha2'
-  s.date              = '2012-04-06'
+  s.date              = '2012-04-13'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -399,10 +399,12 @@ Gem::Specification.new do |s|
     lib/spontaneous/plugins/schema_title.rb
     lib/spontaneous/plugins/serialisation.rb
     lib/spontaneous/plugins/site/features.rb
+    lib/spontaneous/plugins/site/helpers.rb
     lib/spontaneous/plugins/site/hooks.rb
     lib/spontaneous/plugins/site/instance.rb
     lib/spontaneous/plugins/site/level.rb
     lib/spontaneous/plugins/site/map.rb
+    lib/spontaneous/plugins/site/paths.rb
     lib/spontaneous/plugins/site/publishing.rb
     lib/spontaneous/plugins/site/schema.rb
     lib/spontaneous/plugins/site/search.rb
@@ -452,11 +454,13 @@ Gem::Specification.new do |s|
     lib/spontaneous/render/development_renderer.rb
     lib/spontaneous/render/engine.rb
     lib/spontaneous/render/helpers.rb
-    lib/spontaneous/render/helpers/html_helper.rb
+    lib/spontaneous/render/helpers/classes_helper.rb
+    lib/spontaneous/render/helpers/conditional_comment_helper.rb
     lib/spontaneous/render/helpers/script_helper.rb
     lib/spontaneous/render/helpers/stylesheet_helper.rb
     lib/spontaneous/render/output.rb
     lib/spontaneous/render/output/html.rb
+    lib/spontaneous/render/output/plain.rb
     lib/spontaneous/render/preview_context.rb
     lib/spontaneous/render/preview_renderer.rb
     lib/spontaneous/render/publish_context.rb
@@ -514,7 +518,9 @@ Gem::Specification.new do |s|
     test/fixtures/back/public/css/sass_template.scss
     test/fixtures/back/public/js/coffeescript.coffee
     test/fixtures/back/public/test.html
+    test/fixtures/back/templates/layouts/standard.css.cut
     test/fixtures/back/templates/layouts/standard.html.cut
+    test/fixtures/back/templates/layouts/standard.js.cut
     test/fixtures/config/config/environment.rb
     test/fixtures/config/config/environments/development.rb
     test/fixtures/config/config/environments/production.rb
@@ -567,6 +573,8 @@ Gem::Specification.new do |s|
     test/fixtures/example_application/templates/project_image.html.cut
     test/fixtures/example_application/templates/text.html.cut
     test/fixtures/fields/youtube_api_response.xml
+    test/fixtures/helpers/templates/layouts/standard.html.cut
+    test/fixtures/helpers/templates/layouts/standard.mobile.cut
     test/fixtures/images/rose.greyscale.jpg
     test/fixtures/images/rose.jpg
     test/fixtures/images/size.gif
@@ -581,6 +589,7 @@ Gem::Specification.new do |s|
     test/fixtures/layouts/layouts/custom4.html.cut
     test/fixtures/layouts/layouts/standard.html.cut
     test/fixtures/media/101/003/rose.jpg
+    test/fixtures/outputs/templates/layouts/standard.atom.cut
     test/fixtures/permissions/config/user_levels.yml
     test/fixtures/permissions/media/image.jpg
     test/fixtures/plugins/schema_plugin/init.rb
