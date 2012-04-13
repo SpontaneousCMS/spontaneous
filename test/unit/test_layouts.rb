@@ -106,6 +106,14 @@ class LayoutsTest < MiniTest::Spec
         assert_correct_template(page, @template_root / 'layouts/custom3')
       end
 
+      should "support blocks to set simple templates" do
+        LayoutPage.field :title
+        LayoutPage.layout do
+          "${ title }!"
+        end
+        page = LayoutPage.new(:title => "john")
+        page.render.should == "john!"
+      end
       # should "raise error when setting unknown layout" do
       #   LayoutPage.layout :custom1
       #   LayoutPage.layout :custom2

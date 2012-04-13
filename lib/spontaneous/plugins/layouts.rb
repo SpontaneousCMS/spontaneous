@@ -5,8 +5,13 @@ module Spontaneous::Plugins
     extend ActiveSupport::Concern
 
     module ClassMethods
-      def layout(name, options={})
-        layout_prototypes[name] = Spontaneous::Prototypes::LayoutPrototype.new(self, name, options)
+      def layout(name = nil, options = {}, &block)
+        if block_given?
+          @layout_proc = block
+        else
+          raise "Layouts must be given a name" if name.blank?
+          layout_prototypes[name] = Spontaneous::Prototypes::LayoutPrototype.new(self, name, options)
+        end
       end
 
       def layout_prototypes
@@ -24,6 +29,7 @@ module Spontaneous::Plugins
       end
 
       def default_layout
+        return Spontaneous::Layout::Anonymous.new(@layout_proc) unless @layout_proc.nil?
         if prototype = (layouts.hierarchy_detect { |prototype| prototype.default? } || layouts.local_first)
           prototype.layout(self)
         else
