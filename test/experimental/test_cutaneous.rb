@@ -226,6 +226,14 @@ TEMPLATE
         File.open(@template_path, "w") do |file|
           file.write(PUBLISH_TEMPLATE)
         end
+        @context_class = Class.new(Cutaneous::PublishContext) do
+          attr_reader :title
+          def initialize(title = "title")
+            @title = title
+          end
+          def show_errors?; true; end
+          def _format; :html; end
+        end
       end
       teardown do
         FileUtils.rm_r(@tmp)
@@ -241,7 +249,7 @@ TEMPLATE
         template = Cutaneous::PublishTemplate.new
         template.convert("!{ comment }${ title }", "/path/to/template.html.cut")
         template.filename.should == "/path/to/template.html.cut"
-        context = Cutaneous::PublishContext.new(nil, :html, {:title => "title"})
+        context = @context_class.new
         template.render(context).should == "title"
       end
 
@@ -249,7 +257,7 @@ TEMPLATE
         template = Cutaneous::PublishTemplate.new(@template_path)
         template.filename.should == @template_path
         template.script.should =~ /^\s*_buf/
-        context = Cutaneous::PublishContext.new(nil, :html, {:title => "title"})
+        context = @context_class.new
         # puts template.render(context)
         template.render(context).should == (<<-HTML)
 Text here {{ preview_tag }}
@@ -267,7 +275,7 @@ Text
       should "reset if given a different string" do
         template = Cutaneous::PublishTemplate.new
         template.convert("${ title }")
-        context = Cutaneous::PublishContext.new(nil, :html, {:title => "title"})
+        context = @context_class.new
         template.render(context).should == "title"
         template.convert("${ title }!")
         template.render(context).should == "title!"
@@ -281,6 +289,13 @@ Text
         @template_path = File.join(@tmp, "template.html.cut")
         File.open(@template_path, "w") do |file|
           file.write(VIEW_TEMPLATE)
+        end
+        @context_class = Class.new(Cutaneous::RequestContext) do
+          attr_reader :title, :names
+          def initialize(title = "title", names = [])
+            @title = title
+            @names = names
+          end
         end
       end
       teardown do
@@ -297,7 +312,7 @@ Text
         template = Cutaneous::RequestTemplate.new
         template.convert("!{ comment }{{ title }}", "/path/to/template.html.cut")
         template.filename.should == "/path/to/template.html.cut"
-        context = Cutaneous::RequestContext.new(nil, :html, {:title => "title"})
+        context = @context_class.new
         template.render(context).should == "title"
       end
 
@@ -305,7 +320,7 @@ Text
         template = Cutaneous::RequestTemplate.new(@template_path)
         template.filename.should == @template_path
         template.script.should =~ /^\s*_buf/
-        context = Cutaneous::RequestContext.new(nil, :html, {:title => "title", :names => ["george", "mary"]})
+        context = @context_class.new("title", ["george", "mary"])
         # puts template.render(context)
         template.render(context).should == (<<-HTML)
 <title>title</title>
@@ -320,7 +335,7 @@ Welome
       should "reset if given a different string" do
         template = Cutaneous::RequestTemplate.new
         template.convert("{{ title }}")
-        context = Cutaneous::RequestContext.new(nil, :html, {:title => "title"})
+        context = @context_class.new
         template.render(context).should == "title"
         template.convert("{{ title }}!")
         template.render(context).should == "title!"

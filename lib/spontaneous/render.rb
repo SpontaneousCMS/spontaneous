@@ -5,14 +5,11 @@ module Spontaneous
   module Render
 
     class << self
-      def output_path(revision, page, format, extension = nil, template_dynamic = false)
-        output_path_with_root(revision_root(revision), revision, page, format, extension, template_dynamic)
+      def output_path(revision, page, output, extension = nil, template_dynamic = false)
+        output_path_with_root(revision_root(revision), revision, page, output, extension, template_dynamic)
       end
 
-      def output_path_with_root(root, revision, page, format, extension = nil, template_dynamic = false)
-        output = page.output(format)
-        # ext = ".#{format}"
-        # ext += ".#{extension}" if extension && template_dynamic
+      def output_path_with_root(root, revision, page, output, extension = nil, template_dynamic = false)
         ext = output.extension(template_dynamic)
         segment = (template_dynamic || output.dynamic?) ? "dynamic" : (page.dynamic? ? "protected" : "static")
         dir = root / segment / page.path
@@ -70,6 +67,16 @@ module Spontaneous
         @renderer ||= renderer_class.new(template_root)
       end
 
+
+      def context_class(renderer, output)
+        context_class = Class.new(renderer.context_class) do
+          include output.context
+          renderer.context_extensions.each do |mod|
+            include mod
+          end
+        end
+        context_class
+      end
 
       def with_preview_renderer(&block)
         with_renderer(PreviewRenderer, &block)
@@ -197,14 +204,16 @@ module Spontaneous
         end
       end
 
-      def render(content, format=:html, params={}, *args)
+      def render(content, output=nil, params={}, *args)
+        output ||= content.output(:html)
         Content.with_visible do
-          renderer.render_content(content, format || :html, params, *args)
+          renderer.render_content(content, output, params, *args)
         end
       end
-      def render_string(template_string, content, format=:html, params={}, *args)
+      def render_string(template_string, content, output=nil, params={}, *args)
+        output ||= content.output(:html)
         Content.with_visible do
-          renderer.render_string(template_string, content, format || :html, params, *args)
+          renderer.render_string(template_string, content, output, params, *args)
         end
       end
     end

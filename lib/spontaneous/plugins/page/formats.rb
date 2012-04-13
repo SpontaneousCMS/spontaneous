@@ -60,6 +60,7 @@ module Spontaneous::Plugins::Page
       end
 
       def provides_format?(format)
+        return true if format.blank?
         format = format.to_s
         outputs.any? { |output| (output == format) or (output.name.to_s == format) }
       end

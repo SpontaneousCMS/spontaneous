@@ -11,5 +11,8 @@ module Cutaneous
       Cutaneous::RequestContext
     end
 
+    def context_extensions
+      [Spontaneous::Render::RequestContext]
+    end
   end
 end

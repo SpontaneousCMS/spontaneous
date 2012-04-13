@@ -6,5 +6,9 @@ module Cutaneous
     def context_class
       Cutaneous::PreviewContext
     end
+
+    def context_extensions
+      [Spontaneous::Render::PreviewContext]
+    end
   end
 end

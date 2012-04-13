@@ -3,7 +3,6 @@
 module Cutaneous
   class PreviewContext
     include ContextHelper
-    include Spontaneous::Render::PreviewContext
 
     def include(filename, locals={})
       _comment(filename)

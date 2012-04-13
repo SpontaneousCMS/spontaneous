@@ -17,20 +17,20 @@ module Cutaneous
       Cutaneous.extension
     end
 
-    def render_string(string, content, format = :html, params = {})
+    def render_string(string, context)
       template = string_to_template(string)
-      render_template(template, content, format, params)
+      render_template(template, context)
     end
 
-    def render_file(file_path, content, format = :html, params = {})
-      template = get_template(file_path, format)
-      render_template(template, content, format, params)
+    def render_file(file_path, context)
+      template = get_template(file_path, context)
+      render_template(template, context)
     end
 
     def render(filename, context, _layout=true)
       hook_context(context)
       while true
-        template = get_template(filename, context.format)
+        template = get_template(filename, context)
         _buf = context._buf
         output = template.render(context)
         context._buf = _buf
@@ -46,16 +46,28 @@ module Cutaneous
       output
     end
 
+    # Private: Provides a list of modules that should be
+    # included into the context class after the format specific
+    # extensions have been included.
+    #
+    # Some contexts need to override the default behaviour of the
+    # base Spontaneous context so we need to be able to append modules
+    # to the end of the format specific ones in order to maintain this
+    # ability.
+    def context_extensions
+      []
+    end
+
     protected
 
-    def render_template(template, content, format, params = {})
-      context = context_class.new(content, format, params)
+    def render_template(template, context)
+      # context = context_class.new(content, format, params)
       render(template, context)
     end
 
 
-    def create_template(filepath, format)
-      template = template_class.new(nil, format)
+    def create_template(filepath)
+      template = template_class.new(nil)
       case filepath
       when String
         template.timestamp = Time.now
@@ -77,31 +89,31 @@ module Cutaneous
           template.convert(File.read(filepath), filepath)
         end
       when Proc
-        template = template_class.new(nil, format)
+        template = template_class.new(nil)
         template.convert(filepath.call, filepath.to_s)
       end
       template
     end
 
-    def get_template(template, format)
+    def get_template(template, context)
       case template
       when String
         # if the path is absolute and points to an existing file, just render that
         # used by the published renderer
-        filepath = make_path_absolute(template, format)
-        create_template(filepath, format)
+        filepath = make_path_absolute(template, context)
+        create_template(filepath)
       when Proc
-        create_template(template, format)
+        create_template(template)
       else
         template
       end
     end
 
-    def make_path_absolute(path, format)
+    def make_path_absolute(path, context)
       if ::File.file?(path)
         path
       else
-        Spontaneous::Render.find_template(path, format)
+        Spontaneous::Render.find_template(path, context.format)
       end
     end
 
@@ -113,12 +125,11 @@ module Cutaneous
 
 
     def hook_context(context)
-      context._engine = self
-      context._layout = nil
-      context
+      unless context.nil?
+        context._engine = self
+        context._layout = nil
+      end
     end
   end
 end
-
-
 

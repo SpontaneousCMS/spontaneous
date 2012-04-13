@@ -14,6 +14,7 @@ class PluginsTest < MiniTest::Spec
 
 
     klass =  Class.new(Spontaneous::Page)
+    klass.box :box1
     Object.send(:const_set, :Page, klass)
     klass =  Class.new(Spontaneous::Piece)
     Object.send(:const_set, :Piece, klass)
@@ -145,7 +146,9 @@ class PluginsTest < MiniTest::Spec
       should "make content classes available to rest of app" do
         defined?(::SchemaPlugin).should == "constant"
         ::SchemaPlugin::External.fields.length.should == 1
+        page  = ::Page.new
         piece = ::SchemaPlugin::External.new(:a => "A Field")
+        page.box1 << piece
         piece.render.should == "plugins/templates/external.html.cut\n"
       end
     end

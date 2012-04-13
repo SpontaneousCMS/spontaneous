@@ -3,8 +3,6 @@
 
 module Spontaneous::Render
   module ContextBase
-    include Spontaneous::Render::Helpers
-
     attr_reader :_format, :_target, :_locals
 
     def initialize(target, format, parent={})

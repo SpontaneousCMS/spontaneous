@@ -29,6 +29,7 @@ class TemplatesTest < MiniTest::Spec
   def setup
     @site = setup_site
     @klass = Class.new(Object) do
+      include Spontaneous::Render::ContextBase
       include Cutaneous::ContextHelper
       include Spontaneous::Render::PreviewContext
 
@@ -197,6 +198,7 @@ Parent Footer
     setup do
 
       @context_class = Class.new(Object) do
+        include Spontaneous::Render::ContextBase
         include Cutaneous::ContextHelper
         include Spontaneous::Render::PreviewContext
 

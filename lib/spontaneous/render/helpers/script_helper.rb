@@ -67,6 +67,8 @@ module Spontaneous::Render::Helpers
     def compress_js_string(js_string)
       Spontaneous::Render::Assets::Compression.shine_compress_string(js_string, :js)
     end
+
+    Spontaneous::Render::Helpers.register_helper(self, :html)
   end
 end
 

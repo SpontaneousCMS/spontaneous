@@ -181,42 +181,27 @@ module Spontaneous
         [path, format, action]
       end
 
-      def normalise_output
-        @output = (@output || @page.default_output.to_sym).to_s if @page
-      end
-
       def render_page_with_output
-        normalise_output
-        if @page && @page.provides_output?(@output) && (output = @page.output(@output)) && output.public?
+        return not_found! if     @page.nil?
+        return not_found! unless @page.provides_output?(@output)
+
+        output = @page.output(@output)
+
+        if output.public?
           content_type(output.mime_type)
-          render_page(@page, @output)
+          render_page(@page, output)
         else
-          # perhaps we should return the html version if the page exists but
-          # doesn't respond to the requested format?
-          # or even redirect to the html?
           not_found!
         end
       end
 
       def render_page(page, output, local_params = {})
-        response.body = page.render(output, local_params.merge({
+        response.body = output.render(local_params.merge({
           :params => request.params,
           :request => request,
           :session => request.session
         }))
       end
-
-      # def redirect?(page)
-      #   redirection, redirect_code = page.request_redirect(request.params, request, request.session)
-      #   if redirection
-      #     redirection = redirection.path if redirection.respond_to?(:path)
-      #     redirect_code = REDIRECTS[redirect_code] if Symbol === redirect_code
-      #     redirect_code ||= REDIRECTS[:temporary]
-      #     [redirection.to_s, redirect_code]
-      #   else
-      #     nil
-      #   end
-      # end
 
       # our 404 page should come from the CMS
       def not_found!

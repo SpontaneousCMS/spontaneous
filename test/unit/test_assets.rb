@@ -7,22 +7,21 @@ require 'shine'
 class AssetTest < MiniTest::Spec
 
 
-  class Context < OpenStruct
-    include Spontaneous::Render::PublishContext
-
-    # simulate a production + publishing environment
-    def live?
-      true
-    end
-
-    # usually set as part of the render process
-    def revision
-      99
-    end
-  end
-
   def new_context(content = nil, format = :html, params = {})
-    Context.new(content, format, params)
+    output = S::Render::Output.format_class_map[:html].new(content)
+
+    klass = Class.new(S::Render.context_class(Cutaneous::PublishRenderer.new(""), output)) do
+      # simulate a production + publishing environment
+      def live?
+        true
+      end
+
+      # usually set as part of the render process
+      def revision
+        99
+      end
+    end
+    klass.new(content, format, params)
   end
 
   def setup

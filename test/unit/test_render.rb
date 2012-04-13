@@ -52,12 +52,16 @@ class RenderTest < MiniTest::Spec
       end
       # TemplateClass.add_output :pdf
       # TemplateClass.add_output :epub
+      @root = ::Page.create(:title => "Home")
+      @page = ::Page.create
 
       @content = TemplateClass.new
       @content.style.should == TemplateClass.default_style
       @content.title = "The Title"
       @content.description = "The Description"
-      @root = ::Page.create(:title => "Home")
+
+      @page.sections1 << @content
+
       @section1 = ::Page.new(:title => "Section 1")
       @section2 = ::Page.new(:title => "Section 2")
       @section3 = ::Page.new(:title => "Section 3")
@@ -77,43 +81,45 @@ class RenderTest < MiniTest::Spec
     end
 
     should "render strings correctly" do
-      S::Render.render_string('#{title} {{ Time.now }}', @content, :html, {}).should == "The Title {{ Time.now }}"
+      S::Render.render_string('#{title} {{ Time.now }}', @content, @content.output(:html), {}).should == "The Title {{ Time.now }}"
     end
 
     should "use a cache for the site root" do
       S::Render.with_publishing_renderer do
-        a = S::Render.render_string('#{root.object_id} #{root.object_id}', @content, :html, {})
+        a = S::Render.render_string('#{root.object_id} #{root.object_id}', @content, @content.output(:html), {})
         a.should_not == "#{nil.object_id} #{nil.object_id}"
         a.split.uniq.length.should == 1
       end
     end
 
     should "iterate through the sections" do
+      output = @content.output(:html)
       template = '%%{ navigation(%s) do |section, active| }#{section.title}/#{active} %%{ end }'
-      a = S::Render.render_string(template % "", @section1, :html, {})
+      a = S::Render.render_string(template % "", @section1, output, {})
       a.should == "Section 1/true Section 2/false Section 4/false Section 3/false "
-      a = S::Render.render_string(template % "1", @section2, :html, {})
+      a = S::Render.render_string(template % "1", @section2, output, {})
       a.should == "Section 1/false Section 2/true Section 4/false Section 3/false "
-      a = S::Render.render_string(template % ":section", @section1, :html, {})
+      a = S::Render.render_string(template % ":section", @section1, output, {})
       a.should == "Section 1/true Section 2/false Section 4/false Section 3/false "
     end
 
     should "use a cache for navigation pages" do
+      output = @content.output(:html)
       a = b = c = nil
       template = '%{ navigation do |section, active| }#{section.object_id} %{ end }'
-      a = S::Render.render_string(template, S::Content[@section1.id], :html, {}).strip
-      b = S::Render.render_string(template, S::Content[@section1.id], :html, {}).strip
+      a = S::Render.render_string(template, S::Content[@section1.id], output, {}).strip
+      b = S::Render.render_string(template, S::Content[@section1.id], output, {}).strip
       a.should_not == b
 
       S::Render.with_publishing_renderer do
         template = '%{ navigation do |section, active| }#{section.object_id} %{ end }'
-        a = S::Render.render_string(template, S::Content[@section1.id], :html, {}).strip
-        b = S::Render.render_string(template, S::Content[@section1.id], :html, {}).strip
+        a = S::Render.render_string(template, S::Content[@section1.id], output, {}).strip
+        b = S::Render.render_string(template, S::Content[@section1.id], output, {}).strip
         a.should == b
       end
       S::Render.with_publishing_renderer do
         template = '%{ navigation do |section, active| }#{section.object_id} %{ end }'
-        c = S::Render.render_string(template, S::Content[@section1.id], :html, {}).strip
+        c = S::Render.render_string(template, S::Content[@section1.id], output, {}).strip
       end
       a.should_not == c
     end
@@ -123,18 +129,22 @@ class RenderTest < MiniTest::Spec
     end
 
     should "be able to render themselves to PDF" do
+      Page.add_output :pdf
       @content.render(:pdf).should == "<PDF><title>The Title</title><body>{The Description}</body></PDF>\n"
     end
 
     should "be able to render themselves to EPUB" do
+      Page.add_output :epub
       @content.render(:epub).should == "<EPUB><title>The Title</title><body>The Description</body></EPUB>\n"
     end
 
     context "piece trees" do
       setup do
+        @page = ::Page.create
         TemplateClass.style :complex_template, :default => true
         TemplateClass.box :bits
         @content = TemplateClass.new
+        @page.sections1 << @content
         @content.title = "The Title"
         @content.description = "The Description"
         @child = TemplateClass.new
@@ -143,6 +153,7 @@ class RenderTest < MiniTest::Spec
         @content.bits << @child
         @content.contents.first.style = TemplateClass.get_style(:this_template)
       end
+
       teardown do
         Content.delete
       end
@@ -152,6 +163,7 @@ class RenderTest < MiniTest::Spec
       end
 
       should "cascade the chosen format to all subsequent #render calls" do
+        ::Page.add_output :pdf
         @content.render(:pdf).should == "<pdf>\nThe Title\n<piece><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</piece>\n</pdf>\n"
       end
 
@@ -170,9 +182,11 @@ class RenderTest < MiniTest::Spec
       setup do
         TemplateClass.style :slots_template, :default => true
         TemplateClass.box :images
+        @page = ::Page.new
         @content = TemplateClass.new
         @content.title = "The Title"
         @content.description = "The Description"
+        @page.sections1 << @content
         @child = TemplateClass.new
         @child.title = "Child Title"
         @child.description = "Child Description"
@@ -184,6 +198,7 @@ class RenderTest < MiniTest::Spec
         @content.render.should == "<boxes>\n  <img><html><title>Child Title</title><body>Child Description</body></html>\n</img>\n</boxes>\n"
       end
       should "render boxes to alternate formats" do
+        ::Page.add_output :pdf
         @content.render(:pdf).should == "<boxes-pdf>\n  <img><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</img>\n</boxes-pdf>\n"
       end
     end
@@ -199,7 +214,9 @@ class RenderTest < MiniTest::Spec
         AnImage.field :title
         AnImage.template '<img>#{title}</img>'
 
+        @page = ::Page.new
         @root = TemplateClass.new
+        @page.sections1 << @root
         @root.images.introduction = "Images below:"
         @image1 = AnImage.new
         @image1.title = "Image 1"
@@ -207,6 +224,7 @@ class RenderTest < MiniTest::Spec
         @image2.title = "Image 2"
         @root.images << @image1
         @root.images << @image2
+
       end
 
       teardown do
@@ -229,7 +247,9 @@ class RenderTest < MiniTest::Spec
         AnImage.field :title
         AnImage.template '<img>#{title}</img>'
 
+        @page = ::Page.create
         @root = TemplateClass.new
+        @page.sections1 << @root
         @root.images_with_template.introduction = "Images below:"
         @image1 = AnImage.new
         @image1.title = "Image 1"
@@ -368,10 +388,10 @@ class RenderTest < MiniTest::Spec
         PreviewRender.layout :preview_render
       end
 
-      should "something" do
+      should "output both publish & request tags" do
         @now = Time.now
         ::Time.stubs(:now).returns(@now)
-        S::Render.render_string('#{title} {{ Time.now }}', @page, :html, {}).should == "PAGE #{@now.to_s}"
+        S::Render.render_string('${title} {{ Time.now }}', @page, @page.output(:html), {}).should == "PAGE #{@now.to_s}"
       end
 
       should "render all tags & include preview edit markers" do
@@ -423,7 +443,9 @@ PAGE <p>DESCRIPTION</p>
         File.exists?(@file).should be_true
       end
       should "Use file directly if it exists" do
-        result = Spontaneous.template_engine.request_renderer.new(@root).render_file(@file, nil)
+        renderer = Spontaneous.template_engine.request_renderer.new(@root)
+        context = renderer.context_class.new
+        result = renderer.render_file(@file, context)
         result.should == "correct\n"
       end
     end

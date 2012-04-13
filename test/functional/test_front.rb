@@ -183,8 +183,8 @@ class FrontTest < MiniTest::Spec
 
     context "Dynamic pages" do
       setup do
-        Page.stubs(:path).with("/about").returns(about)
-        Page.stubs(:path).with("/news").returns(news)
+        Spontaneous::Page.stubs(:path).with("/about").returns(about)
+        Spontaneous::Page.stubs(:path).with("/news").returns(news)
       end
 
       should "default to static behaviour" do
@@ -264,7 +264,7 @@ class FrontTest < MiniTest::Spec
           show "#news"
         end
         post '/about'
-        assert last_response.status == 200
+        assert last_response.status == 200, "Expected status 200 but recieved #{last_response.status}"
         last_response.body.should == "/news.html\n"
       end
 
@@ -522,12 +522,10 @@ class FrontTest < MiniTest::Spec
       end
 
       should "pass the format onto the page if the action returns it to the render call" do
-				# xml = formats([:xml]).first
-				# html = formats([:html]).first
 				about.class.outputs :html, :xml
-        # about.stubs(:provides_format?).with(xml, anything).returns(true)
-        about.expects(:render).with('xml', anything).returns("/about.xml")
-        about.expects(:render).with('html', anything).never
+        about.class.layout do
+          "${path}.${format}"
+        end
         get "/about/@comments/page.xml"
         assert last_response.ok?
         last_response.body.should == "/about.xml"

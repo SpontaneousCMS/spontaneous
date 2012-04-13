@@ -41,6 +41,10 @@ class FormatsTest < MiniTest::Spec
       FPage.provides_output?(:rss).should be_false
     end
 
+    should "map an empty output onto the default one" do
+      FPage.provides_output?(nil).should be_true
+    end
+
     should "return the mime-type for a output" do
       FPage.mime_type(:html).should == "text/html"
       FPage.mime_type(:atom).should == "application/atom+xml"
@@ -52,10 +56,20 @@ class FormatsTest < MiniTest::Spec
       FPage.output(:html).ancestors.include?(S::Render::Output::HTML).should be_true
     end
 
+    should "correctly determine mimetypes for new (known) formats" do
+      FPage.add_output :au
+      FPage.output(:au).mimetype.should == "audio/basic"
+    end
+
     should "dynamically generate output classes for unknown formats" do
       FPage.add_output :fish, :format => :unknown
       FPage.output(:fish).ancestors[1].should == S::Render::Output::UNKNOWN
-      FPage.output(:fish).ancestors[2].should == S::Render::Output::Format
+      FPage.output(:fish).ancestors[2].should == S::Render::Output::Plain
+    end
+
+    should "dynamically generate output classes based on HTML for outputs with unspecified formats" do
+      FPage.add_output :fish
+      FPage.output(:fish).ancestors[1].should == S::Render::Output::HTML
     end
 
     should "return the format wrapper for a format name string" do
@@ -163,6 +177,34 @@ class FormatsTest < MiniTest::Spec
       FPage.output(:fish).extension(true).should == ".php"
       FPage.add_output :foul, :dynamic => true, :extension => ".php"
       FPage.output(:foul).extension(true).should == ".php"
+    end
+
+    context "format classes" do
+      should "enable new formats" do
+        S::Render::Output.unknown_format?(:fishhtml).should be_true
+        class FishHTMLFormat < S::Render::Output::HTML
+          provides_format :fishhtml
+        end
+        S::Render::Output.unknown_format?(:fishhtml).should be_false
+      end
+
+      should "inherit helper classes from their superclass" do
+        module CustomHelper1
+          def here_is_my_custom_helper1; end
+        end
+        Site.register_helper CustomHelper1, :newhtml
+
+        class NewHTMLFormat < S::Render::Output::HTML
+          provides_format :newhtml
+        end
+
+        FPage.add_output :newhtml
+        page = FPage.new
+        output = page.output(:newhtml)
+        newhtml_context = output.context
+        html_context_ancestors = page.output(:html).context.ancestors[1..-1]
+        Set.new(newhtml_context.ancestors[1..-1]).should == Set.new(html_context_ancestors + [CustomHelper1])
+      end
     end
 
     context "instances" do

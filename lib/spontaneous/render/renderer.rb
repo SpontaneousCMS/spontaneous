@@ -41,6 +41,10 @@ module Spontaneous
         Spontaneous.template_engine.request_renderer.new(template_root, cache?)
       end
 
+      def context_class(renderer, output)
+        Spontaneous::Render.context_class(renderer, output)
+      end
+
       def cache?
         Spontaneous::Render.cache_templates?
       end

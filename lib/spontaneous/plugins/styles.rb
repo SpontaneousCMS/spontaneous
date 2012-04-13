@@ -67,6 +67,10 @@ module Spontaneous::Plugins
       self[:style_sid] = style_to_schema_id(style).to_s
     end
 
+    def style_sid
+      self[:style_sid]
+    end
+
     # converts a symbol or string into a Schema::UID instance
     def style_to_schema_id(style)
       return nil if style.nil?

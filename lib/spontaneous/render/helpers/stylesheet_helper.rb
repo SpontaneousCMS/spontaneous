@@ -56,5 +56,6 @@ module Spontaneous::Render::Helpers
       Spontaneous::Render::Assets::Compression.shine_compress_string(css_string, :css)
     end
 
+    Spontaneous::Render::Helpers.register_helper(self, :html)
   end
 end

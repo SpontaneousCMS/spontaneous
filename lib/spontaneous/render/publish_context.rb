@@ -3,7 +3,6 @@
 
 module Spontaneous::Render
   module PublishContext
-    include Spontaneous::Render::ContextBase
     include Spontaneous::Render::RenderCache
 
     def root
