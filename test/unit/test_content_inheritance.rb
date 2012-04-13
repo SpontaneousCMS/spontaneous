@@ -60,9 +60,9 @@ class ContentInheritanceTest < MiniTest::Spec
     context "Pages" do
 
       should "type subclasses found via Page" do
-        ::Page.all.map { |c| c.class }.should == \
-          [PageClass1, PageClass11, PageClass111, PageClass2, PageClass22]
-        ::Page.all.should == [@page1, @page11, @page111, @page2, @page22]
+        Set.new(::Page.all.map { |c| c.class }).should == \
+          Set.new([PageClass1, PageClass11, PageClass111, PageClass2, PageClass22])
+        Set.new(::Page.all).should == Set.new([@page1, @page11, @page111, @page2, @page22])
       end
 
       should "type subclasses found via Spontaneous::Page" do
