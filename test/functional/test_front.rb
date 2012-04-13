@@ -457,6 +457,7 @@ class FrontTest < MiniTest::Spec
           end
         end
 
+        Page.stubs(:path).with("/").returns(root)
         Page.stubs(:path).with("/about").returns(about)
         Page.stubs(:path).with("/about/now").returns(subpage)
       end
@@ -473,6 +474,13 @@ class FrontTest < MiniTest::Spec
         assert last_response.ok?
         last_response.body.should == about.render
       end
+
+      should "work on the homepage" do
+        get "/@comments"
+        assert last_response.ok?
+        last_response.body.should == "Success"
+      end
+
 
       should "be recognised" do
         get "/about/@comments"

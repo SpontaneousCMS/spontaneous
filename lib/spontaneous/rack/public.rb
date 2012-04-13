@@ -174,6 +174,7 @@ module Spontaneous
       def parse_path(path)
         if path =~ %r(#{ACTION})
           path, action = path.split(ACTION)
+          path = "/" if path.empty?
           action, format = action.split(DOT)
         else
           path, format = path.split(DOT)
