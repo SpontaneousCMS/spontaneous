@@ -22,9 +22,10 @@ module Spontaneous::Plugins
         include AliasMethods
         include PieceAliasMethods unless page?
         include PageAliasMethods  if page?
-        alias_method :target,  :__target
+        # alias_method :target,  :__target
         alias_method :target=, :__target=
       end
+
 
       alias_method :aliases, :alias_of
 
@@ -84,8 +85,25 @@ module Spontaneous::Plugins
 
 
     module ClassAliasMethods
+      def for_target(target_id)
+        self.create(:target_id => target_id)
+      end
+
       def alias?
         true
+      end
+
+      def use_configured_generator(generator_name, *args)
+        return nil unless @alias_options.key?(generator_name)
+        (generator = @alias_options[generator_name]).call(*args)
+      end
+
+      def lookup_target(target_id)
+        use_configured_generator(:lookup, target_id)
+      end
+
+      def target_slug(target)
+        use_configured_generator(:slug, target)
       end
     end
 
@@ -93,6 +111,11 @@ module Spontaneous::Plugins
     module AliasMethods
       def alias?
         true
+      end
+
+      def target
+        (_target = self.class.lookup_target(self.target_id)) and return _target
+        __target
       end
 
       def field?(field_name)
@@ -117,6 +140,7 @@ module Spontaneous::Plugins
       end
 
       def style
+        return self.resolve_style(self.style_sid) unless target.respond_to?(:resolve_style)
         if self.class.styles.empty?
           target.resolve_style(style_sid)
         else
@@ -129,11 +153,20 @@ module Spontaneous::Plugins
       end
 
       def export(user = nil)
-        super.merge(:target => target.shallow_export(user), :alias_title => target.alias_title, :alias_icon => target.exported_alias_icon)
+        super.merge(:target => exported_target(user), :alias_title => target.alias_title, :alias_icon => target.exported_alias_icon)
+      end
+
+      def exported_target(user = nil)
+        case target
+        when S::Content
+          target.shallow_export(user)
+        else
+          target.to_json
+        end
       end
 
       def before_create
-        self.set_visible(target.visible?, target.id)
+        self.set_visible(target.visible?, target.id) if S::Content === target
         super
       end
     end
@@ -146,6 +179,9 @@ module Spontaneous::Plugins
 
     module PageAliasMethods
       def slug
+        unless target.respond_to?(:slug)
+          slug = self.class.target_slug(target) and return slug
+        end
         target.slug
       end
 

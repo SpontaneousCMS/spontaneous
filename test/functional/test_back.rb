@@ -781,7 +781,7 @@ class BackTest < MiniTest::Spec
       end
     end
 
-    context "Aliases" do
+    context "when working with aliases" do
       setup do
         Spontaneous.stubs(:reload!)
       end
@@ -800,6 +800,7 @@ class BackTest < MiniTest::Spec
           }
         end
       end
+
       should "be able to add an alias to a box" do
         @home.featured_jobs.contents.length.should == 0
         auth_post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 0
@@ -816,6 +817,7 @@ class BackTest < MiniTest::Spec
         }
         Spot::JSON.parse(last_response.body).should == required_response
       end
+
       should "be able to add an alias to a box at any position" do
         @home.featured_jobs << Job.new
         @home.featured_jobs << Job.new
@@ -835,6 +837,40 @@ class BackTest < MiniTest::Spec
           :entry => @home.featured_jobs[2].export(@user)
         }
         Spot::JSON.parse(last_response.body).should == required_response
+      end
+
+      context "of non-content targets" do
+        setup do
+          @target_id = target_id = 9999
+          @target = target = mock()
+          @target.stubs(:id).returns(@target_id)
+          @target.stubs(:title).returns("custom object")
+          @target.stubs(:to_json).returns({:title => "custom object", :id => @target_id}.to_json)
+          @target.stubs(:alias_title).returns("custom object")
+          @target.stubs(:exported_alias_icon).returns(nil)
+
+          LinkedSomething = Class.new(Piece) do
+            alias_of proc { [target] }, :lookup => lambda { |id|
+            return target if id == target_id
+            nil
+          }
+          end
+        end
+
+        teardown do
+          BackTest.send(:remove_const, LinkedSomething) rescue nil
+        end
+
+        should "interface with lists of non-content targets" do
+          box = @home.boxes[:featured_jobs]
+          box._prototype.allow LinkedSomething
+          auth_post "/@spontaneous/alias/#{@home.id}/#{box.schema_id.to_s}", 'alias_id' => LinkedSomething.schema_id.to_s, 'target_id' => @target_id, "position" => 0
+          assert last_response.status == 200, "Expected a 200 but got #{last_response.status}"
+          @home.reload
+          a = @home.featured_jobs[0]
+          a.alias?.should be_true
+          a.target.should == @target
+        end
       end
     end
 

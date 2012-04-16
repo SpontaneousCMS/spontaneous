@@ -84,7 +84,7 @@ module Spontaneous
           end
 
           map "#{NAMESPACE}/event" do
-           run EventListener
+            run EventListener
           end
 
 
@@ -497,11 +497,9 @@ module Spontaneous
           if klass.alias?
             content_for_request do |content, box|
               targets = klass.targets(content, box).map do |t|
-                {
-                  :id => t.id,
+                { :id => t.id,
                   :title => t.alias_title,
-                  :icon => t.exported_alias_icon
-                }
+                  :icon => t.exported_alias_icon }
               end
               json(targets)
             end
@@ -513,9 +511,8 @@ module Spontaneous
             type = Spontaneous.schema[params[:alias_id]]
             position = (params[:position] || 0).to_i
             if box.writable?(user, type)
-              target = Spontaneous::Content[params[:target_id]]
-              if target
-                instance = type.create(:target => target)
+              instance = type.for_target(params[:target_id])
+              if instance
                 box.insert(position, instance)
                 content.save
                 json({

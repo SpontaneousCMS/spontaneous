@@ -171,6 +171,10 @@ module Spontaneous::Prototypes
       instance_class.readable_fields(user)
     end
 
+    def allow(*args)
+      instance_class.allow(*args)
+    end
+
     def allowed_types(user)
       if writable?(user)
         types = []
