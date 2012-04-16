@@ -87,7 +87,7 @@ module Spontaneous
     end
 
     def resolve_entry
-      owner.all_pieces.find { |e| e.id == self.id }
+      owner.all_contents.find { |e| e.id == self.id }
     end
 
     def page=(page)

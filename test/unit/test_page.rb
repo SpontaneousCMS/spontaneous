@@ -134,6 +134,10 @@ class PageTest < MiniTest::Spec
         @t = Page[@t.id]
       end
 
+      should "be able to find a reference to their inline entry" do
+        @q.entry.class.should == Spontaneous::PagePiece
+      end
+
       should "have a reference to their parent" do
         @p.parent.should be_nil
         @q.parent.should === @p
