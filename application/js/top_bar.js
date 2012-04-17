@@ -112,7 +112,7 @@ Spontaneous.TopBar = (function($, S) {
 			});
 			for (var boxname in children) {
 				if (children.hasOwnProperty(boxname)) {
-					var optgroup = dom.optgroup().attr('label', boxname), cc = this.sort_children(children[boxname]);
+					var optgroup = this.optgroup(boxname), cc = this.sort_children(children[boxname]);
 					for (var i = 0, ii = cc.length; i < ii; i++) {
 						var p = cc[i];
 						optgroup.append(this.option_for_entry(p));
@@ -146,6 +146,9 @@ Spontaneous.TopBar = (function($, S) {
 			}
 			return '('+(count)+' pages)';
 		},
+		optgroup: function(boxname) {
+			return dom.optgroup().attr('label', boxname);
+		},
 		option_for_entry: function(p) {
 			var opt = dom.option({'value': p.id()}).text(p.slug()).data('page', p);
 			if (p.watch) {
@@ -160,12 +163,17 @@ Spontaneous.TopBar = (function($, S) {
 			return this.status;
 		},
 		add_page: function(page, position) {
+			console.log('add_page', page, position)
 			var self = this
 			, option = self.option_for_entry(page)
 			, container = page.container
 			, name = container.name()
 			, children = self.children
 			, optgroup = self.select.find('optgroup[label="'+name+'"]')
+			if (optgroup.length === 0) {
+				optgroup = this.optgroup(name);
+				this.select.append(optgroup);
+			}
 			optgroup.prepend(option);
 			// since the navigation lists are ordered differently from the entries, it's
 			// difficult to insert into the right position
