@@ -29,7 +29,7 @@ module Spontaneous::Plugins
 
       alias_method :aliases, :alias_of
 
-      def targets(owner = nil, box = nil)
+      def targets(owner = nil, box = nil, options = {})
         targets = []
         classes = []
         proc_args = [owner, box].compact
@@ -42,7 +42,7 @@ module Spontaneous::Plugins
           end
         end
         query = S::Content.filter(sti_key => classes.map { |c| c.to_s })
-        if container_procs = @alias_options[:container]
+        if (container_procs = @alias_options[:container])
           containers = [container_procs].flatten.map { |p| p[*proc_args] }.flatten
           params = []
           containers.each do |container|
@@ -60,16 +60,22 @@ module Spontaneous::Plugins
           query = query.and(container_query)
         end
         targets.concat(query.all)
-        if filter = @alias_options[:filter] and filter.is_a?(Proc)
+
+        if (filter = @alias_options[:filter]) and filter.is_a?(Proc)
           filtered = []
           targets.each { |target|
             filtered << target if filter[*([target, owner, box][0...(filter.arity)])]
           }
           targets = filtered
         end
+
         if @alias_options[:unique] && box
           existing = box.map { |entry| entry.target || entry }
           targets.reject! { |target| existing.include?(target) }
+        end
+
+        if (query =  options[:search])
+          targets.select! { |target| query === target.alias_title }
         end
         targets
       end

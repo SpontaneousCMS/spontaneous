@@ -496,12 +496,21 @@ module Spontaneous
           klass = Spontaneous.schema[params[:schema_id]]
           if klass.alias?
             content_for_request do |content, box|
-              targets = klass.targets(content, box).map do |t|
+              options = {}
+              if (query = params[:query])
+                options[:search] = Regexp.new(query, Regexp::IGNORECASE)
+              end
+              targets = klass.targets(content, box, options).map do |t|
                 { :id => t.id,
                   :title => t.alias_title,
                   :icon => t.exported_alias_icon }
               end
-              json(targets)
+              json({
+                :pages => 1,
+                :total => targets.length,
+                :page => 1,
+                :targets => targets
+              })
             end
           end
         end

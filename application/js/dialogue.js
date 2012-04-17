@@ -75,6 +75,9 @@ Spontaneous.Dialogue = (function($, S) {
 			// set to define non-cancel action buttons
 			// for this dialogue
 		},
+		contentsHeight: function() {
+			return null;
+		},
 		cleanup: function() {
 			// over-ride if you need to do anything before the dialogue is closed
 			// (either by cancel or through other actions)
@@ -99,6 +102,7 @@ Spontaneous.Dialogue = (function($, S) {
 		open: function(instance) {
 			if (this._open || !instance) { return; }
 			this._instance = instance;
+			instance.manager = this;
 			$('body').css("overflow", "hidden");
 			this.overlay().fadeIn(200);
 			var c = this.container(), a = this._actions, b;
@@ -134,10 +138,20 @@ Spontaneous.Dialogue = (function($, S) {
 			}
 			this.button_map = button_map;
 			this._body.empty().append(instance.body());
+
 			c.fadeIn(200);
 			this._open = true;
 		},
 
+		updateLayout: function() {
+			var contentsHeight = this._instance.contentsHeight()
+			, dialogueHeight = (+contentsHeight) + this._actions.outerHeight() + this._title.outerHeight()
+			, el = this._frame;
+			dialogueHeight = Math.max(dialogueHeight, 100);
+			if (contentsHeight && dialogueHeight <  this._originalHeight) {
+				el.animate({'height': dialogueHeight}, 400);
+			}
+		},
 		disable_button: function(button_name) {
 			var button = this.button_map[button_name.toLowerCase()]
 			button.disable();
@@ -173,6 +187,9 @@ Spontaneous.Dialogue = (function($, S) {
 				outline.append(controls_wrap);
 				wrap.append(outline)
 				$('#content').append(wrap);
+				this._originalHeight = outline.outerHeight();
+				console.log('orig height', this._originalHeight)
+				this._frame = outline;
 				this._actions = actions;
 				this._title = title;
 				this._container = wrap;

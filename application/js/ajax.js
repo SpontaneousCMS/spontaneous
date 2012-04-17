@@ -9,7 +9,11 @@ Spontaneous.Ajax = (function($, S) {
 	});
 	return {
 		namespace: "/@spontaneous",
-		get: function(url, callback) {
+		get: function(url, data, callback) {
+			if (typeof data === "function") {
+				callback = data;
+				data = {};
+			}
 			var handle_response = function(data, textStatus, xhr) {
 				callback(data, textStatus, xhr);
 			};
@@ -17,7 +21,7 @@ Spontaneous.Ajax = (function($, S) {
 				'url': this.request_url(url),
 				'success': handle_response,
 				'ifModified': true,
-				'data': this.api_access_key(),
+				'data': $.extend(data, this.api_access_key()),
 				'error': handle_response // pass the error to the handler too
 			});
 		},
