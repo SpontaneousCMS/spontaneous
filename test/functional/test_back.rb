@@ -575,11 +575,21 @@ class BackTest < MiniTest::Spec
         Spot::JSON.parse(last_response.body).should == required_response
       end
     end
-    context "pieces" do
+    context "Box contents" do
       setup do
         Spontaneous.stubs(:reload!)
       end
-      should "default to being added at the top" do
+
+      should "allow addition of pages" do
+        current_count = @home.projects.length
+        auth_post "/@spontaneous/add/#{@home.id}/#{@home.projects.schema_id.to_s}/#{Project.schema_id.to_s}"
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        @home.reload
+        @home.projects.length.should == current_count+1
+        @home.projects.first.must_be_instance_of(Project)
+      end
+
+      should "default to adding entries at the top" do
         current_count = @home.in_progress.contents.length
         first_id = @home.in_progress.contents.first.id
         @home.in_progress.contents.first.class.name.should_not == "BackTest::Image"
@@ -792,13 +802,32 @@ class BackTest < MiniTest::Spec
       should "be able to retrieve a list of potential targets" do
         auth_get "/@spontaneous/targets/#{LinkedJob.schema_id}/#{@home.id}/#{@home.in_progress.schema_id}"
         assert last_response.ok?
-        Spot::JSON.parse(last_response.body).should == LinkedJob.targets(@home, @home.in_progress).map do |job|
-          {
-            :id => job.id,
+        expected = LinkedJob.targets(@home, @home.in_progress)
+        response = Spot::JSON.parse(last_response.body)
+        response[:pages].should == 1
+        response[:page].should == 1
+        response[:total].should == expected.length
+
+        response[:targets].should == expected.map { |job|
+          { :id => job.id,
             :title => job.title.to_s,
-            :icon => job.image.export
-          }
-        end
+            :icon => job.image.export }
+        }
+      end
+
+      should "be able to filter targets using a search string" do
+        auth_get "/@spontaneous/targets/#{LinkedJob.schema_id}/#{@home.id}/#{@home.in_progress.schema_id}", {"query" => "job 3"}
+        assert last_response.ok?
+        expected = [@job3]
+        response = Spot::JSON.parse(last_response.body)
+        response[:pages].should == 1
+        response[:page].should == 1
+        response[:total].should == expected.length
+        response[:targets].should == expected.map { |job|
+          { :id => job.id,
+            :title => job.title.to_s,
+            :icon => job.image.export }
+        }
       end
 
       should "be able to add an alias to a box" do
