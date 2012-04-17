@@ -922,6 +922,7 @@ class BackTest < MiniTest::Spec
         lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
         # hammer, meet nut
         S::Rack::Back::EditingInterface.use Spontaneous::Rack::Reloader
+        S::Rack::Back::Preview.use Spontaneous::Rack::Reloader
         Spontaneous::Loader.stubs(:reload!)
       end
 
@@ -937,6 +938,16 @@ class BackTest < MiniTest::Spec
 
       should "present a dialogue page with possible solutions" do
         auth_get '/@spontaneous/'
+        assert last_response.status == 412, "Schema validation errors should raise a 412 but instead recieved a #{last_response.status}"
+        last_response.body.should =~ %r{<form action="/@spontaneous/schema/delete" method="post"}
+        last_response.body.should =~ %r{<input type="hidden" name="uid" value="#{@df1.schema_id}"}
+
+        last_response.body.should =~ %r{<form action="/@spontaneous/schema/rename" method="post"}
+        last_response.body.should =~ %r{<input type="hidden" name="ref" value="#{@af1.schema_name}"}
+      end
+
+      should "present a dialogue page with possible solutions when in preview mode" do
+        auth_get '/'
         assert last_response.status == 412, "Schema validation errors should raise a 412 but instead recieved a #{last_response.status}"
         last_response.body.should =~ %r{<form action="/@spontaneous/schema/delete" method="post"}
         last_response.body.should =~ %r{<input type="hidden" name="uid" value="#{@df1.schema_id}"}

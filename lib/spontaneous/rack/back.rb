@@ -687,12 +687,12 @@ module Spontaneous
       end
 
       class Preview < Sinatra::Base
+        use CookieAuthentication
+        use AroundPreview
         use Reloader if Site.config.reload_classes
         include Spontaneous::Rack::Public
         helpers Spontaneous::Rack::UserHelpers
 
-        use CookieAuthentication
-        use AroundPreview
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
