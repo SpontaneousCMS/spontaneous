@@ -434,7 +434,7 @@ module Spontaneous
             type = Spontaneous.schema[params[:type_name]]#.constantize
 
             if box.writable?(user, type)
-              instance = type.new
+              instance = type.new(:created_by => user)
               box.insert(position, instance)
               content.save
               json({

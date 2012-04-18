@@ -38,9 +38,10 @@ module Spontaneous
       page?
     end
 
-    many_to_one :owner,   :key => :owner_id, :class => Content, :reciprocal => :_pieces
-    one_to_many :_pieces, :key => :owner_id, :class => Content, :reciprocal => :owner
-    many_to_one :page,    :key => :page_id,  :class => Content, :reciprocal => :content
+    many_to_one :owner,      :key => :owner_id, :class => Content, :reciprocal => :_pieces
+    one_to_many :_pieces,    :key => :owner_id, :class => Content, :reciprocal => :owner
+    many_to_one :page,       :key => :page_id,  :class => Content, :reciprocal => :content
+    many_to_one :created_by, :key => :created_by_id, :class => Spontaneous::Permissions::User
 
     include Enumerable
 

@@ -632,6 +632,14 @@ class BackTest < MiniTest::Spec
         }
         Spot::JSON.parse(last_response.body).should == required_response
       end
+
+      should "create pieces with the piece owner set to the logged in user" do
+        auth_post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => 0
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        @home.reload
+        @home.in_progress.first.created_by_id.should == @user.id
+        @home.in_progress.first.created_by.should == @user
+      end
     end
 
     context "Page paths" do
