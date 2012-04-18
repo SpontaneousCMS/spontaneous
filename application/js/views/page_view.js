@@ -8,6 +8,7 @@ Spontaneous.Views.PageView = (function($, S) {
 	};
 	FunctionBar.prototype = {
 		panel: function() {
+			var self = this;
 			this.panel = dom.div('#page-info');
 			this.title = $('<h1/>');
 			this.set_title();
@@ -23,7 +24,10 @@ Spontaneous.Views.PageView = (function($, S) {
 					this.open_url_editor();
 				}
 			}.bind(this));
-			path_wrap.append(path_text);
+			var resync = dom.a({ "title":"Sync the path to the page title"}).click(function() {
+				Spontaneous.Ajax.post(['/slug', self.page.id(), "titlesync"].join("/"), {}, self.save_complete.bind(self));
+			});
+			path_wrap.append(path_text, dom.div('.titlesync').append(resync));
 
 
 			if (user.is_developer()) {
@@ -111,6 +115,7 @@ Spontaneous.Views.PageView = (function($, S) {
 		},
 		open_url_editor: function() {
 			this.unavailable = false;
+			this.url_editor_open = true;
 			Spontaneous.Ajax.get(['/slug', this.page.id(), 'unavailable'].join('/'), this.unavailable_loaded.bind(this));
 			this.panel.animate({'height': '+=14'}, 200, function() {
 				var view = $('h3', this.panel), edit = $('.edit', this.panel);
@@ -196,8 +201,9 @@ Spontaneous.Views.PageView = (function($, S) {
 			this.input.addClass('error');
 		},
 		hide_path_error: function(error_text) {
-			this.error.fadeOut(100);
-			if (this.input.hasClass('error')) { this.input.removeClass('error'); }
+			if (this.error) { this.error.fadeOut(100); }
+
+			if (this.input && this.input.hasClass('error')) { this.input.removeClass('error'); }
 		},
 		save: function(slug) {
 			Spontaneous.Ajax.post('/slug/'+this.page.id(), {'slug':slug}, this.save_complete.bind(this));
@@ -205,11 +211,14 @@ Spontaneous.Views.PageView = (function($, S) {
 
 		save_complete: function(response, status, xhr) {
 			if (status === 'success') {
+				if (this.url_editor_open) {
+
 				this.hide_path_error();
 				var view = $('h3.path', this.panel), edit = $('.edit', this.panel);
+				this.close();
+				}
 				this.page.set('path', response.path);
 				this.page.set('slug', response.slug);
-				this.close();
 				// HACK: see preview.js (Preview.display)
 				Spontaneous.Location.set('path', this.page.get('path'))
 			} else {
@@ -222,6 +231,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			}
 		},
 		close: function() {
+			this.url_editor_open = false;
 			var view = $('h3', this.panel), edit = $('.edit', this.panel);
 			view.show();
 			edit.hide();

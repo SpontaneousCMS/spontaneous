@@ -480,6 +480,14 @@ module Spontaneous
           end
         end
 
+        post '/slug/:id/titlesync' do
+          content_for_request do |page|
+            page.slug = page.title.unprocessed_value
+            page.save
+            json({:path => page.path, :slug => page.slug })
+          end
+        end
+
         post '/uid/:id' do
           if user.developer?
             content_for_request(true) do |content|

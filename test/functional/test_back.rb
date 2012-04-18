@@ -666,6 +666,16 @@ class BackTest < MiniTest::Spec
         last_response.content_type.should == "application/json;charset=utf-8"
         Spot::JSON.parse(last_response.body).should == %w(project2 project3)
       end
+      should "be syncable with the page title" do
+        @project1.title = "This is Project"
+        @project1.save
+        auth_post "/@spontaneous/slug/#{@project1.id}/titlesync"
+        assert last_response.ok?
+        last_response.content_type.should == "application/json;charset=utf-8"
+        @project1.reload
+        @project1.path.should == "/this-is-project"
+        Spot::JSON.parse(last_response.body).should == {:path => '/this-is-project', :slug => 'this-is-project' }
+      end
     end
     context "UIDs" do
       setup do

@@ -220,6 +220,26 @@ img.missing {
 			position: absolute;
 			bottom: 12px;
 		}
+    .path .titlesync {
+      margin-left: $unit;
+      margin-right: 10 *$unit;
+
+			position: relative;
+      a {
+        position: absolute;
+        top: 2px;
+        position: absolute;
+        background: url(/@spontaneous/static/loop_alt1-white.svg) no-repeat;
+        // background-size: 36% 45%;
+        background-size: contain;
+        width: 20px;
+        height: 12px;
+        opacity: 0.5;
+        &:hover {
+          opacity: 1.0;
+        }
+      }
+    }
 		.path .edit {
 			@include display-box;
 			@include box-orient(horizontal);
