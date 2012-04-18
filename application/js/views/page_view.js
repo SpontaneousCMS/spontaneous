@@ -24,10 +24,11 @@ Spontaneous.Views.PageView = (function($, S) {
 					this.open_url_editor();
 				}
 			}.bind(this));
+
 			var resync = dom.a({ "title":"Sync the path to the page title"}).click(function() {
 				Spontaneous.Ajax.post(['/slug', self.page.id(), "titlesync"].join("/"), {}, self.save_complete.bind(self));
 			});
-			path_wrap.append(path_text, dom.div('.titlesync').append(resync));
+			path_wrap.append(path_text, dom.h3('.titlesync').append(resync));
 
 
 			if (user.is_developer()) {
