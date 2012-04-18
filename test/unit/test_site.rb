@@ -189,6 +189,14 @@ class SiteTest < MiniTest::Spec
         Site.modified_at.should == now
       end
 
+      should "be updated when a page's title changes" do
+        root = ::Page.create
+        now = @now + 98
+        Time.stubs(:now).returns(now)
+        root.update(:title => "Some Title")
+        Site.modified_at.should == now
+      end
+
       should "not be updated when a piece is added" do
         now1 = @now + 24
         Time.stubs(:now).returns(now1)

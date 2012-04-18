@@ -6,6 +6,11 @@ module Spontaneous::Plugins::Page
   module SiteTimestamps
     extend ActiveSupport::Concern
 
+    def after_update
+      ::Spontaneous::State.site_modified! if fields[title_field].modified?
+      super
+    end
+
     # Update the Site's modification time to force clients
     # to reload their map data
     def after_create
