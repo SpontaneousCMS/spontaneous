@@ -765,6 +765,11 @@ class PublishingTest < MiniTest::Spec
         Change.delete
       end
 
+      should "delete any conflicting revision tables" do
+        S::Content.create_revision(3)
+        Site.publish_all
+      end
+
       should "work with lists of change sets" do
         change1 = Change.new
         change1.modified_list = [1, 2, 3]

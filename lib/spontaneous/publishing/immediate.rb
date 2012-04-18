@@ -242,6 +242,9 @@ module Spontaneous
 
       def before_publish
         update_progress("initialising")
+        # when working with multiple instances it's possible to rollback the revision number
+        # leaving behind old revisions > the current published_revision.
+        S::Content.delete_revision(revision)
         S::Site.send(:pending_revision=, revision)
       end
 
