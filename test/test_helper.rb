@@ -137,6 +137,25 @@ class MiniTest::Spec
     FileUtils.rm_r(Spontaneous.instance.root) rescue nil
   end
 
+  def self.stub_time(time)
+    Sequel.datetime_class.stubs(:now).returns(time)
+    Time.stubs(:now).returns(time)
+  end
+  def stub_time(time)
+    self.class.stub_time(time)
+  end
+
+  def assert_content_equal(result, compare)
+    serialised_columns = [:field_store, :entry_store]
+    columns = Content.columns - serialised_columns
+    columns.each do |col|
+      assert_equal(result[col], compare[col], "Column '#{col}' should be equal")
+    end
+    serialised_columns.each do |col|
+      result.send(col).should == compare.send(col)
+    end
+  end
+
   def setup_site(root = nil)
     self.class.setup_site(root)
   end
