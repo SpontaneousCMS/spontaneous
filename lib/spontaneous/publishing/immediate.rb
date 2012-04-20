@@ -209,11 +209,21 @@ module Spontaneous
                 when ".scss"
                   render_sass_template(src, dest)
                 else
-                  FileUtils.ln(src, dest, :force => true)
+                  link_file(src, dest)
                 end
               end
             end
           end
+        end
+      end
+
+      def link_file(src, dest)
+        src_dev = File::stat(src).dev
+        dst_dev = File::stat(File.dirname(dest)).dev
+        if (src_dev == dst_dev)
+          FileUtils.ln(src, dest, :force => true)
+        else
+          FileUtils.cp(src, dest)
         end
       end
 
