@@ -50,7 +50,9 @@ module Spontaneous
 
       def rerender_revision
         logger.info {  "Re-rendering revision #{@revision}"}
-        render_revision
+        S::Content.with_revision(@revision) do
+          render_revision
+        end
       end
 
       protected
