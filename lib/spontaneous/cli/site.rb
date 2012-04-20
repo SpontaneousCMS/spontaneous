@@ -109,18 +109,17 @@ module Spontaneous
       end
 
       desc "#{namespace}:publish", "Publishes the site"
-      method_option :changes, :type => :array, :desc => "List of changesets to include"
+      method_option :pages, :type => :array, :desc => "List of pages to publish"
       method_option :logfile, :type => :string, :desc => "Location of logfile"
       def publish
         prepare :publish
-        # TODO: set up logging
         boot!
         ::Site.publishing_method = :immediate
         Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
         say "Creating revision #{::Site.revision}", :green, true
-        if options.changes
-          say ">  Publishing changes #{options.changes.inspect}", :green, true
-          ::Site.publish_changes(options.changes)
+        if options.pages
+          say ">  Publishing pages #{options.pages.inspect}", :green, true
+          ::Site.publish_pages(options.pages)
         else
           say ">  Publishing all", :green, true
           ::Site.publish_all

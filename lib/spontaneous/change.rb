@@ -58,6 +58,8 @@ module Spontaneous
     def export_page(page)
       { :id => page.id,
         :title => page.title.to_s,
+        :depth => page.depth,
+        :url => page.path,
         :published_at => export_timestamp(page.last_published_at),
         :modified_at => export_timestamp(page.modified_at) }
     end

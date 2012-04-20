@@ -142,11 +142,15 @@ class ChangeTest < MiniTest::Spec
       change.export.should == {
         :id => new_child1.id,
         :title => new_child1.title.value,
+        :url => new_child1.path,
         :published_at => nil,
         :modified_at => new_child1.modified_at.to_s(:rfc822),
+        :depth => new_child1.depth,
         :dependent => [{
           :id => page1.id,
+          :depth => page1.depth,
           :title => page1.title.value,
+          :url => page1.path,
           :published_at => nil,
           :modified_at => page1.modified_at.to_s(:rfc822),
         }]

@@ -73,8 +73,8 @@ module Spontaneous
         self.class.task_name
       end
 
-      def publish_changes(change_list)
-        ::Simultaneous.fire(task_name, {"changes" => change_list})
+      def publish_pages(page_list)
+        ::Simultaneous.fire(task_name, {"pages" => page_list})
       end
 
       def publish_all

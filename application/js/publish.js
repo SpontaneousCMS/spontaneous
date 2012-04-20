@@ -30,10 +30,11 @@ Spontaneous.Publishing = (function($, S) {
 		publish: function() {
 			var ids = [], changes = this.changes_to_publish();
 			for (var i = 0, ii = changes.length; i < ii; i++) {
-				ids.push(changes[i].id);
+				ids = ids.concat(changes[i].page_ids());
 			}
+			console.log('publishing', ids)
 			if (ids.length > 0) {
-				Spontaneous.Ajax.post(['/publish', 'publish'].join('/'),{'change_set_ids': ids}, this.publish_requested.bind(this));
+				Spontaneous.Ajax.post(['/publish', 'publish'].join('/'),{'page_ids': ids}, this.publish_requested.bind(this));
 			} else {
 			}
 		},
@@ -112,15 +113,28 @@ Spontaneous.Publishing = (function($, S) {
 			return selected;
 		},
 		changes_to_publish: function() {
-			var changes = [], selected = this.selected(), cs;
-			for (var i = 0, ii = selected.length; i < ii; i++) {
-				cs = selected[i];
-				changes = changes.concat(cs.change.changes)
-			}
-			return changes;
+			// var changes = [], selected = this.selected(), cs;
+			// for (var i = 0, ii = selected.length; i < ii; i++) {
+			// 	cs = selected[i];
+			// 	changes.push(cs)
+			// }
+			// return changes;
+			return this.selected();
 		}
 	});
 
+	var Page = new JS.Class({
+		initialize: function(details) {
+			$.extend(this, details);
+		},
+		isDependent: function() {
+			return !this.hasOwnProperty("dependent");
+		},
+		panel: function() {
+			var classes = ".title" + (this.isDependent() ? ".dependent" : "");
+			return dom.div(classes).text(this.title).append(dom.div('.url').text(this.url));
+		}
+	});
 	var ChangeSet = new JS.Class({
 		initialize: function(id, dialogue, change) {
 			this.id = id;
@@ -128,11 +142,22 @@ Spontaneous.Publishing = (function($, S) {
 			this.change = change;
 			this.selected = false;
 		},
+		page_ids: function() {
+			var ids = [this.change.id]
+			return ids.concat(this.dependent_pages().map(function(p) { return p.id; }));
+		},
 		panel: function() {
 			if (!this._panel) {
-				var w = dom.div('.change-set'), inner = dom.div('.inner'), page_list = dom.div('.pages'), add = dom.div('.add').append(dom.span().text('+')), pages = this.pages();
+				var w = dom.div('.change-set')
+				, inner = dom.div('.inner')
+				, page_list = dom.div('.pages')
+				, add = dom.div('.add').append(dom.span().text('+'))
+				, page = this.page()
+				, pages = this.dependent_pages();
+
+				page_list.append(page.panel());
 				for (var i = 0, ii = pages.length; i < ii; i++) {
-					page_list.append(dom.div('.title').text(pages[i].title).append(dom.div('.url').text(pages[i].path)));
+					page_list.append(pages[i].panel());
 				}
 				add.click(function() {
 					this.select_toggle();
@@ -164,15 +189,20 @@ Spontaneous.Publishing = (function($, S) {
 				this.wrapper.removeClass('selected')
 			}
 		},
-		pages: function() {
-			if (!this._pages) {
-				this._pages = this.change.pages.sort(function(p1, p2) {
-					var a = p1.depth, b = p2.depth;
+		page: function() {
+			return new Page(this.change);
+		},
+		dependent_pages: function() {
+			if (!this._dependent_pages) {
+				this._dependent_pages = this.change.dependent.map(function(p) {
+					return new Page(p);
+				}).sort(function(p1, p2) {
+					var a = p2.depth, b = p1.depth;
 					if (a == b) return 0;
 					return (a < b ? -1 : 1);
 				});
 			}
-			return this._pages;
+			return this._dependent_pages;
 		}
 	});
 
