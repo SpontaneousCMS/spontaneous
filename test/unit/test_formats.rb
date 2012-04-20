@@ -137,7 +137,7 @@ class FormatsTest < MiniTest::Spec
       FPage.output(:html).extension.should == ".html"
     end
 
-    should "provide the correct output extension for static pages" do
+    should "provide the correct output extension for static pages of non-html formats" do
       FPage.add_output :pdf
       FPage.output(:pdf).extension.should == ".pdf"
     end
