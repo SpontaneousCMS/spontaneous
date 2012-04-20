@@ -72,7 +72,7 @@ require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'test'
   test.ruby_opts << '-rubygems'
-  test.pattern = 'test/{unit,slow,functional,experimental}/test_*.rb'
+  test.pattern = 'test/{unit,functional,experimental}/test_*.rb'
   test.verbose = false
 end
 
