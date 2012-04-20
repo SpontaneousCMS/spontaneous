@@ -32,7 +32,6 @@ Spontaneous.Publishing = (function($, S) {
 			for (var i = 0, ii = changes.length; i < ii; i++) {
 				ids = ids.concat(changes[i].page_ids());
 			}
-			console.log('publishing', ids)
 			if (ids.length > 0) {
 				Spontaneous.Ajax.post(['/publish', 'publish'].join('/'),{'page_ids': ids}, this.publish_requested.bind(this));
 			} else {
@@ -131,8 +130,12 @@ Spontaneous.Publishing = (function($, S) {
 			return !this.hasOwnProperty("dependent");
 		},
 		panel: function() {
-			var classes = ".title" + (this.isDependent() ? ".dependent" : "");
-			return dom.div(classes).text(this.title).append(dom.div('.url').text(this.url));
+			var self = this
+			, classes = ".title" + (this.isDependent() ? ".dependent" : "");
+			return dom.div(classes).text(this.title).append(dom.div('.url').text(this.url)).click(function() {
+				S.Dialogue.close();
+				S.Location.load_id(self.id);
+			});
 		}
 	});
 	var ChangeSet = new JS.Class({
@@ -148,30 +151,33 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		panel: function() {
 			if (!this._panel) {
-				var w = dom.div('.change-set')
-				, inner = dom.div('.inner')
-				, page_list = dom.div('.pages')
-				, add = dom.div('.add').append(dom.span().text('+'))
-				, page = this.page()
-				, pages = this.dependent_pages();
-
-				page_list.append(page.panel());
-				for (var i = 0, ii = pages.length; i < ii; i++) {
-					page_list.append(pages[i].panel());
-				}
-				add.click(function() {
-					this.select_toggle();
-				}.bind(this))
-				inner.append(page_list, add)
-				w.append(inner)
-				this.wrapper = w;
-				this._panel = w;
+				this._panel = this.createPanel();
+				this.wrapper = this._panel;
 			}
 			return this._panel;
 		},
+		createPanel: function() {
+			var w = dom.div('.change-set')
+			, inner = dom.div('.inner')
+			, page_list = dom.div('.pages')
+			, add = dom.div('.add').append(dom.span().text('+'))
+			, page = this.page()
+			, pages = this.dependent_pages();
+
+			page_list.append(page.panel());
+			for (var i = 0, ii = pages.length; i < ii; i++) {
+				page_list.append(pages[i].panel());
+			}
+			add.click(function() {
+				this.select_toggle();
+			}.bind(this))
+			inner.append(page_list, add)
+			w.append(inner)
+			return w;
+		},
 		selected_panel: function(id) {
-			var panel = this.panel().clone().attr('id', id);
-			panel.find('.add').click(this.select_toggle.bind(this)).find('span').text('-');
+			var panel = this.createPanel().attr('id', id);
+			panel.find('.add').find('span').text('-');
 			return panel;
 		},
 		select: function(state) {
