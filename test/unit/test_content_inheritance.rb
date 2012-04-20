@@ -49,12 +49,12 @@ class ContentInheritanceTest < MiniTest::Spec
     end
 
     should "aaa correctly type subclasses found via Content" do
-      Content.all.map { |c| c.class }.should == \
-        [PageClass1, PageClass11, PageClass111, PageClass2, PageClass22,
-          PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22]
-      Content.all.should == \
-        [@page1, @page11, @page111, @page2, @page22,
-          @piece1, @piece11, @piece111, @piece2, @piece22]
+      Set.new(Content.all.map { |c| c.class }).should == \
+        Set.new([PageClass1, PageClass11, PageClass111, PageClass2, PageClass22,
+          PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22])
+      Set.new(Content.all).should == \
+        Set.new([@page1, @page11, @page111, @page2, @page22,
+          @piece1, @piece11, @piece111, @piece2, @piece22])
     end
 
     context "Pages" do
@@ -82,14 +82,14 @@ class ContentInheritanceTest < MiniTest::Spec
 
     context "Pieces" do
       should "type subclasses found via Spontaneous::Piece" do
-        Spontaneous::Piece.all.map { |c| c.class }.should == \
-          [PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22]
-        Spontaneous::Piece.all.should == [@piece1, @piece11, @piece111, @piece2, @piece22]
+        Set.new(Spontaneous::Piece.all.map { |c| c.class }).should == \
+          Set.new([PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22])
+        Set.new(Spontaneous::Piece.all).should == Set.new([@piece1, @piece11, @piece111, @piece2, @piece22])
       end
       should "type subclasses found via Piece" do
-        ::Piece.all.map { |c| c.class }.should == \
-          [PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22]
-        ::Piece.all.should == [@piece1, @piece11, @piece111, @piece2, @piece22]
+        Set.new(::Piece.all.map { |c| c.class }).should == \
+          Set.new([PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22])
+        Set.new(::Piece.all).should == Set.new([@piece1, @piece11, @piece111, @piece2, @piece22])
       end
 
       should "only find instances of a single class when searching via that subclass" do
