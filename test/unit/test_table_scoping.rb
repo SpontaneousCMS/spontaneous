@@ -64,17 +64,17 @@ class TableScopingTest < MiniTest::Spec
     end
 
     should "Be able to handle scoping multiple models at once" do
-      Spontaneous::Change.plugin :scoped_table_name
+      Spontaneous::State.plugin :scoped_table_name
       Content.dataset.sql.should == "SELECT * FROM #{ident "content"}"
       Content.with_table("content_1") do
-        Change.with_table("change_1") do
+        State.with_table("state_1") do
           Content.dataset.sql.should == "SELECT * FROM #{ident "content_1"}"
-          Change.dataset.sql.should == "SELECT * FROM #{ident "change_1"}"
+          State.dataset.sql.should == "SELECT * FROM #{ident "state_1"}"
         end
       end
 
       Content.dataset.sql.should == "SELECT * FROM #{ident "content"}"
-      Change.dataset.sql.should == "SELECT * FROM #{ident "changes"}"
+      State.dataset.sql.should == "SELECT * FROM #{ident "spontaneous_state"}"
     end
   end
 end

@@ -714,16 +714,6 @@ class BackTest < MiniTest::Spec
     context "Request cache" do
       setup do
         Spontaneous.stubs(:reload!)
-        Change.delete
-      end
-      should "wrap all updates in a Change.record" do
-        params = {
-          "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1"
-        }
-        Change.count.should == 0
-        auth_post "/@spontaneous/save/#{@job1.id}", params
-        Change.count.should == 1
-        Change.first.modified_list.should == [@home.id]
       end
 
     end
@@ -734,19 +724,9 @@ class BackTest < MiniTest::Spec
         S::Permissions::UserLevel[:editor].stubs(:can_publish?).returns(true)
         @now = Time.now
         Time.stubs(:now).returns(@now)
-        Change.delete
-        @c1 = Change.new
-        @c1.push(@home)
-        @c1.push(@project1)
-        @c1.save
-        @c2 = Change.new
-        @c2.push(@home)
-        @c2.push(@project1)
-        @c2.save
       end
 
       teardown do
-        Change.delete
       end
 
       should "be able to retrieve a serialised list of all unpublished changes" do
@@ -757,13 +737,13 @@ class BackTest < MiniTest::Spec
       end
 
       should "be able to start a publish with a set of change sets" do
-        Site.expects(:publish_changes).with([@c1.id])
-        auth_post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id]
+        Site.expects(:publish_pages).with([@project1.id])
+        auth_post "/@spontaneous/publish/publish", :page_ids => [@project1.id]
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
 
       should "not launch publish if list of changes is empty" do
-        Site.expects(:publish_changes).with().never
+        Site.expects(:publish_pages).with().never
         auth_post "/@spontaneous/publish/publish", :change_set_ids => ""
         assert last_response.status == 400, "Expected 400, recieved #{last_response.status}"
 
@@ -771,8 +751,8 @@ class BackTest < MiniTest::Spec
         assert last_response.status == 400
       end
       should "recognise when the list of changes is complete" do
-        Site.expects(:publish_changes).with([@c1.id, @c2.id])
-        auth_post "/@spontaneous/publish/publish", :change_set_ids => [@c1.id, @c2.id]
+        Site.expects(:publish_pages).with([@home.id, @project1.id])
+        auth_post "/@spontaneous/publish/publish", :page_ids => [@home.id, @project1.id]
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
     end
@@ -782,7 +762,6 @@ class BackTest < MiniTest::Spec
         Spontaneous.stubs(:reload!)
         @root_class = Site.root.class
         Content.delete
-        Change.delete
       end
       should "raise a 406 Not Acceptable error when downloading page details" do
         auth_get "/@spontaneous/location/"
@@ -801,11 +780,6 @@ class BackTest < MiniTest::Spec
         auth_post "/@spontaneous/root", 'type' => @root_class.schema_id
         assert last_response.status == 403
         Content.count.should == 1
-      end
-      should "have a change reflecting creation of root" do
-        Change.count.should == 0
-        auth_post "/@spontaneous/root", 'type' => @root_class.schema_id
-        Change.count.should == 1
       end
     end
 

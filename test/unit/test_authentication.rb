@@ -517,7 +517,6 @@ class AuthenticationTest < MiniTest::Spec
         end
 
         should "not be able to retrieve the list of changes" do
-          Change.delete
           get "/@spontaneous/publish/changes"
           assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
         end

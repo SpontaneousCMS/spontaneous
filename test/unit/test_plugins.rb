@@ -52,7 +52,6 @@ class PluginsTest < MiniTest::Spec
       Site.publishing_method = :immediate
       State.delete
       Content.delete
-      Change.delete
       @site = Spontaneous.instance
       page = ::Page.new
       page.save
@@ -62,7 +61,6 @@ class PluginsTest < MiniTest::Spec
     teardown do
       State.delete
       Content.delete
-      Change.delete
     end
 
     should "load their init.rb file" do

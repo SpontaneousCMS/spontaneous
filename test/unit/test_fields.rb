@@ -290,27 +290,22 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "not process values coming from db" do
-        ContentClass1 = Class.new(Piece)
-
+        class ContentClass1 < Piece
+        end
+        $transform = lambda { |value| "<#{value}>" }
         ContentClass1.field :title do
           def generate_html(value)
-            "<#{value}>"
+            $transform[value]
           end
         end
         instance = ContentClass1.new
         instance.fields.title = "Monkey"
         instance.save
 
-        ContentClass2 = Class.new(Piece)
-        ContentClass2.field :title do
-          def generate_html(value)
-            "*#{value}*"
-          end
-        end
-        instance = ContentClass2[instance.id]
+        $transform = lambda { |value| "*#{value}*" }
+        instance = ContentClass1[instance.id]
         instance.fields.title.value.should == "<Monkey>"
         FieldsTest.send(:remove_const, :ContentClass1)
-        FieldsTest.send(:remove_const, :ContentClass2)
       end
     end
 

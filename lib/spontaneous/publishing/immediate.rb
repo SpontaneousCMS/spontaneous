@@ -14,22 +14,24 @@ module Spontaneous
         @previous_revision = Site.published_revision
       end
 
-      def publish_changes(change_list)
-        changes = change_list.flatten.map { |c|
-          c.is_a?(S::Change) ? c : S::Change[c]
+      def publish_pages(page_list)
+        pages = page_list.flatten.map { |c|
+          c.is_a?(S::Page) ? c.reload : S::Page[c]
         }
-        all_changes = S::Change.all
+        all_pages = S::Page.all
 
-        if (all_changes - changes).empty?
+        if (all_pages - pages).empty?
           # publish_all is quicker
           publish_all
         else
-          change_set = Spontaneous::Collections::ChangeSet.new(changes)
-          publish(change_set.page_ids)
+          pages = Spontaneous::Change.include_dependencies(pages)
+          # changes = pages.map { |page| Spontaneous::Change.new(page) }
+          publish(pages)
 
-          changes.each do |change|
-            change.destroy
-          end
+          # TODO: scheduled publishes will
+          # changes.each do |change|
+          #   change.destroy
+          # end
         end
 
       end
@@ -39,11 +41,11 @@ module Spontaneous
         # (but after we've duplicated the tables)
         # so save the current list of changes
         # TODO: make sure this is robust
-        changes = S::Change.all
+        # changes = S::Change.all
         publish(nil)
-        changes.each do |change|
-          change.destroy
-        end
+        # changes.each do |change|
+        #   change.destroy
+        # end
       end
 
       def rerender_revision

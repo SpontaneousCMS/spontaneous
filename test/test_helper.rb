@@ -156,6 +156,13 @@ class MiniTest::Spec
     end
   end
 
+  def log_sql(&block)
+    logger = S::Content.db.logger
+    S::Content.db.logger = ::Logger.new($stdout)
+    yield
+  ensure
+    S::Content.db.logger = logger
+  end
   def setup_site(root = nil)
     self.class.setup_site(root)
   end

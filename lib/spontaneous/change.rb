@@ -1,67 +1,27 @@
 # encoding: UTF-8
 
 module Spontaneous
-  class Change < Sequel::Model(:changes)
-    class << self
-      alias_method :sequel_plugin, :plugin
-    end
+  class Change
 
-    sequel_plugin :serialization, :yajl, :modified_list
-    sequel_plugin :timestamps
-
-    @@instance = nil
 
     class << self
-      def record
-        entry_point = @@instance.nil?
-        @@instance ||= self.new(:modified_list => [])
-        yield if block_given?
-      ensure
-        if entry_point and !@@instance.modified_list.empty?
-          @@instance.save
-        end
-        @@instance = nil if entry_point
-      end
-
-      def recording?
-        !@@instance.nil?
-      end
-
-      def push(page)
-        if @@instance
-          @@instance.push(page)
-        end
-      end
-
       def outstanding
-        dependencies = dependency_map
-        dependencies.map { |d| Spontaneous::Collections::ChangeSet.new(d) }
+        unpublished_changes
       end
 
-      def dependency_map
-        grouped_changes = self.valid.map { |c| [c] }
-        begin
-          modified = false
-          grouped_changes.each_with_index do |inner, i|
-            inner_ids = inner.map { |c| c.modified_list }.flatten
-            grouped_changes[(i+1)..-1].each_with_index do |outer, j|
-              outer_ids = outer.map { |c| c.modified_list }.flatten
-              unless (inner_ids & outer_ids).empty?
-                modified = true
-                grouped_changes.delete(outer)
-                grouped_changes[i] += outer
-              end
-            end
-          end
-        end while modified
-
-        grouped_changes
+      def unpublished_changes
+        changes = unpublished_pages.map { |page| Change.new(page) }
       end
 
-      def valid
-        invalid, valid = self.all.partition { |change| change.modified.empty? }
-        self.filter(:id => invalid.map { |change| change.id }).delete
-        valid
+      def unpublished_pages
+        S::Page.filter { (modified_at > last_published_at) | {:first_published_at => nil} }.all
+      end
+
+      def include_dependencies(page_list)
+        changes = page_list.map { |page| Change.new(page) }
+        pages = changes.map { |change| change.all_pages }.flatten.uniq
+        p pages
+        pages
       end
 
       def export
@@ -73,36 +33,47 @@ module Spontaneous
       end
     end
 
+    attr_reader :page
 
-    def after_initialize
-      super
-      self.modified_list ||= []
+    def initialize(page)
+      @page = page
     end
 
-    def push(page)
-      self.modified_list << page.id unless self.modified_list.include?(page.id)
+    def all_pages
+      [page].concat(dependent)
     end
 
-    def before_update
-      self.modified_list.uniq!
+    # Calculates all the pages we would have to publish along with this in order to root
+    # this page into the site hierarchy.
+    #
+    # Returns: a list of dependent pages in ancestor order (ascending depth with root first)
+    def dependent
+      @dependent ||= page.ancestors.reverse.take_while { |ancestor| ancestor.never_published? }.reverse
     end
 
-    def modified
-      @modified ||= modified_list.map { |id| Content[id] }.compact
+    def page_id
+      page.id
     end
 
-    alias_method :pages, :modified
-
-    def &(change)
-      self.modified_list & change.modified_list
+    def export_page(page)
+      { :id => page.id,
+        :title => page.title.to_s,
+        :published_at => export_timestamp(page.last_published_at),
+        :modified_at => export_timestamp(page.modified_at) }
     end
 
+    def export_timestamp(timestamp)
+      return nil if timestamp.nil?
+      timestamp.to_s(:rfc822)
+    end
     def export
-      {
-        :id => self.id,
-        :created_at => self.created_at.to_s,
-        :page_ids => modified_list
-      }
+      export_page(page).merge({
+        :dependent => dependent.map { |p| export_page(p) }
+      })
+    end
+
+    def inspect
+      %(#<Spontaneous::Change page=#{page.id} dependent=#{dependent.map(&:id).inspect}>)
     end
   end
 end

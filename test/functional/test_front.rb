@@ -69,7 +69,6 @@ class FrontTest < MiniTest::Spec
       Site.publishing_method = :immediate
       State.delete
       Content.delete
-      Change.delete
 
       class ::SitePage < Spontaneous::Page
         layout :default

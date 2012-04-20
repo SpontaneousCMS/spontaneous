@@ -311,7 +311,6 @@ module Spontaneous
           if Site.root.nil?
             type = Spontaneous.schema[params[:type]]
             root = type.create(:title => "Home")
-            Spontaneous::Change.push(root)
             json({:id => root.id})
           else
             403
@@ -552,14 +551,14 @@ module Spontaneous
         end
 
         post '/publish/publish' do
-          ids = params[:change_set_ids]
+          ids = params[:page_ids]
           ids = ids.blank? ? [] : ids
-          change_sets = ids.map(&:to_i)
-          if change_sets.empty?
+          pages = ids.map(&:to_i)
+          if pages.empty?
             400
           else
             if user.level.can_publish?
-              Site.publish_changes(change_sets)
+              Site.publish_pages(pages)
               json({})
             else
               unauthorised!

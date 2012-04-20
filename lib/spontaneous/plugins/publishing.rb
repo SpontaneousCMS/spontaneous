@@ -75,6 +75,7 @@ module Spontaneous::Plugins
         mark_published = Proc.new do |dataset|
           dataset.update(:last_published_at => Sequel.datetime_class.now)
         end
+
         first_published = published = nil
 
         with_editable do
@@ -96,7 +97,7 @@ module Spontaneous::Plugins
 
             create_revision(revision, revision-1)
             content.each do |c|
-              c.sync_to_revision(revision)
+              c.sync_to_revision(revision, true)
             end
           end
 
@@ -165,13 +166,7 @@ module Spontaneous::Plugins
       unless caller_is_page
         self.model.where(:id => self.id).update(:modified_at => Sequel.datetime_class.now)
       end
-      push_page_change
     end
-
-    def push_page_change
-      Spontaneous::Change.push(self) if page?
-    end
-
 
     def with_revision(revision, &block)
       self.class.with_revision(revision, &block)
@@ -180,11 +175,16 @@ module Spontaneous::Plugins
       self.class.with_editable(&block)
     end
 
-    def sync_to_revision(revision, origin=true)
+    def never_published?
+      first_published_at.nil?
+    end
+
+    def sync_to_revision(revision, origin=false)
       # 'publish' is a lock to make sure the duplication doesn't cross
       # page boundaries unless that's necessary (such as in the case
       # of a page addition)
       publish = origin || !self.page?
+      first_publish = false
 
       with_revision(revision) do
         published_copy = Spontaneous::Content.first(:id => self.id)
@@ -200,17 +200,42 @@ module Spontaneous::Plugins
         else # missing content (so force a publish)
           Spontaneous::Content.insert({:id => self.id})
           publish = true
+          first_publish = true
         end
 
         if publish
           with_editable do
-            self.contents.each do |entry|
+            self.pieces.each do |entry|
               entry.sync_to_revision(revision, false)
             end
           end
           Spontaneous::Content.where(:id => self.id).update(self.values)
+
+          # Pages that haven't been published before can be published independently of their parents.
+          # In that case we need to insert an entry for them. We can't guarantee that the published
+          # parent has the same entries
+          insert_entry_for_new_page(revision) if first_publish && page?
         end
       end
+    end
+
+    # Finds an entry in the parent page and duplicates it to the parent
+    # of the newly published page. Positions are not exact as other child pages might not have
+    # been published.
+    def insert_entry_for_new_page(revision)
+      detect_entry = proc { |e| e[0] == self.id }
+
+      parent_entry_store = with_editable { self.parent.entry_store.dup }
+      entry = parent_entry_store.find(&detect_entry)
+      index = parent_entry_store.index(&detect_entry)
+      published_parent = Spontaneous::Content.first :id => parent_id
+
+      published_parent.entry_store ||= []
+
+      unless published_parent.entry_store.find(&detect_entry)
+        published_parent.entry_store.insert(index, entry).compact!
+      end
+      published_parent.save
     end
   end
 end

@@ -13,8 +13,19 @@ module Sequel::Plugins
         class_variable_get :"@@unscoped_table_name"
       end
 
+      def fast_instance_delete_sql
+        nil
+      end
+
+      def primary_key_lookup(pk)
+        dataset[primary_key_hash(pk)]
+      end
+
       def with_table(table_name, &block)
+        self.simple_table = table_name
         dataset.with_table(unscoped_table_name, table_name, &block)
+      ensure
+        self.simple_table = unscoped_table_name
       end
     end
 
@@ -25,6 +36,8 @@ module Sequel::Plugins
       def with_table(original_table_name, current_table_name)
         saved_table_name = table_mappings[original_table_name]
         table_mappings[original_table_name] = current_table_name.to_s
+        # self.simple_table = db.literal(current_table_name.to_s)
+
         yield if block_given?
       ensure
         table_mappings[original_table_name] = saved_table_name

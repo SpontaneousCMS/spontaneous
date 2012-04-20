@@ -26,6 +26,7 @@ class PublishingTest < MiniTest::Spec
 
   def setup
     @site = setup_site(self.class.site_root)
+    @now = @@now
     Site.publishing_method = :immediate
   end
 
@@ -67,13 +68,104 @@ class PublishingTest < MiniTest::Spec
       PublishingTest.send(:remove_const, :Page) rescue nil
       PublishingTest.send(:remove_const, :Piece) rescue nil
       Content.delete
-      Change.delete
       DB.logger = nil
     end
 
 
 
 
+    context "site publishing" do
+      setup do
+        Content.delete
+        @revision = 3
+        State.delete
+        State.create(:revision => @revision, :published_revision => 2)
+        State.revision.should == @revision
+      end
+
+      teardown do
+        Content.delete_revision(@revision)
+        Revision.delete
+      end
+
+      should "delete any conflicting revision tables" do
+        S::Content.create_revision(3)
+        Site.publish_all
+      end
+
+
+      should "issue a publish_all if passed page id list including all pages (in any order)" do
+        skip "Implement after scheduled publishes"
+      end
+
+      should "publish all" do
+        Content.expects(:publish).with(@revision, nil)
+        Site.publish_all
+      end
+
+      should "record date and time of publish" do
+        Content.expects(:publish).with(@revision, nil)
+        Revision.expects(:create).with(:revision => @revision, :published_at => @now)
+        Site.publish_all
+      end
+
+      should "bump revision after a publish" do
+        Site.publish_all
+        Site.revision.should == @revision + 1
+        Site.published_revision.should == @revision
+      end
+
+      should "not delete scheduled changes after an exception during publish" do
+        skip "Implement after scheduled publishes"
+      end
+
+      should "set Site.pending_revision before publishing" do
+        Content.expects(:publish).with(@revision, nil) { Site.pending_revision == @revision }
+        Site.publish_all
+      end
+
+      should "reset Site.pending_revision after publishing" do
+        Site.publish_all
+        Site.pending_revision.should be_nil
+      end
+
+      should "not update first_published or last_published if rendering fails" do
+        c = Content.create
+        c.first_published_at.should be_nil
+        Spontaneous::Page.expects(:order).returns([c])
+        # c.expects(:render).raises(Exception)
+        begin
+          silence_logger { Site.publish_all }
+          # Site.publish_all
+        rescue Exception; end
+        c.reload
+        Content.with_editable do
+          c.first_published_at.should be_nil
+        end
+      end
+
+      should "clean up state on publishing failure" do
+        Site.pending_revision.should be_nil
+        Content.revision_exists?(@revision).should be_false
+        # don't like peeking into implementation here but don't know how else
+        # to simulate the right error
+        root = Page.create()
+        Spontaneous::Page.expects(:order).returns([root])
+        output = root.output(:html)
+        output.expects(:render).raises(Exception)
+        root.expects(:outputs).at_least_once.returns([output])
+        begin
+          silence_logger { Site.publish_all }
+        rescue Exception; end
+        Site.pending_revision.should be_nil
+        Content.revision_exists?(@revision).should be_false
+        begin
+          silence_logger { Site.publish_pages([change1]) }
+        rescue Exception; end
+        Site.pending_revision.should be_nil
+        Content.revision_exists?(@revision).should be_false
+      end
+    end
 
 
     context "rendering" do

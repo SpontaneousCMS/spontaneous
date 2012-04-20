@@ -27,8 +27,8 @@ module Spontaneous::Plugins::Site
         end
       end
 
-      def publish_changes(change_list=nil)
-        publishing_method.new(self.revision).publish_changes(change_list)
+      def publish_pages(page_list=nil)
+        publishing_method.new(self.revision).publish_pages(page_list)
       end
 
       def publish_all

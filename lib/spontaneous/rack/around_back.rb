@@ -12,9 +12,7 @@ module Spontaneous
         response = nil
         Content.with_identity_map do
           S::Render.with_preview_renderer do
-            Change.record do
-              response = @app.call(env)
-            end
+            response = @app.call(env)
           end
         end
         response

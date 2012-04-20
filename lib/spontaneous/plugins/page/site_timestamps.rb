@@ -7,7 +7,7 @@ module Spontaneous::Plugins::Page
     extend ActiveSupport::Concern
 
     def after_update
-      ::Spontaneous::State.site_modified! if fields[title_field].modified?
+      ::Spontaneous::State.site_modified! if field?(title_field) && fields[title_field].modified?
       super
     end
 
