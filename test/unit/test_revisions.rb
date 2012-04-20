@@ -453,9 +453,9 @@ class RevisionsTest < MiniTest::Spec
       end
       should "register creation date of all content" do
         c = Content.create
-        c.created_at.should == @now
+        c.created_at.to_i.should == @now.to_i
         p = Page.create
-        p.created_at.should == @now
+        p.created_at.to_i.should == @now.to_i
       end
 
       should "register modification date of all content" do
