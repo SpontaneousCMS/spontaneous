@@ -151,12 +151,25 @@ configuration information about the fields
 
 ## GETTING STARTED
 
-RVM
-Ruby 1.9
-gem install spontaneous
-spot create site.com
-cd site.com
-bundle install
-spot init
-spot server
+Install RVM
+
+		curl -L get.rvm.io | bash -s stable
+		source ~/.rvm/scripts/'rvm'
+		rvm requirements
+
+Install Ruby
+
+		rvm install 1.9.3
+
+Install Spontaneous
+
+		gem install spontaneous
+
+Now generate your site. Replace example.com with the domain of your site.
+
+		spot create example.com
+		cd example.com
+		bundle install
+		spot init
+		spot server
 
