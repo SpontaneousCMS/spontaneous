@@ -504,34 +504,36 @@ class RevisionsTest < MiniTest::Spec
       end
 
       should "set correct timestamps on first publish" do
-        Content.first.first_published_at.should be_nil
-        Content.first.last_published_at.should be_nil
+        first = Content.first
+        first.reload.first_published_at.should be_nil
+        first.reload.last_published_at.should be_nil
         Content.publish(@revision)
-        Content.first.first_published_at.to_i.should == @now.to_i
-        Content.first.last_published_at.to_i.should == @now.to_i
-        Content.first.first_published_revision.should == @revision
+        first.reload.first_published_at.to_i.should == @now.to_i
+        first.reload.last_published_at.to_i.should == @now.to_i
+        first.reload.first_published_revision.should == @revision
         Content.with_editable do
-          Content.first.first_published_at.to_i.should == @now.to_i
-          Content.first.last_published_at.to_i.should == @now.to_i
-          Content.first.first_published_revision.should == @revision
+          first.reload.first_published_at.to_i.should == @now.to_i
+          first.reload.last_published_at.to_i.should == @now.to_i
+          first.reload.first_published_revision.should == @revision
         end
         Content.with_revision(@revision) do
-          Content.first.first_published_at.to_i.should == @now.to_i
-          Content.first.last_published_at.to_i.should == @now.to_i
-          Content.first.first_published_revision.should == @revision
+          first.reload.first_published_at.to_i.should == @now.to_i
+          first.reload.last_published_at.to_i.should == @now.to_i
+          first.reload.first_published_revision.should == @revision
         end
       end
 
       should "set correct timestamps on later publishes" do
-        Content.first.first_published_at.should be_nil
+        first = Content.first
+        first.first_published_at.should be_nil
         Content.publish(@revision)
-        Content.first.first_published_at.to_i.should == @now.to_i
+        first.reload.first_published_at.to_i.should == @now.to_i
         c = Content.create
         c.first_published_at.should be_nil
         stub_time(@now + 100)
         Content.publish(@revision+1)
-        Content.first.first_published_at.to_i.should == @now.to_i
-        Content.first.last_published_at.to_i.should == @now.to_i + 100
+        first.reload.first_published_at.to_i.should == @now.to_i
+        first.reload.last_published_at.to_i.should == @now.to_i + 100
         Content.with_editable do
           c = Content.first :id => c.id
           c.first_published_at.to_i.should == @now.to_i + 100
