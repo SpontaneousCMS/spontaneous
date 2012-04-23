@@ -60,7 +60,7 @@ module Spontaneous::Plugins
     # InstanceMethods
 
     def visible?
-      !self.hidden
+      !self.hidden?
     end
 
     def hidden?

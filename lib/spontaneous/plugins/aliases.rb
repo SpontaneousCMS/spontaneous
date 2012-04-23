@@ -171,9 +171,8 @@ module Spontaneous::Plugins
         end
       end
 
-      def before_create
-        self.set_visible(target.visible?, target.id) if S::Content === target
-        super
+      def hidden?
+        super || target.nil? || (target.respond_to?(:hidden?) && target.hidden?)
       end
     end
 

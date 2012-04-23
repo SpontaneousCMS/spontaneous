@@ -320,6 +320,16 @@ class VisibilityTest < MiniTest::Spec
           target.aliases.should == [al2]
         end
       end
+
+      should "show as 'hidden' if their target is deleted" do
+        parent = E.find(:uid => "1.1")
+        target = P.new
+        parent.pages << target
+        parent.save
+        al1 = MyAlias.create(:target => target)
+        P.filter(:id => target.id).delete
+        al1.reload.visible?.should be_false
+      end
     end
   end
 end
