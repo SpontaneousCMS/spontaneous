@@ -526,7 +526,7 @@ class RevisionsTest < MiniTest::Spec
         page.modified_at.to_i.should == @now.to_i
       end
 
-      should "update a page's timestamp on modification of its slug xxx" do
+      should "update a page's timestamp on modification of its slug" do
         stub_time(@now+1000)
         page = Page.first :uid => "0"
         page.slug = "changed"
@@ -534,7 +534,7 @@ class RevisionsTest < MiniTest::Spec
         page.modified_at.to_i.should == @now.to_i + 1000
       end
 
-      should "not update child pages timestamps after changing their parent's slug xxx" do
+      should "not update child pages timestamps after changing their parent's slug" do
         page = Page.first :uid => "0.0.0"
         modified = page.modified_at
         stub_time(@now+1000)
