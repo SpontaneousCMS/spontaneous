@@ -181,11 +181,13 @@ class ChangeTest < MiniTest::Spec
         :published_at => nil,
         :modified_at => new_child1.modified_at.to_s(:rfc822),
         :depth => new_child1.depth,
+        :side_effects => {},
         :dependent => [{
           :id => page1.id,
           :depth => page1.depth,
           :title => page1.title.value,
           :url => page1.path,
+          :side_effects => {},
           :published_at => nil,
           :modified_at => page1.modified_at.to_s(:rfc822),
         }]
