@@ -29,9 +29,11 @@ class RevisionsTest < MiniTest::Spec
         box :things
       end
 
+      @root = Page.create(:uid => "root")
       count = 0
       2.times do |i|
         c = Page.new(:uid => i)
+        @root.things << c
         count += 1
         2.times do |j|
           d = Piece.new(:uid => "#{i}.#{j}")
@@ -45,6 +47,7 @@ class RevisionsTest < MiniTest::Spec
         end
         c.save
       end
+      @root.save
     end
 
     teardown do
@@ -213,9 +216,7 @@ class RevisionsTest < MiniTest::Spec
         Content.create_revision(source_revision)
 
         Content.with_revision(source_revision) do
-          Content.filter(:depth => 0).limit(1).each do |c|
-            c.destroy
-          end
+          Content.first(:uid => "0").destroy
           source_revision_count = Content.count
         end
 
@@ -448,17 +449,15 @@ class RevisionsTest < MiniTest::Spec
       end
     end
 
-    context "modification timestamps" do
-      setup do
-      end
+    context "modification state" do
       should "register creation date of all content" do
         c = Content.create
         c.created_at.to_i.should == @now.to_i
-        p = Page.create
-        p.created_at.to_i.should == @now.to_i
+        page = Page.create
+        page.created_at.to_i.should == @now.to_i
       end
 
-      should "register modification date of all content" do
+      should "update modification date of page when page fields are updated" do
         now = @now + 100
         stub_time(now)
         c = Content.first
@@ -468,8 +467,20 @@ class RevisionsTest < MiniTest::Spec
         (c.modified_at - now).abs.should <= 1
       end
 
-      should "update page timestamps on modification of a piece" do
+      should "update page timestamps on modification of its box fields" do
+        Page.box :with_fields do
+          field :title
+        end
 
+        stub_time(@now+3600)
+        page = Page.first :uid => "0"
+        (page.modified_at.to_i - @now.to_i).abs.should <= 1
+        page.with_fields.title.value = "updated"
+        page.save.reload
+        page.modified_at.to_i.should == @now.to_i + 3600
+      end
+
+      should "update page timestamps on modification of a piece" do
         stub_time(@now+3600)
         page = Page.first :uid => "0"
         (page.modified_at.to_i - @now.to_i).abs.should <= 1
@@ -481,8 +492,23 @@ class RevisionsTest < MiniTest::Spec
         page.modified_at.to_i.should == @now.to_i + 3600
       end
 
+      should "update page timestamps on modification of a piece's box fields" do
+        Piece.box :with_fields do
+          field :title
+        end
+        stub_time(@now+3600)
+        page = Page.first :uid => "0"
+        (page.modified_at.to_i - @now.to_i).abs.should <= 1
+        content = page.contents.first
+
+        content.with_fields.title.value = "updated"
+        content.save
+        page.reload
+        page.modified_at.to_i.should == @now.to_i + 3600
+      end
+
       should "update page timestamp on addition of piece" do
-        Sequel.datetime_class.stubs(:now).returns(@now+3600)
+        stub_time(@now+3600)
         page = Page.first :uid => "0"
         content = Content[page.contents.first.id]
         content.things << Piece.new
@@ -491,6 +517,240 @@ class RevisionsTest < MiniTest::Spec
         page.reload
         page.modified_at.to_i.should == @now.to_i + 3600
       end
+
+      should "not update the parent page's timestamp on addition of a child page" do
+        stub_time(@now+1000)
+        page = Page.first :uid => "0"
+        page.things << Page.new
+        page.save.reload
+        page.modified_at.to_i.should == @now.to_i
+      end
+
+      should "update the pages timestamp if a boxes order is changed" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "0"
+        content = Content[page.contents.first.id]
+        content.update_position(1)
+        page.reload.modified_at.to_i.should == @now.to_i + 3600
+      end
+
+      should "update the parent page's modification time if the contents of a piece's box are re-ordered" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "0"
+        content = page.things.first.things.first
+        content.update_position(1)
+        page.reload.modified_at.to_i.should == @now.to_i + 3600
+      end
+
+      should "update the parent page's modification date if a piece is deleted" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "0"
+        content = Content[page.contents.first.id]
+        content.destroy
+        page.reload.modified_at.to_i.should == @now.to_i + 3600
+      end
+
+      should "update the parent page's modification date if a page is deleted" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "0"
+        content = Content[page.things.first.things.first.id]
+        content.destroy
+        page.reload.modified_at.to_i.should == @now.to_i + 3600
+      end
+
+      should "add entry to the list of side effects for a visibility change" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "1"
+        old_slug = page.slug
+        page.slug = "changed"
+        page.save
+        page.reload
+        page.pending_modifications.length.should == 1
+        mod = page.pending_modifications[:slug]
+        mod.must_be_instance_of Spontaneous::Plugins::Modifications::SlugModification
+        mod.old_value.should == old_slug
+        mod.new_value.should == "changed"
+        mod.created_at.to_i.should == @now.to_i + 3600
+      end
+
+      should "serialize page modifications" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "1"
+        page.slug = "changed"
+        page.save
+        page.pending_modifications.length.should == 1
+        mod = page.pending_modifications[:slug]
+        page = Page.first :id => page.id
+        page.pending_modifications.length.should == 1
+        page.pending_modifications[:slug].should == mod
+        page.pending_modifications[:slug].created_at.to_i.should == @now.to_i + 3600
+      end
+
+      should "concatenate multiple slug modifications together" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "1"
+        old_slug = page.slug
+        page.slug = "changed"
+        page.save
+        page.pending_modifications.length.should == 1
+        page.slug = "changed-again"
+        page.save
+        mod = page.pending_modifications[:slug]
+        mod.old_value.should == old_slug
+        mod.new_value.should == "changed-again"
+      end
+
+      should "know the number of pages affected by slug modification" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "1"
+        page.slug = "changed"
+        page.save
+        mod = page.pending_modifications[:slug]
+        mod.count.should == 4
+      end
+
+      should "show the number of pages whose visibility is affected in the case of a visibility change" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "1"
+        page.hide!
+        mod = page.pending_modifications[:visibility]
+        mod.count.should == 4
+      end
+
+      should "record visibility changes that originate from a content piece" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "1"
+        page.things.first.hide!
+        page.reload
+        mod = page.pending_modifications[:visibility]
+        mod.count.should == 4
+      end
+
+      should "show number of pages that are to be deleted in the case of a deletion" do
+        stub_time(@now+3600)
+        page = Page[Page.first(:uid => "root").things.first.id]
+        page.destroy
+        page = Page.first(:uid => "root")
+        mod = page.pending_modifications[:deletion]
+        # count is number of children of deleted page + 1 (for deleted page)
+        mod.count.should == 5
+      end
+
+      should "have an empty modification if the slug has been reverted to original value" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "1"
+        old_slug = page.slug
+        page.slug = "changed"
+        page.save
+        page.pending_modifications.length.should == 1
+        page.slug = "changed-again"
+        page.save
+        page.slug = old_slug
+        page.save
+        mod = page.reload.pending_modifications[:slug]
+        mod.should be_nil
+      end
+
+      should "have an empty modification if the visibility has been reverted to original value" do
+        stub_time(@now+3600)
+        page = Page.first :uid => "1"
+        page.things.first.hide!
+        page.reload
+        page.things.first.show!
+        page.reload
+        mod = page.pending_modifications[:visibility]
+        mod.should be_nil
+      end
+
+      context "during publish" do
+        setup do
+          @initial_revision = 1
+          @final_revision = 2
+          S::Content.publish(@initial_revision)
+        end
+
+        teardown do
+          Content.delete_revision(@initial_revision) rescue nil
+          Content.delete_revision(@final_revision) rescue nil
+        end
+
+        should "act on path change modifications" do
+          page = Page.first :uid => "1"
+          old_slug = page.slug
+          page.slug = "changed"
+          page.save
+          S::Content.publish(@final_revision, [page.id])
+          S::Content.with_revision(@final_revision) do
+            %w(1 1.1.1).each do |uid|
+              published_page = Page.first :uid => uid
+              S::Content.with_editable do
+                editable_page = Page.first :uid => uid
+                published_page.path.should == editable_page.path
+              end
+            end
+          end
+        end
+
+        should "act on visibility modifications" do
+          page = Page.first :uid => "1"
+          page.hide!
+          S::Content.publish(@final_revision, [page.id])
+          S::Content.with_revision(@final_revision) do
+            %w(1 1.1.1).each do |uid|
+              published_page = Page.first :uid => uid
+              S::Content.with_editable do
+                editable_page = Page.first :uid => uid
+                published_page.hidden?.should == editable_page.hidden?
+              end
+            end
+          end
+        end
+
+        should "act on multiple modifications" do
+          page = Page.first :uid => "1"
+          page.slug = "changed"
+          page.slug = "changed-again"
+          page.hide!
+
+          S::Content.publish(@final_revision, [page.id])
+          S::Content.with_revision(@final_revision) do
+            %w(1 1.1.1).each do |uid|
+              published_page = Page.first :uid => uid
+              S::Content.with_editable do
+                editable_page = Page.first :uid => uid
+                published_page.hidden?.should == editable_page.hidden?
+                published_page.slug.should == editable_page.slug
+                published_page.path.should == editable_page.path
+              end
+            end
+          end
+        end
+
+        should "ignore deletion modifications" do
+          page = Page.first(:uid => "1")
+          page.destroy
+          page = Page.first(:uid => "root")
+          S::Content.publish(@final_revision, [page.id])
+          S::Content.with_revision(@final_revision) do
+            %w(1 1.1.1).each do |uid|
+              published_page = Page.first :uid => uid
+              published_page.should be_nil
+            end
+            published_page = Page.first :uid => "0"
+            published_page.should_not be_nil
+          end
+        end
+
+        should "clear modifications after publish" do
+          page = Page.first :uid => "1"
+          page.slug = "changed"
+          page.hide!
+          S::Content.publish(@final_revision, [page.id])
+          page = Page.first :id => page.id
+          page.pending_modifications.keys.should == []
+        end
+      end
+
     end
 
     context "publication timestamps" do
@@ -586,6 +846,5 @@ class RevisionsTest < MiniTest::Spec
         Content.filter(:first_published_at => nil).count.should == 0
       end
     end
-
   end
 end

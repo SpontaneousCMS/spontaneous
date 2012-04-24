@@ -65,9 +65,9 @@ module Spontaneous::Collections
       owner.entry_modified!(nil)
     end
 
-    def destroy
+    def destroy(origin)
       store.each do |box_id, entries|
-        entries.dup.each { |e| e.destroy(false) }
+        entries.dup.each { |e| e.destroy(false, origin) }
       end
     end
 

@@ -37,21 +37,19 @@ module Spontaneous::Plugins
       super
     end
 
-    def destroy(remove_owner_entry=true, owner=nil)
-      owner ||= self.owner
-      if owner && remove_owner_entry
-        owner.destroy_entry!(self)
-      end
+    def destroy(remove_owner_entry=true, origin = nil)
+      is_origin = origin.nil?
+      origin ||= page ? (page.parent ? page.parent : page) : owner
+      recursive_destroy(origin)
+      origin.child_page_deleted! if (origin && page?)
+      owner = self.owner
+      owner.destroy_entry!(self) if (owner && remove_owner_entry)
       super()
+      origin.after_child_destroy if is_origin && origin
     end
 
-    def before_destroy
-      recursive_destroy
-      super
-    end
-
-    def recursive_destroy
-      all_contents.destroy
+    def recursive_destroy(origin)
+      all_contents.destroy(origin)
     end
 
     def destroy_entry!(entry)
@@ -67,6 +65,7 @@ module Spontaneous::Plugins
     end
 
     def entry_modified!(modified_entry)
+      @__ignore_page_modification = modified_entry && modified_entry.page?
       self.entry_store = all_contents.serialize_db
     end
 

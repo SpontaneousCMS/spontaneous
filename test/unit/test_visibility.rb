@@ -309,9 +309,12 @@ class VisibilityTest < MiniTest::Spec
       end
 
       should "be filtered by visibility when doing reverse lookup" do
+        page = P.first(:uid => "1")
         target = E.find(:uid => "1.1")
         al1 = MyAlias.create(:target => target)
+        page.things << al1
         al2 = MyAlias.create(:target => target).reload
+        page.things << al2
         al1.hide!
         al1.reload
         Set.new(target.aliases).should == Set.new([al1, al2])

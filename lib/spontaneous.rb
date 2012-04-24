@@ -130,6 +130,7 @@ module Spontaneous
     autoload :Prototypes,       "spontaneous/plugins/prototypes"
     autoload :Permissions,      "spontaneous/plugins/permissions"
     autoload :Controllers,      "spontaneous/plugins/controllers"
+    autoload :Modifications,    "spontaneous/plugins/modifications"
 
     module Field
       autoload :EditorClass,    "spontaneous/plugins/field/editor_class"

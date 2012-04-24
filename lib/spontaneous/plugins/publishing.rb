@@ -179,6 +179,9 @@ module Spontaneous::Plugins
       first_published_at.nil?
     end
 
+    def before_publish(revision); end
+    def after_publish(revision);  end
+
     def sync_to_revision(revision, origin=false)
       # 'publish' is a lock to make sure the duplication doesn't cross
       # page boundaries unless that's necessary (such as in the case
@@ -204,17 +207,32 @@ module Spontaneous::Plugins
         end
 
         if publish
+          self.before_publish(revision)
           with_editable do
             self.pieces.each do |entry|
               entry.sync_to_revision(revision, false)
             end
           end
+          sync_children_to_revision(revision) if page?
           Spontaneous::Content.where(:id => self.id).update(self.values)
 
           # Pages that haven't been published before can be published independently of their parents.
           # In that case we need to insert an entry for them. We can't guarantee that the published
           # parent has the same entries
           insert_entry_for_new_page(revision) if first_publish && page?
+          self.after_publish(revision)
+        end
+      end
+    end
+
+    def sync_children_to_revision(revision)
+      published_children = with_revision(revision) { S::Content.filter(:parent_id => self.id) }
+      published_children.each do |child_page|
+        deleted = with_editable { S::Content.select(:id).first(:id => child_page.id).nil? }
+        if deleted
+          with_revision(revision) do
+            child_page.destroy
+          end
         end
       end
     end

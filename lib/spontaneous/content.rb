@@ -14,10 +14,10 @@ module Spontaneous
     include Plugins::SchemaId
 
     sequel_plugin :content_table_inheritance, :type_sid
-    sequel_plugin :serialization, :yajl, :field_store, :entry_store, :box_store
+    sequel_plugin :serialization, :yajl, :field_store, :entry_store, :box_store, :serialized_modifications
     sequel_plugin :instance_hooks
     sequel_plugin :skip_create_refresh
-    sequel_plugin :timestamps, :create=>:created_at, :update=>:modified_at, :update_on_create => true
+    sequel_plugin :timestamps, :create=>:created_at, :update_on_create => true
     sequel_plugin :identity_map
     sequel_plugin :association_dependencies
     sequel_plugin :defaults_setter
@@ -57,6 +57,7 @@ module Spontaneous
     include Plugins::Serialisation
     include Plugins::Media
     include Plugins::Publishing
+    include Plugins::Modifications
     include Plugins::Aliases
     include Plugins::Visibility
     include Plugins::Prototypes
