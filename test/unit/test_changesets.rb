@@ -191,5 +191,33 @@ class ChangeTest < MiniTest::Spec
         }]
       }
     end
+
+    should "provide information on side effects of publishing page with path changes" do
+      root = Page.create(:title => "root")
+
+
+      root.reload
+      page1 = Page.new(:title => "Page 1")
+      root.things << page1
+      new_child1  = Page.new(:title => "New Child 1")
+      page1.things << new_child1
+      root.save
+
+      Content.publish(@revision)
+
+      old_slug = page1.slug
+      page1.slug = "changed"
+      page1.save
+
+      result = Change.outstanding
+      change = result.detect { |change| change.page.id == page1.id }
+      change.export[:side_effects].should == {
+        :slug => { :count => 1, :created_at => @now.to_s(:rfc822), :old_value => old_slug, :new_value => "changed"}
+      }
+    end
+
+    should "provide information on side effects of publishing page with visibility changes" do
+      skip
+    end
   end
 end

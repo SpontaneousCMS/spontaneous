@@ -59,8 +59,21 @@ module Spontaneous
         :title => page.title.to_s,
         :depth => page.depth,
         :url => page.path,
+        :side_effects => export_side_effects(page),
         :published_at => export_timestamp(page.last_published_at),
         :modified_at => export_timestamp(page.modified_at) }
+    end
+
+    def export_side_effects(page)
+      side_effects = page.pending_modifications.map do |type, modification|
+        [type, {
+          :count => modification.count,
+          :created_at => export_timestamp(modification.created_at),
+          :old_value => modification.old_value,
+          :new_value => modification.new_value
+        }]
+      end
+      Hash[side_effects]
     end
 
     def export_timestamp(timestamp)
