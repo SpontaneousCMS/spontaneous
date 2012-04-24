@@ -15,17 +15,12 @@ module Spontaneous::Plugins
         @created_at = Time.parse(created_at) if @created_at.is_a?(String)
       end
 
+      # Must apply this change the slow way by cascading updates from the parent because
+      # otherwise it's difficult to publish changes to a child page's slug and publish them
+      # separately
       def apply(revision)
-        self.page.with_editable do
-          dataset.each do |editable|
-            page.with_revision(revision) do
-              published = S::Content.first :id => editable.id
-              if published
-                apply_modification(editable, published)
-                published.save
-              end
-            end
-          end
+        page.with_revision(revision) do
+          page.check_for_path_changes(true)
         end
       end
 
@@ -65,6 +60,20 @@ module Spontaneous::Plugins
     class VisibilityModification < SlugModification
       def self.type
         :visibility
+      end
+
+      def apply(revision)
+        self.page.with_editable do
+          dataset.each do |editable|
+            page.with_revision(revision) do
+              published = S::Content.first :id => editable.id
+              if published
+                apply_modification(editable, published)
+                published.save
+              end
+            end
+          end
+        end
       end
 
       def apply_modification(editable, published)

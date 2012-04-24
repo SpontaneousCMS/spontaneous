@@ -108,8 +108,8 @@ module Spontaneous::Plugins
       end
     end
 
-    def check_for_path_changes
-      if @__slug_changed
+    def check_for_path_changes(force = false)
+      if @__slug_changed || force
         @__slug_changed = false
         children.each do |child|
           child.propagate_path_changes

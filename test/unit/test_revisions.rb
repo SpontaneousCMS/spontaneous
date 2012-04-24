@@ -711,6 +711,27 @@ class RevisionsTest < MiniTest::Spec
           end
         end
 
+        should "not publish slug changes on pages other than the one being published xxx" do
+          #/bands/beatles -> /bands/beatles-changed
+          #/bands -> /bands-changed
+          # publish(bands)
+          # with_published { beatles.path.should == /bands-changed/beatles }
+          page = Page.first :uid => "1"
+          page.slug = "changed"
+          page.save
+
+          child_page = Page.first :uid => "1.0.0"
+          old_slug = child_page.slug
+          child_page.slug = "changed-too"
+          child_page.save
+
+          S::Content.publish(@final_revision, [page.id])
+          S::Content.with_revision(@final_revision) do
+            published = Page.first :uid => "1.0.0"
+            published.path.should == "/changed/#{old_slug}"
+          end
+        end
+
         should "act on visibility modifications" do
           page = Page.first :uid => "1"
           page.hide!
