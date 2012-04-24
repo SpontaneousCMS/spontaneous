@@ -526,6 +526,26 @@ class RevisionsTest < MiniTest::Spec
         page.modified_at.to_i.should == @now.to_i
       end
 
+      should "update a page's timestamp on modification of its slug xxx" do
+        stub_time(@now+1000)
+        page = Page.first :uid => "0"
+        page.slug = "changed"
+        page.save.reload
+        page.modified_at.to_i.should == @now.to_i + 1000
+      end
+
+      should "not update child pages timestamps after changing their parent's slug xxx" do
+        page = Page.first :uid => "0.0.0"
+        modified = page.modified_at
+        stub_time(@now+1000)
+        page = Page.first :uid => "0"
+        page.slug = "changed"
+        page.save.reload
+        page.modified_at.to_i.should == @now.to_i + 1000
+        page = Page.first :uid => "0.0.0"
+        page.modified_at.should == modified
+      end
+
       should "update the pages timestamp if a boxes order is changed" do
         stub_time(@now+3600)
         page = Page.first :uid => "0"

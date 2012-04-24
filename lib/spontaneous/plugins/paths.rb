@@ -121,6 +121,9 @@ module Spontaneous::Plugins
     end
 
     def propagate_path_changes
+      # this happens in the child pages who shouldn't update their modification dates
+      # because updates to paths are handled by modifications held on the origin of the path change
+      @__ignore_page_modification = true
       self.update_path
       self.save
       children.each do |child|
