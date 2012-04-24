@@ -20,7 +20,6 @@ module Spontaneous
       def include_dependencies(page_list)
         changes = page_list.map { |page| Change.new(page) }
         pages = changes.map { |change| change.all_pages }.flatten.uniq
-        p pages
         pages
       end
 

@@ -92,6 +92,10 @@ module Spontaneous::Plugins
               c.is_a?(Spontaneous::Content) ? c.reload : Spontaneous::Content.first(:id => c)
             end.compact
 
+            # pages should be published in depth order because its possible to be publishing a child of
+            # a page that's never been published
+            content.sort! { |c1, c2| c1.depth <=> c2.depth }
+
             first_published = first_published.filter(:id => content.map { |c| c.id })
             published = published.filter(:id => content.map { |c| c.id })
 

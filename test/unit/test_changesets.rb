@@ -124,6 +124,41 @@ class ChangeTest < MiniTest::Spec
       ])
     end
 
+    should "successfully publish list of dependent pages" do
+      root = Page.create(:title => "root")
+
+      Content.publish(@revision)
+
+      root.reload
+      page1 = Page.new(:title => "Page 1")
+      root.things << page1
+      new_child1  = Page.new(:title => "New Child 1")
+      page1.things << new_child1
+      new_parent = Page.new(:title => "New Parent")
+      new_child2  = Page.new(:title => "New Child 2")
+      new_child3  = Page.new(:title => "New Child 3")
+      root.things << new_parent
+      new_parent.things << new_child2
+      new_child2.things << new_child3
+
+      pages = [root, page1, new_child1, new_parent, new_child2, new_child3]
+      pages.each(&:save)
+
+
+      Content.publish(@revision+1, [root.id])
+      result = Change.outstanding
+
+      e = nil
+      begin
+        pages = Spontaneous::Change.include_dependencies([new_child3])
+        Content.publish(@revision+2, pages)
+        Content.delete_revision(@revision + 2) rescue nil
+      rescue => e
+        Content.delete_revision(@revision + 2) rescue nil
+        raise
+      end
+    end
+
     should "provide page & dependency information in serializable format" do
       root = Page.create(:title => "root")
 
