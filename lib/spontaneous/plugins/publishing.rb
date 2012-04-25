@@ -78,50 +78,52 @@ module Spontaneous::Plugins
 
         first_published = published = nil
 
-        with_editable do
-          first_published = self.filter(:first_published_at => nil)
-          published = self.filter
-
-          must_publish_all = (content.nil? || (!revision_exists?(revision-1)) || \
-                              (content.is_a?(Array) && content.empty?))
-
-          if must_publish_all
-            create_revision(revision)
-          else
-            content = content.map do |c|
-              c.is_a?(Spontaneous::Content) ? c.reload : Spontaneous::Content.first(:id => c)
-            end.compact
-
-            # pages should be published in depth order because its possible to be publishing a child of
-            # a page that's never been published
-            content.sort! { |c1, c2| c1.depth <=> c2.depth }
-
-            first_published = first_published.filter(:id => content.map { |c| c.id })
-            published = published.filter(:id => content.map { |c| c.id })
-
-            create_revision(revision, revision-1)
-            content.each do |c|
-              c.sync_to_revision(revision, true)
-            end
-          end
-
-          # run any passed code and if it fails revert the publish step
-          if block_given?
-            begin
-              with_revision(revision) { yield }
-            rescue Exception => e
-              delete_revision(revision)
-              raise e
-            end
-          end
-
+        db.transaction do
           with_editable do
-            mark_first_published[first_published]
-            mark_published[published]
-          end
-          with_revision(revision) do
-            mark_first_published[first_published]
-            mark_published[published]
+            first_published = self.filter(:first_published_at => nil)
+            published = self.filter
+
+            must_publish_all = (content.nil? || (!revision_exists?(revision-1)) || \
+                                (content.is_a?(Array) && content.empty?))
+
+            if must_publish_all
+              create_revision(revision)
+            else
+              content = content.map do |c|
+                c.is_a?(Spontaneous::Content) ? c.reload : Spontaneous::Content.first(:id => c)
+              end.compact
+
+              # pages should be published in depth order because its possible to be publishing a child of
+              # a page that's never been published
+              content.sort! { |c1, c2| c1.depth <=> c2.depth }
+
+              first_published = first_published.filter(:id => content.map { |c| c.id })
+              published = published.filter(:id => content.map { |c| c.id })
+
+              create_revision(revision, revision-1)
+              content.each do |c|
+                c.sync_to_revision(revision, true)
+              end
+            end
+
+            # run any passed code and if it fails revert the publish step
+            if block_given?
+              begin
+                with_revision(revision) { yield }
+              rescue Exception => e
+                delete_revision(revision)
+                raise e
+              end
+            end
+
+            with_editable do
+              mark_first_published[first_published]
+              mark_published[published]
+            end
+            with_revision(revision) do
+              mark_first_published[first_published]
+              mark_published[published]
+            end
           end
         end
       end
@@ -217,8 +219,19 @@ module Spontaneous::Plugins
               entry.sync_to_revision(revision, false)
             end
           end
-          sync_children_to_revision(revision) if page?
-          Spontaneous::Content.where(:id => self.id).update(self.values)
+
+          if self.page?
+            sync_children_to_revision(revision)
+          end
+
+          Spontaneous::Content.where(:id => self.id).update(values)
+
+          # ancestors can have un-published changes to their paths so we can't just directly publish the current path.
+          # Instead we re-calculate our path using the published version of the ancestor's path & our (potentially) updated slug.
+          if self.page?
+            published = self.class.first :id => self.id
+            Spontaneous::Content.where(:id => self.id).update(:path => published.calculate_path_with_slug(values[:slug]))
+          end
 
           # Pages that haven't been published before can be published independently of their parents.
           # In that case we need to insert an entry for them. We can't guarantee that the published

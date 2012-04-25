@@ -92,6 +92,10 @@ module Spontaneous::Plugins
 
 
     def calculate_path
+      calculate_path_with_slug(self.slug)
+    end
+
+    def calculate_path_with_slug(slug)
       if parent.nil?
         root? ? Spontaneous::SLASH : '' # bad case, no parent but not root
       else

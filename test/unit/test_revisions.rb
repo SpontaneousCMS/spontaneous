@@ -18,7 +18,6 @@ class RevisionsTest < MiniTest::Spec
     setup do
       stub_time(@now)
 
-      # DB.logger = Logger.new($stdout)
       Content.delete
 
       class Page < Spontaneous::Page
@@ -384,7 +383,7 @@ class RevisionsTest < MiniTest::Spec
           end
         end
 
-        should "choose a sensible position for entry into the parent of a newly added page" do
+        should "choose a sensible position for entry into the parent of a newly added page xxx" do
           editable1 = Content.first(:uid => '0')
           new_page1 = Page.new(:uid => "new1")
           new_page2 = Page.new(:uid => "new2")

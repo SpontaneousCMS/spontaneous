@@ -117,5 +117,12 @@ module Spontaneous
       return page.formats if page
       [:html]
     end
+
+    def log_sql(io = $stdout)
+      db.logger = ::Logger.new(io)
+      yield if block_given?
+    ensure
+      db.logger = nil
+    end
   end
 end

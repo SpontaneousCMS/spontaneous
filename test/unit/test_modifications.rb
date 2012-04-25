@@ -380,6 +380,28 @@ class ModificationsTest < MiniTest::Spec
         end
       end
 
+      should "publish the correct path for new child pages with an un-published parent slug change" do
+        # add /bands/beatles
+        # /bands -> /bands-changed
+        # publish(beatles)
+        # with_published { beatles.path.should == /bands/beatles }
+        page = Page.first :uid => "1"
+        old_slug = page.slug
+        page.slug = "changed"
+        page.save
+
+        child_page = Page.first :uid => "1.0.0"
+        child_page.slug = "changed-too"
+        child_page.save
+
+        S::Content.publish(@final_revision, [child_page.id])
+        S::Content.with_revision(@final_revision) do
+          published = Page.first :uid => "1.0.0"
+          published.path.should == "/#{old_slug}/changed-too"
+        end
+      end
+
+
       should "act on visibility modifications" do
         page = Page.first :uid => "1"
         page.hide!

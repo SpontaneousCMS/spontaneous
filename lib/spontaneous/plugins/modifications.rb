@@ -128,12 +128,8 @@ module Spontaneous::Plugins
       pending_modifications.each do |modification|
         modification.apply(revision)
       end
-      with_editable do
-        self.clear_pending_modifications!
-      end
-      with_revision(revision) do
-        self.clear_pending_modifications!
-      end
+      with_editable { clear_pending_modifications! }
+      with_revision(revision) { clear_pending_modifications! }
       super
     end
 
@@ -199,12 +195,11 @@ module Spontaneous::Plugins
 
     def clear_pending_modifications!
       self.serialized_modifications = nil
+      self.class.filter(:id => self.id).update(:serialized_modifications => "[]")
       @local_modifications = nil
       pieces.each do |piece|
         piece.clear_pending_modifications!
-        piece.save
       end
-      self.save
     end
 
     def serialize_pending_modifications
