@@ -8,11 +8,12 @@ module Spontaneous::Plugins
         :slug
       end
 
-      attr_reader :owner, :created_at, :old_value, :new_value
+      attr_reader :owner, :user, :created_at, :old_value, :new_value
 
-      def initialize(owner, created_at, old_value, new_value)
-        @owner, @created_at, @old_value, @new_value = owner, created_at, old_value, new_value
+      def initialize(owner, user, created_at, old_value, new_value)
+        @owner, @user, @created_at, @old_value, @new_value = owner, user, created_at, old_value, new_value
         @created_at = Time.parse(created_at) if @created_at.is_a?(String)
+        @user = Spontaneous::Permissions::User[user] if @user.is_a?(Fixnum)
       end
 
       # Must apply this change the slow way by cascading updates from the parent because
@@ -34,7 +35,11 @@ module Spontaneous::Plugins
       end
 
       def serialize
-        [type, created_at.to_s(:rfc822), old_value, new_value]
+        [type, user_id, created_at.to_s(:rfc822), old_value, new_value]
+      end
+
+      def user_id
+        @user.nil? ? nil : @user.id
       end
 
       def type
@@ -92,6 +97,14 @@ module Spontaneous::Plugins
       end
     end
 
+    def current_editor
+      @current_editor
+    end
+
+    def current_editor=(user)
+      @current_editor = user
+    end
+
     def reload
       @local_modifications = nil
       super
@@ -143,7 +156,7 @@ module Spontaneous::Plugins
     def create_deletion_modifications
       if @child_page_deletion_count && @child_page_deletion_count > 0
         count = S::Page.count
-        append_modification DeletionModification.new(self, Time.now, count + @child_page_deletion_count, count)
+        append_modification DeletionModification.new(self, current_editor, Time.now, count + @child_page_deletion_count, count)
       end
     end
 
@@ -155,7 +168,7 @@ module Spontaneous::Plugins
             return nil
           end
         end
-        append_modification VisibilityModification.new(self, Time.now, !hidden?, hidden)
+        append_modification VisibilityModification.new(self, current_editor, Time.now, !hidden?, hidden)
       end
     end
 
@@ -168,7 +181,7 @@ module Spontaneous::Plugins
         end
         previous_modification.new_value = self[:slug]
       else
-        append_modification SlugModification.new(self, Time.now, old_slug, self[:slug])
+        append_modification SlugModification.new(self, current_editor, Time.now, old_slug, self[:slug])
       end
     end
 

@@ -81,6 +81,7 @@ class BackTest < MiniTest::Spec
       @user.stubs(:access_keys).returns([@key])
 
       Spontaneous::Permissions::User.stubs(:[]).with(:login => 'root').returns(@user)
+      Spontaneous::Permissions::User.stubs(:[]).with(@user.id).returns(@user)
       Spontaneous::Permissions::AccessKey.stubs(:authenticate).with(@key).returns(@key)
       Spontaneous::Permissions::AccessKey.stubs(:valid?).with(@key, @user).returns(true)
 
@@ -397,7 +398,7 @@ class BackTest < MiniTest::Spec
         Spot::JSON.parse(last_response.body).should == {:id => @job1.id, :hidden => true}
         @job1.reload.visible?.should == false
         auth_post "/@spontaneous/toggle/#{@job1.id}"
-        assert last_response.ok?
+        assert last_response.ok?, "Expected status 200 but recieved #{last_response.status}"
         @job1.reload.visible?.should == true
         Spot::JSON.parse(last_response.body).should == {:id => @job1.id, :hidden => false}
       end
@@ -1072,6 +1073,20 @@ class BackTest < MiniTest::Spec
           :entry => first.export
         }
         Spot::JSON.parse(last_response.body).should == required_response
+      end
+    end
+
+
+    context "making modifications" do
+      setup do
+        Spontaneous.stubs(:reload!)
+      end
+      should "record the currently logged in user" do
+        page = @home.in_progress.last
+        auth_post "/@spontaneous/toggle/#{page.id}"
+        assert last_response.ok?, "Expected status 200 but received #{last_response.status}"
+        page.reload
+        page.pending_modifications(:visibility).first.user.should == @user
       end
     end
   end

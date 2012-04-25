@@ -213,6 +213,7 @@ module Spontaneous
           Content.db.transaction {
             dataset = lock ? Content.for_update : Content
             content = dataset.first(:id => params[:id])
+            content.current_editor = user
             halt 404 if content.nil?
             if box_id = Spontaneous.schema.uids[params[:box_id]]
               box = content.boxes.detect { |b| b.schema_id == box_id }
