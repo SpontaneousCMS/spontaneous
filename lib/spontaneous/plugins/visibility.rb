@@ -96,9 +96,6 @@ module Spontaneous::Plugins
       set_visible(visible)
     end
 
-
-    protected
-
     def set_visible!(state)
       self.set_visible(state)
       self.save
@@ -118,10 +115,14 @@ module Spontaneous::Plugins
     def after_save
       super
       if @_visibility_modified
-        hide_descendents(self.visible?)
-        hide_aliases(self.visible?)
+        propagate_visibility_state
         @_visibility_modified = false
       end
+    end
+
+    def propagate_visibility_state
+      hide_descendents(self.visible?)
+      hide_aliases(self.visible?)
     end
 
     def hide_aliases(visible)

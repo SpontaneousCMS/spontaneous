@@ -536,14 +536,14 @@ class RevisionsTest < MiniTest::Spec
 
       should "not update child pages timestamps after changing their parent's slug" do
         page = Page.first :uid => "0.0.0"
-        modified = page.modified_at
+        modified = page.modified_at.to_i
         stub_time(@now+1000)
         page = Page.first :uid => "0"
         page.slug = "changed"
         page.save.reload
         page.modified_at.to_i.should == @now.to_i + 1000
         page = Page.first :uid => "0.0.0"
-        page.modified_at.should == modified
+        page.modified_at.to_i.should == modified
       end
 
       should "update the pages timestamp if a boxes order is changed" do
@@ -586,7 +586,9 @@ class RevisionsTest < MiniTest::Spec
         page.save
         page.reload
         page.pending_modifications.length.should == 1
-        mod = page.pending_modifications[:slug]
+        mods = page.pending_modifications(:slug)
+        mods.length.should == 1
+        mod = mods.first
         mod.must_be_instance_of Spontaneous::Plugins::Modifications::SlugModification
         mod.old_value.should == old_slug
         mod.new_value.should == "changed"
@@ -599,11 +601,11 @@ class RevisionsTest < MiniTest::Spec
         page.slug = "changed"
         page.save
         page.pending_modifications.length.should == 1
-        mod = page.pending_modifications[:slug]
+        mod = page.pending_modifications(:slug).first
         page = Page.first :id => page.id
         page.pending_modifications.length.should == 1
-        page.pending_modifications[:slug].should == mod
-        page.pending_modifications[:slug].created_at.to_i.should == @now.to_i + 3600
+        page.pending_modifications(:slug).first.should == mod
+        page.pending_modifications(:slug).first.created_at.to_i.should == @now.to_i + 3600
       end
 
       should "concatenate multiple slug modifications together" do
@@ -615,7 +617,7 @@ class RevisionsTest < MiniTest::Spec
         page.pending_modifications.length.should == 1
         page.slug = "changed-again"
         page.save
-        mod = page.pending_modifications[:slug]
+        mod = page.pending_modifications(:slug).first
         mod.old_value.should == old_slug
         mod.new_value.should == "changed-again"
       end
@@ -625,7 +627,7 @@ class RevisionsTest < MiniTest::Spec
         page = Page.first :uid => "1"
         page.slug = "changed"
         page.save
-        mod = page.pending_modifications[:slug]
+        mod = page.pending_modifications(:slug).first
         mod.count.should == 4
       end
 
@@ -633,8 +635,12 @@ class RevisionsTest < MiniTest::Spec
         stub_time(@now+3600)
         page = Page.first :uid => "1"
         page.hide!
-        mod = page.pending_modifications[:visibility]
+        page.reload
+        mods = page.pending_modifications(:visibility)
+        mods.length.should == 1
+        mod = mods.first
         mod.count.should == 4
+        mod.owner.should == page
       end
 
       should "record visibility changes that originate from a content piece" do
@@ -642,18 +648,50 @@ class RevisionsTest < MiniTest::Spec
         page = Page.first :uid => "1"
         page.things.first.hide!
         page.reload
-        mod = page.pending_modifications[:visibility]
-        mod.count.should == 4
+        mods = page.pending_modifications(:visibility)
+        mods.length.should == 1
+        mod = mods.first
+        mod.count.should == 2
+        mod.owner.should == page.things.first
       end
 
       should "show number of pages that are to be deleted in the case of a deletion" do
         stub_time(@now+3600)
-        page = Page[Page.first(:uid => "root").things.first.id]
+        page = Page.first(:uid => "1")
+        owner = page.owner
         page.destroy
         page = Page.first(:uid => "root")
-        mod = page.pending_modifications[:deletion]
+        mods = page.pending_modifications(:deletion)
+        mod = mods.first
         # count is number of children of deleted page + 1 (for deleted page)
         mod.count.should == 5
+        mod.owner.should == owner.reload
+      end
+
+      should "show number of pages deleted if piece with pages is deleted" do
+        stub_time(@now+3600)
+        page = Page.first(:uid => "1")
+        piece = page.things.first
+        owner = piece.owner
+        piece.destroy
+        page = Page.first(:uid => "1")
+        mods = page.pending_modifications(:deletion)
+        mod = mods.first
+        mod.count.should == 2
+        mod.owner.should == owner.reload
+      end
+
+      should "show number of pages deleted if page belonging to piece is deleted" do
+        stub_time(@now+3600)
+        page = Page.first(:uid => "1")
+        child = page.things.first.things.first
+        owner = child.owner
+        child.destroy
+        page = Page.first(:uid => "1")
+        mods = page.pending_modifications(:deletion)
+        mod = mods.first
+        mod.count.should == 1
+        mod.owner.should == owner.reload
       end
 
       should "have an empty modification if the slug has been reverted to original value" do
@@ -667,8 +705,8 @@ class RevisionsTest < MiniTest::Spec
         page.save
         page.slug = old_slug
         page.save
-        mod = page.reload.pending_modifications[:slug]
-        mod.should be_nil
+        mods = page.reload.pending_modifications(:slug)
+        mods.length.should == 0
       end
 
       should "have an empty modification if the visibility has been reverted to original value" do
@@ -678,8 +716,8 @@ class RevisionsTest < MiniTest::Spec
         page.reload
         page.things.first.show!
         page.reload
-        mod = page.pending_modifications[:visibility]
-        mod.should be_nil
+        mods = page.pending_modifications(:visibility)
+        mods.length.should == 0
       end
 
       context "during publish" do
@@ -711,7 +749,7 @@ class RevisionsTest < MiniTest::Spec
           end
         end
 
-        should "not publish slug changes on pages other than the one being published xxx" do
+        should "not publish slug changes on pages other than the one being published" do
           #/bands/beatles -> /bands/beatles-changed
           #/bands -> /bands-changed
           # publish(bands)
@@ -788,7 +826,7 @@ class RevisionsTest < MiniTest::Spec
           page.hide!
           S::Content.publish(@final_revision, [page.id])
           page = Page.first :id => page.id
-          page.pending_modifications.keys.should == []
+          page.pending_modifications.length.should == 0
         end
       end
 

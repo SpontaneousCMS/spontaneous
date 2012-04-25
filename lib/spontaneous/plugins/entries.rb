@@ -39,7 +39,7 @@ module Spontaneous::Plugins
 
     def destroy(remove_owner_entry=true, origin = nil)
       is_origin = origin.nil?
-      origin ||= page ? (page.parent ? page.parent : page) : owner
+      origin ||= owner
       recursive_destroy(origin)
       origin.child_page_deleted! if (origin && page?)
       owner = self.owner

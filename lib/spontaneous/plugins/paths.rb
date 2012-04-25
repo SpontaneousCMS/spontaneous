@@ -120,6 +120,10 @@ module Spontaneous::Plugins
       end
     end
 
+    def force_path_changes
+      check_for_path_changes(true)
+    end
+
     def propagate_path_changes
       # this happens in the child pages who shouldn't update their modification dates
       # because updates to paths are handled by modifications held on the origin of the path change
