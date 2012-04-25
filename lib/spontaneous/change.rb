@@ -65,20 +65,21 @@ module Spontaneous
     end
 
     def export_side_effects(page)
-      side_effects = page.pending_modifications.map do |type, modification|
-        [type, {
-          :count => modification.count,
-          :created_at => export_timestamp(modification.created_at),
-          :old_value => modification.old_value,
-          :new_value => modification.new_value
-        }]
+    side_effects = Hash.new { |h, k| h[k] = [] }
+       page.pending_modifications.map do |modification|
+         side_effects[modification.type] << {
+           :count => modification.count,
+           :created_at => export_timestamp(modification.created_at),
+           :old_value => modification.old_value,
+           :new_value => modification.new_value
+         }
       end
-      Hash[side_effects]
+      side_effects
     end
 
     def export_timestamp(timestamp)
       return nil if timestamp.nil?
-      timestamp.to_s(:rfc822)
+      timestamp.httpdate
     end
     def export
       export_page(page).merge({

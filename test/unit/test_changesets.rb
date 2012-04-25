@@ -179,7 +179,7 @@ class ChangeTest < MiniTest::Spec
         :title => new_child1.title.value,
         :url => new_child1.path,
         :published_at => nil,
-        :modified_at => new_child1.modified_at.to_s(:rfc822),
+        :modified_at => new_child1.modified_at.httpdate,
         :depth => new_child1.depth,
         :side_effects => {},
         :dependent => [{
@@ -189,7 +189,7 @@ class ChangeTest < MiniTest::Spec
           :url => page1.path,
           :side_effects => {},
           :published_at => nil,
-          :modified_at => page1.modified_at.to_s(:rfc822),
+          :modified_at => page1.modified_at.httpdate,
         }]
       }
     end
@@ -214,12 +214,30 @@ class ChangeTest < MiniTest::Spec
       result = Change.outstanding
       change = result.detect { |change| change.page.id == page1.id }
       change.export[:side_effects].should == {
-        :slug => { :count => 1, :created_at => @now.to_s(:rfc822), :old_value => old_slug, :new_value => "changed"}
+        :slug => [{ :count => 1, :created_at => @now.httpdate, :old_value => old_slug, :new_value => "changed"}]
       }
     end
 
     should "provide information on side effects of publishing page with visibility changes" do
-      skip
+      root = Page.create(:title => "root")
+
+
+      root.reload
+      page1 = Page.new(:title => "Page 1")
+      root.things << page1
+      new_child1  = Page.new(:title => "New Child 1")
+      page1.things << new_child1
+      root.save
+
+      Content.publish(@revision)
+
+      page1.hide!
+
+      result = Change.outstanding
+      change = result.detect { |change| change.page.id == page1.id }
+      change.export[:side_effects].should == {
+        :visibility => [{ :count => 1, :created_at => @now.httpdate, :old_value => false, :new_value => true}]
+      }
     end
   end
 end
