@@ -334,6 +334,7 @@ class ModificationsTest < MiniTest::Spec
         @initial_revision = 1
         @final_revision = 2
         Content.delete_revision(@initial_revision) rescue nil
+        Content.delete_revision(@final_revision) rescue nil
         S::Content.publish(@initial_revision)
       end
 
@@ -414,6 +415,58 @@ class ModificationsTest < MiniTest::Spec
               published_page.hidden?.should == editable_page.hidden?
             end
           end
+        end
+      end
+
+      should "publish the correct visibility for new child pages with un-published up-tree visibility changes xxx" do
+        page = Page.first :uid => "1"
+        page.hide!
+
+        child_page = Page.new :uid => "child"
+        page.things << child_page
+        page.save
+
+        S::Content.publish(@final_revision, [child_page.id])
+
+        S::Content.with_revision(@final_revision) do
+          published = Page.first :uid => "1.0.0"
+          published.visible?.should be_true
+          published = Page.first :uid => "child"
+          published.visible?.should be_true
+        end
+      end
+
+      should "publish the correct visibility for new child pages with published up-tree visibility changes xxx" do
+        page = Page.first :uid => "1"
+        page.hide!
+
+        child_page = Page.new :uid => "child"
+        page.things << child_page
+        page.save
+
+        S::Content.publish(@final_revision, [page.id, child_page.id])
+
+        S::Content.with_revision(@final_revision) do
+          published = Page.first :uid => "child"
+          published.visible?.should be_false
+        end
+      end
+
+      should "publish the correct visibility for child pages with un-published parent visibility changes" do
+        # if we publish changes to a child page whose parent page is hidden but that visibility change
+        # hasn't been published then the child page should be visible until the parent is published
+        page = Page.first :uid => "1"
+        page.hide!
+
+        child_page = Page.first :uid => "1.0.0"
+        child_page.slug = "changed-too"
+        child_page.save
+
+        S::Content.publish(@final_revision, [child_page.id])
+
+        S::Content.with_revision(@final_revision) do
+          published = Page.first :uid => "1.0.0"
+          published.visible?.should be_true
         end
       end
 

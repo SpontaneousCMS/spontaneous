@@ -154,6 +154,15 @@ module Spontaneous::Plugins
       # Spontaneous::Content.from(:content___n, :content___p).filter(path_like).filter(:n__page_id => :p__id).set(:n__visible => visible, :n__hidden_origin => origin)
     end
 
+    def visibility_ancestors
+      return [] if visibility_path.blank?
+      visibility_path.split(Spontaneous::VISIBILITY_PATH_SEP).map { |id| S::Content[id] }
+    end
+
+    def recalculated_hidden
+      visibility_ancestors.any? { |ancestor| ancestor.hidden? }
+    end
+
     def protect_root_visibility!
       if self.is_page? && self.is_root?
         raise "Root page is not hidable"

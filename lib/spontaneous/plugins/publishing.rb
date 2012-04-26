@@ -207,7 +207,7 @@ module Spontaneous::Plugins
             end
           end
         else # missing content (so force a publish)
-          Spontaneous::Content.insert({:id => self.id})
+          Spontaneous::Content.insert({:id => self.id, :type_sid => values[:type_sid]})
           publish = true
           first_publish = true
         end
@@ -226,12 +226,21 @@ module Spontaneous::Plugins
 
           Spontaneous::Content.where(:id => self.id).update(values)
 
+          published_values = {}
           # ancestors can have un-published changes to their paths so we can't just directly publish the current path.
           # Instead we re-calculate our path using the published version of the ancestor's path & our (potentially) updated slug.
           if self.page?
             published = self.class.first :id => self.id
-            Spontaneous::Content.where(:id => self.id).update(:path => published.calculate_path_with_slug(values[:slug]))
+            published_values[:path] = published.calculate_path_with_slug(values[:slug])
           end
+
+          # need to calculate the correct visibility for published items. I can't just take this from the editable
+          # content because up-tree visibility changes might not have been published. This kinda mess is why individual
+          # page publishing is a pain.
+
+          published_values[:hidden] = self.recalculated_hidden
+
+          Spontaneous::Content.where(:id => self.id).update(published_values)
 
           # Pages that haven't been published before can be published independently of their parents.
           # In that case we need to insert an entry for them. We can't guarantee that the published

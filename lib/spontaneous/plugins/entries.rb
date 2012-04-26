@@ -14,7 +14,6 @@ module Spontaneous::Plugins
 
     # InstanceMethods
 
-    VISIBILITY_PATH_SEP = ".".freeze
 
     # because it's possible to build content out of order
     # some relations don't necessarily get created straight away
@@ -186,7 +185,7 @@ module Spontaneous::Plugins
 
     def owner=(owner)
       super
-      self[:visibility_path] = [owner.visibility_path, owner.id].compact.join(VISIBILITY_PATH_SEP)
+      self[:visibility_path] = [owner.visibility_path, owner.id].compact.join(Spontaneous::VISIBILITY_PATH_SEP)
     end
   end # Entries
 end # Spontaneous::Plugins

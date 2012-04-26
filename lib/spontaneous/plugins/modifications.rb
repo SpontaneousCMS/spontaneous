@@ -71,7 +71,7 @@ module Spontaneous::Plugins
       def apply(revision)
         owner.with_revision(revision) do
           published = Spontaneous::Content.first :id => owner.id
-          published.propagate_visibility_state
+          published.set_visible!(!new_value)
         end
       end
 
@@ -157,7 +157,9 @@ module Spontaneous::Plugins
     end
 
     def create_visibility_modifications
-      if changed_columns.include?(:hidden)
+      # We only want to record visibility changes that originate from user action, not ones propagated
+      # from higher up the tree, hence the check against the hidden_origin.
+      if changed_columns.include?(:hidden) && hidden_origin.nil?
         if (previous_modification = local_modifications.detect { |mod| mod.type == :visibility })
           if previous_modification.old_value == hidden?
             remove_modification(:visibility)

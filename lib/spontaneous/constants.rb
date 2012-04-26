@@ -21,5 +21,7 @@ module Spontaneous
     RE_FLATTEN = /[^\.a-z0-9-]+/.freeze
     RE_FLATTEN_REPEAT = /\-+/.freeze
     RE_FLATTEN_TRAILING = /(^\-|\-$)/.freeze
+
+    VISIBILITY_PATH_SEP = ".".freeze
   end
 end
