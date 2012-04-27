@@ -78,6 +78,7 @@ module Spontaneous::Prototypes
         @extend.each { |block|
           instance_class.class_eval(&block) if block
         }
+        instance_class.prototype = self
       end
     end
 
@@ -157,7 +158,7 @@ module Spontaneous::Prototypes
         :title => title,
         :comment => comment || "",
         :writable => Spontaneous::Permissions.has_level?(user, write_level)
-      }
+      }.merge(instance_class.export(user))
     end
   end
 end

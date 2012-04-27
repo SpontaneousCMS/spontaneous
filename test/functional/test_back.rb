@@ -1089,6 +1089,47 @@ class BackTest < MiniTest::Spec
         page.pending_modifications(:visibility).first.user.should == @user
       end
     end
+
+    context "select fields xxx" do
+      setup do
+        Spontaneous.stubs(:reload!)
+      end
+
+      teardown do
+      end
+
+      should "be able to provide a static value list" do
+        # static lists should be included in the field definitions
+        field = Job.field :client, :select, :options => [["a", "Value A"], ["b", "Value B"]]
+        auth_get "/@spontaneous/types"
+
+        schema = Spot::JSON.parse(last_response.body)
+        field = schema[:"BackTest.Job"][:fields].detect { |f| f[:name] == "client" }
+        field[:option_list].should == [["a", "Value A"], ["b", "Value B"]]
+      end
+
+      should "be able to provide a dynamic value list" do
+        list = mock()
+        options = [["a", "Value A"], ["b", "Value B"]]
+        list.expects(:values).with(@job1).returns(options)
+        field = Job.field :client, :select, :options => proc { |content| list.values(content) }
+        auth_get "/@spontaneous/options/#{field.schema_id}/#{@job1.id}"
+        assert last_response.ok?,  "Expected status 200 but received #{last_response.status}"
+        result = Spot::JSON.parse(last_response.body)
+        result.should == options
+      end
+
+      should "be able to provide a dynamic value list for a box field" do
+        list = mock()
+        options = [["a", "Value A"], ["b", "Value B"]]
+        list.expects(:values).with(@job1, @job1.images).returns(options)
+        field = Job.boxes.images.instance_class.field :client, :select, :options => proc { |content, box| list.values(content, box) }
+        auth_get "/@spontaneous/options/#{field.schema_id}/#{@job1.id}/#{Job.boxes.images.schema_id}"
+        assert last_response.ok?,  "Expected status 200 but received #{last_response.status}"
+        result = Spot::JSON.parse(last_response.body)
+        result.should == options
+      end
+    end
   end
 end
 

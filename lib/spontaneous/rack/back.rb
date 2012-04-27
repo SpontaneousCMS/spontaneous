@@ -324,6 +324,13 @@ module Spontaneous
           end
         end
 
+        get '/options/:field_sid/:id/?:box_id?' do
+          content_for_request do |content, box|
+            field = (box || content).fields.sid(params[:field_sid])
+            json(field.option_list(content, box))
+          end
+        end
+
         def generate_conflict_list(content)
           field_versions = params[:fields]
           conflicts = []

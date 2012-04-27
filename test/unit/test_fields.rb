@@ -682,5 +682,37 @@ class FieldsTest < MiniTest::Spec
         @field.formatted_address.should == "Cambridge, UK"
       end
     end
+
+    context "Option fields xxx" do
+      setup do
+        @content_class = Class.new(::Piece) do
+          field :options, :select, :options => [
+            ["a", "Value A"],
+            ["b", "Value B"],
+            ["c", "Value C"]
+          ]
+        end
+        @content_class.stubs(:name).returns("ContentClass")
+        @instance = @content_class.new
+        @field = @instance.options
+      end
+
+      should "use a specific editor class" do
+        @content_class.fields.options.export(nil)[:type].should == "Spontaneous.FieldTypes.SelectField"
+      end
+
+      should "select the options class for fields named options" do
+        @content_class.field :type, :select, :options => [["a", "A"]]
+        assert @content_class.fields.options.instance_class.ancestors.include?(Spontaneous::FieldTypes::SelectField)
+      end
+
+      should "accept a json string as a value and convert it properly" do
+        @field.value = %(["a", "Value A"])
+        @field.value.should == "a"
+        @field.value(:label).should == "Value A"
+        @field.label.should == "Value A"
+        @field.unprocessed_value.should == %(["a", "Value A"])
+      end
+    end
   end
 end

@@ -32,7 +32,12 @@ Spontaneous.EditPanel = (function($, S) {
 		},
 
 		upload_values: function() {
-			var values = this.form.serializeArray();
+			var fields = this.parent_view.text_fields();
+			var values = fields.map(function(field) {
+				return field.serializedValue();
+			});
+			// console.log("field values", values)
+			// var values = this.form.serializeArray();
 			var field_data = new FormData();
 			var size = 0;
 			$.each(values, function(i, v) {
@@ -69,13 +74,13 @@ Spontaneous.EditPanel = (function($, S) {
 		},
 
 		upload_conflict: function(conflict_data) {
-			console.log('conflicted_fields', conflict_data)
+			// console.log('conflicted_fields', conflict_data)
 			var dialogue = new S.ConflictedFieldDialogue(this, conflict_data);
 			dialogue.open();
 		},
 
 		conflicts_resolved: function(conflict_list) {
-			console.log('conflicts resolved', conflict_list)
+			// console.log('conflicts resolved', conflict_list)
 			var ff = this.parent_view.field_list(), conflicts = {};
 			for (var i =0, ii = conflict_list.length; i < ii; i++) {
 				var conflict = conflict_list[i];
@@ -84,7 +89,7 @@ Spontaneous.EditPanel = (function($, S) {
 			for (var i = 0, ii = ff.length; i < ii; i++) {
 				var field = ff[i], conflict = conflicts[field.schema_id()];
 				if (conflict) {
-					console.log(">>> conflicts_resolved", field, conflict.version)
+					// console.log(">>> conflicts_resolved", field, conflict.version)
 					field.set_edited_value(conflict.value);
 					field.set_version(conflict.version);
 				}

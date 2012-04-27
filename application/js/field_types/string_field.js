@@ -181,6 +181,12 @@ Spontaneous.FieldTypes.StringField = (function($, S) {
 		},
 		conflict_view: function(dialogue, conflict) {
 			return new StringFieldConflictView(dialogue, conflict);
+		},
+		serializedValue: function() {
+			return {
+				name: this.form_name(),
+				value: this.edited_value()
+			};
 		}
 	});
 

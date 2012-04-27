@@ -25,13 +25,14 @@ module Spontaneous
           end
         end
       end
-      # def self.prototype=(prototype)
-      #   @prototype = prototype
-      # end
 
-      # def self.prototype
-      #   @prototype
-      # end
+      def self.prototype=(prototype)
+        @prototype = prototype
+      end
+
+      def self.prototype
+        @prototype
+      end
 
       def self.accepts
         %w(text/.+)
@@ -43,6 +44,12 @@ module Spontaneous
         end
       end
 
+
+      # Provides the ability for specific field types to customize the schema values
+      # they return to the UI
+      def self.export(user)
+        {}
+      end
 
       attr_accessor :owner, :name, :unprocessed_value, :template_params, :version
       attr_reader   :processed_values
