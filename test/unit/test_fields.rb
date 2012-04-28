@@ -683,7 +683,7 @@ class FieldsTest < MiniTest::Spec
       end
     end
 
-    context "Option fields xxx" do
+    context "Option fields" do
       setup do
         @content_class = Class.new(::Piece) do
           field :options, :select, :options => [
@@ -704,6 +704,12 @@ class FieldsTest < MiniTest::Spec
       should "select the options class for fields named options" do
         @content_class.field :type, :select, :options => [["a", "A"]]
         assert @content_class.fields.options.instance_class.ancestors.include?(Spontaneous::FieldTypes::SelectField)
+      end
+
+      should "accept a list of strings as options" do
+        @content_class.field :type, :select, :options => ["a", "b"]
+        @instance = @content_class.new
+        @instance.type.option_list.should == [["a", "a"], ["b", "b"]]
       end
 
       should "accept a json string as a value and convert it properly" do

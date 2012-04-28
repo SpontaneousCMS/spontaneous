@@ -5,15 +5,23 @@ module Spontaneous::FieldTypes
   #
   # Options for the select are provided by passing an :options value in the field config.
   #
-  # This form gives a fixed list of options:
+  # This form gives a fixed list of options whose values & labels are the same:
   #
-  # class Something < Piece
-  #   field :choices, :select, :options => [ ["value1", "Label 1"], ["value2", "Label 2"] ]
-  # end
+  #   class Something < Piece
+  #     field :choices, :select, :options => [ "First Option", "Second Option" ]
+  #   end
   #
+  # This will generate a select tag showing "First Option" and "Second Option" in the
+  # editing UI.
   #
-  # But you can provide a dynamic set by passing a Proc as the value of
-  # the :options parameter:
+  # If you want to have the generated <option/> tag values to be different from the label,
+  # then pass an array of arrays as the options:
+  #
+  #   class Something < Piece
+  #     field :choices, :select, :options => [ ["value1", "Label 1"], ["value2", "Label 2"] ]
+  #   end
+  #
+  # You can provide a dynamic set by passing a Proc as the value of the :options parameter:
   #
   #   field :choices, :select, :options => proc { |page, box|
   #     Things.all.map { |thing| [thing.id, thing.name] }
@@ -21,10 +29,11 @@ module Spontaneous::FieldTypes
   #
   # In this case the options list will be generated dynamically every time the field is edited.
   #
-  # To retrieve the selected value, use the standard field.value form. In the case of the
-  # example above, the field would return either "value1" or "value2".
+  # To retrieve the selected value from the field, use the standard field.value form.
+  # In the case of the example above, the field would return either "value1" or "value2".
   #
-  # To retrieve the associated label use field.value(:label) or field.label
+  # To retrieve the associated label use `field.value(:label)` or `field.label`
+  # ("Value 1" or "Value 2" in the exampel above).
   #
   class SelectField < Field
     include Spontaneous::Plugins::Field::EditorClass
@@ -35,7 +44,19 @@ module Spontaneous::FieldTypes
     end
 
     def self.configured_option_list
-      prototype.options[:options]
+      @configured_option_list ||= normalize_options_list(prototype.options[:options])
+    end
+
+    def self.normalize_options_list(options)
+      return options if options.is_a?(Proc)
+      options.map { |opt|
+        case opt
+        when Array
+          opt
+        else
+          [opt, opt]
+        end.map { |opt| opt.to_s }
+      }
     end
 
     def self.export(user)
@@ -46,10 +67,10 @@ module Spontaneous::FieldTypes
       })
     end
 
-    def option_list(content, box)
+    def self.option_list(owner)
       case (opts = configured_option_list)
       when Proc
-        opts.call(content, box)
+        opts.call(owner)
       when Array
         opts
       else
@@ -57,8 +78,8 @@ module Spontaneous::FieldTypes
       end
     end
 
-    def configured_option_list
-      prototype.options[:options]
+    def option_list
+      self.class.option_list(self.owner)
     end
 
     def outputs

@@ -1090,7 +1090,7 @@ class BackTest < MiniTest::Spec
       end
     end
 
-    context "select fields xxx" do
+    context "select fields" do
       setup do
         Spontaneous.stubs(:reload!)
       end
@@ -1122,8 +1122,8 @@ class BackTest < MiniTest::Spec
       should "be able to provide a dynamic value list for a box field" do
         list = mock()
         options = [["a", "Value A"], ["b", "Value B"]]
-        list.expects(:values).with(@job1, @job1.images).returns(options)
-        field = Job.boxes.images.instance_class.field :client, :select, :options => proc { |content, box| list.values(content, box) }
+        list.expects(:values).with(@job1.images).returns(options)
+        field = Job.boxes.images.instance_class.field :client, :select, :options => proc { |box| list.values(box) }
         auth_get "/@spontaneous/options/#{field.schema_id}/#{@job1.id}/#{Job.boxes.images.schema_id}"
         assert last_response.ok?,  "Expected status 200 but received #{last_response.status}"
         result = Spot::JSON.parse(last_response.body)
