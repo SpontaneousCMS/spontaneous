@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha2'
-  s.date              = '2012-04-13'
+  s.date              = '2012-05-03'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -71,8 +71,6 @@ Gem::Specification.new do |s|
   s.add_dependency('foreman', ["~> 0.22.0"])
   s.add_dependency('simultaneous', ["~> 0.4"])
   s.add_dependency('rack-async', ["~> 0.1.0"])
-  s.add_dependency('xapian-full', ["~> 1.2.3"])
-  s.add_dependency('xapian-fu', ["~> 1.3"])
   s.add_dependency('nokogiri', ["~> 1.5.0"])
   s.add_dependency('public_suffix', ["~> 1.0"])
   s.add_dependency('coffee-script', ["~> 2.2.0"])
@@ -138,6 +136,7 @@ Gem::Specification.new do |s|
     application/js/field_types/image_field.js
     application/js/field_types/long_string_field.js
     application/js/field_types/markdown_field.js
+    application/js/field_types/select_field.js
     application/js/field_types/string_field.js
     application/js/field_types/webvideo_field.js
     application/js/image.js
@@ -214,6 +213,8 @@ Gem::Specification.new do |s|
     application/static/item-buttons.png
     application/static/location-arrow.png
     application/static/logo-400px-transparent.png
+    application/static/loop_alt1-white.svg
+    application/static/loop_alt1.svg
     application/static/missing.png
     application/static/orange-down-arrow.png
     application/static/page-browser-next.png
@@ -251,6 +252,8 @@ Gem::Specification.new do |s|
     db/migrations/20120106171423_visibility_path.rb
     db/migrations/20120107124541_owner_id.rb
     db/migrations/20120305112647_site_modification_time.rb
+    db/migrations/20120418153903_add_ownership_of_content.rb
+    db/migrations/20120423175416_add_pending_modifications.rb
     docs/recipe-interface-screenshot.png
     lib/cutaneous.rb
     lib/cutaneous/context_helper.rb
@@ -316,6 +319,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/field_types/location_field.rb
     lib/spontaneous/field_types/long_string_field.rb
     lib/spontaneous/field_types/markdown_field.rb
+    lib/spontaneous/field_types/select_field.rb
     lib/spontaneous/field_types/string_field.rb
     lib/spontaneous/field_types/webvideo_field.rb
     lib/spontaneous/generators.rb
@@ -384,6 +388,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/plugins/instance_code.rb
     lib/spontaneous/plugins/layouts.rb
     lib/spontaneous/plugins/media.rb
+    lib/spontaneous/plugins/modifications.rb
     lib/spontaneous/plugins/page/formats.rb
     lib/spontaneous/plugins/page/request.rb
     lib/spontaneous/plugins/page/site_timestamps.rb
@@ -499,7 +504,6 @@ Gem::Specification.new do |s|
     lib/spontaneous/version.rb
     spontaneous.gemspec
     test/disabled/test_slots.rb
-    test/experimental/test_cutaneous.rb
     test/experimental/test_features.rb
     test/fixtures/application/js/test.js
     test/fixtures/application/static/favicon.ico
@@ -705,8 +709,6 @@ Gem::Specification.new do |s|
     test/javascript/env.js
     test/javascript/test_dom.rb
     test/javascript/test_markdown.rb
-    test/slow/test_publishing.rb
-    test/slow/test_visibility.rb
     test/support/custom_matchers.rb
     test/support/timing.rb
     test/test_helper.rb
@@ -717,9 +719,11 @@ Gem::Specification.new do |s|
     test/unit/test_assets.rb
     test/unit/test_authentication.rb
     test/unit/test_boxes.rb
+    test/unit/test_changesets.rb
     test/unit/test_config.rb
     test/unit/test_content.rb
     test/unit/test_content_inheritance.rb
+    test/unit/test_cutaneous.rb
     test/unit/test_extensions.rb
     test/unit/test_fields.rb
     test/unit/test_formats.rb
@@ -730,13 +734,16 @@ Gem::Specification.new do |s|
     test/unit/test_layouts.rb
     test/unit/test_logger.rb
     test/unit/test_media.rb
+    test/unit/test_modifications.rb
     test/unit/test_page.rb
     test/unit/test_permissions.rb
     test/unit/test_piece.rb
     test/unit/test_plugins.rb
     test/unit/test_prototype_set.rb
     test/unit/test_prototypes.rb
+    test/unit/test_publishing.rb
     test/unit/test_render.rb
+    test/unit/test_revisions.rb
     test/unit/test_schema.rb
     test/unit/test_search.rb
     test/unit/test_serialisation.rb
@@ -747,6 +754,7 @@ Gem::Specification.new do |s|
     test/unit/test_table_scoping.rb
     test/unit/test_templates.rb
     test/unit/test_type_hierarchy.rb
+    test/unit/test_visibility.rb
   ]
   # = MANIFEST =
 

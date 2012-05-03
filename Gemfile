@@ -2,6 +2,9 @@ source :rubygems
 
 gemspec
 
+gem 'xapian-full', "~> 1.2.3"
+gem 'xapian-fu', "~> 1.3"
+
 gem 'simultaneous', :path => "/Users/garry/Dropbox/Development/spontaneous3/simultaneous"
 
 group :development do

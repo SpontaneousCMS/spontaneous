@@ -7,6 +7,11 @@ gem 'mysql2', '~> 0.2'
 # Deploy with Capistrano
 gem 'capistrano', '~> 2.9'
 
+# If you want to enable the built in search functionality then you must un-comment
+# the xapian-full & xapian-fu dependencies below. They are not included by default
+# because the xapian library takes a very long time to build.
+#gem 'xapian-full', "~> 1.2.3"
+#gem 'xapian-fu', "~> 1.3"
 
 ## TODO: replace this path based gem with a version once the gem is live
 #gem 'spontaneous', '<%= Spontaneous::VERSION %>'
