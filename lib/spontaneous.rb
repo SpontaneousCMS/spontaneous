@@ -35,16 +35,13 @@ Sequel::Plugins::Serialization.register_format(
 )
 
 
-spontaneous = File.join(File.dirname(__FILE__), "spontaneous")
-
-Dir["#{spontaneous}/extensions/*.rb"].each { |file| require file }
-
-require "spontaneous/logger"
-require "spontaneous/constants"
-require "spontaneous/errors"
-require "spontaneous/json"
-
 module Spontaneous
+
+  require "spontaneous/logger"
+  require "spontaneous/constants"
+  require "spontaneous/errors"
+  require "spontaneous/json"
+
   include Constants
 
   def self.gem_root
@@ -177,6 +174,8 @@ module Spontaneous
   include Plugins::Application::Serialisation
   include Plugins::Application::Features
 end
+
+Dir["#{File.expand_path("../spontaneous", __FILE__)}/extensions/*.rb"].each { |file| require file }
 
 require "spontaneous/loader"
 require "spontaneous/version"
