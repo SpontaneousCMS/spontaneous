@@ -37,7 +37,7 @@ Spontaneous.FieldTypes.SelectField = (function($, S) {
 				, label = val[1]
 				, option = dom.option({"value": value}).text(label);
 				options[value] = label;
-				if (value === selected) {
+				if (value == selected) { // only == so that strings successfully match ints
 					option.attr("selected", "selected");
 				}
 				select.append(option);
