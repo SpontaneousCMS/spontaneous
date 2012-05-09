@@ -13,12 +13,12 @@ module Spontaneous
 
       class_option :no_browser, :type => :boolean, :default => false, :aliases => "-b", :desc => "Don't launch browser"
 
-      desc "#{namespace}:start", "Starts Spntaneous in development mode"
+      desc "#{namespace}:start", "Starts Spontaneous in development mode"
       def start
         File.open(".Procfile", 'wb') do |procfile|
-          procfile.write(%(back: #{binary} server:back\n))
-          procfile.write(%(front: #{binary} server:front\n))
-          procfile.write(%(simultaneous: #{binary} server:simultaneous\n))
+          procfile.write(%(back: #{binary} server:back --root=#{options.site}\n))
+          procfile.write(%(front: #{binary} server:front --root=#{options.site}\n))
+          procfile.write(%(simultaneous: #{binary} server:simultaneous --root=#{options.site}\n))
           procfile.flush
           engine = ::Foreman::Engine.new(procfile.path)
           engine.start
@@ -48,8 +48,10 @@ module Spontaneous
         boot!
         connection = options[:connection] || ::Spontaneous.config.simultaneous_connection
         fork {
+          ENV.delete("BUNDLE_GEMFILE")
           puts("#{Simultaneous.server_binary} -c #{connection} --debug")
           exec("#{Simultaneous.server_binary} -c #{connection} --debug")
+          # sleep 10
         }
         Process.wait
       end
