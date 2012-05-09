@@ -31,18 +31,16 @@ module Spontaneous
         level = nil
 
         say("\nAll fields are required:\n", :green)
-        options_login = options.login
-        begin
-          if options_login
-            attrs[:login] = options_login
-            say "Login : ".rjust(width, " ")+" ", :white
-            say options_login, :green
-            options_login = nil
-          else
+        if options.login
+          attrs[:login] = options.login
+          say "Login : ".rjust(width, " ")+" ", :white
+          say options.login, :green
+        else
+          begin
             attrs[:login] = ask "Login : ".rjust(width, " ")
-          end
-          say("Login must consist of at least 3 letters, numbers and underscores", :red) unless valid_login === attrs[:login]
-        end while attrs[:login] !~ valid_login
+            say("Login must consist of at least 3 letters, numbers and underscores", :red) unless valid_login === attrs[:login]
+          end while attrs[:login] !~ valid_login
+        end
 
         attrs[:name] = options.name || ask("Name : ".rjust(width, " "))
 
@@ -58,35 +56,36 @@ module Spontaneous
           say options.email, :green
         end
 
-        options_passwd = options.passwd
-        begin
-          if options_passwd
-            attrs[:password] = options_passwd
-            say "Password : ".rjust(width, " ")+" ", :white
-            say options_passwd, :green
-            options_passwd = nil
-          else
+        if options.passwd
+          attrs[:password] = options.passwd
+          say "Password : ".rjust(width, " ")+" ", :white
+          say options.passwd, :green
+        else
+          begin
             attrs[:password] = ask "Password : ".rjust(width, " ")
-          end
+            say("Password must be at least 6 characters long", :red) unless attrs[:password].length > 5
+          end while attrs[:password].length < 6
+        end
 
-          say("Password must be at least 6 characters long", :red) unless attrs[:password].length > 5
-        end while attrs[:password].length < 6
 
         if users == 0
           level = "root"
         else
-          options_level = options.level
-          begin
-            if options_level
-              level = options_level
-              say "User level : ".rjust(width, " ")+" ", :white
-              say options_level, :green
-              options_level = nil
-            else
-              level = ask("User level [#{levels.join(', ')}] : ")
+          if options.level
+            level = options.level
+            say "User level : ".rjust(width, " ")+" ", :white
+            say options.level, :green
+            unless levels.include?(level)
+              say("\nInvalid level '#{level}'", :red)
+              say("Valid levels are: #{levels.join(", ")}", :red)
+              exit 127
             end
-            say("Invalid level '#{level}'", :red) unless levels.include?(level)
-          end while !levels.include?(level)
+          else
+            begin
+              level = ask("User level [#{levels.join(', ')}] : ")
+              say("Invalid level '#{level}'", :red) unless levels.include?(level)
+            end while !levels.include?(level)
+          end
         end
 
         attrs[:password_confirmation] = attrs[:password]
@@ -100,6 +99,7 @@ module Spontaneous
             " - '#{a.to_s.capitalize}' #{e.first}"
           end.join("\n")
           say("\nInvalid user details:\n"+errors, :red)
+          exit 127
         end
       end
     end
