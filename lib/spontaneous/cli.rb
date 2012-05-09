@@ -42,14 +42,14 @@ module Spontaneous
         end
       end
 
-      def prepare(task)
+      def prepare(task, mode = nil)
         if options.help?
           help(task.to_s)
           raise SystemExit
         end
         ENV["SPOT_ENV"] ||= options.environment.to_s
         ENV["RACK_ENV"] = ENV["SPOT_ENV"] # Also set this for middleware
-        ENV["SPOT_MODE"] ||= options.mode.to_s
+        ENV["SPOT_MODE"] = mode.to_s unless mode.nil?
         chdir(options.site)
         unless File.exist?('config/boot.rb')
           puts "=> Could not find boot file in: #{options.chdir}/config/boot.rb\n=> Are you sure this is a Spontaneous site?"
@@ -83,6 +83,7 @@ module Spontaneous
     autoload :Adapter,  "spontaneous/cli/adapter"
     autoload :Base,     "spontaneous/cli/base"
     autoload :Site,     "spontaneous/cli/site"
+    autoload :User,     "spontaneous/cli/user"
   end
 end
 

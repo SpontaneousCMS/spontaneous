@@ -127,54 +127,6 @@ module Spontaneous
         say "  >> Done"
       end
 
-      desc :adduser, "Add a user"
-      def adduser
-        prepare :adduser
-        boot!
-        users = Spontaneous::Permissions::User.count
-        attrs = {}
-        width = 12
-        valid_login = /^[a-z0-9_]{3,}$/
-        levels = Spontaneous::Permissions::UserLevel.all.map(&:to_s)
-        level = nil
-
-        say("\nAll fields are required:\n", :green)
-        begin
-          attrs[:login] = ask "Login : ".rjust(width, " ")
-          say("Login must consist of at least 3 letters, numbers and underscores", :red) unless valid_login === attrs[:login]
-        end while attrs[:login] !~ valid_login
-
-        attrs[:name] = ask "Name : ".rjust(width, " ")
-        attrs[:email] = ask "Email : ".rjust(width, " ")
-
-        begin
-          attrs[:password] = ask "Password : ".rjust(width, " ")
-          say("Password must be at least 6 characters long", :red) unless attrs[:password].length > 5
-        end while attrs[:password].length < 6
-
-        if users == 0
-          level = "root"
-        else
-          begin
-            level = ask("User level [#{levels.join(', ')}] : ")
-            say("Invalid level '#{level}'", :red) unless levels.include?(level)
-          end while !levels.include?(level)
-        end
-
-        attrs[:password_confirmation] = attrs[:password]
-        user = Spontaneous::Permissions::User.new(attrs)
-
-        if user.save
-          user.update(:level => level)
-          say("\nUser '#{user.login}' created with level '#{user.level}'", :green)
-        else
-          errors = user.errors.map do | a, e |
-            " - '#{a.to_s.capitalize}' #{e.first}"
-          end.join("\n")
-          say("\nInvalid user details:\n"+errors, :red)
-        end
-      end
-
       private
 
 
