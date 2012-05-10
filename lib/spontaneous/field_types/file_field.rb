@@ -58,6 +58,10 @@ module Spontaneous::FieldTypes
         :processed_value => processed_values
       })
     end
+
+    def path
+      value(:html)
+    end
   end
 
   FileField.register

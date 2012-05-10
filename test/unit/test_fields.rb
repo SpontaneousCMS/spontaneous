@@ -765,6 +765,7 @@ class FieldsTest < MiniTest::Spec
         end
         @field.value(:html).should =~ %r{/media/.+/vimlogo.pdf$}
         @field.value.should =~ %r{/media/.+/vimlogo.pdf$}
+        @field.path.should == @field.value
         @field.value(:filesize).should == 2254
         @field.filesize.should == 2254
         @field.value(:filename).should == "vimlogo.pdf"
