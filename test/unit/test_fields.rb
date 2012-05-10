@@ -720,5 +720,71 @@ class FieldsTest < MiniTest::Spec
         @field.unprocessed_value.should == %(["a", "Value A"])
       end
     end
+
+    context "File fields" do
+      setup do
+        @content_class = Class.new(::Piece)
+        @prototype = @content_class.field :file
+        @content_class.stubs(:name).returns("ContentClass")
+        @instance = @content_class.create
+        @field = @instance.file
+      end
+
+      should "have a distinct editor class" do
+        @prototype.instance_class.editor_class.should == "Spontaneous.FieldTypes.FileField"
+      end
+
+      should "adopt any field called 'file'" do
+        assert @field.is_a?(Spontaneous::FieldTypes::FileField), "Field should be an instance of FileField but instead has the following ancestors #{ @prototype.instance_class.ancestors }"
+      end
+
+      should "copy files to the media folder" do
+        path = File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__)
+        assert File.exists?(path), "Test file #{path} does not exist"
+        File.open(path, 'rb') do |file|
+          @field.value = {
+            :tempfile => file,
+            :type => "application/pdf",
+            :filename => "vimlogo.pdf"
+          }
+        end
+        url = @field.value
+        path = File.join File.dirname(Spontaneous.media_dir), url
+        assert File.exist?(path), "Media file should have been copied into place"
+      end
+
+      should "generate the requisite file metadata" do
+        path = File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__)
+        assert File.exists?(path), "Test file #{path} does not exist"
+        File.open(path, 'rb') do |file|
+          @field.value = {
+            :tempfile => file,
+            :type => "application/pdf",
+            :filename => "vimlogo.pdf"
+          }
+        end
+        @field.value(:html).should =~ %r{/media/.+/vimlogo.pdf$}
+        @field.value.should =~ %r{/media/.+/vimlogo.pdf$}
+        @field.value(:filesize).should == 2254
+        @field.filesize.should == 2254
+        @field.value(:filename).should == "vimlogo.pdf"
+        @field.filename.should == "vimlogo.pdf"
+      end
+
+      should "just accept the given value if passed a path to a non-existant file" do
+        @field.value = "/images/nosuchfile.rtf"
+        @field.value.should ==  "/images/nosuchfile.rtf"
+        @field.filename.should == "nosuchfile.rtf"
+        @field.filesize.should == 0
+      end
+
+      should "copy the given file if passed a path to an existing file" do
+        path = File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__)
+        @field.value = path
+        @field.value.should =~ %r{/media/.+/vimlogo.pdf$}
+        @field.filename.should == "vimlogo.pdf"
+        @field.filesize.should == 2254
+      end
+    end
   end
 end

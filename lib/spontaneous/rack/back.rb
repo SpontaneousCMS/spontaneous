@@ -401,7 +401,7 @@ module Spontaneous
             if target.field_writable?(user, field.name)
               # version = params[:version].to_i
               # if version == field.version
-              field.unprocessed_value = file
+              field.value = file
               content.save
               json(field.export(user))
               # else
@@ -425,7 +425,7 @@ module Spontaneous
                 instance = type.new
                 box.insert(position, instance)
                 field = instance.field_for_mime_type(file[:type])
-                field.unprocessed_value = file
+                field.value = file
                 instance.save
                 content.save
                 json({
@@ -615,7 +615,7 @@ module Spontaneous
             # version = params[:version].to_i
             # if version == field.version
             Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-              field.unprocessed_value = {
+              field.value = {
                 :filename => params[:filename],
                 :tempfile => combined
               }
@@ -642,7 +642,7 @@ module Spontaneous
                 box.insert(position, instance)
                 field = instance.field_for_mime_type(params[:mime_type])
                 Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-                  field.unprocessed_value = {
+                  field.value = {
                     :filename => params[:filename],
                     :tempfile => combined
                   }

@@ -126,15 +126,13 @@ $target-name-size: 14px;
   -webkit-box-align: $aligning;
   -moz-box-align: $aligning;
 }
-@mixin box-flex {
-	-webkit-box-flex: 1;
-	-moz-box-flex: 1;
-	box-flex: 1;
+@mixin box-flex($flex: 1) {
+	-webkit-box-flex: $flex;
+	-moz-box-flex: $flex;
+	box-flex: $flex;
 }
 .box-flexible {
-	-webkit-box-flex: 1;
-	-moz-box-flex: 1;
-	box-flex: 1;
+	@include box-flex(1);
 }
 
 .no-select {

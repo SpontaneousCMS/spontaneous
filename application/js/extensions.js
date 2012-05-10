@@ -58,9 +58,9 @@ function $A(iterable) {
 
 	$.extend(Number.prototype, {
 		to_filesize: function() {
-			var thou = 1000, units = [" bytes", ' KB', ' MB', ' GB'],
+			var thou = 1000, units = [" B", ' kB', ' MB', ' GB'],
 			power = Math.floor(Math.log(this) / Math.log(thou))
-			return this / (Math.pow(thou, power)) + units[power]
+			return Math.round(this / (Math.pow(thou, power))) + units[power]
 		}
 	});
 

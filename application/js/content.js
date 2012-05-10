@@ -62,33 +62,25 @@ Spontaneous.Content = (function($, S) {
 			return list;
 		}.cache(),
 
+		// fields that should be listed in the main field column
 		text_fields: function() {
-			var fields = [], all_fields = this.field_list();
-			for (var i = 0, ii = all_fields.length; i < ii; i++) {
-				var f = all_fields[i];
-				if (!f.is_image()) {
-					fields.push(f);
-				}
-			}
-			return fields;
+			return this.filter_fields(function(f) { return !f.is_image(); });
+		},
+		// fields that should be saved as strings
+		string_fields: function() {
+			return this.filter_fields(function(f) { return !f.is_file(); });
 		},
 		image_fields: function() {
-			var fields = [], all_fields = this.field_list();
-			for (var i = 0, ii = all_fields.length; i < ii; i++) {
-				var f = all_fields[i];
-				if (f.is_image()) {
-					fields.push(f);
-				}
-			}
-			return fields;
+			return this.filter_fields(function(f) { return f.is_image(); });
 		},
 		file_fields: function() {
+			return this.filter_fields(function(f) { return f.is_file(); });
+		},
+		filter_fields: function(filter) {
 			var fields = [], all_fields = this.field_list();
 			for (var i = 0, ii = all_fields.length; i < ii; i++) {
 				var f = all_fields[i];
-				if (f.is_file()) {
-					fields.push(f);
-				}
+				if (filter(f)) { fields.push(f); }
 			}
 			return fields;
 		},

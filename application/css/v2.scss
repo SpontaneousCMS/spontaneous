@@ -598,6 +598,91 @@ img.missing {
 
 .fields-preview-text + .fields-preview-image {}
 
+.file-field {
+	@extend .preview-value;
+	position: relative;
+	width: 100%;
+
+	@include display-box;
+	.file-drop {
+
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		border: solid 1px transparent;
+		&.drop-active {
+			border-color: $action;
+		}
+		z-index:1;
+
+		.drop-upload-outer {
+			@include rounded(4px);
+			border: solid 1px #333;
+			position: absolute;
+			height: 7px;
+			left: 0;
+			right: 0;
+			top: 2px;
+			padding: 0 1px;
+
+			.drop-upload-inner {
+				@include rounded(3px);
+				position: relative;
+				margin-right: 2px;
+				top: 1px;
+				background-color: #333;
+				height: 5px;
+			}
+		}
+	}
+
+	.filename, .filesize {
+		@include box-flex(1);
+		@extend .interface;
+		text-transform: none;
+		position: relative;
+		top: -1px;
+		z-index:0;
+	}
+	.filename {
+		@include box-flex(2);
+		word-wrap: break-word;
+		font-style: italic;
+		// max-width: 90%;
+		overflow: auto;
+		height: auto;
+	}
+	.filesize {
+		text-align: right;
+		min-width: 40px;
+	}
+	&.uploading {
+		.filename, .filesize {
+			display: none;
+		}
+	}
+}
+
+.editing-panel .field-group .fieldtypes-filefield {
+	.value {
+		padding: 0;
+	}
+	.file-field {
+		height: 36px;
+		.file-drop:hover {
+			border-color: $action;
+		}
+		.filesize {
+			padding-right: $unit/2;
+		}
+		.filename {
+			padding-left: $unit/2;
+		}
+	}
+}
+
 #page-slots.slots {
 	height: 100%;
 

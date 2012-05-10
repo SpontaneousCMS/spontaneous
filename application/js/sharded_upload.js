@@ -88,7 +88,7 @@ Spontaneous.ShardedUpload = (function($, S) {
 		onload: function(event) {
 		},
 		onloadend: function(event) {
-			console.error('Shard#onloadend: shard upload failed', event);
+			console.log('Shard#onloadend: shard upload complete', event);
 		},
 		onreadystatechange: function(event) {
 			var xhr = event.currentTarget;

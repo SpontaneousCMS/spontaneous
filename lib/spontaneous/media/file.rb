@@ -37,6 +37,10 @@ module Spontaneous::Media
       F.extname(filename)
     end
 
+    def filesize
+      F.size(source)
+    end
+
     def storage
       @storage ||= Spontaneous::Site.storage(mimetype)
     end

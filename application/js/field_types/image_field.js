@@ -40,15 +40,15 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			this._progress_bar = null;
 		},
 
-		progress_bar: function() {
-			if (!this._progress_bar) {
-				var progress_outer = dom.div('.drop-upload-outer').hide();
-				var progress_inner = dom.div('.drop-upload-inner').css('width', 0);
-				progress_outer.append(progress_inner);
-				this._progress_bar = progress_inner;
-			}
-			return this._progress_bar;
-		},
+		// progress_bar: function() {
+		// 	if (!this._progress_bar) {
+		// 		var progress_outer = dom.div('.drop-upload-outer').hide();
+		// 		var progress_inner = dom.div('.drop-upload-inner').css('width', 0);
+		// 		progress_outer.append(progress_inner);
+		// 		this._progress_bar = progress_inner;
+		// 	}
+		// 	return this._progress_bar;
+		// },
 
 
 		upload_progress: function(position, total) {
@@ -149,17 +149,10 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 
 			dropper.get(0).addEventListener('drop', drop, true);
 			dropper.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
+			this.value_wrap = outer;
 			this.drop_target = dropper;
 			this.preview_img = img;
 			return outer;
-		},
-		upload_values: function() {
-			var file = this.selected_files[0];
-			S.UploadManager.replace(this, file);
-		},
-		upload_conflict: function(conflict_data) {
-			var dialogue = new S.ConflictedFieldDialogue(this, conflict_data);
-			dialogue.open();
 		},
 		conflicts_resolved: function(resolution_list) {
 			console.log('conflicts_resolved', resolution_list)
@@ -327,8 +320,14 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return wrap;
 		},
 
+		get_input: function() {
+			console.log("FileField", "#get_input")
+			this.input = this.generate_input();
+			return this.input;
+		},
+
 		edited_value: function() {
-			return this.input().val();
+			return this.input.val();
 		},
 		cancel_edit: function() {
 			this.image.attr('src', this.original_value().src);
@@ -345,7 +344,8 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		set_edited_value: function(value) {
 			this.preview_img.attr('src', value);
 			this.callSuper(value);
-		}
+		},
+		accept_mimetype: "image/*",
 	});
 
 	ImageField.ConflictView = ImageFieldConflictView;

@@ -271,6 +271,13 @@ module Spontaneous
         @unprocessed_value = new_value
       end
 
+      def method_missing(method, *args)
+        if outputs.include?(method)
+          value(method)
+        else
+          super
+        end
+      end
     end
   end
 end

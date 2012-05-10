@@ -32,7 +32,7 @@ Spontaneous.EditPanel = (function($, S) {
 		},
 
 		upload_values: function() {
-			var fields = this.parent_view.text_fields();
+			var fields = this.parent_view.string_fields();
 			var values = fields.map(function(field) {
 				return field.serializedValue();
 			});
@@ -245,6 +245,8 @@ Spontaneous.EditPanel = (function($, S) {
 		},
 		field_edit: function(field) {
 			var d = dom.div('.field');
+			console.log("field_edit", field.type)
+			d.addClass(field.type.type.toLowerCase().split(".").splice(1).join("-"));
 			// d.append($(dom.label, {'class':'name', 'for':field.css_id()}).html(field.label()));
 			var label = dom.label('.name', {'for':field.css_id()}).html(field.label());
 			if (field.type.comment) {
