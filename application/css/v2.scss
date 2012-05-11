@@ -604,6 +604,8 @@ img.missing {
 	width: 100%;
 
 	@include display-box;
+	@include box-pack(center);
+
 	.file-drop {
 
 		position: absolute;
@@ -667,18 +669,32 @@ img.missing {
 
 .editing-panel .field-group .fieldtypes-filefield {
 	.value {
-		padding: 0;
+		// padding: 0;
 	}
 	.file-field {
-		height: 36px;
+		// height: 36px;
+		cursor: pointer;
+
 		.file-drop:hover {
-			border-color: $action;
+			// border-color: $action;
+		}
+		.filename, .filesize {
+			margin-top: 3px;
 		}
 		.filesize {
 			padding-right: $unit/2;
 		}
 		.filename {
 			padding-left: $unit/2;
+		}
+		.choose {
+			@include button(#333);
+			display: block;
+			padding-left: 6px;
+			padding-right: 6px;
+		}
+		&:hover .choose {
+			@include button;
 		}
 	}
 }

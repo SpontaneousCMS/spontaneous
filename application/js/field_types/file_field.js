@@ -124,6 +124,7 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 			var input = this.input();
 			var filename_info = dom.div('.filename');
 			var filesize_info = dom.div('.filesize');
+			var choose_files  = dom.a('.choose').text("Choose file...");
 
 			var set_info = function(filename, filesize) {
 				filename_info.text(filename);
@@ -155,7 +156,9 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 
 			input.change(onchange);
 
-			var dropper = dom.div('.file-drop').click(onclick);
+			var dropper = dom.div('.file-drop');
+
+			dropper.add(choose_files).click(onclick);
 
 			// dropper.append(filename_info, filesize_info)
 			wrap.append(dropper);
@@ -197,7 +200,7 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 				var s = value.html.split('/'), filename = s[s.length - 1];
 				set_info(filename, value.filesize);
 			}
-			wrap.append(input, filename_info, filesize_info);
+			wrap.append(input, choose_files, filename_info, filesize_info);
 
 
 			return wrap;
