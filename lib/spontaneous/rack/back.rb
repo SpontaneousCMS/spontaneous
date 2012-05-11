@@ -721,12 +721,17 @@ module Spontaneous
         }
 
 
+        # Forward all GETs to the page resolution method
         get '*' do
-          path = params[:splat][0]
-
-          render_path(path)
+          render_path(params[:splat][0])
         end
 
+        # Forward all POSTs to the page resolution method
+        post '*' do
+          render_path(params[:splat][0])
+        end
+
+        # Override the S::Rack::Public method to add in some cache-busting headers
         def render_page(page, format = :html, local_params = {})
           now = Time.now.to_formatted_s(:rfc822)
           response.headers[HTTP_EXPIRES] = now

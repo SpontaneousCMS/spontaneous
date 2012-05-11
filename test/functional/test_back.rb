@@ -470,6 +470,14 @@ class BackTest < MiniTest::Spec
         assert last_response.ok?, "Should return 200 but got #{last_response.status}"
         last_response.body.should =~ /square = function/
       end
+
+      should "accept POST requests" do
+        Project.expects(:posted!).with(@project1)
+        Project.request :post do
+          Project.posted!(page)
+        end
+        post "/project1"
+      end
     end
 
     context "static files" do
