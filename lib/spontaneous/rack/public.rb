@@ -13,6 +13,7 @@ module Spontaneous
       attr_accessor :page
 
       def render_path(path)
+        @template_params = {}
         find_page!(path)
 
         response = catch(:halt) do
@@ -86,6 +87,11 @@ module Spontaneous
         page = Spontaneous::Site[page] if String === page
         @page = page
         status(status)
+      end
+
+      def render(page, template_params = {})
+        @template_params = template_params
+        show(page)
       end
 
       REDIRECTS = {
@@ -190,7 +196,7 @@ module Spontaneous
 
         if output.public?
           content_type(output.mime_type)
-          render_page(@page, output)
+          render_page(@page, output, @template_params)
         else
           not_found!
         end

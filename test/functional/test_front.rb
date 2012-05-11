@@ -285,6 +285,19 @@ class FrontTest < MiniTest::Spec
         last_response.body.should == "/about.html\n"
         last_response.headers["X-Works"].should == "Yes"
       end
+
+      should "allow passing of template params & a page to the render call" do
+        SitePage.layout do
+          "{{ teeth }}"
+        end
+        SitePage.request do
+          render page, :teeth => "white"
+        end
+        get '/about'
+        assert last_response.status == 200
+        last_response.body.should == "white"
+      end
+
       # should "handle anything that responds to #render(format)" do
       #   show = mock()
       #   show.stubs(:render).returns("mocked")
