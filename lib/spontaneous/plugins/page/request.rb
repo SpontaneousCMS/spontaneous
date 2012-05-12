@@ -63,10 +63,20 @@ module Spontaneous::Plugins::Page
         @request_blocks ||= {}
       end
 
+
+      METHOD_MAP = {"GET" => :get, "POST" => :post, "PUT" => :put, "DELETE" => :delete, "HEAD" => :head }.freeze
+
+      # Translate Rack's uppercase string methods to the symbols used internally
+      def normalize_method(method)
+        return method if method.is_a?(Symbol)
+        METHOD_MAP[method]
+      end
+
       # Tests for existance of a request handler for a method
       # Used by the publishing mechanism to determine which template bucket a
       # published page should be placed in.
       def dynamic?(method = :get)
+        method = normalize_method(method)
         request_blocks.has_key?(method) && !request_blocks[method].nil?
       end
 

@@ -204,7 +204,7 @@ module Spontaneous
 
       def render_page(page, output, local_params = {})
         response.body = output.render(local_params.merge({
-          :params => request.params,
+          :params  => params, # use sinatras indifferent params
           :request => request,
           :session => request.session
         }))

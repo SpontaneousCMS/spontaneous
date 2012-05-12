@@ -210,7 +210,7 @@ module Spontaneous::Render
       def output_path(revision, output)
         ext = nil
         template_dynamic = Spontaneous.template_engine.is_dynamic?(output)
-        path = Spontaneous::Render.output_path(revision, @page, self, extension, template_dynamic)
+        path = Spontaneous::Render.output_path(revision, self, template_dynamic)
 
         dir = File.dirname(path)
         FileUtils.mkdir_p(dir) unless File.exist?(dir)

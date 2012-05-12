@@ -54,7 +54,9 @@ module Spontaneous
         def call!(env)
           @env = env
           @response = ::Sinatra::Response.new
-          @request = ::Sinatra::Request.new(env)
+          @request  = ::Sinatra::Request.new(env)
+          @params   = indifferent_params(@request.params)
+
           render_path(@request.path_info)
         end
       end

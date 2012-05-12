@@ -19,7 +19,7 @@ module Spontaneous
           render = rerender(content, output, params)
         else
           # first test for dynamic template
-          template = Spontaneous::Render.output_path(revision, content, output, extension, true)
+          template = Spontaneous::Render.output_path(revision, output, true, request.request_method)
 
           if File.exists?(template)
             context = context_class(request_renderer, output).new(content, output.name, params)
@@ -29,7 +29,7 @@ module Spontaneous
             # if no dynamic template exists then try for a static file
             # this case will normally be handled by the proxy server (nginx, apache...)
             # in production environments
-            template = Spontaneous::Render.output_path(revision, content, output)
+            template = Spontaneous::Render.output_path(revision, output, false, request.request_method)
 
             if File.exists?(template)
               render = File.open(template)

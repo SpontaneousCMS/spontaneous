@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha2'
-  s.date              = '2012-05-03'
+  s.date              = '2012-05-12'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -57,7 +57,7 @@ Gem::Specification.new do |s|
   s.add_dependency('yajl-ruby', ["~> 1.1"])
   s.add_dependency('erubis', ["~> 2.6"])
   s.add_dependency('fog', ["~> 1.1.1"])
-  s.add_dependency('sinatra', ["~> 1.3.0"])
+  s.add_dependency('sinatra', ["= 1.3.2"])
   s.add_dependency('rack', ["~> 1.4.1"])
   s.add_dependency('thin', ["~> 1.2"])
   s.add_dependency('sass', ["~> 3.1.4"])
@@ -290,6 +290,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/cli/site.rb
     lib/spontaneous/cli/sync.rb
     lib/spontaneous/cli/tasks.rb
+    lib/spontaneous/cli/user.rb
     lib/spontaneous/collections/box_set.rb
     lib/spontaneous/collections/change_set.rb
     lib/spontaneous/collections/entry_set.rb
@@ -315,6 +316,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/field_types.rb
     lib/spontaneous/field_types/date_field.rb
     lib/spontaneous/field_types/field.rb
+    lib/spontaneous/field_types/file_field.rb
     lib/spontaneous/field_types/image_field.rb
     lib/spontaneous/field_types/location_field.rb
     lib/spontaneous/field_types/long_string_field.rb
@@ -585,6 +587,7 @@ Gem::Specification.new do |s|
     test/fixtures/images/size.jpg
     test/fixtures/images/size.png24
     test/fixtures/images/size.png8
+    test/fixtures/images/vimlogo.pdf
     test/fixtures/layouts/layouts/custom1.html.cut
     test/fixtures/layouts/layouts/custom1.pdf.cut
     test/fixtures/layouts/layouts/custom1.xml.cut

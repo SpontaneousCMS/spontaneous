@@ -58,9 +58,9 @@ class FrontTest < MiniTest::Spec
     last_request.env['rack.session']
   end
 
-	def formats(format_list)
-		format_list.map { |f| Page.format_for(f) }
-	end
+  def formats(format_list)
+    format_list.map { |f| Page.format_for(f) }
+  end
 
   context "Public pages" do
     setup do
@@ -296,6 +296,17 @@ class FrontTest < MiniTest::Spec
         get '/about'
         assert last_response.status == 200
         last_response.body.should == "white"
+      end
+
+      should "give access to the request params within the controller" do
+        SitePage.layout { "{{ params[:horse] }}*{{ equine }}" }
+        SitePage.request :post do
+          value = params[:horse]
+          render page, :equine => value
+        end
+        post '/about', :horse => "dancing"
+        assert last_response.status == 200
+        last_response.body.should == "dancing*dancing"
       end
 
       # should "handle anything that responds to #render(format)" do
@@ -542,7 +553,7 @@ class FrontTest < MiniTest::Spec
       end
 
       should "pass the format onto the page if the action returns it to the render call" do
-				about.class.outputs :html, :xml
+        about.class.outputs :html, :xml
         about.class.layout do
           "${path}.${format}"
         end
@@ -552,7 +563,7 @@ class FrontTest < MiniTest::Spec
       end
 
       should "use the format within the action if required" do
-				about.class.outputs :html, :xml
+        about.class.outputs :html, :xml
         get "/about/@comments/format.xml"
         assert last_response.ok?
         last_response.body.should == "xml"

@@ -5,23 +5,31 @@ module Spontaneous
   module Render
 
     class << self
-      def output_path(revision, page, output, extension = nil, template_dynamic = false)
-        output_path_with_root(revision_root(revision), revision, page, output, extension, template_dynamic)
+      def output_path(revision, output, template_dynamic = false, request_method = "GET")
+        output_path_with_root(revision_root(revision), revision, output, template_dynamic, request_method)
       end
 
-      def output_path_with_root(root, revision, page, output, extension = nil, template_dynamic = false)
-        ext = output.extension(template_dynamic)
-        segment = (template_dynamic || output.dynamic?) ? "dynamic" : (page.dynamic? ? "protected" : "static")
-        dir = root / segment / page.path
-        path = "#{dir}#{ext}"
-        # root is a special case, as always
-        path = dir / "/index#{ext}" if page.path == "/"
-        path
+      def output_path_with_root(root, revision, output, template_dynamic = false, request_method = "GET")
+        segment = case
+                  when template_dynamic || output.dynamic?
+                    "dynamic"
+                  when output.page.dynamic?(request_method)
+                    "protected"
+                  else
+                    "static"
+                  end
+        path = output.page.path
+        dir  = root / segment / path
+        ext  = output.extension(template_dynamic)
+
+        file = "#{dir}#{ext}"
+        file = dir / "/index#{ext}" if path == "/" # root is a special case, as always
+        file
       end
 
 
-      def redirect_path(revision, page, format)
-        output_path_with_root(Spontaneous.revision_dir(revision, "/"), revision, page, format)
+      def redirect_path(revision, output)
+        output_path_with_root(Spontaneous.revision_dir(revision, "/"), revision, output)
       end
 
       def asset_url(file = nil)

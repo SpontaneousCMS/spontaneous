@@ -256,6 +256,10 @@ class PublishingTest < MiniTest::Spec
             file = revision_dir / "static#{page.path}.html"
             result = "Page: '#{page.title}' 2\n"
           end
+          unless File.exist?(file)
+            puts file
+            puts `ls -l #{File.dirname(file)}`
+          end
           assert File.exists?(file), "File '#{file}' should exist"
           File.read(file).should == result
         end
@@ -331,6 +335,5 @@ class PublishingTest < MiniTest::Spec
         end
       end
     end
-
   end
 end
