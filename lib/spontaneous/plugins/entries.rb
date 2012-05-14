@@ -64,7 +64,9 @@ module Spontaneous::Plugins
     end
 
     def entry_modified!(modified_entry)
-      @__ignore_page_modification = modified_entry && modified_entry.page?
+      # See plugins/modifications.rb for details of __ignore_page_modification ... basically
+      # it stops the parent page appearing in the publishing list when a new page is added.
+      @__ignore_page_modification = modified_entry && modified_entry.added? && modified_entry.page?
       self.entry_store = all_contents.serialize_db
     end
 
@@ -156,6 +158,16 @@ module Spontaneous::Plugins
       end
 
       entry
+    end
+
+    # added is my private mechanism for tracking if a content item is new
+    def before_create
+      @added = true
+      super
+    end
+
+    def added?
+      @added
     end
 
     def update_position(position)

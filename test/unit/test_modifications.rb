@@ -127,12 +127,24 @@ class ModificationsTest < MiniTest::Spec
       page.modified_at.to_i.should == @now.to_i + 3600
     end
 
-    should "not update the parent page's timestamp on addition of a child page" do
+    should "not update the parent page's timestamp on addition of a child page xxx" do
       stub_time(@now+1000)
       page = Page.first :uid => "0"
       page.things << Page.new
       page.save.reload
       page.modified_at.to_i.should == @now.to_i
+    end
+
+    should "update the parent page's modification time if child pages are re-ordered xxx" do
+      page = Page.first :uid => "0.0.0"
+      page.things << Page.new(:uid => "0.0.0.0")
+      page.things << Page.new(:uid => "0.0.0.1")
+      page.save
+      page = Page.first :uid => "0.0.0"
+      stub_time(@now+1000)
+      child = page.things.first
+      child.update_position(1)
+      page.reload.modified_at.to_i.should == @now.to_i + 1000
     end
 
     should "update a page's timestamp on modification of its slug" do
@@ -418,7 +430,7 @@ class ModificationsTest < MiniTest::Spec
         end
       end
 
-      should "publish the correct visibility for new child pages with un-published up-tree visibility changes xxx" do
+      should "publish the correct visibility for new child pages with un-published up-tree visibility changes" do
         page = Page.first :uid => "1"
         page.hide!
 
@@ -436,7 +448,7 @@ class ModificationsTest < MiniTest::Spec
         end
       end
 
-      should "publish the correct visibility for new child pages with published up-tree visibility changes xxx" do
+      should "publish the correct visibility for new child pages with published up-tree visibility changes" do
         page = Page.first :uid => "1"
         page.hide!
 
