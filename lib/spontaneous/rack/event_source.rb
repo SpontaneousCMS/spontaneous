@@ -3,29 +3,15 @@
 module Spontaneous
   module Rack
     class EventSource < ::Simultaneous::Rack::EventSource
-      # def initialize
-      #   @messenger = ::Simultaneous::Rack::EventSource.new
-      #   @app = @messenger.app
-      # end
+      def push(client)
+        @lock.synchronize { @clients << client }
+      end
 
-      # def call(env)
-      #   user = env[S::Rack::ACTIVE_USER]
-      #   if user.nil?
-      #     unauthorized!
-      #   else
-      #     request = ::Rack::Request.new(env)
-      #     key = request[S::Rack::KEY_PARAM]
-      #     if ::S::Permissions::AccessKey.valid?(key, user)
-      #       @app.call(env)
-      #     else
-      #       unauthorized!
-      #     end
-      #   end
-      # end
+      alias_method :<<, :push
 
-      # def unauthorized!
-      #   [401, {}, "Unauthorized"]
-      # end
+      def delete(client)
+        @lock.synchronize { removed = @clients.delete(client) }
+      end
     end
   end
 end

@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha2'
-  s.date              = '2012-05-12'
+  s.date              = '2012-05-14'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -48,33 +48,33 @@ Gem::Specification.new do |s|
 
   ## List your runtime dependencies here. Runtime dependencies are those
   ## that are needed for an end user to actually USE your code.
-  s.add_dependency('bundler', ["> 1.0.15"])
-  s.add_dependency('rake', ["~> 0.9.2"])
-  s.add_dependency('rdoc', ["~> 3.9.4"])
-  s.add_dependency('activesupport', ["~> 3.2.0"])
-  s.add_dependency('home_run', ["~> 1.0.0"])
-  s.add_dependency('sequel', ["~> 3.31"])
-  s.add_dependency('yajl-ruby', ["~> 1.1"])
-  s.add_dependency('erubis', ["~> 2.6"])
-  s.add_dependency('fog', ["~> 1.1.1"])
-  s.add_dependency('sinatra', ["= 1.3.2"])
-  s.add_dependency('rack', ["~> 1.4.1"])
-  s.add_dependency('thin', ["~> 1.2"])
-  s.add_dependency('sass', ["~> 3.1.4"])
-  s.add_dependency('stringex', ["= 1.3"])
-  s.add_dependency('mini_magick', ["~> 3.3"])
-  s.add_dependency('thor', ["~> 0.14.6"])
-  s.add_dependency('base58', ["~> 0.1.0"])
-  s.add_dependency('kramdown', ["~> 0.13.3"])
-  s.add_dependency('launchy', ["~> 0.4.0"])
-  s.add_dependency('shine', ["~> 0.6"])
-  s.add_dependency('foreman', ["~> 0.22.0"])
-  s.add_dependency('simultaneous', ["~> 0.4"])
-  s.add_dependency('rack-async', ["~> 0.1.0"])
-  s.add_dependency('nokogiri', ["~> 1.5.0"])
-  s.add_dependency('public_suffix', ["~> 1.0"])
-  s.add_dependency('coffee-script', ["~> 2.2.0"])
-  s.add_dependency('therubyracer', ['~> 0.9.10'])
+  s.add_dependency('activesupport',   ["~> 3.2.0"])
+  s.add_dependency('base58',          ["~> 0.1.0"])
+  s.add_dependency('bundler',         ["> 1.0.15"])
+  s.add_dependency('coffee-script',   ["~> 2.2.0"])
+  s.add_dependency('erubis',          ["~> 2.6"])
+  s.add_dependency('fog',             ["~> 1.1.1"])
+  s.add_dependency('foreman',         ["~> 0.22.0"])
+  s.add_dependency('home_run',        ["~> 1.0.0"])
+  s.add_dependency('kramdown',        ["~> 0.13.3"])
+  s.add_dependency('launchy',         ["~> 0.4.0"])
+  s.add_dependency('mini_magick',     ["~> 3.3"])
+  s.add_dependency('nokogiri',        ["~> 1.5.0"])
+  s.add_dependency('public_suffix',   ["~> 1.0"])
+  s.add_dependency('rack',            ["~> 1.4.1"])
+  s.add_dependency('rake',            ["~> 0.9.2"])
+  s.add_dependency('rdoc',            ["~> 3.9.4"])
+  s.add_dependency('sass',            ["~> 3.1.4"])
+  s.add_dependency('sequel',          ["~> 3.31"])
+  s.add_dependency('shine',           ["~> 0.6"])
+  s.add_dependency('simultaneous',    ["~> 0.4"])
+  s.add_dependency('sinatra',         ["= 1.3.2"])
+  s.add_dependency('sinatra-contrib', ["~> 1.3.1"])
+  s.add_dependency('stringex',        ["= 1.3"])
+  s.add_dependency('therubyracer',    ['~> 0.9.10'])
+  s.add_dependency('thin',            ["~> 1.2"])
+  s.add_dependency('thor',            ["~> 0.14.6"])
+  s.add_dependency('yajl-ruby',       ["~> 1.1"])
 
   ## List your development dependencies here. Development dependencies are
   ## those that are only needed during development

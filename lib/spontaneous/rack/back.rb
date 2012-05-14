@@ -2,6 +2,8 @@
 
 require 'sass'
 
+require 'sinatra/streaming'
+
 module Spontaneous
   module Rack
     module Back
@@ -16,6 +18,20 @@ module Spontaneous
           @messenger.deliver_event(event)
         }
         @messenger
+      end
+
+      class EventSource < ServerBase
+        helpers Sinatra::Streaming
+
+        get "/", :provides => "text/event-stream" do
+          headers "X-Accel-Buffering" =>  "no"
+          stream(:keep_open) do |out|
+            messenger = Spontaneous::Rack::Back.messenger
+            out.errback  { messenger.delete(out) }
+            out.callback { messenger.delete(out) }
+            messenger << out
+          end
+        end
       end
 
       def self.application
@@ -80,7 +96,7 @@ module Spontaneous
           map "#{NAMESPACE}/events" do
             use CookieAuthentication
             use QueryAuthentication
-            run messenger.app
+            run EventSource
           end
 
           map "#{NAMESPACE}/event" do
