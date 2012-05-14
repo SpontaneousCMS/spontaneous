@@ -469,6 +469,7 @@ class BackTest < MiniTest::Spec
         get "/js/coffeescript.js"
         assert last_response.ok?, "Should return 200 but got #{last_response.status}"
         last_response.body.should =~ /square = function/
+        last_response.content_type.should == "application/javascript;charset=utf-8"
       end
 
       should "accept POST requests" do

@@ -30,7 +30,7 @@ module Spontaneous::Rack
 
     def render_coffeescript(template)
       script = CoffeeScript.compile(File.read(template))
-      [200, {'Content-type' => 'text/css'}, StringIO.new(script)]
+      [200, {'Content-type' => 'application/javascript;charset=utf-8'}, StringIO.new(script)]
     end
 
     def template_path(path)
