@@ -235,11 +235,13 @@ module Spontaneous
       alias_method :empty?, :blank?
 
 
-      def /(field)
+      def or(field)
         return field if self.blank?
         self
       end
-      alias_method :'|', :/
+
+      alias_method :'/', :or
+      alias_method :'|', :or
 
       protected
 

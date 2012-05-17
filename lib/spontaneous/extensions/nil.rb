@@ -2,9 +2,11 @@
 
 module Spontaneous::Extensions
   module NilClass
-    def /(alternative)
+    def or(alternative)
       alternative
     end
+
+    alias_method :/, :or
   end # String
 end # Extensions
 

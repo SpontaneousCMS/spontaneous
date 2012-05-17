@@ -8,6 +8,13 @@ module Spontaneous
         File.join(self, path.to_s)
       end
 
+      def or(alternative)
+        return alternative if empty?
+        self
+      end
+
+      alias_method :|, :or
+
       HTML_ESCAPE_TABLE = {
         '&' => '&amp;',
         '<' => '&lt;',

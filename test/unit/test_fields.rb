@@ -361,6 +361,15 @@ class FieldsTest < MiniTest::Spec
         a.title = "a"
         (a.title | b.title).should == a.title
       end
+
+      should "return the item which isnt empty when using the or method" do
+        a = CC.new(:title => "")
+        b = CC.new(:title => "b")
+        (a.title.or(b.title)).should == b.title
+        a.title = "a"
+        (a.title.or(b.title)).should == a.title
+      end
+
     end
 
     context "Field value persistence" do

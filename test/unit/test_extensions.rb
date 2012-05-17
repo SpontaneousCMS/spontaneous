@@ -9,11 +9,24 @@ class ExtensionsTest < MiniTest::Spec
       ("this" / "that").should == "this/that"
       ("/this" / "/that").should == "/this/that"
     end
+
+    should "override the | method to return the argument if empty" do
+      ("" | "that").should == "that"
+      ("this" | "that").should == "this"
+    end
+
+    should "override the or method to return the argument if empty" do
+      ("".or("that")).should == "that"
+      ("this".or("that")).should == "this"
+    end
   end
 
   context "Nil" do
     should "always return the argument for the slash switch" do
       (nil / "something").should == "something"
+    end
+    should "always return the argument for the #or switch" do
+      (nil.or("something")).should == "something"
     end
   end
 
