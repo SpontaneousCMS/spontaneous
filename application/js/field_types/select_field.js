@@ -25,7 +25,7 @@ Spontaneous.FieldTypes.SelectField = (function($, S) {
 		},
 
 		optionsURL: function() {
-			return ["/options", this.type.schema_id].join("/") + this.content.uid();
+			return ["/options", this.type.schema_id, this.content.id()].join("/");
 		},
 
 		append_select: function(wrapper, option_list) {

@@ -341,13 +341,9 @@ module Spontaneous
         end
 
         get '/options/:field_sid/:id/?:box_id?' do
-          begin
           content_for_request do |content, box|
             field = (box || content).fields.sid(params[:field_sid])
             json(field.option_list)
-          end
-          rescue => e
-            p e
           end
         end
 

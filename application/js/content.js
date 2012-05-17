@@ -16,6 +16,7 @@ Spontaneous.Content = (function($, S) {
 		id: function() {
 			return this.content.id;
 		},
+
 		is_page: function() {
 			return this.type().is_page();
 		},
