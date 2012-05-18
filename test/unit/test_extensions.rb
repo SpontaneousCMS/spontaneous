@@ -19,6 +19,12 @@ class ExtensionsTest < MiniTest::Spec
       ("".or("that")).should == "that"
       ("this".or("that")).should == "this"
     end
+
+    should "return self for #value" do
+      "this".value.should == "this"
+      "this".value(:html).should == "this"
+      "this".value(:smsx).should == "this"
+    end
   end
 
   context "Nil" do

@@ -13,7 +13,11 @@ module Spontaneous
         self
       end
 
-      alias_method :|, :or
+      alias_method :'|', :or
+
+      def value(format = :html)
+        self
+      end
 
       HTML_ESCAPE_TABLE = {
         '&' => '&amp;',
