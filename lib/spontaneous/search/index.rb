@@ -75,6 +75,11 @@ module Spontaneous::Search
           prototype = field.prototype
           values[prototype.index_id(self)] << field.indexable_value if prototype.in_index?(self)
         end
+        if content.respond_to?(:add_index)
+          content.add_index.each do |k, v|
+            values[k.to_s] << v
+          end
+        end
       end
       result = Hash[ values.map { |id, values| [id, values.join("\n")] } ]
       result[:id] = page.id
