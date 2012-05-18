@@ -75,15 +75,25 @@ module Spontaneous::Search
           prototype = field.prototype
           values[prototype.index_id(self)] << field.indexable_value if prototype.in_index?(self)
         end
-        if content.respond_to?(:add_index)
-          content.add_index.each do |k, v|
-            values[k.to_s] << v
-          end
-        end
+        insert_additional_indexable_values(content, values)
       end
       result = Hash[ values.map { |id, values| [id, values.join("\n")] } ]
       result[:id] = page.id
       result
+    end
+
+    def insert_additional_indexable_values(content, values)
+      if content.respond_to?(:additional_search_values)
+        add = content.additional_search_values
+        case add
+        when Array
+          add.each do |row|
+            row.each { |k, v| values[k.to_s] << v }
+          end
+        when Hash
+          add.each { |k, v| values[k.to_s] << v }
+        end
+      end
     end
 
     def fields

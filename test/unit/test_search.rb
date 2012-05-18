@@ -456,7 +456,7 @@ class SearchTest < MiniTest::Spec
           include_types PageClass1, PieceClass1
         end
         class ::PageClass1
-          def add_index
+          def additional_search_values
             { "search_key1" => "value 1",
               "search_key2" => "value 2" }
           end
@@ -470,12 +470,33 @@ class SearchTest < MiniTest::Spec
         }
       end
 
+      should "deal with arrays of additional search index values" do
+        index = S::Site.index :four do
+          include_types PageClass1, PieceClass1
+        end
+        class ::PageClass1
+          def additional_search_values
+            [ { "search_key1" => "value 1",
+                "search_key2" => "value 2" },
+              { "search_key1" => "value 3",
+                "search_key2" => "value 4" } ]
+          end
+        end
+        index.indexable_content(@page1).should == {
+          :id => @page1.id,
+          @a.schema_id.to_s => "a value 1",
+          @g.schema_id.to_s => "g value 1\ng value 2\ng value 3",
+          "search_key1" => "value 1\nvalue 3",
+          "search_key2" => "value 2\nvalue 4"
+        }
+      end
+
       should "allow for pieces to append their own custom indexable values" do
         index = S::Site.index :four do
           include_types PageClass1, PieceClass1
         end
         class ::PieceClass1
-          def add_index
+          def additional_search_values
             { "search_key3" => "value 3",
               "search_key4" => "value 4" }
           end
