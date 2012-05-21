@@ -140,7 +140,7 @@ Spontaneous.ShardedUpload = (function($, S) {
 			form.append('version', this.target_version);
 			form.append('shards', this.hashes().join(','));
 			form.append('mime_type', this.mime_type());
-			form.append('filename', this.file.fileName);
+			form.append('filename', File.filename(this.file));
 			this.post(this.path(), form);
 		},
 		path: function() {
