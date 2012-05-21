@@ -253,7 +253,8 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 					this._edited_value = url;
 					this.image.attr('src', url)
 					window.URL.revokeObjectURL(url);
-					set_info(file.fileName, file.fileSize, null, null)
+					console.log(file)
+					set_info(File.filename(file), file.fileSize, null, null)
 				}
 			}.bind(this);
 

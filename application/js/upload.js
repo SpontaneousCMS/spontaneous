@@ -17,8 +17,7 @@ Spontaneous.Upload = (function($, S) {
 			this.failure_count = 0;
 			this.file = file;
 			this.insert_position = insert_position;
-			console.log('upload insert at', insert_position)
-			this.name = this.file.fileName;
+			this.name = File.filename(this.file);
 			this._total = this.file.size;
 			this.upload_id = upload_id++;
 		},

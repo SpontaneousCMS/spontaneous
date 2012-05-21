@@ -33,6 +33,11 @@ function $A(iterable) {
 
 (function($) {
 
+	// Cope with changing File API
+	File.filename = function(file) {
+		return file.fileName || file.name;
+	};
+
 	var function_id = 0;
 
 	if (!(typeof Function.prototype.bind === 'function')) {

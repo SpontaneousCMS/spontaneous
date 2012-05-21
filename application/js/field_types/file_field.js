@@ -139,7 +139,7 @@ Spontaneous.FieldTypes.FileField = (function($, S) {
 					this.selected_files = files;
 					this._edited_value = url;
 					window.URL.revokeObjectURL(url);
-					set_info(file.fileName, file.fileSize)
+					set_info(File.filename(file), file.fileSize)
 				}
 			}.bind(this);
 
