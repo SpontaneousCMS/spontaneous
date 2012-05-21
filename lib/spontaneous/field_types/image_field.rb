@@ -53,7 +53,7 @@ module Spontaneous
 
       def run_optimization(binary, args)
         return unless binary
-        command = [binary, args, "2>/dev/null", ">/dev/null"].join(" ")
+        command = [binary, args].join(" ")
         Spontaneous.system(command)
       end
     end
