@@ -65,5 +65,6 @@ module Spontaneous
     autoload :CSS,                  'spontaneous/rack/css'
     autoload :JS,                   'spontaneous/rack/js'
     autoload :SSE,                  'spontaneous/rack/sse'
+    autoload :FiberPool,            'spontaneous/rack/fiber_pool'
   end
 end

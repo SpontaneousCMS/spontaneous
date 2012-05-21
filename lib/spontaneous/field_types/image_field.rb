@@ -39,32 +39,21 @@ module Spontaneous
       end
 
       def run
-        Tempfile.open("optimize") do |temp|
-          temp.binmode
-          jpegoptim!(@source_image, temp.path)
-          jpegtran!(temp.path, @source_image)
-        end
+        jpegoptim!(@source_image)
+        jpegtran!(@source_image)
       end
 
-      def jpegoptim!(input, output)
-        # puts `ls -lh #{input}`
+      def jpegoptim!(input)
         run_optimization(self.class.jpegoptim_binary, "-o --strip-all --preserve --force #{input}")
-        # puts `ls -lh #{input}`
-        # ::Spontaneous.system("/usr/bin/env cp #{input} #{output}")
-        # puts `ls -lh #{output}`
       end
 
-      def jpegtran!(input, output)
-        # puts `ls -lh #{input}`
-        run_optimization(self.class.jpegtran_binary, "-optimize -progressive -copy none -outfile #{output} #{output}")
-        # puts `ls -lh #{output}`
+      def jpegtran!(input)
+        run_optimization(self.class.jpegtran_binary, "-optimize -progressive -copy none -outfile #{input} #{input}")
       end
 
       def run_optimization(binary, args)
-        puts "run_optimization #{binary.inspect}"
         return unless binary
         command = [binary, args].join(" ")
-        puts command
         Spontaneous.system(command)
       end
     end
@@ -217,7 +206,6 @@ module Spontaneous
       end
 
       def preprocess(image_path)
-        p image_path
         filename = mimetype = nil
         case image_path
         when Hash
