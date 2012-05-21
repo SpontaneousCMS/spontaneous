@@ -44,7 +44,7 @@ module Spontaneous
       end
 
       def jpegoptim!(input)
-        run_optimization(self.class.jpegoptim_binary, "-o --strip-all --preserve --force #{input}")
+        run_optimization(self.class.jpegoptim_binary, "-o -q --strip-all --preserve --force #{input}")
       end
 
       def jpegtran!(input)
@@ -53,7 +53,7 @@ module Spontaneous
 
       def run_optimization(binary, args)
         return unless binary
-        command = [binary, args].join(" ")
+        command = [binary, args, "2>/dev/null", ">/dev/null"].join(" ")
         Spontaneous.system(command)
       end
     end
