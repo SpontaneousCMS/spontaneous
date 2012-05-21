@@ -7,6 +7,68 @@ require 'delegate'
 module Spontaneous
   module FieldTypes
 
+    class ImageOptimizer
+      def self.run(source_image)
+        self.new(source_image).run
+      end
+
+      def self.jpegtran_binary
+        @jpegtran ||= find_binary("jpegtran")
+      end
+
+      def self.jpegoptim_binary
+        @jpegoptim ||= find_binary("jpegoptim")
+      end
+
+      def self.find_binary(name)
+        binary = `which #{name}`.chomp
+        return nil if binary.length == 0
+        binary
+      end
+
+      # def self.find_binary(name)
+      #   binaries = ["/usr/bin/env #{name}"]
+      #   puts "testing name #{name}"
+      #   binaries.detect { |bin| status = Spontaneous.system("#{bin} -h"); p status; status == 1  }.tap do |b|
+      #     puts "found #{b.inspect}"
+      #   end
+      # end
+
+      def initialize(source_image)
+        @source_image = source_image
+      end
+
+      def run
+        Tempfile.open("optimize") do |temp|
+          temp.binmode
+          jpegoptim!(@source_image, temp.path)
+          jpegtran!(temp.path, @source_image)
+        end
+      end
+
+      def jpegoptim!(input, output)
+        # puts `ls -lh #{input}`
+        run_optimization(self.class.jpegoptim_binary, "-o --strip-all --preserve --force #{input}")
+        # puts `ls -lh #{input}`
+        # ::Spontaneous.system("/usr/bin/env cp #{input} #{output}")
+        # puts `ls -lh #{output}`
+      end
+
+      def jpegtran!(input, output)
+        # puts `ls -lh #{input}`
+        run_optimization(self.class.jpegtran_binary, "-optimize -progressive -copy none -outfile #{output} #{output}")
+        # puts `ls -lh #{output}`
+      end
+
+      def run_optimization(binary, args)
+        puts "run_optimization #{binary.inspect}"
+        return unless binary
+        command = [binary, args].join(" ")
+        puts command
+        Spontaneous.system(command)
+      end
+    end
+
     module ImageFieldUtilities
       attr_accessor :template_params
 
@@ -155,6 +217,7 @@ module Spontaneous
       end
 
       def preprocess(image_path)
+        p image_path
         filename = mimetype = nil
         case image_path
         when Hash
@@ -271,6 +334,10 @@ module Spontaneous
 
         def smush_it!
           ::Spontaneous::Utils::SmushIt.smush!(image.path, current_image_format)
+        end
+
+        def optimize!
+          ImageOptimizer.run(image.path) if current_image_format == "jpg"
         end
 
         def border_radius(radius, bg_color = nil)

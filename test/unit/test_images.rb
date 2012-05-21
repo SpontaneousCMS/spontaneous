@@ -55,6 +55,7 @@ class ImagesTest < MiniTest::Spec
       class ::ResizingImageField < FieldTypes::ImageField
         size :preview do
           width 200
+          optimize!
         end
         size :tall do
           height 200
@@ -113,6 +114,15 @@ class ImagesTest < MiniTest::Spec
         @image.reformatted.src.should =~ /\.png$/
       end
     end
+
+    context "with optimization xxx" do
+      should "run jpegoptim" do
+        Spontaneous.expects(:system).with(regexp_matches(/jpegoptim/)).at_least_once
+        Spontaneous.expects(:system).with(regexp_matches(/jpegtran/)).at_least_once
+        @image.value = @origin_image.to_s
+      end
+    end
+
     context "in templates" do
 
       should "render an <img/> tag in HTML format" do

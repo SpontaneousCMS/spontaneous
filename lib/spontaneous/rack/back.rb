@@ -3,6 +3,7 @@
 require 'sass'
 
 require 'sinatra/streaming'
+require 'rack/fiber_pool'
 
 module Spontaneous
   module Rack
@@ -104,7 +105,9 @@ module Spontaneous
           end
 
 
+          puts Spontaneous.async?
           map NAMESPACE do
+            # use ::Rack::FiberPool, :size => 15# if Spontaneous.async?
             use ::Rack::Lint
             use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static /js)
             use AssetsHandler

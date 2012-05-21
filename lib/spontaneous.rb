@@ -164,6 +164,7 @@ module Spontaneous
       autoload :Facets,         "spontaneous/plugins/application/facets"
       autoload :Serialisation,  "spontaneous/plugins/application/serialisation"
       autoload :Features,       "spontaneous/plugins/application/features"
+      autoload :System,         "spontaneous/plugins/application/system"
     end
   end
 
@@ -173,6 +174,7 @@ module Spontaneous
   include Plugins::Application::Facets
   include Plugins::Application::Serialisation
   include Plugins::Application::Features
+  include Plugins::Application::System
 end
 
 Dir["#{File.expand_path("../spontaneous", __FILE__)}/extensions/*.rb"].each { |file| require file }
