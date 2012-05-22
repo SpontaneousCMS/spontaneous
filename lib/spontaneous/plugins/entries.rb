@@ -197,7 +197,16 @@ module Spontaneous::Plugins
 
     def owner=(owner)
       super
+      set_visibility_path
+    end
+
+    def set_visibility_path
       self[:visibility_path] = [owner.visibility_path, owner.id].compact.join(Spontaneous::VISIBILITY_PATH_SEP)
+    end
+
+    def set_visibility_path!
+      set_visibility_path
+      save
     end
   end # Entries
 end # Spontaneous::Plugins

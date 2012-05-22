@@ -127,7 +127,7 @@ class ModificationsTest < MiniTest::Spec
       page.modified_at.to_i.should == @now.to_i + 3600
     end
 
-    should "not update the parent page's timestamp on addition of a child page xxx" do
+    should "not update the parent page's timestamp on addition of a child page" do
       stub_time(@now+1000)
       page = Page.first :uid => "0"
       page.things << Page.new
@@ -135,7 +135,7 @@ class ModificationsTest < MiniTest::Spec
       page.modified_at.to_i.should == @now.to_i
     end
 
-    should "update the parent page's modification time if child pages are re-ordered xxx" do
+    should "update the parent page's modification time if child pages are re-ordered" do
       page = Page.first :uid => "0.0.0"
       page.things << Page.new(:uid => "0.0.0.0")
       page.things << Page.new(:uid => "0.0.0.1")
@@ -479,6 +479,48 @@ class ModificationsTest < MiniTest::Spec
         S::Content.with_revision(@final_revision) do
           published = Page.first :uid => "1.0.0"
           published.visible?.should be_true
+        end
+      end
+
+      should "publish the correct visibility for immediate child pages with published parent visibility changes" do
+        Content.delete_revision(@final_revision+1) rescue nil
+        page = Page.first :uid => "1"
+
+        child_page = Page.new :uid => "newpage"
+        page.things << child_page
+        page.save
+
+        S::Content.publish(@final_revision, [page.id, child_page.id])
+
+        child_page.hidden?.should be_false
+
+        page.hide!
+
+        child_page.reload.hidden?.should be_true
+
+        S::Content.publish(@final_revision + 1, [page.id])
+
+        S::Content.with_revision(@final_revision + 1) do
+          published = Page.first :uid => "newpage"
+          published.visible?.should be_false
+        end
+        Content.delete_revision(@final_revision+1) rescue nil
+      end
+
+      should "publish the correct visibility for child pages with published parent visibility changes" do
+        page = Page.first :uid => "1"
+        child_page = Page.first :uid => "1.0.0"
+        child_page.hidden?.should be_false
+
+        page.hide!
+
+        child_page.reload.hidden?.should be_true
+
+        S::Content.publish(@final_revision, [page.id])
+
+        S::Content.with_revision(@final_revision) do
+          published = Page.first :uid => "1.0.0"
+          published.visible?.should be_false
         end
       end
 

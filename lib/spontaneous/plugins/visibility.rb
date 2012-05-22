@@ -64,7 +64,7 @@ module Spontaneous::Plugins
     end
 
     def hidden?
-      self.hidden
+      self.hidden || false
     end
 
     def hide!

@@ -48,7 +48,7 @@ module Spontaneous::Plugins
 
       def ==(other)
         super || (other.class == self.class &&
-                  other.owner == self.owner &&
+                  other.owner.id == self.owner.id &&
                   other.old_value == self.old_value &&
                   other.new_value == self.new_value)
       end
