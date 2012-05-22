@@ -254,7 +254,7 @@ Spontaneous.TopBar = (function($, S) {
 				this.publishing_state();
 				// don't turn off intermediate and replace it with an empty progress dial
 				// by making sure our progress is > 0 before switching to progress view
-				if (state === 'rendering' && (progress > 0)) {
+				if ((progress !== "*")) {
 					this.progress().update(progress);
 				} else {
 					this.progress().indeterminate();
