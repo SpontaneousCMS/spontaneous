@@ -328,6 +328,10 @@ class ContentTest < MiniTest::Spec
         @b.reload
         @b.visibility_path.should == @r.id.to_s
       end
+
+      should "ensure that child pages have their visibility paths updated" do
+        flunk "Implement this"
+      end
     end
 
 
