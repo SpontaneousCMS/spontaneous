@@ -189,6 +189,7 @@ $dialogue-title-height: 32px;
 		.change-sets {
 			@include fullsize(25px, 0, 0, 0);
 			overflow: auto;
+			padding-bottom: $unit;
 			.instructions {
 				font-family: $headline-font-family;
 				color: #999;
@@ -266,9 +267,13 @@ $dialogue-title-height: 32px;
 			.title:hover {
 				color: $action;
 			}
-			.url {
+			.url, .modification-date {
 				font-size: 10px;
 				color: #666;
+			}
+			.modification-date {
+				margin-top: 4px;
+				color: #999;
 			}
 		}
 		.add {
@@ -284,7 +289,7 @@ $dialogue-title-height: 32px;
 				@extend .interface;
 				font-size: 40px;
 				position: relative;
-				top: -5px;
+				top: 1px;
 			}
 			&:hover {
 				background-color: $action;

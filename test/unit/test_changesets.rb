@@ -194,6 +194,23 @@ class ChangeTest < MiniTest::Spec
       }
     end
 
+    should "order modified changes in reverse modification date order" do
+      root = Page.create(:title => "root")
+
+      Content.publish(@revision)
+
+      root.reload
+      page1 = Page.new(:title => "Page 1")
+      root.things << page1
+      new_child1  = Page.new(:title => "New Child 1")
+      page1.things << new_child1
+      root.save
+      last = Time.now + 100
+      S::Content.filter(:id => new_child1.id).update(:modified_at => last)
+      result = Change.outstanding
+      assert result.first.modified_at > result.last.modified_at, "Change list in incorrect order"
+    end
+
     should "provide information on side effects of publishing page with path changes" do
       root = Page.create(:title => "root")
 

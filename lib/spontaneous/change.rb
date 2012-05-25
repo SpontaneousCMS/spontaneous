@@ -14,7 +14,7 @@ module Spontaneous
       end
 
       def unpublished_pages
-        S::Page.filter { (modified_at > last_published_at) | {:first_published_at => nil} }.all
+        S::Page.filter { (modified_at > last_published_at) | {:first_published_at => nil} }.order(:modified_at.desc).all
       end
 
       def include_dependencies(page_list)
@@ -77,10 +77,15 @@ module Spontaneous
       side_effects
     end
 
+    def modified_at
+      page.modified_at
+    end
+
     def export_timestamp(timestamp)
       return nil if timestamp.nil?
       timestamp.httpdate
     end
+
     def export
       export_page(page).merge({
         :dependent => dependent.map { |p| export_page(p) }

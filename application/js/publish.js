@@ -132,10 +132,13 @@ Spontaneous.Publishing = (function($, S) {
 		panel: function() {
 			var self = this
 			, classes = ".title" + (this.isDependent() ? ".dependent" : "");
-			return dom.div(classes).text(this.title).append(dom.div('.url').text(this.url)).click(function() {
+			return dom.div(classes).text(this.title).append(dom.div('.url').text(this.url)).append(dom.div('.modification-date').text(this.modifiedAt())).click(function() {
 				S.Dialogue.close();
 				S.Location.load_id(self.id);
 			});
+		},
+		modifiedAt: function() {
+			return "Modified: " + this.modified_at;
 		}
 	});
 	var ChangeSet = new JS.Class({
@@ -146,7 +149,7 @@ Spontaneous.Publishing = (function($, S) {
 			this.selected = false;
 		},
 		page_ids: function() {
-			var ids = [this.change.id]
+			var ids = [this.change.id];
 			return ids.concat(this.dependent_pages().map(function(p) { return p.id; }));
 		},
 		panel: function() {
@@ -170,9 +173,9 @@ Spontaneous.Publishing = (function($, S) {
 			}
 			add.click(function() {
 				this.select_toggle();
-			}.bind(this))
-			inner.append(page_list, add)
-			w.append(inner)
+			}.bind(this));
+			inner.append(page_list, add);
+			w.append(inner);
 			return w;
 		},
 		selected_panel: function(id) {
