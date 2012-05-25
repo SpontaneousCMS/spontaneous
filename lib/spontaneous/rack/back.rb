@@ -33,6 +33,30 @@ module Spontaneous
         end
       end
 
+      def self.editing_app
+        ::Rack::Builder.app do
+          use Spontaneous::Rack::FiberPool, :size => 15
+          use ::Rack::Lint
+          use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static /js)
+          use AssetsHandler
+          use UnsupportedBrowserHandler
+          use SchemaModification
+          run EditingInterface
+        end
+      end
+
+      def self.preview_app
+        ::Rack::Builder.app do
+          use ::Rack::Lint
+          use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
+            :urls => %w[/],
+            :try => ['.html', 'index.html', '/index.html']
+          use Spontaneous::Rack::CSS, :root => Spontaneous.instance.paths.expanded(:public)
+          use Spontaneous::Rack::JS,  :root => Spontaneous.instance.paths.expanded(:public)
+          run Preview
+        end
+      end
+
       def self.application
         messenger = self.messenger
         app = ::Rack::Builder.new do
@@ -102,14 +126,9 @@ module Spontaneous
             run EventListener
           end
 
+
           map NAMESPACE do
-            use Spontaneous::Rack::FiberPool, :size => 15
-            use ::Rack::Lint
-            use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static /js)
-            use AssetsHandler
-            use UnsupportedBrowserHandler
-            use SchemaModification
-            run EditingInterface
+            run Spontaneous::Rack::Back.editing_app
           end
 
           map "/media" do
@@ -118,15 +137,8 @@ module Spontaneous
           end
 
           map "/" do
-            use ::Rack::Lint
-            use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
-              :urls => %w[/],
-              :try => ['.html', 'index.html', '/index.html']
-            use Spontaneous::Rack::CSS, :root => Spontaneous.instance.paths.expanded(:public)
-            use Spontaneous::Rack::JS,  :root => Spontaneous.instance.paths.expanded(:public)
-            run Preview
+            run Spontaneous::Rack::Back.preview_app
           end
-
         end
       end
 
@@ -755,3 +767,4 @@ module Spontaneous
     end
   end
 end
+

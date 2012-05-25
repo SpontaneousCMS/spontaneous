@@ -5,6 +5,13 @@ require 'sinatra/base'
 module Spontaneous
   module Rack
     module Front
+      def self.front_app
+        ::Rack::Builder.app do
+          use AroundFront
+          use Reloader if Site.config.reload_classes
+          run Server.new
+        end
+      end
       def self.application
         app = ::Rack::Builder.new do
           # use ::Rack::CommonLogger, STDERR  #unless server.name =~ /CGI/
@@ -42,12 +49,11 @@ module Spontaneous
           end
 
           map "/" do
-            use AroundFront
-            use Reloader if Site.config.reload_classes
-            run Server.new
+            run Spontaneous::Rack::Front.front_app
           end
         end
       end
+
       class Server < Sinatra::Base
         include Spontaneous::Rack::Public
 

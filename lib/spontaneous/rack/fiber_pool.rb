@@ -3,8 +3,8 @@ require 'rack/fiber_pool'
 module Spontaneous::Rack
   class FiberPool
     def initialize(app, options = {})
-      @app     = app
-      @options = options
+      @target_app = app
+      @options    = options
     end
 
     def call(env)
@@ -12,10 +12,14 @@ module Spontaneous::Rack
     end
 
     def app
+      @app ||= wrap_target_app
+    end
+
+    def wrap_target_app
       if Spontaneous.async?
-        ::Rack::FiberPool.new(@app, @options)
+        ::Rack::FiberPool.new(@target_app, @options)
       else
-        @app
+        @target_app
       end
     end
   end
