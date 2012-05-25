@@ -591,6 +591,20 @@ class FieldsTest < MiniTest::Spec
         v = vv.first
         v.user.should == @user
       end
+
+      should "have quick access to the last version" do
+        @instance.title.value = "one"
+        @instance.save.reload
+        vv = @instance.title.versions
+        v = vv.first
+        v.value.should == ""
+        @instance.title.value = "two"
+        @instance.save.reload
+        vv = @instance.title.versions
+        v = vv.first
+        v.value.should == "one"
+        @instance.title.previous_version.value.should == "one"
+      end
     end
 
     context "WebVideo fields" do

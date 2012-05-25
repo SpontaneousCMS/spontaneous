@@ -247,6 +247,10 @@ module Spontaneous
         owner.field_versions(self)
       end
 
+      def previous_version
+        versions.first
+      end
+
       def create_version
         Spontaneous::FieldVersion.create(
           :content_id => owner.id,
