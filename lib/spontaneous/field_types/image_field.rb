@@ -44,11 +44,11 @@ module Spontaneous
       end
 
       def jpegoptim!(input)
-        run_optimization(self.class.jpegoptim_binary, "-o -q --strip-all --preserve --force #{input}")
+        run_optimization(self.class.jpegoptim_binary, "-o -q --strip-all --preserve --force #{input} 2>&1 1>/dev/null")
       end
 
       def jpegtran!(input)
-        run_optimization(self.class.jpegtran_binary, "-optimize -progressive -copy none -outfile #{input} #{input}")
+        run_optimization(self.class.jpegtran_binary, "-optimize -progressive -copy none -outfile #{input} #{input} 2>/dev/null")
       end
 
       def run_optimization(binary, args)

@@ -510,6 +510,89 @@ class FieldsTest < MiniTest::Spec
       end
     end
 
+    context "Field versions xxx" do
+      setup do
+        @user = Spontaneous::Permissions::User.create(:email => "user@example.com", :login => "user", :name => "user", :password => "rootpass", :password_confirmation => "rootpass")
+        @user.reload
+
+        class ::Piece
+          field :title
+        end
+        # @content_class.stubs(:name).returns("ContentClass")
+        @instance = ::Piece.create
+      end
+
+      teardown do
+        # Object.send(:remove_const, :Piece) rescue nil
+        Spontaneous::Permissions::User.delete
+        S::Content.delete
+        S::FieldVersion.delete
+      end
+
+      should "start out as empty" do
+        assert @instance.title.versions.empty?, "Field version list should be empty"
+      end
+
+      should "be created every time a field is modified" do
+        @instance.title.value = "one"
+        @instance.save.reload
+        v = @instance.title.versions
+        v.count.should == 1
+      end
+
+      should "have a creation date" do
+        now = Time.now + 1000
+        stub_time(now)
+        @instance.title.value = "one"
+        @instance.save.reload
+        @instance.reload
+        vv = @instance.title.versions
+        v = vv.first
+        v.created_at.should == now
+      end
+
+      should "save the previous value" do
+        @instance.title.value = "one"
+        @instance.save.reload
+        vv = @instance.title.versions
+        v = vv.first
+        v.value.should == ""
+        @instance.title.value = "two"
+        @instance.save.reload
+        vv = @instance.title.versions
+        v = vv.first
+        v.value.should == "one"
+        @instance.title.value = "three"
+        @instance.save.reload
+        vv = @instance.title.versions
+        v = vv.first
+        v.value.should == "two"
+      end
+
+      should "keep a track of the version number" do
+        @instance.title.value = "one"
+        @instance.save.reload
+        vv = @instance.title.versions
+        v = vv.first
+        v.version.should == 1
+        @instance.title.value = "two"
+        @instance.save.reload
+        vv = @instance.title.versions
+        vv.count.should == 2
+        v = vv.first
+        v.version.should == 2
+      end
+
+      should "remember the responsible editor" do
+        @instance.current_editor = @user
+        @instance.title.value = "one"
+        @instance.save.reload
+        vv = @instance.title.versions
+        v = vv.first
+        v.user.should == @user
+      end
+    end
+
     context "WebVideo fields" do
       setup do
         @content_class = Class.new(::Piece) do

@@ -60,6 +60,7 @@ module Spontaneous
   autoload :Piece,            "spontaneous/piece"
   autoload :Box,              "spontaneous/box"
   autoload :FieldTypes,       "spontaneous/field_types"
+  autoload :FieldVersion,     "spontaneous/field_version"
   autoload :PagePiece,        "spontaneous/page_piece"
   autoload :Style,            "spontaneous/style"
   autoload :BoxStyle,         "spontaneous/box_style"

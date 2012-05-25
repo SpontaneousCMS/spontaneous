@@ -75,6 +75,21 @@ module Spontaneous::Plugins
       fields.saved
     end
 
+    def before_save
+      save_field_versions
+      super
+    end
+
+    def field_versions(field)
+      Spontaneous::FieldVersion.filter(:content_id => self.id, :field_sid => field.schema_id.to_s).order(:created_at.desc)
+    end
+
+    def save_field_versions
+      fields.each do |field|
+        field.create_version if field.modified?
+      end
+    end
+
     def reload
       @field_set = nil
       super

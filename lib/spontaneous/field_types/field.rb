@@ -243,6 +243,19 @@ module Spontaneous
       alias_method :'/', :or
       alias_method :'|', :or
 
+      def versions
+        owner.field_versions(self)
+      end
+
+      def create_version
+        Spontaneous::FieldVersion.create(
+          :content_id => owner.id,
+          :field_sid => self.schema_id.to_s,
+          :version => version,
+          :value => @initial_value,
+          :user => owner.current_editor)
+      end
+
       protected
 
       def load(params={}, from_db=false)
