@@ -63,7 +63,7 @@ module Spontaneous::Plugins
       end
     end
 
-    class VisibilityModification < SlugModification
+    class HiddenModification < SlugModification
       def self.type
         :visibility
       end
@@ -79,7 +79,6 @@ module Spontaneous::Plugins
         path_like = :visibility_path.like("#{owner[:visibility_path]}.#{owner.id}%")
         Spontaneous::Page.filter(path_like)
       end
-
     end
 
     class DeletionModification < SlugModification
@@ -166,7 +165,7 @@ module Spontaneous::Plugins
             return nil
           end
         end
-        append_modification VisibilityModification.new(self, current_editor, Time.now, !hidden?, hidden)
+        append_modification HiddenModification.new(self, current_editor, Time.now, !hidden?, hidden)
       end
     end
 
@@ -223,7 +222,7 @@ module Spontaneous::Plugins
     end
 
     def modification_class_map
-      Hash[[SlugModification, VisibilityModification, DeletionModification].map { |mod_class| [mod_class.type, mod_class] }]
+      Hash[[SlugModification, HiddenModification, DeletionModification].map { |mod_class| [mod_class.type, mod_class] }]
     end
   end
 end
