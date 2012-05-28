@@ -146,7 +146,7 @@ module Spontaneous::Plugins
 
       def delete_revision(revision)
         return if revision.nil?
-        database.drop_table(revision_table(revision)) if revision_exists?(revision)
+        database.drop_table?(revision_table(revision))
       end
 
       def delete_all_revisions!
