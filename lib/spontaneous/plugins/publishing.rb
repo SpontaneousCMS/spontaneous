@@ -237,10 +237,15 @@ module Spontaneous::Plugins
           # need to calculate the correct visibility for published items. I can't just take this from the editable
           # content because up-tree visibility changes might not have been published. This kinda mess is why individual
           # page publishing is a pain.
+          # However, this only applies if the item's visibility is dependent on some up-tree state. So
+          # if hidden_origin is empty (which means we have a separately calculated visibility) we want
+          # to take visibility from our own value.
 
-          published_values[:hidden] = self.recalculated_hidden
+          published_values[:hidden] = self.recalculated_hidden unless self.hidden_origin.blank?
 
-          Spontaneous::Content.where(:id => self.id).update(published_values)
+          unless published_values.empty?
+            Spontaneous::Content.where(:id => self.id).update(published_values)
+          end
 
           # Pages that haven't been published before can be published independently of their parents.
           # In that case we need to insert an entry for them. We can't guarantee that the published

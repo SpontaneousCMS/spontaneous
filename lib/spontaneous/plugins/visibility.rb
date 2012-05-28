@@ -102,14 +102,27 @@ module Spontaneous::Plugins
       self
     end
 
+    # Private: Used by visibility modifications to force a cascade of visibility
+    # state during the publish process.
+    def set_visible_with_cascade!(state)
+      set_visible(state)
+      force_visibility_cascade
+      self.save
+      self
+    end
+
     def set_visible(visible, hidden_origin = nil)
       protect_root_visibility!
       if self.visible? != visible
         raise Spontaneous::NotShowable.new(self, hidden_origin) if hidden? && visible && !showable?
         self[:hidden] = !visible
         self[:hidden_origin] = hidden_origin
-        @_visibility_modified = true
+        force_visibility_cascade
       end
+    end
+
+    def force_visibility_cascade
+      @_visibility_modified = true
     end
 
     def after_save

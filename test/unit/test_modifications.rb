@@ -353,6 +353,7 @@ class ModificationsTest < MiniTest::Spec
       teardown do
         Content.delete_revision(@initial_revision) rescue nil
         Content.delete_revision(@final_revision) rescue nil
+        Content.delete_revision(@final_revision+1) rescue nil
       end
 
       should "act on path change modifications" do
@@ -483,7 +484,6 @@ class ModificationsTest < MiniTest::Spec
       end
 
       should "publish the correct visibility for immediate child pages with published parent visibility changes" do
-        Content.delete_revision(@final_revision+1) rescue nil
         page = Page.first :uid => "1"
 
         child_page = Page.new :uid => "newpage"
@@ -504,7 +504,6 @@ class ModificationsTest < MiniTest::Spec
           published = Page.first :uid => "newpage"
           published.visible?.should be_false
         end
-        Content.delete_revision(@final_revision+1) rescue nil
       end
 
       should "publish the correct visibility for child pages with published parent visibility changes" do
@@ -523,6 +522,42 @@ class ModificationsTest < MiniTest::Spec
           published.visible?.should be_false
         end
       end
+
+      should "maintain correct published visibility for pieces xxx" do
+        page = Page.first :uid => "1"
+        piece = page.things.first
+        piece.hide!
+        S::Content.publish(@final_revision, [page.id])
+        S::Content.with_revision(@final_revision) do
+          piece = Page.first(:uid => "1").things.first
+          piece.visible?.should be_false
+        end
+
+        S::Content.publish(@final_revision+1, [page.id])
+
+        S::Content.with_revision(@final_revision+1) do
+          piece = Page.first(:uid => "1").things.first
+          piece.visible?.should be_false
+        end
+      end
+
+      should "maintain correct published visibility for pages xxx" do
+        page = Page.first :uid => "1.1.1"
+        page.hide!
+        S::Content.publish(@final_revision, [page.id])
+        S::Content.with_revision(@final_revision) do
+          page = Page.first(:uid => "1.1.1")
+          page.visible?.should be_false
+        end
+
+        S::Content.publish(@final_revision+1, [page.id])
+
+        S::Content.with_revision(@final_revision+1) do
+          page = Page.first(:uid => "1.1.1")
+          page.visible?.should be_false
+        end
+      end
+
 
       should "act on multiple modifications" do
         page = Page.first :uid => "1"

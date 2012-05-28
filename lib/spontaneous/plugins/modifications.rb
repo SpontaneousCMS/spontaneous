@@ -71,7 +71,7 @@ module Spontaneous::Plugins
       def apply(revision)
         owner.with_revision(revision) do
           published = Spontaneous::Content.first :id => owner.id
-          published.set_visible!(!new_value)
+          published.set_visible_with_cascade!(!new_value)
         end
       end
 
