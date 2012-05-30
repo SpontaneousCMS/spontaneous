@@ -268,11 +268,14 @@ $dialogue-title-height: 32px;
 				color: $action;
 			}
 			.url, .modification-date {
+				margin-top: 4px;
 				font-size: 10px;
 				color: #666;
 			}
+			.url {
+				font-size: 11px;
+			}
 			.modification-date {
-				margin-top: 4px;
 				color: #999;
 			}
 		}
