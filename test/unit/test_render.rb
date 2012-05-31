@@ -436,6 +436,45 @@ PAGE <p>DESCRIPTION</p>
       end
     end
 
+    context "Publishing renderer" do
+      setup do
+          Spontaneous::Render.cache_templates = true
+        Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
+        @temp_template_root = @site.root / "templates"
+        FileUtils.mkdir_p(@temp_template_root)
+        FileUtils.mkdir_p(@temp_template_root / "layouts")
+        @site.paths.add(:templates, @temp_template_root)
+        @template_path = @temp_template_root / "layouts/standard.html.cut"
+        @compiled_path = @temp_template_root / "layouts/standard.html.rb"
+        File.open(@template_path, "w") do |t|
+          t.write("template")
+        end
+        File.open(@compiled_path, "w") do |t|
+          t.write("@_buf << 'compiled'")
+        end
+        later = Time.now + 10
+        File.utime(later, later, @compiled_path)
+        template_mtime = File.mtime(@template_path)
+        compiled_mtime = File.mtime(@compiled_path)
+        assert compiled_mtime > template_mtime, "Compiled file should register as newer"
+        @first = PreviewRender.new(:title => "first")
+        @first.save
+      end
+
+      should "ignore compiled template file if it is older than the template" do
+        @first.render.should == "compiled"
+        File.open(@temp_template_root / "layouts/standard.html.cut", "w") do |t|
+          t.write("updated template")
+        end
+        later = Time.now + 1000
+        File.utime(later, later, @template_path)
+        template_mtime = File.mtime(@template_path)
+        compiled_mtime = File.mtime(@compiled_path)
+        assert template_mtime > compiled_mtime, "Template file should register as newer"
+        @first.render.should == "updated template"
+      end
+    end
+
     context "Published rendering" do
       setup do
         @file = ::File.expand_path("../../fixtures/templates/direct.html.cut", __FILE__)
@@ -450,7 +489,7 @@ PAGE <p>DESCRIPTION</p>
       end
     end
 
-    context "variables in templates" do
+    context "variables in render command" do
       setup do
         Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
         PreviewRender.layout :variables

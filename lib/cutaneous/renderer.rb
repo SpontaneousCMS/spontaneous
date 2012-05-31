@@ -65,6 +65,9 @@ module Cutaneous
       render(template, context)
     end
 
+    def is_newer?(test_file, compare_file)
+      File.mtime(test_file) > File.mtime(compare_file)
+    end
 
     def create_template(filepath)
       template = template_class.new(nil)
@@ -74,7 +77,7 @@ module Cutaneous
         template.filename = filepath
         if use_cache?
           cache_path = filepath[0...(-Cutaneous.extension.length)] + 'rb'
-          if test(?f, cache_path)
+          if test(?f, cache_path) && is_newer?(cache_path, filepath)
             # puts "Using cached template #{cache_path}"
             template.filename = cache_path
             template.script = File.read(cache_path)

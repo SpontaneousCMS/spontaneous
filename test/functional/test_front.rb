@@ -425,6 +425,8 @@ class FrontTest < MiniTest::Spec
           # puts `ls -l #{File.dirname(@cache_file)}`
           File.exists?(@cache_file).should be_true
           File.open(@cache_file, 'w') { |f| f.write('_buf << %Q`@cache_filed-version/#{params[\'wendy\']}`;')}
+          # Force compiled file to have a later timestamp
+          File.utime(Time.now, Time.now + 1, @cache_file)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           last_response.body.should == "@cache_filed-version/peter"
           FileUtils.rm(@cache_file)
