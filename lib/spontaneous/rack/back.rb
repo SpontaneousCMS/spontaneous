@@ -261,12 +261,12 @@ module Spontaneous
         end
 
         post "/reauthenticate" do
+          origin = "#{NAMESPACE}#{params[:origin].gsub(%r[^#{NAMESPACE}], "")}"
           if key = Spot::Permissions::AccessKey.authenticate(params[:api_key])
             set_authentication_cookie(key)
-            origin = "#{NAMESPACE}#{params[:origin]}"
             redirect origin, 302
           else
-            show_login_page( :invalid_key => true )
+            show_login_page( :invalid_key => true, :origin => origin )
           end
         end
 
