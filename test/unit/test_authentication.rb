@@ -368,7 +368,7 @@ class AuthenticationTest < MiniTest::Spec
           assert last_response.ok?, "Expected 200 but got #{last_response.status}"
         end
 
-        should "be able to logout xxx" do
+        should "be able to logout" do
           auth_post "/@spontaneous/logout"
           assert last_response.status == 401
           rack_mock_session.cookie_jar.merge(last_response.headers["set-cookie"])

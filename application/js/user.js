@@ -30,7 +30,7 @@ Spontaneous.User = (function($, S) {
 		},
 		logout: function() {
 			ajax.post("/logout", {}, function() {
-				S.Ajax.unauthorized();
+				// S.Ajax.unauthorized();
 			});
 			S.Auth.Key.remove(S.site_id);
 		},

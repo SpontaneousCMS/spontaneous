@@ -299,7 +299,7 @@ module Spontaneous
 
         post "/logout" do
           unset_authentication_cookie
-          204
+          401
         end
 
         get '/?' do
