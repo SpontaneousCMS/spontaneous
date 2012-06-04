@@ -54,6 +54,7 @@ class BackTest < MiniTest::Spec
       config.stubs(:auto_login).returns('root')
       config.stubs(:default_charset).returns('utf-8')
       config.stubs(:publishing_method).returns(:immediate)
+      config.stubs(:services).returns(nil)
       config.stubs(:site_domain).returns('example.org')
       config.stubs(:site_id).returns('example_org')
       config.stubs(:site_id).returns('example_org')
@@ -193,7 +194,7 @@ class BackTest < MiniTest::Spec
         result[:fields].map { |f| f[:name] }.should == ["title"]
       end
 
-      should "return the typelist as part of the site metadata" do
+      should "return the typelist as part of the site metadata xxx" do
         auth_get "/@spontaneous/metadata"
         assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
         last_response.content_type.should == "application/json;charset=utf-8"
@@ -219,7 +220,6 @@ class BackTest < MiniTest::Spec
       end
 
       should "return an empty list of service URLs by default xxx" do
-        Site.config.stubs(:services).returns(nil)
         auth_get "/@spontaneous/metadata"
         assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
         result = Spot::JSON.parse(last_response.body)
