@@ -12,7 +12,6 @@ module Spontaneous::Rack
         unless first_level_exceptions.any? { |e| e === request.path }
           ignore_key = second_level_exceptions.any? { |e| e === request.path }
           valid_key = ignore_key || Spontaneous::Permissions::AccessKey.valid?(params[KEY_PARAM], user)
-          halt(401, erb(:login, :views => Spontaneous.application_dir('/views'), :locals => { :login => '' })) unless (user and valid_key)
           show_login_page( :login => '' ) unless (user and valid_key)
         end
       }
