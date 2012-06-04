@@ -302,16 +302,16 @@ module Spontaneous
           json Site.root
         end
 
-        get '/user' do
-          json(user)
-        end
-
         get '/page/:id' do
           content_for_request { |content| json(content)}
         end
 
-        get '/types' do
-          json Site.schema
+        get '/metadata' do
+          json({
+            :types => Site.schema.export(user),
+            :user  => user.export,
+            :services => (Site.config.services || [])
+          })
         end
 
         get '/map/?:id?' do

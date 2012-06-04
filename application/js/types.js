@@ -72,20 +72,14 @@ Spontaneous.Types = (function($, S) {
 	});
 	var Types = new JS.Singleton({
 		include: Spontaneous.Properties,
-		init: function(callback) {
-			var done = (function(callback) {
-				return function(data) {
-					var types = {};
-					for (id in data) {
-						if (data.hasOwnProperty(id)) {
-							types[id] = new Type(data[id]);
-						}
-					}
-					Spontaneous.Types.set('types', types);
-					if (callback) { callback.call(type_map); };
-				};
-			})(callback)
-			ajax.get('/types', done);
+		loaded: function(typeData) {
+			var types = {};
+			for (id in typeData) {
+				if (typeData.hasOwnProperty(id)) {
+					types[id] = new Type(typeData[id]);
+				}
+			}
+			Spontaneous.Types.set('types', types);
 		},
 		type: function(id) {
 			return this.get('types')[id];
