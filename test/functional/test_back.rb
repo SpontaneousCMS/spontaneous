@@ -205,7 +205,6 @@ class BackTest < MiniTest::Spec
         auth_get "/@spontaneous/metadata"
         assert last_response.ok?
         result = Spot::JSON.parse(last_response.body)
-        result[:'BackTest.AdminAccess'][:fields].map { |f| f[:name] }.should == %w(title)
         result[:types][:'BackTest.AdminAccess'][:fields].map { |f| f[:name] }.should == %w(title)
       end
 
@@ -219,6 +218,23 @@ class BackTest < MiniTest::Spec
         result[:user][:developer].should  == false # although the login is root, the level is :editor
       end
 
+      should "return an empty list of service URLs by default xxx" do
+        Site.config.stubs(:services).returns(nil)
+        auth_get "/@spontaneous/metadata"
+        assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
+        result = Spot::JSON.parse(last_response.body)
+        result[:services].should == []
+      end
+
+      should "return the configured list of service URLs in the metadata xxx" do
+        Site.config.stubs(:services).returns([
+          {:title => "Google Analytics", :url => "http://google.com/analytics"},
+          {:title => "Facebook", :url => "http://facebook.com/spontaneous"}
+        ])
+        auth_get "/@spontaneous/metadata"
+        assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
+        result = Spot::JSON.parse(last_response.body)
+        result[:services].should == Site.config.services
       end
 
       should "return scripts from js dir" do

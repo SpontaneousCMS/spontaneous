@@ -180,6 +180,7 @@ class ChangeTest < MiniTest::Spec
         :url => new_child1.path,
         :published_at => nil,
         :modified_at => new_child1.modified_at.httpdate,
+        # :editor_login => "someone",
         :depth => new_child1.depth,
         :side_effects => {},
         :dependent => [{

@@ -105,7 +105,7 @@ class AuthenticationTest < MiniTest::Spec
   end
 
   def get_paths
-    %(/root /page/#{root.id} /types /map /map/#{root.id} /location/about /user)
+    %(/root /page/#{root.id} /metadata /map /map/#{root.id} /location/about)
   end
 
   context "Authentication:" do
@@ -368,18 +368,18 @@ class AuthenticationTest < MiniTest::Spec
           assert last_response.ok?, "Expected 200 but got #{last_response.status}"
         end
 
+        should "be able to logout xxx" do
+          auth_post "/@spontaneous/logout"
+          assert last_response.status == 401
+          rack_mock_session.cookie_jar.merge(last_response.headers["set-cookie"])
+          rack_mock_session.cookie_jar[Spontaneous::Rack::AUTH_COOKIE].value.should == ""
+        end
+
         # context "providing an API key in the request" do
         #   should "be able to see previously forbidden fruit" do
         #     get "/@spontaneous/root"
         #     assert last_response.ok?
         #   end
-
-        #   should "be able to load info about themselves" do
-        #     get "/@spontaneous/user"
-        #     assert last_response.ok?
-        #     Spot::JSON.parse(last_response.body).should == @editor_user.export
-        #   end
-        # end
       end
 
     end

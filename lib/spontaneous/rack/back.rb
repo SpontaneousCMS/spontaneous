@@ -260,8 +260,16 @@ module Spontaneous
           })
         end
 
+        def unset_authentication_cookie
+          response.delete_cookie(AUTH_COOKIE, {
+            :path => '/',
+            :secure => request.ssl?,
+            :httponly => true
+          })
+        end
+
         post "/reauthenticate" do
-          origin = "#{NAMESPACE}#{params[:origin].gsub(%r[^#{NAMESPACE}], "")}"
+          origin = "#{NAMESPACE}#{(params[:origin] || "").gsub(%r[^#{NAMESPACE}], "")}"
           if key = Spot::Permissions::AccessKey.authenticate(params[:api_key])
             set_authentication_cookie(key)
             redirect origin, 302
@@ -289,6 +297,10 @@ module Spontaneous
           end
         end
 
+        post "/logout" do
+          unset_authentication_cookie
+          204
+        end
 
         get '/?' do
           erb :index

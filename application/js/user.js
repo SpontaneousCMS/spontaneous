@@ -1,6 +1,8 @@
 // console.log('Loading User...')
 
 Spontaneous.User = (function($, S) {
+	var ajax = S.Ajax;
+
 	var User = new JS.Class({
 		initialize: function(user_data) {
 			this.attrs = user_data;
@@ -21,12 +23,16 @@ Spontaneous.User = (function($, S) {
 
 	var instance = new JS.Singleton({
 		include: Spontaneous.Properties,
-		load: function() {
-			S.Ajax.get('/user', this.loaded.bind(this));
-		},
+
 		loaded: function(user_data) {
 			this.user = new User(user_data);
 			this.set('user', this.user);
+		},
+		logout: function() {
+			ajax.post("/logout", {}, function() {
+				S.Ajax.unauthorized();
+			});
+			S.Auth.Key.remove(S.site_id);
 		},
 		name: function() { return this.user.name(); },
 		email: function() { return this.user.email(); },
