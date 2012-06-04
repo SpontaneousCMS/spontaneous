@@ -41,7 +41,7 @@ Spontaneous.Popover = (function($, S) {
 			// need to subtract the height of the top-bar because the
 			// popover is positioned absolutely inside the data-pane but
 			// given coordinates relative to the body
-			top -= 31 - Popover.div().scrollTop();
+			top -= 37 - Popover.div().scrollTop();
 			wrapper.offset({top:(o.top+top), left:(o.left + left)});
 			wrapper.hide();
 			location.append(wrapper);

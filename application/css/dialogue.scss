@@ -246,9 +246,10 @@ $dialogue-title-height: 32px;
 		.inner {
 			@include rounded;
 			@include display-box;
-			border: solid 3px transparent;
+			// border: solid 3px transparent;
 			background-color: #fbfbfb;
-			border: solid 1px #f2f2f2;
+			// border: solid 1px #f2f2f2;
+			margin-right: $unit;
 		}
 		.pages {
 			@include box-flex;
@@ -315,3 +316,39 @@ $dialogue-title-height: 32px;
 	}
 }
 
+#root-menu {
+	ul {
+		margin-bottom: 2 * $unit;
+		li {
+			@extend .interface;
+			font-size: 11px;
+			color: #999;
+			margin-bottom: $unit/2;
+			a {
+				font-family: $content-font-family;
+				text-transform: none;
+				color: #fff;
+				cursor: pointer;
+				&:hover {
+					color: $action;
+				}
+			}
+		}
+		.title {
+			padding-bottom: $unit/2;
+			border-bottom: solid 1px #333;
+		}
+	}
+	li.user:before {
+		@include awesome-icon("\f007");
+	}
+	.external-services li.title:before {
+		@include awesome-icon("\f013");
+	}
+	li.user:before, .external-services li.title:before {
+		position: relative;
+		top: 1px;
+		font-size: 1.3em;
+		width: 2*$unit;
+	}
+}

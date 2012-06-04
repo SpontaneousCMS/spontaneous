@@ -72,7 +72,7 @@ class BackTest < MiniTest::Spec
       # Spontaneous::Rack::Back.application.send :set, :show_exceptions, false
 
       # annoying to have to do this, but there you go
-      @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
+      @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass", :password_confirmation => "rootpass")
       @user.update(:level => Spontaneous::Permissions[:editor])
       @user.save
       @key = "c5AMX3r5kMHX2z9a5ExLKjAmCcnT6PFf22YQxzb4Codj"
@@ -193,18 +193,32 @@ class BackTest < MiniTest::Spec
         result[:fields].map { |f| f[:name] }.should == ["title"]
       end
 
-      should "return json for all types" do
-        auth_get "/@spontaneous/types"
-        assert last_response.ok?
+      should "return the typelist as part of the site metadata" do
+        auth_get "/@spontaneous/metadata"
+        assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal Site.schema.serialise_http(@user), last_response.body
+        result = Spot::JSON.parse(last_response.body)
+        result[:types].stringify_keys.should == Site.schema.export(@user)
       end
 
       should "apply the current user's permissions to the exported schema" do
-        auth_get "/@spontaneous/types"
+        auth_get "/@spontaneous/metadata"
         assert last_response.ok?
         result = Spot::JSON.parse(last_response.body)
         result[:'BackTest.AdminAccess'][:fields].map { |f| f[:name] }.should == %w(title)
+        result[:types][:'BackTest.AdminAccess'][:fields].map { |f| f[:name] }.should == %w(title)
+      end
+
+      should "return info about the current user in the metadata" do
+        auth_get "/@spontaneous/metadata"
+        assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
+        result = Spot::JSON.parse(last_response.body)
+        result[:user][:email].should == "root@example.com"
+        result[:user][:login].should == "root"
+        result[:user][:name].should  == "root name"
+        result[:user][:developer].should  == false # although the login is root, the level is :editor
+      end
+
       end
 
       should "return scripts from js dir" do
@@ -329,6 +343,7 @@ class BackTest < MiniTest::Spec
           @home.fields.title.value.should ==  "Updated title"
           @home.fields.introduction.value.should ==  "<p>Updated intro</p>\n"
         end
+
         should "update box field values" do
           box = @job1.images
           box.fields.title.to_s.should_not == "Updated title"
@@ -1110,10 +1125,10 @@ class BackTest < MiniTest::Spec
       should "be able to provide a static value list" do
         # static lists should be included in the field definitions
         field = Job.field :client, :select, :options => [["a", "Value A"], ["b", "Value B"]]
-        auth_get "/@spontaneous/types"
+        auth_get "/@spontaneous/metadata"
 
         schema = Spot::JSON.parse(last_response.body)
-        field = schema[:"BackTest.Job"][:fields].detect { |f| f[:name] == "client" }
+        field = schema[:types][:"BackTest.Job"][:fields].detect { |f| f[:name] == "client" }
         field[:option_list].should == [["a", "Value A"], ["b", "Value B"]]
       end
 

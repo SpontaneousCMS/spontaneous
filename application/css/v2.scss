@@ -1,4 +1,5 @@
 @import "definitions";
+@import "font";
 
 @mixin image-overlay {
 	opacity: 0.7;
@@ -121,16 +122,51 @@ img.missing {
 			background-image: none;
 			padding-right: 5px;
 		}
-		li:first-child {
-			background-image: url("/@spontaneous/static/spontaneous.png"), url("/@spontaneous/static/location-arrow.png");
-			background-position: 0 70%, right 0;
-			background-repeat: no-repeat;
-			padding-right: 12px;
-			a {
-				padding-right: 28px;
-			}
-		}
 	}
+  #spontaneous-root {
+    background-image: url("/@spontaneous/static/spontaneous-states.png"), url("/@spontaneous/static/location-arrow.png");
+    background-position: 0 5px, right 0;
+    background-repeat: no-repeat;
+    padding-right: 12px;
+    cursor: pointer;
+    height: 31px;
+
+    span {
+      padding-right: 28px;
+    }
+    &:hover {
+      background-position: 0 -83px, right 0;
+
+    }
+
+    &.active {
+      background-position: 0 -39px, right 0;
+    }
+  }
+  #service-outer {
+		@include box-flex;
+  }
+  #cms-navigation-view {
+    @include display-box;
+    @include box-align(center);
+  }
+  #service-navigation {
+    @include display-box;
+    @include box-align(center);
+    h2 {
+      @include box-flex;
+      @extend .interface;
+      text-transform: none;
+      font-size: 11px;
+      padding-left: $unit;
+      color: #fff;
+      font-weight: bold;
+    }
+    a {
+      display: block;
+      width: 64px;
+    }
+  }
 	#switch-mode, #open-publish {
 		@include button;
 		@include display-box;
@@ -164,7 +200,9 @@ img.missing {
 	right: 0;
 	bottom: 0px;
 	left: 0;
-	#data_pane, #preview_pane {
+	#data_pane,
+  #preview_pane,
+  #services_pane {
 		border: none;
 		display: block;
 		position: absolute;
@@ -800,11 +838,20 @@ img.missing {
 		padding-top: 8px;
 		position: relative;
 		a {
+      $add-pad: $unit * 3;
 			@include button;
-			padding-right: 16px;
-			padding-left: 16px;
+			padding-right: $add-pad;
+			padding-left: $add-pad;
 			margin-right: 4px;
 			margin-left: 4px;
+      position: relative;
+      min-width: 84px;
+      &:before {
+        @include awesome-icon("\f063");
+        position: absolute;
+        left: $unit/2;
+        // width: $unit*2;
+      }
 		}
 		// a:hover {
 			//   background-color: $highlight;

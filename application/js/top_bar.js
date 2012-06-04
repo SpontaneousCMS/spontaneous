@@ -314,35 +314,30 @@ Spontaneous.TopBar = (function($, S) {
 		id: function() { return this.child.id; },
 		title: function() { return this.child.title; },
 		slug: function() { return this.child.slug; }
-	})
-	var TopBar = new JS.Singleton({
-		include: Spontaneous.Properties,
-		location: "/",
-		panel: function() {
-			this.wrap = dom.div('#top');
-			this.location = dom.ul('#navigation');
-			this.location.append(dom.li().append(dom.a()))
-			this.mode_switch = dom.a('#switch-mode').
-				text(this.opposite_mode(S.ContentArea.mode)).
-				click(function() {
-					S.TopBar.toggle_modes();
-			});
-			this.publish_button = new PublishButton();
-			this.wrap.append(this.location);
-			this.wrap.append(this.publish_button.button());
-			this.wrap.append(this.mode_switch);
-			return this.wrap;
+	});
+
+	var CMSNavigationView = new JS.Class({
+		initialize: function() {
+
 		},
-		init: function() {
-			if (!this.get('mode')) {
-				this.set('mode', S.ContentArea.mode);
+		panel: function() {
+			var self = this;
+			if (!self.wrap) {
+				self.wrap = dom.div("#cms-navigation-view");
+				self.location = dom.ul('#navigation');
+				self.mode_switch = dom.a('#switch-mode').
+					text(S.TopBar.opposite_mode(S.ContentArea.mode)).
+					click(function() {
+						S.TopBar.toggle_modes();
+					});
+				self.publish_button = new PublishButton();
+				self.wrap.append(self.location);
+				self.wrap.append(self.publish_button.button());
+				self.wrap.append(self.mode_switch);
 			}
-			S.Editing.watch('page', this.page_loaded.bind(this));
-			S.Location.watch('location', this.location_loaded.bind(this));
+			return self.wrap;
 		},
 		location_loaded: function(location) {
-			// clear the loaded page so that it forces a reload of the nav when we switch back to edit mode
-			this.set('page', undefined);
 			var children = {};
 
 			for (var boxname in location.children) {
@@ -358,64 +353,35 @@ Spontaneous.TopBar = (function($, S) {
 			this.children_node = children_node;
 		},
 		page_loaded: function(page) {
-			var loaded_page = this.get('page'), loaded_id = (loaded_page ? loaded_page.id() : undefined);
-			if (page && (page.id() !== loaded_id)) {
-				if (this.children_node) {
-					this.children_node.element().remove();
+			if (this.children_node) {
+				this.children_node.element().remove();
+			}
+			var children_node = new ChildrenNode(page.children());
+			this.location.append(children_node.element());
+			page.bind('entry_added', function(entry, position) {
+				if (entry.is_page()) {
+					children_node.add_page(entry, position);
 				}
-				this.set('page', page);
-				var children_node = new ChildrenNode(page.children());
-				this.location.append(children_node.element());
-				page.bind('entry_added', function(entry, position) {
-					if (entry.is_page()) {
-						children_node.add_page(entry, position);
-					}
-				});
-				page.bind('removed_entry', function(entry) {
-					if (entry.is_page()) {
-						children_node.remove_page(entry);
-					}
-				});
+			});
+			page.bind('removed_entry', function(entry) {
+				if (entry.is_page()) {
+					children_node.remove_page(entry);
+				}
+			});
 
-				page.watch('slug', function(title) {
-					this.navigation_current.set_title(title);
-				}.bind(this));
+			page.watch('slug', function(title) {
+				this.navigation_current.set_title(title);
+			}.bind(this));
 
-				page.title_field().watch('value', function(title) {
-					this.set_browser_title(title);
-				}.bind(this));
+			page.title_field().watch('value', function(title) {
+				this.set_browser_title(title);
+			}.bind(this));
 
-				this.children_node = children_node;
-			}
+			this.children_node = children_node;
 		},
-		set_mode: function(mode) {
-			this.set('mode', mode);
-			this.mode_switch.text(this.opposite_mode(mode));
-		},
-		toggle_modes: function() {
-			this.set_mode(this.opposite_mode(this.get('mode')));
-		},
-		opposite_mode: function(to_mode) {
-			if (to_mode === 'preview') {
-				return 'edit';
-			} else if (to_mode === 'edit') {
-				return 'preview';
-			}
-		},
-		publishing_started: function() {
-			this.publish_button.publishing_started();
-		},
-		set_browser_title: function(page_title) {
-			document.title = S.site_domain + " | Editing: '"+page_title+"'";
-		},
-		location_changed: function(new_location) {
-			this.set_browser_title(new_location.title)
-			this.set('location', new_location);
-			this.update_navigation();
-		},
-		update_navigation: function() {
+		update_navigation: function(location) {
 			var nodes = [];
-			var location = this.get('location');
+			// var location = this.get('location');
 			var $location_bar = this.location;
 			var ancestors = location.ancestors.slice(0);
 			var root, is_root = false, root_node, children_node, current_node;
@@ -438,7 +404,7 @@ Spontaneous.TopBar = (function($, S) {
 			} else {
 				current_node = root_node;
 			}
-			$('li:gt(0)', $location_bar).remove();
+			$('li', $location_bar).remove();
 			var children_node;
 			if (location.children.length > 0) {
 				//  children_node = new ChildrenNode(location.children);
@@ -449,8 +415,110 @@ Spontaneous.TopBar = (function($, S) {
 				$location_bar.append(node.element())
 			}
 			this.navigation_current = current_node;
+		},
+		mode_set: function(mode) {
+			this.mode_switch.text(S.TopBar.opposite_mode(mode));
+		},
+		hide: function() {
+			this.wrap.hide();
+		},
+		show: function() {
+			this.wrap.show();
+		}
+	});
+
+	var ServiceNavigationView = new JS.Class({
+		initialize: function(service) {
+			this.service = service;
+		},
+		panel: function() {
+			var self = this;
+			this.wrap = dom.div("#service-navigation")
+			var title = dom.h2().text(this.service.title);
+			var close = dom.a(".button").text("Close").click(function() {
+				S.Services.close();
+			})
+			this.wrap.append(title, close)
+			return this.wrap;
+		}
+	});
+	var TopBar = new JS.Singleton({
+		include: Spontaneous.Properties,
+		location: "/",
+		panel: function() {
+			this.wrap = dom.div('#top');
+			// this.icon = dom.div('#spontaneous-root');
+			this.icon = this.rootMenu()
+			this.holder = dom.div('#service-outer')
+			this.navigationView = new CMSNavigationView();
+			this.serviceStation = dom.div("#service-inner");
+			this.holder.append(this.navigationView.panel(), this.serviceStation);
+			this.wrap.append(this.icon, this.holder);
+			return this.wrap;
+		},
+		rootMenu: function() {
+			var li = dom.div('#spontaneous-root').click(function(event) {
+				$(this).addClass("active"); // no easy way to remove this
+				Spontaneous.Popover.open(event, new Spontaneous.RootMenuView(function() {
+					li.removeClass("active");
+				}));
+			});
+			return li.append(dom.span());
+		},
+		init: function() {
+			if (!this.get('mode')) {
+				this.set('mode', S.ContentArea.mode);
+			}
+			S.Editing.watch('page', this.page_loaded.bind(this));
+			S.Location.watch('location', this.location_loaded.bind(this));
+		},
+		location_loaded: function(location) {
+			// clear the loaded page so that it forces a reload of the nav when we switch back to edit mode
+			this.set('page', undefined);
+			this.navigationView.location_loaded(location);
+		},
+		page_loaded: function(page) {
+			var loaded_page = this.get('page'), loaded_id = (loaded_page ? loaded_page.id() : undefined);
+			if (page && (page.id() !== loaded_id)) {
+				this.set('page', page);
+				this.navigationView.page_loaded(page);
+			}
+		},
+		publishing_started: function() {
+			this.publish_button.publishing_started();
+		},
+		set_browser_title: function(page_title) {
+			document.title = S.site_domain + " | Editing: '"+page_title+"'";
+		},
+		location_changed: function(new_location) {
+			this.set_browser_title(new_location.title)
+			this.set('location', new_location);
+			this.navigationView.update_navigation(new_location);
 			this.page_loaded = function(page) {
 			};
+		},
+		toggle_modes: function() {
+			this.set_mode(this.opposite_mode(this.get('mode')));
+		},
+		opposite_mode: function(to_mode) {
+			if (to_mode === 'preview') {
+				return 'edit';
+			} else if (to_mode === 'edit') {
+				return 'preview';
+			}
+		},
+		set_mode: function(mode) {
+			this.set('mode', mode);
+			this.navigationView.mode_set(mode)
+		},
+		showService: function(service) {
+			this.navigationView.hide();
+			this.serviceView = new ServiceNavigationView(service);
+			this.serviceStation.empty().append(this.serviceView.panel())
+		},
+		showNavigationView: function() {
+			this.serviceStation.empty();
+			this.navigationView.show();
 		}
 	});
 	return TopBar;

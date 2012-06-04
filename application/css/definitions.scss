@@ -33,7 +33,7 @@ $field-preview-total-width: $field-text-preview-width + $field-image-preview-wid
 $title-bar-height: 16px;
 $dialogue-width: 980px;
 
-$corner-radius: 4px;
+$corner-radius: 2px;
 $radius: $corner-radius;
 
 $slot-addable-colour: #ddd;
@@ -41,19 +41,19 @@ $entry-background-colour: #eee;
 
 $target-name-size: 14px;
 
-@mixin rounded($radius: 4px) {
+@mixin rounded($radius: $corner-radius) {
   -webkit-border-radius: $radius;
   -moz-border-radius: $radius;
   border-radius: $radius;
 }
 
-@mixin corners($radius-tl: 4px, $radius-tr: 4px, $radius-br: 4px, $radius-bl: 4px) {
+@mixin corners($radius-tl: $corner-radius, $radius-tr: $corner-radius, $radius-br: $corner-radius, $radius-bl: $corner-radius) {
   -webkit-border-radius: $radius-tl $radius-tr $radius-br $radius-bl;
   -moz-border-radius: $radius-tl $radius-tr $radius-br $radius-bl;
   border-radius: $radius-tl $radius-tr $radius-br $radius-bl;
 }
 
-@mixin rounded-top($radius: 4px) {
+@mixin rounded-top($radius: $corner-radius) {
   -webkit-border-top-right-radius: $radius;
   -moz-border-radius-topright: $radius;
   border-top-right-radius: $radius;
@@ -61,7 +61,7 @@ $target-name-size: 14px;
   -moz-border-radius-topleft: $radius;
   border-top-left-radius: $radius; }
 
-@mixin rounded-bottom($radius: 4px) {
+@mixin rounded-bottom($radius: $corner-radius) {
   -webkit-border-bottom-right-radius: $radius;
   -moz-border-radius-bottomright: $radius;
   border-bottom-right-radius: $radius;
@@ -69,17 +69,17 @@ $target-name-size: 14px;
   -moz-border-radius-bottomleft: $radius;
   border-bottom-left-radius: $radius; }
 
-@mixin rounded-top-left($radius: 4px) {
+@mixin rounded-top-left($radius: $corner-radius) {
   -webkit-border-top-left-radius: $radius;
   -moz-border-radius-topleft: $radius;
   border-top-left-radius: $radius; }
 
-@mixin rounded-top-right($radius: 4px) {
+@mixin rounded-top-right($radius: $corner-radius) {
   -webkit-border-top-right-radius: $radius;
   -moz-border-radius-topright: $radius;
   border-top-right-radius: $radius; }
 
-@mixin rounded-right($radius: 4px) {
+@mixin rounded-right($radius: $corner-radius) {
   -webkit-border-radius: 0 $radius $radius 0;
   -moz-border-radius: 0 $radius $radius 0;
   border-radius: 0 $radius $radius 0; }
@@ -267,4 +267,13 @@ ul, ol {
 
 a {
 	text-decoration: none;
+}
+
+@mixin awesome-icon($icon) {
+	font-family: FontAwesome;
+	font-weight: normal;
+	font-style: normal;
+	display: inline-block;
+	text-decoration: inherit;
+	content: $icon;
 }
