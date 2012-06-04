@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha2'
-  s.date              = '2012-05-14'
+  s.date              = '2012-06-04'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -66,7 +66,7 @@ Gem::Specification.new do |s|
   s.add_dependency('rake',            ["~> 0.9.2"])
   s.add_dependency('rdoc',            ["~> 3.9.4"])
   s.add_dependency('sass',            ["~> 3.1.4"])
-  s.add_dependency('sequel',          ["~> 3.31"])
+  s.add_dependency('sequel',          ["= 3.36.1"])
   s.add_dependency('shine',           ["~> 0.6"])
   s.add_dependency('simultaneous',    ["~> 0.4"])
   s.add_dependency('sinatra',         ["= 1.3.2"])
@@ -106,6 +106,7 @@ Gem::Specification.new do |s|
     application/css/developer.scss
     application/css/dialogue.scss
     application/css/editing.scss
+    application/css/font.scss
     application/css/login.scss
     application/css/popover.scss
     application/css/schema_error.scss
@@ -145,9 +146,11 @@ Gem::Specification.new do |s|
     application/js/load.js
     application/js/location.js
     application/js/login.js
+    application/js/metadata.js
     application/js/page.js
     application/js/page_browser.js
     application/js/page_entry.js
+    application/js/panel/root_menu.js
     application/js/popover.js
     application/js/popover_view.js
     application/js/preview.js
@@ -155,6 +158,7 @@ Gem::Specification.new do |s|
     application/js/properties.js
     application/js/publish.js
     application/js/require.js
+    application/js/services.js
     application/js/sharded_upload.js
     application/js/side_bar.js
     application/js/spontaneous.js
@@ -209,6 +213,7 @@ Gem::Specification.new do |s|
     application/static/editing-toolbar-shadow-bottom.png
     application/static/editing-toolbar-shadow-top.png
     application/static/favicon.ico
+    application/static/font/fontawesome-webfont.ttf
     application/static/inner-glow.png
     application/static/item-buttons-highlight.png
     application/static/item-buttons.png
@@ -228,6 +233,7 @@ Gem::Specification.new do |s|
     application/static/slot-down-arrow.png
     application/static/slot-up-arrow.png
     application/static/splash.png
+    application/static/spontaneous-states.png
     application/static/spontaneous.png
     application/static/spot.png
     application/static/spot.svg
@@ -255,6 +261,7 @@ Gem::Specification.new do |s|
     db/migrations/20120305112647_site_modification_time.rb
     db/migrations/20120418153903_add_ownership_of_content.rb
     db/migrations/20120423175416_add_pending_modifications.rb
+    db/migrations/20120525164947_add_field_versions.rb
     docs/recipe-interface-screenshot.png
     lib/cutaneous.rb
     lib/cutaneous/context_helper.rb
@@ -325,6 +332,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/field_types/select_field.rb
     lib/spontaneous/field_types/string_field.rb
     lib/spontaneous/field_types/webvideo_field.rb
+    lib/spontaneous/field_version.rb
     lib/spontaneous/generators.rb
     lib/spontaneous/generators/page.rb
     lib/spontaneous/generators/page/inline.html.cut
@@ -382,6 +390,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/plugins/application/render.rb
     lib/spontaneous/plugins/application/serialisation.rb
     lib/spontaneous/plugins/application/state.rb
+    lib/spontaneous/plugins/application/system.rb
     lib/spontaneous/plugins/boxes.rb
     lib/spontaneous/plugins/controllers.rb
     lib/spontaneous/plugins/entries.rb
@@ -444,6 +453,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/rack/cookie_authentication.rb
     lib/spontaneous/rack/css.rb
     lib/spontaneous/rack/event_source.rb
+    lib/spontaneous/rack/fiber_pool.rb
     lib/spontaneous/rack/front.rb
     lib/spontaneous/rack/helpers.rb
     lib/spontaneous/rack/http.rb
@@ -721,6 +731,7 @@ Gem::Specification.new do |s|
     test/ui_helper.rb
     test/unit/test_alias.rb
     test/unit/test_assets.rb
+    test/unit/test_async.rb
     test/unit/test_authentication.rb
     test/unit/test_boxes.rb
     test/unit/test_changesets.rb
