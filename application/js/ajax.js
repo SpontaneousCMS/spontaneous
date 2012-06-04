@@ -7,8 +7,23 @@ Spontaneous.Ajax = (function($, S) {
 		'dataType': 'json',
 		'ifModified': true
 	});
+	// wraps jQuery.ajax with a auth aware error catcher
+	var __request = function(params) {
+		var requestErrorHandler = params["error"]
+		, errorHandler = function(xhr, textStatus, error_thrown) {
+			console.log('caught http error', xhr, textStatus, error_thrown)
+			if (xhr.status === 401) {
+				S.Ajax.unauthorized();
+			} else if (requestErrorHandler) {
+				requestErrorHandler(xhr, textStatus, error_thrown);
+			}
+		};
+		params["error"] = errorHandler;
+		$.ajax(params);
+	};
 	return {
 		namespace: "/@spontaneous",
+
 		get: function(url, data, callback) {
 			if (typeof data === "function") {
 				callback = data;
@@ -17,7 +32,7 @@ Spontaneous.Ajax = (function($, S) {
 			var handle_response = function(data, textStatus, xhr) {
 				callback(data, textStatus, xhr);
 			};
-			$.ajax({
+			__request({
 				'url': this.request_url(url),
 				'success': handle_response,
 				'ifModified': true,
@@ -37,13 +52,17 @@ Spontaneous.Ajax = (function($, S) {
 				callback(data, textStatus, XMLHttpRequest);
 			};
 			post_data = $.extend(post_data, this.api_access_key());
-			$.ajax({
+			__request({
 				'url': this.request_url(url, true),
 				'type': 'post',
 				'data': post_data,
 				'success': success,
 				'error': error
 			});
+		},
+		unauthorized: function() {
+			console.log("UNAUTH!")
+			window.location.href = "/";
 		},
 		test_field_versions: function(target, fields, success, failure) {
 			var version_data = {}, modified = 0;

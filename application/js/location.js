@@ -172,6 +172,9 @@ Spontaneous.Location = (function($, S) {
 					if (req.status === 304) {
 						data = self.getLocationCache(url)
 					}
+					if (req.status === 401) {
+						S.Ajax.unauthorized();
+					}
 					callback(data, req);
 				}
 			};
