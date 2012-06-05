@@ -111,16 +111,23 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 				if (files.length > 0) {
 					this.selected_files = files;
 					var file = files[0],
-					url = window.URL.createObjectURL(file);
+					url = window.URL.createObjectURL(file)
+					, image = this.image;
 					this._edited_value = url;
-					this.image.__start_upload = true;
-					this.image.bind('load', function() {
+					image.__start_upload = true;
+					image.bind('load', function() {
 						if (this.image.__start_upload) {
-							this.image.__start_upload = false;
+							image.__start_upload = false;
 							S.Ajax.test_field_versions(this.content, [this], this.upload_values.bind(this), this.upload_conflict.bind(this));
 						}
+						var img = image[0], w = img.width, h = img.height, r = w/h;
+						if (r > 1) {
+							container.addClass('landscape');
+						} else {
+							container.removeClass('landscape');
+						}
 					}.bind(this))
-					this.image.attr('src', url)
+					image.attr('src', url)
 					// see http://www.htmlfivewow.com/slide25
 					window.URL.revokeObjectURL(url);
 				}
