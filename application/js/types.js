@@ -1,7 +1,10 @@
 // console.log('Loading Types...');
 
 Spontaneous.Types = (function($, S) {
-	var ajax = S.Ajax, type_map = {};
+	var ajax = S.Ajax
+	, user = S.User
+	, type_map = {};
+
 	var BoxPrototype = new JS.Class({
 		initialize: function(type_data) {
 			this.data = type_data;
@@ -25,6 +28,7 @@ Spontaneous.Types = (function($, S) {
 			return types;
 		}
 	});
+
 	var Type = new JS.Class({
 		initialize: function(type_data) {
 			this.data = type_data;
@@ -68,6 +72,13 @@ Spontaneous.Types = (function($, S) {
 		},
 		edit_url: function() {
 			return S.editor_protocol + "://open?url=file://"+this.data.source;
+		},
+		display_title: function(content) {
+			var t = this.title;
+			if (user.is_developer()) {
+				t += "/" + content.id();
+			}
+			return t;
 		}
 	});
 	var Types = new JS.Singleton({

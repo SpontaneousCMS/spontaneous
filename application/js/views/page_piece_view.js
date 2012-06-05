@@ -1,6 +1,7 @@
 // console.log('Loading PageEntry...')
 
 Spontaneous.Views.PagePieceView = (function($, S) {
+	"use strict";
 	var dom = S.Dom;
 
 	var PagePieceView = new JS.Class(Spontaneous.Views.PieceView, {
@@ -11,7 +12,7 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 			var inside = dom.div('.entry-inner');
 			var outline = dom.div('.white-bg').mouseover(this.mouseover.bind(this)).mouseout(this.mouseout.bind(this)).click(this.edit.bind(this))
 			inside.append(outline)
-			contents.append(this.title_bar(contents));
+			contents.append(this.action_buttons(contents));
 			if (this.content.type().is_alias()) {
 				contents.append(this.alias_target_panel());
 			}
@@ -31,13 +32,15 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 			return wrapper;
 		},
 		page_title_panel: function() {
-			var wrapper = dom.div('.page-title'),
-			__content = this,
-			title = dom.a().html(this.content.title()).click(function() {
-				S.Location.load_id(__content.id());
-			});
+			var wrapper = dom.div('.page-title').click(function() {
+				S.Location.load_id(self.id());
+			}),
+			self = this,
+			content = self.content,
+			title = dom.a().html(this.content.title()),
+			type = dom.span(".content-type").text(content.type().display_title(content));
 			this.content.title_field().watch('value', function(t) { title.html(t); }.bind(this));
-			wrapper.append(title);
+			wrapper.append(title, type);
 			return wrapper;
 		}
 	});

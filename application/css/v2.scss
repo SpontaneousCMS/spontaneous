@@ -938,7 +938,7 @@ img.missing {
 			// padding-top: $title-bar-height + 4px;
 		}
 		.entry-spacer {
-			height: $entry-gap/2;
+			height: $entry-gap;
 			position: relative;
 		}
 		.entry-spacer.add-entry {
@@ -952,6 +952,7 @@ img.missing {
 			// background-color: gray;
 			// padding: $unit;
 			position: relative;
+      padding-bottom: $unit;
 		}
 		.title-bar {
 			// @include vertical-gradient(gray + #111111, gray);
@@ -1258,17 +1259,30 @@ img.missing {
 		}
 		.alias-target {
 			@include rounded-top;
+      position: relative;
 			padding: $unit/2;
 			background-color: #444;
 			color: white;
 			font-size: $target-name-size;
 			font-style: italic;
+      cursor: pointer;
 			&.no-fields {
 				@include rounded;
 			}
 			&:hover {
 				color: $highlight;
 			}
+      .content-type {
+        @extend .interface;
+        position: absolute;
+        right: $unit;
+        top: 5px;
+        font-style: normal;
+        color: rgba(255, 255, 255, 0.4);
+        &:hover {
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
 			.icon-wrap, a {
 				display: inline-block;
 				vertical-align: top;
@@ -1329,6 +1343,7 @@ img.missing {
 			@include rounded-top;
 			background-color: #444;
 			padding: $unit/2;
+      cursor: pointer;
 			a {
 				cursor: pointer;
 				font-family: $headline-font-family;
@@ -1336,10 +1351,20 @@ img.missing {
 				color: #fff;
 				font-size: 16px;
 				line-height: normal;
-				&:hover {
-					color: $highlight;
-				}
 			}
+      &:hover a, a:hover {
+        color: $highlight;
+      }
+      .content-type {
+        @extend .interface;
+        position: absolute;
+        right: $unit;
+        top: $unit+1;
+        color: rgba(255, 255, 255, 0.4);
+        &:hover {
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
 		}
 	}
 	.entry-wrap.ui-sortable-helper > .entry-contents {
@@ -1636,6 +1661,21 @@ img.missing {
 	img {
 		position: relative;
 	}
+}
+.content-type.piece {
+  @extend .interface;
+  height: 0;
+  overflow: visible;
+  position: absolute;
+  top: auto;
+  bottom: $entry-gap + ($unit * 2);
+  right: $unit;
+  left: auto;
+  color: rgba(0, 0, 0, 0.3);
+  z-index: 21;
+  &:hover {
+    color: rgba(0, 0, 0, 0.5);
+  }
 }
 @import "dialogue";
 @import "popover";

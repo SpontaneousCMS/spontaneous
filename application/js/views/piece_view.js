@@ -57,7 +57,10 @@ Spontaneous.Views.PieceView = (function($, S) {
 				inside.append(dom.div('.grey-bg'));
 			}
 
-			contents.append(this.title_bar(contents));
+			if (!this.content.type().is_alias()) {
+				wrapper.append(this.content_type_info());
+			}
+			contents.append( this.action_buttons(contents));
 			if (this.content.type().is_alias()) {
 				contents.append(this.alias_target_panel());
 			}
@@ -99,10 +102,11 @@ Spontaneous.Views.PieceView = (function($, S) {
 		},
 		alias_target_panel: function() {
 			var content = this.content,
-			wrap = dom.div('.alias-target'),
-			icon = content.alias_icon,
 			click = function() { S.Location.load_id(content.target().id); },
-			title = dom.a().html(content.content.alias_title).click(click);
+			wrap = dom.div('.alias-target').click(click),
+			icon = content.alias_icon,
+			type = dom.span(".content-type").text(content.type().display_title(content));
+			title = dom.a().html(content.content.alias_title);
 
 			if (!content.has_fields()) { wrap.addClass('no-fields'); }
 
@@ -111,18 +115,22 @@ Spontaneous.Views.PieceView = (function($, S) {
 				wrap.append(img.icon(60, 60).click(click))
 			}
 
-			return wrap.append(title)
+			return wrap.append(title, type)
 		},
-		title_bar: function(wrapper) {
+		content_type_info: function() {
+			var type = dom.div(".content-type.piece").text(this.content.type().display_title(this.content));
+			return type;
+		},
+		action_buttons: function(wrapper) {
 			if (!this._title_bar) {
 				var label = user.is_developer() ? dom.a('.developer.source').attr('href', this.content.developer_edit_url()).text(this.content.developer_description()) : (this.content.type().title);
-				var title_bar = dom.div('.title-bar')//.append(label);
+				var action_buttons = dom.div('.title-bar');//.append(label);
 				var actions = dom.div('.actions', {'xstyle':'display: none'});
 				var destroy = dom.a('.delete');
 				var visibility = dom.a('.visibility');
 				actions.append(destroy);
 				actions.append(visibility);
-				title_bar.append(actions);
+				action_buttons.append(actions);
 				var _hide_pause;
 				// wrapper.mouseenter(function() {
 				// 	if (_hide_pause) { window.clearTimeout(_hide_pause); }
@@ -133,9 +141,9 @@ Spontaneous.Views.PieceView = (function($, S) {
 				destroy.click(this.confirm_destroy.bind(this));
 				this.content.watch('hidden', this.visibility_changed.bind(this));
 				visibility.click(this.toggle_visibility.bind(this));
-				this._title_bar = title_bar;
+				this._action_buttons = action_buttons;
 			}
-			return this._title_bar;
+			return this._action_buttons;
 		},
 		reposition: function(position, callback) {
 			this.content.bind('repositioned', callback);
