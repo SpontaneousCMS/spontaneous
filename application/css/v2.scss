@@ -984,23 +984,34 @@ img.missing {
 				top: $unit/2;
 				// right: $unit/2;
 				a {
-					background: url("/@spontaneous/static/item-buttons-highlight.png") 0 0 no-repeat;
-					display: block;
+					// background: url("/@spontaneous/static/item-buttons-highlight.png") 0 0 no-repeat;
+					display: inline-block;
+          position: absolute;
 					width: 15px;
 					height: 15px;
-					// position: relative;
-					// top: 4px;
+					position: relative;
 					cursor: pointer;
-					// padding: 0 10px;
+          color: $entry-background-colour - #111;
+          font-size: 14px;
 				}
-				.delete {
-					background-position: -61px 0;
+        a:before {
+          @include awesome-icon("\f057");
+          position: absolute;
+          left: 3px;
+          top: 2px;
+        }
+        a:hover {
+          color: $highlight;
+        }
+				.delete:before {
+          font-size: 18px;
 				}
-				.delete:hover {
-					background-position: -61px -20px;
-				}
-				.visibility {
-					background-position: -32px 0;
+				// .delete:hover {
+					// background-position: -61px -20px;
+				// }
+				.visibility:before {
+          content: "\f070";
+					// background-position: -32px 0;
 				}
 				.visibility:hover {
 					background-position: -32px -20px;
@@ -1295,6 +1306,13 @@ img.missing {
 	}
 	.entry-wrap.hidden {
 		opacity: 0.4 !important;
+    .actions {
+
+      .visibility:before {
+        content: "\f06e";
+
+      }
+    }
 	}
 	.entry-wrap.editing.hidden {
 		opacity: 1 !important;
