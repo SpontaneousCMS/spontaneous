@@ -28,7 +28,7 @@ module Spontaneous::Search
     end
 
     def pages
-      @page_list ||= Spontaneous::Content.filter(:id => @results.map { |doc| doc.id })
+      @page_list ||= @results.map { |doc| Spontaneous::Content.first(:id => doc.id) }
     end
   end # Results
 end
