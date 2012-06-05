@@ -36,7 +36,7 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 			title = dom.a().html(this.content.title()).click(function() {
 				S.Location.load_id(__content.id());
 			});
-			this.content.title_field().watch('value', function(t) { title.text(t); }.bind(this));
+			this.content.title_field().watch('value', function(t) { title.html(t); }.bind(this));
 			wrapper.append(title);
 			return wrapper;
 		}
