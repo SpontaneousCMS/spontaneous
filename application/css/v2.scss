@@ -832,11 +832,12 @@ img.missing {
 		@extend .container-padding;
 		@include box-sizing;
 		// @include vertical-gradient($slot-addable-colour, $entry-background-colour);
-		background: url("/@spontaneous/static/diagonal-texture.png");
+		background: url("/@spontaneous/static/dot-texture.png");
 		border-top: solid 1px #cccccc;
 		text-align: center;
-		height: 40px;
+		height: auto;
 		padding-top: 8px;
+		padding-bottom: 8px;
 		position: relative;
 		a {
       $add-pad: $unit * 1.5;
@@ -879,8 +880,10 @@ img.missing {
 		padding-left: 10px;
 		padding-right: 10px;
 		padding-top: 5px;
+		padding-bottom: 5px;
 		text-align: center;
 		background: url("/@spontaneous/static/plus-box.png") 10px 7px no-repeat;
+    height: auto;
 
 		.down {
 			display: none;
@@ -935,11 +938,11 @@ img.missing {
 			// padding-top: $title-bar-height + 4px;
 		}
 		.entry-spacer {
-			height: $container-padding/2;
+			height: $entry-gap/2;
 			position: relative;
 		}
 		.entry-spacer.add-entry {
-			background: url("/@spontaneous/static/diagonal-texture.png");
+			background: url("/@spontaneous/static/dot-texture.png");
 			margin: 0 4px;
 			cursor: pointer;
 		}

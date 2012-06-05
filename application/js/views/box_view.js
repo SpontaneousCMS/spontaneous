@@ -109,6 +109,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			// var allowed_bar = $(dom.div, {'class':'slot-addable'});
 			, _box = this
 			, allowed_bar = dom.div('.slot-addable')
+			, inner = dom.div(".addable-inner")
 			, dropper = allowed_bar
 			, drop = function(event) {
 				dropper.removeClass('drop-active').addClass('uploading');
@@ -128,7 +129,6 @@ Spontaneous.Views.BoxView = (function($, S) {
 
 			, drag_enter = function(event) {
 				// var files = event.originalEvent.dataTransfer.files;
-				// console.log(event.originalEvent.dataTransfer, files)
 				$(this).addClass('drop-active');
 				event.stopPropagation();
 				event.preventDefault();
@@ -166,9 +166,9 @@ Spontaneous.Views.BoxView = (function($, S) {
 					}.bind(_box, type);
 				}
 				a.click(add_allowed);
-				allowed_bar.append(a)
+				inner.append(a)
 			});
-			allowed_bar.append(dom.span('.down'));
+			allowed_bar.append(inner, dom.span('.down'));
 
 			return allowed_bar;
 		},
@@ -297,10 +297,14 @@ Spontaneous.Views.BoxView = (function($, S) {
 			}
 			bar = this.add_allowed_types_bar('floating', position + 1);
 			entry_spacer.addClass('add-entry').append(bar.show());
+			if (!entry_spacer.data("auto-height")) {
+				entry_spacer.data("auto-height", entry_spacer.height());
+			}
+			entry_spacer.animate({height:bar.find('.addable-inner').outerHeight() + 12}, 200)
 		},
 		hide_add_after: function(entry, entry_spacer) {
 			entry_spacer.empty();
-			entry_spacer.removeClass('add-entry');
+			entry_spacer.removeClass('add-entry').animate({height: entry_spacer.data("auto-height")}, 200);
 		}
 	});
 
