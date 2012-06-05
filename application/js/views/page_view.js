@@ -25,10 +25,14 @@ Spontaneous.Views.PageView = (function($, S) {
 				}
 			}.bind(this));
 
-			var resync = dom.a({ "title":"Sync the path to the page title"}).click(function() {
-				Spontaneous.Ajax.post(['/slug', self.page.id(), "titlesync"].join("/"), {}, self.save_complete.bind(self));
-			});
-			path_wrap.append(path_text, dom.h3('.titlesync').append(resync));
+			path_wrap.append(path_text);
+
+			if (!self.page.is_root()) {
+				var resync = dom.a({ "title":"Sync the path to the page title"}).click(function() {
+					Spontaneous.Ajax.post(['/slug', self.page.id(), "titlesync"].join("/"), {}, self.save_complete.bind(self));
+				});
+				path_wrap.append( dom.h3('.titlesync').append(resync));
+			}
 
 
 			if (user.is_developer()) {

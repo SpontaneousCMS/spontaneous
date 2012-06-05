@@ -15,6 +15,9 @@ Spontaneous.Page = (function($, S) {
 			this.set('path', values.path);
 		},
 
+		is_root: function() {
+			return (this.get('path') === "/");
+		},
 		depth: function() {
 			// depth in this case refers to content depth which is always 0 for pages
 			return 0;
