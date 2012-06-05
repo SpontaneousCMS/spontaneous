@@ -839,10 +839,10 @@ img.missing {
 		padding-top: 8px;
 		position: relative;
 		a {
-      $add-pad: $unit * 3;
+      $add-pad: $unit * 1.5;
 			@include button;
+      padding-left: $add-pad + $unit;
 			padding-right: $add-pad;
-			padding-left: $add-pad;
 			margin-right: 4px;
 			margin-left: 4px;
       position: relative;
