@@ -29,7 +29,6 @@ module Spontaneous
 
       def preprocess(value)
         return value if value.blank?
-        puts "parsing value #{value.inspect}"
         Date.parse(value)
       end
 
