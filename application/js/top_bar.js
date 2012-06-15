@@ -416,6 +416,9 @@ Spontaneous.TopBar = (function($, S) {
 			}
 			this.navigation_current = current_node;
 		},
+		publishing_started: function() {
+			this.publish_button.publishing_started();
+		},
 		mode_set: function(mode) {
 			this.mode_switch.text(S.TopBar.opposite_mode(mode));
 		},
@@ -485,7 +488,7 @@ Spontaneous.TopBar = (function($, S) {
 			}
 		},
 		publishing_started: function() {
-			this.publish_button.publishing_started();
+			this.navigationView.publishing_started();
 		},
 		set_browser_title: function(page_title) {
 			document.title = S.site_domain + " | Editing: '"+page_title+"'";
