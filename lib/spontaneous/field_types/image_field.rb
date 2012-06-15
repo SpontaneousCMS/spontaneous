@@ -48,7 +48,7 @@ module Spontaneous
       end
 
       def jpegtran!(input)
-        run_optimization(self.class.jpegtran_binary, "-optimize -progressive -copy none -outfile #{input} #{input} 2>/dev/null")
+        run_optimization(self.class.jpegtran_binary, "-optimize -progressive -copy none -outfile #{input} #{input}")
       end
 
       def run_optimization(binary, args)
