@@ -893,5 +893,43 @@ class FieldsTest < MiniTest::Spec
         @field.filesize.should == 2254
       end
     end
+    context "Date fields" do
+      setup do
+        @content_class = Class.new(::Piece)
+        @prototype = @content_class.field :date
+        @content_class.stubs(:name).returns("ContentClass")
+        @instance = @content_class.create
+        @field = @instance.date
+      end
+
+      should "have a distinct editor class" do
+        @prototype.instance_class.editor_class.should == "Spontaneous.FieldTypes.DateField"
+      end
+
+      should "adopt any field called 'date'" do
+        assert @field.is_a?(Spontaneous::FieldTypes::DateField), "Field should be an instance of DateField but instead has the following ancestors #{ @prototype.instance_class.ancestors }"
+      end
+
+      should "default to an empty string" do
+        @field.value(:html).should == ""
+        @field.value(:plain).should == ""
+      end
+
+      should "correctly parse strings" do
+        @field.value = "Friday, 8 June, 2012"
+        @field.value(:html).should == %(<time datetime="2012-06-08">Friday, 8 June, 2012</time>)
+        @field.value(:plain).should == %(Friday, 8 June, 2012)
+        @field.date.should == Date.parse("Friday, 8 June, 2012")
+      end
+
+      should "allow for setting a custom default format" do
+        prototype = @content_class.field :datef, :date, :format => "%d %b %Y, %a"
+        instance = @content_class.new
+        field = instance.datef
+        field.value = "Friday, 8 June, 2012"
+        field.value(:html).should == %(<time datetime="2012-06-08">08 Jun 2012, Fri</time>)
+        field.value(:plain).should == %(08 Jun 2012, Fri)
+      end
+    end
   end
 end

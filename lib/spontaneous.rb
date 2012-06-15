@@ -9,7 +9,6 @@ else
 end
 
 require "fileutils"
-require "home_run"
 require "stringex"
 require "sequel"
 require "yajl"

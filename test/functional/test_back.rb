@@ -1130,6 +1130,19 @@ class BackTest < MiniTest::Spec
       end
     end
 
+    context "date fields" do
+      setup do
+        Spontaneous.stubs(:reload!)
+      end
+      should "provide a format value" do
+        field = Job.field :date, :date, :format => "%Y %d %a"
+        auth_get "/@spontaneous/metadata"
+        schema = Spot::JSON.parse(last_response.body)
+        field = schema[:types][:"BackTest.Job"][:fields].detect { |f| f[:name] == "date" }
+        field[:date_format].should ==  "%Y %d %a"
+      end
+    end
+
     context "select fields" do
       setup do
         Spontaneous.stubs(:reload!)
