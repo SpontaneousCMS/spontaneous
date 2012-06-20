@@ -168,6 +168,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 				a.click(add_allowed);
 				inner.append(a)
 			});
+			allowed_bar.data("allowed-count", allowed.length);
 			allowed_bar.append(inner, dom.span('.down'));
 
 			return allowed_bar;
@@ -296,11 +297,13 @@ Spontaneous.Views.BoxView = (function($, S) {
 				}
 			}
 			bar = this.add_allowed_types_bar('floating', position + 1);
-			entry_spacer.addClass('add-entry').append(bar.show());
-			if (!entry_spacer.data("auto-height")) {
-				entry_spacer.data("auto-height", entry_spacer.height());
+			if (bar.data("allowed-count") > 0) {
+				entry_spacer.addClass('add-entry').append(bar.show());
+				if (!entry_spacer.data("auto-height")) {
+					entry_spacer.data("auto-height", entry_spacer.height());
+				}
+				entry_spacer.animate({height:bar.find('.addable-inner').outerHeight() + 12}, 200)
 			}
-			entry_spacer.animate({height:bar.find('.addable-inner').outerHeight() + 12}, 200)
 		},
 		hide_add_after: function(entry, entry_spacer) {
 			entry_spacer.empty();
