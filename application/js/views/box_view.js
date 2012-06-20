@@ -105,9 +105,9 @@ Spontaneous.Views.BoxView = (function($, S) {
 			}
 		},
 		add_allowed_types_bar: function(position, insert_at) {
-			var allowed = this.box.allowed_types()
-			// var allowed_bar = $(dom.div, {'class':'slot-addable'});
-			, _box = this
+			var allowed = this.box.allowed_types();
+			if (allowed.length === 0) { return ""; }
+			var _box = this
 			, allowed_bar = dom.div('.slot-addable')
 			, inner = dom.div(".addable-inner")
 			, dropper = allowed_bar
@@ -297,7 +297,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 				}
 			}
 			bar = this.add_allowed_types_bar('floating', position + 1);
-			if (bar.data("allowed-count") > 0) {
+			if (bar && bar.data("allowed-count") > 0) {
 				entry_spacer.addClass('add-entry').append(bar.show());
 				if (!entry_spacer.data("auto-height")) {
 					entry_spacer.data("auto-height", entry_spacer.height());
