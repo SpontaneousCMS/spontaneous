@@ -13,6 +13,7 @@
 // 3. Add some useful CSS-visible attributes to the HTML element
 (function() {
 	var _window = window, _document = document;
+	var testFlexBoxCompatibility = false;
 	var prefixes = ' -webkit- -moz- -o- -ms- -khtml- '.split(' ');
 	try {
 
@@ -26,23 +27,26 @@
 			element.style.cssText = (property + prefixes.join(value + ';' + property)).slice(0, -property.length) + (extra || '');
 		}
 
-		var docElement = _document.documentElement,
-		c = _document.createElement('div'),
-		elem = _document.createElement('div'),
-		w;
 
-		set_prefixed_value_css(c, 'display', 'box', 'width:42px;padding:0;');
-		set_prefixed_property_css(elem, 'box-flex', '1', 'width:10px;');
+		if (testFlexBoxCompatibility) {
+			var docElement = _document.documentElement,
+			c = _document.createElement('div'),
+			elem = _document.createElement('div'),
+			w;
 
-		c.appendChild(elem);
-		docElement.appendChild(c);
-		w = elem.offsetWidth
-		c.removeChild(elem);
-		docElement.removeChild(c);
+			set_prefixed_value_css(c, 'display', 'box', 'width:42px;padding:0;');
+			set_prefixed_property_css(elem, 'box-flex', '1', 'width:10px;');
 
-		if (w !== 42) {
-			// console.error(w)
-			throw (w) + " Flexible Box Model not supported"
+			c.appendChild(elem);
+			docElement.appendChild(c);
+			w = elem.offsetWidth
+			c.removeChild(elem);
+			docElement.removeChild(c);
+
+			if (w !== 42) {
+				// console.error(w)
+				throw (w) + " Flexible Box Model not supported"
+			}
 		}
 
 		///////////////////////////// XHR Uploads
