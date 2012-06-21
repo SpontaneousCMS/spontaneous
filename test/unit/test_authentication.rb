@@ -421,7 +421,7 @@ class AuthenticationTest < MiniTest::Spec
           value = "Updated #{version}"
           field = root.fields[:root_level]
           auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
           root.reload.fields[:root_level].value.should == @root_copy.root_level.value
         end
 
@@ -435,12 +435,12 @@ class AuthenticationTest < MiniTest::Spec
 
         should "not be able to add to root level box" do
           auth_post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].schema_id}/#{AuthenticationTest::C.schema_id}"
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
         should "not be able to add root level types to admin level box" do
           auth_post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{AuthenticationTest::D.schema_id}"
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
         should "be able to add to admin level box" do
@@ -453,27 +453,27 @@ class AuthenticationTest < MiniTest::Spec
           value = "Updated #{version}"
           field = root.fields[:editor_level]
           auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
         should "not be able to update root level fields from admin level box" do
           value = "Updated #{version}"
           field = root.boxes[:admin_level].fields[:root_level]
           auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:admin_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
         should "not be able to delete from root level box" do
           piece = root.boxes[:root_level].contents.first
           pieces = root.reload.boxes[:root_level].contents.length
           auth_post "/@spontaneous/destroy/#{piece.id}"
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
           root.reload.boxes[:root_level].contents.length.should == pieces
         end
         should "not be able to wrap files in root level box" do
           src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
           auth_post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:root_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
         should "not be able to wrap files in box if allow permissions don't permit it" do
           src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
@@ -481,12 +481,12 @@ class AuthenticationTest < MiniTest::Spec
           # editor_level box allows addition of type C but only by root
           # so the following should throw a perms error:
           auth_post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:editor_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
         should "not be able to re-order pieces in root level box" do
           piece = root.boxes[:root_level].contents.last
           auth_post "/@spontaneous/content/#{piece.id}/position/0"
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
           root.reload.boxes[:root_level].contents.last.id.should == piece.id
         end
 
@@ -495,13 +495,13 @@ class AuthenticationTest < MiniTest::Spec
           src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
           field = piece.fields[:photo]
           auth_post "/@spontaneous/file/replace/#{piece.id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg"), "field" => field.schema_id
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
         should "not be able to hide entries in root-level boxes" do
           piece = root.boxes[:root_level].contents.first
           auth_post "/@spontaneous/toggle/#{piece.id}"
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
         should "not be allowed to update path of pages without permission"
@@ -517,8 +517,8 @@ class AuthenticationTest < MiniTest::Spec
         end
 
         should "not be able to retrieve the list of changes" do
-          get "/@spontaneous/publish/changes"
-          assert last_response.status == 401, "Should have a permissions error 401 not #{last_response.status}"
+          auth_get "/@spontaneous/publish/changes"
+          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
       end
     end

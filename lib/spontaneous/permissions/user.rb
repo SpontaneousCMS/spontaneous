@@ -98,7 +98,11 @@ module Spontaneous::Permissions
     end
 
     def developer?
-      level.developer?
+      level.developer? || false
+    end
+
+    def can_publish?
+      level.can_publish? || false
     end
 
     def export
@@ -106,6 +110,7 @@ module Spontaneous::Permissions
         :name => name,
         :email => email,
         :login => login,
+        :can_publish => can_publish?,
         :developer => !!developer?
       }
     end

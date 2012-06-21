@@ -5,7 +5,7 @@ module Spontaneous
     module UserHelpers
 
       def unauthorised!
-        halt 401#, "You do not have the necessary permissions to update the '#{name}' field"
+        halt 403#, "You do not have the necessary permissions to update the '#{name}' field"
       end
 
       def api_key

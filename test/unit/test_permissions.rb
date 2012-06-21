@@ -289,9 +289,16 @@ class PermissionsTest < MiniTest::Spec
 
       should "have a test for developer status" do
         @user.update(:level => Permissions::UserLevel.editor)
-        @user.developer?.should be_nil
+        @user.developer?.should be_false
         @user.update(:level => Permissions::UserLevel.designer)
         @user.developer?.should be_true
+      end
+
+      should "be testable for ability to publish depending on their user level" do
+        @user.update(:level => Permissions::UserLevel.editor)
+        @user.can_publish?.should be_false
+        @user.update(:level => Permissions::UserLevel.designer)
+        @user.can_publish?.should be_true
       end
 
       should "serialise to JSON" do
@@ -299,6 +306,7 @@ class PermissionsTest < MiniTest::Spec
           :name => "A Person",
           :email => "person@example.org",
           :login => "person",
+          :can_publish => false,
           :developer => false
         }
       end

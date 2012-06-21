@@ -748,7 +748,7 @@ class BackTest < MiniTest::Spec
         orig = @project1.uid
         @project1.uid.should_not == uid
         auth_post "/@spontaneous/uid/#{@project1.id}", 'uid' => uid
-        assert last_response.status == 401
+        assert last_response.status == 403
         @project1.reload.uid.should == orig
       end
     end

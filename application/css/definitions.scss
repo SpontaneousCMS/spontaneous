@@ -167,14 +167,14 @@ $target-name-size: 14px;
 	color: white !important;
 }
 
-@mixin button-color($background-color: $action) {
+@mixin button-color($background-color: $action, $hover-color: $highlight) {
   background-color: $background-color;
 	@include vertical-gradient(lighten($background-color, 5%), darken($background-color, 5%));
 	box-shadow: inset 0 0 8px darken($background-color, 8%);
 	&:hover {
-		background-color: $highlight !important;
-		@include vertical-gradient($highlight, darken($highlight, 5%));
-		box-shadow: inset 0 0 8px darken($highlight, 8%);
+		background-color: $hover-color !important;
+		@include vertical-gradient($hover-color, darken($hover-color, 5%));
+		box-shadow: inset 0 0 8px darken($hover-color, 8%);
 		color: white !important;
 	}
 }
