@@ -67,7 +67,7 @@ Gem::Specification.new do |s|
   s.add_dependency('sass',            ["~> 3.1.4"])
   s.add_dependency('sequel',          ["= 3.36.1"])
   s.add_dependency('shine',           ["~> 0.6"])
-  s.add_dependency('simultaneous',    ["~> 0.4"])
+  s.add_dependency('simultaneous',    ["~> 0.4.1"])
   s.add_dependency('sinatra',         ["= 1.3.2"])
   s.add_dependency('sinatra-contrib', ["~> 1.3.1"])
   s.add_dependency('stringex',        ["= 1.3"])

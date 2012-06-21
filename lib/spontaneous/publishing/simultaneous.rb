@@ -43,7 +43,7 @@ module Spontaneous
       end
 
       def self.simultaneous_setup
-        ::Simultaneous.client_mode  = :sync
+        ::Simultaneous.client_mode  = :async
         ::Simultaneous.connection   = ::Spontaneous.config.simultaneous_connection
         ::Simultaneous.domain       = ::Spontaneous.config.site_domain
       end
