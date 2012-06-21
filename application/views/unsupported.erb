@@ -11,13 +11,15 @@
 	<div id="outer">
 	<h1>Sorry!</h1>
 	<h2>You are using an unsupported browser...</h2>
-	<p>In order to provide the best editing experience Spontaneous uses features found in the best, modern, browsers.</p>
-	<p>Please download and install one of the following browsers in order to use this CMS as well as enjoy the best of the internet.  You won&rsquo;t regret it...</p>
-	<ul>
-		<li><a href="http://www.google.com/chrome">Google Chrome</a></li>
-		<li><a href="http://www.mozilla.com/firefox/">Firefox 4</a></li>
-		<!-- <li><a href="http://www.mozilla.com/firefox/">Safari</a></li> -->
-	</ul>
+  <div class="error">
+    <p class="feature"><%= params[:msg] %></p>
+    <p class="user-agent">Browser: <%= params[:useragent] %></p>
+  </div>
+	<p>In order to provide the best editing experience Spontaneous uses features only found in the latest browsers.</p>
+	<p>Please download and install <a href="http://www.google.com/chrome">Google Chrome</a> or <a href="http://www.google.com/chromeframe">Chrome Frame</a> in order to use this CMS as well as enjoy the best of the internet.  You won&rsquo;t regret it...</p>
+  <p class="chrome"><a href="http://www.google.com/chrome">
+    <img src="/@spontaneous/static/chromelogo-200x52.png" alt="" />
+  </a></p>
 	</div>
 </body>
 </html>

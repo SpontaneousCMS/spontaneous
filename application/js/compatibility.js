@@ -138,6 +138,6 @@
 		b.setAttribute('data-useragent',  navigator.userAgent);
 		b.setAttribute('data-platform', navigator.platform );
 	} catch (e) {
-		_window.location.href = "/@spontaneous/unsupported?msg=" + _window.encodeURI(e);
+		_window.location.href = "/@spontaneous/unsupported?msg=" + _window.encodeURIComponent(e) + "&useragent=" + _window.encodeURIComponent(_window.navigator.userAgent);
 	}
 }());
