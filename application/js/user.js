@@ -18,6 +18,9 @@ Spontaneous.User = (function($, S) {
 		},
 		is_developer: function() {
 			return this.attrs.developer;
+		},
+		can_publish: function() {
+			return this.attrs.can_publish;
 		}
 	});
 
@@ -37,7 +40,8 @@ Spontaneous.User = (function($, S) {
 		name: function() { return this.user.name(); },
 		email: function() { return this.user.email(); },
 		login: function() { return this.user.login(); },
-		is_developer: function() { return this.user.is_developer(); }
+		is_developer: function() { return this.user.is_developer(); },
+		can_publish: function() { return this.user.can_publish(); }
 	});
 	return instance;
 }(jQuery, Spontaneous));

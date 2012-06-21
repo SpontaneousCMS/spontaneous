@@ -215,6 +215,7 @@ Spontaneous.TopBar = (function($, S) {
 		normal_check: 10000,
 		initialize: function() {
 			this.status = false;
+			this.disabled = true;
 			this.set_interval(this.normal_check);
 			// this.check_status();
 			var update_status = this.update_status.bind(this);
@@ -222,7 +223,13 @@ Spontaneous.TopBar = (function($, S) {
 				update_status($.parseJSON(event.data))
 			});
 		},
-
+		user_loaded: function(user) {
+			console.log("user loaded", user)
+			if (user.can_publish()) {
+				this.disabled = false;
+				this.button().removeClass("disabled").fadeIn();
+			}
+		},
 		check_status: function() {
 			S.Ajax.get('/publish/status', this.status_recieved.bind(this));
 		},
@@ -283,10 +290,10 @@ Spontaneous.TopBar = (function($, S) {
 			if (!this._button) {
 				this._progress_container = dom.span('#publish-progress');
 				this._label = dom.span();
-				this._button = dom.a('#open-publish').append(this._progress_container).append(this._label);
+				this._button = dom.a('#open-publish.disabled').append(this._progress_container).append(this._label).hide();
 				this.set_label("Publish");
 				this._button.click(function() {
-					if (!this.in_progress) {
+					if (!this.disabled && !this.in_progress) {
 						S.Publishing.open_dialogue();
 					}
 				}.bind(this));
@@ -330,10 +337,12 @@ Spontaneous.TopBar = (function($, S) {
 					click(function() {
 						S.TopBar.toggle_modes();
 					});
+
 				self.publish_button = new PublishButton();
 				self.wrap.append(self.location);
 				self.wrap.append(self.publish_button.button());
 				self.wrap.append(self.mode_switch);
+				S.User.watch("user", function(user) { self.publish_button.user_loaded(user);  })
 			}
 			return self.wrap;
 		},
