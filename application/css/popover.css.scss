@@ -1,3 +1,4 @@
+@import "definitions.css.scss";
 .pop-over {
 	$popover-border-radius: 4px;
 	display: inline-block;
@@ -25,8 +26,8 @@
 		// height: 22px;
 }
 	& > header > h3 {
-		@extend .interface;
-		@extend .box-flexible;
+		@include interface;
+		@include box-flex(1);
 		text-transform: none;
 		margin: 0px;
 		margin-bottom: 0;
@@ -186,7 +187,7 @@
 
 		}
 		label {
-			@extend .interface;
+			@include interface;
 			@include rounded;
 			display: block;
 			background-color: $chrome-accent;
@@ -229,7 +230,7 @@
 			.page {
 				cursor: pointer;
 				color: #333;
-				@extend .interface;
+				@include interface;
 				text-transform: none;
 				padding: $unit/2 $unit/2;
 				padding-right: $deeper-width;
@@ -290,7 +291,7 @@
 
 				padding: $unit/2;
 				li {
-					@extend .interface;
+					@include interface;
 					font-size: 10px;
 					text-transform: none;
 					cursor: pointer;
@@ -328,7 +329,7 @@
 			display: block;
 		}
 		a {
-			@extend .box-flexible;
+			@include box-flex(1);
 			max-width: 100px
 		}
 	}

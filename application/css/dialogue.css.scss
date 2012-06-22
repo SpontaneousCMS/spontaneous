@@ -1,3 +1,4 @@
+@import "definitions.css.scss";
 $dialogue-title-height: 32px;
 
 #dialogue-wrap {
@@ -32,7 +33,6 @@ $dialogue-title-height: 32px;
 			padding-top: 6px;
 		}
 		#dialogue-body {
-			// @extend .box-flexible;
 			position: absolute;
 			top: $dialogue-title-height;
 			right: 0;
@@ -101,7 +101,7 @@ $dialogue-title-height: 32px;
 
 #create-home-dialogue {
 	.instructions {
-		@extend .interface;
+		@include interface;
 		margin: 0;
 		background-color: #f2f2f2;
 		color: #666;
@@ -155,7 +155,7 @@ $dialogue-title-height: 32px;
 			border-right: solid 2px #000;
 		}
 		.actions {
-			@extend .interface;
+			@include interface;
 			@include display-box;
 			@include box-orient(horizontal);
 			@include box-align(center);
@@ -224,7 +224,7 @@ $dialogue-title-height: 32px;
 		// margin-top: 0;
 		// .publish-all {
 			// 	@include button(#666);
-			// 	@extend .interface;
+			// 	@include interface;
 			// 	width: 128px;
 			// 	float: right;
 			// 	text-align: left;
@@ -290,7 +290,7 @@ $dialogue-title-height: 32px;
 			position: relative;
 			color: #999;
 			span {
-				@extend .interface;
+				@include interface;
 				font-size: 40px;
 				position: relative;
 				top: 1px;
@@ -320,7 +320,7 @@ $dialogue-title-height: 32px;
 	ul {
 		margin-bottom: 2 * $unit;
 		li {
-			@extend .interface;
+			@include interface;
 			font-size: 11px;
 			color: #999;
 			margin-bottom: $unit/2;

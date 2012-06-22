@@ -2,6 +2,7 @@
 
 require 'sass'
 require 'sinatra/streaming'
+require 'sprockets'
 
 module Spontaneous
   module Rack
@@ -37,7 +38,8 @@ module Spontaneous
         ::Rack::Builder.app do
           use Spontaneous::Rack::FiberPool, :size => 15
           use ::Rack::Lint
-          use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static /js)
+          use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static)
+          use Spontaneous::Rack::Static, :root => Spontaneous.root / "public/@spontaneous", :urls => %W(/assets)
           use AssetsHandler
           use UnsupportedBrowserHandler
           use SchemaModification
@@ -54,6 +56,12 @@ module Spontaneous
           use Spontaneous::Rack::CSS, :root => Spontaneous.instance.paths.expanded(:public)
           use Spontaneous::Rack::JS,  :root => Spontaneous.instance.paths.expanded(:public)
           run Preview
+        end
+      end
+
+      def self.assets_app(dir)
+        ::Sprockets::Environment.new(Spontaneous.gem_dir) do |environment|
+          environment.append_path("application/#{dir}")
         end
       end
 
@@ -126,6 +134,13 @@ module Spontaneous
             run EventListener
           end
 
+          map "#{NAMESPACE}/css" do
+            run Spontaneous::Rack::Back.assets_app("css")
+          end
+
+          map "#{NAMESPACE}/js" do
+            run Spontaneous::Rack::Back.assets_app("js")
+          end
 
           map NAMESPACE do
             run Spontaneous::Rack::Back.editing_app

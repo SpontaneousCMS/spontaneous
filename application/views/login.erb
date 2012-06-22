@@ -11,10 +11,6 @@
     <% Spontaneous::Rack::Assets::JavaScript::JQUERY.each do |js_file| %>
       <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
     <% end %>
-    <% Spontaneous::Rack::Assets::JavaScript::COMPATIBILITY.each do |js_file| %>
-      <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
-    <% end %>
-
     <script type="text/javascript">
       var Spontaneous = {
         site_domain: '<%= Spontaneous::Site.config.site_domain %>',
@@ -43,7 +39,7 @@
       }(jQuery));
     </script>
   </head>
-  <body id="spontaneous">
+  <body id="login">
     <div id="outer" style="display: none">
       <h1>Please Login</h1>
       <div id="login">

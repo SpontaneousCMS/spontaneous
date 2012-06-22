@@ -1,14 +1,5 @@
-@import "definitions";
-@import "font";
-
-@mixin image-overlay {
-	opacity: 0.7;
-	color: black;
-	padding-left: 4px;
-	padding-top: 2px;
-	background-color: #efefef;
-}
-
+@import "definitions.css.scss";
+@import "font.css.scss";
 
 
 @mixin down-arrow($image: "/@spontaneous/static/orange-down-arrow-395ae1929e8662b2ff0977daf12c35bb.png", $height: 7px) {
@@ -21,8 +12,11 @@
 	background: url($image) 50% 0 no-repeat;
 }
 
+.no-select {
+	@include no-select;
+}
 .preview-label {
-	@extend .interface;
+	@include interface;
 	color: #333333;
 }
 
@@ -80,7 +74,7 @@ img.missing {
 			font-weight: bold;
 			select {
 				@include box-sizing;
-				@extend .interface;
+				@include interface;
 				text-transform: none;
 				font-size: 11px;
         line-height: 13px;
@@ -156,7 +150,7 @@ img.missing {
     @include box-align(center);
     h2 {
       @include box-flex;
-      @extend .interface;
+      @include interface;
       text-transform: none;
       font-size: 11px;
       padding-left: $unit;
@@ -239,7 +233,7 @@ img.missing {
 			}
 		}
 		.path, .path h3, .path h3.developer a {
-			@extend .interface;
+			@include interface;
 			cursor: pointer;
 			color: #c1c1c1;
 			font-size: 11px;
@@ -375,7 +369,7 @@ img.missing {
 				background-color: $highlight;
 			}
 			.status {
-				@extend .interface;
+				@include interface;
 				vertical-align: top;
 				display: inline-block;
 				text-transform: none;
@@ -618,7 +612,7 @@ img.missing {
 				background-color: rgba(0, 0, 0, 0.5);
 			}
 			img {
-				@extend .no-select;
+				@include no-select;
 				@include rounded;
 				position: relative;
 				max-height: 100%;
@@ -683,7 +677,7 @@ img.missing {
 
 	.filename, .filesize {
 		@include box-flex(1);
-		@extend .interface;
+		@include interface;
 		text-transform: none;
 		position: relative;
 		top: -1px;
@@ -750,7 +744,7 @@ img.missing {
 		@include vertical-gradient(#666666, #4d4d4d);
 		li {
 			@include box-sizing;
-			@extend .interface;
+			@include interface;
 			font-size: 11px;
 			color: #dddddd;
 			display: block;
@@ -957,7 +951,7 @@ img.missing {
 			// @include vertical-gradient(gray + #111111, gray);
 			@include box-sizing;
 			@include rounded-right;
-			@extend .interface;
+			@include interface;
 			$title-bar-width: 20px;
 
 			// background-color: rgba($entry-background-colour, 0.6);
@@ -1118,7 +1112,7 @@ img.missing {
 				background: none;
 				li {
 					@include box-sizing;
-					@extend .interface;
+					@include interface;
 					float: left;
 					width: 25%;
 					height: 100%;
@@ -1162,7 +1156,7 @@ img.missing {
 				}
 			}
 			.slot-addable {
-				@extend .interface;
+				@include interface;
 				@include box-sizing;
 				border: none;
 				background: none;
@@ -1267,7 +1261,7 @@ img.missing {
 				color: $highlight;
 			}
       .content-type {
-        @extend .interface;
+        @include interface;
         position: absolute;
         right: $unit;
         top: 5px;
@@ -1350,7 +1344,7 @@ img.missing {
         color: $highlight;
       }
       .content-type {
-        @extend .interface;
+        @include interface;
         position: absolute;
         right: $unit;
         top: $unit+1;
@@ -1448,7 +1442,7 @@ img.missing {
 		.name {
 			@include rounded-top;
 			@include box-sizing;
-			@extend .interface;
+			@include interface;
 			background-color: #d1d1d1;
 			display: block;
 			height: 24px;
@@ -1656,7 +1650,7 @@ img.missing {
 	}
 }
 .content-type.piece {
-  @extend .interface;
+  @include interface;
   height: 0;
   overflow: visible;
   position: absolute;
@@ -1670,9 +1664,10 @@ img.missing {
     color: rgba(0, 0, 0, 0.5);
   }
 }
-@import "dialogue";
-@import "popover";
-@import "editing";
-@import "add_alias_dialogue";
-@import "developer";
-@import "jquery-ui-1.8.21.custom/ui-lightness";
+@import "dialogue.css.scss";
+@import "popover.css.scss";
+@import "editing.css.scss";
+@import "add_alias_dialogue.css.scss";
+@import "developer.css.scss";
+@import "jquery-ui-1.8.21.custom/ui-lightness.css.scss";
+

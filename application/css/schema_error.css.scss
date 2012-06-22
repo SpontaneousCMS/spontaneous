@@ -1,12 +1,12 @@
-@import "definitions";
+@import "definitions.css.scss";
 
-body {
+body#schema-error {
 	background: url(/@spontaneous/static/texture-03f7627e8264b1d607113ab32c593a58.png) repeat;
 	color: #fff;
 	font-size: 16px;
 }
 
-#container {
+#schema-error #container {
 	@include rounded;
 	background-color: rgba(0, 0, 0, 0.2);
 	width: 700px;

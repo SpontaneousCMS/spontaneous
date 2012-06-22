@@ -1,3 +1,6 @@
+//= require compatibility
+//= require authentication
+
 (function($) {
 	$(function() {
 		$('#login-form input.text').focus(function() {

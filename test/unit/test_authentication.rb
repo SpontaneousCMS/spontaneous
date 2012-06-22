@@ -92,13 +92,6 @@ class AuthenticationTest < MiniTest::Spec
   def teardown
     teardown_site
   end
-  def assert_login_page(path = nil, method = "GET")
-    assert last_response.status == 401, "#{method} #{path} should have status 401 but has #{last_response.status}"
-    last_response.body.should =~ %r{<form.+action="/@spontaneous/login"}
-    last_response.body.should =~ %r{<form.+method="post"}
-    last_response.body.should =~ %r{<input.+name="user\[login\]"}
-    last_response.body.should =~ %r{<input.+name="user\[password\]"}
-  end
 
   def post_paths
     %(/save/#{root.id} /savebox/#{root.id}/#{root.boxes[:editor_level].schema_id} /content/#{root.id}/position/0 /file/upload/#{root.id} /file/replace/#{root.id} /file/wrap/#{root.id}/#{root.boxes[:pages].schema_id} /add/#{root.id}/#{root.boxes[:pages].schema_id}/#{SitePage.schema_id} /destroy/#{root.id} /slug/#{root.id} /slug/#{root.id}/unavailable /toggle/#{root.id} /schema/delete /schema/rename)

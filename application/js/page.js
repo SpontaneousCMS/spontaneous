@@ -48,3 +48,8 @@ Spontaneous.Page = (function($, S) {
 
 	return Page;
 }(jQuery, Spontaneous));
+
+Spontaneous.page = function() {
+	return Spontaneous.Editing.get('page');
+}
+

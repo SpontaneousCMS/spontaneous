@@ -82,11 +82,12 @@ module Spontaneous
           File.join(Spontaneous.application_dir, filetype, "#{file}.#{extension}")
         end
 
-        JQUERY = %w(vendor/jquery-1.7.1.min)
-        COMPATIBILITY = %w(compatibility)
+        # TODO: remove these
+        JQUERY = %w(vendor/jquery)
+        COMPATIBILITY = []#%w(compatibility)
         REQUIRE = %w(require)
-        LOGIN_JS = %w(authentication login)
-        EDITING_JS = %w(vendor/jquery-ui-1.8.18.custom.min vendor/JS.Class-2.1.5/min/core vendor/crypto-2.3.0-crypto vendor/crypto-2.3.0-sha1 vendor/diff_match_patch extensions spontaneous properties dom ajax authentication user popover popover_view event_source metadata types image content views views/box_view views/page_view views/piece_view views/page_piece_view entry page_entry box page field field_types/string_field field_types/long_string_field field_types/file_field field_types/image_field field_types/markdown_field field_types/date_field field_types/webvideo_field field_types/select_field content_area preview editing location state panel/root_menu top_bar field_preview box_container progress status_bar upload sharded_upload upload_manager dialogue edit_panel add_home_dialogue page_browser add_alias_dialogue conflicted_field_dialogue  publish services init load)
+        LOGIN_JS = %w(login)
+        EDITING_JS = %w(spontaneous)
       end
 
       module CSS
@@ -114,9 +115,10 @@ module Spontaneous
           File.join(Spontaneous.application_dir, filetype, "#{file}.#{extension}")
         end
 
-        LOGIN_CSS = %w(login)
-        EDITING_CSS = %w(v2)
-        SCHEMA_MODIFICATION_CSS = %w(schema_error)
+        # TODO: remove these
+        LOGIN_CSS = %w(spontaneous) # login
+        EDITING_CSS = %w(spontaneous)
+        SCHEMA_MODIFICATION_CSS = %w(spontaneous) #schema_error
       end
 
     end # Assets

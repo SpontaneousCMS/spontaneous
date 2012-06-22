@@ -1,9 +1,9 @@
-@import "definitions";
+@import "definitions.css.scss";
 
 $login-width: 400px;
 $splash-width: 100px;
 
-#outer {
+#login #outer {
 	width: $login-width;
 	margin: 0 auto;
 	top: 100px;
@@ -65,7 +65,7 @@ $splash-width: 100px;
 				label {
 					position: relative;
 					span {
-						@extend .interface;
+						@include interface;
 						position: absolute;
 						left: $unit;
 						top: $unit/2;

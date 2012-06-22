@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'simultaneous'
+
 module Spontaneous
   module Rack
     class EventSource < ::Simultaneous::Rack::EventSource

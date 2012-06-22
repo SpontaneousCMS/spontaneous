@@ -1,3 +1,5 @@
+@import "definitions.css.scss";
+
 #add-alias-dialogue {
 	$instruction-height: 20px;
 	$paging-height: 30px;
@@ -8,7 +10,7 @@
 	height: auto;
 	bottom: 0;
 	.paging {
-		@extend .interface;
+		@include interface;
 		@include box-sizing;
 		height: $paging-height;
 		background-color: #f2f2f2;
@@ -35,7 +37,7 @@
 		}
 	}
 	.instructions {
-		@extend .interface;
+		@include interface;
 		@include box-sizing;
 		height: $instruction-height;
 		margin: 0;

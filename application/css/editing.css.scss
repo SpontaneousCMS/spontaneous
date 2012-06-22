@@ -1,3 +1,4 @@
+@import "definitions.css.scss";
 $editing-0: #ede9e4;
 $editing-1: #444444;
 $editing-2: #ccc;
@@ -101,7 +102,7 @@ $text-edit-width: 621px;
 		.name {
 			@include rounded-top;
 			@include box-sizing;
-			@extend .interface;
+			@include interface;
 			background-color: $editing-blur;
       color: #fff;
 			display: block;
@@ -196,7 +197,7 @@ $text-edit-width: 621px;
 	}
 	.field-group.image {
 		@include box-sizing;
-    @extend .box-flexible;
+		@include box-flex(1);
 		display: block;
 		padding: $unit 0;
 		.field {
@@ -273,7 +274,7 @@ $text-edit-width: 621px;
 				bottom: 0;
 				padding: $unit;
 				@include image-overlay;
-				@extend .interface;
+				@include interface;
 				text-transform: none;
 				@include display-box;
 				@include box-orient(vertical);
@@ -335,8 +336,8 @@ $text-edit-width: 621px;
     @include box-orient;
     background-color: $editing-blur;
     a {
-      @extend .interface;
-      @extend .no-select;
+      @include interface;
+      @include no-select;
       color: $editing-3;
       display: block;
       border: solid 1px transparent;
@@ -367,7 +368,7 @@ $text-edit-width: 621px;
 
 #conflicted-fields-dialogue {
   .instructions {
-		@extend .interface;
+		@include interface;
 		text-transform: none;
 		margin: 0;
 		background-color: #f2f2f2;
@@ -407,8 +408,8 @@ $text-edit-width: 621px;
 		.diff {
 			border: none;
 			background-color: #fbfbfb;
-      @extend .interface;
-      @extend .no-select;
+      @include interface;
+      @include no-select;
 			padding-top: $unit/2;
 			padding-bottom: $unit/2;
 		}

@@ -70,10 +70,12 @@ Gem::Specification.new do |s|
   s.add_dependency('simultaneous',    ["~> 0.4.1"])
   s.add_dependency('sinatra',         ["= 1.3.2"])
   s.add_dependency('sinatra-contrib', ["~> 1.3.1"])
+  s.add_dependency('sprockets',       ["~> 2.4.3"])
   s.add_dependency('stringex',        ["= 1.3"])
   s.add_dependency('therubyracer',    ['~> 0.9.10'])
   s.add_dependency('thin',            ["~> 1.2"])
   s.add_dependency('thor',            ["~> 0.14.6"])
+  s.add_dependency('uglifier',        ["~> 1.2.4"])
   s.add_dependency('yajl-ruby',       ["~> 1.1"])
 
   ## List your development dependencies here. Development dependencies are
