@@ -303,3 +303,26 @@ namespace :gem do
     require File.expand_path(@build_dir + '/lib/spontaneous')
   end
 end
+
+namespace :asset do
+  desc "Fingerprints a file"
+  task :fingerprint do
+    require 'digest/md5'
+    unless file = (ENV["file"] || ENV["FILE"])
+      puts "Usage rake asset:fingerprint file=path/to/file.ext"
+      exit 1
+    end
+    unless File.file?(file)
+      puts "File #{file.inspect} does not exist or is a directory"
+      exit 1
+    end
+    Digest::MD5
+    p file
+    fingerprint = Digest::MD5.file(file).hexdigest
+    *name_parts, ext = File.basename(file).split(".")
+    name = "%s-%s.%s" % [name_parts.join("."), fingerprint, ext]
+    path = File.join File.dirname(file), name
+    system "git mv #{file} #{path}"
+    p path
+  end
+end
