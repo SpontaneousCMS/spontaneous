@@ -316,11 +316,14 @@ namespace :asset do
       puts "File #{file.inspect} does not exist or is a directory"
       exit 1
     end
-    Digest::MD5
-    p file
     fingerprint = Digest::MD5.file(file).hexdigest
     *name_parts, ext = File.basename(file).split(".")
-    name = "%s-%s.%s" % [name_parts.join("."), fingerprint, ext]
+    name = name_parts.join(".")
+    if name =~ /-([0-9a-fA-F]{32})$/
+      puts "Removing existing fingerprint '#{$1}'"
+      name = name.gsub(/-#{$1}/, "")
+    end
+    name = "%s-%s.%s" % [name, fingerprint, ext]
     path = File.join File.dirname(file), name
     system "git mv #{file} #{path}"
     p path
