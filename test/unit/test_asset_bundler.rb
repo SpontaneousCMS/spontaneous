@@ -2,7 +2,7 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 
-class Assets < MiniTest::Spec
+class AssetBundler < MiniTest::Spec
   include ::Rack::Test::Methods
 
   def app
