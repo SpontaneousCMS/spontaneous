@@ -1,0 +1,288 @@
+
+$unit: 8px;
+
+$action: #10b2fe;
+$action_r: 16;
+$action_g: 178;
+$action_b: 254;
+
+$editing: #42AB06;
+
+$highlight: #FF6C03;
+$highlight_r: 255;
+$highlight_g: 108;
+$highlight_b: 3;
+
+$error: #f00;
+
+$chrome-bg: #222;
+$chrome-accent: #404040;
+
+$content-font-family:  "HelveticaNeue", "Helvetica Neue", "FrutigerLTStd-Light", "Frutiger LT Std 45 Light";
+$input-font-family:  "Lucida Grande";
+$headline-font-family:   "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "FrutigerLTStd-Light", "Frutiger LT Std";
+$interface-font-family: "HelveticaNeue", "Helvetica Neue", "FrutigerLTStd-Roman", "Frutiger LT Std";
+/*$interface-font-family: "Helvetica";*/
+
+$field-preview-font-size: 12px;
+
+$container-padding: 48px;
+$entry-gap: 32px;
+$field-text-preview-width: 680px;
+$field-image-preview-width: 280px;
+$field-preview-total-width: $field-text-preview-width + $field-image-preview-width + 32px;
+$title-bar-height: 16px;
+$dialogue-width: 980px;
+
+$corner-radius: 2px;
+$radius: $corner-radius;
+
+$slot-addable-colour: #ddd;
+$entry-background-colour: #eee;
+
+$target-name-size: 14px;
+
+@mixin rounded($radius: $corner-radius) {
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  border-radius: $radius;
+}
+
+@mixin corners($radius-tl: $corner-radius, $radius-tr: $corner-radius, $radius-br: $corner-radius, $radius-bl: $corner-radius) {
+  -webkit-border-radius: $radius-tl $radius-tr $radius-br $radius-bl;
+  -moz-border-radius: $radius-tl $radius-tr $radius-br $radius-bl;
+  border-radius: $radius-tl $radius-tr $radius-br $radius-bl;
+}
+
+@mixin rounded-top($radius: $corner-radius) {
+  -webkit-border-top-right-radius: $radius;
+  -moz-border-radius-topright: $radius;
+  border-top-right-radius: $radius;
+  -webkit-border-top-left-radius: $radius;
+  -moz-border-radius-topleft: $radius;
+  border-top-left-radius: $radius; }
+
+@mixin rounded-bottom($radius: $corner-radius) {
+  -webkit-border-bottom-right-radius: $radius;
+  -moz-border-radius-bottomright: $radius;
+  border-bottom-right-radius: $radius;
+  -webkit-border-bottom-left-radius: $radius;
+  -moz-border-radius-bottomleft: $radius;
+  border-bottom-left-radius: $radius; }
+
+@mixin rounded-top-left($radius: $corner-radius) {
+  -webkit-border-top-left-radius: $radius;
+  -moz-border-radius-topleft: $radius;
+  border-top-left-radius: $radius; }
+
+@mixin rounded-top-right($radius: $corner-radius) {
+  -webkit-border-top-right-radius: $radius;
+  -moz-border-radius-topright: $radius;
+  border-top-right-radius: $radius; }
+
+@mixin rounded-right($radius: $corner-radius) {
+  -webkit-border-radius: 0 $radius $radius 0;
+  -moz-border-radius: 0 $radius $radius 0;
+  border-radius: 0 $radius $radius 0; }
+
+.shadow {
+  -webkit-box-shadow: 0px 3px 30px #cccccc;
+  -moz-box-shadow: 0px 3px 30px #cccccc; }
+
+.clearfix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden; }
+
+@mixin vertical-gradient($start-color: #cccccc, $end-color: black, $mid-point: 0.5) {
+  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from($start-color), to($end-color));
+  background-image: -moz-linear-gradient(top, $start-color, $end-color);
+}
+
+@mixin display-box {
+  display: -webkit-box;
+  display: -moz-box;
+  display: box;
+}
+@mixin box-sizing($model: border-box) {
+  -webkit-box-sizing: $model;
+  -moz-box-sizing: $model;
+  box-sizing: $model;
+}
+
+@mixin box-orient($direction: horizontal) {
+  box-orient: $direction;
+  -webkit-box-orient: $direction;
+  -moz-box-orient: $direction;
+}
+@mixin box-pack($packing: center) {
+  box-pack: $packing;
+  -webkit-box-pack: $packing;
+  -moz-box-pack: $packing;
+}
+@mixin box-align($aligning: start) {
+  box-align: $aligning;
+  -webkit-box-align: $aligning;
+  -moz-box-align: $aligning;
+}
+@mixin box-flex($flex: 1) {
+	-webkit-box-flex: $flex;
+	-moz-box-flex: $flex;
+	box-flex: $flex;
+}
+
+@mixin no-select {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+@mixin interface {
+  font-family: $interface-font-family;
+  -webkit-font-smoothing: antialiased;
+  text-transform: uppercase;
+  font-size: 10px;
+	line-height: 12px;
+  font-weight: bold;
+  @extend .no-select;
+}
+
+@mixin button($background-color: $action) {
+  @include rounded;
+  @include box-sizing;
+  @include interface;
+  margin: 0;
+  cursor: pointer;
+  text-align: center;
+  height: 17px;
+  padding-top: 2px;
+  font-weight: bold;
+  display: inline-block;
+  text-decoration: none;
+	@include button-color($background-color);
+	color: white !important;
+}
+
+@mixin button-color($background-color: $action, $hover-color: $highlight) {
+  background-color: $background-color;
+	@include vertical-gradient(lighten($background-color, 5%), darken($background-color, 5%));
+	box-shadow: inset 0 0 8px darken($background-color, 8%);
+	&:hover {
+		background-color: $hover-color !important;
+		@include vertical-gradient($hover-color, darken($hover-color, 5%));
+		box-shadow: inset 0 0 8px darken($hover-color, 8%);
+		color: white !important;
+	}
+}
+@mixin background-size($size-w: 100%, $size-h: 100%) {
+	-moz-background-size: $size-w $size-h;
+	-o-background-size: $size-w $size-h;
+	-webkit-background-size: $size-w $size-h;
+	background-size: $size-w $size-h;
+}
+
+@mixin header {
+	font-weight: 100;
+	font-family: $headline-font-family;
+	-webkit-font-smoothing: antialiased;
+}
+
+@mixin padding-start($p: 0) {
+	-webkit-padding-start: $p;
+	-moz-padding-start: $p;
+}
+
+@mixin transform($transform) {
+	-webkit-transform: $transform;
+	-moz-transform: $transform;
+	transform: $transform;
+}
+
+@mixin background-clip($clip:content) {
+		-webkit-background-clip: $clip;
+		-moz-background-clip: $clip;
+		background-clip: $clip;
+}
+
+@mixin transition($transition) {
+	-webkit-transition: $transition;
+	-moz-transition: $transition;
+	transition: $transition;
+}
+
+@mixin disable-text-select {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+@mixin fullsize($top: 0, $right: 0, $bottom: 0, $left: 0) {
+	position: absolute;
+	left: $left;
+	right: $right;
+	top: $top;
+	bottom: $bottom;
+}
+
+.button {
+	@include button;
+}
+.button:hover {
+	background-color: $highlight !important;
+	color: white !important;
+}
+
+.button .key-combo {
+  opacity: 0.5;
+	margin-left: $unit/2;
+}
+
+.button.cancel {
+  @include button-color(#6b6b6b);
+}
+.controls-gradient {
+	@include vertical-gradient($chrome-accent, $chrome-bg);
+}
+body, h1, h2, h3, h4, h5, h6, dd, dt, ul, ol, li {
+	margin: 0;
+	padding: 0;
+	font-weight: normal;
+	-webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+	margin-bottom: 300px;
+	background-color: white;
+	font-family: $content-font-family;
+}
+
+ul, ol {
+	list-style-type: none;
+}
+
+a {
+	text-decoration: none;
+}
+
+@mixin awesome-icon($icon) {
+	font-family: FontAwesome;
+	font-weight: normal;
+	font-style: normal;
+	display: inline-block;
+	text-decoration: inherit;
+	content: $icon;
+}
+
+@mixin image-overlay {
+	opacity: 0.7;
+	color: black;
+	padding-left: 4px;
+	padding-top: 2px;
+	background-color: #efefef;
+}
+

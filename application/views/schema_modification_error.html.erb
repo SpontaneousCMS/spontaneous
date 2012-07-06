@@ -16,9 +16,6 @@
     <script type="text/javascript">
       var Spontaneous = {};
     </script>
-    <% Spontaneous::Rack::Assets::JavaScript::LOGIN_JS.each do |js_file| %>
-      <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
-    <% end %>
     <script type="text/javascript">
       function _confirm(id) {
         var t = 200;
@@ -33,7 +30,7 @@
       }
     </script>
   </head>
-  <body id="spontaneous">
+  <body id="schema-error">
     <div id="container">
 
       <%

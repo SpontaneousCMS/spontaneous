@@ -215,6 +215,13 @@ class MiniTest::Spec
     end
   end
 
+  def assert_login_page(path = nil, method = "GET")
+    assert last_response.status == 401, "#{method} #{path} should have status 401 but has #{last_response.status}"
+    last_response.body.should =~ %r{<form.+action="/@spontaneous/login"}
+    last_response.body.should =~ %r{<form.+method="post"}
+    last_response.body.should =~ %r{<input.+name="user\[login\]"}
+    last_response.body.should =~ %r{<input.+name="user\[password\]"}
+  end
 
 end
 

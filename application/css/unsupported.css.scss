@@ -1,0 +1,42 @@
+@import "definitions.css.scss";
+
+#outer {
+	width: 600px;
+	margin: 0 auto;
+	font-family: $content-font-family;
+	font-size: 14px;
+	color: #666;
+	padding-top: 5 * $unit;
+
+	a {
+		color: $action;
+		&:hover {
+		color: $highlight;
+		}
+	}
+	img {
+		border: 0;
+	}
+	.error {
+		margin: 2*$unit 0;
+		padding: 0;
+		color: $highlight;
+		.feature {
+			font-weight: bold;
+		}
+		.user-agent {
+			font-size: 0.9em;
+		}
+	}
+	h1 {
+		@include header;
+		color: #666;
+	}
+	h2 {
+		@include header;
+	}
+	.chrome {
+		margin-top: 4*$unit;
+	}
+}
+
