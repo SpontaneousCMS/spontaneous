@@ -147,9 +147,7 @@ class Assets < MiniTest::Spec
 
       should "load fingerpringed JS files" do
         get "/@spontaneous/#{@page.id}"
-        puts last_response.body
         assert_login_page
-        puts "*"*30
 
         js_path = Dir["#{@site.root}/public/@spontaneous/assets/login*.js"].first
         js_file = ::File.basename(js_path)
@@ -197,7 +195,6 @@ class Assets < MiniTest::Spec
       should "load fingerpringed JS files" do
         get "/@spontaneous/"
         assert last_response.ok?, "User should be authorised but recieving a #{last_response.status}"
-        puts last_response.body
 
         js_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.js"].first
         js_file = ::File.basename(js_path)
