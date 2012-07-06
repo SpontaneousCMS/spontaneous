@@ -25,6 +25,10 @@ Capistrano::Configuration.instance(:must_exist).load do
     task :symlink_application do
       run "cd #{release_path} && ln -s `bundle show spontaneous`/application public/.spontaneous"
     end
+
+    task :bundle_assets do
+      run "cd #{release_path} && bundle exec spot assets:compile --destination=#{release_path}"
+    end
   end
 
   namespace :deploy do
@@ -36,4 +40,5 @@ Capistrano::Configuration.instance(:must_exist).load do
 
   after 'deploy:finalize_update', 'spot:symlink_cache'
   after 'bundle:install', 'spot:symlink_application'
+  after 'bundle:install', 'spot:bundle_assets'
 end
