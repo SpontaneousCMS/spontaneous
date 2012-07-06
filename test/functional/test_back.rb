@@ -239,10 +239,10 @@ class BackTest < MiniTest::Spec
 
       should "return scripts from js dir" do
         get '/@spontaneous/js/test.js'
-        assert last_response.ok?
-        # last_response.content_type.should == "application/javascript;charset=utf-8"
+        assert last_response.ok?, "Expected a 200 but received a #{last_response.status}"
         last_response.content_type.should == "application/javascript"
-        assert_equal File.read(@app_dir / 'js/test.js'), last_response.body
+        # Sprockets appends sone newlines and a semicolon onto our test file
+        assert_equal File.read(@app_dir / 'js/test.js') + "\n;\n", last_response.body
       end
 
       should "return a site map for root by default" do

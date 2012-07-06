@@ -60,8 +60,8 @@ module Spontaneous
       end
 
       def self.assets_app(dir)
-        ::Sprockets::Environment.new(Spontaneous.gem_dir) do |environment|
-          environment.append_path("application/#{dir}")
+        ::Sprockets::Environment.new(Spontaneous.application_dir) do |environment|
+          environment.append_path("#{dir}")
         end
       end
 
