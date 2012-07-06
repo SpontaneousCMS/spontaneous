@@ -176,6 +176,7 @@ class AuthenticationTest < MiniTest::Spec
       Permissions::User.delete
       Permissions::AccessKey.delete
       Spontaneous.environment = :test
+      Permissions::UserLevel.reset!
       Permissions::UserLevel.stubs(:level_file).returns(File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml')
 
       @root = SitePage.create
@@ -247,7 +248,7 @@ class AuthenticationTest < MiniTest::Spec
       end
 
       should "get access to CSS files" do
-        get "/@spontaneous/css/v2.css"
+        get "/@spontaneous/css/spontaneous.css"
         assert last_response.status == 200
       end
 
