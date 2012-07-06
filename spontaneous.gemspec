@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha2'
-  s.date              = '2012-06-04'
+  s.date              = '2012-07-06'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -102,19 +102,33 @@ Gem::Specification.new do |s|
     README
     Rakefile
     Readme.markdown
-    application/css/add_alias_dialogue.scss
-    application/css/definitions.scss
-    application/css/developer.scss
-    application/css/dialogue.scss
-    application/css/editing.scss
-    application/css/font.scss
-    application/css/login.scss
-    application/css/popover.scss
-    application/css/schema_error.scss
-    application/css/spontaneous.scss
-    application/css/unsupported.scss
-    application/css/v2.scss
-    application/css/variables.scss
+    application/css/add_alias_dialogue.css.scss
+    application/css/core.css.scss
+    application/css/definitions.css.scss
+    application/css/developer.css.scss
+    application/css/dialogue.css.scss
+    application/css/editing.css.scss
+    application/css/font.css.scss
+    application/css/jquery-ui-1.8.21.custom/images/ui-bg_diagonals-thick_18_b81900_40x40.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-bg_diagonals-thick_20_666666_40x40.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-bg_flat_10_000000_40x100.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-bg_glass_100_f6f6f6_1x400.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-bg_glass_100_fdf5ce_1x400.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-bg_glass_65_ffffff_1x400.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-bg_gloss-wave_35_f6a828_500x100.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-bg_highlight-soft_100_eeeeee_1x100.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-bg_highlight-soft_75_ffe45c_1x100.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-icons_222222_256x240.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-icons_228ef1_256x240.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-icons_ef8c08_256x240.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-icons_ffd27a_256x240.png
+    application/css/jquery-ui-1.8.21.custom/images/ui-icons_ffffff_256x240.png
+    application/css/jquery-ui-1.8.21.custom/ui-lightness.css.scss
+    application/css/login.css.scss
+    application/css/popover.css.scss
+    application/css/schema_error.css.scss
+    application/css/spontaneous.css
+    application/css/unsupported.css.scss
     application/js/add_alias_dialogue.js
     application/js/add_home_dialogue.js
     application/js/ajax.js
@@ -196,49 +210,36 @@ Gem::Specification.new do |s|
     application/js/vendor/crypto-2.3.0-sha1.js
     application/js/vendor/diff_match_patch.js
     application/js/vendor/jquery-1.6.2.min.js
-    application/js/vendor/jquery-1.7.1.min.js
     application/js/vendor/jquery-ui-1.8.16.custom.min.js
     application/js/vendor/jquery-ui-1.8.18.custom.min.js
     application/js/vendor/jquery-ui-1.8.9.custom.min.js
+    application/js/vendor/jquery.js
     application/js/views.js
     application/js/views/box_view.js
     application/js/views/page_piece_view.js
     application/js/views/page_view.js
     application/js/views/piece_view.js
-    application/static/diagonal-texture.png
-    application/static/editing-0-noise.png
-    application/static/editing-1-noise.png
-    application/static/editing-textarea-resize-s.png
-    application/static/editing-texture-1.png
-    application/static/editing-texture.png
-    application/static/editing-toolbar-shadow-bottom.png
-    application/static/editing-toolbar-shadow-top.png
+    application/static/chromelogo-200x52-45c7cbc93be080bea342df5fcda2ef8b.png
+    application/static/dot-texture-9eea29e4ac7ad9a772285252078ec127.png
+    application/static/editing-textarea-resize-s-b5af62365eb7e19ea4beccf7242d508e.png
+    application/static/editing-texture-1-42b06a3439752490988f30f2a06d5e7c.png
     application/static/favicon.ico
-    application/static/font/fontawesome-webfont.ttf
-    application/static/inner-glow.png
-    application/static/item-buttons-highlight.png
-    application/static/item-buttons.png
-    application/static/location-arrow.png
+    application/static/font/fontawesome-webfont-5c5c21100a346972a82c34c5e96ffcfe.ttf
+    application/static/location-arrow-c1c1d3ca472481c61a0a5f8cb289d743.png
     application/static/logo-400px-transparent.png
-    application/static/loop_alt1-white.svg
-    application/static/loop_alt1.svg
-    application/static/missing.png
-    application/static/orange-down-arrow.png
-    application/static/page-browser-next.png
-    application/static/paper-texture-dark.png
-    application/static/plus-box.png
-    application/static/plus_alt.svg
+    application/static/loop_alt1-white-7894b458528e92216196cae26b4c2c96.svg
+    application/static/missing-911ce6dbd9f4602e0f3fbcd7e78846a2.png
+    application/static/orange-down-arrow-395ae1929e8662b2ff0977daf12c35bb.png
+    application/static/page-browser-next-ce781a242c23b980b99b9db7abc20b05.png
+    application/static/plus-box-dcde74a1e496f68298c9b443caa1c5d5.png
     application/static/px.gif
-    application/static/select-arrow-root.png
-    application/static/select-arrow.png
-    application/static/slot-down-arrow.png
-    application/static/slot-up-arrow.png
-    application/static/splash.png
-    application/static/spontaneous-states.png
-    application/static/spontaneous.png
-    application/static/spot.png
-    application/static/spot.svg
-    application/static/texture.png
+    application/static/select-arrow-6e7dd3745b00e934b0d7a3250c46558b.png
+    application/static/slot-down-arrow-59ad5f5ee5b52a7ebd00bca4b3104194.png
+    application/static/splash-65b493a714df9b8b3ab170103401b53d.png
+    application/static/spontaneous-states-e91ec89db525c62da0105b97cdd781ce.png
+    application/static/spot-71fab1d2f065034f5fc15e7bea2ad36c.png
+    application/static/spot-8505041082d8d3bbe8d34c29dddb3b7d.svg
+    application/static/texture-03f7627e8264b1d607113ab32c593a58.png
     application/views/index.erb
     application/views/login.erb
     application/views/schema_modification_error.html.erb
@@ -284,6 +285,9 @@ Gem::Specification.new do |s|
     lib/spontaneous/application.rb
     lib/spontaneous/application/feature.rb
     lib/spontaneous/application/plugin.rb
+    lib/spontaneous/asset.rb
+    lib/spontaneous/asset/file.rb
+    lib/spontaneous/asset/source.rb
     lib/spontaneous/box.rb
     lib/spontaneous/box_style.rb
     lib/spontaneous/capistrano.rb
@@ -292,6 +296,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/change.rb
     lib/spontaneous/cli.rb
     lib/spontaneous/cli/adapter.rb
+    lib/spontaneous/cli/assets.rb
     lib/spontaneous/cli/base.rb
     lib/spontaneous/cli/console.rb
     lib/spontaneous/cli/media.rb
@@ -523,6 +528,25 @@ Gem::Specification.new do |s|
     test/fixtures/application/static/favicon.ico
     test/fixtures/application/static/test.html
     test/fixtures/application/views/index.erb
+    test/fixtures/asset_pipeline/application/css/basic.css.scss
+    test/fixtures/asset_pipeline/application/css/complex.css.scss.erb
+    test/fixtures/asset_pipeline/application/css/simple.css
+    test/fixtures/asset_pipeline/application/css/spontaneous.css
+    test/fixtures/asset_pipeline/application/css/subdir/complex.css.scss.erb
+    test/fixtures/asset_pipeline/application/css/subdir/library.css.scss
+    test/fixtures/asset_pipeline/application/css/subdir/simple.css
+    test/fixtures/asset_pipeline/application/js/basic.js.coffee
+    test/fixtures/asset_pipeline/application/js/complex.js.coffee.erb
+    test/fixtures/asset_pipeline/application/js/login.js
+    test/fixtures/asset_pipeline/application/js/require.js
+    test/fixtures/asset_pipeline/application/js/simple.js
+    test/fixtures/asset_pipeline/application/js/spontaneous.js
+    test/fixtures/asset_pipeline/application/js/subdir/complex.js.coffee.erb
+    test/fixtures/asset_pipeline/application/js/subdir/library.js.coffee
+    test/fixtures/asset_pipeline/application/js/subdir/simple.js
+    test/fixtures/asset_pipeline/application/js/vendor/jquery.js
+    test/fixtures/asset_pipeline/application/static/dot-texture.png
+    test/fixtures/asset_pipeline/application/static/subdir/px.gif
     test/fixtures/assets/public1/css/a.scss
     test/fixtures/assets/public1/js/a.js
     test/fixtures/assets/public1/js/m.coffee
@@ -731,6 +755,7 @@ Gem::Specification.new do |s|
     test/ui/test_page_editing.rb
     test/ui_helper.rb
     test/unit/test_alias.rb
+    test/unit/test_asset_bundler.rb
     test/unit/test_assets.rb
     test/unit/test_async.rb
     test/unit/test_authentication.rb
