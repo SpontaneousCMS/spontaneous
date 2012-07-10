@@ -252,7 +252,7 @@ $dialogue-title-height: 32px;
 			// border: solid 1px #f2f2f2;
 			margin-left: $unit;
 			margin-right: $unit;
-			margin-bottom: $unit;
+			margin-bottom: 2 * $unit;
 		}
 		.pages {
 			@include box-flex;
@@ -343,6 +343,11 @@ $dialogue-title-height: 32px;
 					position: relative;
 					top: -1px;
 					margin-left: $unit/2;
+				}
+			}
+			.title.dependent .page-title {
+				&:after {
+					content: "";
 				}
 			}
 		}
