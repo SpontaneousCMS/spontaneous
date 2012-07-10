@@ -126,19 +126,44 @@ Spontaneous.Publishing = (function($, S) {
 		initialize: function(details) {
 			$.extend(this, details);
 		},
+		isUnpublished: function() {
+			return !this.published_at;
+		},
 		isDependent: function() {
 			return !this.hasOwnProperty("dependent");
 		},
 		panel: function() {
 			var self = this
-			, classes = ".title" + (this.isDependent() ? ".dependent" : "");
-			return dom.div(classes).text(this.title).append(dom.div('.url').text(this.url)).append(dom.div('.modification-date').text(this.modifiedAt())).click(function() {
+			, pageTitle = dom.span(".page-title").html(this.title)
+			, classes = ".title" + (this.isDependent() ? ".dependent" : "")
+			, modificationDate = dom.div('.modification-date').html(this.modifiedAt())
+			, publicationDate = dom.div('.publication-date').html(this.publishedAt())
+			, metadata = dom.div(".dates").append(modificationDate, publicationDate)
+			if (this.isUnpublished()) {
+				pageTitle.attr("title", "This page is new and has never been published");
+			}
+			return dom.div(classes).append(pageTitle, dom.div('.url').text(this.url)).append(metadata).click(function() {
 				S.Dialogue.close();
 				S.Location.load_id(self.id);
 			});
 		},
 		modifiedAt: function() {
-			return "Modified: " + this.modified_at;
+			return "Modified: " + this.formatDate(this.modified_at);
+		},
+		publishedAt: function() {
+			var date;
+			if (this.isUnpublished()) {
+				date = '<span class="never">Never</span>';
+			} else {
+				date = this.formatDate(this.published_at);
+			}
+			return "Published: " + date;
+		},
+		formatDate: function(dateString) {
+			if (!dateString) { return ""; }
+			var d = new Date(dateString);
+			// use date.js formatting
+			return d.toString("d MMM yyyy, HH:mm");
 		}
 	});
 	var ChangeSet = new JS.Class({
@@ -163,10 +188,13 @@ Spontaneous.Publishing = (function($, S) {
 			var w = dom.div('.change-set')
 			, inner = dom.div('.inner')
 			, page_list = dom.div('.pages')
-			, add = dom.div('.add').append(dom.span().text('+'))
+			, add = dom.div('.add').append(dom.span().text(''))
 			, page = this.page()
 			, pages = this.dependent_pages();
 
+			if (page.isUnpublished()) {
+				w.addClass('unpublished');
+			}
 			page_list.append(page.panel());
 			for (var i = 0, ii = pages.length; i < ii; i++) {
 				page_list.append(pages[i].panel());
@@ -180,7 +208,7 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		selected_panel: function(id) {
 			var panel = this.createPanel().attr('id', id);
-			panel.find('.add').find('span').text('-');
+			panel.find('.add').find('span').addClass('active');
 			return panel;
 		},
 		select: function(state) {

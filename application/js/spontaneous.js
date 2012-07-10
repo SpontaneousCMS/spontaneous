@@ -4,6 +4,7 @@
 //= require vendor/crypto-2.3.0-crypto
 //= require vendor/crypto-2.3.0-sha1
 //= require vendor/diff_match_patch
+//= require vendor/date
 //= require extensions
 //= require properties
 //= require dom

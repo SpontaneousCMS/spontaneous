@@ -190,6 +190,7 @@ $dialogue-title-height: 32px;
 			@include fullsize(25px, 0, 0, 0);
 			overflow: auto;
 			padding-bottom: $unit;
+			padding-top: $unit;
 			.instructions {
 				font-family: $headline-font-family;
 				color: #999;
@@ -242,14 +243,16 @@ $dialogue-title-height: 32px;
 	}
 	.change-set {
 		cursor: pointer;
-		padding: $unit $unit 0 $unit;
+		// padding: $unit $unit 0 $unit;
 		.inner {
 			@include rounded;
 			@include display-box;
 			// border: solid 3px transparent;
 			background-color: #fbfbfb;
 			// border: solid 1px #f2f2f2;
+			margin-left: $unit;
 			margin-right: $unit;
+			margin-bottom: $unit;
 		}
 		.pages {
 			@include box-flex;
@@ -268,7 +271,7 @@ $dialogue-title-height: 32px;
 			.title:hover {
 				color: $action;
 			}
-			.url, .modification-date {
+			.url, .dates {
 				margin-top: 4px;
 				font-size: 10px;
 				color: #666;
@@ -276,8 +279,20 @@ $dialogue-title-height: 32px;
 			.url {
 				font-size: 11px;
 			}
-			.modification-date {
+			.dates {
 				color: #999;
+			}
+			.modification-date, .publication-date {
+				display: inline-block;
+			}
+			.modification-date {
+				width: 40%;
+			}
+			.publication-date {
+				margin-left: 4px;
+				.never {
+					font-weight: bold;
+				}
 			}
 		}
 		.add {
@@ -290,10 +305,18 @@ $dialogue-title-height: 32px;
 			position: relative;
 			color: #999;
 			span {
-				@include interface;
-				font-size: 40px;
 				position: relative;
 				top: 1px;
+				&:before {
+					@include awesome-icon("\f054");
+				}
+				&.active {
+					top: 0px;
+					&:before {
+						@include awesome-icon("\f00d");
+					}
+				}
+
 			}
 			&:hover {
 				background-color: $action;
@@ -306,6 +329,21 @@ $dialogue-title-height: 32px;
 			span {
 				font-size: 11px;
 				margin-left: 1em;
+			}
+		}
+		&.unpublished {
+			.title .page-title {
+				&:after {
+					// \00a0 is a nbsp
+					@include awesome-icon("\f005\00a0new");
+					font-size: 10px;
+					line-height: 10px;
+					text-transform: uppercase;
+					color: $action;
+					position: relative;
+					top: -1px;
+					margin-left: $unit/2;
+				}
 			}
 		}
 	}
