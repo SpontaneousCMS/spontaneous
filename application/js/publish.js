@@ -100,6 +100,19 @@ Spontaneous.Publishing = (function($, S) {
 				});
 				change_set.panel().appear();
 			}
+			change_set.selected = state;
+		},
+		change_set_dependency_state: function(dependentPage) {
+			var self = this;
+			var dependentSet = this.change_sets.filter(function(set) {
+				return set.change.id === dependentPage.id;
+			});
+			console.log("change_set_dependency_state", dependentPage, dependentSet);
+			dependentSet.forEach(function(set) {
+				if (!set.selected) {
+					self.change_set_state(set, true);
+				}
+			});
 		},
 		selected: function() {
 			var selected = [], cs;
@@ -132,6 +145,7 @@ Spontaneous.Publishing = (function($, S) {
 		isDependent: function() {
 			return !this.hasOwnProperty("dependent");
 		},
+
 		panel: function() {
 			var self = this
 			, pageTitle = dom.span(".page-title").html(this.title)
@@ -153,7 +167,7 @@ Spontaneous.Publishing = (function($, S) {
 		publishedAt: function() {
 			var date;
 			if (this.isUnpublished()) {
-				date = '<span class="never">Never</span>';
+				date = 'Never';
 			} else {
 				date = this.formatDate(this.published_at);
 			}
@@ -213,8 +227,15 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		select: function(state) {
 			if (state === this.selected) { return; }
-			this.selected = state;
-			this.dialogue.change_set_state(this, this.selected);
+			var self = this;
+			self.selected = state;
+			self.dialogue.change_set_state(self, self.selected);
+			if (state) {
+				console.log("selected", state, self.dependent_pages());
+				self.dependent_pages().forEach(function(page) {
+					self.dialogue.change_set_dependency_state(page);
+				});
+			}
 		},
 		select_toggle: function() {
 			this.select(!this.selected)
