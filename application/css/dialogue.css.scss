@@ -250,6 +250,7 @@ $dialogue-title-height: 32px;
 			// border: solid 3px transparent;
 			background-color: #fbfbfb;
 			// border: solid 1px #f2f2f2;
+			// border: solid 1px #f2f2f2;
 			margin-left: $unit;
 			margin-right: $unit;
 			margin-bottom: 2 * $unit;
@@ -274,13 +275,17 @@ $dialogue-title-height: 32px;
 			.url, .dates {
 				margin-top: 4px;
 				font-size: 10px;
-				color: #666;
+				color: #aaaaaa;
+				// color: transparent;
+			}
+			.dates {
+				color: transparent;
 			}
 			.url {
 				font-size: 11px;
 			}
 			.dates {
-				color: #999;
+				color: #bbb;
 			}
 			.modification-date, .publication-date {
 				display: inline-block;
@@ -295,6 +300,11 @@ $dialogue-title-height: 32px;
 				}
 			}
 		}
+		// &:hover {
+		// 	.dates {
+		// 		color: #999;
+		// 	}
+		// }
 		.add {
 			@include rounded-right;
 			@include display-box;
