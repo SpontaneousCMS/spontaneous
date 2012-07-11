@@ -114,6 +114,14 @@ Spontaneous.Publishing = (function($, S) {
 				set.select(true);
 			});
 		},
+		dependency_forces_publish: function(set) {
+			var dependencyPage = set.page();
+			return this.change_sets.some(function(set) {
+				return set.selected && set.dependent_pages().some(function(page) {
+					return page.id === dependencyPage.id;
+				});
+			});
+		},
 		selected: function() {
 			var selected = [], cs;
 			for (var i = 0, ii = this.change_sets.length; i < ii; i++) {
@@ -220,8 +228,11 @@ Spontaneous.Publishing = (function($, S) {
 			return panel;
 		},
 		select: function(state) {
-			if (state === this.selected) { return; }
 			var self = this;
+			if (state === self.selected) { return; }
+			if (!state && self.dependency_forces_publish()) {
+				return;
+			}
 			self.selected = state;
 			self.dialogue.change_set_state(self, self.selected);
 			if (state) {
@@ -247,6 +258,10 @@ Spontaneous.Publishing = (function($, S) {
 		page: function() {
 			return new Page(this.change);
 		}.cache("_page_"),
+
+		dependency_forces_publish: function() {
+			return this.dialogue.dependency_forces_publish(this);
+		},
 		dependent_pages: function() {
 			if (!this._dependent_pages) {
 				this._dependent_pages = this.change.dependent.map(function(p) {

@@ -308,6 +308,7 @@ $dialogue-title-height: 32px;
 		.add {
 			@include rounded-right;
 			@include display-box;
+			@include no-select;
 			@include box-pack(center);
 			@include box-align(center);
 			width: $container-padding;
