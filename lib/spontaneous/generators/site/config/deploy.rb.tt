@@ -13,6 +13,8 @@ ssh_options[:forward_agent] = true
 set :application,           "<%= @domain %>"
 server                      "<%= @domain %>", :app, :web, :db, :media
 set :user,                  "<%= @username %>"
+set :use_sudo,              false
+
 
 set :scm,                   "git"
 set :repository,            "git@<%= @domain %>:spontaneous.git"
