@@ -66,6 +66,7 @@ img.missing {
 		color: #999999;
 		width: 100%;
 		li {
+      @include no-select;
 			padding-left: 10px;
 			padding-right: 15px;
 			background: url("/@spontaneous/static/location-arrow-c1c1d3ca472481c61a0a5f8cb289d743.png") right 0 no-repeat;
