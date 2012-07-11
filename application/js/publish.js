@@ -100,18 +100,18 @@ Spontaneous.Publishing = (function($, S) {
 				});
 				change_set.panel().appear();
 			}
-			change_set.selected = state;
 		},
 		change_set_dependency_state: function(dependentPage) {
 			var self = this;
 			var dependentSet = this.change_sets.filter(function(set) {
 				return set.change.id === dependentPage.id;
 			});
-			console.log("change_set_dependency_state", dependentPage, dependentSet);
-			dependentSet.forEach(function(set) {
-				if (!set.selected) {
-					self.change_set_state(set, true);
-				}
+			var dependentGraph = this.change_sets.filter(function(set) {
+				return set.has_dependency(dependentPage);
+			});
+			var group = dependentSet.concat(dependentGraph)
+			group.forEach(function(set) {
+				set.select(true);
 			});
 		},
 		selected: function() {
@@ -125,12 +125,6 @@ Spontaneous.Publishing = (function($, S) {
 			return selected;
 		},
 		changes_to_publish: function() {
-			// var changes = [], selected = this.selected(), cs;
-			// for (var i = 0, ii = selected.length; i < ii; i++) {
-			// 	cs = selected[i];
-			// 	changes.push(cs)
-			// }
-			// return changes;
 			return this.selected();
 		}
 	});
@@ -231,10 +225,13 @@ Spontaneous.Publishing = (function($, S) {
 			self.selected = state;
 			self.dialogue.change_set_state(self, self.selected);
 			if (state) {
-				console.log("selected", state, self.dependent_pages());
 				self.dependent_pages().forEach(function(page) {
 					self.dialogue.change_set_dependency_state(page);
 				});
+				var page = self.page();
+				if (page.isUnpublished()) {
+					self.dialogue.change_set_dependency_state(page);
+				}
 			}
 		},
 		select_toggle: function() {
@@ -249,7 +246,7 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		page: function() {
 			return new Page(this.change);
-		},
+		}.cache("_page_"),
 		dependent_pages: function() {
 			if (!this._dependent_pages) {
 				this._dependent_pages = this.change.dependent.map(function(p) {
@@ -261,6 +258,14 @@ Spontaneous.Publishing = (function($, S) {
 				});
 			}
 			return this._dependent_pages;
+		},
+		has_dependency: function(onPage) {
+			var dependents = this.dependent_pages();
+			if (dependents.length === 0) { return false; }
+			var matches = dependents.filter(function(dep) {
+				return dep.id === onPage.id;
+			});
+			return matches.length > 0;
 		}
 	});
 
