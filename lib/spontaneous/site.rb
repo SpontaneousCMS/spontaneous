@@ -106,7 +106,7 @@ module Spontaneous
     end
 
     def revision_root
-      @revision_dir ||= Pathname.new(@root / 'cache/revisions').realpath
+      @revision_dir ||= Pathname.new(@root / 'cache/revisions').realpath.to_s
     end
 
     def revision_dir(revision=nil, root = revision_root)
