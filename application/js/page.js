@@ -51,5 +51,8 @@ Spontaneous.Page = (function($, S) {
 
 Spontaneous.page = function() {
 	return Spontaneous.Editing.get('page');
-}
+};
 
+Spontaneous.set_browser_title = function(page_title) {
+	document.title = Spontaneous.site_domain + " | Editing: '"+page_title+"'";
+};

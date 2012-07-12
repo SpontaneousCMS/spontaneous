@@ -383,8 +383,8 @@ Spontaneous.TopBar = (function($, S) {
 			}.bind(this));
 
 			page.title_field().watch('value', function(title) {
-				this.set_browser_title(title);
-			}.bind(this));
+				Spontaneous.set_browser_title(title);
+			});
 
 			this.children_node = children_node;
 		},
@@ -499,11 +499,8 @@ Spontaneous.TopBar = (function($, S) {
 		publishing_started: function() {
 			this.navigationView.publishing_started();
 		},
-		set_browser_title: function(page_title) {
-			document.title = S.site_domain + " | Editing: '"+page_title+"'";
-		},
 		location_changed: function(new_location) {
-			this.set_browser_title(new_location.title)
+			Spontaneous.set_browser_title(new_location.title)
 			this.set('location', new_location);
 			this.navigationView.update_navigation(new_location);
 			this.page_loaded = function(page) {
