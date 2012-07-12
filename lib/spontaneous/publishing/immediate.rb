@@ -288,7 +288,9 @@ module Spontaneous
       end
 
       def symlink_revision(rev)
-        system("ln -nsf #{Spontaneous.revision_dir(rev)} #{Spontaneous.revision_dir}")
+        revision_path = Pathname.new(Spontaneous.revision_dir(rev))
+        root_path     = Pathname.new(Spontaneous.revision_dir)
+        system("ln -nsf #{revision_path.realpath} #{root_path.realpath}")
       end
 
       def abort_publish_at_exit
