@@ -163,7 +163,6 @@ Spontaneous.TopBar = (function($, S) {
 			return this.status;
 		},
 		add_page: function(page, position) {
-			console.log('add_page', page, position)
 			var self = this
 			, option = self.option_for_entry(page)
 			, container = page.container
@@ -362,11 +361,12 @@ Spontaneous.TopBar = (function($, S) {
 			this.children_node = children_node;
 		},
 		page_loaded: function(page) {
-			if (this.children_node) {
-				this.children_node.element().remove();
+			var self = this;
+			if (self.children_node) {
+				self.children_node.element().remove();
 			}
 			var children_node = new ChildrenNode(page.children());
-			this.location.append(children_node.element());
+			self.location.append(children_node.element());
 			page.bind('entry_added', function(entry, position) {
 				if (entry.is_page()) {
 					children_node.add_page(entry, position);
@@ -379,14 +379,14 @@ Spontaneous.TopBar = (function($, S) {
 			});
 
 			page.watch('slug', function(title) {
-				this.navigation_current.set_title(title);
-			}.bind(this));
+				self.navigation_current.set_title(title);
+			});
 
 			page.title_field().watch('value', function(title) {
 				Spontaneous.set_browser_title(title);
 			});
 
-			this.children_node = children_node;
+			self.children_node = children_node;
 		},
 		update_navigation: function(location) {
 			var nodes = [];
