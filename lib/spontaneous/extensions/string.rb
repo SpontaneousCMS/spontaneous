@@ -45,6 +45,11 @@ module Spontaneous
         self.gsub(/(\\|<\/|\r\n|[\n\r"'])/) { JS_ESCAPE_MAP[$1] }
       end
 
+      # Makes it easier to pass either a field or a String around
+      # in templates
+      def to_html
+        self
+      end
     end
   end
 end
