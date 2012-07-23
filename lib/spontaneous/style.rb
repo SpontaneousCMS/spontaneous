@@ -42,7 +42,7 @@ module Spontaneous
       template_path = nil
       Site.paths(:templates).each do |template_root|
         template_path = try_template_paths.detect do |path|
-          Spontaneous::Render.exists?(template_root, path, format)
+          Spontaneous::Output.template_exists?(template_root, path, format)
         end
         return (template_root / template_path) if template_path
       end

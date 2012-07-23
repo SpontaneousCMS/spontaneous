@@ -1,6 +1,6 @@
-%{ extends 'parent' }
-%{ block :title }Main Title {{page.title}}%{ endblock }
-%{ block :body }
+%{ extends 'parent' -}
+%{ block :title }Main Title {{page.title}}%{ endblock -}
+%{ block :body -}
 Main Body
-%{ block_super }
-%{ endblock }
+%{ block_super -}
+%{ endblock -}

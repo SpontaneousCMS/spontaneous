@@ -9,12 +9,11 @@ class RenderTest < MiniTest::Spec
 
   def setup
     @site = setup_site
-    @saved_engine_class = Spontaneous::Render.renderer_class
   end
 
   def teardown
     teardown_site
-    Spontaneous::Render.renderer_class = @saved_engine_class
+    Spontaneous::Output.cache_templates = false
   end
 
   def template_root
@@ -25,7 +24,6 @@ class RenderTest < MiniTest::Spec
     setup do
       Content.delete
       @site.paths.add(:templates, template_root)
-      Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
 
       class ::Page < Spontaneous::Page
         field :title
@@ -50,10 +48,9 @@ class RenderTest < MiniTest::Spec
         style :this_template
         style :another_template
       end
-      # TemplateClass.add_output :pdf
-      # TemplateClass.add_output :epub
+
       @root = ::Page.create(:title => "Home")
-      @page = ::Page.create
+      @page = ::Page.create(:title => "Page Title")
 
       @content = TemplateClass.new
       @content.style.should == TemplateClass.default_style
@@ -73,6 +70,8 @@ class RenderTest < MiniTest::Spec
 
       @root.sections2.entries.last.set_position(0)
       @root.save.reload
+      @renderer = Spontaneous::Output::Template::PublishRenderer.new
+      Spontaneous::Output.renderer = @renderer
     end
 
     teardown do
@@ -81,46 +80,42 @@ class RenderTest < MiniTest::Spec
     end
 
     should "render strings correctly" do
-      S::Render.render_string('#{title} {{ Time.now }}', @content, @content.output(:html), {}).should == "The Title {{ Time.now }}"
+      @renderer.render_string('${title} {{ Time.now }}', @page.output(:html), {}).should == "Page Title {{ Time.now }}"
     end
 
     should "use a cache for the site root" do
-      S::Render.with_publishing_renderer do
-        a = S::Render.render_string('#{root.object_id} #{root.object_id}', @content, @content.output(:html), {})
+        a = @renderer.render_string('#{root.object_id} #{root.object_id}', @page.output(:html), {})
         a.should_not == "#{nil.object_id} #{nil.object_id}"
         a.split.uniq.length.should == 1
-      end
     end
 
     should "iterate through the sections" do
-      output = @content.output(:html)
-      template = '%%{ navigation(%s) do |section, active| }#{section.title}/#{active} %%{ end }'
-      a = S::Render.render_string(template % "", @section1, output, {})
+      template = '%%{ navigation(%s) do |section, active| }${section.title}/${active} %%{ end }'
+      a = @renderer.render_string(template % "", @section1.output(:html), {})
       a.should == "Section 1/true Section 2/false Section 4/false Section 3/false "
-      a = S::Render.render_string(template % "1", @section2, output, {})
+      a = @renderer.render_string(template % "1", @section2.output(:html), {})
       a.should == "Section 1/false Section 2/true Section 4/false Section 3/false "
-      a = S::Render.render_string(template % ":section", @section1, output, {})
+      a = @renderer.render_string(template % ":section", @section1.output(:html), {})
       a.should == "Section 1/true Section 2/false Section 4/false Section 3/false "
     end
 
     should "use a cache for navigation pages" do
-      output = @content.output(:html)
       a = b = c = nil
-      template = '%{ navigation do |section, active| }#{section.object_id} %{ end }'
-      a = S::Render.render_string(template, S::Content[@section1.id], output, {}).strip
-      b = S::Render.render_string(template, S::Content[@section1.id], output, {}).strip
+      template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
+      renderer = Spontaneous::Output::Template::PreviewRenderer.new
+      a = renderer.render_string(template, S::Content[@section1.id].output(:html), {}).strip
+      b = renderer.render_string(template, S::Content[@section1.id].output(:html), {}).strip
       a.should_not == b
 
-      S::Render.with_publishing_renderer do
-        template = '%{ navigation do |section, active| }#{section.object_id} %{ end }'
-        a = S::Render.render_string(template, S::Content[@section1.id], output, {}).strip
-        b = S::Render.render_string(template, S::Content[@section1.id], output, {}).strip
-        a.should == b
-      end
-      S::Render.with_publishing_renderer do
-        template = '%{ navigation do |section, active| }#{section.object_id} %{ end }'
-        c = S::Render.render_string(template, S::Content[@section1.id], output, {}).strip
-      end
+      renderer = Spontaneous::Output::Template::PublishRenderer.new
+      template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
+      a = renderer.render_string(template, S::Content[@section1.id].output(:html), {}).strip
+      b = renderer.render_string(template, S::Content[@section1.id].output(:html), {}).strip
+      a.should == b
+
+      renderer = Spontaneous::Output::Template::PublishRenderer.new
+      template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
+      c = renderer.render_string(template, S::Content[@section1.id].output(:html), {}).strip
       a.should_not == c
     end
 
@@ -159,7 +154,8 @@ class RenderTest < MiniTest::Spec
       end
 
       should "be accessible through #content method" do
-        @content.render.should == "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
+        expected = "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
+        @content.render.should == expected
       end
 
       should "cascade the chosen format to all subsequent #render calls" do
@@ -264,7 +260,7 @@ class RenderTest < MiniTest::Spec
       end
 
       should "render using default style if present" do
-        @root.render.should == "<root>\nImages below:\n<images>\n  <img>Image 1</img>\n  <img>Image 2</img>\n</images>\n\n</root>\n"
+        @root.render.should == "<root>\nImages below:\n<images>\n  <img>Image 1</img>\n  <img>Image 2</img>\n</images>\n</root>\n"
       end
     end
 
@@ -273,8 +269,6 @@ class RenderTest < MiniTest::Spec
         class ::PageClass < Page
           field :title, :string
         end
-        # PageClass.box :things
-        # PageClass.style :inline_style
         PageClass.layout :subdir_style
         PageClass.layout :standard_page
         @parent = PageClass.new
@@ -302,7 +296,6 @@ class RenderTest < MiniTest::Spec
         class ::PageClass < Page
           field :title, :string
         end
-        # class ::PieceClass < Piece; end
         PageClass.box :things
         PageClass.layout :page_style
         PageClass.style :inline_style
@@ -373,7 +366,6 @@ class RenderTest < MiniTest::Spec
       PreviewRender.box :images
       PreviewRender.field :description, :markdown
       @page = PreviewRender.new(:title => "PAGE", :description => "DESCRIPTION")
-      # @page.stubs(:id).returns(24)
       @page.save
       @session = ::Rack::MockSession.new(::Sinatra::Application)
     end
@@ -384,29 +376,31 @@ class RenderTest < MiniTest::Spec
 
     context "Preview render" do
       setup do
-        Spontaneous::Render.renderer_class = Spontaneous::Render::PreviewRenderer
+        @renderer = Spontaneous::Output::Template::PreviewRenderer.new
+        Spontaneous::Output.renderer = @renderer
         PreviewRender.layout :preview_render
       end
 
       should "output both publish & request tags" do
         @now = Time.now
         ::Time.stubs(:now).returns(@now)
-        S::Render.render_string('${title} {{ Time.now }}', @page, @page.output(:html), {}).should == "PAGE #{@now.to_s}"
+        @renderer.render_string('${title} {{ Time.now }}', @page.output(:html), {}).should == "PAGE #{@now.to_s}"
       end
 
-      should "render all tags & include preview edit markers" do
-        @page.render.should == <<-HTML
-PAGE <p>DESCRIPTION</p>
-
-<!-- spontaneous:previewedit:start:box id:#{@page.images.schema_id} -->
-<!-- spontaneous:previewedit:end:box id:#{@page.images.schema_id} -->
-
-        HTML
-      end
+#       should "render all tags & include preview edit markers" do
+#         @page.render.should == <<-HTML
+# PAGE <p>DESCRIPTION</p>
+#
+# <!-- spontaneous:previewedit:start:box id:#{@page.images.schema_id} -->
+# <!-- spontaneous:previewedit:end:box id:#{@page.images.schema_id} -->
+#
+#         HTML
+#       end
     end
     context "Request rendering" do
       setup do
-        Spontaneous::Render.renderer_class = Spontaneous::Render::PreviewRenderer
+        @renderer = Spontaneous::Output::Template::PreviewRenderer.new
+        Spontaneous::Output.renderer = @renderer
         PreviewRender.layout :params
       end
 
@@ -421,7 +415,8 @@ PAGE <p>DESCRIPTION</p>
 
     context "entry parameters" do
       setup do
-        Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
+        @renderer = Spontaneous::Output::Template::PreviewRenderer.new
+        Spontaneous::Output.renderer = @renderer
         PreviewRender.layout :entries
         @first = PreviewRender.new(:title => "first")
         @second = PreviewRender.new(:title => "second")
@@ -438,19 +433,22 @@ PAGE <p>DESCRIPTION</p>
 
     context "Publishing renderer" do
       setup do
-          Spontaneous::Render.cache_templates = true
-        Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
+        Spontaneous::Output.write_compiled_scripts = true
         @temp_template_root = @site.root / "templates"
         FileUtils.mkdir_p(@temp_template_root)
         FileUtils.mkdir_p(@temp_template_root / "layouts")
         @site.paths.add(:templates, @temp_template_root)
+
+        @renderer = Spontaneous::Output::Template::PublishRenderer.new(true)
+        Spontaneous::Output.renderer = @renderer
+
         @template_path = @temp_template_root / "layouts/standard.html.cut"
         @compiled_path = @temp_template_root / "layouts/standard.html.rb"
         File.open(@template_path, "w") do |t|
           t.write("template")
         end
         File.open(@compiled_path, "w") do |t|
-          t.write("@_buf << 'compiled'")
+          t.write("@__buf << 'compiled'")
         end
         later = Time.now + 10
         File.utime(later, later, @compiled_path)
@@ -471,27 +469,18 @@ PAGE <p>DESCRIPTION</p>
         template_mtime = File.mtime(@template_path)
         compiled_mtime = File.mtime(@compiled_path)
         assert template_mtime > compiled_mtime, "Template file should register as newer"
+        # Need to use a new renderer because the existing one will have cached the compiled template
+        @renderer = Spontaneous::Output::Template::PublishRenderer.new
+        Spontaneous::Output.renderer = @renderer
         @first.render.should == "updated template"
-      end
-    end
-
-    context "Published rendering" do
-      setup do
-        @file = ::File.expand_path("../../fixtures/templates/direct.html.cut", __FILE__)
-        @root = ::File.expand_path("../../fixtures/templates/", __FILE__)
-        File.exists?(@file).should be_true
-      end
-      should "Use file directly if it exists" do
-        renderer = Spontaneous.template_engine.request_renderer.new(@root)
-        context = renderer.context_class.new
-        result = renderer.render_file(@file, context)
-        result.should == "correct\n"
       end
     end
 
     context "variables in render command" do
       setup do
-        Spontaneous::Render.renderer_class = Spontaneous::Render::PublishingRenderer
+        @renderer = Spontaneous::Output::Template::PublishRenderer.new
+        Spontaneous::Output.renderer = @renderer
+
         PreviewRender.layout :variables
         PreviewRender.style :variables
 

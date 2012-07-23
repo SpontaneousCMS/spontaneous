@@ -31,7 +31,7 @@ module Spontaneous
         self.destination_root = options[:root]
         empty_directory "schema"
         template 'page.rb.tt', "schema/#{disk_name}.rb"
-        copy_file 'inline.html.cut', "templates/#{disk_name}.html.#{Spontaneous::Render.extension}"
+        copy_file 'inline.html.cut', "templates/#{disk_name}.html.#{Spontaneous::Output::Template.extension}"
       end
     end
   end

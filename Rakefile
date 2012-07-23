@@ -300,7 +300,7 @@ namespace :gem do
     FileUtils.cp_r(@project_dir+"/.", @build_dir)
     Dir.chdir(@build_dir)
     $:.unshift(@build_dir + "/lib")
-    require File.expand_path(@build_dir + '/lib/spontaneous')
+    # require File.expand_path(@build_dir + '/lib/spontaneous')
   end
 end
 

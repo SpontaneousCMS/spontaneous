@@ -1,12 +1,12 @@
-%{ extends 'grandparent' }
+%{ extends 'grandparent' -}
 %{ block :title  }Parent Title
-%{ endblock }
+%{ endblock -}
 
-%{ block :body  }
+%{ block :body  -}
 Parent Body
-%{ block_super }
-%{ endblock }
-%{ block :footer  }
-%{ block_super }
+%{ block_super -}
+%{ endblock -}
+%{ block :footer  -}
+%{ block_super -}
 Parent Footer
-%{ endblock }
+%{ endblock -}

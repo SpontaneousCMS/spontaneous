@@ -15,10 +15,12 @@ class FrontTest < MiniTest::Spec
   def self.startup
     @site_root = Dir.mktmpdir
     FileUtils.cp_r(File.expand_path("../../fixtures/public/templates", __FILE__), @site_root)
+    Spontaneous::Output.write_compiled_scripts = true
   end
 
   def self.shutdown
     teardown_site
+    Spontaneous::Output.write_compiled_scripts = false
   end
 
   def setup
@@ -400,31 +402,35 @@ class FrontTest < MiniTest::Spec
 
       context "caching" do
         setup do
-          Spontaneous::Render.cache_templates = true
-          @cache_file = "#{Spontaneous.revision_dir(1)}/html/dynamic/index.html.rb"
+          Spontaneous::Output.cache_templates = true
+          @cache_file = "#{Spontaneous.revision_dir(1)}/dynamic/dynamic.html.rb"
+          Spontaneous::Output.write_compiled_scripts = true
         end
 
         teardown do
-          Spontaneous::Render.cache_templates = false
+          Spontaneous::Output.cache_templates = true
         end
 
         should "use pre-rendered versions of the templates" do
           dummy_content = 'cached-version/#{session[\'user_id\']}'
-          dummy_template = File.join(@site.revision_root, "dummy.html.cut")
+          dummy_template = File.join(@site.revision_root, "current/dynamic/dynamic.html.cut")
           File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
-          Spontaneous::Render.stubs(:output_path).returns(dummy_template)
+          # Spontaneous::Render.stubs(:output_path).returns(dummy_template)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           last_response.body.should == "cached-version/42"
         end
 
         should "cache templates as ruby files" do
-          @cache_file = "#{Spontaneous.revision_dir(1)}/dynamic/dynamic.html.rb"
+          dummy_content = 'cached-version/#{session[\'user_id\']}'
+          dummy_template = File.join(@site.revision_root, "current/dynamic/index.html.cut")
+          Spontaneous::Output.renderer.write_compiled_scripts = true
+          File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
           FileUtils.rm(@cache_file) if File.exists?(@cache_file)
           File.exists?(@cache_file).should be_false
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
-          # puts `ls -l #{File.dirname(@cache_file)}`
+
           File.exists?(@cache_file).should be_true
-          File.open(@cache_file, 'w') { |f| f.write('_buf << %Q`@cache_filed-version/#{params[\'wendy\']}`;')}
+          File.open(@cache_file, 'w') { |f| f.write('@__buf << %Q`@cache_filed-version/#{params[\'wendy\']}`;')}
           # Force compiled file to have a later timestamp
           File.utime(Time.now, Time.now + 1, @cache_file)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
@@ -433,7 +439,7 @@ class FrontTest < MiniTest::Spec
         end
 
         should "not cache templates if caching turned off" do
-          Spontaneous::Render.cache_templates = false
+          Spontaneous::Output.cache_templates = false
           FileUtils.rm(@cache_file) if File.exists?(@cache_file)
           File.exists?(@cache_file).should be_false
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
@@ -557,7 +563,7 @@ class FrontTest < MiniTest::Spec
       should "pass the format onto the page if the action returns it to the render call" do
         about.class.outputs :html, :xml
         about.class.layout do
-          "${path}.${format}"
+          "${path}.${__format}"
         end
         get "/about/@comments/page.xml"
         assert last_response.ok?

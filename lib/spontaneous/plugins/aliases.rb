@@ -128,6 +128,16 @@ module Spontaneous::Plugins
         super || target.class.field?(field_name)
       end
 
+      def respond_to_missing?(name, include_private = false)
+        return true if target && target.respond_to?(name)
+        super
+      end
+
+      def respond_to?(name, include_private = false)
+        return true if target && target.respond_to?(name)
+        super
+      end
+
       def method_missing(method, *args)
         if target && target.respond_to?(method)
           if block_given?

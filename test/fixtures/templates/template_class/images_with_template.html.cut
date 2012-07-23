@@ -1,5 +1,5 @@
 <images>
-%{ pieces.each do |image| }
+%{ pieces.each do |image| -}
   ${ image }
-%{ end }
+%{ end -}
 </images>

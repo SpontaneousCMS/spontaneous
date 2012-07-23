@@ -2,7 +2,7 @@ require 'shine'
 require 'sass'
 
 module Spontaneous
-  module Render
+  module Output
     module Assets
       module Compression
         extend self

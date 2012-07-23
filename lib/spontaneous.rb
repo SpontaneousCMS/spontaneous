@@ -69,7 +69,7 @@ module Spontaneous
   autoload :Schema,           "spontaneous/schema"
   autoload :ImageSize,        "spontaneous/image_size"
   autoload :Rack,             "spontaneous/rack"
-  autoload :Render,           "spontaneous/render"
+  autoload :Output,           "spontaneous/output"
   autoload :Media,            "spontaneous/media"
   autoload :Change,           "spontaneous/change"
   autoload :Revision,         "spontaneous/revision"

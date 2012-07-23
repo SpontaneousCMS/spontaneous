@@ -1,10 +1,10 @@
-%{ block :title }Grandparent Title%{ endblock }
-%{ block :navigation  }
+%{ block :title }Grandparent Title%{ endblock -}
+%{ block :navigation  -}
 Grandparent Nav
-%{ endblock }
-%{ block :body  }
+%{ endblock -}
+%{ block :body  -}
 Grandparent Body
-%{ endblock }
-%{ block :footer }
+%{ endblock -}
+%{ block :footer -}
 Grandparent Footer
-%{ endblock }
+%{ endblock -}

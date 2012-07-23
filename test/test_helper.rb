@@ -40,7 +40,8 @@ DB = Sequel.connect(connection_string) unless defined?(DB)
 Sequel::Migrator.apply(DB, 'db/migrations')
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spontaneous')
-require File.expand_path(File.dirname(__FILE__) + '/../lib/cutaneous')
+# require File.expand_path(File.dirname(__FILE__) + '/../lib/cutaneous')
+require 'cutaneous'
 
 # require 'test/unit'
 require 'minitest/spec'

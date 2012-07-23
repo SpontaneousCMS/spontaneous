@@ -1,6 +1,6 @@
 <pdf>
 ${ title }
-%{ content.each do |piece| }
+%{ content.each do |piece| -}
 <piece>${ piece }</piece>
-%{ end }
+%{ end -}
 </pdf>

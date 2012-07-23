@@ -9,15 +9,15 @@ module Spontaneous
     class AroundFront
       def initialize(app)
         @app = app
+        @renderer = Spontaneous::Output.published_renderer
       end
 
       def call(env)
         status = headers = body = nil
+        env[Rack::RENDERER] = @renderer
         Content.with_identity_map do
-          S::Render.with_published_renderer do
-            Site.with_published do
-              status, headers, body = @app.call(env)
-            end
+          Site.with_published do
+            status, headers, body = @app.call(env)
           end
         end
         [status, headers.merge(POWERED_BY), body]

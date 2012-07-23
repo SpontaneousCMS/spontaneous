@@ -76,6 +76,15 @@ class ModificationsTest < MiniTest::Spec
       (c.modified_at - now).abs.should <= 1
     end
 
+    should "update modification date of path when page visibility is changed" do
+      now = @now + 100
+      stub_time(now)
+      c = Page.first
+      (c.modified_at.to_i - @now.to_i).abs.should <= 1
+      c.toggle_visibility!
+      (c.modified_at - now).abs.should <= 1
+    end
+
     should "update page timestamps on modification of its box fields" do
       Page.box :with_fields do
         field :title

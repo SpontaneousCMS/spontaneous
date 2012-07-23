@@ -58,7 +58,7 @@ module Spontaneous
       #   end
       # end
       module JavaScript
-        extend Spontaneous::Render::Assets::Compression
+        extend Spontaneous::Output::Assets::Compression
 
         def self.filetype
           "js"
@@ -91,7 +91,7 @@ module Spontaneous
       end
 
       module CSS
-        extend Spontaneous::Render::Assets::Compression
+        extend Spontaneous::Output::Assets::Compression
 
         def self.filetype
           "css"

@@ -53,7 +53,7 @@ class FormatsTest < MiniTest::Spec
 
     should "return the output class for a named output" do
       FPage.output(:html).must_be_instance_of(Class)
-      FPage.output(:html).ancestors.include?(S::Render::Output::HTML).should be_true
+      FPage.output(:html).ancestors.include?(S::Output::HTML).should be_true
     end
 
     should "correctly determine mimetypes for new (known) formats" do
@@ -63,13 +63,13 @@ class FormatsTest < MiniTest::Spec
 
     should "dynamically generate output classes for unknown formats" do
       FPage.add_output :fish, :format => :unknown
-      FPage.output(:fish).ancestors[1].should == S::Render::Output::UNKNOWN
-      FPage.output(:fish).ancestors[2].should == S::Render::Output::Plain
+      FPage.output(:fish).ancestors[1].should == S::Output::UNKNOWN
+      FPage.output(:fish).ancestors[2].should == S::Output::Plain
     end
 
     should "dynamically generate output classes based on HTML for outputs with unspecified formats" do
       FPage.add_output :fish
-      FPage.output(:fish).ancestors[1].should == S::Render::Output::HTML
+      FPage.output(:fish).ancestors[1].should == S::Output::HTML
     end
 
     should "return the format wrapper for a format name string" do
@@ -181,11 +181,11 @@ class FormatsTest < MiniTest::Spec
 
     context "format classes" do
       should "enable new formats" do
-        S::Render::Output.unknown_format?(:fishhtml).should be_true
-        class FishHTMLFormat < S::Render::Output::HTML
+        S::Output.unknown_format?(:fishhtml).should be_true
+        class FishHTMLFormat < S::Output::HTML
           provides_format :fishhtml
         end
-        S::Render::Output.unknown_format?(:fishhtml).should be_false
+        S::Output.unknown_format?(:fishhtml).should be_false
       end
 
       should "inherit helper classes from their superclass" do
@@ -194,7 +194,7 @@ class FormatsTest < MiniTest::Spec
         end
         Site.register_helper CustomHelper1, :newhtml
 
-        class NewHTMLFormat < S::Render::Output::HTML
+        class NewHTMLFormat < S::Output::HTML
           provides_format :newhtml
         end
 

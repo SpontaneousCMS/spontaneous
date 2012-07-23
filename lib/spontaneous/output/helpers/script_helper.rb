@@ -2,7 +2,7 @@
 
 require 'coffee-script'
 
-module Spontaneous::Render::Helpers
+module Spontaneous::Output::Helpers
   module ScriptHelper
     extend self
 
@@ -22,11 +22,11 @@ module Spontaneous::Render::Helpers
     end
 
     def convert_coffeescript(url)
-      S::Render::Assets.compile_coffeescript(url)
+      S::Output::Assets.compile_coffeescript(url)
     end
 
     def compressed_scripts(scripts)
-      file_paths = scripts.map { |script| [script, S::Render::Assets.find_file("#{script}.js", "#{script}.coffee")] }
+      file_paths = scripts.map { |script| [script, S::Output::Assets.find_file("#{script}.js", "#{script}.coffee")] }
       invalid, file_paths = file_paths.partition { |url, path| path.nil? }
 
       tags = []
@@ -52,12 +52,12 @@ module Spontaneous::Render::Helpers
         }.join
 
         compressed, hash = compress_js_string(js)
-        output_path = Spontaneous::Render::Assets.path_for(revision, "#{hash}.js")
+        output_path = Spontaneous::Output::Assets.path_for(revision, "#{hash}.js")
 
         FileUtils.mkdir_p(File.dirname(output_path))
         File.open(output_path, "w") { |file| file.write(compressed) }
 
-        tags = [script_tag(Spontaneous::Render::Assets.url(hash))]
+        tags = [script_tag(Spontaneous::Output::Assets.url(hash))]
       end
 
       tags.concat invalid.map { |src, path| script_tag(src) }
@@ -65,10 +65,9 @@ module Spontaneous::Render::Helpers
     end
 
     def compress_js_string(js_string)
-      Spontaneous::Render::Assets::Compression.shine_compress_string(js_string, :js)
+      Spontaneous::Output::Assets::Compression.shine_compress_string(js_string, :js)
     end
 
-    Spontaneous::Render::Helpers.register_helper(self, :html)
+    Spontaneous::Output::Helpers.register_helper(self, :html)
   end
 end
-

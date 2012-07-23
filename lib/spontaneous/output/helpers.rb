@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module Spontaneous::Render
+module Spontaneous::Output
   module Helpers
     # Helpers needs a separate helper registration mechanism outside of the Site scope
     # because loading of these modules happens before we instantiate the site object.
@@ -20,10 +20,9 @@ module Spontaneous::Render
       @registered_helpers ||= Hash.new { |hash, key| hash[key] = [] }
     end
 
-    require 'spontaneous/render/helpers/stylesheet_helper'
-    require 'spontaneous/render/helpers/script_helper'
-    require 'spontaneous/render/helpers/classes_helper'
-    require 'spontaneous/render/helpers/conditional_comment_helper'
+    require 'spontaneous/output/helpers/stylesheet_helper'
+    require 'spontaneous/output/helpers/script_helper'
+    require 'spontaneous/output/helpers/classes_helper'
+    require 'spontaneous/output/helpers/conditional_comment_helper'
   end
 end
-

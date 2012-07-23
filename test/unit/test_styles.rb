@@ -5,16 +5,6 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class StylesTest < MiniTest::Spec
 
-
-  # context "template root" do
-  #   should "be settable" do
-  #     File.exists?(template_root).should be_true
-  #     Spontaneous.template_root = template_root
-  #     Spontaneous.template_root.should == template_root
-  #   end
-  # end
-
-
   def teardown
     teardown_site
   end
@@ -23,7 +13,8 @@ class StylesTest < MiniTest::Spec
     @site = setup_site
     @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/styles"))
     @site.paths.add(:templates, @template_root)
-    Spontaneous::Render.use_development_renderer
+    @renderer = S::Output::Template::PreviewRenderer.new
+    S::Output.renderer = @renderer
   end
 
   context "styles for" do
@@ -281,7 +272,7 @@ class StylesTest < MiniTest::Spec
       context "inline templates" do
         setup do
           Page.add_output :pdf
-          class ::InlineTemplateClass < Content
+          class ::InlineTemplateClass < Piece
             field :title
 
             template 'html: {{title}}'
@@ -302,7 +293,7 @@ class StylesTest < MiniTest::Spec
           @a.render.should ==  "html: Total Title"
         end
 
-        should "be used to render the content with the right format" do
+        should "be used to render the content with the right format xxx" do
           @a.render(:pdf).should ==  "pdf: Total Title"
         end
       end

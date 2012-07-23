@@ -15,6 +15,10 @@ module Spontaneous
         @previous_revision = Site.published_revision
       end
 
+      def renderer
+        @renderer ||= Spontaneous::Output::Template::PublishRenderer.new(true)
+      end
+
       def publish_pages(page_list)
         pages = page_list.flatten.map { |c|
           c.is_a?(S::Page) ? c.reload : S::Page[c]
@@ -94,14 +98,13 @@ module Spontaneous
       end
 
       def render_revision
+        S::Output.renderer = renderer
         update_progress("rendering", 0)
         @pages_rendered = 0
         S::Content.with_identity_map do
           S::Content.with_visible do
-            S::Render.with_publishing_renderer do
-              render_pages
-              index_pages unless index_stages == 0
-            end
+            render_pages
+            index_pages unless index_stages == 0
           end
         end
         copy_static_files
@@ -121,7 +124,7 @@ module Spontaneous
 
       def render_page(page, output)
         logger.info { "#{page.path}" }
-        output.publish_page(revision)
+        output.publish_page(renderer, revision)
         page_rendered(page, "rendering", output.format)
       end
 

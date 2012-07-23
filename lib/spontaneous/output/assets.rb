@@ -1,5 +1,5 @@
 module Spontaneous
-  module Render
+  module Output
     module Assets
       extend self
 
@@ -8,11 +8,11 @@ module Spontaneous
       end
 
       def url(file = nil)
-        Spontaneous::Render.asset_url(file)
+        Spontaneous::Output.asset_url(file)
       end
 
       def path_for(revision, path = nil)
-        File.join [Spontaneous::Render.asset_path(revision), path].compact
+        File.join [Spontaneous::Output.asset_path(revision), path].compact
       end
 
       def find_file(*relative_paths)
@@ -26,7 +26,7 @@ module Spontaneous
         nil
       end
 
-      autoload :Compression,               "spontaneous/render/assets/compression"
+      autoload :Compression, "spontaneous/output/assets/compression"
     end
   end
 end

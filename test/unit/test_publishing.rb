@@ -11,11 +11,8 @@ class PublishingTest < MiniTest::Spec
 
   def self.startup
     @site_root = Dir.mktmpdir
-    FileUtils.cp_r(File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing/templates"), @site_root)
-  end
-
-  def self.shutdown
-    teardown_site
+    template_source = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing/templates")
+    FileUtils.cp_r(template_source, @site_root)
   end
 
   def self.shutdown
@@ -152,7 +149,7 @@ class PublishingTest < MiniTest::Spec
         root = Page.create()
         Spontaneous::Page.expects(:order).returns([root])
         output = root.output(:html)
-        output.expects(:render).raises(Exception)
+        output.expects(:render_using).raises(Exception)
         root.expects(:outputs).at_least_once.returns([output])
         begin
           silence_logger { Site.publish_all }
@@ -222,7 +219,7 @@ class PublishingTest < MiniTest::Spec
       end
 
       should "put its files into a numbered revision directory" do
-        Spontaneous.revision_dir(2).should == @site.root / 'cache/revisions' / "00002"
+        Spontaneous.revision_dir(2).should == Pathname.new(@site.root / 'cache/revisions' / "00002").realpath.to_s
       end
 
       should "symlink the latest revision to 'current'" do
@@ -280,7 +277,7 @@ class PublishingTest < MiniTest::Spec
         File.read("#{@site.revision_root}/00003/static/index.rtf").should == "RICH!\n"
       end
 
-      should "respect a format's #dynamic? setting when deciding a rendered templates location" do
+      should "respect a format's #dynamic? setting when deciding a rendered templates location xxx" do
         PublishablePage.add_output :rtf, :dynamic => true
         Content.delete_revision(@revision+1)
         Site.publish_all

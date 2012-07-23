@@ -7,10 +7,6 @@ module Spontaneous::Plugins::Page
     extend ActiveSupport::Concern
 
     module ClassMethods
-      # def format_for(format_name)
-      #   Spontaneous::Render::Output.new(format_name)
-      # end
-
       def outputs(*outputs)
         return output_list if outputs.nil? or outputs.empty?
         set_outputs(outputs)
@@ -42,7 +38,7 @@ module Spontaneous::Plugins::Page
       end
 
       def define_output(format, options = {})
-        o = Spontaneous::Render::Output.create(format, options).tap do |output|
+        o = Spontaneous::Output.create(format, options).tap do |output|
           silence_warnings { self.const_set("Output#{format.to_s.upcase}", output) }
         end
       end
@@ -72,7 +68,7 @@ module Spontaneous::Plugins::Page
       end
 
       def output_without_validation(name = nil)
-        return name if name.is_a?(Spontaneous::Render::Output::Format)
+        return name if name.is_a?(Spontaneous::Output::Format)
         return default_output if name.blank?
         output_map[name.to_sym]
       end
@@ -99,10 +95,10 @@ module Spontaneous::Plugins::Page
       self.class.provides_output?(format)
     end
 
-    def output(format)
-      return format if format.is_a?(Spontaneous::Render::Output::Format)
+    def output(format, content = nil)
+      return format if format.is_a?(Spontaneous::Output::Format)
       output_class = self.class.output(format)
-      output_class.new(self)
+      output_class.new(self, content)
     end
 
     def mime_type(format)

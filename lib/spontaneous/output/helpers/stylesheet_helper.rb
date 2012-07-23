@@ -2,7 +2,7 @@
 
 require 'sass'
 
-module Spontaneous::Render::Helpers
+module Spontaneous::Output::Helpers
   module StylesheetHelper
     extend self
 
@@ -26,7 +26,7 @@ module Spontaneous::Render::Helpers
     end
 
     def compressed_stylesheets(stylesheets)
-      file_paths = stylesheets.map { |style| [style, S::Render::Assets.find_file("#{style}.scss", "#{style}.css")] }
+      file_paths = stylesheets.map { |style| [style, S::Output::Assets.find_file("#{style}.scss", "#{style}.css")] }
       invalid, file_paths = file_paths.partition { |url, path| path.nil? }
       roots = Spontaneous.instance.paths.expanded(:public)
 
@@ -45,17 +45,17 @@ module Spontaneous::Render::Helpers
         end
       }.join
       compressed, hash = compress_css_string(css)
-      output_path = Spontaneous::Render::Assets.path_for(revision, "#{hash}.css")
+      output_path = Spontaneous::Output::Assets.path_for(revision, "#{hash}.css")
       FileUtils.mkdir_p(File.dirname(output_path))
       File.open(output_path, "w") { |file| file.write(compressed) }
-      tags = [stylesheet_tag(Spontaneous::Render::Assets.url(hash))]
+      tags = [stylesheet_tag(Spontaneous::Output::Assets.url(hash))]
       tags.join("\n")
     end
 
     def compress_css_string(css_string)
-      Spontaneous::Render::Assets::Compression.shine_compress_string(css_string, :css)
+      Spontaneous::Output::Assets::Compression.shine_compress_string(css_string, :css)
     end
 
-    Spontaneous::Render::Helpers.register_helper(self, :html)
+    Spontaneous::Output::Helpers.register_helper(self, :html)
   end
 end

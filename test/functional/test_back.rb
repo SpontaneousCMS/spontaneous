@@ -194,7 +194,7 @@ class BackTest < MiniTest::Spec
         result[:fields].map { |f| f[:name] }.should == ["title"]
       end
 
-      should "return the typelist as part of the site metadata xxx" do
+      should "return the typelist as part of the site metadata" do
         auth_get "/@spontaneous/metadata"
         assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
         last_response.content_type.should == "application/json;charset=utf-8"
@@ -219,14 +219,14 @@ class BackTest < MiniTest::Spec
         result[:user][:developer].should  == false # although the login is root, the level is :editor
       end
 
-      should "return an empty list of service URLs by default xxx" do
+      should "return an empty list of service URLs by default" do
         auth_get "/@spontaneous/metadata"
         assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
         result = Spot::JSON.parse(last_response.body)
         result[:services].should == []
       end
 
-      should "return the configured list of service URLs in the metadata xxx" do
+      should "return the configured list of service URLs in the metadata" do
         Site.config.stubs(:services).returns([
           {:title => "Google Analytics", :url => "http://google.com/analytics"},
           {:title => "Facebook", :url => "http://facebook.com/spontaneous"}
@@ -440,19 +440,20 @@ class BackTest < MiniTest::Spec
         Spontaneous.stubs(:reload!)
         @now = Time.now
         Time.stubs(:now).returns(@now)
+        @renderer = Spontaneous::Output.preview_renderer
       end
       should "return rendered root page" do
         get "/"
         assert last_response.ok?
         last_response.content_type.should == "text/html;charset=utf-8"
-        assert_equal S::Render.with_preview_renderer { @home.render }, last_response.body
+        assert_equal @renderer.render(@home.output(:html)), last_response.body
       end
 
       should "return rendered child-page" do
         get "/project1"
         assert last_response.ok?
         last_response.content_type.should == "text/html;charset=utf-8"
-        assert_equal S::Render.with_preview_renderer { @project1.render }, last_response.body
+        assert_equal @renderer.render(@project1.output(:html)), last_response.body
       end
 
       should "return alternate formats" do
@@ -460,7 +461,7 @@ class BackTest < MiniTest::Spec
         get "/project1.js"
         assert last_response.ok?
         last_response.content_type.should == "application/javascript;charset=utf-8"
-        assert_equal S::Render.with_preview_renderer { @project1.render(:js) }, last_response.body
+        assert_equal @renderer.render(@project1.output(:js)), last_response.body
       end
 
       should "allow pages to have css formats" do
@@ -468,7 +469,7 @@ class BackTest < MiniTest::Spec
         get "/project1.css"
         assert last_response.ok?
         last_response.content_type.should == "text/css;charset=utf-8"
-        assert_equal S::Render.with_preview_renderer { @project1.render(:css) }, last_response.body
+        assert_equal @renderer.render(@project1.output(:css)), last_response.body
       end
 
       should "return cache-busting headers" do

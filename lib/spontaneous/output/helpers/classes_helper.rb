@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module Spontaneous::Render::Helpers
+module Spontaneous::Output::Helpers
   module ClassesHelper
     extend self
 
@@ -13,7 +13,6 @@ module Spontaneous::Render::Helpers
       return "" if args.empty?
       %(class="#{args.join(" ")}")
     end
-    Spontaneous::Render::Helpers.register_helper(self, :html)
+    Spontaneous::Output::Helpers.register_helper(self, :html)
   end
 end
-

@@ -1,8 +1,7 @@
 # encoding: UTF-8
 
 require "rack"
-# require "sinatra"
-require 'sinatra/base'
+require "sinatra/base"
 
 module Spontaneous
   module Rack
@@ -11,6 +10,7 @@ module Spontaneous
     ACTIVE_KEY  = "SPONTANEOUS_KEY".freeze
     AUTH_COOKIE = "spontaneous_api_key".freeze
     KEY_PARAM   = "__key".freeze
+    RENDERER    = "spot.renderer".freeze
 
     EXPIRES_MAX = DateTime.parse("Thu, 31 Dec 2037 23:55:55 GMT").httpdate
 

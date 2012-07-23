@@ -20,6 +20,8 @@ class AliasTest < MiniTest::Spec
       @site = setup_site
       @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
       @site.paths.add(:templates, @template_root)
+      @renderer = S::Output::Template::Renderer.new(false)
+      S::Output.renderer = @renderer
 
       Content.delete
 

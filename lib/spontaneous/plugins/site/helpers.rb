@@ -15,17 +15,15 @@ module Spontaneous::Plugins::Site
       # Private: Generates a module including all helper methods for the requested format(s)
       def context(*formats)
         formats = [:*].concat formats.flatten.map { |f| f.to_sym }
-        helper_module = Module.new do
-          include Spontaneous::Render::ContextBase
-          formats.each do |format|
-            Spontaneous::Render::Helpers.registered_helpers[format].each do |mod|
-              include mod
-              extend  mod
-            end
-            Spontaneous::Site.registered_helpers[format].each do |mod|
-              include mod
-              extend  mod
-            end
+        helper_module = Module.new
+        formats.each do |format|
+          Spontaneous::Output::Helpers.registered_helpers[format].each do |mod|
+            helper_module.send :include, mod
+            helper_module.send :extend,  mod
+          end
+          Spontaneous::Site.registered_helpers[format].each do |mod|
+            helper_module.send :include, mod
+            helper_module.send :extend,  mod
           end
         end
         helper_module

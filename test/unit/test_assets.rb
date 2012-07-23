@@ -6,31 +6,34 @@ require 'shine'
 
 class AssetTest < MiniTest::Spec
 
-
-  def new_context(content = nil, format = :html, params = {})
-    output = S::Render::Output.format_class_map[:html].new(content)
-
-    klass = Class.new(S::Render.context_class(Cutaneous::PublishRenderer.new(""), output)) do
-      # simulate a production + publishing environment
-      def live?
-        true
-      end
-
-      # usually set as part of the render process
-      def revision
-        99
-      end
+  module LiveSimulation
+    # simulate a production + publishing environment
+    def live?
+      true
     end
-    klass.new(content, format, params)
+    # usually set as part of the render process
+    def revision
+      99
+    end
+  end
+
+  def new_context(content = @page, format = :html, params = {})
+    renderer = Spontaneous::Output::Template::PublishRenderer.new
+    output = content.output(format)
+    context = renderer.context(output, params)
+    context.extend LiveSimulation
+    context
   end
 
   def setup
     @site = setup_site
     @fixture_root = File.expand_path("../../fixtures/assets", __FILE__)
     @site.paths.add :public, @fixture_root / "public1", @fixture_root / "public2"
+    @page = S::Page.create
   end
 
   def teardown
+    S::Content.delete
     teardown_site
   end
 
@@ -53,7 +56,7 @@ class AssetTest < MiniTest::Spec
       context = new_context
       result = context.scripts("/js/a", "/js/b")
       result.should =~ /src="\/rev\/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad\.js"/
-      on_disk = Spontaneous::Render.revision_root(context.revision) / "rev/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad.js"
+      on_disk = Spontaneous::Output.revision_root(context.revision) / "rev/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad.js"
       assert File.exist?(on_disk)
       File.read(on_disk).should == "var A;\nvar B;\n"
     end
@@ -66,13 +69,11 @@ class AssetTest < MiniTest::Spec
       Shine.expects(:compress_string).with(src1, :js, {}).once.returns("var A;\nvar B;\n")
       Shine.expects(:compress_string).with(src2, :js, {}).once.returns("var B;\nvar C;\n")
       context = new_context
-      S::Render.with_publishing_renderer do
-        result = context.scripts("/js/a", "/js/b")
-        result = context.scripts("/js/a", "/js/b")
-        result = context.scripts("/js/b", "/js/c")
-        result = context.scripts("/js/b", "/js/c")
-        result.should =~ /src="\/rev\/1458221916fde33ec803fbbae20af8ded0ee2ca1\.js"/
-      end
+      result = context.scripts("/js/a", "/js/b")
+      result = context.scripts("/js/a", "/js/b")
+      result = context.scripts("/js/b", "/js/c")
+      result = context.scripts("/js/b", "/js/c")
+      result.should =~ /src="\/rev\/1458221916fde33ec803fbbae20af8ded0ee2ca1\.js"/
     end
 
     should "be compressed when publishing & passed a force_compression option" do
@@ -122,7 +123,7 @@ class AssetTest < MiniTest::Spec
       context = new_context
       result = context.scripts("/js/m", "/js/n")
       result.should =~ /src="\/rev\/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad\.js"/
-      on_disk = Spontaneous::Render.revision_root(context.revision) / "rev/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad.js"
+      on_disk = Spontaneous::Output.revision_root(context.revision) / "rev/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad.js"
       assert File.exist?(on_disk)
       File.read(on_disk).should == "var A;\nvar B;\n"
     end
@@ -158,7 +159,7 @@ var B;
       CSS
       result = context.stylesheets("/css/a", "/css/c", "/css/b")
       result.should =~ /href="\/rev\/df3e2b3fa3409d8ca37faac7da80349098f0b28a\.css"/
-      on_disk = Spontaneous::Render.revision_root(context.revision) / "rev/df3e2b3fa3409d8ca37faac7da80349098f0b28a.css"
+      on_disk = Spontaneous::Output.revision_root(context.revision) / "rev/df3e2b3fa3409d8ca37faac7da80349098f0b28a.css"
 
       assert File.exist?(on_disk)
       File.read(on_disk).should == "/* compressed */\n"
@@ -167,13 +168,16 @@ var B;
     should "be compressed if publishing and passed a force option" do
       files = [@fixture_root / "public1/css/a.scss", @fixture_root / "public2/css/b.scss"]
       context = new_context
-      context.stubs(:live?).returns(false)
-      context.stubs(:publishing?).returns(true)
+      m = Module.new do
+        def live?; false; end
+        def publishing?; true; end
+      end
+      context.extend m
       context.live?.should be_false
       Shine.expects(:compress_string).with(anything, :css, {}).once.returns("/* compressed */\n")
       result = context.stylesheets("/css/a", "/css/c", "/css/b", {:force_compression => true})
 
-      context.stubs(:publishing?).returns(false)
+      def context.publishing?; false; end
       context.publishing?.should be_false
       Shine.expects(:compress_string).with(anything, :css, {}).never
       result = context.stylesheets("/css/a", "/css/c", "/css/b", {:force_compression => true})
@@ -189,14 +193,12 @@ var B;
 .a{width:8px}
 .c { color: #fff; }
       CSS
-      S::Render.with_publishing_renderer do
-        result = context.stylesheets("/css/a", "/css/b")
-        result = context.stylesheets("/css/a", "/css/b")
-        result.should =~ /href="\/rev\/20aac22ae20e78ef1574a3a6635fa353148e9d9a\.css"/
-        result = context.stylesheets("/css/a", "/css/c")
-        result = context.stylesheets("/css/a", "/css/c")
-        result.should =~ /href="\/rev\/77ec1b6ee2907c65cf316b99b59c8cf8006dcddf\.css"/
-      end
+      result = context.stylesheets("/css/a", "/css/b")
+      result = context.stylesheets("/css/a", "/css/b")
+      result.should =~ /href="\/rev\/20aac22ae20e78ef1574a3a6635fa353148e9d9a\.css"/
+      result = context.stylesheets("/css/a", "/css/c")
+      result = context.stylesheets("/css/a", "/css/c")
+      result.should =~ /href="\/rev\/77ec1b6ee2907c65cf316b99b59c8cf8006dcddf\.css"/
     end
 
     should "support UTF8 styles" do

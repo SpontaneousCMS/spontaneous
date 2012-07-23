@@ -5,14 +5,15 @@ module Spontaneous
     class AroundPreview
       def initialize(app)
         @app = app
+        @renderer = Spontaneous::Output.preview_renderer
+        Spontaneous::Output.renderer = @renderer
       end
 
       def call(env)
+        env[Rack::RENDERER] = @renderer
         response = nil
         Content.with_identity_map do
-          S::Render.with_preview_renderer do
-            response = @app.call(env)
-          end
+          response = @app.call(env)
         end
         response
       end

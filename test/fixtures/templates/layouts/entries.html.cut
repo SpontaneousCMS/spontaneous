@@ -1,7 +1,7 @@
-%{ images.each do |image| }
+%{ images.each do |image| -}
 ${image.position}%{ if image.first? }>%{ end }%{ if image.last? }<%{ end }${ image.title }
-%{ end }
-%{ images.each_with_index do |image, i| }
+%{ end -}
+%{ images.each_with_index do |image, i| -}
 ${ i }:${ image.title }
-%{ end }
+%{ end -}
 ${ images.map do |i|; i.title end.join('.') }

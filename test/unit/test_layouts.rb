@@ -5,7 +5,6 @@ require File.expand_path('../../test_helper', __FILE__)
 class LayoutsTest < MiniTest::Spec
 
   def setup
-    Spontaneous::Render.use_development_renderer
     @template_root = ::File.expand_path('../../fixtures/layouts', __FILE__)
     @site = setup_site
     @site.paths.add(:templates, @template_root)

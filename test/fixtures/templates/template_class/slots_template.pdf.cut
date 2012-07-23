@@ -1,5 +1,5 @@
 <boxes-pdf>
-%{ images.entries.each do |image| }
+%{ images.entries.each do |image| -}
   <img>${ image }</img>
-%{ end }
+%{ end -}
 </boxes-pdf>

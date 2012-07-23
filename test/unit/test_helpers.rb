@@ -7,6 +7,9 @@ class HelpersTest < MiniTest::Spec
   def setup
     @site = setup_site
     @site.paths.add :templates, File.expand_path("../../fixtures/helpers/templates", __FILE__)
+    @renderer = S::Output::Template::Renderer.new(false)
+    S::Output.renderer = @renderer
+
   end
 
   def teardown
@@ -20,12 +23,11 @@ class HelpersTest < MiniTest::Spec
       end
 
       included_helpers = [
-        Spontaneous::Render::ContextBase,
         CustomHelper1,
-        Spontaneous::Render::Helpers::ConditionalCommentHelper,
-        Spontaneous::Render::Helpers::ClassesHelper,
-        Spontaneous::Render::Helpers::ScriptHelper,
-        Spontaneous::Render::Helpers::StylesheetHelper
+        Spontaneous::Output::Helpers::ConditionalCommentHelper,
+        Spontaneous::Output::Helpers::ClassesHelper,
+        Spontaneous::Output::Helpers::ScriptHelper,
+        Spontaneous::Output::Helpers::StylesheetHelper
       ]
       helper_module = Site.context :html
       join = included_helpers & helper_module.ancestors
@@ -53,16 +55,18 @@ class HelpersTest < MiniTest::Spec
         add_output :mobile
       end
 
-      CustomHelper3 = Site.helper :html do
+      Site.helper :html do
         def here_is_my_custom_helper3
           "here_is_my_custom_helper3"
         end
+        extend self
       end
 
-      CustomHelper4 = Site.helper :mobile do
+      Site.helper :mobile do
         def here_is_my_custom_helper4
           "here_is_my_custom_helper4"
         end
+        extend self
       end
 
       page = Page.new
@@ -73,7 +77,7 @@ class HelpersTest < MiniTest::Spec
 
   context "Classes helper" do
     setup do
-      @helper = Spontaneous::Render::Helpers::ClassesHelper
+      @helper = Spontaneous::Output::Helpers::ClassesHelper
     end
     should "enable easy addition of classes" do
       classes = @helper.classes("a", "b", "c", :active => false, :invisible => true)
@@ -99,7 +103,7 @@ class HelpersTest < MiniTest::Spec
 
   context "ConditionalComment helper" do
     setup do
-      @helper = Spontaneous::Render::Helpers::ConditionalCommentHelper
+      @helper = Spontaneous::Output::Helpers::ConditionalCommentHelper
     end
 
     should "provide a wrapper around IE conditional comments" do

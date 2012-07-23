@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha2'
-  s.date              = '2012-07-06'
+  s.date              = '2012-07-23'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -52,6 +52,7 @@ Gem::Specification.new do |s|
   s.add_dependency('base58',          ["~> 0.1.0"])
   s.add_dependency('bundler',         ["> 1.0.15"])
   s.add_dependency('coffee-script',   ["~> 2.2.0"])
+  s.add_dependency('cutaneous',       ["~> 0.1.1"])
   s.add_dependency('erubis',          ["~> 2.6"])
   s.add_dependency('fog',             ["~> 1.1.1"])
   s.add_dependency('foreman',         ["~> 0.22.0"])
@@ -208,6 +209,7 @@ Gem::Specification.new do |s|
     application/js/vendor/JS.Class-2.1.5/min/stdlib.js
     application/js/vendor/crypto-2.3.0-crypto.js
     application/js/vendor/crypto-2.3.0-sha1.js
+    application/js/vendor/date.js
     application/js/vendor/diff_match_patch.js
     application/js/vendor/jquery-1.6.2.min.js
     application/js/vendor/jquery-ui-1.8.16.custom.min.js
@@ -265,20 +267,6 @@ Gem::Specification.new do |s|
     db/migrations/20120423175416_add_pending_modifications.rb
     db/migrations/20120525164947_add_field_versions.rb
     docs/recipe-interface-screenshot.png
-    lib/cutaneous.rb
-    lib/cutaneous/context_helper.rb
-    lib/cutaneous/preview_context.rb
-    lib/cutaneous/preview_renderer.rb
-    lib/cutaneous/publish_context.rb
-    lib/cutaneous/publish_renderer.rb
-    lib/cutaneous/publish_template.rb
-    lib/cutaneous/publish_token_parser.rb
-    lib/cutaneous/renderer.rb
-    lib/cutaneous/request_context.rb
-    lib/cutaneous/request_renderer.rb
-    lib/cutaneous/request_template.rb
-    lib/cutaneous/request_token_parser.rb
-    lib/cutaneous/token_parser.rb
     lib/sequel/plugins/content_table_inheritance.rb
     lib/sequel/plugins/scoped_table_name.rb
     lib/spontaneous.rb
@@ -378,6 +366,21 @@ Gem::Specification.new do |s|
     lib/spontaneous/logger.rb
     lib/spontaneous/media.rb
     lib/spontaneous/media/file.rb
+    lib/spontaneous/output.rb
+    lib/spontaneous/output/assets.rb
+    lib/spontaneous/output/assets/compression.rb
+    lib/spontaneous/output/context.rb
+    lib/spontaneous/output/format.rb
+    lib/spontaneous/output/format/html.rb
+    lib/spontaneous/output/format/plain.rb
+    lib/spontaneous/output/helpers.rb
+    lib/spontaneous/output/helpers/classes_helper.rb
+    lib/spontaneous/output/helpers/conditional_comment_helper.rb
+    lib/spontaneous/output/helpers/script_helper.rb
+    lib/spontaneous/output/helpers/stylesheet_helper.rb
+    lib/spontaneous/output/template.rb
+    lib/spontaneous/output/template/engine.rb
+    lib/spontaneous/output/template/renderer.rb
     lib/spontaneous/page.rb
     lib/spontaneous/page_controller.rb
     lib/spontaneous/page_piece.rb
@@ -471,28 +474,6 @@ Gem::Specification.new do |s|
     lib/spontaneous/rack/sse.rb
     lib/spontaneous/rack/static.rb
     lib/spontaneous/rack/user_helpers.rb
-    lib/spontaneous/render.rb
-    lib/spontaneous/render/assets.rb
-    lib/spontaneous/render/assets/compression.rb
-    lib/spontaneous/render/context_base.rb
-    lib/spontaneous/render/development_renderer.rb
-    lib/spontaneous/render/engine.rb
-    lib/spontaneous/render/helpers.rb
-    lib/spontaneous/render/helpers/classes_helper.rb
-    lib/spontaneous/render/helpers/conditional_comment_helper.rb
-    lib/spontaneous/render/helpers/script_helper.rb
-    lib/spontaneous/render/helpers/stylesheet_helper.rb
-    lib/spontaneous/render/output.rb
-    lib/spontaneous/render/output/html.rb
-    lib/spontaneous/render/output/plain.rb
-    lib/spontaneous/render/preview_context.rb
-    lib/spontaneous/render/preview_renderer.rb
-    lib/spontaneous/render/publish_context.rb
-    lib/spontaneous/render/published_renderer.rb
-    lib/spontaneous/render/publishing_renderer.rb
-    lib/spontaneous/render/render_cache.rb
-    lib/spontaneous/render/renderer.rb
-    lib/spontaneous/render/request_context.rb
     lib/spontaneous/revision.rb
     lib/spontaneous/schema.rb
     lib/spontaneous/schema/schema_modification.rb
@@ -720,6 +701,7 @@ Gem::Specification.new do |s|
     test/fixtures/templates/layouts/page_style.html.cut
     test/fixtures/templates/layouts/params.html.cut
     test/fixtures/templates/layouts/preview_render.html.cut
+    test/fixtures/templates/layouts/standard.html.cut
     test/fixtures/templates/layouts/standard_page.html.cut
     test/fixtures/templates/layouts/subdir_style.html.cut
     test/fixtures/templates/layouts/template_params.html.cut
@@ -730,6 +712,7 @@ Gem::Specification.new do |s|
     test/fixtures/templates/publishing/templates/layouts/dynamic.html.cut
     test/fixtures/templates/publishing/templates/layouts/dynamic.rtf.cut
     test/fixtures/templates/publishing/templates/layouts/static.html.cut
+    test/fixtures/templates/publishing/templates/layouts/static.rtf.cut
     test/fixtures/templates/template_class/anonymous_style.html.cut
     test/fixtures/templates/template_class/another_template.html.cut
     test/fixtures/templates/template_class/complex_template.html.cut
@@ -764,7 +747,6 @@ Gem::Specification.new do |s|
     test/unit/test_config.rb
     test/unit/test_content.rb
     test/unit/test_content_inheritance.rb
-    test/unit/test_cutaneous.rb
     test/unit/test_extensions.rb
     test/unit/test_fields.rb
     test/unit/test_formats.rb
