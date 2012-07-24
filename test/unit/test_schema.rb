@@ -527,6 +527,88 @@ class SchemaTest < MiniTest::Spec
     end
   end
 
+  context "Schema groups" do
+    setup do
+      class ::A < Spontaneous::Page
+        group :a, :b, :c
+        box :cgroup do
+          allow_group :c
+        end
+      end
+      class ::B < Spontaneous::Piece
+        group :b, :c
+        style :fish
+        style :frog
+
+        box :agroup do
+          allow_groups :a, :c
+        end
+      end
+      class ::C < Spontaneous::Piece
+        group :c
+
+        box :bgroup do
+          allow_group :b, :style => "fish"
+        end
+        box :cgroup do
+          allow_group :c, :level => :root
+        end
+      end
+    end
+
+    teardown do
+      Object.send(:remove_const, :A) rescue nil
+      Object.send(:remove_const, :B) rescue nil
+      Object.send(:remove_const, :C) rescue nil
+    end
+
+    should "let boxes allow a list of content types" do
+      A.boxes.cgroup.allowed_types(nil).should == [A, B, C]
+      C.boxes.bgroup.allowed_types(nil).should == [A, B]
+      C.boxes.cgroup.allowed_types(nil).should == [A, B, C]
+      B.boxes.agroup.allowed_types(nil).should == [A, B, C]
+    end
+
+    should "appply the options to all the included classes" do
+      user = mock()
+      S::Permissions.expects(:has_level?).at_least(1).with(user, S::Permissions::UserLevel.root).returns(true)
+      A.boxes.cgroup.allowed_types(user).should == [A, B, C]
+      S::Permissions.expects(:has_level?).at_least(1).with(user, S::Permissions::UserLevel.root).returns(false)
+      A.boxes.cgroup.allowed_types(user).should == []
+    end
+
+    should "allow for configuring styles" do
+      c = C.new
+      b = B.new
+      styles =  c.bgroup.available_styles(b)
+      styles.length.should == 1
+      styles.first.name.should == :fish
+    end
+
+    should "reload correctly" do
+      FileUtils.mkdir(@site.root / "config")
+      @site.schema.write_schema
+      @site.schema.delete(::B)
+      Object.send(:remove_const, :B)
+
+      class ::B < Spontaneous::Piece
+        group :b
+        style :fish
+        style :frog
+
+        box :agroup do
+          allow_groups :a, :c
+        end
+      end
+
+      @site.schema.validate!
+
+      A.boxes.cgroup.allowed_types(nil).should == [A, C]
+      C.boxes.bgroup.allowed_types(nil).should == [A, B]
+    end
+  end
+
+
   context "Map writing" do
     context "Non-existant maps" do
       setup do

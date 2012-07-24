@@ -28,23 +28,40 @@ module Spontaneous::Plugins
       end
 
       def instance_class
-        case @type
+        resolve_instance_class(@type)
+      end
+
+      def resolve_instance_class(name)
+        case name
         when Class
-          @type
+          name
         when Symbol, String
-          @type.to_s.constantize
+          name.to_s.constantize
         end
       end
 
-      def styles
-        configured_styles || all_styles
+      def styles(content)
+        configured_styles(content) || all_styles(content)
       end
 
-      def configured_styles
-        if (@options.key?(:styles) and styles = @options[:styles]) or \
-          (@options.key?(:style) and styles = [@options[:style]].flatten)
+      def configured_styles(content)
+        if (styles = style_options)
           styles.map { |s| instance_class.find_named_style(s) }
         end
+      end
+
+      def all_styles(content)
+        instance_class.styles
+      end
+
+      def default_style
+        styles.first
+      end
+
+      def style_options
+        return Array(@options[:styles]) if @options.key?(:styles)
+        return Array(@options[:style])  if @options.key?(:style)
+        nil
       end
 
       def includes?(type)
@@ -63,14 +80,6 @@ module Spontaneous::Plugins
         end
       end
 
-      def all_styles
-        instance_class.styles
-      end
-
-      def default_style
-        styles.first
-      end
-
       def prototype
         @options[:prototype]
       end
@@ -84,6 +93,32 @@ module Spontaneous::Plugins
         Spontaneous::Permissions.has_level?(user, user_level)
       end
       alias_method :addable?, :readable?
+    end
+
+    class AllowedGroup < AllowedType
+      def groups
+        @type
+      end
+
+      def instance_classes
+        schema = Spontaneous::Site.schema
+        names = groups.flat_map { |name| Spontaneous::Site.schema.groups[name] }
+        names.map { |name| resolve_instance_class(name) }.uniq
+      end
+
+      def includes?(type)
+        instance_classes.include?(type)
+      end
+
+      def configured_styles(content)
+        if (styles = style_options)
+          styles.map { |s| content.class.find_named_style(s) }
+        end
+      end
+
+      def all_styles(content)
+        content.class.styles
+      end
     end
 
     module ClassMethods
@@ -113,6 +148,13 @@ module Spontaneous::Plugins
         #   allow(subclass, options)
         # end
       end
+
+      def allow_group(*group_names)
+        options = group_names.extract_options!
+        allowed_types_config << AllowedGroup.new(group_names, options)
+      end
+
+      alias_method :allow_groups, :allow_group
 
       def allowed_types_config
         @_allowed_types ||= []
@@ -163,7 +205,7 @@ module Spontaneous::Plugins
 
     def available_styles(content)
       if allowed = allowed_type(content)
-        allowed.styles
+        allowed.styles(content)
       else
         content.class.styles
       end

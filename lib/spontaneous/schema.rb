@@ -208,7 +208,7 @@ module Spontaneous
         # will check that each of the classes in the schema has a
         # corresponding id
         self.classes.each do | schema_class |
-          schema_class.schema_validate
+          schema_class.schema_validate(self)
         end
 
         # now check that each of the ids in the map has a
@@ -320,6 +320,33 @@ module Spontaneous
 
       def [](schema_id)
         map[schema_id]
+      end
+
+      def groups
+        @groups ||= Hash.new { |h, k| h[k] = [] }
+      end
+
+      def add_group_member(schema_class, group_names)
+        group_names.each do |name|
+          group = groups[name.to_sym]
+          group << schema_class.to_s unless group.include?(schema_class.to_s)
+        end
+      end
+
+      def is_group?(group_name)
+        groups.key?(group_name.to_sym)
+      end
+
+      def group_memberships(klass)
+        classname = klass.to_s
+        groups.select { |group, members| members.include?(classname) }.keys
+      end
+
+      def remove_group_members(klass)
+        type = klass.to_s
+        groups.each do |group, members|
+          members.delete(type)
+        end
       end
     end
   end

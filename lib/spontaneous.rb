@@ -129,6 +129,7 @@ module Spontaneous
     autoload :Permissions,      "spontaneous/plugins/permissions"
     autoload :Controllers,      "spontaneous/plugins/controllers"
     autoload :Modifications,    "spontaneous/plugins/modifications"
+    autoload :ContentGroups,    "spontaneous/plugins/content_groups"
 
     module Field
       autoload :EditorClass,    "spontaneous/plugins/field/editor_class"

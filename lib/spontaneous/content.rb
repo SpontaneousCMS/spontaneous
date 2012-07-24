@@ -62,6 +62,7 @@ module Spontaneous
     include Plugins::Visibility
     include Plugins::Prototypes
     include Plugins::Permissions
+    include Plugins::ContentGroups
 
     # marker method enabling a simple test for "cms content" vs "everything else"
     def spontaneous_content?
