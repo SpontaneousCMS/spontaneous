@@ -54,8 +54,8 @@ module Spontaneous::Plugins
         instance_class.styles
       end
 
-      def default_style
-        styles.first
+      def default_style(content)
+        styles(content).first
       end
 
       def style_options
@@ -197,7 +197,7 @@ module Spontaneous::Plugins
     # TODO: BOXES remove box reference here
     def style_for_content(content, box = nil)
       if allowed = allowed_type(content)
-        allowed.default_style
+        allowed.default_style(content)
       else
         content.default_style
       end

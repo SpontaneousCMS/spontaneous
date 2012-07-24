@@ -569,11 +569,11 @@ class SchemaTest < MiniTest::Spec
       B.boxes.agroup.allowed_types(nil).should == [A, B, C]
     end
 
-    should "appply the options to all the included classes" do
+    should "apply the options to all the included classes" do
       user = mock()
-      S::Permissions.expects(:has_level?).at_least(1).with(user, S::Permissions::UserLevel.root).returns(true)
+      S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.root).returns(true)
       A.boxes.cgroup.allowed_types(user).should == [A, B, C]
-      S::Permissions.expects(:has_level?).at_least(1).with(user, S::Permissions::UserLevel.root).returns(false)
+      S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.root).returns(false)
       A.boxes.cgroup.allowed_types(user).should == []
     end
 

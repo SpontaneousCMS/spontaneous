@@ -444,12 +444,12 @@ class BoxesTest < MiniTest::Spec
     # end
 
     should "allow all styles by default" do
-      Parent.allowed[2].styles.should == Allowed3.styles
+      Parent.allowed[2].styles(nil).should == Allowed3.styles
     end
 
     should "have a list of allowable styles" do
-      Parent.allowed[1].styles.length.should == 2
-      Parent.allowed[1].styles.map { |s| s.name }.should == [:ringo, :george]
+      Parent.allowed[1].styles(nil).length.should == 2
+      Parent.allowed[1].styles(nil).map { |s| s.name }.should == [:ringo, :george]
     end
 
     # TODO: decide on whether verifying style names is a good idea
