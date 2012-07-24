@@ -79,12 +79,6 @@ module Spontaneous::Output::Template
       Thread.current[:_render_cache]
     end
 
-    def context(output, params)
-      super.tap do |context|
-        context._render_cache_store = render_cache
-      end
-    end
-
     def write_compiled_scripts=(state)
       engine.write_compiled_scripts = state
     end

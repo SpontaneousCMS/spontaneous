@@ -117,20 +117,16 @@ module Spontaneous::Output::Context
   end
 
   module RenderCache
-    def _render_cache_store=(store)
-      @_render_cache_store = store
-    end
-
     def _render_cache_value(key)
-      @_render_cache_store[key]
+      __renderer.render_cache[key]
     end
 
     def _render_cache_set_value(key, value)
-      @_render_cache_store[key] = value
+      __renderer.render_cache[key] = value
     end
 
     def _render_cache_key?(key)
-      @_render_cache_store.key?(key)
+      __renderer.render_cache.key?(key)
     end
 
     def _with_render_cache(key, &value_block)
