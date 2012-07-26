@@ -105,6 +105,10 @@ module Spontaneous::Permissions
       level.can_publish? || false
     end
 
+    def admin?
+      level.admin? || false
+    end
+
     def export
       {
         :name => name,

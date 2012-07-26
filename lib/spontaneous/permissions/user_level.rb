@@ -7,27 +7,26 @@ module Spontaneous::Permissions
 
     class Root
       private(:initialize)
-      def self.>(level); true; end
-      def self.>=(level); true; end
-      def self.<=>(level); 1; end
-      def self.to_s; 'root'; end
-      def self.to_sym; :root; end
-      def self.can_publish?; true; end
-      def self.developer?; true; end
+      def self.>(level)     ; true  ; end
+      def self.>=(level)    ; true  ; end
+      def self.<=>(level)   ; 1     ; end
+      def self.to_s         ; 'root'; end
+      def self.to_sym       ; :root ; end
+      def self.can_publish? ; true  ; end
+      def self.developer?   ; true  ; end
+      def self.admin?       ; true  ; end
     end
 
     class None
       private(:initialize)
-      def self.>(level); false; end
-      def self.>=(level)
-        level.equal?(None)
-      end
-
-      def self.<=>(level); -1; end
-      def self.to_s; 'none'; end
-      def self.to_sym; :none; end
-      def self.can_publish?; false; end
-      def self.developer?; false; end
+      def self.>(level)     ; false ; end
+      def self.>=(level)    ; level.equal?(None); end
+      def self.<=>(level)   ; -1    ; end
+      def self.to_s         ; 'none'; end
+      def self.to_sym       ; :none ; end
+      def self.can_publish? ; false ; end
+      def self.developer?   ; false ; end
+      def self.admin?       ; false ; end
     end
 
     class Level
@@ -85,6 +84,11 @@ module Spontaneous::Permissions
 
       def developer?
         @permissions[:developer]
+      end
+
+      # Users with admin level can access the user manager interface
+      def admin?
+        @permissions[:admin]
       end
 
       def to_s

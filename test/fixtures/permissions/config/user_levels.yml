@@ -1,9 +1,12 @@
 
-- :name: editor
+- :name:    editor
   :publish: false
-- :name: admin
+
+- :name:    admin
+  :admin:   true
   :publish: false
-- :name: designer
+
+- :name:    designer
   :publish: true
   :developer: true
 

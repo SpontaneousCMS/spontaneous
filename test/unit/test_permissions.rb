@@ -301,6 +301,19 @@ class PermissionsTest < MiniTest::Spec
         @user.can_publish?.should be_true
       end
 
+      should "be testable for admin privileges" do
+        @user.update(:level => Permissions::UserLevel.none)
+        @user.admin?.should be_false
+        @user.update(:level => Permissions::UserLevel.editor)
+        @user.admin?.should be_false
+        @user.update(:level => Permissions::UserLevel.designer)
+        @user.admin?.should be_false
+        @user.update(:level => Permissions::UserLevel.admin)
+        @user.admin?.should be_true
+        @user.update(:level => Permissions::UserLevel.root)
+        @user.admin?.should be_true
+      end
+
       should "serialise to JSON" do
         @user.export.should == {
           :name => "A Person",
