@@ -296,7 +296,7 @@ module Spontaneous
           login = params[:user][:login]
           password = params[:user][:password]
           origin = "#{NAMESPACE}#{params[:origin]}"
-          if key = Spontaneous::Permissions::User.authenticate(login, password)
+          if key = Spontaneous::Permissions::User.authenticate(login, password, env["REMOTE_ADDR"])
             set_authentication_cookie(key)
             if request.xhr?
               json({

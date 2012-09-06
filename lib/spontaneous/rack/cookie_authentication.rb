@@ -11,14 +11,14 @@ module Spontaneous
         if login = Site.config.auto_login
           user = Spontaneous::Permissions::User[:login => login]
           if user.access_keys.empty?
-            user.generate_access_key
+            user.generate_access_key(env["REMOTE_ADDR"])
           else
             user.access_keys.first
           end
         else
           request = ::Rack::Request.new(env)
           api_key = request.cookies[Spontaneous::Rack::AUTH_COOKIE]
-          if api_key && key = Spontaneous::Permissions::AccessKey.authenticate(api_key)
+          if api_key && key = Spontaneous::Permissions::AccessKey.authenticate(api_key, env["REMOTE_ADDR"])
             key
           else
             nil
