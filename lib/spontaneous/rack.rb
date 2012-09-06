@@ -54,6 +54,7 @@ module Spontaneous
     autoload :CacheableFile,        'spontaneous/rack/cacheable_file'
     autoload :Static,               'spontaneous/rack/static'
     autoload :UserHelpers,          'spontaneous/rack/user_helpers'
+    autoload :UserAdmin,            'spontaneous/rack/user_admin'
     autoload :Helpers,              'spontaneous/rack/helpers'
     autoload :CookieAuthentication, 'spontaneous/rack/cookie_authentication'
     autoload :QueryAuthentication,  'spontaneous/rack/query_authentication'

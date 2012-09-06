@@ -91,7 +91,7 @@ class AssetBundler < MiniTest::Spec
 
     context "authorised users" do
       setup do
-        @user = Spontaneous::Permissions::User.create(:email => "test@example.com", :login => "test", :name => "test name", :password => "testpass", :password_confirmation => "testpass")
+        @user = Spontaneous::Permissions::User.create(:email => "test@example.com", :login => "test", :name => "test name", :password => "testpass")
         @site.config.auto_login @user.login
 
         @key = "c5AMX3r5kMHX2z9a5ExLKjAmCcnT6PFf22YQxzb4Codj"
@@ -162,7 +162,7 @@ class AssetBundler < MiniTest::Spec
     context "authorised users aaaa" do
       setup do
         Spontaneous.stubs(:reload!)
-        @user = Spontaneous::Permissions::User.create(:email => "test@example.com", :login => "test", :name => "test name", :password => "testpass", :password_confirmation => "testpass")
+        @user = Spontaneous::Permissions::User.create(:email => "test@example.com", :login => "test", :name => "test name", :password => "testpass")
         @user.update(:level => Spontaneous::Permissions[:editor])
         @user.save
         config = mock()

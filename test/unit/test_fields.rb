@@ -512,7 +512,7 @@ class FieldsTest < MiniTest::Spec
 
     context "Field versions xxx" do
       setup do
-        @user = Spontaneous::Permissions::User.create(:email => "user@example.com", :login => "user", :name => "user", :password => "rootpass", :password_confirmation => "rootpass")
+        @user = Spontaneous::Permissions::User.create(:email => "user@example.com", :login => "user", :name => "user", :password => "rootpass")
         @user.reload
 
         class ::Piece

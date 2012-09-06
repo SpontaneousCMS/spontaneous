@@ -40,22 +40,36 @@ Spontaneous.Ajax = (function($, S) {
 				'error': handle_response // pass the error to the handler too
 			});
 		},
-		post: function(url, post_data, callback) {
+		put: function(url, data, callback) {
+			this.makeRequest("PUT", url, data, callback);
+		},
+		del: function(url, data, callback) {
+			this.makeRequest("DELETE", url, data, callback);
+		},
+		post: function(url, data, callback) {
+			this.makeRequest("POST", url, data, callback);
+		},
+		makeRequest: function(method, url, data, callback) {
 			var success = function(data, textStatus, XMLHttpRequest) {
-				callback(data, textStatus, XMLHttpRequest);
+				if (typeof callback === "function") {
+					callback(data, textStatus, XMLHttpRequest);
+				}
 			};
 			var error = function(XMLHttpRequest, textStatus, error_thrown) {
-				var data = false;
+				var result = false;
 				try {
-					data = $.parseJSON(XMLHttpRequest.responseText);
+					result = $.parseJSON(XMLHttpRequest.responseText);
 				} catch (e) { }
-				callback(data, textStatus, XMLHttpRequest);
+				if (typeof callback === "function") {
+					callback(result, textStatus, XMLHttpRequest);
+				}
 			};
-			post_data = $.extend(post_data, this.api_access_key());
+			data = data || {};
+			data = $.extend(data, this.api_access_key());
 			__request({
 				'url': this.request_url(url, true),
-				'type': 'post',
-				'data': post_data,
+				'type': method,
+				'data': data,
 				'success': success,
 				'error': error
 			});

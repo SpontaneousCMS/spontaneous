@@ -7,7 +7,7 @@ module Spontaneous::Permissions
 
     class Root
       private(:initialize)
-      def self.>(level)     ; true  ; end
+      def self.>(level)     ; level < Root ; end
       def self.>=(level)    ; true  ; end
       def self.<=>(level)   ; 1     ; end
       def self.to_s         ; 'root'; end
@@ -79,16 +79,16 @@ module Spontaneous::Permissions
       end
 
       def can_publish?
-        @permissions[:publish]
+        @permissions[:publish] || false
       end
 
       def developer?
-        @permissions[:developer]
+        @permissions[:developer] || false
       end
 
       # Users with admin level can access the user manager interface
       def admin?
-        @permissions[:admin]
+        @permissions[:admin] || false
       end
 
       def to_s
@@ -114,9 +114,9 @@ module Spontaneous::Permissions
       end
 
       def all(base_level = nil)
-        list = store.to_a.sort { |a, b| a[1] <=> b[1] }
-        list.reject! { |l| l[1] > get(base_level) } if base_level
-        list.map { |l| l[0] }
+        list = store.values.sort { |a, b| a <=> b }
+        list.reject! { |l| l > get(base_level) } if base_level
+        list
       end
 
       def root

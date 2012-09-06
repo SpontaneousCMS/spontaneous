@@ -73,7 +73,7 @@ class BackTest < MiniTest::Spec
       # Spontaneous::Rack::Back.application.send :set, :show_exceptions, false
 
       # annoying to have to do this, but there you go
-      @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass", :password_confirmation => "rootpass")
+      @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass")
       @user.update(:level => Spontaneous::Permissions[:editor])
       @user.save
       @key = "c5AMX3r5kMHX2z9a5ExLKjAmCcnT6PFf22YQxzb4Codj"

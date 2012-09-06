@@ -616,7 +616,7 @@ class ModificationsTest < MiniTest::Spec
     context "with assigned editor" do
       setup do
         Spontaneous::Permissions::User.delete
-        @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
+        @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass")
       end
 
       teardown do

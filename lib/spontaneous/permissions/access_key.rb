@@ -5,16 +5,16 @@ module Spontaneous::Permissions
     plugin :timestamps
     many_to_one :user, :class => :'Spontaneous::Permissions::User'
 
-    def self.authenticate(key_id)
+    def self.authenticate(key_id, ip_address = nil)
       if key = self.for_id(key_id)
-        key.access!
+        key.access!(ip_address)
         return key
       end
       nil
     end
 
     def self.valid?(key_id, user)
-      return true if (key = self.for_id(key_id)) and key.user == user
+      return true if (key = self.for_id(key_id)) && (key.user == user) && (key.user.enabled?)
       false
     end
 
@@ -28,8 +28,8 @@ module Spontaneous::Permissions
       super
     end
 
-    def access!
-      self.update(:last_access_at => Time.now)
+    def access!(ip_address = nil)
+      self.update(:last_access_at => Time.now, :last_access_ip => ip_address)
     end
   end
 end

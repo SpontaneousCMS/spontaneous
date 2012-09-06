@@ -191,13 +191,24 @@ img.missing {
 	}
 }
 
-#content {
+#content-outer {
+	background: url(/@spontaneous/static/texture-03f7627e8264b1d607113ab32c593a58.png) repeat;
+	color: #fff;
+	font-size: 16px;
 	position: fixed;
-	overflow: auto;
 	top: 31px;
 	right: 0;
 	bottom: 0px;
 	left: 0;
+	#content {
+		background-color: white;
+		overflow: auto;
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		top: 0;
+	}
 	#data_pane,
   #preview_pane,
   #services_pane {
@@ -1670,5 +1681,6 @@ img.missing {
 @import "editing.css.scss";
 @import "add_alias_dialogue.css.scss";
 @import "developer.css.scss";
+@import "meta.css.scss";
 @import "jquery-ui-1.8.21.custom/ui-lightness.css.scss";
 

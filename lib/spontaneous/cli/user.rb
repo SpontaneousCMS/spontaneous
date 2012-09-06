@@ -88,7 +88,6 @@ module Spontaneous
           end
         end
 
-        attrs[:password_confirmation] = attrs[:password]
         user = Spontaneous::Permissions::User.new(attrs)
 
         if user.save

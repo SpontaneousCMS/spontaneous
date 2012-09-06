@@ -152,6 +152,7 @@ $target-name-size: 14px;
   @include rounded;
   @include box-sizing;
   @include interface;
+	border: none;
   margin: 0;
   cursor: pointer;
   text-align: center;
@@ -228,6 +229,11 @@ $target-name-size: 14px;
 	bottom: $bottom;
 }
 
+@mixin calc($property, $calculation) {
+	#{ $property }: -webkit-calc(#{ $calculation });
+	#{ $property }: -moz-calc(#{ $calculation });
+	#{ $property }: calc(#{ $calculation });
+}
 .button {
 	@include button;
 }
@@ -286,3 +292,47 @@ a {
 	background-color: #efefef;
 }
 
+.meta-background {
+	background: url(/@spontaneous/static/texture-03f7627e8264b1d607113ab32c593a58.png) repeat;
+}
+
+.editing-background {
+  background: url(/@spontaneous/static/editing-texture-1-42b06a3439752490988f30f2a06d5e7c.png) repeat;
+}
+
+$editing-blur: rgba(0, 0, 0, 0.2);
+$editing-focus: rgba(0, 0, 0, 0.6);
+@mixin field-name {
+			@include rounded-top;
+			@include box-sizing;
+			@include interface;
+			background-color: $editing-blur;
+      color: #fff;
+			display: block;
+			height: 16px;
+			padding-left: 8px;
+			padding-top: 2px;
+}
+
+@mixin field-value {
+	@include rounded-bottom;
+	border: solid 2px transparent;
+	padding: 6px;
+	background-color: white;
+	opacity: 0.8;
+}
+
+@mixin text-input {
+	@include box-sizing;
+	width: 100%;
+	border: none;
+	display: block;
+	font-weight: bold;
+	outline: none;
+}
+
+@mixin input-font {
+	font-family: $input-font-family;
+	font-size: 11px;
+	line-height: 14px;
+}

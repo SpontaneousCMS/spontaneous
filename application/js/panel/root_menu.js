@@ -1,5 +1,6 @@
 (function(S, $) {
 	var dom = S.Dom;
+	var sharedUserAdmin = new Spontaneous.MetaView.UserAdmin();
 	var RootMenuView = new JS.Class(S.PopoverView, {
 		initialize: function(afterCloseCallback) {
 			this.afterCloseCallback = afterCloseCallback;
@@ -29,6 +30,13 @@
 		userActionMenu: function() {
 			var menu = dom.ul(".user-actions");
 			menu.append(dom.li('.user.title').text(S.User.name()));
+			if (S.User.is_admin()) {
+				var manage = dom.a().text("User Administration").click(function() {
+					Spontaneous.ContentArea.enterMeta(sharedUserAdmin);
+					Spontaneous.Popover.close();
+				});
+				menu.append(dom.li('.user-administration').append(manage));
+			}
 			var logout = dom.a().text("Logout").click(function() {
 				console.log("Logout");
 				S.User.logout();

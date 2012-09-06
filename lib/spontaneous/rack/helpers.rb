@@ -5,6 +5,10 @@ require 'sprockets'
 module Spontaneous
   module Rack
     module Helpers
+      def json(response)
+        content_type 'application/json', :charset => 'utf-8'
+        response.serialise_http(user)
+      end
 
       def application_assets
         @application_assets_compiler ||= Spontaneous::Asset::AppCompiler.new(Spontaneous.gem_dir, Spontaneous.root)

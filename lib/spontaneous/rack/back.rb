@@ -43,6 +43,9 @@ module Spontaneous
           use AssetsHandler
           use UnsupportedBrowserHandler
           use SchemaModification
+          map "/users" do
+            run UserAdmin
+          end
           run EditingInterface
         end
       end
@@ -173,10 +176,6 @@ module Spontaneous
         helpers Spontaneous::Rack::UserHelpers
         helpers Spontaneous::Rack::Helpers
 
-        def json(response)
-          content_type 'application/json', :charset => 'utf-8'
-          response.serialise_http(user)
-        end
       end
 
       class UnsupportedBrowserHandler < EditingBase

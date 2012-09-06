@@ -72,7 +72,7 @@ Spontaneous.Popover = (function($, S) {
 	Popover.extend({
 		_instance: false,
 		div: function() {
-			if (!this._div) { this._div = $('#content'); }
+			if (!this._div) { this._div = $('#content-outer'); }
 			return this._div;
 		},
 		open: function(event, view) {

@@ -1,0 +1,331 @@
+@import "definitions.css.scss";
+
+#content-outer #content-meta {
+	a {
+		color: $highlight;
+	}
+	.container {
+	}
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+#user-admin-container {
+	$container-margin: $container-padding;
+	$user-admin-dialogue-width: 680px;
+	@include calc(max-height, "100% - #{ 2 * $container-margin }");
+	@include display-box;
+	@include box-orient(vertical);
+
+	@include rounded;
+	min-height: 450px;
+	background-color: rgba(0, 0, 0, 0.2);
+	position: relative;
+	width: $user-admin-dialogue-width;
+	margin: $container-margin auto 0 auto;
+	overflow: hidden;
+
+	.title {
+		@include rounded-top;
+		height: $container-padding;
+		background-color: rgba(0, 0, 0, 0.2);
+		// background: #ccc;
+		position: relative;
+		span {
+			position: absolute;
+			color: $editing-focus;
+			left: $container-padding/4;
+			top: 15px;
+		}
+	}
+	.title.main {
+		.done {
+			@include button-color($highlight, $action);
+			position: absolute;
+			right: $container-padding / 2;
+			width: 20%;
+			top: ($container-padding / 4) + 4;
+		}
+		span {
+			color: rgba(255, 255, 255, 0.3);
+			padding-left: $container-padding - 10;
+			left: $container-padding / 4;
+			&:before {
+				@include awesome-icon("\f0c0");
+				position: absolute;
+				left: -2px;
+				top: -5px;
+				font-size: 2em;
+				margin-right: $unit;
+			}
+		}
+	}
+
+	.gap {
+		@include box-flex;
+	}
+	.edit {
+		// @extend .meta-background;
+		@include rounded;
+		@extend .editing-background;
+		@include box-sizing;
+		color: #000;
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: $user-admin-dialogue-width - $container-padding;
+		margin-right: $container-padding;
+
+		.back {
+			position: absolute;
+			left: -$container-padding;
+			top: 0;
+			bottom: 0;
+			width: $container-padding;
+		}
+		form {
+			padding: ( $container-padding / 2 ) ($container-padding / 4);
+			margin: 0;
+			p {
+				margin: 0 0 $unit 0;
+			}
+			label {
+				@include field-name;
+			}
+			.value {
+				@include field-value;
+				position: relative;
+				.error {
+					@include rounded;
+					@include box-sizing;
+					@include button-color(rgba(255, 0, 0, 0.8), rgba(255, 0, 0, 0.8));
+					@include input-font;
+					margin: 0;
+					border: 0;
+					padding: 0;
+					display: table;
+					font-weight: bold;
+					position: absolute;
+					right: -3px;
+					top: 0;
+					height: 31px;
+					width: 25%;
+					color:#fff;
+					span {
+						display: table-cell;
+						padding-left: $unit;
+						vertical-align: middle;
+					}
+				}
+			}
+
+			input[type="text"], input[type="email"] {
+				@include text-input;
+			}
+			.focus {
+				label {
+					background-color: $editing-focus;
+					color: white;
+				}
+			}
+			.admin {
+				@include display-box;
+				@include box-orient(horizontal);
+				@include box-align(stretch);
+				margin-bottom: $container-padding / 2;
+				p {
+					width: 30%;
+					margin: 0;
+				}
+				.log-out {
+					display: block;
+					background: $editing-focus;
+					box-shadow: none;
+
+					&:active {
+						@include button-color($editing-focus, $editing-focus);
+					}
+
+					&.complete,
+					&.complete:hover {
+						@include button-color($editing-blur, $editing-blur);
+					}
+
+					&:before {
+						@include awesome-icon("\f08b ");
+						margin-right: $unit/2;
+					}
+				}
+				.enabled {
+					label {
+						@include rounded;
+						background-color: $editing-focus;
+						height: 17px;
+						position: relative;
+						input {
+							margin: 0;
+							padding: 0;
+							position: absolute;
+							right: $unit;
+							top: 3px;
+						}
+					}
+				}
+			}
+			.save {
+				@include display-box;
+				@include box-orient(horizontal);
+				@include box-align(stretch);
+				margin-top: ($container-padding / 2);
+				.button {
+					@include button-color($highlight, $action);
+					display: block;
+					width: 30%;
+				}
+				.cancel {
+					@include button-color($editing-blur, $action);
+				}
+			}
+			.level-select {
+				@include input-font;
+				@include no-select;
+				position: relative;
+				height: 20px;
+				cursor: pointer;
+				font-weight: bold;
+				z-index: 100;
+				.select {
+					@include rounded;
+					cursor: pointer;
+					position: absolute;
+					background-color: opacify($editing-focus, 0.5);
+					width: 300px;
+					padding: $unit/2 0;
+					color: #fff;
+					margin-left: -$unit;
+					margin-top: -$unit/2;
+					z-index: 100;
+					.level {
+						@include display-box;
+						@include box-align(stretch);
+						@include box-orient(horizontal);
+						padding: $unit/2 $unit;
+						// position: relative;
+						span {
+							display: block;
+							width: 25%;
+						}
+						.level-name {
+							@include box-flex;
+							width: auto;
+						}
+						span.true, span.false {
+							margin-left: $unit;
+							font-weight: normal;
+						}
+
+						span.true {
+							color: $editing;
+						}
+						span.true:before {
+							@include awesome-icon("\f00c");
+							width: $unit * 1.5;
+						}
+						span.false {
+							color: rgba(255, 255, 255, 0.4);
+						}
+						span.false:before {
+							@include awesome-icon("\f00d");
+							width: $unit * 1.5;
+						}
+					}
+					.level:hover {
+						background-color: $highlight;
+						color: #000;
+					}
+				}
+			}
+		}
+	}
+	.contents {
+		@include box-flex;
+		overflow: auto;
+		padding: ($container-padding / 4) ($container-padding / 4);
+		.user {
+			@include box-sizing;
+			@include display-box;
+			@include box-align(stretch);
+			@include box-orient(horizontal);
+			@include box-pack(top);
+			@include rounded;
+
+			cursor: pointer;
+			height: $container-padding * 1;
+			padding: ($container-padding / 4);
+
+			& > div {
+				position: relative;
+				top: 2px;
+			}
+			.name {
+				color: $highlight;
+				width: 40%;
+				// font-weight: bold;
+			}
+			.level {
+				@include box-flex;
+				color: rgba(255, 255, 255, 0.5);
+			}
+			.delete {
+				width: 50px;
+				text-align: right;
+				&:after {
+					@include awesome-icon("\f014");
+					font-size: 1.5em;
+					position: relative;
+					top: 1px;
+					text-align: right;
+					color: rgba(255, 255, 255, 0.3);
+				}
+				&:hover:after {
+					color: $highlight;
+				}
+			}
+		}
+		.user.disabled {
+			.name {
+				// text-decoration: line-through;
+			}
+			.name:after {
+				content: "(disabled)";
+				color: rgba(255, 255, 255, 0.5);
+				margin-left: $unit;
+				// text-decoration: line-through;
+			}
+		}
+		.user:hover {
+			background-color: rgba(0, 0, 0, 0.5);
+			.name {
+
+			}
+		}
+	}
+	.add-user {
+		@include rounded-bottom;
+		height: $container-padding;
+		background-color: rgba(0, 0, 0, 0.2);
+		position: relative;
+
+		.add {
+			@include button-color($highlight, $action);
+			position: absolute;
+			right: $container-padding / 2;
+			width: 20%;
+			top: ($container-padding / 4) + 4;
+		}
+	}
+}

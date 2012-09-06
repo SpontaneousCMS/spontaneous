@@ -49,7 +49,7 @@ class FeaturesTest < MiniTest::Spec
       config.stubs(:site_id).returns('example_org')
       @site.stubs(:config).returns(config)
 
-      @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
+      @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass")
       @user.update(:level => Spontaneous::Permissions.root)
       @user.save
       @key = "c5AMX3r5kMHX2z9a5ExLKjAmCcnT6PFf22YQxzb4Codj"

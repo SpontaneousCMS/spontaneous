@@ -42,7 +42,7 @@ Spontaneous.Preview = (function($, S) {
 		},
 		goto_path: function(path) {
 			if (path) {
-				path += click_param();
+				// path += click_param();
 				this.iframe[0].contentWindow.location.href = path;
 			}
 		},

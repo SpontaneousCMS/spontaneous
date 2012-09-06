@@ -50,21 +50,22 @@ class PermissionsTest < MiniTest::Spec
     end
 
     should "provide a sorted list of all levels" do
-      Permissions::UserLevel.all.should == [:none, :editor, :admin, :designer, :root]
+      Permissions::UserLevel.all.map(&:to_sym).should == [:none, :editor, :admin, :designer, :root]
     end
+
     should "provide a list of all levels <= provided level" do
-      Permissions::UserLevel.all(:editor).should == [:none, :editor]
-      Permissions::UserLevel.all(:designer).should == [:none, :editor, :admin, :designer]
+      Permissions::UserLevel.all(:editor).map(&:to_sym).should == [:none, :editor]
+      Permissions::UserLevel.all(:designer).map(&:to_sym).should == [:none, :editor, :admin, :designer]
     end
 
     should "have a root level" do
       Permissions::UserLevel.root.should == Permissions::UserLevel::Root
     end
 
-    should "have a root level that is always greater than other levels" do
+    should "have a root level that is always greater than other levels except root" do
       Permissions::UserLevel.root.should > Permissions::UserLevel['designer']
       Permissions::UserLevel.root.should >= Permissions::UserLevel['designer']
-      Permissions::UserLevel.root.should > Permissions::UserLevel::Root
+      Permissions::UserLevel.root.should_not > Permissions::UserLevel::Root
       Permissions::UserLevel.root.should >= Permissions::UserLevel::Root
       Permissions::UserLevel[:root].should == Permissions::UserLevel::Root
     end
@@ -97,8 +98,8 @@ class PermissionsTest < MiniTest::Spec
     end
     should "Have a developer flag" do
       Permissions::UserLevel[:none].developer?.should be_false
-      Permissions::UserLevel[:editor].developer?.should be_nil
-      Permissions::UserLevel[:admin].developer?.should be_nil
+      Permissions::UserLevel[:editor].developer?.should be_false
+      Permissions::UserLevel[:admin].developer?.should be_false
       Permissions::UserLevel[:designer].developer?.should be_true
       Permissions::UserLevel[:root].developer?.should be_true
     end
@@ -112,12 +113,56 @@ class PermissionsTest < MiniTest::Spec
         :name => "A Person",
         :email => "person@example.org",
         :login => "person",
-        :password => "xxxxxx",
-        :password_confirmation => "xxxxxx"
+        :password => "xxxxxxxx"
+      }
+      @valid2 = {
+        :name => "Another Person",
+        :email => "person2@example.org",
+        :login => "person2",
+        :password => "xxxxxxxxxx"
       }
     end
 
     teardown do
+    end
+
+    should "be retrievable as a list" do
+      user1 = Permissions::User.create(@valid.merge(:level => S::Permissions[:editor]))
+      user2 = Permissions::User.create(@valid2.merge(:level => S::Permissions[:admin]))
+      user1.logged_in!("196.168.1.11")
+      exported = Permissions::User.export(nil)
+      exported[:users].should == [
+        { :id => user1.id, :name => "A Person", :email => "person@example.org", :login => "person", :level => "editor",
+          :keys => [:last_access_at => @now.httpdate, :last_access_ip => "196.168.1.11"], :disabled => false },
+        { :id => user2.id, :name => "Another Person", :email => "person2@example.org", :login => "person2", :level => "admin", :disabled => false,
+          :keys => [] }
+      ]
+      exported[:levels].should == [
+        { :level => "none", :can_publish => false, :is_admin => false  },
+        { :level => "editor", :can_publish => false, :is_admin => false  },
+        { :level => "admin", :can_publish => false, :is_admin => true  },
+        { :level => "designer", :can_publish => true, :is_admin => false  },
+        { :level => "root", :can_publish => true, :is_admin => true  }
+      ]
+    end
+
+    should "filter exported user list to remove users with a higher level" do
+      user1 = Permissions::User.create(@valid.merge(:level => S::Permissions[:editor]))
+      user2 = Permissions::User.create(@valid2.merge(:level => S::Permissions[:admin]))
+      user3 = Permissions::User.create(@valid.merge(:login => "person3", :email => "person3@example.com", :level => S::Permissions[:root]))
+      user1.logged_in!("196.168.1.11")
+      exported = Permissions::User.export(user2)
+      exported[:users].should == [
+        { :id => user1.id, :name => "A Person", :email => "person@example.org", :login => "person", :level => "editor", :disabled => false,
+          :keys => [:last_access_at => @now.httpdate, :last_access_ip => "196.168.1.11"] },
+        { :id => user2.id, :name => "Another Person", :email => "person2@example.org", :login => "person2", :level => "admin", :disabled => false,
+          :keys => [] }
+      ]
+      exported[:levels].should == [
+        { :level => "none", :can_publish => false, :is_admin => false  },
+        { :level => "editor", :can_publish => false, :is_admin => false  },
+        { :level => "admin", :can_publish => false, :is_admin => true  },
+      ]
     end
 
     should "be creatable with valid params" do
@@ -161,7 +206,7 @@ class PermissionsTest < MiniTest::Spec
       user.errors[:login].should_not be_blank
     end
 
-    should "reject duplicate logins" do
+    should "reject duplicate logins on creation" do
       user1 = Permissions::User.create(@valid)
       user2 = Permissions::User.new(@valid)
       user2.save
@@ -169,22 +214,23 @@ class PermissionsTest < MiniTest::Spec
       user2.errors[:login].should_not be_blank
     end
 
-    should "require a non-blank password & password_confirmation" do
-      user = Permissions::User.new(@valid.merge(:password => "", :password_confirmation => ""))
+    should "reject duplicate logins" do
+      user1 = Permissions::User.create(@valid)
+      user2 = Permissions::User.create(@valid.merge(:login => "other"))
+      user2.update_fields({:login => @valid[:login]}, [:login])
+      user2.valid?.should be_false
+      user2.errors[:login].should_not be_blank
+    end
+
+    should "require a non-blank password" do
+      user = Permissions::User.new(@valid.merge(:password => ""))
       user.save
       user.valid?.should be_false
       user.errors[:password].should_not be_blank
     end
 
-    should "require a matching password & password_confirmation" do
-      user = Permissions::User.new(@valid.merge(:password => "sdfsddfsdf", :password_confirmation => "sdf"))
-      user.save
-      user.valid?.should be_false
-      user.errors[:password_confirmation].should_not be_blank
-    end
-
-    should "require passwords to be at least 6 characters" do
-      user = Permissions::User.new(@valid.merge(:password => "12345", :password_confirmation => "12345"))
+    should "require passwords to be at least 8 characters" do
+      user = Permissions::User.new(@valid.merge(:password => "1234567"))
       user.save
       user.valid?.should be_false
       user.errors[:password].should_not be_blank
@@ -320,6 +366,7 @@ class PermissionsTest < MiniTest::Spec
           :email => "person@example.org",
           :login => "person",
           :can_publish => false,
+          :admin => false,
           :developer => false
         }
       end
@@ -334,8 +381,7 @@ class PermissionsTest < MiniTest::Spec
         :name => "A Person",
         :email => "person@example.org",
         :login => "person",
-        :password => "xxxxxx",
-        :password_confirmation => "xxxxxx"
+        :password => "xxxxxxxx"
       }
     end
 
@@ -447,10 +493,10 @@ class PermissionsTest < MiniTest::Spec
   context "Guards" do
     setup do
       Permissions::User.delete
-      @visitor = Permissions::User.create(:email => "visitor@example.com", :login => "visitor", :name => "visitor", :password => "visitorpass", :password_confirmation => "visitorpass")
-      @editor = Permissions::User.create(:email => "editor@example.com", :login => "editor", :name => "editor", :password => "editorpass", :password_confirmation => "editorpass")
-      @admin = Permissions::User.create(:email => "admin@example.com", :login => "admin", :name => "admin", :password => "adminpass", :password_confirmation => "adminpass")
-      @root = Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass", :password_confirmation => "rootpass")
+      @visitor = Permissions::User.create(:email => "visitor@example.com", :login => "visitor", :name => "visitor", :password => "visitorpass")
+      @editor = Permissions::User.create(:email => "editor@example.com", :login => "editor", :name => "editor", :password => "editorpass")
+      @admin = Permissions::User.create(:email => "admin@example.com", :login => "admin", :name => "admin", :password => "adminpass")
+      @root = Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass")
       @editor.update(:level => Permissions::UserLevel.editor)
       @admin.update(:level => Permissions::UserLevel.admin)
       @root.update(:level => Permissions::UserLevel.root)

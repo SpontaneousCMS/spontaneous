@@ -6,16 +6,15 @@ $editing-3: darken($editing-2, 20%);
 $editing-4: darken($editing-3, 20%);
 
 // $editing-focus: #8ac551;
-$editing-blur: rgba(0, 0, 0, 0.2);
-$editing-focus: rgba(0, 0, 0, 0.6);
 
 $text-edit-width: 621px;
 
 .editing-panel {
 
+	@extend .editing-background;
 	z-index: 1001;
 	// background-color: $editing-0;
-  background: url(/@spontaneous/static/editing-texture-1-42b06a3439752490988f30f2a06d5e7c.png) repeat;
+  // background: url(/@spontaneous/static/editing-texture-1-42b06a3439752490988f30f2a06d5e7c.png) repeat;
 
 	.editing-fields {
 		@extend .clearfix;
@@ -100,15 +99,7 @@ $text-edit-width: 621px;
 			margin-top: 8px;
 		}
 		.name {
-			@include rounded-top;
-			@include box-sizing;
-			@include interface;
-			background-color: $editing-blur;
-      color: #fff;
-			display: block;
-			height: 16px;
-			padding-left: 8px;
-			padding-top: 2px;
+			@include field-name;
 			.comment {
 				font-weight: normal;
 				text-transform: none;
@@ -117,15 +108,9 @@ $text-edit-width: 621px;
 			}
 		}
 		.value {
-			@include rounded-bottom;
-			border: solid 2px transparent;
-			padding: 6px;
-      background-color: white;
-      opacity: 0.8;
+			@include field-value;
 			textarea, input[type="text"] {
-				font-family: $input-font-family;
-				font-size: 11px;
-				line-height: 14px;
+				@include input-font;
 				outline: none;
 			}
 			input[type="file"] {
@@ -144,11 +129,7 @@ $text-edit-width: 621px;
 				resize:vertical;
 			}
 			input[type="text"] {
-				@include box-sizing;
-				width: 100%;
-				border: none;
-				display: block;
-				font-weight: bold;
+				@include text-input;
 			}
 		}
 

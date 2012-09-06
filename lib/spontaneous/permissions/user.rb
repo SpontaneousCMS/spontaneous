@@ -10,7 +10,7 @@ module Spontaneous::Permissions
     many_to_many :groups,       :class => :'Spontaneous::Permissions::AccessGroup', :join_table => :spontaneous_groups_users
     one_to_many  :access_keys,  :class => :'Spontaneous::Permissions::AccessKey'
 
-    set_restricted_columns(:crypted_password)
+    set_restricted_columns(:crypted_password, :salt)
 
     def_delegators :group, :level, :access_selector
 
@@ -18,18 +18,53 @@ module Spontaneous::Permissions
       Digest::SHA1.hexdigest("--#{salt}--#{clear_password}--")
     end
 
-    def self.authenticate(login, clear_password)
+    def self.authenticate(login, clear_password, ip_address = nil)
       if user = self[:login => login, :disabled => false]
         crypted_password = user.encrypt_password(clear_password)
         if crypted_password == user.crypted_password
-          access_key = user.logged_in!
+          access_key = user.logged_in!(ip_address)
           return access_key
         end
       end
       nil
     end
 
-    attr_accessor :password, :password_confirmation
+    def self.create(attributes = {})
+      level = attributes.delete(:level) || attributes.delete("level")
+      user =  super
+      user.update(:level => Spontaneous::Permissions[level]) if level && user
+      user
+    end
+
+    def self.export(user = nil)
+      users = self.order(:login).all
+      users = users.reject { |u| u.level > user.level } if user
+      exported = {}
+      exported[:users] = users.map { |u|
+        export_user(u)
+      }
+      base_level = user.nil? ? nil : user.level
+      exported[:levels] = UserLevel.all(base_level).map { |level|
+        { :level => level.to_s, :can_publish => level.can_publish?, :is_admin => level.admin? }
+      }
+      exported
+    end
+
+    def self.export_user(u)
+      keys = u.access_keys.map { |key|
+        {:last_access_at => key.last_access_at.httpdate, :last_access_ip => key.last_access_ip}
+      }
+      { :id    => u.id,
+        :name  => u.name,
+        :email => u.email,
+        :login => u.login,
+        :level => u.level.to_s,
+        :disabled => u.disabled?,
+        :keys  => keys }
+    end
+
+    attr_accessor :password
+    alias_method  :disabled?, :disabled
 
     ##
     # Find the highest access level available from all the groups we
@@ -43,13 +78,13 @@ module Spontaneous::Permissions
       access_keys.map(&:last_access_at).sort.last
     end
 
-    def logged_in!
+    def logged_in!(ip_address = nil)
       self.last_login_at = Time.now
-      generate_access_key
+      generate_access_key(ip_address)
     end
 
-    def generate_access_key
-      key = AccessKey.new
+    def generate_access_key(ip_address)
+      key = AccessKey.new(:last_access_ip => ip_address)
       self.add_access_key(key)
       self.save
       key
@@ -62,10 +97,26 @@ module Spontaneous::Permissions
     def before_save
       self.salt = Spontaneous::Permissions.random_string(32) if salt.blank?
       self.crypted_password = encrypt_password(password) unless password.blank?
-      if self.disabled
-        access_keys.each { | key | key.delete }
-      end
+      clear_access_keys! if disabled?
       super
+    end
+
+    def clear_access_keys!
+      access_keys.each { | key | key.delete }
+    end
+
+    def enabled?
+      !disabled?
+    end
+
+    def disable!
+      self.disabled = true
+      self.save
+    end
+
+    def enable!
+      self.disabled = false
+      self.save
     end
 
     def after_create
@@ -76,11 +127,6 @@ module Spontaneous::Permissions
     def password=(new_password)
       updating_password!
       @password = new_password
-    end
-
-    def password_confirmation=(new_password)
-      updating_password!
-      @password_confirmation = new_password
     end
 
     def level=(level)
@@ -115,7 +161,8 @@ module Spontaneous::Permissions
         :email => email,
         :login => login,
         :can_publish => can_publish?,
-        :developer => !!developer?
+        :developer => developer?,
+        :admin => admin?
       }
     end
 
@@ -127,36 +174,26 @@ module Spontaneous::Permissions
 
     def validate
       super
-      errors.add(:name, 'is required') if name.blank?
+      errors.add(:name,  'is required') if name.blank?
       errors.add(:email, 'is required') if email.blank?
-      errors.add(:email, 'is invalid') unless email =~ /^[^@]+@.+$/
+      errors.add(:email, 'is invalid')  unless email.blank? or email =~ /\A[^@]+@.+\z/
 
       if login.blank?
         errors.add(:login, 'is required')
       else
-        errors.add(:login, 'should only contain letters, numbers & underscore') unless login =~ /^[a-zA-Z0-9_]+$/
+        errors.add(:login, 'should only contain letters, numbers & underscore') unless login =~ /\A[a-zA-Z0-9_]+\z/
         errors.add(:login, 'should be at least 3 letters long') if login.length < 3
       end
 
-      if errors[:login].empty? && new?
-        if User[:login => login]
-          errors.add(:login, "must be unique, login '#{login}' already exists")
-        end
+      if (u = User[:login => login]) && (u.id != id)
+        errors.add(:login, "must be unique, login '#{login}' already exists")
       end
 
       if new? || updating_password?
         if password.blank?
           errors.add(:password, 'is required')
-        elsif password_confirmation.blank?
-          errors.add(:password_confirmation, 'is required')
-        else
-          if password != password_confirmation
-            errors.add(:password_confirmation, 'should match the password')
-          else
-            if password.length < 6
-              errors.add(:password, 'is too short. It should be at least 6 characters')
-            end
-          end
+        elsif password.length < 8
+          errors.add(:password, 'should be at least 6 characters long')
         end
       end
     end

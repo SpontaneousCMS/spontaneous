@@ -14,8 +14,7 @@ class AuthenticationTest < MiniTest::Spec
       :name => "#{name.capitalize}",
       :email => "#{name}@example.org",
       :login => name,
-      :password => "#{name}_password",
-      :password_confirmation => "#{name}_password"
+      :password => "#{name}_password"
     })
     user.update(:level => level)
     user

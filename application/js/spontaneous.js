@@ -23,6 +23,8 @@
 //= require views/page_view
 //= require views/piece_view
 //= require views/page_piece_view
+//= require meta_view
+//= require meta_view/user_admin
 //= require entry
 //= require page_entry
 //= require box

@@ -202,6 +202,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			}.bind(this));
 		}
 	});
+	PieceView.ConfirmDeletePopup = ConfirmDeletePopup;
 	return PieceView;
 }(jQuery, Spontaneous));
 
