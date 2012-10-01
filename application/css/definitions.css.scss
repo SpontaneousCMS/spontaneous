@@ -21,10 +21,10 @@ $chrome-accent: #404040;
 $content-font-family:  "HelveticaNeue", "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
 $input-font-family:  "Lucida Grande", "Lucida Sans Unicode";
 $headline-font-family:   "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "Helvetica", "Arial";
-$interface-font-family: "HelveticaNeue", "Helvetica Neue", "Arial";
+$interface-font-family: "HelveticaNeue", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 /*$interface-font-family: "Helvetica";*/
 
-$field-preview-font-size: 12px;
+$field-preview-font-size: 13px;
 
 $container-padding: 48px;
 $entry-gap: 32px;
@@ -143,8 +143,9 @@ $target-name-size: 14px;
   -webkit-font-smoothing: antialiased;
   text-transform: uppercase;
   font-size: 10px;
-	line-height: 12px;
-  font-weight: bold;
+  line-height: 13px;
+  //font-weight: bold;
+  font-weight: 600;
   @extend .no-select;
 }
 
@@ -184,7 +185,7 @@ $target-name-size: 14px;
 }
 
 @mixin header {
-	font-weight: 100;
+	font-weight: 600;
 	font-family: $headline-font-family;
 	-webkit-font-smoothing: antialiased;
 }
@@ -303,15 +304,16 @@ a {
 $editing-blur: rgba(0, 0, 0, 0.2);
 $editing-focus: rgba(0, 0, 0, 0.6);
 @mixin field-name {
-			@include rounded-top;
-			@include box-sizing;
-			@include interface;
-			background-color: $editing-blur;
-      color: #fff;
-			display: block;
-			height: 16px;
-			padding-left: 8px;
-			padding-top: 2px;
+	@include rounded-top;
+	@include box-sizing;
+	@include interface;
+	background-color: $editing-blur;
+	color: #fff;
+	display: block;
+	height: 16px;
+	padding-left: 8px;
+	padding-top: 2px;
+
 }
 
 @mixin field-value {

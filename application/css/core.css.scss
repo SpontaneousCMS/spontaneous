@@ -492,6 +492,7 @@ img.missing {
 		// right: 100px;
 		// margin-left: -100px;
 		padding-right: $unit;
+		padding-top: 2px;
 	}
 	.value {
 		@extend .preview-value;
