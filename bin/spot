@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -KU
+#!/usr/bin/env ruby
 
 require 'rubygems' unless defined?(Gem) # Useful only on --dev mode
 require 'bundler'
