@@ -510,7 +510,7 @@ class FieldsTest < MiniTest::Spec
       end
     end
 
-    context "Field versions xxx" do
+    context "Field versions" do
       setup do
         @user = Spontaneous::Permissions::User.create(:email => "user@example.com", :login => "user", :name => "user", :password => "rootpass")
         @user.reload
@@ -604,6 +604,17 @@ class FieldsTest < MiniTest::Spec
         v = vv.first
         v.value.should == "one"
         @instance.title.previous_version.value.should == "one"
+      end
+    end
+
+    context "String fields xxx" do
+      should "be aliased to the :title type" do
+        @content_class = Class.new(::Piece) do
+          field :title
+          field :something, :title
+        end
+        instance = @content_class.new
+        assert instance.fields.title.class.ancestors.include?(Spontaneous::FieldTypes::StringField), ":title type should inherit from StringField"
       end
     end
 

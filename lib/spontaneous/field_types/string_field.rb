@@ -13,6 +13,7 @@ module Spontaneous
         escape_html(value)
       end
     end
-    StringField.register
+
+    StringField.register :string, :title
   end
 end
