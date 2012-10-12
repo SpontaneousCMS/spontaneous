@@ -77,7 +77,7 @@ Gem::Specification.new do |s|
   s.add_dependency('thin',            ["~> 1.2"])
   s.add_dependency('thor',            ["~> 0.14.6"])
   s.add_dependency('uglifier',        ["~> 1.2.4"])
-  s.add_dependency('yajl-ruby',       ["~> 1.1"])
+  s.add_dependency('oj',              ["~> 1.4"])
 
   ## List your development dependencies here. Development dependencies are
   ## those that are only needed during development

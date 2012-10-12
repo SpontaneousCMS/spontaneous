@@ -1,25 +1,48 @@
 # encoding: UTF-8
 
+require 'oj'
+
+Oj.default_options = {
+  symbol_keys: true,
+  mode: :compat
+} if defined?(Oj)
+
 module Spontaneous
   module JSON
-    module ModuleMethods
-      def parser
-        Yajl::Parser.new(:symbolize_keys => true)
-      end
-      def encoder
-        Yajl::Encoder.new
-      end
-
+    module OjParser
       def parse(json_string)
-        parser.parse(json_string)
+        ::Oj.load(json_string)
+      rescue
+        nil
       end
 
       def encode(object)
-        encoder.encode(object)
+        ::Oj.dump(object)
       end
     end
 
-    extend ModuleMethods
+    if defined?(Yajl)
+      module YajlParser
+        def parser
+          Yajl::Parser.new(:symbolize_keys => true)
+        end
+        def encoder
+          Yajl::Encoder.new
+        end
+
+        def parse(json_string)
+          parser.parse(json_string)
+        rescue
+          nil
+        end
+
+        def encode(object)
+          encoder.encode(object)
+        end
+      end
+    end
+
+    extend OjParser
 
     def parse_json(json_string)
       Spontaneous::JSON.parse(json_string)

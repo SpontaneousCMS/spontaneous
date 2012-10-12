@@ -14,7 +14,7 @@ module Spontaneous
     include Plugins::SchemaId
 
     sequel_plugin :content_table_inheritance, :type_sid
-    sequel_plugin :serialization, :yajl, :field_store, :entry_store, :box_store, :serialized_modifications
+    sequel_plugin :serialization, :ojson, :field_store, :entry_store, :box_store, :serialized_modifications
     sequel_plugin :instance_hooks
     sequel_plugin :skip_create_refresh
     sequel_plugin :timestamps, :create=>:created_at, :update_on_create => true

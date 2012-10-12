@@ -6,8 +6,6 @@ Encoding.default_internal = Encoding::UTF_8
 
 require "fileutils"
 require "stringex"
-require "sequel"
-require "yajl"
 require "logger"
 
 require "active_support/concern"
@@ -19,15 +17,6 @@ require "active_support/core_ext/array/grouping"
 require "active_support/core_ext/array/extract_options"
 require "active_support/core_ext/file"
 
-Sequel.extension :inflector
-
-require 'sequel/plugins/serialization'
-
-Sequel::Plugins::Serialization.register_format(
-  :yajl,
-  lambda { |v| Yajl::Encoder.new.encode(v) },
-  lambda { |v| Yajl::Parser.new(:symbolize_keys => true).parse(v)   }
-)
 
 
 module Spontaneous
@@ -36,6 +25,7 @@ module Spontaneous
   require "spontaneous/constants"
   require "spontaneous/errors"
   require "spontaneous/json"
+  require "spontaneous/sequel"
 
   include Constants
 
