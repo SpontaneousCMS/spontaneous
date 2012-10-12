@@ -607,14 +607,15 @@ class FieldsTest < MiniTest::Spec
       end
     end
 
-    context "String fields xxx" do
+    context "String fields" do
       should "be aliased to the :title type" do
         @content_class = Class.new(::Piece) do
-          field :title
+          field :title, default: "Right"
           field :something, :title
         end
         instance = @content_class.new
         assert instance.fields.title.class.ancestors.include?(Spontaneous::FieldTypes::StringField), ":title type should inherit from StringField"
+        instance.title.value.should == "Right"
       end
     end
 
