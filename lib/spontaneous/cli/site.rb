@@ -3,12 +3,11 @@ require 'spontaneous/cli'
 module Spontaneous
   module Cli
     class Site < ::Spontaneous::Cli::Thor
-      Spontaneous = ::Spontaneous
       namespace :site
 
       default_task :browse
 
-      class DumpTask < ::Thor::Group
+      module DumpTask
         protected
 
         def db_adapter
@@ -36,7 +35,7 @@ module Spontaneous
         end
 
         def database
-          Spontaneous.database
+          ::Spontaneous.database
         end
 
         def dump_path
@@ -44,16 +43,19 @@ module Spontaneous
         end
 
         def dump_root
-          Spontaneous.cache_dir('dump')
+          ::Spontaneous.cache_dir('dump')
         end
 
         def relative_dir(path)
           path = Pathname.new(path)
-          path.relative_path_from(Pathname.new(Spontaneous.root)).to_s
+          path.relative_path_from(Pathname.new(::Spontaneous.root)).to_s
         end
       end
 
-      class Dump < DumpTask
+
+      class Dump < ::Thor::Group
+        include DumpTask
+
         def create_dump_dir
           ::FileUtils.mkdir_p(dump_path)
         end
@@ -64,15 +66,17 @@ module Spontaneous
         end
 
         def archive_media
-          tmp = relative_dir(Spontaneous.media_dir('tmp'))
-          src = relative_dir(Spontaneous.media_dir)
+          tmp = relative_dir(::Spontaneous.media_dir('tmp'))
+          src = relative_dir(::Spontaneous.media_dir)
           say "Creating media archive at '#{relative_dir(media_archive)}'", :green
           cmd = %(tar czf #{media_archive} --exclude #{tmp} #{src})
           system(cmd)
         end
       end
 
-      class Load < DumpTask
+      class Load < ::Thor::Group
+        include DumpTask
+
         def find_latest_dump
           root = Pathname.new(dump_root)
           @id = root.entries.
@@ -115,7 +119,7 @@ module Spontaneous
         prepare :publish
         boot!
         ::Site.publishing_method = :immediate
-        Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
+        ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
         say "Creating revision #{::Site.revision}", :green, true
         if options.pages
           say ">  Publishing pages #{options.pages.inspect}", :green, true
