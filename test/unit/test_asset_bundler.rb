@@ -42,9 +42,9 @@ class AssetBundler < MiniTest::Spec
       compiled_js_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.js"].first
       js = File.read(compiled_js_path)
       # hard to test because we don't know exactly what the uglifier is going to do
-      js.should =~ /var a;a="yes"/
-      js.should =~ /var a;a="#{Date.today.day}"/
-      js.should =~ /var a;a="subdir\/#{Date.today.day}"/
+      js.should =~ /var (\w);\1="yes"/
+      js.should =~ /var (\w);\1="#{Date.today.day}"/
+      js.should =~ /var (\w);\1="subdir\/#{Date.today.day}"/
     end
 
     should "compile CSS into any destination directory" do
