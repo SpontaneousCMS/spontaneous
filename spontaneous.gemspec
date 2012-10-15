@@ -83,7 +83,7 @@ Gem::Specification.new do |s|
   ## those that are only needed during development
   s.add_development_dependency('minitest', ["~> 2.1.0"])
   s.add_development_dependency('mysql2', ["~> 0.3.11"])
-  s.add_development_dependency('pg', ["~> 0.13.2"])
+  s.add_development_dependency('pg', ["~> 0.14.1"])
   s.add_development_dependency('jeweler', ["~> 1.5"])
   s.add_development_dependency('jnunemaker-matchy', ["~> 0.4"])
   s.add_development_dependency('shoulda', ["~> 2.11.3"])
