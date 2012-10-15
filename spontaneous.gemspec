@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
-  s.version           = '0.2.0.alpha2'
-  s.date              = '2012-07-23'
+  s.version           = '0.2.0.alpha3'
+  s.date              = '2012-10-15'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -126,6 +126,7 @@ Gem::Specification.new do |s|
     application/css/jquery-ui-1.8.21.custom/images/ui-icons_ffffff_256x240.png
     application/css/jquery-ui-1.8.21.custom/ui-lightness.css.scss
     application/css/login.css.scss
+    application/css/meta.css.scss
     application/css/popover.css.scss
     application/css/schema_error.css.scss
     application/css/spontaneous.css
@@ -162,6 +163,8 @@ Gem::Specification.new do |s|
     application/js/load.js
     application/js/location.js
     application/js/login.js
+    application/js/meta_view.js
+    application/js/meta_view/user_admin.js
     application/js/metadata.js
     application/js/page.js
     application/js/page_browser.js
@@ -401,6 +404,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/plugins/application/state.rb
     lib/spontaneous/plugins/application/system.rb
     lib/spontaneous/plugins/boxes.rb
+    lib/spontaneous/plugins/content_groups.rb
     lib/spontaneous/plugins/controllers.rb
     lib/spontaneous/plugins/entries.rb
     lib/spontaneous/plugins/entry.rb
@@ -473,6 +477,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/rack/reloader.rb
     lib/spontaneous/rack/sse.rb
     lib/spontaneous/rack/static.rb
+    lib/spontaneous/rack/user_admin.rb
     lib/spontaneous/rack/user_helpers.rb
     lib/spontaneous/revision.rb
     lib/spontaneous/schema.rb
@@ -485,6 +490,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/search/field.rb
     lib/spontaneous/search/index.rb
     lib/spontaneous/search/results.rb
+    lib/spontaneous/sequel.rb
     lib/spontaneous/server.rb
     lib/spontaneous/site.rb
     lib/spontaneous/state.rb
@@ -725,9 +731,11 @@ Gem::Specification.new do |s|
     test/fixtures/templates/template_class/this_template.html.cut
     test/fixtures/templates/template_class/this_template.pdf.cut
     test/fixtures/templates/with_default_style_class.html.cut
+    test/fixtures/user_manager/config/user_levels.yml
     test/functional/test_application.rb
     test/functional/test_back.rb
     test/functional/test_front.rb
+    test/functional/test_user_manager.rb
     test/javascript/env.js
     test/javascript/test_dom.rb
     test/javascript/test_markdown.rb
