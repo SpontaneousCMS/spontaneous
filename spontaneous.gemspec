@@ -57,7 +57,7 @@ Gem::Specification.new do |s|
   s.add_dependency('fog',             ["~> 1.1.1"])
   s.add_dependency('foreman',         ["~> 0.22.0"])
   s.add_dependency('kramdown',        ["~> 0.13.3"])
-  s.add_dependency('launchy',         ["~> 0.4.0"])
+  s.add_dependency('launchy',         ["~> 2.1.2"])
   s.add_dependency('mini_magick',     ["~> 3.3"])
   s.add_dependency('nokogiri',        ["~> 1.5.0"])
   s.add_dependency('public_suffix',   ["~> 1.0"])
