@@ -118,7 +118,7 @@ class AssetBundler < MiniTest::Spec
     end
   end
 
-  context "Production mode editing app xxxx" do
+  context "Production mode editing app" do
     setup do
       @compiler = Spontaneous::Asset::AppCompiler.new(fixture_dir, @site.root)
       @compiler.compile

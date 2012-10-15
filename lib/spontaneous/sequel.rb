@@ -12,6 +12,6 @@ require 'sequel/plugins/serialization'
 Sequel::Plugins::Serialization.register_format(
   :ojson,
   lambda { |v| Oj.dump(v) },
-  lambda { |v| Oj.load(v)   }
+  lambda { |v| Oj.load(v, symbol_keys: true)   }
 )
 

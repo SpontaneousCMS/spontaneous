@@ -3,7 +3,6 @@
 require 'oj'
 
 Oj.default_options = {
-  symbol_keys: true,
   mode: :compat
 } if defined?(Oj)
 
@@ -11,7 +10,7 @@ module Spontaneous
   module JSON
     module OjParser
       def parse(json_string)
-        ::Oj.load(json_string)
+        ::Oj.load(json_string, symbol_keys: true)
       rescue
         nil
       end
