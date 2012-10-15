@@ -108,18 +108,7 @@ class AssetTest < MiniTest::Spec
   context "CoffeeScript assets" do
     should "be compiled & compressed in live environment" do
       files = [@fixture_root / "public1/js/m.js", @fixture_root / "public2/js/n.js"]
-      Shine.expects(:compress_string).with((<<-COMPILED), :js, {}).once.returns("var A;\nvar B;\n")
-(function() {
-  var square;
-
-  square = function(x) {
-    return x * x;
-  };
-
-  if (typeof elvis !== "undefined" && elvis !== null) alert("I knew it!");
-
-}).call(this);
-      COMPILED
+      Shine.expects(:compress_string).with(regexp_matches(/square = function/), :js, {}).once.returns("var A;\nvar B;\n")
       context = new_context
       result = context.scripts("/js/m", "/js/n")
       result.should =~ /src="\/rev\/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad\.js"/
@@ -129,20 +118,7 @@ class AssetTest < MiniTest::Spec
     end
 
     should "be correctly compiled when mixed with plain js" do
-      Shine.expects(:compress_string).with((<<-COMPILED), :js, {}).once.returns("var A;\nvar B;\n")
-var A;
-(function() {
-  var square;
-
-  square = function(x) {
-    return x * x;
-  };
-
-  if (typeof elvis !== "undefined" && elvis !== null) alert("I knew it!");
-
-}).call(this);
-var B;
-      COMPILED
+      Shine.expects(:compress_string).with(regexp_matches(/square = function/), :js, {}).once.returns("var A;\nvar B;\n")
       context = new_context
       result = context.scripts("/js/a", "/js/m", "/js/n", "/js/b")
     end
