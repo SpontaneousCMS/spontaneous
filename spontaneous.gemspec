@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
-  s.version           = '0.2.0.alpha4'
+  s.version           = '0.2.0.alpha5'
   s.date              = '2012-10-16'
   s.rubyforge_project = 'spontaneous'
 
