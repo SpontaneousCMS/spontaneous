@@ -3,21 +3,31 @@
 require 'rubygems' unless defined?(Gem) # Useful only on --dev mode
 require 'bundler'
 
-begin
-	Bundler.setup(:default)
-rescue Bundler::GemfileNotFound
-	# We're operating outside of a site dir, probably generating a site
-	# so load the Spontaneous gem Gemfile
-  ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
-	retry
-rescue Bundler::GemNotFound => e
-  STDERR.puts e.message
-  STDERR.puts "Try running `bundle install`."
-  exit!
+# Are we in the root of a Spontaneous site?
+# If so then we want to use the bundled version of Spontaneous and its
+# dependencies
+if File.exist?("config/schema.yml")
+  begin
+    Bundler.setup(:default)
+  rescue Bundler::GemfileNotFound
+    # We're operating outside of a site dir, probably generating a site
+    # so load the Spontaneous gem Gemfile
+    ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
+    retry
+  rescue Bundler::GemNotFound => e
+    STDERR.puts e.message
+    STDERR.puts "Try running `bundle install`."
+    exit!
+  end
+else
+  # If spot is being run outside of a site, then we want to use the global
+  # gem files
+  spot_path = File.expand_path('../../lib', __FILE__)
+  if File.directory?(spot_path) && !$:.include?(spot_path)
+    $:.unshift(spot_path)
+  end
 end
 
-spot_path = File.expand_path('../../lib', __FILE__)
-$:.unshift(spot_path) if File.directory?(spot_path) && !$:.include?(spot_path)
+require 'spontaneous'
 
-require 'spontaneous/cli'
-Spontaneous::Cli::Runner.start(ARGV)
+Spontaneous::Cli::Root.start(ARGV)
