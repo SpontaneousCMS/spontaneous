@@ -2,7 +2,8 @@ require 'spontaneous/cli'
 
 module Spontaneous
   module Cli
-    class Site < ::Spontaneous::Cli::Thor
+    class Site < ::Thor
+      include Spontaneous::Cli::TaskUtils
       namespace :site
 
       default_task :browse
@@ -98,26 +99,23 @@ module Spontaneous
         end
       end
 
-      desc "#{namespace}:dump", "Dumps the current site to an archive on the local machine"
+      desc "dump", "Dumps the current site to an archive on the local machine"
       def dump
-        prepare :dump
-        boot!
+        prepare! :dump
         Dump.start
       end
 
-      desc "#{namespace}:load", "Uploads a dump of the current site to a remote server"
+      desc "load", "Uploads a dump of the current site to a remote server"
       def load
-        prepare :load
-        boot!
+        prepare! :load
         Load.start
       end
 
-      desc "#{namespace}:publish", "Publishes the site"
+      desc "publish", "Publishes the site"
       method_option :pages, :type => :array, :desc => "List of pages to publish"
       method_option :logfile, :type => :string, :desc => "Location of logfile"
       def publish
-        prepare :publish
-        boot!
+        prepare! :publish
         ::Site.publishing_method = :immediate
         ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
         say "Creating revision #{::Site.revision}", :green, true
@@ -130,22 +128,20 @@ module Spontaneous
         end
       end
 
-      desc "#{namespace}:render", "Re-renders the current content"
+      desc "render", "Re-renders the current content"
       def render
-        prepare :render
-        boot!
+        prepare! :render
         ::Site.publishing_method = :immediate
         ::Site.rerender
       end
 
-      desc "#{namespace}:revision", "Shows the site status"
+      desc "revision", "Shows the site status"
       def revision
-        prepare :revision
-        boot!
+        prepare! :revision
         say "Site is at revision #{::Site.revision}", :green
       end
 
-      desc "#{namespace}:browse", "Launces a browser pointing to the current development CMS"
+      desc "browse", "Launces a browser pointing to the current development CMS"
       def browse
         prepare :browse
         require 'launchy'

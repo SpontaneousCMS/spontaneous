@@ -1,8 +1,8 @@
 source :rubygems
 
 ## choose your poison:
-# gem 'pg', '~> 0.9.0'
-gem 'mysql2', '~> 0.2'
+# gem 'pg', '~> 0.14.0'
+gem 'mysql2', '~> 0.3'
 
 # Deploy with Capistrano
 gem 'capistrano', '~> 2.9'
@@ -19,10 +19,10 @@ gem 'capistrano', '~> 2.9'
 gem 'spontaneous', :git => "git://github.com/SpontaneousCMS/spontaneous.git"
 gem 'simultaneous', :git => "git://github.com/SpontaneousCMS/simultaneous.git"
 
-group :production do
-  gem 'thin',    '~> 1.3.1'
-  gem 'unicorn', '~> 4.2'
-end
+# group :production do
+#   gem 'thin',    '~> 1.3.1'
+#   gem 'unicorn', '~> 4.2'
+# end
 
 
 # source gemfiles from Plugins & Features

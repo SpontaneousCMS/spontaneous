@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha4'
-  s.date              = '2012-10-15'
+  s.date              = '2012-10-16'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -75,7 +75,7 @@ Gem::Specification.new do |s|
   s.add_dependency('stringex',        ["= 1.3"])
   s.add_dependency('therubyracer',    ['~> 0.9.10'])
   s.add_dependency('thin',            ["~> 1.2"])
-  s.add_dependency('thor',            ["~> 0.14.6"])
+  s.add_dependency('thor',            ["~> 0.16.0"])
   s.add_dependency('uglifier',        ["~> 1.3.0"])
   s.add_dependency('oj',              ["~> 1.4"])
 
@@ -286,15 +286,15 @@ Gem::Specification.new do |s|
     lib/spontaneous/capistrano/sync.rb
     lib/spontaneous/change.rb
     lib/spontaneous/cli.rb
-    lib/spontaneous/cli/adapter.rb
     lib/spontaneous/cli/assets.rb
-    lib/spontaneous/cli/base.rb
     lib/spontaneous/cli/console.rb
+    lib/spontaneous/cli/generate.rb
+    lib/spontaneous/cli/init.rb
     lib/spontaneous/cli/media.rb
+    lib/spontaneous/cli/migrate.rb
     lib/spontaneous/cli/server.rb
     lib/spontaneous/cli/site.rb
     lib/spontaneous/cli/sync.rb
-    lib/spontaneous/cli/tasks.rb
     lib/spontaneous/cli/user.rb
     lib/spontaneous/collections/box_set.rb
     lib/spontaneous/collections/change_set.rb
@@ -349,6 +349,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/generators/site/config/environments/production.rb.tt
     lib/spontaneous/generators/site/config/front.ru
     lib/spontaneous/generators/site/config/indexes.rb.tt
+    lib/spontaneous/generators/site/config/schema.yml
     lib/spontaneous/generators/site/config/user_levels.yml
     lib/spontaneous/generators/site/lib/site.rb.tt
     lib/spontaneous/generators/site/lib/tasks/site.rake.tt

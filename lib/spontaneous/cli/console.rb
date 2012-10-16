@@ -2,34 +2,26 @@
 
 # require 'watchr'
 
-module Spontaneous::Cli
-  class Console < ::Spontaneous::Cli::Thor
-    Spontaneous = ::Spontaneous
+module ::Spontaneous::Cli
+  class Console < ::Thor
+    include Spontaneous::Cli::TaskUtils
     include Thor::Actions
-    namespace :console
 
+    namespace    :console
     default_task :open
 
-    desc "#{namespace}:open", "Gives you console access to the current site"
+    desc "open", "Gives you console access to the current site"
     def open
-      # script = Watchr::Script.new
-      # script.watch('(lib|schema)/.*\\.rb') { puts 'reload!' } # doesn't block
-      # Thread.new do
-      #   Watchr::Controller.new(script, Watchr.handler.new).run
-      # end
+      prepare! :console
 
-
-      ENV["SPOT_MODE"] = "console"
-      prepare :console
       ARGV.clear
       ARGV.concat [ "--readline", "--prompt-mode", "simple" ]
-      require 'irb'
-      boot!
 
+      require 'irb'
       require 'irb/completion'
       require 'irb/ext/save-history'
 
-      history_file = Spontaneous.root / ".irb_history"
+      history_file = ::Spontaneous.root / ".irb_history"
 
       IRB.setup(nil)
       IRB.conf[:SAVE_HISTORY] = 100
@@ -38,8 +30,7 @@ module Spontaneous::Cli
       irb = IRB::Irb.new
       IRB.conf[:MAIN_CONTEXT] = irb.context
 
-      irb.context.evaluate((<<-INIT), __LINE__)
-
+      irb.context.evaluate((<<-CONTEXT), __LINE__)
         module Readline
           module History
             def self.write_log(line)
@@ -57,16 +48,15 @@ module Spontaneous::Cli
             ln
           end
         end
-
-
-      INIT
+      CONTEXT
 
       trap("SIGINT") do
         irb.signal_handle
       end
-      catch(:IRB_EXIT) do
+
+      catch("IRB_EXIT") do
         irb.eval_input
       end
     end
   end # Console
-end # Spontaneous::Cli
+end # ::Spontaneous::Cli

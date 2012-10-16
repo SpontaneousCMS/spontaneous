@@ -68,7 +68,10 @@ module Spontaneous
         2. bundle install
         3. spot init
 
-        Then go to http://spontaneouscms.org/docs
+        Then go to
+
+          http://spontaneous.io/documentation
+
         and read the many useful guides to getting started with Spontaneous.
 
         MSG

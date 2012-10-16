@@ -1,9 +1,9 @@
 
-module Spontaneous
+module ::Spontaneous
   module Cli
-    class User < ::Spontaneous::Cli::Thor
-      Spontaneous = ::Spontaneous
-      namespace :user
+    class User < ::Thor
+      include Spontaneous::Cli::TaskUtils
+      # namespace :user
 
       default_task :add
 
@@ -23,11 +23,11 @@ module Spontaneous
       def add
         prepare :adduser, :console
         boot!
-        users = Spontaneous::Permissions::User.count
+        users = ::Spontaneous::Permissions::User.count
         attrs = {}
         width = 14
         valid_login = /^[a-z0-9_]{3,}$/
-        levels = Spontaneous::Permissions::UserLevel.all.map(&:to_s)
+        levels = ::Spontaneous::Permissions::UserLevel.all.map(&:to_s)
         level = nil
 
         say("\nAll fields are required:\n", :green)
@@ -88,7 +88,7 @@ module Spontaneous
           end
         end
 
-        user = Spontaneous::Permissions::User.new(attrs)
+        user = ::Spontaneous::Permissions::User.new(attrs)
 
         if user.save
           user.update(:level => level)

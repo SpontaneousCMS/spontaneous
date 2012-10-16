@@ -1,31 +1,34 @@
 # encoding: UTF-8
 
-require 'spontaneous'
+# require 'spontaneous'
 require 'simultaneous'
 require 'foreman'
 require 'foreman/engine'
 
 module Spontaneous
   module Cli
-    class Server < ::Spontaneous::Cli::Thor
-      namespace :server
+    class Server < ::Thor
+      include Spontaneous::Cli::TaskUtils
+
+      namespace    :server
       default_task :start
 
       class_option :no_browser, :type => :boolean, :default => false, :aliases => "-b", :desc => "Don't launch browser"
 
-      desc "#{namespace}:start", "Starts Spontaneous in development mode"
+      desc "start", "Starts Spontaneous in development mode"
       def start
+        # I can do this programatically in the latest version of Foreman
         File.open(".Procfile", 'wb') do |procfile|
-          procfile.write(%(back: #{binary} server:back --root=#{options.site}\n))
-          procfile.write(%(front: #{binary} server:front --root=#{options.site}\n))
-          procfile.write(%(simultaneous: #{binary} server:simultaneous --root=#{options.site}\n))
+          procfile.write(%(back: #{binary} server back --root=#{options.site}\n))
+          procfile.write(%(front: #{binary} server front --root=#{options.site}\n))
+          procfile.write(%(simultaneous: #{binary} server simultaneous --root=#{options.site}\n))
           procfile.flush
           engine = ::Foreman::Engine.new(procfile.path)
           engine.start
         end
       end
 
-      desc "#{namespace}:front", "Starts Spontaneous in front/public mode"
+      desc "front", "Starts Spontaneous in front/public mode"
       # method_option :adapter, :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
       method_option :host, :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
       method_option :port, :type => :numeric, :aliases => "-p", :desc => "Use PORT"
@@ -33,7 +36,7 @@ module Spontaneous
         start_server(:front)
       end
 
-      desc "#{namespace}:back", "Starts Spontaneous in back/CMS mode"
+      desc "back", "Starts Spontaneous in back/CMS mode"
       # method_option :adapter, :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
       method_option :host, :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
       method_option :port, :type => :numeric, :aliases => "-p", :desc => "Use PORT"
@@ -41,11 +44,10 @@ module Spontaneous
         start_server(:back)
       end
 
-      desc "#{namespace}:simultaneous", "Launches the Simultaneous server"
+      desc "simultaneous", "Launches the Simultaneous server"
       method_option :connection, :type => :string, :aliases => "-c", :desc => "Use CONNECTION"
       def simultaneous
-        prepare(:start)
-        boot!
+        prepare! :start
         connection = options[:connection] || ::Spontaneous.config.simultaneous_connection
         fork {
           ENV.delete("BUNDLE_GEMFILE")
@@ -63,11 +65,8 @@ module Spontaneous
       end
 
       def start_server(mode)
-        prepare mode.to_sym
-        ENV["SPOT_MODE"] = mode.to_s
-        require File.expand_path(File.dirname(__FILE__) + "/adapter")
-        boot!
-        Spontaneous::Cli::Adapter.start(options)
+        prepare! :server, mode
+        Spontaneous::Server.run!(options)
       end
 
     end

@@ -1,24 +1,25 @@
 require 'thor'
-require 'thor/runner'
+require 'thor/group'
 
 module Spontaneous
   module Cli
-    class Thor < ::Thor
+    module TaskUtils
+      # include Thor::Actions
 
-      class_option :site, :type => :string, :aliases => ["-s", "--root"], :desc => "Site root dir"
-      class_option :environment, :type => :string,  :aliases => "-e", :required => true, :default => :development, :desc => "Spontaneous Environment"
-      class_option :mode, :type => :string,  :aliases => "-m", :default => :back, :desc => "Spontaneous mode ('front' or 'back')"
-      class_option :help, :type => :boolean, :desc => "Show help usage"
+      def self.included(base)
+        base.class_eval do
+          def self.banner(task, namespace = true, subcommand = false)
+            "#{basename} #{task.formatted_usage(self, true, subcommand)}"
+          end
+        end
+        base.class_option :site, :type => :string, :aliases => ["-s", "--root"], :desc => "Site root dir"
+        base.class_option :environment, :type => :string,  :aliases => "-e", :required => true, :default => :development, :desc => "Spontaneous Environment"
+        base.class_option :mode, :type => :string,  :aliases => "-m", :default => :back, :desc => "Spontaneous mode ('front' or 'back')"
+        base.class_option :help, :type => :boolean, :desc => "Show help usage"
+      end
+
 
       protected
-
-      def boot!
-        begin
-          require File.expand_path('config/boot.rb')
-        rescue Spontaneous::SchemaModificationError => error
-          fix_schema(error)
-        end
-      end
 
       def fix_schema(error)
         modification = error.modification
@@ -42,18 +43,31 @@ module Spontaneous
         end
       end
 
-      def prepare(task, mode = nil)
+      def prepare(task, mode = "console")
         if options.help?
           help(task.to_s)
           raise SystemExit
         end
-        ENV["SPOT_ENV"] ||= options.environment.to_s
+        ENV["SPOT_ENV"] ||= options.environment.to_s ||
         ENV["RACK_ENV"] = ENV["SPOT_ENV"] # Also set this for middleware
-        ENV["SPOT_MODE"] = mode.to_s unless mode.nil?
+        ENV["SPOT_MODE"] = mode.to_s
         chdir(options.site)
         unless File.exist?('config/boot.rb')
           puts "=> Could not find boot file in: #{options.chdir}/config/boot.rb\n=> Are you sure this is a Spontaneous site?"
           raise SystemExit
+        end
+      end
+
+      def prepare!(task, mode = "console")
+        prepare(task, mode)
+        boot!
+      end
+
+      def boot!
+        begin
+          require File.expand_path('config/boot.rb')
+        rescue Spontaneous::SchemaModificationError => error
+          fix_schema(error)
         end
       end
 
@@ -69,116 +83,41 @@ module Spontaneous
       end
     end
 
-    class Runner < ::Thor
-      namespace "default"
+    autoload :Console,  "spontaneous/cli/console"
+    autoload :Site,     "spontaneous/cli/site"
+    autoload :Init,     "spontaneous/cli/init"
+    autoload :User,     "spontaneous/cli/user"
+    autoload :Generate, "spontaneous/cli/generate"
+    autoload :Server,   "spontaneous/cli/server"
+    autoload :Media,    "spontaneous/cli/media"
+    autoload :Sync,     "spontaneous/cli/sync"
+    autoload :Migrate,  "spontaneous/cli/migrate"
+    autoload :Assets,   "spontaneous/cli/assets"
 
-      remove_task :help
+    class Root < ::Thor
+      register Spontaneous::Cli::Console,  "console",  "console",           "Gives you console access to the current site"
+      register Spontaneous::Cli::User,     "user",     "user [ACTION]",     "Administer site users"
+      register Spontaneous::Cli::Generate, "generate", "generate [OBJECT]", "Generates things"
+      register Spontaneous::Cli::Site,     "site",     "site [ACTION]",     "Run site-wide actions"
+      register Spontaneous::Cli::Init,     "init",     "init",              "Creates databases and initialises a new Spontaneous site"
+      register Spontaneous::Cli::Server,   "server",   "server [ACTION]",   "Launch development server(s)"
+      register Spontaneous::Cli::Media,    "media",    "media [ACTION]",    "Manage site media"
+      register Spontaneous::Cli::Sync,     "sync",     "sync [DIRECTION]",  "Sync database and media to and from the production server"
+      register Spontaneous::Cli::Migrate,  "migrate",  "migrate",           "Runs Spontaneous migrations"
+      register Spontaneous::Cli::Assets,   "assets",   "assets [ACTION]",   "Manage Spontaneous assets"
 
-      map %w(-T) => :list, %w(--version -v) => :version
+      desc :browse, "Launces a browser pointing to the current development CMS"
+      def browse
+        prepare! :browse
+        require 'launchy'
+        ::Launchy.open("http://localhost:#{::Spontaneous::Site.config.port}/@spontaneous")
+      end
 
-      desc "version", "Show Spontaneous version"
+      desc :version, "Show the version of Spontaneous in use"
       def version
-        require 'spontaneous/version'
+        require "spontaneous/version"
         say "Spontaneous #{Spontaneous::VERSION}"
       end
-
-      desc "list [SEARCH]", "List the available tasks (--substring means .*SEARCH)"
-      method_options :substring => :boolean, :group => :string, :all => :boolean, :debug => :boolean
-      def list(search="")
-        initialize_thorfiles
-
-        search = ".*#{search}" if options["substring"]
-        search = /^#{search}.*/i
-        group  = options[:group] || "standard"
-
-        klasses = Thor::Base.subclasses.select do |k|
-          (options[:all] || k.group == group) && k.namespace =~ search
-        end
-
-        display_klasses(false, false, klasses)
-      end
-
-      # Override Thor#help so it can give information about any class and any method.
-      #
-      desc "help [TASK]", "Describe available tasks or one specific task"
-      def help(task = nil, subcommand = false)
-        task ? self.class.task_help(shell, task) : self.class.help(shell, subcommand)
-      end
-
-
-      # Override Thor#help so it can give information about any class and any method.
-      #
-      def help(meth = nil)
-        if meth && !self.respond_to?(meth)
-          initialize_thorfiles(meth)
-          klass, task = Thor::Util.find_class_and_task_by_namespace(meth)
-          klass.start(["-h", task].compact, :shell => self.shell)
-        else
-          list
-        end
-      end
-
-      # If a task is not found on Thor::Runner, method missing is invoked and
-      # Thor::Runner is then responsable for finding the task in all classes.
-      #
-      def method_missing(meth, *args)
-        meth = meth.to_s
-        initialize_thorfiles(meth)
-        klass, task = Thor::Util.find_class_and_task_by_namespace(meth)
-        args.unshift(task) if task
-        klass.start(args, :shell => self.shell)
-      end
-
-      private
-
-      # Display information about the given klasses. If with_module is given,
-      # it shows a table with information extracted from the yaml file.
-      #
-      def display_klasses(with_modules=false, show_internal=false, klasses=Thor::Base.subclasses)
-        klasses -= [Thor, Thor::Runner, Thor::Group] unless show_internal
-
-        raise Error, "No tasks available" if klasses.empty?
-        show_modules if with_modules && !thor_yaml.empty?
-
-        list = Hash.new { |h,k| h[k] = [] }
-        groups = klasses.select { |k| k.ancestors.include?(Thor::Group) }
-
-        # Get classes which inherit from Thor
-        (klasses - groups).each { |k| list[k.namespace.split(":").first] += k.printable_tasks(false) }
-
-        list.delete("thor")
-
-        # Order namespaces with default coming first
-        list = list.sort{ |a,b| a[0].sub(/^default/, '') <=> b[0].sub(/^default/, '') }
-        list.each { |n, tasks| display_tasks(n, tasks) unless tasks.empty? }
-      end
-
-      def display_tasks(namespace, list) #:nodoc:
-        list.sort!{ |a,b| a[0] <=> b[0] }
-
-        say shell.set_color(namespace, :blue, true)
-        say "-" * namespace.size
-
-        print_table(list, :truncate => true)
-        say
-      end
-
-      def initialize_thorfiles(relevant_to=nil, skip_lookup=false)
-        thorfiles(relevant_to, skip_lookup).each do |f|
-          Thor::Util.load_thorfile(f, nil, options[:debug]) unless Thor::Base.subclass_files.keys.include?(File.expand_path(f))
-        end
-      end
-
-      def thorfiles(*args)
-        task_dir = File.expand_path('../cli', __FILE__)
-        Dir["#{task_dir}/*.rb"]
-      end
     end
-
-    autoload :Adapter,  "spontaneous/cli/adapter"
-    autoload :Base,     "spontaneous/cli/base"
-    autoload :Site,     "spontaneous/cli/site"
-    autoload :User,     "spontaneous/cli/user"
   end
 end
-
