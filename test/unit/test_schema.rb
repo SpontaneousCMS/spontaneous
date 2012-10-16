@@ -611,9 +611,26 @@ class SchemaTest < MiniTest::Spec
 
   context "Map writing" do
     context "Non-existant maps" do
+      def expected_schema
+        classes = [ ::A, ::B]
+        expected = Hash[ classes.map { |klass| [ klass.schema_id.to_s, klass.schema_name ] } ]
+        expected.merge!({
+          A.field_prototypes[:title].schema_id.to_s => A.field_prototypes[:title].schema_name,
+          A.field_prototypes[:introduction].schema_id.to_s => A.field_prototypes[:introduction].schema_name,
+          A.layout_prototypes[:sparse].schema_id.to_s => A.layout_prototypes[:sparse].schema_name,
+          A.boxes[:posts].schema_id.to_s => A.boxes[:posts].schema_name,
+          A.boxes[:posts].field_prototypes[:description].schema_id.to_s => A.boxes[:posts].field_prototypes[:description].schema_name,
+          B.field_prototypes[:location].schema_id.to_s => B.field_prototypes[:location].schema_name,
+          B.style_prototypes[:daring].schema_id.to_s => B.style_prototypes[:daring].schema_name,
+        })
+        expected
+      end
+
       setup do
         @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)
-        ::File.exists?(@map_file).should be_false
+
+        ::FileUtils.rm_f(@map_file) if ::File.exists?(@map_file)
+
         @site.schema.schema_map_file = @map_file
         class ::A < Spontaneous::Page
           field :title
@@ -628,29 +645,30 @@ class SchemaTest < MiniTest::Spec
           style :daring
         end
       end
+
       teardown do
         Object.send(:remove_const, :A) rescue nil
         Object.send(:remove_const, :B) rescue nil
         FileUtils.rm(@map_file) if ::File.exists?(@map_file)
       end
+
       should "get created with verification" do
         S.schema.validate!
-        classes = [ ::A, ::B]
-        @inheritance_map = nil
-        # would like to do all of this using mocks, but don't know how to do that
-        # without fecking up the whole schema id creation process
-        expected = Hash[ classes.map { |klass| [ klass.schema_id.to_s, klass.schema_name ] } ]
-        expected.merge!({
-          A.field_prototypes[:title].schema_id.to_s => A.field_prototypes[:title].schema_name,
-          A.field_prototypes[:introduction].schema_id.to_s => A.field_prototypes[:introduction].schema_name,
-          A.layout_prototypes[:sparse].schema_id.to_s => A.layout_prototypes[:sparse].schema_name,
-          A.boxes[:posts].schema_id.to_s => A.boxes[:posts].schema_name,
-          A.boxes[:posts].field_prototypes[:description].schema_id.to_s => A.boxes[:posts].field_prototypes[:description].schema_name,
-          B.field_prototypes[:location].schema_id.to_s => B.field_prototypes[:location].schema_name,
-          B.style_prototypes[:daring].schema_id.to_s => B.style_prototypes[:daring].schema_name,
-        })
         File.exists?(@map_file).should be_true
-        YAML.load_file(@map_file).should == expected
+        YAML.load_file(@map_file).should == expected_schema
+      end
+
+      # Having the generator create an empty config/schema.yml is a useful way of
+      # identifying a spontaneous site (for use by bin/spot)
+      should "get overwritten if invalid or empty" do
+        File.open(@map_file, "w") do |f|
+          f.write("# schema")
+        end
+        File.exists?(@map_file).should be_true
+        S.schema.map.valid?.should be_false
+        S.schema.validate!
+        S.schema.map.valid?.should be_true
+        YAML.load_file(@map_file).should == expected_schema
       end
     end
 

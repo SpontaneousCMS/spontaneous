@@ -34,15 +34,23 @@ module Spontaneous
 
       def load_map
         if exists?
-          map = YAML.load_file(@path)
+          map = parse_map
           map.each do | uid, reference |
             uids.load(uid, reference)
           end
         end
       end
 
+      def parse_map
+        YAML.load_file(@path)
+      end
+
       def exists?
         ::File.exists?(@path)
+      end
+
+      def valid?
+        exists? && parse_map.is_a?(Hash)
       end
 
       # def invert_map
@@ -86,6 +94,10 @@ module Spontaneous
       def exists?
         true
       end
+
+      def valid?
+        true
+      end
     end
 
     class Schema
@@ -112,7 +124,7 @@ module Spontaneous
           changes = e.modification
           # if the map file is missing, then this is a first run and we can just
           # create the thing by populating it with the current schema
-          if !map.exists?
+          if !map.valid?
             logger.warn("Generating new schema")
             generate_new_schema
           else
