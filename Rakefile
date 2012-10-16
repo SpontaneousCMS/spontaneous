@@ -121,6 +121,12 @@ namespace :test do
     test.pattern = 'test/javascript/**/test_*.rb'
     test.verbose = true
   end
+  Rake::TestTask.new(:integration) do |test|
+    test.libs << 'test'
+    test.ruby_opts << '-rubygems'
+    test.pattern = 'test/integration/**/test_*.rb'
+    test.verbose = true
+  end
 end
 
 
