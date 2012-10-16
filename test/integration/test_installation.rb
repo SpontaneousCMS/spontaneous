@@ -1,6 +1,5 @@
 # encoding: UTF-8
 
-require File.expand_path('../../test_helper', __FILE__)
 require File.expand_path('../../test_integration_helper', __FILE__)
 
 class InstallationTest < MiniTest::Spec
