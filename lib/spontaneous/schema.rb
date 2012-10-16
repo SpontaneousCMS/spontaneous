@@ -33,8 +33,7 @@ module Spontaneous
       end
 
       def load_map
-        if exists?
-          map = parse_map
+        if exists? && (map = parse_map)
           map.each do | uid, reference |
             uids.load(uid, reference)
           end
@@ -124,6 +123,7 @@ module Spontaneous
           changes = e.modification
           # if the map file is missing, then this is a first run and we can just
           # create the thing by populating it with the current schema
+
           if !map.valid?
             logger.warn("Generating new schema")
             generate_new_schema
