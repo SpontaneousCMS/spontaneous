@@ -18,3 +18,4 @@ todo.taskpaper
 Gemfile.lock
 pkg
 .rbx
+.travis/gemfiles/*.lock
