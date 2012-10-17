@@ -49,6 +49,7 @@ Gem::Specification.new do |s|
   ## List your runtime dependencies here. Runtime dependencies are those
   ## that are needed for an end user to actually USE your code.
   s.add_dependency('activesupport',   ["~> 3.2.0"])
+  s.add_dependency('i18n',            ["~> 0.6.0"]) # this is an undeclared activesupport dependency
   s.add_dependency('base58',          ["~> 0.1.0"])
   s.add_dependency('bundler',         ["> 1.0.15"])
   s.add_dependency('coffee-script',   ["~> 2.2.0"])
