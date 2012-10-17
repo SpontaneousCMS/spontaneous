@@ -2,30 +2,43 @@
 
 require File.expand_path('../../test_integration_helper', __FILE__)
 
-describe "Installation" do
+class SpontaneousInstallationTest < OrderedTestCase
+
+  def self.before_suite
+    system "rm -rf pkg && rake gem:build"
+    @@gem_build = File.expand_path(Dir["pkg/*.gem"].last)
+  end
+
+  def self.after_suite
+    system "gem uninstall -a -x -I spontaneous"
+  end
+
   def system(command)
-    puts "SYSTEM #{command.inspect}"
+    puts "$ #{command}"
     Kernel.system command
   end
 
-  before do
+  def setup
     @root = Dir.mktmpdir
     Dir.chdir(@root)
-    puts "root.before"
   end
 
-  describe "when starting with a base system" do
-    before do
-      puts "describe.before"
+  def test_step_001__gem_installation
+    assert_raises "Precondition failed, spontaneous gem is already installed", Gem::LoadError do
+      Gem::Specification.find_by_name("spontaneous")
     end
+    system "gem install #{@@gem_build} --no-rdoc --no-ri"
+    spec = Gem::Specification.find_by_name("spontaneous")
+    asssert_instance_of Gem::Specification, spec, "spontaneous gem should have been installed"
+  end
 
-    it "will allow the installation of the spontaneous gem" do
-      assert_raises "Precondition failed, spontaneous gem is already installed", Gem::LoadError do
-        Gem::Specification.find_by_name("spontaneous")
-      end
-      system "gem install spontaneous --prerelease --no-rdoc --no-ri"
-      spec = Gem::Specification.find_by_name("spontaneous")
-      asssert_instance_of Gem::Specification, spec, "spontaneous gem should have been installed"
-    end
+  def test_step_002__invalid_site_creation
+  end
+
+  def test_step_003__valid_site_creation
+  end
+
+  def test_step_004__site_initialization
   end
 end
+
