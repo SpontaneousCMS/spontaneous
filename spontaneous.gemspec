@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
-  s.version           = '0.2.0.alpha5'
-  s.date              = '2012-10-16'
+  s.version           = '0.2.0.alpha6'
+  s.date              = '2012-10-17'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -738,12 +738,14 @@ Gem::Specification.new do |s|
     test/functional/test_back.rb
     test/functional/test_front.rb
     test/functional/test_user_manager.rb
+    test/integration/test_installation.rb
     test/javascript/env.js
     test/javascript/test_dom.rb
     test/javascript/test_markdown.rb
     test/support/custom_matchers.rb
     test/support/timing.rb
     test/test_helper.rb
+    test/test_integration_helper.rb
     test/test_javascript.rb
     test/ui/test_page_editing.rb
     test/ui_helper.rb
