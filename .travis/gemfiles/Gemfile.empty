@@ -4,4 +4,3 @@ source :rubygems
 # this way I can test the installation process itself
 
 gem "rake"
-gem 'minitest', "~> 2.1.0"

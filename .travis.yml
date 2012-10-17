@@ -5,5 +5,5 @@ rvm:
   # - jruby-19mode # JRuby in 1.9 mode
   # - rbx-19mode
 # uncomment this line if your project needs to run something other than `rake`:
-gemfile: .travisci/gemfiles/Gemfile.empty
+gemfile: .travis/gemfiles/Gemfile.empty
 script: bundle exec rake test:integration
