@@ -1,12 +1,19 @@
 # encoding: UTF-8
 
 # Helpers for integration tests
+require "rbconfig"
 require "rubygems"
-# require "bundler/setup"
+
+# 1.9.2's minitest is way out of date
+if RUBY_VERSION < "1.9.3"
+  gem "minitest"
+end
+
 require "minitest/unit"
 require "minitest/autorun"
-require 'tmpdir'
-require 'pp'
+require "tmpdir"
+require "pp"
+
 
 # A test case that reproduces the actions of a user and hence need to run in order
 # I.e. I don't suck thank you very much

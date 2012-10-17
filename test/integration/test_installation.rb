@@ -5,8 +5,12 @@ require File.expand_path('../../test_integration_helper', __FILE__)
 class SpontaneousInstallationTest < OrderedTestCase
 
   def self.before_suite
-    system "rm -rf pkg && rake gem:build"
-    @@gem_build = File.expand_path(Dir["pkg/*.gem"].last)
+    if ENV["GEM_SOURCE"] == "rubygems"
+      @@gem = "spontaneous"
+    else
+      system "rm -rf pkg && rake gem:build"
+      @@gem = File.expand_path(Dir["pkg/*.gem"].last)
+    end
   end
 
   def self.after_suite
@@ -27,7 +31,7 @@ class SpontaneousInstallationTest < OrderedTestCase
     assert_raises "Precondition failed, spontaneous gem is already installed", Gem::LoadError do
       Gem::Specification.find_by_name("spontaneous")
     end
-    system "gem install #{@@gem_build} --no-rdoc --no-ri"
+    system "gem install #{@@gem} --no-rdoc --no-ri"
     Gem.refresh
     spec = Gem::Specification.find_by_name("spontaneous")
     assert_instance_of Gem::Specification, spec, "spontaneous gem should have been installed"
