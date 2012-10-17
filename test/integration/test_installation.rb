@@ -28,8 +28,9 @@ class SpontaneousInstallationTest < OrderedTestCase
       Gem::Specification.find_by_name("spontaneous")
     end
     system "gem install #{@@gem_build} --no-rdoc --no-ri"
+    Gem.refresh
     spec = Gem::Specification.find_by_name("spontaneous")
-    asssert_instance_of Gem::Specification, spec, "spontaneous gem should have been installed"
+    assert_instance_of Gem::Specification, spec, "spontaneous gem should have been installed"
   end
 
   def test_step_002__invalid_site_creation
