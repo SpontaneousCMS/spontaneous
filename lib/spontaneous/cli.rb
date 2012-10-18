@@ -113,6 +113,8 @@ module Spontaneous
         ::Launchy.open("http://localhost:#{::Spontaneous::Site.config.port}/@spontaneous")
       end
 
+      map %w(--version -v) => :version
+
       desc :version, "Show the version of Spontaneous in use"
       def version
         require "spontaneous/version"

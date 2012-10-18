@@ -3,7 +3,7 @@ module ::Spontaneous
   module Cli
     class User < ::Thor
       include Spontaneous::Cli::TaskUtils
-      # namespace :user
+      namespace :user
 
       default_task :add
 
@@ -67,7 +67,6 @@ module ::Spontaneous
           end while attrs[:password].length < 6
         end
 
-
         if users == 0
           level = "root"
         else
@@ -81,10 +80,7 @@ module ::Spontaneous
               exit 127
             end
           else
-            begin
-              level = ask("User level [#{levels.join(', ')}] : ")
-              say("Invalid level '#{level}'", :red) unless levels.include?(level)
-            end while !levels.include?(level)
+            level = ask("User level [#{levels.join(', ')}] : ", :limited_to => levels)
           end
         end
 
