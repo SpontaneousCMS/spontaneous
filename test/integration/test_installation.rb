@@ -28,8 +28,6 @@ $_root = Dir.mktmpdir
 Dir.chdir($_root)
 
 
-
-
 class SpontaneousInstallationTest < OrderedTestCase
 
   def self.before_suite
@@ -156,7 +154,6 @@ class SpontaneousInstallationTest < OrderedTestCase
   end
 
   def test_step_008__site_initialization_should_add_root_user
-    # this now works because we install the gem above
     users = select_users
     assert users.length == 1, "Site initialization should have created a single user not #{users.length}"
     login, name, email = users.first
@@ -172,13 +169,6 @@ class SpontaneousInstallationTest < OrderedTestCase
     status, out, _ = system cmd, { "BUNDLE_GEMFILE" => ENV["BUNDLE_GEMFILE"] }
     users = select_users.length
     assert users == 1, "Re-running the 'init' command shouldn't add another user"
-    # Bundler.with_clean_env do
-    #   # require 'spontaneous'
-    #   users = Spontaneous::Permissions::User.count
-    #   status, out, _ = system cmd, { "BUNDLE_GEMFILE" => ENV["BUNDLE_GEMFILE"] }
-    #   users = Spontaneous::Permissions::User.count
-    #   assert users == 1, "Re-running the 'init' command shouldn't add another user"
-    # end
   end
 
   def test_step_010__site_initialization_should_append_auto_login_config
