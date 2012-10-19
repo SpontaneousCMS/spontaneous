@@ -101,6 +101,7 @@ class SpontaneousInstallationTest < OrderedTestCase
 
   def test_step_004__bundler_should_install_dependencies
     status, output, err = system "bundle install --without development test", { "BUNDLE_GEMFILE" => File.expand_path("Gemfile") }
+    puts output
     assert status.exitstatus == 0, "Bundler failed to run #{err.inspect}"
   end
 
