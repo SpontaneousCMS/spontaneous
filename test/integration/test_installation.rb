@@ -38,9 +38,9 @@ class SpontaneousInstallationTest < OrderedTestCase
     FileUtils.rm_r($_root)
   end
 
-  def system(command)
+  def system(command, env = {})
     puts "$ #{command}" #if $DEBUG
-    Open3.popen3(command) do |stdin, stdout, stderr, wait_thread|
+    Open3.popen3(env, command) do |stdin, stdout, stderr, wait_thread|
       out = stdout.read.chomp
       err = stderr.read.chomp
       sts = wait_thread.value
@@ -100,7 +100,7 @@ class SpontaneousInstallationTest < OrderedTestCase
   end
 
   def test_step_004__bundler_should_install_dependencies
-    status, output, err = system "bundle install --without development test"
+    status, output, err = system "bundle install --without development test", { "BUNDLE_GEMFILE" => File.expand_path("Gemfile") }
     assert status.exitstatus == 0, "Bundler failed to run #{err.inspect}"
   end
 
@@ -108,6 +108,8 @@ class SpontaneousInstallationTest < OrderedTestCase
     cmd =  "spot init --user=#{ENV['DB_USER']} "
     cmd << "--account login:#{@account[:login]} email:#{@account[:email]} name:'#{@account[:name]}' password:#{@account[:password]}"
     status, out, err = system cmd
+    puts out
+    puts err
     unless status.exitstatus == 0
       fail "init task failed with error"
     end

@@ -22,11 +22,12 @@ module Spontaneous::Cli
       site = ::Spontaneous::Site.instantiate(Dir.pwd, options.environment, :back)
       Sequel.extension :migration
 
-      database, connection_params = admin_connection_params
+      database, admin_connection_params, site_connection_params = generate_connection_params
 
       [database, "#{database}_test"].each do |db|
-        create(db, connection_params)
-        migrate(db, connection_params)
+        config = site_connection_params.merge(:database => db)
+        create(db, admin_connection_params, config)
+        migrate(db, admin_connection_params, config)
       end
 
       boot!
@@ -39,7 +40,6 @@ module Spontaneous::Cli
     protected
 
     def insert_root_user
-      p options.account
       invoke "user:add", [],  options.account
       # Set up auto_login configuration with the name of the root user
       # we've just created
@@ -50,33 +50,33 @@ module Spontaneous::Cli
       File.write(config_path, config, encoding: "UTF-8")
     end
 
-    def create(database, db_config)
-      Sequel.connect(db_config) do |connection|
+    def create(database, admin_config, site_config)
+      Sequel.connect(admin_config) do |connection|
         begin
-          say "  >> Creating database `#{database}`", :green
-          create_database(connection, database)
+          say "  >> Creating database `#{site_config[:database]}`", :green
+          create_database(connection, site_config)
         rescue => e
-          say " >>> Unable to create #{db_config[:adapter]} database `#{database}`:\n   > #{e}", :red
+          say " >>> Unable to create #{admin_config[:adapter]} database `#{site_config[:database]}`:\n   > #{e}", :red
         end
       end
     end
 
-    def migrate(database, db_config)
-      Sequel.connect(db_config.merge(:database => database)) do |connection|
+    def migrate(database, admin_config, site_config)
+      Sequel.connect(admin_config.merge(:database => site_config[:database])) do |connection|
         begin
           connection.logger = nil
           say "  >> Running migrations..."
           Sequel::Migrator.apply(connection, ::Spontaneous.gem_dir('db/migrations'))
           say "  >> Done"
         rescue => e
-          say " >>> Error running migrations on database `#{database}`:\n   > #{e}", :red
+          say " >>> Error running migrations on database `#{site_config[:database]}`:\n   > #{e}", :red
         end
       end
     end
 
     # Converts the site db parameters into 'admin' connection using the provided
     # db credentials and the necessary :database settings
-    def admin_connection_params
+    def generate_connection_params
       site_connection_params = ::Spontaneous.db_settings
       connection_params = site_connection_params.merge({
         :user     => options.user,
@@ -90,17 +90,30 @@ module Spontaneous::Cli
         # "postgres" is guaranteed to exist
         connection_params[:database] = "postgres"
       end
-      [database, connection_params]
+      [database, connection_params, site_connection_params]
     end
 
-    def create_database(connection, database)
-      command = case connection.database_type
+    def create_database(connection, config)
+      commands = case connection.database_type
                 when :postgres
-                  %(CREATE DATABASE "#{database}" TEMPLATE=template0 ENCODING='UTF8')
+                  [
+                    [%(CREATE ROLE "#{config[:user]}" LOGIN PASSWORD '#{config[:password]}'), false],
+                    [%(CREATE DATABASE "#{config[:database]}" TEMPLATE=template0 ENCODING='UTF8' OWNER="#{config[:user]}"), true]
+                  ]
                 when :mysql
-                  "CREATE DATABASE `#{database}` CHARACTER SET UTF8"
+                  host = config[:host].blank? ? "" : "@#{config[:host]}"
+                  [
+                    ["CREATE DATABASE `#{config[:database]}` CHARACTER SET UTF8", true],
+                    ["GRANT ALL ON `#{config[:database]}`.* TO `#{config[:user]}`#{host} IDENTIFIED BY '#{config[:password]}'", false]
+                  ]
                 end
-      connection.run(command)
+      commands.each do |command, raise_error|
+        begin
+          connection.run(command)
+        rescue => e
+          raise e if raise_error
+        end
+      end
     end
   end # Init
 end # Spontaneous::Cli
