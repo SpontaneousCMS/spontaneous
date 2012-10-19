@@ -108,8 +108,8 @@ class SpontaneousInstallationTest < OrderedTestCase
 
   def test_step_005__site_initialization_should_run
     cmd =  "spot init --user=#{ENV['DB_USER']}"
-    $expect_verbose = false
-    debug = false
+    $expect_verbose = true
+    debug = true
     status = Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thread|
       stdin.sync = true
       # stdout.expect(/Login : /) do |result|
