@@ -146,8 +146,7 @@ class SpontaneousInstallationTest < OrderedTestCase
   def test_step_008__site_initialization_should_add_root_user
     # this now works because we install the gem above
     Bundler.with_clean_env do
-      require 'spontaneous'
-      Spontaneous.init mode: :console
+      require File.expand_path('config/boot')
       users = Spontaneous::Permissions::User.all
       assert users.length == 1, "Site initialization should have created a root user"
       user = users.first
@@ -161,7 +160,7 @@ class SpontaneousInstallationTest < OrderedTestCase
 
   def test_step_009__site_initialization_should_not_add_root_user_if_exists
     Bundler.with_clean_env do
-      require 'spontaneous'
+      # require 'spontaneous'
       cmd =  "spot init --user=#{ENV['DB_USER']}"
       users = Spontaneous::Permissions::User.count
       assert users == 1, "Precondition failed. There should only be 1 user"
