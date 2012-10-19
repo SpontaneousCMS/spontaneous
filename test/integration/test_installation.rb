@@ -97,8 +97,6 @@ class SpontaneousInstallationTest < OrderedTestCase
     Dir.chdir("example_org")
     assert File.exist?("Gemfile")
     assert File.exist?("config/schema.yml")
-    puts File.read("Gemfile")
-    puts File.read("config/database.yml")
   end
 
   def test_step_004__bundler_should_install_dependencies
@@ -107,33 +105,9 @@ class SpontaneousInstallationTest < OrderedTestCase
   end
 
   def test_step_005__site_initialization_should_run
-    cmd =  "spot init --user=#{ENV['DB_USER']}"
-    $expect_verbose = true
-    debug = true
-    status = Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thread|
-      stdin.sync = true
-      # stdout.expect(/Login : /) do |result|
-      #   # $stdout.write result
-      #   stdin.write(@account[:login] + "\\n")
-      # end
-      stdout.expect(/Name : /) do |result|
-        stdin.write(@account[:name] + "\n")
-      end
-      stdout.expect(/Email : /) do |result|
-        stdin.write(@account[:email] + "\n")
-      end
-      stdout.expect(/Password : /) do |result|
-        stdin.write(@account[:password] + "\n")
-      end
-      stdin.close_write
-      out = stdout.read
-      $stdout.write out if debug
-      stdout.close
-      err = stderr.read
-      $stderr.write err if debug
-      stderr.close
-      wait_thread.value
-    end
+    cmd =  "spot init --user=#{ENV['DB_USER']} "
+    cmd << "--account login:#{@account[:login]} email:#{@account[:email]} name:'#{@account[:name]}' password:#{@account[:password]}"
+    status, out, err = system cmd
     unless status.exitstatus == 0
       fail "init task failed with error"
     end

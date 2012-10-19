@@ -15,6 +15,7 @@ module Spontaneous::Cli
 
     method_option :user, :type => :string, :default => "root", :aliases => "-u", :desc => "Database admin user"
     method_option :password, :type => :string, :default => "", :aliases => "-p", :desc => "Database admin password"
+    method_option :account, :type => :hash, :default => {}, :aliases => "-a", :desc => "Details of the root login"
 
     def init
       prepare :init
@@ -38,7 +39,8 @@ module Spontaneous::Cli
     protected
 
     def insert_root_user
-      invoke "user:add", [],  :login => Etc.getlogin
+      p options.account
+      invoke "user:add", [],  options.account
       # Set up auto_login configuration with the name of the root user
       # we've just created
       root = ::Spontaneous::Permissions::User.first

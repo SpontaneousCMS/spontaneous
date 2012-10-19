@@ -15,7 +15,7 @@ module ::Spontaneous
         :desc => "The user's name"
       method_option :email,  :type => :string, :aliases => "-e",
         :desc => "The user's email address"
-      method_option :passwd, :type => :string, :aliases => ["-p", "--password"],
+      method_option :password, :type => :string, :aliases => ["-p", "--passwd"],
         :desc => "The user's password"
       method_option :level, :type => :string, :aliases => "-a",
         :desc => "The user's access level"
@@ -56,10 +56,10 @@ module ::Spontaneous
           say options.email, :green
         end
 
-        if options.passwd
-          attrs[:password] = options.passwd
+        if options.password
+          attrs[:password] = options.password
           say "Password : ".rjust(width, " ")+" ", :white
-          say options.passwd, :green
+          say options.password, :green
         else
           begin
             attrs[:password] = ask "Password : ".rjust(width, " ")
