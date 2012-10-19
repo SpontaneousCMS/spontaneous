@@ -3,11 +3,11 @@ module ::Spontaneous
   module Cli
     class User < ::Thor
       include Spontaneous::Cli::TaskUtils
-      namespace :user
 
+      namespace    :user
       default_task :add
 
-      desc "#{namespace}:add", "Add a new user"
+      desc "add", "Add a new user"
 
       method_option :login,  :type => :string, :aliases => "-l",
         :desc => "The user's login -- must be unique"
@@ -43,6 +43,20 @@ module ::Spontaneous
           say("\nUnable to create user:\n"+errors, :red)
           exit 127
         end
+      end
+
+
+      desc "list", "List the current users"
+      def list
+        prepare! :listusers, :console
+        columns = [:login, :name, :email, :level]
+        users = ::Spontaneous::Permissions::User.all.map { |user|
+          columns.map { |column| user.send(column) }
+        }
+        users.unshift columns.map { |c| c.to_s.capitalize }
+        puts "\n"
+        print_table(users, indent: 2)
+        puts "\n"
       end
 
       protected
