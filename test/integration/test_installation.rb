@@ -146,6 +146,7 @@ class SpontaneousInstallationTest < OrderedTestCase
   def test_step_008__site_initialization_should_add_root_user
     # this now works because we install the gem above
     Bundler.with_clean_env do
+      ENV["BUNDLE_GEMFILE"] = File.expand_path("Gemfile")
       require File.expand_path('config/boot')
       users = Spontaneous::Permissions::User.all
       assert users.length == 1, "Site initialization should have created a root user"
