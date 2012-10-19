@@ -13,14 +13,16 @@ module Spontaneous::Cli
 
     desc :init, "Creates databases and initialises a new Spontaneous site"
 
-    method_option :user, :type => :string, :default => "root", :aliases => "-u", :desc => "Database admin user"
+    method_option :user, :type => :string, :default => nil, :aliases => "-u", :desc => "Database admin user"
     method_option :password, :type => :string, :default => "", :aliases => "-p", :desc => "Database admin password"
     method_option :account, :type => :hash, :default => {}, :aliases => "-a", :desc => "Details of the root login"
 
     def init
       prepare :init
-      site = ::Spontaneous::Site.instantiate(Dir.pwd, options.environment, :back)
+
+      site = ::Spontaneous::Site.instantiate(Dir.pwd, options.environment, :console)
       Sequel.extension :migration
+
 
       database, admin_connection_params, site_connection_params = generate_connection_params
 
@@ -78,10 +80,10 @@ module Spontaneous::Cli
     # db credentials and the necessary :database settings
     def generate_connection_params
       site_connection_params = ::Spontaneous.db_settings
-      connection_params = site_connection_params.merge({
-        :user     => options.user,
-        :password => options.password
-      })
+      connection_params = site_connection_params.dup
+      connection_params[:user] = options.user unless options.user.blank?
+      connection_params[:password] = options.password unless options.password.blank?
+
       database = connection_params.delete(:database)
       case connection_params[:adapter]
       when /mysql/
