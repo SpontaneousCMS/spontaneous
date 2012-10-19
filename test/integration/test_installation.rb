@@ -108,7 +108,7 @@ class SpontaneousInstallationTest < OrderedTestCase
   def test_step_005__site_initialization_should_run
     cmd =  "spot init --user=#{ENV['DB_USER']} "
     cmd << "--account login:#{@account[:login]} email:#{@account[:email]} name:'#{@account[:name]}' password:#{@account[:password]}"
-    status, out, err = system cmd
+    status, out, err = system cmd, { "BUNDLE_GEMFILE" => File.expand_path("Gemfile") }
     puts out
     puts err
     unless status.exitstatus == 0
@@ -156,7 +156,7 @@ class SpontaneousInstallationTest < OrderedTestCase
     cmd =  "spot init --user=#{ENV['DB_USER']}"
     users = Spontaneous::Permissions::User.count
     assert users == 1, "Precondition failed. There should only be 1 user"
-    status, out, _ = system cmd
+    status, out, _ = system cmd, { "BUNDLE_GEMFILE" => File.expand_path("Gemfile") }
     users = Spontaneous::Permissions::User.count
     assert users == 1, "Re-running the 'init' command shouldn't add another user"
   end
@@ -165,7 +165,6 @@ class SpontaneousInstallationTest < OrderedTestCase
     config = File.read("config/environments/development.rb")
     assert_match /^\s*auto_login +('|")#{@account[:login]}\1/, config,
       "Config should include auto_login for '#{@account[:login]}'"
-      # auto_login 'dev'
   end
 end
 
