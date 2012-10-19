@@ -97,6 +97,8 @@ class SpontaneousInstallationTest < OrderedTestCase
     Dir.chdir("example_org")
     assert File.exist?("Gemfile")
     assert File.exist?("config/schema.yml")
+    puts File.read("Gemfile")
+    puts File.read("config/database.yml")
   end
 
   def test_step_004__bundler_should_install_dependencies
