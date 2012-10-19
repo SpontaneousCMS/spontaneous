@@ -22,6 +22,7 @@ module Spontaneous
       class_option :database,    :desc => "The database to use ('mysql' (default) or 'postgres')", :aliases => '-d', :default => "mysql",   :type => :string
       class_option :user,    :desc => "The database account to use", :aliases => '-u', :default => "root",   :type => :string
       class_option :password,    :desc => "The password for the database user", :aliases => %w(-p), :default => "",   :type => :string
+      class_option :host,    :desc => "The database host", :aliases => %w(-h), :default => "",   :type => :string
 
 
       desc "Generates a new site for DOMAIN"
@@ -35,7 +36,7 @@ module Spontaneous
           @domain = domain
           @site_name = domain.to_s.gsub(/\./, "_")
           @username  = domain.split(/\./).first
-          @database  = { :user => options.user, :adapter => adapter[:adapter], :gem => adapter_dependency, :password => options.password }
+          @database  = { :user => options.user, :adapter => adapter[:adapter], :gem => adapter_dependency, :password => options.password, :host => options.host }
           self.destination_root = options[:root]
           empty_directory(@site_name)
           self.destination_root = self.destination_root / @site_name

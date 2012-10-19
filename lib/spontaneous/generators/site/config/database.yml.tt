@@ -4,7 +4,9 @@
   :database:   <%= @site_name %>
   :user:       <%= @database[:user] %>
   :password:   <%= @database[:password] %>
-# :host:       localhost
+<% unless (host = @database[:host]).blank? -%>
+  :host:       <%= host %>
+<% end %>
 
 :test:
   <<:         *defaults

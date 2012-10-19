@@ -27,7 +27,8 @@ class GeneratorsTest < MiniTest::Spec
   end
 
   def database_config(path)
-    YAML.load_file(File.join(@tmp, path, "config/database.yml"))
+    path = File.join(@tmp, path, "config/database.yml")
+    YAML.load_file(path)
   end
 
   attr_reader :site_root
@@ -89,7 +90,7 @@ class GeneratorsTest < MiniTest::Spec
 
     should "correctly configure the site for a 'mysql' database" do
       site_root = File.join(@tmp, 'example_com')
-      generate(:site, "example.com", "--root=#{@tmp}", "--database=mysql")
+      generate(:site, "example.com", "--root=#{@tmp}", "--database=mysql", "--host=127.0.0.1")
       gemfile = File.read(File.join(site_root, "Gemfile"))
       gemfile.should =~ /^gem 'mysql2'/
       config = database_config("example_com")
@@ -97,19 +98,20 @@ class GeneratorsTest < MiniTest::Spec
         config[environment][:adapter].should == "mysql2"
         config[environment][:database].should =~ /^example_com(_test)?/
         # db connections seem to work if you exclude the host
-        config[environment][:host].should be_nil
+        config[environment][:host].should == "127.0.0.1"
       end
     end
 
     should "correctly configure the site for a 'postgresql' database" do
       site_root = File.join(@tmp, 'example_com')
-      generate(:site, "example.com", "--root=#{@tmp}", "--database=postgresql")
+      generate(:site, "example.com", "--root=#{@tmp}", "--database=postgresql", "--host=")
       gemfile = File.read(File.join(site_root, "Gemfile"))
       gemfile.should =~ /^gem 'pg'/
       config = database_config("example_com")
       [:development, :test, :production].each do |environment|
         config[environment][:adapter].should == "postgres"
         config[environment][:database].should =~ /^example_com(_test)?/
+        config[environment].key?(:host).should be_false
       end
     end
 

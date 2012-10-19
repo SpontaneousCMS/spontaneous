@@ -91,7 +91,7 @@ class SpontaneousInstallationTest < OrderedTestCase
   def test_step_003__valid_site_creation
     domain = "example.org"
     refute File.exist?("example_org"), "Precondition failed, site directory should not exist"
-    status, output, err = system "spot generate --database=#{ENV["DB"]} --user=#{ENV["DB_USER"]} #{domain}"
+    status, output, err = system "spot generate --database=#{ENV["DB"]} --user=#{ENV["DB_USER"]} --host=#{ENV["DB_HOST"]} #{domain}"
     assert status.exitstatus == 0, "Expected status of 0 but got #{status.exitstatus}"
     assert File.exist?("example_org"), "Site directory should exist after generation step"
     Dir.chdir("example_org")
@@ -159,7 +159,6 @@ class SpontaneousInstallationTest < OrderedTestCase
   end
 
   def test_step_008__site_initialization_should_add_root_user
-    status, out, _ = system "psql -t -U #{ENV["DB_USER"]} -d example_com -c 'select * from spontaneous_users'"
     # this now works because we install the gem above
     require 'spontaneous'
     Spontaneous.init mode: :console
