@@ -6,6 +6,7 @@ require 'open3'
 require 'expect'
 require 'yaml'
 require 'etc'
+require 'bundler'
 
 ENV["DB"]      ||= "mysql"
 ENV["DB_USER"] ||= "root"
@@ -27,6 +28,8 @@ $_root = Dir.mktmpdir
 Dir.chdir($_root)
 
 
+
+
 class SpontaneousInstallationTest < OrderedTestCase
 
   def self.before_suite
@@ -39,12 +42,14 @@ class SpontaneousInstallationTest < OrderedTestCase
   end
 
   def system(command, env = {})
-    puts "$ #{command}" #if $DEBUG
-    Open3.popen3(env, command) do |stdin, stdout, stderr, wait_thread|
-      out = stdout.read.chomp
-      err = stderr.read.chomp
-      sts = wait_thread.value
-      [sts, out, err]
+    Bundler.with_clean_env do
+      puts "$ #{command}" #if $DEBUG
+      Open3.popen3(env, command) do |stdin, stdout, stderr, wait_thread|
+        out = stdout.read.chomp
+        err = stderr.read.chomp
+        sts = wait_thread.value
+        [sts, out, err]
+      end
     end
   end
 
@@ -100,7 +105,8 @@ class SpontaneousInstallationTest < OrderedTestCase
   end
 
   def test_step_004__bundler_should_install_dependencies
-    status, output, err = system "bundle install --without development test", { "BUNDLE_GEMFILE" => File.expand_path("Gemfile") }
+    ENV["BUNDLE_GEMFILE"] = File.expand_path("Gemfile")
+    status, output, err = system "bundle install --without development test", { "BUNDLE_GEMFILE" => ENV["BUNDLE_GEMFILE"] }
     puts output
     assert status.exitstatus == 0, "Bundler failed to run #{err.inspect}"
   end
@@ -108,7 +114,7 @@ class SpontaneousInstallationTest < OrderedTestCase
   def test_step_005__site_initialization_should_run
     cmd =  "spot init --user=#{ENV['DB_USER']} "
     cmd << "--account login:#{@account[:login]} email:#{@account[:email]} name:'#{@account[:name]}' password:#{@account[:password]}"
-    status, out, err = system cmd, { "BUNDLE_GEMFILE" => File.expand_path("Gemfile") }
+    status, out, err = system cmd, { "BUNDLE_GEMFILE" => ENV["BUNDLE_GEMFILE"] }
     puts out
     puts err
     unless status.exitstatus == 0
@@ -156,7 +162,7 @@ class SpontaneousInstallationTest < OrderedTestCase
     cmd =  "spot init --user=#{ENV['DB_USER']}"
     users = Spontaneous::Permissions::User.count
     assert users == 1, "Precondition failed. There should only be 1 user"
-    status, out, _ = system cmd, { "BUNDLE_GEMFILE" => File.expand_path("Gemfile") }
+    status, out, _ = system cmd, { "BUNDLE_GEMFILE" => ENV["BUNDLE_GEMFILE"] }
     users = Spontaneous::Permissions::User.count
     assert users == 1, "Re-running the 'init' command shouldn't add another user"
   end
