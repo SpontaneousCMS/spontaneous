@@ -145,26 +145,30 @@ class SpontaneousInstallationTest < OrderedTestCase
 
   def test_step_008__site_initialization_should_add_root_user
     # this now works because we install the gem above
-    require 'spontaneous'
-    Spontaneous.init mode: :console
-    users = Spontaneous::Permissions::User.all
-    assert users.length == 1, "Site initialization should have created a root user"
-    user = users.first
-    assert user.login == @account[:login], "Incorrect login #{user.login}"
-    assert user.email == @account[:email], "Incorrect email #{user.email}"
-    assert user.level.to_sym == :root, "Incorrect level #{user.level}"
-    key = Spontaneous::Permissions::User.authenticate(@account[:login], @account[:password])
-    assert_instance_of Spontaneous::Permissions::AccessKey, key, "User created with incorrect password"
+    Bundler.with_clean_env do
+      require 'spontaneous'
+      Spontaneous.init mode: :console
+      users = Spontaneous::Permissions::User.all
+      assert users.length == 1, "Site initialization should have created a root user"
+      user = users.first
+      assert user.login == @account[:login], "Incorrect login #{user.login}"
+      assert user.email == @account[:email], "Incorrect email #{user.email}"
+      assert user.level.to_sym == :root, "Incorrect level #{user.level}"
+      key = Spontaneous::Permissions::User.authenticate(@account[:login], @account[:password])
+      assert_instance_of Spontaneous::Permissions::AccessKey, key, "User created with incorrect password"
+    end
   end
 
   def test_step_009__site_initialization_should_not_add_root_user_if_exists
-    require 'spontaneous'
-    cmd =  "spot init --user=#{ENV['DB_USER']}"
-    users = Spontaneous::Permissions::User.count
-    assert users == 1, "Precondition failed. There should only be 1 user"
-    status, out, _ = system cmd, { "BUNDLE_GEMFILE" => ENV["BUNDLE_GEMFILE"] }
-    users = Spontaneous::Permissions::User.count
-    assert users == 1, "Re-running the 'init' command shouldn't add another user"
+    Bundler.with_clean_env do
+      require 'spontaneous'
+      cmd =  "spot init --user=#{ENV['DB_USER']}"
+      users = Spontaneous::Permissions::User.count
+      assert users == 1, "Precondition failed. There should only be 1 user"
+      status, out, _ = system cmd, { "BUNDLE_GEMFILE" => ENV["BUNDLE_GEMFILE"] }
+      users = Spontaneous::Permissions::User.count
+      assert users == 1, "Re-running the 'init' command shouldn't add another user"
+    end
   end
 
   def test_step_010__site_initialization_should_append_auto_login_config
