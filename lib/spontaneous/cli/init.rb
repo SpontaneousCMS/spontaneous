@@ -49,7 +49,9 @@ module Spontaneous::Cli
       config_path = "./config/environments/development.rb"
       config = File.read(config_path, encoding: "UTF-8").
         gsub(/__SPONTANEOUS_ROOT_USER_INSERT__/, root.login)
-      File.write(config_path, config, encoding: "UTF-8")
+      File.open(config_path, "w:UTF-8") do |file|
+        file.write(config)
+      end
     end
 
     def create(database, admin_config, site_config)
