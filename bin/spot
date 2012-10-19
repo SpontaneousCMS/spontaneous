@@ -30,4 +30,11 @@ end
 
 require 'spontaneous'
 
-Spontaneous::Cli::Root.start(ARGV)
+begin
+  Spontaneous::Cli::Root.start(ARGV)
+rescue Interrupt => e
+  puts "\nAbort..."
+  exit 1
+rescue SystemExit => e
+  exit e.status
+end
