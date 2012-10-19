@@ -31,12 +31,22 @@ module Spontaneous::Cli
       boot!
 
       # Add a root user if this is a new site
-      if ::Spontaneous::Permissions::User.count == 0
-        invoke "user:add", [],  :login => Etc.getlogin
-      end
+      insert_root_user if ::Spontaneous::Permissions::User.count == 0
+
     end
 
     protected
+
+    def insert_root_user
+      invoke "user:add", [],  :login => Etc.getlogin
+      # Set up auto_login configuration with the name of the root user
+      # we've just created
+      root = ::Spontaneous::Permissions::User.first
+      config_path = "./config/environments/development.rb"
+      config = File.read(config_path, encoding: "UTF-8").
+        gsub(/__SPONTANEOUS_ROOT_USER_INSERT__/, root.login)
+      File.write(config_path, config, encoding: "UTF-8")
+    end
 
     def create(database, db_config)
       Sequel.connect(db_config) do |connection|

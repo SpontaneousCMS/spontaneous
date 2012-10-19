@@ -107,6 +107,7 @@ class SpontaneousInstallationTest < OrderedTestCase
   def test_step_005__site_initialization_should_run
     cmd =  "spot init --user=#{ENV['DB_USER']}"
     $expect_verbose = false
+    debug = false
     status = Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thread|
       stdin.sync = true
       # stdout.expect(/Login : /) do |result|
@@ -124,8 +125,11 @@ class SpontaneousInstallationTest < OrderedTestCase
       end
       stdin.close_write
       out = stdout.read
-      # $stdout.write out
+      $stdout.write out if debug
       stdout.close
+      err = stderr.read
+      $stderr.write err if debug
+      stderr.close
       wait_thread.value
     end
     unless status.exitstatus == 0
@@ -158,7 +162,7 @@ class SpontaneousInstallationTest < OrderedTestCase
     status, out, _ = system "psql -t -U #{ENV["DB_USER"]} -d example_com -c 'select * from spontaneous_users'"
     # this now works because we install the gem above
     require 'spontaneous'
-    Spontaneous.init
+    Spontaneous.init mode: :console
     users = Spontaneous::Permissions::User.all
     assert users.length == 1, "Site initialization should have created a root user"
     user = users.first
@@ -180,7 +184,10 @@ class SpontaneousInstallationTest < OrderedTestCase
   end
 
   def test_step_010__site_initialization_should_append_auto_login_config
-    skip
+    config = File.read("config/environments/development.rb")
+    assert_match /^\s*auto_login +('|")#{@account[:login]}\1/, config,
+      "Config should include auto_login for '#{@account[:login]}'"
+      # auto_login 'dev'
   end
 end
 
