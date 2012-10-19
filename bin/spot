@@ -6,13 +6,10 @@ require 'bundler'
 # Are we in the root of a Spontaneous site?
 # If so then we want to use the bundled version of Spontaneous and its
 # dependencies
-puts "spot: BUNDLE_GEMFILE = " + ENV["BUNDLE_GEMFILE"].inspect
 if File.exist?("config/schema.yml")
-  puts "spot: Using Bundler"
   begin
     Bundler.setup(:default)
   rescue Bundler::GemfileNotFound
-    puts "spot: Bundler::GemfileNotFound"
     # We're operating outside of a site dir, probably generating a site
     # so load the Spontaneous gem Gemfile
     ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
@@ -23,7 +20,6 @@ if File.exist?("config/schema.yml")
     exit!
   end
 else
-  puts "spot: installed version"
   # If spot is being run outside of a site, then we want to use the global
   # gem files
   spot_path = File.expand_path('../../lib', __FILE__)
