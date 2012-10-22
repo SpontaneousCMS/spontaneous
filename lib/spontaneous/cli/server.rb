@@ -19,7 +19,7 @@ module Spontaneous
         root   = File.expand_path(options.site)
         engine = ::Foreman::Engine::CLI.new(root: options.site)
 
-        %w(back front bg).each do |process|
+        %w(back front publish).each do |process|
           engine.register(process, "#{binary} server #{process} --root=#{root}")
         end
 
@@ -47,18 +47,12 @@ module Spontaneous
       def simultaneous
         prepare! :start
         connection = options[:connection] || ::Spontaneous.config.simultaneous_connection
-        fork {
-          ENV.delete("BUNDLE_GEMFILE")
-          puts("#{Simultaneous.server_binary} -c #{connection} --debug")
-          exec("#{Simultaneous.server_binary} -c #{connection} --debug")
-          # sleep 10
-        }
-        Process.wait
+        exec({"BUNDLE_GEMFILE" => nil}, "#{Simultaneous.server_binary} -c #{connection} --debug")
       end
 
       # A shorter name for the 'simultaneous' task is useful (Foreman appends
       # it to each line of output)
-      map %(bg) => :simultaneous
+      map %w(bg publish) => :simultaneous
 
       private
 
