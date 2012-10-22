@@ -12,7 +12,7 @@ module Spontaneous
             "#{basename} #{task.formatted_usage(self, true, subcommand)}"
           end
         end
-        base.class_option :site, :type => :string, :aliases => ["-s", "--root"], :desc => "Site root dir"
+        base.class_option :site, :type => :string, :aliases => ["-s", "--root"], :default => ".", :desc => "Site root dir"
         base.class_option :environment, :type => :string,  :aliases => "-e", :required => true, :default => :development, :desc => "Spontaneous Environment"
         base.class_option :mode, :type => :string,  :aliases => "-m", :default => :back, :desc => "Spontaneous mode ('front' or 'back')"
         base.class_option :help, :type => :boolean, :desc => "Show help usage"
