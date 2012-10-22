@@ -47,19 +47,42 @@ module ::Spontaneous
 
 
       desc "list", "List the current users"
+      method_option :bare, :type => :boolean, :default => false, :aliases => %w(-b),
+        :desc => "Remove descriptive text from result"
       def list
         prepare! :listusers, :console
+        user_table(::Spontaneous::Permissions::User.all, options.bare)
+      end
+
+
+      desc "authenticate LOGIN PASSWORD", "Test a user/password combination"
+      method_option :bare, :type => :boolean, :default => false, :aliases => %w(-b),
+        :desc => "Remove descriptive text from result"
+
+      def authenticate(login, password)
+        prepare! :user_authenticate, :console
+        key = Spontaneous::Permissions::User.authenticate login, password
+        if key
+          say "\nAuthentication successful for user '#{login}'", :green unless options.bare
+          user_table([key.user], options.bare)
+        else
+          say "\nInvalid username & password combination", :red
+          exit 127
+        end
+      end
+
+      protected
+
+      def user_table(users, hide_headers = false)
         columns = [:login, :name, :email, :level]
         users = ::Spontaneous::Permissions::User.all.map { |user|
           columns.map { |column| user.send(column) }
         }
-        users.unshift columns.map { |c| c.to_s.capitalize }
-        puts "\n"
-        print_table(users, indent: 2)
+        users.unshift columns.map { |c| c.to_s.capitalize } unless hide_headers
+        puts "\n" unless hide_headers
+        print_table(users, indent: (hide_headers ? 0 : 2))
         puts "\n"
       end
-
-      protected
 
       def find_defaults(existing_user_count)
         return {} if existing_user_count > 0
