@@ -142,24 +142,25 @@ class SpontaneousInstallationTest < OrderedTestCase
   end
 
   def select_users
-    query = "SELECT login, name, email FROM spontaneous_users"
-    case ENV["DB"]
-    when "postgres"
-      status, out, _ = system "psql -t -U #{ENV["DB_USER"]} -d example_org -c '#{query}'"
-      out.split("\n").map { |line| line.split("|").map(&:strip) }
-    when "mysql"
-      status, out, _ = system "mysql -u #{ENV["DB_USER"]} --skip-column-names -e '#{query}' example_org"
-      out.split("\n").map { |line| line.split("\t").map(&:strip) }
-    end
+    status, out, _ = system "spot user list --bare", { "BUNDLE_GEMFILE" => ENV["BUNDLE_GEMFILE"] }
+    assert status.exitstatus == 0, "Failed to list users"
+    parse_user_list(out)
+  end
+
+  def parse_user_list(output)
+    users = output.strip.split("\n").map { |line| line.split(/ {2,}/).map(&:strip) }
   end
 
   def test_step_008__site_initialization_should_add_root_user
+    status, out, _ = system "spot user list --bare", { "BUNDLE_GEMFILE" => ENV["BUNDLE_GEMFILE"] }
+    assert status.exitstatus == 0, "Failed to list users"
     users = select_users
     assert users.length == 1, "Site initialization should have created a single user not #{users.length}"
-    login, name, email = users.first
+    login, name, email, level = users.first
     assert login == @account[:login], "Incorrect login #{login}"
     assert name == @account[:name], "Incorrect name #{name}"
     assert email == @account[:email], "Incorrect email #{email}"
+    assert level == "root", "Incorrect level #{email}"
   end
 
   def test_step_009__site_initialization_should_not_add_root_user_if_exists
@@ -171,7 +172,15 @@ class SpontaneousInstallationTest < OrderedTestCase
     assert users == 1, "Re-running the 'init' command shouldn't add another user"
   end
 
-  def test_step_010__site_initialization_should_append_auto_login_config
+  def test_step_010__site_initialization_should_use_correct_password
+    status, out, _ = system "spot user authenticate #{@account[:login]} #{@account[:password]} --bare", { "BUNDLE_GEMFILE" => ENV["BUNDLE_GEMFILE"] }
+    assert status.exitstatus == 0, "Failed to authenticate root user"
+    users = parse_user_list(out)
+    assert users.length == 1, "Site initialization should have created a single user not #{users.length}"
+    assert users.first.first == @account[:login]
+  end
+
+  def test_step_011__site_initialization_should_append_auto_login_config
     config = File.read("config/environments/development.rb")
     assert_match /^\s*auto_login +('|")#{@account[:login]}\1/, config,
       "Config should include auto_login for '#{@account[:login]}'"
