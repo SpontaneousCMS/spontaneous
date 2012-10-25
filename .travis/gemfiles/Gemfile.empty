@@ -4,3 +4,4 @@ source :rubygems
 # this way I can test the installation process itself
 
 gem "rake"
+gem "minitest"

@@ -1,9 +1,12 @@
 ---
 :development: &defaults
-  :adapter:    mysql2
+  :adapter:    <%= @database[:adapter] %>
   :database:   <%= @site_name %>
-  :user:       root
-  :host:       localhost
+  :user:       <%= @database[:user] %>
+  :password:   <%= @database[:password] %>
+<% unless (host = @database[:host]).blank? -%>
+  :host:       <%= host %>
+<% end %>
 
 :test:
   <<:         *defaults
@@ -13,7 +16,7 @@
   <<:         *defaults
   :database:  <%= @site_name %>
   :user:      <%= @site_name %>
-  :password:  passw0rd
+  :password:   <%= @database[:password] %>
 
 :rake:
   <<:         *defaults

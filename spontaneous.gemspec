@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha6'
-  s.date              = '2012-10-17'
+  s.date              = '2012-10-19'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -49,14 +49,13 @@ Gem::Specification.new do |s|
   ## List your runtime dependencies here. Runtime dependencies are those
   ## that are needed for an end user to actually USE your code.
   s.add_dependency('activesupport',   ["~> 3.2.0"])
-  s.add_dependency('i18n',            ["~> 0.6.0"]) # this is an undeclared activesupport dependency
   s.add_dependency('base58',          ["~> 0.1.0"])
   s.add_dependency('bundler',         ["> 1.0.15"])
   s.add_dependency('coffee-script',   ["~> 2.2.0"])
   s.add_dependency('cutaneous',       ["~> 0.1.3"])
   s.add_dependency('erubis',          ["~> 2.6"])
   s.add_dependency('fog',             ["~> 1.6.0"])
-  s.add_dependency('foreman',         ["~> 0.22.0"])
+  s.add_dependency('foreman',         ["~> 0.60.2"])
   s.add_dependency('kramdown',        ["~> 0.14.0"])
   s.add_dependency('launchy',         ["~> 2.1.2"])
   s.add_dependency('mini_magick',     ["~> 3.3"])

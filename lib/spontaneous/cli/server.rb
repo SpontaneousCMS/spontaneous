@@ -2,8 +2,7 @@
 
 # require 'spontaneous'
 require 'simultaneous'
-require 'foreman'
-require 'foreman/engine'
+require 'foreman/engine/cli'
 
 module Spontaneous
   module Cli
@@ -17,15 +16,14 @@ module Spontaneous
 
       desc "start", "Starts Spontaneous in development mode"
       def start
-        # I can do this programatically in the latest version of Foreman
-        File.open(".Procfile", 'wb') do |procfile|
-          procfile.write(%(back: #{binary} server back --root=#{options.site}\n))
-          procfile.write(%(front: #{binary} server front --root=#{options.site}\n))
-          procfile.write(%(simultaneous: #{binary} server simultaneous --root=#{options.site}\n))
-          procfile.flush
-          engine = ::Foreman::Engine.new(procfile.path)
-          engine.start
+        root   = File.expand_path(options.site)
+        engine = ::Foreman::Engine::CLI.new(root: options.site)
+
+        %w(back front publish).each do |process|
+          engine.register(process, "#{binary} server #{process} --root=#{root}")
         end
+
+        engine.start
       end
 
       desc "front", "Starts Spontaneous in front/public mode"
@@ -49,14 +47,12 @@ module Spontaneous
       def simultaneous
         prepare! :start
         connection = options[:connection] || ::Spontaneous.config.simultaneous_connection
-        fork {
-          ENV.delete("BUNDLE_GEMFILE")
-          puts("#{Simultaneous.server_binary} -c #{connection} --debug")
-          exec("#{Simultaneous.server_binary} -c #{connection} --debug")
-          # sleep 10
-        }
-        Process.wait
+        exec({"BUNDLE_GEMFILE" => nil}, "#{Simultaneous.server_binary} -c #{connection} --debug")
       end
+
+      # A shorter name for the 'simultaneous' task is useful (Foreman appends
+      # it to each line of output)
+      map %w(bg publish) => :simultaneous
 
       private
 
