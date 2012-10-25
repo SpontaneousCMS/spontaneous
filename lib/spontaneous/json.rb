@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
-require 'oj'
+# require 'oj'
+require 'yajl'
 
 Oj.default_options = {
   mode: :compat
@@ -41,7 +42,8 @@ module Spontaneous
       end
     end
 
-    extend OjParser
+    # extend OjParser
+    extend YajlParser
 
     def parse_json(json_string)
       Spontaneous::JSON.parse(json_string)
