@@ -20,7 +20,7 @@ module Spontaneous
       end
 
       def self.register_task
-        publish_binary = spot_binary + " site:publish"
+        publish_binary = spot_binary + " site publish"
         site_root = Pathname.new(Spontaneous.root).expand_path.to_s
         niceness = S.config.publish_niceness || 15
         logfile =  "#{site_root}/log/publish.log"
