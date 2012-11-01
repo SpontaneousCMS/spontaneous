@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
-  s.version           = '0.2.0.alpha6'
-  s.date              = '2012-10-19'
+  s.version           = '0.2.0.alpha7'
+  s.date              = '2012-11-01'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -77,7 +77,6 @@ Gem::Specification.new do |s|
   s.add_dependency('thin',            ["~> 1.2"])
   s.add_dependency('thor',            ["~> 0.16.0"])
   s.add_dependency('uglifier',        ["~> 1.3.0"])
-  # s.add_dependency('oj',              ["~> 1.4"])
   s.add_dependency('yajl-ruby',       ["~> 1.1.0"])
 
   ## List your development dependencies here. Development dependencies are
