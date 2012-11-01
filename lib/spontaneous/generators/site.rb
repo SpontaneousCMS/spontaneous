@@ -19,7 +19,7 @@ module Spontaneous
       argument :domain, :type => :string, :desc => "The domain name of the site to generate"
 
       class_option :root,    :desc => "The root destination", :aliases => '-r', :default => ".",   :type => :string
-      class_option :database,    :desc => "The database to use ('mysql' (default) or 'postgres')", :aliases => '-d', :default => "mysql",   :type => :string
+      class_option :database,    :desc => "The database to use ('mysql' (default) or 'postgres')", :aliases => %w(-d --db), :default => "mysql",   :type => :string
       class_option :user,    :desc => "The database account to use", :aliases => '-u', :default => "root",   :type => :string
       class_option :password,    :desc => "The password for the database user", :aliases => %w(-p), :default => "",   :type => :string
       class_option :host,    :desc => "The database host", :aliases => %w(-h), :default => "",   :type => :string
