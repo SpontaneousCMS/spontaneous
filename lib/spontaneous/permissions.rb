@@ -10,8 +10,6 @@ module Spontaneous
     autoload :AccessGroup, "spontaneous/permissions/access_group"
     autoload :AccessKey, "spontaneous/permissions/access_key"
 
-    @@active_user = nil
-
     class << self
       # Convenience shortcut so we can do Permissions[:root]
       def [](level_name)
