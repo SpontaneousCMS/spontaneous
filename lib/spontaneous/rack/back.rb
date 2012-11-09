@@ -36,7 +36,7 @@ module Spontaneous
 
       def self.editing_app
         ::Rack::Builder.app do
-          use Spontaneous::Rack::FiberPool, :size => 15
+          # use Spontaneous::Rack::FiberPool, :size => 15
           use ::Rack::Lint
           use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static)
           use Spontaneous::Rack::Static, :root => Spontaneous.root / "public/@spontaneous", :urls => %W(/assets)
