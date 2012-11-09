@@ -29,7 +29,7 @@ module Spontaneous::Cli
       [database, "#{database}_test"].each do |db|
         config = site_connection_params.merge(:database => db)
         create(db, admin_connection_params, config)
-        migrate(db, admin_connection_params, config)
+        migrate(db, site_connection_params, config)
       end
 
       boot!
@@ -102,7 +102,7 @@ module Spontaneous::Cli
                 when :postgres
                   [
                     [%(CREATE ROLE "#{config[:user]}" LOGIN PASSWORD '#{config[:password]}'), false],
-                    [%(CREATE DATABASE "#{config[:database]}" TEMPLATE=template0 ENCODING='UTF8' OWNER="#{config[:user]}"), true]
+                    [%(CREATE DATABASE "#{config[:database]}" WITH TEMPLATE=template0 ENCODING='UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8' OWNER="#{config[:user]}"), true]
                   ]
                 when :mysql
                   host = config[:host].blank? ? "" : "@#{config[:host]}"
