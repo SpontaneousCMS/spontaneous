@@ -6,11 +6,9 @@ module Spontaneous::Plugins
     extend ActiveSupport::Concern
 
     module ClassMethods
-      @@dataset = nil
-      @@revision = nil
 
       def current_revision_table
-        revision_table(@@revision)
+        revision_table(revision)
       end
 
       def base_table
@@ -36,15 +34,19 @@ module Spontaneous::Plugins
       end
 
       def revision
-        @@revision
+        Thread.current[:spontaneous_active_revision]
+      end
+
+      def revision=(revision)
+        Thread.current[:spontaneous_active_revision] = revision
       end
 
       def with_revision(revision=nil, &block)
-        saved_revision = @@revision
-        @@revision = revision
+        saved_revision = self.revision
+        self.revision = revision
         self.with_table(revision_table(revision), &block)
       ensure
-        @@revision = saved_revision
+        self.revision = saved_revision
       end
 
       def with_editable(&block)
