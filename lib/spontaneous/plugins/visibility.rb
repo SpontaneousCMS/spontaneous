@@ -7,6 +7,30 @@ module Spontaneous::Plugins
     module ClassMethods
       @@visible_filter = false
 
+      def visible_filter_enabled?
+        Thread.current[:spontaneous_visible_filter] || false
+      end
+
+      def visible_filter_enable
+        self.visible_filter = true
+      end
+
+      def visible_filter_disable
+        self.visible_filter = false
+      end
+
+      def visible_filter=(state)
+        Thread.current[:spontaneous_visible_filter] = state
+      end
+
+      # Although everything around this is thread safe, the actual dataset used
+      # isn't, so it's all a bit pointless. Need to re-implement using the
+      # DataMapper pattern so that I can thread-safely change the filters on the
+      # Content dataset.
+      #
+      # Luckily I think the particular way that the visibility filter is used
+      # prevents problems.
+      #
       def _set_visible_dataset!
         @_saved_dataset ||= self.dataset
         ds = filter_visible self.dataset
@@ -30,22 +54,22 @@ module Spontaneous::Plugins
       end
 
       def with_visible(&block)
-        if @@visible_filter
+        if visible_filter_enabled?
           yield
         else
           begin
             Spontaneous::Content._set_visible_dataset!
-            @@visible_filter = true
+            visible_filter_enable
             yield
           ensure
-            @@visible_filter = false
+            visible_filter_disable
             Spontaneous::Content._restore_dataset!
           end
         end
       end
 
       def visible_only?
-        @@visible_filter
+        visible_filter_enabled?
       end
 
       def visible

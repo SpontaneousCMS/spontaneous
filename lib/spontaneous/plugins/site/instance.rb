@@ -7,14 +7,12 @@ module Spontaneous::Plugins::Site
     module ClassMethods
       extend Forwardable
 
-      @@instance = nil
-
       def instantiate(root, env, mode)
-        @@instance = Spontaneous::Site.new(root, env, mode)
+        Thread.current[:spontaneous_site_instance] = Spontaneous::Site.new(root, env, mode)
       end
 
       def instance
-        @@instance
+        Thread.current[:spontaneous_site_instance]
       end
 
       def_delegators :instance, :config, :database, :database=
