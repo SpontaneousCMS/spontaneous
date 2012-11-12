@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Page
   module Request
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     # liked this but it didn't work particularly well so wasn't used in the end
     # perhaps, when I re-write the bloody Public handler i can use it

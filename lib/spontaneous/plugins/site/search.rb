@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Site
   module Search
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def index(name, &definition)

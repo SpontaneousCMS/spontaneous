@@ -32,7 +32,7 @@ module Spontaneous
       def after_destroy
         case @category
         when :box
-          Spontaneous::Content.filter(:box_sid  => @id).delete
+          ::Content.filter(:box_sid  => @id).delete
         end
       end
 
@@ -124,6 +124,10 @@ module Spontaneous
         @id
       end
 
+      def sql_literal(dataset)
+        dataset.literal @id
+      end
+
       def <=>(other)
         self.to_s <=> other.to_s
       end
@@ -132,6 +136,5 @@ module Spontaneous
         %(#<#{self.class}:"#{@id}" => "#{reference}">)
       end
     end
-
   end
 end

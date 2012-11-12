@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Styles
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def style(name, options={})

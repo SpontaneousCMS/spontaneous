@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Fields
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def field(name, type=nil, options={}, &block)

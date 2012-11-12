@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Site
   module Paths
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def paths(group)

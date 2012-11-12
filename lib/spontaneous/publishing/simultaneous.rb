@@ -65,8 +65,8 @@ module Spontaneous
 
       attr_reader :revision
 
-      def initialize(revision)
-        @revision = revision
+      def initialize(revision, content_model)
+        @revision, @content_model = revision, content_model
       end
 
       def task_name

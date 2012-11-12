@@ -1,4 +1,6 @@
 # encoding: UTF-8
 
-class Piece < Spontaneous::Piece
+require 'content'
+
+class Piece < Content::Piece
 end

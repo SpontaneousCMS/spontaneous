@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Supertype
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def supertype

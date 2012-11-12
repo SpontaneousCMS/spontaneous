@@ -22,10 +22,12 @@ require "active_support/core_ext/file"
 module Spontaneous
 
   require "spontaneous/logger"
+  require "spontaneous/concern"
   require "spontaneous/constants"
   require "spontaneous/errors"
   require "spontaneous/json"
   require "spontaneous/sequel"
+  require "spontaneous/model"
 
   include Constants
 
@@ -37,12 +39,13 @@ module Spontaneous
     instance.reload!
   end
 
+  autoload :Content,          "spontaneous/content"
   autoload :Config,           "spontaneous/config"
+  autoload :DataMapper,       "spontaneous/data_mapper"
   autoload :Paths,            "spontaneous/paths"
   autoload :Facet,            "spontaneous/facet"
-  autoload :Content,          "spontaneous/content"
-  autoload :Page,             "spontaneous/page"
-  autoload :Piece,            "spontaneous/piece"
+  # autoload :Page,             "spontaneous/page"
+  # autoload :Piece,            "spontaneous/piece"
   autoload :Box,              "spontaneous/box"
   autoload :FieldTypes,       "spontaneous/field_types"
   autoload :FieldVersion,     "spontaneous/field_version"

@@ -10,8 +10,8 @@ module Spontaneous
 
       attr_reader :revision
 
-      def initialize(revision)
-        @revision = revision
+      def initialize(revision, content_model)
+        @revision, @content_model = revision, content_model
         @previous_revision = Site.published_revision
       end
 
@@ -21,9 +21,9 @@ module Spontaneous
 
       def publish_pages(page_list)
         pages = page_list.flatten.map { |c|
-          c.is_a?(S::Page) ? c.reload : S::Page[c]
+          c.is_a?(@content_model::Page) ? c.reload : @content_model::Page[c]
         }
-        all_pages = S::Page.all
+        all_pages = @content_model::Page.all
 
         if (all_pages - pages).empty?
           # publish_all is quicker
@@ -55,7 +55,7 @@ module Spontaneous
 
       def rerender_revision
         logger.info {  "Re-rendering revision #{@revision}"}
-        S::Content.with_revision(@revision) do
+        @content_model.with_revision(@revision) do
           render_revision
         end
       end
@@ -70,7 +70,7 @@ module Spontaneous
 
 
       def pages
-        @pages ||= S::Page.order(:depth)
+        @pages ||= Spontaneous::Site.pages(@content_model)
       end
 
       # The number of times the publisher has to run through the site's pages
@@ -87,7 +87,7 @@ module Spontaneous
         }
         before_publish
         begin
-          S::Content.publish(revision, modified_page_list) do
+          @content_model.publish(revision, modified_page_list) do
             render_revision
           end
           after_publish
@@ -101,11 +101,9 @@ module Spontaneous
         S::Output.renderer = renderer
         update_progress("rendering", 0)
         @pages_rendered = 0
-        S::Content.with_identity_map do
-          S::Content.with_visible do
-            render_pages
-            index_pages unless index_stages == 0
-          end
+        @content_model.with_visible do
+          render_pages
+          index_pages unless index_stages == 0
         end
         copy_static_files
         generate_rackup_file
@@ -138,12 +136,15 @@ module Spontaneous
       end
 
       # Used to calculate the progress percentage
-      # Calculated by (pages * indexes) * (pages * formats)
+      # Calculated by (pages * indexes) + (pages * formats)
       # where indexes = Site.indexes.length > 0 ? 1 : 0
       # although not all pages are included by a format
       def total_pages_to_render
-        @total_pages ||= (index_stages * pages.count) + pages.inject(0) do |total, page|
-          total += page.outputs.length
+        @total_pages ||= \
+          begin
+            index_steps  = (index_stages * pages.count)
+            output_steps = pages.map { |page| page.outputs.length }.inject(0, :+)
+            index_steps  + output_steps
         end
       end
 
@@ -264,26 +265,26 @@ module Spontaneous
         update_progress("initialising")
         # when working with multiple instances it's possible to rollback the revision number
         # leaving behind old revisions > the current published_revision.
-        S::Content.delete_revision(revision)
-        S::Site.send(:pending_revision=, revision)
+        @content_model.delete_revision(revision)
+        Spontaneous::Site.send(:pending_revision=, revision)
       end
 
       def after_publish
         update_progress("finalising")
         S::Revision.create(:revision => revision, :published_at => Time.now)
-        S::Site.send(:set_published_revision, revision)
+        Spontaneous::Site.send(:set_published_revision, revision)
         tmp = Spontaneous.revision_dir(revision) / "tmp"
         FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
         symlink_revision(revision)
 
         begin
-          S::Site.trigger(:after_publish, revision)
-          S::Site.send(:pending_revision=, nil)
+          Spontaneous::Site.trigger(:after_publish, revision)
+          Spontaneous::Site.send(:pending_revision=, nil)
           update_progress("complete")
         rescue Exception => e
           # if a post publish hook raises an exception then we want to roll everything back
           S::Revision.filter(:revision => revision).delete
-          S::Site.send(:set_published_revision, @previous_revision)
+          Spontaneous::Site.send(:set_published_revision, @previous_revision)
           symlink_revision(@previous_revision)
           abort_publish(e)
           raise e
@@ -302,8 +303,8 @@ module Spontaneous
         if r = S::Site.pending_revision
           update_progress("aborting")
           FileUtils.rm_r(Spontaneous.revision_dir(revision)) if File.exists?(Spontaneous.revision_dir(revision))
-          S::Site.send(:pending_revision=, nil)
-          S::Content.delete_revision(revision)
+          Spontaneous::Site.send(:pending_revision=, nil)
+          @content_model.delete_revision(revision)
           puts exception.backtrace.join("\n") if exception
           update_progress("error", exception)
         end

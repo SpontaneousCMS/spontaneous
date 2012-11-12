@@ -4,7 +4,7 @@ require 'fiber'
 
 module Spontaneous::Plugins::Application
   module System
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def async?

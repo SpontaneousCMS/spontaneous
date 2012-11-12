@@ -117,6 +117,10 @@ module Spontaneous::Output
       @content ||= page
     end
 
+    def model
+      content.model
+    end
+
     def render(params = {}, *args)
       render_using(default_renderer, params, *args)
     end

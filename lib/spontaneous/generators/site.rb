@@ -42,20 +42,21 @@ module Spontaneous
           self.destination_root = self.destination_root / @site_name
           directory "config"
           directory "schema"
+          directory "lib"
           directory "templates"
           directory "public"
           template "Gemfile.tt", "Gemfile"
           template "Capfile.tt", "Capfile"
           template "Rakefile.tt", "Rakefile"
-          template "lib/site.rb.tt", "lib/site.rb"
-          empty_directory "lib/tasks"
+          # template "lib/site.rb.tt", "lib/site.rb"
+          # empty_directory "lib/tasks"
           empty_directory "log"
           empty_directory "tmp"
           empty_directory "cache/media"
           empty_directory "cache/tmp"
           empty_directory "cache/revisions"
           copy_file ".gitignore"
-          template "lib/tasks/site.rake.tt", "lib/tasks/#{@site_name}.rake"
+          # template "lib/tasks/site.rake.tt", "lib/tasks/#{@site_name}.rake"
         else
           @valid = false
           say "Invalid database selection '#{options.database}'. Valid options are: #{self.class.available_dbs.keys.join(', ')}", :red

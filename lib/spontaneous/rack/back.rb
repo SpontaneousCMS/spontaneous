@@ -216,7 +216,7 @@ module Spontaneous
       end
 
       class EditingInterface < AuthenticatedHandler
-        use Reloader if Site.config.reload_classes
+        use Reloader if Spontaneous::Site.config.reload_classes
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
@@ -250,13 +250,17 @@ module Spontaneous
           end
         end
 
+        def content_model
+          ::Content
+        end
+
         def content_for_request(lock = false)
-          Content.db.transaction {
-            dataset = lock ? Content.for_update : Content
+          content_model.db.transaction {
+            dataset = lock ? content_model.for_update : content_model
             content = dataset.first(:id => params[:id])
             halt 404 if content.nil?
             content.current_editor = user
-            if box_id = Spontaneous.schema.uids[params[:box_id]]
+            if box_id = content_model.schema.uids[params[:box_id]]
               box = content.boxes.detect { |b| b.schema_id == box_id }
               yield(content, box)
             else
@@ -325,7 +329,7 @@ module Spontaneous
         end
 
         get '/root' do
-          json Site.root
+          json Spontaneous::Site.root
         end
 
         get '/page/:id' do
@@ -334,15 +338,15 @@ module Spontaneous
 
         get '/metadata' do
           json({
-            :types => Site.schema.export(user),
+            :types => Spontaneous::Site.schema.export(user),
             :user  => user.export,
-            :services => (Site.config.services || [])
+            :services => (Spontaneous::Site.config.services || [])
           })
         end
 
         get '/map/?:id?' do
-          last_modified(Site.modified_at)
-          map = Site.map(params[:id])
+          last_modified(Spontaneous::Site.modified_at)
+          map = Spontaneous::Site.map(params[:id])
           if map
             json(map)
           else
@@ -351,19 +355,19 @@ module Spontaneous
         end
 
         get '/location*' do
-          last_modified(Site.modified_at)
-          if Page.count == 0
+          last_modified(Spontaneous::Site.modified_at)
+          if content_model::Page.count == 0
             406
           else
             path = params[:splat].first
-            page = Site[path]
-            json Site.map(page.id)
+            page = Spontaneous::Site[path]
+            json Spontaneous::Site.map(page.id)
           end
         end
 
         post '/root' do
-          if Site.root.nil?
-            type = Spontaneous.schema[params[:type]]
+          if Spontaneous::Site.root.nil?
+            type = content_model.schema.to_class(params[:type])
             root = type.create(:title => "Home")
             json({:id => root.id})
           else
@@ -491,7 +495,7 @@ module Spontaneous
         post '/add/:id/:box_id/:type_name' do
           content_for_request(true) do |content, box|
             position = (params[:position] || 0).to_i
-            type = Spontaneous.schema[params[:type_name]]#.constantize
+            type = content_model.schema.to_class(params[:type_name])#.constantize
 
             if box.writable?(user, type)
               instance = type.new(:created_by => user)
@@ -561,7 +565,7 @@ module Spontaneous
         end
 
         get '/targets/:schema_id/:id/:box_id' do
-          klass = Spontaneous.schema[params[:schema_id]]
+          klass = content_model.schema.to_class(params[:schema_id])
           if klass.alias?
             content_for_request do |content, box|
               options = {}
@@ -585,7 +589,7 @@ module Spontaneous
 
         post '/alias/:id/:box_id' do
           content_for_request(true) do |content, box|
-            type = Spontaneous.schema[params[:alias_id]]
+            type = content_model.schema.to_class(params[:alias_id])
             position = (params[:position] || 0).to_i
             if box.writable?(user, type)
               instance = type.for_target(params[:target_id])
@@ -619,7 +623,7 @@ module Spontaneous
             400
           else
             if user.level.can_publish?
-              Site.publish_pages(pages)
+              Spontaneous::Site.publish_pages(pages)
               json({})
             else
               unauthorised!
@@ -757,7 +761,7 @@ module Spontaneous
       class Preview < Sinatra::Base
         use CookieAuthentication
         use AroundPreview
-        use Reloader if Site.config.reload_classes
+        use Reloader if Spontaneous::Site.config.reload_classes
         include Spontaneous::Rack::Public
         helpers Spontaneous::Rack::UserHelpers
 

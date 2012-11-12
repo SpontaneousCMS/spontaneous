@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Render
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     def output(format = :html)
       return page.output(format, self) if page

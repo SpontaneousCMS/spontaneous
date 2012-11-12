@@ -29,11 +29,11 @@ class AssetTest < MiniTest::Spec
     @site = setup_site
     @fixture_root = File.expand_path("../../fixtures/assets", __FILE__)
     @site.paths.add :public, @fixture_root / "public1", @fixture_root / "public2"
-    @page = S::Page.create
+    @page = Page.create
   end
 
   def teardown
-    S::Content.delete
+    Content.delete
     teardown_site
   end
 

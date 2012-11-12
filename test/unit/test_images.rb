@@ -5,7 +5,7 @@ require File.expand_path('../../test_helper', __FILE__)
 require 'fog'
 
 class ImagesTest < MiniTest::Spec
-  include Spontaneous
+
   def setup
     @site = setup_site
   end
@@ -16,7 +16,7 @@ class ImagesTest < MiniTest::Spec
 
   context "Image fields set using absolute values" do
     setup do
-      @image = FieldTypes::ImageField.new(:name => "image")
+      @image = S::FieldTypes::ImageField.new(:name => "image")
     end
     should "accept and not alter URL values" do
       url =  "http://example.com/image.png"
@@ -44,7 +44,7 @@ class ImagesTest < MiniTest::Spec
       @upload_dir.mkpath
 
       @revision = 10
-      Site.stubs(:working_revision).returns(@revision)
+      S::Site.stubs(:working_revision).returns(@revision)
 
       @src_image =  Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg")).realpath
       @origin_image = @upload_dir + "rose.jpg"
@@ -52,7 +52,7 @@ class ImagesTest < MiniTest::Spec
       FileUtils.cp(@src_image.to_s, @origin_image.to_s)
       @origin_image = @origin_image.realpath.to_s
 
-      class ::ResizingImageField < FieldTypes::ImageField
+      class ::ResizingImageField < S::FieldTypes::ImageField
         size :preview do
           width 200
           optimize!
@@ -78,7 +78,7 @@ class ImagesTest < MiniTest::Spec
 
       ResizingImageField.register
 
-      class ::ContentWithImage < Content
+      class ::ContentWithImage < ::Content::Piece
         field :photo, :resizing_image
       end
 
@@ -103,11 +103,11 @@ class ImagesTest < MiniTest::Spec
       end
 
       should "create resized versions of the input image" do
-        ImageSize.read(@image.preview.filepath).should == [200, 267]
-        ImageSize.read(@image.tall.filepath).should == [150, 200]
-        ImageSize.read(@image.thumbnail.filepath).should == [38, 50]
-        ImageSize.read(@image.icon.filepath).should == [50, 50]
-        ImageSize.read(@image.greyscale.filepath).should == [38, 50]
+        S::ImageSize.read(@image.preview.filepath).should == [200, 267]
+        S::ImageSize.read(@image.tall.filepath).should == [150, 200]
+        S::ImageSize.read(@image.thumbnail.filepath).should == [38, 50]
+        S::ImageSize.read(@image.icon.filepath).should == [50, 50]
+        S::ImageSize.read(@image.greyscale.filepath).should == [38, 50]
       end
 
       should "preserve new format if processing has altered it" do

@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module PageSearch
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def root
@@ -20,12 +20,10 @@ module Spontaneous::Plugins
       end
 
       def first_visible(params)
-        page = Spontaneous::Content.first(params)
+        page = content_model::Page.first(params)
         # don't want to return nil if a page matching the params exists but is hidden
         # if we return blank we force searches via other routes (such as aliased pages)
-        if page and Spontaneous::Content.visible_only? and page.hidden?
-          return false
-        end
+        return false if page and mapper.visible_only? and page.hidden?
         page
       end
 

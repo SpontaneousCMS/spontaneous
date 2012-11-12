@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Site
   module Instance
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       extend Forwardable

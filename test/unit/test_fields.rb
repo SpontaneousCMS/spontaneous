@@ -15,13 +15,13 @@ class FieldsTest < MiniTest::Spec
 
   context "Fields" do
     setup do
-      class ::Page < Spontaneous::Page; end
-      class ::Piece < Spontaneous::Piece; end
+      # class ::Page < Spontaneous::Page; end
+      # class ::Piece < Spontaneous::Piece; end
     end
 
     teardown do
-      Object.send(:remove_const, :Page)
-      Object.send(:remove_const, :Piece)
+      # Object.send(:remove_const, :Page)
+      # Object.send(:remove_const, :Piece)
     end
 
     context "New content instances" do
@@ -233,7 +233,7 @@ class FieldsTest < MiniTest::Spec
 
     context "Values" do
       setup do
-        @field_class = Class.new(FieldTypes::Field) do
+        @field_class = Class.new(S::FieldTypes::Field) do
           def outputs
             [:html, :plain, :fancy]
           end
@@ -273,7 +273,7 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "escape ampersands by default" do
-        field_class = Class.new(FieldTypes::StringField) do
+        field_class = Class.new(S::FieldTypes::StringField) do
         end
         field = field_class.new
         field.value = "Hello & Welcome"
@@ -282,7 +282,7 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "educate quotes" do
-        field_class = Class.new(FieldTypes::StringField)
+        field_class = Class.new(S::FieldTypes::StringField)
         field = field_class.new
         field.value = %("John's first... example")
         field.value(:html).should == "“John’s first… example”"
@@ -432,7 +432,7 @@ class FieldsTest < MiniTest::Spec
 
     context "Available output formats" do
       should "include HTML & PDF and default to default value" do
-        f = FieldTypes::Field.new
+        f = S::FieldTypes::Field.new
         f.value = "Value"
         f.to_html.should == "Value"
         f.to_pdf.should == "Value"
@@ -498,7 +498,7 @@ class FieldsTest < MiniTest::Spec
           self.register(:custom)
         end
 
-        class ::CustomContent < Spontaneous::Piece
+        class ::CustomContent < ::Piece
           field :custom
         end
         assert CustomContent.fields.custom.instance_class < CustomField
@@ -525,7 +525,7 @@ class FieldsTest < MiniTest::Spec
       teardown do
         # Object.send(:remove_const, :Piece) rescue nil
         Spontaneous::Permissions::User.delete
-        S::Content.delete
+        ::Content.delete
         S::FieldVersion.delete
       end
 
@@ -705,7 +705,7 @@ class FieldsTest < MiniTest::Spec
 
         should "provide a version of the YouTube player params in JSON/JS format" do
           @field.value = "http://www.youtube.com/watch?v=_0jroAM_pO4&feature=feedrec_grec_index"
-          json = JSON.parse(@field.render(:json))
+          json = Spontaneous::JSON.parse(@field.render(:json))
           json[:"tagname"].should == "iframe"
           json[:"tag"].should == "<iframe/>"
           attr = json[:"attr"]
@@ -726,7 +726,7 @@ class FieldsTest < MiniTest::Spec
 
         should "provide a version of the Vimeo player params in JSON/JS format" do
           @field.value = "http://vimeo.com/31836285"
-          json = JSON.parse(@field.render(:json))
+          json = Spontaneous::JSON.parse(@field.render(:json))
           json[:"tagname"].should == "iframe"
           json[:"tag"].should == "<iframe/>"
           attr = json[:"attr"]

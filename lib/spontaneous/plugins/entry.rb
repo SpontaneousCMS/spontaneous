@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Entry
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     # InstanceMethods
 
@@ -13,7 +13,7 @@ module Spontaneous::Plugins
     end
 
     def box_sid
-      @box_sid ||= Spontaneous.schema.uids[self[:box_sid]]
+      @box_sid ||= mapper.schema_uid(self[:box_sid])
     end
 
     def box_sid=(sid)

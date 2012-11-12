@@ -1,6 +1,6 @@
 module Spontaneous::Plugins::Site
   module URL
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def public_url(path = "/")

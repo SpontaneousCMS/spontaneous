@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Application
   module Facets
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def instance
@@ -16,7 +16,6 @@ module Spontaneous::Plugins::Application
       def schema
         instance.schema
       end
-
     end
   end
 end

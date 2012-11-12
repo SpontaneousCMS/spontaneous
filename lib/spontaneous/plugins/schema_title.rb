@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module SchemaTitle
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def class_name_with_fallback

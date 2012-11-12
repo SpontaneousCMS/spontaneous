@@ -2,12 +2,12 @@
 
 module Spontaneous::Plugins
   module PageTree
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     # InstanceMethods
 
     def ancestors
-      @ancestors ||= ancestor_path.map { |id| Spontaneous::Content[id] }
+      @ancestors ||= ancestor_path.map { |id| content_model[id] }
     end
 
     def ancestor(depth)

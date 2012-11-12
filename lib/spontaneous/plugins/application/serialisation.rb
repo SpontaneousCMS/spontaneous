@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Application
   module Serialisation
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       include Spontaneous::JSON

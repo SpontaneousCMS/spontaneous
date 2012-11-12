@@ -29,7 +29,7 @@ module Spontaneous::Prototypes
     end
 
     def schema_id
-      Spontaneous.schema.schema_id(self)
+      Spontaneous.schema.to_id(self)
     end
 
     def export(user)

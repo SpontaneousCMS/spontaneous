@@ -19,13 +19,17 @@ class FrontTest < MiniTest::Spec
   end
 
   def self.shutdown
-    teardown_site
+    teardown_site(true)
     Spontaneous::Output.write_compiled_scripts = false
   end
 
   def setup
     @site = setup_site(self.class.site_root)
     Site.publishing_method = :immediate
+  end
+
+  def teardown
+    teardown_site(false)
   end
 
   def app
@@ -68,11 +72,11 @@ class FrontTest < MiniTest::Spec
     setup do
 
 
-      Site.publishing_method = :immediate
-      State.delete
+      S::Site.publishing_method = :immediate
+      S::State.delete
       Content.delete
 
-      class ::SitePage < Spontaneous::Page
+      class ::SitePage < ::Page
         layout :default
         layout :dynamic
         box :pages
@@ -109,7 +113,7 @@ class FrontTest < MiniTest::Spec
       Content.delete_revision(1) rescue nil
 
       Spontaneous.logger.silent! {
-        Site.publish_all
+        S::Site.publish_all
       }
     end
 
@@ -117,7 +121,7 @@ class FrontTest < MiniTest::Spec
       Object.send(:remove_const, :SitePage) rescue nil
       Object.send(:remove_const, :SubPage) rescue nil
       Content.delete
-      State.delete
+      S::State.delete
       Content.delete_revision(1)
     end
 
@@ -184,8 +188,8 @@ class FrontTest < MiniTest::Spec
 
     context "Dynamic pages" do
       setup do
-        Spontaneous::Page.stubs(:path).with("/about").returns(about)
-        Spontaneous::Page.stubs(:path).with("/news").returns(news)
+        Content::Page.stubs(:path).with("/about").returns(about)
+        Content::Page.stubs(:path).with("/news").returns(news)
       end
 
       should "default to static behaviour" do
@@ -488,9 +492,9 @@ class FrontTest < MiniTest::Spec
           end
         end
 
-        Page.stubs(:path).with("/").returns(root)
-        Page.stubs(:path).with("/about").returns(about)
-        Page.stubs(:path).with("/about/now").returns(subpage)
+        Content::Page.stubs(:path).with("/").returns(root)
+        Content::Page.stubs(:path).with("/about").returns(about)
+        Content::Page.stubs(:path).with("/about/now").returns(subpage)
       end
 
       teardown do

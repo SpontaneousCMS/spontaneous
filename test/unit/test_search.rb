@@ -27,13 +27,13 @@ class SearchTest < MiniTest::Spec
 
   def self.startup
     # make sure that S::Piece & S::Page are removed from the schema
-    setup_site
-    *ids = S::Page.schema_id, S::Piece.schema_id
-    Object.const_set(:Site, Class.new(S::Site))
+    # setup_site
+    # *ids = S::Page.schema_id, S::Piece.schema_id
+    # Object.const_set(:Site, Class.new(S::Site))
   end
 
   def self.shutdown
-    Object.send(:remove_const, :Site) rescue nil
+    # Object.send(:remove_const, :Site) rescue nil
   end
 
   def setup
@@ -49,8 +49,8 @@ class SearchTest < MiniTest::Spec
       Content.delete
 
 
-      class ::Piece < S::Piece; end
-      class ::Page < S::Page; end
+      # class ::Piece < S::Piece; end
+      # class ::Page < S::Page; end
       b = ::Page.box :pages
       # instantiate box instance class to it gets added to schema
       ::Page.boxes.pages.instance_class.schema_id
@@ -68,7 +68,7 @@ class SearchTest < MiniTest::Spec
 
       @all_page_classes = [::Page, ::PageClass1, ::PageClass2, ::PageClass3, ::PageClass4, ::PageClass5, ::PageClass6]
       @all_piece_classes = [::Piece, ::PieceClass1, ::PieceClass2, ::PieceClass3]
-      @all_box_classes = [ ::Page::PagesBox ]
+      @all_box_classes = [ ::Box, ::Page::PagesBox ]
       @all_classes = @all_page_classes + @all_piece_classes + @all_box_classes
 
       @root0 = ::Page.create(:uid => "root")
@@ -580,7 +580,7 @@ class SearchTest < MiniTest::Spec
 
       should "return (reasonable) results to searches" do
         db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
-        Site.stubs(:published_revision).returns(@revision)
+        S::Site.stubs(:published_revision).returns(@revision)
         db = @index1.create_db(@revision)
         db << @page1
         db << @page2
@@ -590,7 +590,7 @@ class SearchTest < MiniTest::Spec
         results = @index1.search('+valeu', :limit => 1, :autocorrect => true)
         results.must_be_instance_of S::Search::Results
         results.each do |result|
-          result.class.should < S::Page
+          result.class.should < Content::Page
         end
 
         results.corrected_query.should == '+value'

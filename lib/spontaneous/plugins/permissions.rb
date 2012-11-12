@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Permissions
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def box_readable?(user, box_name)

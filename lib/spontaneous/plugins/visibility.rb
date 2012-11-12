@@ -2,82 +2,17 @@
 
 module Spontaneous::Plugins
   module Visibility
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
-      @@visible_filter = false
-
-      def visible_filter_enabled?
-        Thread.current[:spontaneous_visible_filter] || false
-      end
-
-      def visible_filter_enable
-        self.visible_filter = true
-      end
-
-      def visible_filter_disable
-        self.visible_filter = false
-      end
-
-      def visible_filter=(state)
-        Thread.current[:spontaneous_visible_filter] = state
-      end
-
-      # Although everything around this is thread safe, the actual dataset used
-      # isn't, so it's all a bit pointless. Need to re-implement using the
-      # DataMapper pattern so that I can thread-safely change the filters on the
-      # Content dataset.
-      #
-      # Luckily I think the particular way that the visibility filter is used
-      # prevents problems.
-      #
-      def _set_visible_dataset!
-        @_saved_dataset ||= self.dataset
-        ds = filter_visible self.dataset
-        @dataset = ds
-        # set_dataset clears the row_proc which desroys the STI
-        # self.set_dataset(ds)
-      end
-
-      def _restore_dataset!
-        # self.set_dataset( self.dataset.unfiltered) if @_saved_dataset
-        @dataset = @_saved_dataset if @_saved_dataset
-        @_saved_dataset = nil
-      end
-
-      def _content_classes
-        [Spontaneous::Content, Spontaneous::Page, Spontaneous::Piece] + Spontaneous.schema.content_classes
-      end
-
-      def _unfiltered_dataset
-        @_saved_dataset or dataset
-      end
-
       def with_visible(&block)
-        if visible_filter_enabled?
+        mapper.visible do
           yield
-        else
-          begin
-            Spontaneous::Content._set_visible_dataset!
-            visible_filter_enable
-            yield
-          ensure
-            visible_filter_disable
-            Spontaneous::Content._restore_dataset!
-          end
         end
       end
 
       def visible_only?
-        visible_filter_enabled?
-      end
-
-      def visible
-        filter_visible self.dataset
-      end
-
-      def filter_visible(dataset)
-        dataset.filter(:hidden => false)
+        mapper.visible_only?
       end
     end # ClassMethods
 
@@ -163,7 +98,7 @@ module Spontaneous::Plugins
     end
 
     def hide_aliases(visible)
-      dataset = Spontaneous::Content.filter(:target_id => self.id)
+      dataset = content_model.filter(:target_id => self.id)
       origin = visible ? nil : self.id
       dataset.update(:hidden => !visible, :hidden_origin => origin)
     end
@@ -171,7 +106,7 @@ module Spontaneous::Plugins
     def hide_descendents(visible)
       path_like = :visibility_path.like("#{self[:visibility_path]}.#{self.id}%")
       origin = visible ? nil : self.id
-      dataset = Spontaneous::Content.filter(path_like).filter(:hidden => visible)
+      dataset = content_model.filter(path_like).filter(:hidden => visible)
       # if a child item has been made invisible *before* its parent then it exists
       # with hidden = true and hidden_origin = nil
       if visible
@@ -193,7 +128,7 @@ module Spontaneous::Plugins
 
     def visibility_ancestors
       return [] if visibility_path.blank?
-      visibility_path.split(Spontaneous::VISIBILITY_PATH_SEP).map { |id| S::Content[id] }
+      visibility_path.split(Spontaneous::VISIBILITY_PATH_SEP).map { |id| content_model[id] }
     end
 
     def recalculated_hidden

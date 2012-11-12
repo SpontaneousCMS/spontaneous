@@ -7,12 +7,11 @@ class FormatsTest < MiniTest::Spec
     setup do
       @site = setup_site
       @site.paths.add :templates, File.expand_path('../../fixtures/outputs/templates', __FILE__)
-      class Page < Spontaneous::Page; end
-      class FPage < Page; end
+      # class Page < ::Page; end
+      class FPage < ::Page; end
     end
 
     teardown do
-      self.class.send(:remove_const, :Page) rescue nil
       self.class.send(:remove_const, :FPage) rescue nil
       teardown_site
     end

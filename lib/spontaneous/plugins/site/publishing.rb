@@ -2,9 +2,13 @@
 
 module Spontaneous::Plugins::Site
   module Publishing
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
+      def content_model
+        ::Content
+      end
+
       def default_publishing_method
         resolve_publishing_method(Spontaneous::Site.config.publishing_method || :immediate)
       end
@@ -28,15 +32,15 @@ module Spontaneous::Plugins::Site
       end
 
       def publish_pages(page_list=nil)
-        publishing_method.new(self.revision).publish_pages(page_list)
+        publishing_method.new(self.revision, content_model).publish_pages(page_list)
       end
 
       def publish_all
-        publishing_method.new(self.revision).publish_all
+        publishing_method.new(self.revision, content_model).publish_all
       end
 
       def rerender
-        publishing_method.new(self.published_revision).rerender_revision
+        publishing_method.new(self.published_revision, content_model).rerender_revision
       end
 
       def publishing_status
@@ -53,7 +57,7 @@ module Spontaneous::Plugins::Site
       end
 
       def with_published(&block)
-        S::Content.with_published(&block)
+        ::Content.with_revision(published_revision, &block)
       end
 
       protected

@@ -33,7 +33,7 @@ class ConfigTest < MiniTest::Spec
 
     context "Config" do
       setup do
-        @config = Config.new(:development)
+        @config = Spontaneous::Config.new(:development)
         @config.load(@config_dir)
       end
       should "load the first time its accessed" do
@@ -44,7 +44,7 @@ class ConfigTest < MiniTest::Spec
     context "containing blocks" do
       setup do
         @settings = {}
-        @config = Config::Loader.new(@settings)
+        @config = Spontaneous::Config::Loader.new(@settings)
       end
       should "add a hash to the settings under the defined key" do
         @config.storage :key1 do |config|
@@ -71,7 +71,7 @@ class ConfigTest < MiniTest::Spec
         # defined?(Spontaneous).should be_nil
         # require @lib_dir + '/spontaneous/config.rb'
         # Config.environment = :development
-        @config = Config.new(:development)
+        @config = Spontaneous::Config.new(:development)
         @config.load(@config_dir)
       end
 
@@ -98,10 +98,10 @@ class ConfigTest < MiniTest::Spec
 
       should "overwrite values depending on environment" do
         @config.over_ridden.should == :development_value
-        config = Config.new(:production)
+        config = Spontaneous::Config.new(:production)
         config.load(@config_dir)
         config.over_ridden.should == :production_value
-        config = Config.new(:staging)
+        config = Spontaneous::Config.new(:staging)
         config.load(@config_dir)
         config.over_ridden.should == :environment_value
       end
@@ -120,10 +120,10 @@ class ConfigTest < MiniTest::Spec
 
       should "dynamically switch values according to the configured env" do
         @config.over_ridden.should == :development_value
-        config = Config.new(:production)
+        config = Spontaneous::Config.new(:production)
         config.load(@config_dir)
         config.over_ridden.should == :production_value
-        config = Config.new(:staging)
+        config = Spontaneous::Config.new(:staging)
         config.load(@config_dir)
         config.over_ridden.should == :environment_value
       end
@@ -157,7 +157,7 @@ class ConfigTest < MiniTest::Spec
 
       context "Spontaneous :back" do
         setup do
-          @config = Config.new(:development, :back)
+          @config = Spontaneous::Config.new(:development, :back)
           @config.load(@config_dir)
         end
         should "read the correct configuration values" do
@@ -166,7 +166,7 @@ class ConfigTest < MiniTest::Spec
       end
       context "Spontaneous :front" do
         setup do
-          @config = Config.new(:development, :front)
+          @config = Spontaneous::Config.new(:development, :front)
           @config.load(@config_dir)
         end
         should "read the correct configuration values" do

@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Application
   module Features
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def register_back_controller(namespace, controller_class)

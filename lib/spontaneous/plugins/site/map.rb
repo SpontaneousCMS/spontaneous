@@ -2,15 +2,15 @@
 
 module Spontaneous::Plugins::Site
   module Map
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def map(root_id=nil)
         page = \
           if root_id.nil?
-            Spontaneous::Page.root
+            content_model::Page.root
           else
-            Spontaneous::Content.first :id => root_id
+            content_model.first :id => root_id
           end
         return nil unless page
         page.map_entry

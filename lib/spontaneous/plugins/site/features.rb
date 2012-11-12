@@ -3,7 +3,7 @@
 
 module Spontaneous::Plugins::Site
   module Features
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     # InstanceMethods
     def back_controllers

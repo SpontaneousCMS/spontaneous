@@ -18,7 +18,7 @@
 
 module Spontaneous::Plugins::Site
   module Storage
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def storage(mimetype = nil)

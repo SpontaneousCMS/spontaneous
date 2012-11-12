@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Application
   module State
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def init(options={})
@@ -11,6 +11,8 @@ module Spontaneous::Plugins::Application
         self.mode = options.delete(:mode) || ENV["SPOT_MODE"] || :back
         root = options.delete(:root) || ENV["SPOT_ROOT"] || Dir.pwd
         site = Spontaneous::Site.instantiate(root, environment, mode)
+        lib = File.expand_path(File.join(root, "lib"))
+        $:.push(lib) unless $:.include?(lib)
         Spontaneous::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
         site.initialize!
         site.schema.validate! if self.mode == :console

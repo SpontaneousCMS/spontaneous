@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Paths
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def generate_default_slug
@@ -56,7 +56,7 @@ module Spontaneous::Plugins
 
     def place_in_page_tree
       if self.parent_id.nil?
-        if Spontaneous::Page.root.nil?
+        if content_model::Page.root.nil?
           make_root
         end
       else
@@ -77,11 +77,9 @@ module Spontaneous::Plugins
     def root?
       path == Spontaneous::SLASH
     end
+
     alias_method :is_root?, :root?
 
-    def root
-      Spontaneous::Page.root
-    end
 
     def update_path
       self.path = calculate_path

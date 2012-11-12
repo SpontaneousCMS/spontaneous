@@ -3,7 +3,7 @@
 
 module Spontaneous::Plugins
   module Publishing
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
 
@@ -21,12 +21,11 @@ module Spontaneous::Plugins
       end
 
       def revision_table(revision=nil)
-        return base_table if revision.nil?
-        "__r#{revision.to_s.rjust(5, '0')}_content"
+        mapper.revision_table(revision)
       end
 
       def revision_table?(table_name)
-        /^__r\d{5}_content$/ === table_name.to_s
+        mapper.revision_table?(table_name)
       end
 
       def revision_exists?(revision)
@@ -34,23 +33,15 @@ module Spontaneous::Plugins
       end
 
       def revision
-        Thread.current[:spontaneous_active_revision]
-      end
-
-      def revision=(revision)
-        Thread.current[:spontaneous_active_revision] = revision
+        mapper.current_revision
       end
 
       def with_revision(revision=nil, &block)
-        saved_revision = self.revision
-        self.revision = revision
-        self.with_table(revision_table(revision), &block)
-      ensure
-        self.revision = saved_revision
+        mapper.revision(revision, &block)
       end
 
       def with_editable(&block)
-        with_revision(nil, &block)
+        mapper.editable(&block)
       end
 
       def with_published(&block)
@@ -70,20 +61,13 @@ module Spontaneous::Plugins
       # Pass in a block if you want to tie some bit of post processing to the success or failure
       # of the publish step (used in the site render stage for example)
       def publish(revision, content=nil)
-        mark_first_published = Proc.new do |dataset|
-          dataset.update(:first_published_at => Sequel.datetime_class.now, :first_published_revision => revision)
-        end
 
-        mark_published = Proc.new do |dataset|
-          dataset.update(:last_published_at => Sequel.datetime_class.now)
-        end
-
-        first_published = published = nil
+        # first_published_filter = published_filter = {}
 
         db.transaction do
           with_editable do
-            first_published = self.filter(:first_published_at => nil)
-            published = self.filter
+            first_published_filter = {:first_published_at => nil}
+            published_filter = {}
 
             must_publish_all = (content.nil? || (!revision_exists?(revision-1)) || \
                                 (content.is_a?(Array) && content.empty?))
@@ -92,15 +76,16 @@ module Spontaneous::Plugins
               create_revision(revision)
             else
               content = content.map do |c|
-                c.is_a?(Spontaneous::Content) ? c.reload : Spontaneous::Content.first(:id => c)
+                c.is_a?(content_model) ? c.reload : content_model.first(:id => c)
               end.compact
 
               # pages should be published in depth order because its possible to be publishing a child of
               # a page that's never been published
               content.sort! { |c1, c2| c1.depth <=> c2.depth }
 
-              first_published = first_published.filter(:id => content.map { |c| c.id })
-              published = published.filter(:id => content.map { |c| c.id })
+              ids = content.map { |c| c.id }
+              first_published_filter.update(:id => ids)
+              published_filter.update(:id => ids)
 
               create_revision(revision, revision-1)
               content.each do |c|
@@ -118,13 +103,16 @@ module Spontaneous::Plugins
               end
             end
 
-            with_editable do
-              mark_first_published[first_published]
-              mark_published[published]
-            end
-            with_revision(revision) do
-              mark_first_published[first_published]
-              mark_published[published]
+            [nil, revision].each do |r|
+              with_revision(r) do
+                mapper.filter!(first_published_filter).update({
+                  :first_published_at => Sequel.datetime_class.now,
+                  :first_published_revision => revision
+                })
+                mapper.filter!(published_filter).update({
+                  :last_published_at => Sequel.datetime_class.now
+                })
+              end
             end
           end
         end
@@ -137,7 +125,7 @@ module Spontaneous::Plugins
       def create_revision(revision, from_revision=nil)
         dest_table = revision_table(revision)
         src_table = revision_table(from_revision)
-        sql = "CREATE TABLE #{dataset.quote_identifier(dest_table)} AS SELECT * FROM #{dataset.quote_identifier(src_table)}"
+        sql = "CREATE TABLE #{mapper.quote_identifier(dest_table)} AS SELECT * FROM #{mapper.quote_identifier(src_table)}"
         database.run(sql)
         indexes = database.indexes(base_table)
         indexes.each do |name, options|
@@ -198,18 +186,18 @@ module Spontaneous::Plugins
       first_publish = false
 
       with_revision(revision) do
-        published_copy = Spontaneous::Content.first(:id => self.id)
+        published_copy = content_model.first(:id => self.id)
         if published_copy
           if publish and published_copy.entry_store
             pieces_to_delete = published_copy.entry_store - self.entry_store
             pieces_to_delete.each do |entry|
-              if c = Spontaneous::Content.first(:id => entry[0])
+              if c = content_model.first(:id => entry[0])
                 c.destroy(false) rescue ::Sequel::NoExistingObject
               end
             end
           end
         else # missing content (so force a publish)
-          Spontaneous::Content.insert({:id => self.id, :type_sid => values[:type_sid]})
+          content_model.insert({:id => self.id, :type_sid => attributes[:type_sid]})
           publish = true
           first_publish = true
         end
@@ -226,14 +214,14 @@ module Spontaneous::Plugins
             sync_children_to_revision(revision)
           end
 
-          Spontaneous::Content.where(:id => self.id).update(values)
+          content_model.where(:id => self.id).update(attributes)
 
           published_values = {}
           # ancestors can have un-published changes to their paths so we can't just directly publish the current path.
           # Instead we re-calculate our path using the published version of the ancestor's path & our (potentially) updated slug.
           if self.page?
             published = self.class.first :id => self.id
-            published_values[:path] = published.calculate_path_with_slug(values[:slug])
+            published_values[:path] = published.calculate_path_with_slug(attributes[:slug])
           end
 
           # need to calculate the correct visibility for published items. I can't just take this from the editable
@@ -246,7 +234,7 @@ module Spontaneous::Plugins
           published_values[:hidden] = self.recalculated_hidden unless self.hidden_origin.blank?
 
           unless published_values.empty?
-            Spontaneous::Content.where(:id => self.id).update(published_values)
+            content_model.where(:id => self.id).update(published_values)
           end
 
           # Pages that haven't been published before can be published independently of their parents.
@@ -259,9 +247,9 @@ module Spontaneous::Plugins
     end
 
     def sync_children_to_revision(revision)
-      published_children = with_revision(revision) { S::Content.filter(:parent_id => self.id) }
+      published_children = with_revision(revision) { content_model.filter(:parent_id => self.id) }
       published_children.each do |child_page|
-        deleted = with_editable { S::Content.select(:id).first(:id => child_page.id).nil? }
+        deleted = with_editable { content_model.select(:id).first(:id => child_page.id).nil? }
         if deleted
           with_revision(revision) do
             child_page.destroy
@@ -274,18 +262,24 @@ module Spontaneous::Plugins
     # of the newly published page. Positions are not exact as other child pages might not have
     # been published.
     def insert_entry_for_new_page(revision)
-      detect_entry = proc { |e| e[0] == self.id }
+      return if parent_id.nil?
+      this = self.id
+      detect_entry = proc { |e| e[0] == this }
 
-      parent_entry_store = with_editable { self.parent.entry_store.dup }
+      parent_entry_store = with_editable {
+        content_model[self.parent_id].entry_store.dup
+      }
       entry = parent_entry_store.find(&detect_entry)
       index = parent_entry_store.index(&detect_entry)
-      published_parent = Spontaneous::Content.first :id => parent_id
+      published_parent = content_model.first :id => parent_id
 
-      published_parent.entry_store ||= []
+      store = published_parent.entry_store || []
 
-      unless published_parent.entry_store.find(&detect_entry)
-        published_parent.entry_store.insert(index, entry).compact!
+      unless store.find(&detect_entry)
+        store.insert(index, entry).compact!
+        published_parent.entry_store = store
       end
+
       published_parent.save
     end
   end

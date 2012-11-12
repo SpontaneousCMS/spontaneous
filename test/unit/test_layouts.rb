@@ -17,13 +17,13 @@ class LayoutsTest < MiniTest::Spec
   context "layouts" do
 
     setup do
-      class ::LayoutPage < Spontaneous::Page; end
-      class ::ABoxClass < Spontaneous::Box; end
+      class ::LayoutPage < ::Page; end
+      class ::ABoxClass < ::Box; end
       class ::SubPage < LayoutPage; end
       ABoxClass.style :monkey
       ABoxClass.style :crazy
 
-      class ::SomeContent < Spontaneous::Piece; end
+      class ::SomeContent < ::Piece; end
     end
 
     teardown do

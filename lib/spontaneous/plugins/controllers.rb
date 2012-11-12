@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Controllers
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     ACTION_SEPARATOR = "@".freeze
 

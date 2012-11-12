@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Serialisation
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def export(user = nil)

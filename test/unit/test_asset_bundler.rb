@@ -74,7 +74,7 @@ class AssetBundler < MiniTest::Spec
 
   context "Development mode editing app" do
     setup do
-      @page = ::S::Content.create
+      @page = Content.create
     end
 
     teardown do
@@ -122,7 +122,7 @@ class AssetBundler < MiniTest::Spec
     setup do
       @compiler = Spontaneous::Asset::AppCompiler.new(fixture_dir, @site.root)
       @compiler.compile
-      @page = ::S::Content.create
+      @page = Content.create
     end
 
     teardown do

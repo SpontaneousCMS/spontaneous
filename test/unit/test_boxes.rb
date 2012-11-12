@@ -16,7 +16,6 @@ class BoxesTest < MiniTest::Spec
   context "Box definitions" do
     setup do
 
-      class ::Piece < Spontaneous::Piece; end
       class ::MyBoxClass < Box; end
       class ::MyContentClass < Piece; end
       class ::MyContentClass2 < MyContentClass; end
@@ -24,10 +23,9 @@ class BoxesTest < MiniTest::Spec
     end
 
     teardown do
-      Object.send(:remove_const, :Piece)
-      Object.send(:remove_const, :MyContentClass2)
-      Object.send(:remove_const, :MyContentClass)
-      Object.send(:remove_const, :MyBoxClass)
+      Object.send(:remove_const, :MyContentClass2) rescue nil
+      Object.send(:remove_const, :MyContentClass) rescue nil
+      Object.send(:remove_const, :MyBoxClass) rescue nil
     end
 
     should "start empty" do
@@ -234,7 +232,6 @@ class BoxesTest < MiniTest::Spec
   context "Box classes" do
     setup do
       @site.stubs(:template_root).returns(File.expand_path('../../fixtures/templates/boxes', __FILE__))
-      class ::Piece < Spontaneous::Piece; end
       class ::MyContentClass < ::Piece; end
       class ::MyBoxClass < Box; end
       MyBoxClass.field :title, :string
@@ -247,9 +244,8 @@ class BoxesTest < MiniTest::Spec
     end
 
     teardown do
-      Object.send(:remove_const, :Piece)
-      Object.send(:remove_const, :MyContentClass)
-      Object.send(:remove_const, :MyBoxClass)
+      Object.send(:remove_const, :MyContentClass) rescue nil
+      Object.send(:remove_const, :MyBoxClass) rescue nil
     end
 
     should "have fields" do
@@ -297,7 +293,6 @@ class BoxesTest < MiniTest::Spec
 
   context "Box content" do
     setup do
-      class ::Piece < Spontaneous::Piece; end
       class ::BlankContent < ::Piece; end
       class ::StyledContent < ::Piece; end
 
@@ -319,9 +314,8 @@ class BoxesTest < MiniTest::Spec
     end
 
     teardown do
-      Object.send(:remove_const, :Piece)
-      Object.send(:remove_const, :BlankContent)
-      Object.send(:remove_const, :StyledContent)
+      Object.send(:remove_const, :BlankContent) rescue nil
+      Object.send(:remove_const, :StyledContent) rescue nil
     end
 
     should "be addable" do
@@ -492,8 +486,8 @@ class BoxesTest < MiniTest::Spec
       box = AChild2.boxes.parents
       box.title.should == "Things"
       box.allowed_types(nil).should == [Allowed1, Allowed2, Allowed3, Allowed11, Allowed111]
-      Object.send(:remove_const, :AChild)
-      Object.send(:remove_const, :AChild2)
+      Object.send(:remove_const, :AChild) rescue nil
+      Object.send(:remove_const, :AChild2) rescue nil
     end
 
     should "include a subtype's allowed list as well as the supertype's" do
@@ -513,7 +507,7 @@ class BoxesTest < MiniTest::Spec
 
   context "Box groups" do
     setup do
-      class ::A < S::Piece
+      class ::A < ::Piece
         box_group :inner do
           box :a
           box :b
@@ -549,9 +543,9 @@ class BoxesTest < MiniTest::Spec
     end
 
     teardown do
-      Object.send(:remove_const, :A)
-      Object.send(:remove_const, :B)
-      Object.send(:remove_const, :C)
+      Object.send(:remove_const, :A) rescue nil
+      Object.send(:remove_const, :B) rescue nil
+      Object.send(:remove_const, :C) rescue nil
     end
 
     should "successfully allocate boxes" do

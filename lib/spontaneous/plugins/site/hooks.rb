@@ -1,7 +1,7 @@
 
 module Spontaneous::Plugins::Site
   module Hooks
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     HOOKS = [:after_publish]
 

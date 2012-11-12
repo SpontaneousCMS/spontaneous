@@ -4,7 +4,7 @@ require 'rack'
 
 module Spontaneous::Plugins::Page
   module Formats
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def outputs(*outputs)

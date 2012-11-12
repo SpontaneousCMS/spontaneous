@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module InstanceCode
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     # InstanceMethods
 

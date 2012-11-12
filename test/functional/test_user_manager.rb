@@ -21,7 +21,7 @@ class UserAdminTest < MiniTest::Spec
   end
 
   def self.shutdown
-    teardown_site
+    teardown_site(true)
   end
 
   def app
@@ -42,11 +42,12 @@ class UserAdminTest < MiniTest::Spec
   end
 
   def teardown
+    teardown_site(false)
     S::Permissions::User.delete
   end
 
   def create_user(name, level)
-    user = Permissions::User.create({
+    user = S::Permissions::User.create({
       :name => "#{name.capitalize}",
       :email => "#{name}@example.org",
       :login => name,

@@ -51,7 +51,7 @@ class HelpersTest < MiniTest::Spec
     end
 
     should "be available during the render step" do
-      class Page < Spontaneous::Page
+      class Page < Content::Page
         add_output :mobile
       end
 

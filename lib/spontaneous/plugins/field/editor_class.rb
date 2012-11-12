@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Field
   module EditorClass
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def editor_class

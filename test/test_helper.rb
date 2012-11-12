@@ -80,7 +80,7 @@ class MiniTestWithHooks < MiniTest::Unit
 
   def _run_suites(suites, type)
     names = suites.reject { |s| exclude?(s) }.map { |s| s.to_s.gsub(/Test$/, '') }
-    @max_name_length = names.inject(-1) { |max, name| [name.length, max].max }
+    @max_name_length = names.map(&:length).max
     begin
       before_suites
       super(suites, type)
@@ -119,23 +119,42 @@ def silence_logger(&block)
 end
 
 class MiniTest::Spec
-  include Spontaneous
   include CustomMatchers
 
   attr_accessor :template_root
   alias :silence_stdout :silence_logger
 
-  def self.setup_site(root = nil)
+  def self.setup_site(root = nil, define_models = true)
     root ||= Dir.mktmpdir
-    instance = Spontaneous::Site.instantiate(root, :test, :back)
+    unless Object.const_defined?(:Site)
+      site_class = Class.new(Spontaneous::Site)
+      Object.const_set :Site, site_class
+    end
+    instance = ::Site.instantiate(root, :test, :back)
     instance.schema_loader_class = Spontaneous::Schema::TransientMap
     instance.logger.silent!
     instance.database = DB
+    unless Object.const_defined?(:Content)
+      content_class = Class.new(Spontaneous::Model(:content, DB, instance.schema)) do
+        include Spontaneous::Content
+      end
+      Object.const_set :Content, content_class
+      if define_models
+        Object.const_set :Page, Class.new(::Content::Page)
+        Object.const_set :Piece, Class.new(::Content::Piece)
+        Object.const_set :Box, Class.new(::Content::Box)
+      end
+    end
     instance
   end
 
-  def self.teardown_site
-    FileUtils.rm_r(Spontaneous.instance.root) rescue nil
+  def self.teardown_site(clear_disk = true)
+    if clear_disk
+      FileUtils.rm_r(Spontaneous.instance.root) rescue nil
+    end
+    %w(Piece Page Box Content Site).each do |klass|
+      Object.send :remove_const, klass if Object.const_defined?(klass)
+    end
   end
 
   def self.stub_time(time)
@@ -158,18 +177,19 @@ class MiniTest::Spec
   end
 
   def log_sql(&block)
-    logger = S::Content.db.logger
-    S::Content.db.logger = ::Logger.new($stdout)
+    logger = ::Content.mapper.logger
+    ::Content.mapper.logger = ::Logger.new($stdout)
     yield
   ensure
-    S::Content.db.logger = logger
-  end
-  def setup_site(root = nil)
-    self.class.setup_site(root)
+    ::Content.mapper.logger = logger
   end
 
-  def teardown_site
-    self.class.teardown_site
+  def setup_site(root = nil, define_models = true)
+    self.class.setup_site(root, define_models)
+  end
+
+  def teardown_site(clear_disk = true)
+    self.class.teardown_site(clear_disk)
   end
 
   def assert_correct_template(content, expected_path, format = :html)

@@ -3,15 +3,7 @@
 
 module Spontaneous::Plugins
   module Aliases
-    extend ActiveSupport::Concern
-
-    included do
-      # '__target' rather than 'target' because we want to override the behaviour of the
-      # Content#target method only on classes that are aliases, and this is defined dynamically
-      many_to_one :__target, :class => self, :key => :target_id, :reciprocal => :aliases
-      one_to_many :aliases, :class => self, :key => :target_id, :reciprocal => :__target
-      add_association_dependencies :aliases => :destroy
-    end
+    extend Spontaneous::Concern
 
     module ClassMethods
       def alias_of(*args)
@@ -38,10 +30,14 @@ module Spontaneous::Plugins
           when Proc
             targets.concat(source[*proc_args])
           else
-            classes.concat(source.to_s.constantize.sti_subclasses_array)
+            type = source.to_s.constantize
+            classes.push(type)
+            classes.concat(type.subclasses)
           end
         end
-        query = S::Content.filter(sti_key => classes.map { |c| c.to_s })
+
+        query = content_model.filter(:type_sid => classes.map { |c| c.schema_id })
+
         if (container_procs = @alias_options[:container])
           containers = [container_procs].flatten.map { |p| p[*proc_args] }.flatten
           params = []

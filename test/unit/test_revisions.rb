@@ -20,11 +20,11 @@ class RevisionsTest < MiniTest::Spec
 
       Content.delete
 
-      class Page < Spontaneous::Page
+      class Page < ::Page
         field :title, :string, :default => "New Page"
         box :things
       end
-      class Piece < Spontaneous::Piece
+      class Piece < ::Piece
         box :things
       end
 
@@ -59,8 +59,8 @@ class RevisionsTest < MiniTest::Spec
     context "data sources" do
 
       should "have the right names" do
-        Content.revision_table(23).should == '__r00023_content'
-        Content.revision_table(nil).should == 'content'
+        Content.revision_table(23).should == :'__r00023_content'
+        Content.revision_table(nil).should == :'content'
       end
 
       should "be recognisable" do
@@ -71,13 +71,11 @@ class RevisionsTest < MiniTest::Spec
       end
 
       should "be switchable within blocks" do
-        Content.dataset.should be_content_revision
         Content.with_revision(23) do
           Content.revision.should ==23
-          Content.dataset.should be_content_revision(23)
+          Content.mapper.current_revision.should == 23
         end
-        Content.dataset.should  be_content_revision
-        Content.revision.should be_nil
+        Content.mapper.current_revision.should be_nil
       end
 
       should "know which revision is active" do
@@ -88,55 +86,44 @@ class RevisionsTest < MiniTest::Spec
 
       should "understand the with_editable" do
         Content.with_revision(23) do
-          Content.dataset.should be_content_revision(23)
+          Content.mapper.current_revision.should == 23
           Content.with_editable do
-            Content.dataset.should be_content_revision
+            Content.mapper.current_revision.should be_nil
           end
-          Content.dataset.should be_content_revision(23)
         end
-        Content.dataset.should be_content_revision
       end
 
       should "understand with_published" do
-        Site.stubs(:published_revision).returns(99)
+        S::Site.stubs(:published_revision).returns(99)
         Content.with_published do
-          Content.dataset.should be_content_revision(99)
-          Content.with_editable do
-            Content.dataset.should be_content_revision
-          end
-          Content.dataset.should be_content_revision(99)
+          Content.mapper.current_revision.should == 99
         end
-        Content.dataset.should be_content_revision
       end
 
       should "be stackable" do
-        Content.dataset.should be_content_revision
         Content.with_revision(23) do
-          Content.dataset.should be_content_revision(23)
+          Content.mapper.current_revision.should == 23
           Content.with_revision(24) do
-            Content.dataset.should be_content_revision(24)
+            Content.mapper.current_revision.should == 24
           end
-          Content.dataset.should be_content_revision(23)
         end
-        Content.dataset.should be_content_revision
       end
 
       should "reset datasource after an exception" do
-        Content.dataset.should be_content_revision
         begin
           Content.with_revision(23) do
-            Content.dataset.should be_content_revision(23)
+            Content.mapper.current_revision.should == 23
             raise Exception.new
           end
         rescue Exception
         end
-        Content.dataset.should be_content_revision
+        Content.mapper.current_revision.should be_nil
       end
 
       should "read revision from the environment if present" do
         ENV["SPOT_REVISION"] = '1001'
         Content.with_published do
-          Content.dataset.should be_content_revision(1001)
+          Content.mapper.current_revision.should == 1001
         end
         ENV.delete("SPOT_REVISION")
       end
@@ -152,14 +139,11 @@ class RevisionsTest < MiniTest::Spec
 
         should "set all subclasses to use the same dataset" do
           Content.with_revision(23) do
-            Subclass.revision.should ==23
-            Subclass.dataset.should be_content_revision(23, Subclass.schema_id)
+            Subclass.revision.should == 23
+            Subclass.mapper.current_revision.should == 23
             # piece wasn't loaded until this point
-            Piece.dataset.should  be_content_revision(23)
-            Piece.revision.should == 23
+            Piece.mapper.current_revision.should == 23
           end
-          Subclass.dataset.should  be_content_revision(nil, Subclass.schema_id)
-          Piece.dataset.should  be_content_revision(nil)
         end
       end
     end
@@ -180,7 +164,7 @@ class RevisionsTest < MiniTest::Spec
       should "be deletable en masse" do
         tables = (1..10).map { |i| Content.revision_table(i).to_sym }
         tables.each do |t|
-          DB.create_table(t){Integer :id}
+          DB.create_table(t){Integer :id} rescue nil
         end
         tables.each do |t|
           DB.tables.include?(t).should be_true
@@ -383,7 +367,7 @@ class RevisionsTest < MiniTest::Spec
           end
         end
 
-        should "choose a sensible position for entry into the parent of a newly added page xxx" do
+        should "choose a sensible position for entry into the parent of a newly added page" do
           editable1 = Content.first(:uid => '0')
           new_page1 = Page.new(:uid => "new1")
           new_page2 = Page.new(:uid => "new2")

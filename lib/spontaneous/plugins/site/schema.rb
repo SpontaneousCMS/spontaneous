@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Site
   module Schema
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def schema
@@ -15,7 +15,7 @@ module Spontaneous::Plugins::Site
     end
 
     def schema_id(obj)
-      schema.schema_id(obj)
+      schema.to_id(obj)
     end
 
     def schema
@@ -27,7 +27,7 @@ module Spontaneous::Plugins::Site
     end
 
     def schema_loader_class=(loader_class)
-      @schema_loader_class = loader_class
+      schema.schema_loader_class = (@schema_loader_class = loader_class)
     end
   end
 end

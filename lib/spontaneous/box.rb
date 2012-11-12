@@ -23,6 +23,10 @@ module Spontaneous
     # Returns: the owning Content object
     alias_method :parent, :owner
 
+    class << self
+      attr_reader :mapper
+    end
+
     def self.page?
       false
     end
@@ -41,7 +45,7 @@ module Spontaneous
     end
 
     def self.schema_id
-      Spontaneous.schema.uids[@schema_id] || Spontaneous.schema.schema_id(self)
+      mapper.schema.uids[@schema_id] || mapper.schema.to_id(self)
     end
 
     # This is overridden by anonymous classes defined by box prototypes
@@ -50,6 +54,12 @@ module Spontaneous
       "type//#{self.name}"
     end
 
+    # def self.inherited(subclass)
+    #     # Spontaneous.schema.add_class(self, subclass)# if subclass.schema_class?
+    #     p :inherited
+    #     p self
+    #   super
+    # end
 
     def self.supertype
       if self == Spontaneous::Box
@@ -72,6 +82,9 @@ module Spontaneous
       @field_initialization = false
     end
 
+    def model
+      @owner.model
+    end
 
     def page?
       false
@@ -224,7 +237,7 @@ module Spontaneous
     end
 
     def pieces
-      contents.select { |e| e.is_a?(Spontaneous::Piece) }
+      contents.select { |e| e.is_a?(Spontaneous::Model::Piece) }
     end
 
     def [](index)

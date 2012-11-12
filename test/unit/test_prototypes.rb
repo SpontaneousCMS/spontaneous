@@ -13,7 +13,7 @@ class PrototypesTest < MiniTest::Spec
 
   context "Prototypes" do
     setup do
-      class ::ImageClass < Spontaneous::Piece
+      class ::ImageClass < ::Piece
         field :image
         field :description
 
@@ -26,7 +26,7 @@ class PrototypesTest < MiniTest::Spec
         end
       end
 
-      class ::PrototypeClass < Spontaneous::Piece
+      class ::PrototypeClass < ::Piece
         field :title, :string
         field :date,  :string
         field :something, :string, :default => "Here"
@@ -149,7 +149,7 @@ class PrototypesTest < MiniTest::Spec
 
     should "raise error if definition does not accept exactly 1 argument" do
       begin
-        class ::Prototype3Class < ::S::Piece
+        class ::Prototype3Class < ::Piece
           prototype {}
         end
         flunk("Defining prototypes with no arguments should raise error")

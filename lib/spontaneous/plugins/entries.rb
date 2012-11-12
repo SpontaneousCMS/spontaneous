@@ -2,11 +2,16 @@
 
 module Spontaneous::Plugins
   module Entries
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
-    included do
-      alias_method :<<, :push
-    end
+    # before_include do
+    #   puts "owner= defined?"
+    #   p method_defined?(:owner=)
+    # end
+
+    # included do
+    #   # alias_method :<<, :push
+    # end
     #
     #     def self.configure(base)
     #       base.__send__(:alias_method,  :<<, :push)
@@ -27,6 +32,10 @@ module Spontaneous::Plugins
         end
       end
       super
+    end
+
+    def depth
+      super || 0
     end
 
     def after_save
@@ -71,7 +80,7 @@ module Spontaneous::Plugins
     end
 
     def contents
-      return visible_contents if Spontaneous::Content.visible_only?
+      return visible_contents if model.visible_only?
       all_contents
     end
 
@@ -106,6 +115,8 @@ module Spontaneous::Plugins
       insert(-1, page_or_piece)
     end
 
+    alias_method :<<, :push
+
     def insert(index, page_or_piece, box)
       save if new?
       if page_or_piece.page?
@@ -135,7 +146,7 @@ module Spontaneous::Plugins
     end
 
     def insert_with_style(type, index, content, box)
-      self._pieces << content
+      self.pieces << content
       entry_style = style_for_content(content, box)
       content.box_sid = box.schema_id if box
       content._prototype = box.prototype_for_content(content) if box
@@ -194,6 +205,7 @@ module Spontaneous::Plugins
     def available_styles(content)
       content.class.styles
     end
+
 
     def owner=(owner)
       super

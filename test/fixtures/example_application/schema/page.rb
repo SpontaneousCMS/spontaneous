@@ -1,4 +1,5 @@
+require File.expand_path("../../lib/content", __FILE__)
 
-class Page < Spontaneous::Page
+class Page < Content::Page
   field :title, :string, :default => "New Page"
 end

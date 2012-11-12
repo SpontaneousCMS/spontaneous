@@ -8,6 +8,7 @@ require File.expand_path('../../test_helper', __FILE__)
 class AuthenticationTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
+  Permissions = Spontaneous::Permissions
 
   def create_user(name, level)
     user = Permissions::User.create({
@@ -104,12 +105,12 @@ class AuthenticationTest < MiniTest::Spec
     setup do
       # Spontaneous::Schema.reset!
 
-      class C < Spontaneous::Piece
+      class C < Piece
         field :photo, :image, :write_level => :root
       end
-      class D < Spontaneous::Piece; end
+      class D < Piece; end
 
-      class SitePage < Spontaneous::Page
+      class SitePage < Page
         # page_style :default
         field :editor_level, :user_level => :editor
           field :admin_level, :user_level => :admin

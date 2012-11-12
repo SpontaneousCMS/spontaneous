@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module SchemaHierarchy
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def schema_validate(schema)
@@ -56,7 +56,7 @@ module Spontaneous::Plugins
       end
 
       def __source_file=(path)
-        @__source_file = path
+        @__source_file ||= path
       end
 
       protected(:__source_file=)
@@ -65,17 +65,13 @@ module Spontaneous::Plugins
         @__source_file
       end
 
-      def subclasses
-        Spontaneous.schema.subclasses_of(self)
-      end
-
-      def descendents
-        Spontaneous.schema.descendents_of(self)
+      def __determine_source_file(subclass, _caller)
+        src = File.expand_path(_caller.split(':')[0])
+        subclass.__source_file = src
       end
 
       def inherited(subclass, real_caller = nil)
-        subclass.__source_file = File.expand_path((real_caller || caller[0]).split(':')[0])
-        Spontaneous.schema.add_class(self, subclass)# if subclass.schema_class?
+        __determine_source_file(subclass, real_caller || caller[0])
         super(subclass)
       end
 

@@ -116,29 +116,29 @@ module Spontaneous
       method_option :logfile, :type => :string, :desc => "Location of logfile"
       def publish
         prepare! :publish
-        ::Site.publishing_method = :immediate
+        Spontaneous::Site.publishing_method = :immediate
         ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
-        say "Creating revision #{::Site.revision}", :green, true
+        say "Creating revision #{Spontaneous::Site.revision}", :green, true
         if options.pages
           say ">  Publishing pages #{options.pages.inspect}", :green, true
-          ::Site.publish_pages(options.pages)
+          Spontaneous::Site.publish_pages(options.pages)
         else
           say ">  Publishing all", :green, true
-          ::Site.publish_all
+          Spontaneous::Site.publish_all
         end
       end
 
       desc "render", "Re-renders the current content"
       def render
         prepare! :render
-        ::Site.publishing_method = :immediate
-        ::Site.rerender
+        Spontaneous::Site.publishing_method = :immediate
+        Spontaneous::Site.rerender
       end
 
       desc "revision", "Shows the site status"
       def revision
         prepare! :revision
-        say "Site is at revision #{::Site.revision}", :green
+        say "Site is at revision #{Spontaneous::Site.revision}", :green
       end
 
       desc "browse", "Launces a browser pointing to the current development CMS"
@@ -146,7 +146,7 @@ module Spontaneous
         prepare :browse
         require 'launchy'
         boot!
-        ::Launchy.open("http://localhost:#{::Site.config.port}/@spontaneous")
+        ::Launchy.open("http://localhost:#{Spontaneous::Site.config.port}/@spontaneous")
       end
     end
   end

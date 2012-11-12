@@ -2,11 +2,19 @@
 
 module Spontaneous::Plugins::Site
   module Selectors
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
-      def root
-        Spontaneous::Page.root
+      def root(content_model = ::Content)
+        content_model.root
+      end
+
+      def pages(content_model = ::Content)
+        pages_dataset(content_model).all
+      end
+
+      def pages_dataset(content_model = ::Content)
+        content_model::Page.order(:depth)
       end
 
       def [](path_or_uid)
@@ -23,15 +31,15 @@ module Spontaneous::Plugins::Site
       end
 
       def by_id(id)
-        Spontaneous::Page[id]
+        ::Content::Page[id]
       end
 
       def by_path(path)
-        Spontaneous::Page.path(path)
+        ::Content::Page.path(path)
       end
 
       def by_uid(uid)
-        Spontaneous::Page.uid(uid)
+        ::Content::Page.uid(uid)
       end
 
       def method_missing(method, *args)

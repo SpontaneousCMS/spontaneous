@@ -83,10 +83,10 @@ class VisibilityTest < MiniTest::Spec
       end
     end
 
-    should "hide page content" do
+    should "hide page content xxx" do
       @child.hide!
       @child.reload
-      Piece.all.select { |f| f.visible? }.length.should == 20
+      Content::Piece.all.select { |f| f.visible? }.length.should == 20
       Piece.all.select do |f|
         f.page.ancestors.include?(@child) || f.page == @child
       end.each do |f|
@@ -292,7 +292,7 @@ class VisibilityTest < MiniTest::Spec
       end
 
       should "be initalized as invisible if their target is invisible" do
-        target = E.find(:uid => "1.1")
+        target = E.first(:uid => "1.1")
         target.hide!
         al = MyAlias.create(:target => target)
         al.visible?.should be_false
@@ -300,7 +300,7 @@ class VisibilityTest < MiniTest::Spec
 
 
       should "be made visible along with their target if added when target is hidden" do
-        target = E.find(:uid => "1.1")
+        target = E.first(:uid => "1.1")
         target.hide!
         al = MyAlias.create(:target => target)
         al.reload.visible?.should be_false
@@ -310,7 +310,7 @@ class VisibilityTest < MiniTest::Spec
 
       should "be filtered by visibility when doing reverse lookup" do
         page = P.first(:uid => "1")
-        target = E.find(:uid => "1.1")
+        target = E.first(:uid => "1.1")
         al1 = MyAlias.create(:target => target)
         page.things << al1
         al2 = MyAlias.create(:target => target).reload
@@ -326,7 +326,7 @@ class VisibilityTest < MiniTest::Spec
       end
 
       should "show as 'hidden' if their target is deleted" do
-        parent = E.find(:uid => "1.1")
+        parent = E.first(:uid => "1.1")
         target = P.new
         parent.pages << target
         parent.save

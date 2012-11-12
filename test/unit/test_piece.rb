@@ -4,7 +4,6 @@ require File.expand_path('../../test_helper', __FILE__)
 
 
 class PieceTest < MiniTest::Spec
-  include Spontaneous
 
   def setup
     @site = setup_site
@@ -17,15 +16,11 @@ class PieceTest < MiniTest::Spec
   context "Pieces" do
     setup do
       Content.delete
-      class ::Piece < Spot::Piece; end
-      class ::Page < Spot::Page; end
       class ::Fridge < ::Piece; end
     end
 
     teardown do
-      Object.send(:remove_const, :Page)
-      Object.send(:remove_const, :Piece)
-      Object.send(:remove_const, :Fridge)
+      Object.send(:remove_const, :Fridge) rescue nil
     end
 
     should "not be pages" do

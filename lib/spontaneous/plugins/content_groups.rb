@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module ContentGroups
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       attr_reader :group_memberships

@@ -21,11 +21,11 @@ class ModificationsTest < MiniTest::Spec
       # DB.logger = Logger.new($stdout)
       Content.delete
 
-      class Page < Spontaneous::Page
+      class Page < ::Page
         field :title, :string, :default => "New Page"
         box :things
       end
-      class Piece < Spontaneous::Piece
+      class Piece < ::Piece
         box :things
       end
 
@@ -136,7 +136,7 @@ class ModificationsTest < MiniTest::Spec
       page.modified_at.to_i.should == @now.to_i + 3600
     end
 
-    should "not update the parent page's timestamp on addition of a child page" do
+    should "not update the parent page's timestamp on addition of a child page yyyy" do
       stub_time(@now+1000)
       page = Page.first :uid => "0"
       page.things << Page.new
@@ -356,7 +356,7 @@ class ModificationsTest < MiniTest::Spec
         @final_revision = 2
         Content.delete_revision(@initial_revision) rescue nil
         Content.delete_revision(@final_revision) rescue nil
-        S::Content.publish(@initial_revision)
+        ::Content.publish(@initial_revision)
       end
 
       teardown do
@@ -370,11 +370,11 @@ class ModificationsTest < MiniTest::Spec
         old_slug = page.slug
         page.slug = "changed"
         page.save
-        S::Content.publish(@final_revision, [page.id])
-        S::Content.with_revision(@final_revision) do
+        ::Content.publish(@final_revision, [page.id])
+        ::Content.with_revision(@final_revision) do
           %w(1 1.1.1).each do |uid|
             published_page = Page.first :uid => uid
-            S::Content.with_editable do
+            ::Content.with_editable do
               editable_page = Page.first :uid => uid
               published_page.path.should == editable_page.path
             end
@@ -396,8 +396,8 @@ class ModificationsTest < MiniTest::Spec
         child_page.slug = "changed-too"
         child_page.save
 
-        S::Content.publish(@final_revision, [page.id])
-        S::Content.with_revision(@final_revision) do
+        ::Content.publish(@final_revision, [page.id])
+        ::Content.with_revision(@final_revision) do
           published = Page.first :uid => "1.0.0"
           published.path.should == "/changed/#{old_slug}"
         end
@@ -417,8 +417,8 @@ class ModificationsTest < MiniTest::Spec
         child_page.slug = "changed-too"
         child_page.save
 
-        S::Content.publish(@final_revision, [child_page.id])
-        S::Content.with_revision(@final_revision) do
+        ::Content.publish(@final_revision, [child_page.id])
+        ::Content.with_revision(@final_revision) do
           published = Page.first :uid => "1.0.0"
           published.path.should == "/#{old_slug}/changed-too"
         end
@@ -428,11 +428,11 @@ class ModificationsTest < MiniTest::Spec
       should "act on visibility modifications" do
         page = Page.first :uid => "1"
         page.hide!
-        S::Content.publish(@final_revision, [page.id])
-        S::Content.with_revision(@final_revision) do
+        ::Content.publish(@final_revision, [page.id])
+        ::Content.with_revision(@final_revision) do
           %w(1 1.1.1).each do |uid|
             published_page = Page.first :uid => uid
-            S::Content.with_editable do
+            ::Content.with_editable do
               editable_page = Page.first :uid => uid
               published_page.hidden?.should == editable_page.hidden?
             end
@@ -448,9 +448,9 @@ class ModificationsTest < MiniTest::Spec
         page.things << child_page
         page.save
 
-        S::Content.publish(@final_revision, [child_page.id])
+        ::Content.publish(@final_revision, [child_page.id])
 
-        S::Content.with_revision(@final_revision) do
+        ::Content.with_revision(@final_revision) do
           published = Page.first :uid => "1.0.0"
           published.visible?.should be_true
           published = Page.first :uid => "child"
@@ -466,9 +466,9 @@ class ModificationsTest < MiniTest::Spec
         page.things << child_page
         page.save
 
-        S::Content.publish(@final_revision, [page.id, child_page.id])
+        ::Content.publish(@final_revision, [page.id, child_page.id])
 
-        S::Content.with_revision(@final_revision) do
+        ::Content.with_revision(@final_revision) do
           published = Page.first :uid => "child"
           published.visible?.should be_false
         end
@@ -484,9 +484,9 @@ class ModificationsTest < MiniTest::Spec
         child_page.slug = "changed-too"
         child_page.save
 
-        S::Content.publish(@final_revision, [child_page.id])
+        ::Content.publish(@final_revision, [child_page.id])
 
-        S::Content.with_revision(@final_revision) do
+        ::Content.with_revision(@final_revision) do
           published = Page.first :uid => "1.0.0"
           published.visible?.should be_true
         end
@@ -499,7 +499,7 @@ class ModificationsTest < MiniTest::Spec
         page.things << child_page
         page.save
 
-        S::Content.publish(@final_revision, [page.id, child_page.id])
+        ::Content.publish(@final_revision, [page.id, child_page.id])
 
         child_page.hidden?.should be_false
 
@@ -507,9 +507,9 @@ class ModificationsTest < MiniTest::Spec
 
         child_page.reload.hidden?.should be_true
 
-        S::Content.publish(@final_revision + 1, [page.id])
+        ::Content.publish(@final_revision + 1, [page.id])
 
-        S::Content.with_revision(@final_revision + 1) do
+        ::Content.with_revision(@final_revision + 1) do
           published = Page.first :uid => "newpage"
           published.visible?.should be_false
         end
@@ -524,9 +524,9 @@ class ModificationsTest < MiniTest::Spec
 
         child_page.reload.hidden?.should be_true
 
-        S::Content.publish(@final_revision, [page.id])
+        ::Content.publish(@final_revision, [page.id])
 
-        S::Content.with_revision(@final_revision) do
+        ::Content.with_revision(@final_revision) do
           published = Page.first :uid => "1.0.0"
           published.visible?.should be_false
         end
@@ -536,15 +536,15 @@ class ModificationsTest < MiniTest::Spec
         page = Page.first :uid => "1"
         piece = page.things.first
         piece.hide!
-        S::Content.publish(@final_revision, [page.id])
-        S::Content.with_revision(@final_revision) do
+        ::Content.publish(@final_revision, [page.id])
+        ::Content.with_revision(@final_revision) do
           piece = Page.first(:uid => "1").things.first
           piece.visible?.should be_false
         end
 
-        S::Content.publish(@final_revision+1, [page.id])
+        ::Content.publish(@final_revision+1, [page.id])
 
-        S::Content.with_revision(@final_revision+1) do
+        ::Content.with_revision(@final_revision+1) do
           piece = Page.first(:uid => "1").things.first
           piece.visible?.should be_false
         end
@@ -553,15 +553,15 @@ class ModificationsTest < MiniTest::Spec
       should "maintain correct published visibility for pages xxx" do
         page = Page.first :uid => "1.1.1"
         page.hide!
-        S::Content.publish(@final_revision, [page.id])
-        S::Content.with_revision(@final_revision) do
+        ::Content.publish(@final_revision, [page.id])
+        ::Content.with_revision(@final_revision) do
           page = Page.first(:uid => "1.1.1")
           page.visible?.should be_false
         end
 
-        S::Content.publish(@final_revision+1, [page.id])
+        ::Content.publish(@final_revision+1, [page.id])
 
-        S::Content.with_revision(@final_revision+1) do
+        ::Content.with_revision(@final_revision+1) do
           page = Page.first(:uid => "1.1.1")
           page.visible?.should be_false
         end
@@ -574,11 +574,11 @@ class ModificationsTest < MiniTest::Spec
         page.slug = "changed-again"
         page.hide!
 
-        S::Content.publish(@final_revision, [page.id])
-        S::Content.with_revision(@final_revision) do
+        ::Content.publish(@final_revision, [page.id])
+        ::Content.with_revision(@final_revision) do
           %w(1 1.1.1).each do |uid|
             published_page = Page.first :uid => uid
-            S::Content.with_editable do
+            ::Content.with_editable do
               editable_page = Page.first :uid => uid
               published_page.hidden?.should == editable_page.hidden?
               published_page.slug.should == editable_page.slug
@@ -592,8 +592,8 @@ class ModificationsTest < MiniTest::Spec
         page = Page.first(:uid => "1")
         page.destroy
         page = Page.first(:uid => "root")
-        S::Content.publish(@final_revision, [page.id])
-        S::Content.with_revision(@final_revision) do
+        ::Content.publish(@final_revision, [page.id])
+        ::Content.with_revision(@final_revision) do
           %w(1 1.1.1).each do |uid|
             published_page = Page.first :uid => uid
             published_page.should be_nil
@@ -607,7 +607,7 @@ class ModificationsTest < MiniTest::Spec
         page = Page.first :uid => "1"
         page.slug = "changed"
         page.hide!
-        S::Content.publish(@final_revision, [page.id])
+        ::Content.publish(@final_revision, [page.id])
         page = Page.first :id => page.id
         page.pending_modifications.length.should == 0
       end

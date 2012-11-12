@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Prototypes
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     DEFAULT_PROTOTYPE_NAME = :__default_prototype unless defined?(DEFAULT_PROTOTYPE_NAME)
 

@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Layouts
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def layout(name = nil, options = {}, &block)

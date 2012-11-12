@@ -1,7 +1,7 @@
 module Spontaneous::Plugins
   # Modifications is responsible for tracking changes made to Content items
   module Modifications
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     class SlugModification
       def self.type
@@ -27,7 +27,7 @@ module Spontaneous::Plugins
 
       def dataset
         path_like = :ancestor_path.like("#{owner[:ancestor_path]}.#{owner.id}%")
-        Spontaneous::Content.filter(path_like)
+        owner.content_model.filter(path_like)
       end
 
       def count
@@ -70,14 +70,14 @@ module Spontaneous::Plugins
 
       def apply(revision)
         owner.with_revision(revision) do
-          published = Spontaneous::Content.first :id => owner.id
+          published = owner.content_model.first :id => owner.id
           published.set_visible_with_cascade!(!new_value)
         end
       end
 
       def dataset
         path_like = :visibility_path.like("#{owner[:visibility_path]}.#{owner.id}%")
-        Spontaneous::Page.filter(path_like)
+        owner.content_model::Page.filter(path_like)
       end
     end
 
@@ -116,6 +116,7 @@ module Spontaneous::Plugins
       # This is to correctly map changes to a list of pages to publish. In the case of a page
       # addition the change is owned by the new page.
       self.modified_at = Time.now unless @__ignore_page_modification or changed_columns.empty?
+      @__ignore_page_modification = false
       # marks this object as the modified object appending modifications to the list
       # needed in order to know if changes to the modification list will be saved automatically
       # or if we need an explicit call to #save
@@ -150,7 +151,7 @@ module Spontaneous::Plugins
 
     def create_deletion_modifications
       if @child_page_deletion_count && @child_page_deletion_count > 0
-        count = S::Page.count
+        count = content_model::Page.count
         append_modification DeletionModification.new(self, current_editor, Time.now, count + @child_page_deletion_count, count)
       end
     end

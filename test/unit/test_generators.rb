@@ -62,13 +62,15 @@ class GeneratorsTest < MiniTest::Spec
       end
       assert_file_exists(site_root, 'schema')
       assert_file_exists(site_root, 'schema/page.rb')
-      assert File.read(site_root / 'schema/page.rb') =~ /class Page < Spontaneous::Page/
+      assert File.read(site_root / 'schema/page.rb') =~ /class Page < Content::Page/
       assert_file_exists(site_root, 'schema/piece.rb')
       assert_file_exists(site_root, 'schema/box.rb')
-      assert File.read(site_root / 'schema/piece.rb') =~ /class Piece < Spontaneous::Piece/
+      assert File.read(site_root / 'schema/piece.rb') =~ /class Piece < Content::Piece/
       assert_file_exists(site_root, 'public/js')
       assert_file_exists(site_root, 'public/css')
-      assert_file_exists(site_root, 'lib/tasks/example_com.rake')
+      content_rb =  File.read(site_root / 'lib/content.rb')
+      assert content_rb =~ /class Content < Spontaneous::Model\(:content\)\s+include Spontaneous::Content/
+      assert_file_exists(site_root, 'lib/tasks/site.rake')
       assert_file_exists(site_root, 'lib/site.rb')
       assert File.read(site_root / 'lib/site.rb') =~ /class Site < Spontaneous::Site/
       assert_file_exists(site_root, 'log')
@@ -78,7 +80,6 @@ class GeneratorsTest < MiniTest::Spec
       assert_file_exists(site_root, 'cache/revisions')
       assert_file_exists(site_root, '.gitignore')
       assert File.read(site_root / '.gitignore') =~ /cache\/\*/
-      assert File.read(site_root / 'schema/piece.rb') =~ /class Piece < Spontaneous::Piece/
     end
 
     should "specify the current version of spontaneous as the dependency" do

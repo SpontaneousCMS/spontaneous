@@ -10,7 +10,6 @@ class ContentInheritanceTest < MiniTest::Spec
       @site = setup_site
 
       Content.delete
-      class ::Page < Spontaneous::Page; end
       class ::PageClass1 < ::Page; end
       class ::PageClass11 < ::PageClass1; end
       class ::PageClass111 < ::PageClass1; end
@@ -23,7 +22,6 @@ class ContentInheritanceTest < MiniTest::Spec
       @page2 = PageClass2.create.reload
       @page22 = PageClass22.create.reload
 
-      class ::Piece < Spontaneous::Piece; end
       class ::PieceClass1 < ::Piece; end
       class ::PieceClass11 < PieceClass1; end
       class ::PieceClass111 < PieceClass11; end
@@ -39,7 +37,6 @@ class ContentInheritanceTest < MiniTest::Spec
 
     teardown do
       [
-        :Page, :Piece,
         :PageClass1, :PageClass11, :PageClass111, :PageClass2, :PageClass22,
         :PieceClass1, :PieceClass11, :PieceClass111, :PieceClass2, :PieceClass22
       ].each do |klass|
@@ -48,7 +45,7 @@ class ContentInheritanceTest < MiniTest::Spec
       teardown_site
     end
 
-    should "aaa correctly type subclasses found via Content" do
+    should "correctly type subclasses found via Content" do
       Set.new(Content.all.map { |c| c.class }).should == \
         Set.new([PageClass1, PageClass11, PageClass111, PageClass2, PageClass22,
           PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22])
@@ -59,16 +56,10 @@ class ContentInheritanceTest < MiniTest::Spec
 
     context "Pages" do
 
-      should "type subclasses found via Page" do
-        Set.new(::Page.all.map { |c| c.class }).should == \
+      should "type subclasses found via Content::Page" do
+        Set.new(Content::Page.all.map { |c| c.class }).should == \
           Set.new([PageClass1, PageClass11, PageClass111, PageClass2, PageClass22])
-        Set.new(::Page.all).should == Set.new([@page1, @page11, @page111, @page2, @page22])
-      end
-
-      should "type subclasses found via Spontaneous::Page" do
-        Set.new(Spontaneous::Page.all.map { |c| c.class }).should == \
-          Set.new([PageClass1, PageClass11, PageClass111, PageClass2, PageClass22])
-        Set.new(Spontaneous::Page.all).should == Set.new([@page1, @page11, @page111, @page2, @page22])
+        Set.new(Content::Page.all).should == Set.new([@page1, @page11, @page111, @page2, @page22])
       end
 
       should "only find instances of a single class when searching via that subclass" do
@@ -82,14 +73,9 @@ class ContentInheritanceTest < MiniTest::Spec
 
     context "Pieces" do
       should "type subclasses found via Spontaneous::Piece" do
-        Set.new(Spontaneous::Piece.all.map { |c| c.class }).should == \
+        Set.new(Content::Piece.all.map { |c| c.class }).should == \
           Set.new([PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22])
-        Set.new(Spontaneous::Piece.all).should == Set.new([@piece1, @piece11, @piece111, @piece2, @piece22])
-      end
-      should "type subclasses found via Piece" do
-        Set.new(::Piece.all.map { |c| c.class }).should == \
-          Set.new([PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22])
-        Set.new(::Piece.all).should == Set.new([@piece1, @piece11, @piece111, @piece2, @piece22])
+        Set.new(Content::Piece.all).should == Set.new([@piece1, @piece11, @piece111, @piece2, @piece22])
       end
 
       should "only find instances of a single class when searching via that subclass" do

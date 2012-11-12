@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Media
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     # InstanceMethods
 
@@ -25,16 +25,6 @@ module Spontaneous::Plugins
 
     def padded_revision
       Spontaneous::Site.working_revision.to_s.rjust(4, "0")
-    end
-
-    # TODO: Is this still used? It shouldn't be
-    def make_media_file(src_file, filename = nil)
-      filename ||= File.basename(src_file)
-      filename = Spontaneous::Media.to_filename(filename)
-      media_filepath = media_filepath(filename)
-      FileUtils.mkdir_p(File.dirname(media_filepath))
-      FileUtils.cp(src_file, media_filepath)
-      media_filepath
     end
   end
 end

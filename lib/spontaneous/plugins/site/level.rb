@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Site
   module Level
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def at_depth(level)

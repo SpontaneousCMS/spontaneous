@@ -4,7 +4,7 @@ require 'rack'
 
 module Spontaneous::Plugins::Page
   module SiteTimestamps
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     def after_update
       ::Spontaneous::State.site_modified! if field?(title_field) && fields[title_field].modified?

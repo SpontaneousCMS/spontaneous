@@ -6,7 +6,7 @@ module Spontaneous
     attr_reader :box
 
     def self.excluded_classes
-      [Spontaneous::Box].tap do |classes|
+      [Spontaneous::Box, ::Content::Box].tap do |classes|
         classes.push(::Box) if defined?(::Box)
       end
     end
@@ -74,8 +74,7 @@ module Spontaneous
     end
 
     def anonymous_template
-      Proc.new { '#{ render_content }' }
+      Proc.new { '${ render_content }' }
     end
   end
 end
-

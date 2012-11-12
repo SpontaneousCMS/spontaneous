@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module AllowedTypes
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     class AllowedType
       attr_accessor :allow_subclasses
@@ -102,7 +102,7 @@ module Spontaneous::Plugins
 
       def instance_classes
         schema = Spontaneous::Site.schema
-        names = groups.flat_map { |name| Spontaneous::Site.schema.groups[name] }
+        names = groups.flat_map { |name| schema.groups[name] }
         names.map { |name| resolve_instance_class(name) }.uniq
       end
 

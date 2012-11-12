@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module Boxes
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def box(name, options = {}, &block)

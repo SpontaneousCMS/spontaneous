@@ -10,9 +10,7 @@ module Spontaneous
 
       def call(env)
         response = nil
-        Content.with_identity_map do
-          response = @app.call(env)
-        end
+        response = @app.call(env)
         response
       end
     end

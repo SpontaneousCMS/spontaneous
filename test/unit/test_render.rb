@@ -5,7 +5,6 @@ require File.expand_path('../../test_helper', __FILE__)
 require 'sinatra/base'
 
 class RenderTest < MiniTest::Spec
-  include Spontaneous
 
   def setup
     @site = setup_site
@@ -25,12 +24,11 @@ class RenderTest < MiniTest::Spec
       Content.delete
       @site.paths.add(:templates, template_root)
 
-      class ::Page < Spontaneous::Page
-        field :title
-        box :sections1
-        box :sections2
-      end
-      class ::TemplateClass < Spontaneous::Piece
+      Page.field :title
+      Page.box :sections1
+      Page.box :sections2
+
+      class ::TemplateClass < ::Piece
         field :title do
           def to_epub
             to_html
@@ -103,19 +101,19 @@ class RenderTest < MiniTest::Spec
       a = b = c = nil
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
       renderer = Spontaneous::Output::Template::PreviewRenderer.new
-      a = renderer.render_string(template, S::Content[@section1.id].output(:html), {}).strip
-      b = renderer.render_string(template, S::Content[@section1.id].output(:html), {}).strip
+      a = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
+      b = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.should_not == b
 
       renderer = Spontaneous::Output::Template::PublishRenderer.new
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
-      a = renderer.render_string(template, S::Content[@section1.id].output(:html), {}).strip
-      b = renderer.render_string(template, S::Content[@section1.id].output(:html), {}).strip
+      a = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
+      b = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.should == b
 
       renderer = Spontaneous::Output::Template::PublishRenderer.new
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
-      c = renderer.render_string(template, S::Content[@section1.id].output(:html), {}).strip
+      c = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.should_not == c
     end
 
@@ -170,7 +168,9 @@ class RenderTest < MiniTest::Spec
         @content.bits << child
         @content.bits.last.style = TemplateClass.get_style(:this_template)
         @content.bits.last.hide!
-        @content.render.should == "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
+
+        expected = "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
+        @content.render.should == expected
       end
     end
 
@@ -325,7 +325,7 @@ class RenderTest < MiniTest::Spec
       end
 
       should "persist sub-page style settings" do
-        @parent = Page[@parent.id]
+        @parent = Content[@parent.id]
         @parent.contents.first.style.should == PageClass.default_style
       end
 

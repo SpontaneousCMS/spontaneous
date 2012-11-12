@@ -13,11 +13,7 @@ class PluginsTest < MiniTest::Spec
     @site = setup_site
 
 
-    klass =  Class.new(Spontaneous::Page)
-    klass.box :box1
-    Object.send(:const_set, :Page, klass)
-    klass =  Class.new(Spontaneous::Piece)
-    Object.send(:const_set, :Piece, klass)
+    ::Page.box :box1
     klass =  Class.new(::Page) do
       layout :from_plugin
     end
@@ -35,11 +31,9 @@ class PluginsTest < MiniTest::Spec
   end
 
   def self.shutdown
-    teardown_site
-    Object.send(:remove_const, :Page) rescue nil
-    Object.send(:remove_const, :Piece) rescue nil
     Object.send(:remove_const, :LocalPage) rescue nil
     Object.send(:remove_const, :LocalPiece) rescue nil
+    teardown_site
   end
 
   def app
@@ -49,8 +43,8 @@ class PluginsTest < MiniTest::Spec
   context "Plugins:" do
 
     setup do
-      Site.publishing_method = :immediate
-      State.delete
+      S::Site.publishing_method = :immediate
+      S::State.delete
       Content.delete
       @site = Spontaneous.instance
       page = ::Page.new
@@ -59,7 +53,7 @@ class PluginsTest < MiniTest::Spec
     end
 
     teardown do
-      State.delete
+      S::State.delete
       Content.delete
     end
 
@@ -100,18 +94,17 @@ class PluginsTest < MiniTest::Spec
 
       context "during publishing" do
         setup do
-
           Content.delete_revision(1) rescue nil
 
           Spontaneous.logger.silent! {
-            Site.publish_all
+            S::Site.publish_all
           }
         end
 
         teardown do
           FileUtils.rm_rf(@revision_root) rescue nil
           Content.delete
-          State.delete
+          S::State.delete
           Content.delete_revision(1)
         end
 

@@ -5,7 +5,6 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class TypeHierarchyTest < MiniTest::Spec
 
-
   def setup
     @site = setup_site
   end
@@ -16,17 +15,20 @@ class TypeHierarchyTest < MiniTest::Spec
 
   context "Content" do
     should "have an empty supertype" do
-      S::Content.supertype.should be_nil
-      S::Content.supertype?.should be_false
+      ::Content.supertype.should be_nil
+      ::Content.supertype?.should be_false
     end
   end
   context "Schema classes" do
     setup do
-      class SchemaClass < Spontaneous::Piece
+      class SchemaClass < ::Piece
       end
     end
+    teardown do
+      self.class.send :remove_const, :SchemaClass
+    end
     should "have a reference to their super type" do
-      SchemaClass.supertype.should == Spontaneous::Piece
+      SchemaClass.supertype.should == ::Piece
     end
 
     should "know what file they were defined in" do

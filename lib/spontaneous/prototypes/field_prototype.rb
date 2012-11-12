@@ -25,11 +25,8 @@ module Spontaneous::Prototypes
       "field/#{owner.schema_id}/#{name}"
     end
 
-    # def schema_id
-    #   Spontaneous.schema.schema_id(self)
-    # end
     def schema_id
-      Spontaneous.schema.uids[@_inherited_schema_id] || Spontaneous.schema.schema_id(self)
+      Spontaneous.schema.uids[@_inherited_schema_id] || Spontaneous.schema.to_id(self)
     end
 
     def schema_owner

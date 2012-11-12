@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Site
   module State
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def working_revision

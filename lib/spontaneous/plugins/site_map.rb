@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins
   module SiteMap
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     # InstanceMethods
     def map_children

@@ -3,7 +3,7 @@
 
 module Spontaneous::Plugins::Site
   module Helpers
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def helper(*formats, &block)
