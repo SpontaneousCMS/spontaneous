@@ -42,6 +42,15 @@ module Spontaneous::Model
 
     alias_method :is_page?, :page?
 
+    def parent
+      # Test for the common case where a page's owner is also its parent
+      if (owner_id == parent_id)
+        owner
+      else
+        super
+      end
+    end
+
     def children
       @ordered_children ||= generate_ordered_children(unordered_children)
     end
