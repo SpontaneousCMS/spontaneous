@@ -31,15 +31,15 @@ module Spontaneous::Plugins::Site
       end
 
       def by_id(id)
-        ::Content::Page[id]
+        ::Content[id]
       end
 
       def by_path(path)
-        ::Content::Page.path(path)
+        ::Content.path(path)
       end
 
       def by_uid(uid)
-        ::Content::Page.uid(uid)
+        ::Content.uid(uid)
       end
 
       def method_missing(method, *args)

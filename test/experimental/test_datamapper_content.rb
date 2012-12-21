@@ -111,7 +111,7 @@ class DataMapperContentTest < MiniTest::Spec
         @database.sqls # clear sql log
         P2.root
         @database.sqls.should == [
-          "SELECT * FROM content WHERE ((type_sid IN ('Page', 'P1', 'P2')) AND (path = '/')) LIMIT 1"
+          "SELECT * FROM content WHERE (path = '/') LIMIT 1"
         ]
       end
 

@@ -56,6 +56,7 @@ module Spontaneous
     include Plugins::Permissions
     include Plugins::ContentGroups
     include Plugins::SchemaHierarchy
+    include Plugins::PageSearch
 
     # marker method enabling a simple test for "cms content" vs "everything else"
     def spontaneous_content?

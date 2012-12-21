@@ -10,7 +10,6 @@ module Spontaneous::Model
     include Spontaneous::Plugins::Paths
     include Spontaneous::Plugins::PageTree
     include Spontaneous::Plugins::SiteMap
-    include Spontaneous::Plugins::PageSearch
     include Spontaneous::Plugins::Controllers
     include Spontaneous::Plugins::Page::Request
     include Spontaneous::Plugins::Page::SiteTimestamps
