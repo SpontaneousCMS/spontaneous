@@ -679,7 +679,7 @@ class BackTest < MiniTest::Spec
         Spot::JSON.parse(last_response.body).should == required_response
       end
 
-      should "create pieces with the piece owner set to the logged in user yyy" do
+      should "create pieces with the piece owner set to the logged in user" do
         auth_post "/@spontaneous/add/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => 0
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         @home.reload
@@ -775,7 +775,7 @@ class BackTest < MiniTest::Spec
       teardown do
       end
 
-      should "be able to retrieve a serialised list of all unpublished changes yyyy" do
+      should "be able to retrieve a serialised list of all unpublished changes" do
         auth_get "/@spontaneous/publish/changes"
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
         last_response.content_type.should == "application/json;charset=utf-8"
@@ -1075,10 +1075,8 @@ class BackTest < MiniTest::Spec
         @image1.image.processed_value.should == ""
         dataset = mock()
         ::Content.stubs(:for_update).returns(dataset)
-        dataset.stubs(:first).with(:id => @image1.id.to_s).returns(@image1)
-        dataset.stubs(:first).with(:id => @image1.id).returns(@image1)
-        # S::Content.stubs(:[]).with(@image1.id.to_s).returns(@image1)
-        # S::Content.stubs(:[]).with(@image1.id).returns(@image1)
+        dataset.stubs(:get).with(@image1.id.to_s).returns(@image1)
+        dataset.stubs(:get).with(@image1.id).returns(@image1)
         auth_post "/@spontaneous/shard/replace/#{@image1.id}", "filename" => "rose.jpg",
           "shards" => hashes, "field" => @image1.image.schema_id.to_s
         assert last_response.ok?

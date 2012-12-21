@@ -352,7 +352,7 @@ class BoxesTest < MiniTest::Spec
       styled.one << child1
       styled.two << child2
       styled.save
-      styled = Content.first :id => styled.id
+      styled = Content.get styled.id
 
       styled.one.contents.first.style.name.should == :blank2
       styled.two.contents.first.style.name.should == :blank3

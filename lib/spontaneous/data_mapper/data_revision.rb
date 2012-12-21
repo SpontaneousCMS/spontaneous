@@ -6,6 +6,7 @@ module Spontaneous
         @revision   = revision
         @visibility = visibility
         @table, @schema = table, schema
+        @identity_map = {}
       end
 
       def count(models = nil)
@@ -53,6 +54,8 @@ module Spontaneous
       def get(id)
         dataset.get(id)
       end
+
+      alias_method :[], :get
 
       def insert(*values, &block)
         dataset.insert(*values, &block)
@@ -135,7 +138,7 @@ module Spontaneous
       end
 
       def dataset(models = nil)
-        ds = Dataset.new(raw_dataset(@revision), @schema)
+        ds = Dataset.new(raw_dataset(@revision), @schema, @identity_map)
         return typed_dataset(models, ds) unless models.nil?
         ds
       end

@@ -57,7 +57,15 @@ module Spontaneous::Plugins::Site
       end
 
       def with_published(&block)
-        ::Content.with_revision(published_revision, &block)
+        ::Content.scoped(published_revision, true, &block)
+      end
+
+      def with_editable(&block)
+        ::Content.scoped(nil, false, &block)
+      end
+
+      def with_preview(&block)
+        ::Content.scoped(nil, true, &block)
       end
 
       protected

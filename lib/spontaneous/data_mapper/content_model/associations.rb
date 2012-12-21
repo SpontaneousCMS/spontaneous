@@ -122,7 +122,6 @@ module Spontaneous
           def before_destroy
             model.association_dependencies[:before_delete].each{|m| send(m).delete}
             model.association_dependencies[:before_destroy].each{|m| send(m).destroy}
-            # model.association_dependencies[:before_nullify].each{|p| instance_eval(&p)}
             super
           end
 
@@ -130,25 +129,27 @@ module Spontaneous
 
           def cached_belongs_to_association(name, options)
             clear_association_cache(name) if options[:reload]
-            unless associations_cache.key?(name)
-              associations_cache[name] = load_belongs_to_association(name)
+            ac = associations_cache
+            unless ac.key?(name)
+              ac[name] = load_belongs_to_association(name)
             end
-            associations_cache[name]
+            ac[name]
           end
 
           def load_belongs_to_association(name)
             assoc = model.associations[name]
             id    = send(assoc[:key])
             return nil if id.nil?
-            self.send(assoc[:dataset_method]).first
+            self.send(assoc[:mapper_method])[id]
           end
 
           def cached_has_many_association(name, options)
             clear_association_cache(name) if options[:reload]
-            unless associations_cache.key?(name)
-              associations_cache[name] = load_has_many_association(name)
+            ac = associations_cache
+            unless ac.key?(name)
+              ac[name] = load_has_many_association(name)
             end
-            associations_cache[name]
+            ac[name]
           end
 
           def load_has_many_association(name)

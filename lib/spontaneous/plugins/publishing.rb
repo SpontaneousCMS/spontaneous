@@ -40,13 +40,16 @@ module Spontaneous::Plugins
         mapper.revision(revision, &block)
       end
 
+      def scoped(revision = nil, visible = false, &block)
+        mapper.scoped(revision, visible, &block)
+      end
+
       def with_editable(&block)
         mapper.editable(&block)
       end
 
       def with_published(&block)
-        revision = Spontaneous::Site.published_revision
-        with_revision(revision, &block)
+        scoped(Spontaneous::Site.published_revision, true, &block)
       end
 
       def database
@@ -76,7 +79,7 @@ module Spontaneous::Plugins
               create_revision(revision)
             else
               content = content.map do |c|
-                c.is_a?(content_model) ? c.reload : content_model.first(:id => c)
+                c.is_a?(content_model) ? c.reload : content_model.get(c)
               end.compact
 
               # pages should be published in depth order because its possible to be publishing a child of
@@ -167,6 +170,11 @@ module Spontaneous::Plugins
     def with_revision(revision, &block)
       self.class.with_revision(revision, &block)
     end
+
+    def scope(revision, visible, &block)
+      self.class.scope(revision, visible, &block)
+    end
+
     def with_editable(&block)
       self.class.with_editable(&block)
     end
@@ -186,12 +194,12 @@ module Spontaneous::Plugins
       first_publish = false
 
       with_revision(revision) do
-        published_copy = content_model.first(:id => self.id)
+        published_copy = content_model.get(self.id)
         if published_copy
           if publish and published_copy.entry_store
             pieces_to_delete = published_copy.entry_store - self.entry_store
             pieces_to_delete.each do |entry|
-              if c = content_model.first(:id => entry[0])
+              if c = content_model.get(entry[0])
                 c.destroy(false) rescue ::Sequel::NoExistingObject
               end
             end
@@ -220,7 +228,7 @@ module Spontaneous::Plugins
           # ancestors can have un-published changes to their paths so we can't just directly publish the current path.
           # Instead we re-calculate our path using the published version of the ancestor's path & our (potentially) updated slug.
           if self.page?
-            published = self.class.first :id => self.id
+            published = self.class.get(self.id)
             published_values[:path] = published.calculate_path_with_slug(attributes[:slug])
           end
 
@@ -249,7 +257,7 @@ module Spontaneous::Plugins
     def sync_children_to_revision(revision)
       published_children = with_revision(revision) { content_model.filter(:parent_id => self.id) }
       published_children.each do |child_page|
-        deleted = with_editable { content_model.select(:id).first(:id => child_page.id).nil? }
+        deleted = with_editable { content_model.select(:id).get(child_page.id).nil? }
         if deleted
           with_revision(revision) do
             child_page.destroy
@@ -271,7 +279,7 @@ module Spontaneous::Plugins
       }
       entry = parent_entry_store.find(&detect_entry)
       index = parent_entry_store.index(&detect_entry)
-      published_parent = content_model.first :id => parent_id
+      published_parent = content_model.get(parent_id)
 
       store = published_parent.entry_store || []
 

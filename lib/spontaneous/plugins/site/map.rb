@@ -10,7 +10,7 @@ module Spontaneous::Plugins::Site
           if root_id.nil?
             content_model::Page.root
           else
-            content_model.first :id => root_id
+            content_model.get root_id
           end
         return nil unless page
         page.map_entry

@@ -3,8 +3,8 @@ module Spontaneous
     class Dataset
       include Enumerable
 
-      def initialize(dataset, schema)
-        @dataset, @schema = dataset, schema
+      def initialize(dataset, schema, identity_map)
+        @dataset, @schema, @identity_map = dataset, schema, identity_map
       end
 
       def count
@@ -12,7 +12,11 @@ module Spontaneous
       end
 
       def get(id)
-        first(id: id)
+        if (instance = @identity_map[id])
+          instance
+        else
+          first(id: id)
+        end
       end
 
       def first(*args, &block)
@@ -148,14 +152,18 @@ module Spontaneous
 
       def load_instance(attributes)
         return nil if attributes.nil?
-        return attributes if attributes[:type_sid].nil?
-        model = @schema.to_class(attributes[:type_sid])
-        allocate_instance(model, attributes)
+        allocate_instance(attributes)
       end
 
-      def allocate_instance(model, attributes)
-        instance = model.new(attributes, true)
-        instance
+      def allocate_instance(attributes)
+        return attributes if attributes[:type_sid].nil?
+        if (instance = @identity_map[attributes[:id]])
+          instance
+        else
+          model = @schema.to_class(attributes[:type_sid])
+          instance = model.new(attributes, true)
+          @identity_map[instance.id] = instance
+        end
       end
     end
   end

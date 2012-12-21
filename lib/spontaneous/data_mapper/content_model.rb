@@ -81,9 +81,11 @@ module Spontaneous
         mapper.schema
       end
 
-      def [](id)
-        mapper.filter(types, id: id).first
+      def get(id)
+        mapper.get(id)
       end
+
+      alias_method :[], :get
 
       def count
         mapper.count(types)

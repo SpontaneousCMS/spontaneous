@@ -55,9 +55,7 @@ module Spontaneous
 
       def rerender_revision
         logger.info {  "Re-rendering revision #{@revision}"}
-        @content_model.with_revision(@revision) do
-          render_revision
-        end
+        render_revision
       end
 
       protected
@@ -101,7 +99,7 @@ module Spontaneous
         S::Output.renderer = renderer
         update_progress("rendering", 0)
         @pages_rendered = 0
-        @content_model.with_visible do
+        @content_model.scoped(@revision, true) do
           render_pages
           index_pages unless index_stages == 0
         end

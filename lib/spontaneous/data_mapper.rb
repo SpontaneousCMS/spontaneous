@@ -8,29 +8,35 @@ module Spontaneous
 
     def self.Model(table_name, database, schema, &block)
       table  = ::Spontaneous::DataMapper::ContentTable.new(table_name, database)
-      mapper = RevisionMapper.new(table, schema)
+      mapper = ScopedMapper.new(table, schema)
       Spontaneous::DataMapper::ContentModel.generate(mapper, &block)
     end
 
     def self.new(table, schema)
-      RevisionMapper.new(table, schema)
+      ScopedMapper.new(table, schema)
     end
 
-    class RevisionMapper
+    class ScopedMapper
       extend Forwardable
 
       attr_reader :schema
 
       def initialize(table, schema)
         @table, @schema = table, schema
+        name = table.name
+        @keys = {
+          :visible  => :"#{name}_mapper_visibility",
+          :revision => :"#{name}_mapper_revision",
+          :dataset => :"#{name}_mapper_dataset"
+        }
       end
 
-      def_delegators :revision,
+      def_delegators :dataset,
         :filter, :where,
         :filter!, :where!,
         :count, :count!,
         :order,
-        :all, :get, :first,
+        :all, :get, :[], :first,
         :all!, :first!,
         :reload,
         :instance,
@@ -44,41 +50,57 @@ module Spontaneous
       def_delegators :@schema, :subclasses, :inherited
 
       def visible(visible_only = true, &block)
-        if block_given?
-          thread_local_scope(:spontaneous_visibility, visible_only, &block)
-        else
-          data_revision(current_revision, visible_only)
-        end
+        scoped(current_revision, visible_only, &block)
       end
 
       def revision(r = current_revision, &block)
-        if block_given?
-          thread_local_scope(:spontaneous_revision, r.nil? ? nil : r.to_i, &block)
-        else
-          data_revision(r, visible_only?)
-        end
-      end
-
-      def thread_local_scope(key, value)
-        previous_value = Thread.current[key]
-        begin
-          Thread.current[key] = value
-          yield
-        ensure
-          Thread.current[key] = previous_value
-        end
+        scoped(r, visible_only?, &block)
       end
 
       def editable(&block)
         revision(nil, &block)
       end
 
+      def scoped(revision, visible, &block)
+        if cached_dataset? && (current_revision == revision_number(revision)) && (visible == visible_only?)
+          if block_given?
+            yield
+          else
+            dataset
+          end
+        else
+          create_new_scope(revision, visible, &block)
+        end
+      end
+
+      def create_new_scope(revision, visible, &block)
+        if block_given?
+          thread = Thread.current
+          r, v, d  = @keys[:revision], @keys[:visible], @keys[:dataset]
+          prev_r, prev_v, prev_d = thread[r], thread[v], thread[d]
+          begin
+            thread[r] = revision_number(revision)
+            thread[v] = visible
+            thread[d] = scoped_dataset
+            yield
+          ensure
+            thread[r], thread[v], thread[d] = prev_r, prev_v, prev_d
+          end
+        else
+          revision_dataset(revision, visible)
+        end
+      end
+
+      def revision_number(r)
+        r.nil? ? nil : r.to_i
+      end
+
       def current_revision
-        Thread.current[:spontaneous_revision]
+        Thread.current[@keys[:revision]]
       end
 
       def visible_only?
-        Thread.current[:spontaneous_visibility] || false
+        Thread.current[@keys[:visible]] || false
       end
 
       def db
@@ -101,9 +123,21 @@ module Spontaneous
         @schema.uids[id_string]
       end
 
+      def dataset
+        Thread.current[@keys[:dataset]] || scoped_dataset
+      end
+
+      def cached_dataset?
+        !Thread.current[@keys[:dataset]].nil?
+      end
+
       private
 
-      def data_revision(revision, visibility)
+      def scoped_dataset
+        revision_dataset(current_revision, visible_only?)
+      end
+
+      def revision_dataset(revision, visibility)
         DataRevision.new(revision, visibility, @table, @schema)
       end
     end

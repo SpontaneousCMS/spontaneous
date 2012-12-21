@@ -12,7 +12,9 @@ module Spontaneous
       def call(env)
         env[Rack::RENDERER] = @renderer
         response = nil
-        response = @app.call(env)
+        ::Content.scoped(nil, true) do
+          response = @app.call(env)
+        end
         response
       end
     end

@@ -257,7 +257,7 @@ module Spontaneous
         def content_for_request(lock = false)
           content_model.db.transaction {
             dataset = lock ? content_model.for_update : content_model
-            content = dataset.first(:id => params[:id])
+            content = dataset.get(params[:id])
             halt 404 if content.nil?
             content.current_editor = user
             if box_id = content_model.schema.uids[params[:box_id]]

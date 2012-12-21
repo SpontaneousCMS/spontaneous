@@ -51,7 +51,7 @@ class DataMapperTest < MiniTest::Spec
     should "be creatable from any table" do
       table = Spontaneous::DataMapper::ContentTable.new(:content, @database)
       mapper = Spontaneous::DataMapper.new(table, @schema)
-      mapper.must_be_instance_of Spontaneous::DataMapper::RevisionMapper
+      mapper.must_be_instance_of Spontaneous::DataMapper::ScopedMapper
     end
 
     context "instances" do
@@ -548,7 +548,7 @@ class DataMapperTest < MiniTest::Spec
       should "retrieve by primary key using []" do
         instance = MockContent[1]
         @database.sqls.should == [
-          "SELECT * FROM content WHERE ((type_sid IN ('DataMapperTest::MockContent')) AND (id = 1)) LIMIT 1",
+          "SELECT * FROM content WHERE (id = 1) LIMIT 1",
         ]
       end
 
@@ -1128,23 +1128,23 @@ class DataMapperTest < MiniTest::Spec
       should "load the owner" do
         @database.fetch = { id: 7, type_sid:"DataMapperTest::AssocContent", parent_id: nil }
         parent = @child.parent
-        @database.sqls.should == ["SELECT * FROM content WHERE (content.id = 7) LIMIT 1"]
+        @database.sqls.should == ["SELECT * FROM content WHERE (id = 7) LIMIT 1"]
         parent.must_be_instance_of AssocContent
         parent.id.should == 7
       end
 
       should "cache the result" do
         parent = @child.parent
-        @database.sqls.should == ["SELECT * FROM content WHERE (content.id = 7) LIMIT 1"]
+        @database.sqls.should == ["SELECT * FROM content WHERE (id = 7) LIMIT 1"]
         parent = @child.parent
         @database.sqls.should == [ ]
       end
 
       should "reload the result if asked" do
         parent = @child.parent
-        @database.sqls.should == ["SELECT * FROM content WHERE (content.id = 7) LIMIT 1"]
+        @database.sqls.should == ["SELECT * FROM content WHERE (id = 7) LIMIT 1"]
         parent = @child.parent(reload: true)
-        @database.sqls.should == ["SELECT * FROM content WHERE (content.id = 7) LIMIT 1"]
+        @database.sqls.should == ["SELECT * FROM content WHERE (id = 7) LIMIT 1"]
       end
 
       should "allow access to the relation dataset" do
@@ -1175,6 +1175,73 @@ class DataMapperTest < MiniTest::Spec
         @database.sqls.should == [
           "SELECT * FROM content WHERE (content.parent_id = 7)"
         ]
+      end
+    end
+
+    context "performance" do
+      should "use a cached version within revision blocks" do
+        @mapper.revision(20) do
+          assert @mapper.dataset.equal?(@mapper.dataset), "Dataset should be the same object"
+        end
+      end
+
+      should "use an identity map within revision scopes" do
+        @database.fetch = [
+          { id: 7, type_sid:"DataMapperTest::MockContent", parent_id: 7 }
+        ]
+        @mapper.editable do
+          a = @mapper.first! :id => 7
+          b = @mapper.first! :id => 7
+          assert a.object_id == b.object_id, "a and b should be the same object"
+        end
+      end
+
+      should "use an object cache for #get calls" do
+        @database.fetch = [
+          [{ id: 8, type_sid:"DataMapperTest::MockContent", parent_id: 7 }],
+          [{ id: 9, type_sid:"DataMapperTest::MockContent", parent_id: 7 }]
+        ]
+        @mapper.revision(20) do
+          a = @mapper.get(8)
+          b = @mapper.get(9)
+          @database.sqls
+          a = @mapper.get(8)
+          b = @mapper.get(9)
+          @database.sqls.should == []
+        end
+      end
+
+      should "not create new scope if revisions are the same" do
+        a = b = nil
+        @mapper.revision(20) do
+          a = @mapper.dataset
+          @mapper.revision(20) do
+            b = @mapper.dataset
+          end
+        end
+        assert a.object_id == b.object_id, "Mappers should be same object"
+      end
+
+      should "not create new scope if visibility are the same" do
+        a = b = nil
+        @mapper.scoped(20, true) do
+          a = @mapper.dataset
+          @mapper.visible do
+            b = @mapper.dataset
+          end
+        end
+        assert a.object_id == b.object_id, "Mappers should be same object"
+      end
+
+      should "not create new scope if parameters are the same" do
+        a = b = nil
+        @mapper.scoped(20, true) do
+          a = @mapper.dataset
+          @mapper.scoped(20, true) do
+            b = @mapper.dataset
+          end
+        end
+        assert a.object_id == b.object_id, "Mappers should be same object"
       end
     end
   end
