@@ -179,23 +179,25 @@ class AuthenticationTest < MiniTest::Spec
       Permissions::UserLevel.reset!
       Permissions::UserLevel.stubs(:level_file).returns(File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml')
 
-      @root = SitePage.create
-      @root.save
+      ::Content.scoped do
+        @root = SitePage.create
+        @root.save
 
-      @about = SitePage.create(:uid => 'about', :slug => "about")
-      @root.pages << @about
-      piece = C.new
-      @root.boxes[:root_level] << piece
-      piece = C.new
-      @root.boxes[:root_level] << piece
-      @root.save
+        @about = SitePage.create(:uid => 'about', :slug => "about")
+        @root.pages << @about
+        piece = C.new
+        @root.boxes[:root_level] << piece
+        piece = C.new
+        @root.boxes[:root_level] << piece
+        @root.save
 
-      @root_user = create_user('root', Permissions::UserLevel.root)
-      @admin_user = create_user('admin', Permissions::UserLevel.admin)
-      @editor_user = create_user('editor', Permissions::UserLevel.editor)
-      @guest_user = create_user('guest', Permissions::UserLevel.none)
-      @disabled_user = create_user('disabled', Permissions::UserLevel.admin)
-      @disabled_user.update(:disabled => true)
+        @root_user = create_user('root', Permissions::UserLevel.root)
+        @admin_user = create_user('admin', Permissions::UserLevel.admin)
+        @editor_user = create_user('editor', Permissions::UserLevel.editor)
+        @guest_user = create_user('guest', Permissions::UserLevel.none)
+        @disabled_user = create_user('disabled', Permissions::UserLevel.admin)
+        @disabled_user.update(:disabled => true)
+      end
     end
 
     teardown do

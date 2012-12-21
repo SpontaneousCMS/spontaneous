@@ -8,6 +8,7 @@ class RenderTest < MiniTest::Spec
 
   def setup
     @site = setup_site
+    Content.delete
   end
 
   def teardown
@@ -21,7 +22,6 @@ class RenderTest < MiniTest::Spec
 
   context "Publish rendering step" do
     setup do
-      Content.delete
       @site.paths.add(:templates, template_root)
 
       Page.field :title

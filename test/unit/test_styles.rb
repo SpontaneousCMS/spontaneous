@@ -20,6 +20,7 @@ class StylesTest < MiniTest::Spec
   context "styles for" do
 
     setup do
+      ::Content.delete
 
       ::Page.box :box1
 
@@ -31,6 +32,7 @@ class StylesTest < MiniTest::Spec
     end
 
     teardown do
+      ::Content.delete
       Object.send(:remove_const, :MissingClass) rescue nil
       Object.send(:remove_const, :TemplateClass) rescue nil
       Object.send(:remove_const, :TemplateSubClass1) rescue nil

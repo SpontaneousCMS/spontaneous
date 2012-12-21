@@ -26,6 +26,7 @@ class FrontTest < MiniTest::Spec
   def setup
     @site = setup_site(self.class.site_root)
     Site.publishing_method = :immediate
+    ::Content.delete
   end
 
   def teardown
@@ -74,7 +75,6 @@ class FrontTest < MiniTest::Spec
 
       S::Site.publishing_method = :immediate
       S::State.delete
-      Content.delete
 
       class ::SitePage < ::Page
         layout :default
@@ -98,17 +98,19 @@ class FrontTest < MiniTest::Spec
       # @site.stubs(:template_root).returns(File.expand_path("../../fixtures/public/templates", __FILE__))
       # self.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
 
-      @root = ::SitePage.create
-      @about = ::SitePage.create(:slug => "about", :uid => "about")
-      @sub = ::SubPage.create(:slug => "now", :uid => "now")
-      @news = ::SitePage.create(:slug => "news", :uid => "news")
-      @dynamic = ::SitePage.create(:slug => "dynamic", :uid => "dynamic")
-      @dynamic.layout = :dynamic
-      @root.pages << @about
-      @root.pages << @news
-      @root.pages << @dynamic
-      @about.pages << @sub
-      @root.save
+      ::Content.scoped do
+        @root = ::SitePage.create
+        @about = ::SitePage.create(:slug => "about", :uid => "about")
+        @sub = ::SubPage.create(:slug => "now", :uid => "now")
+        @news = ::SitePage.create(:slug => "news", :uid => "news")
+        @dynamic = ::SitePage.create(:slug => "dynamic", :uid => "dynamic")
+        @dynamic.layout = :dynamic
+        @root.pages << @about
+        @root.pages << @news
+        @root.pages << @dynamic
+        @about.pages << @sub
+        @root.save
+      end
 
       Content.delete_revision(1) rescue nil
 
@@ -492,9 +494,9 @@ class FrontTest < MiniTest::Spec
           end
         end
 
-        Content::Page.stubs(:path).with("/").returns(root)
-        Content::Page.stubs(:path).with("/about").returns(about)
-        Content::Page.stubs(:path).with("/about/now").returns(subpage)
+        Content.stubs(:path).with("/").returns(root)
+        Content.stubs(:path).with("/about").returns(about)
+        Content.stubs(:path).with("/about/now").returns(subpage)
       end
 
       teardown do
