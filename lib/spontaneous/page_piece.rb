@@ -4,7 +4,7 @@ require 'delegate'
 
 module Spontaneous
   class PagePiece < DelegateClass(Page)
-    include Plugins::Render
+    include Spontaneous::Model::Core::Render
 
     attr_accessor :owner
     attr_reader   :style_id

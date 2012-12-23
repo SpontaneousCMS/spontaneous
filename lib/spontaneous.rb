@@ -39,13 +39,10 @@ module Spontaneous
     instance.reload!
   end
 
-  autoload :Content,          "spontaneous/content"
   autoload :Config,           "spontaneous/config"
   autoload :DataMapper,       "spontaneous/data_mapper"
   autoload :Paths,            "spontaneous/paths"
   autoload :Facet,            "spontaneous/facet"
-  # autoload :Page,             "spontaneous/page"
-  # autoload :Piece,            "spontaneous/piece"
   autoload :Box,              "spontaneous/box"
   autoload :FieldTypes,       "spontaneous/field_types"
   autoload :FieldVersion,     "spontaneous/field_version"
@@ -67,7 +64,6 @@ module Spontaneous
   autoload :Server,           "spontaneous/server"
   autoload :Permissions,      "spontaneous/permissions"
   autoload :ContentQuery,     "spontaneous/content_query"
-  autoload :PageController,   "spontaneous/page_controller"
   autoload :Application,      "spontaneous/application"
   autoload :Search,           "spontaneous/search"
   autoload :Storage,          "spontaneous/storage"
@@ -92,62 +88,6 @@ module Spontaneous
   end
 
   module Plugins
-    autoload :Supertype,        "spontaneous/plugins/supertype"
-    autoload :Boxes,            "spontaneous/plugins/boxes"
-    autoload :Fields,           "spontaneous/plugins/fields"
-    autoload :Entries,          "spontaneous/plugins/entries"
-    autoload :Entry,            "spontaneous/plugins/entry"
-    autoload :Styles,           "spontaneous/plugins/styles"
-    autoload :Layouts,          "spontaneous/plugins/layouts"
-    autoload :SchemaTitle,      "spontaneous/plugins/schema_title"
-    autoload :SchemaId,         "spontaneous/plugins/schema_id"
-    autoload :Render,           "spontaneous/plugins/render"
-    autoload :SchemaHierarchy,  "spontaneous/plugins/schema_hierarchy"
-    autoload :InstanceCode,     "spontaneous/plugins/instance_code"
-    autoload :Paths,            "spontaneous/plugins/paths"
-    autoload :PageTree,         "spontaneous/plugins/page_tree"
-    autoload :AllowedTypes,     "spontaneous/plugins/allowed_types"
-    autoload :Serialisation,    "spontaneous/plugins/serialisation"
-    autoload :SiteMap,          "spontaneous/plugins/site_map"
-    autoload :PageSearch,       "spontaneous/plugins/page_search"
-    autoload :Media,            "spontaneous/plugins/media"
-    autoload :Publishing,       "spontaneous/plugins/publishing"
-    autoload :Aliases,          "spontaneous/plugins/aliases"
-    autoload :Visibility,       "spontaneous/plugins/visibility"
-    autoload :Prototypes,       "spontaneous/plugins/prototypes"
-    autoload :Permissions,      "spontaneous/plugins/permissions"
-    autoload :Controllers,      "spontaneous/plugins/controllers"
-    autoload :Modifications,    "spontaneous/plugins/modifications"
-    autoload :ContentGroups,    "spontaneous/plugins/content_groups"
-
-    module Field
-      autoload :EditorClass,    "spontaneous/plugins/field/editor_class"
-    end
-
-    module Page
-      autoload :Formats,        "spontaneous/plugins/page/formats"
-      autoload :Request,        "spontaneous/plugins/page/request"
-      autoload :SiteTimestamps, "spontaneous/plugins/page/site_timestamps"
-    end
-
-    module Site
-      autoload :Publishing,     "spontaneous/plugins/site/publishing"
-      autoload :State,          "spontaneous/plugins/site/state"
-      autoload :Selectors,      "spontaneous/plugins/site/selectors"
-      autoload :Map,            "spontaneous/plugins/site/map"
-      autoload :Paths,          "spontaneous/plugins/site/paths"
-      autoload :Instance,       "spontaneous/plugins/site/instance"
-      autoload :Search,         "spontaneous/plugins/site/search"
-      autoload :Features,       "spontaneous/plugins/site/features"
-      autoload :Schema,         "spontaneous/plugins/site/schema"
-      autoload :Level,          "spontaneous/plugins/site/level"
-      autoload :Storage,        "spontaneous/plugins/site/storage"
-      autoload :Timestamps,     "spontaneous/plugins/site/timestamps"
-      autoload :URL,            "spontaneous/plugins/site/url"
-      autoload :Hooks,          "spontaneous/plugins/site/hooks"
-      autoload :Helpers,        "spontaneous/plugins/site/helpers"
-    end
-
     module Application
       autoload :State,          "spontaneous/plugins/application/state"
       autoload :Paths,          "spontaneous/plugins/application/paths"

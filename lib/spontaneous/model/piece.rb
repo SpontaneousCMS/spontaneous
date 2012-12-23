@@ -4,7 +4,7 @@ module Spontaneous::Model
   module Piece
     extend Spontaneous::Concern
 
-    include Spontaneous::Plugins::Supertype
+    include Spontaneous::Model::Core::Supertype
 
     # Public: for Pieces #parent is the same as the #owner
     # whereas for pages, parent is the next page up in the

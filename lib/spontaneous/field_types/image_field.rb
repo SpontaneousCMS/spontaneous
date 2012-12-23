@@ -109,7 +109,7 @@ module Spontaneous
     end
 
     class ImageField < Field
-      include Spontaneous::Plugins::Field::EditorClass
+      include Spontaneous::FieldTypes::EditorClass
       include ImageFieldUtilities
 
       def self.accepts

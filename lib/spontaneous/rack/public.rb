@@ -81,7 +81,7 @@ module Spontaneous
       end
 
       DOT = '.'.freeze
-      ACTION = "/#{S::Plugins::Controllers::ACTION_SEPARATOR}".freeze
+      ACTION = "/#{S::Model::Page::Controllers::ACTION_SEPARATOR}".freeze
 
       def show(page, status=200)
         page = Spontaneous::Site[page] if String === page

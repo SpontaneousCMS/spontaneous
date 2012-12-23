@@ -456,7 +456,7 @@ class FrontTest < MiniTest::Spec
 
     context "Model controllers" do
       setup do
-        class ::TestController < Spontaneous::PageController
+        class ::TestController < Spontaneous::Rack::PageController
           get '/' do
             "Magic"
           end
@@ -603,7 +603,7 @@ class FrontTest < MiniTest::Spec
 
       context "overriding base controller class" do
         setup do
-          class ::PageController < S::PageController
+          class ::PageController < S::Rack::PageController
             get '/nothing' do
               'Something'
             end

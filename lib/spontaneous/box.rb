@@ -4,14 +4,14 @@ module Spontaneous
   class Box
     include Enumerable
 
-    include Plugins::SchemaHierarchy
-    include Plugins::Fields
-    include Plugins::Styles
-    include Plugins::Serialisation
-    include Plugins::Render
-    include Plugins::AllowedTypes
-    include Plugins::Permissions
-    include Plugins::Media
+    include Spontaneous::Model::Core::SchemaHierarchy
+    include Spontaneous::Model::Core::Fields
+    include Spontaneous::Model::Core::Styles
+    include Spontaneous::Model::Core::Serialisation
+    include Spontaneous::Model::Core::Render
+    include Spontaneous::Model::Box::AllowedTypes
+    include Spontaneous::Model::Core::Permissions
+    include Spontaneous::Model::Core::Media
 
     # use underscores to protect against field name conflicts
     attr_reader :_name, :_prototype, :owner

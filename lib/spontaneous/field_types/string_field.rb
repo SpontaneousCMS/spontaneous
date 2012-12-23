@@ -3,7 +3,7 @@
 module Spontaneous
   module FieldTypes
     class StringField < Field
-      include Spontaneous::Plugins::Field::EditorClass
+      include Spontaneous::FieldTypes::EditorClass
 
       def preprocess(value)
         Spontaneous::Utils::SmartQuotes.smarten(value.to_s)

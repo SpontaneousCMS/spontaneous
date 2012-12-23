@@ -135,9 +135,7 @@ class MiniTest::Spec
     instance.logger.silent!
     instance.database = DB
     unless Object.const_defined?(:Content)
-      content_class = Class.new(Spontaneous::Model(:content, DB, instance.schema)) do
-        include Spontaneous::Content
-      end
+      content_class = Class.new(Spontaneous::Model(:content, DB, instance.schema))
       Object.const_set :Content, content_class
       if define_models
         Object.const_set :Page, Class.new(::Content::Page)

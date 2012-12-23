@@ -3,7 +3,7 @@
 module Spontaneous
   module FieldTypes
     class DateField < Field
-      include Spontaneous::Plugins::Field::EditorClass
+      include Spontaneous::FieldTypes::EditorClass
 
       DEFAULT_FORMAT = "%A, %-d %B, %Y"
 

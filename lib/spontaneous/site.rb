@@ -1,21 +1,37 @@
 # encoding: UTF-8
 
+
 module Spontaneous
   class Site < Spontaneous::Facet
-    include Plugins::Site::Instance
-    include Plugins::Site::Publishing
-    include Plugins::Site::State
-    include Plugins::Site::Selectors
-    include Plugins::Site::Map
-    include Plugins::Site::Search
-    include Plugins::Site::Features
-    include Plugins::Site::Schema
-    include Plugins::Site::Level
-    include Plugins::Site::Storage
-    include Plugins::Site::URL
-    include Plugins::Site::Hooks
-    include Plugins::Site::Paths
-    include Plugins::Site::Helpers
+    require "spontaneous/site/features"
+    require "spontaneous/site/helpers"
+    require "spontaneous/site/hooks"
+    require "spontaneous/site/instance"
+    require "spontaneous/site/level"
+    require "spontaneous/site/map"
+    require "spontaneous/site/paths"
+    require "spontaneous/site/publishing"
+    require "spontaneous/site/schema"
+    require "spontaneous/site/search"
+    require "spontaneous/site/selectors"
+    require "spontaneous/site/state"
+    require "spontaneous/site/storage"
+    require "spontaneous/site/url"
+
+    include Features
+    include Helpers
+    include Hooks
+    include Instance
+    include Level
+    include Map
+    include Paths
+    include Publishing
+    include Schema
+    include Search
+    include Selectors
+    include State
+    include Storage
+    include URL
 
     attr_accessor :database
     attr_reader :environment, :mode

@@ -1,18 +1,27 @@
 # encoding: UTF-8
 
+require "spontaneous/model/page/controllers"
+require "spontaneous/model/page/formats"
+require "spontaneous/model/page/layouts"
+require "spontaneous/model/page/page_tree"
+require "spontaneous/model/page/paths"
+require "spontaneous/model/page/request"
+require "spontaneous/model/page/site_map"
+require "spontaneous/model/page/site_timestamps"
+
 module Spontaneous::Model
   module Page
     extend Spontaneous::Concern
 
-    include Spontaneous::Plugins::Supertype
-    include Spontaneous::Plugins::Page::Formats
-    include Spontaneous::Plugins::Layouts
-    include Spontaneous::Plugins::Paths
-    include Spontaneous::Plugins::PageTree
-    include Spontaneous::Plugins::SiteMap
-    include Spontaneous::Plugins::Controllers
-    include Spontaneous::Plugins::Page::Request
-    include Spontaneous::Plugins::Page::SiteTimestamps
+    include Spontaneous::Model::Core::Supertype
+    include Controllers
+    include Formats
+    include Layouts
+    include PageTree
+    include Paths
+    include Request
+    include SiteMap
+    include SiteTimestamps
 
     included do
       many_to_one :parent,   :key => :parent_id, :class => self, :reciprocal => :unordered_children

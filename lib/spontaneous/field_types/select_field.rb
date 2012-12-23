@@ -36,7 +36,7 @@ module Spontaneous::FieldTypes
   # ("Value 1" or "Value 2" in the exampel above).
   #
   class SelectField < Field
-    include Spontaneous::Plugins::Field::EditorClass
+    include Spontaneous::FieldTypes::EditorClass
 
     def self.static_option_list?
       return false if configured_option_list.is_a?(Proc)

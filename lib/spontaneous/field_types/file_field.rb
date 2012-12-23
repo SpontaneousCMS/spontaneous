@@ -4,7 +4,7 @@ require 'tempfile'
 
 module Spontaneous::FieldTypes
   class FileField < Field
-    include Spontaneous::Plugins::Field::EditorClass
+    include Spontaneous::FieldTypes::EditorClass
 
     def outputs
       [:html, :filesize, :filename]

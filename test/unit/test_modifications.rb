@@ -219,7 +219,7 @@ class ModificationsTest < MiniTest::Spec
       mods = page.pending_modifications(:slug)
       mods.length.should == 1
       mod = mods.first
-      mod.must_be_instance_of Spontaneous::Plugins::Modifications::SlugModification
+      mod.must_be_instance_of Spontaneous::Model::Core::Modifications::SlugModification
       mod.old_value.should == old_slug
       mod.new_value.should == "changed"
       mod.created_at.to_i.should == @now.to_i + 3600

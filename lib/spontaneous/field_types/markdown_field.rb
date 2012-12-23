@@ -5,7 +5,7 @@ require 'kramdown'
 module Spontaneous
   module FieldTypes
     class MarkdownField < Field
-      include Spontaneous::Plugins::Field::EditorClass
+      include Spontaneous::FieldTypes::EditorClass
 
       def outputs
         [:html]

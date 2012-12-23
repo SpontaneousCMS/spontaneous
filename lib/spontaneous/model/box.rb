@@ -2,6 +2,8 @@
 
 module Spontaneous::Model
   module Box
+    autoload :AllowedTypes,     "spontaneous/model/box/allowed_types"
+
     extend Spontaneous::Concern
 
     module ClassMethods

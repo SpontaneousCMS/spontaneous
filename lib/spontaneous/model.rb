@@ -1,4 +1,19 @@
 module Spontaneous
+  # This is a marker module so that we can test for content models like this:
+  #   obj.is_a?(Spontaneous::Content)
+  module Content; end
+
+  module Model
+    autoload :Core,  "spontaneous/model/core"
+    autoload :Page,  "spontaneous/model/page"
+    autoload :Piece, "spontaneous/model/piece"
+    autoload :Box,   "spontaneous/model/box"
+  end
+
+  def self.models
+    @models ||= {}
+  end
+
   def self.Model(table_name, database = Spontaneous.database, schema = Site.schema)
     define_content_model(table_name, database, schema)
   end
@@ -23,17 +38,7 @@ module Spontaneous
     model
   end
 
-  module Model
-    autoload :Page,  "spontaneous/model/page"
-    autoload :Piece, "spontaneous/model/piece"
-    autoload :Box,   "spontaneous/model/box"
-  end
-
   module ContentModelClassMethods
-    def self.extended(klass)
-      super
-    end
-
     # Can't just use the @@ syntax here because it gets scoped to the
     # enclosing module rather than the generated class...
     def content_model
@@ -44,9 +49,13 @@ module Spontaneous
     # first subclass of the Spontaneous::Content call as that is going to be our
     # ::Content model. In this particular instance I want the behaviour of Ruby's
     # class variables -- I want a single value to be shared across all subclasses
+    # Use this moment to include the core functionality because this is the first
+    # access to the subclass derived from the base model.
     def inherited(subclass)
       unless class_variable_defined?(:@@content_model)
         class_variable_set(:@@content_model, subclass)
+        subclass.send :include, Spontaneous::Model::Core
+        subclass.send :include, Spontaneous::Content
       end
       super
     end
