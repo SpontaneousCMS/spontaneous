@@ -54,13 +54,6 @@ module Spontaneous
       "type//#{self.name}"
     end
 
-    # def self.inherited(subclass)
-    #     # Spontaneous.schema.add_class(self, subclass)# if subclass.schema_class?
-    #     p :inherited
-    #     p self
-    #   super
-    # end
-
     def self.supertype
       if self == Spontaneous::Box
         nil
