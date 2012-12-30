@@ -1243,6 +1243,20 @@ class DataMapperTest < MiniTest::Spec
         end
         assert a.object_id == b.object_id, "Mappers should be same object"
       end
+
+      should "allow for using a custom cache key" do
+        @database.fetch = [
+          { id: 20, type_sid:"DataMapperTest::MockContent", parent_id: 7 }
+        ]
+        a = b = nil
+        @mapper.scoped(20, false) do
+          a = @mapper.with_cache("key") { @mapper.filter(nil, label: "frog").first }
+          b = @mapper.with_cache("key") { @mapper.filter(nil, label: "frog").first }
+        end
+        @database.sqls.should == [
+          "SELECT * FROM __r00020_content WHERE (label = 'frog') LIMIT 1"
+        ]
+      end
     end
   end
 end

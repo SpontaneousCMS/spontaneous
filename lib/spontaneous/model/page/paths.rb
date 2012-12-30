@@ -56,9 +56,7 @@ module Spontaneous::Model::Page
 
     def place_in_page_tree
       if self.parent_id.nil?
-        if content_model::Page.root.nil?
-          make_root
-        end
+        make_root unless content_model.has_root?
       else
         update_path
       end

@@ -45,6 +45,7 @@ module Spontaneous
         :delete, :delete_instance,
         :for_update, :select,
         :columns, :qualify_column, :quote_identifier,
+        :with_cache,
         :logger, :logger=
 
       def_delegators :@schema, :subclasses, :inherited

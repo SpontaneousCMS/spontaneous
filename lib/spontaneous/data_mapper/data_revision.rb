@@ -121,6 +121,14 @@ module Spontaneous
         dataset.each(&block)
       end
 
+      def with_cache(key, &block)
+        if @identity_map.key?(key)
+          @identity_map[key]
+        else
+          @identity_map[key] = block.call
+        end
+      end
+
       def logger
         @table.logger
       end

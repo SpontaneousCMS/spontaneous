@@ -58,6 +58,42 @@ class DataMapperContentTest < MiniTest::Spec
       ::Content::Piece.must_be_instance_of Class
     end
 
+    should "use the mapper's cache for retrieval of the site root" do
+      @database.sqls # clear sql log
+      a = b = nil
+      ::Content.with_editable do
+        a = ::Content.root
+        b = ::Content.root
+      end
+      @database.sqls.should == [
+        "SELECT * FROM content WHERE (path = '/') LIMIT 1"
+      ]
+    end
+
+    should "use the mapper's cache for retrieval of artibary paths" do
+      @database.sqls # clear sql log
+      a = b = nil
+      ::Content.with_editable do
+        a = ::Content.path("/this")
+        b = ::Content.path("/this")
+      end
+      @database.sqls.should == [
+        "SELECT * FROM content WHERE (path = '/this') LIMIT 1"
+      ]
+    end
+
+    should "use the mapper's cache for retrieval via UID" do
+      @database.sqls # clear sql log
+      a = b = nil
+      ::Content.with_editable do
+        a = ::Content.uid("fish")
+        b = ::Content.uid("fish")
+      end
+      @database.sqls.should == [
+        "SELECT * FROM content WHERE (uid = 'fish') LIMIT 1"
+      ]
+    end
+
     context "Pages" do
       setup do
         page_class = Class.new(::Content::Page)
