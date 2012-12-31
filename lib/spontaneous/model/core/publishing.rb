@@ -40,8 +40,8 @@ module Spontaneous::Model::Core
         mapper.revision(revision, &block)
       end
 
-      def scoped(revision = nil, visible = false, &block)
-        mapper.scoped(revision, visible, &block)
+      def scope(revision = nil, visible = false, &block)
+        mapper.scope(revision, visible, &block)
       end
 
       def with_editable(&block)
@@ -49,7 +49,7 @@ module Spontaneous::Model::Core
       end
 
       def with_published(&block)
-        scoped(Spontaneous::Site.published_revision, true, &block)
+        scope(Spontaneous::Site.published_revision, true, &block)
       end
 
       def database

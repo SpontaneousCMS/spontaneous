@@ -1,6 +1,6 @@
 module Spontaneous
   module DataMapper
-    class DataRevision
+    class Scope
 
       def initialize(revision, visibility, table, schema)
         @revision   = revision

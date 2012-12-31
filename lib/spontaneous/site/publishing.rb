@@ -57,15 +57,15 @@ class Spontaneous::Site
       end
 
       def with_published(&block)
-        ::Content.scoped(published_revision, true, &block)
+        ::Content.scope(published_revision, true, &block)
       end
 
       def with_editable(&block)
-        ::Content.scoped(nil, false, &block)
+        ::Content.scope(nil, false, &block)
       end
 
       def with_preview(&block)
-        ::Content.scoped(nil, true, &block)
+        ::Content.scope(nil, true, &block)
       end
 
       protected

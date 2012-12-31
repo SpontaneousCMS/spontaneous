@@ -179,7 +179,7 @@ class AuthenticationTest < MiniTest::Spec
       Permissions::UserLevel.reset!
       Permissions::UserLevel.stubs(:level_file).returns(File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml')
 
-      ::Content.scoped do
+      ::Content.scope do
         @root = SitePage.create
         @root.save
 

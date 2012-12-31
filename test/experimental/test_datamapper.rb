@@ -51,7 +51,7 @@ class DataMapperTest < MiniTest::Spec
     should "be creatable from any table" do
       table = Spontaneous::DataMapper::ContentTable.new(:content, @database)
       mapper = Spontaneous::DataMapper.new(table, @schema)
-      mapper.must_be_instance_of Spontaneous::DataMapper::ScopedMapper
+      mapper.must_be_instance_of Spontaneous::DataMapper::ScopingMapper
     end
 
     context "instances" do
@@ -1224,7 +1224,7 @@ class DataMapperTest < MiniTest::Spec
 
       should "not create new scope if visibility are the same" do
         a = b = nil
-        @mapper.scoped(20, true) do
+        @mapper.scope(20, true) do
           a = @mapper.dataset
           @mapper.visible do
             b = @mapper.dataset
@@ -1235,9 +1235,9 @@ class DataMapperTest < MiniTest::Spec
 
       should "not create new scope if parameters are the same" do
         a = b = nil
-        @mapper.scoped(20, true) do
+        @mapper.scope(20, true) do
           a = @mapper.dataset
-          @mapper.scoped(20, true) do
+          @mapper.scope(20, true) do
             b = @mapper.dataset
           end
         end
@@ -1249,7 +1249,7 @@ class DataMapperTest < MiniTest::Spec
           { id: 20, type_sid:"DataMapperTest::MockContent", parent_id: 7 }
         ]
         a = b = nil
-        @mapper.scoped(20, false) do
+        @mapper.scope(20, false) do
           a = @mapper.with_cache("key") { @mapper.filter(nil, label: "frog").first }
           b = @mapper.with_cache("key") { @mapper.filter(nil, label: "frog").first }
         end

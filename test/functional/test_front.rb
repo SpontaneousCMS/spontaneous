@@ -98,7 +98,7 @@ class FrontTest < MiniTest::Spec
       # @site.stubs(:template_root).returns(File.expand_path("../../fixtures/public/templates", __FILE__))
       # self.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
 
-      ::Content.scoped do
+      ::Content.scope do
         @root = ::SitePage.create
         @about = ::SitePage.create(:slug => "about", :uid => "about")
         @sub = ::SubPage.create(:slug => "now", :uid => "now")

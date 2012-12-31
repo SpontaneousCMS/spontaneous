@@ -99,7 +99,7 @@ module Spontaneous
         S::Output.renderer = renderer
         update_progress("rendering", 0)
         @pages_rendered = 0
-        @content_model.scoped(@revision, true) do
+        @content_model.scope(@revision, true) do
           render_pages
           index_pages unless index_stages == 0
         end
