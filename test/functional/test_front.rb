@@ -410,6 +410,7 @@ class FrontTest < MiniTest::Spec
         setup do
           Spontaneous::Output.cache_templates = true
           @cache_file = "#{Spontaneous.revision_dir(1)}/dynamic/dynamic.html.rb"
+          FileUtils.rm(@cache_file) if File.exist?(@cache_file)
           Spontaneous::Output.write_compiled_scripts = true
         end
 
@@ -417,11 +418,10 @@ class FrontTest < MiniTest::Spec
           Spontaneous::Output.cache_templates = true
         end
 
-        should "use pre-rendered versions of the templates" do
+        should "use pre-rendered versions of the templates xxx" do
           dummy_content = 'cached-version/#{session[\'user_id\']}'
           dummy_template = File.join(@site.revision_root, "current/dynamic/dynamic.html.cut")
           File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
-          # Spontaneous::Render.stubs(:output_path).returns(dummy_template)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           last_response.body.should == "cached-version/42"
         end
@@ -441,12 +441,10 @@ class FrontTest < MiniTest::Spec
           File.utime(Time.now, Time.now + 1, @cache_file)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           last_response.body.should == "@cache_filed-version/peter"
-          FileUtils.rm(@cache_file)
         end
 
         should "not cache templates if caching turned off" do
           Spontaneous::Output.cache_templates = false
-          FileUtils.rm(@cache_file) if File.exists?(@cache_file)
           File.exists?(@cache_file).should be_false
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           File.exists?(@cache_file).should be_false
