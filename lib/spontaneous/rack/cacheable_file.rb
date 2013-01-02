@@ -3,7 +3,7 @@ module Spontaneous::Rack
   class CacheableFile < ::Rack::File
     include HTTP
 
-    TEN_YEARS = 10*365*24*3600
+    TEN_YEARS = 10*365.25*24*3600
     MAX_AGE =  "max-age=#{TEN_YEARS}, public".freeze
 
     def initialize(file_root)
@@ -20,7 +20,7 @@ module Spontaneous::Rack
     def caching_headers(headers)
       headers.merge({
         HTTP_CACHE_CONTROL => MAX_AGE,
-        HTTP_EXPIRES => (Time.now + TEN_YEARS).httpdate
+        HTTP_EXPIRES => (Time.now.advance(:years => 10)).httpdate
       })
     end
   end
