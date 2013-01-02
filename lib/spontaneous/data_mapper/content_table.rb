@@ -1,6 +1,8 @@
 module Spontaneous
   module DataMapper
     class ContentTable
+      REVISION_PADDING = 5
+
       attr_reader :name, :database
 
       def initialize(name, database)
@@ -23,9 +25,7 @@ module Spontaneous
         @database.logger = logger
       end
 
-      def db
-        @database
-      end
+      alias_method :db, :database
 
       def qualify(revision, col)
         Sequel::SQL::QualifiedIdentifier.new(revision_table(revision), col)
@@ -41,11 +41,11 @@ module Spontaneous
       end
 
       def revision_table?(table_name)
-        /^__r\d{5}_content$/ === table_name.to_s
+        /\A__r\d{#{REVISION_PADDING}}_#{@name}\z/ === table_name.to_s
       end
 
       def pad_revision_number(revision_number)
-        revision_number.to_s.rjust(5, "0")
+        revision_number.to_s.rjust(REVISION_PADDING, "0")
       end
     end
   end
