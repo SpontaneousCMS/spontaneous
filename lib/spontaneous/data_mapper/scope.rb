@@ -2,55 +2,61 @@ module Spontaneous
   module DataMapper
     class Scope
 
-      def initialize(revision, visibility, table, schema)
-        @revision   = revision
-        @visibility = visibility
-        @table, @schema = table, schema
-        @identity_map = {}
+      def initialize(revision, visible, table, schema)
+        @revision, @visible  = revision, visible
+        @table, @schema      = table, schema
+        @identity_map        = {}
       end
 
-      def count(models = nil)
-        dataset.filter(type_filter(models)).count
+      def count(types = nil)
+        dataset(types).count
       end
 
+      # A type free version of #count
       def count!
         count(nil)
       end
 
-      def filter(models, *cond, &block)
-        dataset.filter(type_filter(models)).filter(*cond, &block)
+      def filter(types, *cond, &block)
+        dataset(types).filter(*cond, &block)
       end
 
+      # A type free version of #filter
       def filter!(*cond, &block)
         filter(nil, *cond, &block)
       end
 
-      def where(models, *cond, &block)
-        dataset.where(type_filter(models)).where(*cond, &block)
+      def where(types, *cond, &block)
+        dataset(types).where(*cond, &block)
       end
 
+      # A type free version of #where
       def where!(*cond, &block)
         where(nil, *cond, &block)
       end
 
-      def first(models, *args, &block)
-        dataset.filter(type_filter(models)).first(*args, &block)
+      def first(types, *args, &block)
+        dataset(types).first(*args, &block)
       end
 
+      # A type free version of #first
       def first!(*args, &block)
         first(nil, *args, &block)
       end
 
-      def all(*models, &block)
-        instances = typed_dataset(models).all
+      def all(*types, &block)
+        instances = dataset(types).all
         instances.each(&block) if block_given?
         instances
       end
 
+      # A type free version of #all
       def all!(&block)
         all(nil, &block)
       end
 
+      # Get doesn't need typing as it retrieves a single instance by direct
+      # id reference.
       def get(id)
         dataset.get(id)
       end
@@ -65,10 +71,11 @@ module Spontaneous
         model.create(attributes)
       end
 
-      def update(models, columns)
-        typed_dataset(models).update(columns)
+      def update(types, columns)
+        dataset(types).update(columns)
       end
 
+      # A type free version of #update
       def update!(columns)
         update(nil, columns)
       end
@@ -77,8 +84,8 @@ module Spontaneous
         dataset.for_update
       end
 
-      def delete(models)
-        typed_dataset(models).delete
+      def delete(types)
+        dataset(types).delete
       end
 
       def delete_instance(instance)
@@ -97,12 +104,12 @@ module Spontaneous
         dataset.save(instance)
       end
 
-      def order(models, *columns, &block)
-        typed_dataset(models).order(*columns, &block)
+      def order(types, *columns, &block)
+        dataset(types).order(*columns, &block)
       end
 
-      def select(models, *columns, &block)
-        typed_dataset(models).select(*columns, &block)
+      def select(types, *columns, &block)
+        dataset(types).select(*columns, &block)
       end
 
       def schema_uid(id_string)
@@ -142,33 +149,30 @@ module Spontaneous
       end
 
       def visible_only?
-        @visibility || false
+        @visible || false
       end
 
-      def dataset(models = nil)
-        ds = Dataset.new(raw_dataset(@revision), @schema, @identity_map)
-        return typed_dataset(models, ds) unless models.nil?
-        ds
+      def dataset(types = nil)
+        Dataset.new(table_dataset(types), @schema, @identity_map)
       end
 
-      def typed_dataset(models, ds = dataset)
-        ds.filter(type_filter(models))
+      private
+
+      def table_dataset(types)
+        @table.dataset(@revision).filter(conditions(types))
       end
 
-      alias_method :typed, :typed_dataset
-
-      def type_filter(models, existing_filter = {})
-        return existing_filter if models.nil?
-        filter = {}.update(existing_filter)
-        sids = Array(models || []).flatten.map { |model| @schema.to_id(model)}
-        filter[:type_sid] = sids unless sids.empty?
-        filter
+      def conditions(types)
+        cond = type_conditions(types)
+        cond[:hidden] = false if @visible
+        cond
       end
 
-      def raw_dataset(revision_number)
-        @table.dataset(revision_number).tap do |ds|
-          ds.filter!(hidden: !@visibility) if @visibility
-        end
+      def type_conditions(types)
+        return {} if types.nil?
+        types = Array(types)
+        return {} if types.empty?
+        { :type_sid => types.flatten.map { |model| @schema.to_id(model) } }
       end
     end
   end
