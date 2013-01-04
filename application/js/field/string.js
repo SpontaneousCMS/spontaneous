@@ -1,5 +1,5 @@
 // console.log('Loading StringField...')
-Spontaneous.FieldTypes.StringField = (function($, S) {
+Spontaneous.Field.String = (function($, S) {
 	var dom = S.Dom;
 	var StringFieldConflictView = new JS.Class({
 		initialize: function(dialogue, conflict) {

@@ -1,58 +1,57 @@
-# encoding: UTF-8
-
-
 module Spontaneous
-  module FieldTypes
-    class Field
+  module Field
+    class Base
+      module ClassMethods
+        def has_editor
+          define_singleton_method(:editor_class) { ui_class }
+        end
 
-      def self.has_editor
-        define_singleton_method(:editor_class) { ui_class }
-      end
+        def register(*labels)
+          labels = self.labels if labels.empty?
+          # logger.debug("Registering #{self} as #{labels.join(", ")}")
+          Field.register(self, *labels)
+          self
+        end
 
-      def self.register(*labels)
-        labels = self.labels if labels.empty?
-        # logger.debug("Registering #{self} as #{labels.join(", ")}")
-        FieldTypes.register(self, *labels)
-        self
-      end
+        def labels
+          [self.name.demodulize.gsub(/Field$/, '').underscore]
+        end
 
-      def self.labels
-        [self.name.demodulize.gsub(/Field$/, '').underscore]
-      end
-
-      def self.inherited(subclass, real_caller = nil)
-        if self.respond_to?(:editor_class)
-          editor_class = self.editor_class
-          subclass.singleton_class.send(:define_method, :editor_class) do
-            editor_class
+        def inherited(subclass, real_caller = nil)
+          if self.respond_to?(:editor_class)
+            editor_class = self.editor_class
+            subclass.singleton_class.send(:define_method, :editor_class) do
+              editor_class
+            end
           end
         end
-      end
 
-      def self.prototype=(prototype)
-        @prototype = prototype
-      end
+        def prototype=(prototype)
+          @prototype = prototype
+        end
 
-      def self.prototype
-        @prototype
-      end
+        def prototype
+          @prototype
+        end
 
-      def self.accepts
-        %w(text/.+)
-      end
+        def accepts
+          %w(text/.+)
+        end
 
-      def self.accepts?(mime_type)
-        accepts.find do |pattern|
-          Regexp.new(pattern).match(mime_type)
+        def accepts?(mime_type)
+          accepts.find do |pattern|
+            Regexp.new(pattern).match(mime_type)
+          end
+        end
+
+        # Provides the ability for specific field types to customize the schema values
+        # they return to the UI
+        def export(user)
+          {}
         end
       end
 
-
-      # Provides the ability for specific field types to customize the schema values
-      # they return to the UI
-      def self.export(user)
-        {}
-      end
+      extend ClassMethods
 
       attr_accessor :owner, :name, :unprocessed_value, :template_params, :version
       attr_reader   :processed_values
@@ -194,7 +193,7 @@ module Spontaneous
       end
 
       def serialize_db
-        S::FieldTypes.serialize_field(self)
+        S::Field.serialize_field(self)
       end
 
       def update(params={})
@@ -255,7 +254,7 @@ module Spontaneous
       end
 
       def create_version
-        Spontaneous::FieldVersion.create(
+        Spontaneous::Field::FieldVersion.create(
           :content_id => owner.id,
           :field_sid => self.schema_id.to_s,
           :version => version,

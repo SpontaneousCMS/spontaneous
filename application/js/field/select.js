@@ -1,11 +1,11 @@
 
-Spontaneous.FieldTypes.SelectField = (function($, S) {
+Spontaneous.Field.Select = (function($, S) {
 	"use strict";
 
 	var dom = S.Dom
 	, ajax = S.Ajax;
 
-	var SelectField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+	var SelectField = new JS.Class(Spontaneous.Field.String, {
 		edit: function() {
 			var self = this
 			, type = this.type

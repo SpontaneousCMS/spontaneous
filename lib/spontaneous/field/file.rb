@@ -2,8 +2,8 @@
 
 require 'tempfile'
 
-module Spontaneous::FieldTypes
-  class FileField < Field
+module Spontaneous::Field
+  class File < Base
     has_editor
 
     def outputs
@@ -17,10 +17,10 @@ module Spontaneous::FieldTypes
         mimetype = image_path[:type]
         filename = image_path[:filename]
         image_path = image_path[:tempfile].path
-      when String
+      when ::String
         filename = ::File.basename(image_path)
       end
-      return image_path unless File.exist?(image_path)
+      return image_path unless ::File.exist?(image_path)
 
       media_file = Spontaneous::Media::File.new(owner, filename, mimetype)
       media_file.copy(image_path)
@@ -49,7 +49,7 @@ module Spontaneous::FieldTypes
     end
 
     def generate_html(input)
-      return input if input.is_a?(String)
+      return input if input.is_a?(::String)
       input.url
     end
 
@@ -62,7 +62,7 @@ module Spontaneous::FieldTypes
     def path
       value(:html)
     end
-  end
 
-  FileField.register
+    self.register
+  end
 end

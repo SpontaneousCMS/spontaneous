@@ -278,7 +278,7 @@ class BoxesTest < MiniTest::Spec
         field :description, :string
       end
       instance = MyContentClass.new
-      assert instance.partners.name.class < Spontaneous::FieldTypes::StringField
+      assert instance.partners.name.class < Spontaneous::Field::String
       instance.partners.name = "Howard"
       instance.partners.description = "Here is Howard"
       instance.save

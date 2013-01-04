@@ -16,7 +16,7 @@ class ImagesTest < MiniTest::Spec
 
   context "Image fields set using absolute values" do
     setup do
-      @image = S::FieldTypes::ImageField.new(:name => "image")
+      @image = S::Field::Image.new(:name => "image")
     end
     should "accept and not alter URL values" do
       url =  "http://example.com/image.png"
@@ -52,7 +52,7 @@ class ImagesTest < MiniTest::Spec
       FileUtils.cp(@src_image.to_s, @origin_image.to_s)
       @origin_image = @origin_image.realpath.to_s
 
-      class ::ResizingImageField < S::FieldTypes::ImageField
+      class ::ResizingImageField < S::Field::Image
         size :preview do
           width 200
           optimize!
@@ -191,7 +191,7 @@ class ImagesTest < MiniTest::Spec
       end
 
       should "serialise attributes" do
-        serialised = S::FieldTypes.deserialize_field(@image.serialize_db)[:processed_values]
+        serialised = S::Field.deserialize_field(@image.serialize_db)[:processed_values]
         [:preview, :thumbnail, :icon, :tall].each do |size|
           serialised.key?(size).should be_true
           serialised[size][:src].should == "/media/00234/0010/rose.#{size}.jpg"
@@ -237,7 +237,7 @@ class ImagesTest < MiniTest::Spec
       end
 
       should "serialise attributes" do
-        serialised = S::FieldTypes.deserialize_field(@image.serialize_db)[:processed_values]
+        serialised = S::Field.deserialize_field(@image.serialize_db)[:processed_values]
         [:preview, :thumbnail, :icon, :tall].each do |size|
           serialised.key?(size).should be_true
           serialised[size][:src].should == "/media/00234/0010/rose.#{size}.jpg"

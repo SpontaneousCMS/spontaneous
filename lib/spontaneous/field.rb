@@ -1,8 +1,9 @@
 # encoding: UTF-8
 
 module Spontaneous
-  module FieldTypes
-    autoload :Field, "spontaneous/field_types/field"
+  module Field
+    autoload :Base,         "spontaneous/field/base"
+    autoload :FieldVersion, "spontaneous/field/field_version"
 
     @@type_map = {}
 
@@ -13,7 +14,7 @@ module Spontaneous
     end
 
     def self.[](label)
-      @@type_map[label.to_sym] || StringField
+      @@type_map[label.to_sym] || String
     end
 
     def self.serialize_field(field)
@@ -33,5 +34,5 @@ module Spontaneous
 end
 
 [:string, :long_string, :file, :image, :date, :markdown, :location, :webvideo, :select].each do |type|
-  require "spontaneous/field_types/#{type}_field"
+  require "spontaneous/field/#{type}"
 end

@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
-module Spontaneous::FieldTypes
-  class LongStringField < Field
+module Spontaneous::Field
+  class LongString < Base
     has_editor
 
     def generate_html(value)

@@ -4,8 +4,7 @@ require 'tempfile'
 require 'mini_magick'
 require 'delegate'
 
-module Spontaneous
-  module FieldTypes
+module Spontaneous::Field
 
     class ImageOptimizer
       def self.run(source_image)
@@ -108,7 +107,7 @@ module Spontaneous
       end
     end
 
-    class ImageField < FileField
+    class Image < File
       has_editor
       include ImageFieldUtilities
 
@@ -188,7 +187,7 @@ module Spontaneous
       end
 
       def generate(output, media_file)
-        return { :src => media_file } if media_file.is_a?(String)#File.exist?(image_path)
+        return { :src => media_file } if media_file.is_a?(::String)#File.exist?(image_path)
         image = ImageProcessor.new(media_file)
         # Create a tempfile here that will be kept open for the duration of the block
         # this is used in #apply to hold a copy of the processed image data rather than
@@ -212,15 +211,15 @@ module Spontaneous
           mimetype = image_path[:type]
           filename = image_path[:filename]
           image_path = image_path[:tempfile].path
-        when String
+        when ::String
           # return image_path unless File.exist?(image_path)
           filename = ::File.basename(image_path)
         end
-        return image_path unless File.exist?(image_path)
+        return image_path unless ::File.exist?(image_path)
         # media_path = owner.make_media_file(image_path, filename)
         media_file = Spontaneous::Media::File.new(owner, filename, mimetype)
         media_file.copy(image_path)
-        set_unprocessed_value(File.expand_path(media_file.filepath))
+        set_unprocessed_value(::File.expand_path(media_file.filepath))
         # media_path
         # image_path
         media_file
@@ -231,6 +230,8 @@ module Spontaneous
           :processed_value => processed_values
         })
       end
+
+      self.register(:image, :photo)
     end
 
 
@@ -314,7 +315,7 @@ module Spontaneous
         end
 
         def composite(other_image_path, output_extension = "jpg", &block)
-          File.open(other_image_path) do |other_image|
+          ::File.open(other_image_path) do |other_image|
             new_image = image.composite(other_image, output_extension, &block)
             image.path = new_image.path
           end
@@ -398,7 +399,7 @@ module Spontaneous
       end
 
       def filesize
-        File.size(path)
+        ::File.size(path)
       end
 
       def width
@@ -455,7 +456,5 @@ module Spontaneous
       end
     end
 
-    ImageField.register(:image, :photo)
 
-  end
 end
