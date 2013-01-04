@@ -79,7 +79,7 @@ class ModificationsTest < MiniTest::Spec
     should "update modification date of path when page visibility is changed" do
       now = @now + 100
       stub_time(now)
-      c = Page.first
+      c = Page.uid("0")
       (c.modified_at.to_i - @now.to_i).abs.should <= 1
       c.toggle_visibility!
       (c.modified_at - now).abs.should <= 1
@@ -532,7 +532,7 @@ class ModificationsTest < MiniTest::Spec
         end
       end
 
-      should "maintain correct published visibility for pieces xxx" do
+      should "maintain correct published visibility for pieces" do
         page = Page.first :uid => "1"
         piece = page.things.first
         piece.hide!
@@ -550,7 +550,7 @@ class ModificationsTest < MiniTest::Spec
         end
       end
 
-      should "maintain correct published visibility for pages xxx" do
+      should "maintain correct published visibility for pages" do
         page = Page.first :uid => "1.1.1"
         page.hide!
         ::Content.publish(@final_revision, [page.id])
