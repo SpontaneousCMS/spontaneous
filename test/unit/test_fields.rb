@@ -6,6 +6,7 @@ class FieldsTest < MiniTest::Spec
 
   def setup
     @site = setup_site
+    @now = Time.now
     Site.publishing_method = :immediate
   end
 
@@ -548,20 +549,23 @@ class FieldsTest < MiniTest::Spec
         @instance.reload
         vv = @instance.title.versions
         v = vv.first
-        v.created_at.should == now
+        v.created_at.to_i.should == now.to_i
       end
 
       should "save the previous value" do
+        stub_time(@now)
         @instance.title.value = "one"
         @instance.save.reload
         vv = @instance.title.versions
         v = vv.first
         v.value.should == ""
+        stub_time(@now+10)
         @instance.title.value = "two"
         @instance.save.reload
         vv = @instance.title.versions
         v = vv.first
         v.value.should == "one"
+        stub_time(@now+20)
         @instance.title.value = "three"
         @instance.save.reload
         vv = @instance.title.versions
@@ -570,11 +574,13 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "keep a track of the version number" do
+        stub_time(@now)
         @instance.title.value = "one"
         @instance.save.reload
         vv = @instance.title.versions
         v = vv.first
         v.version.should == 1
+        stub_time(@now+10)
         @instance.title.value = "two"
         @instance.save.reload
         vv = @instance.title.versions
@@ -593,11 +599,13 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "have quick access to the last version" do
+        stub_time(@now)
         @instance.title.value = "one"
         @instance.save.reload
         vv = @instance.title.versions
         v = vv.first
         v.value.should == ""
+        stub_time(@now+10)
         @instance.title.value = "two"
         @instance.save.reload
         vv = @instance.title.versions

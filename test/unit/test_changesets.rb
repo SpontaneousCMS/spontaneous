@@ -16,6 +16,7 @@ class ChangeTest < MiniTest::Spec
 
   context "Changes" do
     setup do
+      stub_time(@now)
       @revision = 1
 
       Content.delete
@@ -223,18 +224,21 @@ class ChangeTest < MiniTest::Spec
 
       Content.publish(@revision)
 
+      later = @now + 10
+      stub_time(later)
       old_slug = page1.slug
       page1.slug = "changed"
       page1.save
 
       result = S::Change.outstanding
+
       change = result.detect { |change| change.page.id == page1.id }
       change.export[:side_effects].should == {
-        :slug => [{ :count => 1, :created_at => @now.httpdate, :old_value => old_slug, :new_value => "changed"}]
+        :slug => [{ :count => 1, :created_at => later.httpdate, :old_value => old_slug, :new_value => "changed"}]
       }
     end
 
-    should "provide information on side effects of publishing page with visibility changes yyy" do
+    should "provide information on side effects of publishing page with visibility changes" do
       root = Page.create(:title => "root")
 
 
@@ -247,13 +251,15 @@ class ChangeTest < MiniTest::Spec
 
       Content.publish(@revision)
 
+      later = @now + 10
+      stub_time(later)
       page1.hide!
 
       page1.reload
       result = S::Change.outstanding
       change = result.detect { |change| change.page.id == page1.id }
       change.export[:side_effects].should == {
-        :visibility => [{ :count => 1, :created_at => page1.created_at.httpdate, :old_value => false, :new_value => true}]
+        :visibility => [{ :count => 1, :created_at => later.httpdate, :old_value => false, :new_value => true}]
       }
     end
   end
