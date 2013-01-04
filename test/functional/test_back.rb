@@ -1165,6 +1165,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "be able to provide a dynamic value list" do
+        @job1.reload
         list = mock()
         options = [["a", "Value A"], ["b", "Value B"]]
         list.expects(:values).with(@job1).returns(options)
@@ -1176,6 +1177,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "be able to provide a dynamic value list for a box field" do
+        @job1.reload
         list = mock()
         options = [["a", "Value A"], ["b", "Value B"]]
         list.expects(:values).with(@job1.images).returns(options)
