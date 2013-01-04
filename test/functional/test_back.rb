@@ -58,7 +58,7 @@ class BackTest < MiniTest::Spec
       config.stubs(:reload_classes).returns(false)
       config.stubs(:auto_login).returns('root')
       config.stubs(:default_charset).returns('utf-8')
-      config.stubs(:publishing_method).returns(:immediate)
+      config.stubs(:background_mode).returns(:immediate)
       config.stubs(:publishing_delay).returns(nil)
       config.stubs(:services).returns(nil)
       config.stubs(:site_domain).returns('example.org')

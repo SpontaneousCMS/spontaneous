@@ -7,7 +7,7 @@ class FieldsTest < MiniTest::Spec
   def setup
     @site = setup_site
     @now = Time.now
-    Site.publishing_method = :immediate
+    Site.background_mode = :immediate
   end
 
   def teardown

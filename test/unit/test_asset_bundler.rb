@@ -169,7 +169,7 @@ class AssetBundler < MiniTest::Spec
         config.stubs(:reload_classes).returns(false)
         config.stubs(:auto_login).returns('test')
         config.stubs(:default_charset).returns('utf-8')
-        config.stubs(:publishing_method).returns(:immediate)
+        config.stubs(:background_mode).returns(:immediate)
         config.stubs(:services).returns(nil)
         config.stubs(:site_domain).returns('example.org')
         config.stubs(:site_id).returns('example_org')

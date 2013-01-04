@@ -43,7 +43,7 @@ class PluginsTest < MiniTest::Spec
   context "Plugins:" do
 
     setup do
-      S::Site.publishing_method = :immediate
+      S::Site.background_mode = :immediate
       S::State.delete
       Content.delete
       @site = Spontaneous.instance

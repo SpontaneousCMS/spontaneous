@@ -1,5 +1,5 @@
 
-publishing_method :simultaneous
+background_mode :simultaneous
 
 simultaneous_connection ENV["SIMULTANEOUS_SOCKET"]
 spontaneous_binary      ENV["SPONTANEOUS_BINARY"]
