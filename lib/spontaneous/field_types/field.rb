@@ -4,7 +4,10 @@
 module Spontaneous
   module FieldTypes
     class Field
-      extend Plugins
+
+      def self.has_editor
+        define_singleton_method(:editor_class) { ui_class }
+      end
 
       def self.register(*labels)
         labels = self.labels if labels.empty?

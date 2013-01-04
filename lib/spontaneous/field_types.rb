@@ -2,17 +2,6 @@
 
 module Spontaneous
   module FieldTypes
-
-    module EditorClass
-      extend Spontaneous::Concern
-
-      module ClassMethods
-        def editor_class
-          ui_class
-        end
-      end
-    end
-
     autoload :Field, "spontaneous/field_types/field"
 
     @@type_map = {}

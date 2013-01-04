@@ -108,8 +108,8 @@ module Spontaneous
       end
     end
 
-    class ImageField < Field
-      include Spontaneous::FieldTypes::EditorClass
+    class ImageField < FileField
+      has_editor
       include ImageFieldUtilities
 
       def self.accepts
