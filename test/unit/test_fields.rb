@@ -955,6 +955,7 @@ class FieldsTest < MiniTest::Spec
     context "Asynchronous processing" do
       setup do
         S::Site.background_mode = :simultaneous
+        @image = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
         @model = Class.new(::Piece)
         @model.field :title
         @model.field :image
@@ -1038,7 +1039,7 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "immediately update a group of fields passed in parameter format" do
-        Tempfile.open("upload") do |file|
+        File.open(@image, "r") do |file|
           fields = {
             @instance.title.schema_id.to_s => "Updated title",
             @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
@@ -1056,7 +1057,7 @@ class FieldsTest < MiniTest::Spec
           "fields" => [@instance.image.id]
         })
 
-        Tempfile.open("upload") do |file|
+        File.open(@image, "r") do |file|
           fields = {
             @instance.title.schema_id.to_s => "Updated title",
             @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
@@ -1070,9 +1071,11 @@ class FieldsTest < MiniTest::Spec
           @instance.description.value.should == "<p>Updated description</p>\n"
           @instance.image.value.should == ""
           @instance.image.pending_value.should == {
+            :width=>400, :height=>533, :filesize=>54746,
             :type=>"image/gif",
             :tempfile=>"#{@site.root}/cache/media/tmp/00111/something.gif",
-            :filename=>"something.gif"
+            :filename=>"something.gif",
+            :src => "/media/tmp/00111/something.gif"
           }
           @instance.image.process_pending_value
           @instance.image.value.should == "/media/00111/0001/something.gif"
@@ -1084,13 +1087,15 @@ class FieldsTest < MiniTest::Spec
         Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
           "fields" => [@instance.image.id]
         })
-        Tempfile.open("upload") do |file|
+        File.open(@image, "r") do |file|
           Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           @instance.image.value.should == ""
           @instance.image.pending_value.should == {
+            :width=>400, :height=>533, :filesize=>54746,
             :type=>"image/gif",
             :tempfile=>"#{@site.root}/cache/media/tmp/00111/something.gif",
-            :filename=>"something.gif"
+            :filename=>"something.gif",
+            :src => "/media/tmp/00111/something.gif"
           }
           @instance.image.process_pending_value
           @instance.image.value.should == "/media/00111/0001/something.gif"
@@ -1099,7 +1104,7 @@ class FieldsTest < MiniTest::Spec
 
       should "synchronously update box fields" do
         box = @instance.items
-        Tempfile.open("upload") do |file|
+        File.open(@image, "r") do |file|
           fields = {
             box.title.schema_id.to_s => "Updated title",
             box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
@@ -1115,7 +1120,7 @@ class FieldsTest < MiniTest::Spec
         Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
           "fields" => [box.image.id]
         })
-        Tempfile.open("upload") do |file|
+        File.open(@image, "r") do |file|
           fields = {
             box.title.schema_id.to_s => "Updated title",
             box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
@@ -1124,16 +1129,18 @@ class FieldsTest < MiniTest::Spec
           box.title.value.should == "Updated title"
           box.image.value.should == ""
           box.image.pending_value.should == {
+            :width=>400, :height=>533, :filesize=>54746,
             :type=>"image/gif",
             :tempfile=>"#{@site.root}/cache/media/tmp/00111/#{box.schema_id}/something.gif",
-            :filename=>"something.gif"
+            :filename=>"something.gif",
+            :src => "/media/tmp/00111/#{box.schema_id}/something.gif"
           }
         end
       end
 
       should "immediately update asynchronous fields if background mode is :immediate" do
         S::Site.background_mode = :immediate
-        Tempfile.open("upload") do |file|
+        File.open(@image, "r") do |file|
           fields = {
             @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
           }

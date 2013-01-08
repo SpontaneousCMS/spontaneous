@@ -136,7 +136,13 @@ module Spontaneous::Field
       end
 
       def self.size_definitions
-        @size_definitions ||= superclass.respond_to?(:size_definitions) ? superclass.size_definitions.dup : {}
+        @size_definitions ||= superclass.respond_to?(:size_definitions) ? superclass.size_definitions.dup : { :__ui__ => ui_preview_size }
+      end
+
+      def self.ui_preview_size
+        Proc.new {
+          width 300
+        }
       end
 
       def image?
@@ -150,6 +156,12 @@ module Spontaneous::Field
       # value used to show conflicts between the current value and the value they're attempting to enter
       def conflicted_value
         value
+      end
+
+      def serialize_pending_file(file)
+        attrs = ImageProcessor.new(file).serialize
+        attrs.delete(:path)
+        attrs.merge(super)
       end
 
       # original is special and should always be defined
@@ -179,7 +191,7 @@ module Spontaneous::Field
 
       # formats are irrelevant to image/file fields
       def outputs
-        [:original].concat(self.class.size_definitions.map { |name, process| name })
+        [:original, :__ui__].concat(self.class.size_definitions.map { |name, process| name })
       end
 
       def value(format=:html, *args)

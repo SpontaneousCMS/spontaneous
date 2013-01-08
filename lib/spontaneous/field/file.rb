@@ -20,9 +20,13 @@ module Spontaneous::Field
         when String
           { :tempfile => file }
         else
-          { :tempfile => file.path, :type => file.mimetype, :filename => file.filename }
+          serialize_pending_file(file)
         end
       super(pending)
+    end
+
+    def serialize_pending_file(file)
+      { :tempfile => file.path, :type => file.mimetype, :filename => file.filename, :src => file.url }
     end
 
     def preprocess(image)
