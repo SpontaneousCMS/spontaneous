@@ -1062,7 +1062,7 @@ class FieldsTest < MiniTest::Spec
             @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
             @instance.description.schema_id.to_s => "Updated description"
           }
-          @instance.expects(:save)
+          @instance.expects(:save).at_least_once
 
           Spontaneous::Field.update(@instance, fields, nil, true)
 

@@ -23,9 +23,7 @@ module Spontaneous::Field
 
       immediate, asynchronous = partition_fields(asynchronous)
 
-      process = Immediate.new(immediate)
-      process.run
-
+      Immediate.new(immediate).run
 
       launch_asynchronous_update(asynchronous)
     end
@@ -43,12 +41,17 @@ module Spontaneous::Field
       writable_fields
     end
 
+    def owners(fields)
+      fields.map(&:owner).uniq
+    end
+
     def writable_fields
       @fields.reject { |f, v| !f.writable?(@user)}
     end
 
     def launch_asynchronous_update(fields)
       return if fields.empty?
+      owners(fields).each(&:save_fields)
       updater_class = self.class.asynchronous_update_class
       updater_class.new(fields).run
     end
@@ -72,9 +75,7 @@ module Spontaneous::Field
 
     class Simultaneous < Immediate
       def run
-        params = {
-          "fields" => @fields.map { |f| [f.owner.id, f.schema_id.to_s].join("/") }
-        }
+        params = { "fields" => @fields.map { |f| f.id } }
         Spontaneous::Simultaneous.fire(:update_fields, params)
       end
     end
