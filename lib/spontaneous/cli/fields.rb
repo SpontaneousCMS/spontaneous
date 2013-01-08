@@ -10,7 +10,7 @@ module Spontaneous
       def update
         prepare! :update, :console
         fields = Spontaneous::Field.find(*options.fields)
-        Spontaneous::Field::Update::Immediate.new(fields).run
+        Spontaneous::Field::Update::Immediate.process(fields)
       end
     end
   end

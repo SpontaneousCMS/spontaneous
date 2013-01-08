@@ -23,7 +23,7 @@ module Spontaneous::Field
 
       immediate, asynchronous = partition_fields(asynchronous)
 
-      Immediate.new(immediate).run
+      Immediate.process(immediate)
 
       launch_asynchronous_update(asynchronous)
     end
@@ -57,6 +57,10 @@ module Spontaneous::Field
     end
 
     class Immediate
+      def self.process(fields)
+        self.new(fields).run
+      end
+
       def initialize(fields)
         @fields = fields
       end
