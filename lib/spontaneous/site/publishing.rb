@@ -6,7 +6,7 @@ class Spontaneous::Site
 
     module ClassMethods
       def content_model
-        ::Content
+        Spontaneous::Content
       end
 
       def background_mode
@@ -59,15 +59,15 @@ class Spontaneous::Site
       end
 
       def with_published(&block)
-        ::Content.scope(published_revision, true, &block)
+        Spontaneous::Content.scope(published_revision, true, &block)
       end
 
       def with_editable(&block)
-        ::Content.scope(nil, false, &block)
+        Spontaneous::Content.scope(nil, false, &block)
       end
 
       def with_preview(&block)
-        ::Content.scope(nil, true, &block)
+        Spontaneous::Content.scope(nil, true, &block)
       end
 
       protected

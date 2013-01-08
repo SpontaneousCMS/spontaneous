@@ -23,9 +23,7 @@ class DataMapperContentTest < MiniTest::Spec
     @database.columns = @expected_columns
     @schema = Spontaneous::Schema.new(Dir.pwd, NameMap)
     content_super = Spontaneous::Model(:content, @database, @schema)
-    content_class = Class.new(content_super) do
-      include Spontaneous::Content
-    end
+    content_class = Class.new(content_super)
     Object.const_set(:Content, content_class)
   end
 

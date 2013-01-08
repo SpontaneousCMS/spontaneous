@@ -5,15 +5,15 @@ class Spontaneous::Site
     extend Spontaneous::Concern
 
     module ClassMethods
-      def root(content_model = ::Content)
+      def root(content_model = Spontaneous::Content)
         content_model.root
       end
 
-      def pages(content_model = ::Content)
+      def pages(content_model = Spontaneous::Content)
         pages_dataset(content_model).all
       end
 
-      def pages_dataset(content_model = ::Content)
+      def pages_dataset(content_model = Spontaneous::Content)
         content_model::Page.order(:depth)
       end
 
@@ -31,15 +31,15 @@ class Spontaneous::Site
       end
 
       def by_id(id)
-        ::Content[id]
+        Spontaneous::Content[id]
       end
 
       def by_path(path)
-        ::Content.path(path)
+        Spontaneous::Content.path(path)
       end
 
       def by_uid(uid)
-        ::Content.uid(uid)
+        Spontaneous::Content.uid(uid)
       end
 
       def method_missing(method, *args)

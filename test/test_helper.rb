@@ -126,11 +126,7 @@ class MiniTest::Spec
 
   def self.setup_site(root = nil, define_models = true)
     root ||= Dir.mktmpdir
-    unless Object.const_defined?(:Site)
-      site_class = Class.new(Spontaneous::Site)
-      Object.const_set :Site, site_class
-    end
-    instance = ::Site.instantiate(root, :test, :back)
+    instance = Spontaneous::Site.instantiate(root, :test, :back)
     instance.schema_loader_class = Spontaneous::Schema::TransientMap
     instance.logger.silent!
     instance.database = DB
@@ -144,6 +140,7 @@ class MiniTest::Spec
         Object.const_set :Box, Class.new(::Content::Box)
       end
     end
+    Object.const_set :Site,  Spontaneous.site!(::Content)
     instance
   end
 
@@ -154,6 +151,7 @@ class MiniTest::Spec
     %w(Piece Page Box Content Site).each do |klass|
       Object.send :remove_const, klass if Object.const_defined?(klass)
     end
+    Spontaneous.send :remove_const, :Content rescue nil
   end
 
   def self.stub_time(time)

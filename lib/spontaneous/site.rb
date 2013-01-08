@@ -2,6 +2,7 @@
 
 
 module Spontaneous
+
   class Site < Spontaneous::Facet
     require "spontaneous/site/features"
     require "spontaneous/site/helpers"

@@ -20,6 +20,33 @@ module Spontaneous::Plugins::Application
         Thread.current[:spontaneous_loaded] = true
       end
 
+      # This is called after definition of the Content model.
+      #
+      #   Site = Spontaneous.site(Content)
+      #
+      # It is a safe way to define the content model that should be used
+      # globally as it checks for its existance before overwriting.
+      #
+      # I could do the assignment of Spontaneous::Content automatically
+      # after creation of the first content model, but this method provides
+      # a nice way to create the ::Site constant in the user/site code
+      def site(content_model)
+        site!(content_model) unless defined?(Spontaneous::Content)
+        Spontaneous::Site
+      end
+
+      # This forces the assignment of Spontaneous::Content, overwriting any
+      # previous value.
+      #
+      # Used in tests.
+      #
+      def site!(content_model)
+        spot = ::Spontaneous
+        Spontaneous.send :remove_const, :Content if defined?(Spontaneous::Content)
+        Spontaneous.const_set(:Content, content_model)
+        Spontaneous::Site
+      end
+
       def loaded?
         Thread.current[:spontaneous_loaded]
       end
