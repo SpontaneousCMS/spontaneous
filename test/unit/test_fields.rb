@@ -1153,6 +1153,18 @@ class FieldsTest < MiniTest::Spec
         @instance.title.value.should == ""
       end
 
+      should "call Fields::Update::Immediate from the cli" do
+        ::Content.stubs(:get).with('111').returns(@instance)
+        immediate = mock()
+        immediate.expects(:run)
+        Spontaneous::Field::Update::Immediate.expects(:new).with([@instance.image, @instance.items.title]).returns(immediate)
+        # Thor generates a warning about creating a task with no 'desc'
+        silence_logger {
+          Spontaneous::Cli::Fields.any_instance.stubs(:prepare!)
+        }
+        Spontaneous::Cli::Fields.start(["update", "--fields", @instance.image.id, @instance.items.title.id])
+      end
+
       should "generate a conflict list if field has been simultaneously updated"
     end
   end
