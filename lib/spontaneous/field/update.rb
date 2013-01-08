@@ -53,7 +53,7 @@ module Spontaneous::Field
       return if fields.empty?
       owners(fields).each(&:save_fields)
       updater_class = self.class.asynchronous_update_class
-      updater_class.new(fields).run
+      updater_class.process(fields)
     end
 
     class Immediate
