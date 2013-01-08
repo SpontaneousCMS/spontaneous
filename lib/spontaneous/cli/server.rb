@@ -47,7 +47,7 @@ module Spontaneous
       def simultaneous
         prepare! :start
         connection = options[:connection] || ::Spontaneous.config.simultaneous_connection
-        exec({"BUNDLE_GEMFILE" => nil}, "#{Simultaneous.server_binary} -c #{connection} --debug")
+        exec({"BUNDLE_GEMFILE" => nil}, "#{::Simultaneous.server_binary} -c #{connection} --debug")
       end
 
       # A shorter name for the 'simultaneous' task is useful (Foreman appends
