@@ -1,7 +1,7 @@
 // console.log('Loading ImageField...')
 Spontaneous.Field.Image = (function($, S) {
 	var dom = S.Dom;
-	var ImageFieldConflictView = new JS.Class(S.Field.StringField.ConflictView, {
+	var ImageFieldConflictView = new JS.Class(S.Field.String.ConflictView, {
 
 		panel: function() {
 			var labels = dom.div('.image-field-conflict.labels.differences'),
@@ -29,7 +29,7 @@ Spontaneous.Field.Image = (function($, S) {
 		}
 	});
 
-	var ImageField = new JS.Class(Spontaneous.Field.FileField, {
+	var ImageField = new JS.Class(Spontaneous.Field.File, {
 		is_image: function() {
 			return true;
 		},
