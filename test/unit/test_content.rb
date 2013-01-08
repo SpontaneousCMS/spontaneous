@@ -329,7 +329,7 @@ class ContentTest < MiniTest::Spec
       end
 
       should "ensure that child pages have their visibility paths updated" do
-        flunk "Implement this"
+        skip "Implement this"
       end
     end
 
