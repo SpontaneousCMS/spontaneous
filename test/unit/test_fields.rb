@@ -1172,7 +1172,13 @@ class FieldsTest < MiniTest::Spec
         Spontaneous::Cli::Fields.start(["update", "--fields", @instance.image.id, @instance.items.title.id])
       end
 
-      should "generate a conflict list if field has been simultaneously updated"
+      should "revert to immediate updating if connection to simultaneous fails" do
+        File.open(@image, "r") do |file|
+          Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          @instance.image.value.should == "/media/00111/0001/something.gif"
+          @instance.image.pending_value.should be_nil
+        end
+      end
     end
   end
 end

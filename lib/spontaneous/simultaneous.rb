@@ -3,6 +3,8 @@ require 'simultaneous'
 module Spontaneous
   module Simultaneous
 
+    class Error < Spontaneous::Error; end
+
     module ModuleMethods
       def simultaneous_setup
         ::Simultaneous.client_mode  = :async
@@ -23,6 +25,8 @@ module Spontaneous
 
       def fire(task_name, params = {})
         ::Simultaneous.fire(task_name, params)
+      rescue Exception => e
+        raise Error, e
       end
 
       def spot_binary

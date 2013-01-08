@@ -80,7 +80,11 @@ module Spontaneous::Field
     class Simultaneous < Immediate
       def run
         params = { "fields" => @fields.map { |f| f.id } }
-        Spontaneous::Simultaneous.fire(:update_fields, params)
+        begin
+          Spontaneous::Simultaneous.fire(:update_fields, params)
+        rescue Spontaneous::Simultaneous::Error
+          Immediate.process(@fields)
+        end
       end
     end
   end
