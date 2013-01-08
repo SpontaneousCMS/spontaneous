@@ -64,6 +64,10 @@ module Spontaneous
         deserialize(params, default_values)
       end
 
+      def id
+        [owner.id, schema_id].join("/")
+      end
+
       def writable?(user)
         owner.field_writable?(user, name)
       end

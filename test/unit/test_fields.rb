@@ -952,13 +952,17 @@ class FieldsTest < MiniTest::Spec
       end
     end
 
-    context "Asynchronous processing yyy" do
+    context "Asynchronous processing" do
       setup do
         S::Site.background_mode = :simultaneous
         @model = Class.new(::Piece)
         @model.field :title
         @model.field :image
         @model.field :description, :markdown
+        @model.box :items do
+          field :title
+          field :image
+        end
         @instance = @model.new
         @instance.stubs(:id).returns(111)
       end
@@ -972,6 +976,21 @@ class FieldsTest < MiniTest::Spec
       #   S::Site.background_mode = :simultaneous
       #   S::Field::Update.asynchronous_update_class.should == S::Field::Update::Simultaneous
       # end
+
+      should "be able to resolve fields id" do
+        ::Content.stubs(:get).with('111').returns(@instance)
+        S::Field.find(@instance.image.id, @instance.items.title.id).should == [
+          @instance.image, @instance.items.title
+        ]
+      end
+
+      should "not raise errors for invalid fields" do
+        ::Content.stubs(:get).with('111').returns(@instance)
+        ::Content.stubs(:get).with('xxx').returns(nil)
+        S::Field.find("xxx", "#{@instance.id}/xxx/#{@instance.items.title.schema_id}", "#{@instance.items.id}/nnn", @instance.items.title.id).should == [
+          @instance.items.title
+        ]
+      end
 
       should "be disabled for Date fields" do
         f = S::Field::Date.new
@@ -1034,7 +1053,7 @@ class FieldsTest < MiniTest::Spec
 
       should "asynchronously update a group of fields passed in parameter format" do
         Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
-          "fields" => ["#{@instance.id}/#{@instance.image.schema_id}"]
+          "fields" => [@instance.image.id]
         })
 
         Tempfile.open("upload") do |file|
@@ -1063,7 +1082,7 @@ class FieldsTest < MiniTest::Spec
 
       should "asynchronously update a single field value" do
         Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
-          "fields" => ["#{@instance.id}/#{@instance.image.schema_id}"]
+          "fields" => [@instance.image.id]
         })
         Tempfile.open("upload") do |file|
           Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
@@ -1075,6 +1094,40 @@ class FieldsTest < MiniTest::Spec
           }
           @instance.image.process_pending_value
           @instance.image.value.should == "/media/00111/0001/something.gif"
+        end
+      end
+
+      should "synchronously update box fields" do
+        box = @instance.items
+        Tempfile.open("upload") do |file|
+          fields = {
+            box.title.schema_id.to_s => "Updated title",
+            box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+          }
+          Spontaneous::Field.update(box, fields, nil, false)
+          box.title.value.should == "Updated title"
+          box.image.value.should == "/media/00111/#{box.schema_id}/0001/something.gif"
+        end
+      end
+
+      should "asynchronously update box fields" do
+        box = @instance.items
+        Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+          "fields" => [box.image.id]
+        })
+        Tempfile.open("upload") do |file|
+          fields = {
+            box.title.schema_id.to_s => "Updated title",
+            box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+          }
+          Spontaneous::Field.update(box, fields, nil, true)
+          box.title.value.should == "Updated title"
+          box.image.value.should == ""
+          box.image.pending_value.should == {
+            :type=>"image/gif",
+            :tempfile=>"#{@site.root}/cache/media/tmp/00111/#{box.schema_id}/something.gif",
+            :filename=>"something.gif"
+          }
         end
       end
 
