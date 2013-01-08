@@ -11,6 +11,9 @@ module Spontaneous
       end
 
       def register(task_name, task, options = {}, params = {}, env = {})
+        options.update({
+          :pwd => root
+        })
         params.update({
           "site" => root,
           "environment" => Spontaneous.env
