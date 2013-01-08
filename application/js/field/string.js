@@ -106,13 +106,15 @@ Spontaneous.Field.String = (function($, S) {
 			return 'field-'+this.name+'-'+this.id();
 		},
 		form_name: function() {
-			return this.input_name('unprocessed_value');
+			return this.input_name();
 		},
-		version_name: function() {
-			return this.input_name('version');
-		},
-		input_name: function(name) {
-			return 'field['+this.schema_id()+']['+name+']';
+		// version_name: function() {
+		// 	return this.input_name('version');
+		// },
+		input_name: function(param) {
+			var name = 'field['+this.schema_id()+']';
+			if (param) { n += '['+param+']'; }
+			return name;
 		},
 		schema_id: function() {
 			return this.type.schema_id;
