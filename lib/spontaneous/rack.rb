@@ -55,7 +55,6 @@ module Spontaneous
     autoload :CacheableFile,        'spontaneous/rack/cacheable_file'
     autoload :CookieAuthentication, 'spontaneous/rack/cookie_authentication'
     autoload :EventSource,          'spontaneous/rack/event_source'
-    autoload :FiberPool,            'spontaneous/rack/fiber_pool'
     autoload :Front,                'spontaneous/rack/front'
     autoload :HTTP,                 'spontaneous/rack/http'
     autoload :Helpers,              'spontaneous/rack/helpers'
