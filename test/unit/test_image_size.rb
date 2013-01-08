@@ -21,6 +21,10 @@ class ImageSizeTest < MiniTest::Spec
     should "work for GIF" do
       S::ImageSize.read(File.join(@base_dir, "size.gif")).should == @dimensions
     end
+    should "return 0x0 for empty files" do
+      Tempfile.open("imagesize") do |file|
+      S::ImageSize.read(file).should == [0,0]
+      end
+    end
   end
 end
-

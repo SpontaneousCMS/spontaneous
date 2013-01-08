@@ -59,24 +59,71 @@ module Spontaneous
       alias_method :values, :processed_values
 
 
-      def initialize(params={}, from_db=false)
+      def initialize(params={}, default_values=true)
         @processed_values = {}
-        load(params, from_db)
+        deserialize(params, default_values)
       end
 
+      def writable?(user)
+        owner.field_writable?(user, name)
+      end
+
+      # IF a field type needs to do some long running processing on a
+      def asynchronous?
+        false
+      end
+
+      def pending_value=(value)
+        values[:__pending__] = value
+      end
+
+      def pending_value
+        values[:__pending__]
+      end
+
+      def has_pending_value?
+        values.key?(:__pending__)
+      end
+
+      def clear_pending_value
+        values.delete(:__pending__)
+      end
+
+      def process_pending_value
+        process_pending_value!
+        save
+      end
+
+      def process_pending_value!
+        set_value!(pending_value)
+      end
 
       def outputs
         [:html, :plain]
       end
 
-      def unprocessed_value=(v)
+      def process_value(value)
+        @modified = (@initial_value != value)
+        increment_version if @modified
+        self.processed_values = generate_outputs(@unprocessed_value)
+      end
+
+      def set_value(v, process = true)
+        set_value!(v, process)
+        save
+      end
+
+      def set_value!(v, process = true)
         set_unprocessed_value(v)
-        unless @preprocessed
-          @modified = (@initial_value != v)
-          increment_version if @modified
-          self.processed_values = generate_outputs(@unprocessed_value)
-          owner.field_modified!(self) if owner
-        end
+        process_value(v) if process
+      end
+
+      def modified?(v)
+        @modified = (@initial_value != v)
+      end
+
+      def modified!
+        owner.field_modified!(self) if owner
       end
 
       def increment_version
@@ -159,7 +206,13 @@ module Spontaneous
       end
 
       def value=(value)
-        self.unprocessed_value = value
+        self.set_value value, true
+      end
+
+      alias_method :unprocessed_value=, :value=
+
+      def save
+        owner.field_modified!(self) if owner
       end
 
       def mark_unmodified
@@ -194,15 +247,6 @@ module Spontaneous
 
       def serialize_db
         S::Field.serialize_field(self)
-      end
-
-      def update(params={})
-        params.each do |property, value|
-          setter = "#{property}=".to_sym
-          if respond_to?(setter)
-            self.send(setter, value)
-          end
-        end
       end
 
       # def start_inline_edit_marker
@@ -262,16 +306,18 @@ module Spontaneous
           :user => owner.current_editor)
       end
 
+
       protected
 
-      def load(params={}, from_db=false)
-        with_preprocessed_values(from_db) do
-          params.each do |property, value|
-            setter = "#{property}=".to_sym
-            if respond_to?(setter)
-              self.send(setter, value)
-            end
-          end
+      def deserialize(params={}, default_values=true)
+        data = params.dup
+        unprocessed_value = data.delete(:unprocessed_value) || ""
+        processed_values  = data.delete(:processed_values)  || {}
+        @processed_values = processed_values
+        set_value(unprocessed_value, default_values)
+        data.each do |property, value|
+          setter = "#{property}="
+          self.send(setter, value) if respond_to?(setter)
         end
       end
 
@@ -279,14 +325,7 @@ module Spontaneous
         @processed_values = values
       end
 
-      def with_preprocessed_values(state=true)
-        @preprocessed = state
-        yield
-      ensure
-        @preprocessed = nil
-      end
-
-      def set_unprocessed_value(new_value)
+      def set_unprocessed_value(new_value, preprocessed = false)
         # initial_value should only be set once so that it can act as a test for field modification
         @initial_value ||= new_value
         @unprocessed_value = new_value

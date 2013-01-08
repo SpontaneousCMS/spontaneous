@@ -23,6 +23,7 @@ module Spontaneous::Media
     def copy(existing_file)
       @source = existing_file.respond_to?(:path) ? existing_file.path : existing_file
       storage.copy(existing_file, storage_path, mimetype)
+      self
     end
 
     def url
@@ -74,5 +75,9 @@ module Spontaneous::Media
     end
 
     alias_method :filepath, :path
+
+    def serialize
+      { :url => url, :mimetype => mimetype, :path => path, :filename => filename }
+    end
   end
 end

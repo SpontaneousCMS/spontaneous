@@ -48,7 +48,6 @@ class ImagesTest < MiniTest::Spec
 
       @src_image =  Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg")).realpath
       @origin_image = @upload_dir + "rose.jpg"
-      # @origin_image.make_link(@src_image.to_s) unless @origin_image.exist?
       FileUtils.cp(@src_image.to_s, @origin_image.to_s)
       @origin_image = @origin_image.realpath.to_s
 
@@ -115,7 +114,7 @@ class ImagesTest < MiniTest::Spec
       end
     end
 
-    context "with optimization xxx" do
+    context "with optimization" do
       should "run jpegoptim" do
         Spontaneous.expects(:system).with(regexp_matches(/jpegoptim/)).at_least_once
         Spontaneous.expects(:system).with(regexp_matches(/jpegtran/)).at_least_once
@@ -177,7 +176,7 @@ class ImagesTest < MiniTest::Spec
         @image.height.should == 533
       end
 
-      should "have access to the original uploaded file through field.original" do
+      should "have access to the original uploaded file through field.original xxx" do
         @image.src.should == "/media/00234/0010/rose.jpg"
         @image.original.width.should == @image.width
         @image.original.height.should == @image.height

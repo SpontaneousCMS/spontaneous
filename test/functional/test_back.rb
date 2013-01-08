@@ -64,6 +64,8 @@ class BackTest < MiniTest::Spec
       config.stubs(:site_domain).returns('example.org')
       config.stubs(:site_id).returns('example_org')
       config.stubs(:site_id).returns('example_org')
+      config.stubs(:simultaneous_connection).returns('')
+      config.stubs(:spontaneous_binary).returns('')
       @site.stubs(:config).returns(config)
 
       S::Rack::Back::EditingInterface.set :raise_errors, true
@@ -340,7 +342,7 @@ class BackTest < MiniTest::Spec
 
         should "update content field values" do
           params = {
-            "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1"
+            "field[#{@job1.fields.title.schema_id.to_s}]" => "Updated field_name_1"
           }
           auth_post "/@spontaneous/save/#{@job1.id}", params
           assert last_response.ok?
@@ -352,8 +354,8 @@ class BackTest < MiniTest::Spec
 
         should "update page field values" do
           params = {
-            "field[#{@home.fields.title.schema_id.to_s}][value]" => "Updated title",
-            "field[#{@home.fields.introduction.schema_id.to_s}][value]" => "Updated intro"
+            "field[#{@home.fields.title.schema_id.to_s}]" => "Updated title",
+            "field[#{@home.fields.introduction.schema_id.to_s}]" => "Updated intro"
           }
           auth_post "/@spontaneous/save/#{@home.id}", params
           assert last_response.ok?
@@ -368,7 +370,7 @@ class BackTest < MiniTest::Spec
           box = @job1.images
           box.fields.title.to_s.should_not == "Updated title"
           params = {
-            "field[#{box.fields.title.schema_id.to_s}][value]" => "Updated title"
+            "field[#{box.fields.title.schema_id.to_s}]" => "Updated title"
           }
           auth_post "/@spontaneous/savebox/#{@job1.id}/#{box.schema_id.to_s}", params
           assert last_response.ok?
@@ -1087,6 +1089,7 @@ class BackTest < MiniTest::Spec
         Spot::JSON.parse(last_response.body).should == @image1.image.export
         File.exist?(S::Media.to_filepath(src)).should be_true
         S::Media.digest(S::Media.to_filepath(src)).should == @image_digest
+
       end
 
       should "be able to wrap pieces around files using default addable class" do

@@ -4,6 +4,7 @@ module Spontaneous
   module Field
     autoload :Base,         "spontaneous/field/base"
     autoload :FieldVersion, "spontaneous/field/field_version"
+    autoload :Update,       "spontaneous/field/update"
 
     @@type_map = {}
 
@@ -30,6 +31,22 @@ module Spontaneous
       }
     end
 
+    def self.update(content, params, user, asynchronous = false)
+      fields = Hash[params.map { |sid, value| [content.fields.sid(sid), value] }]
+      Update.perform(fields, user, asynchronous)
+    end
+
+    def self.update_asynchronously(content, params, user)
+      update(content, params, user, true)
+    end
+
+    def self.set(field, value, user, asynchronous = false)
+      Update.perform({field => value}, user, asynchronous)
+    end
+
+    def self.set_asynchronously(field, value, user)
+      set(field, value, user, true)
+    end
   end
 end
 

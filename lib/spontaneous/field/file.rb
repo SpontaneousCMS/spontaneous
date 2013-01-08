@@ -6,37 +6,61 @@ module Spontaneous::Field
   class File < Base
     has_editor
 
+    def asynchronous?
+      true
+    end
+
     def outputs
       [:html, :filesize, :filename]
     end
 
-    def preprocess(image_path)
-      filename = mimetype = nil
-      case image_path
-      when Hash
-        mimetype = image_path[:type]
-        filename = image_path[:filename]
-        image_path = image_path[:tempfile].path
-      when ::String
-        filename = ::File.basename(image_path)
-      end
-      return image_path unless ::File.exist?(image_path)
+    def pending_value=(value)
+      file = process_upload(value)
+      pending = case file
+        when String
+          { :tempfile => file }
+        else
+          { :tempfile => file.path, :type => file.mimetype, :filename => file.filename }
+        end
+      super(pending)
+    end
+
+    def preprocess(image)
+      file, filename, mimetype = fileinfo(image)
+      return "" if file.nil?
+      return file unless ::File.exist?(file)
 
       media_file = Spontaneous::Media::File.new(owner, filename, mimetype)
-      media_file.copy(image_path)
-      set_unprocessed_value(filename)
+      media_file.copy(file)
+      set_unprocessed_value(media_file.path)
       media_file
     end
+
+    def process_upload(value)
+      file, filename, mimetype = fileinfo(value)
+      media_file = Spontaneous::Media::TempFile.new(owner, filename, mimetype)
+      media_file.copy(file)
+      media_file
+    end
+
+    def fileinfo(fileinfo)
+      file = filename = mimetype = nil
+      case fileinfo
+      when Hash
+        file, filename, mimetype = fileinfo.values_at(:tempfile, :filename, :type)
+      when ::String
+        filename = ::File.basename(fileinfo)
+        file     = fileinfo
+      end
+      [file, filename, mimetype]
+    end
+
 
     def generate_filesize(input)
       if input.respond_to?(:filesize)
         input.filesize
       else
-        if ::File.exist?(input)
-          ::File.size(input)
-        else
-          0
-        end
+        ::File.exist?(input) ? ::File.size(input) : 0
       end
     end
 

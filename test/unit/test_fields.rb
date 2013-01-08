@@ -951,5 +951,156 @@ class FieldsTest < MiniTest::Spec
         field.value(:plain).should == %(08 Jun 2012, Fri)
       end
     end
+
+    context "Asynchronous processing yyy" do
+      setup do
+        S::Site.background_mode = :simultaneous
+        @model = Class.new(::Piece)
+        @model.field :title
+        @model.field :image
+        @model.field :description, :markdown
+        @instance = @model.new
+        @instance.stubs(:id).returns(111)
+      end
+
+      # should "be disabled if the background mode is set to immediate" do
+      #   S::Site.background_mode = :immediate
+      #   S::Field::Update.asynchronous_update_class.should == S::Field::Update::Immediate
+      # end
+
+      # should "be enabled if the background mode is set to simultaneous" do
+      #   S::Site.background_mode = :simultaneous
+      #   S::Field::Update.asynchronous_update_class.should == S::Field::Update::Simultaneous
+      # end
+
+      should "be disabled for Date fields" do
+        f = S::Field::Date.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for Location fields" do
+        f = S::Field::Location.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for LongString fields" do
+        f = S::Field::LongString.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for Markdown fields" do
+        f = S::Field::Markdown.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for Select fields" do
+        f = S::Field::Select.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for String fields" do
+        f = S::Field::String.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for WebVideo fields" do
+        f = S::Field::WebVideo.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be enabled for File fields" do
+        f = S::Field::File.new
+        f.asynchronous?.should be_true
+      end
+
+      should "be enabled for Image fields" do
+        f = S::Field::Image.new
+        f.asynchronous?.should be_true
+      end
+
+      should "immediately update a group of fields passed in parameter format" do
+        Tempfile.open("upload") do |file|
+          fields = {
+            @instance.title.schema_id.to_s => "Updated title",
+            @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+            @instance.description.schema_id.to_s => "Updated description"
+          }
+          Spontaneous::Field.update(@instance, fields, nil, false)
+          @instance.title.value.should == "Updated title"
+          @instance.description.value.should == "<p>Updated description</p>\n"
+          @instance.image.value.should == "/media/00111/0001/something.gif"
+        end
+      end
+
+      should "asynchronously update a group of fields passed in parameter format" do
+        Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+          "fields" => ["#{@instance.id}/#{@instance.image.schema_id}"]
+        })
+
+        Tempfile.open("upload") do |file|
+          fields = {
+            @instance.title.schema_id.to_s => "Updated title",
+            @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+            @instance.description.schema_id.to_s => "Updated description"
+          }
+          @instance.expects(:save)
+
+          Spontaneous::Field.update(@instance, fields, nil, true)
+
+          @instance.title.value.should == "Updated title"
+          @instance.description.value.should == "<p>Updated description</p>\n"
+          @instance.image.value.should == ""
+          @instance.image.pending_value.should == {
+            :type=>"image/gif",
+            :tempfile=>"#{@site.root}/cache/media/tmp/00111/something.gif",
+            :filename=>"something.gif"
+          }
+          @instance.image.process_pending_value
+          @instance.image.value.should == "/media/00111/0001/something.gif"
+          @instance.image.pending_value.should be_nil
+        end
+      end
+
+      should "asynchronously update a single field value" do
+        Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+          "fields" => ["#{@instance.id}/#{@instance.image.schema_id}"]
+        })
+        Tempfile.open("upload") do |file|
+          Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          @instance.image.value.should == ""
+          @instance.image.pending_value.should == {
+            :type=>"image/gif",
+            :tempfile=>"#{@site.root}/cache/media/tmp/00111/something.gif",
+            :filename=>"something.gif"
+          }
+          @instance.image.process_pending_value
+          @instance.image.value.should == "/media/00111/0001/something.gif"
+        end
+      end
+
+      should "immediately update asynchronous fields if background mode is :immediate" do
+        S::Site.background_mode = :immediate
+        Tempfile.open("upload") do |file|
+          fields = {
+            @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
+          }
+          Spontaneous::Simultaneous.expects(:fire).never
+          Spontaneous::Field.update(@instance, fields, nil, true)
+          @instance.image.value.should == "/media/00111/0001/something.gif"
+        end
+      end
+
+      should "not update a field if user does not have necessary permissions" do
+        user = mock()
+        @instance.title.expects(:writable?).with(user).at_least_once.returns(false)
+        fields = {
+          @instance.title.schema_id.to_s => "Updated title"
+        }
+        Spontaneous::Field.update(@instance, fields, user, true)
+        @instance.title.value.should == ""
+      end
+
+      should "generate a conflict list if field has been simultaneously updated"
+    end
   end
 end

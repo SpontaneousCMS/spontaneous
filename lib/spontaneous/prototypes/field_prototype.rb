@@ -142,7 +142,7 @@ module Spontaneous::Prototypes
       values = { :name => self.name }
       values[:unprocessed_value] = default(instance) if using_default_values
       values.update(database_values || {})
-      self.instance_class.new(values, !using_default_values).tap do |field|
+      self.instance_class.new(values, using_default_values).tap do |field|
         field.prototype = self
       end
     end

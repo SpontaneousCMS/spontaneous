@@ -186,6 +186,11 @@ module Spontaneous::Field
         sizes[:original].src
       end
 
+      def set_value!(value, process = true)
+        @sizes = nil
+        super
+      end
+
       def generate(output, media_file)
         return { :src => media_file } if media_file.is_a?(::String)#File.exist?(image_path)
         image = ImageProcessor.new(media_file)
@@ -204,26 +209,6 @@ module Spontaneous::Field
         result.serialize
       end
 
-      def preprocess(image_path)
-        filename = mimetype = nil
-        case image_path
-        when Hash
-          mimetype = image_path[:type]
-          filename = image_path[:filename]
-          image_path = image_path[:tempfile].path
-        when ::String
-          # return image_path unless File.exist?(image_path)
-          filename = ::File.basename(image_path)
-        end
-        return image_path unless ::File.exist?(image_path)
-        # media_path = owner.make_media_file(image_path, filename)
-        media_file = Spontaneous::Media::File.new(owner, filename, mimetype)
-        media_file.copy(image_path)
-        set_unprocessed_value(::File.expand_path(media_file.filepath))
-        # media_path
-        # image_path
-        media_file
-      end
 
       def export(user = nil)
         super(user).merge({
@@ -447,7 +432,7 @@ module Spontaneous::Field
           :width => width,
           :height => height,
           :filesize => filesize,
-          :path => path
+          :path => @media_file.path
         }
       end
 

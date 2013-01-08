@@ -14,7 +14,7 @@ module Spontaneous
         # Find a way to move this into a more de-centralised place
         # at some point we are going to want to have some configurable, extendable
         # list of event handlers
-        Simultaneous.on_event("publish_progress") { |event|
+        ::Simultaneous.on_event("publish_progress") { |event|
           @messenger.deliver_event(event)
         }
         @messenger
@@ -222,40 +222,46 @@ module Spontaneous
 
 
         def update_fields(model, field_data)
-          conflicts = []
-          if field_data
-            field_data.each do |id, values|
-              field = model.fields.sid(id)
-              if model.field_writable?(user, field.name.to_sym)
-                # version = values.delete("version").to_i
-                # if version == field.version
-                field.update(values)
-                # else
-                #   conflicts << [field, values]
-                # end
-              else
-                unauthorised!
-              end
-            end
-          end
-          if conflicts.empty?
-            if model.save
-              json(model)
-            end
-          else
-            errors = conflicts.map  do |field, new_value|
-              [field.schema_id.to_s, [field.version, field.conflicted_value, new_value["unprocessed_value"]]]
-            end
-            [409, json(Hash[errors])]
-          end
+          return unless field_data
+          Spontaneous::Field.update_asynchronously(model, field_data, user)
+          json(model)
         end
+
+        # def update_fields(model, field_data)
+        #   conflicts = []
+        #   if field_data
+        #     field_data.each do |id, values|
+        #       field = model.fields.sid(id)
+        #       if model.field_writable?(user, field.name.to_sym)
+        #         # version = values.delete("version").to_i
+        #         # if version == field.version
+        #         field.update(values)
+        #         # else
+        #         #   conflicts << [field, values]
+        #         # end
+        #       else
+        #         unauthorised!
+        #       end
+        #     end
+        #   end
+        #   if conflicts.empty?
+        #     if model.save
+        #       json(model)
+        #     end
+        #   else
+        #     errors = conflicts.map  do |field, new_value|
+        #       [field.schema_id.to_s, [field.version, field.conflicted_value, new_value["unprocessed_value"]]]
+        #     end
+        #     [409, json(Hash[errors])]
+        #   end
+        # end
 
         def content_model
           ::Content
         end
 
         def content_for_request(lock = false)
-          content_model.db.transaction {
+          content_model.db.transaction do
             dataset = lock ? content_model.for_update : content_model
             content = dataset.get(params[:id])
             halt 404 if content.nil?
@@ -266,7 +272,7 @@ module Spontaneous
             else
               yield(content)
             end
-          }
+          end
         end
 
         def set_authentication_cookie(key)
@@ -454,8 +460,7 @@ module Spontaneous
             if target.field_writable?(user, field.name)
               # version = params[:version].to_i
               # if version == field.version
-              field.value = file
-              content.save
+              Spontaneous::Field.set_asynchronously(field, file, user)
               json(field.export(user))
               # else
               #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
@@ -478,8 +483,7 @@ module Spontaneous
                 instance = type.new
                 box.insert(position, instance)
                 field = instance.field_for_mime_type(file[:type])
-                field.value = file
-                instance.save
+                Spontaneous::Field.set_asynchronously(field, file, user)
                 content.save
                 json({
                   :position => position,
@@ -668,11 +672,10 @@ module Spontaneous
             # version = params[:version].to_i
             # if version == field.version
             Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-              field.value = {
+              Spontaneous::Field.set_asynchronously(field, {
                 :filename => params[:filename],
                 :tempfile => combined
-              }
-              target.save
+              }, user)
             end
             json(field.export(user))
             # else
@@ -695,11 +698,15 @@ module Spontaneous
                 box.insert(position, instance)
                 field = instance.field_for_mime_type(params[:mime_type])
                 Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-                  field.value = {
+                  Spontaneous::Field.set_asynchronously(field, {
                     :filename => params[:filename],
                     :tempfile => combined
-                  }
+                  }, user)
                   content.save
+                  # field.value = {
+                  #   :filename => params[:filename],
+                  #   :tempfile => combined
+                  # }
                 end
                 json({
                   :position => position,
