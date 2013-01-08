@@ -93,8 +93,10 @@ module Spontaneous
       self.class.schema_id
     end
 
+    # A boxes "identity" must be a combination of its owner's id and
+    # its schema_id.
     def id
-      schema_id.to_s
+      [owner.id, schema_id.to_s].join("/")
     end
 
     def schema_name

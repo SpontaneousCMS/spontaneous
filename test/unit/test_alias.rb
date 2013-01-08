@@ -490,7 +490,7 @@ class AliasTest < MiniTest::Spec
         a.render.should == "alternate\n"
       end
 
-      should "have access to their target's page styles xxxx" do
+      should "have access to their target's page styles" do
         BAlias.layout :b_alias
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases.box1 << a

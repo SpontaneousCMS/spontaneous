@@ -46,7 +46,7 @@ module Spontaneous::Model::Core
               params << Sequel::SQL::BooleanExpression.new(:'=', :page_id, container.id)
             else
               box_params = [
-                [:box_sid, container.id],
+                [:box_sid, container.schema_id],
                 [:owner_id, container.owner.id]
               ]
               params << Sequel::SQL::BooleanExpression.from_value_pairs(box_params, :AND)
