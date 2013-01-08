@@ -8,7 +8,7 @@ module Spontaneous
       def self.front_app
         ::Rack::Builder.app do
           use AroundFront
-          use Reloader if Site.config.reload_classes
+          use Reloader if Spontaneous::Site.config.reload_classes
           run Server.new
         end
       end

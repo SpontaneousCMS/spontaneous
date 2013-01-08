@@ -735,6 +735,7 @@ class BackTest < MiniTest::Spec
     end
     context "UIDs" do
       setup do
+        Spontaneous.stubs(:reload!)
         # editing UIDs is a developer only activity
         @user.update(:level => Spontaneous::Permissions[:root])
         @user.save
@@ -758,12 +759,6 @@ class BackTest < MiniTest::Spec
         assert last_response.status == 403
         @project1.reload.uid.should == orig
       end
-    end
-    context "Request cache" do
-      setup do
-        Spontaneous.stubs(:reload!)
-      end
-
     end
 
     context "Publishing" do

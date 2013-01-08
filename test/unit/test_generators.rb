@@ -70,9 +70,8 @@ class GeneratorsTest < MiniTest::Spec
       assert_file_exists(site_root, 'public/css')
       content_rb =  File.read(site_root / 'lib/content.rb')
       assert content_rb =~ /class Content < Spontaneous::Model\(:content\)/
+      assert content_rb =~ /^Site = Spontaneous\.site\(Content\)/
       assert_file_exists(site_root, 'lib/tasks/site.rake')
-      assert_file_exists(site_root, 'lib/site.rb')
-      assert File.read(site_root / 'lib/site.rb') =~ /class Site < Spontaneous::Site/
       assert_file_exists(site_root, 'log')
       assert_file_exists(site_root, 'tmp')
       assert_file_exists(site_root, 'cache/media')

@@ -15,7 +15,7 @@ module Spontaneous
       def call(env)
         status = headers = body = nil
         env[Rack::RENDERER] = @renderer
-        ::Content.with_published do
+        Spontaneous::Content.with_published do
           status, headers, body = @app.call(env)
         end
         [status, headers.merge(POWERED_BY), body]

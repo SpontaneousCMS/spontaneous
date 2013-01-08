@@ -10,7 +10,7 @@ module Spontaneous
 
       def call(env)
         response = nil
-        ::Content.scope(nil, false) do
+        Spontaneous::Content.scope(nil, false) do
           response = @app.call(env)
         end
         response

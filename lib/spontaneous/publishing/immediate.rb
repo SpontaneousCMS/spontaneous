@@ -12,7 +12,7 @@ module Spontaneous
 
       def initialize(revision, content_model)
         @revision, @content_model = revision, content_model
-        @previous_revision = Site.published_revision
+        @previous_revision = Spontaneous::Site.published_revision
       end
 
       def renderer

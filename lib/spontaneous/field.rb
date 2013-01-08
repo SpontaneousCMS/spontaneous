@@ -55,7 +55,7 @@ module Spontaneous
     def self.resolve_id(id)
       content_id, box_sid, field_sid = id.split("/")
       field_sid, box_sid = box_sid, field_sid if field_sid.nil?
-      content = target = ::Content.get(content_id)
+      content = target = Spontaneous::Content.get(content_id)
       return nil if target.nil?
       target  = content.boxes.sid(box_sid) if box_sid
       return nil if target.nil?

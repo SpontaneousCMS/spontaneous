@@ -1,7 +1,4 @@
 module Spontaneous
-  # This is a marker module so that we can test for content models like this:
-  #   obj.is_a?(Spontaneous::Content)
-  module Content; end
 
   module Model
     autoload :Core,  "spontaneous/model/core"
@@ -55,7 +52,6 @@ module Spontaneous
       unless class_variable_defined?(:@@content_model)
         class_variable_set(:@@content_model, subclass)
         subclass.send :include, Spontaneous::Model::Core
-        subclass.send :include, Spontaneous::Content
       end
       super
     end

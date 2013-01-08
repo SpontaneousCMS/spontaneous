@@ -6,7 +6,7 @@ module Spontaneous
     attr_reader :box
 
     def self.excluded_classes
-      [Spontaneous::Box, ::Content::Box].tap do |classes|
+      [Spontaneous::Box, Spontaneous::Content::Box].tap do |classes|
         classes.push(::Box) if defined?(::Box)
       end
     end

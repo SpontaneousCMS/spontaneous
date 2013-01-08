@@ -275,7 +275,7 @@ module Spontaneous
       end
 
       def excluded_types
-        [::Content, ::Content::Page, ::Content::Piece]
+        [Spontaneous::Content, Spontaneous::Content::Page, Spontaneous::Content::Piece]
       end
 
       def inheritance_map

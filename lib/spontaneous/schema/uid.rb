@@ -32,7 +32,7 @@ module Spontaneous
       def after_destroy
         case @category
         when :box
-          ::Content.filter(:box_sid  => @id).delete
+          Spontaneous::Content.filter(:box_sid  => @id).delete
         end
       end
 

@@ -256,7 +256,7 @@ module Spontaneous
         # end
 
         def content_model
-          ::Content
+          Spontaneous::Content
         end
 
         def content_for_request(lock = false)
