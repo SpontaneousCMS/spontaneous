@@ -738,7 +738,6 @@ class BackTest < MiniTest::Spec
         Spontaneous.stubs(:reload!)
         # editing UIDs is a developer only activity
         @user.update(:level => Spontaneous::Permissions[:root])
-        @user.save
       end
 
       should "be editable" do
@@ -751,7 +750,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "not be editable by non-developer users" do
-        @user.stubs(:developer?).returns(false)
+        @user.update(:level => Spontaneous::Permissions[:editor])
         uid = "boom"
         orig = @project1.uid
         @project1.uid.should_not == uid
