@@ -1,6 +1,6 @@
 // console.log('Loading DiscountField...')
 
-Spontaneous.FieldTypes.MarkdownField = (function($, S) {
+Spontaneous.Field.Markdown = (function($, S) {
 	var dom = S.Dom;
 	var TextCommand = new JS.Class({
 		name: '',
@@ -594,7 +594,7 @@ Spontaneous.FieldTypes.MarkdownField = (function($, S) {
 	});
 
 
-	var MarkdownField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+	var MarkdownField = new JS.Class(Spontaneous.Field.String, {
 		actions: [Bold, Italic, H1, H2, UL, OL, Link],
 		generate_input: function() {
 			var input = dom.textarea(dom.id(this.css_id()), {'name':this.form_name(), 'rows':10, 'cols':90}).val(this.unprocessed_value()), height = this.content.getFieldMetadata(this, 'height');

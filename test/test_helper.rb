@@ -134,6 +134,7 @@ class MiniTest::Spec
     instance.schema_loader_class = Spontaneous::Schema::TransientMap
     instance.logger.silent!
     instance.database = DB
+    Spontaneous::Site.background_mode = :immediate
     unless Object.const_defined?(:Content)
       content_class = Class.new(Spontaneous::Model(:content, DB, instance.schema))
       Object.const_set :Content, content_class

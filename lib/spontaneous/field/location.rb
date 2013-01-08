@@ -2,8 +2,8 @@
 
 require 'open-uri'
 
-module Spontaneous::FieldTypes
-  class LocationField < StringField
+module Spontaneous::Field
+  class Location < String
 
     def outputs
       [:html, :lat, :lng]

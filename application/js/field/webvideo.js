@@ -1,7 +1,7 @@
 // console.log('Loading DateField...')
-Spontaneous.FieldTypes.WebVideoField = (function($, S) {
+Spontaneous.Field.WebVideo = (function($, S) {
 	var dom = S.Dom;
-	var WebVideoField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+	var WebVideoField = new JS.Class(Spontaneous.Field.String, {
 		// get_input: function() {
 		// 	this.input = $(dom.textarea, {'id':this.css_id(), 'name':this.form_name(), 'rows':10, 'cols':30}).text(this.unprocessed_value());
 		// 	return this.input;

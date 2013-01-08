@@ -1,5 +1,5 @@
 
-module Spontaneous
+module Spontaneous::Field
   class FieldVersion < Sequel::Model(:spontaneous_field_versions)
     plugin :timestamps
 

@@ -9,26 +9,28 @@ class Spontaneous::Site
         ::Content
       end
 
-      def default_publishing_method
-        resolve_publishing_method(Spontaneous::Site.config.publishing_method || :immediate)
+      def background_mode
+        @background_mode ||= (Spontaneous::Site.config.background_mode || :immediate)
+      end
+
+      def background_mode=(method)
+        @background_mode = method
+      end
+
+      def resolve_background_mode(mod)
+        klass_name = background_mode.to_s.camelize
+        begin
+          mod.const_get(klass_name)
+        rescue NameError => e
+          puts "Unknown method #{method} (#{mod}::#{klass_name})"
+          mod::Immediate
+        rescue NameError => e
+          raise "Illegal background mode #{mod}::Immediate"
+        end
       end
 
       def publishing_method
-        @publishing_method ||= default_publishing_method
-      end
-
-      def publishing_method=(method)
-        @publishing_method = resolve_publishing_method(method)
-      end
-
-      def resolve_publishing_method(method)
-        klass_name = method.to_s.camelize
-        begin
-          S::Publishing.const_get(klass_name)
-        rescue NameError => e
-          puts "Unknown method #{method} (#{klass_name})"
-          S::Publishing::Immediate
-        end
+        resolve_background_mode(Spontaneous::Publishing)
       end
 
       def publish_pages(page_list=nil)

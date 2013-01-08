@@ -83,16 +83,17 @@ module Spontaneous
       end
     end
 
-    autoload :Console,  "spontaneous/cli/console"
-    autoload :Site,     "spontaneous/cli/site"
-    autoload :Init,     "spontaneous/cli/init"
-    autoload :User,     "spontaneous/cli/user"
-    autoload :Generate, "spontaneous/cli/generate"
-    autoload :Server,   "spontaneous/cli/server"
-    autoload :Media,    "spontaneous/cli/media"
-    autoload :Sync,     "spontaneous/cli/sync"
-    autoload :Migrate,  "spontaneous/cli/migrate"
     autoload :Assets,   "spontaneous/cli/assets"
+    autoload :Console,  "spontaneous/cli/console"
+    autoload :Fields,   "spontaneous/cli/fields"
+    autoload :Generate, "spontaneous/cli/generate"
+    autoload :Init,     "spontaneous/cli/init"
+    autoload :Media,    "spontaneous/cli/media"
+    autoload :Migrate,  "spontaneous/cli/migrate"
+    autoload :Server,   "spontaneous/cli/server"
+    autoload :Site,     "spontaneous/cli/site"
+    autoload :Sync,     "spontaneous/cli/sync"
+    autoload :User,     "spontaneous/cli/user"
 
     class Root < ::Thor
       register Spontaneous::Cli::Console,  "console",  "console",           "Gives you console access to the current site"
@@ -105,6 +106,7 @@ module Spontaneous
       register Spontaneous::Cli::Sync,     "sync",     "sync [DIRECTION]",  "Sync database and media to and from the production server"
       register Spontaneous::Cli::Migrate,  "migrate",  "migrate",           "Runs Spontaneous migrations"
       register Spontaneous::Cli::Assets,   "assets",   "assets [ACTION]",   "Manage Spontaneous assets"
+      register Spontaneous::Cli::Fields,   "fields",   "fields [ACTION]",   "Manage Spontaneous fields"
 
       desc :browse, "Launces a browser pointing to the current development CMS"
       def browse

@@ -7,7 +7,7 @@ class FieldsTest < MiniTest::Spec
   def setup
     @site = setup_site
     @now = Time.now
-    Site.publishing_method = :immediate
+    Site.background_mode = :immediate
   end
 
   def teardown
@@ -36,7 +36,7 @@ class FieldsTest < MiniTest::Spec
 
       should "have fields with values defined by prototypes" do
         f = @instance.fields[:title]
-        assert f.class < Spontaneous::FieldTypes::StringField
+        assert f.class < Spontaneous::Field::String
         f.value.should == "Magic"
       end
 
@@ -81,7 +81,7 @@ class FieldsTest < MiniTest::Spec
         @class2.fields.title.title.should == "Two"
         @class3.fields.date.title.should == "Three"
         @class3.fields.date.schema_id.should == @class1.fields.date.schema_id
-        assert @instance.title.class < Spontaneous::FieldTypes::ImageField
+        assert @instance.title.class < Spontaneous::Field::Image
         @instance.title.value.to_s.should == "Two"
         instance1 = @class1.new
         instance3 = @class3.new
@@ -110,11 +110,11 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "default to basic string class" do
-        assert @content_class.field_prototypes[:title].instance_class < Spontaneous::FieldTypes::StringField
+        assert @content_class.field_prototypes[:title].instance_class < Spontaneous::Field::String
       end
 
-      should "map :string type to FieldTypes::StringField" do
-        assert @content_class.field_prototypes[:synopsis].instance_class < Spontaneous::FieldTypes::StringField
+      should "map :string type to Field::String" do
+        assert @content_class.field_prototypes[:synopsis].instance_class < Spontaneous::Field::String
       end
 
       should "be listable" do
@@ -163,9 +163,9 @@ class FieldsTest < MiniTest::Spec
             field :chunky
           end
 
-          assert content_class.field_prototypes[:image].field_class < Spontaneous::FieldTypes::ImageField
-          assert content_class.field_prototypes[:date].field_class < Spontaneous::FieldTypes::DateField
-          assert content_class.field_prototypes[:chunky].field_class < Spontaneous::FieldTypes::StringField
+          assert content_class.field_prototypes[:image].field_class < Spontaneous::Field::Image
+          assert content_class.field_prototypes[:date].field_class < Spontaneous::Field::Date
+          assert content_class.field_prototypes[:chunky].field_class < Spontaneous::Field::String
         end
       end
 
@@ -196,7 +196,7 @@ class FieldsTest < MiniTest::Spec
         end
 
         should "parse field class" do
-          assert @prototype.field_class < Spontaneous::FieldTypes::ImageField
+          assert @prototype.field_class < Spontaneous::Field::Image
         end
 
         should "parse default value" do
@@ -234,7 +234,7 @@ class FieldsTest < MiniTest::Spec
 
     context "Values" do
       setup do
-        @field_class = Class.new(S::FieldTypes::Field) do
+        @field_class = Class.new(S::Field::Base) do
           def outputs
             [:html, :plain, :fancy]
           end
@@ -274,7 +274,7 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "escape ampersands by default" do
-        field_class = Class.new(S::FieldTypes::StringField) do
+        field_class = Class.new(S::Field::String) do
         end
         field = field_class.new
         field.value = "Hello & Welcome"
@@ -283,7 +283,7 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "educate quotes" do
-        field_class = Class.new(S::FieldTypes::StringField)
+        field_class = Class.new(S::Field::String)
         field = field_class.new
         field.value = %("John's first... example")
         field.value(:html).should == "“John’s first… example”"
@@ -433,7 +433,7 @@ class FieldsTest < MiniTest::Spec
 
     context "Available output formats" do
       should "include HTML & PDF and default to default value" do
-        f = S::FieldTypes::Field.new
+        f = S::Field::Base.new
         f.value = "Value"
         f.to_html.should == "Value"
         f.to_pdf.should == "Value"
@@ -453,10 +453,10 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "be available as the :markdown type" do
-        assert MarkdownContent.field_prototypes[:text1].field_class < Spontaneous::FieldTypes::MarkdownField
+        assert MarkdownContent.field_prototypes[:text1].field_class < Spontaneous::Field::Markdown
       end
       should "be available as the :text type" do
-        assert MarkdownContent.field_prototypes[:text2].field_class < Spontaneous::FieldTypes::MarkdownField
+        assert MarkdownContent.field_prototypes[:text2].field_class < Spontaneous::Field::Markdown
       end
 
       should "process input into HTML" do
@@ -474,18 +474,18 @@ class FieldsTest < MiniTest::Spec
 
     context "Editor classes" do
       should "be defined in base types" do
-        base_class = Spontaneous::FieldTypes::ImageField
-        base_class.editor_class.should == "Spontaneous.FieldTypes.ImageField"
-        base_class = Spontaneous::FieldTypes::DateField
-        base_class.editor_class.should == "Spontaneous.FieldTypes.DateField"
-        base_class = Spontaneous::FieldTypes::MarkdownField
-        base_class.editor_class.should == "Spontaneous.FieldTypes.MarkdownField"
-        base_class = Spontaneous::FieldTypes::StringField
-        base_class.editor_class.should == "Spontaneous.FieldTypes.StringField"
+        base_class = Spontaneous::Field::Image
+        base_class.editor_class.should == "Spontaneous.Field.Image"
+        base_class = Spontaneous::Field::Date
+        base_class.editor_class.should == "Spontaneous.Field.Date"
+        base_class = Spontaneous::Field::Markdown
+        base_class.editor_class.should == "Spontaneous.Field.Markdown"
+        base_class = Spontaneous::Field::String
+        base_class.editor_class.should == "Spontaneous.Field.String"
       end
 
       should "be inherited in subclasses" do
-        base_class = Spontaneous::FieldTypes::ImageField
+        base_class = Spontaneous::Field::Image
         @field_class = Class.new(base_class)
         @field_class.stubs(:name).returns("CustomField")
         @field_class.editor_class.should == base_class.editor_class
@@ -494,8 +494,8 @@ class FieldsTest < MiniTest::Spec
         @field_class2.editor_class.should == base_class.editor_class
       end
       should "correctly defined by field prototypes" do
-        base_class = Spontaneous::FieldTypes::ImageField
-        class ::CustomField < Spontaneous::FieldTypes::ImageField
+        base_class = Spontaneous::Field::Image
+        class ::CustomField < Spontaneous::Field::Image
           self.register(:custom)
         end
 
@@ -504,7 +504,7 @@ class FieldsTest < MiniTest::Spec
         end
         assert CustomContent.fields.custom.instance_class < CustomField
 
-        CustomContent.fields.custom.instance_class.editor_class.should == Spontaneous::FieldTypes::ImageField.editor_class
+        CustomContent.fields.custom.instance_class.editor_class.should == Spontaneous::Field::Image.editor_class
 
         Object.send(:remove_const, :CustomContent)
         Object.send(:remove_const, :CustomField)
@@ -527,7 +527,7 @@ class FieldsTest < MiniTest::Spec
         # Object.send(:remove_const, :Piece) rescue nil
         Spontaneous::Permissions::User.delete
         ::Content.delete
-        S::FieldVersion.delete
+        S::Field::FieldVersion.delete
       end
 
       should "start out as empty" do
@@ -622,7 +622,7 @@ class FieldsTest < MiniTest::Spec
           field :something, :title
         end
         instance = @content_class.new
-        assert instance.fields.title.class.ancestors.include?(Spontaneous::FieldTypes::StringField), ":title type should inherit from StringField"
+        assert instance.fields.title.class.ancestors.include?(Spontaneous::Field::String), ":title type should inherit from StringField"
         instance.title.value.should == "Right"
       end
     end
@@ -637,7 +637,7 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "have their own editor type" do
-        @content_class.fields.video.export(nil)[:type].should == "Spontaneous.FieldTypes.WebVideoField"
+        @content_class.fields.video.export(nil)[:type].should == "Spontaneous.Field.WebVideo"
         @instance.video = "http://www.youtube.com/watch?v=_0jroAM_pO4&feature=feedrec_grec_index"
         fields  = @instance.export(nil)[:fields]
         fields[0][:processed_value].should == @instance.video.src
@@ -789,7 +789,7 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "use a standard string editor" do
-        @content_class.fields.location.export(nil)[:type].should == "Spontaneous.FieldTypes.StringField"
+        @content_class.fields.location.export(nil)[:type].should == "Spontaneous.Field.String"
       end
 
       should "successfullt geolocate an address" do
@@ -824,12 +824,12 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "use a specific editor class" do
-        @content_class.fields.options.export(nil)[:type].should == "Spontaneous.FieldTypes.SelectField"
+        @content_class.fields.options.export(nil)[:type].should == "Spontaneous.Field.Select"
       end
 
       should "select the options class for fields named options" do
         @content_class.field :type, :select, :options => [["a", "A"]]
-        assert @content_class.fields.options.instance_class.ancestors.include?(Spontaneous::FieldTypes::SelectField)
+        assert @content_class.fields.options.instance_class.ancestors.include?(Spontaneous::Field::Select)
       end
 
       should "accept a list of strings as options" do
@@ -857,11 +857,11 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "have a distinct editor class" do
-        @prototype.instance_class.editor_class.should == "Spontaneous.FieldTypes.FileField"
+        @prototype.instance_class.editor_class.should == "Spontaneous.Field.File"
       end
 
       should "adopt any field called 'file'" do
-        assert @field.is_a?(Spontaneous::FieldTypes::FileField), "Field should be an instance of FileField but instead has the following ancestors #{ @prototype.instance_class.ancestors }"
+        assert @field.is_a?(Spontaneous::Field::File), "Field should be an instance of FileField but instead has the following ancestors #{ @prototype.instance_class.ancestors }"
       end
 
       should "copy files to the media folder" do
@@ -923,11 +923,11 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "have a distinct editor class" do
-        @prototype.instance_class.editor_class.should == "Spontaneous.FieldTypes.DateField"
+        @prototype.instance_class.editor_class.should == "Spontaneous.Field.Date"
       end
 
       should "adopt any field called 'date'" do
-        assert @field.is_a?(Spontaneous::FieldTypes::DateField), "Field should be an instance of DateField but instead has the following ancestors #{ @prototype.instance_class.ancestors }"
+        assert @field.is_a?(Spontaneous::Field::Date), "Field should be an instance of DateField but instead has the following ancestors #{ @prototype.instance_class.ancestors }"
       end
 
       should "default to an empty string" do
@@ -949,6 +949,235 @@ class FieldsTest < MiniTest::Spec
         field.value = "Friday, 8 June, 2012"
         field.value(:html).should == %(<time datetime="2012-06-08">08 Jun 2012, Fri</time>)
         field.value(:plain).should == %(08 Jun 2012, Fri)
+      end
+    end
+
+    context "Asynchronous processing" do
+      setup do
+        S::Site.background_mode = :simultaneous
+        @image = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+        @model = Class.new(::Piece)
+        @model.field :title
+        @model.field :image
+        @model.field :description, :markdown
+        @model.box :items do
+          field :title
+          field :image
+        end
+        @instance = @model.new
+        @instance.stubs(:id).returns(111)
+      end
+
+      # should "be disabled if the background mode is set to immediate" do
+      #   S::Site.background_mode = :immediate
+      #   S::Field::Update.asynchronous_update_class.should == S::Field::Update::Immediate
+      # end
+
+      # should "be enabled if the background mode is set to simultaneous" do
+      #   S::Site.background_mode = :simultaneous
+      #   S::Field::Update.asynchronous_update_class.should == S::Field::Update::Simultaneous
+      # end
+
+      should "be able to resolve fields id" do
+        ::Content.stubs(:get).with('111').returns(@instance)
+        S::Field.find(@instance.image.id, @instance.items.title.id).should == [
+          @instance.image, @instance.items.title
+        ]
+      end
+
+      should "not raise errors for invalid fields" do
+        ::Content.stubs(:get).with('111').returns(@instance)
+        ::Content.stubs(:get).with('xxx').returns(nil)
+        S::Field.find("xxx", "#{@instance.id}/xxx/#{@instance.items.title.schema_id}", "#{@instance.items.id}/nnn", @instance.items.title.id).should == [
+          @instance.items.title
+        ]
+      end
+
+      should "be disabled for Date fields" do
+        f = S::Field::Date.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for Location fields" do
+        f = S::Field::Location.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for LongString fields" do
+        f = S::Field::LongString.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for Markdown fields" do
+        f = S::Field::Markdown.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for Select fields" do
+        f = S::Field::Select.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for String fields" do
+        f = S::Field::String.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be disabled for WebVideo fields" do
+        f = S::Field::WebVideo.new
+        f.asynchronous?.should be_false
+      end
+
+      should "be enabled for File fields" do
+        f = S::Field::File.new
+        f.asynchronous?.should be_true
+      end
+
+      should "be enabled for Image fields" do
+        f = S::Field::Image.new
+        f.asynchronous?.should be_true
+      end
+
+      should "immediately update a group of fields passed in parameter format" do
+        File.open(@image, "r") do |file|
+          fields = {
+            @instance.title.schema_id.to_s => "Updated title",
+            @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+            @instance.description.schema_id.to_s => "Updated description"
+          }
+          Spontaneous::Field.update(@instance, fields, nil, false)
+          @instance.title.value.should == "Updated title"
+          @instance.description.value.should == "<p>Updated description</p>\n"
+          @instance.image.value.should == "/media/00111/0001/something.gif"
+        end
+      end
+
+      should "asynchronously update a group of fields passed in parameter format" do
+        Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+          "fields" => [@instance.image.id]
+        })
+
+        File.open(@image, "r") do |file|
+          fields = {
+            @instance.title.schema_id.to_s => "Updated title",
+            @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+            @instance.description.schema_id.to_s => "Updated description"
+          }
+          @instance.expects(:save).at_least_once
+
+          Spontaneous::Field.update(@instance, fields, nil, true)
+
+          @instance.title.value.should == "Updated title"
+          @instance.description.value.should == "<p>Updated description</p>\n"
+          @instance.image.value.should == ""
+          @instance.image.pending_value.should == {
+            :width=>400, :height=>533, :filesize=>54746,
+            :type=>"image/gif",
+            :tempfile=>"#{@site.root}/cache/media/tmp/00111/something.gif",
+            :filename=>"something.gif",
+            :src => "/media/tmp/00111/something.gif"
+          }
+          @instance.image.process_pending_value
+          @instance.image.value.should == "/media/00111/0001/something.gif"
+          @instance.image.pending_value.should be_nil
+        end
+      end
+
+      should "asynchronously update a single field value" do
+        Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+          "fields" => [@instance.image.id]
+        })
+        File.open(@image, "r") do |file|
+          Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          @instance.image.value.should == ""
+          @instance.image.pending_value.should == {
+            :width=>400, :height=>533, :filesize=>54746,
+            :type=>"image/gif",
+            :tempfile=>"#{@site.root}/cache/media/tmp/00111/something.gif",
+            :filename=>"something.gif",
+            :src => "/media/tmp/00111/something.gif"
+          }
+          @instance.image.process_pending_value
+          @instance.image.value.should == "/media/00111/0001/something.gif"
+        end
+      end
+
+      should "synchronously update box fields" do
+        box = @instance.items
+        File.open(@image, "r") do |file|
+          fields = {
+            box.title.schema_id.to_s => "Updated title",
+            box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+          }
+          Spontaneous::Field.update(box, fields, nil, false)
+          box.title.value.should == "Updated title"
+          box.image.value.should == "/media/00111/#{box.schema_id}/0001/something.gif"
+        end
+      end
+
+      should "asynchronously update box fields" do
+        box = @instance.items
+        Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+          "fields" => [box.image.id]
+        })
+        File.open(@image, "r") do |file|
+          fields = {
+            box.title.schema_id.to_s => "Updated title",
+            box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+          }
+          Spontaneous::Field.update(box, fields, nil, true)
+          box.title.value.should == "Updated title"
+          box.image.value.should == ""
+          box.image.pending_value.should == {
+            :width=>400, :height=>533, :filesize=>54746,
+            :type=>"image/gif",
+            :tempfile=>"#{@site.root}/cache/media/tmp/00111/#{box.schema_id}/something.gif",
+            :filename=>"something.gif",
+            :src => "/media/tmp/00111/#{box.schema_id}/something.gif"
+          }
+        end
+      end
+
+      should "immediately update asynchronous fields if background mode is :immediate" do
+        S::Site.background_mode = :immediate
+        File.open(@image, "r") do |file|
+          fields = {
+            @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
+          }
+          Spontaneous::Simultaneous.expects(:fire).never
+          Spontaneous::Field.update(@instance, fields, nil, true)
+          @instance.image.value.should == "/media/00111/0001/something.gif"
+        end
+      end
+
+      should "not update a field if user does not have necessary permissions" do
+        user = mock()
+        @instance.title.expects(:writable?).with(user).at_least_once.returns(false)
+        fields = {
+          @instance.title.schema_id.to_s => "Updated title"
+        }
+        Spontaneous::Field.update(@instance, fields, user, true)
+        @instance.title.value.should == ""
+      end
+
+      should "call Fields::Update::Immediate from the cli" do
+        ::Content.stubs(:get).with('111').returns(@instance)
+        immediate = mock()
+        immediate.expects(:run)
+        Spontaneous::Field::Update::Immediate.expects(:new).with([@instance.image, @instance.items.title]).returns(immediate)
+        # Thor generates a warning about creating a task with no 'desc'
+        silence_logger {
+          Spontaneous::Cli::Fields.any_instance.stubs(:prepare!)
+        }
+        Spontaneous::Cli::Fields.start(["update", "--fields", @instance.image.id, @instance.items.title.id])
+      end
+
+      should "revert to immediate updating if connection to simultaneous fails" do
+        File.open(@image, "r") do |file|
+          Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          @instance.image.value.should == "/media/00111/0001/something.gif"
+          @instance.image.pending_value.should be_nil
+        end
       end
     end
   end

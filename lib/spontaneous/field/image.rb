@@ -4,8 +4,7 @@ require 'tempfile'
 require 'mini_magick'
 require 'delegate'
 
-module Spontaneous
-  module FieldTypes
+module Spontaneous::Field
 
     class ImageOptimizer
       def self.run(source_image)
@@ -108,8 +107,8 @@ module Spontaneous
       end
     end
 
-    class ImageField < Field
-      include Spontaneous::FieldTypes::EditorClass
+    class Image < File
+      has_editor
       include ImageFieldUtilities
 
       def self.accepts
@@ -137,7 +136,13 @@ module Spontaneous
       end
 
       def self.size_definitions
-        @size_definitions ||= superclass.respond_to?(:size_definitions) ? superclass.size_definitions.dup : {}
+        @size_definitions ||= superclass.respond_to?(:size_definitions) ? superclass.size_definitions.dup : { :__ui__ => ui_preview_size }
+      end
+
+      def self.ui_preview_size
+        Proc.new {
+          width 300
+        }
       end
 
       def image?
@@ -151,6 +156,12 @@ module Spontaneous
       # value used to show conflicts between the current value and the value they're attempting to enter
       def conflicted_value
         value
+      end
+
+      def serialize_pending_file(file)
+        attrs = ImageProcessor.new(file).serialize
+        attrs.delete(:path)
+        attrs.merge(super)
       end
 
       # original is special and should always be defined
@@ -180,15 +191,20 @@ module Spontaneous
 
       # formats are irrelevant to image/file fields
       def outputs
-        [:original].concat(self.class.size_definitions.map { |name, process| name })
+        [:original, :__ui__].concat(self.class.size_definitions.map { |name, process| name })
       end
 
       def value(format=:html, *args)
         sizes[:original].src
       end
 
+      def set_value!(value, process = true)
+        @sizes = nil
+        super
+      end
+
       def generate(output, media_file)
-        return { :src => media_file } if media_file.is_a?(String)#File.exist?(image_path)
+        return { :src => media_file } if media_file.is_a?(::String)#File.exist?(image_path)
         image = ImageProcessor.new(media_file)
         # Create a tempfile here that will be kept open for the duration of the block
         # this is used in #apply to hold a copy of the processed image data rather than
@@ -205,32 +221,14 @@ module Spontaneous
         result.serialize
       end
 
-      def preprocess(image_path)
-        filename = mimetype = nil
-        case image_path
-        when Hash
-          mimetype = image_path[:type]
-          filename = image_path[:filename]
-          image_path = image_path[:tempfile].path
-        when String
-          # return image_path unless File.exist?(image_path)
-          filename = ::File.basename(image_path)
-        end
-        return image_path unless File.exist?(image_path)
-        # media_path = owner.make_media_file(image_path, filename)
-        media_file = Spontaneous::Media::File.new(owner, filename, mimetype)
-        media_file.copy(image_path)
-        set_unprocessed_value(File.expand_path(media_file.filepath))
-        # media_path
-        # image_path
-        media_file
-      end
 
       def export(user = nil)
         super(user).merge({
           :processed_value => processed_values
         })
       end
+
+      self.register(:image, :photo)
     end
 
 
@@ -314,7 +312,7 @@ module Spontaneous
         end
 
         def composite(other_image_path, output_extension = "jpg", &block)
-          File.open(other_image_path) do |other_image|
+          ::File.open(other_image_path) do |other_image|
             new_image = image.composite(other_image, output_extension, &block)
             image.path = new_image.path
           end
@@ -398,7 +396,7 @@ module Spontaneous
       end
 
       def filesize
-        File.size(path)
+        ::File.size(path)
       end
 
       def width
@@ -446,7 +444,7 @@ module Spontaneous
           :width => width,
           :height => height,
           :filesize => filesize,
-          :path => path
+          :path => @media_file.path
         }
       end
 
@@ -455,7 +453,5 @@ module Spontaneous
       end
     end
 
-    ImageField.register(:image, :photo)
 
-  end
 end

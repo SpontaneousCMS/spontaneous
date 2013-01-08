@@ -116,7 +116,7 @@ module Spontaneous
       method_option :logfile, :type => :string, :desc => "Location of logfile"
       def publish
         prepare! :publish
-        Spontaneous::Site.publishing_method = :immediate
+        Spontaneous::Site.background_mode = :immediate
         ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
         say "Creating revision #{Spontaneous::Site.revision}", :green, true
         if options.pages
@@ -131,7 +131,7 @@ module Spontaneous
       desc "render", "Re-renders the current content"
       def render
         prepare! :render
-        Spontaneous::Site.publishing_method = :immediate
+        Spontaneous::Site.background_mode = :immediate
         Spontaneous::Site.rerender
       end
 

@@ -167,6 +167,75 @@ class MediaTest < MiniTest::Spec
     end
   end
 
+  context "temporary media items" do
+    setup do
+      # Setup cloud storage as default to ensure that the temp files
+      # are bypassing this and being written locally
+      Fog.mock!
+      @bucket_name = "media.example.com"
+      @aws_credentials = {
+        :provider=>"AWS",
+        :aws_secret_access_key=>"SECRET_ACCESS_KEY",
+        :aws_access_key_id=>"ACCESS_KEY_ID",
+        :public_host => "http://media.example.com"
+      }
+      cloud = Spontaneous::Storage::Cloud.new(@aws_credentials, 'media.example.com')
+      cloud.backend.directories.create(:key => @bucket_name)
+      @site.stubs(:storage).with(anything).returns(cloud)
+      @media_dir = Dir.mktmpdir
+      @storage = Spontaneous::Storage::Local.new(@media_dir, '/media')
+      @site.stubs(:local_storage).with(anything).returns(@storage)
+      @site.stubs(:default_storage).with(anything).returns(@storage)
+      @content = ::Piece.create
+      @content.stubs(:id).returns(99)
+    end
+
+    should "return an absolute path for the url" do
+      file = Spontaneous::Media::TempFile.new(@content, "file name.txt")
+      file.url.should == "/media/tmp/00099/file-name.txt"
+    end
+
+    should "place files into its configured root" do
+      file = Spontaneous::Media::TempFile.new(@content, "file name.txt")
+      file.path.should == File.join(@media_dir, "/tmp/00099/file-name.txt")
+    end
+
+    should "be able to copy a file into place if passed the path of an existing file" do
+      file_path = File.join(@media_dir, "/tmp/00099/file-name.txt")
+      existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+      ::File.exist?(file_path).should be_false
+      ::File.exist?(existing_file).should be_true
+      file = Spontaneous::Media::TempFile.new(@content, "file name.txt")
+      file.copy(existing_file)
+      ::File.exist?(file_path).should be_true
+      file.source.should == existing_file
+    end
+
+    should "be able to copy a file into place if passed the handle of an existing file" do
+      file_path = File.join(@media_dir, "/tmp/00099/file-name.txt")
+      existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+      ::File.exist?(file_path).should be_false
+      ::File.exist?(existing_file).should be_true
+      file = Spontaneous::Media::TempFile.new(@content, "file name.txt")
+      File.open(existing_file, 'rb') do |f|
+        file.copy(f)
+      end
+      ::File.exist?(file_path).should be_true
+      file.source.should == existing_file
+    end
+
+    should "provide an open method that writes files to the correct location" do
+      file_path = File.join(@media_dir, "/tmp/00099/file-name.txt")
+      ::File.exist?(file_path).should be_false
+      file = Spontaneous::Media::TempFile.new(@content, "file name.txt")
+      content_string = "Hello"
+      file.open do |f|
+        f.write(content_string)
+      end
+      File.read(file_path).should == content_string
+    end
+  end
+
   context "Content items" do
     setup do
       # @media_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/media"))

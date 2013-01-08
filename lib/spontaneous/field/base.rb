@@ -1,55 +1,57 @@
-# encoding: UTF-8
-
-
 module Spontaneous
-  module FieldTypes
-    class Field
-      extend Plugins
+  module Field
+    class Base
+      module ClassMethods
+        def has_editor
+          define_singleton_method(:editor_class) { ui_class }
+        end
 
-      def self.register(*labels)
-        labels = self.labels if labels.empty?
-        # logger.debug("Registering #{self} as #{labels.join(", ")}")
-        FieldTypes.register(self, *labels)
-        self
-      end
+        def register(*labels)
+          labels = self.labels if labels.empty?
+          # logger.debug("Registering #{self} as #{labels.join(", ")}")
+          Field.register(self, *labels)
+          self
+        end
 
-      def self.labels
-        [self.name.demodulize.gsub(/Field$/, '').underscore]
-      end
+        def labels
+          [self.name.demodulize.gsub(/Field$/, '').underscore]
+        end
 
-      def self.inherited(subclass, real_caller = nil)
-        if self.respond_to?(:editor_class)
-          editor_class = self.editor_class
-          subclass.singleton_class.send(:define_method, :editor_class) do
-            editor_class
+        def inherited(subclass, real_caller = nil)
+          if self.respond_to?(:editor_class)
+            editor_class = self.editor_class
+            subclass.singleton_class.send(:define_method, :editor_class) do
+              editor_class
+            end
           end
         end
-      end
 
-      def self.prototype=(prototype)
-        @prototype = prototype
-      end
+        def prototype=(prototype)
+          @prototype = prototype
+        end
 
-      def self.prototype
-        @prototype
-      end
+        def prototype
+          @prototype
+        end
 
-      def self.accepts
-        %w(text/.+)
-      end
+        def accepts
+          %w(text/.+)
+        end
 
-      def self.accepts?(mime_type)
-        accepts.find do |pattern|
-          Regexp.new(pattern).match(mime_type)
+        def accepts?(mime_type)
+          accepts.find do |pattern|
+            Regexp.new(pattern).match(mime_type)
+          end
+        end
+
+        # Provides the ability for specific field types to customize the schema values
+        # they return to the UI
+        def export(user)
+          {}
         end
       end
 
-
-      # Provides the ability for specific field types to customize the schema values
-      # they return to the UI
-      def self.export(user)
-        {}
-      end
+      extend ClassMethods
 
       attr_accessor :owner, :name, :unprocessed_value, :template_params, :version
       attr_reader   :processed_values
@@ -57,24 +59,75 @@ module Spontaneous
       alias_method :values, :processed_values
 
 
-      def initialize(params={}, from_db=false)
+      def initialize(params={}, default_values=true)
         @processed_values = {}
-        load(params, from_db)
+        deserialize(params, default_values)
       end
 
+      def id
+        [owner.id, schema_id].join("/")
+      end
+
+      def writable?(user)
+        owner.field_writable?(user, name)
+      end
+
+      # IF a field type needs to do some long running processing on a
+      def asynchronous?
+        false
+      end
+
+      def pending_value=(value)
+        values[:__pending__] = value
+      end
+
+      def pending_value
+        values[:__pending__]
+      end
+
+      def has_pending_value?
+        values.key?(:__pending__)
+      end
+
+      def clear_pending_value
+        values.delete(:__pending__)
+      end
+
+      def process_pending_value
+        process_pending_value!
+        save
+      end
+
+      def process_pending_value!
+        set_value!(pending_value)
+      end
 
       def outputs
         [:html, :plain]
       end
 
-      def unprocessed_value=(v)
+      def process_value(value)
+        @modified = (@initial_value != value)
+        increment_version if @modified
+        self.processed_values = generate_outputs(@unprocessed_value)
+      end
+
+      def set_value(v, process = true)
+        set_value!(v, process)
+        save
+      end
+
+      def set_value!(v, process = true)
         set_unprocessed_value(v)
-        unless @preprocessed
-          @modified = (@initial_value != v)
-          increment_version if @modified
-          self.processed_values = generate_outputs(@unprocessed_value)
-          owner.field_modified!(self) if owner
-        end
+        process_value(v) if process
+      end
+
+      def modified?(v)
+        @modified = (@initial_value != v)
+      end
+
+      def modified!
+        owner.field_modified!(self) if owner
       end
 
       def increment_version
@@ -157,7 +210,13 @@ module Spontaneous
       end
 
       def value=(value)
-        self.unprocessed_value = value
+        self.set_value value, true
+      end
+
+      alias_method :unprocessed_value=, :value=
+
+      def save
+        owner.field_modified!(self) if owner
       end
 
       def mark_unmodified
@@ -191,16 +250,7 @@ module Spontaneous
       end
 
       def serialize_db
-        S::FieldTypes.serialize_field(self)
-      end
-
-      def update(params={})
-        params.each do |property, value|
-          setter = "#{property}=".to_sym
-          if respond_to?(setter)
-            self.send(setter, value)
-          end
-        end
+        S::Field.serialize_field(self)
       end
 
       # def start_inline_edit_marker
@@ -252,7 +302,7 @@ module Spontaneous
       end
 
       def create_version
-        Spontaneous::FieldVersion.create(
+        Spontaneous::Field::FieldVersion.create(
           :content_id => owner.id,
           :field_sid => self.schema_id.to_s,
           :version => version,
@@ -260,16 +310,18 @@ module Spontaneous
           :user => owner.current_editor)
       end
 
+
       protected
 
-      def load(params={}, from_db=false)
-        with_preprocessed_values(from_db) do
-          params.each do |property, value|
-            setter = "#{property}=".to_sym
-            if respond_to?(setter)
-              self.send(setter, value)
-            end
-          end
+      def deserialize(params={}, default_values=true)
+        data = params.dup
+        unprocessed_value = data.delete(:unprocessed_value) || ""
+        processed_values  = data.delete(:processed_values)  || {}
+        @processed_values = processed_values
+        set_value(unprocessed_value, default_values)
+        data.each do |property, value|
+          setter = "#{property}="
+          self.send(setter, value) if respond_to?(setter)
         end
       end
 
@@ -277,14 +329,7 @@ module Spontaneous
         @processed_values = values
       end
 
-      def with_preprocessed_values(state=true)
-        @preprocessed = state
-        yield
-      ensure
-        @preprocessed = nil
-      end
-
-      def set_unprocessed_value(new_value)
+      def set_unprocessed_value(new_value, preprocessed = false)
         # initial_value should only be set once so that it can act as a test for field modification
         @initial_value ||= new_value
         @unprocessed_value = new_value

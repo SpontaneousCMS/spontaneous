@@ -1,4 +1,4 @@
-// console.log('Loading FieldTypes...')
+// console.log('Loading Field...')
 
-Spontaneous.FieldTypes = {};
+Spontaneous.Field = {};
 

@@ -25,7 +25,7 @@ class PublishingTest < MiniTest::Spec
   def setup
     @site = setup_site(self.class.site_root)
     @now = @@now
-    Site.publishing_method = :immediate
+    Site.background_mode = :immediate
   end
 
   def teardown

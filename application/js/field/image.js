@@ -1,7 +1,7 @@
 // console.log('Loading ImageField...')
-Spontaneous.FieldTypes.ImageField = (function($, S) {
+Spontaneous.Field.Image = (function($, S) {
 	var dom = S.Dom;
-	var ImageFieldConflictView = new JS.Class(S.FieldTypes.StringField.ConflictView, {
+	var ImageFieldConflictView = new JS.Class(S.Field.String.ConflictView, {
 
 		panel: function() {
 			var labels = dom.div('.image-field-conflict.labels.differences'),
@@ -29,7 +29,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		}
 	});
 
-	var ImageField = new JS.Class(Spontaneous.FieldTypes.FileField, {
+	var ImageField = new JS.Class(Spontaneous.Field.File, {
 		is_image: function() {
 			return true;
 		},
@@ -57,10 +57,16 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			this.callSuper();
 		},
 
+		currentValue: function() {
+			var v = this.get('value');
+			console.log('currentValue', v)
+			return v['__pending__'] || v['__ui__'] || v['original'];
+		},
+
 		preview: function(container) {
 			Spontaneous.UploadManager.register(this);
 			var self = this
-			, value = this.get('value').original
+			, value = this.currentValue()
 			, src = value.src
 			, img = null
 			, dim = 45
@@ -190,7 +196,7 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 
 			this.callSuper(values)
 			if (values) {
-				var value = this.value().original;
+				var value = this.currentValue();
 				if (this.image) {
 					var img = new Image()
 					img.onload = function() {
@@ -202,20 +208,20 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 		},
 
 		width: function() {
-			if (this.data.values && this.data.values.original) {
-				return this.data.values.original.width;
+			if (this.data.values && this.currentValue()) {
+				return this.currentValue().width;
 			}
 			return 0;
 		},
 		height: function() {
-			if (this.data.values && this.data.values.original) {
-				return this.data.values.original.height;
+			if (this.data.values && this.currentValue()) {
+				return this.currentValue().height;
 			}
 			return 0;
 		},
 		edit: function() {
 			var wrap = dom.div({'style':'position:relative;'}),
-				value = this.value().original,
+				value = this.currentValue(),
 				src = value.src,
 				img = dom.img({'src':src}),
 				info, sizes, filename_info, filesize_info, dimensions_info;
@@ -338,13 +344,10 @@ Spontaneous.FieldTypes.ImageField = (function($, S) {
 			return this.input.val();
 		},
 		cancel_edit: function() {
-			this.image.attr('src', this.original_value().src);
+			this.image.attr('src', this.currentValue().src);
 		},
 		conflict_view: function(dialogue, conflict) {
 			return new ImageFieldConflictView(dialogue, conflict);
-		},
-		original_value: function() {
-			return this.value().original;
 		},
 		edited_value: function() {
 			return this._edited_value;

@@ -93,8 +93,10 @@ module Spontaneous
       self.class.schema_id
     end
 
+    # A boxes "identity" must be a combination of its owner's id and
+    # its schema_id.
     def id
-      schema_id.to_s
+      [owner.id, schema_id.to_s].join("/")
     end
 
     def schema_name
@@ -147,7 +149,7 @@ module Spontaneous
         default_values.each do |field_name, value|
           if self.field?(field_name)
             field = self.class.field_prototypes[field_name].to_field(self)
-            field.unprocessed_value = value
+            field.value = value
             field_store << field.serialize_db
           end
         end
@@ -155,7 +157,7 @@ module Spontaneous
       field_store
     end
 
-    def field_modified!(modified_field)
+    def field_modified!(modified_field = nil)
       @modified = true
       owner.box_modified!(self)
     end

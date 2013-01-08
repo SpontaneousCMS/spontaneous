@@ -16,14 +16,7 @@ module Spontaneous
 
       desc "start", "Starts Spontaneous in development mode"
       def start
-        root   = File.expand_path(options.site)
-        engine = ::Foreman::Engine::CLI.new(root: options.site)
-
-        %w(back front publish).each do |process|
-          engine.register(process, "#{binary} server #{process} --root=#{root}")
-        end
-
-        engine.start
+        launch %w(back front tasks)
       end
 
       desc "front", "Starts Spontaneous in front/public mode"
@@ -47,14 +40,25 @@ module Spontaneous
       def simultaneous
         prepare! :start
         connection = options[:connection] || ::Spontaneous.config.simultaneous_connection
-        exec({"BUNDLE_GEMFILE" => nil}, "#{Simultaneous.server_binary} -c #{connection} --debug")
+        exec({"BUNDLE_GEMFILE" => nil}, "#{::Simultaneous.server_binary} -c #{connection} --debug")
       end
 
       # A shorter name for the 'simultaneous' task is useful (Foreman appends
       # it to each line of output)
-      map %w(bg publish) => :simultaneous
+      map %w(bg publish tasks) => :simultaneous
 
       private
+
+      def launch(processes)
+        root   = File.expand_path(options.site)
+        engine = ::Foreman::Engine::CLI.new(root: options.site)
+
+        processes.each do |process|
+          engine.register(process, "#{binary} server #{process} --root=#{root}")
+        end
+
+        engine.start
+      end
 
       def binary
         ::Spontaneous.gem_dir("bin/spot")

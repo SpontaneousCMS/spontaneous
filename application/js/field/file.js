@@ -1,7 +1,7 @@
 // console.log('Loading FileField...')
-Spontaneous.FieldTypes.FileField = (function($, S) {
+Spontaneous.Field.File = (function($, S) {
 	var dom = S.Dom;
-	var FileField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+	var FileField = new JS.Class(Spontaneous.Field.String, {
 		selected_files: false,
 
 		preview: function() {

@@ -1,7 +1,7 @@
 // console.log('Loading DateField...')
-Spontaneous.FieldTypes.DateField = (function($, S) {
+Spontaneous.Field.Date = (function($, S) {
 	var dom = S.Dom;
-	var DateField = new JS.Class(Spontaneous.FieldTypes.StringField, {
+	var DateField = new JS.Class(Spontaneous.Field.String, {
 		input: function() {
 			var input = this.callSuper();
 			input.datepicker({ "dateFormat": "DD, d MM yy" });

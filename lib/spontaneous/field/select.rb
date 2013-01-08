@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module Spontaneous::FieldTypes
+module Spontaneous::Field
   # Provides a select field in the UI.
   #
   # Options for the select are provided by passing an :options value in the field config.
@@ -35,8 +35,8 @@ module Spontaneous::FieldTypes
   # To retrieve the associated label use `field.value(:label)` or `field.label`
   # ("Value 1" or "Value 2" in the exampel above).
   #
-  class SelectField < Field
-    include Spontaneous::FieldTypes::EditorClass
+  class Select < Base
+    has_editor
 
     def self.static_option_list?
       return false if configured_option_list.is_a?(Proc)
@@ -104,6 +104,5 @@ module Spontaneous::FieldTypes
     end
 
     self.register
-  end # OptionsField
+  end # Select
 end
-

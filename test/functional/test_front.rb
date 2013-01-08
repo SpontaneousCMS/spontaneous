@@ -25,7 +25,7 @@ class FrontTest < MiniTest::Spec
 
   def setup
     @site = setup_site(self.class.site_root)
-    Site.publishing_method = :immediate
+    Site.background_mode = :immediate
     ::Content.delete
   end
 
@@ -73,7 +73,7 @@ class FrontTest < MiniTest::Spec
     setup do
 
 
-      S::Site.publishing_method = :immediate
+      S::Site.background_mode = :immediate
       S::State.delete
 
       class ::SitePage < ::Page

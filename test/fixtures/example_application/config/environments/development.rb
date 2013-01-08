@@ -10,7 +10,7 @@ front do
 end
 
 # can be one of :threaded, :immediate or :fire_and_forget
-publishing_method :threaded
+background_mode :threaded
 
 publishing_delay 10
 

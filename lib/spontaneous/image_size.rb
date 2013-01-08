@@ -15,7 +15,6 @@ module Spontaneous
         else
           File.open(file, 'rb') { |io| read_size(io) }
         end
-
       end
 
       def read_size(file)
@@ -24,6 +23,7 @@ module Spontaneous
       end
 
       def image_type(file)
+        return Formats::EMPTY if file.size == 0
         img_top = file.read(16)
         bytes = img_top.unpack("C*")
         file.seek(0,0)
@@ -64,6 +64,13 @@ module Spontaneous
           end
         end
 
+        class EMPTY
+          def initialize(file)
+          end
+          def size
+            [0, 0]
+          end
+        end
         class GIF < Abstract
           def read_size
             @file.read_o(6)

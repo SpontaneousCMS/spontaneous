@@ -1,5 +1,5 @@
 
-publishing_method :simultaneous
+background_mode :simultaneous
 
 simultaneous_connection "/tmp/simultaneous.<%= @site_name %>.sock"
 

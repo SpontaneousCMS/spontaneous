@@ -81,7 +81,7 @@ module Spontaneous::Model::Core
     end
 
     def field_versions(field)
-      Spontaneous::FieldVersion.filter(:content_id => self.id, :field_sid => field.schema_id.to_s).order(:created_at.desc)
+      Spontaneous::Field::FieldVersion.filter(:content_id => self.id, :field_sid => field.schema_id.to_s).order(:created_at.desc)
     end
 
     def save_field_versions
@@ -108,8 +108,13 @@ module Spontaneous::Model::Core
     end
 
     # TODO: unify the update mechanism for these two stores
-    def field_modified!(modified_field)
+    def field_modified!(modified_field = nil)
       self.field_store = @field_set.serialize_db
+    end
+
+    def save_fields
+      field_modified!
+      save
     end
 
     def type_for_mime_type(mime_type)

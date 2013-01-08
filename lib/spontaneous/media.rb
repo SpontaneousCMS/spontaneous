@@ -5,7 +5,8 @@ require 'digest/sha1'
 module Spontaneous
   module Media
 
-    autoload :File, "spontaneous/media/file"
+    autoload :File,     "spontaneous/media/file"
+    autoload :TempFile, "spontaneous/media/temp_file"
 
     include Spontaneous::Constants
 
@@ -42,27 +43,19 @@ module Spontaneous
     def combine_shards(hashes, &block)
       hashes = hashes.split(',') unless hashes.is_a?(Array)
       shards = hashes.map { |hash| Spontaneous.shard_path(hash) }
-      combined = Tempfile.new('shard')
-      combined.binmode
+      Tempfile.open('shard') do |combined|
+        combined.binmode
 
-      shards.each do |shard|
-        ::File.open(shard, 'rb') do |part|
-          while data = part.read(131072)
-            combined.write(data)
+        shards.each do |shard|
+          ::File.open(shard, 'rb') do |part|
+            while data = part.read(131072)
+              combined.write(data)
+            end
           end
         end
-      end
-      combined.close
-
-      if block_given?
-        begin
-          yield(combined)
-        ensure
-          combined.close!
-        end
-      else
-        # caller's responsibility to close & delete tempfile
-        combined
+        combined.flush
+        combined.rewind
+        yield(combined) if block_given?
       end
     end
 

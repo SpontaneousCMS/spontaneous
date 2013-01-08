@@ -392,7 +392,7 @@ class AuthenticationTest < MiniTest::Spec
 
         should "be able to update root level fields" do
           field = root.fields.root_level
-          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => "Updated"
+          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}]" => "Updated"
           assert last_response.ok?
           root.reload.fields[:root_level].value.should == "Updated"
         end
@@ -413,18 +413,28 @@ class AuthenticationTest < MiniTest::Spec
           clear_cookies
         end
 
-        should "not be able to update root level fields" do
-          value = "Updated #{version}"
-          field = root.fields[:root_level]
-          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
-          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
-          root.reload.fields[:root_level].value.should == @root_copy.root_level.value
-        end
+        # DISABLED: The ui should ensure that forbidden fields don't appear
+        # the async update system simply ignores fields that the user can't
+        # modify (see test_fields.rb).
+        # should "not be able to update root level fields" do
+        #   value = "Updated #{version}"
+        #   field = root.fields[:root_level]
+        #   auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}]" => value
+        #   assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
+        #   root.reload.fields[:root_level].value.should == @root_copy.root_level.value
+        # end
+
+        # should "not be able to update root level fields from admin level box" do
+        #   value = "Updated #{version}"
+        #   field = root.boxes[:admin_level].fields[:root_level]
+        #   auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:admin_level].schema_id}", "field[#{field.schema_id}]" => value
+        #   assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
+        # end
 
         should "be able to update admin level fields" do
           value = "Updated #{version}"
           field = root.fields[:admin_level]
-          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
+          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}]" => value
           assert last_response.ok?
           root.reload.fields[:admin_level].value.should == value
         end
@@ -448,14 +458,7 @@ class AuthenticationTest < MiniTest::Spec
         should "not be able to update fields from root level box" do
           value = "Updated #{version}"
           field = root.fields[:editor_level]
-          auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
-          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
-        end
-
-        should "not be able to update root level fields from admin level box" do
-          value = "Updated #{version}"
-          field = root.boxes[:admin_level].fields[:root_level]
-          auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:admin_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
+          auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}]" => value
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 

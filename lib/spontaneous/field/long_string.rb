@@ -1,8 +1,8 @@
 # encoding: UTF-8
 
-module Spontaneous::FieldTypes
-  class LongStringField < Field
-    include Spontaneous::FieldTypes::EditorClass
+module Spontaneous::Field
+  class LongString < Base
+    has_editor
 
     def generate_html(value)
       escape_html(value).gsub(/[\r\n]+/, "<br />")

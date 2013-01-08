@@ -46,7 +46,7 @@ module Spontaneous::Collections
 
     def parse_field_data(initial_values)
       values = (initial_values || []).map do |value|
-        value = S::FieldTypes.deserialize_field(value)
+        value = S::Field.deserialize_field(value)
         [Spontaneous.schema.uids[value[:id]], value]
       end
       Hash[values]
