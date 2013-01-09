@@ -140,6 +140,10 @@ module Spontaneous
         end
       end
 
+      def pk
+        @table.pk
+      end
+
       def logger
         @table.logger
       end

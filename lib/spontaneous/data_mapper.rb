@@ -44,7 +44,8 @@ module Spontaneous
         :update, :update!,
         :delete, :delete_instance,
         :for_update, :select,
-        :columns, :qualify_column, :quote_identifier,
+        :columns, :table_name,
+        :qualify_column, :quote_identifier,
         :with_cache,
         :logger, :logger=
 
@@ -112,6 +113,10 @@ module Spontaneous
 
       def db
         @table.db
+      end
+
+      def primary_key
+        @table.primary_key
       end
 
       def revision_table(revision)

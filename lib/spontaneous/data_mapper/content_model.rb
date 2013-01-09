@@ -163,6 +163,10 @@ module Spontaneous
         mapper.columns
       end
 
+      def primary_key
+        mapper.primary_key
+      end
+
       include Associations
 
       module InstanceMethods
@@ -286,6 +290,7 @@ module Spontaneous
           @attributes[:id]
         end
 
+        alias_method :pk, :id
 
         def update(values)
           set(values)

@@ -13,6 +13,10 @@ module Spontaneous
         dataset.columns
       end
 
+      def primary_key
+        :id
+      end
+
       def dataset(revision = nil)
         @database[revision_table(revision)]
       end
