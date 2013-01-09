@@ -51,9 +51,20 @@ module Spontaneous::Field
 
     def launch_asynchronous_update(fields)
       return if fields.empty?
+      # Keep the saving command here rather than in the field
+      # because all the fields most probably belong to
+      # the same owner
       owners(fields).each(&:save_fields)
-      updater_class = self.class.asynchronous_update_class
-      updater_class.process(fields)
+      fields.each do |field|
+        prepare_asynchronous_update(field)
+      end
+      updater = self.class.asynchronous_update_class
+      updater.process(fields)
+    end
+
+    def prepare_asynchronous_update(field)
+      field.before_asynchronous_update
+      Spontaneous::PageLock.lock_field(field)
     end
 
     class Immediate
@@ -68,8 +79,13 @@ module Spontaneous::Field
       def run
         @fields.each do |field|
           field.process_pending_value
+          remove_update_lock(field)
         end
         owners.each(&:save_fields)
+      end
+
+      def remove_update_lock(field)
+        Spontaneous::PageLock.unlock_field(field)
       end
 
       def owners

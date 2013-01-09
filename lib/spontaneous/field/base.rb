@@ -102,6 +102,15 @@ module Spontaneous
         set_value!(pending_value)
       end
 
+      # Called by Field::Update before launching the background
+      # task that updates the field values.
+      def before_asynchronous_update
+      end
+
+      def page_lock_description
+        "Field '#{self.name}' of #{owner.class}/#{owner.id}"
+      end
+
       def outputs
         [:html, :plain]
       end

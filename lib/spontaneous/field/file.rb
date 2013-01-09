@@ -25,6 +25,10 @@ module Spontaneous::Field
       super(pending)
     end
 
+    def page_lock_description
+      "Processing '#{pending_value[:filename]}'"
+    end
+
     def serialize_pending_file(file)
       { :tempfile => file.path, :type => file.mimetype, :filename => file.filename, :src => file.url }
     end

@@ -1182,6 +1182,119 @@ class FieldsTest < MiniTest::Spec
           @instance.image.pending_value.should be_nil
         end
       end
+
+      context "page locks" do
+        setup do
+          @now = Time.now
+          stub_time(@now)
+          LockedPage = Class.new(::Page)
+          LockedPage.field :image
+          LockedPage.box :instances do
+            field :image
+          end
+          LockedPiece = @model
+          @page = LockedPage.create
+          @instance = LockedPiece.create
+          @page.instances << @instance
+          @page.save.reload
+          @instance.save.reload
+          # The PageLock associations cache the Content model
+          # but since this changes every time later tests
+          # use an old version of Content with an old schema
+          S::PageLock.all_association_reflections.each do |r|
+            # Clear the cached class
+            r[:cache] = {}
+          end
+        end
+
+        teardown do
+          Spontaneous::PageLock.delete
+          self.class.send :remove_const, :LockedPage rescue nil
+          self.class.send :remove_const, :LockedPiece rescue nil
+        end
+
+        should "be created when scheduling a page field for async updating" do
+          Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+            "fields" => [@page.image.id]
+          })
+          File.open(@image, "r") do |file|
+            Spontaneous::Field.set(@page.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+            @page.image.value.should == ""
+            @page.update_locks.length.should == 1
+            lock = @page.update_locks.first
+            lock.field.should == @page.image
+            lock.content.should == @page
+            lock.page.should == @page
+            lock.description.should =~ /something\.gif/
+            lock.created_at.should == @now
+            @page.locked_for_update?.should be_true
+          end
+        end
+
+        should "not create locks for fields processed immediately" do
+          field = @instance.title
+          Spontaneous::Field.set(field, "Updated Title", nil, true)
+          field.value.should == "Updated Title"
+          @page.update_locks.length.should == 0
+          @page.locked_for_update?.should be_false
+        end
+
+        should "be created when scheduling a box field for async updating" do
+          field = @page.instances.image
+          Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+            "fields" => [field.id]
+          })
+          File.open(@image, "r") do |file|
+            Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+            field.value.should == ""
+            @page.update_locks.length.should == 1
+            lock = @page.update_locks.first
+            lock.field.should == field
+            lock.content.should == @page
+            lock.page.should == @page
+            lock.description.should =~ /something\.gif/
+            lock.created_at.should == @now
+            @page.locked_for_update?.should be_true
+          end
+        end
+
+        should "be created when scheduling a piece field for async updating" do
+          field = @instance.image
+          Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+            "fields" => [field.id]
+          })
+          File.open(@image, "r") do |file|
+            Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+            field.value.should == ""
+            @page.update_locks.length.should == 1
+            lock = @page.update_locks.first
+            lock.field.should == field
+            lock.content.should == @instance
+            lock.page.should == @page
+            lock.description.should =~ /something\.gif/
+            lock.created_at.should == @now
+            @page.locked_for_update?.should be_true
+          end
+        end
+
+        should "be removed when the field has been processed" do
+          Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+            "fields" => [@page.image.id]
+          })
+          File.open(@image, "r") do |file|
+            Spontaneous::Field.set(@page.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+            @page.image.value.should == ""
+            @page.update_locks.length.should == 1
+            @page.locked_for_update?.should be_true
+            # The lock manipulation is done by the updater
+            # so calling update_pending_value on the field
+            # won't clear any locks
+            Spontaneous::Field::Update::Immediate.process([@page.image])
+            @page.image.value.should == "/media/#{@page.id.to_s.rjust(5, "0")}/0001/something.gif"
+            @page.reload.locked_for_update?.should be_false
+          end
+        end
+      end
     end
   end
 end
