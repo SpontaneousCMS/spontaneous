@@ -144,6 +144,10 @@ module Spontaneous
         @table.pk
       end
 
+      def table_name
+        naked_dataset.first_source_alias
+      end
+
       def logger
         @table.logger
       end
@@ -167,7 +171,11 @@ module Spontaneous
       private
 
       def table_dataset(types)
-        @table.dataset(@revision).filter(conditions(types))
+        naked_dataset.filter(conditions(types))
+      end
+
+      def naked_dataset
+        @table.dataset(@revision)
       end
 
       def conditions(types)

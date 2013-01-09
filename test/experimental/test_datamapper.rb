@@ -133,6 +133,13 @@ class DataMapperTest < MiniTest::Spec
         end
       end
 
+      should "return the correct table name" do
+        @mapper.table_name.should == :"content"
+        @mapper.revision(10) do
+          @mapper.table_name.should == :"__r00010_content"
+        end
+      end
+
       should "allow for retrieval of rows from a specific revision" do
         @database.fetch = { id:1, label:"column1", type_sid:"DataMapperTest::MockContent" }
         instance = @mapper.revision(20).get(1)

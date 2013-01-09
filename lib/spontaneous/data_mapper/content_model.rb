@@ -167,6 +167,10 @@ module Spontaneous
         mapper.primary_key
       end
 
+      def table_name
+        mapper.table_name
+      end
+
       include Associations
 
       module InstanceMethods
