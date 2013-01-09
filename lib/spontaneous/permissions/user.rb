@@ -8,7 +8,7 @@ module Spontaneous::Permissions
 
     one_to_one   :group,        :class => :'Spontaneous::Permissions::AccessGroup'
     many_to_many :groups,       :class => :'Spontaneous::Permissions::AccessGroup', :join_table => :spontaneous_groups_users
-    one_to_many  :access_keys,  :class => :'Spontaneous::Permissions::AccessKey'
+    one_to_many  :access_keys,  :class => :'Spontaneous::Permissions::AccessKey', :reciprocal => :user
 
     set_restricted_columns(:crypted_password, :salt)
 
@@ -16,6 +16,16 @@ module Spontaneous::Permissions
 
     def self.encrypt_password(clear_password, salt)
       Digest::SHA1.hexdigest("--#{salt}--#{clear_password}--")
+    end
+
+    def self.login(login)
+      login_dataset.call(:login => login).first
+    end
+
+    def self.login_dataset
+      @login_dataset ||= self.where(:login => :$login).
+        eager_graph(:access_keys).
+        prepare(:select, :select_user_by_login)
     end
 
     def self.authenticate(login, clear_password, ip_address = nil)
