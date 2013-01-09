@@ -29,12 +29,12 @@ module Spontaneous::Field
     end
 
     def partition_fields(asynchronous)
-      fields = self.fields
-      return [fields.keys, []] unless asynchronous
-      filter    = proc { |f, v| f.asynchronous? }
+      fields = self.fields.keys
+      return [fields, []] unless asynchronous
+      filter    = proc { |f| f.asynchronous? }
       async     = fields.select(&filter)
       immediate = fields.reject(&filter)
-      [immediate.keys, async.keys]
+      [immediate, async]
     end
 
     def fields
