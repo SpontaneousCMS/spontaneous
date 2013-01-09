@@ -49,7 +49,9 @@ module Spontaneous
     end
 
     def self.find(*ids)
-      ids.map { |id| resolve_id(id) }.compact
+      fields = ids.map { |id| resolve_id(id) }.compact
+      return fields.first if ids.length == 1
+      fields
     end
 
     def self.resolve_id(id)

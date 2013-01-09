@@ -988,9 +988,12 @@ class FieldsTest < MiniTest::Spec
       should "not raise errors for invalid fields" do
         ::Content.stubs(:get).with('111').returns(@instance)
         ::Content.stubs(:get).with('xxx').returns(nil)
-        S::Field.find("xxx", "#{@instance.id}/xxx/#{@instance.items.title.schema_id}", "#{@instance.items.id}/nnn", @instance.items.title.id).should == [
-          @instance.items.title
-        ]
+        S::Field.find("xxx", "#{@instance.id}/xxx/#{@instance.items.title.schema_id}", "#{@instance.items.id}/nnn", @instance.items.title.id).should == [ @instance.items.title ]
+      end
+
+      should "return a single field if given a single id" do
+        ::Content.stubs(:get).with('111').returns(@instance)
+        S::Field.find(@instance.image.id).should == @instance.image
       end
 
       should "be disabled for Date fields" do
