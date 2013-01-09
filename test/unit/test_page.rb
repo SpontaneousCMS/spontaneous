@@ -176,6 +176,11 @@ class PageTest < MiniTest::Spec
         @s.page.should == @s
         @t.page.should == @t
       end
+
+      should "have a reference to themselves as content_instance" do
+        @p.content_instance.should == @p
+      end
+
       should "keep track of their depth" do
         @p.depth.should == 0
         @q.depth.should == 1

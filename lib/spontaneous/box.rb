@@ -185,6 +185,10 @@ module Spontaneous
       owner
     end
 
+    def content_instance
+      owner
+    end
+
     def page
       owner.page
     end

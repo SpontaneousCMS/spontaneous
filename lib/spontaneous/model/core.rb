@@ -93,6 +93,10 @@ module Spontaneous::Model
       content_model::Page.root
     end
 
+    def content_instance
+      self
+    end
+
     # Provides consistency between aliases & non-aliases
     # so that a mixed list of both can be treated the same
     # (for instance when ensuring uniqueness)
