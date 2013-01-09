@@ -310,6 +310,20 @@ module Spontaneous
           :user => owner.current_editor)
       end
 
+      def ==(o)
+        eql?(o)
+      end
+
+      def eql?(o)
+        super || (o.class == self.class &&
+                  o.id == id &&
+                  o.unprocessed_value == unprocessed_value &&
+                  o.values == values)
+      end
+
+      def hash
+        id.hash
+      end
 
       protected
 
