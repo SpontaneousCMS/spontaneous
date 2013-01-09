@@ -61,7 +61,15 @@ module Spontaneous
         :url => page.path,
         :side_effects => export_side_effects(page),
         :published_at => export_timestamp(page.last_published_at),
-        :modified_at => export_timestamp(page.modified_at) }
+        :modified_at => export_timestamp(page.modified_at),
+        :update_locks => export_update_locks(page) }
+    end
+
+    def export_update_locks(page)
+      keys = [:id, :content_id, :field_id, :description]
+      page.update_locks.map { |lock|
+        Hash[ keys.map { |key| [key, lock.send(key)]} ].update(:created_at => lock.created_at.httpdate)
+      }
     end
 
     def export_side_effects(page)

@@ -182,12 +182,14 @@ class ChangeTest < MiniTest::Spec
         # :editor_login => "someone",
         :depth => new_child1.depth,
         :side_effects => {},
+        :update_locks => [],
         :dependent => [{
           :id => page1.id,
           :depth => page1.depth,
           :title => page1.title.value,
           :url => page1.path,
           :side_effects => {},
+          :update_locks => [],
           :published_at => nil,
           :modified_at => page1.modified_at.httpdate,
         }]
@@ -261,6 +263,21 @@ class ChangeTest < MiniTest::Spec
       change.export[:side_effects].should == {
         :visibility => [{ :count => 1, :created_at => later.httpdate, :old_value => false, :new_value => true}]
       }
+    end
+
+    should "provide information about any update locks that exist on a page" do
+      root = Page.create(:title => "root")
+      lock = Spontaneous::PageLock.create(:page_id => root.id, :content_id => root.id, :field_id => root.title.id, :description => "Update Lock")
+      root.locked_for_update?.should be_true
+      result = S::Change.outstanding
+      change = result.detect { |change| change.page.id == root.id }
+      change.export[:update_locks].should == [{
+        id: lock.id,
+        content_id: root.id,
+        field_id: root.title.id,
+        description: "Update Lock",
+        created_at: @now.httpdate
+      }]
     end
   end
 end
