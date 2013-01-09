@@ -108,6 +108,10 @@ module Spontaneous
         dataset(types).order(*columns, &block)
       end
 
+      def limit(types, l, o = (no_offset = true; nil))
+        dataset(types).limit(l, o)
+      end
+
       def select(types, *columns, &block)
         dataset(types).select(*columns, &block)
       end

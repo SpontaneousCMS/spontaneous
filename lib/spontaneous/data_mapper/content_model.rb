@@ -143,6 +143,10 @@ module Spontaneous
         mapper.order(types, *columns, &block)
       end
 
+      def limit(l, o = (no_offset = true; nil))
+        mapper.limit(types, l, o)
+      end
+
       def for_update
         mapper.for_update
       end

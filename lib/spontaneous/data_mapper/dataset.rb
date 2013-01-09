@@ -105,6 +105,11 @@ module Spontaneous
         self
       end
 
+      def limit(l, o = (no_offset = true; nil))
+        @dataset.limit!(l, o)
+        self
+      end
+
       def select(*columns, &block)
         @dataset.select!(*columns, &block)
         self

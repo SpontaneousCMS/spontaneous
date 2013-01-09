@@ -217,6 +217,15 @@ class DataMapperTest < MiniTest::Spec
         ]
       end
 
+      should "allow for defining a limit" do
+        ds = @mapper.limit([MockContent], 10...20).all
+        ds = @mapper.filter([], label: "this").limit(10).all
+        @database.sqls.should == [
+          "SELECT * FROM content WHERE (type_sid IN ('DataMapperTest::MockContent')) LIMIT 10 OFFSET 10",
+          "SELECT * FROM content WHERE (label = 'this') LIMIT 10"
+        ]
+      end
+
       should "support chained filters" do
         @database.fetch = [
           { id:1, label:"column1", type_sid:"DataMapperTest::MockContent" }

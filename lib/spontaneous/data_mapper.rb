@@ -35,7 +35,7 @@ module Spontaneous
         :filter, :where,
         :filter!, :where!,
         :count, :count!,
-        :order,
+        :order, :limit,
         :all, :get, :[], :first,
         :all!, :first!,
         :reload,
