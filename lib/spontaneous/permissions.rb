@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require 'base58'
+require 'securerandom'
 
 module Spontaneous
   module Permissions
@@ -26,9 +27,7 @@ module Spontaneous
       end
 
       def random_string(length)
-        bytes = ((length * Math.log10(58))/(8 * Math.log10(2))).ceil + 2
-        string = Base58.encode(OpenSSL::Random.random_bytes(bytes).unpack("h*").first.to_i(16))
-        string[0...(length)]
+        SecureRandom.urlsafe_base64(length)[0...(length)]
       end
     end
   end
