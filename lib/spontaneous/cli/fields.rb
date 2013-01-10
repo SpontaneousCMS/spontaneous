@@ -13,7 +13,6 @@ module Spontaneous
         prepare! :update, :console
         fields = Spontaneous::Field.find(*options.fields)
         updater = Spontaneous::Field::Update::Immediate.new(fields)
-        unlocked_pages = updater.pages.reject { |p| p.locked_for_update? }
         updater.run
         send_completion_event(updater)
       end

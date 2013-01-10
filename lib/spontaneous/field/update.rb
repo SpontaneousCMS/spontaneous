@@ -81,11 +81,7 @@ module Spontaneous::Field
           field.process_pending_value
           remove_update_lock(field)
         end
-        owners.each do |owner|
-          # Need to reload in order to update the unlocked
-          # status of the pages
-          owner.save_fields.reload
-        end
+        owners.each(&:save_fields)
       end
 
 
@@ -94,11 +90,14 @@ module Spontaneous::Field
       end
 
       def owners
-        @fields.map(&:owner).uniq
+        @fields.map(&:owner).uniq.compact
       end
 
+      # Load these everytime to ensure they are updated with their
+      # correct lock status
       def pages
-        owners.map(&:page).uniq.compact
+        page_ids = owners.map(&:page).uniq.compact.map(&:id)
+        page_ids.map { |id| Spontaneous::Content.get(id) }
       end
     end
 
