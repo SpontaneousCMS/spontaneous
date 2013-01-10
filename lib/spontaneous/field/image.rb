@@ -164,6 +164,10 @@ module Spontaneous::Field
         attrs.merge(super)
       end
 
+      def page_lock_description
+        "Processing image '#{pending_value[:filename]}'"
+      end
+
       # original is special and should always be defined
       def original
         @original ||= sizes[:original]

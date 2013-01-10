@@ -108,7 +108,7 @@ module Spontaneous
       end
 
       def page_lock_description
-        "Field '#{self.name}' of #{owner.class}/#{owner.id}"
+        "Updating to new value"
       end
 
       def outputs
