@@ -1175,6 +1175,14 @@ class FieldsTest < MiniTest::Spec
         Spontaneous::Cli::Fields.start(["update", "--fields", @instance.image.id, @instance.items.title.id])
       end
 
+      should "call Fields::Update::Immediate from the cli with a single field" do
+        ::Content.stubs(:get).with('111').returns(@instance)
+        silence_logger {
+          Spontaneous::Cli::Fields.any_instance.stubs(:prepare!)
+        }
+        Spontaneous::Cli::Fields.start(["update", "--fields", @instance.image.id])
+      end
+
       should "revert to immediate updating if connection to simultaneous fails" do
         File.open(@image, "r") do |file|
           Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)

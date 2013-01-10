@@ -73,7 +73,7 @@ module Spontaneous::Field
       end
 
       def initialize(fields)
-        @fields = fields
+        @fields = Array(fields)
       end
 
       def run
