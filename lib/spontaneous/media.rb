@@ -34,6 +34,10 @@ module Spontaneous
     end
 
 
+    def pad_revision(r)
+      r.to_s.rjust(4, "0")
+    end
+
     def sha1(filepath)
       Digest::SHA1.file(filepath).hexdigest
     end

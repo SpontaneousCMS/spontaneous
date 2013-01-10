@@ -51,7 +51,11 @@ module Spontaneous::Media
     end
 
     def padded_revision
-      Spontaneous::Site.working_revision.to_s.rjust(4, "0")
+      Spontaneous::Media.pad_revision(revision)
+    end
+
+    def revision
+      Spontaneous::Site.working_revision
     end
 
     def media_dir
