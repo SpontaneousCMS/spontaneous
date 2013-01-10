@@ -8,11 +8,12 @@ module Spontaneous
     class Immediate
       include ::Simultaneous::Task
 
-      attr_reader :revision
+      attr_reader :revision, :now
 
       def initialize(revision, content_model)
         @revision, @content_model = revision, content_model
         @previous_revision = Spontaneous::Site.published_revision
+        @now = Time.now
       end
 
       def renderer
@@ -187,6 +188,15 @@ module Spontaneous
         File.open(rack_file, 'w') { |f| f.write(template) }
       end
 
+      # Creates a revisions/REVISION file that contains the directory name of the current
+      # revision. This is useful in deployment because it's a real (non-symlinked) file
+      # that changes with each publish and can hence be used as the target for an
+      # `inotifywait` script that does something with every publish.
+      def generate_revision_file(r)
+        rev_file = Spontaneous.revision_root / 'REVISION'
+        File.open(rev_file, 'w') { |f| f.write(Spontaneous::Media.pad_revision(r)) }
+      end
+
       def copy_static_files
         update_progress("copying_files")
         public_dest = Pathname.new(Spontaneous.revision_dir(revision) / 'public')
@@ -201,26 +211,31 @@ module Spontaneous
       def copy_facet_public_files(facet, public_dest)
         public_dirs = facet.paths.expanded(:public).map { |dir| Pathname.new(dir) }
         public_dirs.each do |public_src|
-          if public_src.exist?
-            public_src = public_src.realpath
-            Dir[public_src.to_s / "**/*"].each do |src|
-              src = Pathname.new(src)
-              # insert facet namespace in front of path to keep URLs consistent across
-              # the back & front servers
-              dest = [facet.file_namespace, src.relative_path_from(public_src).to_s].compact
-              dest = (public_dest + File.join(dest))
-              if src.directory?
-                dest.mkpath
-              else
-                case src.extname
-                when ".scss"
-                  render_sass_template(src, dest)
-                else
-                  link_file(src, dest)
-                end
-              end
+          next unless public_src.exist?
+          public_src = public_src.realpath
+          Dir[public_src.to_s / "**/*"].each do |src|
+            src = Pathname.new(src)
+            # insert facet namespace in front of path to keep URLs consistent across
+            # the back & front servers
+            dest = [facet.file_namespace, src.relative_path_from(public_src).to_s].compact
+            dest = (public_dest + File.join(dest))
+            if src.directory?
+              dest.mkpath
+            else
+              copy_public_file(src, dest)
             end
           end
+        end
+      end
+
+      def copy_public_file(src, dest)
+        # TODO: Add coffeescript compilation.
+        # Should be implemented using sprockets
+        case src.extname
+        when ".scss"
+          render_sass_template(src, dest)
+        else
+          link_file(src, dest)
         end
       end
 
@@ -269,11 +284,11 @@ module Spontaneous
 
       def after_publish
         update_progress("finalising")
-        S::Revision.create(:revision => revision, :published_at => Time.now)
+        S::Revision.create(:revision => revision, :published_at => now)
         Spontaneous::Site.send(:set_published_revision, revision)
         tmp = Spontaneous.revision_dir(revision) / "tmp"
         FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
-        symlink_revision(revision)
+        write_revision(revision)
 
         begin
           Spontaneous::Site.trigger(:after_publish, revision)
@@ -283,10 +298,18 @@ module Spontaneous
           # if a post publish hook raises an exception then we want to roll everything back
           S::Revision.filter(:revision => revision).delete
           Spontaneous::Site.send(:set_published_revision, @previous_revision)
-          symlink_revision(@previous_revision)
+          write_revision(@previous_revision)
           abort_publish(e)
           raise e
         end
+      end
+
+      # Makes the revision live on the filesystem by symlinking the revisions/current
+      # directory to the revision directory and writing the current revision to the
+      # revisions/REVISION file.
+      def write_revision(revision)
+        symlink_revision(revision)
+        generate_revision_file(revision)
       end
 
       def symlink_revision(rev)

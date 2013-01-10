@@ -273,6 +273,12 @@ class PublishingTest < MiniTest::Spec
         File.read(config_file).should =~ %r(#{Spontaneous.root})
       end
 
+      should "generate a REVISION file containing the published revision number" do
+        rev_file = @site.revision_root / "REVISION"
+        result = File.read(rev_file)
+        result.should == Spontaneous::Media.pad_revision(@revision)
+      end
+
       should "transparently support previously unknown formats by assuming a simple HTML like rendering model" do
         PublishablePage.add_output :rtf
         Content.delete_revision(@revision+1)
