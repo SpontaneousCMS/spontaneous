@@ -266,15 +266,26 @@ class ChangeTest < MiniTest::Spec
     end
 
     should "provide information about any update locks that exist on a page" do
-      root = Page.create(:title => "root")
-      lock = Spontaneous::PageLock.create(:page_id => root.id, :content_id => root.id, :field_id => root.title.id, :description => "Update Lock")
-      root.locked_for_update?.should be_true
+      Piece.field :async
+      page = Page.create(:title => "page")
+
+
+      piece = Piece.new
+
+      page.things << piece
+      page.save
+      piece.save
+
+      lock = Spontaneous::PageLock.create(:page_id => page.id, :content_id => piece.id, :field_id => piece.async.id, :description => "Update Lock")
+      page.locked_for_update?.should be_true
       result = S::Change.outstanding
-      change = result.detect { |change| change.page.id == root.id }
+      change = result.detect { |change| change.page.id == page.id }
       change.export[:update_locks].should == [{
         id: lock.id,
-        content_id: root.id,
-        field_id: root.title.id,
+        content_id: piece.id,
+        field_id: piece.async.id,
+        field_name: :async,
+        location: "Field ‘async’ of entry 1 in box ‘things’",
         description: "Update Lock",
         created_at: @now.httpdate
       }]

@@ -66,22 +66,16 @@ module Spontaneous
     end
 
     def export_update_locks(page)
-      keys = [:id, :content_id, :field_id, :description]
-      page.update_locks.map { |lock|
-        Hash[ keys.map { |key| [key, lock.send(key)]} ].update(:created_at => lock.created_at.httpdate)
-      }
+      keys = [:id, :content_id, :field_id, :field_name, :location, :description, :created_at]
+      page.update_locks.map { |lock| export_object(lock, keys) }
     end
 
     def export_side_effects(page)
-    side_effects = Hash.new { |h, k| h[k] = [] }
-       page.pending_modifications.map do |modification|
-         side_effects[modification.type] << {
-           :count => modification.count,
-           :created_at => export_timestamp(modification.created_at),
-           :old_value => modification.old_value,
-           :new_value => modification.new_value
-         }
-      end
+      keys = [:count, :created_at, :old_value, :new_value]
+      side_effects = Hash.new { |h, k| h[k] = [] }
+      page.pending_modifications.map { |modification|
+        side_effects[modification.type] << export_object(modification, keys)
+      }
       side_effects
     end
 
@@ -102,6 +96,18 @@ module Spontaneous
 
     def inspect
       %(#<Spontaneous::Change page=#{page.id} dependent=#{dependent.map(&:id).inspect}>)
+    end
+
+    def export_object(target, keys)
+      translate = proc { |value|
+        case value
+        when Time, Date
+          export_timestamp(value)
+        else
+          value
+        end
+      }
+      Hash[ keys.map { |k| [k, translate[target.send(k)] ] } ]
     end
   end
 end

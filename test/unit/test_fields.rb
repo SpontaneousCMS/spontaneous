@@ -1227,6 +1227,7 @@ class FieldsTest < MiniTest::Spec
             lock.page.should == @page
             lock.description.should =~ /something\.gif/
             lock.created_at.should == @now
+            lock.location.should == "Field ‘image’"
             @page.locked_for_update?.should be_true
           end
         end
@@ -1254,6 +1255,7 @@ class FieldsTest < MiniTest::Spec
             lock.page.should == @page
             lock.description.should =~ /something\.gif/
             lock.created_at.should == @now
+            lock.location.should == "Field ‘image’ of box ‘instances’"
             @page.locked_for_update?.should be_true
           end
         end
@@ -1273,6 +1275,7 @@ class FieldsTest < MiniTest::Spec
             lock.page.should == @page
             lock.description.should =~ /something\.gif/
             lock.created_at.should == @now
+            lock.location.should == "Field ‘image’ of entry 1 in box ‘instances’"
             @page.locked_for_update?.should be_true
           end
         end

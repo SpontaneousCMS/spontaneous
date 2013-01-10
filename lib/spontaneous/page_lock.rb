@@ -1,3 +1,4 @@
+# encoding: UTF-8
 
 module Spontaneous
   class PageLock < Sequel::Model(:spontaneous_page_lock)
@@ -40,6 +41,22 @@ module Spontaneous
 
     def field
       @field ||= Spontaneous::Field.find(field_id)
+    end
+
+    def field_name
+      field.name
+    end
+
+    def location
+      field, owner = self.field, self.field.owner
+      case owner
+      when Spontaneous::Content::Box
+        "Field ‘#{field.name}’ of box ‘#{owner.box_name}’"
+      when Spontaneous::Content::Page
+        "Field ‘#{field.name}’"
+      when Spontaneous::Content::Piece
+        "Field ‘#{field.name}’ of entry #{owner.position + 1} in box ‘#{owner.container.box_name}’"
+      end
     end
   end
 end
