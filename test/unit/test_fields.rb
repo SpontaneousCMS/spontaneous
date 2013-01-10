@@ -1305,6 +1305,23 @@ class FieldsTest < MiniTest::Spec
             @page.reload.locked_for_update?.should be_false
           end
         end
+
+        should "send a completion event that includes a list of unlocked pages eee" do
+          field = @instance.image
+          Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+            "fields" => [field.id]
+          })
+          Simultaneous.expects(:send_event).with('page_lock_status', "[#{@page.id}]")
+
+          File.open(@image, "r") do |file|
+            Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+            @page.locked_for_update?.should be_true
+            silence_logger {
+              Spontaneous::Cli::Fields.any_instance.stubs(:prepare!)
+            }
+            Spontaneous::Cli::Fields.start(["update", "--fields", field.id])
+          end
+        end
       end
     end
   end

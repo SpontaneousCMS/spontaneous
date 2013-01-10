@@ -17,6 +17,9 @@ module Spontaneous
         ::Simultaneous.on_event("publish_progress") { |event|
           @messenger.deliver_event(event)
         }
+        ::Simultaneous.on_event("page_lock_status") { |event|
+          @messenger.deliver_event(event)
+        }
         @messenger
       end
 

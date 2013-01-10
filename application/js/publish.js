@@ -6,6 +6,25 @@ Spontaneous.Publishing = (function($, S) {
 	var PublishingDialogue = new JS.Class(Dialogue, {
 		initialize: function(content) {
 			this.change_sets = [];
+			var callback = this.page_lock_removed.bind(this);
+			var page_lock_removed = function(event) {
+				callback($.parseJSON(event.data))
+			};
+			S.EventSource.addEventListener('page_lock_status', page_lock_removed);
+			this.page_lock_removed_listener = page_lock_removed;
+		},
+		page_lock_removed: function(page_ids) {
+			var changes = this.change_sets, toUnlock = [];
+			page_ids.forEach(function(id) {
+				toUnlock = toUnlock.concat(changes.filter(function(c) { return c.change.id == id }))
+			});
+
+			toUnlock.forEach(function(cs) {
+				cs.unlock();
+			});
+		},
+		cleanup: function() {
+			S.EventSource.removeEventListener('page_lock_status', this.page_lock_removed_listener);
 		},
 		width: function() {
 			return '90%';
@@ -194,6 +213,11 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		isLocked: function() {
 			return this.locks().length > 0;
+		},
+		unlock: function() {
+			var w = this.wrapper;
+			w.removeClass("locked").find(".lock-state").remove();
+			this.locks().length = 0;
 		},
 		page_ids: function() {
 			var ids = [this.change.id];
