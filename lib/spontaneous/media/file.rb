@@ -47,7 +47,7 @@ module Spontaneous::Media
     end
 
     def padded_id
-      owner.media_id.to_s.rjust(5, "0")
+      Spontaneous::Media.pad_id(owner.media_id)
     end
 
     def padded_revision
