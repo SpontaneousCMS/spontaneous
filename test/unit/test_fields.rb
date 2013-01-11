@@ -1072,6 +1072,7 @@ class FieldsTest < MiniTest::Spec
           @instance.image.value.should == ""
           @instance.image.pending_value.should == {
             :timestamp => S::Field.timestamp(@now),
+            :version => 1,
             :value => {
               :width=>400, :height=>533, :filesize=>54746,
               :type=>"image/gif",
@@ -1091,10 +1092,12 @@ class FieldsTest < MiniTest::Spec
           "fields" => [@instance.image.id]
         })
         File.open(@image, "r") do |file|
+          @instance.image.pending_version.should == 0
           Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           @instance.image.value.should == ""
           @instance.image.pending_value.should == {
             :timestamp => S::Field.timestamp(@now),
+            :version => 1,
             :value => {
               :width=>400, :height=>533, :filesize=>54746,
               :type=>"image/gif",
@@ -1103,6 +1106,7 @@ class FieldsTest < MiniTest::Spec
               :src => "/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif"
             }
           }
+          @instance.image.pending_version.should == 1
           @instance.image.process_pending_value
           @instance.image.value.should == "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         end
@@ -1118,6 +1122,7 @@ class FieldsTest < MiniTest::Spec
           Spontaneous::Field.update(box, fields, nil, false)
           box.title.value.should == "Updated title"
           box.image.value.should == "/media/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/0001/something.gif"
+          @instance.image.pending_version.should == 1
         end
       end
 
@@ -1136,6 +1141,7 @@ class FieldsTest < MiniTest::Spec
           box.image.value.should == ""
           box.image.pending_value.should == {
             :timestamp => S::Field.timestamp(@now),
+            :version => 1,
             :value => {
               :width=>400, :height=>533, :filesize=>54746,
               :type=>"image/gif",

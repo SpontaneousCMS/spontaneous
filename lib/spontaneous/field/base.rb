@@ -82,6 +82,7 @@ module Spontaneous
       def pending_value=(value)
         values[:__pending__] = {
           :value => value,
+          :version => version + 1,
           :timestamp => Spontaneous::Field.timestamp
         }
       end
@@ -179,6 +180,15 @@ module Spontaneous
 
       def version
         @version ||= 0
+      end
+
+      def pending_version
+        return version unless has_pending_value?
+        pending_value[:version]
+      end
+
+      def matches_version?(v)
+        (version != v) && (pending_version != v)
       end
 
       # value used to show conflicts between the current value and the value they're attempting to enter

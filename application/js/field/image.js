@@ -65,6 +65,28 @@ Spontaneous.Field.Image = (function($, S) {
 			return v['__ui__'] || v['original'];
 		},
 
+		/*
+		* HACK: The async nature of image updates means that the version setting
+		* may be out of date not because of the actions of another, but because
+		* the field version has been updated in the background.
+		* The right way to do this would be to use an event to update the field
+		* values at the point where the update is complete, but that's a big change.
+		*
+		* If I do that then I could use it to update all field values across all sessions
+		* and avoid most conflicts by keeping the field values up-to-date automatically
+		* but I'm not ready for that just yet...
+		*
+		* Instead hackily use the pending version and hope it's not going to cause
+		* weird problems with simultaneous updates.
+		*/
+		version: function() {
+			var value = this.get("value");
+			if ((pending = value["__pending__"])) {
+				return pending["version"];
+			}
+			return this.data.version;
+		},
+
 		preview: function(container) {
 			Spontaneous.UploadManager.register(this);
 			var self = this
@@ -117,7 +139,7 @@ Spontaneous.Field.Image = (function($, S) {
 				this.spinner().indeterminate();
 
 				if (files.length > 0) {
-					this.selected_files = files;
+					this.select_files(files);
 					var file = files[0],
 					url = window.URL.createObjectURL(file)
 					, image = this.image;
@@ -170,7 +192,7 @@ Spontaneous.Field.Image = (function($, S) {
 			return outer;
 		},
 		conflicts_resolved: function(resolution_list) {
-			console.log('conflicts_resolved', resolution_list)
+			// console.log('conflicts_resolved', resolution_list)
 			var resolution = resolution_list[0];
 			this.set_edited_value(resolution.value);
 			this.set_version(resolution.version);
@@ -195,7 +217,7 @@ Spontaneous.Field.Image = (function($, S) {
 			return this._spinner;
 		},
 		upload_complete: function(values) {
-
+			this.mark_unmodified();
 			this.callSuper(values)
 			if (values) {
 				var value = this.currentValue();
@@ -263,12 +285,11 @@ Spontaneous.Field.Image = (function($, S) {
 				if (files.length > 0) {
 					var file = files[0], url = window.URL.createObjectURL(file);
 					img.attr('src', url).removeClass('empty');
-					this.selected_files = files;
+					this.select_files(files);
 					img.attr('src', url)
 					this._edited_value = url;
 					this.image.attr('src', url)
 					window.URL.revokeObjectURL(url);
-					console.log(file)
 					set_info(File.filename(file), file.fileSize, null, null)
 				}
 			}.bind(this);
@@ -336,8 +357,16 @@ Spontaneous.Field.Image = (function($, S) {
 			return wrap;
 		},
 
+		select_files: function(files) {
+			this.selected_files = files;
+			this.mark_modified();
+		},
+
+		is_modified: function() {
+			return this.get_modified_state();
+		},
+
 		get_input: function() {
-			console.log("FileField", "#get_input")
 			this.input = this.generate_input();
 			return this.input;
 		},
