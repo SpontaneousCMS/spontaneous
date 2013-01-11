@@ -1273,6 +1273,45 @@ class DataMapperTest < MiniTest::Spec
           "SELECT * FROM __r00020_content WHERE (label = 'frog') LIMIT 1"
         ]
       end
+
+      should "allow for forcing the creation of a new scope to bypass the cache" do
+        @database.fetch = [
+          { id: 7, type_sid:"DataMapperTest::MockContent", parent_id: 7 }
+        ]
+        a = b = c = nil
+
+        @mapper.scope(nil, false) do
+          a = @mapper.first! :id => 7
+          @mapper.scope(nil, false) do
+            b = @mapper.first! :id => 7
+            @mapper.scope!(nil, false) do
+              c = @mapper.first! :id => 7
+            end
+          end
+        end
+        assert a.object_id == b.object_id, "a and b should be the same object"
+        assert a.object_id != c.object_id
+      end
+
+      should "update the instance cache with updated values after a reload" do
+        @database.fetch = [
+          [{ id: 7, type_sid:"DataMapperTest::MockContent", parent_id: 7, label: "a" }],
+          [{ id: 7, type_sid:"DataMapperTest::MockContent", parent_id: 7, label: "b" }],
+          [{ id: 7, type_sid:"DataMapperTest::MockContent", parent_id: 7, label: "b" }]
+        ]
+        a = b = c = nil
+        la = lb = lc = nil
+
+        @mapper.scope(nil, false) do
+          a = @mapper.first! :id => 7
+          la = a.label
+          b = a.reload
+          lb = b.label
+          c = @mapper.get 7
+          lc = c.label
+        end
+        assert [la, lb, lc] == ["a", "b", "b"], "Incorrect labels #{[la, lb, lc].inspect}"
+      end
     end
   end
 end

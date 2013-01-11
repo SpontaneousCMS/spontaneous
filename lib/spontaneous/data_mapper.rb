@@ -55,12 +55,24 @@ module Spontaneous
         scope(current_revision, visible_only, &block)
       end
 
+      def visible!(visible_only = true, &block)
+        scope!(current_revision, visible_only, &block)
+      end
+
       def revision(r = current_revision, &block)
         scope(r, visible_only?, &block)
       end
 
+      def revision!(r = current_revision, &block)
+        scope!(r, visible_only?, &block)
+      end
+
       def editable(&block)
         revision(nil, &block)
+      end
+
+      def editable!(&block)
+        revision!(nil, &block)
       end
 
       def scope(revision, visible, &block)
@@ -71,11 +83,11 @@ module Spontaneous
             dataset
           end
         else
-          with_scope(revision, visible, &block)
+          scope!(revision, visible, &block)
         end
       end
 
-      def with_scope(revision, visible, &block)
+      def scope!(revision, visible, &block)
         if block_given?
           r, v, d  = @keys.values_at(:revision, :visible, :dataset)
           thread   = Thread.current
@@ -91,6 +103,14 @@ module Spontaneous
         else
           scope_for(revision, visible)
         end
+      end
+
+      def dataset
+        Thread.current[@keys[:dataset]] || current_scope
+      end
+
+      def cached_dataset?
+        !Thread.current[@keys[:dataset]].nil?
       end
 
       def use_current_scope?(revision, visible)
@@ -133,14 +153,6 @@ module Spontaneous
 
       def schema_uid(id_string)
         @schema.uids[id_string]
-      end
-
-      def dataset
-        Thread.current[@keys[:dataset]] || current_scope
-      end
-
-      def cached_dataset?
-        !Thread.current[@keys[:dataset]].nil?
       end
 
       private
