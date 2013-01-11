@@ -4,7 +4,6 @@ module Spontaneous
   module Crypt
     VERSION_SEP = "%".freeze
 
-    # <version>=<password field>:<password field>
     module ModuleMethods
       def current
         return version(@forced) if @forced
