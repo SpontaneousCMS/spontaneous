@@ -131,6 +131,9 @@ module Spontaneous
       _name.to_s
     end
 
+    def reload
+      owner.reload
+    end
     # needed by Render::Context
     def box?(box_name)
       false
@@ -158,15 +161,35 @@ module Spontaneous
     end
 
     def field_modified!(modified_field = nil)
+      save_fields!
+    end
+
+    def save_fields(fields = nil)
+      save_fields!(fields)
+      save
+    end
+
+    # Use @serialized_fields to temporarily overwrite the value of
+    # #serialized_fields because this call may be coming from an async
+    # process that only wants to update a subset of the field values
+    # and because we don't have direct access to the serialization
+    # store we have to control our serialization output.
+    # TODO: Make boxes responsible for directly writing their serialized
+    # form
+    def save_fields!(fields = nil)
       @modified = true
+      @serialized_fields = update_serialized_fields(fields)
       owner.box_modified!(self)
+      @serialized_fields = nil
     end
 
     def serialize_db
-      {
-        :box_id => schema_id.to_s,
-        :fields => fields.serialize_db
-      }
+      { :box_id => schema_id.to_s,
+        :fields => serialized_fields }
+    end
+
+    def serialized_fields
+      @serialized_fields || fields.serialize_db
     end
 
     def self.resolve_style(box)

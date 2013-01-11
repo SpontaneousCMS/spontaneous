@@ -72,13 +72,18 @@ module Spontaneous
         owner.field_writable?(user, name)
       end
 
-      # IF a field type needs to do some long running processing on a
+      # If a field type needs to do some long running processing
+      # then it should declare itself as asynchronous so as not to tie up
+      # the CMS process.
       def asynchronous?
         false
       end
 
       def pending_value=(value)
-        values[:__pending__] = value
+        values[:__pending__] = {
+          :value => value,
+          :timestamp => Spontaneous::Field.timestamp
+        }
       end
 
       def pending_value
@@ -86,7 +91,7 @@ module Spontaneous
       end
 
       def has_pending_value?
-        values.key?(:__pending__)
+        values.key?(:__pending__) && values[:__pending__].key?(:value)
       end
 
       def clear_pending_value
@@ -99,7 +104,36 @@ module Spontaneous
       end
 
       def process_pending_value!
-        set_value!(pending_value)
+        if has_pending_value?
+          @previous_values = values.dup
+          set_value!(pending_value[:value])
+        end
+      end
+
+      def validate_update!
+        return true if is_valid_pending_value?
+        self.processed_values = @previous_values
+        false
+      end
+
+      def is_valid_pending_value?
+        return true if @previous_values.nil?
+        reloaded = reload
+        pending = @previous_values[:__pending__] || {}
+        p1 = pending[:timestamp] || 0
+        p2 = (reloaded.pending_value || {})[:timestamp] || 0
+        if p1 >= p2
+          true
+        else
+          @previous_values = reloaded.values
+          false
+        end
+      end
+
+      def reload
+        Spontaneous::Content.scope! do
+          Spontaneous::Field.find(self.id)
+        end
       end
 
       # Called by Field::Update before launching the background

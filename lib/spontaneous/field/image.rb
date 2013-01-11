@@ -165,7 +165,7 @@ module Spontaneous::Field
       end
 
       def page_lock_description
-        "Processing image '#{pending_value[:filename]}'"
+        "Processing image '#{pending_value[:value][:filename]}'"
       end
 
       # original is special and should always be defined

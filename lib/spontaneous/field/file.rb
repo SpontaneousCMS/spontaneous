@@ -26,7 +26,7 @@ module Spontaneous::Field
     end
 
     def page_lock_description
-      "Processing file '#{pending_value[:filename]}'"
+      "Processing file '#{pending_value[:value][:filename]}'"
     end
 
     def serialize_pending_file(file)

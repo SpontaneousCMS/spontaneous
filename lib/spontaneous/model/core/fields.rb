@@ -109,11 +109,35 @@ module Spontaneous::Model::Core
 
     # TODO: unify the update mechanism for these two stores
     def field_modified!(modified_field = nil)
-      self.field_store = @field_set.serialize_db
+      serialize_fields
     end
 
-    def save_fields
-      field_modified!
+    def serialize_fields(fields = nil)
+      self.field_store = update_serialized_fields(fields)
+    end
+
+    def update_serialized_fields(fields = nil)
+      if fields.nil?
+        @field_set.serialize_db
+      else
+        field_store = (self.field_store || []).dup
+        fields.each do |field|
+          schema_id = field.schema_id.to_s
+          if (index = field_store.index { |f| f[0] == schema_id })
+            field_store[index.to_i] = field.serialize_db
+          else
+            field_store << field.serialize_db
+          end
+        end
+        field_store
+      end
+    end
+
+    # Re-serializes the field store.
+    #
+    # If fields is given then only the fields included in it will be written
+    def save_fields(fields = nil)
+      serialize_fields(fields)
       save
     end
 

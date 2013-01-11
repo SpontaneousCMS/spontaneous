@@ -7,6 +7,7 @@ class FieldsTest < MiniTest::Spec
   def setup
     @site = setup_site
     @now = Time.now
+    stub_time(@now)
     Site.background_mode = :immediate
   end
 
@@ -956,7 +957,7 @@ class FieldsTest < MiniTest::Spec
       setup do
         S::Site.background_mode = :simultaneous
         @image = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-        @model = Class.new(::Piece)
+        @model = (::Piece)
         @model.field :title
         @model.field :image
         @model.field :description, :markdown
@@ -964,8 +965,7 @@ class FieldsTest < MiniTest::Spec
           field :title
           field :image
         end
-        @instance = @model.new
-        @instance.stubs(:id).returns(111)
+        @instance = @model.create
       end
 
       # should "be disabled if the background mode is set to immediate" do
@@ -979,20 +979,16 @@ class FieldsTest < MiniTest::Spec
       # end
 
       should "be able to resolve fields id" do
-        ::Content.stubs(:get).with('111').returns(@instance)
         S::Field.find(@instance.image.id, @instance.items.title.id).should == [
           @instance.image, @instance.items.title
         ]
       end
 
       should "not raise errors for invalid fields" do
-        ::Content.stubs(:get).with('111').returns(@instance)
-        ::Content.stubs(:get).with('xxx').returns(nil)
-        S::Field.find("xxx", "#{@instance.id}/xxx/#{@instance.items.title.schema_id}", "#{@instance.items.id}/nnn", @instance.items.title.id).should == [ @instance.items.title ]
+        S::Field.find("0", "#{@instance.id}/xxx/#{@instance.items.title.schema_id}", "#{@instance.items.id}/nnn", @instance.items.title.id).should == [ @instance.items.title ]
       end
 
       should "return a single field if given a single id" do
-        ::Content.stubs(:get).with('111').returns(@instance)
         S::Field.find(@instance.image.id).should == @instance.image
       end
 
@@ -1049,9 +1045,10 @@ class FieldsTest < MiniTest::Spec
             @instance.description.schema_id.to_s => "Updated description"
           }
           Spontaneous::Field.update(@instance, fields, nil, false)
+          @instance.reload
           @instance.title.value.should == "Updated title"
           @instance.description.value.should == "<p>Updated description</p>\n"
-          @instance.image.value.should == "/media/00111/0001/something.gif"
+          @instance.image.value.should == "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         end
       end
 
@@ -1074,14 +1071,17 @@ class FieldsTest < MiniTest::Spec
           @instance.description.value.should == "<p>Updated description</p>\n"
           @instance.image.value.should == ""
           @instance.image.pending_value.should == {
-            :width=>400, :height=>533, :filesize=>54746,
-            :type=>"image/gif",
-            :tempfile=>"#{@site.root}/cache/media/tmp/00111/something.gif",
-            :filename=>"something.gif",
-            :src => "/media/tmp/00111/something.gif"
+            :timestamp => S::Field.timestamp(@now),
+            :value => {
+              :width=>400, :height=>533, :filesize=>54746,
+              :type=>"image/gif",
+              :tempfile=>"#{@site.root}/cache/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif",
+              :filename=>"something.gif",
+              :src => "/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif"
+            }
           }
           @instance.image.process_pending_value
-          @instance.image.value.should == "/media/00111/0001/something.gif"
+          @instance.image.value.should == "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
           @instance.image.pending_value.should be_nil
         end
       end
@@ -1094,14 +1094,17 @@ class FieldsTest < MiniTest::Spec
           Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           @instance.image.value.should == ""
           @instance.image.pending_value.should == {
-            :width=>400, :height=>533, :filesize=>54746,
-            :type=>"image/gif",
-            :tempfile=>"#{@site.root}/cache/media/tmp/00111/something.gif",
-            :filename=>"something.gif",
-            :src => "/media/tmp/00111/something.gif"
+            :timestamp => S::Field.timestamp(@now),
+            :value => {
+              :width=>400, :height=>533, :filesize=>54746,
+              :type=>"image/gif",
+              :tempfile=>"#{@site.root}/cache/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif",
+              :filename=>"something.gif",
+              :src => "/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif"
+            }
           }
           @instance.image.process_pending_value
-          @instance.image.value.should == "/media/00111/0001/something.gif"
+          @instance.image.value.should == "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         end
       end
 
@@ -1114,7 +1117,7 @@ class FieldsTest < MiniTest::Spec
           }
           Spontaneous::Field.update(box, fields, nil, false)
           box.title.value.should == "Updated title"
-          box.image.value.should == "/media/00111/#{box.schema_id}/0001/something.gif"
+          box.image.value.should == "/media/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/0001/something.gif"
         end
       end
 
@@ -1132,11 +1135,14 @@ class FieldsTest < MiniTest::Spec
           box.title.value.should == "Updated title"
           box.image.value.should == ""
           box.image.pending_value.should == {
-            :width=>400, :height=>533, :filesize=>54746,
-            :type=>"image/gif",
-            :tempfile=>"#{@site.root}/cache/media/tmp/00111/#{box.schema_id}/something.gif",
-            :filename=>"something.gif",
-            :src => "/media/tmp/00111/#{box.schema_id}/something.gif"
+            :timestamp => S::Field.timestamp(@now),
+            :value => {
+              :width=>400, :height=>533, :filesize=>54746,
+              :type=>"image/gif",
+              :tempfile=>"#{@site.root}/cache/media/tmp/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/something.gif",
+              :filename=>"something.gif",
+              :src => "/media/tmp/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/something.gif"
+            }
           }
         end
       end
@@ -1149,7 +1155,7 @@ class FieldsTest < MiniTest::Spec
           }
           Spontaneous::Simultaneous.expects(:fire).never
           Spontaneous::Field.update(@instance, fields, nil, true)
-          @instance.image.value.should == "/media/00111/0001/something.gif"
+          @instance.image.value.should == "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         end
       end
 
@@ -1164,7 +1170,6 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "call Fields::Update::Immediate from the cli" do
-        ::Content.stubs(:get).with('111').returns(@instance)
         immediate = mock()
         immediate.expects(:pages).returns([])
         immediate.expects(:run)
@@ -1177,7 +1182,6 @@ class FieldsTest < MiniTest::Spec
       end
 
       should "call Fields::Update::Immediate from the cli with a single field" do
-        ::Content.stubs(:get).with('111').returns(@instance)
         silence_logger {
           Spontaneous::Cli::Fields.any_instance.stubs(:prepare!)
         }
@@ -1187,7 +1191,7 @@ class FieldsTest < MiniTest::Spec
       should "revert to immediate updating if connection to simultaneous fails" do
         File.open(@image, "r") do |file|
           Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
-          @instance.image.value.should == "/media/00111/0001/something.gif"
+          @instance.image.value.should == "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
           @instance.image.pending_value.should be_nil
         end
       end
@@ -1200,6 +1204,7 @@ class FieldsTest < MiniTest::Spec
           LockedPage.field :image
           LockedPage.box :instances do
             field :image
+            field :title
           end
           LockedPiece = @model
           @page = LockedPage.create
@@ -1259,8 +1264,8 @@ class FieldsTest < MiniTest::Spec
             field.value.should == ""
             @page.update_locks.length.should == 1
             lock = @page.update_locks.first
-            lock.field.should == field
-            lock.content.should == @page
+            lock.field.should == field.reload
+            lock.content.should == @page.reload
             lock.page.should == @page
             lock.description.should =~ /something\.gif/
             lock.created_at.should == @now
@@ -1307,7 +1312,7 @@ class FieldsTest < MiniTest::Spec
           end
         end
 
-        should "send a completion event that includes a list of unlocked pages eee" do
+        should "send a completion event that includes a list of unlocked pages" do
           field = @instance.image
           Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
             "fields" => [field.id]
@@ -1322,6 +1327,92 @@ class FieldsTest < MiniTest::Spec
             }
             Spontaneous::Cli::Fields.start(["update", "--fields", field.id])
           end
+        end
+
+        should "ignore an update that has been superceded" do
+          # user uploads an image and then changes their mind and uploads another
+          # before the first one has been processed.
+          # Pending value might have changed between the start of the update and the end
+          # especially in the case of video processing or file upload
+          # Before we update the value of a field or
+          # clear pending values we need to be sure that they aren't still needed
+          #
+
+          field = @instance.image
+          Spontaneous::Simultaneous.expects(:fire).at_least_once.with(:update_fields, {
+            "fields" => [field.id]
+          })
+          File.open(@image, "r") do |file|
+            Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          end
+          update = Spontaneous::Field::Update::Immediate.new(field)
+          old, field = field, field.reload
+          later = @now + 1
+          t = S::Field.timestamp(later)
+          S::Field.stubs(:timestamp).returns(t)
+          File.open(@image, "r") do |file|
+            Spontaneous::Field.set(field, {:tempfile => file, :filename => "else.gif", :type => "image/jpeg"}, nil, true)
+          end
+          update.run
+
+          pending = field.pending_value
+          pending[:value][:filename].should == "else.gif"
+        end
+
+        should "merge async updates with synchronous ones effected during processing" do
+          # Scenario:
+          # - User uploads file to content item which gets scheduled for async processing
+          # - User modifies synchronous field of same content item that gets immediately updated
+          # - Async process completes and...
+          #   SHOULD
+          #   Keep the updated values from the immediate change
+          #   Merge in the results of the async change
+          field = @instance.image
+          Spontaneous::Simultaneous.expects(:fire).at_least_once.with(:update_fields, {
+            "fields" => [field.id]
+          })
+          File.open(@image, "r") do |file|
+            Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          end
+          # Create update but don't run it
+          update = Spontaneous::Field::Update::Immediate.new(field)
+          # Someone updates a field before the async update is run...
+          content = ::Content.get(@instance.id)
+          content.title = "Updated Title"
+          content.save
+
+          # Now run the update with a field that's out of sync with the version in the db
+          update.run
+
+          content = ::Content.get(@instance.id)
+          content.title.value.should == "Updated Title"
+          content.image.value.should == "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        end
+
+        should "merge async updates to box fields with synchronous ones effected during processing" do
+          # The scenario for boxes is more complex because their fields are stored by their owner
+          # not directly by themselves
+          field = @page.instances.image
+          Spontaneous::Simultaneous.expects(:fire).at_least_once.with(:update_fields, {
+            "fields" => [field.id]
+          })
+          File.open(@image, "r") do |file|
+            Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          end
+          # Create update but don't run it
+          update = Spontaneous::Field::Update::Immediate.new(field)
+          # Someone updates a field before the async update is run...
+          content = ::Content.get(@page.id)
+          content.instances.title = "Updated Title"
+          content.save
+
+          # Now run the update with a field that's out of sync with the version in the db
+          update.run
+
+
+          content = ::Content.get(@page.id)
+          content.instances.title.value.should == "Updated Title"
+          content.instances.image.value.should == "/media/#{S::Media.pad_id(@page.id)}/#{@page.instances.schema_id}/0001/something.gif"
         end
       end
     end
