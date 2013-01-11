@@ -147,6 +147,18 @@ Spontaneous.Field.String = (function($, S) {
 			// version in the case of a conflict
 			return true;
 		},
+		mark_modified: function() {
+			this.set_modified_state(true);
+		},
+		mark_unmodified: function() {
+			this.set_modified_state(false);
+		},
+		set_modified_state: function(state) {
+			this._is_modified = state;
+		},
+		get_modified_state: function() {
+			return this._is_modified;
+		},
 		original_value: function() {
 			return this.unprocessed_value();
 		},

@@ -8,6 +8,19 @@ module Spontaneous
           super
         end
 
+        # Provided for compatibility with Sequel models.
+        #
+        # In particular when constructing associations between
+        # a content model and a Sequel model, the Sequel
+        # association tries to automatically set the reciprocal
+        # value and uses Model.all_association_reflections to
+        # search for appropriate candidates.
+        #
+        # Returning an empty array here stops this crashing.
+        def all_association_reflections
+          []
+        end
+
         def associations
           @associations ||= {}
         end

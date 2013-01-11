@@ -6,6 +6,25 @@ Spontaneous.Publishing = (function($, S) {
 	var PublishingDialogue = new JS.Class(Dialogue, {
 		initialize: function(content) {
 			this.change_sets = [];
+			var callback = this.page_lock_removed.bind(this);
+			var page_lock_removed = function(event) {
+				callback($.parseJSON(event.data))
+			};
+			S.EventSource.addEventListener('page_lock_status', page_lock_removed);
+			this.page_lock_removed_listener = page_lock_removed;
+		},
+		page_lock_removed: function(page_ids) {
+			var changes = this.change_sets, toUnlock = [];
+			page_ids.forEach(function(id) {
+				toUnlock = toUnlock.concat(changes.filter(function(c) { return c.change.id == id }))
+			});
+
+			toUnlock.forEach(function(cs) {
+				cs.unlock();
+			});
+		},
+		cleanup: function() {
+			S.EventSource.removeEventListener('page_lock_status', this.page_lock_removed_listener);
 		},
 		width: function() {
 			return '90%';
@@ -189,6 +208,17 @@ Spontaneous.Publishing = (function($, S) {
 			this.change = change;
 			this.selected = false;
 		},
+		locks: function(){
+			return this.change.update_locks;
+		},
+		isLocked: function() {
+			return this.locks().length > 0;
+		},
+		unlock: function() {
+			var w = this.wrapper;
+			w.removeClass("locked").find(".lock-state").remove();
+			this.locks().length = 0;
+		},
 		page_ids: function() {
 			var ids = [this.change.id];
 			return ids.concat(this.dependent_pages().map(function(p) { return p.id; }));
@@ -206,10 +236,33 @@ Spontaneous.Publishing = (function($, S) {
 			, page_list = dom.div('.pages')
 			, add = dom.div('.add').append(dom.span().text(''))
 			, page = this.page()
-			, pages = this.dependent_pages();
+			, pages = this.dependent_pages()
+			, locked = this.isLocked()
+			, info = dom.div(".info").hide();
 
 			if (page.isUnpublished()) {
 				w.addClass('unpublished');
+			}
+			if (locked) {
+				w.addClass('locked');
+				var lockState = dom.div(".lock-state")
+				, title = dom.h3().html("<strong>Cannot publish page</strong> until the following actions have completed:")
+				, details = dom.div(".locks")
+				, locks = this.locks();
+				locks.forEach(function(lock) {
+					var line = dom.p();
+					line.text(lock.description);
+					line.prepend(dom.strong().text(lock.location));
+					details.append(line);
+				});
+				lockState.append(title, details)
+				info.append(lockState);
+				page_list.append(info);
+				add.hover(function() {
+					info.show().animate({"width": "100%"}, 150);
+				}, function() {
+					info.hide().css("width", 0);
+				});
 			}
 			page_list.append(page.panel());
 			for (var i = 0, ii = pages.length; i < ii; i++) {
@@ -229,6 +282,7 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		select: function(state) {
 			var self = this;
+			if (this.isLocked()) { return ; }
 			if (state === self.selected) { return; }
 			if (!state && self.dependency_forces_publish()) {
 				return;

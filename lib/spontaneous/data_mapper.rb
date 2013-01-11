@@ -35,7 +35,7 @@ module Spontaneous
         :filter, :where,
         :filter!, :where!,
         :count, :count!,
-        :order,
+        :order, :limit,
         :all, :get, :[], :first,
         :all!, :first!,
         :reload,
@@ -44,7 +44,8 @@ module Spontaneous
         :update, :update!,
         :delete, :delete_instance,
         :for_update, :select,
-        :columns, :qualify_column, :quote_identifier,
+        :columns, :table_name,
+        :qualify_column, :quote_identifier,
         :with_cache,
         :logger, :logger=
 
@@ -54,12 +55,24 @@ module Spontaneous
         scope(current_revision, visible_only, &block)
       end
 
+      def visible!(visible_only = true, &block)
+        scope!(current_revision, visible_only, &block)
+      end
+
       def revision(r = current_revision, &block)
         scope(r, visible_only?, &block)
       end
 
+      def revision!(r = current_revision, &block)
+        scope!(r, visible_only?, &block)
+      end
+
       def editable(&block)
         revision(nil, &block)
+      end
+
+      def editable!(&block)
+        revision!(nil, &block)
       end
 
       def scope(revision, visible, &block)
@@ -70,11 +83,11 @@ module Spontaneous
             dataset
           end
         else
-          with_scope(revision, visible, &block)
+          scope!(revision, visible, &block)
         end
       end
 
-      def with_scope(revision, visible, &block)
+      def scope!(revision, visible, &block)
         if block_given?
           r, v, d  = @keys.values_at(:revision, :visible, :dataset)
           thread   = Thread.current
@@ -90,6 +103,14 @@ module Spontaneous
         else
           scope_for(revision, visible)
         end
+      end
+
+      def dataset
+        Thread.current[@keys[:dataset]] || current_scope
+      end
+
+      def cached_dataset?
+        !Thread.current[@keys[:dataset]].nil?
       end
 
       def use_current_scope?(revision, visible)
@@ -114,6 +135,10 @@ module Spontaneous
         @table.db
       end
 
+      def primary_key
+        @table.primary_key
+      end
+
       def revision_table(revision)
         @table.revision_table(revision)
       end
@@ -128,14 +153,6 @@ module Spontaneous
 
       def schema_uid(id_string)
         @schema.uids[id_string]
-      end
-
-      def dataset
-        Thread.current[@keys[:dataset]] || current_scope
-      end
-
-      def cached_dataset?
-        !Thread.current[@keys[:dataset]].nil?
       end
 
       private

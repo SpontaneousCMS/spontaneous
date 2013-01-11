@@ -14,8 +14,7 @@ module Spontaneous::Permissions
     end
 
     def self.valid?(key_id, user)
-      return true if (key = self.for_id(key_id)) && (key.user == user) && (key.user.enabled?)
-      false
+      (key = self.for_id(key_id)) && (key.user == user) && (key.user.enabled?)
     end
 
     def self.for_id(key_id)

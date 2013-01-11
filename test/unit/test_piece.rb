@@ -71,6 +71,10 @@ class PieceTest < MiniTest::Spec
         @f3.parent.should == @f2
       end
 
+      should "return themselves as content_instance" do
+        @f2.content_instance.should == @f2
+      end
+
       should "know their depth in the piece tree" do
         @f1.depth.should == 1
         @f2.depth.should == 2

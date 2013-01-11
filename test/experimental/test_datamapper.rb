@@ -133,6 +133,13 @@ class DataMapperTest < MiniTest::Spec
         end
       end
 
+      should "return the correct table name" do
+        @mapper.table_name.should == :"content"
+        @mapper.revision(10) do
+          @mapper.table_name.should == :"__r00010_content"
+        end
+      end
+
       should "allow for retrieval of rows from a specific revision" do
         @database.fetch = { id:1, label:"column1", type_sid:"DataMapperTest::MockContent" }
         instance = @mapper.revision(20).get(1)
@@ -214,6 +221,15 @@ class DataMapperTest < MiniTest::Spec
         ds = @mapper.order([MockContent], "column1").all
         @database.sqls.should == [
           "SELECT * FROM content WHERE (type_sid IN ('DataMapperTest::MockContent')) ORDER BY 'column1'"
+        ]
+      end
+
+      should "allow for defining a limit" do
+        ds = @mapper.limit([MockContent], 10...20).all
+        ds = @mapper.filter([], label: "this").limit(10).all
+        @database.sqls.should == [
+          "SELECT * FROM content WHERE (type_sid IN ('DataMapperTest::MockContent')) LIMIT 10 OFFSET 10",
+          "SELECT * FROM content WHERE (label = 'this') LIMIT 10"
         ]
       end
 
@@ -1256,6 +1272,45 @@ class DataMapperTest < MiniTest::Spec
         @database.sqls.should == [
           "SELECT * FROM __r00020_content WHERE (label = 'frog') LIMIT 1"
         ]
+      end
+
+      should "allow for forcing the creation of a new scope to bypass the cache" do
+        @database.fetch = [
+          { id: 7, type_sid:"DataMapperTest::MockContent", parent_id: 7 }
+        ]
+        a = b = c = nil
+
+        @mapper.scope(nil, false) do
+          a = @mapper.first! :id => 7
+          @mapper.scope(nil, false) do
+            b = @mapper.first! :id => 7
+            @mapper.scope!(nil, false) do
+              c = @mapper.first! :id => 7
+            end
+          end
+        end
+        assert a.object_id == b.object_id, "a and b should be the same object"
+        assert a.object_id != c.object_id
+      end
+
+      should "update the instance cache with updated values after a reload" do
+        @database.fetch = [
+          [{ id: 7, type_sid:"DataMapperTest::MockContent", parent_id: 7, label: "a" }],
+          [{ id: 7, type_sid:"DataMapperTest::MockContent", parent_id: 7, label: "b" }],
+          [{ id: 7, type_sid:"DataMapperTest::MockContent", parent_id: 7, label: "b" }]
+        ]
+        a = b = c = nil
+        la = lb = lc = nil
+
+        @mapper.scope(nil, false) do
+          a = @mapper.first! :id => 7
+          la = a.label
+          b = a.reload
+          lb = b.label
+          c = @mapper.get 7
+          lc = c.label
+        end
+        assert [la, lb, lc] == ["a", "b", "b"], "Incorrect labels #{[la, lb, lc].inspect}"
       end
     end
   end

@@ -31,6 +31,15 @@ module Spontaneous
       }
     end
 
+    # Used to test for the validity of asynchronous updates.
+    #
+    # A to-the-second resolution would actually probably be fine as
+    # real updates will come from the user in meat-space time but
+    # why not use the full resolution available...
+    def self.timestamp(time = Time.now)
+      (time.to_f * 10000000).to_i
+    end
+
     def self.update(content, params, user, asynchronous = false)
       fields = Hash[params.map { |sid, value| [content.fields.sid(sid), value] }]
       Update.perform(fields, user, asynchronous)
@@ -49,7 +58,9 @@ module Spontaneous
     end
 
     def self.find(*ids)
-      ids.map { |id| resolve_id(id) }.compact
+      fields = ids.map { |id| resolve_id(id) }.compact
+      return fields.first if ids.length == 1
+      fields
     end
 
     def self.resolve_id(id)

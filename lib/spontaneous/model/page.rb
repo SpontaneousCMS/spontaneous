@@ -3,6 +3,7 @@
 require "spontaneous/model/page/controllers"
 require "spontaneous/model/page/formats"
 require "spontaneous/model/page/layouts"
+require "spontaneous/model/page/locks"
 require "spontaneous/model/page/page_tree"
 require "spontaneous/model/page/paths"
 require "spontaneous/model/page/request"
@@ -22,11 +23,12 @@ module Spontaneous::Model
     include Request
     include SiteMap
     include SiteTimestamps
+    include Locks
 
     included do
-      many_to_one :parent,   :key => :parent_id, :class => self, :reciprocal => :unordered_children
-      one_to_many :unordered_children, :class => self, :key => :parent_id, :reciprocal => :parent
-      one_to_many :content,  :class => self, :key => :page_id,   :reciprocal => :page
+      many_to_one :parent, :model => self,   :key => :parent_id, :reciprocal => :unordered_children
+      one_to_many :unordered_children, :model => self, :key => :parent_id, :reciprocal => :parent
+      one_to_many :content, :model => self, :key => :page_id,   :reciprocal => :page
     end
 
     # field :title, :string, :default => "New Page"

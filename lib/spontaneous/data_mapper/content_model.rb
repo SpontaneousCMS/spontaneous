@@ -143,6 +143,10 @@ module Spontaneous
         mapper.order(types, *columns, &block)
       end
 
+      def limit(l, o = (no_offset = true; nil))
+        mapper.limit(types, l, o)
+      end
+
       def for_update
         mapper.for_update
       end
@@ -157,6 +161,14 @@ module Spontaneous
 
       def columns
         mapper.columns
+      end
+
+      def primary_key
+        mapper.primary_key
+      end
+
+      def table_name
+        mapper.table_name
       end
 
       include Associations
@@ -282,6 +294,7 @@ module Spontaneous
           @attributes[:id]
         end
 
+        alias_method :pk, :id
 
         def update(values)
           set(values)

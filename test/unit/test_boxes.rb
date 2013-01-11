@@ -153,6 +153,12 @@ class BoxesTest < MiniTest::Spec
         instance.box1.container.should == instance
         instance.box1.container.should == instance
       end
+
+      should "return their owner as content_instance" do
+        MyContentClass.box :box1
+        instance = MyContentClass.new
+        instance.box1.content_instance.should == instance
+      end
     end
 
     context "ranges" do

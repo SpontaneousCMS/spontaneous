@@ -11,6 +11,9 @@ Spontaneous.EventSource = (function($, S) {
 
 		addEventListener: function(event, callback) {
 			this.eventSource().addEventListener(event, callback);
+		},
+		removeEventListener: function(event, callback) {
+			this.eventSource().removeEventListener(event, callback);
 		}
 	});
 	return EventSource;

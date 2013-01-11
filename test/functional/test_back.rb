@@ -396,6 +396,22 @@ class BackTest < MiniTest::Spec
           }
         end
 
+        should "not generate an error if the pending version of the field matches" do
+          field = @job1.fields.title
+          field.version = 2
+          field.processed_values[:__pending__] = {:value => "something.gif", :version => 3 }
+          @job1.save_fields
+          @job1.reload
+          field = @job1.fields.title
+          field.pending_version.should == 3
+          sid = field.schema_id.to_s
+          params = { "fields" => {sid => "3"} }
+
+          auth_post "/@spontaneous/version/#{@job1.id}", params
+          assert last_response.status == 200, "Should have recieved a 200 OK but instead received a #{last_response.status}"
+        end
+
+
         should "generate an error if there is a field version conflict for boxes" do
           box = @job1.images
           field = box.fields.title

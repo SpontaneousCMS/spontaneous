@@ -56,6 +56,7 @@ module Spontaneous
   autoload :Media,            "spontaneous/media"
   autoload :Output,           "spontaneous/output"
   autoload :PagePiece,        "spontaneous/page_piece"
+  autoload :PageLock,         "spontaneous/page_lock"
   autoload :Paths,            "spontaneous/paths"
   autoload :Permissions,      "spontaneous/permissions"
   autoload :Publishing,       "spontaneous/publishing"

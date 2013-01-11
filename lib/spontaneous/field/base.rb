@@ -72,13 +72,19 @@ module Spontaneous
         owner.field_writable?(user, name)
       end
 
-      # IF a field type needs to do some long running processing on a
+      # If a field type needs to do some long running processing
+      # then it should declare itself as asynchronous so as not to tie up
+      # the CMS process.
       def asynchronous?
         false
       end
 
       def pending_value=(value)
-        values[:__pending__] = value
+        values[:__pending__] = {
+          :value => value,
+          :version => version + 1,
+          :timestamp => Spontaneous::Field.timestamp
+        }
       end
 
       def pending_value
@@ -86,7 +92,7 @@ module Spontaneous
       end
 
       def has_pending_value?
-        values.key?(:__pending__)
+        values.key?(:__pending__) && values[:__pending__].key?(:value)
       end
 
       def clear_pending_value
@@ -99,7 +105,45 @@ module Spontaneous
       end
 
       def process_pending_value!
-        set_value!(pending_value)
+        if has_pending_value?
+          @previous_values = values.dup
+          set_value!(pending_value[:value])
+        end
+      end
+
+      def validate_update!
+        return true if is_valid_pending_value?
+        self.processed_values = @previous_values
+        false
+      end
+
+      def is_valid_pending_value?
+        return true if @previous_values.nil?
+        reloaded = reload
+        pending = @previous_values[:__pending__] || {}
+        p1 = pending[:timestamp] || 0
+        p2 = (reloaded.pending_value || {})[:timestamp] || 0
+        if p1 >= p2
+          true
+        else
+          @previous_values = reloaded.values
+          false
+        end
+      end
+
+      def reload
+        Spontaneous::Content.scope! do
+          Spontaneous::Field.find(self.id)
+        end
+      end
+
+      # Called by Field::Update before launching the background
+      # task that updates the field values.
+      def before_asynchronous_update
+      end
+
+      def page_lock_description
+        "Updating to new value"
       end
 
       def outputs
@@ -136,6 +180,15 @@ module Spontaneous
 
       def version
         @version ||= 0
+      end
+
+      def pending_version
+        return version unless has_pending_value?
+        pending_value[:version]
+      end
+
+      def matches_version?(v)
+        (version != v) && (pending_version != v)
       end
 
       # value used to show conflicts between the current value and the value they're attempting to enter
@@ -310,6 +363,20 @@ module Spontaneous
           :user => owner.current_editor)
       end
 
+      def ==(o)
+        eql?(o)
+      end
+
+      def eql?(o)
+        super || (o.class == self.class &&
+                  o.id == id &&
+                  o.unprocessed_value == unprocessed_value &&
+                  o.values == values)
+      end
+
+      def hash
+        id.hash
+      end
 
       protected
 

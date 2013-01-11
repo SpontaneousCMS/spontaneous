@@ -34,6 +34,14 @@ module Spontaneous
     end
 
 
+    def pad_id(r)
+      r.to_s.rjust(5, "0")
+    end
+
+    def pad_revision(r)
+      r.to_s.rjust(4, "0")
+    end
+
     def sha1(filepath)
       Digest::SHA1.file(filepath).hexdigest
     end
@@ -45,10 +53,9 @@ module Spontaneous
       shards = hashes.map { |hash| Spontaneous.shard_path(hash) }
       Tempfile.open('shard') do |combined|
         combined.binmode
-
         shards.each do |shard|
           ::File.open(shard, 'rb') do |part|
-            while data = part.read(131072)
+            while (data = part.read(131072))
               combined.write(data)
             end
           end

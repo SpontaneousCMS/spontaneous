@@ -44,12 +44,26 @@ module Spontaneous::Model::Core
         mapper.scope(revision, visible, &block)
       end
 
+      # A version of scope that forces the creation of a new scope
+      # thus allow us to bypass the cache within a particular block
+      def scope!(revision = nil, visible = false, &block)
+        mapper.scope!(revision, visible, &block)
+      end
+
       def with_editable(&block)
         mapper.editable(&block)
       end
 
+      def with_editable!(&block)
+        mapper.editable!(&block)
+      end
+
       def with_published(&block)
         scope(Spontaneous::Site.published_revision, true, &block)
+      end
+
+      def with_published!(&block)
+        scope!(Spontaneous::Site.published_revision, true, &block)
       end
 
       def database

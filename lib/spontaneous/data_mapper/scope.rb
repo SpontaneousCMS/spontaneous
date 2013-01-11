@@ -108,6 +108,10 @@ module Spontaneous
         dataset(types).order(*columns, &block)
       end
 
+      def limit(types, l, o = (no_offset = true; nil))
+        dataset(types).limit(l, o)
+      end
+
       def select(types, *columns, &block)
         dataset(types).select(*columns, &block)
       end
@@ -136,6 +140,14 @@ module Spontaneous
         end
       end
 
+      def pk
+        @table.pk
+      end
+
+      def table_name
+        naked_dataset.first_source_alias
+      end
+
       def logger
         @table.logger
       end
@@ -159,7 +171,11 @@ module Spontaneous
       private
 
       def table_dataset(types)
-        @table.dataset(@revision).filter(conditions(types))
+        naked_dataset.filter(conditions(types))
+      end
+
+      def naked_dataset
+        @table.dataset(@revision)
       end
 
       def conditions(types)

@@ -17,6 +17,9 @@ module Spontaneous
         ::Simultaneous.on_event("publish_progress") { |event|
           @messenger.deliver_event(event)
         }
+        ::Simultaneous.on_event("page_lock_status") { |event|
+          @messenger.deliver_event(event)
+        }
         @messenger
       end
 
@@ -398,7 +401,7 @@ module Spontaneous
           conflicts = []
           field_versions.each do |schema_id, version|
             field = content.fields.sid(schema_id)
-            unless field.version == version.to_i
+            if field.matches_version?(version.to_i)
               conflicts << field
             end
           end
