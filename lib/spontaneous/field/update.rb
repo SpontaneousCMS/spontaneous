@@ -84,12 +84,14 @@ module Spontaneous::Field
       end
 
       # This is made more complex by the need to verify that:
+      #
       #   a. this update has not been superceded by a more recent one and
-      #   b. other fields on the owner have not been synchrnously since
+      #   b. other fields on the owner have not been updated synchronously since
       #      this update was launched.
       #
-      # (a) is achieved by only saving fields that pass the #validate_update!
+      # (a) is verified by only saving fields that pass the #validate_update!
       # test.
+      #
       # (b) by calling Content#save_fields on a reloaded version of the owner
       # and by the fact that only the fields that have been modified by this
       # updater are re-serialized.
