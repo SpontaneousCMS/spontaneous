@@ -59,7 +59,10 @@ Spontaneous.Field.Image = (function($, S) {
 
 		currentValue: function() {
 			var v = this.get('value');
-			return v['__pending__'] || v['__ui__'] || v['original'];
+			if ((pending = v['__pending__'])) {
+				return pending['value'];
+			}
+			return v['__ui__'] || v['original'];
 		},
 
 		preview: function(container) {
