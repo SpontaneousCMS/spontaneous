@@ -271,6 +271,7 @@ Gem::Specification.new do |s|
     db/migrations/20120423175416_add_pending_modifications.rb
     db/migrations/20120525164947_add_field_versions.rb
     db/migrations/20130109125023_add_page_publish_lock.rb
+    db/migrations/20130111161934_convert_bcrypt_passwords.rb
     docs/recipe-interface-screenshot.png
     lib/spontaneous.rb
     lib/spontaneous/application.rb
@@ -307,6 +308,8 @@ Gem::Specification.new do |s|
     lib/spontaneous/config.rb
     lib/spontaneous/constants.rb
     lib/spontaneous/content_query.rb
+    lib/spontaneous/crypt.rb
+    lib/spontaneous/crypt/version.rb
     lib/spontaneous/data_mapper.rb
     lib/spontaneous/data_mapper/content_model.rb
     lib/spontaneous/data_mapper/content_model/associations.rb
@@ -529,6 +532,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/version.rb
     spontaneous.gemspec
     test/disabled/test_slots.rb
+    test/experimental/test_crypt.rb
     test/experimental/test_features.rb
     test/fixtures/application/js/test.js
     test/fixtures/application/static/favicon.ico
