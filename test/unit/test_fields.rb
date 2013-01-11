@@ -1122,7 +1122,7 @@ class FieldsTest < MiniTest::Spec
           Spontaneous::Field.update(box, fields, nil, false)
           box.title.value.should == "Updated title"
           box.image.value.should == "/media/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/0001/something.gif"
-          @instance.image.pending_version.should == 1
+          box.image.pending_version.should == 1
         end
       end
 
