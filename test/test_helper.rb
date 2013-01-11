@@ -141,6 +141,8 @@ class MiniTest::Spec
       end
     end
     Object.const_set :Site,  Spontaneous.site!(::Content)
+    # Use the fast version of the password hashing algorithm
+    Spontaneous::Crypt.force_version(0)
     instance
   end
 

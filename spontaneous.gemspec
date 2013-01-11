@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
   s.version           = '0.2.0.alpha7'
-  s.date              = '2013-01-08'
+  s.date              = '2013-01-11'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -50,6 +50,7 @@ Gem::Specification.new do |s|
   ## that are needed for an end user to actually USE your code.
   s.add_dependency('activesupport',   ["~> 3.2.0"])
   s.add_dependency('base58',          ["~> 0.1.0"])
+  s.add_dependency('bcrypt-ruby',     ["~> 3.0.1"])
   s.add_dependency('bundler',         ["> 1.0.15"])
   s.add_dependency('coffee-script',   ["~> 2.2.0"])
   s.add_dependency('cutaneous',       ["~> 0.1.3"])
@@ -269,6 +270,7 @@ Gem::Specification.new do |s|
     db/migrations/20120418153903_add_ownership_of_content.rb
     db/migrations/20120423175416_add_pending_modifications.rb
     db/migrations/20120525164947_add_field_versions.rb
+    db/migrations/20130109125023_add_page_publish_lock.rb
     docs/recipe-interface-screenshot.png
     lib/spontaneous.rb
     lib/spontaneous/application.rb
@@ -304,7 +306,6 @@ Gem::Specification.new do |s|
     lib/spontaneous/concern.rb
     lib/spontaneous/config.rb
     lib/spontaneous/constants.rb
-    lib/spontaneous/content/page.rb
     lib/spontaneous/content_query.rb
     lib/spontaneous/data_mapper.rb
     lib/spontaneous/data_mapper/content_model.rb
@@ -363,7 +364,6 @@ Gem::Specification.new do |s|
     lib/spontaneous/generators/site/config/schema.yml
     lib/spontaneous/generators/site/config/user_levels.yml
     lib/spontaneous/generators/site/lib/content.rb.tt
-    lib/spontaneous/generators/site/lib/site.rb.tt
     lib/spontaneous/generators/site/lib/tasks/site.rake.tt
     lib/spontaneous/generators/site/public/css/site.scss
     lib/spontaneous/generators/site/public/favicon.ico
@@ -413,6 +413,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/model/page/controllers.rb
     lib/spontaneous/model/page/formats.rb
     lib/spontaneous/model/page/layouts.rb
+    lib/spontaneous/model/page/locks.rb
     lib/spontaneous/model/page/page_tree.rb
     lib/spontaneous/model/page/paths.rb
     lib/spontaneous/model/page/request.rb
@@ -434,6 +435,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/output/template.rb
     lib/spontaneous/output/template/engine.rb
     lib/spontaneous/output/template/renderer.rb
+    lib/spontaneous/page_lock.rb
     lib/spontaneous/page_piece.rb
     lib/spontaneous/paths.rb
     lib/spontaneous/permissions.rb
@@ -527,8 +529,6 @@ Gem::Specification.new do |s|
     lib/spontaneous/version.rb
     spontaneous.gemspec
     test/disabled/test_slots.rb
-    test/experimental/test_datamapper.rb
-    test/experimental/test_datamapper_content.rb
     test/experimental/test_features.rb
     test/fixtures/application/js/test.js
     test/fixtures/application/static/favicon.ico
@@ -592,7 +592,6 @@ Gem::Specification.new do |s|
     test/fixtures/example_application/config/unicorn.rb
     test/fixtures/example_application/config/user_levels.yml
     test/fixtures/example_application/lib/content.rb
-    test/fixtures/example_application/lib/site.rb
     test/fixtures/example_application/public/css/test.css
     test/fixtures/example_application/public/favicon.ico
     test/fixtures/example_application/public/js/test.js
@@ -778,6 +777,8 @@ Gem::Specification.new do |s|
     test/unit/test_config.rb
     test/unit/test_content.rb
     test/unit/test_content_inheritance.rb
+    test/unit/test_datamapper.rb
+    test/unit/test_datamapper_content.rb
     test/unit/test_extensions.rb
     test/unit/test_fields.rb
     test/unit/test_formats.rb

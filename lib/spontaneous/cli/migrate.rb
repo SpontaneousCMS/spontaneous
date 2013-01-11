@@ -14,9 +14,8 @@ module Spontaneous::Cli
       Sequel.extension :migration
       connection_params = ::Spontaneous.db_settings
       say "  >> Running migrations..."
-      Sequel::Migrator.apply(Spontaneous.database, ::Spontaneous.gem_dir('db/migrations'))
+      # Sequel::Migrator.apply(Spontaneous.database, ::Spontaneous.gem_dir('db/migrations'))
       say "  >> Done"
     end
-
   end # Migrate
 end # Spontaneous::Cli

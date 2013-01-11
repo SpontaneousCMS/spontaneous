@@ -47,6 +47,7 @@ module Spontaneous
   autoload :Cli,              "spontaneous/cli"
   autoload :Config,           "spontaneous/config"
   autoload :ContentQuery,     "spontaneous/content_query"
+  autoload :Crypt,            "spontaneous/crypt"
   autoload :DataMapper,       "spontaneous/data_mapper"
   autoload :Facet,            "spontaneous/facet"
   autoload :Field,            "spontaneous/field"

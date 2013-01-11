@@ -238,15 +238,6 @@ class PermissionsTest < MiniTest::Spec
       user.errors[:password].should_not be_blank
     end
 
-
-    should "have a random salt" do
-      user1 = Permissions::User.create(@valid)
-      user2 = Permissions::User.create(@valid.merge(:login => "person2"))
-      user1.salt.should_not be_blank
-      user2.salt.should_not be_blank
-      user1.salt.should_not == user2.salt
-    end
-
     context "who are valid" do
       setup do
         @user = Permissions::User.create(@valid)

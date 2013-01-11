@@ -157,13 +157,6 @@ class UserAdminTest < MiniTest::Spec
       result[:email].should_not be_nil
     end
 
-    should "ignore changes to the salt" do
-      salt = @editor_user.salt
-      auth_put "/@spontaneous/users/#{@editor_user.id}", {  "user[name]" => "Robert Something", "user[login]" => "editor", "user[email]" => "robert@example.com", "user[salt]" => "123456" }
-      assert last_response.ok?
-      @editor_user.reload.salt.should == salt
-    end
-
     should "allow updating of the user's password" do
       new_pass = "123467890"
       auth_put "/@spontaneous/users/password/#{@editor_user.id}", {  "password" => new_pass }
