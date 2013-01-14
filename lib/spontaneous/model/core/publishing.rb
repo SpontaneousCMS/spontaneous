@@ -90,13 +90,18 @@ module Spontaneous::Model::Core
                                 (content.is_a?(Array) && content.empty?))
 
             if must_publish_all
-              create_revision(revision)
+              create_revision(revision) do
+                with_revision(revision) do
+                  _set_publish_timestamps(revision, first_published_filter, published_filter)
+                end
+              end
             else
               content = content.map do |c|
                 c.is_a?(content_model) ? c.reload : content_model.get(c)
               end.compact
 
-              # pages should be published in depth order because its possible to be publishing a child of
+              # pages should be published in depth order because it's
+              # possible to be publishing a child of
               # a page that's never been published
               content.sort! { |c1, c2| c1.depth <=> c2.depth }
 
@@ -104,9 +109,13 @@ module Spontaneous::Model::Core
               first_published_filter.update(:id => ids)
               published_filter.update(:id => ids)
 
-              create_revision(revision, revision-1)
-              content.each do |c|
-                c.sync_to_revision(revision, true)
+              create_revision(revision, revision-1) do
+                content.each do |c|
+                  c.sync_to_revision(revision, true)
+                end
+                with_revision(revision) do
+                  _set_publish_timestamps(revision, first_published_filter, published_filter)
+                end
               end
             end
 
@@ -120,19 +129,26 @@ module Spontaneous::Model::Core
               end
             end
 
-            [nil, revision].each do |r|
-              with_revision(r) do
-                mapper.filter!(first_published_filter).update({
-                  :first_published_at => Sequel.datetime_class.now,
-                  :first_published_revision => revision
-                })
-                mapper.filter!(published_filter).update({
-                  :last_published_at => Sequel.datetime_class.now
-                })
-              end
+            # Only set the timestamps once we're sure the publish has completed
+            # successfully
+            # The revision timestamps must be set above because the revision must
+            # be completely written before it is copied to the revision history
+            # table.
+            with_editable do
+              _set_publish_timestamps(revision, first_published_filter, published_filter)
             end
           end
         end
+      end
+
+      def _set_publish_timestamps(revision, first_published_filter, published_filter)
+        mapper.filter!(first_published_filter).update({
+          :first_published_at => Sequel.datetime_class.now,
+          :first_published_revision => revision
+        })
+        mapper.filter!(published_filter).update({
+          :last_published_at => Sequel.datetime_class.now
+        })
       end
 
       def publish_all(revision, &block)
@@ -141,14 +157,31 @@ module Spontaneous::Model::Core
 
       def create_revision(revision, from_revision=nil)
         dest_table = revision_table(revision)
-        src_table = revision_table(from_revision)
-        sql = "CREATE TABLE #{mapper.quote_identifier(dest_table)} AS SELECT * FROM #{mapper.quote_identifier(src_table)}"
+        _insert_revision(from_revision, dest_table)
+        _copy_indexes(dest_table)
+        yield if block_given?
+        database[dest_table].update(:revision => revision)
+        _copy_revision(revision, content_revision_table)
+        _copy_revision(revision, content_archive_table)
+      end
+
+      def _copy_revision(revision, dest_table)
+        src_table = revision_table(revision)
+        sql = "INSERT INTO #{database.literal(dest_table)} SELECT * FROM #{database.literal(src_table)}"
         database.run(sql)
+      end
+
+      def _copy_indexes(dest_table)
         indexes = database.indexes(base_table)
         indexes.each do |name, options|
           columns = options.delete(:columns)
           database.add_index(dest_table, columns, options)
         end
+      end
+
+      def _insert_revision(from_revision, dest_table)
+        sql = "CREATE TABLE #{mapper.quote_identifier(dest_table)} AS #{revision_src_dataset(from_revision).select_sql} "
+        database.run(sql)
       end
 
       def delete_revision(revision)
@@ -157,9 +190,43 @@ module Spontaneous::Model::Core
       end
 
       def delete_all_revisions!
-        database.tables.each do |table|
-          database.drop_table(table) if revision_table?(table)
+        tables = database.tables.select { |t| revision_table?(t) }
+        tables.each do |table|
+          drop_table(table)
         end
+        revision_dataset.delete
+        revision_archive_dataset.delete
+      end
+
+      def drop_table(table)
+        database.drop_table?(table)
+      end
+
+      def content_revision_table
+        :spontaneous_content_revisions
+      end
+
+      def content_archive_table
+        :spontaneous_content_archive
+      end
+
+      def revision_src_dataset(revision = nil)
+        return database[base_table.to_sym] if revision.nil?
+        revision_dataset(revision)
+      end
+
+      def revision_dataset(revision = nil)
+        _filter_by_revision(content_revision_table, revision)
+      end
+
+      def revision_archive_dataset(revision = nil)
+        _filter_by_revision(content_archive_table, revision)
+      end
+
+      def _filter_by_revision(table, revision)
+        ds = database[table]
+        return ds.filter(:revision => revision) unless revision.nil?
+        ds
       end
     end # ClassMethods
 

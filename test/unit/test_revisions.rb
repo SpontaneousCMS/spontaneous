@@ -151,18 +151,33 @@ class RevisionsTest < MiniTest::Spec
     context "content revisions" do
       setup do
         @revision = 1
+        Content.revision_dataset.delete
+        Content.revision_archive_dataset.delete
       end
+
       teardown do
         Content.delete_revision(@revision)
         Content.delete_revision(@revision+1) rescue nil
       end
+
       should "be testable for existance" do
         Content.revision_exists?(@revision).should be_false
         Content.create_revision(@revision)
         Content.revision_exists?(@revision).should be_true
       end
+
       should "be deletable en masse" do
-        tables = (1..10).map { |i| Content.revision_table(i).to_sym }
+        revisions = (1..10).to_a
+        tables = revisions.map { |i| Content.revision_table(i).to_sym }
+
+        revisions.each do |r|
+          Content.revision_dataset.insert(:revision => r, :uid => "revision-#{r}")
+          Content.revision_archive_dataset.insert(:revision => r, :uid => "archive-#{r}")
+        end
+
+        Content.revision_dataset.count.should == 10
+        Content.revision_archive_dataset.count.should == 10
+
         tables.each do |t|
           DB.create_table(t){Integer :id} rescue nil
         end
@@ -170,9 +185,13 @@ class RevisionsTest < MiniTest::Spec
           DB.tables.include?(t).should be_true
         end
         Content.delete_all_revisions!
+
         tables.each do |t|
           DB.tables.include?(t).should be_false
         end
+
+        Content.revision_dataset.count.should == 0
+        Content.revision_archive_dataset.count.should == 0
       end
 
       should "be creatable from current content" do
@@ -183,12 +202,18 @@ class RevisionsTest < MiniTest::Spec
         Content.with_revision(@revision) do
           Content.count.should == count
           Content.all.each do |published|
+            published.revision.should == @revision
             Content.with_editable do
               e = Content[published.id]
-              e.should == published
+              assert_content_equal(e, published, :revision)
+              e.revision.should be_nil
             end
           end
         end
+        Content.revision_dataset(@revision).count.should == count
+        Content.revision_dataset.select(:revision).group(:revision).all.should == [{:revision => 1}]
+        Content.revision_archive_dataset(@revision).count.should == count
+        Content.revision_archive_dataset.select(:revision).group(:revision).all.should == [{:revision => 1}]
       end
 
       should "be creatable from any revision" do
@@ -198,12 +223,14 @@ class RevisionsTest < MiniTest::Spec
 
         Content.create_revision(source_revision)
 
-        Content.with_revision(source_revision) do
-          Content.first(:uid => "0").destroy
-          source_revision_count = Content.count
-        end
+        uid0 = Content.first(:uid => '0')
+        path = uid0.visibility_path + ".#{uid0.id}%"
+        ds = Content.revision_dataset(source_revision)
+        dd = ds.filter(Sequel.like(:visibility_path, path))
+        dd.delete
+        source_revision_count = ds.count
 
-        Content.count.should == source_revision_count + 7
+        Content.count.should == (source_revision_count + 6)
 
         Content.create_revision(revision, source_revision)
 
@@ -213,7 +240,7 @@ class RevisionsTest < MiniTest::Spec
 
             Content.with_revision(source_revision) do
               e = Content.first :id => published.id
-              e.should == published
+              assert_content_equal(e, published, :revision)
             end
           end
         end
@@ -262,9 +289,9 @@ class RevisionsTest < MiniTest::Spec
           Content.with_revision(@final_revision) do
             published = Content.first :id => editable1.id
             unpublished = Content.first :id => editable2.id
-            assert_content_equal(published, editable1)
+            assert_content_equal(published, editable1, :revision)
 
-            unpublished.should_not == editable2
+            assert_content_unequal(unpublished, editable2, :revision)
           end
         end
 
@@ -280,8 +307,8 @@ class RevisionsTest < MiniTest::Spec
           Content.with_revision(@final_revision) do
             published1 = Content[editable1.id]
             published2 = Content[new_content.id]
-            assert_content_equal(published2, new_content)
-            assert_content_equal(published1, editable1)
+            assert_content_equal(published2, new_content, :revision)
+            assert_content_equal(published1, editable1, :revision)
           end
         end
 
@@ -293,7 +320,7 @@ class RevisionsTest < MiniTest::Spec
           editable1.reload
           Content.with_revision(@final_revision) do
             published1 = Content[editable1.id]
-            assert_content_equal(published1, editable1)
+            assert_content_equal(published1, editable1, :revision)
             Content[deleted.id].should be_nil
           end
         end
@@ -311,11 +338,11 @@ class RevisionsTest < MiniTest::Spec
             published1 = Content[editable1.id]
             published2 = Content[new_page.id]
             published2.should be_nil
-            assert_content_equal(published1, editable1)
+            assert_content_equal(published1, editable1, :revision)
           end
         end
 
-        should "not publish changes to existing pages unless explicitly asked" do
+        should "not publish changes to existing pages unless explicitly asked ccc" do
           editable1 = Content.first(:uid => '0')
           editable1.things << Piece.new(:uid => "added")
           editable1.save
@@ -331,8 +358,8 @@ class RevisionsTest < MiniTest::Spec
             published1 = Content.first :id => editable1.id
             Content.first(:uid => "added").should_not be_nil
             published3 = Content.first :id => editable2.id
-            assert_content_equal(published1, editable1)
-            published3.should_not == editable2
+            assert_content_equal(published1, editable1, :revision)
+            assert_content_unequal(published3, editable2, :revision)
             published3.uid.should_not == "new"
           end
           Content.publish(@final_revision+1, [editable2.id])
@@ -341,12 +368,12 @@ class RevisionsTest < MiniTest::Spec
           new_content.reload
           Content.with_revision(@final_revision+1) do
             published1 = Content.first :id => editable1.id
-            assert_content_equal(published1, editable1)
+            assert_content_equal(published1, editable1, :revision)
             published2 = Content.first :id => editable2.id
-            assert_content_equal(published2, editable2)
+            assert_content_equal(published2, editable2, :revision)
             published3 = Content.first :id => editable2.contents.first.id
             # published3.should == editable2.contents.first
-            assert_content_equal(published3, editable2.contents.first)
+            assert_content_equal(published3, editable2.contents.first, :revision)
           end
         end
 
@@ -362,7 +389,7 @@ class RevisionsTest < MiniTest::Spec
           Content.with_revision(@final_revision) do
             published1 = Content[editable1.id]
             published2 = Content[new_page.id]
-            assert_content_equal(published2, new_page)
+            assert_content_equal(published2, new_page, :revision)
             editable1.entry_store.should == published1.entry_store
           end
         end
@@ -385,7 +412,7 @@ class RevisionsTest < MiniTest::Spec
             published2 = Content[new_page1.id]
             published3 = Content[new_page2.id]
             published2.should be_nil
-            assert_content_equal(published3, new_page2)
+            assert_content_equal(published3, new_page2, :revision)
             editable1.entry_store.reject { |e| e[0] == new_page1.id }.should == published1.entry_store
           end
         end
@@ -408,8 +435,8 @@ class RevisionsTest < MiniTest::Spec
             published2 = Content[new_page1.id]
             published3 = Content[new_page2.id]
             published2.should be_nil
-            assert_content_equal(published3, new_page2)
-            assert_content_equal(published1, editable1)
+            assert_content_equal(published3, new_page2, :revision)
+            assert_content_equal(published1, editable1, :revision)
           end
         end
 
