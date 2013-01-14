@@ -32,6 +32,10 @@ module Spontaneous::Model::Core
         database.tables.include?(revision_table(revision).to_sym)
       end
 
+      def revision_tables
+        database.tables.select { |t| revision_table?(t) }
+      end
+
       def revision
         mapper.current_revision
       end
@@ -184,9 +188,24 @@ module Spontaneous::Model::Core
         database.run(sql)
       end
 
-      def delete_revision(revision)
+      def cleanup_revisions(current_revision, keep_revisions)
+        (1...current_revision).each do |r|
+          delete_revision_table(r)
+        end
+        # Sequel is so great
+        revision_dataset { revision <= (current_revision - keep_revisions) }.delete
+      end
+
+      def delete_revision_table(revision)
         return if revision.nil?
         database.drop_table?(revision_table(revision))
+      end
+
+      def delete_revision(revision)
+        return if revision.nil?
+        delete_revision_table(revision)
+        revision_dataset(revision).delete
+        revision_archive_dataset(revision).delete
       end
 
       def delete_all_revisions!
@@ -215,18 +234,18 @@ module Spontaneous::Model::Core
         revision_dataset(revision)
       end
 
-      def revision_dataset(revision = nil)
-        _filter_by_revision(content_revision_table, revision)
+      def revision_dataset(revision = nil, &block)
+        _filter_by_revision(content_revision_table, revision, &block)
       end
 
-      def revision_archive_dataset(revision = nil)
-        _filter_by_revision(content_archive_table, revision)
+      def revision_archive_dataset(revision = nil, &block)
+        _filter_by_revision(content_archive_table, revision, &block)
       end
 
-      def _filter_by_revision(table, revision)
+      def _filter_by_revision(table, revision, &block)
         ds = database[table]
-        return ds.filter(:revision => revision) unless revision.nil?
-        ds
+        return ds.filter(:revision => revision, &block) unless revision.nil?
+        ds.filter(&block)
       end
     end # ClassMethods
 

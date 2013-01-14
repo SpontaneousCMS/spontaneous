@@ -156,8 +156,7 @@ class RevisionsTest < MiniTest::Spec
       end
 
       teardown do
-        Content.delete_revision(@revision)
-        Content.delete_revision(@revision+1) rescue nil
+        Content.delete_all_revisions!
       end
 
       should "be testable for existance" do
@@ -255,6 +254,24 @@ class RevisionsTest < MiniTest::Spec
         assert_same_elements published_indexes.values, content_indexes.values
       end
 
+      should "only be kept until a new revision is available ccc" do
+        Content.create_revision(@revision)
+        Content.revision_tables.should == [:__r00001_content]
+        Content.create_revision(@revision+1)
+        Content.revision_tables.should == [:__r00001_content, :__r00002_content]
+        Content.create_revision(@revision+2)
+        Content.revision_tables.should == [:__r00001_content, :__r00002_content, :__r00003_content]
+        (0..2).each do |r|
+          Content.revision_dataset(@revision+r).count.should == 15
+          Content.revision_archive_dataset(@revision+r).count.should == 15
+        end
+        Content.cleanup_revisions(@revision+2, 2)
+        Content.revision_tables.should == [:__r00003_content]
+        Content.revision_dataset(@revision).count.should == 0
+        Content.revision_archive_dataset(@revision).count.should == 15
+        Content.revision_dataset(@revision+2).count.should == 15
+      end
+
 
       context "incremental publishing" do
         setup do
@@ -342,7 +359,7 @@ class RevisionsTest < MiniTest::Spec
           end
         end
 
-        should "not publish changes to existing pages unless explicitly asked ccc" do
+        should "not publish changes to existing pages unless explicitly asked" do
           editable1 = Content.first(:uid => '0')
           editable1.things << Piece.new(:uid => "added")
           editable1.save
