@@ -111,10 +111,10 @@ module Spontaneous
         end
       end
 
-      def validate_update!
-        return true if is_valid_pending_value?
+      def conflicted_update?
+        return false if is_valid_pending_value?
         self.processed_values = @previous_values
-        false
+        true
       end
 
       def is_valid_pending_value?

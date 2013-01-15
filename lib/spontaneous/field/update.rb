@@ -97,7 +97,7 @@ module Spontaneous::Field
       # updater are re-serialized.
       #
       def save
-        valid_fields = @fields.select { |field| field.validate_update! }
+        valid_fields = @fields.reject { |field| field.conflicted_update? }
         remove_update_lock(valid_fields)
         field_map = valid_fields.group_by { |f| f.owner }
         field_map.each do |owner, fields|

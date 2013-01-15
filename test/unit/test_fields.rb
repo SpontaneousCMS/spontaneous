@@ -8,6 +8,7 @@ class FieldsTest < MiniTest::Spec
     @site = setup_site
     @now = Time.now
     stub_time(@now)
+    Spontaneous::State.delete
     Site.background_mode = :immediate
   end
 
