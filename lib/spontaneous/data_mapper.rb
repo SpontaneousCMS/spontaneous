@@ -135,6 +135,10 @@ module Spontaneous
         @table.db
       end
 
+      def base_table
+        @table.name
+      end
+
       def primary_key
         @table.primary_key
       end

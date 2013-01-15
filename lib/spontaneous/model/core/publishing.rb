@@ -12,7 +12,7 @@ module Spontaneous::Model::Core
       end
 
       def base_table
-        'content'
+        mapper.base_table
       end
 
       # make sure that the table name is always the correct revision
@@ -230,7 +230,7 @@ module Spontaneous::Model::Core
       end
 
       def revision_src_dataset(revision = nil)
-        return database[base_table.to_sym] if revision.nil?
+        return database[base_table] if revision.nil?
         revision_dataset(revision)
       end
 
