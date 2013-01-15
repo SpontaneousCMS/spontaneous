@@ -32,8 +32,10 @@ module Spontaneous::Model::Core
         database.tables.include?(revision_table(revision).to_sym)
       end
 
+      # Returns a list of all tables in the database that represent a content
+      # revision.
       def revision_tables
-        database.tables.select { |t| revision_table?(t) }
+        database.tables.select { |t| revision_table?(t) }.sort
       end
 
       def revision

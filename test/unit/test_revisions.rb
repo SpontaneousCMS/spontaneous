@@ -255,16 +255,12 @@ class RevisionsTest < MiniTest::Spec
       end
 
       should "only be kept until a new revision is available ccc" do
-        Content.create_revision(@revision)
-        Content.revision_tables.should == [:__r00001_content]
-        Content.create_revision(@revision+1)
-        Content.revision_tables.should == [:__r00001_content, :__r00002_content]
-        Content.create_revision(@revision+2)
-        Content.revision_tables.should == [:__r00001_content, :__r00002_content, :__r00003_content]
         (0..2).each do |r|
+          Content.create_revision(@revision+r)
           Content.revision_dataset(@revision+r).count.should == 15
           Content.revision_archive_dataset(@revision+r).count.should == 15
         end
+        Content.revision_tables.should == [:__r00001_content, :__r00002_content, :__r00003_content]
         Content.cleanup_revisions(@revision+2, 2)
         Content.revision_tables.should == [:__r00003_content]
         Content.revision_dataset(@revision).count.should == 0
