@@ -270,13 +270,14 @@ module Spontaneous
 
       def after_publish
         update_progress("finalising")
-        S::Revision.create(:revision => revision, :published_at => Time.now)
-        S::Site.send(:set_published_revision, revision)
-        tmp = Spontaneous.revision_dir(revision) / "tmp"
-        FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
-        symlink_revision(revision)
-
         begin
+          S::Revision.create(:revision => revision, :published_at => Time.now)
+          S::Site.send(:set_published_revision, revision)
+          tmp = Spontaneous.revision_dir(revision) / "tmp"
+          FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
+          symlink_revision(revision)
+          generate_revision_file(revision)
+
           S::Site.trigger(:after_publish, revision)
           S::Site.send(:pending_revision=, nil)
           update_progress("complete")
@@ -288,6 +289,15 @@ module Spontaneous
           abort_publish(e)
           raise e
         end
+      end
+
+      # Creates a revisions/REVISION file that contains the directory name of the current
+      # revision. This is useful in deployment because it's a real (non-symlinked) file
+      # that changes with each publish and can hence be used as the target for an
+      # `inotifywait` script that does something with every publish.
+      def generate_revision_file(r)
+        rev_file = Spontaneous.revision_root / 'REVISION'
+        File.open(rev_file, 'w') { |f| f.write(r) }
       end
 
       def symlink_revision(rev)
