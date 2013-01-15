@@ -146,10 +146,11 @@ class MiniTest::Spec
     instance
   end
 
-  def self.teardown_site(clear_disk = true)
+  def self.teardown_site(clear_disk = true, clear_const = true)
     if clear_disk
       FileUtils.rm_r(Spontaneous.instance.root) rescue nil
     end
+    return unless clear_const
     %w(Piece Page Box Content Site).each do |klass|
       Object.send :remove_const, klass if Object.const_defined?(klass)
     end
@@ -200,8 +201,8 @@ class MiniTest::Spec
     self.class.setup_site(root, define_models)
   end
 
-  def teardown_site(clear_disk = true)
-    self.class.teardown_site(clear_disk)
+  def teardown_site(clear_disk = true, clear_const = true)
+    self.class.teardown_site(clear_disk, clear_const)
   end
 
   def assert_correct_template(content, expected_path, format = :html)

@@ -6,52 +6,79 @@ require File.expand_path('../../test_helper', __FILE__)
 class VisibilityTest < MiniTest::Spec
 
 
-  def setup
+
+  def self.startup
     @site = setup_site
+    Object.const_set :R, Class.new(Page)
+    Object.const_set :P, Class.new(Page)
+    Object.const_set :E, Class.new(Piece)
+    Object.const_set :MyAlias, Class.new(Piece)
+    ::R.box :pages
+    # class ::R < Page; end
+    # class ::P < Page; end
+    P.box :things
+    # class ::E < Piece; end
+    E.box :pages
+    MyAlias.alias_of ::E
+
+    Content.delete
+
+    @root = R.new(:uid => 'root')
+    2.times do |i|
+      c = P.new(:uid => i, :slug => "#{i}")
+      @root.pages << c
+      4.times do |j|
+        d = E.new(:uid => "#{i}.#{j}")
+        c.things << d
+        2.times do |k|
+          e = P.new(:uid => "#{i}.#{j}.#{k}", :slug => "#{i}-#{j}-#{k}")
+          d.pages << e
+          2.times do |l|
+            e.things << E.new(:uid => "#{i}.#{j}.#{k}.#{l}")
+          end
+          e.save
+        end
+      end
+    end
+    @root.save
+    @root.reload
+  end
+
+  def self.shutdown
+    Content.delete
+    Object.send(:remove_const, :R)
+    Object.send(:remove_const, :P)
+    Object.send(:remove_const, :E)
+    Object.send(:remove_const, :MyAlias)
+    teardown_site(true, true)
+  end
+
+  def self.site
+    @site
+  end
+
+  def setup
+     Content.count.should == 59
+    @site = self.class.site
+    @root = Content.root
+    @child = Page.uid("0")
   end
 
   def teardown
-    teardown_site
+    Content.update(:hidden => false, :hidden_origin => nil)
+    teardown_site(false, false)
   end
 
   context "Content" do
     setup do
-      Content.delete
-      class ::R < Page; end
-      R.box :pages
-      class ::P < Page; end
-      P.box :things
-      class ::E < Piece; end
-      E.box :pages
-
-      @root = R.new(:uid => 'root')
-      2.times do |i|
-        c = P.new(:uid => i, :slug => "#{i}")
-        @root.pages << c
-        4.times do |j|
-          d = E.new(:uid => "#{i}.#{j}")
-          c.things << d
-          2.times do |k|
-            e = P.new(:uid => "#{i}.#{j}.#{k}", :slug => "#{i}-#{j}-#{k}")
-            d.pages << e
-            2.times do |l|
-              e.things << E.new(:uid => "#{i}.#{j}.#{k}.#{l}")
-            end
-            e.save
-          end
-        end
-      end
-      @root.save
-      @root.reload
-      @child = Page.uid("0")
     end
 
     teardown do
-      [:R, :P, :E].each do |k|
-        Object.send(:remove_const, k)
-      end
-      Spontaneous.database.logger = nil
-      Content.delete
+      # [:R, :P, :E].each do |k|
+      #   Object.send(:remove_const, k)
+      # end
+      # Spontaneous.database.logger = nil
+      # Content.delete
     end
 
     should "be visible by default" do
@@ -134,7 +161,7 @@ class VisibilityTest < MiniTest::Spec
           c.hidden_origin.should be_nil
         end
       end
-
+      f.destroy
     end
 
     should "re-show all descendents of page content" do
@@ -198,6 +225,7 @@ class VisibilityTest < MiniTest::Spec
       piece.hidden?.should be_true
       page.show!
       piece.reload.hidden?.should be_false
+      piece.destroy
     end
 
     context "root" do
@@ -216,20 +244,11 @@ class VisibilityTest < MiniTest::Spec
       end
     end
     context "visibility scoping" do
-      setup do
-        # S.database.logger = ::Logger.new($stdout)
-      end
-
-      teardown do
-        # S.database.logger = nil
-      end
-
       should "prevent inclusion of hidden content" do
         @uid = '0'
         @page = Page.uid(@uid)
         @page.hide!
         @page.reload
-        # Spontaneous.database.logger = ::Logger.new($stdout)
         Page.path("/0").should == @page
         Content.with_visible do
           Content.visible_only?.should be_true
@@ -258,7 +277,9 @@ class VisibilityTest < MiniTest::Spec
         Content.with_visible do
           # would like to make sure we're raising a predictable error
           # but 1.9 changes the typeerror to a runtime error
-          lambda { page.things << Piece.new }.must_raise(TypeError, RuntimeError)
+          p = Piece.new
+          lambda { page.things << p }.must_raise(TypeError, RuntimeError)
+          p.destroy
         end
       end
 
@@ -283,16 +304,15 @@ class VisibilityTest < MiniTest::Spec
 
     context "aliases" do
       setup do
-        class ::MyAlias < Piece; end
-        MyAlias.alias_of ::E
       end
 
       teardown do
-        Object.send(:remove_const, :MyAlias)
+        MyAlias.delete
       end
 
       should "be initalized as invisible if their target is invisible" do
-        target = E.first(:uid => "1.1")
+        target = E.create(:uid => "X")
+        target.destroy
         target.hide!
         al = MyAlias.create(:target => target)
         al.visible?.should be_false
@@ -318,6 +338,9 @@ class VisibilityTest < MiniTest::Spec
         al1.hide!
         al1.reload
         al2.reload
+        target.reload
+        sort = proc { |e1, e2| e1.id <=> e2.id }
+        al = target.aliases.sort(&sort)
         Set.new(target.aliases).should == Set.new([al1, al2])
         target.reload
         Content.with_visible do
@@ -333,6 +356,7 @@ class VisibilityTest < MiniTest::Spec
         al1 = MyAlias.create(:target => target)
         P.filter(:id => target.id).delete
         al1.reload.visible?.should be_false
+        target.destroy
       end
     end
   end
