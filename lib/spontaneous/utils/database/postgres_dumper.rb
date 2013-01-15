@@ -45,6 +45,7 @@ module Spontaneous
             option(:password),
             option(:username),
             option(:encoding),
+            option(:exclude_table),
             database_name
           ]
           unless tables.nil?
@@ -70,6 +71,10 @@ module Spontaneous
 
         def encoding
           "UTF8"
+        end
+
+        def exclude_table
+          revision_archive_table
         end
       end
     end

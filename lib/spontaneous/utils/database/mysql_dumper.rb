@@ -3,6 +3,7 @@ module Spontaneous
   module Utils
     module Database
       class MySQLDumper
+
         def initialize(database)
           @database = database
         end
@@ -39,6 +40,7 @@ module Spontaneous
             option(:password),
             option(:user),
             option(:default_character_set),
+            option(:ignore_table),
             database_name
           ]
           unless tables.nil?
@@ -63,6 +65,16 @@ module Spontaneous
 
         def default_character_set
           "UTF8"
+        end
+
+        def ignore_table
+          [database_name, revision_archive_table].join(".")
+        end
+
+        # The whole point of this table's existance is to reduce the
+        # size of the db dump for syncing
+        def revision_archive_table
+          Spontaneous::Content.revision_archive_dataset.first_source.to_s
         end
 
         def option(option, add_if_nil=false)
