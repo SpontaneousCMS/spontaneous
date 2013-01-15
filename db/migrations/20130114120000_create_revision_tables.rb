@@ -1,6 +1,7 @@
 
 require 'logger'
 require 'spontaneous'
+require 'benchmark'
 
 Sequel.migration do
   ContentTable = S::DataMapper::ContentTable
@@ -13,7 +14,6 @@ Sequel.migration do
   logger = ::Logger.new($stdout)
 
   up do
-    self.logger = logger
 
     add_column content_table, :revision, :integer, :default => nil
 
@@ -22,7 +22,6 @@ Sequel.migration do
     [revision_table, archive_table].each do |table|
       drop_table?(table)
       run %(CREATE TABLE #{literal(table)} AS (SELECT * FROM #{literal(content_table)} LIMIT 1);)
-      self[table].delete
     end
 
 
@@ -45,32 +44,42 @@ Sequel.migration do
       insert_columns = (columns + [literal(:revision)]).join(", ")
       select_columns = columns.join(", ")
 
+      self.logger = nil
+
       revisions.each do |(table, revision)|
         begin
-          dest = archive_table
-          dest = revision_table if revision > keep_revision
-          run <<-SQL
-          INSERT #{literal(dest)} (#{insert_columns})
-            SELECT #{select_columns}, #{revision}
-            FROM #{literal(table)}
-            SQL
-            drop_table table unless revision == current_revision
+          print ">> Copying revision #{revision} from table #{table} ... "
+          bm = Benchmark.measure do
+            transaction do
+              dest = archive_table
+              dest = revision_table if revision > keep_revision
+              run <<-SQL
+                INSERT #{literal(dest)} (#{insert_columns})
+                SELECT #{select_columns}, #{revision}
+                FROM #{literal(table)}
+              SQL
+              drop_table table unless revision == current_revision
+            end
+          end
+          puts " done (#{"%.4f" % bm.real}s)"
         rescue Sequel::DatabaseError => e
           logger.error(e.message)
         end
       end
+
+      self.logger = logger
 
       # Dont want an index on the archive because the assumption is that we won't
       # need it except for archival purposes and the index will add space & slow
       # things down.
       add_index revision_table, :revision
 
-      # Because of errors, some of the revisions will have been left.
+      # Because of errors some of the revisions will have been left.
       # Just delete them.
-      max_revision_table = ContentTable.revision_table(content_table, max_revision)
+      current_revision_table = ContentTable.revision_table(content_table, current_revision)
       drop_tables = self.tables.
         select { |t| ContentTable.revision_table?(content_table, t) }.
-        reject { |t| t == max_revision_table }
+        reject { |t| t == current_revision_table }
 
       drop_tables.each do |table|
         drop_table table
