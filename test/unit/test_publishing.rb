@@ -293,6 +293,11 @@ class PublishingTest < MiniTest::Spec
         File.read("#{@site.revision_root}/00003/dynamic/index.rtf.cut").should == "RICH!\n"
       end
 
+      should "run the content revision cleanup task after the revision is live xxx" do
+        Content.expects(:cleanup_revisions).with(@revision+1, 8)
+        Site.publish_all
+      end
+
       context "hooks & triggers" do
         setup do
         end

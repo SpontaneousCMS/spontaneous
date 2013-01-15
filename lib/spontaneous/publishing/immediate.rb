@@ -8,6 +8,8 @@ module Spontaneous
     class Immediate
       include ::Simultaneous::Task
 
+      KEEP_REVISIONS = 8
+
       attr_reader :revision, :now
 
       def initialize(revision, content_model)
@@ -293,6 +295,7 @@ module Spontaneous
         begin
           Spontaneous::Site.trigger(:after_publish, revision)
           Spontaneous::Site.send(:pending_revision=, nil)
+          Spontaneous::Content.cleanup_revisions(revision, keep_revisions)
           update_progress("complete")
         rescue Exception => e
           # if a post publish hook raises an exception then we want to roll everything back
@@ -329,6 +332,10 @@ module Spontaneous
           puts exception.backtrace.join("\n") if exception
           update_progress("error", exception)
         end
+      end
+
+      def keep_revisions
+        Spontaneous::Site.config.keep_revisions || KEEP_REVISIONS
       end
     end # Immediate
   end # Publishing
