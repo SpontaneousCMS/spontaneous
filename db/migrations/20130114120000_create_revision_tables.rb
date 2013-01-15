@@ -20,6 +20,7 @@ Sequel.migration do
     current_revision = self[:spontaneous_state].first[:published_revision]
 
     [revision_table, archive_table].each do |table|
+      drop_table?(table)
       run %(CREATE TABLE #{literal(table)} AS (SELECT * FROM #{literal(content_table)} LIMIT 1);)
       self[table].delete
     end
