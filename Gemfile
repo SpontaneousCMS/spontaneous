@@ -3,7 +3,7 @@ source :rubygems
 gemspec
 
 # gem "cutaneous", :path => "/Users/garry/Dropbox/Development/spontaneous3/cutaneous"
-gem 'xapian-full', "~> 1.2.3"
+gem 'xapian-ruby', "~> 1.2.12"
 gem 'xapian-fu', "~> 1.3"
 
 group :development do
