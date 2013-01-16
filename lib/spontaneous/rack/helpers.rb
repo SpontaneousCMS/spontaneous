@@ -15,22 +15,21 @@ module Spontaneous
       end
 
       def style_url(style)
-        style = "#{style}.css" unless style =~ /\.css$/
-        if (compiled_asset = application_assets.manifest.assets[style])
-          return "#{NAMESPACE}/assets/#{compiled_asset}"
-        end
-        # TODO: use the sprockets environment to append a modification time to the non-compiled URL
-        "#{NAMESPACE}/css/#{style}"
+        asset_url(style, "css")
       end
 
       def script_url(script)
-        script = "#{script}.js" unless script =~ /\.js$/
+        asset_url(script, "js")
+      end
 
-        if (compiled_asset = application_assets.manifest.assets[script])
+      def asset_url(file, type)
+        file = "#{file}.#{type}" unless file =~ /\.#{type}$/
+
+        if (compiled_asset = application_assets.manifest.assets[file])
           return "#{NAMESPACE}/assets/#{compiled_asset}"
         end
         # TODO: use the sprockets environment to append a modification time to the non-compiled URL
-        "#{NAMESPACE}/js/#{script}"
+        "#{NAMESPACE}/#{type}/#{file}"
       end
 
       def script_list(scripts)
