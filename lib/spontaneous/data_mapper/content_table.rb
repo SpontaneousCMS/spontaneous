@@ -84,7 +84,7 @@ module Spontaneous
       end
 
       def revision_history_table
-        :"spontaneous_#{@name}_revisions"
+        :"spontaneous_#{@name}_history"
       end
 
       def revision_archive_table

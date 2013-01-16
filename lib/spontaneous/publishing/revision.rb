@@ -94,12 +94,6 @@ module Spontaneous::Publishing
         @revision.dataset.update(:revision => revision)
       end
 
-      # def copy_revision(revision, dest_table)
-      #   src_table = table(revision)
-      #   sql = "INSERT INTO #{db.literal(dest_table)} SELECT * FROM #{database.literal(src_table)}"
-      #   database.run(sql)
-      # end
-
       def mapper
         @revision.mapper
       end
@@ -141,11 +135,7 @@ module Spontaneous::Publishing
       end
 
       def filter_ids(ds)
-        ds.filter(:id => modified_ids)
-      end
-
-      def modified_ids
-        @modified.map { |m| m.id }
+        ds.filter(:id => @modified.map(&:id))
       end
     end
 
@@ -243,7 +233,7 @@ module Spontaneous::Publishing
     end
 
     def must_publish_all?(modified)
-      Array(modified).empty? || !previous.data_source?
+      Array(modified).empty? || !previous.revision_exists?
     end
 
     def validate!
@@ -255,7 +245,10 @@ module Spontaneous::Publishing
     end
 
     def delete
-      delete_table if creatable?
+      return self unless creatable?
+      delete_table
+      history_dataset.delete
+      archive_dataset.delete
       self
     end
 
@@ -267,9 +260,18 @@ module Spontaneous::Publishing
       database.tables.include?(table)
     end
 
-    def data_source?
+    def revision_exists?
       return false if @revision.nil?
       history_dataset.count > 0
+    end
+
+    def exists?
+      revision_exists?
+    end
+
+    def unarchive
+      return if revision_exists?
+      copy_dataset(archive_dataset, history_table)
     end
 
     def mapper
@@ -302,15 +304,16 @@ module Spontaneous::Publishing
     end
 
     def copy_to(dest_table)
-      db.run(<<-SQL)
-        INSERT INTO #{db.literal(dest_table)}
-          SELECT * FROM #{db.literal(table)}
-      SQL
+      copy_dataset(dataset, dest_table)
+    end
+
+    def copy_dataset(ds, dest_table)
+      db.run("INSERT INTO #{db.literal(dest_table)} #{ds.select_sql}")
     end
 
     def previous
-      prev = (@revision.nil? || @revision <= 1) ? nil : @revision - 1
-      Revision.new(@model, prev)
+      revision = (@revision.nil? || @revision <= 1) ? nil : @revision - 1
+      Revision.new(@model, revision)
     end
 
     def table
