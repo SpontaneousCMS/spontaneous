@@ -8,7 +8,7 @@ This is version 2 of an existing (closed source) CMS that has been in active pro
 
 Spontaneous uses a powerful hierarchical system to organise your information. This breaks out of the bonds of the traditional "title, slug, text" model of CMS content and instead allows content authors to build complex, highly styled pages out of simple, easily editable blocks.
 
-- Ruby 1.9
+- Ruby 1.9.3
 - Using classes instead of db for metadata
   - Versioning of metadata
   - Keeps the developer in the text editor
