@@ -89,10 +89,9 @@ class PublishingTest < MiniTest::Spec
       end
 
       should "delete any conflicting revision tables" do
-        ::Content.create_revision(3)
+        S::Publishing::Revision.create(Content, 3)
         S::Site.publish_all
       end
-
 
       should "issue a publish_all if passed page id list including all pages (in any order)" do
         skip "Implement after scheduled publishes"

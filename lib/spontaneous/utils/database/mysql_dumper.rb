@@ -51,6 +51,7 @@ module Spontaneous
 
           command = %(mysqldump #{options.join(" ")} > #{path} )
         end
+
         def database_name
           @database.opts[:database]
         end

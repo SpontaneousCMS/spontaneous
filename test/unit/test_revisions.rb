@@ -5,6 +5,8 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class RevisionsTest < MiniTest::Spec
 
+  Revision = Spontaneous::Publishing::Revision
+
   def setup
     @now = Time.now
     @site = setup_site
@@ -53,7 +55,6 @@ class RevisionsTest < MiniTest::Spec
       RevisionsTest.send(:remove_const, :Page) rescue nil
       RevisionsTest.send(:remove_const, :Piece) rescue nil
       Content.delete
-      DB.logger = nil
     end
 
     context "data sources" do
@@ -84,7 +85,7 @@ class RevisionsTest < MiniTest::Spec
         end
       end
 
-      should "understand the with_editable" do
+      should "understand with_editable" do
         Content.with_revision(23) do
           Content.mapper.current_revision.should == 23
           Content.with_editable do
@@ -151,18 +152,21 @@ class RevisionsTest < MiniTest::Spec
     context "content revisions" do
       setup do
         @revision = 1
-        Content.revision_dataset.delete
-        Content.revision_archive_dataset.delete
+        Revision.history_dataset(Content).delete
+        Revision.archive_dataset(Content).delete
       end
 
       teardown do
-        Content.delete_all_revisions!
+        # Content.delete_all_revisions!
+        Revision.delete_all(Content)
       end
 
       should "be testable for existance" do
         Content.revision_exists?(@revision).should be_false
-        Content.create_revision(@revision)
-        Content.revision_exists?(@revision).should be_true
+        Revision.create(Content, @revision)
+        # Content.create_revision(@revision)
+        Revision.exists?(Content, @revision).should be_true
+        # Content.revision_exists?(@revision).should be_true
       end
 
       should "be deletable en masse" do
@@ -170,32 +174,36 @@ class RevisionsTest < MiniTest::Spec
         tables = revisions.map { |i| Content.revision_table(i).to_sym }
 
         revisions.each do |r|
-          Content.revision_dataset.insert(:revision => r, :uid => "revision-#{r}")
-          Content.revision_archive_dataset.insert(:revision => r, :uid => "archive-#{r}")
+          Content.history_dataset.insert(:revision => r, :uid => "revision-#{r}")
+          Content.archive_dataset.insert(:revision => r, :uid => "archive-#{r}")
         end
 
-        Content.revision_dataset.count.should == 10
-        Content.revision_archive_dataset.count.should == 10
+        Content.history_dataset.count.should == 10
+        Content.archive_dataset.count.should == 10
 
         tables.each do |t|
           DB.create_table(t){Integer :id} rescue nil
         end
+
         tables.each do |t|
           DB.tables.include?(t).should be_true
         end
-        Content.delete_all_revisions!
+
+        Revision.delete_all(Content)
+        # Content.delete_all_revisions!
 
         tables.each do |t|
           DB.tables.include?(t).should be_false
         end
 
-        Content.revision_dataset.count.should == 0
-        Content.revision_archive_dataset.count.should == 0
+        Content.history_dataset.count.should == 0
+        Content.archive_dataset.count.should == 0
       end
 
       should "be creatable from current content" do
         DB.tables.include?(Content.revision_table(@revision).to_sym).should be_false
-        Content.create_revision(@revision)
+        # Content.create_revision(@revision)
+        Revision.create(Content, @revision)
         DB.tables.include?(Content.revision_table(@revision).to_sym).should be_true
         count = Content.count
         Content.with_revision(@revision) do
@@ -209,44 +217,47 @@ class RevisionsTest < MiniTest::Spec
             end
           end
         end
-        Content.revision_dataset(@revision).count.should == count
-        Content.revision_dataset.select(:revision).group(:revision).all.should == [{:revision => 1}]
-        Content.revision_archive_dataset(@revision).count.should == count
-        Content.revision_archive_dataset.select(:revision).group(:revision).all.should == [{:revision => 1}]
+        Content.history_dataset(@revision).count.should == count
+        Content.history_dataset.select(:revision).group(:revision).all.should == [{:revision => 1}]
+        Content.archive_dataset(@revision).count.should == count
+        Content.archive_dataset.select(:revision).group(:revision).all.should == [{:revision => 1}]
       end
 
-      should "be creatable from any revision" do
-        revision = 2
-        source_revision = @revision
-        source_revision_count = nil
+      # should "be creatable from any revision" do
+      #   revision = 2
+      #   source_revision = @revision
+      #   source_revision_count = nil
 
-        Content.create_revision(source_revision)
+      #   # Content.create_revision(source_revision)
+      #   Revision.create(Content, source_revision)
 
-        uid0 = Content.first(:uid => '0')
-        path = uid0.visibility_path + ".#{uid0.id}%"
-        ds = Content.revision_dataset(source_revision)
-        dd = ds.filter(Sequel.like(:visibility_path, path))
-        dd.delete
-        source_revision_count = ds.count
+      #   uid0 = Content.first(:uid => '0')
+      #   path = uid0.visibility_path + ".#{uid0.id}%"
+      #   ds = Content.history_dataset(source_revision)
+      #   dd = ds.filter(Sequel.like(:visibility_path, path))
+      #   dd.delete
+      #   source_revision_count = ds.count
 
-        Content.count.should == (source_revision_count + 6)
+      #   Content.count.should == (source_revision_count + 6)
 
-        Content.create_revision(revision, source_revision)
+      #   # Content.create_revision(revision, source_revision)
+      #   Revision.create(Content, revision, source_revision)
 
-        Content.with_revision(revision) do
-          Content.count.should == source_revision_count
-          Content.all.each do |published|
+      #   Content.with_revision(revision) do
+      #     Content.count.should == source_revision_count
+      #     Content.all.each do |published|
 
-            Content.with_revision(source_revision) do
-              e = Content.first :id => published.id
-              assert_content_equal(e, published, :revision)
-            end
-          end
-        end
-      end
+      #       Content.with_revision(source_revision) do
+      #         e = Content.first :id => published.id
+      #         assert_content_equal(e, published, :revision)
+      #       end
+      #     end
+      #   end
+      # end
 
       should "have the correct indexes" do
-        Content.create_revision(@revision)
+        # Content.create_revision(@revision)
+        Revision.create(Content, @revision)
         content_indexes = DB.indexes(:content)
         published_indexes = DB.indexes(Content.revision_table(@revision))
         # made slightly complex by the fact that the index names depend on the table names
@@ -256,16 +267,18 @@ class RevisionsTest < MiniTest::Spec
 
       should "only be kept until a new revision is available ccc" do
         (0..2).each do |r|
-          Content.create_revision(@revision+r)
-          Content.revision_dataset(@revision+r).count.should == 15
-          Content.revision_archive_dataset(@revision+r).count.should == 15
+          # Content.create_revision(@revision+r)
+          Revision.create(Content, @revision+r)
+          Content.history_dataset(@revision+r).count.should == 15
+          Content.archive_dataset(@revision+r).count.should == 15
         end
         Content.revision_tables.should == [:__r00001_content, :__r00002_content, :__r00003_content]
-        Content.cleanup_revisions(@revision+2, 2)
+        Revision.cleanup(Content, @revision+2, 2)
+        # Content.cleanup_revisions(@revision+2, 2)
         Content.revision_tables.should == [:__r00003_content]
-        Content.revision_dataset(@revision).count.should == 0
-        Content.revision_archive_dataset(@revision).count.should == 15
-        Content.revision_dataset(@revision+2).count.should == 15
+        Content.history_dataset(@revision).count.should == 0
+        Content.archive_dataset(@revision).count.should == 15
+        Content.history_dataset(@revision+2).count.should == 15
       end
 
 
@@ -273,19 +286,18 @@ class RevisionsTest < MiniTest::Spec
         setup do
           @initial_revision = 1
           @final_revision = 2
-          Content.create_revision(@initial_revision)
-          Content.delete_revision(@final_revision) rescue nil
-          Content.delete_revision(@final_revision+1) rescue nil
+          # Content.create_revision(@initial_revision)
+          Revision.create(Content, @initial_revision)
+          Revision.delete(Content, @final_revision) rescue nil
+          Revision.delete(Content, @final_revision+1) rescue nil
+          # Content.delete_revision(@final_revision) rescue nil
+          # Content.delete_revision(@final_revision+1) rescue nil
         end
 
         teardown do
-          begin
-            Content.delete_revision(@initial_revision)
-            Content.delete_revision(@final_revision)
-            Content.delete_revision(@final_revision+1)
-          rescue
-          end
-          DB.logger = nil
+          Revision.create(Content, @initial_revision) rescue nil
+          Revision.delete(Content, @final_revision) rescue nil
+          Revision.delete(Content, @final_revision+1) rescue nil
         end
 
         should "duplicate changes to only a single item" do
@@ -297,13 +309,13 @@ class RevisionsTest < MiniTest::Spec
           editable2.label = "unpublished"
           editable2.save
           editable2.reload
-          Content.publish(@final_revision, [editable1.id])
+          # Content.publish(@final_revision, [editable1.id])
+          Revision.patch(Content, @final_revision, [editable1.id])
           editable1.reload
           Content.with_revision(@final_revision) do
             published = Content.first :id => editable1.id
             unpublished = Content.first :id => editable2.id
             assert_content_equal(published, editable1, :revision)
-
             assert_content_unequal(unpublished, editable2, :revision)
           end
         end
@@ -314,7 +326,8 @@ class RevisionsTest < MiniTest::Spec
 
           editable1.things << new_content
           editable1.save
-          Content.publish(@final_revision, [editable1.id])
+          Revision.patch(Content, @final_revision, [editable1.id])
+          # Content.publish(@final_revision, [editable1.id])
           new_content.reload
           editable1.reload
           Content.with_revision(@final_revision) do
@@ -329,7 +342,8 @@ class RevisionsTest < MiniTest::Spec
           editable1 = Content.first(:uid => '0')
           deleted = editable1.contents.first
           editable1.contents.first.destroy
-          Content.publish(@final_revision, [editable1.id])
+          # Content.publish(@final_revision, [editable1.id])
+          Revision.patch(Content, @final_revision, [editable1.id])
           editable1.reload
           Content.with_revision(@final_revision) do
             published1 = Content[editable1.id]
@@ -344,7 +358,8 @@ class RevisionsTest < MiniTest::Spec
           editable1.things << new_page
           editable1.save
           new_page.save
-          Content.publish(@final_revision, [editable1.id])
+          # Content.publish(@final_revision, [editable1.id])
+          Revision.patch(Content, @final_revision, [editable1.id])
           new_page.reload
           editable1.reload
           Content.with_revision(@final_revision) do
@@ -363,7 +378,8 @@ class RevisionsTest < MiniTest::Spec
           new_content = Piece.new(:uid => "new")
           editable2.things << new_content
           editable2.save
-          Content.publish(@final_revision, [editable1.id])
+          # Content.publish(@final_revision, [editable1.id])
+          Revision.patch(Content, @final_revision, [editable1.id])
           editable1.reload
           editable2.reload
           new_content.reload
@@ -375,7 +391,8 @@ class RevisionsTest < MiniTest::Spec
             assert_content_unequal(published3, editable2, :revision)
             published3.uid.should_not == "new"
           end
-          Content.publish(@final_revision+1, [editable2.id])
+          # Content.publish(@final_revision+1, [editable2.id])
+          Revision.patch(Content, @final_revision+1, [editable2.id])
           editable1.reload
           editable2.reload
           new_content.reload
@@ -390,13 +407,14 @@ class RevisionsTest < MiniTest::Spec
           end
         end
 
-        should "insert an entry value into the parent of a newly added page when that page is published" do
+        should "insert an entry value into the parent of a newly added page when that page is published aaa" do
           editable1 = Content.first(:uid => '0')
           new_page = Page.new(:uid => "new")
           editable1.things << new_page
           editable1.save
           new_page.save
-          Content.publish(@final_revision, [new_page.id])
+          # Content.publish(@final_revision, [new_page.id])
+          Revision.patch(Content, @final_revision, [new_page.id])
           new_page.reload
           editable1.reload
           Content.with_revision(@final_revision) do
@@ -416,7 +434,8 @@ class RevisionsTest < MiniTest::Spec
           editable1.save
           new_page1.save
           new_page2.save
-          Content.publish(@final_revision, [new_page2.id])
+          # Content.publish(@final_revision, [new_page2.id])
+          Revision.patch(Content, @final_revision, [new_page2.id])
           new_page1.reload
           new_page2.reload
           editable1.reload
@@ -439,7 +458,8 @@ class RevisionsTest < MiniTest::Spec
           editable1.save
           new_page1.save
           new_page2.save
-          Content.publish(@final_revision, [editable1.id, new_page2.id])
+          # Content.publish(@final_revision, [editable1.id, new_page2.id])
+          Revision.patch(Content, @final_revision, [editable1.id, new_page2.id])
           new_page1.reload
           new_page2.reload
           editable1.reload
@@ -458,7 +478,8 @@ class RevisionsTest < MiniTest::Spec
           piece = page.things.first
           child = piece.things.first
           page.things.first.destroy
-          Content.publish(@final_revision, [page.id])
+          # Content.publish(@final_revision, [page.id])
+          Revision.patch(Content, @final_revision, [page.id])
 
           Content.with_revision(@final_revision) do
             published_parent = Content[page.id]
@@ -476,18 +497,22 @@ class RevisionsTest < MiniTest::Spec
     context "publication timestamps" do
       setup do
         @revision = 1
-        Content.delete_revision(@revision+1)
+        Revision.delete(Content, @revision+1)
+        # Content.delete_revision(@revision+1)
       end
       teardown do
-        Content.delete_revision(@revision)
-        Content.delete_revision(@revision+1)
+        Revision.delete(Content, @revision)
+        Revision.delete(Content, @revision+1)
+        # Content.delete_revision(@revision)
+        # Content.delete_revision(@revision+1)
       end
 
       should "set correct timestamps on first publish" do
         first = Content.first
         first.reload.first_published_at.should be_nil
         first.reload.last_published_at.should be_nil
-        Content.publish(@revision)
+        # Content.publish(@revision)
+        Revision.create(Content, @revision)
         first.reload.first_published_at.to_i.should == @now.to_i
         first.reload.last_published_at.to_i.should == @now.to_i
         first.reload.first_published_revision.should == @revision
@@ -506,12 +531,14 @@ class RevisionsTest < MiniTest::Spec
       should "set correct timestamps on later publishes" do
         first = Content.first
         first.first_published_at.should be_nil
-        Content.publish(@revision)
+        # Content.publish(@revision)
+        Revision.create(Content, @revision)
         first.reload.first_published_at.to_i.should == @now.to_i
         c = Content.create
         c.first_published_at.should be_nil
         stub_time(@now + 100)
-        Content.publish(@revision+1)
+        # Content.publish(@revision+1)
+        Revision.create(Content, @revision+1)
         first.reload.first_published_at.to_i.should == @now.to_i
         first.reload.last_published_at.to_i.should == @now.to_i + 100
         Content.with_editable do
@@ -525,22 +552,24 @@ class RevisionsTest < MiniTest::Spec
       end
 
       should "not set publishing date for items not published" do
-        Content.publish(@revision)
+        # Content.publish(@revision)
+        Revision.create(Content, @revision)
         page = Content.first
         page.uid = "fish"
         page.save
         added = Content.create
         added.first_published_at.should be_nil
-        Content.publish(@revision+1, [page])
+        # Content.publish(@revision+1, [page])
+        Revision.patch(Content, @revision+1, [page])
         page.first_published_at.to_i.should == @now.to_i
         added.first_published_at.should be_nil
         added.last_published_at.should be_nil
       end
 
-      should "not set publishing dates if exception raised in passed block" do
+      should "not set publishing dates if exception raised in passed block xxx" do
         Content.first.first_published_at.should be_nil
         begin
-          Content.publish(@revision) do
+          Revision.create(Content, @revision) do
             raise Exception
           end
         rescue Exception; end
@@ -548,21 +577,26 @@ class RevisionsTest < MiniTest::Spec
       end
 
       should "delete revision tables if exception raised in passed block" do
-        Content.revision_exists?(@revision).should be_false
+        # Content.revision_exists?(@revision).should be_false
+        Revision.exists?(Content, @revision).should be_false
         begin
-          Content.publish(@revision) do
-            Content.revision_exists?(@revision).should be_true
+          Revision.create(Content, @revision) do
+          # Content.publish(@revision) do
+            # Content.revision_exists?(@revision).should be_true
+            Revision.exists?(Content, @revision).should be_true
             Content.revision.should == @revision
             raise Exception
           end
         rescue Exception; end
-        Content.revision_exists?(@revision).should be_false
+        # Content.revision_exists?(@revision).should be_false
+        Revision.exists?(Content, @revision).should be_false
       end
 
       should "always publish all if no previous revisions exist" do
         page = Content.first
         Content.filter(:first_published_at => nil).count.should == Content.count
-        Content.publish(@revision, [page])
+        # Content.publish(@revision, [page])
+        Revision.patch(Content, @revision, [page])
         Content.filter(:first_published_at => nil).count.should == 0
       end
     end
