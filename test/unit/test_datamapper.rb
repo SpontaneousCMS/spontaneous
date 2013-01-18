@@ -111,6 +111,19 @@ class DataMapperTest < MiniTest::Spec
         instance.attributes[:label].should == "column1"
       end
 
+      should "retirieve a list of objects in the specified order" do
+        instance = @mapper.instance MockContent, :label => "column1"
+        @database.sqls # clear the sql log
+        @database.fetch = [
+          { id:1, type_sid:"DataMapperTest::MockContent" },
+          { id:2, type_sid:"DataMapperTest::MockContent" },
+          { id:3, type_sid:"DataMapperTest::MockContent" },
+          { id:4, type_sid:"DataMapperTest::MockContent" }
+        ]
+        results = @mapper.get([2, 3, 4, 1])
+        results.map(&:id).should == [2, 3, 4, 1]
+      end
+
       should "allow for finding the first instance of a model" do
         @database.fetch = { id:1, label:"column1", type_sid:"DataMapperTest::MockContent" }
         instance = @mapper.first([MockContent], id: 1)

@@ -28,7 +28,7 @@ module Spontaneous::Search
     end
 
     def pages
-      @page_list ||= @results.map { |doc| Spontaneous::Content.get(doc.id) }
+      @page_list ||= Spontaneous::Content.get(@results.map { |doc| doc.id })
     end
   end # Results
 end
