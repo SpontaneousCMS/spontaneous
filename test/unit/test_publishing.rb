@@ -337,7 +337,16 @@ class PublishingTest < MiniTest::Spec
           previous_root = Spontaneous.revision_dir(@revision)
           published_root = Spontaneous.revision_dir(published_revision)
           symlink = Pathname.new Spontaneous.revision_dir
-          symlink.realpath.to_s.should == Pathname.new(previous_root).realpath.to_s
+          # JRuby's Pathname#realpath doesn't work properly
+          # See: http://jira.codehaus.org/browse/JRUBY-6460
+          #
+          # This workaround tests that the symlink has been re-pointed
+          #
+          # File.read(symlink + "REVISION").realpath.to_s.should == Pathname.new(previous_root).realpath.to_s
+          File.open(Pathname.new(previous_root) + "REVISION", "w") do |file|
+            file.write(@revision)
+          end
+          File.read(symlink + "REVISION").should == @revision.to_s
         end
       end
     end
