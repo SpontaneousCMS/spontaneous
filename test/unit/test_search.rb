@@ -401,7 +401,7 @@ class SearchTest < MiniTest::Spec
         @l = ::PageClass1.boxes.pages.instance_class.field :l, :index => true
 
         @page1.a = "a value 1"
-        @page1.pages.first.a =  "a value 2"
+      @page1.pages.first.a =  "a value 2"
         @page1.pages.l =  "l value 1"
 
         @piece1 = PieceClass1.new(:g => "g value 1")
@@ -520,14 +520,14 @@ class SearchTest < MiniTest::Spec
         xapian.expects(:search).with('"value 2"', {}).returns(XapianFu::ResultSet.new(:mset => mset))
         xapian.expects(:flush)
 
-        XapianFu::XapianDb.expects(:new).with({
+        XapianFu::XapianDb.expects(:new).with(has_entries({
           :dir => db_path,
           :create => true,
           :overwrite => true,
           :language => :english,
           :fields => @index1.fields,
           :spelling => true
-        }).returns(xapian)
+        })).returns(xapian)
 
         db = @index1.create_db(@revision)
         assert File.directory?(db_path)
@@ -545,14 +545,14 @@ class SearchTest < MiniTest::Spec
           language :italian
         end
 
-        XapianFu::XapianDb.expects(:new).with({
+        XapianFu::XapianDb.expects(:new).with(has_entries({
           :dir => db_path,
           :create => true,
           :overwrite => true,
           :language => :italian,
           :fields => index.fields,
           :spelling => true
-        })
+        }))
 
         db = index.create_db(@revision)
 
@@ -562,7 +562,7 @@ class SearchTest < MiniTest::Spec
           stemmer  false
         end
 
-        XapianFu::XapianDb.expects(:new).with({
+        XapianFu::XapianDb.expects(:new).with(has_entries({
           :dir => db_path,
           :create => true,
           :overwrite => true,
@@ -571,7 +571,7 @@ class SearchTest < MiniTest::Spec
           :stopper => false,
           :fields => index.fields,
           :spelling => true
-        })
+        }))
 
         db = index.create_db(@revision)
 
@@ -611,6 +611,54 @@ class SearchTest < MiniTest::Spec
         results.total_entries.should == 2
 
         FileUtils.rm_r(db_path)
+      end
+
+      should "respect weighting factors given to fields" do
+        db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
+        S::Site.stubs(:published_revision).returns(@revision)
+        db = @index1.create_db(@revision)
+        @w = PieceClass1.field :w, :index => { :weight => 100 }
+        @page1.pages << PieceClass1.new(:w => "findme")
+        @page2.pages << PieceClass2.new(:h => "findme findme")
+        @page2.pages << PieceClass2.new(:h => "findme findme")
+        @page5.pages << PieceClass2.new(:h => "findme")
+        @page5.pages << PieceClass2.new(:h => "findme")
+
+        @page1.save
+        @page2.save
+        @page5.save
+        db << @page1
+        db << @page2
+        db << @page5
+        db.close
+        results = @index1.search('findme', :limit => 5)
+        results.map(&:id).should == [@page1.id, @page2.id, @page5.id]
+      end
+
+      should "use the weighting specific to a subclass" do
+        db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
+        S::Site.stubs(:published_revision).returns(@revision)
+        @w = PieceClass1.field :w, :index => { :weight => 100 }
+        WeightedPiece = Class.new(PieceClass1)
+        WeightedPiece.field :w, :index => { :weight => 1}
+        index = Site.index :weighted do
+        end
+        @page1.pages << WeightedPiece.new(:w => "findme")
+        @page2.pages << PieceClass2.new(:h => "findme findme")
+        @page2.pages << PieceClass2.new(:h => "findme findme")
+        @page5.pages << PieceClass2.new(:h => "findme")
+        @page5.pages << PieceClass2.new(:h => "findme")
+
+        @page1.save
+        @page2.save
+        @page5.save
+        db = index.create_db(@revision)
+        db << @page1
+        db << @page2
+        db << @page5
+        db.close
+        results = index.search('findme', :limit => 5)
+        results.map(&:id).should == [@page2.id, @page5.id, @page1.id]
       end
 
       should "provide a convenient way to add documents to multiple indexes" do
