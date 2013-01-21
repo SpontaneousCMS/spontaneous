@@ -259,6 +259,17 @@ class FieldsTest < MiniTest::Spec
         @field = @field_class.new
       end
 
+      should "be used as the comparator" do
+        f1 = @field_class.new
+        f1.value = "a"
+        f2 = @field_class.new
+        f2.value = "b"
+        (f1 <=> f2).should == -1
+        (f2 <=> f1).should == 1
+        (f1 <=> f1).should == 0
+        [f2, f1].sort.map(&:value).should == ["<a>", "<b>"]
+      end
+
       should "be transformed by the update method" do
         @field.value = "Hello"
         @field.value.should == "<Hello>"

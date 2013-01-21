@@ -363,6 +363,10 @@ module Spontaneous
           :user => owner.current_editor)
       end
 
+      def <=>(o)
+        unprocessed_value <=> o.unprocessed_value
+      end
+
       def ==(o)
         eql?(o)
       end
