@@ -7,9 +7,11 @@ module Spontaneous::Model::Box
     class AllowedType
       attr_accessor :allow_subclasses
 
-      def initialize(type, options={})
-        @type = type
-        @options = options
+      def initialize(box, type, options={}, &definition)
+        @box_class  = box
+        @type       = type
+        @options    = options
+        @definition = definition
       end
 
       def check_instance_class
@@ -32,12 +34,35 @@ module Spontaneous::Model::Box
       end
 
       def resolve_instance_class(name)
+        begin
+          constantize(name)
+        rescue NameError => e
+          if @definition
+            define_instance_class
+          else
+            raise e
+          end
+        end
+      end
+
+      def constantize(name)
         case name
         when Class
           name
         when Symbol, String
           name.to_s.constantize
         end
+      end
+
+      def define_instance_class
+        content_type = Class.new(instance_class_supertype, &@definition)
+        @box_class.const_set @type, content_type
+        content_type
+      end
+
+      def instance_class_supertype
+        type = @options[:supertype] || (defined?(::Piece) ? ::Piece : Content::Piece)
+        constantize type
       end
 
       def styles(content)
@@ -135,13 +160,15 @@ module Spontaneous::Model::Box
       #   :prototype => The name of the prototype to use when creating pieces of this type
       #
       # TODO: finish these!
-      def allow(type, options={})
-        allowed_types_config << AllowedType.new(type, options)
+      def allow(type, options={}, &definition)
+        allowed = AllowedType.new(self, type, options, &definition)
+        allowed_types_config << allowed
+        allowed
       end
 
       # TODO: implement this in a way that doesn't require searching through constants at load-time
       def allow_subclasses(type, options = {})
-        parent_type = AllowedType.new(type)
+        parent_type = AllowedType.new(self, type)
         parent_type.allow_subclasses = true
         allowed_types_config << parent_type
         # parent_type.instance_class.subclasses.each do |subclass|
@@ -151,7 +178,7 @@ module Spontaneous::Model::Box
 
       def allow_group(*group_names)
         options = group_names.extract_options!
-        allowed_types_config << AllowedGroup.new(group_names, options)
+        allowed_types_config << AllowedGroup.new(self, group_names, options)
       end
 
       alias_method :allow_groups, :allow_group
