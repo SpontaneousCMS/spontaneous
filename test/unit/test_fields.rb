@@ -17,17 +17,7 @@ class FieldsTest < MiniTest::Spec
   end
 
   context "Fields" do
-    setup do
-      # class ::Page < Spontaneous::Page; end
-      # class ::Piece < Spontaneous::Piece; end
-    end
-
-    teardown do
-      # Object.send(:remove_const, :Page)
-      # Object.send(:remove_const, :Piece)
-    end
-
-    context "New content instances" do
+    context "New content instances xxx" do
       setup do
         @content_class = Class.new(Piece) do
           field :title, :default => "Magic"
@@ -57,6 +47,14 @@ class FieldsTest < MiniTest::Spec
         @instance.title = "Boing!"
         @instance.fields[:title].value.should == "Boing!"
       end
+
+      # TODO: I want to allow this but don't like overwriting the ::fields
+      # method like this.
+      # should "allow the definition of multiple fields at once" do
+      #   content_class = Class.new(Piece) do
+      #     fields :title, :photo, :date
+      #   end
+      # end
     end
 
     context "Overwriting fields" do
