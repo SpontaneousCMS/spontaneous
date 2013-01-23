@@ -528,7 +528,7 @@ class BoxesTest < MiniTest::Spec
       inline_type.ancestors[0..1].should == [ChildClass::InlineType, Allowed1]
     end
 
-    should "add the created class to the schema immediately xxx" do
+    should "add the created class to the schema immediately" do
       allowed = ChildClass.allow :InlineType, :supertype => :Allowed1 do
         field :title
       end
