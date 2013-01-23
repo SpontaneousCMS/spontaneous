@@ -11,7 +11,7 @@ module Spontaneous::Model::Box
         @box_class  = box
         @type       = type
         @options    = options
-        @definition = definition
+        define_instance_class(definition) if definition
       end
 
       def check_instance_class
@@ -33,31 +33,10 @@ module Spontaneous::Model::Box
         resolve_instance_class(@type)
       end
 
-      def resolve_instance_class(name)
-        begin
-          constantize(name)
-        rescue NameError => e
-          if @definition
-            define_instance_class
-          else
-            raise e
-          end
-        end
-      end
-
-      def constantize(name)
-        case name
-        when Class
-          name
-        when Symbol, String
-          name.to_s.constantize
-        end
-      end
-
-      def define_instance_class
-        content_type = Class.new(instance_class_supertype, &@definition)
+      def define_instance_class(definition)
+        content_type = Class.new(instance_class_supertype, &definition)
         @box_class.const_set @type, content_type
-        content_type
+        @type = content_type.name
       end
 
       def instance_class_supertype
@@ -118,6 +97,21 @@ module Spontaneous::Model::Box
         Spontaneous::Permissions.has_level?(user, user_level)
       end
       alias_method :addable?, :readable?
+
+      protected
+
+      def resolve_instance_class(name)
+        constantize(name)
+      end
+
+      def constantize(name)
+        case name
+        when Class
+          name
+        when Symbol, String
+          name.to_s.constantize
+        end
+      end
     end
 
     class AllowedGroup < AllowedType
