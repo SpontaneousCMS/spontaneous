@@ -144,7 +144,7 @@ Spontaneous.TopBar = (function($, S) {
 			} else {
 				this.select.show();
 			}
-			return '('+(count)+' pages)';
+			return '('+(count)+' page'+(count === 1 ? '' : 's')+')';
 		},
 		optgroup: function(boxname) {
 			return dom.optgroup().attr('label', boxname);
