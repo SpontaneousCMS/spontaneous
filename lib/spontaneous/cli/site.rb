@@ -1,9 +1,11 @@
 require 'spontaneous/cli'
+require 'simultaneous'
 
 module Spontaneous
   module Cli
     class Site < ::Thor
       include Spontaneous::Cli::TaskUtils
+      include ::Simultaneous::Task
       namespace :site
 
       default_task :browse
@@ -119,12 +121,17 @@ module Spontaneous
         Spontaneous::Site.background_mode = :immediate
         ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
         say "Creating revision #{Spontaneous::Site.revision}", :green, true
-        if options.pages
-          say ">  Publishing pages #{options.pages.inspect}", :green, true
-          Spontaneous::Site.publish_pages(options.pages)
-        else
-          say ">  Publishing all", :green, true
-          Spontaneous::Site.publish_all
+        begin
+          if options.pages
+            say ">  Publishing pages #{options.pages.inspect}", :green, true
+            Spontaneous::Site.publish_pages(options.pages)
+          else
+            say ">  Publishing all", :green, true
+            Spontaneous::Site.publish_all
+          end
+          # Rescue all errors to feed back to the UI
+        rescue ::Exception => e
+          send_error_notification(e)
         end
       end
 
@@ -147,6 +154,12 @@ module Spontaneous
         require 'launchy'
         boot!
         ::Launchy.open("http://localhost:#{Spontaneous::Site.config.port}/@spontaneous")
+      end
+
+      private
+
+      def send_error_notification(error)
+        simultaneous_event('publish_progress', {:state => "error", :progress => error}.to_json)
       end
     end
   end
