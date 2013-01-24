@@ -242,9 +242,6 @@ module Spontaneous
       # Removes the specified class and constant.
       #
       def remove_constant(const)
-        # return if Padrino::Reloader.exclude_constants.any? { |base| (const.to_s =~ /^#{base}/ || const.superclass.to_s =~ /^#{base}/) } &&
-        # !Padrino::Reloader.include_constants.any? { |base| (const.to_s =~ /^#{base}/ || const.superclass.to_s =~ /^#{base}/) }
-
         Spontaneous.schema.delete(const)
 
         parts = const.to_s.split("::")
@@ -378,7 +375,7 @@ module Spontaneous
       end
 
       def is_schema_class?(klass)
-        (klass < Spontaneous::Page or klass < Spontaneous::Piece or klass < Spontaneous::Box)
+        (klass < Spontaneous::Content or klass < Content::Box)
       end
 
       def remove_constant(const)
