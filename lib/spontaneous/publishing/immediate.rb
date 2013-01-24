@@ -330,7 +330,6 @@ module Spontaneous
           Spontaneous::Site.send(:pending_revision=, nil)
           @content_model.delete_revision(revision)
           puts exception.backtrace.join("\n") if exception
-          update_progress("error", exception)
         end
       end
 

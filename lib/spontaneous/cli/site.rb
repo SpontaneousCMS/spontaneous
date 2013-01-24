@@ -121,18 +121,16 @@ module Spontaneous
         Spontaneous::Site.background_mode = :immediate
         ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
         say "Creating revision #{Spontaneous::Site.revision}", :green, true
-        begin
-          if options.pages
-            say ">  Publishing pages #{options.pages.inspect}", :green, true
-            Spontaneous::Site.publish_pages(options.pages)
-          else
-            say ">  Publishing all", :green, true
-            Spontaneous::Site.publish_all
-          end
-          # Rescue all errors to feed back to the UI
-        rescue ::Exception => e
-          send_error_notification(e)
+        if options.pages
+          say ">  Publishing pages #{options.pages.inspect}", :green, true
+          Spontaneous::Site.publish_pages(options.pages)
+        else
+          say ">  Publishing all", :green, true
+          Spontaneous::Site.publish_all
         end
+        # Rescue all errors to feed back to the UI
+      rescue ::Exception => e
+        send_error_notification(e)
       end
 
       desc "render", "Re-renders the current content"

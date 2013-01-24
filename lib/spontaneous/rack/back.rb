@@ -10,17 +10,21 @@ module Spontaneous
       include Assets
 
       def self.messenger
-        @messenger ||= ::Spontaneous::Rack::EventSource.new
+        @messenger ||= event_source
+      end
+
+      def self.event_source
+        messenger = ::Spontaneous::Rack::EventSource.new
         # Find a way to move this into a more de-centralised place
         # at some point we are going to want to have some configurable, extendable
         # list of event handlers
         ::Simultaneous.on_event("publish_progress") { |event|
-          @messenger.deliver_event(event)
+          messenger.deliver_event(event)
         }
         ::Simultaneous.on_event("page_lock_status") { |event|
-          @messenger.deliver_event(event)
+          messenger.deliver_event(event)
         }
-        @messenger
+        messenger
       end
 
       class EventSource < ServerBase
