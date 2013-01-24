@@ -146,7 +146,7 @@ module Spontaneous
         say "Site is at revision #{Spontaneous::Site.revision}", :green
       end
 
-      desc "browse", "Launces a browser pointing to the current development CMS"
+      desc "browse", "Launches a browser pointing to the current development CMS"
       def browse
         prepare :browse
         require 'launchy'
