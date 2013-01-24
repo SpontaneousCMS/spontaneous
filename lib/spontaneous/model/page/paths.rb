@@ -28,12 +28,18 @@ module Spontaneous::Model::Page
       super
     end
 
+    # Test for title changes and update the slug to match if it hasn't already
+    # been set.
+    #
+    # This doesn't happen when the item is created (i.e. #new? => true)
+    # because otherwise the slug would always take on the title fields
+    # default value.
     def before_save
-      # unless new?
+      unless new?
         if (title = self.fields[title_field])
           set_slug_from_title(title)
         end
-      # end
+      end
       super
     end
 
