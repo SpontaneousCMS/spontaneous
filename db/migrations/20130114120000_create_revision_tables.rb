@@ -17,7 +17,9 @@ Sequel.migration do
 
     add_column content_table, :revision, :integer, :default => nil
 
-    current_revision = self[:spontaneous_state].first[:published_revision]
+    state = self[:spontaneous_state].first
+
+    current_revision = state.nil? ? 0 : state[:published_revision]
 
     [revision_table, archive_table].each do |table|
       drop_table?(table)
