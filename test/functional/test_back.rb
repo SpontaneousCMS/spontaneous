@@ -366,6 +366,21 @@ class BackTest < MiniTest::Spec
           @home.fields.introduction.value.should ==  "<p>Updated intro</p>\n"
         end
 
+        should "trigger replacement of default slug if title is first set xxx" do
+
+          project = Project.new
+          @home.projects << project
+          @home.save
+          project.has_generated_slug?.should be_true
+          params = {
+            "field[#{@home.fields.title.schema_id.to_s}]" => "Updated title",
+          }
+          auth_post "/@spontaneous/save/#{project.id}", params
+          project.reload
+          project.slug.should == "updated-title"
+          project.has_generated_slug?.should be_false
+        end
+
         should "update box field values" do
           box = @job1.images
           box.fields.title.to_s.should_not == "Updated title"

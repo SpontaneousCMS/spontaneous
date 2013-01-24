@@ -166,10 +166,6 @@ module Spontaneous
         process_value(v) if process
       end
 
-      def modified?(v)
-        @modified = (@initial_value != v)
-      end
-
       def modified!
         owner.field_modified!(self) if owner
       end
@@ -273,7 +269,7 @@ module Spontaneous
       end
 
       def mark_unmodified
-        @modified = nil
+        @modified = false
       end
 
       def modified?

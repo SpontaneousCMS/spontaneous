@@ -122,6 +122,7 @@ module Spontaneous::Model::Core
       else
         field_store = (self.field_store || []).dup
         fields.each do |field|
+          before_save_field(field)
           schema_id = field.schema_id.to_s
           if (index = field_store.index { |f| f[0] == schema_id })
             field_store[index.to_i] = field.serialize_db
@@ -131,6 +132,9 @@ module Spontaneous::Model::Core
         end
         field_store
       end
+    end
+
+    def before_save_field(field)
     end
 
     # Re-serializes the field store.

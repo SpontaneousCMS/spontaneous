@@ -29,14 +29,30 @@ module Spontaneous::Model::Page
     end
 
     def before_save
-      unless new?
-        if title = self.fields[:title]
-          if title.modified? and !title.blank? and self.class.is_default_slug?(slug)
-            self.slug = title.value
-          end
+      # unless new?
+        if (title = self.fields[title_field])
+          set_slug_from_title(title)
         end
-      end
+      # end
       super
+    end
+
+    # Syncing the slug with the title is made more difficult because the field
+    # update mechanism works differently from the more direct, console version.
+    # This is called by the field updater before re-serializing each modified field.
+    def before_save_field(field)
+      set_slug_from_title(field) if (field.name == title_field)
+      super
+    end
+
+    def set_slug_from_title(title)
+      if title.modified? and !title.blank? and has_generated_slug?
+        self.slug = title.value
+      end
+    end
+
+    def has_generated_slug?
+      self.class.is_default_slug?(slug)
     end
 
     def after_save
