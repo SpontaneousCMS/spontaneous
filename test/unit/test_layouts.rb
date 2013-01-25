@@ -41,6 +41,20 @@ class LayoutsTest < MiniTest::Spec
         page.render.should == "layouts/standard.html.cut\n"
       end
 
+      should "use the named template if it exists" do
+        layout = @template_root / "layouts/layout_page.html.cut"
+        begin
+          File.open(layout, "w") do |file|
+            file.write("layouts/layout_page.html.cut\n")
+          end
+          page = LayoutPage.new
+          assert_correct_template(page, @template_root / 'layouts/layout_page')
+          page.render.should == "layouts/layout_page.html.cut\n"
+        ensure
+          FileUtils.rm(layout)
+        end
+      end
+
       should "return the first layout if some are declared but none declared default" do
         LayoutPage.layout :custom1
         LayoutPage.layout :custom2
@@ -48,6 +62,7 @@ class LayoutsTest < MiniTest::Spec
         assert_correct_template(page, @template_root / 'layouts/custom1')
         page.render.should == "layouts/custom1.html.cut\n"
       end
+
       should "return the layout declared default" do
         LayoutPage.layout :custom1
         LayoutPage.layout :custom2, :default => true
