@@ -250,6 +250,10 @@ module Spontaneous
         value(format)
       end
 
+      def render_using(renderer, format=:html, *args)
+        render(format)
+      end
+
       def to_html(*args)
         render(:html, *args)
       end

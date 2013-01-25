@@ -32,7 +32,30 @@ module Spontaneous::Collections
       super || load_field(owner.field_prototypes[name.to_sym])
     end
 
+    # A call to ${ fields } within a template will call
+    # this #render method.
+    # This should only be used during development
+    #
+    def render(format = :html, params = {}, *args)
+      map { |field| wrap_field_value(field, field.render(format, params, *args), format) }.join("\n")
+    end
+
+    def render_using(renderer, format = :html, params = {}, *args)
+      map { |field| wrap_field_value(field, field.render_using(renderer, format, params, *args), format) }.join("\n")
+    end
+
     protected
+
+    def wrap_field_value(field, value, format)
+      case format
+      when "html", :html
+        classes = [owner.class.to_s.dasherize.downcase, "field", field.name].join(" ")
+        id = "field-#{field.id.gsub(/\//, "-")}"
+        [ %(<div class="#{classes}" id="#{id}">), value, "</div>" ].join
+      else
+        value
+      end
+    end
 
     def initialize_from_prototypes
       owner.field_prototypes.each do |field_prototype|

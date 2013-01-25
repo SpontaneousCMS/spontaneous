@@ -174,6 +174,22 @@ class RenderTest < MiniTest::Spec
       end
     end
 
+    context "fields" do
+      should "render a joined list of field values" do
+        Page.field :description, :markdown
+        Page.field :image
+        ::Page.layout do
+          %(${ fields })
+        end
+        @page.title = "Title & Things"
+        @page.image = "/photo.jpg"
+        @page.description = "Description & Stuff"
+        lines = @page.render.split(/\n(?=<div)/)
+        @page.fields.each_with_index do |field, i|
+          lines[i].should =~ /<div.+?>#{field.render(:html)}<\/div>/
+        end
+      end
+    end
     context "boxes" do
       setup do
         TemplateClass.style :slots_template, :default => true
@@ -190,9 +206,24 @@ class RenderTest < MiniTest::Spec
         @content.images.first.style = TemplateClass.get_style(:this_template)
       end
 
+      should "render box sets as a joined list of each box's output" do
+        ::Page.layout do
+          %(${ content })
+        end
+        @page.render.should == @page.boxes.map(&:render).join("\n")
+      end
+
+      should "render 'boxes' as a joined list of each box's output" do
+        ::Page.layout do
+          %(${ boxes })
+        end
+        @page.render.should == @page.boxes.map(&:render).join("\n")
+      end
+
       should "render boxes" do
         @content.render.should == "<boxes>\n  <img><html><title>Child Title</title><body>Child Description</body></html>\n</img>\n</boxes>\n"
       end
+
       should "render boxes to alternate formats" do
         ::Page.add_output :pdf
         @content.render(:pdf).should == "<boxes-pdf>\n  <img><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</img>\n</boxes-pdf>\n"
