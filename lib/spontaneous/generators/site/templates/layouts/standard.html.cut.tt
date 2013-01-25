@@ -12,7 +12,9 @@
 </head>
 <body>
   %{ block :content }
-    <h2>Welcome to <%= @domain %></h2>
+		<h2>Welcome to <%= @domain %></h2>
+		${ fields }
+		${ boxes  }
   %{ endblock :content }
 	${ scripts %w(/js/site) }
 </body>
