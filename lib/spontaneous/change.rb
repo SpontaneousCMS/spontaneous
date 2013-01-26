@@ -6,7 +6,10 @@ module Spontaneous
 
     class << self
       def outstanding
-        unpublished_changes
+        outstanding = { :published_revision => Spontaneous::Site.published_revision,
+          :changes => unpublished_changes }
+        outstanding[:first_publish] = true if outstanding[:published_revision] == 0
+        outstanding
       end
 
       def unpublished_changes
@@ -24,7 +27,16 @@ module Spontaneous
       end
 
       def export
-        outstanding.map { |change_set| change_set.export }
+        exported = {}
+        outstanding.each do |k, v|
+          case k
+          when :changes
+            exported[k] = v.map { |change_set| change_set.export }
+          else
+            exported[k] = v
+          end
+        end
+        exported
       end
 
       def serialise_http(user = nil)
