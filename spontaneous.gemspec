@@ -6,8 +6,8 @@ Gem::Specification.new do |s|
   s.required_ruby_version = ">= 1.9.3"
 
   s.name              = 'spontaneous'
-  s.version           = '0.2.0.alpha7'
-  s.date              = '2013-01-11'
+  s.version           = '0.2.0.beta1'
+  s.date              = '2013-01-26'
   s.rubyforge_project = 'spontaneous'
 
   s.summary     = "Spontaneous is a next-generation Ruby CMS"
@@ -245,6 +245,8 @@ Gem::Specification.new do |s|
     db/migrations/20120525164947_add_field_versions.rb
     db/migrations/20130109125023_add_page_publish_lock.rb
     db/migrations/20130111161934_convert_bcrypt_passwords.rb
+    db/migrations/20130114120000_create_revision_tables.rb
+    db/migrations/20130116220423_add_index_to_archive.rb
     docs/recipe-interface-screenshot.png
     lib/spontaneous.rb
     lib/spontaneous/application.rb
@@ -433,6 +435,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/publishing.rb
     lib/spontaneous/publishing/event_client.rb
     lib/spontaneous/publishing/immediate.rb
+    lib/spontaneous/publishing/revision.rb
     lib/spontaneous/publishing/simultaneous.rb
     lib/spontaneous/publishing/threaded.rb
     lib/spontaneous/rack.rb
