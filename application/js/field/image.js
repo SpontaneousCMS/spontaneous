@@ -1,5 +1,6 @@
 // console.log('Loading ImageField...')
 Spontaneous.Field.Image = (function($, S) {
+	"use strict";
 	var dom = S.Dom;
 	var ImageFieldConflictView = new JS.Class(S.Field.String.ConflictView, {
 
@@ -58,11 +59,24 @@ Spontaneous.Field.Image = (function($, S) {
 		},
 
 		currentValue: function() {
-			var v = this.get('value');
+			var pending, v = this.get('value');
 			if ((pending = v['__pending__'])) {
 				return pending['value'];
 			}
 			return v['__ui__'] || v['original'];
+		},
+
+		currentEditValue: function() {
+			var value, pending, ui, v = this.get('value');
+			if ((pending = v['__pending__'])) {
+				return pending['value'];
+			}
+			value = v['original'];
+			if ((ui = v['__ui__'])) {
+				value['path'] = value['src'];
+				value['src'] = ui['src'];
+			}
+			return value;
 		},
 
 		/*
@@ -80,7 +94,7 @@ Spontaneous.Field.Image = (function($, S) {
 		* weird problems with simultaneous updates.
 		*/
 		version: function() {
-			var value = this.get("value");
+			var pending, value = this.get("value");
 			if ((pending = value["__pending__"])) {
 				return pending["version"];
 			}
@@ -245,7 +259,7 @@ Spontaneous.Field.Image = (function($, S) {
 		},
 		edit: function() {
 			var wrap = dom.div({'style':'position:relative;'}),
-				value = this.currentValue(),
+				value = this.currentEditValue(),
 				src = value.src,
 				img = dom.img({'src':src}),
 				info, sizes, filename_info, filesize_info, dimensions_info;
@@ -350,7 +364,7 @@ Spontaneous.Field.Image = (function($, S) {
 			wrap.append(img, actions, info);
 
 			if (value) {
-				var s = value.src.split('/'), filename = s[s.length - 1];
+				var s = value.path.split('/'), filename = s[s.length - 1];
 				set_info(filename, value.filesize, value.width, value.height);
 			}
 			this.preview_img = img;
@@ -369,10 +383,6 @@ Spontaneous.Field.Image = (function($, S) {
 		get_input: function() {
 			this.input = this.generate_input();
 			return this.input;
-		},
-
-		edited_value: function() {
-			return this.input.val();
 		},
 		cancel_edit: function() {
 			this.image.attr('src', this.currentValue().src);
