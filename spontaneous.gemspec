@@ -28,7 +28,6 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = %w[README LICENSE]
 
   s.add_dependency('activesupport',   ["~> 3.2.0"])
-  s.add_dependency('base58',          ["~> 0.1.0"])
   s.add_dependency('bcrypt-ruby',     ["~> 3.0.1"])
   s.add_dependency('bundler',         [">  1.0.15"])
   s.add_dependency('coffee-script',   ["~> 2.2.0"])
