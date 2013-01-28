@@ -129,7 +129,7 @@ module Spontaneous
           Spontaneous::Site.publish_all
         end
         # Rescue all errors to feed back to the UI
-      rescue ::Exception => e
+      rescue => e
         send_error_notification(e)
       end
 

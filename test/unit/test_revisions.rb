@@ -114,7 +114,7 @@ class RevisionsTest < MiniTest::Spec
         begin
           Content.with_revision(23) do
             Content.mapper.current_revision.should == 23
-            raise Exception.new
+            raise "Fail"
           end
         rescue Exception
         end
@@ -514,7 +514,7 @@ class RevisionsTest < MiniTest::Spec
         Content.first.first_published_at.should be_nil
         begin
           Revision.create(Content, @revision) do
-            raise Exception
+            raise "Fail"
           end
         rescue Exception; end
         Content.first.first_published_at.should be_nil
@@ -526,7 +526,7 @@ class RevisionsTest < MiniTest::Spec
           Revision.create(Content, @revision) do
             Revision.exists?(Content, @revision).should be_true
             Content.revision.should == @revision
-            raise Exception
+            raise "Fail"
           end
         rescue Exception; end
         Revision.exists?(Content, @revision).should be_false

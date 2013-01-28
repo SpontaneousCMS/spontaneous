@@ -25,7 +25,7 @@ module Spontaneous
 
       def fire(task_name, params = {})
         ::Simultaneous.fire(task_name, params)
-      rescue Exception => e
+      rescue => e
         raise Error, e
       end
 

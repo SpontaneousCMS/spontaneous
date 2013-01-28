@@ -55,7 +55,7 @@ module Spontaneous
       Handlers.each do |handler_name|
         begin
           return ::Rack::Handler.get(handler_name.downcase)
-        rescue Exception => e
+        rescue => e
           puts e
           puts e.backtrace
         end

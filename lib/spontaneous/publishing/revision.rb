@@ -28,7 +28,7 @@ module Spontaneous::Publishing
             yield if block_given?
           end
           set_source_timestamps
-        rescue ::Exception => e
+        rescue => e
           @revision.delete
           raise e
         end
