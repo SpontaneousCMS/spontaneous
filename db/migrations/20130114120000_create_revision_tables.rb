@@ -30,7 +30,7 @@ Sequel.migration do
     tables = self.tables
     revisions = tables.select { |t| ContentTable.revision_table?(content_table, t)}.sort
 
-    revisions = revisions.map { |name| [name, ContentTable.revision_number(content_table, name)] }
+    revisions = revisions.map { |name| [name, ContentTable.revision_from_table(content_table, name)] }
 
     unless revisions.empty?
 
