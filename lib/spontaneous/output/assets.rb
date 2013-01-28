@@ -3,8 +3,8 @@ module Spontaneous
     module Assets
       extend self
 
-      def compress_js(file_paths, options={})
-        Compression.compress_js(file_paths, options)
+      def compress_js_files(file_paths, options={})
+        Compression.compress_js_files(file_paths, options)
       end
 
       def url(file = nil)
