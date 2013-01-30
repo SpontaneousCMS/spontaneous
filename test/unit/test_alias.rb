@@ -131,6 +131,12 @@ class AliasTest < MiniTest::Spec
           assert_same_content AAAAlias.targets, [@aaa1, @aaa2]
         end
 
+        should "use the first available string field as the alias title" do
+          Piece.field :something
+          target = Piece.new(:something => "something")
+          target.alias_title.should == "something"
+        end
+
         should "allow aliasing multiple classes" do
           assert_same_content MultipleAlias.targets, [@aa, @aaa1, @aaa2, @b, @bb]
         end
@@ -140,6 +146,7 @@ class AliasTest < MiniTest::Spec
           instance.target.should == @a
           @a.aliases.should == [instance]
         end
+
         should "have a back link in the target" do
           instance1 = AAlias.create(:target => @a).reload
           instance2 = AAlias.create(:target => @a).reload
