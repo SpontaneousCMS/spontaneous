@@ -1,10 +1,8 @@
 # encoding: UTF-8
 
-require 'active_support/ordered_hash'
+require 'pathname'
 
 module Spontaneous
-  OrderedHash = ActiveSupport::OrderedHash unless defined?(OrderedHash)
-
   class Loader
     attr_reader :use_reloader, :load_paths
 
@@ -110,7 +108,7 @@ module Spontaneous
         @cache          = {}
         @mtimes         = {}
         @files_loaded   = {}
-        @loaded_classes = {}
+        @loaded_classes = Hash.new { |h, k| h[k] = [] }
       end
 
       def reset!
@@ -167,7 +165,7 @@ module Spontaneous
       def safe_load(file, mtime=nil)
         reload = mtime && mtime > mtimes[file]
 
-        logger.debug "Reloading #{file}" if reload
+        logger.debug "Reloading #{relativize_path(file)}" if reload
 
         # Removes all classes declared in the specified file
         if klasses = loaded_classes.delete(file)
@@ -224,18 +222,27 @@ module Spontaneous
         # And finally reload the specified file
         begin
           require(file)
-        # rescue => ex
-        #   logger.fatal "Cannot require #{file}\\\\\\\\n#{ex.message}"
-        #   raise ex
+        rescue => e
+          logger.info "Failed to load '#{relativize_path(file)}' : #{e.message}"
+          raise e
         ensure
+          # Ensure that any classes loaded by the file before it failed get
+          # added to the list of loaded classes for a file.
+          # Without this a long file with an error will only record classes
+          # loaded after the error has been resolved.
+          loaded_classes[file].concat(ObjectSpace.classes - klasses)
           mtimes[file] = mtime if mtime
         end
 
         # Store the file details after successful loading
-        loaded_classes[file] = ObjectSpace.classes - klasses
         self.files_loaded[file]   = $LOADED_FEATURES - already_loaded
 
-        nil
+        loaded_classes[file]
+      end
+
+      def relativize_path(path)
+        pwd = Pathname.new(Dir.pwd)
+        Pathname.new(path).relative_path_from(pwd)
       end
 
       ##
@@ -379,9 +386,7 @@ module Spontaneous
       end
 
       def remove_constant(const)
-        if is_schema_class?(const)
-          super
-        end
+        super if is_schema_class?(const)
       end
 
       def dependency_file?(file)
