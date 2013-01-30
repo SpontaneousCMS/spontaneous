@@ -32,8 +32,8 @@ module Spontaneous::Collections
       local_order << key unless order.include?(key)
     end
 
-    def key?(key)
-      keys.include?(key.to_sym)
+    def key?(key, inherited = true)
+      keys(inherited).include?(key.to_sym)
     end
 
     alias_method :has_key?, :key?
@@ -86,8 +86,8 @@ module Spontaneous::Collections
       end
     end
 
-    def keys
-      order.map { |name| name }
+    def keys(inherited = true)
+      order(inherited).map { |name| name }
     end
 
     def values
@@ -120,8 +120,9 @@ module Spontaneous::Collections
     end
 
 
-    def order
+    def order(inherited = true)
       return @custom_order if @custom_order
+      return local_order unless inherited
       superset? ? (superset.order + local_order) : local_order
     end
 

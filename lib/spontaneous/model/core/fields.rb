@@ -13,6 +13,9 @@ module Spontaneous::Model::Core
         prototype = nil
         name = name.to_sym
 
+        # Because of load conflicts types are likely to be loaded twice
+        return if self.field?(name, false)
+
         if (existing_prototype = field_prototypes[name])
           prototype = existing_prototype.merge(self, type, options, &block)
         else
@@ -53,8 +56,8 @@ module Spontaneous::Model::Core
         field_prototypes.order = new_order.flatten if new_order and !new_order.empty?
       end
 
-      def field?(field_name)
-        field_prototypes.key?(field_name)
+      def field?(field_name, inherited = true)
+        field_prototypes.key?(field_name, inherited)
       end
 
       def field_for_mime_type(mime_type)

@@ -10,6 +10,9 @@ module Spontaneous::Model::Core
         prototype = nil
         options[:group] = @box_group if @box_group
 
+        # Because of load conflicts types are likely to be loaded twice
+        return if box?(name, false)
+
         if existing_prototype = boxes[name]
           prototype = existing_prototype.merge(self, options, &block)
         else
@@ -44,8 +47,8 @@ module Spontaneous::Model::Core
         box_prototypes.order = new_order.flatten
       end
 
-      def box?(box_name)
-        box_prototypes.key?(box_name.to_sym)
+      def box?(box_name, inherited = true)
+        box_prototypes.key?(box_name.to_sym, inherited)
       end
 
       def is_box?
