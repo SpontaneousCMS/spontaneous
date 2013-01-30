@@ -98,6 +98,9 @@ img.missing {
 				font-weight: normal;
 				font-style: italic;
 				max-width: 80px;
+				optgroup, optgroup option {
+					font-style: normal !important;
+				}
 			}
 			a {
 				@include box-sizing;
