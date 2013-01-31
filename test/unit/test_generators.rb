@@ -102,29 +102,83 @@ class GeneratorsTest < MiniTest::Spec
       end
     end
 
-    should "correctly configure the site for a 'postgresql' database" do
-      site_root = File.join(@tmp, 'example_com')
-      generate(:site, "example.com", "--root=#{@tmp}", "--database=postgresql", "--host=")
-      gemfile = File.read(File.join(site_root, "Gemfile"))
-      gemfile.should =~ /^gem 'pg'/
-      config = database_config("example_com")
-      [:development, :test, :production].each do |environment|
-        config[environment][:adapter].should == "postgres"
-        config[environment][:database].should =~ /^example_com(_test)?/
-        config[environment].key?(:host).should be_false
+    context "configured for a postgres database" do
+      setup do
+        @site_root = File.join(@tmp, 'example_com')
+      end
+
+      should "define the correct adapter" do
+        generate(:site, "example.com", "--root=#{@tmp}", "--database=postgres")
+        config = database_config("example_com")
+        [:development, :test, :production].each do |environment|
+          config[environment][:adapter].should == "postgres"
+        end
+      end
+
+      should "configure the correct gem" do
+        generate(:site, "example.com", "--root=#{@tmp}", "--database=postgresql")
+        gemfile = File.read(File.join(@site_root, "Gemfile"))
+        gemfile.should =~ /^gem 'pg'/
+      end
+
+      should "setup the right db parameters" do
+        generate(:site, "example.com", "--root=#{@tmp}", "--database=postgresql")
+        config = database_config("example_com")
+        [:development, :test].each do |environment|
+          config[environment][:adapter].should == "postgres"
+          config[environment][:user].should be_nil
+          config[environment][:database].should =~ /^example_com(_test)?/
+          config[environment].key?(:host).should be_false
+        end
+      end
+
+      should "honor the user parameter" do
+        generate(:site, "example.com", "--root=#{@tmp}", "--database=postgresql", "--user=fred")
+        config = database_config("example_com")
+        [:development, :test].each do |environment|
+          config[environment][:user].should == "fred"
+        end
       end
     end
 
-    should "correctly configure the site for a 'postgres' database" do
-      site_root = File.join(@tmp, 'example_com')
-      generate(:site, "example.com", "--root=#{@tmp}", "--database=postgres")
-      gemfile = File.read(File.join(site_root, "Gemfile"))
-      gemfile.should =~ /^gem 'pg'/
-      config = database_config("example_com")
-      [:development, :test, :production].each do |environment|
-        config[environment][:adapter].should == "postgres"
+    context "configured for a mysql database" do
+      setup do
+        @site_root = File.join(@tmp, 'example_com')
+      end
+
+      should "define the correct adapter" do
+        generate(:site, "example.com", "--root=#{@tmp}", "--database=mysql")
+        config = database_config("example_com")
+        [:development, :test, :production].each do |environment|
+          config[environment][:adapter].should == "mysql2"
+        end
+      end
+
+      should "configure the correct gem" do
+        generate(:site, "example.com", "--root=#{@tmp}", "--database=mysql")
+        gemfile = File.read(File.join(@site_root, "Gemfile"))
+        gemfile.should =~ /^gem 'mysql2'/
+      end
+
+      should "setup the right db parameters" do
+        generate(:site, "example.com", "--root=#{@tmp}", "--database=mysql")
+        config = database_config("example_com")
+        [:development, :test].each do |environment|
+          config[environment][:user].should == "root"
+          config[environment][:database].should =~ /^example_com(_test)?/
+          config[environment].key?(:host).should be_false
+        end
+      end
+
+      should "honor the user parameter" do
+        generate(:site, "example.com", "--root=#{@tmp}", "--database=mysql", "--user=fred")
+        config = database_config("example_com")
+        [:development, :test].each do |environment|
+          config[environment][:user].should == "fred"
+        end
       end
     end
+
 
     should "include specified connection params in the generated database config" do
       site_root = File.join(@tmp, 'example_com')

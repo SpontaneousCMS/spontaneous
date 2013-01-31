@@ -6,9 +6,9 @@ module Spontaneous
   module Generators
     class Site < Thor::Group
       def self.available_dbs
-        { "mysql"      => { :gem => "mysql2", :adapter => "mysql2" },
-          "postgresql" => { :gem => "pg", :adapter => "postgres" },
-          "postgres"   => { :gem => "pg", :adapter => "postgres" } }
+        postgres = { :gem => "pg", :adapter => "postgres", :user => nil }
+        { "mysql"      => { :gem => "mysql2", :adapter => "mysql2", :user => "root" },
+          "postgresql" =>  postgres, "postgres"   =>  postgres }
       end
 
       def self.source_root; File.expand_path(File.dirname(__FILE__) + "/site"); end
@@ -18,11 +18,11 @@ module Spontaneous
 
       argument :domain, :type => :string, :desc => "The domain name of the site to generate"
 
-      class_option :root,    :desc => "The root destination", :aliases => '-r', :default => ".",   :type => :string
-      class_option :database,    :desc => "The database to use ('mysql' (default) or 'postgres')", :aliases => %w(-d --db), :default => "mysql",   :type => :string
-      class_option :user,    :desc => "The database account to use", :aliases => '-u', :default => "root",   :type => :string
-      class_option :password,    :desc => "The password for the database user", :aliases => %w(-p), :default => "",   :type => :string
-      class_option :host,    :desc => "The database host", :aliases => %w(-h), :default => "",   :type => :string
+      class_option :root,     :desc => "The root destination", :aliases => '-r', :default => ".",   :type => :string
+      class_option :database, :desc => "The database to use ('mysql' (default) or 'postgres')", :aliases => %w(-d --db), :default => "mysql",   :type => :string
+      class_option :user,     :desc => "The database account to use", :aliases => '-u', :type => :string
+      class_option :password, :desc => "The password for the database user", :aliases => %w(-p), :default => "",   :type => :string
+      class_option :host,     :desc => "The database host", :aliases => %w(-h),   :type => :string
 
 
       desc "Generates a new site for DOMAIN"
@@ -36,7 +36,8 @@ module Spontaneous
           @domain = domain
           @site_name = domain.to_s.gsub(/\./, "_")
           @username  = domain.split(/\./).first
-          @database  = { :user => options.user, :adapter => adapter[:adapter], :gem => adapter_dependency, :password => options.password, :host => options.host }
+          user = options.user || adapter[:user]
+          @database  = { :user => user, :adapter => adapter[:adapter], :gem => adapter_dependency, :password => options.password, :host => options.host }
           self.destination_root = options[:root]
           empty_directory(@site_name)
           self.destination_root = self.destination_root / @site_name
