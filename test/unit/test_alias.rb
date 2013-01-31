@@ -321,6 +321,7 @@ class AliasTest < MiniTest::Spec
 
         should "have their own styles" do
           assert_correct_template(@a_alias,  @template_root / 'a_alias/a_alias_style')
+          assert_correct_template(@aa_alias,  @template_root / 'aa_alias')
         end
 
         should "present their target's styles as their own" do

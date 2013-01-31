@@ -19,21 +19,26 @@ module Spontaneous
     end
 
     def template(format = :html)
-      unless template = inline_template(format)
-        template = find_template(format)
+      inline_template(format) || external_template(format)
+    end
+
+    def external_template(format = :html)
+      unless (template = file_template(format))
+        logger.warn("No template file found for style #{owner}:#{name}.#{format}")
+        template = anonymous_template
       end
       template
     end
 
-    def find_template(format = :html)
-      unless template = local_template(format)
-        template = supertype_template(format)
-      end
-      unless template
-        logger.warn("No template file found for style #{owner}/#{name}.#{format}")
-        template = anonymous_template
-      end
-      template
+    def file_template(format)
+      local_template(format) || supertype_template(format)
+    end
+
+    # Tests to see if a template file exists for the specified format.
+    # If one doesn't exist then the style would fall back to an
+    # 'anonymous' template.
+    def template?(format = :html)
+      !(inline_template(format) || file_template(format)).nil?
     end
 
     alias_method :path, :template
@@ -59,7 +64,11 @@ module Spontaneous
 
     def try_supertype_styles
       class_ancestors(owner).take_while { |a| a and a < Spontaneous::Content }.
-        map { |s| self.class.new(s, prototype) }
+        map { |s| supertype_style_class.new(s, prototype) }
+    end
+
+    def supertype_style_class
+      self.class
     end
 
     def class_ancestors(klass)
@@ -73,7 +82,7 @@ module Spontaneous
     end
 
     def inline_template(format)
-      if template_string = owner.inline_templates[format.to_sym]
+      if (template_string = owner.inline_templates[format.to_sym])
         Anonymous.new(template_string).template(format)
       end
     end
@@ -113,13 +122,6 @@ module Spontaneous
       Spontaneous::Render.formats(self)
     end
 
-    # def export
-    #   {
-    #     :name => name.to_s,
-    #     :schema_id => schema_id.to_s
-    #   }
-    # end
-
     def ==(other)
       other.class == self.class && other.prototype == self.prototype && other.owner == self.owner
     end
@@ -157,6 +159,24 @@ module Spontaneous
 
       def schema_id
         nil
+      end
+    end
+
+    # Aliases are unique in that their style depends on the instance as well
+    # as the class.
+    # This style searches for appropriate templates based on the class of the
+    # instance before falling back to templates for the target.
+    class AliasStyle
+      def initialize(instance)
+        @instance = instance
+      end
+
+      def template(format = :html)
+        if (style = @instance.resolve_style(@instance.style_sid))
+          return style.template(format) if style.template?(format)
+        end
+        style = @instance.target.resolve_style(@instance.style_sid)
+        style.template(format)
       end
     end
   end

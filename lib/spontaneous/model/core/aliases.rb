@@ -151,13 +151,10 @@ module Spontaneous::Model::Core
         super or target.find_named_style(style_name)
       end
 
+      # Aliases are unique in that their style depends on the instance as well
+      # as the class.
       def style
-        return self.resolve_style(self.style_sid) unless target.respond_to?(:resolve_style)
-        if self.class.styles.empty?
-          target.resolve_style(style_sid)
-        else
-          self.resolve_style(self.style_sid) or target.resolve_style(self.style_sid)
-        end
+        Spontaneous::Style::AliasStyle.new(self)
       end
 
       def styles
