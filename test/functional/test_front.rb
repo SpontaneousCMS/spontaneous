@@ -388,7 +388,7 @@ class FrontTest < MiniTest::Spec
 
     end
 
-    context "Templates xxx" do
+    context "Templates" do
       setup do
         Spontaneous::Output.cache_templates = true
         @cache_file = "#{Spontaneous.revision_dir(1)}/dynamic/dynamic.html.rb"
@@ -407,7 +407,7 @@ class FrontTest < MiniTest::Spec
       end
 
       context "caching" do
-        should "use pre-rendered versions of the templates xxx" do
+        should "use pre-rendered versions of the templates" do
           dummy_content = 'cached-version/#{session[\'user_id\']}'
           dummy_template = File.join(@site.revision_root, "current/dynamic/dynamic.html.cut")
           File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
@@ -642,6 +642,7 @@ class FrontTest < MiniTest::Spec
         expiry = DateTime.parse last_response.headers["Expires"]
         expiry.year.should == (Date.today.year) + 10
       end
+
       should "pass far-future expires headers for compiled assets" do
         test_string = "#{Time.now}\n"
         test_file_url = "/rev/#{Time.now.to_i}.txt"
