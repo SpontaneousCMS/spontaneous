@@ -20,14 +20,3 @@ gem 'capistrano', '~> 2.9'
 #   gem 'thin',    '~> 1.3.1'
 #   gem 'unicorn', '~> 4.2'
 # end
-
-
-# source gemfiles from Plugins & Features
-Dir['*/**/Gemfile'].each do |path|
-  gemfile = File.expand_path(path)
-  unless gemfile == File.expand_path(__FILE__)
-    dependencies = File.read(gemfile).gsub(/^\s*source.+$/, '')
-    eval(dependencies)
-  end
-end
-
