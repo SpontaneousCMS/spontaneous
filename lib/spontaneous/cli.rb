@@ -97,11 +97,13 @@ module Spontaneous
 
     class Root < ::Thor
       register Spontaneous::Cli::Console,  "console",  "console",           "Gives you console access to the current site"
+      register Spontaneous::Cli::Console,  "c",  "c",           "Gives you console access to the current site"
       register Spontaneous::Cli::User,     "user",     "user [ACTION]",     "Administer site users"
       register Spontaneous::Cli::Generate, "generate", "generate [OBJECT]", "Generates things"
       register Spontaneous::Cli::Site,     "site",     "site [ACTION]",     "Run site-wide actions"
       register Spontaneous::Cli::Init,     "init",     "init",              "Creates databases and initialises a new Spontaneous site"
       register Spontaneous::Cli::Server,   "server",   "server [ACTION]",   "Launch development server(s)"
+      register Spontaneous::Cli::Server,   "s",   "s [ACTION]",   "Launch development server(s)"
       register Spontaneous::Cli::Media,    "media",    "media [ACTION]",    "Manage site media"
       register Spontaneous::Cli::Sync,     "sync",     "sync [DIRECTION]",  "Sync database and media to and from the production server"
       register Spontaneous::Cli::Migrate,  "migrate",  "migrate",           "Runs Spontaneous migrations"
