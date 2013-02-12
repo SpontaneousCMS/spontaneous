@@ -8,14 +8,14 @@ Gem::Specification.new do |s|
   s.specification_version = 2 if s.respond_to? :specification_version=
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.rubygems_version = '1.3.5'
-  s.required_ruby_version = ">= 1.9.2"
+  s.required_ruby_version = ">= 1.9.3"
 
   ## Leave these as is they will be modified for you by the rake gemspec task.
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
-  s.version           = '0.2.0.alpha2'
-  s.date              = '2012-07-23'
+  s.version           = '0.2.0.alpha7'
+  s.date              = '2013-01-11'
   s.rubyforge_project = 'spontaneous'
 
   ## Make sure your summary is short. The description may be as long
@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
   ## a custom homepage, consider using your GitHub URL or the like.
   s.authors  = ["Garry Hill"]
   s.email    = 'garry@magnetised.net'
-  s.homepage = 'http://spontaneouscms.org'
+  s.homepage = 'http://spontaneous.io'
 
   ## This gets added to the $LOAD_PATH so that 'lib/NAME.rb' can be required as
   ## require 'NAME.rb' or'/lib/NAME/file.rb' can be as require 'NAME/file.rb'
@@ -50,19 +50,19 @@ Gem::Specification.new do |s|
   ## that are needed for an end user to actually USE your code.
   s.add_dependency('activesupport',   ["~> 3.2.0"])
   s.add_dependency('base58',          ["~> 0.1.0"])
+  s.add_dependency('bcrypt-ruby',     ["~> 3.0.1"])
   s.add_dependency('bundler',         ["> 1.0.15"])
   s.add_dependency('coffee-script',   ["~> 2.2.0"])
   s.add_dependency('cutaneous',       ["~> 0.1.3"])
   s.add_dependency('erubis',          ["~> 2.6"])
-  s.add_dependency('fog',             ["~> 1.1.1"])
-  s.add_dependency('foreman',         ["~> 0.22.0"])
-  s.add_dependency('kramdown',        ["~> 0.13.3"])
-  s.add_dependency('launchy',         ["~> 0.4.0"])
+  s.add_dependency('fog',             ["~> 1.6.0"])
+  s.add_dependency('foreman',         ["~> 0.60.2"])
+  s.add_dependency('kramdown',        ["~> 0.14.0"])
+  s.add_dependency('launchy',         ["~> 2.1.2"])
   s.add_dependency('mini_magick',     ["~> 3.3"])
   s.add_dependency('nokogiri',        ["~> 1.5.0"])
   s.add_dependency('public_suffix',   ["~> 1.0"])
   s.add_dependency('rack',            ["~> 1.4.1"])
-  s.add_dependency('rack-fiber_pool', ["~> 0.9.2"])
   s.add_dependency('rake',            ["~> 0.9.2"])
   s.add_dependency('rdoc',            ["~> 3.9.4"])
   s.add_dependency('sass',            ["~> 3.1.4"])
@@ -71,19 +71,19 @@ Gem::Specification.new do |s|
   s.add_dependency('simultaneous',    ["~> 0.4.1"])
   s.add_dependency('sinatra',         ["= 1.3.2"])
   s.add_dependency('sinatra-contrib', ["~> 1.3.1"])
-  s.add_dependency('sprockets',       ["~> 2.4.3"])
+  s.add_dependency('sprockets',       ["~> 2.7.0"])
   s.add_dependency('stringex',        ["= 1.3"])
   s.add_dependency('therubyracer',    ['~> 0.9.10'])
   s.add_dependency('thin',            ["~> 1.2"])
-  s.add_dependency('thor',            ["~> 0.14.6"])
-  s.add_dependency('uglifier',        ["~> 1.2.4"])
-  s.add_dependency('yajl-ruby',       ["~> 1.1"])
+  s.add_dependency('thor',            ["~> 0.16.0"])
+  s.add_dependency('uglifier',        ["~> 1.3.0"])
+  s.add_dependency('yajl-ruby',       ["~> 1.1.0"])
 
   ## List your development dependencies here. Development dependencies are
   ## those that are only needed during development
   s.add_development_dependency('minitest', ["~> 2.1.0"])
   s.add_development_dependency('mysql2', ["~> 0.3.11"])
-  s.add_development_dependency('pg', ["~> 0.13.2"])
+  s.add_development_dependency('pg', ["~> 0.14.1"])
   s.add_development_dependency('jeweler', ["~> 1.5"])
   s.add_development_dependency('jnunemaker-matchy', ["~> 0.4"])
   s.add_development_dependency('shoulda', ["~> 2.11.3"])
@@ -126,6 +126,7 @@ Gem::Specification.new do |s|
     application/css/jquery-ui-1.8.21.custom/images/ui-icons_ffffff_256x240.png
     application/css/jquery-ui-1.8.21.custom/ui-lightness.css.scss
     application/css/login.css.scss
+    application/css/meta.css.scss
     application/css/popover.css.scss
     application/css/schema_error.css.scss
     application/css/spontaneous.css
@@ -148,20 +149,22 @@ Gem::Specification.new do |s|
     application/js/event_source.js
     application/js/extensions.js
     application/js/field.js
+    application/js/field/date.js
+    application/js/field/file.js
+    application/js/field/image.js
+    application/js/field/long_string.js
+    application/js/field/markdown.js
+    application/js/field/select.js
+    application/js/field/string.js
+    application/js/field/webvideo.js
     application/js/field_preview.js
-    application/js/field_types/date_field.js
-    application/js/field_types/file_field.js
-    application/js/field_types/image_field.js
-    application/js/field_types/long_string_field.js
-    application/js/field_types/markdown_field.js
-    application/js/field_types/select_field.js
-    application/js/field_types/string_field.js
-    application/js/field_types/webvideo_field.js
     application/js/image.js
     application/js/init.js
     application/js/load.js
     application/js/location.js
     application/js/login.js
+    application/js/meta_view.js
+    application/js/meta_view/user_admin.js
     application/js/metadata.js
     application/js/page.js
     application/js/page_browser.js
@@ -266,9 +269,9 @@ Gem::Specification.new do |s|
     db/migrations/20120418153903_add_ownership_of_content.rb
     db/migrations/20120423175416_add_pending_modifications.rb
     db/migrations/20120525164947_add_field_versions.rb
+    db/migrations/20130109125023_add_page_publish_lock.rb
+    db/migrations/20130111161934_convert_bcrypt_passwords.rb
     docs/recipe-interface-screenshot.png
-    lib/sequel/plugins/content_table_inheritance.rb
-    lib/sequel/plugins/scoped_table_name.rb
     lib/spontaneous.rb
     lib/spontaneous/application.rb
     lib/spontaneous/application/feature.rb
@@ -283,15 +286,16 @@ Gem::Specification.new do |s|
     lib/spontaneous/capistrano/sync.rb
     lib/spontaneous/change.rb
     lib/spontaneous/cli.rb
-    lib/spontaneous/cli/adapter.rb
     lib/spontaneous/cli/assets.rb
-    lib/spontaneous/cli/base.rb
     lib/spontaneous/cli/console.rb
+    lib/spontaneous/cli/fields.rb
+    lib/spontaneous/cli/generate.rb
+    lib/spontaneous/cli/init.rb
     lib/spontaneous/cli/media.rb
+    lib/spontaneous/cli/migrate.rb
     lib/spontaneous/cli/server.rb
     lib/spontaneous/cli/site.rb
     lib/spontaneous/cli/sync.rb
-    lib/spontaneous/cli/tasks.rb
     lib/spontaneous/cli/user.rb
     lib/spontaneous/collections/box_set.rb
     lib/spontaneous/collections/change_set.rb
@@ -299,10 +303,22 @@ Gem::Specification.new do |s|
     lib/spontaneous/collections/field_set.rb
     lib/spontaneous/collections/prototype_set.rb
     lib/spontaneous/collections/style_set.rb
+    lib/spontaneous/concern.rb
     lib/spontaneous/config.rb
     lib/spontaneous/constants.rb
-    lib/spontaneous/content.rb
     lib/spontaneous/content_query.rb
+    lib/spontaneous/crypt.rb
+    lib/spontaneous/crypt/version.rb
+    lib/spontaneous/data_mapper.rb
+    lib/spontaneous/data_mapper/content_model.rb
+    lib/spontaneous/data_mapper/content_model/associations.rb
+    lib/spontaneous/data_mapper/content_model/column_accessors.rb
+    lib/spontaneous/data_mapper/content_model/instance_hooks.rb
+    lib/spontaneous/data_mapper/content_model/serialization.rb
+    lib/spontaneous/data_mapper/content_model/timestamps.rb
+    lib/spontaneous/data_mapper/content_table.rb
+    lib/spontaneous/data_mapper/dataset.rb
+    lib/spontaneous/data_mapper/scope.rb
     lib/spontaneous/errors.rb
     lib/spontaneous/extensions/array.rb
     lib/spontaneous/extensions/class.rb
@@ -315,18 +331,19 @@ Gem::Specification.new do |s|
     lib/spontaneous/extensions/object_space.rb
     lib/spontaneous/extensions/string.rb
     lib/spontaneous/facet.rb
-    lib/spontaneous/field_types.rb
-    lib/spontaneous/field_types/date_field.rb
-    lib/spontaneous/field_types/field.rb
-    lib/spontaneous/field_types/file_field.rb
-    lib/spontaneous/field_types/image_field.rb
-    lib/spontaneous/field_types/location_field.rb
-    lib/spontaneous/field_types/long_string_field.rb
-    lib/spontaneous/field_types/markdown_field.rb
-    lib/spontaneous/field_types/select_field.rb
-    lib/spontaneous/field_types/string_field.rb
-    lib/spontaneous/field_types/webvideo_field.rb
-    lib/spontaneous/field_version.rb
+    lib/spontaneous/field.rb
+    lib/spontaneous/field/base.rb
+    lib/spontaneous/field/date.rb
+    lib/spontaneous/field/field_version.rb
+    lib/spontaneous/field/file.rb
+    lib/spontaneous/field/image.rb
+    lib/spontaneous/field/location.rb
+    lib/spontaneous/field/long_string.rb
+    lib/spontaneous/field/markdown.rb
+    lib/spontaneous/field/select.rb
+    lib/spontaneous/field/string.rb
+    lib/spontaneous/field/update.rb
+    lib/spontaneous/field/webvideo.rb
     lib/spontaneous/generators.rb
     lib/spontaneous/generators/page.rb
     lib/spontaneous/generators/page/inline.html.cut
@@ -346,8 +363,9 @@ Gem::Specification.new do |s|
     lib/spontaneous/generators/site/config/environments/production.rb.tt
     lib/spontaneous/generators/site/config/front.ru
     lib/spontaneous/generators/site/config/indexes.rb.tt
+    lib/spontaneous/generators/site/config/schema.yml
     lib/spontaneous/generators/site/config/user_levels.yml
-    lib/spontaneous/generators/site/lib/site.rb.tt
+    lib/spontaneous/generators/site/lib/content.rb.tt
     lib/spontaneous/generators/site/lib/tasks/site.rake.tt
     lib/spontaneous/generators/site/public/css/site.scss
     lib/spontaneous/generators/site/public/favicon.ico
@@ -366,6 +384,44 @@ Gem::Specification.new do |s|
     lib/spontaneous/logger.rb
     lib/spontaneous/media.rb
     lib/spontaneous/media/file.rb
+    lib/spontaneous/media/temp_file.rb
+    lib/spontaneous/model.rb
+    lib/spontaneous/model/box.rb
+    lib/spontaneous/model/box/allowed_types.rb
+    lib/spontaneous/model/core.rb
+    lib/spontaneous/model/core/aliases.rb
+    lib/spontaneous/model/core/boxes.rb
+    lib/spontaneous/model/core/content_groups.rb
+    lib/spontaneous/model/core/editor_class.rb
+    lib/spontaneous/model/core/entries.rb
+    lib/spontaneous/model/core/entry.rb
+    lib/spontaneous/model/core/fields.rb
+    lib/spontaneous/model/core/instance_code.rb
+    lib/spontaneous/model/core/media.rb
+    lib/spontaneous/model/core/modifications.rb
+    lib/spontaneous/model/core/page_search.rb
+    lib/spontaneous/model/core/permissions.rb
+    lib/spontaneous/model/core/prototypes.rb
+    lib/spontaneous/model/core/publishing.rb
+    lib/spontaneous/model/core/render.rb
+    lib/spontaneous/model/core/schema_hierarchy.rb
+    lib/spontaneous/model/core/schema_id.rb
+    lib/spontaneous/model/core/schema_title.rb
+    lib/spontaneous/model/core/serialisation.rb
+    lib/spontaneous/model/core/styles.rb
+    lib/spontaneous/model/core/supertype.rb
+    lib/spontaneous/model/core/visibility.rb
+    lib/spontaneous/model/page.rb
+    lib/spontaneous/model/page/controllers.rb
+    lib/spontaneous/model/page/formats.rb
+    lib/spontaneous/model/page/layouts.rb
+    lib/spontaneous/model/page/locks.rb
+    lib/spontaneous/model/page/page_tree.rb
+    lib/spontaneous/model/page/paths.rb
+    lib/spontaneous/model/page/request.rb
+    lib/spontaneous/model/page/site_map.rb
+    lib/spontaneous/model/page/site_timestamps.rb
+    lib/spontaneous/model/piece.rb
     lib/spontaneous/output.rb
     lib/spontaneous/output/assets.rb
     lib/spontaneous/output/assets/compression.rb
@@ -381,8 +437,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/output/template.rb
     lib/spontaneous/output/template/engine.rb
     lib/spontaneous/output/template/renderer.rb
-    lib/spontaneous/page.rb
-    lib/spontaneous/page_controller.rb
+    lib/spontaneous/page_lock.rb
     lib/spontaneous/page_piece.rb
     lib/spontaneous/paths.rb
     lib/spontaneous/permissions.rb
@@ -390,9 +445,6 @@ Gem::Specification.new do |s|
     lib/spontaneous/permissions/access_key.rb
     lib/spontaneous/permissions/user.rb
     lib/spontaneous/permissions/user_level.rb
-    lib/spontaneous/piece.rb
-    lib/spontaneous/plugins/aliases.rb
-    lib/spontaneous/plugins/allowed_types.rb
     lib/spontaneous/plugins/application/facets.rb
     lib/spontaneous/plugins/application/features.rb
     lib/spontaneous/plugins/application/paths.rb
@@ -400,48 +452,6 @@ Gem::Specification.new do |s|
     lib/spontaneous/plugins/application/serialisation.rb
     lib/spontaneous/plugins/application/state.rb
     lib/spontaneous/plugins/application/system.rb
-    lib/spontaneous/plugins/boxes.rb
-    lib/spontaneous/plugins/controllers.rb
-    lib/spontaneous/plugins/entries.rb
-    lib/spontaneous/plugins/entry.rb
-    lib/spontaneous/plugins/field/editor_class.rb
-    lib/spontaneous/plugins/fields.rb
-    lib/spontaneous/plugins/instance_code.rb
-    lib/spontaneous/plugins/layouts.rb
-    lib/spontaneous/plugins/media.rb
-    lib/spontaneous/plugins/modifications.rb
-    lib/spontaneous/plugins/page/formats.rb
-    lib/spontaneous/plugins/page/request.rb
-    lib/spontaneous/plugins/page/site_timestamps.rb
-    lib/spontaneous/plugins/page_search.rb
-    lib/spontaneous/plugins/page_tree.rb
-    lib/spontaneous/plugins/paths.rb
-    lib/spontaneous/plugins/permissions.rb
-    lib/spontaneous/plugins/prototypes.rb
-    lib/spontaneous/plugins/publishing.rb
-    lib/spontaneous/plugins/render.rb
-    lib/spontaneous/plugins/schema_hierarchy.rb
-    lib/spontaneous/plugins/schema_id.rb
-    lib/spontaneous/plugins/schema_title.rb
-    lib/spontaneous/plugins/serialisation.rb
-    lib/spontaneous/plugins/site/features.rb
-    lib/spontaneous/plugins/site/helpers.rb
-    lib/spontaneous/plugins/site/hooks.rb
-    lib/spontaneous/plugins/site/instance.rb
-    lib/spontaneous/plugins/site/level.rb
-    lib/spontaneous/plugins/site/map.rb
-    lib/spontaneous/plugins/site/paths.rb
-    lib/spontaneous/plugins/site/publishing.rb
-    lib/spontaneous/plugins/site/schema.rb
-    lib/spontaneous/plugins/site/search.rb
-    lib/spontaneous/plugins/site/selectors.rb
-    lib/spontaneous/plugins/site/state.rb
-    lib/spontaneous/plugins/site/storage.rb
-    lib/spontaneous/plugins/site/url.rb
-    lib/spontaneous/plugins/site_map.rb
-    lib/spontaneous/plugins/styles.rb
-    lib/spontaneous/plugins/supertype.rb
-    lib/spontaneous/plugins/visibility.rb
     lib/spontaneous/prototypes/box_prototype.rb
     lib/spontaneous/prototypes/field_prototype.rb
     lib/spontaneous/prototypes/layout_prototype.rb
@@ -462,17 +472,18 @@ Gem::Specification.new do |s|
     lib/spontaneous/rack/cookie_authentication.rb
     lib/spontaneous/rack/css.rb
     lib/spontaneous/rack/event_source.rb
-    lib/spontaneous/rack/fiber_pool.rb
     lib/spontaneous/rack/front.rb
     lib/spontaneous/rack/helpers.rb
     lib/spontaneous/rack/http.rb
     lib/spontaneous/rack/js.rb
     lib/spontaneous/rack/media.rb
+    lib/spontaneous/rack/page_controller.rb
     lib/spontaneous/rack/public.rb
     lib/spontaneous/rack/query_authentication.rb
     lib/spontaneous/rack/reloader.rb
     lib/spontaneous/rack/sse.rb
     lib/spontaneous/rack/static.rb
+    lib/spontaneous/rack/user_admin.rb
     lib/spontaneous/rack/user_helpers.rb
     lib/spontaneous/revision.rb
     lib/spontaneous/schema.rb
@@ -485,8 +496,24 @@ Gem::Specification.new do |s|
     lib/spontaneous/search/field.rb
     lib/spontaneous/search/index.rb
     lib/spontaneous/search/results.rb
+    lib/spontaneous/sequel.rb
     lib/spontaneous/server.rb
+    lib/spontaneous/simultaneous.rb
     lib/spontaneous/site.rb
+    lib/spontaneous/site/features.rb
+    lib/spontaneous/site/helpers.rb
+    lib/spontaneous/site/hooks.rb
+    lib/spontaneous/site/instance.rb
+    lib/spontaneous/site/level.rb
+    lib/spontaneous/site/map.rb
+    lib/spontaneous/site/paths.rb
+    lib/spontaneous/site/publishing.rb
+    lib/spontaneous/site/schema.rb
+    lib/spontaneous/site/search.rb
+    lib/spontaneous/site/selectors.rb
+    lib/spontaneous/site/state.rb
+    lib/spontaneous/site/storage.rb
+    lib/spontaneous/site/url.rb
     lib/spontaneous/state.rb
     lib/spontaneous/storage.rb
     lib/spontaneous/storage/backend.rb
@@ -504,6 +531,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/version.rb
     spontaneous.gemspec
     test/disabled/test_slots.rb
+    test/experimental/test_crypt.rb
     test/experimental/test_features.rb
     test/fixtures/application/js/test.js
     test/fixtures/application/static/favicon.ico
@@ -566,6 +594,7 @@ Gem::Specification.new do |s|
     test/fixtures/example_application/config/schema.yml
     test/fixtures/example_application/config/unicorn.rb
     test/fixtures/example_application/config/user_levels.yml
+    test/fixtures/example_application/lib/content.rb
     test/fixtures/example_application/public/css/test.css
     test/fixtures/example_application/public/favicon.ico
     test/fixtures/example_application/public/js/test.js
@@ -725,15 +754,19 @@ Gem::Specification.new do |s|
     test/fixtures/templates/template_class/this_template.html.cut
     test/fixtures/templates/template_class/this_template.pdf.cut
     test/fixtures/templates/with_default_style_class.html.cut
+    test/fixtures/user_manager/config/user_levels.yml
     test/functional/test_application.rb
     test/functional/test_back.rb
     test/functional/test_front.rb
+    test/functional/test_user_manager.rb
+    test/integration/test_installation.rb
     test/javascript/env.js
     test/javascript/test_dom.rb
     test/javascript/test_markdown.rb
     test/support/custom_matchers.rb
     test/support/timing.rb
     test/test_helper.rb
+    test/test_integration_helper.rb
     test/test_javascript.rb
     test/ui/test_page_editing.rb
     test/ui_helper.rb
@@ -747,6 +780,8 @@ Gem::Specification.new do |s|
     test/unit/test_config.rb
     test/unit/test_content.rb
     test/unit/test_content_inheritance.rb
+    test/unit/test_datamapper.rb
+    test/unit/test_datamapper_content.rb
     test/unit/test_extensions.rb
     test/unit/test_fields.rb
     test/unit/test_formats.rb
@@ -774,7 +809,6 @@ Gem::Specification.new do |s|
     test/unit/test_storage.rb
     test/unit/test_structure.rb
     test/unit/test_styles.rb
-    test/unit/test_table_scoping.rb
     test/unit/test_templates.rb
     test/unit/test_type_hierarchy.rb
     test/unit/test_visibility.rb

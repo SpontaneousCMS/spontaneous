@@ -123,6 +123,7 @@ $dialogue-title-height: 32px;
 		border: solid 1px #f2f2f2;
 		margin: $unit;
 		margin-top: 0;
+		color: #333333;
 		&:hover {
 			background-color: #666;
 			color: #fff;
@@ -368,6 +369,56 @@ $dialogue-title-height: 32px;
 		border-color: $action;
 	}
 	.change-set.selected {
+	}
+	.change-set.locked {
+		.pages {
+			position: relative;
+		}
+		.info {
+			@include rounded-left;
+			position: absolute;
+			overflow: hidden;
+			right: 0;
+			top: 0;
+			bottom: 0;
+			width: 0;
+			background-color: rgba(33, 33, 33, 0.9);
+			color: #aaaaaa;
+			font-size: 0.7em;
+			.lock-state {
+				overflow: auto;
+				padding: $unit/2;
+			}
+			.locks {
+				strong {
+					margin-right: $unit/2;
+					&:after {
+						content: ":";
+					}
+				}
+				p {
+					margin: 0 0 $unit/2 0;
+				}
+			}
+			h3 {
+				font-size: 1em;
+				font-weight: normal;
+				margin: 0;
+				color: #fafafa;
+				margin: 0;
+				margin-bottom: $unit/2;
+			}
+		}
+		.page-title {
+			color: #999;
+		}
+		.add {
+			span {
+				&:before {
+					@include awesome-icon("\f023");
+				}
+			}
+		}
 	}
 }
 

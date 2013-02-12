@@ -1,24 +1,25 @@
 require 'thor'
-require 'thor/runner'
+require 'thor/group'
 
 module Spontaneous
   module Cli
-    class Thor < ::Thor
+    module TaskUtils
+      # include Thor::Actions
 
-      class_option :site, :type => :string, :aliases => ["-s", "--root"], :desc => "Site root dir"
-      class_option :environment, :type => :string,  :aliases => "-e", :required => true, :default => :development, :desc => "Spontaneous Environment"
-      class_option :mode, :type => :string,  :aliases => "-m", :default => :back, :desc => "Spontaneous mode ('front' or 'back')"
-      class_option :help, :type => :boolean, :desc => "Show help usage"
+      def self.included(base)
+        base.class_eval do
+          def self.banner(task, namespace = true, subcommand = false)
+            "#{basename} #{task.formatted_usage(self, true, subcommand)}"
+          end
+        end
+        base.class_option :site, :type => :string, :aliases => ["-s", "--root"], :default => ".", :desc => "Site root dir"
+        base.class_option :environment, :type => :string,  :aliases => "-e", :required => true, :default => :development, :desc => "Spontaneous Environment"
+        base.class_option :mode, :type => :string,  :aliases => "-m", :default => :back, :desc => "Spontaneous mode ('front' or 'back')"
+        base.class_option :help, :type => :boolean, :desc => "Show help usage"
+      end
+
 
       protected
-
-      def boot!
-        begin
-          require File.expand_path('config/boot.rb')
-        rescue Spontaneous::SchemaModificationError => error
-          fix_schema(error)
-        end
-      end
 
       def fix_schema(error)
         modification = error.modification
@@ -42,18 +43,31 @@ module Spontaneous
         end
       end
 
-      def prepare(task, mode = nil)
+      def prepare(task, mode = "console")
         if options.help?
           help(task.to_s)
           raise SystemExit
         end
-        ENV["SPOT_ENV"] ||= options.environment.to_s
+        ENV["SPOT_ENV"] ||= options.environment.to_s ||
         ENV["RACK_ENV"] = ENV["SPOT_ENV"] # Also set this for middleware
-        ENV["SPOT_MODE"] = mode.to_s unless mode.nil?
+        ENV["SPOT_MODE"] = mode.to_s
         chdir(options.site)
         unless File.exist?('config/boot.rb')
           puts "=> Could not find boot file in: #{options.chdir}/config/boot.rb\n=> Are you sure this is a Spontaneous site?"
           raise SystemExit
+        end
+      end
+
+      def prepare!(task, mode = "console")
+        prepare(task, mode)
+        boot!
+      end
+
+      def boot!
+        begin
+          require File.expand_path('config/boot.rb')
+        rescue Spontaneous::SchemaModificationError => error
+          fix_schema(error)
         end
       end
 
@@ -69,21 +83,45 @@ module Spontaneous
       end
     end
 
-    class Runner < ::Thor::Runner
-      remove_task :install#, :undefine => true
+    autoload :Assets,   "spontaneous/cli/assets"
+    autoload :Console,  "spontaneous/cli/console"
+    autoload :Fields,   "spontaneous/cli/fields"
+    autoload :Generate, "spontaneous/cli/generate"
+    autoload :Init,     "spontaneous/cli/init"
+    autoload :Media,    "spontaneous/cli/media"
+    autoload :Migrate,  "spontaneous/cli/migrate"
+    autoload :Server,   "spontaneous/cli/server"
+    autoload :Site,     "spontaneous/cli/site"
+    autoload :Sync,     "spontaneous/cli/sync"
+    autoload :User,     "spontaneous/cli/user"
 
-      private
+    class Root < ::Thor
+      register Spontaneous::Cli::Console,  "console",  "console",           "Gives you console access to the current site"
+      register Spontaneous::Cli::User,     "user",     "user [ACTION]",     "Administer site users"
+      register Spontaneous::Cli::Generate, "generate", "generate [OBJECT]", "Generates things"
+      register Spontaneous::Cli::Site,     "site",     "site [ACTION]",     "Run site-wide actions"
+      register Spontaneous::Cli::Init,     "init",     "init",              "Creates databases and initialises a new Spontaneous site"
+      register Spontaneous::Cli::Server,   "server",   "server [ACTION]",   "Launch development server(s)"
+      register Spontaneous::Cli::Media,    "media",    "media [ACTION]",    "Manage site media"
+      register Spontaneous::Cli::Sync,     "sync",     "sync [DIRECTION]",  "Sync database and media to and from the production server"
+      register Spontaneous::Cli::Migrate,  "migrate",  "migrate",           "Runs Spontaneous migrations"
+      register Spontaneous::Cli::Assets,   "assets",   "assets [ACTION]",   "Manage Spontaneous assets"
+      register Spontaneous::Cli::Fields,   "fields",   "fields [ACTION]",   "Manage Spontaneous fields"
 
-      def thorfiles(*args)
-        task_dir = File.expand_path('../cli', __FILE__)
-        Dir["#{task_dir}/*.rb"]
+      desc :browse, "Launces a browser pointing to the current development CMS"
+      def browse
+        prepare! :browse
+        require 'launchy'
+        ::Launchy.open("http://localhost:#{::Spontaneous::Site.config.port}/@spontaneous")
+      end
+
+      map %w(--version -v) => :version
+
+      desc :version, "Show the version of Spontaneous in use"
+      def version
+        require "spontaneous/version"
+        say "Spontaneous #{Spontaneous::VERSION}"
       end
     end
-
-    autoload :Adapter,  "spontaneous/cli/adapter"
-    autoload :Base,     "spontaneous/cli/base"
-    autoload :Site,     "spontaneous/cli/site"
-    autoload :User,     "spontaneous/cli/user"
   end
 end
-

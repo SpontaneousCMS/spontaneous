@@ -14,7 +14,10 @@ module Spontaneous
         # Find a way to move this into a more de-centralised place
         # at some point we are going to want to have some configurable, extendable
         # list of event handlers
-        Simultaneous.on_event("publish_progress") { |event|
+        ::Simultaneous.on_event("publish_progress") { |event|
+          @messenger.deliver_event(event)
+        }
+        ::Simultaneous.on_event("page_lock_status") { |event|
           @messenger.deliver_event(event)
         }
         @messenger
@@ -36,7 +39,6 @@ module Spontaneous
 
       def self.editing_app
         ::Rack::Builder.app do
-          use Spontaneous::Rack::FiberPool, :size => 15
           use ::Rack::Lint
           use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static)
           use Spontaneous::Rack::Static, :root => Spontaneous.root / "public/@spontaneous", :urls => %W(/assets)
@@ -216,53 +218,63 @@ module Spontaneous
       end
 
       class EditingInterface < AuthenticatedHandler
-        use Reloader if Site.config.reload_classes
+        use Reloader if Spontaneous::Site.config.reload_classes
 
         set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
 
         def update_fields(model, field_data)
-          conflicts = []
-          if field_data
-            field_data.each do |id, values|
-              field = model.fields.sid(id)
-              if model.field_writable?(user, field.name.to_sym)
-                # version = values.delete("version").to_i
-                # if version == field.version
-                field.update(values)
-                # else
-                #   conflicts << [field, values]
-                # end
-              else
-                unauthorised!
-              end
-            end
-          end
-          if conflicts.empty?
-            if model.save
-              json(model)
-            end
-          else
-            errors = conflicts.map  do |field, new_value|
-              [field.schema_id.to_s, [field.version, field.conflicted_value, new_value["unprocessed_value"]]]
-            end
-            [409, json(Hash[errors])]
-          end
+          return unless field_data
+          Spontaneous::Field.update_asynchronously(model, field_data, user)
+          json(model)
+        end
+
+        # def update_fields(model, field_data)
+        #   conflicts = []
+        #   if field_data
+        #     field_data.each do |id, values|
+        #       field = model.fields.sid(id)
+        #       if model.field_writable?(user, field.name.to_sym)
+        #         # version = values.delete("version").to_i
+        #         # if version == field.version
+        #         field.update(values)
+        #         # else
+        #         #   conflicts << [field, values]
+        #         # end
+        #       else
+        #         unauthorised!
+        #       end
+        #     end
+        #   end
+        #   if conflicts.empty?
+        #     if model.save
+        #       json(model)
+        #     end
+        #   else
+        #     errors = conflicts.map  do |field, new_value|
+        #       [field.schema_id.to_s, [field.version, field.conflicted_value, new_value["unprocessed_value"]]]
+        #     end
+        #     [409, json(Hash[errors])]
+        #   end
+        # end
+
+        def content_model
+          Spontaneous::Content
         end
 
         def content_for_request(lock = false)
-          Content.db.transaction {
-            dataset = lock ? Content.for_update : Content
-            content = dataset.first(:id => params[:id])
-            content.current_editor = user
+          content_model.db.transaction do
+            dataset = lock ? content_model.for_update : content_model
+            content = dataset.get(params[:id])
             halt 404 if content.nil?
-            if box_id = Spontaneous.schema.uids[params[:box_id]]
+            content.current_editor = user
+            if box_id = content_model.schema.uids[params[:box_id]]
               box = content.boxes.detect { |b| b.schema_id == box_id }
               yield(content, box)
             else
               yield(content)
             end
-          }
+          end
         end
 
         def set_authentication_cookie(key)
@@ -325,7 +337,7 @@ module Spontaneous
         end
 
         get '/root' do
-          json Site.root
+          json Spontaneous::Site.root
         end
 
         get '/page/:id' do
@@ -334,15 +346,15 @@ module Spontaneous
 
         get '/metadata' do
           json({
-            :types => Site.schema.export(user),
+            :types => Spontaneous::Site.schema.export(user),
             :user  => user.export,
-            :services => (Site.config.services || [])
+            :services => (Spontaneous::Site.config.services || [])
           })
         end
 
         get '/map/?:id?' do
-          last_modified(Site.modified_at)
-          map = Site.map(params[:id])
+          last_modified(Spontaneous::Site.modified_at)
+          map = Spontaneous::Site.map(params[:id])
           if map
             json(map)
           else
@@ -351,19 +363,19 @@ module Spontaneous
         end
 
         get '/location*' do
-          last_modified(Site.modified_at)
-          if Page.count == 0
+          last_modified(Spontaneous::Site.modified_at)
+          if content_model::Page.count == 0
             406
           else
             path = params[:splat].first
-            page = Site[path]
-            json Site.map(page.id)
+            page = Spontaneous::Site[path]
+            json Spontaneous::Site.map(page.id)
           end
         end
 
         post '/root' do
-          if Site.root.nil?
-            type = Spontaneous.schema[params[:type]]
+          if Spontaneous::Site.root.nil?
+            type = content_model.schema.to_class(params[:type])
             root = type.create(:title => "Home")
             json({:id => root.id})
           else
@@ -389,7 +401,7 @@ module Spontaneous
           conflicts = []
           field_versions.each do |schema_id, version|
             field = content.fields.sid(schema_id)
-            unless field.version == version.to_i
+            if field.matches_version?(version.to_i)
               conflicts << field
             end
           end
@@ -450,8 +462,7 @@ module Spontaneous
             if target.field_writable?(user, field.name)
               # version = params[:version].to_i
               # if version == field.version
-              field.value = file
-              content.save
+              Spontaneous::Field.set_asynchronously(field, file, user)
               json(field.export(user))
               # else
               #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
@@ -474,8 +485,7 @@ module Spontaneous
                 instance = type.new
                 box.insert(position, instance)
                 field = instance.field_for_mime_type(file[:type])
-                field.value = file
-                instance.save
+                Spontaneous::Field.set_asynchronously(field, file, user)
                 content.save
                 json({
                   :position => position,
@@ -491,7 +501,7 @@ module Spontaneous
         post '/add/:id/:box_id/:type_name' do
           content_for_request(true) do |content, box|
             position = (params[:position] || 0).to_i
-            type = Spontaneous.schema[params[:type_name]]#.constantize
+            type = content_model.schema.to_class(params[:type_name])#.constantize
 
             if box.writable?(user, type)
               instance = type.new(:created_by => user)
@@ -561,7 +571,7 @@ module Spontaneous
         end
 
         get '/targets/:schema_id/:id/:box_id' do
-          klass = Spontaneous.schema[params[:schema_id]]
+          klass = content_model.schema.to_class(params[:schema_id])
           if klass.alias?
             content_for_request do |content, box|
               options = {}
@@ -585,7 +595,7 @@ module Spontaneous
 
         post '/alias/:id/:box_id' do
           content_for_request(true) do |content, box|
-            type = Spontaneous.schema[params[:alias_id]]
+            type = content_model.schema.to_class(params[:alias_id])
             position = (params[:position] || 0).to_i
             if box.writable?(user, type)
               instance = type.for_target(params[:target_id])
@@ -619,7 +629,7 @@ module Spontaneous
             400
           else
             if user.level.can_publish?
-              Site.publish_pages(pages)
+              Spontaneous::Site.publish_pages(pages)
               json({})
             else
               unauthorised!
@@ -664,11 +674,10 @@ module Spontaneous
             # version = params[:version].to_i
             # if version == field.version
             Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-              field.value = {
+              Spontaneous::Field.set_asynchronously(field, {
                 :filename => params[:filename],
                 :tempfile => combined
-              }
-              target.save
+              }, user)
             end
             json(field.export(user))
             # else
@@ -691,11 +700,15 @@ module Spontaneous
                 box.insert(position, instance)
                 field = instance.field_for_mime_type(params[:mime_type])
                 Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-                  field.value = {
+                  Spontaneous::Field.set_asynchronously(field, {
                     :filename => params[:filename],
                     :tempfile => combined
-                  }
+                  }, user)
                   content.save
+                  # field.value = {
+                  #   :filename => params[:filename],
+                  #   :tempfile => combined
+                  # }
                 end
                 json({
                   :position => position,
@@ -757,7 +770,7 @@ module Spontaneous
       class Preview < Sinatra::Base
         use CookieAuthentication
         use AroundPreview
-        use Reloader if Site.config.reload_classes
+        use Reloader if Spontaneous::Site.config.reload_classes
         include Spontaneous::Rack::Public
         helpers Spontaneous::Rack::UserHelpers
 

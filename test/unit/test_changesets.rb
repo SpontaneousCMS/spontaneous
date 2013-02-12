@@ -16,17 +16,16 @@ class ChangeTest < MiniTest::Spec
 
   context "Changes" do
     setup do
-      @revision = 1
       stub_time(@now)
+      @revision = 1
 
-      # DB.logger = Logger.new($stdout)
       Content.delete
 
-      class Page < Spontaneous::Page
+      class Page < ::Page
         field :title, :string, :default => "New Page"
         box :things
       end
-      class Piece < Spontaneous::Piece
+      class Piece < ::Piece
         box :things
       end
     end
@@ -49,11 +48,11 @@ class ChangeTest < MiniTest::Spec
 
       5.times { |i| root.things << Page.create(:title => "Page #{i+1}") }
 
-      result = Change.outstanding
+      result = S::Change.outstanding
       result.must_be_instance_of(Array)
       result.length.should == 5
 
-      result.map(&:class).should == [Change]*5
+      result.map(&:class).should == [S::Change]*5
 
       Set.new(result.map(&:page_id)).should == Set.new(root.things.map { |p| p.id })
     end
@@ -66,7 +65,7 @@ class ChangeTest < MiniTest::Spec
       root[:first_published_at] = root[:last_published_at] = root.modified_at - 1000
       root.things << Piece.new
       root.save.reload
-      result = Change.outstanding
+      result = S::Change.outstanding
       result.length.should == 1
       result.first.page.should == root
     end
@@ -81,7 +80,7 @@ class ChangeTest < MiniTest::Spec
 
       Content.publish(@revision+1, [root.id, root.things.first.id])
 
-      result = Change.outstanding
+      result = S::Change.outstanding
       result.length.should == 4
       Set.new(result.map(&:page_id).flatten).should == Set.new(root.things[1..-1].map(&:id))
     end
@@ -108,7 +107,7 @@ class ChangeTest < MiniTest::Spec
 
 
       Content.publish(@revision+1, [root.id])
-      result = Change.outstanding
+      result = S::Change.outstanding
 
       result.length.should == 5
 
@@ -146,7 +145,7 @@ class ChangeTest < MiniTest::Spec
 
 
       Content.publish(@revision+1, [root.id])
-      result = Change.outstanding
+      result = S::Change.outstanding
 
       e = nil
       begin
@@ -172,7 +171,7 @@ class ChangeTest < MiniTest::Spec
       root.save
 
       Content.publish(@revision+1, [root.id])
-      result = Change.outstanding
+      result = S::Change.outstanding
       change = result.detect { |change| change.page.id == new_child1.id }
       change.export.should == {
         :id => new_child1.id,
@@ -183,12 +182,14 @@ class ChangeTest < MiniTest::Spec
         # :editor_login => "someone",
         :depth => new_child1.depth,
         :side_effects => {},
+        :update_locks => [],
         :dependent => [{
           :id => page1.id,
           :depth => page1.depth,
           :title => page1.title.value,
           :url => page1.path,
           :side_effects => {},
+          :update_locks => [],
           :published_at => nil,
           :modified_at => page1.modified_at.httpdate,
         }]
@@ -207,8 +208,8 @@ class ChangeTest < MiniTest::Spec
       page1.things << new_child1
       root.save
       last = Time.now + 100
-      S::Content.filter(:id => new_child1.id).update(:modified_at => last)
-      result = Change.outstanding
+      ::Content.filter(:id => new_child1.id).update(:modified_at => last)
+      result = S::Change.outstanding
       assert result.first.modified_at > result.last.modified_at, "Change list in incorrect order"
     end
 
@@ -225,14 +226,17 @@ class ChangeTest < MiniTest::Spec
 
       Content.publish(@revision)
 
+      later = @now + 10
+      stub_time(later)
       old_slug = page1.slug
       page1.slug = "changed"
       page1.save
 
-      result = Change.outstanding
+      result = S::Change.outstanding
+
       change = result.detect { |change| change.page.id == page1.id }
       change.export[:side_effects].should == {
-        :slug => [{ :count => 1, :created_at => @now.httpdate, :old_value => old_slug, :new_value => "changed"}]
+        :slug => [{ :count => 1, :created_at => later.httpdate, :old_value => old_slug, :new_value => "changed"}]
       }
     end
 
@@ -249,13 +253,42 @@ class ChangeTest < MiniTest::Spec
 
       Content.publish(@revision)
 
+      later = @now + 10
+      stub_time(later)
       page1.hide!
 
-      result = Change.outstanding
+      page1.reload
+      result = S::Change.outstanding
       change = result.detect { |change| change.page.id == page1.id }
       change.export[:side_effects].should == {
-        :visibility => [{ :count => 1, :created_at => @now.httpdate, :old_value => false, :new_value => true}]
+        :visibility => [{ :count => 1, :created_at => later.httpdate, :old_value => false, :new_value => true}]
       }
+    end
+
+    should "provide information about any update locks that exist on a page" do
+      Piece.field :async
+      page = Page.create(:title => "page")
+
+
+      piece = Piece.new
+
+      page.things << piece
+      page.save
+      piece.save
+
+      lock = Spontaneous::PageLock.create(:page_id => page.id, :content_id => piece.id, :field_id => piece.async.id, :description => "Update Lock")
+      page.locked_for_update?.should be_true
+      result = S::Change.outstanding
+      change = result.detect { |change| change.page.id == page.id }
+      change.export[:update_locks].should == [{
+        id: lock.id,
+        content_id: piece.id,
+        field_id: piece.async.id,
+        field_name: :async,
+        location: "Field ‘async’ of entry 1 in box ‘things’",
+        description: "Update Lock",
+        created_at: @now.httpdate
+      }]
     end
   end
 end

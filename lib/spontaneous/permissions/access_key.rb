@@ -3,7 +3,7 @@
 module Spontaneous::Permissions
   class AccessKey < Sequel::Model(:spontaneous_access_keys)
     plugin :timestamps
-    many_to_one :user, :class => :'Spontaneous::Permissions::User'
+    many_to_one :user, :class => :'Spontaneous::Permissions::User', :reciprocal => :access_keys
 
     def self.authenticate(key_id, ip_address = nil)
       if key = self.for_id(key_id)
@@ -14,12 +14,17 @@ module Spontaneous::Permissions
     end
 
     def self.valid?(key_id, user)
-      return true if (key = self.for_id(key_id)) && (key.user == user) && (key.user.enabled?)
-      false
+      (key = self.for_id(key_id)) && (key.user == user) && (key.user.enabled?)
     end
 
     def self.for_id(key_id)
-      self[:key_id => key_id]
+      key_dataset.call(:key_id => key_id).first
+    end
+
+    def self.key_dataset
+      @key_dataset ||= self.where(:key_id => :$key_id).
+        eager_graph(:user).
+        prepare(:select, :select_access_key_by_key)
     end
 
     def before_create

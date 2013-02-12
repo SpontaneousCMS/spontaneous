@@ -1,17 +1,16 @@
 module Spontaneous
   module Cli
-    class Assets < ::Spontaneous::Cli::Thor
-      Spontaneous = ::Spontaneous
+    class Assets < ::Thor
+      include Spontaneous::Cli::TaskUtils
+
       namespace :assets
       default_task :compile
 
 
-      # class Up < SyncTask
-      #   desc "Syncs up"
-      # end
+      desc "compile", "Compiles assets for the Spontaneous UI"
 
-      desc "#{namespace}:compile", "Compiles assets for the Spontaneous UI"
       method_option :destination, :type => :string, :aliases => "-d", :required => true, :desc => "Compile assets into DESTINATION"
+
       def compile
         prepare(:compile)
         # options[:mode] = :console
@@ -20,7 +19,7 @@ module Spontaneous
         spec = Bundler.load.specs.find{|s| s.name == "spontaneous" }
         p spec.full_gem_path
 
-        compiler = Spontaneous::Asset::AppCompiler.new(spec.full_gem_path, options.destination)
+        compiler = ::Spontaneous::Asset::AppCompiler.new(spec.full_gem_path, options.destination)
         compiler.compile
       end
     end

@@ -4,7 +4,6 @@
 
 ## thanks again to the stirling work of the Padrino guys & gals.
 require 'rack'
-require 'launchy'
 
 module Spontaneous
 
@@ -14,9 +13,9 @@ module Spontaneous
 
 
     def self.run!(options={})
-      host = options["host"] || Site.config.host || "0.0.0.0"
-      port = options["port"] || Site.config.port || 2012
-      adapter = options["adapter"] || Site.config.adapter
+      host = options["host"] || Spontaneous::Site.config.host || "0.0.0.0"
+      port = options["port"] || Spontaneous::Site.config.port || 2012
+      adapter = options["adapter"] || Spontaneous::Site.config.adapter
 
       handler = nil
 
@@ -41,7 +40,6 @@ module Spontaneous
         end
         trap(:INT, &term)
         trap(:TERM, &term)
-        # ::Launchy::Browser.run("http://localhost:#{port}/@spontaneous") if Spontaneous.mode == :back
       end
     rescue RuntimeError => e
       if e.message =~ /no acceptor/

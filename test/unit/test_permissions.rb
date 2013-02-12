@@ -5,9 +5,11 @@ require File.expand_path('../../test_helper', __FILE__)
 
 class PermissionsTest < MiniTest::Spec
 
+  Permissions = Spontaneous::Permissions
+
   def setup
     @site = setup_site
-    Spontaneous::Content.delete
+    ::Content.delete
     Permissions::UserLevel.reset!
     Permissions::UserLevel.stubs(:level_file).returns(File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml')
   end
@@ -234,15 +236,6 @@ class PermissionsTest < MiniTest::Spec
       user.save
       user.valid?.should be_false
       user.errors[:password].should_not be_blank
-    end
-
-
-    should "have a random salt" do
-      user1 = Permissions::User.create(@valid)
-      user2 = Permissions::User.create(@valid.merge(:login => "person2"))
-      user1.salt.should_not be_blank
-      user2.salt.should_not be_blank
-      user1.salt.should_not == user2.salt
     end
 
     context "who are valid" do

@@ -4,12 +4,11 @@ require File.expand_path('../../test_helper', __FILE__)
 
 
 class SchemaTest < MiniTest::Spec
-  include Spontaneous
-
-
   def setup
     @site = setup_site
     @site.schema_loader_class = Spontaneous::Schema::PersistentMap
+    S::Permissions::UserLevel.reset!
+    S::Permissions::UserLevel.stubs(:level_file).returns(File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml')
   end
 
   def teardown
@@ -18,9 +17,9 @@ class SchemaTest < MiniTest::Spec
 
   context "Configurable names" do
     setup do
-      class ::FunkyContent < Content; end
+      class ::FunkyContent < Piece; end
       class ::MoreFunkyContent < FunkyContent; end
-      class ::ABCDifficultName < Content; end
+      class ::ABCDifficultName < Piece; end
 
       class ::CustomName < ABCDifficultName
         title "Some Name"
@@ -68,8 +67,10 @@ class SchemaTest < MiniTest::Spec
           layout :clean
           box :posts
         end
+        # force loading of map
+        @site.schema.map
         @instance = SchemaClass.new
-        @uids = @site.uid
+        @uids = @site.schema.uids
       end
 
       teardown do
@@ -81,7 +82,7 @@ class SchemaTest < MiniTest::Spec
       # end
 
       should "be unique" do
-        ids = (0..10000).map { Schema::UIDMap.generate }
+        ids = (0..10000).map { S::Schema::UIDMap.generate }
         ids.uniq.length.should == ids.length
       end
 
@@ -146,19 +147,19 @@ class SchemaTest < MiniTest::Spec
 
       context "lookups" do
         should "return classes" do
-          Site.schema["xxxxxxxxxxxx"].should == SchemaClass
+          Site.schema.to_class("xxxxxxxxxxxx").should == SchemaClass
         end
         should "return fields" do
-          Site.schema["ffffffffffff"].should == SchemaClass.field_prototypes[:description]
+          Site.schema.to_class("ffffffffffff").should == SchemaClass.field_prototypes[:description]
         end
         should "return boxes" do
-          Site.schema["bbbbbbbbbbbb"].should == SchemaClass.box_prototypes[:posts]
+          Site.schema.to_class("bbbbbbbbbbbb").should == SchemaClass.box_prototypes[:posts]
         end
         should "return styles" do
-          Site.schema["ssssssssssss"].should == SchemaClass.style_prototypes[:simple]
+          Site.schema.to_class("ssssssssssss").should == SchemaClass.style_prototypes[:simple]
         end
         should "return layouts" do
-          Site.schema["llllllllllll"].should == SchemaClass.layout_prototypes[:clean]
+          Site.schema.to_class("llllllllllll").should == SchemaClass.layout_prototypes[:clean]
         end
       end
 
@@ -167,12 +168,10 @@ class SchemaTest < MiniTest::Spec
     context "schema verification" do
       setup do
         @site.schema.schema_map_file = File.expand_path('../../fixtures/schema/before.yml', __FILE__)
-        class ::Page < Spontaneous::Page
-          field :title
-        end
+        Page.field :title
         class B < ::Page; end
-        class C < Content; end
-        class D < Content; end
+        class C < Piece; end
+        class D < Piece; end
         class O < Box; end
         B.field :description
         B.field :author
@@ -199,6 +198,7 @@ class SchemaTest < MiniTest::Spec
         #       between tests
         # Schema.stubs(:classes).returns([B, C, D, O])
         # Schema.classes.should == [B, C, D, O]
+        @site.schema.map
         @uids = @site.schema.uids
         ::Page.schema_id.should == @uids["tttttttttttt"]
         B.schema_id.should == @uids["bbbbbbbbbbbb"]
@@ -224,7 +224,7 @@ class SchemaTest < MiniTest::Spec
       end
 
       should "detect addition of classes" do
-        class E < Content; end
+        class E < ::Piece; end
         @site.schema.stubs(:classes).returns([B, C, D, E])
         exception = nil
         begin
@@ -477,8 +477,8 @@ class SchemaTest < MiniTest::Spec
   context "Transient (testing) maps" do
     setup do
       @site.schema.schema_loader_class = Spontaneous::Schema::TransientMap
-      class V < Spontaneous::Piece; end
-      class W < Spontaneous::Piece; end
+      class V < ::Piece; end
+      class W < ::Piece; end
     end
     teardown do
       self.class.send(:remove_const, :V)
@@ -503,7 +503,7 @@ class SchemaTest < MiniTest::Spec
 
     context "for inherited boxes" do
       setup do
-        class ::A < Spontaneous::Piece
+        class ::A < ::Piece
           box :a
         end
         class ::B < ::A
@@ -529,13 +529,13 @@ class SchemaTest < MiniTest::Spec
 
   context "Schema groups" do
     setup do
-      class ::A < Spontaneous::Page
+      class ::A < ::Page
         group :a, :b, :c
         box :cgroup do
           allow_group :c
         end
       end
-      class ::B < Spontaneous::Piece
+      class ::B < ::Piece
         group :b, :c
         style :fish
         style :frog
@@ -544,7 +544,7 @@ class SchemaTest < MiniTest::Spec
           allow_groups :a, :c
         end
       end
-      class ::C < Spontaneous::Piece
+      class ::C < ::Piece
         group :c
 
         box :bgroup do
@@ -569,12 +569,15 @@ class SchemaTest < MiniTest::Spec
       B.boxes.agroup.allowed_types(nil).should == [A, B, C]
     end
 
-    should "apply the options to all the included classes" do
+    should "apply the options to all the included classes xxx" do
       user = mock()
+      S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.editor).returns(true)
       S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.root).returns(true)
-      A.boxes.cgroup.allowed_types(user).should == [A, B, C]
+      C.boxes.cgroup.allowed_types(user).should == [A, B, C]
+      S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.editor).returns(true)
       S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.root).returns(false)
-      A.boxes.cgroup.allowed_types(user).should == []
+      C.boxes.cgroup.allowed_types(user).should == []
+      A.boxes.cgroup.allowed_types(user).should == [A, B, C]
     end
 
     should "allow for configuring styles" do
@@ -591,7 +594,7 @@ class SchemaTest < MiniTest::Spec
       @site.schema.delete(::B)
       Object.send(:remove_const, :B)
 
-      class ::B < Spontaneous::Piece
+      class ::B < ::Piece
         group :b
         style :fish
         style :frog
@@ -611,34 +614,8 @@ class SchemaTest < MiniTest::Spec
 
   context "Map writing" do
     context "Non-existant maps" do
-      setup do
-        @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)
-        ::File.exists?(@map_file).should be_false
-        @site.schema.schema_map_file = @map_file
-        class ::A < Spontaneous::Page
-          field :title
-          field :introduction
-          layout :sparse
-          box :posts do
-            field :description
-          end
-        end
-        class ::B < Spontaneous::Piece
-          field :location
-          style :daring
-        end
-      end
-      teardown do
-        Object.send(:remove_const, :A) rescue nil
-        Object.send(:remove_const, :B) rescue nil
-        FileUtils.rm(@map_file) if ::File.exists?(@map_file)
-      end
-      should "get created with verification" do
-        S.schema.validate!
-        classes = [ ::A, ::B]
-        @inheritance_map = nil
-        # would like to do all of this using mocks, but don't know how to do that
-        # without fecking up the whole schema id creation process
+      def expected_schema
+        classes = @site.schema.classes#[ Content::Page, Page, Content::Piece, Piece, ::A, ::B]
         expected = Hash[ classes.map { |klass| [ klass.schema_id.to_s, klass.schema_name ] } ]
         expected.merge!({
           A.field_prototypes[:title].schema_id.to_s => A.field_prototypes[:title].schema_name,
@@ -649,8 +626,52 @@ class SchemaTest < MiniTest::Spec
           B.field_prototypes[:location].schema_id.to_s => B.field_prototypes[:location].schema_name,
           B.style_prototypes[:daring].schema_id.to_s => B.style_prototypes[:daring].schema_name,
         })
+        expected
+      end
+
+      setup do
+        @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)
+
+        ::FileUtils.rm_f(@map_file) if ::File.exists?(@map_file)
+
+        @site.schema.schema_map_file = @map_file
+        class ::A < ::Page
+          field :title
+          field :introduction
+          layout :sparse
+          box :posts do
+            field :description
+          end
+        end
+        class ::B < ::Piece
+          field :location
+          style :daring
+        end
+      end
+
+      teardown do
+        Object.send(:remove_const, :A) rescue nil
+        Object.send(:remove_const, :B) rescue nil
+        FileUtils.rm(@map_file) if ::File.exists?(@map_file)
+      end
+
+      should "get created with verification" do
+        S.schema.validate!
         File.exists?(@map_file).should be_true
-        YAML.load_file(@map_file).should == expected
+        YAML.load_file(@map_file).should == expected_schema
+      end
+
+      # Having the generator create an empty config/schema.yml is a useful way of
+      # identifying a spontaneous site (for use by bin/spot)
+      should "get overwritten if invalid or empty" do
+        File.open(@map_file, "w") do |f|
+          f.write("# schema")
+        end
+        File.exists?(@map_file).should be_true
+        S.schema.map.valid?.should be_false
+        S.schema.validate!
+        S.schema.map.valid?.should be_true
+        YAML.load_file(@map_file).should == expected_schema
       end
     end
 
@@ -660,7 +681,7 @@ class SchemaTest < MiniTest::Spec
         FileUtils.mkdir_p(File.dirname(@map_file))
         FileUtils.cp(File.expand_path('../../fixtures/schema/resolvable.yml', __FILE__), @map_file)
         @site.schema.schema_map_file = @map_file
-        class ::A < Spontaneous::Page
+        class ::A < ::Page
           field :title
           field :introduction
           layout :sparse
@@ -668,7 +689,7 @@ class SchemaTest < MiniTest::Spec
             field :description
           end
         end
-        class ::B < Spontaneous::Piece
+        class ::B < ::Piece
           field :location
           field :duration
           style :daring
@@ -682,25 +703,9 @@ class SchemaTest < MiniTest::Spec
         Object.send(:remove_const, :B) rescue nil
         Object.send(:remove_const, :X) rescue nil
         Object.send(:remove_const, :Y) rescue nil
-        S::Content.delete
+        ::Content.delete
         FileUtils.rm(@map_file) if ::File.exists?(@map_file) rescue nil
       end
-
-      should "update the STI map after addition of classes" do
-        ::A.sti_subclasses_array.should == [::A.schema_id.to_s]
-        class ::X < ::A
-          field :wild
-          box :monkeys do
-            field :banana
-          end
-          layout :rich
-        end
-        S.schema.validate!
-        ::X.schema_id.should_not be_nil
-        ::X.sti_key_array.should == [::X.schema_id.to_s]
-        ::A.sti_subclasses_array.should == [::A.schema_id.to_s, ::X.schema_id.to_s]
-      end
-
 
       should "be done automatically if only additions are found" do
         A.field :moose
@@ -862,7 +867,7 @@ class SchemaTest < MiniTest::Spec
         instance.posts << piece1
         instance.posts << piece2
         instance.save
-        instance = S::Content[instance.id]
+        instance = Content[instance.id]
         instance.posts.contents.length.should == 2
         Content.count.should == 3
         uid = A.boxes[:posts].schema_id.to_s
@@ -871,7 +876,7 @@ class SchemaTest < MiniTest::Spec
         S.schema.reload!
         S.schema.validate!
         Content.count.should == 1
-        S::Content[instance.id].should == instance
+        Content[instance.id].should == instance
       end
 
       context "which isn't automatically resolvable" do

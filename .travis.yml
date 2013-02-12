@@ -1,0 +1,17 @@
+language: ruby
+rvm:
+  - "1.9.3"
+  # - jruby-19mode # JRuby in 1.9 mode
+  # - rbx-19mode
+# uncomment this line if your project needs to run something other than `rake`:
+env:
+  global:
+    - DB_HOST=127.0.0.1
+  matrix:
+  # - GEM_SOURCE=rubygems DB=postgres   DB_USER=postgres
+  # - GEM_SOURCE=rubygems DB=mysql      DB_USER=root
+    - GEM_SOURCE=git      DB=postgres   DB_USER=postgres
+    - GEM_SOURCE=git      DB=mysql      DB_USER=root
+before_install: gem install rake
+gemfile: .travis/gemfiles/Gemfile.empty
+script: rake test:integration

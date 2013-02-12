@@ -9,7 +9,7 @@ module Spontaneous
 
       def access_key(env)
         if login = Site.config.auto_login
-          user = Spontaneous::Permissions::User[:login => login]
+          user = Spontaneous::Permissions::User.login(login)
           if user.access_keys.empty?
             user.generate_access_key(env["REMOTE_ADDR"])
           else

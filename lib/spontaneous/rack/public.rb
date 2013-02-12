@@ -81,7 +81,7 @@ module Spontaneous
       end
 
       DOT = '.'.freeze
-      ACTION = "/#{S::Plugins::Controllers::ACTION_SEPARATOR}".freeze
+      ACTION = "/#{S::Model::Page::Controllers::ACTION_SEPARATOR}".freeze
 
       def show(page, status=200)
         page = Spontaneous::Site[page] if String === page
@@ -101,7 +101,7 @@ module Spontaneous
 
       def redirect(location, redirect_code=:temporary)
         if String === location
-          destination = Site[location]
+          destination = Spontaneous::Site[location]
           location = destination.path if destination and destination.respond_to?(:path)
         else
           location = location.path if location.respond_to?(:path)
@@ -129,7 +129,7 @@ module Spontaneous
 
       def find_page!(path)
         @path, @output, @action = parse_path(path)
-        @page = Site[@path]
+        @page = Spontaneous::Site[@path]
       end
 
       def output

@@ -5,7 +5,8 @@ require 'digest/sha1'
 module Spontaneous
   module Media
 
-    autoload :File, "spontaneous/media/file"
+    autoload :File,     "spontaneous/media/file"
+    autoload :TempFile, "spontaneous/media/temp_file"
 
     include Spontaneous::Constants
 
@@ -14,25 +15,6 @@ module Spontaneous
     def media_path(*args)
       ::File.join(Spontaneous.media_dir, *args)
     end
-
-    @@upload_uid_lock  = Mutex.new
-    @@upload_uid_index = 0
-
-    def upload_index
-      @@upload_uid_lock.synchronize do
-        @@upload_uid_index = (@@upload_uid_index + 1) % 0xFFFFFF
-      end
-    end
-
-    def upload_path(filename)
-      time = Time.now.to_i
-      dir = "#{time}.#{upload_index}"
-      Spontaneous.cache_path("tmp", dir, filename)
-    end
-
-    # def to_urlpath(filepath)
-    #   filepath.gsub(%r{^#{Spontaneous.media_dir}}, "/media")
-    # end
 
     def to_filepath(urlpath)
       parts = urlpath.split("/")
@@ -52,6 +34,14 @@ module Spontaneous
     end
 
 
+    def pad_id(r)
+      r.to_s.rjust(5, "0")
+    end
+
+    def pad_revision(r)
+      r.to_s.rjust(4, "0")
+    end
+
     def sha1(filepath)
       Digest::SHA1.file(filepath).hexdigest
     end
@@ -61,27 +51,18 @@ module Spontaneous
     def combine_shards(hashes, &block)
       hashes = hashes.split(',') unless hashes.is_a?(Array)
       shards = hashes.map { |hash| Spontaneous.shard_path(hash) }
-      combined = Tempfile.new('shard')
-      combined.binmode
-
-      shards.each do |shard|
-        ::File.open(shard, 'rb') do |part|
-          while data = part.read(131072)
-            combined.write(data)
+      Tempfile.open('shard') do |combined|
+        combined.binmode
+        shards.each do |shard|
+          ::File.open(shard, 'rb') do |part|
+            while (data = part.read(131072))
+              combined.write(data)
+            end
           end
         end
-      end
-      combined.close
-
-      if block_given?
-        begin
-          yield(combined)
-        ensure
-          combined.close!
-        end
-      else
-        # caller's responsibility to close & delete tempfile
-        combined
+        combined.flush
+        combined.rewind
+        yield(combined) if block_given?
       end
     end
 

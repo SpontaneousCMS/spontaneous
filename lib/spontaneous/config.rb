@@ -105,9 +105,8 @@ module Spontaneous
       def_delegators :@settings, :key?
     end
 
-    @@defaults = {
-      #TODO: add in sensible default configuration (or do it in the generators)
-    }
+    DEFAULTS = {
+    }.freeze unless defined?(DEFAULTS)
 
     attr_reader :environment, :mode, :env, :base, :local, :defaults
 
@@ -117,7 +116,7 @@ module Spontaneous
       @local = Configuration.new
       @env = Configuration.new
       @base = Configuration.new
-      @defaults = Configuration.new(@@defaults)
+      @defaults = Configuration.new(DEFAULTS)
     end
 
     def load(config_root)

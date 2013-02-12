@@ -76,11 +76,11 @@ module Spontaneous
 
     # TODO: Is this ever used? Delete it & see what breaks
     def self.revision_dir(revision=nil, root = nil)
-      Site.instance.revision_dir(revision, root)
+      Spontaneous::Site.instance.revision_dir(revision, root)
     end
 
     def self.revision_root(revision)
-      Site.instance.revision_dir(revision)
+      Spontaneous::Site.instance.revision_dir(revision)
     end
 
     def self.context_class

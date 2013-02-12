@@ -28,10 +28,9 @@ class AsyncTest < MiniTest::Spec
 
     should "use fibers to simulate sync code if running in a fiber" do
       EM.run do
-        Fiber.new {
-          result = Spontaneous.system("touch #{@filepath}")
+        result = Spontaneous.system("touch #{@filepath}") {
           File.exist?(@filepath).should be_true
-        }.resume
+        }
         EM.stop
       end
     end
@@ -47,9 +46,11 @@ class AsyncTest < MiniTest::Spec
 
 
     should "run synchronously outside of EM reactor" do
-      result = Spontaneous.system("touch #{@filepath}")
-      File.exist?(@filepath).should be_true
-      result.should be_true
+      Spontaneous.system("touch #{@filepath}") { |result|
+        File.exist?(@filepath).should be_true
+        result.should be_true
+
+      }
     end
   end
 end

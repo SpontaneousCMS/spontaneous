@@ -4,7 +4,6 @@ require File.expand_path('../../test_helper', __FILE__)
 
 
 class PageTest < MiniTest::Spec
-  include Spontaneous
 
   def setup
     @site = setup_site
@@ -14,21 +13,14 @@ class PageTest < MiniTest::Spec
     teardown_site
   end
 
-  context "All pages" do
-    # should "have a pre-defined 'title' field" do
-    #   p = Page.new
-    #   p.field?(:title).should be_true
-    #   p.title.value.should == "New Page"
-    # end
-  end
   context "Pages:" do
     setup do
       Content.delete
-      class Page < Spot::Page
+      class Page < ::Page
         field :title, :string
         box :sub
       end
-      class Piece < Spontaneous::Piece; end
+      class Piece < ::Piece; end
     end
     teardown do
       PageTest.send(:remove_const, :Page)
@@ -184,6 +176,11 @@ class PageTest < MiniTest::Spec
         @s.page.should == @s
         @t.page.should == @t
       end
+
+      should "have a reference to themselves as content_instance" do
+        @p.content_instance.should == @p
+      end
+
       should "keep track of their depth" do
         @p.depth.should == 0
         @q.depth.should == 1

@@ -20,26 +20,24 @@ class StylesTest < MiniTest::Spec
   context "styles for" do
 
     setup do
-
-      class ::Page < Spontaneous::Page; end
-      class ::Piece < Spontaneous::Piece; end
-      class ::Box < Spontaneous::Box; end
+      ::Content.delete
 
       ::Page.box :box1
 
-      class ::MissingClass < Piece; end
-      class ::TemplateClass < Piece; end
+      class ::MissingClass < ::Piece; end
+      class ::TemplateClass < ::Piece; end
       class ::TemplateSubClass1 < TemplateClass; end
       class ::TemplateSubClass2 < TemplateClass; end
-      class ::InvisibleClass < Piece; end
+      class ::InvisibleClass < ::Piece; end
     end
 
     teardown do
-      Object.send(:remove_const, :Page)
-      Object.send(:remove_const, :MissingClass)
-      Object.send(:remove_const, :TemplateClass)
-      Object.send(:remove_const, :TemplateSubClass1)
-      Object.send(:remove_const, :TemplateSubClass2)
+      ::Content.delete
+      Object.send(:remove_const, :MissingClass) rescue nil
+      Object.send(:remove_const, :TemplateClass) rescue nil
+      Object.send(:remove_const, :TemplateSubClass1) rescue nil
+      Object.send(:remove_const, :TemplateSubClass2) rescue nil
+      Object.send(:remove_const, :InvisibleClass) rescue nil
     end
 
     context "pieces" do
@@ -286,14 +284,14 @@ class StylesTest < MiniTest::Spec
         end
 
         teardown do
-          Object.send(:remove_const, :InlineTemplateClass)
+          Object.send(:remove_const, :InlineTemplateClass) rescue nil
         end
 
         should "be used to render the content" do
           @a.render.should ==  "html: Total Title"
         end
 
-        should "be used to render the content with the right format xxx" do
+        should "be used to render the content with the right format" do
           @a.render(:pdf).should ==  "pdf: Total Title"
         end
       end
@@ -344,13 +342,13 @@ class StylesTest < MiniTest::Spec
 
     context "boxes" do
       setup do
-        class ::BoxA < Spontaneous::Box; end
-        class ::BoxB < Spontaneous::Box; end
+        class ::BoxA < ::Box; end
+        class ::BoxB < ::Box; end
       end
 
       teardown do
-        Object.send(:remove_const, :BoxA)
-        Object.send(:remove_const, :BoxB)
+        Object.send(:remove_const, :BoxA) rescue nil
+        Object.send(:remove_const, :BoxB) rescue nil
       end
 
       context "anonymous boxes" do
@@ -372,7 +370,7 @@ class StylesTest < MiniTest::Spec
           @piece.entities << TemplateClass.new
           @piece.entities << TemplateClass.new
           @piece.entities.render.should == "template_class.html.cut\n\ntemplate_class.html.cut\n"
-          @piece.entities.style.template.call.should == '#{ render_content }'
+          @piece.entities.style.template.call.should == '${ render_content }'
         end
 
 
@@ -394,7 +392,7 @@ class StylesTest < MiniTest::Spec
           @piece.dongles.render.should == "named2.html.cut\n"
         end
 
-        should "use styles assigned in a subclass" do
+        should "use styles assigned in a subclass xxx" do
           ::TemplateSubClass = Class.new(TemplateClass)
           ::TemplateSubSubClass = Class.new(TemplateSubClass)
 
@@ -432,8 +430,8 @@ class StylesTest < MiniTest::Spec
           end
 
 
-          Object.send(:remove_const, :TemplateSubClass)
-          Object.send(:remove_const, :TemplateSubSubClass)
+          Object.send(:remove_const, :TemplateSubClass) rescue nil
+          Object.send(:remove_const, :TemplateSubSubClass) rescue nil
         end
       end
 
@@ -466,8 +464,8 @@ class StylesTest < MiniTest::Spec
           piece = TemplateSubClass.new
           @page.box1 << piece
           assert_correct_template(piece.lastly, @template_root / 'box_a')
-          Object.send(:remove_const, :BoxASubclass)
-          Object.send(:remove_const, :TemplateSubClass)
+          Object.send(:remove_const, :BoxASubclass) rescue nil
+          Object.send(:remove_const, :TemplateSubClass) rescue nil
         end
 
         context "with configured styles" do

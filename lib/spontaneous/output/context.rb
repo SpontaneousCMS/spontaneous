@@ -68,7 +68,7 @@ module Spontaneous::Output::Context
     def render_content
       __target.map do |c|
         __render_content(c)
-      end.join("\n")
+      end.reject(&:blank?).join("\n")
     end
 
     def first

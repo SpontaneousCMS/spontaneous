@@ -114,7 +114,7 @@ module Spontaneous::Prototypes
     end
 
     def default_box_class
-      defined?(::Box) ? ::Box : Spontaneous::Box
+      defined?(::Box) ? ::Box : owner.content_model::Box
     end
 
     ## failed attempt to exclude anonymous boxes from the list of schema classes

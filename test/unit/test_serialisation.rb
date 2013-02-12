@@ -5,7 +5,6 @@ require 'erb'
 
 
 class SerialisationTest < MiniTest::Spec
-  include Spontaneous
 
   def setup
     @site = setup_site
@@ -18,13 +17,9 @@ class SerialisationTest < MiniTest::Spec
   context "Content" do
     setup do
       Content.delete
-      class ::Page < Spontaneous::Page
-        field :title, :string, :default => "New Page"
-      end
+      Page.field :title, :string, :default => "New Page"
 
-      class ::Piece < Spontaneous::Piece
-        style :tepid
-      end
+      Piece.style :tepid
 
       class ::SerialisedPage < ::Page
         field :direction, :title => "Pointing Direction", :comment => "NSEW" do
@@ -83,8 +78,6 @@ class SerialisationTest < MiniTest::Spec
     end
 
     teardown do
-      Object.send(:remove_const, :Page)
-      Object.send(:remove_const, :Piece)
       Object.send(:remove_const, :SerialisedPiece)
       Object.send(:remove_const, :SerialisedPage)
     end
@@ -95,7 +88,7 @@ class SerialisationTest < MiniTest::Spec
           pp SerialisedPiece.export; puts "="*60; pp @class_hash
         end
         # SerialisedPiece.export.should == @class_hash
-        assert_hashes_equal(SerialisedPiece.export, @class_hash)
+        assert_hashes_equal(@class_hash, SerialisedPiece.export)
       end
       should "serialise to JSON" do
         Spot::deserialise_http(SerialisedPiece.serialise_http).should == @class_hash
@@ -103,7 +96,7 @@ class SerialisationTest < MiniTest::Spec
       should "include the title field name in the serialisation of page types" do
         SerialisedPage.export(nil)[:title_field].should == 'title'
       end
-      should "use JS friendly names for type keys" do
+      should "use JS friendly names for type keys xxx" do
         class ::SerialisedPage
           class InnerClass < Piece
           end

@@ -35,9 +35,9 @@ class MarkdownEditorTest < MiniTest::Spec
   def style(command, sel_start, sel_end, value)
     state = @page.eval(<<-JS)
       var input = fake_input(#{sel_start}, #{sel_end}, #{value.inspect})
-      var command = new Spontaneous.FieldTypes.MarkdownField.#{command}(input)
+      var command = new Spontaneous.Field.Markdown.#{command}(input)
       command.execute();
-      Spontaneous.FieldTypes.MarkdownField.TextCommand.get_state(input)
+      Spontaneous.Field.Markdown.TextCommand.get_state(input)
     JS
     result = {
       "before" => state["before"],

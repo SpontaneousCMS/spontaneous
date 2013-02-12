@@ -40,7 +40,7 @@ module Spontaneous
 
     def local_template(format)
       template_path = nil
-      Site.paths(:templates).each do |template_root|
+      Spontaneous::Site.paths(:templates).each do |template_root|
         template_path = try_template_paths.detect do |path|
           Spontaneous::Output.template_exists?(template_root, path, format)
         end
@@ -83,6 +83,7 @@ module Spontaneous
     end
 
     def name
+      return "<default>" if prototype.nil?
       prototype.name
     end
 
@@ -96,7 +97,7 @@ module Spontaneous
     end
 
     def owner_directory_names
-      classes = [owner].concat(owner.ancestors.take_while { |klass| klass < Spontaneous::Page or klass < Spontaneous::Piece })
+      classes = [owner].concat(owner.ancestors.take_while { |klass| klass < owner.content_model::Page or klass < owner.content_model::Piece })
       classes.map { |klass| self.class.to_directory_name(klass) }
     end
 

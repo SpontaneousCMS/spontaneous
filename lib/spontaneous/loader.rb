@@ -98,7 +98,7 @@ module Spontaneous
     def is_site_page?(backtrace)
       path, line, context = backtrace.split(":")
       path = File.expand_path(path)
-      root = Site.instance.root
+      root = Spontaneous::Site.instance.root
       path.start_with?(root)
     end
 

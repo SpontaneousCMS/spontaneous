@@ -21,7 +21,7 @@ class UserAdminTest < MiniTest::Spec
   end
 
   def self.shutdown
-    teardown_site
+    teardown_site(true)
   end
 
   def app
@@ -42,11 +42,12 @@ class UserAdminTest < MiniTest::Spec
   end
 
   def teardown
+    teardown_site(false)
     S::Permissions::User.delete
   end
 
   def create_user(name, level)
-    user = Permissions::User.create({
+    user = S::Permissions::User.create({
       :name => "#{name.capitalize}",
       :email => "#{name}@example.org",
       :login => name,
@@ -154,13 +155,6 @@ class UserAdminTest < MiniTest::Spec
       result = S::JSON.parse last_response.body
       result.must_be_instance_of Hash
       result[:email].should_not be_nil
-    end
-
-    should "ignore changes to the salt" do
-      salt = @editor_user.salt
-      auth_put "/@spontaneous/users/#{@editor_user.id}", {  "user[name]" => "Robert Something", "user[login]" => "editor", "user[email]" => "robert@example.com", "user[salt]" => "123456" }
-      assert last_response.ok?
-      @editor_user.reload.salt.should == salt
     end
 
     should "allow updating of the user's password" do

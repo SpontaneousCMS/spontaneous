@@ -2,13 +2,13 @@ require 'spontaneous/cli'
 
 module Spontaneous
   module Cli
-    class Site < ::Spontaneous::Cli::Thor
-      Spontaneous = ::Spontaneous
+    class Site < ::Thor
+      include Spontaneous::Cli::TaskUtils
       namespace :site
 
       default_task :browse
 
-      class DumpTask < ::Thor::Group
+      module DumpTask
         protected
 
         def db_adapter
@@ -36,7 +36,7 @@ module Spontaneous
         end
 
         def database
-          Spontaneous.database
+          ::Spontaneous.database
         end
 
         def dump_path
@@ -44,16 +44,19 @@ module Spontaneous
         end
 
         def dump_root
-          Spontaneous.cache_dir('dump')
+          ::Spontaneous.cache_dir('dump')
         end
 
         def relative_dir(path)
           path = Pathname.new(path)
-          path.relative_path_from(Pathname.new(Spontaneous.root)).to_s
+          path.relative_path_from(Pathname.new(::Spontaneous.root)).to_s
         end
       end
 
-      class Dump < DumpTask
+
+      class Dump < ::Thor::Group
+        include DumpTask
+
         def create_dump_dir
           ::FileUtils.mkdir_p(dump_path)
         end
@@ -64,15 +67,17 @@ module Spontaneous
         end
 
         def archive_media
-          tmp = relative_dir(Spontaneous.media_dir('tmp'))
-          src = relative_dir(Spontaneous.media_dir)
+          tmp = relative_dir(::Spontaneous.media_dir('tmp'))
+          src = relative_dir(::Spontaneous.media_dir)
           say "Creating media archive at '#{relative_dir(media_archive)}'", :green
           cmd = %(tar czf #{media_archive} --exclude #{tmp} #{src})
           system(cmd)
         end
       end
 
-      class Load < DumpTask
+      class Load < ::Thor::Group
+        include DumpTask
+
         def find_latest_dump
           root = Pathname.new(dump_root)
           @id = root.entries.
@@ -94,59 +99,54 @@ module Spontaneous
         end
       end
 
-      desc "#{namespace}:dump", "Dumps the current site to an archive on the local machine"
+      desc "dump", "Dumps the current site to an archive on the local machine"
       def dump
-        prepare :dump
-        boot!
+        prepare! :dump
         Dump.start
       end
 
-      desc "#{namespace}:load", "Uploads a dump of the current site to a remote server"
+      desc "load", "Uploads a dump of the current site to a remote server"
       def load
-        prepare :load
-        boot!
+        prepare! :load
         Load.start
       end
 
-      desc "#{namespace}:publish", "Publishes the site"
+      desc "publish", "Publishes the site"
       method_option :pages, :type => :array, :desc => "List of pages to publish"
       method_option :logfile, :type => :string, :desc => "Location of logfile"
       def publish
-        prepare :publish
-        boot!
-        ::Site.publishing_method = :immediate
-        Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
-        say "Creating revision #{::Site.revision}", :green, true
+        prepare! :publish
+        Spontaneous::Site.background_mode = :immediate
+        ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
+        say "Creating revision #{Spontaneous::Site.revision}", :green, true
         if options.pages
           say ">  Publishing pages #{options.pages.inspect}", :green, true
-          ::Site.publish_pages(options.pages)
+          Spontaneous::Site.publish_pages(options.pages)
         else
           say ">  Publishing all", :green, true
-          ::Site.publish_all
+          Spontaneous::Site.publish_all
         end
       end
 
-      desc "#{namespace}:render", "Re-renders the current content"
+      desc "render", "Re-renders the current content"
       def render
-        prepare :render
-        boot!
-        ::Site.publishing_method = :immediate
-        ::Site.rerender
+        prepare! :render
+        Spontaneous::Site.background_mode = :immediate
+        Spontaneous::Site.rerender
       end
 
-      desc "#{namespace}:revision", "Shows the site status"
+      desc "revision", "Shows the site status"
       def revision
-        prepare :revision
-        boot!
-        say "Site is at revision #{::Site.revision}", :green
+        prepare! :revision
+        say "Site is at revision #{Spontaneous::Site.revision}", :green
       end
 
-      desc "#{namespace}:browse", "Launces a browser pointing to the current development CMS"
+      desc "browse", "Launces a browser pointing to the current development CMS"
       def browse
         prepare :browse
         require 'launchy'
         boot!
-        ::Launchy::Browser.run("http://localhost:#{::Site.config.port}/@spontaneous")
+        ::Launchy.open("http://localhost:#{Spontaneous::Site.config.port}/@spontaneous")
       end
     end
   end

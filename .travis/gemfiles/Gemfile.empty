@@ -1,0 +1,7 @@
+source :rubygems
+
+# An empty Gemfile to stop Travis from installing anything
+# this way I can test the installation process itself
+
+gem "rake"
+gem "minitest"

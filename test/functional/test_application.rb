@@ -17,10 +17,20 @@ class ApplicationTest < MiniTest::Spec
     app_root = File.expand_path('../../fixtures/example_application', __FILE__)
     FileUtils.cp_r(app_root, @site_root)
     @site_root += "/example_application"
+    # Force loading of model in dev mode (where we have a db to introspect)
+    Spontaneous.init(:root => @site_root, :mode => :back, :environment => :development)
   end
 
   def self.shutdown
-    teardown_site
+    teardown_site(true)
+  end
+
+  def setup
+    # @site = setup_site(self.class.site_root, true)
+  end
+
+  def teardown
+    # teardown_site(false)
   end
 
   context "schema" do
@@ -103,6 +113,7 @@ class ApplicationTest < MiniTest::Spec
 
     setup do
       Spontaneous.init(:root => self.class.site_root, :mode => :front, :environment => :development)
+      Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
     end
 
     should "have the right mode setting" do

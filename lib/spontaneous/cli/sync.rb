@@ -1,8 +1,9 @@
 
 module Spontaneous
   module Cli
-    class Sync < ::Spontaneous::Cli::Thor
-      Spontaneous = ::Spontaneous
+    class Sync < ::Thor
+      include Spontaneous::Cli::TaskUtils
+
       namespace :sync
       default_task :down
 
@@ -28,12 +29,12 @@ module Spontaneous
         desc "Syncs up"
       end
 
-      desc "#{namespace}:down", "Makes the local copy a clone of the live server"
+      desc "down", "Makes the local copy a clone of the production server"
       def down
         Down.start
       end
 
-      desc "#{namespace}:up", "Makes the local copy a clone of the live server"
+      desc "up", "Makes the local copy a clone of the production server"
       def up
         Down.start
       end

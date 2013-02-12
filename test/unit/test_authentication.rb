@@ -8,6 +8,7 @@ require File.expand_path('../../test_helper', __FILE__)
 class AuthenticationTest < MiniTest::Spec
   include ::Rack::Test::Methods
 
+  Permissions = Spontaneous::Permissions
 
   def create_user(name, level)
     user = Permissions::User.create({
@@ -104,12 +105,12 @@ class AuthenticationTest < MiniTest::Spec
     setup do
       # Spontaneous::Schema.reset!
 
-      class C < Spontaneous::Piece
+      class C < Piece
         field :photo, :image, :write_level => :root
       end
-      class D < Spontaneous::Piece; end
+      class D < Piece; end
 
-      class SitePage < Spontaneous::Page
+      class SitePage < Page
         # page_style :default
         field :editor_level, :user_level => :editor
           field :admin_level, :user_level => :admin
@@ -178,23 +179,25 @@ class AuthenticationTest < MiniTest::Spec
       Permissions::UserLevel.reset!
       Permissions::UserLevel.stubs(:level_file).returns(File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml')
 
-      @root = SitePage.create
-      @root.save
+      ::Content.scope do
+        @root = SitePage.create
+        @root.save
 
-      @about = SitePage.create(:uid => 'about', :slug => "about")
-      @root.pages << @about
-      piece = C.new
-      @root.boxes[:root_level] << piece
-      piece = C.new
-      @root.boxes[:root_level] << piece
-      @root.save
+        @about = SitePage.create(:uid => 'about', :slug => "about")
+        @root.pages << @about
+        piece = C.new
+        @root.boxes[:root_level] << piece
+        piece = C.new
+        @root.boxes[:root_level] << piece
+        @root.save
 
-      @root_user = create_user('root', Permissions::UserLevel.root)
-      @admin_user = create_user('admin', Permissions::UserLevel.admin)
-      @editor_user = create_user('editor', Permissions::UserLevel.editor)
-      @guest_user = create_user('guest', Permissions::UserLevel.none)
-      @disabled_user = create_user('disabled', Permissions::UserLevel.admin)
-      @disabled_user.update(:disabled => true)
+        @root_user = create_user('root', Permissions::UserLevel.root)
+        @admin_user = create_user('admin', Permissions::UserLevel.admin)
+        @editor_user = create_user('editor', Permissions::UserLevel.editor)
+        @guest_user = create_user('guest', Permissions::UserLevel.none)
+        @disabled_user = create_user('disabled', Permissions::UserLevel.admin)
+        @disabled_user.update(:disabled => true)
+      end
     end
 
     teardown do
@@ -389,7 +392,7 @@ class AuthenticationTest < MiniTest::Spec
 
         should "be able to update root level fields" do
           field = root.fields.root_level
-          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => "Updated"
+          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}]" => "Updated"
           assert last_response.ok?
           root.reload.fields[:root_level].value.should == "Updated"
         end
@@ -410,18 +413,28 @@ class AuthenticationTest < MiniTest::Spec
           clear_cookies
         end
 
-        should "not be able to update root level fields" do
-          value = "Updated #{version}"
-          field = root.fields[:root_level]
-          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
-          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
-          root.reload.fields[:root_level].value.should == @root_copy.root_level.value
-        end
+        # DISABLED: The ui should ensure that forbidden fields don't appear
+        # the async update system simply ignores fields that the user can't
+        # modify (see test_fields.rb).
+        # should "not be able to update root level fields" do
+        #   value = "Updated #{version}"
+        #   field = root.fields[:root_level]
+        #   auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}]" => value
+        #   assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
+        #   root.reload.fields[:root_level].value.should == @root_copy.root_level.value
+        # end
+
+        # should "not be able to update root level fields from admin level box" do
+        #   value = "Updated #{version}"
+        #   field = root.boxes[:admin_level].fields[:root_level]
+        #   auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:admin_level].schema_id}", "field[#{field.schema_id}]" => value
+        #   assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
+        # end
 
         should "be able to update admin level fields" do
           value = "Updated #{version}"
           field = root.fields[:admin_level]
-          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}][unprocessed_value]" => value
+          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}]" => value
           assert last_response.ok?
           root.reload.fields[:admin_level].value.should == value
         end
@@ -445,14 +458,7 @@ class AuthenticationTest < MiniTest::Spec
         should "not be able to update fields from root level box" do
           value = "Updated #{version}"
           field = root.fields[:editor_level]
-          auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
-          assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
-        end
-
-        should "not be able to update root level fields from admin level box" do
-          value = "Updated #{version}"
-          field = root.boxes[:admin_level].fields[:root_level]
-          auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:admin_level].schema_id}", "field[#{field.schema_id}][unprocessed_value]" => value
+          auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}]" => value
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 

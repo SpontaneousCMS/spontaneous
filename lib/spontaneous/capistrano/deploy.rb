@@ -29,7 +29,7 @@ Capistrano::Configuration.instance(:must_exist).load do
     end
 
     task :bundle_assets do
-      run "cd #{release_path} && bundle exec spot assets:compile --destination=#{release_path}"
+      run "cd #{release_path} && ./bin/spot assets compile --destination=#{release_path}"
     end
   end
 

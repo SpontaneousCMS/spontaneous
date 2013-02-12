@@ -23,7 +23,7 @@ class BackTest < MiniTest::Spec
   end
 
   def self.shutdown
-    teardown_site
+    teardown_site(true)
   end
 
   def app
@@ -31,10 +31,15 @@ class BackTest < MiniTest::Spec
   end
 
   def setup
-    @site = setup_site(self.class.site_root)
+    @site = setup_site(self.class.site_root, true)
     Spot::Permissions::UserLevel.reset!
     Spot::Permissions::UserLevel.init!
   end
+
+  def teardown
+    teardown_site(false)
+  end
+
 
 
   def auth_post(path, params={}, env={})
@@ -53,11 +58,14 @@ class BackTest < MiniTest::Spec
       config.stubs(:reload_classes).returns(false)
       config.stubs(:auto_login).returns('root')
       config.stubs(:default_charset).returns('utf-8')
-      config.stubs(:publishing_method).returns(:immediate)
+      config.stubs(:background_mode).returns(:immediate)
+      config.stubs(:publishing_delay).returns(nil)
       config.stubs(:services).returns(nil)
       config.stubs(:site_domain).returns('example.org')
       config.stubs(:site_id).returns('example_org')
       config.stubs(:site_id).returns('example_org')
+      config.stubs(:simultaneous_connection).returns('')
+      config.stubs(:spontaneous_binary).returns('')
       @site.stubs(:config).returns(config)
 
       S::Rack::Back::EditingInterface.set :raise_errors, true
@@ -75,7 +83,7 @@ class BackTest < MiniTest::Spec
       # annoying to have to do this, but there you go
       @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass")
       @user.update(:level => Spontaneous::Permissions[:editor])
-      @user.save
+      @user.save.reload
       @key = "c5AMX3r5kMHX2z9a5ExLKjAmCcnT6PFf22YQxzb4Codj"
       @key.stubs(:user).returns(@user)
       @key.stubs(:key_id).returns(@key)
@@ -86,11 +94,11 @@ class BackTest < MiniTest::Spec
       Spontaneous::Permissions::AccessKey.stubs(:authenticate).with(@key).returns(@key)
       Spontaneous::Permissions::AccessKey.stubs(:valid?).with(@key, @user).returns(true)
 
-      class Page < Spot::Page
+      class Page < Page
         field :title
       end
 
-      class Piece < Spot::Piece; end
+      class Piece < Piece; end
       class Project < Page; end
       class Image < Piece
         field :image, :image
@@ -131,7 +139,6 @@ class BackTest < MiniTest::Spec
         field :private, :user_level => :root
       end
 
-
       @home = HomePage.new(:title => "Home")
       @project1 = Project.new(:title => "Project 1", :slug => "project1")
       @project2 = Project.new(:title => "Project 2", :slug => "project2")
@@ -152,7 +159,6 @@ class BackTest < MiniTest::Spec
 
       @home.save
       @home = Content[@home.id]
-
     end
 
     teardown do
@@ -176,11 +182,11 @@ class BackTest < MiniTest::Spec
         auth_get '/@spontaneous/root'
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal S::JSON.encode(Site.root.export), last_response.body
+        assert_equal S::JSON.encode(S::Site.root.export), last_response.body
       end
 
       should "return json for individual pages" do
-        page = Site.root.children.first
+        page = S::Site.root.children.first
         auth_get "/@spontaneous/page/#{page.id}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
@@ -199,7 +205,7 @@ class BackTest < MiniTest::Spec
         assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
         last_response.content_type.should == "application/json;charset=utf-8"
         result = Spot::JSON.parse(last_response.body)
-        result[:types].stringify_keys.should == Site.schema.export(@user)
+        result[:types].stringify_keys.should == S::Site.schema.export(@user)
       end
 
       should "apply the current user's permissions to the exported schema" do
@@ -227,14 +233,14 @@ class BackTest < MiniTest::Spec
       end
 
       should "return the configured list of service URLs in the metadata" do
-        Site.config.stubs(:services).returns([
+        S::Site.config.stubs(:services).returns([
           {:title => "Google Analytics", :url => "http://google.com/analytics"},
           {:title => "Facebook", :url => "http://facebook.com/spontaneous"}
         ])
         auth_get "/@spontaneous/metadata"
         assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
         result = Spot::JSON.parse(last_response.body)
-        result[:services].should == Site.config.services
+        result[:services].should == S::Site.config.services
       end
 
       should "return scripts from js dir" do
@@ -249,14 +255,14 @@ class BackTest < MiniTest::Spec
         auth_get '/@spontaneous/map'
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal Site.map.to_json, last_response.body
+        assert_equal S::Site.map.to_json, last_response.body
       end
 
       should "return a site map for any page id" do
         auth_get "/@spontaneous/map/#{@home.id}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal Site.map(@home.id).to_json, last_response.body
+        assert_equal S::Site.map(@home.id).to_json, last_response.body
       end
 
       should "return a site map for any url" do
@@ -264,19 +270,19 @@ class BackTest < MiniTest::Spec
         auth_get "/@spontaneous/location#{@project1.path}"
         assert last_response.ok?
         last_response.content_type.should == "application/json;charset=utf-8"
-        assert_equal Site.map(@project1.id).to_json, last_response.body
+        assert_equal S::Site.map(@project1.id).to_json, last_response.body
       end
 
       should "return 404 when asked for map of non-existant page" do
         id = '9999'
-        S::Content.stubs(:[]).with(id).returns(nil)
+        ::Content.stubs(:[]).with(id).returns(nil)
         auth_get "/@spontaneous/map/#{id}"
         assert last_response.status == 404
       end
 
       should "return the correct Last-Modified header for the site map" do
         now = Time.at(Time.now.to_i + 10000)
-        S::Site.stubs(:modified_at).returns(now)
+        Spontaneous::Site.stubs(:modified_at).returns(now)
         auth_get '/@spontaneous/map'
         Time.httpdate(last_response.headers["Last-Modified"]).should == now
         auth_get "/@spontaneous/location#{@project1.path}"
@@ -286,7 +292,7 @@ class BackTest < MiniTest::Spec
       should "reply with a 304 Not Modified if the site hasn't been updated since last request" do
         datestring = "Sat, 03 Mar 2012 00:49:44 GMT"
         now = Time.httpdate(datestring)
-        S::Site.stubs(:modified_at).returns(now)
+        Spontaneous::Site.stubs(:modified_at).returns(now)
         auth_get "/@spontaneous/map/#{@home.id}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
         last_response.status.should == 304
         auth_get "/@spontaneous/map", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
@@ -299,7 +305,7 @@ class BackTest < MiniTest::Spec
         datestring1 = "Sat, 03 Mar 2012 00:49:44 GMT"
         datestring2 = "Sat, 03 Mar 2012 01:49:44 GMT"
         now = Time.httpdate(datestring2)
-        S::Site.stubs(:modified_at).returns(now)
+        Spontaneous::Site.stubs(:modified_at).returns(now)
         auth_get "/@spontaneous/map/#{@home.id}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring1}
         last_response.status.should == 200
         auth_get "/@spontaneous/location#{@project1.path}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring1}
@@ -336,7 +342,7 @@ class BackTest < MiniTest::Spec
 
         should "update content field values" do
           params = {
-            "field[#{@job1.fields.title.schema_id.to_s}][value]" => "Updated field_name_1"
+            "field[#{@job1.fields.title.schema_id.to_s}]" => "Updated field_name_1"
           }
           auth_post "/@spontaneous/save/#{@job1.id}", params
           assert last_response.ok?
@@ -348,8 +354,8 @@ class BackTest < MiniTest::Spec
 
         should "update page field values" do
           params = {
-            "field[#{@home.fields.title.schema_id.to_s}][value]" => "Updated title",
-            "field[#{@home.fields.introduction.schema_id.to_s}][value]" => "Updated intro"
+            "field[#{@home.fields.title.schema_id.to_s}]" => "Updated title",
+            "field[#{@home.fields.introduction.schema_id.to_s}]" => "Updated intro"
           }
           auth_post "/@spontaneous/save/#{@home.id}", params
           assert last_response.ok?
@@ -364,7 +370,7 @@ class BackTest < MiniTest::Spec
           box = @job1.images
           box.fields.title.to_s.should_not == "Updated title"
           params = {
-            "field[#{box.fields.title.schema_id.to_s}][value]" => "Updated title"
+            "field[#{box.fields.title.schema_id.to_s}]" => "Updated title"
           }
           auth_post "/@spontaneous/savebox/#{@job1.id}/#{box.schema_id.to_s}", params
           assert last_response.ok?
@@ -389,6 +395,22 @@ class BackTest < MiniTest::Spec
             sid.to_sym => [ field.version, field.value ]
           }
         end
+
+        should "not generate an error if the pending version of the field matches" do
+          field = @job1.fields.title
+          field.version = 2
+          field.processed_values[:__pending__] = {:value => "something.gif", :version => 3 }
+          @job1.save_fields
+          @job1.reload
+          field = @job1.fields.title
+          field.pending_version.should == 3
+          sid = field.schema_id.to_s
+          params = { "fields" => {sid => "3"} }
+
+          auth_post "/@spontaneous/version/#{@job1.id}", params
+          assert last_response.status == 200, "Should have recieved a 200 OK but instead received a #{last_response.status}"
+        end
+
 
         should "generate an error if there is a field version conflict for boxes" do
           box = @job1.images
@@ -575,7 +597,7 @@ class BackTest < MiniTest::Spec
         #   :src => src,
         #   :version => 1
         # }.to_json
-        File.exist?(Media.to_filepath(src)).should be_true
+        File.exist?(S::Media.to_filepath(src)).should be_true
         get src
         assert last_response.ok?
       end
@@ -593,7 +615,7 @@ class BackTest < MiniTest::Spec
         #   :src => src,
         #   :version => 1
         # }.to_json
-        File.exist?(Media.to_filepath(src)).should be_true
+        File.exist?(S::Media.to_filepath(src)).should be_true
         get src
         assert last_response.ok?
       end
@@ -729,9 +751,9 @@ class BackTest < MiniTest::Spec
     end
     context "UIDs" do
       setup do
+        Spontaneous.stubs(:reload!)
         # editing UIDs is a developer only activity
         @user.update(:level => Spontaneous::Permissions[:root])
-        @user.save
       end
 
       should "be editable" do
@@ -744,7 +766,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "not be editable by non-developer users" do
-        @user.stubs(:developer?).returns(false)
+        @user.update(:level => Spontaneous::Permissions[:editor])
         uid = "boom"
         orig = @project1.uid
         @project1.uid.should_not == uid
@@ -752,12 +774,6 @@ class BackTest < MiniTest::Spec
         assert last_response.status == 403
         @project1.reload.uid.should == orig
       end
-    end
-    context "Request cache" do
-      setup do
-        Spontaneous.stubs(:reload!)
-      end
-
     end
 
     context "Publishing" do
@@ -775,17 +791,17 @@ class BackTest < MiniTest::Spec
         auth_get "/@spontaneous/publish/changes"
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
         last_response.content_type.should == "application/json;charset=utf-8"
-        last_response.body.should == Change.serialise_http
+        last_response.body.should == S::Change.serialise_http
       end
 
       should "be able to start a publish with a set of change sets" do
-        Site.expects(:publish_pages).with([@project1.id])
+        S::Site.expects(:publish_pages).with([@project1.id])
         auth_post "/@spontaneous/publish/publish", :page_ids => [@project1.id]
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
 
       should "not launch publish if list of changes is empty" do
-        Site.expects(:publish_pages).with().never
+        S::Site.expects(:publish_pages).with().never
         auth_post "/@spontaneous/publish/publish", :change_set_ids => ""
         assert last_response.status == 400, "Expected 400, recieved #{last_response.status}"
 
@@ -793,7 +809,7 @@ class BackTest < MiniTest::Spec
         assert last_response.status == 400
       end
       should "recognise when the list of changes is complete" do
-        Site.expects(:publish_pages).with([@home.id, @project1.id])
+        S::Site.expects(:publish_pages).with([@home.id, @project1.id])
         auth_post "/@spontaneous/publish/publish", :page_ids => [@home.id, @project1.id]
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
@@ -802,7 +818,7 @@ class BackTest < MiniTest::Spec
     context "New sites" do
       setup do
         Spontaneous.stubs(:reload!)
-        @root_class = Site.root.class
+        @root_class = S::Site.root.class
         Content.delete
       end
       should "raise a 406 Not Acceptable error when downloading page details" do
@@ -812,8 +828,8 @@ class BackTest < MiniTest::Spec
       should "create a homepage of the specified type" do
         auth_post "/@spontaneous/root", 'type' => @root_class.schema_id
         assert last_response.ok?
-        Site.root.must_be_instance_of(@root_class)
-        Site.root.title.value.should =~ /Home/
+        S::Site.root.must_be_instance_of(@root_class)
+        S::Site.root.title.value.should =~ /Home/
       end
       should "only create one root" do
         auth_post "/@spontaneous/root", 'type' => @root_class.schema_id
@@ -1070,11 +1086,9 @@ class BackTest < MiniTest::Spec
         end
         @image1.image.processed_value.should == ""
         dataset = mock()
-        S::Content.stubs(:for_update).returns(dataset)
-        dataset.stubs(:first).with(:id => @image1.id.to_s).returns(@image1)
-        dataset.stubs(:first).with(:id => @image1.id).returns(@image1)
-        # S::Content.stubs(:[]).with(@image1.id.to_s).returns(@image1)
-        # S::Content.stubs(:[]).with(@image1.id).returns(@image1)
+        ::Content.stubs(:for_update).returns(dataset)
+        dataset.stubs(:get).with(@image1.id.to_s).returns(@image1)
+        dataset.stubs(:get).with(@image1.id).returns(@image1)
         auth_post "/@spontaneous/shard/replace/#{@image1.id}", "filename" => "rose.jpg",
           "shards" => hashes, "field" => @image1.image.schema_id.to_s
         assert last_response.ok?
@@ -1083,8 +1097,9 @@ class BackTest < MiniTest::Spec
         src = @image1.image.src
         src.should =~ %r{^(.+)/rose\.jpg$}
         Spot::JSON.parse(last_response.body).should == @image1.image.export
-        File.exist?(Media.to_filepath(src)).should be_true
-        S::Media.digest(Media.to_filepath(src)).should == @image_digest
+        File.exist?(S::Media.to_filepath(src)).should be_true
+        S::Media.digest(S::Media.to_filepath(src)).should == @image_digest
+
       end
 
       should "be able to wrap pieces around files using default addable class" do
@@ -1163,6 +1178,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "be able to provide a dynamic value list" do
+        @job1.reload
         list = mock()
         options = [["a", "Value A"], ["b", "Value B"]]
         list.expects(:values).with(@job1).returns(options)
@@ -1174,6 +1190,7 @@ class BackTest < MiniTest::Spec
       end
 
       should "be able to provide a dynamic value list for a box field" do
+        @job1.reload
         list = mock()
         options = [["a", "Value A"], ["b", "Value B"]]
         list.expects(:values).with(@job1.images).returns(options)

@@ -19,13 +19,18 @@ class FrontTest < MiniTest::Spec
   end
 
   def self.shutdown
-    teardown_site
+    teardown_site(true)
     Spontaneous::Output.write_compiled_scripts = false
   end
 
   def setup
     @site = setup_site(self.class.site_root)
-    Site.publishing_method = :immediate
+    Site.background_mode = :immediate
+    ::Content.delete
+  end
+
+  def teardown
+    teardown_site(false)
   end
 
   def app
@@ -68,11 +73,10 @@ class FrontTest < MiniTest::Spec
     setup do
 
 
-      Site.publishing_method = :immediate
-      State.delete
-      Content.delete
+      S::Site.background_mode = :immediate
+      S::State.delete
 
-      class ::SitePage < Spontaneous::Page
+      class ::SitePage < ::Page
         layout :default
         layout :dynamic
         box :pages
@@ -94,22 +98,24 @@ class FrontTest < MiniTest::Spec
       # @site.stubs(:template_root).returns(File.expand_path("../../fixtures/public/templates", __FILE__))
       # self.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
 
-      @root = ::SitePage.create
-      @about = ::SitePage.create(:slug => "about", :uid => "about")
-      @sub = ::SubPage.create(:slug => "now", :uid => "now")
-      @news = ::SitePage.create(:slug => "news", :uid => "news")
-      @dynamic = ::SitePage.create(:slug => "dynamic", :uid => "dynamic")
-      @dynamic.layout = :dynamic
-      @root.pages << @about
-      @root.pages << @news
-      @root.pages << @dynamic
-      @about.pages << @sub
-      @root.save
+      ::Content.scope do
+        @root = ::SitePage.create
+        @about = ::SitePage.create(:slug => "about", :uid => "about")
+        @sub = ::SubPage.create(:slug => "now", :uid => "now")
+        @news = ::SitePage.create(:slug => "news", :uid => "news")
+        @dynamic = ::SitePage.create(:slug => "dynamic", :uid => "dynamic")
+        @dynamic.layout = :dynamic
+        @root.pages << @about
+        @root.pages << @news
+        @root.pages << @dynamic
+        @about.pages << @sub
+        @root.save
+      end
 
       Content.delete_revision(1) rescue nil
 
       Spontaneous.logger.silent! {
-        Site.publish_all
+        S::Site.publish_all
       }
     end
 
@@ -117,7 +123,7 @@ class FrontTest < MiniTest::Spec
       Object.send(:remove_const, :SitePage) rescue nil
       Object.send(:remove_const, :SubPage) rescue nil
       Content.delete
-      State.delete
+      S::State.delete
       Content.delete_revision(1)
     end
 
@@ -184,8 +190,8 @@ class FrontTest < MiniTest::Spec
 
     context "Dynamic pages" do
       setup do
-        Spontaneous::Page.stubs(:path).with("/about").returns(about)
-        Spontaneous::Page.stubs(:path).with("/news").returns(news)
+        Content::Page.stubs(:path).with("/about").returns(about)
+        Content::Page.stubs(:path).with("/news").returns(news)
       end
 
       should "default to static behaviour" do
@@ -404,6 +410,7 @@ class FrontTest < MiniTest::Spec
         setup do
           Spontaneous::Output.cache_templates = true
           @cache_file = "#{Spontaneous.revision_dir(1)}/dynamic/dynamic.html.rb"
+          FileUtils.rm(@cache_file) if File.exist?(@cache_file)
           Spontaneous::Output.write_compiled_scripts = true
         end
 
@@ -411,11 +418,10 @@ class FrontTest < MiniTest::Spec
           Spontaneous::Output.cache_templates = true
         end
 
-        should "use pre-rendered versions of the templates" do
+        should "use pre-rendered versions of the templates xxx" do
           dummy_content = 'cached-version/#{session[\'user_id\']}'
           dummy_template = File.join(@site.revision_root, "current/dynamic/dynamic.html.cut")
           File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
-          # Spontaneous::Render.stubs(:output_path).returns(dummy_template)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           last_response.body.should == "cached-version/42"
         end
@@ -435,12 +441,10 @@ class FrontTest < MiniTest::Spec
           File.utime(Time.now, Time.now + 1, @cache_file)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           last_response.body.should == "@cache_filed-version/peter"
-          FileUtils.rm(@cache_file)
         end
 
         should "not cache templates if caching turned off" do
           Spontaneous::Output.cache_templates = false
-          FileUtils.rm(@cache_file) if File.exists?(@cache_file)
           File.exists?(@cache_file).should be_false
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           File.exists?(@cache_file).should be_false
@@ -450,7 +454,7 @@ class FrontTest < MiniTest::Spec
 
     context "Model controllers" do
       setup do
-        class ::TestController < Spontaneous::PageController
+        class ::TestController < Spontaneous::Rack::PageController
           get '/' do
             "Magic"
           end
@@ -488,9 +492,9 @@ class FrontTest < MiniTest::Spec
           end
         end
 
-        Page.stubs(:path).with("/").returns(root)
-        Page.stubs(:path).with("/about").returns(about)
-        Page.stubs(:path).with("/about/now").returns(subpage)
+        Content.stubs(:path).with("/").returns(root)
+        Content.stubs(:path).with("/about").returns(about)
+        Content.stubs(:path).with("/about/now").returns(subpage)
       end
 
       teardown do
@@ -597,7 +601,7 @@ class FrontTest < MiniTest::Spec
 
       context "overriding base controller class" do
         setup do
-          class ::PageController < S::PageController
+          class ::PageController < S::Rack::PageController
             get '/nothing' do
               'Something'
             end

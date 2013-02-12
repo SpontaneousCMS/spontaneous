@@ -8,12 +8,11 @@ module Spontaneous
     end
 
 
-    @@instance = nil
-
     class << self
 
       def instance
-        return @@instance if @@instance
+        current = Thread.current[:spontaneous_state_instance]
+        return current if current
         unless instance = self.first
           instance = State.create(:revision => 1, :published_revision => 0)
         end
@@ -21,11 +20,11 @@ module Spontaneous
       end
 
       # def with_cache(&block)
-      #   yield if @@instance
-      #   @@instance = self.instance
+      #   yield if Thread.current[:spontaneous_state_instance]
+      #   Thread.current[:spontaneous_state_instance] = self.instance
       #   yield
       # ensure
-      #   @@instance = nil
+      #   Thread.current[:spontaneous_state_instance] = nil
       # end
 
       def working_revision

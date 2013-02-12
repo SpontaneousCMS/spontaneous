@@ -16,7 +16,7 @@ module Spontaneous
         load_map
       end
 
-      def schema_id(obj)
+      def to_id(obj)
         reference_to_id(obj.schema_name)
       end
 
@@ -24,7 +24,7 @@ module Spontaneous
         uids.get_id(reference)
       end
 
-      def [](id)
+      def to_class(id)
         if uid = uids[id]
           uid.target
         else
@@ -33,16 +33,23 @@ module Spontaneous
       end
 
       def load_map
-        if exists?
-          map = YAML.load_file(@path)
+        if exists? && (map = parse_map)
           map.each do | uid, reference |
             uids.load(uid, reference)
           end
         end
       end
 
+      def parse_map
+        YAML.load_file(@path)
+      end
+
       def exists?
         ::File.exists?(@path)
+      end
+
+      def valid?
+        exists? && parse_map.is_a?(Hash)
       end
 
       # def invert_map
@@ -71,7 +78,7 @@ module Spontaneous
         @uids = uids
       end
 
-      def schema_id(obj)
+      def to_id(obj)
         if id = super
           id
         else
@@ -86,14 +93,24 @@ module Spontaneous
       def exists?
         true
       end
+
+      def valid?
+        true
+      end
+    end
+
+    def self.new(root, schema_loader_class = Spontaneous::Schema::PersistentMap)
+      Schema.new(root, schema_loader_class)
     end
 
     class Schema
-      attr_reader :schema_loader_class, :uids
+      attr_accessor :schema_loader_class
+      attr_reader   :uids
 
       def initialize(root, schema_loader_class = Spontaneous::Schema::PersistentMap)
         @root = root
         @schema_loader_class = schema_loader_class
+        @subclass_map = Hash.new { |h, k| h[k] = [] }
         initialize_uid_map
       end
 
@@ -112,7 +129,8 @@ module Spontaneous
           changes = e.modification
           # if the map file is missing, then this is a first run and we can just
           # create the thing by populating it with the current schema
-          if !map.exists?
+
+          if !map.valid?
             logger.warn("Generating new schema")
             generate_new_schema
           else
@@ -238,38 +256,53 @@ module Spontaneous
         Spontaneous.serialise_http(export(user))
       end
 
-      # all classes including boxes
-      def classes
+      def unfiltered_classes
         @classes ||= []
       end
 
-      def add_class(supertype, type)
+      # all classes including boxes
+      def classes
+        unfiltered_classes.reject { |c| is_excluded_type?(c) }
+      end
+
+      def inherited(supertype, type)
         inheritance_map[supertype.to_s] << type
-        classes << type unless classes.include?(type)
+        unfiltered_classes << type
+      end
+
+      def is_excluded_type?(type)
+        excluded_types.include?(type)
+      end
+
+      def excluded_types
+        [Spontaneous::Content, Spontaneous::Content::Page, Spontaneous::Content::Piece]
       end
 
       def inheritance_map
-        @inheritance_map ||= Hash.new { |h, k| h[k] = [] }
+        @inheritance_map ||= empty_inheritance_map
       end
 
+      def empty_inheritance_map
+        Hash.new { |h, k| h[k] = [] }
+      end
 
       def subclasses_of(type)
         inheritance_map[type.to_s].map { |subclass| subclass }
       end
 
       def descendents_of(type)
-        subclasses_of(type).map{ |x| [x] + descendents_of(x) }.flatten
+        subclasses_of(type).flat_map{ |x| [x] + descendents_of(x) }
       end
+
+      alias_method :subclasses, :descendents_of
 
       # just subclasses of Content (excluding boxes)
       # only need this for the serialisation (which doesn't include boxes)
+      #
+      # TODO: Find a way to filter out the top-level classes without hard-coding
+      # them here.
       def content_classes
-        classes = []
-        self.classes.reject { |k| k.is_box? }.each do |klass|
-          classes << klass unless [Spontaneous::Page, Spontaneous::Piece].include?(klass)
-          # recurse_classes(klass, classes)
-        end
-        classes.uniq
+        classes.reject { |k| k.is_box? }.uniq
       end
 
       def recurse_classes(root_class, list)
@@ -279,16 +312,14 @@ module Spontaneous
         end
       end
 
-      # should only be used in tests
       def reset!
-        Content.schema_reset!
-        @classes = []
+        @classes         = []
         @inheritance_map = nil
         reload!
       end
 
       def reload!
-        @map = nil
+        @map             = nil
         initialize_uid_map
       end
 
@@ -314,13 +345,21 @@ module Spontaneous
         @map ||= self.schema_loader_class.new(@uids, schema_map_file)
       end
 
-      def schema_id(obj)
-        map.schema_id(obj)
+      def to_id(obj)
+        map.to_id(obj)
       end
 
-      def [](schema_id)
-        map[schema_id]
+      # def schema_id(obj)
+      #   map.to_id(obj)
+      # end
+
+      def to_class(id)
+        map.to_class(id)
       end
+
+      # def [](schema_id)
+      #   map[schema_id]
+      # end
 
       def groups
         @groups ||= Hash.new { |h, k| h[k] = [] }

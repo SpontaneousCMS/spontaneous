@@ -12,7 +12,7 @@ module Spontaneous
       def call(env)
         env[Rack::RENDERER] = @renderer
         response = nil
-        Content.with_identity_map do
+        Spontaneous::Content.scope(nil, true) do
           response = @app.call(env)
         end
         response

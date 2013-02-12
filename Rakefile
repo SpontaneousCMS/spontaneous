@@ -121,6 +121,12 @@ namespace :test do
     test.pattern = 'test/javascript/**/test_*.rb'
     test.verbose = true
   end
+  Rake::TestTask.new(:integration) do |test|
+    test.libs << 'test'
+    test.ruby_opts << '-rubygems'
+    test.pattern = 'test/integration/**/test_*.rb'
+    test.verbose = true
+  end
 end
 
 
@@ -218,44 +224,6 @@ namespace :gem do
     # File.open(gemspec_file, 'w') { |io| io.write(spec) }
     puts "Updated #{gemspec_file}"
     FileUtils.cp(gemspec_file, @project_dir)
-  end
-
-  desc "Bundle & compress assets"
-  task :assets => :working_copy do
-    app_dir = Spontaneous.application_dir
-    bundles = {}
-    [Spontaneous::Rack::Assets::JavaScript, Spontaneous::Rack::Assets::CSS].each do |mod|
-      mod.constants.map { |const| [const, mod.const_get(const)] }.each do |constant, files|
-        source, hash = mod.compress(files)
-        if source
-          source.force_encoding("UTF-8")
-          bundle_url = "min" / "#{hash}"
-          bundle_path = File.join(app_dir, mod.filetype, "#{bundle_url}.#{mod.filetype}")
-          FileUtils.mkdir_p(File.dirname(bundle_path))
-          File.open(bundle_path, 'w', :internal_encoding => Encoding::UTF_8, :external_encoding => Encoding::UTF_8) { |bundle| bundle.write(source) }
-          bundles[constant] = bundle_url
-        end
-      end
-    end
-    module_path = 'lib/spontaneous/rack/assets.rb'
-    module_src = File.read(module_path)
-    converted = []
-    module_src.lines.each do |line|
-      bundles.each do |constant, url|
-        line = "#{$1}%w(#{url})\n" if line =~ %r[^( *#{constant}\s*=\s*)(.+)$]
-      end
-      converted << line
-    end
-    File.open(module_path, 'w') { |file| file.write(converted.join) }
-
-    module_path = 'lib/spontaneous/version.rb'
-    module_src = File.read(module_path)
-    converted = []
-    module_src.lines.each do |line|
-      line = "#{$1}true\n" if line =~ /^(\s*GEM\s*=\s*)(.+)$/
-      converted << line
-    end
-    File.open(module_path, 'w') { |file| file.write(converted.join) }
   end
 
   task :working_copy => :validate do

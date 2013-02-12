@@ -4,7 +4,7 @@ require 'cutaneous'
 
 module Spontaneous::Plugins::Application
   module Render
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       attr_accessor :render_engine

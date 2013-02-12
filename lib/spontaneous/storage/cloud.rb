@@ -5,6 +5,9 @@ require 'tempfile'
 
 module Spontaneous::Storage
   class Cloud < Backend
+    # Thanks thoughtbot (via paperclip)
+    # http://rdoc.info/github/thoughtbot/paperclip/Paperclip/Storage/Fog
+    AWS_BUCKET_SUBDOMAIN_RESTRICTON_REGEX = /^(?:[a-z]|\d(?!\d{0,2}(?:\.\d{1,3}){3}$))(?:[a-z0-9]|\.(?![\.\-])|\-(?![\.])){1,61}[a-z0-9]$/
     #  bucket_name = "media.kitmonsters.com"
     #  connection = Fog::Storage.new({
     #     :provider=>"AWS",
@@ -97,7 +100,23 @@ module Spontaneous::Storage
       if @public_host
         "#{@public_host}/#{join_path(path)}"
       else
-        bucket.files.new(:key => join_path(path)).public_url
+        if @config[:provider] == "AWS"
+          public_url_aws(path)
+        else
+          bucket.files.new(:key => join_path(path)).public_url
+        end
+      end
+    end
+
+    # AWS Redirects to the bucketname.s3.amazonaws.com style of public URL
+    # if you use the s3.amazonaws.com/bucketname/ style so to avoid a lot of
+    # slow redirects when loading a page's media we use the fastest available
+    # version
+    def public_url_aws(path)
+      if bucket_name =~ AWS_BUCKET_SUBDOMAIN_RESTRICTON_REGEX
+        "https://#{bucket_name}.s3.amazonaws.com/#{join_path(path)}"
+      else
+        "https://s3.amazonaws.com/#{bucket_name}/#{join_path(path)}"
       end
     end
 

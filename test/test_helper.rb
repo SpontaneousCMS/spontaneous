@@ -49,7 +49,7 @@ require 'rack/test'
 require 'matchy'
 require 'shoulda'
 require 'timecop'
-require 'mocha'
+require 'mocha/setup'
 require 'pp'
 require 'tmpdir'
 require 'json'
@@ -80,7 +80,7 @@ class MiniTestWithHooks < MiniTest::Unit
 
   def _run_suites(suites, type)
     names = suites.reject { |s| exclude?(s) }.map { |s| s.to_s.gsub(/Test$/, '') }
-    @max_name_length = names.inject(-1) { |max, name| [name.length, max].max }
+    @max_name_length = names.map(&:length).max
     begin
       before_suites
       super(suites, type)
@@ -119,23 +119,42 @@ def silence_logger(&block)
 end
 
 class MiniTest::Spec
-  include Spontaneous
   include CustomMatchers
 
   attr_accessor :template_root
   alias :silence_stdout :silence_logger
 
-  def self.setup_site(root = nil)
+  def self.setup_site(root = nil, define_models = true)
     root ||= Dir.mktmpdir
     instance = Spontaneous::Site.instantiate(root, :test, :back)
     instance.schema_loader_class = Spontaneous::Schema::TransientMap
     instance.logger.silent!
     instance.database = DB
+    Spontaneous::Site.background_mode = :immediate
+    unless Object.const_defined?(:Content)
+      content_class = Class.new(Spontaneous::Model(:content, DB, instance.schema))
+      Object.const_set :Content, content_class
+      if define_models
+        Object.const_set :Page, Class.new(::Content::Page)
+        Object.const_set :Piece, Class.new(::Content::Piece)
+        Object.const_set :Box, Class.new(::Content::Box)
+      end
+    end
+    Object.const_set :Site,  Spontaneous.site!(::Content)
+    # Use the fast version of the password hashing algorithm
+    Spontaneous::Crypt.force_version(0)
     instance
   end
 
-  def self.teardown_site
-    FileUtils.rm_r(Spontaneous.instance.root) rescue nil
+  def self.teardown_site(clear_disk = true, clear_const = true)
+    if clear_disk
+      FileUtils.rm_r(Spontaneous.instance.root) rescue nil
+    end
+    return unless clear_const
+    %w(Piece Page Box Content Site).each do |klass|
+      Object.send :remove_const, klass if Object.const_defined?(klass)
+    end
+    Spontaneous.send :remove_const, :Content rescue nil
   end
 
   def self.stub_time(time)
@@ -146,9 +165,9 @@ class MiniTest::Spec
     self.class.stub_time(time)
   end
 
-  def assert_content_equal(result, compare)
+  def assert_content_equal(result, compare, *ignore_columns)
     serialised_columns = [:field_store, :entry_store]
-    columns = Content.columns - serialised_columns
+    columns = Content.columns - serialised_columns - ignore_columns
     columns.each do |col|
       assert_equal(result[col], compare[col], "Column '#{col}' should be equal")
     end
@@ -157,19 +176,33 @@ class MiniTest::Spec
     end
   end
 
-  def log_sql(&block)
-    logger = S::Content.db.logger
-    S::Content.db.logger = ::Logger.new($stdout)
-    yield
-  ensure
-    S::Content.db.logger = logger
-  end
-  def setup_site(root = nil)
-    self.class.setup_site(root)
+  def assert_content_unequal(result, compare, *ignore_columns)
+    serialised_columns = [:field_store, :entry_store]
+    columns = Content.columns - serialised_columns - ignore_columns
+    columns.each do |col|
+      return true unless result[col] == compare[col]
+    end
+    serialised_columns.each do |col|
+      return true unless result.send(col) == compare.send(col)
+    end
+    flunk("#{result} & #{compare} are equal")
   end
 
-  def teardown_site
-    self.class.teardown_site
+
+  def log_sql(&block)
+    logger = ::Content.mapper.logger
+    ::Content.mapper.logger = ::Logger.new($stdout)
+    yield
+  ensure
+    ::Content.mapper.logger = logger
+  end
+
+  def setup_site(root = nil, define_models = true)
+    self.class.setup_site(root, define_models)
+  end
+
+  def teardown_site(clear_disk = true, clear_const = true)
+    self.class.teardown_site(clear_disk, clear_const)
   end
 
   def assert_correct_template(content, expected_path, format = :html)

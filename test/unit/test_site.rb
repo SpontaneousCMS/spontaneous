@@ -4,7 +4,6 @@ require File.expand_path('../../test_helper', __FILE__)
 
 
 class SiteTest < MiniTest::Spec
-  include Spontaneous
 
   def setup
     @site = setup_site
@@ -17,16 +16,8 @@ class SiteTest < MiniTest::Spec
   context "Site" do
     setup do
       Content.delete
-      class ::Page < Spontaneous::Page
-        field :title
-        box :subpages
-      end
-      class ::Piece < Spontaneous::Piece; end
-    end
-
-    teardown do
-      Object.send(:remove_const, :Page)
-      Object.send(:remove_const, :Piece)
+      Page.field :title
+      Page.box   :subpages
     end
 
     context "contents" do
@@ -170,7 +161,7 @@ class SiteTest < MiniTest::Spec
 
     context "Structure modification times" do
       setup do
-        State.delete
+        S::State.delete
         # remove microseconds from time value
         @now = Time.at(Time.now.to_i)
       end

@@ -8,20 +8,27 @@ module Spontaneous::Permissions
 
     one_to_one   :group,        :class => :'Spontaneous::Permissions::AccessGroup'
     many_to_many :groups,       :class => :'Spontaneous::Permissions::AccessGroup', :join_table => :spontaneous_groups_users
-    one_to_many  :access_keys,  :class => :'Spontaneous::Permissions::AccessKey'
+    one_to_many  :access_keys,  :class => :'Spontaneous::Permissions::AccessKey', :reciprocal => :user
 
-    set_restricted_columns(:crypted_password, :salt)
+    set_restricted_columns(:crypted_password)
 
     def_delegators :group, :level, :access_selector
 
-    def self.encrypt_password(clear_password, salt)
-      Digest::SHA1.hexdigest("--#{salt}--#{clear_password}--")
+    def self.login(login)
+      login_dataset.call(:login => login).first
+    end
+
+    def self.login_dataset
+      @login_dataset ||= self.where(:login => :$login).
+        eager_graph(:access_keys).
+        prepare(:select, :select_user_by_login)
     end
 
     def self.authenticate(login, clear_password, ip_address = nil)
-      if user = self[:login => login, :disabled => false]
-        crypted_password = user.encrypt_password(clear_password)
-        if crypted_password == user.crypted_password
+      if (user = self[:login => login, :disabled => false])
+        authenticator = Spontaneous::Crypt.new(clear_password, user.crypted_password)
+        if authenticator.valid?
+          user.upgrade_authentication(authenticator) if authenticator.outdated?
           access_key = user.logged_in!(ip_address)
           return access_key
         end
@@ -91,11 +98,14 @@ module Spontaneous::Permissions
     end
 
     def encrypt_password(clear_password)
-      self.class.encrypt_password(clear_password, salt)
+      Spontaneous::Crypt.hash(clear_password)
+    end
+
+    def upgrade_authentication(auth)
+      update_all :crypted_password => auth.upgrade
     end
 
     def before_save
-      self.salt = Spontaneous::Permissions.random_string(32) if salt.blank?
       self.crypted_password = encrypt_password(password) unless password.blank?
       clear_access_keys! if disabled?
       super

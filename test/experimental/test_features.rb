@@ -9,9 +9,9 @@ class FeaturesTest < MiniTest::Spec
 
   def self.startup
     # make sure that S::Piece & S::Page are removed from the schema
-    @site = setup_site
-    *ids = S::Page.schema_id, S::Piece.schema_id
-    Object.const_set(:Site, Class.new(S::Site))
+    # @site = setup_site
+    # *ids = ::Page.schema_id, ::Piece.schema_id
+    # Object.const_set(:Site, Class.new(S::Site))
   end
 
   def setup

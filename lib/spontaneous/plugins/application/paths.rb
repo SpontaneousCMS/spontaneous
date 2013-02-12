@@ -2,7 +2,7 @@
 
 module Spontaneous::Plugins::Application
   module Paths
-    extend ActiveSupport::Concern
+    extend Spontaneous::Concern
 
     module ClassMethods
       def load_paths

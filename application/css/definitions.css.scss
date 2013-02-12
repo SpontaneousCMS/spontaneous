@@ -85,6 +85,11 @@ $target-name-size: 14px;
   -moz-border-radius: 0 $radius $radius 0;
   border-radius: 0 $radius $radius 0; }
 
+@mixin rounded-left($radius: $corner-radius) {
+  -webkit-border-radius: $radius 0 0 $radius;
+  -moz-border-radius: $radius 0 0 $radius;
+  border-radius: $radius 0 0 $radius; }
+
 .shadow {
   -webkit-box-shadow: 0px 3px 30px #cccccc;
   -moz-box-shadow: 0px 3px 30px #cccccc; }

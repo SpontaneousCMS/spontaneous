@@ -5,7 +5,7 @@ require File.expand_path('../../test_helper', __FILE__)
 require 'fog'
 
 class ImagesTest < MiniTest::Spec
-  include Spontaneous
+
   def setup
     @site = setup_site
   end
@@ -16,7 +16,7 @@ class ImagesTest < MiniTest::Spec
 
   context "Image fields set using absolute values" do
     setup do
-      @image = FieldTypes::ImageField.new(:name => "image")
+      @image = S::Field::Image.new(:name => "image")
     end
     should "accept and not alter URL values" do
       url =  "http://example.com/image.png"
@@ -44,15 +44,14 @@ class ImagesTest < MiniTest::Spec
       @upload_dir.mkpath
 
       @revision = 10
-      Site.stubs(:working_revision).returns(@revision)
+      S::Site.stubs(:working_revision).returns(@revision)
 
       @src_image =  Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg")).realpath
       @origin_image = @upload_dir + "rose.jpg"
-      # @origin_image.make_link(@src_image.to_s) unless @origin_image.exist?
       FileUtils.cp(@src_image.to_s, @origin_image.to_s)
       @origin_image = @origin_image.realpath.to_s
 
-      class ::ResizingImageField < FieldTypes::ImageField
+      class ::ResizingImageField < S::Field::Image
         size :preview do
           width 200
           optimize!
@@ -78,7 +77,7 @@ class ImagesTest < MiniTest::Spec
 
       ResizingImageField.register
 
-      class ::ContentWithImage < Content
+      class ::ContentWithImage < ::Content::Piece
         field :photo, :resizing_image
       end
 
@@ -103,11 +102,11 @@ class ImagesTest < MiniTest::Spec
       end
 
       should "create resized versions of the input image" do
-        ImageSize.read(@image.preview.filepath).should == [200, 267]
-        ImageSize.read(@image.tall.filepath).should == [150, 200]
-        ImageSize.read(@image.thumbnail.filepath).should == [38, 50]
-        ImageSize.read(@image.icon.filepath).should == [50, 50]
-        ImageSize.read(@image.greyscale.filepath).should == [38, 50]
+        S::ImageSize.read(@image.preview.filepath).should == [200, 267]
+        S::ImageSize.read(@image.tall.filepath).should == [150, 200]
+        S::ImageSize.read(@image.thumbnail.filepath).should == [38, 50]
+        S::ImageSize.read(@image.icon.filepath).should == [50, 50]
+        S::ImageSize.read(@image.greyscale.filepath).should == [38, 50]
       end
 
       should "preserve new format if processing has altered it" do
@@ -115,7 +114,7 @@ class ImagesTest < MiniTest::Spec
       end
     end
 
-    context "with optimization xxx" do
+    context "with optimization" do
       should "run jpegoptim" do
         Spontaneous.expects(:system).with(regexp_matches(/jpegoptim/)).at_least_once
         Spontaneous.expects(:system).with(regexp_matches(/jpegtran/)).at_least_once
@@ -177,7 +176,7 @@ class ImagesTest < MiniTest::Spec
         @image.height.should == 533
       end
 
-      should "have access to the original uploaded file through field.original" do
+      should "have access to the original uploaded file through field.original xxx" do
         @image.src.should == "/media/00234/0010/rose.jpg"
         @image.original.width.should == @image.width
         @image.original.height.should == @image.height
@@ -187,11 +186,11 @@ class ImagesTest < MiniTest::Spec
 
 
       should "have a 'sizes' config option that generates resized versions" do
-        assert_same_elements ResizingImageField.size_definitions.keys, [:preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
+        assert_same_elements ResizingImageField.size_definitions.keys, [:__ui__, :preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
       end
 
       should "serialise attributes" do
-        serialised = S::FieldTypes.deserialize_field(@image.serialize_db)[:processed_values]
+        serialised = S::Field.deserialize_field(@image.serialize_db)[:processed_values]
         [:preview, :thumbnail, :icon, :tall].each do |size|
           serialised.key?(size).should be_true
           serialised[size][:src].should == "/media/00234/0010/rose.#{size}.jpg"
@@ -232,12 +231,12 @@ class ImagesTest < MiniTest::Spec
         @image.original.filesize.should == @image.filesize
       end
       should "have a 'sizes' config option that generates resized versions" do
-        assert_same_elements @image.class.size_definitions.keys, [:preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
-        assert_same_elements @image.class.sizes.keys, [:preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
+        assert_same_elements @image.class.size_definitions.keys, [:__ui__, :preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
+        assert_same_elements @image.class.sizes.keys, [:__ui__, :preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
       end
 
       should "serialise attributes" do
-        serialised = S::FieldTypes.deserialize_field(@image.serialize_db)[:processed_values]
+        serialised = S::Field.deserialize_field(@image.serialize_db)[:processed_values]
         [:preview, :thumbnail, :icon, :tall].each do |size|
           serialised.key?(size).should be_true
           serialised[size][:src].should == "/media/00234/0010/rose.#{size}.jpg"

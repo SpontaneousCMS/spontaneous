@@ -101,7 +101,7 @@ Spontaneous.Content = (function($, S) {
 							"type:", "'"+type.title+"'",
 							"field_name:", f.name
 						);
-						type_class = Spontaneous.FieldTypes.StringField;
+						type_class = Spontaneous.Field.String;
 					}
 					var field = new type_class(this, f);
 					// field.watch('value', this.field_updated.bind(this, field));

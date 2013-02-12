@@ -14,7 +14,7 @@ module Spontaneous::Prototypes
 
       # if the type is nil then try the name, this will assign sensible defaults
       # to fields like 'image' or 'date'
-      @base_class = Spontaneous::FieldTypes[type || name]
+      @base_class = Spontaneous::Field[type || name]
 
       owner.const_set("#{name.to_s.camelize}Field", instance_class)
 
@@ -25,11 +25,8 @@ module Spontaneous::Prototypes
       "field/#{owner.schema_id}/#{name}"
     end
 
-    # def schema_id
-    #   Spontaneous.schema.schema_id(self)
-    # end
     def schema_id
-      Spontaneous.schema.uids[@_inherited_schema_id] || Spontaneous.schema.schema_id(self)
+      Spontaneous.schema.uids[@_inherited_schema_id] || Spontaneous.schema.to_id(self)
     end
 
     def schema_owner
@@ -145,7 +142,7 @@ module Spontaneous::Prototypes
       values = { :name => self.name }
       values[:unprocessed_value] = default(instance) if using_default_values
       values.update(database_values || {})
-      self.instance_class.new(values, !using_default_values).tap do |field|
+      self.instance_class.new(values, using_default_values).tap do |field|
         field.prototype = self
       end
     end

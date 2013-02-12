@@ -42,9 +42,9 @@ class AssetBundler < MiniTest::Spec
       compiled_js_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.js"].first
       js = File.read(compiled_js_path)
       # hard to test because we don't know exactly what the uglifier is going to do
-      js.should =~ /var a;a="yes"/
-      js.should =~ /var a;a="#{Date.today.day}"/
-      js.should =~ /var a;a="subdir\/#{Date.today.day}"/
+      js.should =~ /var (\w);\1="yes"/
+      js.should =~ /var (\w);\1="#{Date.today.day}"/
+      js.should =~ /var (\w);\1="subdir\/#{Date.today.day}"/
     end
 
     should "compile CSS into any destination directory" do
@@ -74,7 +74,7 @@ class AssetBundler < MiniTest::Spec
 
   context "Development mode editing app" do
     setup do
-      @page = ::S::Content.create
+      @page = Content.create
     end
 
     teardown do
@@ -118,11 +118,11 @@ class AssetBundler < MiniTest::Spec
     end
   end
 
-  context "Production mode editing app xxxx" do
+  context "Production mode editing app" do
     setup do
       @compiler = Spontaneous::Asset::AppCompiler.new(fixture_dir, @site.root)
       @compiler.compile
-      @page = ::S::Content.create
+      @page = Content.create
     end
 
     teardown do
@@ -169,7 +169,7 @@ class AssetBundler < MiniTest::Spec
         config.stubs(:reload_classes).returns(false)
         config.stubs(:auto_login).returns('test')
         config.stubs(:default_charset).returns('utf-8')
-        config.stubs(:publishing_method).returns(:immediate)
+        config.stubs(:background_mode).returns(:immediate)
         config.stubs(:services).returns(nil)
         config.stubs(:site_domain).returns('example.org')
         config.stubs(:site_id).returns('example_org')

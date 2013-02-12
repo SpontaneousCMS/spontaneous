@@ -4,14 +4,14 @@ module Spontaneous
   class Box
     include Enumerable
 
-    include Plugins::SchemaHierarchy
-    include Plugins::Fields
-    include Plugins::Styles
-    include Plugins::Serialisation
-    include Plugins::Render
-    include Plugins::AllowedTypes
-    include Plugins::Permissions
-    include Plugins::Media
+    include Spontaneous::Model::Core::SchemaHierarchy
+    include Spontaneous::Model::Core::Fields
+    include Spontaneous::Model::Core::Styles
+    include Spontaneous::Model::Core::Serialisation
+    include Spontaneous::Model::Core::Render
+    include Spontaneous::Model::Box::AllowedTypes
+    include Spontaneous::Model::Core::Permissions
+    include Spontaneous::Model::Core::Media
 
     # use underscores to protect against field name conflicts
     attr_reader :_name, :_prototype, :owner
@@ -22,6 +22,10 @@ module Spontaneous
     #
     # Returns: the owning Content object
     alias_method :parent, :owner
+
+    class << self
+      attr_reader :mapper
+    end
 
     def self.page?
       false
@@ -41,7 +45,7 @@ module Spontaneous
     end
 
     def self.schema_id
-      Spontaneous.schema.uids[@schema_id] || Spontaneous.schema.schema_id(self)
+      mapper.schema.uids[@schema_id] || mapper.schema.to_id(self)
     end
 
     # This is overridden by anonymous classes defined by box prototypes
@@ -49,7 +53,6 @@ module Spontaneous
     def self.schema_name
       "type//#{self.name}"
     end
-
 
     def self.supertype
       if self == Spontaneous::Box
@@ -72,6 +75,9 @@ module Spontaneous
       @field_initialization = false
     end
 
+    def model
+      @owner.model
+    end
 
     def page?
       false
@@ -87,8 +93,10 @@ module Spontaneous
       self.class.schema_id
     end
 
+    # A boxes "identity" must be a combination of its owner's id and
+    # its schema_id.
     def id
-      schema_id.to_s
+      [owner.id, schema_id.to_s].join("/")
     end
 
     def schema_name
@@ -123,6 +131,9 @@ module Spontaneous
       _name.to_s
     end
 
+    def reload
+      owner.reload
+    end
     # needed by Render::Context
     def box?(box_name)
       false
@@ -141,7 +152,7 @@ module Spontaneous
         default_values.each do |field_name, value|
           if self.field?(field_name)
             field = self.class.field_prototypes[field_name].to_field(self)
-            field.unprocessed_value = value
+            field.value = value
             field_store << field.serialize_db
           end
         end
@@ -149,16 +160,36 @@ module Spontaneous
       field_store
     end
 
-    def field_modified!(modified_field)
+    def field_modified!(modified_field = nil)
+      save_fields!
+    end
+
+    def save_fields(fields = nil)
+      save_fields!(fields)
+      save
+    end
+
+    # Use @serialized_fields to temporarily overwrite the value of
+    # #serialized_fields because this call may be coming from an async
+    # process that only wants to update a subset of the field values
+    # and because we don't have direct access to the serialization
+    # store we have to control our serialization output.
+    # TODO: Make boxes responsible for directly writing their serialized
+    # form
+    def save_fields!(fields = nil)
       @modified = true
+      @serialized_fields = update_serialized_fields(fields)
       owner.box_modified!(self)
+      @serialized_fields = nil
     end
 
     def serialize_db
-      {
-        :box_id => schema_id.to_s,
-        :fields => fields.serialize_db
-      }
+      { :box_id => schema_id.to_s,
+        :fields => serialized_fields }
+    end
+
+    def serialized_fields
+      @serialized_fields || fields.serialize_db
     end
 
     def self.resolve_style(box)
@@ -174,6 +205,10 @@ module Spontaneous
     end
 
     def container
+      owner
+    end
+
+    def content_instance
       owner
     end
 
@@ -224,7 +259,7 @@ module Spontaneous
     end
 
     def pieces
-      contents.select { |e| e.is_a?(Spontaneous::Piece) }
+      contents.select { |e| e.is_a?(Spontaneous::Model::Piece) }
     end
 
     def [](index)

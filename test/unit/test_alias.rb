@@ -5,13 +5,13 @@ require File.expand_path('../../test_helper', __FILE__)
 class AliasTest < MiniTest::Spec
 
   def assert_same_content(c1, c2)
-    assert_equal c1.length, c2.length
+    assert_equal c2.length, c1.length
     c1 = c1.dup.sort { |a, b| a.id <=> b.id }
     c2 = c2.dup.sort { |a, b| a.id <=> b.id }
     c1.each_with_index do |a, i|
       b = c2[i]
-      assert_equal a.id, b.id
-      assert_equal a.class, b.class
+      assert_equal b.id, a.id
+      assert_equal b.class, a.class
     end
   end
 
@@ -25,13 +25,13 @@ class AliasTest < MiniTest::Spec
 
       Content.delete
 
-      class ::Page < Spontaneous::Page
-        field :title
-        box :box1
-        box :box2
-      end
+      Page.field :title
+      Page.box :box1
+      Page.box :box2
+      # class ::Page < Spontaneous::Page
+      # end
 
-      class ::Piece < Spontaneous::Piece; end
+      # class ::Piece < Spontaneous::Piece; end
 
       class ::A < ::Piece
         field :a_field1
@@ -98,7 +98,7 @@ class AliasTest < MiniTest::Spec
       end
 
       class ::ProcAlias < ::Piece
-        alias_of proc { Spontaneous::Site.root.children }
+        alias_of proc { Content.root.children }
       end
 
       @root = ::Page.create
@@ -116,11 +116,11 @@ class AliasTest < MiniTest::Spec
     end
 
     teardown do
-      [:Page, :Piece, :A, :AA, :AAA, :B, :BB, :AAlias, :AAAlias, :AAAAlias, :BBAlias, :BAlias, :MultipleAlias, :ProcAlias].each do |c|
+      [:A, :AA, :AAA, :B, :BB, :AAlias, :AAAlias, :AAAAlias, :BBAlias, :BAlias, :MultipleAlias, :ProcAlias].each do |c|
         Object.send(:remove_const, c) rescue nil
       end
       Content.delete
-      FileUtils.rm_r(@site.root)
+      teardown_site
     end
 
     context "All alias" do
@@ -159,7 +159,7 @@ class AliasTest < MiniTest::Spec
               @page.box2 << A.new
               @page.box2 << AA.new
             }
-            @page.save.reload
+            @page = @page.save.reload
           end
 
           teardown do
@@ -175,8 +175,13 @@ class AliasTest < MiniTest::Spec
             class ::XX < ::Piece
               alias_of :AA, :container => Proc.new { S::Site['#thepage'].box1 }
             end
-            Set.new(X.targets).should == Set.new(@page.box1.select { |p| A === p })
-            Set.new(XX.targets).should == Set.new(@page.box1.select { |p| AA === p })
+            targets = lambda { |a, target|
+              [(a.targets), @page.box1.select { |p| target === p }].map { |a| Set.new(a) }
+            }
+            expected, actual = targets.call(X, A)
+            actual.should == expected
+            expected, actual = targets.call(XX, AA)
+            actual.should == expected
           end
 
           should "allow for selecting only content from a range of boxes" do
@@ -322,6 +327,7 @@ class AliasTest < MiniTest::Spec
           @a_alias.destroy
           Content[@a.id].should == @a
         end
+
         should "be deleted when target deleted" do
           @a.destroy
           Content[@a_alias.id].should be_nil

@@ -16,10 +16,7 @@ class StructureTest < MiniTest::Spec
   context "content building" do
     setup do
       Content.delete
-      class Page < Spot::Page
-        field :title
-      end
-      class Piece < Spot::Piece; end
+      Page.field :title
       class ProjectPage < Page; end
       class Image < Piece; end
       class Project < Piece
@@ -53,7 +50,7 @@ class StructureTest < MiniTest::Spec
     end
 
     teardown do
-      [:Page, :HomePage, :Project, :ProjectPage, :Image].each { |klass| StructureTest.send(:remove_const, klass) rescue nil }
+      [:HomePage, :Project, :ProjectPage, :Image].each { |klass| StructureTest.send(:remove_const, klass) rescue nil }
     end
 
     context "site content" do

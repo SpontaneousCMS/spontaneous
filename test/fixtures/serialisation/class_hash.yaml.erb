@@ -14,26 +14,26 @@
 :fields:
 - :name: title
   :schema_id: <%= @fp[:title].schema_id.to_s %>
-  :type: Spontaneous.FieldTypes.StringField
+  :type: Spontaneous.Field.String
   :title: Title
   :comment: ""
   :writable: true
 - :name: location
   :schema_id: <%= @fp[:location].schema_id.to_s %>
-  :type: Spontaneous.FieldTypes.StringField
+  :type: Spontaneous.Field.String
   :title: Where
   :comment: Fill in the address
   :writable: true
 - :name: date
   :schema_id: <%= @fp[:date].schema_id.to_s %>
-  :type: Spontaneous.FieldTypes.DateField
+  :type: Spontaneous.Field.Date
   :title: Date
   :comment: ""
   :writable: true
   :date_format: "%A, %-d %B, %Y"
 - :name: image
   :schema_id: <%= @fp[:image].schema_id.to_s %>
-  :type: Spontaneous.FieldTypes.ImageField
+  :type: Spontaneous.Field.Image
   :title: Image
   :comment: ""
   :writable: true
@@ -47,7 +47,7 @@
   :fields:
   - :name: title
     :schema_id: <%= SerialisedPiece.boxes[:things].field_prototypes[:title].schema_id.to_s %>
-    :type: Spontaneous.FieldTypes.StringField
+    :type: Spontaneous.Field.String
     :title: Title
     :comment: ""
     :writable: true
