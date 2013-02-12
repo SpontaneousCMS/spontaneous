@@ -223,7 +223,7 @@ module Spontaneous
         begin
           require(file)
         rescue => e
-          logger.info "Failed to load '#{relativize_path(file)}' : #{e.message}"
+          # logger.info "Failed to load '#{relativize_path(file)}' : #{e.message}"
           raise e
         ensure
           # Ensure that any classes loaded by the file before it failed get
