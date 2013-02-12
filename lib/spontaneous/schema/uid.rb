@@ -1,8 +1,5 @@
 # encoding: UTF-8
 
-
-require 'base58'
-
 module Spontaneous
   module Schema
     class UID

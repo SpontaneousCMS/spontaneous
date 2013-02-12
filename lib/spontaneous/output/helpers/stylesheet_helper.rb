@@ -53,7 +53,7 @@ module Spontaneous::Output::Helpers
     end
 
     def compress_css_string(css_string)
-      Spontaneous::Output::Assets::Compression.shine_compress_string(css_string, :css)
+      Spontaneous::Output::Assets::Compression.compress_css_string(css_string)
     end
 
     Spontaneous::Output::Helpers.register_helper(self, :html)

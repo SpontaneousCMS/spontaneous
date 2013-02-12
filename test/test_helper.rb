@@ -18,7 +18,6 @@ $:.unshift(spot_path) if File.directory?(spot_path) && !$:.include?(spot_path)
 
 require 'rack'
 require 'logger'
-require 'pg'
 
 
 Sequel.extension :migration
@@ -26,14 +25,37 @@ Sequel.extension :migration
 # for future integration with travis
 ENV["SPOT_ADAPTER"] ||= "postgres"
 
-connection_string = case ENV["SPOT_ADAPTER"]
-                    when "postgres"
-                      'postgres:///spontaneous2_test'
-                    when "mysql"
-                      'mysql2://root@localhost/spontaneous2_test'
-                    end
+jruby = case RUBY_PLATFORM
+           when "java"
+             true
+           else
+             false
+           end
 
-p connection_string
+
+connection_string = \
+  case ENV["SPOT_ADAPTER"]
+  when "postgres"
+    if jruby
+      require 'jdbc/postgres'
+      Jdbc::Postgres.load_driver
+      "jdbc:postgresql:///spontaneous2_test"
+    else
+      require 'pg'
+      "postgres:///spontaneous2_test"
+    end
+  when "mysql"
+    if jruby
+      require 'jdbc/mysql'
+      Jdbc::MySQL.load_driver
+      "jdbc:mysql://localhost/spontaneous2_test?user=root"
+    else
+      require 'mysql2'
+      "mysql2://root@localhost/spontaneous2_test"
+    end
+  end
+
+puts "DB Connection: #{connection_string}"
 DB = Sequel.connect(connection_string) unless defined?(DB)
 # DB.logger = Logger.new($stdout)
 

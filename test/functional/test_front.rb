@@ -390,14 +390,14 @@ class FrontTest < MiniTest::Spec
 
     context "Templates" do
       setup do
-        # Page.stubs(:path).with("/about").returns(about)
-        # about.style = :dynamic
-        # about.save
+        Spontaneous::Output.cache_templates = true
+        @cache_file = "#{Spontaneous.revision_dir(1)}/dynamic/dynamic.html.rb"
+        FileUtils.rm(@cache_file) if File.exist?(@cache_file)
+        Spontaneous::Output.write_compiled_scripts = true
       end
 
       teardown do
-        # about.style = :default
-        # about.save
+        Spontaneous::Output.cache_templates = true
       end
 
       should "have access to the params, request & session object" do
@@ -407,18 +407,7 @@ class FrontTest < MiniTest::Spec
       end
 
       context "caching" do
-        setup do
-          Spontaneous::Output.cache_templates = true
-          @cache_file = "#{Spontaneous.revision_dir(1)}/dynamic/dynamic.html.rb"
-          FileUtils.rm(@cache_file) if File.exist?(@cache_file)
-          Spontaneous::Output.write_compiled_scripts = true
-        end
-
-        teardown do
-          Spontaneous::Output.cache_templates = true
-        end
-
-        should "use pre-rendered versions of the templates xxx" do
+        should "use pre-rendered versions of the templates" do
           dummy_content = 'cached-version/#{session[\'user_id\']}'
           dummy_template = File.join(@site.revision_root, "current/dynamic/dynamic.html.cut")
           File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
@@ -653,6 +642,7 @@ class FrontTest < MiniTest::Spec
         expiry = DateTime.parse last_response.headers["Expires"]
         expiry.year.should == (Date.today.year) + 10
       end
+
       should "pass far-future expires headers for compiled assets" do
         test_string = "#{Time.now}\n"
         test_file_url = "/rev/#{Time.now.to_i}.txt"

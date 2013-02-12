@@ -509,6 +509,31 @@ class BoxesTest < MiniTest::Spec
     should "correctly allow addition of subclasses" do
       Mixed.allowed_types.should == [Allowed11, Allowed111]
     end
+
+    should "create inline classes if passed a definition block" do
+      allowed = ChildClass.allow :InlineType do
+        field :title
+      end
+      inline_type = allowed.instance_class
+      inline_type.fields.length.should == 1
+      inline_type.fields.first.name.should == :title
+      inline_type.name.should == "ChildClass::InlineType"
+    end
+
+    should "use the given supertype for inline classes" do
+      allowed = ChildClass.allow :InlineType, :supertype => :Allowed1 do
+        field :title
+      end
+      inline_type = allowed.instance_class
+      inline_type.ancestors[0..1].should == [ChildClass::InlineType, Allowed1]
+    end
+
+    should "add the created class to the schema immediately" do
+      allowed = ChildClass.allow :InlineType, :supertype => :Allowed1 do
+        field :title
+      end
+      assert @site.schema.classes.map(&:to_s).include?("ChildClass::InlineType"), "#{@site.schema.classes} does not include ChildClass::InlineType"
+    end
   end
 
   context "Box groups" do

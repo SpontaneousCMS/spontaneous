@@ -2,13 +2,13 @@
 
 Spontaneous is a revolutionary new content management system that brings the best of Ruby and the best of HTML5 together in one elegant package.
 
-This is version 2 of an existing (closed source) CMS that has been in active production use for over 6 years. For more information about that, and to see the sites that it powers, please go to [magnetised's homepage](http://magnetised.info/spontaneous).
+This is version 2 of an existing (closed source) CMS that has been in active production use for over 6 years. For more information about that, and to see the sites that it powers, please go to http://spontaneous.io
 
 ## INTRODUCTION
 
 Spontaneous uses a powerful hierarchical system to organise your information. This breaks out of the bonds of the traditional "title, slug, text" model of CMS content and instead allows content authors to build complex, highly styled pages out of simple, easily editable blocks.
 
-- Ruby 1.9
+- Ruby 1.9.3
 - Using classes instead of db for metadata
   - Versioning of metadata
   - Keeps the developer in the text editor

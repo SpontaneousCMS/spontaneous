@@ -12,11 +12,30 @@ module Spontaneous
       end
 
       def get(id)
+        return get_all(id) if id.is_a?(Array)
         if (instance = @identity_map[id])
           instance
         else
           first(id: id)
         end
+      end
+
+      # Gets all the instances for the list of ids and returns them
+      # in the id order of the list, rather than the db order.
+      def get_all(id_list)
+        # This pure-db solution is Postgresql only unfortunately...
+        #
+        # values = []
+        # id_list.each_with_index do |id, index|
+        #   values << ("(" << [id, index].join(",") << ")")
+        # end
+        # ds = @dataset.filter(:id => id_list).qualify.
+        # join(Sequel::LiteralString.new("(VALUES #{values.join(",")}) AS id_order (id, pos)"), {:id_order__id => :id}, {:qualify => true}).
+        # order(:id_order__pos)
+        order = Hash[id_list.each_with_index.map { |id, index| [id, index] }]
+        filter(:id => id_list).all.sort { |i1, i2|
+          order[i1.id] <=> order[i2.id]
+        }
       end
 
       def first(*args, &block)

@@ -3,13 +3,7 @@ Sequel.migration do
   up do
     scheme = Spontaneous::Crypt::Version::SHALegacy
 
-    dataset = nil
-    begin
-      dataset = Spontaneous.database[:spontaneous_users]
-    rescue
-      # Test environment
-      dataset = DB[:spontaneous_users]
-    end
+    dataset = self[:spontaneous_users]
 
     dataset.each do |user|
       hash = scheme.create(user[:crypted_password], user[:salt])

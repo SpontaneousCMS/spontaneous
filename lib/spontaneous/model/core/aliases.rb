@@ -151,13 +151,10 @@ module Spontaneous::Model::Core
         super or target.find_named_style(style_name)
       end
 
+      # Aliases are unique in that their style depends on the instance as well
+      # as the class.
       def style
-        return self.resolve_style(self.style_sid) unless target.respond_to?(:resolve_style)
-        if self.class.styles.empty?
-          target.resolve_style(style_sid)
-        else
-          self.resolve_style(self.style_sid) or target.resolve_style(self.style_sid)
-        end
+        Spontaneous::Style::AliasStyle.new(self)
       end
 
       def styles
@@ -213,12 +210,21 @@ module Spontaneous::Model::Core
 
     # InstanceMethods
 
+    # Used as the title for this instance in the list of potential targets for
+    # and alias.
     def alias_title
-      fields[:title].to_s
+      alias_title_field.to_s
+    end
+
+    def alias_title_field
+      unless (field = fields[:title])
+        field = fields.detect { |f| f.is_a?(Spontaneous::Field::String) }
+      end
+      field
     end
 
     def alias_icon_field
-      if field = fields.detect { |f| f.image? }
+      if (field = fields.detect { |f| f.image? })
         field
       else
         nil

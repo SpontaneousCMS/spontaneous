@@ -1,6 +1,5 @@
 # encoding: UTF-8
 
-require 'base58'
 require 'securerandom'
 
 module Spontaneous

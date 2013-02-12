@@ -17,17 +17,7 @@ class FieldsTest < MiniTest::Spec
   end
 
   context "Fields" do
-    setup do
-      # class ::Page < Spontaneous::Page; end
-      # class ::Piece < Spontaneous::Piece; end
-    end
-
-    teardown do
-      # Object.send(:remove_const, :Page)
-      # Object.send(:remove_const, :Piece)
-    end
-
-    context "New content instances" do
+    context "New content instances xxx" do
       setup do
         @content_class = Class.new(Piece) do
           field :title, :default => "Magic"
@@ -57,6 +47,14 @@ class FieldsTest < MiniTest::Spec
         @instance.title = "Boing!"
         @instance.fields[:title].value.should == "Boing!"
       end
+
+      # TODO: I want to allow this but don't like overwriting the ::fields
+      # method like this.
+      # should "allow the definition of multiple fields at once" do
+      #   content_class = Class.new(Piece) do
+      #     fields :title, :photo, :date
+      #   end
+      # end
     end
 
     context "Overwriting fields" do
@@ -257,6 +255,17 @@ class FieldsTest < MiniTest::Spec
           end
         end
         @field = @field_class.new
+      end
+
+      should "be used as the comparator" do
+        f1 = @field_class.new
+        f1.value = "a"
+        f2 = @field_class.new
+        f2.value = "b"
+        (f1 <=> f2).should == -1
+        (f2 <=> f1).should == 1
+        (f1 <=> f1).should == 0
+        [f2, f1].sort.map(&:value).should == ["<a>", "<b>"]
       end
 
       should "be transformed by the update method" do

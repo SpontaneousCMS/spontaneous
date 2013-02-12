@@ -32,6 +32,7 @@ module Spontaneous::Search
     def exclude_types(*types)
       @search_types -= resolve_type_list(types)
     end
+
     # end Index DSL methods
 
     def create_db(revision)
@@ -61,25 +62,52 @@ module Spontaneous::Search
       @stopper
     end
 
+    def weights(page)
+      weights = {}
+      each_field(page) do |field, prototype, id|
+        weights[id] = prototype.options_for_index(self)[:weight]
+      end
+      weights
+    end
+
     # Extract all indexable content from a page. Values are grouped across fields
     # or across field index groups
     def indexable_content(page)
       values = Hash.new { |h, k| h[k] = [] }
-      # not sure that I need the include? test here as page.content only returns Pieces
-      # and I'm not sure that there is a particular need to exclude Pieces from indexes
-      indexable = [page]
-      indexable.concat(page.pieces.select { |content| include?(content) })
-      indexable += page.boxes.select { |box| include?(box) }
-      indexable.each do |content|
+      each_indexable(page) do |content|
         content.fields.each do |field|
           prototype = field.prototype
-          values[prototype.index_id(self)] << field.indexable_value if prototype.in_index?(self)
+          if prototype.in_index?(self)
+            values[prototype.index_id(self)] << field.indexable_value
+          end
         end
         insert_additional_indexable_values(content, values)
       end
       result = Hash[ values.map { |id, values| [id, values.join("\n")] } ]
       result[:id] = page.id
       result
+    end
+
+    def each_indexable(page)
+      indexable = [page]
+      # not sure that I need the include? test here as page.content only returns Pieces
+      # and I'm not sure that there is a particular need to exclude Pieces from indexes
+      indexable.concat(page.pieces.select { |content| include?(content) })
+      indexable += page.boxes.select { |box| include?(box) }
+      indexable.each do |content|
+        yield content
+      end
+    end
+
+    def each_field(page)
+      each_indexable(page) do |content|
+        content.fields.each do |field|
+          prototype = field.prototype
+          if prototype.in_index?(self)
+            yield field, prototype, prototype.index_id(self)
+          end
+        end
+      end
     end
 
     def insert_additional_indexable_values(content, values)

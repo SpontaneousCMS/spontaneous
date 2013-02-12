@@ -420,6 +420,17 @@ $dialogue-title-height: 32px;
 			}
 		}
 	}
+	&.first-publish {
+		#changes {
+			display: none;
+		}
+		#to-publish {
+			position: absolute;
+			left: 0;
+			right: 0;
+			width: auto;
+		}
+	}
 }
 
 #root-menu {

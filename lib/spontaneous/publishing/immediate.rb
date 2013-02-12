@@ -87,15 +87,13 @@ module Spontaneous
           abort_publish_at_exit
         }
         before_publish
-        begin
-          @content_model.publish(revision, modified_page_list) do
-            render_revision
-          end
-          after_publish
-        rescue ::Exception => e
-          abort_publish(e)
-          raise(e)
+        @content_model.publish(revision, modified_page_list) do
+          render_revision
         end
+        after_publish
+      rescue ::Exception => e # Catch even interrupts because we definitely need to cleanup
+        abort_publish(e)
+        raise(e)
       end
 
       def render_revision
@@ -297,7 +295,7 @@ module Spontaneous
           Spontaneous::Site.send(:pending_revision=, nil)
           Spontaneous::Content.cleanup_revisions(revision, keep_revisions)
           update_progress("complete")
-        rescue Exception => e
+        rescue => e
           # if a post publish hook raises an exception then we want to roll everything back
           S::Revision.filter(:revision => revision).delete
           Spontaneous::Site.send(:set_published_revision, @previous_revision)
@@ -324,13 +322,12 @@ module Spontaneous
       end
 
       def abort_publish(exception)
-        if r = S::Site.pending_revision
+        if (r = S::Site.pending_revision)
           update_progress("aborting")
           FileUtils.rm_r(Spontaneous.revision_dir(revision)) if File.exists?(Spontaneous.revision_dir(revision))
           Spontaneous::Site.send(:pending_revision=, nil)
           @content_model.delete_revision(revision)
           puts exception.backtrace.join("\n") if exception
-          update_progress("error", exception)
         end
       end
 

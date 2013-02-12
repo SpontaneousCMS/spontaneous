@@ -1,57 +1,35 @@
-## This is the rakegem gemspec template. Make sure you read and understand
-## all of the comments. Some sections require modification, and others can
-## be deleted if you don't need them. Once you understand the contents of
-## this file, feel free to delete any comments that begin with two hash marks.
-## You can find comprehensive Gem::Specification documentation, at
-## http://docs.rubygems.org/read/chapter/20
+
 Gem::Specification.new do |s|
   s.specification_version = 2 if s.respond_to? :specification_version=
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.rubygems_version = '1.3.5'
   s.required_ruby_version = ">= 1.9.3"
 
-  ## Leave these as is they will be modified for you by the rake gemspec task.
-  ## If your rubyforge_project name is different, then edit it and comment out
-  ## the sub! line in the Rakefile
   s.name              = 'spontaneous'
-  s.version           = '0.2.0.alpha7'
-  s.date              = '2013-01-11'
+  s.version           = '0.2.0.beta1'
+  s.date              = '2013-01-26'
   s.rubyforge_project = 'spontaneous'
 
-  ## Make sure your summary is short. The description may be as long
-  ## as you like.
   s.summary     = "Spontaneous is a next-generation Ruby CMS"
   s.description = "Spontaneous is a next-generation Ruby CMS"
 
-  ## List the primary authors. If there are a bunch of authors, it's probably
-  ## better to set the email to an email list or something. If you don't have
-  ## a custom homepage, consider using your GitHub URL or the like.
   s.authors  = ["Garry Hill"]
   s.email    = 'garry@magnetised.net'
   s.homepage = 'http://spontaneous.io'
 
-  ## This gets added to the $LOAD_PATH so that 'lib/NAME.rb' can be required as
-  ## require 'NAME.rb' or'/lib/NAME/file.rb' can be as require 'NAME/file.rb'
   s.require_paths = %w[lib]
 
-  # ## This sections is only necessary if you have C extensions.
   # s.require_paths << 'ext'
   # s.extensions = %w[ext/extconf.rb]
 
-  ## If your gem includes any executables, list them here.
   s.executables = ["spot"]
 
-  ## Specify any RDoc options here. You'll want to add your README and
-  ## LICENSE files to the extra_rdoc_files list.
   s.rdoc_options = ["--charset=UTF-8"]
   s.extra_rdoc_files = %w[README LICENSE]
 
-  ## List your runtime dependencies here. Runtime dependencies are those
-  ## that are needed for an end user to actually USE your code.
   s.add_dependency('activesupport',   ["~> 3.2.0"])
-  s.add_dependency('base58',          ["~> 0.1.0"])
   s.add_dependency('bcrypt-ruby',     ["~> 3.0.1"])
-  s.add_dependency('bundler',         ["> 1.0.15"])
+  s.add_dependency('bundler',         [">  1.0.15"])
   s.add_dependency('coffee-script',   ["~> 2.2.0"])
   s.add_dependency('cutaneous',       ["~> 0.1.3"])
   s.add_dependency('erubis',          ["~> 2.6"])
@@ -62,28 +40,23 @@ Gem::Specification.new do |s|
   s.add_dependency('mini_magick',     ["~> 3.3"])
   s.add_dependency('nokogiri',        ["~> 1.5.0"])
   s.add_dependency('public_suffix',   ["~> 1.0"])
-  s.add_dependency('rack',            ["~> 1.4.1"])
+  s.add_dependency('rack',            ["~> 1.5.0"])
   s.add_dependency('rake',            ["~> 0.9.2"])
   s.add_dependency('rdoc',            ["~> 3.9.4"])
   s.add_dependency('sass',            ["~> 3.1.4"])
-  s.add_dependency('sequel',          ["= 3.36.1"])
-  s.add_dependency('shine',           ["~> 0.6"])
-  s.add_dependency('simultaneous',    ["~> 0.4.1"])
-  s.add_dependency('sinatra',         ["= 1.3.2"])
+  s.add_dependency('sequel',          ["~> 3.43.0"])
+  s.add_dependency('simultaneous',    ["~> 0.4.2"])
+  s.add_dependency('sinatra',         ["~> 1.3.4"])
   s.add_dependency('sinatra-contrib', ["~> 1.3.1"])
   s.add_dependency('sprockets',       ["~> 2.7.0"])
-  s.add_dependency('stringex',        ["= 1.3"])
+  s.add_dependency('stringex',        ["=  1.3"])
   s.add_dependency('therubyracer',    ['~> 0.9.10'])
   s.add_dependency('thin',            ["~> 1.2"])
   s.add_dependency('thor',            ["~> 0.16.0"])
   s.add_dependency('uglifier',        ["~> 1.3.0"])
   s.add_dependency('yajl-ruby',       ["~> 1.1.0"])
 
-  ## List your development dependencies here. Development dependencies are
-  ## those that are only needed during development
   s.add_development_dependency('minitest', ["~> 2.1.0"])
-  s.add_development_dependency('mysql2', ["~> 0.3.11"])
-  s.add_development_dependency('pg', ["~> 0.14.1"])
   s.add_development_dependency('jeweler', ["~> 1.5"])
   s.add_development_dependency('jnunemaker-matchy', ["~> 0.4"])
   s.add_development_dependency('shoulda', ["~> 2.11.3"])
@@ -93,9 +66,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency('leftright', ["~> 0.9"])
   s.add_development_dependency('stackdeck', ["~> 0.2"])
 
-  ## Leave this section as-is. It will be automatically generated from the
-  ## contents of your Git repository via the gemspec task. DO NOT REMOVE
-  ## THE MANIFEST COMMENTS, they are used as delimiters by the task.
   # = MANIFEST =
   s.files = %w[
     Gemfile
@@ -271,6 +241,8 @@ Gem::Specification.new do |s|
     db/migrations/20120525164947_add_field_versions.rb
     db/migrations/20130109125023_add_page_publish_lock.rb
     db/migrations/20130111161934_convert_bcrypt_passwords.rb
+    db/migrations/20130114120000_create_revision_tables.rb
+    db/migrations/20130116220423_add_index_to_archive.rb
     docs/recipe-interface-screenshot.png
     lib/spontaneous.rb
     lib/spontaneous/application.rb
@@ -459,6 +431,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/publishing.rb
     lib/spontaneous/publishing/event_client.rb
     lib/spontaneous/publishing/immediate.rb
+    lib/spontaneous/publishing/revision.rb
     lib/spontaneous/publishing/simultaneous.rb
     lib/spontaneous/publishing/threaded.rb
     lib/spontaneous/rack.rb
@@ -815,7 +788,5 @@ Gem::Specification.new do |s|
   ]
   # = MANIFEST =
 
-  ## Test files will be grabbed from the file list. Make sure the path glob
-  ## matches what you actually use.
   s.test_files = s.files.select { |path| path =~ /^test\/test_.*\.rb/ }
 end

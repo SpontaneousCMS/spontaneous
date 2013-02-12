@@ -16,7 +16,8 @@ module Spontaneous::Prototypes
       # to fields like 'image' or 'date'
       @base_class = Spontaneous::Field[type || name]
 
-      owner.const_set("#{name.to_s.camelize}Field", instance_class)
+      field_class_name = "#{name.to_s.camelize}Field"
+      owner.const_set(field_class_name, instance_class)
 
       self
     end

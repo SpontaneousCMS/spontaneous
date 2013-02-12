@@ -7,7 +7,7 @@ module Spontaneous::Rack
     MAX_AGE =  "max-age=#{TEN_YEARS}, public".freeze
 
     def initialize(file_root)
-      super(file_root, 'public')
+      super(file_root)
     end
 
     def call(env)
@@ -18,7 +18,7 @@ module Spontaneous::Rack
     # Send a far future Expires header and make sure that
     # the cache control is public
     def caching_headers(headers)
-      headers.merge({
+      headers.update({
         HTTP_CACHE_CONTROL => MAX_AGE,
         HTTP_EXPIRES => (Time.now.advance(:years => 10)).httpdate
       })

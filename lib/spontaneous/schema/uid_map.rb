@@ -1,8 +1,5 @@
 # encoding: UTF-8
 
-
-require 'base58'
-
 module Spontaneous::Schema
   class UIDMap
 
@@ -10,36 +7,20 @@ module Spontaneous::Schema
       @uid_lock ||= Mutex.new
     end
 
-    def self.uid_index
-      @uid_index ||= 0
-    end
-
-    def self.increment_uid_index
-      @uid_index = (uid_index + 1) % 0xFFFF
-    end
-
     def self.get_inc
       uid_lock.synchronize do
-        increment_uid_index
+        @uid_index = ((@uid_index ||= 0) + 1) % 0xFFFF
       end
     end
 
     def self.generate(ref = nil)
-      generate58(ref)
+      generate36(ref)
     end
 
-    def self.generate58(ref)
+    def self.generate36(ref)
       # reverse the time so that sequential ids are more obviously different
-      oid =  Base58.encode((Time.now.to_f * 1000).to_i).reverse
-      oid << Base58.encode(get_inc).rjust(3, '0')
-    end
-
-    def self.generate16(ref)
-      oid = ''
-      # 4 bytes current time
-      oid = (Time.now.to_f * 1000).to_i.to_s(16)
-      # 2 bytes inc
-      oid << get_inc.to_s(16).rjust(4, '0')
+      oid =  (Time.now.to_f * 1000).to_i.to_s(36).reverse
+      oid << get_inc.to_s(36).rjust(3, '0')
     end
 
     include Enumerable

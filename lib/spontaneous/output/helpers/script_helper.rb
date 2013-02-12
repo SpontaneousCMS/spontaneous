@@ -65,7 +65,7 @@ module Spontaneous::Output::Helpers
     end
 
     def compress_js_string(js_string)
-      Spontaneous::Output::Assets::Compression.shine_compress_string(js_string, :js)
+      Spontaneous::Output::Assets::Compression.compress_js_string(js_string)
     end
 
     Spontaneous::Output::Helpers.register_helper(self, :html)

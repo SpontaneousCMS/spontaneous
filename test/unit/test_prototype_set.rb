@@ -119,6 +119,11 @@ class PrototypeSetTest < MiniTest::Spec
         @set.key?(:five).should be_true
       end
 
+      should "test for local keys only" do
+        @set.key?(:one, false).should be_false
+        @set.key?(:five, false).should be_true
+      end
+
       should "enable array-like access by index" do
         @set[3].should == "Four"
         @set[0].should == "Three"

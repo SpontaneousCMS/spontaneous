@@ -1,5 +1,5 @@
-require 'shine'
 require 'sass'
+require 'uglifier'
 
 module Spontaneous
   module Output
@@ -7,19 +7,40 @@ module Spontaneous
       module Compression
         extend self
 
-        def compress_js(filelist, options={})
-          shine_compress_files(filelist, :js, options)
+        def compress_js_files(filelist, options = {})
+          js = []
+          compressor = js_compressor(options)
+          filelist.each do |path|
+            ::File.open(path, "rb") do |source|
+              js << compressor.compile(source)
+            end
+          end
+          compressed = js.join("\n")
+          [compressed, digest(compressed)]
         end
 
-        def compress_js_string(js, options={})
-          shine_compress_string(js, :js, options)
+        def compress_js_string(source, options = {})
+          compressed = compress_js(source, options)
+          [compressed, digest(compressed)]
         end
 
-        def compress_css(filelist, options={})
-          # compress_files(filelist, :css, options)
+        def compress_js(source, options = {})
+          js_compressor(options).compile(source)
+        end
+
+        def js_compressor(options = {})
+          Uglifier.new(options.merge(default_js_compression_options))
+        end
+
+        # Default options passed to Uglifier
+        # an empty hash means "accept defaults"
+        def default_js_compression_options
+          {}
+        end
+
+        def compress_css_files(filelist, options={})
           opts = {
             :load_paths => [Spontaneous.css_dir],
-            # :filename => sass_template,
             :cache => false,
             :style => :compressed
           }.merge(options)
@@ -30,18 +51,14 @@ module Spontaneous
           [css, hash]
         end
 
-        def shine_compress_string(string, format, options = {})
-          compressed = Shine::compress_string(string, format, options).force_encoding("UTF-8")
-          hash = digest(compressed)
-          [compressed, hash]
+        def compress_css_string(source)
+          compressed = compress_css(source)
+          [compressed, digest(compressed)]
         end
 
-        def shine_compress_files(filelist, format, options = {})
-          original_size = filesize(filelist)
-          compressed = Shine::compress_files(filelist, format, options).force_encoding("UTF-8")
-          logger.info("Compressed #{filelist.length} files. Original size #{original_size}, compressed size #{compressed.length}, ratio #{(100*compressed.length.to_f/original_size.to_f).round}%")
-          hash = digest(compressed)
-          [compressed, hash]
+        def compress_css(source)
+          opts = { :cache => false, :style => :compressed, :syntax => :scss }
+          Sass::Engine.new(source, opts).render
         end
 
         def digest(str)

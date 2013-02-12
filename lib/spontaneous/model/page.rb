@@ -139,5 +139,13 @@ module Spontaneous::Model
       hash.delete(:name)
       hash
     end
+
+    def serialize_db
+      [target.id, @style_id]
+    end
+
+    def inspecttion_values
+      { :id => id, :uid => uid, :path => path }.merge(inspection_fields)
+    end
   end
 end

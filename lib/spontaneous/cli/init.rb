@@ -74,6 +74,7 @@ module Spontaneous::Cli
           say "  >> Done"
         rescue => e
           say " >>> Error running migrations on database `#{site_config[:database]}`:\n   > #{e}", :red
+          raise e
         end
       end
     end
@@ -99,18 +100,11 @@ module Spontaneous::Cli
 
     def create_database(connection, config)
       commands = case connection.database_type
-                when :postgres
-                  [
-                    [%(CREATE ROLE "#{config[:user]}" LOGIN PASSWORD '#{config[:password]}'), false],
-                    [%(CREATE DATABASE "#{config[:database]}" WITH TEMPLATE=template0 ENCODING='UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8' OWNER="#{config[:user]}"), true]
-                  ]
-                when :mysql
-                  host = config[:host].blank? ? "" : "@#{config[:host]}"
-                  [
-                    ["CREATE DATABASE `#{config[:database]}` CHARACTER SET UTF8", true],
-                    ["GRANT ALL ON `#{config[:database]}`.* TO `#{config[:user]}`#{host} IDENTIFIED BY '#{config[:password]}'", false]
-                  ]
-                end
+                 when :postgres
+                   create_postgres_database_commands(config)
+                 when :mysql
+                   create_mysql_database_commands(config)
+                 end
       commands.each do |command, raise_error|
         begin
           connection.run(command)
@@ -118,6 +112,34 @@ module Spontaneous::Cli
           raise e if raise_error
         end
       end
+    end
+
+    def create_mysql_database_commands(config)
+      host = config[:host].blank? ? "" : "@#{config[:host]}"
+      cmds = [ ["CREATE DATABASE `#{config[:database]}` CHARACTER SET UTF8", true] ]
+      unless config[:user] == "root"
+        cmds << ["GRANT ALL ON `#{config[:database]}`.* TO `#{config[:user]}`#{host} IDENTIFIED BY '#{config[:password]}'", false]
+      end
+      cmds
+    end
+
+    # On some machines the db creation fails due to incompabilities between the UTF8 encoding
+    # and the configured locale.
+    # You can force a locale for the db by adding LC_COLLATE & LC_CTYPE params
+    # to the CREATE command:
+    #
+    #   LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8'
+    #
+    # but I don't know a good/the best way to determine the most appropriate UTF-8 locale
+    # C.UTF-8 doesn't exist on OS X.
+    def create_postgres_database_commands(config)
+      create_cmd = %(CREATE DATABASE "#{config[:database]}" WITH TEMPLATE=template0 ENCODING='UTF8')
+      cmds = []
+      unless config[:user].blank?
+        create_cmd << %( OWNER="#{config[:user]}")
+        cmds << [%(CREATE ROLE "#{config[:user]}" LOGIN PASSWORD '#{config[:password]}'), false]
+      end
+      cmds << [create_cmd, true]
     end
   end # Init
 end # Spontaneous::Cli

@@ -1,9 +1,11 @@
 require 'spontaneous/cli'
+require 'simultaneous'
 
 module Spontaneous
   module Cli
     class Site < ::Thor
       include Spontaneous::Cli::TaskUtils
+      include ::Simultaneous::Task
       namespace :site
 
       default_task :browse
@@ -126,6 +128,9 @@ module Spontaneous
           say ">  Publishing all", :green, true
           Spontaneous::Site.publish_all
         end
+        # Rescue all errors to feed back to the UI
+      rescue => e
+        send_error_notification(e)
       end
 
       desc "render", "Re-renders the current content"
@@ -141,12 +146,18 @@ module Spontaneous
         say "Site is at revision #{Spontaneous::Site.revision}", :green
       end
 
-      desc "browse", "Launces a browser pointing to the current development CMS"
+      desc "browse", "Launches a browser pointing to the current development CMS"
       def browse
         prepare :browse
         require 'launchy'
         boot!
         ::Launchy.open("http://localhost:#{Spontaneous::Site.config.port}/@spontaneous")
+      end
+
+      private
+
+      def send_error_notification(error)
+        simultaneous_event('publish_progress', {:state => "error", :progress => error}.to_json)
       end
     end
   end

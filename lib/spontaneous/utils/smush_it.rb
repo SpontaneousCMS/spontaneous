@@ -49,7 +49,7 @@ module Spontaneous::Utils
           ::FileUtils.cp(temp.path, src_file)
         end
       end
-    rescue Exception => e
+    rescue => e
       logger.error(e)
     ensure
       FileUtils.rm(public_filepath) if public_filepath and File.exist?(public_filepath)

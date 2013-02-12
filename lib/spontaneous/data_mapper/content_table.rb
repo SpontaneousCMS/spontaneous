@@ -21,7 +21,7 @@ module Spontaneous
       #   revision_number :content, :__r00034_content
       #   => 34
       #
-      def self.revision_number(base_name, table_name)
+      def self.revision_from_table(base_name, table_name)
         return nil if base_name == table_name
         return nil unless revision_table?(base_name, table_name)
         if (match = /\A__r(\d+)_#{base_name}\z/.match(table_name.to_s))
@@ -71,12 +71,32 @@ module Spontaneous
         self.class.revision_table(@name, revision_number)
       end
 
+      def revision_from_table(table)
+        self.class.revision_from_table(@name, table)
+      end
+
       def revision_table?(table_name)
         self.class.revision_table?(@name, table_name)
       end
 
       def pad_revision_number(revision_number)
         self.class.pad_revision_number(revision_number)
+      end
+
+      def revision_history_table
+        :"spontaneous_#{@name}_history"
+      end
+
+      def revision_archive_table
+        :"spontaneous_#{@name}_archive"
+      end
+
+      def revision_history_dataset
+        @database[revision_history_table]
+      end
+
+      def revision_archive_dataset
+        @database[revision_archive_table]
       end
     end
   end

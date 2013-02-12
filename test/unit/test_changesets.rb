@@ -40,6 +40,15 @@ class ChangeTest < MiniTest::Spec
     end
 
 
+    should "flag if the site has never been published" do
+      root = Page.create(:title => "root")
+      5.times { |i| root.things << Page.create(:title => "Page #{i+1}") }
+      result = S::Change.outstanding
+      assert result.key?(:published_revision)
+      result[:published_revision].should == 0
+      result[:first_publish].should be_true
+    end
+
 
     should "list all newly created pages" do
       root = Page.create(:title => "root")
@@ -49,12 +58,15 @@ class ChangeTest < MiniTest::Spec
       5.times { |i| root.things << Page.create(:title => "Page #{i+1}") }
 
       result = S::Change.outstanding
-      result.must_be_instance_of(Array)
-      result.length.should == 5
+      result.must_be_instance_of(Hash)
 
-      result.map(&:class).should == [S::Change]*5
+      pages = result[:changes]
+      pages.must_be_instance_of(Array)
+      pages.length.should == 5
 
-      Set.new(result.map(&:page_id)).should == Set.new(root.things.map { |p| p.id })
+      pages.map(&:class).should == [S::Change]*5
+
+      Set.new(pages.map(&:page_id)).should == Set.new(root.things.map { |p| p.id })
     end
 
     should "not list new pieces as available for publish" do
@@ -65,7 +77,7 @@ class ChangeTest < MiniTest::Spec
       root[:first_published_at] = root[:last_published_at] = root.modified_at - 1000
       root.things << Piece.new
       root.save.reload
-      result = S::Change.outstanding
+      result = S::Change.outstanding[:changes]
       result.length.should == 1
       result.first.page.should == root
     end
@@ -80,7 +92,7 @@ class ChangeTest < MiniTest::Spec
 
       Content.publish(@revision+1, [root.id, root.things.first.id])
 
-      result = S::Change.outstanding
+      result = S::Change.outstanding[:changes]
       result.length.should == 4
       Set.new(result.map(&:page_id).flatten).should == Set.new(root.things[1..-1].map(&:id))
     end
@@ -107,7 +119,7 @@ class ChangeTest < MiniTest::Spec
 
 
       Content.publish(@revision+1, [root.id])
-      result = S::Change.outstanding
+      result = S::Change.outstanding[:changes]
 
       result.length.should == 5
 
@@ -145,7 +157,7 @@ class ChangeTest < MiniTest::Spec
 
 
       Content.publish(@revision+1, [root.id])
-      result = S::Change.outstanding
+      result = S::Change.outstanding[:changes]
 
       e = nil
       begin
@@ -171,7 +183,7 @@ class ChangeTest < MiniTest::Spec
       root.save
 
       Content.publish(@revision+1, [root.id])
-      result = S::Change.outstanding
+      result = S::Change.outstanding[:changes]
       change = result.detect { |change| change.page.id == new_child1.id }
       change.export.should == {
         :id => new_child1.id,
@@ -209,7 +221,7 @@ class ChangeTest < MiniTest::Spec
       root.save
       last = Time.now + 100
       ::Content.filter(:id => new_child1.id).update(:modified_at => last)
-      result = S::Change.outstanding
+      result = S::Change.outstanding[:changes]
       assert result.first.modified_at > result.last.modified_at, "Change list in incorrect order"
     end
 
@@ -232,7 +244,7 @@ class ChangeTest < MiniTest::Spec
       page1.slug = "changed"
       page1.save
 
-      result = S::Change.outstanding
+      result = S::Change.outstanding[:changes]
 
       change = result.detect { |change| change.page.id == page1.id }
       change.export[:side_effects].should == {
@@ -258,7 +270,7 @@ class ChangeTest < MiniTest::Spec
       page1.hide!
 
       page1.reload
-      result = S::Change.outstanding
+      result = S::Change.outstanding[:changes]
       change = result.detect { |change| change.page.id == page1.id }
       change.export[:side_effects].should == {
         :visibility => [{ :count => 1, :created_at => later.httpdate, :old_value => false, :new_value => true}]
@@ -278,7 +290,7 @@ class ChangeTest < MiniTest::Spec
 
       lock = Spontaneous::PageLock.create(:page_id => page.id, :content_id => piece.id, :field_id => piece.async.id, :description => "Update Lock")
       page.locked_for_update?.should be_true
-      result = S::Change.outstanding
+      result = S::Change.outstanding[:changes]
       change = result.detect { |change| change.page.id == page.id }
       change.export[:update_locks].should == [{
         id: lock.id,

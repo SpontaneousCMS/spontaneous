@@ -33,7 +33,7 @@ module Spontaneous
         if choice and choice <= actions.length and choice > 0
           action = actions[choice - 1]
           begin
-            Spontaneous::Schema.apply(action)
+            Spontaneous.schema.apply(action)
           rescue Spontaneous::SchemaModificationError => error
             fix_schema(error)
           end

@@ -47,9 +47,17 @@ module Spontaneous
         :columns, :table_name,
         :qualify_column, :quote_identifier,
         :with_cache,
-        :logger, :logger=
+        :logger=, :logger
 
-      def_delegators :@schema, :subclasses, :inherited
+      def_delegators :@schema,
+        :subclasses, :inherited
+
+      def_delegators :@table,
+        :db, :primary_key,
+        :revision_table, :revision_table?, :revision_from_table,
+        :revision_history_table, :revision_archive_table,
+        :revision_history_dataset, :revision_archive_dataset,
+        :quote_identifier
 
       def visible(visible_only = true, &block)
         scope(current_revision, visible_only, &block)
@@ -93,7 +101,7 @@ module Spontaneous
           thread   = Thread.current
           state    = [thread[r], thread[v], thread[d]]
           begin
-            thread[r] = revision_number(revision)
+            thread[r] = to_revision(revision)
             thread[v] = visible
             thread[d] = current_scope
             yield
@@ -115,11 +123,11 @@ module Spontaneous
 
       def use_current_scope?(revision, visible)
         cached_dataset? &&
-          (current_revision == revision_number(revision)) &&
+          (current_revision == to_revision(revision)) &&
           ((visible || false) == visible_only?)
       end
 
-      def revision_number(r)
+      def to_revision(r)
         r.nil? ? nil : r.to_i
       end
 
@@ -131,28 +139,8 @@ module Spontaneous
         Thread.current[@keys[:visible]] || false
       end
 
-      def db
-        @table.db
-      end
-
       def base_table
         @table.name
-      end
-
-      def primary_key
-        @table.primary_key
-      end
-
-      def revision_table(revision)
-        @table.revision_table(revision)
-      end
-
-      def revision_table?(table_name)
-        @table.revision_table?(table_name)
-      end
-
-      def quote_identifier(identifier)
-        @table.quote_identifier(identifier)
       end
 
       def schema_uid(id_string)

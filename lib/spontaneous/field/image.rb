@@ -62,7 +62,7 @@ module Spontaneous::Field
 
       def render(format=:html, *args)
         case format
-        when :html
+        when "html", :html
           to_html(*args)
         else
           value

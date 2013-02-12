@@ -166,10 +166,6 @@ module Spontaneous
         process_value(v) if process
       end
 
-      def modified?(v)
-        @modified = (@initial_value != v)
-      end
-
       def modified!
         owner.field_modified!(self) if owner
       end
@@ -254,6 +250,10 @@ module Spontaneous
         value(format)
       end
 
+      def render_using(renderer, format=:html, *args)
+        render(format)
+      end
+
       def to_html(*args)
         render(:html, *args)
       end
@@ -273,7 +273,7 @@ module Spontaneous
       end
 
       def mark_unmodified
-        @modified = nil
+        @modified = false
       end
 
       def modified?
@@ -361,6 +361,10 @@ module Spontaneous
           :version => version,
           :value => @initial_value,
           :user => owner.current_editor)
+      end
+
+      def <=>(o)
+        unprocessed_value <=> o.unprocessed_value
       end
 
       def ==(o)

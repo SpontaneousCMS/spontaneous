@@ -37,6 +37,17 @@ module Spontaneous::Collections
       self.select { |box| box._prototype.group == group_name }
     end
 
+    # A call to ${ content } within a layout template will call
+    # this #render method. The obvious result of this should be
+    # to just render each of the contained boxes.
+    def render(format = :html, params = {}, *args)
+      map { |box| box.render(format, params, *args) }.join("\n")
+    end
+
+    def render_using(renderer, format = :html, params = {}, *args)
+      map { |box| box.render_using(renderer, format, params, *args) }.join("\n")
+    end
+
     protected
 
     def get_single(index)

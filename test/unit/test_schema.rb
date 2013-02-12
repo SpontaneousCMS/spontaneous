@@ -569,7 +569,7 @@ class SchemaTest < MiniTest::Spec
       B.boxes.agroup.allowed_types(nil).should == [A, B, C]
     end
 
-    should "apply the options to all the included classes xxx" do
+    should "apply the options to all the included classes" do
       user = mock()
       S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.editor).returns(true)
       S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.root).returns(true)
@@ -698,6 +698,44 @@ class SchemaTest < MiniTest::Spec
         A.schema_id.should == S.schema.uids["qLcxinA008"]
       end
 
+      context "renamed boxes" do
+        setup do
+          S.schema.delete(::A)
+          Object.send :remove_const, :A
+          class ::A < ::Page
+            field :title
+            field :introduction
+            layout :sparse
+            box :renamed do
+              field :description
+            end
+          end
+        end
+        should "raise a validation exception" do
+          lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
+        end
+        context "modification exception" do
+          setup do
+            begin
+              S.schema.validate!
+            rescue Spontaneous::SchemaModificationError => e
+              @exception = e
+              @modification = e.modification
+            end
+          end
+
+          should "not be resolvable" do
+            @modification.resolvable?.should be_false
+          end
+          should "have one added & one removed box"do
+            @modification.added_boxes.length.should == 1
+            @modification.added_boxes.first.name.should == :renamed
+            @modification.removed_boxes.length.should == 1
+            @modification.removed_boxes.first.name.should == "posts"
+          end
+        end
+      end
+
       teardown do
         Object.send(:remove_const, :A) rescue nil
         Object.send(:remove_const, :B) rescue nil
@@ -747,7 +785,12 @@ class SchemaTest < MiniTest::Spec
 
       should "be done automatically if only boxes have been removed" do
         uid = A.boxes[:posts].schema_id.to_s
-        A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
+        Object.send :remove_const, :A
+        class ::A < ::Page
+          field :title
+          field :introduction
+          layout :sparse
+        end
         S.schema.stubs(:classes).returns([A, B])
         S.schema.reload!
         S.schema.validate!
@@ -756,11 +799,14 @@ class SchemaTest < MiniTest::Spec
       end
 
       should "be done automatically if only fields have been removed" do
-        f1 = A.field_prototypes[:title]
-        uid = f1.schema_id.to_s
-        f2 = A.field_prototypes[:introduction]
-        A.stubs(:field_prototypes).returns({:introduction => f2})
-        A.stubs(:fields).returns([f2])
+        uid = A.fields[:title].schema_id.to_s
+        S.schema.delete(::A)
+        Object.send :remove_const, :A
+        class ::A < ::Page
+          field :introduction
+          layout :sparse
+          box(:posts) { field :description }
+        end
         S.schema.reload!
         S.schema.validate!
         m = YAML.load_file(@map_file)

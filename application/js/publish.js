@@ -63,35 +63,54 @@ Spontaneous.Publishing = (function($, S) {
 			this.close();
 		},
 
-		change_list_loaded: function(change_list) {
-			var w = this.wrapper, __dialogue = this;
+		change_list_loaded: function(outstanding) {
+			var change_list = outstanding.changes
+			, w = this.wrapper
+			, self = this
+			, changed_wrap = dom.div("#changes.change-list")
+			, publish_wrap = dom.div("#to-publish.change-list")
+			, first_publish = outstanding.first_publish
+			, append_to;
+			if (first_publish) {
+				w.addClass("first-publish");
+			}
 			w.empty();
-			var changed_wrap = dom.div("#changes.change-list"), publish_wrap = dom.div("#to-publish.change-list")
 			w.append(changed_wrap, publish_wrap)
 			if (change_list.length === 0) {
 				var summary = dom.p('.publish-up-to-date').text("The site is up to date");
 				w.append(summary);
-				this.disable_button('Publish');
+				self.disable_button('Publish');
 			} else {
 				var publish_all = dom.a('.button').text('Publish All').click(function() {
-					this.set_publish_all(true);
-				}.bind(this));
+					self.set_publish_all(true);
+				}.bind(self));
 				var clear_all = dom.a('.button').text('Clear All').click(function() {
-					this.set_publish_all(false);
-				}.bind(this));
+					self.set_publish_all(false);
+				}.bind(self));
+
 				var changed_toolbar = dom.div('.actions').append(dom.div().text("Modified pages")).append(publish_all);
-				var publish_toolbar = dom.div('.actions').append(dom.div().text("Publish pages")).append(clear_all);
+				var publish_toolbar = dom.div('.actions').append(dom.div().text("Publish pages"));
+				if (!first_publish) {
+					publish_toolbar.append(clear_all);
+				}
 				var changed_entries = dom.div('.change-sets'), publish_entries = dom.div('.change-sets')
 				changed_wrap.append(changed_toolbar, changed_entries);
 				publish_wrap.append(publish_toolbar, publish_entries);
-				for (var i = 0, ii = change_list.length; i < ii; i++) {
-					var cs = new ChangeSet(i, this, change_list[i]);
-					this.change_sets.push(cs);
-					changed_entries.append(cs.panel())
+				append_to = changed_entries;
+				if (first_publish) {
+					append_to = publish_entries;
 				}
-				publish_entries.append(dom.div('.instructions').text('Add pages to publish from the list on the left'));
-				this.changed_entries = changed_entries;
-				this.publish_entries = publish_entries;
+				for (var i = 0, ii = change_list.length; i < ii; i++) {
+					var cs = new ChangeSet(i, self, change_list[i], first_publish);
+					self.change_sets.push(cs);
+					append_to.append(cs.panel())
+				}
+				if (!first_publish) {
+					publish_entries.append(dom.div('.instructions').text('Add pages to publish from the list on the left'));
+				}
+
+				self.changed_entries = changed_entries;
+				self.publish_entries = publish_entries;
 			}
 		},
 		set_publish_all: function(state) {
@@ -202,11 +221,12 @@ Spontaneous.Publishing = (function($, S) {
 		}
 	});
 	var ChangeSet = new JS.Class({
-		initialize: function(id, dialogue, change) {
+		initialize: function(id, dialogue, change, selected) {
 			this.id = id;
 			this.dialogue = dialogue;
 			this.change = change;
-			this.selected = false;
+			this.selected    = selected || false;
+			this.mustPublish = selected || false;
 		},
 		locks: function(){
 			return this.change.update_locks;
@@ -268,10 +288,16 @@ Spontaneous.Publishing = (function($, S) {
 			for (var i = 0, ii = pages.length; i < ii; i++) {
 				page_list.append(pages[i].panel());
 			}
+
 			add.click(function() {
 				this.select_toggle();
 			}.bind(this));
-			inner.append(page_list, add);
+
+			inner.append(page_list);
+
+			if (!this.mustPublish) {
+				inner.append(add);
+			}
 			w.append(inner);
 			return w;
 		},

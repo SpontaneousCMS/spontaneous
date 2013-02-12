@@ -119,7 +119,25 @@ module Spontaneous::Model
     end
 
     def to_s
-      %(#<#{self.class.name} id=#{id}>)
+      inspect
+    end
+
+    def inspect
+      values = inspecttion_values.map { |(name, value)| "#{name}=#{value.inspect}" }.join(" ")
+      %(#<#{self.class.name} #{values}>)
+    end
+
+    def inspecttion_values
+      { :id => id, :location => [page.path, container._name, position].join(":") }.merge(inspection_fields)
+    end
+
+    def inspection_fields
+      crop = lambda{ |str|
+        len = 23
+        return str if str.length <= len
+        str[0...len] + "…"
+      }
+      Hash[fields.map { |field| [field.name, crop[field.unprocessed_value]]}]
     end
 
     def each

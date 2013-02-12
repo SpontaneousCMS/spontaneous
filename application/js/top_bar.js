@@ -144,7 +144,7 @@ Spontaneous.TopBar = (function($, S) {
 			} else {
 				this.select.show();
 			}
-			return '('+(count)+' pages)';
+			return '('+(count)+' page'+(count === 1 ? '' : 's')+')';
 		},
 		optgroup: function(boxname) {
 			return dom.optgroup().attr('label', boxname);
@@ -378,9 +378,11 @@ Spontaneous.TopBar = (function($, S) {
 				}
 			});
 
-			page.watch('slug', function(title) {
-				self.navigation_current.set_title(title);
-			});
+			if (!page.is_root()) {
+				page.watch('slug', function(title) {
+					self.navigation_current.set_title(title);
+				});
+			}
 
 			page.title_field().watch('value', function(title) {
 				Spontaneous.set_browser_title(title);

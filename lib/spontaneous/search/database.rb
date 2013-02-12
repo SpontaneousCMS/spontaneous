@@ -26,10 +26,20 @@ module Spontaneous::Search
       options = { :dir => directory,
         :language => @index.language,
         :fields => @index.fields,
-        :spelling => true }
+        :spelling => true,
+        :weights => weighting_proc
+      }
       options[:stemmer] = @index.stemmer unless @index.stemmer.nil?
       options[:stopper] = @index.stopper unless @index.stopper.nil?
       options
+    end
+
+    def weighting_proc
+      Proc.new { |key, value, fields| field_weighting(key, fields) }
+    end
+
+    def field_weighting(key, fields)
+      @weights[key]
     end
 
     def database
@@ -42,6 +52,7 @@ module Spontaneous::Search
 
     def add(page)
       if @index.include?(page)
+        @weights = @index.weights(page)
         database << @index.indexable_content(page)
       end
     end

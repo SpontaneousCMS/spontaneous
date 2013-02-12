@@ -327,8 +327,22 @@ module Spontaneous
         @uids = Spontaneous::Schema::UIDMap.new
       end
 
+      # It's obvious from this method that schema classes are
+      # stored in too many ways
       def delete(klass)
-        classes.delete(klass)
+        constants_of(klass).each { |const| delete(const) }
+        unfiltered_classes.delete(klass)
+        remove_group_members(klass)
+        inheritance_map.delete(klass.to_s)
+        inheritance_map.each do |supertype, subtypes|
+          subtypes.delete(klass)
+        end
+      end
+
+      def constants_of(klass)
+        klass.constants.
+          select { |c| klass.const_defined?(c, false) }.
+          map { |c| klass.const_get(c) }
       end
 
       def schema_map_file
@@ -349,17 +363,9 @@ module Spontaneous
         map.to_id(obj)
       end
 
-      # def schema_id(obj)
-      #   map.to_id(obj)
-      # end
-
       def to_class(id)
         map.to_class(id)
       end
-
-      # def [](schema_id)
-      #   map[schema_id]
-      # end
 
       def groups
         @groups ||= Hash.new { |h, k| h[k] = [] }
