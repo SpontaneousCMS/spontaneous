@@ -23,7 +23,7 @@ module Spontaneous
     end
 
     def external_template(format = :html)
-      unless (template = file_template(format))
+      unless (template = (file_template(format) || supertype_template(format)))
         logger.warn("No template file found for style #{owner}:#{name}.#{format}")
         template = anonymous_template
       end
@@ -31,7 +31,7 @@ module Spontaneous
     end
 
     def file_template(format)
-      local_template(format) || supertype_template(format)
+      local_template(format)
     end
 
     # Tests to see if a template file exists for the specified format.
