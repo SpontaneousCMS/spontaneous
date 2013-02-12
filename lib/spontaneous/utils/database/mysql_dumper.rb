@@ -75,7 +75,7 @@ module Spontaneous
         # The whole point of this table's existance is to reduce the
         # size of the db dump for syncing
         def revision_archive_table
-          Spontaneous::Content.history_dataset.first_source.to_s
+          Spontaneous::Content.archive_dataset.first_source.to_s
         end
 
         def option(option, add_if_nil=false)
