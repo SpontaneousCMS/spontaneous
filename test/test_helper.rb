@@ -19,7 +19,6 @@ $:.unshift(spot_path) if File.directory?(spot_path) && !$:.include?(spot_path)
 require 'rack'
 require 'logger'
 
-
 Sequel.extension :migration
 
 # for future integration with travis
@@ -62,32 +61,19 @@ DB = Sequel.connect(connection_string) unless defined?(DB)
 Sequel::Migrator.apply(DB, 'db/migrations')
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spontaneous')
-# require File.expand_path(File.dirname(__FILE__) + '/../lib/cutaneous')
-require 'cutaneous'
 
-# require 'test/unit'
 require 'minitest/spec'
 require 'rack/test'
-require 'matchy'
-require 'shoulda'
-require 'timecop'
 require 'mocha/setup'
 require 'pp'
 require 'tmpdir'
 require 'json'
 
-begin
-  require 'leftright'
-rescue LoadError
-  # fails for ruby 1.9
-end
-
-require 'support/custom_matchers'
+# require 'support/custom_matchers'
 # require 'support/timing'
 
 
 # Spontaneous.database = DB
-
 
 class MiniTestWithHooks < MiniTest::Unit
   def before_suites
@@ -97,7 +83,7 @@ class MiniTestWithHooks < MiniTest::Unit
   end
 
   def exclude?(suite)
-    [MiniTest::Spec, Test::Unit::TestCase].include?(suite)
+    [MiniTest::Spec].include?(suite)
   end
 
   def _run_suites(suites, type)
@@ -124,8 +110,6 @@ class MiniTestWithHooks < MiniTest::Unit
   end
 end
 
-
-
 MiniTest::Unit.runner = MiniTestWithHooks.new
 
 def silence_logger(&block)
@@ -141,7 +125,7 @@ def silence_logger(&block)
 end
 
 class MiniTest::Spec
-  include CustomMatchers
+  # include CustomMatchers
 
   attr_accessor :template_root
   alias :silence_stdout :silence_logger
@@ -281,7 +265,4 @@ class MiniTest::Spec
 
 end
 
-
-
 require 'minitest/autorun'
-

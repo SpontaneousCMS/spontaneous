@@ -57,14 +57,8 @@ Gem::Specification.new do |s|
   s.add_dependency('yajl-ruby',       ["~> 1.1.0"])
 
   s.add_development_dependency('minitest', ["~> 2.1.0"])
-  s.add_development_dependency('jeweler', ["~> 1.5"])
-  s.add_development_dependency('jnunemaker-matchy', ["~> 0.4"])
-  s.add_development_dependency('shoulda', ["~> 2.11.3"])
-  s.add_development_dependency('timecop', ["~> 0.3"])
-  s.add_development_dependency('mocha', ["~> 0.9"])
+  s.add_development_dependency('mocha', ["~> 0.13.2"])
   s.add_development_dependency('rack-test', ["~> 0.5"])
-  s.add_development_dependency('leftright', ["~> 0.9"])
-  s.add_development_dependency('stackdeck', ["~> 0.2"])
 
   # = MANIFEST =
   s.files = %w[
