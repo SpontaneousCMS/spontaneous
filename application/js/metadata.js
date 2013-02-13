@@ -12,7 +12,7 @@ Spontaneous.Metadata = (function($, S) {
 	};
 	return {
 		load: function(onComplete) {
-			ajax.get('/metadata', loaded(onComplete));
+			ajax.get('/site', loaded(onComplete));
 		}
 	};
 }(jQuery, Spontaneous));

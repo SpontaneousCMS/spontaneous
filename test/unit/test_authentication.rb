@@ -121,7 +121,7 @@ describe "Authentication" do
       class ::SitePage < Page
         # page_style :default
         field :editor_level, :user_level => :editor
-          field :admin_level, :user_level => :admin
+        field :admin_level, :user_level => :admin
         field :root_level, :user_level => :root
         field :mixed_level, :read_level => :editor, :write_level => :root
         field :default_level
@@ -130,18 +130,18 @@ describe "Authentication" do
 
         box :editor_level, :user_level => :editor do
           field :editor_level, :user_level => :editor
-            field :admin_level, :user_level => :admin
+          field :admin_level, :user_level => :admin
           field :root_level, :user_level => :root
           field :mixed_level, :read_level => :editor, :write_level => :root
           field :default_level
 
           allow :'D', :user_level => :editor
-            allow :'C', :user_level => :root
+          allow :'C', :user_level => :root
         end
 
         box :admin_level, :user_level => :admin do
           field :editor_level, :user_level => :editor
-            field :admin_level, :user_level => :admin
+          field :admin_level, :user_level => :admin
           field :root_level, :user_level => :root
           field :mixed_level, :read_level => :editor, :write_level => :root
           field :default_level
@@ -152,7 +152,7 @@ describe "Authentication" do
 
         box :root_level, :user_level => :root do
           field :editor_level, :user_level => :editor
-            field :admin_level, :user_level => :admin
+          field :admin_level, :user_level => :admin
           field :root_level, :user_level => :root
           field :mixed_level, :read_level => :editor, :write_level => :root
           field :default_level
@@ -162,7 +162,7 @@ describe "Authentication" do
 
         box :mixed_level, :read_level => :editor, :write_level => :root do
           field :editor_level, :user_level => :editor
-            field :admin_level, :user_level => :admin
+          field :admin_level, :user_level => :admin
           field :root_level, :user_level => :root
           field :mixed_level, :read_level => :editor, :write_level => :root
           field :default_level
@@ -172,7 +172,7 @@ describe "Authentication" do
 
         box :default_level do
           field :editor_level, :user_level => :editor
-            field :admin_level, :user_level => :admin
+          field :admin_level, :user_level => :admin
           field :root_level, :user_level => :root
           field :mixed_level, :read_level => :editor, :write_level => :root
           field :default_level
@@ -321,62 +321,82 @@ describe "Authentication" do
         end
       end
 
-      describe "Logged in users" do
-        before do
-          login_user(@editor_user)
-        end
+    end
 
-        after do
-          clear_cookies
-        end
+    describe "Invalid access keys" do
+      before do
+        login_user(@editor_user)
+        @valid_key = rack_mock_session.cookie_jar[S::Rack::AUTH_COOKIE]
+        S::Permissions::AccessKey.expects(:authenticate).with(@valid_key, anything).returns(nil)
+      end
 
-        it "sets a long-lived cookie xxx" do
-          cookies = rack_mock_session.cookie_jar.instance_variable_get("@cookies")
-          cookie = cookies.detect { |c| c.name == S::Rack::AUTH_COOKIE }
-          expiry = cookie.expires
-          expiry.must_be_instance_of Time
-          expiry.must_be_close_to Time.now + S::Rack::SESSION_LIFETIME, 1
-        end
-
-        it "are provided with a CSRF token xxx" do
-          auth_get "/@spontaneous"
-          assert last_response.ok?
-          assert_contains_csrf_token @user.access_keys.first
-        end
-
-        it "need to supply CSRF header for all POSTs xxx" do
-          post_paths.split.delete_if { |path| }.each do |path|
-            post "/@spontaneous#{path}"
-            assert last_response.status == 401, "Status was #{last_response.status} not 401"
-          end
-        end
-
-        it "need to supply API key in params for all GETs" do
-          get_paths.split.each do |path|
-            get "/@spontaneous#{path}"
-            assert last_response.status == 401, "Status was #{last_response.status} not 401"
-          end
-        end
-
-        it "be able to view the preview" do
-          get "/"
-          assert last_response.ok?
-        end
-
-        it "be able to view the editing interface" do
-          get "/@spontaneous"
-          assert last_response.ok?, "Expected 200 but got #{last_response.status}"
-        end
-
-        it "be able to logout" do
-          auth_post "/@spontaneous/logout"
-          assert last_response.status == 401
-          rack_mock_session.cookie_jar.merge(last_response.headers["set-cookie"])
-          rack_mock_session.cookie_jar[Spontaneous::Rack::AUTH_COOKIE].value.must_equal ""
-        end
+      it "should show a login page" do
+        get '/@spontaneous'
+        assert_login_page
       end
     end
 
+    describe "Logged in users" do
+      before do
+        login_user(@editor_user)
+      end
+
+      after do
+        clear_cookies
+      end
+
+      it "sets a long-lived cookie" do
+        cookies = rack_mock_session.cookie_jar.instance_variable_get("@cookies")
+        cookie = cookies.detect { |c| c.name == S::Rack::AUTH_COOKIE }
+        expiry = cookie.expires
+        expiry.must_be_instance_of Time
+        expiry.must_be_close_to Time.now + S::Rack::SESSION_LIFETIME, 1
+      end
+
+      it "are provided with a CSRF token" do
+        auth_get "/@spontaneous"
+        assert last_response.ok?
+        assert_contains_csrf_token @user.access_keys.first
+      end
+
+      it "need to supply CSRF header for all POSTs" do
+        post_paths.split.delete_if { |path| }.each do |path|
+          post "/@spontaneous#{path}"
+          assert last_response.status == 401, "Status was #{last_response.status} not 401"
+        end
+      end
+
+      it "need to supply CSRF header for all GETs" do
+        get_paths.split.each do |path|
+          get "/@spontaneous#{path}"
+          assert last_response.status == 401, "Status was #{last_response.status} not 401"
+        end
+      end
+
+      it "can supply the CSRF token as a URL parameter xxx" do
+        get_paths.split.each do |path|
+          get "/@spontaneous/site?#{S::Rack::CSRF_PARAM}=#{api_key.generate_csrf_token}"
+          assert last_response.status == 200, "Status was #{last_response.status} not 401"
+        end
+      end
+
+      it "be able to view the preview" do
+        get "/"
+        assert last_response.ok?
+      end
+
+      it "be able to view the editing interface" do
+        get "/@spontaneous"
+        assert last_response.ok?, "Expected 200 but got #{last_response.status}"
+      end
+
+      it "be able to logout" do
+        auth_post "/@spontaneous/logout"
+        assert last_response.status == 401
+        rack_mock_session.cookie_jar.merge(last_response.headers["set-cookie"])
+        rack_mock_session.cookie_jar[Spontaneous::Rack::AUTH_COOKIE].value.must_equal ""
+      end
+    end
     describe "User levels" do
       describe "Root access" do
         before do

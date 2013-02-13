@@ -34,6 +34,7 @@ module Spontaneous
           use UnsupportedBrowser
           use User::Load
           use User::Login
+          # Everything after this handler requires authentication
           use User::AuthenticateEdit
           use CSRF::Header
           # Schema has to come before Reloader because we need to be able to
@@ -42,6 +43,7 @@ module Spontaneous
           map("/schema")  { run Schema }
           use Reloader
           use Index
+          # Everything after this middleware requires a valid CSRF token
           use CSRF::Verification
           map("/events")  { run Events }
           map("/users")   { run UserAdmin }
@@ -64,6 +66,12 @@ module Spontaneous
           use ::Rack::Lint
           use Scope::Preview
           use User::Load
+          use CSRF::Header
+          # Preview authentication redirects to /@spontaneous rather than
+          # showing a login screen. This way if you go to rhe root of the site
+          # as an unauthorised user (say for the first time) you will get sent
+          # to the editing interface wrapper rather than being presented with
+          # the preview site.
           use User::AuthenticatePreview
           use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
             :urls => %w[/],

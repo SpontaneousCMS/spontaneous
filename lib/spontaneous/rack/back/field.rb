@@ -1,6 +1,8 @@
 module Spontaneous::Rack::Back
   class Field < Base
-    get '/conflicts/:id/?:box_id?' do
+    # Should be a GET as it changes no state but the request can need a lot
+    # of data which is best done outside of the query string
+    post '/conflicts/:id/?:box_id?' do
       content_for_request(true) do |content, box|
         generate_conflict_list(box || content)
       end

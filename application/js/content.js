@@ -121,11 +121,11 @@ Spontaneous.Content = (function($, S) {
 		save_field: function(field) {
 			var params = { field: {} };
 			params.field[field.name] = {value: field.value()};
-			Spontaneous.Ajax.post(this.save_path(), params, this.save_complete.bind(this));
+			Spontaneous.Ajax.put(this.save_path(), params, this.save_complete.bind(this));
 		},
 
 		save_path: function() {
-			return ['/save', this.content.id].join('/');
+			return ['/content', this.content.id].join('/');
 		},
 
 		save_complete: function(response) {
@@ -197,10 +197,10 @@ Spontaneous.Content = (function($, S) {
 		},
 
 		destroy: function() {
-			Spontaneous.Ajax.post(['/destroy', this.content.id].join('/'), {}, this.destroyed.bind(this));
+			Spontaneous.Ajax.del(['/content', this.content.id].join('/'), {}, this.destroyed.bind(this));
 		},
 		toggle_visibility: function() {
-			Spontaneous.Ajax.post(['/toggle', this.content.id].join('/'), {}, this.visibility_toggled.bind(this));
+			Spontaneous.Ajax.patch(['/content', this.content.id, "toggle"].join('/'), {}, this.visibility_toggled.bind(this));
 		},
 		visibility_toggled: function(result) {
 			this.set('hidden', result.hidden);
@@ -212,7 +212,7 @@ Spontaneous.Content = (function($, S) {
 			page.trigger('removed_entry', this);
 		},
 		reposition: function(position) {
-			Spontaneous.Ajax.post(['/content', this.content.id, 'position', position].join('/'), {}, function() {
+			Spontaneous.Ajax.patch(['/content', this.content.id, 'position', position].join('/'), {}, function() {
 				this.repositioned();
 			}.bind(this));
 		},

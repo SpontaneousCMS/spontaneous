@@ -15,11 +15,26 @@ module Spontaneous::Rack::Back
 
       def call(env)
         if (key = env[ACTIVE_KEY])
-          token = env[CSRF_ENV]
+          token = load_token(env)
           call!(env, key, token)
-        else # Should never happen
+        else
+          # Should never happen as authentication should be enforced further up
+          # the stack
           [401, {}, ["Unauthorised"]]
         end
+      end
+
+      def load_token(env)
+        header_token(env) || param_token(env)
+      end
+
+      def header_token(env)
+        env[CSRF_ENV]
+      end
+
+      def param_token(env)
+        request = ::Rack::Request.new(env)
+        request.params[CSRF_PARAM]
       end
 
       def call!(env, key, token)

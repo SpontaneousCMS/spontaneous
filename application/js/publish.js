@@ -38,7 +38,7 @@ Spontaneous.Publishing = (function($, S) {
 		body: function() {
 			var wrapper = dom.div('#publishing-dialogue');
 			this.wrapper = wrapper;
-			Spontaneous.Ajax.get(['/publish', 'changes'].join('/'), this.change_list_loaded.bind(this));
+			Spontaneous.Ajax.get('/changes', this.change_list_loaded.bind(this));
 			return wrapper;
 		},
 		buttons: function() {
@@ -52,7 +52,7 @@ Spontaneous.Publishing = (function($, S) {
 				ids = ids.concat(changes[i].page_ids());
 			}
 			if (ids.length > 0) {
-				Spontaneous.Ajax.post(['/publish', 'publish'].join('/'),{'page_ids': ids}, this.publish_requested.bind(this));
+				Spontaneous.Ajax.post('/changes', {'page_ids': ids}, this.publish_requested.bind(this));
 			} else {
 			}
 		},

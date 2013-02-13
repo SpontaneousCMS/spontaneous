@@ -60,7 +60,7 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 					}
 
 					self.spinner.start();
-					Spontaneous.Ajax.get(['/targets', self.type.schema_id, self.box().id()].join('/'), params, self.targets_loaded.bind(self));
+					Spontaneous.Ajax.get(['/alias', self.type.schema_id, self.box().id()].join('/'), params, self.targets_loaded.bind(self));
 				}
 				, input = dom.input({"type":"search", "placeholder":"Search..."}).keydown(function(event) {
 					if (event.keyCode === 13) {

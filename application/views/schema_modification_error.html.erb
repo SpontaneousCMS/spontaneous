@@ -50,7 +50,7 @@
     <li>
     <form action="/@spontaneous/schema/<%= action.action %>" method="post">
       <input type="hidden" name="origin" value="<%= env['SCRIPT_NAME'] %>" />
-      <input type="hidden" name="__key" value="<%= env[S::Rack::ACTIVE_KEY].key_id %>" />
+      <input type="hidden" name="__token" value="<%= env[S::Rack::CSRF_TOKEN] %>" />
       <input type="hidden" name="uid" value="<%= action.source.to_s %>" />
       <% if action.dest %>
         <input type="hidden" name="ref" value="<%= action.dest.schema_name %>" />

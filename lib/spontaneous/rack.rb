@@ -17,6 +17,7 @@ module Spontaneous
       CSRF_TOKEN     = "spot.csrf_token".freeze
 
       CSRF_HEADER    = "X-CSRF-Token".freeze
+      CSRF_PARAM     = "__token".freeze
       CSRF_ENV       = ("HTTP_" << CSRF_HEADER.upcase.gsub(/-/, "_")).freeze
 
       EXPIRES_MAX = DateTime.parse("Thu, 31 Dec 2037 23:55:55 GMT").httpdate

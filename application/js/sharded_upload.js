@@ -32,7 +32,7 @@ Spontaneous.ShardedUpload = (function($, S) {
 			this.failure_count = 0;
 		},
 		remote_path: function() {
-			return S.Ajax.request_url(['shard', this.hash].join('/'), true);
+			return S.Ajax.request_url(['shard', this.hash].join('/'));
 		},
 		begin_upload: function() {
 			// test for existance of shard on server
@@ -57,10 +57,12 @@ Spontaneous.ShardedUpload = (function($, S) {
 			// create the form and post it using the calculated hash
 			// assigning the callbacks to myself.
 
-			var form = new FormData(),
-				path = S.Ajax.request_url(['/shard', this.hash].join('/'), true);
+			var form = new FormData()
+			, path = S.Ajax.request_url(['/shard', this.hash].join('/'));
 			form.append('file', this.blob);
-			var xhr = new XMLHttpRequest(), upload = xhr.upload;
+			var xhr = S.Ajax.authenticatedRequest();
+			var upload = xhr.upload;
+
 			xhr.open("POST", path, true);
 			upload.onprogress = this.onprogress.bind(this);
 			upload.onload = this.onload.bind(this);
@@ -141,11 +143,12 @@ Spontaneous.ShardedUpload = (function($, S) {
 			form.append('shards', this.hashes().join(','));
 			form.append('mime_type', this.mime_type());
 			form.append('filename', File.filename(this.file));
-			this.post(this.path(), form);
+			this.request(this.method, this.path(), form);
 		},
 		path: function() {
-			return ["/shard/replace", this.target_id].join('/');
+			return ["/shard", this.target_id].join('/');
 		},
+		method: "PUT",
 		hashes: function() {
 			var hashes = [];
 			for (var i = 0, ii = this.completed.length; i < ii; i++) {

@@ -244,7 +244,7 @@ describe "Back" do
         sid = field.schema_id.to_s
         params = { "fields" => {sid => "2"} }
 
-        auth_get "/@spontaneous/field/conflicts/#{@job1.id}", params
+        auth_post "/@spontaneous/field/conflicts/#{@job1.id}", params
         assert last_response.status == 409, "Should have recieved a 409 conflict but instead received a #{last_response.status}"
         last_response.content_type.must_equal "application/json;charset=utf-8"
         result = Spontaneous.deserialise_http(last_response.body)
@@ -264,7 +264,7 @@ describe "Back" do
         sid = field.schema_id.to_s
         params = { "fields" => {sid => "3"} }
 
-        auth_get "/@spontaneous/field/conflicts/#{@job1.id}", params
+        auth_post "/@spontaneous/field/conflicts/#{@job1.id}", params
         assert last_response.status == 200, "Should have recieved a 200 OK but instead received a #{last_response.status}"
       end
 
@@ -279,7 +279,7 @@ describe "Back" do
         sid = field.schema_id.to_s
         params = { "fields" => {sid => "2"} }
 
-        auth_get "/@spontaneous/field/conflicts/#{@job1.id}/#{box.schema_id.to_s}", params
+        auth_post "/@spontaneous/field/conflicts/#{@job1.id}/#{box.schema_id.to_s}", params
         assert last_response.status == 409, "Should have recieved a 409 conflict but instead received a #{last_response.status}"
         last_response.content_type.must_equal "application/json;charset=utf-8"
         result = Spontaneous.deserialise_http(last_response.body)
@@ -1013,6 +1013,7 @@ describe "Back" do
         auth_get '/@spontaneous/'
         assert last_response.status == 412, "Schema validation errors should raise a 412 but instead recieved a #{last_response.status}"
         last_response.body.must_match %r{<form action="/@spontaneous/schema/delete" method="post"}
+        last_response.body.must_match %r{<input type="hidden" name="#{S::Rack::CSRF_PARAM}" value=".{32}:[0-9a-f]{40}"}
         last_response.body.must_match %r{<input type="hidden" name="uid" value="#{@df1.schema_id}"}
 
         last_response.body.must_match %r{<form action="/@spontaneous/schema/rename" method="post"}
@@ -1023,6 +1024,7 @@ describe "Back" do
         auth_get '/'
         assert last_response.status == 412, "Schema validation errors should raise a 412 but instead recieved a #{last_response.status}"
         last_response.body.must_match %r{<form action="/@spontaneous/schema/delete" method="post"}
+        last_response.body.must_match %r{<input type="hidden" name="#{S::Rack::CSRF_PARAM}" value=".{32}:[0-9a-f]{40}"}
         last_response.body.must_match %r{<input type="hidden" name="uid" value="#{@df1.schema_id}"}
 
         last_response.body.must_match %r{<form action="/@spontaneous/schema/rename" method="post"}
@@ -1031,7 +1033,7 @@ describe "Back" do
 
       it "perform renames via a link" do
         action ="/@spontaneous/schema/rename"
-        auth_post action, "uid" => @df1.schema_id, "ref" => @af1.schema_name, "origin" => "/@spontaneous"
+        post action, "uid" => @df1.schema_id, "ref" => @af1.schema_name, "origin" => "/@spontaneous", S::Rack::CSRF_PARAM => api_key.generate_csrf_token
         last_response.status.must_equal 302
         begin
           S.schema.validate!
@@ -1042,7 +1044,7 @@ describe "Back" do
 
       it "perform deletions via a link" do
         action ="/@spontaneous/schema/delete"
-        auth_post action, "uid" => @df1.schema_id, "origin" => "/@spontaneous"
+        post action, "uid" => @df1.schema_id, "origin" => "/@spontaneous", S::Rack::CSRF_PARAM => api_key.generate_csrf_token
         last_response.status.must_equal 302
         begin
           S.schema.validate!

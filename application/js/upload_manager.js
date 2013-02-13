@@ -8,13 +8,14 @@ Spontaneous.UploadManager = (function($, S) {
 		start: function() {
 			var form = new FormData();
 			form.append('file', this.file);
-			this.post(["/file/wrap", this.target_id].join('/'), form);
+			this.post(["/file", this.target_id].join('/'), form);
 		}
 	});
 	var ShardedWrapUpload = new JS.Class(S.ShardedUpload, {
 		path: function() {
-			return ["/shard/wrap", this.target_id].join('/');
+			return ["/shard", this.target_id].join('/');
 		},
+		method: "POST"
 	});
 	var FormUpload = new JS.Class(Upload, {
 		initialize: function(manager, target, form_data, size) {
@@ -24,7 +25,7 @@ Spontaneous.UploadManager = (function($, S) {
 			this.name = "Saving...";
 		},
 		start: function() {
-			this.post(this.target.save_path(), this.form_data);
+			this.put(this.target.save_path(), this.form_data);
 		}
 	});
 	var UploadManager = {

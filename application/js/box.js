@@ -81,7 +81,7 @@ Spontaneous.Box = (function($, S) {
 		},
 
 		add_entry: function(type, position) {
-			Spontaneous.Ajax.post(['/add', this.id(), type.schema_id].join('/'), {position: position}, this.entry_added.bind(this));
+			Spontaneous.Ajax.post(['/content', this.id(), type.schema_id].join('/'), {position: position}, this.entry_added.bind(this));
 		},
 
 		add_alias: function(alias_target_id, type, position) {
