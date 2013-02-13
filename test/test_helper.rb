@@ -263,6 +263,13 @@ class MiniTest::Spec
     last_response.body.must_match %r{<input.+name="user\[password\]"}
   end
 
+  def assert_contains_csrf_token(key)
+    body = last_response.body
+    match = /csrf_token: *('|")(.*)\1/.match(body)
+    flunk "CSRF token not included in template" unless match
+    token = match[2]
+    assert key.csrf_token_valid?(token), "Invalid token #{token.inspect}"
+  end
 end
 
 require 'minitest/autorun'

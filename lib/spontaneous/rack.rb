@@ -5,14 +5,23 @@ require "sinatra/base"
 
 module Spontaneous
   module Rack
-    NAMESPACE   = "/@spontaneous".freeze
-    ACTIVE_USER = "SPONTANEOUS_USER".freeze
-    ACTIVE_KEY  = "SPONTANEOUS_KEY".freeze
-    AUTH_COOKIE = "spontaneous_api_key".freeze
-    KEY_PARAM   = "__key".freeze
-    RENDERER    = "spot.renderer".freeze
+    module Constants
+      NAMESPACE      = "/@spontaneous".freeze
+      AUTH_COOKIE    = "spontaneous_api_key".freeze
+      # Rack env params
+      ACTIVE_USER    = "spot.user".freeze
+      ACTIVE_KEY     = "spot.key".freeze
+      RENDERER       = "spot.renderer".freeze
+      CSRF_VALID     = "spot.csrf_valid".freeze
+      CSRF_TOKEN     = "spot.csrf_token".freeze
 
-    EXPIRES_MAX = DateTime.parse("Thu, 31 Dec 2037 23:55:55 GMT").httpdate
+      CSRF_HEADER    = "X-CSRF-Token".freeze
+      CSRF_ENV       = ("HTTP_" << CSRF_HEADER.upcase.gsub(/-/, "_")).freeze
+
+      EXPIRES_MAX = DateTime.parse("Thu, 31 Dec 2037 23:55:55 GMT").httpdate
+    end
+
+    include Constants
 
     class << self
       def application
@@ -42,6 +51,8 @@ module Spontaneous
     end
 
     class ServerBase < ::Sinatra::Base
+      include Constants
+
       set :environment, Proc.new { Spontaneous.environment }
     end
 

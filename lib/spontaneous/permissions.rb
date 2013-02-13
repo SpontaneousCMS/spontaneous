@@ -28,6 +28,10 @@ module Spontaneous
       def random_string(length)
         SecureRandom.urlsafe_base64(length)[0...(length)]
       end
+
+      def crypto_hash(string, algorithm = Digest::SHA1)
+        algorithm.new.update(string).hexdigest
+      end
     end
   end
 end

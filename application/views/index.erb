@@ -24,9 +24,10 @@
 				development: <%= Spontaneous.development? %>,
 				asynchronous: <%= Spontaneous.production? %>,
 				editor_protocol: 'mvim',
+				csrf_header: '<%= Spontaneous::Rack::CSRF_HEADER %>',
+				csrf_token: '<%= env[Spontaneous::Rack::CSRF_TOKEN] %>',
 				<% if Spontaneous.config.auto_login; %>
 				auto_login: '<%= Spontaneous.config.auto_login %>',
-				user_key: '<%= env[Spontaneous::Rack::ACTIVE_KEY].key_id %>',
 				<% end %>
 				onload: function() {
 					jQuery.noConflict();
