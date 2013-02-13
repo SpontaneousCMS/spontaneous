@@ -2,7 +2,7 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 
-class AliasTest < MiniTest::Spec
+describe "Alias" do
 
   def assert_same_content(c1, c2)
     assert_equal c2.length, c1.length
@@ -15,8 +15,8 @@ class AliasTest < MiniTest::Spec
     end
   end
 
-  context "Aliases:" do
-    setup do
+  describe "Aliases:" do
+    before do
       @site = setup_site
       @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
       @site.paths.add(:templates, @template_root)
@@ -115,7 +115,7 @@ class AliasTest < MiniTest::Spec
       @root.save.reload
     end
 
-    teardown do
+    after do
       [:A, :AA, :AAA, :B, :BB, :AAlias, :AAAlias, :AAAAlias, :BBAlias, :BAlias, :MultipleAlias, :ProcAlias].each do |c|
         Object.send(:remove_const, c) rescue nil
       end
@@ -123,42 +123,42 @@ class AliasTest < MiniTest::Spec
       teardown_site
     end
 
-    context "All alias" do
-      context "class methods" do
-        should "provide a list of available instances that includes all subclasses" do
+    describe "All alias" do
+      describe "class methods" do
+        it "provide a list of available instances that includes all subclasses" do
           assert_same_content AAlias.targets, [@a, @aa, @aaa1, @aaa2]
           assert_same_content AAAlias.targets, [@aa, @aaa1, @aaa2]
           assert_same_content AAAAlias.targets, [@aaa1, @aaa2]
         end
 
-        should "use the first available string field as the alias title" do
+        it "use the first available string field as the alias title" do
           Piece.field :something
           target = Piece.new(:something => "something")
-          target.alias_title.should == "something"
+          target.alias_title.must_equal "something"
         end
 
-        should "allow aliasing multiple classes" do
+        it "allow aliasing multiple classes" do
           assert_same_content MultipleAlias.targets, [@aa, @aaa1, @aaa2, @b, @bb]
         end
 
-        should "be creatable with a target" do
+        it "be creatable with a target" do
           instance = AAlias.create(:target => @a).reload
-          instance.target.should == @a
-          @a.aliases.should == [instance]
+          instance.target.must_equal @a
+          @a.aliases.must_equal [instance]
         end
 
-        should "have a back link in the target" do
+        it "have a back link in the target" do
           instance1 = AAlias.create(:target => @a).reload
           instance2 = AAlias.create(:target => @a).reload
           assert_same_content @a.aliases, [instance1, instance2]
         end
 
-        should "accept a proc that returns an array as a target list generator" do
+        it "accept a proc that returns an array as a target list generator" do
           assert_same_content ProcAlias.targets, @root.children
         end
 
-        context "with container options" do
-          setup do
+        describe "with container options" do
+          before do
             @page = ::Page.new(:uid => "thepage")
             4.times { |n|
               @page.box1 << A.new
@@ -169,13 +169,13 @@ class AliasTest < MiniTest::Spec
             @page = @page.save.reload
           end
 
-          teardown do
+          after do
             Object.send(:remove_const, 'X') rescue nil
             Object.send(:remove_const, 'XX') rescue nil
             Object.send(:remove_const, 'XXX') rescue nil
           end
 
-          should "allow for selecting only content from within one box" do
+          it "allow for selecting only content from within one box" do
             class ::X < ::Piece
               alias_of :A, :container => Proc.new { S::Site['#thepage'].box1 }
             end
@@ -186,12 +186,12 @@ class AliasTest < MiniTest::Spec
               [(a.targets), @page.box1.select { |p| target === p }].map { |a| Set.new(a) }
             }
             expected, actual = targets.call(X, A)
-            actual.should == expected
+            actual.must_equal expected
             expected, actual = targets.call(XX, AA)
-            actual.should == expected
+            actual.must_equal expected
           end
 
-          should "allow for selecting only content from a range of boxes" do
+          it "allow for selecting only content from a range of boxes" do
             class ::X < ::Piece
               alias_of :A, :container => Proc.new { [S::Site['#thepage'].box1, S::Site['#thepage'].box2] }
             end
@@ -202,7 +202,7 @@ class AliasTest < MiniTest::Spec
             assert_same_content XX.targets, @page.box1.select { |p| AA === p } + @page.box2.select { |p| AA === p }
           end
 
-          should "allow for selecting only content from within one page" do
+          it "allow for selecting only content from within one page" do
             class ::X < ::Piece
               alias_of :A, :container => Proc.new { S::Site['#thepage'] }
             end
@@ -213,7 +213,7 @@ class AliasTest < MiniTest::Spec
             assert_same_content XX.targets, @page.content.select { |p| AA === p }
           end
 
-          should "allow for selecting only content from a range of pages & boxes" do
+          it "allow for selecting only content from a range of pages & boxes" do
             page2 = ::Page.new(:uid => "thepage2")
             4.times { |n|
               page2.box1 << A.new
@@ -232,7 +232,7 @@ class AliasTest < MiniTest::Spec
             assert_same_content XX.targets, @page.content.select { |p| AA === p } + page2.box2.select { |p| AA === p }
           end
 
-          should "allow for selecting content only from the content of the owner of the box" do
+          it "allow for selecting content only from the content of the owner of the box" do
             class ::X < ::Piece
               alias_of proc { |owner| owner.box1.contents }
             end
@@ -248,7 +248,7 @@ class AliasTest < MiniTest::Spec
             assert_same_content XXX.targets(@page, @page.box1), @page.box1.contents.select { |p| A === p }
           end
 
-          should "allow for filtering instances according to some arbitrary proc" do
+          it "allow for filtering instances according to some arbitrary proc" do
             pieces = [@page.box1.entries.first, @page.box2.entries.first]
             _filter = lambda { |c|
               pieces.map(&:id).include?(c.id)
@@ -259,7 +259,7 @@ class AliasTest < MiniTest::Spec
             assert_same_content pieces, X.targets
           end
 
-          should "allow for filtering instances according to current page content" do
+          it "allow for filtering instances according to current page content" do
             @page.box1 << AAA.create
             @page.box2 << AAA.create
             @page.save.reload
@@ -270,7 +270,7 @@ class AliasTest < MiniTest::Spec
             assert_same_content allowable, X.targets(@page, @page.box1)
           end
 
-          should "allow for ensuring the uniqueness of the entries" do
+          it "allow for ensuring the uniqueness of the entries" do
             aaa = AAA.all
             ::X  = Class.new(::Piece) do
               alias_of :AAA, :unique => true
@@ -280,81 +280,81 @@ class AliasTest < MiniTest::Spec
             assert_same_content [aaa.last], X.targets(@page, @page.box1)
           end
 
-          should "allow for returning an arbitrary list of results generated by a proc" do
+          it "allow for returning an arbitrary list of results generated by a proc" do
             results = [mock, mock, mock]
             ::X  = Class.new(::Piece) do
               alias_of proc { results }
             end
-            ::X.targets.should ==  results
+            ::X.targets.must_equal  results
           end
 
         end
       end
 
-      context "instances" do
-        setup do
+      describe "instances" do
+        before do
           @a_alias = AAlias.create(:target => @a).reload
           @aa_alias = AAAlias.create(:target => @aa).reload
           @aaa_alias = AAAAlias.create(:target => @aaa1).reload
         end
 
-        should "have their own fields" do
-          @a_alias.field?(:a_alias_field1).should be_true
+        it "have their own fields" do
+          assert @a_alias.field?(:a_alias_field1)
         end
 
-        should "provide access to their target" do
-          @a_alias.target.should == @a
+        it "provide access to their target" do
+          @a_alias.target.must_equal @a
         end
 
 
         # TODO
-        should "reference the aliases fields before the targets"
+        it "reference the aliases fields before the targets"
 
-        should "present their target's fields as their own" do
-          @a_alias.field?(:a_field1).should be_true
-          @a_alias.a_field1.value.should == @a.a_field1.value
+        it "present their target's fields as their own" do
+          assert @a_alias.field?(:a_field1)
+          @a_alias.a_field1.value.must_equal @a.a_field1.value
         end
 
-        should "have access to their target's fields" do
-          @a_alias.target.a_field1.value.should == @a.a_field1.value
+        it "have access to their target's fields" do
+          @a_alias.target.a_field1.value.must_equal @a.a_field1.value
         end
 
-        should "have their own styles" do
+        it "have their own styles" do
           assert_correct_template(@a_alias,  @template_root / 'a_alias/a_alias_style')
           assert_correct_template(@aa_alias,  @template_root / 'aa_alias')
         end
 
-        should "present their target's styles as their own" do
+        it "present their target's styles as their own" do
           @a_alias.style = :a_style
 
           assert_correct_template(@a_alias,  @template_root / 'a/a_style')
         end
 
         # should "have an independent style setting"
-        should "not delete their target when deleted" do
+        it "not delete their target when deleted" do
           @a_alias.destroy
-          Content[@a.id].should == @a
+          Content[@a.id].must_equal @a
         end
 
-        should "be deleted when target deleted" do
+        it "be deleted when target deleted" do
           @a.destroy
-          Content[@a_alias.id].should be_nil
+          Content[@a_alias.id].must_be_nil
         end
 
-        should "include target values in serialisation" do
-          @a_alias.export[:target].should == @a.shallow_export(nil)
+        it "include target values in serialisation" do
+          @a_alias.export[:target].must_equal @a.shallow_export(nil)
         end
 
-        should "include alias title & icon in serialisation" do
-          @a_alias.export[:alias_title].should == @a.alias_title
-          @a_alias.export[:alias_icon].should == @a.alias_icon_field.export
+        it "include alias title & icon in serialisation" do
+          @a_alias.export[:alias_title].must_equal @a.alias_title
+          @a_alias.export[:alias_icon].must_equal @a.alias_icon_field.export
         end
 
       end
     end
 
-    context "Aliases to custom models" do
-      setup do
+    describe "Aliases to custom models" do
+      before do
         @target_id = target_id = 9999
         @target = target = mock()
         @target.stubs(:id).returns(@target_id)
@@ -367,73 +367,73 @@ class AliasTest < MiniTest::Spec
           }, :slug => lambda { |target| target.title.to_url }
         end
       end
-      should "be creatable using a custom initializer" do
+      it "be creatable using a custom initializer" do
         a = @custom_alias_class.for_target(@target_id)
 
-        a.target_id.should == @target_id
-        a.target.should == @target
+        a.target_id.must_equal @target_id
+        a.target.must_equal @target
       end
 
-      should "be able to provide a slug for pages" do
+      it "be able to provide a slug for pages" do
         a = @custom_alias_class.for_target(@target_id)
-        a.target.should == @target
-        a.slug.should == "custom-object"
+        a.target.must_equal @target
+        a.slug.must_equal "custom-object"
       end
 
-      should "ignore styles if object doesn't provide them" do
+      it "ignore styles if object doesn't provide them" do
         a = @custom_alias_class.for_target(@target_id)
-        a.style.template.call.should == Page.new.style.template.call
+        a.style.template.call.must_equal Page.new.style.template.call
       end
     end
 
 
-    context "Piece aliases" do
-      should "be allowed to target pages" do
+    describe "Piece aliases" do
+      it "be allowed to target pages" do
         a = BBAlias.create(:target => @bb)
-        a.bb_field1.value.should == "BB"
+        a.bb_field1.value.must_equal "BB"
       end
 
-      should "not be loadable via their compound path when linked to a page" do
+      it "not be loadable via their compound path when linked to a page" do
         a = BBAlias.create(:target => @bb)
         @aliases.box1 << a
         @aliases.save
-        Site["/aliases/bb"].should be_nil
+        Site["/aliases/bb"].must_be_nil
       end
 
-      should "have their target's path attribute if they alias to a page type" do
+      it "have their target's path attribute if they alias to a page type" do
         a = BBAlias.create(:target => @bb)
-        a.path.should == @bb.path
+        a.path.must_equal @bb.path
       end
     end
 
-    context "Page aliases" do
-      should "be allowed to have piece classes as targets" do
+    describe "Page aliases" do
+      it "be allowed to have piece classes as targets" do
         class ::CAlias < Page
           alias_of :AAA
           layout :c_alias
         end
 
         c = CAlias.new(:target => @aaa1)
-        c.render.should == "aaa1\n"
+        c.render.must_equal "aaa1\n"
       end
 
-      should "respond as a page" do
+      it "respond as a page" do
         a = BAlias.create(:target => @b, :slug => "balias")
-        a.page?.should be_true
+        assert a.page?
       end
 
-      should "be discoverable via their compound path" do
+      it "be discoverable via their compound path" do
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases.box1 << a
         @aliases.save
         a.save
         a.reload
-        a.path.should == "/aliases/b"
-        Site["/aliases/balias"].should be_nil
-        Site["/aliases/b"].should == a
+        a.path.must_equal "/aliases/b"
+        Site["/aliases/balias"].must_be_nil
+        Site["/aliases/b"].must_equal a
       end
 
-      should "update their path if their target's slug changes" do
+      it "update their path if their target's slug changes" do
         a = BAlias.create(:target => @b, :slug => "balias")
         b = BAlias.create(:target => @b, :slug => "balias")
         @aliases.box1 << a
@@ -442,17 +442,17 @@ class AliasTest < MiniTest::Spec
 
         a.save
         a.reload
-        a.path.should == "/aliases/b"
-        b.path.should == "/aliases/b/b"
+        a.path.must_equal "/aliases/b"
+        b.path.must_equal "/aliases/b/b"
         @b.slug = "newb"
         @b.save
         a.reload
         b.reload
-        a.path.should == "/aliases/newb"
-        b.path.should == "/aliases/newb/newb"
+        a.path.must_equal "/aliases/newb"
+        b.path.must_equal "/aliases/newb/newb"
       end
 
-      should "update their path if their parent's path changes" do
+      it "update their path if their parent's path changes" do
         a = BAlias.create(:target => @b, :slug => "balias")
         b = BAlias.create(:target => @b, :slug => "balias")
         @aliases.box1 << a
@@ -460,62 +460,62 @@ class AliasTest < MiniTest::Spec
         @aliases.save
         a.save
         a.reload
-        a.path.should == "/aliases/b"
-        b.path.should == "/aliases/b/b"
+        a.path.must_equal "/aliases/b"
+        b.path.must_equal "/aliases/b/b"
         @aliases.slug = "newaliases"
         @aliases.save
         a.reload
         b.reload
-        a.path.should == "/newaliases/b"
-        b.path.should == "/newaliases/b/b"
+        a.path.must_equal "/newaliases/b"
+        b.path.must_equal "/newaliases/b/b"
       end
 
-      should "show in the parent's list of children" do
+      it "show in the parent's list of children" do
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases.box1 << a
         @aliases.save
         a.save
         a.reload
         @aliases.reload
-        @aliases.children.should == [a]
-        a.parent.should == @aliases
+        @aliases.children.must_equal [a]
+        a.parent.must_equal @aliases
       end
 
-      should "render the using target's layout when accessed via the path and no local layouts defined" do
+      it "render the using target's layout when accessed via the path and no local layouts defined" do
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases.box1 << a
         @aliases.save
         a.reload
-        a.render.should == @b.render
+        a.render.must_equal @b.render
       end
 
-      should "render with locally defined style when available" do
+      it "render with locally defined style when available" do
         BAlias.layout :b_alias
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases.box1 << a
         @aliases.save
         a.reload
-        a.render.should == "alternate\n"
+        a.render.must_equal "alternate\n"
       end
 
-      should "have access to their target's page styles" do
+      it "have access to their target's page styles" do
         BAlias.layout :b_alias
         a = BAlias.create(:target => @b, :slug => "balias")
         @aliases.box1 << a
         @aliases.save
         a.reload
         a.layout = :b
-        a.render.should == @b.render
+        a.render.must_equal @b.render
       end
     end
 
-    context "visibility" do
-      should "be linked to the target's visibility" do
+    describe "visibility" do
+      it "be linked to the target's visibility" do
         a = BAlias.create(:target => @b, :slug => "balias")
         @b.hide!
         @b.reload
         a.reload
-        a.visible?.should be_false
+        refute a.visible?
       end
     end
   end
