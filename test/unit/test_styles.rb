@@ -3,13 +3,9 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 
-class StylesTest < MiniTest::Spec
+describe "Styles" do
 
-  def teardown
-    teardown_site
-  end
-
-  def setup
+  before do
     @site = setup_site
     @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/styles"))
     @site.paths.add(:templates, @template_root)
@@ -17,9 +13,13 @@ class StylesTest < MiniTest::Spec
     S::Output.renderer = @renderer
   end
 
-  context "styles for" do
+  after do
+    teardown_site
+  end
 
-    setup do
+  describe "styles for" do
+
+    before do
       ::Content.delete
 
       ::Page.box :box1
@@ -31,7 +31,7 @@ class StylesTest < MiniTest::Spec
       class ::InvisibleClass < ::Piece; end
     end
 
-    teardown do
+    after do
       ::Content.delete
       Object.send(:remove_const, :MissingClass) rescue nil
       Object.send(:remove_const, :TemplateClass) rescue nil
@@ -40,121 +40,121 @@ class StylesTest < MiniTest::Spec
       Object.send(:remove_const, :InvisibleClass) rescue nil
     end
 
-    context "pieces" do
+    describe "pieces" do
 
 
-      context "default styles" do
-        setup do
+      describe "default styles" do
+        before do
           @page  = ::Page.new
           @piece = TemplateClass.new
           @page.box1 << @piece
         end
 
-        should "return anonymous style if no templates are found" do
+        it "return anonymous style if no templates are found" do
           piece = MissingClass.new
-          piece.style.class.should == Spontaneous::Style::Default
+          piece.style.class.must_equal Spontaneous::Style::Default
           # piece.style.template.must_be_instance_of(Proc)
-          piece.style.template.call.should == ""
+          piece.style.template.call.must_equal ""
         end
 
-        should "derive path from owning class and name" do
+        it "derive path from owning class and name" do
           assert_correct_template(@piece, @template_root / 'template_class')
         end
 
-        should "render using correct template" do
-          @piece.render.should == "template_class.html.cut\n"
+        it "render using correct template" do
+          @piece.render.must_equal "template_class.html.cut\n"
         end
 
         # should "be able to give a list of available formats" do
         #   skip("Need to re-implement the format functionality")
-        #   @piece.style.formats.should == [:epub, :html, :pdf]
+        #   @piece.style.formats.must_equal [:epub, :html, :pdf]
         # end
 
-        should "simply render an empty string if no templates are available" do
+        it "simply render an empty string if no templates are available" do
           piece = InvisibleClass.new
           @page.box1 << piece
-          piece.render.should == ""
+          piece.render.must_equal ""
         end
       end
 
 
-      context "named styles" do
-        setup do
+      describe "named styles" do
+        before do
           @page  = ::Page.new
           @piece = TemplateClass.new
           @page.box1 << @piece
         end
 
-        should "use template found in class directory if exists" do
+        it "use template found in class directory if exists" do
           TemplateClass.style :named1
           assert_correct_template(@piece, @template_root / 'template_class/named1')
-          @piece.render.should == "template_class/named1.html.cut\n"
+          @piece.render.must_equal "template_class/named1.html.cut\n"
         end
 
-        should "use template in template root with correct name if it exists" do
+        it "use template in template root with correct name if it exists" do
           TemplateClass.style :named2
           assert_correct_template(@piece, @template_root / 'named2')
-          @piece.render.should == "named2.html.cut\n"
+          @piece.render.must_equal "named2.html.cut\n"
         end
 
-        should "allow passing of directory/stylename" do
+        it "allow passing of directory/stylename" do
           TemplateClass.style :'orange/apple'
-          # piece.style.template.should == 'orange/apple'
+          # piece.style.template.must_equal 'orange/apple'
           assert_correct_template(@piece, @template_root / 'orange/apple')
-          @piece.render.should == "orange/apple.html.cut\n"
+          @piece.render.must_equal "orange/apple.html.cut\n"
         end
 
-        should "default to styles marked as 'default'" do
+        it "default to styles marked as 'default'" do
           TemplateClass.style :named1
           TemplateClass.style :named2, :default => true
           assert_correct_template(@piece, @template_root / 'named2')
-          # @piece.style.template.should == 'named2'
-          @piece.render.should == "named2.html.cut\n"
+          # @piece.style.template.must_equal 'named2'
+          @piece.render.must_equal "named2.html.cut\n"
         end
       end
 
-      context "switching styles" do
-        setup do
+      describe "switching styles" do
+        before do
           TemplateClass.style :named1
           TemplateClass.style :named2, :default => true
           @page  = ::Page.new
           @piece = TemplateClass.new
           @page.box1 << @piece
           assert_correct_template(@piece, @template_root / 'named2')
-          # @piece.style.template.should == 'named2'
-          @piece.render.should == "named2.html.cut\n"
+          # @piece.style.template.must_equal 'named2'
+          @piece.render.must_equal "named2.html.cut\n"
         end
 
-        should "be possible" do
+        it "be possible" do
           @piece.style = :named1
           assert_correct_template(@piece, @template_root / 'template_class/named1')
-          @piece.render.should == "template_class/named1.html.cut\n"
+          @piece.render.must_equal "template_class/named1.html.cut\n"
         end
 
-        should "persist" do
+        it "persist" do
           @piece.style = :named1
           @piece.save
           @piece = Content[@piece.id]
-          # @piece.style.template.should == 'template_class/named1'
+          # @piece.style.template.must_equal 'template_class/named1'
           assert_correct_template(@piece, @template_root / 'template_class/named1')
         end
       end
 
-      context "inheriting styles" do
-        should "use default for sub class if it exists" do
+      describe "inheriting styles" do
+        it "use default for sub class if it exists" do
           piece = TemplateSubClass1.new
           assert_correct_template(piece, @template_root / 'template_sub_class1')
         end
 
-        should "fall back to default style for superclass if default for class doesn't exist" do
+        it "fall back to default style for superclass if default for class doesn't exist" do
           piece = TemplateSubClass2.new
           assert_correct_template(piece, @template_root / 'template_class')
-          # piece.style.template.should == 'template_class'
+          # piece.style.template.must_equal 'template_class'
         end
-        should "fall back to defined default style for superclass if default for class doesn't exist" do
+        it "fall back to defined default style for superclass if default for class doesn't exist" do
           TemplateClass.style :named1
           piece = TemplateSubClass2.new
-          # piece.style.template.should == 'template_class/named1'
+          # piece.style.template.must_equal 'template_class/named1'
           assert_correct_template(piece, @template_root / 'template_class/named1')
         end
       end
@@ -162,61 +162,61 @@ class StylesTest < MiniTest::Spec
 
 
 
-      # context "inline templates" do
-      #   setup do
+      # describe "inline templates" do
+      #   before do
       #     @class = Class.new(Content)
       #   end
       #   should "be definiable" do
       #     @class.style :simple
-      #     @class.styles.length.should == 1
+      #     @class.styles.length.must_equal 1
       #     t = @class.styles.first
-      #     t.name.should == :simple
+      #     t.name.must_equal :simple
       #   end
 
       #   should "have configurable filenames" do
       #     @class.style :simple, :filename => "funky"
       #     t = @class.styles.first
-      #     t.filename.should == "funky.html.cut"
+      #     t.filename.must_equal "funky.html.cut"
       #   end
 
       #   should "have sane default titles" do
       #     @class.style :simple_style
       #     t = @class.styles.first
-      #     t.title.should == "Simple Style"
+      #     t.title.must_equal "Simple Style"
       #   end
 
       #   should "have configurable titles" do
       #     @class.style :simple, :title => "A Simple Style"
       #     t = @class.styles.first
-      #     t.title.should == "A Simple Style"
+      #     t.title.must_equal "A Simple Style"
       #   end
 
       #   should "be accessable by name" do
       #     @class.style :simple
       #     @class.style :complex
-      #     @class.styles[:simple].should == @class.styles.first
+      #     @class.styles[:simple].must_equal @class.styles.first
       #   end
 
       #   should "have #styles as a shortcut for #inliine_styles" do
       #     @class.style :simple
-      #     @class.styles.should == @class.styles
+      #     @class.styles.must_equal @class.styles
       #   end
 
       #   should "take the first style as the default" do
       #     @class.style :simple
       #     @class.style :complex
-      #     @class.styles.default.should == @class.styles[:simple]
+      #     @class.styles.default.must_equal @class.styles[:simple]
       #   end
 
       #   should "honour the :default flag" do
       #     @class.style :simple
       #     @class.style :complex, :default => true
-      #     @class.styles.default.should == @class.styles[:complex]
+      #     @class.styles.default.must_equal @class.styles[:complex]
       #   end
       # end
 
-      # context "assigned styles" do
-      #   setup do
+      # describe "assigned styles" do
+      #   before do
       #     class ::StyleTestClass < Content
       #       style :first_style
       #       style :default_style, :default => true
@@ -227,30 +227,30 @@ class StylesTest < MiniTest::Spec
       #     @a << @b
       #   end
 
-      #   teardown do
+      #   after do
       #     Object.send(:remove_const, :StyleTestClass)
       #   end
 
       #   should "assign the default style" do
-      #     @a.pieces.first.style.should == ::StyleTestClass.styles.default
+      #     @a.pieces.first.style.must_equal ::StyleTestClass.styles.default
       #   end
 
       #   should "persist" do
       #     @a.save
       #     @b.save
       #     @a = StyleTestClass[@a.id]
-      #     @a.pieces.first.style.should == ::StyleTestClass.styles.default
+      #     @a.pieces.first.style.must_equal ::StyleTestClass.styles.default
       #   end
 
       #   should "be settable" do
       #     @a.pieces.first.style = StyleTestClass.styles[:first_style]
       #     @a.save
       #     @a = StyleTestClass[@a.id]
-      #     @a.pieces.first.style.should == ::StyleTestClass.styles[:first_style]
+      #     @a.pieces.first.style.must_equal ::StyleTestClass.styles[:first_style]
       #   end
 
-      #   context "direct piece access" do
-      #     setup do
+      #   describe "direct piece access" do
+      #     before do
       #       @a.pieces.first.style = StyleTestClass.styles[:first_style]
       #       @a.save
       #       piece_id = @a.pieces.first.target.id
@@ -258,7 +258,7 @@ class StylesTest < MiniTest::Spec
       #     end
 
       #     should "be accessible directly for pieces" do
-      #       @piece.style.should == ::StyleTestClass.styles[:first_style]
+      #       @piece.style.must_equal ::StyleTestClass.styles[:first_style]
       #     end
 
       #     should "not be settable directly on bare pieces" do
@@ -267,8 +267,8 @@ class StylesTest < MiniTest::Spec
       #   end
       # end
 
-      context "inline templates" do
-        setup do
+      describe "inline templates" do
+        before do
           Page.add_output :pdf
           class ::InlineTemplateClass < Piece
             field :title
@@ -283,20 +283,20 @@ class StylesTest < MiniTest::Spec
           @a.title = "Total Title"
         end
 
-        teardown do
+        after do
           Object.send(:remove_const, :InlineTemplateClass) rescue nil
         end
 
-        should "be used to render the content" do
-          @a.render.should ==  "html: Total Title"
+        it "be used to render the content" do
+          @a.render.must_equal  "html: Total Title"
         end
 
-        should "be used to render the content with the right format" do
-          @a.render(:pdf).should ==  "pdf: Total Title"
+        it "be used to render the content with the right format" do
+          @a.render(:pdf).must_equal  "pdf: Total Title"
         end
       end
 
-      # context "default styles" do
+      # describe "default styles" do
       #   class ::DefaultStyleClass < Spontaneous::Box
       #     field :title
       #   end
@@ -308,7 +308,7 @@ class StylesTest < MiniTest::Spec
       #     field :title
       #     box :with_style, :type => :DefaultStyleClass
       #   end
-      #   setup do
+      #   before do
       #     Content.delete
 
       #     @with_default_style = WithDefaultStyleClass.new
@@ -319,7 +319,7 @@ class StylesTest < MiniTest::Spec
       #     # @without_default_style.with_style.path = "Box Title"
       #   end
 
-      #   teardown do
+      #   after do
       #     Content.delete
       #     # Object.send(:remove_const, :DefaultStyleClass)
       #     # Object.send(:remove_const, :WithDefaultStyleClass)
@@ -327,32 +327,32 @@ class StylesTest < MiniTest::Spec
       #   end
 
       #   should "be used when available" do
-      #     @with_default_style.render.should == "Title: Total Title\\n"
+      #     @with_default_style.render.must_equal "Title: Total Title\\n"
       #   end
 
       #   should "be used by boxes too" do
-      #     @without_default_style.with_style.render.should == "Title: Box Title\\n"
+      #     @without_default_style.with_style.render.must_equal "Title: Box Title\\n"
       #   end
 
       #   should "fallback to anonymous style when default style template doesn't exist" do
-      #     @without_default_style.render.should == "Title: Box Title\\n"
+      #     @without_default_style.render.must_equal "Title: Box Title\\n"
       #   end
       # end
     end
 
-    context "boxes" do
-      setup do
+    describe "boxes" do
+      before do
         class ::BoxA < ::Box; end
         class ::BoxB < ::Box; end
       end
 
-      teardown do
+      after do
         Object.send(:remove_const, :BoxA) rescue nil
         Object.send(:remove_const, :BoxB) rescue nil
       end
 
-      context "anonymous boxes" do
-        setup do
+      describe "anonymous boxes" do
+        before do
           TemplateClass.box :results
           TemplateClass.box :entities
           @page  = ::Page.new
@@ -360,28 +360,28 @@ class StylesTest < MiniTest::Spec
           @page.box1 << @piece
         end
 
-        should "use template with their name inside container class template dir if it exists" do
+        it "use template with their name inside container class template dir if it exists" do
           @piece.results << TemplateClass.new
           assert_correct_template(@piece.results, @template_root / 'template_class/results')
-          @piece.results.render.should == "template_class/results.html.cut\n"
+          @piece.results.render.must_equal "template_class/results.html.cut\n"
         end
 
-        should "render a simple list of content if named template doesn't exist" do
+        it "render a simple list of content if named template doesn't exist" do
           @piece.entities << TemplateClass.new
           @piece.entities << TemplateClass.new
-          @piece.entities.render.should == "template_class.html.cut\n\ntemplate_class.html.cut\n"
-          @piece.entities.style.template.call.should == '${ render_content }'
+          @piece.entities.render.must_equal "template_class.html.cut\n\ntemplate_class.html.cut\n"
+          @piece.entities.style.template.call.must_equal '${ render_content }'
         end
 
 
-        should "use a named template if given" do
+        it "use a named template if given" do
           TemplateClass.box :things do
             style :named1
           end
           @piece = TemplateClass.new
           @page.box1 << @piece
           assert_correct_template(@piece.things, @template_root / 'template_class/named1')
-          @piece.things.render.should == "template_class/named1.html.cut\n"
+          @piece.things.render.must_equal "template_class/named1.html.cut\n"
 
           TemplateClass.box :dongles do
             style :named2
@@ -389,10 +389,10 @@ class StylesTest < MiniTest::Spec
           @piece = TemplateClass.new
           @page.box1 << @piece
           assert_correct_template(@piece.dongles, @template_root / 'named2')
-          @piece.dongles.render.should == "named2.html.cut\n"
+          @piece.dongles.render.must_equal "named2.html.cut\n"
         end
 
-        should "use styles assigned in a subclass xxx" do
+        it "use styles assigned in a subclass xxx" do
           ::TemplateSubClass = Class.new(TemplateClass)
           ::TemplateSubSubClass = Class.new(TemplateSubClass)
 
@@ -435,8 +435,8 @@ class StylesTest < MiniTest::Spec
         end
       end
 
-      context "boxes with a specified class" do
-        setup do
+      describe "boxes with a specified class" do
+        before do
           TemplateClass.box :entities, :type => :BoxA
           TemplateClass.box :results, :type => :BoxB
           @page  = ::Page.new
@@ -444,17 +444,17 @@ class StylesTest < MiniTest::Spec
           @page.box1 << @piece
         end
 
-        should "use the box name template if it exists" do
+        it "use the box name template if it exists" do
           assert_correct_template(@piece.results, @template_root / 'template_class/results')
-          @piece.results.render.should == "template_class/results.html.cut\n"
+          @piece.results.render.must_equal "template_class/results.html.cut\n"
         end
 
-        should "use the box classes default template if box name template is missing" do
+        it "use the box classes default template if box name template is missing" do
           assert_correct_template(@piece.entities, @template_root / 'box_a')
-          @piece.entities.render.should == "box_a.html.cut\n"
+          @piece.entities.render.must_equal "box_a.html.cut\n"
         end
 
-        should "find templates for box subclasses with specified types defined in a supertype" do
+        it "find templates for box subclasses with specified types defined in a supertype" do
           Object.send(:remove_const, :TemplateSubClass) rescue nil
           Object.send(:remove_const, :BoxASubclass) rescue nil
           class ::BoxASubclass < BoxA; end
@@ -468,13 +468,13 @@ class StylesTest < MiniTest::Spec
           Object.send(:remove_const, :TemplateSubClass) rescue nil
         end
 
-        context "with configured styles" do
-          setup do
+        describe "with configured styles" do
+          before do
             BoxA.style :runny
             BoxA.style :walky
           end
 
-          should "be configurable to use a specific style" do
+          it "be configurable to use a specific style" do
             TemplateClass.box :sprinters, :type => :BoxA, :style => :runny
             TemplateClass.box :strollers, :type => :BoxA, :style => :walky
             page = ::Page.new
