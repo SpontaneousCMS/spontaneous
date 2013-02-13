@@ -68,7 +68,6 @@ module Spontaneous
         prepare! :server, mode
         Spontaneous::Server.run!(options)
       end
-
     end
   end
 end
