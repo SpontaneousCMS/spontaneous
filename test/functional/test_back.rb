@@ -4,8 +4,7 @@ require File.expand_path('../../test_helper', __FILE__)
 
 
 describe "Back" do
-  include ::Rack::Test::Methods
-  include Spontaneous::Rack::Constants
+  include RackTestMethods
 
   def self.site_root
     @site_root
@@ -50,25 +49,16 @@ describe "Back" do
     config.stubs(:spontaneous_binary).returns('')
     @site.stubs(:config).returns(config)
 
-    # S::Rack::Back::EditingInterface.set :raise_errors, true
-    # S::Rack::Back::EditingInterface.set :dump_errors, true
-    # S::Rack::Back::EditingInterface.set :show_exceptions, false
-
-
     Spontaneous::Permissions::User.delete
     # annoying to have to do this, but there you go
     @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass")
     @user.update(:level => Spontaneous::Permissions[:editor])
     @user.save.reload
     @key = @user.generate_access_key("127.0.0.1")
-    # @key.stubs(:user).returns(@user)
-    # @key.stubs(:key_id).returns(@key)
-    # @user.stubs(:access_keys).returns([@key])
 
     Spontaneous::Permissions::User.stubs(:[]).with(:login => 'root').returns(@user)
     Spontaneous::Permissions::User.stubs(:[]).with(@user.id).returns(@user)
     Spontaneous::Permissions::AccessKey.stubs(:authenticate).with(@key.key_id).returns(@key)
-    # Spontaneous::Permissions::AccessKey.stubs(:valid?).with(@key.key_id, @user).returns(true)
 
     Content.delete
 
@@ -145,30 +135,9 @@ describe "Back" do
     teardown_site(false)
   end
 
-
-
-  def auth_post(path, params={}, env={})
-    post(path, params, csrf_header(env))
-  end
-
-  def auth_get(path, params={}, env={})
-    get(path, params, csrf_header(env))
-  end
-
-  def auth_put(path, params={}, env={})
-    put(path, params, csrf_header(env))
-  end
-
-  def auth_delete(path, params={}, env={})
-    delete(path, params, csrf_header(env))
-  end
-
-  def auth_patch(path, params={}, env={})
-    patch(path, params, csrf_header(env))
-  end
-
-  def csrf_header(env)
-    env.merge(Spontaneous::Rack::CSRF_ENV => @key.generate_csrf_token)
+  # Used by the various auth_* methods
+  def api_key
+    @key
   end
 
   it "retrieves /@spontaneous without a CSRF token yyy" do
@@ -1083,6 +1052,23 @@ describe "Back" do
       end
 
       it "redirects back to original page"
+    end
+
+    describe "/events" do
+      it "should require CSRF header" do
+        get "/@spontaneous/events"
+        assert last_response.status == 401
+      end
+
+      it "should disable buffering" do
+        auth_get "/@spontaneous/events", {}, {"HTTP_ACCEPT" => "text/event-stream"}
+        last_response.headers["X-Accel-Buffering"].must_equal "no"
+      end
+
+      it "should have a content type of text/event-stream" do
+        auth_get "/@spontaneous/events", {}, {"HTTP_ACCEPT" => "text/event-stream"}
+        last_response.headers["Content-Type"].must_match /^text\/event-stream/
+      end
     end
   end
 

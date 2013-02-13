@@ -1,12 +1,12 @@
 module Spontaneous::Rack::Back
   class Field < Base
-    get '/field/conflicts/:id/?:box_id?' do
+    get '/conflicts/:id/?:box_id?' do
       content_for_request(true) do |content, box|
         generate_conflict_list(box || content)
       end
     end
 
-    get '/field/options/:field_sid/:id/?:box_id?' do
+    get '/options/:field_sid/:id/?:box_id?' do
       content_for_request do |content, box|
         field = (box || content).fields.sid(params[:field_sid])
         json(field.option_list)

@@ -2,7 +2,7 @@ module Spontaneous::Rack::Back
   class Site < Base
     SS = Spontaneous::Site
 
-    get "/site" do
+    get '/?' do
       json({
         :types => SS.schema.export(user),
         :user  => user.export,
@@ -10,11 +10,11 @@ module Spontaneous::Rack::Back
       })
     end
 
-    get '/site/home' do
+    get '/home' do
       json SS.root
     end
 
-    post '/site/home' do
+    post '/home' do
       forbidden! unless SS.root.nil?
       type = content_model.schema.to_class(params[:type])
       root = type.create(:title => "Home")

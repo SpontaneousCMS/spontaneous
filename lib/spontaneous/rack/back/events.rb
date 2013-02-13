@@ -18,10 +18,10 @@ module Spontaneous::Rack::Back
       messenger
     end
 
-    get "/events", :provides => "text/event-stream" do
-      headers "X-Accel-Buffering" =>  "no"
+    get '/?', :provides => 'text/event-stream' do
+      headers 'X-Accel-Buffering' =>  'no'
       stream(:keep_open) do |out|
-        messenger = Event.messenger
+        messenger = self.class.messenger
         out.errback  { messenger.delete(out) }
         out.callback { messenger.delete(out) }
         messenger << out

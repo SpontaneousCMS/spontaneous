@@ -4,11 +4,11 @@ module Spontaneous::Rack::Back
       forbidden! unless user.level.can_publish?
     end
 
-    get '/changes' do
+    get '/?' do
       json(Spontaneous::Change)
     end
 
-    post '/changes' do
+    post '/?' do
       ids = params[:page_ids]
       halt 400 if ids.blank? || ids.empty?
       pages = ids.map(&:to_i)

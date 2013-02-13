@@ -1,6 +1,6 @@
 module Spontaneous::Rack::Back
   class Alias < Base
-    get '/alias/:schema_id/:id/:box_id' do
+    get '/:schema_id/:id/:box_id' do
       klass = content_model.schema.to_class(params[:schema_id])
       if klass.alias?
         content_for_request do |content, box|
@@ -23,7 +23,7 @@ module Spontaneous::Rack::Back
       end
     end
 
-    post '/alias/:id/:box_id' do
+    post '/:id/:box_id' do
       content_for_request(true) do |content, box|
         type = content_model.schema.to_class(params[:alias_id])
         position = (params[:position] || 0).to_i

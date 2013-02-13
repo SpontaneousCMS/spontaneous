@@ -1,13 +1,8 @@
 # encoding: UTF-8
 
-require 'sass'
-require 'sinatra/streaming'
-require 'sprockets'
-
 require 'spontaneous/rack/back/base'
 require 'spontaneous/rack/back/alias'
 require 'spontaneous/rack/back/assets'
-require 'spontaneous/rack/back/authentication'
 require 'spontaneous/rack/back/changes'
 require 'spontaneous/rack/back/content'
 require 'spontaneous/rack/back/csrf'
@@ -15,6 +10,7 @@ require 'spontaneous/rack/back/events'
 require 'spontaneous/rack/back/field'
 require 'spontaneous/rack/back/file'
 require 'spontaneous/rack/back/index'
+require 'spontaneous/rack/back/login'
 require 'spontaneous/rack/back/map'
 require 'spontaneous/rack/back/page'
 require 'spontaneous/rack/back/preview'
@@ -23,6 +19,7 @@ require 'spontaneous/rack/back/schema'
 require 'spontaneous/rack/back/scope'
 require 'spontaneous/rack/back/site'
 require 'spontaneous/rack/back/unsupported_browser'
+require 'spontaneous/rack/back/user'
 require 'spontaneous/rack/back/user_admin'
 
 module Spontaneous
@@ -33,25 +30,31 @@ module Spontaneous
       def self.editing_app
         ::Rack::Builder.app do
           use ::Rack::Lint
-          use Scope::Back
+          use Scope::Edit
           use Assets
           use UnsupportedBrowser
-          use Authentication
-          use CSRFHeader
-          use Schema
+          use User::Load
+          use User::Login
+          use User::AuthenticateEdit
+          use CSRF::Header
+          # Schema has to come before Reloader because we need to be able to
+          # present the conflict resolution interface without running through
+          # the schema validation step
+          map("/schema")  { run Schema }
           use Reloader
           use Index
-          use CSRFVerification
-          use Events
-          map("/users") { run UserAdmin }
-          use Site
-          use Map
-          use Field
-          use Page
-          use Content
-          use Alias
-          use Changes
-          use File
+          use CSRF::Verification
+          map("/events")  { run Events }
+          map("/users")   { run UserAdmin }
+          map("/site")    { run Site }
+          map("/map")     { run Map }
+          map("/field")   { run Field }
+          map("/page")    { run Page }
+          map("/content") { run Content }
+          map("/alias")   { run Alias }
+          map("/changes") { run Changes }
+          map("/file")    { run File::Simple }
+          map("/shard")   { run File::Sharded }
           run lambda { |env| [ 404, {}, ["Not Found"] ] }
         end
       end
@@ -61,7 +64,8 @@ module Spontaneous
         ::Rack::Builder.app do
           use ::Rack::Lint
           use Scope::Preview
-          use Authentication
+          use User::Load
+          use User::AuthenticatePreview
           use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']

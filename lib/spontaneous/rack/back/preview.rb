@@ -2,11 +2,6 @@ module Spontaneous::Rack::Back
   class Preview < Base
     include Spontaneous::Rack::Public
 
-    before {
-      redirect NAMESPACE, 302 unless user
-    }
-
-
     # Forward all GETs to the page resolution method
     get '*' do
       render_path(params[:splat][0])

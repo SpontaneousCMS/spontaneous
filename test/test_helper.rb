@@ -63,15 +63,14 @@ Sequel::Migrator.apply(DB, 'db/migrations')
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spontaneous')
 
 require 'minitest/spec'
-require 'rack/test'
 require 'mocha/setup'
 require 'pp'
 require 'tmpdir'
 require 'json'
 
-# require 'support/custom_matchers'
-# require 'support/timing'
+require 'support/rack'
 
+# require 'support/custom_matchers'
 
 # Spontaneous.database = DB
 

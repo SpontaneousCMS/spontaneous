@@ -1,3 +1,5 @@
+require 'sprockets'
+
 module Spontaneous::Rack::Back
   class Assets < Base
     def initialize(app)

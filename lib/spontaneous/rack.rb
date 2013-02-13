@@ -8,6 +8,7 @@ module Spontaneous
     module Constants
       NAMESPACE      = "/@spontaneous".freeze
       AUTH_COOKIE    = "spontaneous_api_key".freeze
+      SESSION_LIFETIME = 1.year
       # Rack env params
       ACTIVE_USER    = "spot.user".freeze
       ACTIVE_KEY     = "spot.key".freeze

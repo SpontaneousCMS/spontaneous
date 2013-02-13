@@ -6,7 +6,7 @@ require File.expand_path('../../test_helper', __FILE__)
 
 
 describe "Authentication" do
-  include ::Rack::Test::Methods
+  include RackTestMethods
 
   Permissions = Spontaneous::Permissions
 
@@ -62,16 +62,9 @@ describe "Authentication" do
     @user = user
   end
 
-  def auth_post(path, params={})
-    post(path, params, csrf_header)
-  end
-
-  def auth_get(path, params={})
-    get(path, params, csrf_header)
-  end
-
-  def csrf_header(env = {})
-    env.merge(S::Rack::Back::CSRFProtection::RACK_HEADER => @user.access_keys.first.generate_csrf_token)
+  # Used by the various auth_* methods
+  def api_key
+    @user.access_keys.first
   end
 
   before do
@@ -85,7 +78,7 @@ describe "Authentication" do
     @site.paths.add :templates, File.expand_path("../../fixtures/public/templates", __FILE__)
     # see http://benprew.posterous.com/testing-sessions-with-sinatra
     # app.send(:set, :sessions, false)
-    S::Rack::Back::EditingInterface.set :sessions, false
+    # S::Rack::Back::EditingInterface.set :sessions, false
     Spontaneous.stubs(:media_dir).returns(File.expand_path('../../fixtures/permissions/media', __FILE__))
   end
 
@@ -93,12 +86,27 @@ describe "Authentication" do
     teardown_site
   end
 
+  # These paths don't have to be accurate because we only ever test for failure
   def post_paths
-    %(/save/#{root.id} /savebox/#{root.id}/#{root.boxes[:editor_level].schema_id} /content/#{root.id}/position/0 /file/upload/#{root.id} /file/replace/#{root.id} /file/wrap/#{root.id}/#{root.boxes[:pages].schema_id} /add/#{root.id}/#{root.boxes[:pages].schema_id}/#{SitePage.schema_id} /destroy/#{root.id} /slug/#{root.id} /slug/#{root.id}/unavailable /toggle/#{root.id} /schema/delete /schema/rename)
+    %(/site/home
+      /content/999/BOXID/TYPENAME
+      /file/999/BOXID
+      /shard/0000000000000000000000000000000000000000
+      /schema/delete
+    )
   end
 
   def get_paths
-    %(/root /page/#{root.id} /metadata /map /map/#{root.id} /location/about)
+    %(/events
+      /users
+      /site
+      /map
+      /field/conflicts/999
+      /page/999
+      /alias/SCHEMAID/999/BOXID
+      /changes
+      /shard/0000000000000000000000000000000000000000
+    )
   end
 
   describe "Authentication:" do
@@ -259,6 +267,11 @@ describe "Authentication" do
         assert last_response.status == 200
       end
 
+      it "has access to the unsupported browser page" do
+        get '/@spontaneous/unsupported'
+        assert last_response.status == 200
+      end
+
       describe "Logging in" do
         it "fail unless provided with a login & password" do
           post "/@spontaneous/login", "user[login]" => "", "user[password]" => ""
@@ -297,17 +310,6 @@ describe "Authentication" do
           assert cookie.secure?
         end
 
-        it "set the secure flag for cookies delivered behind https when reauthenticating" do
-          clear_cookies
-          key = @admin_user.logged_in!
-          post "https://example.org/@spontaneous/reauthenticate", "api_key" => key.key_id, "origin" => "/99/edit"
-          cookies = rack_mock_session.cookie_jar.instance_variable_get("@cookies")
-          cookie = cookies.detect { |c| c.name == S::Rack::AUTH_COOKIE }
-          assert cookie.secure?
-          cookie_options = cookie.instance_variable_get("@options")
-          assert cookie_options.key?("HttpOnly")
-        end
-
         it "succeed and return an api key value for correct login over XHR" do
           key = Spontaneous::Permissions::AccessKey.new
           Spontaneous::Permissions::AccessKey.expects(:new).returns(key)
@@ -316,18 +318,6 @@ describe "Authentication" do
           result = Spot::JSON.parse(last_response.body)
           result[:key].must_equal key.key_id
           result[:redirect].must_equal "/@spontaneous"
-        end
-
-        it "accept a valid API key for re-authentication" do
-          key = @admin_user.logged_in!
-          post "/@spontaneous/reauthenticate", "api_key" => key.key_id, "origin" => "/99/edit"
-          assert last_response.status == 302, "Status was #{last_response.status} not 302"
-          last_response.headers["Location"].must_match %r{/@spontaneous/99/edit$}
-        end
-
-        it "reject invalid API key" do
-          post "/@spontaneous/reauthenticate", "key" => "invalid"
-          assert_login_page("/@spontaneous/reauthenticate", "POST")
         end
       end
 
@@ -341,32 +331,27 @@ describe "Authentication" do
         end
 
         it "sets a long-lived cookie xxx" do
-          p last_response.headers["set-cookie"]
           cookies = rack_mock_session.cookie_jar.instance_variable_get("@cookies")
           cookie = cookies.detect { |c| c.name == S::Rack::AUTH_COOKIE }
           expiry = cookie.expires
           expiry.must_be_instance_of Time
-          expiry.must_be :>, Time.now + 30*24*3600
-          # rack_mock_session.cookie_jar.merge()
-          # p rack_mock_session.cookie_jar[Spontaneous::Rack::AUTH_COOKIE].value#.must_equal ""
-          # auth_get "/@spontaneous"
-          # p last_request.cookies
+          expiry.must_be_close_to Time.now + S::Rack::SESSION_LIFETIME, 1
         end
 
-        it "are provided with a CSRF token" do
+        it "are provided with a CSRF token xxx" do
           auth_get "/@spontaneous"
           assert last_response.ok?
           assert_contains_csrf_token @user.access_keys.first
         end
 
-        it "need to supply API key in params for all POSTs" do
-          post_paths.split.each do |path|
+        it "need to supply CSRF header for all POSTs xxx" do
+          post_paths.split.delete_if { |path| }.each do |path|
             post "/@spontaneous#{path}"
             assert last_response.status == 401, "Status was #{last_response.status} not 401"
           end
         end
 
-        it "need to supply API key in params for all GETs xxx" do
+        it "need to supply API key in params for all GETs" do
           get_paths.split.each do |path|
             get "/@spontaneous#{path}"
             assert last_response.status == 401, "Status was #{last_response.status} not 401"
@@ -389,14 +374,7 @@ describe "Authentication" do
           rack_mock_session.cookie_jar.merge(last_response.headers["set-cookie"])
           rack_mock_session.cookie_jar[Spontaneous::Rack::AUTH_COOKIE].value.must_equal ""
         end
-
-        # describe "providing an API key in the request" do
-        #   should "be able to see previously forbidden fruit" do
-        #     get "/@spontaneous/root"
-        #     assert last_response.ok?
-        #   end
       end
-
     end
 
     describe "User levels" do
@@ -411,14 +389,14 @@ describe "Authentication" do
 
         it "be able to update root level fields" do
           field = root.fields.root_level
-          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}]" => "Updated"
+          auth_put "/@spontaneous/content/#{root.id}", "field[#{field.schema_id}]" => "Updated"
           assert last_response.ok?
           root.reload.fields[:root_level].value.must_equal "Updated"
         end
 
         it "be able to add to root level box" do
           klass = C
-          auth_post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].schema_id}/#{klass.schema_id}"
+          auth_post "/@spontaneous/content/#{root.id}/#{root.boxes[:root_level].schema_id}/#{klass.schema_id}"
           assert last_response.ok?
         end
       end
@@ -453,23 +431,23 @@ describe "Authentication" do
         it "be able to update admin level fields" do
           value = "Updated #{version}"
           field = root.fields[:admin_level]
-          auth_post "/@spontaneous/save/#{root.id}", "field[#{field.schema_id}]" => value
+          auth_put "/@spontaneous/content/#{root.id}", "field[#{field.schema_id}]" => value
           assert last_response.ok?
           root.reload.fields[:admin_level].value.must_equal value
         end
 
         it "not be able to add to root level box" do
-          auth_post "/@spontaneous/add/#{root.id}/#{root.boxes[:root_level].schema_id}/#{C.schema_id}"
+          auth_post "/@spontaneous/content/#{root.id}/#{root.boxes[:root_level].schema_id}/#{C.schema_id}"
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
         it "not be able to add root level types to admin level box" do
-          auth_post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{D.schema_id}"
+          auth_post "/@spontaneous/content/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{D.schema_id}"
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
         it "be able to add to admin level box" do
-          auth_post "/@spontaneous/add/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{C.schema_id}"
+          auth_post "/@spontaneous/content/#{root.id}/#{root.boxes[:admin_level].schema_id}/#{C.schema_id}"
           # post "/@spontaneous/add/#{root.id}/admin_level/C"
           assert last_response.ok?
         end
@@ -477,20 +455,20 @@ describe "Authentication" do
         it "not be able to update fields from root level box" do
           value = "Updated #{version}"
           field = root.fields[:editor_level]
-          auth_post "/@spontaneous/savebox/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}]" => value
+          auth_put "/@spontaneous/content/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}]" => value
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
         it "not be able to delete from root level box" do
           piece = root.boxes[:root_level].contents.first
           pieces = root.reload.boxes[:root_level].contents.length
-          auth_post "/@spontaneous/destroy/#{piece.id}"
+          auth_delete "/@spontaneous/content/#{piece.id}"
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
           root.reload.boxes[:root_level].contents.length.must_equal pieces
         end
         it "not be able to wrap files in root level box" do
           src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-          auth_post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:root_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
+          auth_post "/@spontaneous/file/#{root.id}/#{root.boxes[:root_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
         it "not be able to wrap files in box if allow permissions don't permit it" do
@@ -498,12 +476,12 @@ describe "Authentication" do
           # only type with an image field is C
           # editor_level box allows addition of type C but only by root
           # so the following should throw a perms error:
-          auth_post "/@spontaneous/file/wrap/#{root.id}/#{root.boxes[:editor_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
+          auth_post "/@spontaneous/file/#{root.id}/#{root.boxes[:editor_level].schema_id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg")
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
         it "not be able to re-order pieces in root level box" do
           piece = root.boxes[:root_level].contents.last
-          auth_post "/@spontaneous/content/#{piece.id}/position/0"
+          auth_patch "/@spontaneous/content/#{piece.id}/position/0"
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
           root.reload.boxes[:root_level].contents.last.id.must_equal piece.id
         end
@@ -512,13 +490,13 @@ describe "Authentication" do
           piece = root.boxes[:root_level].contents.first
           src_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
           field = piece.fields[:photo]
-          auth_post "/@spontaneous/file/replace/#{piece.id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg"), "field" => field.schema_id
+          auth_put "/@spontaneous/file/#{piece.id}", "file" => ::Rack::Test::UploadedFile.new(src_file, "image/jpeg"), "field" => field.schema_id
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
         it "not be able to hide entries in root-level boxes" do
           piece = root.boxes[:root_level].contents.first
-          auth_post "/@spontaneous/toggle/#{piece.id}"
+          auth_patch "/@spontaneous/content/#{piece.id}/toggle"
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
 
@@ -535,7 +513,7 @@ describe "Authentication" do
         end
 
         it "not be able to retrieve the list of changes" do
-          auth_get "/@spontaneous/publish/changes"
+          auth_get "/@spontaneous/changes"
           assert last_response.status == 403, "Should have a permissions error 403 not #{last_response.status}"
         end
       end

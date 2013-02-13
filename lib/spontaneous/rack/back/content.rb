@@ -1,6 +1,6 @@
 module Spontaneous::Rack::Back
   class Content < Base
-    put '/content/:id/?:box_id?' do
+    put '/:id/?:box_id?' do
       content_for_request(true) do |content, box|
         target = content
         if box
@@ -11,7 +11,7 @@ module Spontaneous::Rack::Back
       end
     end
 
-    post '/content/:id/:box_id/:type_name' do
+    post '/:id/:box_id/:type_name' do
       content_for_request(true) do |content, box|
         position = (params[:position] || 0).to_i
         type = content_model.schema.to_class(params[:type_name])#.constantize
@@ -27,7 +27,7 @@ module Spontaneous::Rack::Back
       end
     end
 
-    delete '/content/:id' do
+    delete '/:id' do
       content_for_request(true) do |content|
         forbidden! unless content.box.writable?(user)
         content.destroy
@@ -35,7 +35,7 @@ module Spontaneous::Rack::Back
       end
     end
 
-    patch '/content/:id/toggle' do
+    patch '/:id/toggle' do
       content_for_request(true) do |content|
         forbidden! unless content.box && content.box.writable?(user)
         content.toggle_visibility!
@@ -43,7 +43,7 @@ module Spontaneous::Rack::Back
       end
     end
 
-    patch '/content/:id/position/:position' do
+    patch '/:id/position/:position' do
       content_for_request(true) do |content|
         forbidden! unless content.box.writable?(user)
         content.update_position(params[:position].to_i)

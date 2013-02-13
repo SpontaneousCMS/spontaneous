@@ -1,6 +1,6 @@
 module Spontaneous::Rack::Back
   module Scope
-    class Back
+    class Edit
 
       def initialize(app)
         @app = app
