@@ -172,8 +172,9 @@ module Spontaneous
       end
 
       def template(format = :html)
+        target_is_content = @instance.target.respond_to?(:resolve_style)
         if (style = @instance.resolve_style(@instance.style_sid))
-          return style.template(format) if style.template?(format)
+          return style.template(format) if !target_is_content || style.template?(format)
         end
         style = @instance.target.resolve_style(@instance.style_sid)
         style.template(format)
