@@ -4,10 +4,12 @@ module Spontaneous::Rack::Back
   class Assets < Base
     def initialize(app)
       css, js = %w(css js).map { |d| build_asset_handler(d) }
+      assets = Spontaneous::Rack::CacheableFile.new(Spontaneous.root / "public/@spontaneous/assets")
       @app = ::Rack::Builder.app do
         use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static)
-        map("/css") { run css }
-        map("/js")  { run js }
+        map("/assets") { run assets }
+        map("/css")    { run css }
+        map("/js")     { run js }
         run app
       end
     end
