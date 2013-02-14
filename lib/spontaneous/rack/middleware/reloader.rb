@@ -4,7 +4,9 @@ require 'stringio'
 require 'erubis'
 require 'tilt'
 
-module Spontaneous::Rack::Back
+require 'spontaneous/rack/back/helpers'
+
+module Spontaneous::Rack::Middleware
   class Reloader
     include Spontaneous::Rack::Back::TemplateHelpers
 

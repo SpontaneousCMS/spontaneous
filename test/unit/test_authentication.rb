@@ -373,7 +373,7 @@ describe "Authentication" do
         end
       end
 
-      it "can supply the CSRF token as a URL parameter xxx" do
+      it "can supply the CSRF token as a URL parameter" do
         get_paths.split.each do |path|
           get "/@spontaneous/site?#{S::Rack::CSRF_PARAM}=#{api_key.generate_csrf_token}"
           assert last_response.status == 200, "Status was #{last_response.status} not 401"

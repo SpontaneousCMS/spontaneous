@@ -1,41 +1,44 @@
 # encoding: UTF-8
 
+require 'spontaneous/rack/middleware/csrf'
+require 'spontaneous/rack/middleware/reloader'
+require 'spontaneous/rack/middleware/scope'
+require 'spontaneous/rack/middleware/authenticate'
+
 require 'spontaneous/rack/back/base'
 require 'spontaneous/rack/back/alias'
 require 'spontaneous/rack/back/assets'
 require 'spontaneous/rack/back/changes'
 require 'spontaneous/rack/back/content'
-require 'spontaneous/rack/back/csrf'
 require 'spontaneous/rack/back/events'
 require 'spontaneous/rack/back/field'
 require 'spontaneous/rack/back/file'
 require 'spontaneous/rack/back/index'
+require 'spontaneous/rack/back/login'
 require 'spontaneous/rack/back/map'
 require 'spontaneous/rack/back/page'
 require 'spontaneous/rack/back/preview'
-require 'spontaneous/rack/back/reloader'
 require 'spontaneous/rack/back/schema'
-require 'spontaneous/rack/back/scope'
 require 'spontaneous/rack/back/site'
 require 'spontaneous/rack/back/unsupported_browser'
-require 'spontaneous/rack/back/user'
 require 'spontaneous/rack/back/user_admin'
 
 module Spontaneous
   module Rack
     module Back
       include Spontaneous::Rack::Constants
+      include Spontaneous::Rack::Middleware
 
       def self.editing_app
         ::Rack::Builder.app do
-          use ::Rack::Lint
+          use ::Rack::Lint if Spontaneous.development?
           use Scope::Edit
           use Assets
           use UnsupportedBrowser
-          use User::Load
-          use User::Login
+          use Authenticate::Init
+          use Login
           # Everything after this handler requires authentication
-          use User::AuthenticateEdit
+          use Authenticate::Edit
           use CSRF::Header
           # Schema has to come before Reloader because we need to be able to
           # present the conflict resolution interface without running through
@@ -63,16 +66,16 @@ module Spontaneous
 
       def self.preview_app
         ::Rack::Builder.app do
-          use ::Rack::Lint
+          use ::Rack::Lint if Spontaneous.development?
           use Scope::Preview
-          use User::Load
-          use CSRF::Header
+          use Authenticate::Init
           # Preview authentication redirects to /@spontaneous rather than
           # showing a login screen. This way if you go to rhe root of the site
           # as an unauthorised user (say for the first time) you will get sent
           # to the editing interface wrapper rather than being presented with
           # the preview site.
-          use User::AuthenticatePreview
+          use Authenticate::Preview
+          use CSRF::Header
           use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']

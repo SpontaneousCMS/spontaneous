@@ -7,15 +7,8 @@
 		<title>Spontaneous: Loading...</title>
 		<link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
 
-	<% Spontaneous::Rack::Assets::CSS::EDITING_CSS.each do |css_file| %>
-		<link rel="stylesheet" href="<%= style_url(css_file) %>" type="text/css" media="screen" charset="utf-8" />
-	<% end %>
-    <% Spontaneous::Rack::Assets::JavaScript::JQUERY.each do |js_file| %>
-      <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
-    <% end %>
-	<% Spontaneous::Rack::Assets::JavaScript::COMPATIBILITY.each do |js_file| %>
-		<script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
-	<% end %>
+		<link rel="stylesheet" href="<%= style_url("spontaneous") %>" type="text/css" media="screen" charset="utf-8" />
+    <script type="text/javascript" charset="utf-8" src="<%= script_url("vendor/jquery") %>"></script>
 		<script type="text/javascript" charset="utf-8">
 			Spontaneous = {
 				site_domain: '<%= Spontaneous::Site.config.site_domain %>',
@@ -34,15 +27,13 @@
 				}
 			};
 		</script>
-	<% Spontaneous::Rack::Assets::JavaScript::REQUIRE.each do |js_file| %>
-		<script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
-	<% end %>
+		<script type="text/javascript" charset="utf-8" src="<%= script_url("require") %>"></script>
 	</head>
 	<body id="spontaneous">
 		<script type="text/javascript" charset="utf-8">
 			Spontaneous.Require.init(Spontaneous.asynchronous);
 			<%# list of scripts to append, in order %>
-			var sources = <%= script_list(Spontaneous::Rack::Assets::JavaScript::EDITING_JS)  %>;
+			var sources = <%= script_list(["spontaneous"])  %>;
 			for (var i = 0, ii = sources.length; i < ii; i++) {
 				Spontaneous.require(sources[i]);
 			}

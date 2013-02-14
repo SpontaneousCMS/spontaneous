@@ -1,4 +1,4 @@
-module Spontaneous::Rack::Back
+module Spontaneous::Rack::Middleware
   module Scope
     class Edit
 
@@ -31,6 +31,28 @@ module Spontaneous::Rack::Back
           response = @app.call(env)
         end
         response
+      end
+    end
+
+    POWERED_BY = {
+      "X-Powered-By" => "Spontaneous CMS v#{Spontaneous::VERSION}"
+    }
+
+    class Front
+      include Spontaneous::Rack::Constants
+
+      def initialize(app)
+        @app = app
+        @renderer = Spontaneous::Output.published_renderer
+      end
+
+      def call(env)
+        status = headers = body = nil
+        env[RENDERER] = @renderer
+        Spontaneous::Content.with_published do
+          status, headers, body = @app.call(env)
+        end
+        [status, headers.merge(POWERED_BY), body]
       end
     end
   end

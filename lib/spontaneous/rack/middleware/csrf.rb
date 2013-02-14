@@ -1,4 +1,4 @@
-module Spontaneous::Rack::Back
+module Spontaneous::Rack::Middleware
   module CSRF
     # Creates and inserts CSRF tokens into Rack env
     # If token is present then it validates it and adds the validation

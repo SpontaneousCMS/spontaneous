@@ -5,8 +5,8 @@ require File.expand_path('../../test_helper', __FILE__)
 ENV['RACK_ENV'] = 'test'
 
 
-class FrontTest < MiniTest::Spec
-  include ::Rack::Test::Methods
+describe "Front" do
+  include RackTestMethods
 
   def self.site_root
     @site_root
@@ -69,8 +69,8 @@ class FrontTest < MiniTest::Spec
     format_list.map { |f| Page.format_for(f) }
   end
 
-  context "Public pages" do
-    setup do
+  describe "Public pages" do
+    before do
 
 
       S::Site.background_mode = :immediate
@@ -119,7 +119,7 @@ class FrontTest < MiniTest::Spec
       }
     end
 
-    teardown do
+    after do
       Object.send(:remove_const, :SitePage) rescue nil
       Object.send(:remove_const, :SubPage) rescue nil
       Content.delete
@@ -127,128 +127,128 @@ class FrontTest < MiniTest::Spec
       Content.delete_revision(1)
     end
 
-    should "return a 404 if asked for a non-existant page" do
+    it "return a 404 if asked for a non-existant page" do
       get '/not-bloody-likely'
       assert last_response.status == 404
     end
 
-    should "provide root when asked" do
+    it "provide root when asked" do
       get '/'
       assert last_response.ok?
-      last_response.body.should == "/.html\n"
+      last_response.body.must_equal "/.html\n"
     end
 
-    should "be available through their path" do
+    it "be available through their path" do
       get '/about'
       assert last_response.ok?
-      last_response.body.should == "/about.html\n"
-      last_response.content_type.should == "text/html;charset=utf-8"
+      last_response.body.must_equal "/about.html\n"
+      last_response.content_type.must_equal "text/html;charset=utf-8"
     end
 
-    should "be available through their path with explicit format" do
+    it "be available through their path with explicit format" do
       get '/about.html'
       assert last_response.ok?
-      last_response.body.should == "/about.html\n"
-      last_response.content_type.should == "text/html;charset=utf-8"
+      last_response.body.must_equal "/about.html\n"
+      last_response.content_type.must_equal "text/html;charset=utf-8"
     end
 
-    should "honor the format of the request" do
+    it "honor the format of the request" do
       @about.class.outputs :html, :pdf
       get '/about.pdf'
       assert last_response.ok?
-      last_response.body.should == "/about.pdf\n"
-      last_response.content_type.should == "application/pdf;charset=utf-8"
+      last_response.body.must_equal "/about.pdf\n"
+      last_response.content_type.must_equal "application/pdf;charset=utf-8"
     end
 
-    should "provide the default format of the page if none is explicitly given" do
+    it "provide the default format of the page if none is explicitly given" do
       @about.class.outputs :rss, :html
       get '/about'
       assert last_response.ok?
-      last_response.content_type.should == ::Rack::Mime.mime_type('.rss') + ";charset=utf-8"
-      last_response.body.should == "/about.rss\n"
+      last_response.content_type.must_equal ::Rack::Mime.mime_type('.rss') + ";charset=utf-8"
+      last_response.body.must_equal "/about.rss\n"
     end
 
-    should "return a custom content type if one is defined" do
+    it "return a custom content type if one is defined" do
       @about.class.outputs [:html, {:mimetype => "application/xhtml+xml"}]
       get '/about'
       assert last_response.ok?
-      last_response.content_type.should == "application/xhtml+xml;charset=utf-8"
-      last_response.body.should == "/about.html\n"
+      last_response.content_type.must_equal "application/xhtml+xml;charset=utf-8"
+      last_response.body.must_equal "/about.html\n"
     end
 
 
-    should "raise a 404 if asked for a format not provided by the page" do
+    it "raise a 404 if asked for a format not provided by the page" do
       get '/about.time'
       assert last_response.status == 404
     end
 
-    should "raise a 404 when accessing a private format" do
+    it "raise a 404 when accessing a private format" do
       @about.class.outputs [:html, {:mimetype => "application/xhtml+xml"}], [:rss, {:private => true}]
       get '/about.rss'
       assert last_response.status == 404
     end
 
-    context "Dynamic pages" do
-      setup do
+    describe "Dynamic pages" do
+      before do
         Content::Page.stubs(:path).with("/about").returns(about)
         Content::Page.stubs(:path).with("/news").returns(news)
       end
 
-      should "default to static behaviour" do
-        SitePage.dynamic?.should be_false
+      it "default to static behaviour" do
+        refute SitePage.dynamic?
         page = SitePage.new
-        page.dynamic?.should be_false
+        refute page.dynamic?
       end
-      should "correctly show a dynamic behaviour" do
+      it "correctly show a dynamic behaviour" do
         SitePage.request do
           show "/news"
         end
-        SitePage.dynamic?.should be_true
+        assert SitePage.dynamic?
         page = SitePage.new
-        page.dynamic?.should be_true
+        assert page.dynamic?
       end
 
-      should "render an alternate page if passed a page" do
+      it "render an alternate page if passed a page" do
         # about.stubs(:request_show).returns(news)
         SitePage.request do
           show Site['/news']
         end
         get '/about'
         assert last_response.ok?
-        last_response.body.should == "/news.html\n"
+        last_response.body.must_equal "/news.html\n"
       end
 
-      should "render an alternate page if passed a path" do
+      it "render an alternate page if passed a path" do
         # about.stubs(:request_show).returns("/news")
         SitePage.request do
           show "/news"
         end
         get '/about'
         assert last_response.ok?
-        last_response.body.should == "/news.html\n"
+        last_response.body.must_equal "/news.html\n"
       end
 
-      should "render an alternate page if passed a uid with a #" do
+      it "render an alternate page if passed a uid with a #" do
         # about.stubs(:request_show).returns("#news")
         SitePage.request do
           show "#news"
         end
         get '/about'
         assert last_response.ok?
-        last_response.body.should == "/news.html\n"
+        last_response.body.must_equal "/news.html\n"
       end
 
-      should "render an alternate page if passed a uid" do
+      it "render an alternate page if passed a uid" do
         # about.stubs(:request_show).returns("news")
         SitePage.request do
           show "news"
         end
         get '/about'
         assert last_response.ok?
-        last_response.body.should == "/news.html\n"
+        last_response.body.must_equal "/news.html\n"
       end
 
-      should "return not found of #request_show returns an invalid uid or path" do
+      it "return not found of #request_show returns an invalid uid or path" do
         # about.stubs(:request_show).returns("caterpillars")
         SitePage.request do
           show "caterpillars"
@@ -257,44 +257,44 @@ class FrontTest < MiniTest::Spec
         assert last_response.status == 404
       end
 
-      should "return the right status code" do
+      it "return the right status code" do
         SitePage.request do
           show "#news", 404
         end
         get '/about'
         assert last_response.status == 404
-        last_response.body.should == "/news.html\n"
+        last_response.body.must_equal "/news.html\n"
       end
 
-      should "allow handing POST requests" do
+      it "allow handing POST requests" do
         SitePage.request :post do
           show "#news"
         end
         post '/about'
         assert last_response.status == 200, "Expected status 200 but recieved #{last_response.status}"
-        last_response.body.should == "/news.html\n"
+        last_response.body.must_equal "/news.html\n"
       end
 
-      should "allow returning of any status code without altering content" do
+      it "allow returning of any status code without altering content" do
         SitePage.request do
           404
         end
         get '/about'
         assert last_response.status == 404
-        last_response.body.should == "/about.html\n"
+        last_response.body.must_equal "/about.html\n"
       end
 
-      should "allow altering of headers" do
+      it "allow altering of headers" do
         SitePage.request do
           headers["X-Works"] = "Yes"
         end
         get '/about'
         assert last_response.status == 200
-        last_response.body.should == "/about.html\n"
-        last_response.headers["X-Works"].should == "Yes"
+        last_response.body.must_equal "/about.html\n"
+        last_response.headers["X-Works"].must_equal "Yes"
       end
 
-      should "allow passing of template params & a page to the render call" do
+      it "allow passing of template params & a page to the render call" do
         SitePage.layout do
           "{{ teeth }}"
         end
@@ -303,10 +303,10 @@ class FrontTest < MiniTest::Spec
         end
         get '/about'
         assert last_response.status == 200
-        last_response.body.should == "white"
+        last_response.body.must_equal "white"
       end
 
-      should "give access to the request params within the controller" do
+      it "give access to the request params within the controller" do
         SitePage.layout { "{{ params[:horse] }}*{{ equine }}" }
         SitePage.request :post do
           value = params[:horse]
@@ -314,7 +314,7 @@ class FrontTest < MiniTest::Spec
         end
         post '/about', :horse => "dancing"
         assert last_response.status == 200
-        last_response.body.should == "dancing*dancing"
+        last_response.body.must_equal "dancing*dancing"
       end
 
       # should "handle anything that responds to #render(format)" do
@@ -322,127 +322,127 @@ class FrontTest < MiniTest::Spec
       #   show.stubs(:render).returns("mocked")
       #   about.stubs(:request_show).returns(show)
       #   get '/about'
-      #   last_response.body.should == "mocked"
+      #   last_response.body.must_equal "mocked"
       # end
     end
 
-    context "Redirects" do
-      setup do
+    describe "Redirects" do
+      before do
         Page.stubs(:path).with("/about").returns(about)
         Page.stubs(:path).with("/news").returns(news)
       end
 
-      should "respond appropriatly to redirects to path" do
+      it "respond appropriatly to redirects to path" do
         SitePage.request do
           redirect "/news"
         end
         get '/about'
         assert last_response.status == 302
-        last_response.headers["Location"].should == "http://example.org/news"
+        last_response.headers["Location"].must_equal "http://example.org/news"
       end
 
-      should "respond appropriately to redirects to a Page instance" do
+      it "respond appropriately to redirects to a Page instance" do
         SitePage.request do
           redirect Page.path("/news")
         end
         get '/about'
         assert last_response.status == 302
-        last_response.headers["Location"].should == "http://example.org/news"
+        last_response.headers["Location"].must_equal "http://example.org/news"
       end
 
-      should "respond appropriately to redirects to a UID" do
+      it "respond appropriately to redirects to a UID" do
         SitePage.request do
           redirect "#news"
         end
         get '/about'
         assert last_response.status == 302
-        last_response.headers["Location"].should == "http://example.org/news"
+        last_response.headers["Location"].must_equal "http://example.org/news"
       end
 
-      should "recognise a :temporary redirect" do
+      it "recognise a :temporary redirect" do
         SitePage.request do
           redirect "/news", :temporary
         end
         get '/about'
         assert last_response.status == 302
-        last_response.headers["Location"].should == "http://example.org/news"
+        last_response.headers["Location"].must_equal "http://example.org/news"
       end
 
-      should "recognise a :permanent redirect" do
+      it "recognise a :permanent redirect" do
         SitePage.request do
           redirect "/news", :permanent
         end
         get '/about'
         assert last_response.status == 301
-        last_response.headers["Location"].should == "http://example.org/news"
+        last_response.headers["Location"].must_equal "http://example.org/news"
       end
 
-      should "correctly apply numeric status codes" do
+      it "correctly apply numeric status codes" do
         SitePage.request do
           redirect "/news", 307
         end
         get '/about'
-        last_response.headers["Location"].should == "http://example.org/news"
+        last_response.headers["Location"].must_equal "http://example.org/news"
         assert last_response.status == 307
       end
 
     end
 
-    context "Templates" do
-      setup do
+    describe "Templates" do
+      before do
         Spontaneous::Output.cache_templates = true
         @cache_file = "#{Spontaneous.revision_dir(1)}/dynamic/dynamic.html.rb"
         FileUtils.rm(@cache_file) if File.exist?(@cache_file)
         Spontaneous::Output.write_compiled_scripts = true
       end
 
-      teardown do
+      after do
         Spontaneous::Output.cache_templates = true
       end
 
-      should "have access to the params, request & session object" do
+      it "have access to the params, request & session object" do
         get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
         assert last_response.ok?
-        last_response.body.should == "42/peter/example.org\n"
+        last_response.body.must_equal "42/peter/example.org\n"
       end
 
-      context "caching" do
-        should "use pre-rendered versions of the templates" do
+      describe "caching" do
+        it "use pre-rendered versions of the templates" do
           dummy_content = 'cached-version/#{session[\'user_id\']}'
           dummy_template = File.join(@site.revision_root, "current/dynamic/dynamic.html.cut")
           File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
-          last_response.body.should == "cached-version/42"
+          last_response.body.must_equal "cached-version/42"
         end
 
-        should "cache templates as ruby files" do
+        it "cache templates as ruby files" do
           dummy_content = 'cached-version/#{session[\'user_id\']}'
           dummy_template = File.join(@site.revision_root, "current/dynamic/index.html.cut")
           Spontaneous::Output.renderer.write_compiled_scripts = true
           File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
           FileUtils.rm(@cache_file) if File.exists?(@cache_file)
-          File.exists?(@cache_file).should be_false
+          refute File.exists?(@cache_file)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
 
-          File.exists?(@cache_file).should be_true
+          assert File.exists?(@cache_file)
           File.open(@cache_file, 'w') { |f| f.write('@__buf << %Q`@cache_filed-version/#{params[\'wendy\']}`;')}
           # Force compiled file to have a later timestamp
           File.utime(Time.now, Time.now + 1, @cache_file)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
-          last_response.body.should == "@cache_filed-version/peter"
+          last_response.body.must_equal "@cache_filed-version/peter"
         end
 
-        should "not cache templates if caching turned off" do
+        it "not cache templates if caching turned off" do
           Spontaneous::Output.cache_templates = false
-          File.exists?(@cache_file).should be_false
+          refute File.exists?(@cache_file)
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
-          File.exists?(@cache_file).should be_false
+          refute File.exists?(@cache_file)
         end
       end
     end
 
-    context "Model controllers" do
-      setup do
+    describe "Model controllers" do
+      before do
         class ::TestController < Spontaneous::Rack::PageController
           get '/' do
             "Magic"
@@ -486,110 +486,110 @@ class FrontTest < MiniTest::Spec
         Content.stubs(:path).with("/about/now").returns(subpage)
       end
 
-      teardown do
+      after do
         SitePage.send(:remove_const, :StatusController) rescue nil
         SitePage.send(:remove_const, :TestController) rescue nil
         SitePage.send(:remove_const, :Test2Controller) rescue nil
         Object.send(:remove_const, :TestController) rescue nil
       end
 
-      should "not be used unless necessary" do
+      it "not be used unless necessary" do
         get "/about"
         assert last_response.ok?
-        last_response.body.should == about.render
+        last_response.body.must_equal about.render
       end
 
-      should "work on the homepage" do
+      it "work on the homepage" do
         get "/@comments"
         assert last_response.ok?
-        last_response.body.should == "Success"
+        last_response.body.must_equal "Success"
       end
 
 
-      should "be recognised" do
+      it "be recognised" do
         get "/about/@comments"
         assert last_response.ok?
-        last_response.body.should == "Success"
+        last_response.body.must_equal "Success"
       end
 
-      should "render the page correctly if action returns page object" do
+      it "render the page correctly if action returns page object" do
         get "/about/@comments/page"
         assert last_response.ok?
-        last_response.body.should == about.render
+        last_response.body.must_equal about.render
       end
 
-      should "return 404 if trying unknown namespace" do
+      it "return 404 if trying unknown namespace" do
         get "/about/@missing/action"
         assert last_response.status == 404
       end
 
-      should "respond to multiple namespaces" do
+      it "respond to multiple namespaces" do
         get "/about/@status/good"
         assert last_response.ok?
-        last_response.body.should == about.render
-        about.status.should == "good"
+        last_response.body.must_equal about.render
+        about.status.must_equal "good"
       end
 
-      should "accept POST requests" do
+      it "accept POST requests" do
         post "/about/@status/good"
         assert last_response.ok?
-        last_response.body.should == about.render
-        about.status.should == "good"
+        last_response.body.must_equal about.render
+        about.status.must_equal "good"
       end
 
-      should "return 404 unless post request has an action" do
+      it "return 404 unless post request has an action" do
         Page.expects(:path).with("/about").never
         post "/about"
         assert last_response.status == 404
       end
 
-      should "return 404 for post requests to unknown actions" do
+      it "return 404 for post requests to unknown actions" do
         post "/about/@status/missing/action"
         assert last_response.status == 404
       end
 
       # probably the wrong place to test this -- should be in units -- but what the heck
-      should "be able to generate urls for actions" do
-        about.action_url(:status, "/good").should == "/about/@status/good"
+      it "be able to generate urls for actions" do
+        about.action_url(:status, "/good").must_equal "/about/@status/good"
       end
 
-      should "pass the format onto the page if the action returns it to the render call" do
+      it "pass the format onto the page if the action returns it to the render call" do
         about.class.outputs :html, :xml
         about.class.layout do
           "${path}.${__format}"
         end
         get "/about/@comments/page.xml"
         assert last_response.ok?
-        last_response.body.should == "/about.xml"
+        last_response.body.must_equal "/about.xml"
       end
 
-      should "use the format within the action if required" do
+      it "use the format within the action if required" do
         about.class.outputs :html, :xml
         get "/about/@comments/format.xml"
         assert last_response.ok?
-        last_response.body.should == "xml"
+        last_response.body.must_equal "xml"
       end
 
-      should "be inherited by subclasses" do
+      it "be inherited by subclasses" do
         get "/about/now/@comments"
         assert last_response.ok?
-        last_response.body.should == "Success"
+        last_response.body.must_equal "Success"
       end
 
-      should "allow definition of controller using class" do
+      it "allow definition of controller using class" do
         get "/about/@test"
         assert last_response.ok?
-        last_response.body.should == "Magic"
+        last_response.body.must_equal "Magic"
       end
 
-      should "allow definition of controller using class and extend it using block" do
+      it "allow definition of controller using class and extend it using block" do
         get "/about/@test2/block"
         assert last_response.ok?
-        last_response.body.should == "Block"
+        last_response.body.must_equal "Block"
       end
 
-      context "overriding base controller class" do
-        setup do
+      describe "overriding base controller class" do
+        before do
           class ::PageController < S::Rack::PageController
             get '/nothing' do
               'Something'
@@ -604,33 +604,33 @@ class FrontTest < MiniTest::Spec
 
         end
 
-        teardown do
+        after do
           Object.send(:remove_const, :PageController)
         end
 
-        should "affect all controller actions" do
+        it "affect all controller actions" do
           get "/about/@drummer/nothing"
           assert last_response.ok?
-          last_response.body.should == "Something"
+          last_response.body.must_equal "Something"
         end
       end
     end
-    context "Static files" do
-      setup do
+    describe "Static files" do
+      before do
         @revision_dir = Spontaneous.instance.revision_dir(1)
         @public_dir = @revision_dir / "public"
       end
 
-      should "should be sourced from the published revision directory" do
+      it "should be sourced from the published revision directory" do
         test_string = "#{Time.now}\n"
         test_file = "#{Time.now.to_i}.txt"
         File.open(@public_dir / test_file, 'w') { |f| f.write(test_string) }
         get "/#{test_file}"
         assert last_response.ok?
-        last_response.body.should == test_string
+        last_response.body.must_equal test_string
       end
 
-      should "pass far-future expires headers for media" do
+      it "pass far-future expires headers for media" do
         test_string = "#{Time.now}\n"
         test_file_url = "#{Time.now.to_i}.txt"
         test_file = Spontaneous.media_dir / test_file_url
@@ -638,12 +638,12 @@ class FrontTest < MiniTest::Spec
         File.open(test_file, 'w') { |f| f.write(test_string) }
         get "/media/#{test_file_url}"
         assert last_response.ok?
-        last_response.body.should == test_string
+        last_response.body.must_equal test_string
         expiry = DateTime.parse last_response.headers["Expires"]
-        expiry.year.should == (Date.today.year) + 10
+        expiry.year.must_equal (Date.today.year) + 10
       end
 
-      should "pass far-future expires headers for compiled assets" do
+      it "pass far-future expires headers for compiled assets" do
         test_string = "#{Time.now}\n"
         test_file_url = "/rev/#{Time.now.to_i}.txt"
         test_file = @revision_dir / test_file_url
@@ -651,9 +651,9 @@ class FrontTest < MiniTest::Spec
         File.open(test_file, 'w') { |f| f.write(test_string) }
         get test_file_url
         assert last_response.ok?
-        last_response.body.should == test_string
+        last_response.body.must_equal test_string
         expiry = DateTime.parse last_response.headers["Expires"]
-        expiry.year.should == (Date.today.year) + 10
+        expiry.year.must_equal (Date.today.year) + 10
       end
     end
   end

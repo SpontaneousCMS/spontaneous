@@ -1,7 +1,7 @@
 
 module Spontaneous::Rack
   class CacheableFile < ::Rack::File
-    include HTTP
+    include Constants
 
     TEN_YEARS = 10*365.25*24*3600
     MAX_AGE =  "max-age=#{TEN_YEARS}, public".freeze

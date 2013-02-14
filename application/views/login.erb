@@ -5,36 +5,21 @@
     <title><%= Spontaneous::Site.config.site_domain %>: Please Login</title>
     <link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
     <link rel="apple-touch-icon" href="/@spontaneous/static/spot-71fab1d2f065034f5fc15e7bea2ad36c.png" />
-    <% Spontaneous::Rack::Assets::CSS::LOGIN_CSS.each do |css_file| %>
-      <link rel="stylesheet" href="<%= style_url(css_file) %>" type="text/css" media="screen" charset="utf-8" />
-    <% end %>
-    <% Spontaneous::Rack::Assets::JavaScript::JQUERY.each do |js_file| %>
-      <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
-    <% end %>
+      <link rel="stylesheet" href="<%= style_url("spontaneous") %>" type="text/css" media="screen" charset="utf-8" />
+      <script type="text/javascript" charset="utf-8" src="<%= script_url("vendor/jquery") %>"></script>
     <script type="text/javascript">
       var Spontaneous = {
         site_domain: '<%= Spontaneous::Site.config.site_domain %>',
         site_id: '<%= Spontaneous::Site.config.site_id %>',
       };
     </script>
-    <% Spontaneous::Rack::Assets::JavaScript::LOGIN_JS.each do |js_file| %>
-      <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
-    <% end %>
+    <script type="text/javascript" charset="utf-8" src="<%= script_url("login") %>"></script>
     <script type="text/javascript">
       (function($) {
         $(function() {
-          <% if locals[:invalid_key] %>
-            var key = Spontaneous.Auth.Key.remove(Spontaneous.site_id);
-          <% else %>
-            var key = Spontaneous.Auth.Key.load(Spontaneous.site_id);
-          <% end %>
-          if (key) {
-            $('#reauthenticate-key').val(key).parent('form')[0].submit();
-          } else {
-            $('#outer').fadeIn(function() {
-              $('#login-form input#user-login').focus();
-            });
-          }
+          $('#outer').fadeIn(function() {
+            $('#login-form input#user-login').focus();
+          });
         });
       }(jQuery));
     </script>
@@ -61,9 +46,5 @@
         </form>
       </div>
     </div>
-      <form action="/@spontaneous/reauthenticate" method="post" accept-charset="UTF-8">
-        <input type="hidden" id="reauthenticate-key" name="api_key" value="" />
-        <input type="hidden" id="reauthenticate-origin" name="origin" value="<%= locals[:origin] || request.path_info %>" />
-      </form>
   </body>
 </html>

@@ -7,12 +7,8 @@
     <title>Spontaneous: Loading...</title>
 		<link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
 
-    <% Spontaneous::Rack::Assets::CSS::SCHEMA_MODIFICATION_CSS.each do |css_file| %>
-      <link rel="stylesheet" href="<%= style_url(css_file) %>" type="text/css" media="screen" charset="utf-8" />
-    <% end %>
-    <% Spontaneous::Rack::Assets::JavaScript::JQUERY.each do |js_file| %>
-      <script type="text/javascript" charset="utf-8" src="<%= script_url(js_file) %>"></script>
-    <% end %>
+      <link rel="stylesheet" href="<%= style_url("spontaneous") %>" type="text/css" media="screen" charset="utf-8" />
+      <script type="text/javascript" charset="utf-8" src="<%= script_url("vendor/jquery") %>"></script>
     <script type="text/javascript">
       var Spontaneous = {};
     </script>

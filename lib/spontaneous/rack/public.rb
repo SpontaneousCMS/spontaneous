@@ -4,7 +4,7 @@
 module Spontaneous
   module Rack
     module Public
-      include HTTP
+      include Constants
       include Sinatra::Helpers unless method_defined?(:redirect)
 
 

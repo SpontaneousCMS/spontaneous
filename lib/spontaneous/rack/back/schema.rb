@@ -1,4 +1,3 @@
-require 'spontaneous/rack/back/csrf'
 
 module Spontaneous::Rack::Back
   class Schema < Base
@@ -7,7 +6,7 @@ module Spontaneous::Rack::Back
     # The index application needs to load without CSRF validation
     # and the Schema app needs CSRF validation
     # but the Schema app has be before Index in the stack
-    use Spontaneous::Rack::Back::CSRF::Verification
+    use Spontaneous::Rack::Middleware::CSRF::Verification
 
     def schema
       Spontaneous.schema
