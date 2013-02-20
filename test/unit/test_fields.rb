@@ -1430,7 +1430,7 @@ describe "Fields" do
           content.instances.image.value.must_equal "/media/#{S::Media.pad_id(@page.id)}/#{@page.instances.schema_id}/0001/something.gif"
         end
 
-        it "be deleted when their page is deleted xxx" do
+        it "be deleted when their page is deleted" do
           @page.image.stubs(:page_lock_description).returns("Lock description")
           lock = Spontaneous::PageLock.lock_field(@page.image)
           @page.destroy
@@ -1438,7 +1438,7 @@ describe "Fields" do
           found.must_be_nil
         end
 
-        it "be deleted when their owning content is deleted xxx" do
+        it "be deleted when their owning content is deleted" do
           LockedPiece.field :title
           @instance.title.stubs(:page_lock_description).returns("Lock description")
           lock = Spontaneous::PageLock.lock_field(@instance.title)
@@ -1447,7 +1447,7 @@ describe "Fields" do
           found.must_be_nil
         end
 
-        it "deals gracefully with updating content that has been deleted xxx" do
+        it "deals gracefully with updating content that has been deleted" do
           field = @page.image
           Spontaneous::Simultaneous.expects(:fire).at_least_once.with(:update_fields, {
             "fields" => [field.id]
