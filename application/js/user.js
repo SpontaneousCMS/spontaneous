@@ -35,10 +35,9 @@ Spontaneous.User = (function($, S) {
 			this.set('user', this.user);
 		},
 		logout: function() {
-			ajax.post("/logout", {}, function() {
+			ajax.put("/logout", {}, function() {
 				// S.Ajax.unauthorized();
 			});
-			S.Auth.Key.remove(S.site_id);
 		},
 		name: function() { return this.user.name(); },
 		email: function() { return this.user.email(); },

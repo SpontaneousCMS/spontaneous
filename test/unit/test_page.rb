@@ -3,374 +3,360 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 
-class PageTest < MiniTest::Spec
-
-  def setup
+describe "Page" do
+  before do
     @site = setup_site
+    Content.delete
+    class ::Page
+      field :title, :string
+      box :sub
+    end
   end
 
-  def teardown
+  after do
+    Object.send(:remove_const, :Page)
+    Object.send(:remove_const, :Piece)
     teardown_site
   end
 
-  context "Pages:" do
-    setup do
+  describe "Root page" do
+    it "be created by first page insert" do
+      p = Page.create
+      assert p.root?
+      p.path.must_equal "/"
+      p.slug.must_equal ""
+      p.parent.must_be_nil
+    end
+
+    it "be a singleton" do
+      p = Page.create
+      assert p.root?
+      q = Page.create
+      refute q.root?
+    end
+  end
+
+  describe "Slugs" do
+    it "be generated if missing" do
+      o = Page.create
+      p = Page.create
+      p.slug.wont_equal ""
+      p.save
+      p.reload.slug.wont_equal ""
+    end
+
+    it "be made URL safe" do
+      o = Page.create
+      p = Page.create
+      p.slug = " something's illegal and ugly!!"
+      p.slug.must_equal "somethings-illegal-and-ugly"
+      p.save
+      p.reload.slug.must_equal "somethings-illegal-and-ugly"
+    end
+
+    it "be set from title if using generated slug" do
+      r = Page.create
+      slug = Page.generate_default_slug
+      Page.stubs(:generate_default_slug).returns(slug)
+      o = Page.create(:title => "New Page")
+      p = Page.create(:title => "New Page")
+      o.slug.must_equal slug
+      r.sub << o
+      o.save
+      o = Page[o.id]
+      o.slug.must_equal slug
+      o.sub << p
+      o.save
+      o = Page[o.id]
+      o.slug.must_equal slug
+      o.title = "New Title"
+      o.save
+      o.reload
+      o.slug.must_equal "new-title"
+      o.title = "Another Title"
+      o.save
+      o.reload
+      o.slug.must_equal "new-title"
+    end
+
+    it "not be longer than 255 chars" do
+      o = Page.create
+      long_slug = (["bang"]*100)
+      o.slug = long_slug.join(' ')
+      o.slug.length.must_equal 255
+      o.slug.must_equal long_slug.join('-')[0..254]
+    end
+  end
+
+  describe "Pages in tree" do
+    before do
       Content.delete
-      class Page < ::Page
-        field :title, :string
-        box :sub
-      end
-      class Piece < ::Piece; end
-    end
-    teardown do
-      PageTest.send(:remove_const, :Page)
-      PageTest.send(:remove_const, :Piece)
-    end
-    context "Root page" do
-      setup do
-      end
-      should "be created by first page insert" do
-        p = Page.create
-        p.root?.should be_true
-        p.path.should == "/"
-        p.slug.should == ""
-        p.parent.should be_nil
-      end
-
-      should "be a singleton" do
-        p = Page.create
-        p.root?.should be_true
-        q = Page.create
-        q.root?.should be_false
-      end
+      @p = Page.create
+      assert @p.root?
+      @q = Page.new(:slug => 'q')
+      @r = Page.new(:slug => 'r')
+      @s = Page.new(:slug => 's')
+      @t = Page.new(:slug => 't')
+      @p.sub << @q
+      @q.sub << @r
+      @q.sub << @s
+      @s.sub << @t
+      @p.save
+      @q.save
+      @r.save
+      @s.save
+      @t.save
+      # doing this means that the == tests work below
+      @p = Page[@p.id]
+      @q = Page[@q.id]
+      @r = Page[@r.id]
+      @s = Page[@s.id]
+      @t = Page[@t.id]
     end
 
-    context "Slugs" do
-      setup do
-      end
-
-      should "be generated if missing" do
-        o = Page.create
-        p = Page.create
-        p.slug.should_not == ""
-        p.save
-        p.reload.slug.should_not == ""
-      end
-
-      should "be made URL safe" do
-        o = Page.create
-        p = Page.create
-        p.slug = " something's illegal and ugly!!"
-        p.slug.should == "somethings-illegal-and-ugly"
-        p.save
-        p.reload.slug.should == "somethings-illegal-and-ugly"
-      end
-
-      should "be set from title if using generated slug" do
-        r = Page.create
-        slug = Page.generate_default_slug
-        Page.stubs(:generate_default_slug).returns(slug)
-        o = Page.create(:title => "New Page")
-        p = Page.create(:title => "New Page")
-        o.slug.should == slug
-        r.sub << o
-        o.save
-        o = Page[o.id]
-        o.slug.should == slug
-        o.sub << p
-        o.save
-        o = Page[o.id]
-        o.slug.should == slug
-        o.title = "New Title"
-        o.save
-        o.reload
-        o.slug.should == "new-title"
-        o.title = "Another Title"
-        o.save
-        o.reload
-        o.slug.should == "new-title"
-      end
-
-      should "not be longer than 255 chars" do
-        o = Page.create
-        long_slug = (["bang"]*100)
-        o.slug = long_slug.join(' ')
-        o.slug.length.should == 255
-        o.slug.should == long_slug.join('-')[0..254]
-      end
+    it "be able to find a reference to their inline entry" do
+      @q.entry.class.must_equal Spontaneous::PagePiece
     end
 
-    context "Pages in tree" do
-      setup do
-        Content.delete
-        @p = Page.create
-        @p.root?.should be_true
-        @q = Page.new(:slug => 'q')
-        @r = Page.new(:slug => 'r')
-        @s = Page.new(:slug => 's')
-        @t = Page.new(:slug => 't')
-        @p.sub << @q
-        @q.sub << @r
-        @q.sub << @s
-        @s.sub << @t
-        @p.save
-        @q.save
-        @r.save
-        @s.save
-        @t.save
-        # doing this means that the == tests work below
-        @p = Page[@p.id]
-        @q = Page[@q.id]
-        @r = Page[@r.id]
-        @s = Page[@s.id]
-        @t = Page[@t.id]
-      end
-
-      should "be able to find a reference to their inline entry" do
-        @q.entry.class.should == Spontaneous::PagePiece
-      end
-
-      should "have a reference to their parent" do
-        @p.parent.should be_nil
-        @q.parent.should === @p
-        @r.parent.should === @q
-        @s.parent.should === @q
-        @t.parent.should === @s
-      end
-      should "have a reference to their owner" do
-        @p.owner.should be_nil
-        @q.owner.should === @p
-        @r.owner.should === @q
-        @s.owner.should === @q
-        @t.owner.should === @s
-      end
-
-      should "know their container" do
-        @p.container.should be_nil
-        @q.container.should == @p.sub
-        @r.container.should == @q.sub
-        @s.container.should == @q.sub
-        @t.container.should == @s.sub
-      end
-
-      should "know their containing box" do
-        @p.box.should be_nil
-        @q.box.should == @p.sub
-        @r.box.should == @q.sub
-        @s.box.should == @q.sub
-        @t.box.should == @s.sub
-      end
-
-      should "have a list of their children" do
-        @p.children.should == [@q]
-        @q.children.should == [@r, @s]
-        @r.children.should == []
-        @s.children.should == [@t]
-        @t.children.should == []
-      end
-
-      should "have a reference to themselves as page" do
-        @p.page.should == @p
-        @q.page.should == @q
-        @r.page.should == @r
-        @s.page.should == @s
-        @t.page.should == @t
-      end
-
-      should "have a reference to themselves as content_instance" do
-        @p.content_instance.should == @p
-      end
-
-      should "keep track of their depth" do
-        @p.depth.should == 0
-        @q.depth.should == 1
-        @r.depth.should == 2
-        @s.depth.should == 2
-        @t.depth.should == 3
-      end
-
-      should "have the correct page hierarchy" do
-        Page.box :things1
-        Page.box :things2
-        a = Page.new
-        c = Page.new
-        d = Page.new
-        e = Page.new
-        a.things1 << c
-        a.things2 << d
-        a.things2 << e
-        a.save
-        a.reload
-        c.reload
-        d.reload
-        e.reload
-        c.parent.should == a
-        d.parent.should == a
-        e.parent.should == a
-        c.content_ancestors.should == [a, a.things1]
-        d.content_ancestors.should == [a, a.things2]
-        e.content_ancestors.should == [a, a.things2]
-        # the zeroth box is 'sub'
-        c.page_order_string.should == "00001.00000"
-        d.page_order_string.should == "00002.00000"
-        e.page_order_string.should == "00002.00001"
-      end
-
-      should "have the correct page hierarchy for pages within pieces" do
-        Page.box :things
-        Piece.box :pages
-        a = Page.new
-        b = Piece.new
-        a.things << b
-        c = Page.new
-        d = Page.new
-        b.pages << c
-        b.pages << d
-        a.save
-        a.reload
-        b.reload
-        c.reload
-        d.reload
-        c.parent.should == a
-        c.content_ancestors.should == [a, a.things, b, b.pages]
-        c.page_order_string.should == "00001.00000.00000.00000"
-        d.page_order_string.should == "00001.00000.00000.00001"
-      end
-
-      should "have correct paths" do
-        @p.path.should == "/"
-        @q.path.should == "/q"
-        @r.path.should == "/q/r"
-        @s.path.should == "/q/s"
-        @t.path.should == "/q/s/t"
-      end
-
-      should "update paths when being adopted" do
-        @p.sub.adopt(@s)
-        @s.reload
-        @t.reload
-        @s.path.should == "/s"
-        @t.path.should == "/s/t"
-      end
-
-      should "all have a reference to the root node" do
-        # @p.root?.should be_true
-        @p.root.should === @p
-        @q.root.should === @p
-        @r.root.should === @p
-        @s.root.should === @p
-        @t.root.should === @p
-      end
-
-      should "have correct ancestor paths" do
-        @p.ancestor_path.should == []
-        @q.ancestor_path.should == [@p.id]
-        @r.ancestor_path.should == [@p.id, @q.id]
-        @s.ancestor_path.should == [@p.id, @q.id]
-        @t.ancestor_path.should == [@p.id, @q.id, @s.id]
-      end
-      should "know their ancestors" do
-        # must be a better way to test these arrays
-        @p.ancestors.should === []
-        @q.ancestors.should === [@p]
-        @r.ancestors.should == [@p, @q]
-        @s.ancestors.should == [@p, @q]
-        @t.ancestors.should === [@p, @q, @s]
-      end
-
-      should "know their generation" do
-        @r.generation.should == [@r, @s]
-        @s.generation.should == [@r, @s]
-      end
-
-      should "know their siblings" do
-        @r.siblings.should == [@s]
-        @s.siblings.should == [@r]
-      end
-
-      should "always have the right path" do
-        @q.slug = "changed"
-        @q.save
-        @p.reload.path.should == "/"
-        @q.reload.path.should == "/changed"
-        @r.reload.path.should == "/changed/#{@r.slug}"
-        @s.reload.path.should == "/changed/#{@s.slug}"
-        @t.reload.path.should == "/changed/#{@s.slug}/#{@t.slug}"
-      end
-
-      should "have direct access to ancestors at any depth" do
-        @q.ancestor(0).should == @p
-        @r.ancestor(0).should == @p
-        @r.ancestor(1).should == @q
-        @s.ancestor(1).should == @q
-        @t.ancestor(1).should == @q
-        @t.ancestor(2).should == @s
-        @t.ancestor(-1).should == @s
-        @t.ancestor(-2).should == @q
-      end
-
-      should "test for ancestry" do
-        @t.ancestor?(@s).should be_true
-        @t.ancestor?(@q).should be_true
-        @t.ancestor?(@p).should be_true
-        @q.ancestor?(@t).should be_false
-      end
-
-      should "know if it's in the current path" do
-        @t.active?(@s).should be_true
-        @t.active?(@t).should be_true
-        @t.active?(@q).should be_true
-        @t.active?(@p).should be_true
-        @q.active?(@t).should be_false
-      end
-
-      should "provide a list of pages at any depth" do
-        @t.at_depth(2).should == [@r, @s]
-        @p.at_depth(1).should == [@q]
-        lambda { @p.at_depth(2) }.must_raise(ArgumentError)
-      end
+    it "have a reference to their parent" do
+      @p.parent.must_be_nil
+      @q.parent.must_equal @p
+      @r.parent.must_equal @q
+      @s.parent.must_equal @q
+      @t.parent.must_equal @s
+    end
+    it "have a reference to their owner" do
+      @p.owner.must_be_nil
+      @q.owner.must_equal @p
+      @r.owner.must_equal @q
+      @s.owner.must_equal @q
+      @t.owner.must_equal @s
     end
 
-    context "page pieces" do
-      setup do
-        Page.box :things
-        Piece.box :things
-        @parent = Page.create
-        @piece = Piece.new
-        @child = Page.new
-        @parent.things << @piece
-        @piece.things << @child
-        @parent.save
-        @piece.save
-        @child.save
-        @page_piece = @parent.things.first.things.first
-      end
+    it "know their container" do
+      @p.container.must_be_nil
+      @q.container.must_equal @p.sub
+      @r.container.must_equal @q.sub
+      @s.container.must_equal @q.sub
+      @t.container.must_equal @s.sub
+    end
 
-      should "report their depth according to their position in the piece tree" do
-        @parent.depth.should == 0
-        @parent.contents.first.depth.should == 1
-        @parent.contents.first.contents.first.depth.should == 2
-      end
+    it "know their containing box" do
+      @p.box.must_be_nil
+      @q.box.must_equal @p.sub
+      @r.box.must_equal @q.sub
+      @s.box.must_equal @q.sub
+      @t.box.must_equal @s.sub
+    end
 
-      should "know their page" do
-        @page_piece.page.should == @parent
-      end
+    it "have a list of their children" do
+      @p.children.must_equal [@q]
+      @q.children.must_equal [@r, @s]
+      @r.children.must_equal []
+      @s.children.must_equal [@t]
+      @t.children.must_equal []
+    end
 
-      should "know their container" do
-        @page_piece.container.should == @piece.things
-      end
+    it "have a reference to themselves as page" do
+      @p.page.must_equal @p
+      @q.page.must_equal @q
+      @r.page.must_equal @r
+      @s.page.must_equal @s
+      @t.page.must_equal @t
+    end
 
-      should "know their box" do
-        @page_piece.box.should == @piece.things
-      end
+    it "have a reference to themselves as content_instance" do
+      @p.content_instance.must_equal @p
+    end
 
-      should "know their parent" do
-        @page_piece.parent.should == @piece
-      end
+    it "keep track of their depth" do
+      @p.depth.must_equal 0
+      @q.depth.must_equal 1
+      @r.depth.must_equal 2
+      @s.depth.must_equal 2
+      @t.depth.must_equal 3
+    end
 
-      should "know their owner" do
-        @page_piece.owner.should == @piece
-      end
+    it "have the correct page hierarchy" do
+      Page.box :things1
+      Page.box :things2
+      a = Page.new
+      c = Page.new
+      d = Page.new
+      e = Page.new
+      a.things1 << c
+      a.things2 << d
+      a.things2 << e
+      a.save
+      a.reload
+      c.reload
+      d.reload
+      e.reload
+      c.parent.must_equal a
+      d.parent.must_equal a
+      e.parent.must_equal a
+      c.content_ancestors.must_equal [a, a.things1]
+      d.content_ancestors.must_equal [a, a.things2]
+      e.content_ancestors.must_equal [a, a.things2]
+      # the zeroth box is 'sub'
+      c.page_order_string.must_equal "00001.00000"
+      d.page_order_string.must_equal "00002.00000"
+      e.page_order_string.must_equal "00002.00001"
+    end
+
+    it "have the correct page hierarchy for pages within pieces" do
+      Page.box :things
+      Piece.box :pages
+      a = Page.new
+      b = Piece.new
+      a.things << b
+      c = Page.new
+      d = Page.new
+      b.pages << c
+      b.pages << d
+      a.save
+      a.reload
+      b.reload
+      c.reload
+      d.reload
+      c.parent.must_equal a
+      c.content_ancestors.must_equal [a, a.things, b, b.pages]
+      c.page_order_string.must_equal "00001.00000.00000.00000"
+      d.page_order_string.must_equal "00001.00000.00000.00001"
+    end
+
+    it "have correct paths" do
+      @p.path.must_equal "/"
+      @q.path.must_equal "/q"
+      @r.path.must_equal "/q/r"
+      @s.path.must_equal "/q/s"
+      @t.path.must_equal "/q/s/t"
+    end
+
+    it "update paths when being adopted" do
+      @p.sub.adopt(@s)
+      @s.reload
+      @t.reload
+      @s.path.must_equal "/s"
+      @t.path.must_equal "/s/t"
+    end
+
+    it "all have a reference to the root node" do
+      @p.root.must_equal @p
+      @q.root.must_equal @p
+      @r.root.must_equal @p
+      @s.root.must_equal @p
+      @t.root.must_equal @p
+    end
+
+    it "have correct ancestor paths" do
+      @p.ancestor_path.must_equal []
+      @q.ancestor_path.must_equal [@p.id]
+      @r.ancestor_path.must_equal [@p.id, @q.id]
+      @s.ancestor_path.must_equal [@p.id, @q.id]
+      @t.ancestor_path.must_equal [@p.id, @q.id, @s.id]
+    end
+    it "know their ancestors" do
+      # must be a better way to test these arrays
+      @p.ancestors.must_equal []
+      @q.ancestors.must_equal [@p]
+      @r.ancestors.must_equal [@p, @q]
+      @s.ancestors.must_equal [@p, @q]
+      @t.ancestors.must_equal [@p, @q, @s]
+    end
+
+    it "know their generation" do
+      @r.generation.must_equal [@r, @s]
+      @s.generation.must_equal [@r, @s]
+    end
+
+    it "know their siblings" do
+      @r.siblings.must_equal [@s]
+      @s.siblings.must_equal [@r]
+    end
+
+    it "always have the right path" do
+      @q.slug = "changed"
+      @q.save
+      @p.reload.path.must_equal "/"
+      @q.reload.path.must_equal "/changed"
+      @r.reload.path.must_equal "/changed/#{@r.slug}"
+      @s.reload.path.must_equal "/changed/#{@s.slug}"
+      @t.reload.path.must_equal "/changed/#{@s.slug}/#{@t.slug}"
+    end
+
+    it "have direct access to ancestors at any depth" do
+      @q.ancestor(0).must_equal @p
+      @r.ancestor(0).must_equal @p
+      @r.ancestor(1).must_equal @q
+      @s.ancestor(1).must_equal @q
+      @t.ancestor(1).must_equal @q
+      @t.ancestor(2).must_equal @s
+      @t.ancestor(-1).must_equal @s
+      @t.ancestor(-2).must_equal @q
+    end
+
+    it "test for ancestry" do
+      assert @t.ancestor?(@s)
+      assert @t.ancestor?(@q)
+      assert @t.ancestor?(@p)
+      refute @q.ancestor?(@t)
+    end
+
+    it "know if it's in the current path" do
+      assert @t.active?(@s)
+      assert @t.active?(@t)
+      assert @t.active?(@q)
+      assert @t.active?(@p)
+      refute @q.active?(@t)
+    end
+
+    it "provide a list of pages at any depth" do
+      @t.at_depth(2).must_equal [@r, @s]
+      @p.at_depth(1).must_equal [@q]
+      lambda { @p.at_depth(2) }.must_raise(ArgumentError)
+    end
+  end
+
+  describe "page pieces" do
+    before do
+      Page.box :things
+      Piece.box :things
+      @parent = Page.create
+      @piece = Piece.new
+      @child = Page.new
+      @parent.things << @piece
+      @piece.things << @child
+      @parent.save
+      @piece.save
+      @child.save
+      @page_piece = @parent.things.first.things.first
+    end
+
+    it "report their depth according to their position in the piece tree" do
+      @parent.depth.must_equal 0
+      @parent.contents.first.depth.must_equal 1
+      @parent.contents.first.contents.first.depth.must_equal 2
+    end
+
+    it "know their page" do
+      @page_piece.page.must_equal @parent
+    end
+
+    it "know their container" do
+      @page_piece.container.must_equal @piece.things
+    end
+
+    it "know their box" do
+      @page_piece.box.must_equal @piece.things
+    end
+
+    it "know their parent" do
+      @page_piece.parent.must_equal @piece
+    end
+
+    it "know their owner" do
+      @page_piece.owner.must_equal @piece
     end
   end
 end

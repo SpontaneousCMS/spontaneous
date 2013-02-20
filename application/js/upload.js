@@ -34,13 +34,20 @@ Spontaneous.Upload = (function($, S) {
 			if (this.target_version) {
 				form.append('version', this.target_version);
 			}
-			this.post("/file/replace/"+this.target_id, form);
+			this.put("/file/"+this.target_id, form);
 		},
 
 		post: function(url, form_data) {
-			this.xhr = new XMLHttpRequest();
+			this.request("POST", url, form_data)
+		},
+		put: function(url, form_data) {
+			this.request("PUT", url, form_data)
+		},
+		request: function(verb, url, form_data) {
+			this.xhr = S.Ajax.authenticatedRequest();
 			this.upload = this.xhr.upload;
-			this.xhr.open("POST", this.namespaced_path(url), true);
+			this.xhr.open(verb, this.namespaced_path(url), true);
+			// S.Ajax.authenticateRequest(this.xhr);
 			this.upload.onprogress = this.onprogress.bind(this);
 			this.upload.onload = this.onload.bind(this);
 			this.upload.onloadend = this.onloadend.bind(this);
@@ -48,9 +55,9 @@ Spontaneous.Upload = (function($, S) {
 			this.xhr.onreadystatechange = this.onreadystatechange.bind(this);
 			this.started = (new Date()).valueOf();
 			this.xhr.send(form_data);
-		},
+			},
 		namespaced_path: function(path) {
-			return S.Ajax.request_url(path, true);
+			return S.Ajax.request_url(path);
 		},
 		// While loading and sending data.
 		onprogress: function(event) {

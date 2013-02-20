@@ -4,14 +4,14 @@ require File.expand_path('../../test_helper', __FILE__)
 
 require 'sinatra/base'
 
-class RenderTest < MiniTest::Spec
+describe "Render" do
 
-  def setup
+  before do
     @site = setup_site
     Content.delete
   end
 
-  def teardown
+  after do
     teardown_site
     Spontaneous::Output.cache_templates = false
   end
@@ -20,8 +20,8 @@ class RenderTest < MiniTest::Spec
     @template_root ||= File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates"))
   end
 
-  context "Publish rendering step" do
-    setup do
+  describe "Publish rendering step" do
+    before do
       @site.paths.add(:templates, template_root)
 
       Page.field :title
@@ -51,7 +51,7 @@ class RenderTest < MiniTest::Spec
       @page = ::Page.create(:title => "Page Title")
 
       @content = TemplateClass.new
-      @content.style.should == TemplateClass.default_style
+      @content.style.must_equal TemplateClass.default_style
       @content.title = "The Title"
       @content.description = "The Description"
 
@@ -72,67 +72,67 @@ class RenderTest < MiniTest::Spec
       Spontaneous::Output.renderer = @renderer
     end
 
-    teardown do
+    after do
       Object.send(:remove_const, :TemplateClass) rescue nil
       Object.send(:remove_const, :Page) rescue nil
     end
 
-    should "render strings correctly" do
-      @renderer.render_string('${title} {{ Time.now }}', @page.output(:html), {}).should == "Page Title {{ Time.now }}"
+    it "render strings correctly" do
+      @renderer.render_string('${title} {{ Time.now }}', @page.output(:html), {}).must_equal "Page Title {{ Time.now }}"
     end
 
-    should "use a cache for the site root" do
+    it "use a cache for the site root" do
         a = @renderer.render_string('#{root.object_id} #{root.object_id}', @page.output(:html), {})
-        a.should_not == "#{nil.object_id} #{nil.object_id}"
-        a.split.uniq.length.should == 1
+        a.wont_equal "#{nil.object_id} #{nil.object_id}"
+        a.split.uniq.length.must_equal 1
     end
 
-    should "iterate through the sections" do
+    it "iterate through the sections" do
       template = '%%{ navigation(%s) do |section, active| }${section.title}/${active} %%{ end }'
       a = @renderer.render_string(template % "", @section1.output(:html), {})
-      a.should == "Section 1/true Section 2/false Section 4/false Section 3/false "
+      a.must_equal "Section 1/true Section 2/false Section 4/false Section 3/false "
       a = @renderer.render_string(template % "1", @section2.output(:html), {})
-      a.should == "Section 1/false Section 2/true Section 4/false Section 3/false "
+      a.must_equal "Section 1/false Section 2/true Section 4/false Section 3/false "
       a = @renderer.render_string(template % ":section", @section1.output(:html), {})
-      a.should == "Section 1/true Section 2/false Section 4/false Section 3/false "
+      a.must_equal "Section 1/true Section 2/false Section 4/false Section 3/false "
     end
 
-    should "use a cache for navigation pages" do
+    it "use a cache for navigation pages" do
       a = b = c = nil
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
       renderer = Spontaneous::Output::Template::PreviewRenderer.new
       a = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       b = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
-      a.should_not == b
+      a.wont_equal b
 
       renderer = Spontaneous::Output::Template::PublishRenderer.new
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
       a = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       b = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
-      a.should == b
+      a.must_equal b
 
       renderer = Spontaneous::Output::Template::PublishRenderer.new
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
       c = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
-      a.should_not == c
+      a.wont_equal c
     end
 
-    should "be able to render themselves to HTML" do
-      @content.render.should == "<html><title>The Title</title><body>The Description</body></html>\n"
+    it "be able to render themselves to HTML" do
+      @content.render.must_equal "<html><title>The Title</title><body>The Description</body></html>\n"
     end
 
-    should "be able to render themselves to PDF" do
+    it "be able to render themselves to PDF" do
       Page.add_output :pdf
-      @content.render(:pdf).should == "<PDF><title>The Title</title><body>{The Description}</body></PDF>\n"
+      @content.render(:pdf).must_equal "<PDF><title>The Title</title><body>{The Description}</body></PDF>\n"
     end
 
-    should "be able to render themselves to EPUB" do
+    it "be able to render themselves to EPUB" do
       Page.add_output :epub
-      @content.render(:epub).should == "<EPUB><title>The Title</title><body>The Description</body></EPUB>\n"
+      @content.render(:epub).must_equal "<EPUB><title>The Title</title><body>The Description</body></EPUB>\n"
     end
 
-    context "piece trees" do
-      setup do
+    describe "piece trees" do
+      before do
         @page = ::Page.create
         TemplateClass.style :complex_template, :default => true
         TemplateClass.box :bits
@@ -147,21 +147,21 @@ class RenderTest < MiniTest::Spec
         @content.contents.first.style = TemplateClass.get_style(:this_template)
       end
 
-      teardown do
+      after do
         Content.delete
       end
 
-      should "be accessible through #content method" do
+      it "be accessible through #content method" do
         expected = "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
-        @content.render.should == expected
+        @content.render.must_equal expected
       end
 
-      should "cascade the chosen format to all subsequent #render calls" do
+      it "cascade the chosen format to all subsequent #render calls" do
         ::Page.add_output :pdf
-        @content.render(:pdf).should == "<pdf>\nThe Title\n<piece><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</piece>\n</pdf>\n"
+        @content.render(:pdf).must_equal "<pdf>\nThe Title\n<piece><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</piece>\n</pdf>\n"
       end
 
-      should "only show visible pieces" do
+      it "only show visible pieces" do
         child = TemplateClass.new
         child.title = "Child2 Title"
         child.description = "Child2 Description"
@@ -170,12 +170,12 @@ class RenderTest < MiniTest::Spec
         @content.bits.last.hide!
 
         expected = "<complex>\nThe Title\n<piece><html><title>Child Title</title><body>Child Description</body></html>\n</piece>\n</complex>\n"
-        @content.render.should == expected
+        @content.render.must_equal expected
       end
     end
 
-    context "fields" do
-      should "render a joined list of field values" do
+    describe "fields" do
+      it "render a joined list of field values" do
         Page.field :description, :markdown
         Page.field :image
         ::Page.layout do
@@ -186,12 +186,12 @@ class RenderTest < MiniTest::Spec
         @page.description = "Description & Stuff"
         lines = @page.render.split(/\n(?=<div)/)
         @page.fields.each_with_index do |field, i|
-          lines[i].should =~ /<div.+?>#{field.render(:html)}<\/div>/
+          lines[i].must_match /<div.+?>#{field.render(:html)}<\/div>/
         end
       end
     end
-    context "boxes" do
-      setup do
+    describe "boxes" do
+      before do
         TemplateClass.style :slots_template, :default => true
         TemplateClass.box :images
         @page = ::Page.new
@@ -206,32 +206,32 @@ class RenderTest < MiniTest::Spec
         @content.images.first.style = TemplateClass.get_style(:this_template)
       end
 
-      should "render box sets as a joined list of each box's output" do
+      it "render box sets as a joined list of each box's output" do
         ::Page.layout do
           %(${ content })
         end
-        @page.render.should == @page.boxes.map(&:render).join("\n")
+        @page.render.must_equal @page.boxes.map(&:render).join("\n")
       end
 
-      should "render 'boxes' as a joined list of each box's output" do
+      it "render 'boxes' as a joined list of each box's output" do
         ::Page.layout do
           %(${ boxes })
         end
-        @page.render.should == @page.boxes.map(&:render).join("\n")
+        @page.render.must_equal @page.boxes.map(&:render).join("\n")
       end
 
-      should "render boxes" do
-        @content.render.should == "<boxes>\n  <img><html><title>Child Title</title><body>Child Description</body></html>\n</img>\n</boxes>\n"
+      it "render boxes" do
+        @content.render.must_equal "<boxes>\n  <img><html><title>Child Title</title><body>Child Description</body></html>\n</img>\n</boxes>\n"
       end
 
-      should "render boxes to alternate formats" do
+      it "render boxes to alternate formats" do
         ::Page.add_output :pdf
-        @content.render(:pdf).should == "<boxes-pdf>\n  <img><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</img>\n</boxes-pdf>\n"
+        @content.render(:pdf).must_equal "<boxes-pdf>\n  <img><PDF><title>Child Title</title><body>{Child Description}</body></PDF>\n</img>\n</boxes-pdf>\n"
       end
     end
 
-    context "anonymous boxes" do
-      setup do
+    describe "anonymous boxes" do
+      before do
         TemplateClass.style :anonymous_style, :default => true
         TemplateClass.box :images do
           field :introduction
@@ -254,17 +254,17 @@ class RenderTest < MiniTest::Spec
 
       end
 
-      teardown do
+      after do
         Object.send(:remove_const, :AnImage) rescue nil
       end
 
-      should "render using anonymous style" do
-        @root.render.should == "<root>\nImages below:\n<img>Image 1</img>\n<img>Image 2</img>\n</root>\n"
+      it "render using anonymous style" do
+        @root.render.must_equal "<root>\nImages below:\n<img>Image 1</img>\n<img>Image 2</img>\n</root>\n"
       end
     end
 
-    context "default templates" do
-      setup do
+    describe "default templates" do
+      before do
         TemplateClass.style :default_template_style, :default => true
         TemplateClass.box :images_with_template do
           field :introduction
@@ -286,17 +286,17 @@ class RenderTest < MiniTest::Spec
         @root.images_with_template << @image2
       end
 
-      teardown do
+      after do
         Object.send(:remove_const, :AnImage) rescue nil
       end
 
-      should "render using default style if present" do
-        @root.render.should == "<root>\nImages below:\n<images>\n  <img>Image 1</img>\n  <img>Image 2</img>\n</images>\n</root>\n"
+      it "render using default style if present" do
+        @root.render.must_equal "<root>\nImages below:\n<images>\n  <img>Image 1</img>\n  <img>Image 2</img>\n</images>\n</root>\n"
       end
     end
 
-    context "page styles" do
-      setup do
+    describe "page styles" do
+      before do
         class ::PageClass < Page
           field :title, :string
         end
@@ -306,24 +306,24 @@ class RenderTest < MiniTest::Spec
         @parent.title = "Parent"
       end
 
-      teardown do
+      after do
         Object.send(:remove_const, :PageClass) rescue nil
       end
 
-      should "find page styles at root of templates dir" do
+      it "find page styles at root of templates dir" do
         @parent.layout = :standard_page
-        @parent.render.should == "/Parent/\n"
+        @parent.render.must_equal "/Parent/\n"
       end
 
-      should "find page styles in class sub dir" do
+      it "find page styles in class sub dir" do
         @parent.layout = :subdir_style
-        @parent.render.should == "<Parent>\n"
+        @parent.render.must_equal "<Parent>\n"
       end
     end
 
-    context "pages as inline content" do
+    describe "pages as inline content" do
 
-      setup do
+      before do
         class ::PageClass < Page
           field :title, :string
         end
@@ -339,55 +339,55 @@ class RenderTest < MiniTest::Spec
         @page.save
       end
 
-      teardown do
+      after do
         Object.send(:remove_const, :PageClass) rescue nil
       end
 
-      should "use style assigned by entry" do
-        @parent.contents.first.style.should == PageClass.default_style
-        @parent.things.first.style.should == PageClass.default_style
+      it "use style assigned by entry" do
+        @parent.contents.first.style.must_equal PageClass.default_style
+        @parent.things.first.style.must_equal PageClass.default_style
       end
 
-      should "use their default page style when accessed directly" do
+      it "use their default page style when accessed directly" do
         @page = PageClass[@page.id]
-        @page.layout.should == PageClass.default_layout
+        @page.layout.must_equal PageClass.default_layout
         assert_correct_template(@parent, template_root / 'layouts/page_style')
-        @page.render.should == "<html></html>\n"
+        @page.render.must_equal "<html></html>\n"
       end
 
-      should "persist sub-page style settings" do
+      it "persist sub-page style settings" do
         @parent = Content[@parent.id]
-        @parent.contents.first.style.should == PageClass.default_style
+        @parent.contents.first.style.must_equal PageClass.default_style
       end
 
-      should "render using the inline style" do
+      it "render using the inline style" do
         assert_correct_template(@parent.contents.first, template_root / 'page_class/inline_style')
-        @parent.contents.first.render.should == "Child\n"
-        @parent.things.render.should == "Child\n"
-        @parent.render.should == "<html>Child\n</html>\n"
+        @parent.contents.first.render.must_equal "Child\n"
+        @parent.things.render.must_equal "Child\n"
+        @parent.render.must_equal "<html>Child\n</html>\n"
       end
     end
 
-    context "params in templates" do
-      setup do
+    describe "params in templates" do
+      before do
         class ::TemplateParams < Page; end
         TemplateParams.field :image, :default => "/images/fromage.jpg"
         TemplateParams.layout :template_params
         @page = TemplateParams.new
       end
-      teardown do
+      after do
         Object.send(:remove_const, :TemplateParams) rescue nil
       end
-      should "be passed to the render call" do
-        @page.image.value.should == "/images/fromage.jpg"
-        @page.image.src.should == "/images/fromage.jpg"
-        @page.render.should =~ /alt="Smelly"/
+      it "be passed to the render call" do
+        @page.image.value.must_equal "/images/fromage.jpg"
+        @page.image.src.must_equal "/images/fromage.jpg"
+        @page.render.must_match /alt="Smelly"/
       end
     end
   end
 
-  context "Request rendering" do
-    setup do
+  describe "Request rendering" do
+    before do
       @site.paths.add(:templates, template_root)
 
       class ::PreviewRender < Page
@@ -401,25 +401,25 @@ class RenderTest < MiniTest::Spec
       @session = ::Rack::MockSession.new(::Sinatra::Application)
     end
 
-    teardown do
+    after do
       Object.send(:remove_const, :PreviewRender)
     end
 
-    context "Preview render" do
-      setup do
+    describe "Preview render" do
+      before do
         @renderer = Spontaneous::Output::Template::PreviewRenderer.new
         Spontaneous::Output.renderer = @renderer
         PreviewRender.layout :preview_render
       end
 
-      should "output both publish & request tags" do
+      it "output both publish & request tags" do
         @now = Time.now
         ::Time.stubs(:now).returns(@now)
-        @renderer.render_string('${title} {{ Time.now }}', @page.output(:html), {}).should == "PAGE #{@now.to_s}"
+        @renderer.render_string('${title} {{ Time.now }}', @page.output(:html), {}).must_equal "PAGE #{@now.to_s}"
       end
 
-#       should "render all tags & include preview edit markers" do
-#         @page.render.should == <<-HTML
+#       it "render all tags & include preview edit markers" do
+#         @page.render.must_equal <<-HTML
 # PAGE <p>DESCRIPTION</p>
 #
 # <!-- spontaneous:previewedit:start:box id:#{@page.images.schema_id} -->
@@ -428,24 +428,24 @@ class RenderTest < MiniTest::Spec
 #         HTML
 #       end
     end
-    context "Request rendering" do
-      setup do
+    describe "Request rendering" do
+      before do
         @renderer = Spontaneous::Output::Template::PreviewRenderer.new
         Spontaneous::Output.renderer = @renderer
         PreviewRender.layout :params
       end
 
-      should "pass on passed params" do
+      it "pass on passed params" do
         result = @page.render({
           :welcome => "hello"
         })
-        result.should == "PAGE hello\n"
+        result.must_equal "PAGE hello\n"
       end
     end
 
 
-    context "entry parameters" do
-      setup do
+    describe "entry parameters" do
+      before do
         @renderer = Spontaneous::Output::Template::PreviewRenderer.new
         Spontaneous::Output.renderer = @renderer
         PreviewRender.layout :entries
@@ -457,13 +457,13 @@ class RenderTest < MiniTest::Spec
         @page.images << @third
         @page.save
       end
-      should "be available to templates" do
-        @page.render.should == "0>first\n1second\n2<third\n0:first\n1:second\n2:third\nfirst.second.third\n"
+      it "be available to templates" do
+        @page.render.must_equal "0>first\n1second\n2<third\n0:first\n1:second\n2:third\nfirst.second.third\n"
       end
     end
 
-    context "Publishing renderer" do
-      setup do
+    describe "Publishing renderer" do
+      before do
         Spontaneous::Output.write_compiled_scripts = true
         @temp_template_root = @site.root / "templates"
         FileUtils.mkdir_p(@temp_template_root)
@@ -490,8 +490,8 @@ class RenderTest < MiniTest::Spec
         @first.save
       end
 
-      should "ignore compiled template file if it is older than the template" do
-        @first.render.should == "compiled"
+      it "ignore compiled template file if it is older than the template" do
+        @first.render.must_equal "compiled"
         File.open(@temp_template_root / "layouts/standard.html.cut", "w") do |t|
           t.write("updated template")
         end
@@ -503,12 +503,12 @@ class RenderTest < MiniTest::Spec
         # Need to use a new renderer because the existing one will have cached the compiled template
         @renderer = Spontaneous::Output::Template::PublishRenderer.new
         Spontaneous::Output.renderer = @renderer
-        @first.render.should == "updated template"
+        @first.render.must_equal "updated template"
       end
     end
 
-    context "variables in render command" do
-      setup do
+    describe "variables in render command" do
+      before do
         @renderer = Spontaneous::Output::Template::PublishRenderer.new
         Spontaneous::Output.renderer = @renderer
 
@@ -521,8 +521,8 @@ class RenderTest < MiniTest::Spec
         @page.images.first.style = :variables
       end
 
-      should "be passed to page content" do
-        @page.render(:html, :param => "param").should == "param\n<variable/param/>\n\nlocal\n"
+      it "be passed to page content" do
+        @page.render(:html, :param => "param").must_equal "param\n<variable/param/>\n\nlocal\n"
       end
     end
   end

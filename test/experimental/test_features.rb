@@ -4,21 +4,14 @@ require File.expand_path('../../test_helper', __FILE__)
 
 require 'sinatra/base'
 
-class FeaturesTest < MiniTest::Spec
-  include ::Rack::Test::Methods
+describe "Features" do
+  include RackTestMethods
 
-  def self.startup
-    # make sure that S::Piece & S::Page are removed from the schema
-    # @site = setup_site
-    # *ids = ::Page.schema_id, ::Piece.schema_id
-    # Object.const_set(:Site, Class.new(S::Site))
-  end
-
-  def setup
+  before do
     @site = setup_site
   end
 
-  def teardown
+  after do
     teardown_site
   end
 
@@ -26,16 +19,12 @@ class FeaturesTest < MiniTest::Spec
     Spontaneous::Rack.application
   end
 
-  def auth_post(path, params={})
-    post(path, params.merge("__key" => @key))
+  def api_key
+    @key
   end
 
-  def auth_get(path, params={})
-    get(path, params.merge("__key" => @key))
-  end
-
-  context "Feature" do
-    setup do
+  describe "Feature" do
+    before do
       Content.delete
       Spontaneous::Permissions::User.delete
 
@@ -52,8 +41,7 @@ class FeaturesTest < MiniTest::Spec
       @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass")
       @user.update(:level => Spontaneous::Permissions.root)
       @user.save
-      @key = "c5AMX3r5kMHX2z9a5ExLKjAmCcnT6PFf22YQxzb4Codj"
-      @key.stubs(:user).returns(@user)
+      @key = @user.generate_access_key("127.0.0.1")
 
       Spontaneous::Permissions::User.stubs(:[]).with(:login => 'root').returns(@user)
       Spontaneous::Permissions::AccessKey.stubs(:authenticate).with(@key).returns(@key)
@@ -62,15 +50,15 @@ class FeaturesTest < MiniTest::Spec
       Spontaneous::Permissions::AccessKey.stubs(:valid?).with(@key, @user).returns(true)
     end
 
-    teardown do
+    after do
       # (@all_classes.map { |k| k.name.to_sym }).each { |klass|
       #   Object.send(:remove_const, klass) rescue nil
       # } rescue nil
       Content.delete
     end
 
-    context "controllers" do
-      setup do
+    describe "controllers" do
+      before do
         class ::FeatureBackController < ::Sinatra::Base
           get '/hello' do
             'Editor'
@@ -89,12 +77,12 @@ class FeaturesTest < MiniTest::Spec
         end
       end
 
-      teardown do
+      after do
         Object.send(:remove_const, :FeatureBackController) rescue nil
         Object.send(:remove_const, :FeatureFrontController) rescue nil
       end
 
-      should "be able to injectable into the back application" do
+      it "be able to injectable into the back application" do
         Spontaneous.mode = :back
         Spontaneous.register_back_controller(:myfeature, FeatureBackController)
 
@@ -113,7 +101,7 @@ class FeaturesTest < MiniTest::Spec
         assert last_response.body == "Cruel Editor"
       end
 
-      should "be able to inject controllers into the front application" do
+      it "be able to inject controllers into the front application" do
         Spontaneous.mode = :front
         Spontaneous.register_front_controller(:myfeature, FeatureFrontController)
         get "/@myfeature/hello"

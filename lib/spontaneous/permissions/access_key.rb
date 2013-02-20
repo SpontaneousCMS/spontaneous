@@ -36,5 +36,23 @@ module Spontaneous::Permissions
     def access!(ip_address = nil)
       self.update(:last_access_at => Time.now, :last_access_ip => ip_address)
     end
+
+    CSFR_SEP = ":".freeze
+
+    def generate_csrf_token
+      salt = Spontaneous::Permissions.random_string(32)
+      [salt, generate_csrf_hash(salt)].join(CSFR_SEP)
+    end
+
+    def csrf_token_valid?(token)
+      return false if token.nil?
+      salt, fingerprint = token.split(CSFR_SEP)
+      generate_csrf_hash(salt) == fingerprint
+    end
+
+    def generate_csrf_hash(salt)
+      fingerprint = [salt, key_id].join(CSFR_SEP)
+      Spontaneous::Permissions.crypto_hash(fingerprint)
+    end
   end
 end

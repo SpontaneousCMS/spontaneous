@@ -1,14 +1,26 @@
 // console.log("Loading Ajax...");
 
 Spontaneous.Ajax = (function($, S) {
+	"use strict";
+
 	$.ajaxSetup({
 		'async': true,
 		'cache': false,
 		'dataType': 'json',
-		'ifModified': true
+		'ifModified': false
 	});
+
+	var csrfToken = S.csrf_token;
+
+	var __authenticate = function(request) {
+		request.setRequestHeader(S.csrf_header, csrfToken);
+	};
 	// wraps jQuery.ajax with a auth aware error catcher
 	var __request = function(params) {
+		var requestSuccessHandler = params["success"]
+		, successHandler = function(data, textStatus, xhr) {
+			requestSuccessHandler(data, textStatus, xhr)
+		};
 		var requestErrorHandler = params["error"]
 		, errorHandler = function(xhr, textStatus, error_thrown) {
 			console.log('caught http error', xhr, textStatus, error_thrown)
@@ -18,27 +30,45 @@ Spontaneous.Ajax = (function($, S) {
 				requestErrorHandler(xhr, textStatus, error_thrown);
 			}
 		};
-		params["error"] = errorHandler;
+		params['error'] = errorHandler;
+		params['success'] = successHandler;
+		params['beforeSend'] = function (request) {
+			__authenticate(request);
+		};
 		$.ajax(params);
 	};
 	return {
 		namespace: "/@spontaneous",
-
+		// returns a modified xmlhttprequest that adds csrf headers
+		// after #open is called.
+		authenticatedRequest: function(request) {
+			var xhr = new XMLHttpRequest();
+			xhr.__open = xhr.open;
+			xhr.open = function() {
+				this.__open.apply(this, arguments);
+				__authenticate(this);
+			};
+			return xhr;
+		},
+		authenticateRequest: function(request) {
+			__authenticate(request);
+		},
 		get: function(url, data, callback) {
 			if (typeof data === "function") {
 				callback = data;
 				data = {};
 			}
-			var handle_response = function(data, textStatus, xhr) {
-				callback(data, textStatus, xhr);
-			};
-			__request({
-				'url': this.request_url(url),
-				'success': handle_response,
-				'ifModified': true,
-				'data': $.extend(data, this.api_access_key()),
-				'error': handle_response // pass the error to the handler too
-			});
+			// var handle_response = function(data, textStatus, xhr) {
+			// 	callback(data, textStatus, xhr);
+			// };
+			this.makeRequest("GET", url, data, callback)
+			// __request({
+			// 	'url': this.request_url(url),
+			// 	'success': handle_response,
+			// 	'ifModified': false,
+			// 	'data': data,
+			// 	'error': handle_response // pass the error to the handler too
+			// });
 		},
 		put: function(url, data, callback) {
 			this.makeRequest("PUT", url, data, callback);
@@ -49,25 +79,27 @@ Spontaneous.Ajax = (function($, S) {
 		post: function(url, data, callback) {
 			this.makeRequest("POST", url, data, callback);
 		},
+		patch: function(url, data, callback) {
+			this.makeRequest("PATCH", url, data, callback);
+		},
 		makeRequest: function(method, url, data, callback) {
-			var success = function(data, textStatus, XMLHttpRequest) {
+			var success = function(data, textStatus, xhr) {
 				if (typeof callback === "function") {
-					callback(data, textStatus, XMLHttpRequest);
+					callback(data, textStatus, xhr);
 				}
 			};
-			var error = function(XMLHttpRequest, textStatus, error_thrown) {
+			var error = function(xhr, textStatus, error_thrown) {
 				var result = false;
 				try {
-					result = $.parseJSON(XMLHttpRequest.responseText);
+					result = $.parseJSON(xhr.responseText);
 				} catch (e) { }
 				if (typeof callback === "function") {
-					callback(result, textStatus, XMLHttpRequest);
+					callback(result, textStatus, xhr);
 				}
 			};
 			data = data || {};
-			data = $.extend(data, this.api_access_key());
 			__request({
-				'url': this.request_url(url, true),
+				'url': this.request_url(url),
 				'type': method,
 				'data': data,
 				'success': success,
@@ -75,7 +107,6 @@ Spontaneous.Ajax = (function($, S) {
 			});
 		},
 		unauthorized: function() {
-			console.log("UNAUTH!")
 			window.location.href = "/";
 		},
 		test_field_versions: function(target, fields, success, failure) {
@@ -89,7 +120,7 @@ Spontaneous.Ajax = (function($, S) {
 			}
 			if (modified === 0) { success(); }
 
-			this.post(['/version', target.id()].join('/'), version_data, function(data, textStatus, xhr) {
+			this.post(['/field/conflicts', target.id()].join('/'), version_data, function(data, textStatus, xhr) {
 				if (textStatus === 'success') {
 					success();
 				} else {
@@ -119,13 +150,13 @@ Spontaneous.Ajax = (function($, S) {
 				}
 			});
 		},
-		api_access_key: function() {
-			return {'__key':Spontaneous.Auth.Key.load(S.site_id)}
+		csrf_token: function() {
+			return {'__token':csrfToken }
 		},
 		request_url: function(url, needs_key) {
 			var path = this.namespace + url;
 			if (needs_key) {
-				path += "?"+$.param(this.api_access_key())
+				path += "?"+$.param(this.csrf_token())
 			}
 			return path
 		}

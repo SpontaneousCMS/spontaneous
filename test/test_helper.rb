@@ -19,7 +19,6 @@ $:.unshift(spot_path) if File.directory?(spot_path) && !$:.include?(spot_path)
 require 'rack'
 require 'logger'
 
-
 Sequel.extension :migration
 
 # for future integration with travis
@@ -62,69 +61,111 @@ DB = Sequel.connect(connection_string) unless defined?(DB)
 Sequel::Migrator.apply(DB, 'db/migrations')
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spontaneous')
-# require File.expand_path(File.dirname(__FILE__) + '/../lib/cutaneous')
-require 'cutaneous'
 
-# require 'test/unit'
+require 'minitest/unit'
 require 'minitest/spec'
-require 'rack/test'
-require 'matchy'
-require 'shoulda'
-require 'timecop'
+require 'minitest/reporters'
 require 'mocha/setup'
 require 'pp'
 require 'tmpdir'
 require 'json'
 
-begin
-  require 'leftright'
-rescue LoadError
-  # fails for ruby 1.9
+require 'support/rack'
+require 'support/matchers'
+
+module MiniTest::StartFinish
+  module Unit
+    def _run_suites(suites, type)
+      begin
+        super(suites, type)
+      ensure
+        if (suite = suites.last.master_suite)
+          suite._run_finish_hook
+        end
+      end
+    end
+
+    def _run_suite(suite, type)
+      begin
+        if @_previous_suite && @_previous_suite.master_suite != suite.master_suite
+          @_previous_suite.master_suite._run_finish_hook if @_previous_suite.master_suite
+        end
+        suite._run_start_hook
+        super(suite, type)
+      ensure
+        @_previous_suite = suite unless suite == MiniTest::Spec
+      end
+    end
+  end
+
 end
 
-require 'support/custom_matchers'
-# require 'support/timing'
+class MiniTest::Spec
+  class << self
+    def parent_suite
+      a = ancestors.take_while { |a| a != MiniTest::Spec }.reject { |a| !(Class === a)}
+      a.last
+    end
 
+    def master_suite
+      ancestors.detect { |a| a.respond_to?(:has_finish_hook?) && a.has_finish_hook? }
+    end
 
-# Spontaneous.database = DB
+    def has_finish_hook?
+      !@finish_hook.nil?
+    end
 
+    def start(&block)
+      @start_hook = block
+    end
+
+    def finish(&block)
+      @finish_hook = block
+    end
+
+    def _hooks_run
+      @_hooks_run ||= []
+    end
+    def _run_start_hook
+      _run_start_finish_hook(@start_hook, :start)
+    end
+
+    def _run_finish_hook
+      if _hooks_run.include?(:start)
+        _run_start_finish_hook(@finish_hook, :finish)
+      end
+    end
+
+    def _run_start_finish_hook(hook, label)
+      _hooks_run << label
+      hook.call if hook
+    end
+  end
+end
 
 class MiniTestWithHooks < MiniTest::Unit
-  def before_suites
-  end
-
-  def after_suites
-  end
-
+  include MiniTest::StartFinish::Unit
   def exclude?(suite)
-    [MiniTest::Spec, Test::Unit::TestCase].include?(suite)
+    return true if suite.nil?
+    [MiniTest::Spec].include?(suite) || !suite.ancestors.include?(MiniTest::Spec)
   end
 
   def _run_suites(suites, type)
-    names = suites.reject { |s| exclude?(s) }.map { |s| s.to_s.gsub(/Test$/, '') }
+    names = suites.map(&:parent_suite).reject { |s| exclude?(s) }.uniq.map(&:to_s)
     @max_name_length = names.map(&:length).max
-    begin
-      before_suites
-      super(suites, type)
-    ensure
-      after_suites
-    end
+    super(suites, type)
   end
 
   def _run_suite(suite, type)
-    begin
-      unless exclude?(suite)
-        print "\n#{suite.to_s.gsub(/Test$/, '').ljust(@max_name_length, " ")}  "
+    unless exclude?(suite)
+      if (name = suite.parent_suite.name) != @_previous_suite_name
+        print "\n#{name.ljust(@max_name_length, " ")}  "
+        @_previous_suite_name = name
       end
-      suite.startup if suite.respond_to?(:startup)
-      super(suite, type)
-    ensure
-      suite.shutdown if suite.respond_to?(:shutdown)
     end
+    super(suite, type)
   end
 end
-
-
 
 MiniTest::Unit.runner = MiniTestWithHooks.new
 
@@ -140,8 +181,13 @@ def silence_logger(&block)
   end
 end
 
+class Minitest::ReporterRunner
+  include MiniTest::StartFinish::Unit
+end
+
+# MiniTest::Reporters.use! MiniTest::Reporters::DefaultReporter.new
+
 class MiniTest::Spec
-  include CustomMatchers
 
   attr_accessor :template_root
   alias :silence_stdout :silence_logger
@@ -194,7 +240,7 @@ class MiniTest::Spec
       assert_equal(result[col], compare[col], "Column '#{col}' should be equal")
     end
     serialised_columns.each do |col|
-      result.send(col).should == compare.send(col)
+      result.send(col).must_equal compare.send(col)
     end
   end
 
@@ -273,15 +319,21 @@ class MiniTest::Spec
 
   def assert_login_page(path = nil, method = "GET")
     assert last_response.status == 401, "#{method} #{path} should have status 401 but has #{last_response.status}"
-    last_response.body.should =~ %r{<form.+action="/@spontaneous/login"}
-    last_response.body.should =~ %r{<form.+method="post"}
-    last_response.body.should =~ %r{<input.+name="user\[login\]"}
-    last_response.body.should =~ %r{<input.+name="user\[password\]"}
+    last_response.body.must_match %r{<form.+action="/@spontaneous/login"}
+    last_response.body.must_match %r{<form.+method="post"}
+    last_response.body.must_match %r{<input.+name="user\[login\]"}
+    last_response.body.must_match %r{<input.+name="user\[password\]"}
   end
 
+  def assert_contains_csrf_token(key)
+    body = last_response.body
+    match = /csrf_token: *('|")(.*)\1/.match(body)
+    flunk "CSRF token not included in template" unless match
+    token = match[2]
+    assert key.csrf_token_valid?(token), "Invalid token #{token.inspect}"
+  end
 end
 
-
-
 require 'minitest/autorun'
+
 

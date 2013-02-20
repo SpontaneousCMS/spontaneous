@@ -5,14 +5,34 @@ require "sinatra/base"
 
 module Spontaneous
   module Rack
-    NAMESPACE   = "/@spontaneous".freeze
-    ACTIVE_USER = "SPONTANEOUS_USER".freeze
-    ACTIVE_KEY  = "SPONTANEOUS_KEY".freeze
-    AUTH_COOKIE = "spontaneous_api_key".freeze
-    KEY_PARAM   = "__key".freeze
-    RENDERER    = "spot.renderer".freeze
+    module Constants
+      METHOD_GET = "GET".freeze
+      METHOD_POST = "POST".freeze
+      METHOD_HEAD = "HEAD".freeze
+      HTTP_CONTENT_LENGTH = "Content-Length".freeze
+      HTTP_EXPIRES = "Expires".freeze
+      HTTP_CACHE_CONTROL = "Cache-Control".freeze
+      HTTP_LAST_MODIFIED = "Last-Modified".freeze
+      HTTP_NO_CACHE = "max-age=0, must-revalidate, no-cache, no-store".freeze
 
-    EXPIRES_MAX = DateTime.parse("Thu, 31 Dec 2037 23:55:55 GMT").httpdate
+      NAMESPACE      = "/@spontaneous".freeze
+      AUTH_COOKIE    = "spontaneous_api_key".freeze
+      SESSION_LIFETIME = 1.year
+      # Rack env params
+      ACTIVE_USER    = "spot.user".freeze
+      ACTIVE_KEY     = "spot.key".freeze
+      RENDERER       = "spot.renderer".freeze
+      CSRF_VALID     = "spot.csrf_valid".freeze
+      CSRF_TOKEN     = "spot.csrf_token".freeze
+
+      CSRF_HEADER    = "X-CSRF-Token".freeze
+      CSRF_PARAM     = "__token".freeze
+      CSRF_ENV       = ("HTTP_" << CSRF_HEADER.upcase.gsub(/-/, "_")).freeze
+
+      EXPIRES_MAX = DateTime.parse("Thu, 31 Dec 2037 23:55:55 GMT").httpdate
+    end
+
+    include Constants
 
     class << self
       def application
@@ -29,43 +49,31 @@ module Spontaneous
       end
 
       def make_front_controller(controller_class)
-        controller_class.use(Spontaneous::Rack::AroundFront)
+        Spontaneous::Rack::Front.make_controller(controller_class)
       end
 
       def make_back_controller(controller_class)
-        controller_class.helpers Spontaneous::Rack::Helpers
-        controller_class.helpers Spontaneous::Rack::UserHelpers
-        controller_class.use Spontaneous::Rack::CookieAuthentication
-        controller_class.use Spontaneous::Rack::AroundBack
-        controller_class.register Spontaneous::Rack::Authentication
+        Spontaneous::Rack::Back.make_controller(controller_class)
       end
     end
 
     class ServerBase < ::Sinatra::Base
+      include Constants
+
       set :environment, Proc.new { Spontaneous.environment }
     end
 
-    autoload :AroundBack,           'spontaneous/rack/around_back'
-    autoload :AroundFront,          'spontaneous/rack/around_front'
-    autoload :AroundPreview,        'spontaneous/rack/around_preview'
     autoload :Assets,               'spontaneous/rack/assets'
-    autoload :Authentication,       'spontaneous/rack/authentication'
     autoload :Back,                 'spontaneous/rack/back'
     autoload :CSS,                  'spontaneous/rack/css'
     autoload :CacheableFile,        'spontaneous/rack/cacheable_file'
-    autoload :CookieAuthentication, 'spontaneous/rack/cookie_authentication'
     autoload :EventSource,          'spontaneous/rack/event_source'
     autoload :Front,                'spontaneous/rack/front'
-    autoload :HTTP,                 'spontaneous/rack/http'
-    autoload :Helpers,              'spontaneous/rack/helpers'
     autoload :JS,                   'spontaneous/rack/js'
+    autoload :Middleware,           'spontaneous/rack/middleware'
     autoload :PageController,       "spontaneous/rack/page_controller"
     autoload :Public,               'spontaneous/rack/public'
-    autoload :QueryAuthentication,  'spontaneous/rack/query_authentication'
-    autoload :Reloader,             'spontaneous/rack/reloader'
     autoload :SSE,                  'spontaneous/rack/sse'
     autoload :Static,               'spontaneous/rack/static'
-    autoload :UserAdmin,            'spontaneous/rack/user_admin'
-    autoload :UserHelpers,          'spontaneous/rack/user_helpers'
   end
 end

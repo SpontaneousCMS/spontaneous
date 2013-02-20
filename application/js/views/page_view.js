@@ -29,7 +29,7 @@ Spontaneous.Views.PageView = (function($, S) {
 
 			if (!self.page.is_root()) {
 				var resync = dom.a({ "title":"Sync the path to the page title"}).click(function() {
-					Spontaneous.Ajax.post(['/slug', self.page.id(), "titlesync"].join("/"), {}, self.save_complete.bind(self));
+					Spontaneous.Ajax.put(['/page', self.page.id(), "slug/sync"].join("/"), {}, self.save_complete.bind(self));
 				});
 				path_wrap.append( dom.h3('.titlesync').append(resync));
 			}
@@ -107,7 +107,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			}.bind(this));
 		},
 		save_uid: function(uid) {
-			Spontaneous.Ajax.post('/uid/'+this.page.id(), {'uid':uid}, this.uid_save_complete.bind(this));
+			Spontaneous.Ajax.put(['/page',this.page.id(), "uid"].join("/"), {'uid':uid}, this.uid_save_complete.bind(this));
 		},
 		uid_save_complete: function(response, status, xhr) {
 			if (status === 'success') {
@@ -121,7 +121,7 @@ Spontaneous.Views.PageView = (function($, S) {
 		open_url_editor: function() {
 			this.unavailable = false;
 			this.url_editor_open = true;
-			Spontaneous.Ajax.get(['/slug', this.page.id(), 'unavailable'].join('/'), this.unavailable_loaded.bind(this));
+			Spontaneous.Ajax.get(['/page', this.page.id(), 'slug/unavailable'].join('/'), this.unavailable_loaded.bind(this));
 			this.panel.animate({'height': '+=14'}, 200, function() {
 				var view = $('h3', this.panel), edit = $('.edit', this.panel);
 				view.hide();
@@ -211,7 +211,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			if (this.input && this.input.hasClass('error')) { this.input.removeClass('error'); }
 		},
 		save: function(slug) {
-			Spontaneous.Ajax.post('/slug/'+this.page.id(), {'slug':slug}, this.save_complete.bind(this));
+			Spontaneous.Ajax.put(['/page',this.page.id(), "slug"].join("/"), {'slug':slug}, this.save_complete.bind(this));
 		},
 
 		save_complete: function(response, status, xhr) {

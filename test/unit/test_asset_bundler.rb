@@ -2,8 +2,8 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 
-class AssetBundler < MiniTest::Spec
-  include ::Rack::Test::Methods
+describe "AssetBundler" do
+  include RackTestMethods
 
   def app
     Spontaneous::Rack::Back.application
@@ -21,76 +21,76 @@ class AssetBundler < MiniTest::Spec
     teardown_site
   end
 
-  context "CMS asset bundler" do
-    should "compile Javascript into any destination directory ddd" do
+  describe "CMS asset bundler" do
+    it "compile Javascript into any destination directory ddd" do
       compiler = Spontaneous::Asset::AppCompiler.new(fixture_dir, @site.root, :compress => false)
       compiler.compile
       compiled_js_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.js"].first
       js = File.read(compiled_js_path)
-      js.should =~ /var simple = "yes";/
-      js.should =~ /var basic/
-      js.should =~ /var complex/
-      js.should =~ /complex = "#{Date.today.day}"/
-      js.should =~ /var simple_subdir = "yes";/
-      js.should =~ /var complex_subdir;/
-      js.should =~ /complex_subdir = "subdir\/#{Date.today.day}";/
+      js.must_match /var simple = "yes";/
+      js.must_match /var basic/
+      js.must_match /var complex/
+      js.must_match /complex = "#{Date.today.day}"/
+      js.must_match /var simple_subdir = "yes";/
+      js.must_match /var complex_subdir;/
+      js.must_match /complex_subdir = "subdir\/#{Date.today.day}";/
     end
 
-    should "produce compressed Javascript on demand" do
+    it "produce compressed Javascript on demand" do
       compiler = Spontaneous::Asset::AppCompiler.new(fixture_dir, @site.root, :compress => true)
       compiler.compile
       compiled_js_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.js"].first
       js = File.read(compiled_js_path)
       # hard to test because we don't know exactly what the uglifier is going to do
-      js.should =~ /var (\w);\1="yes"/
-      js.should =~ /var (\w);\1="#{Date.today.day}"/
-      js.should =~ /var (\w);\1="subdir\/#{Date.today.day}"/
+      js.must_match /var (\w);\1="yes"/
+      js.must_match /var (\w);\1="#{Date.today.day}"/
+      js.must_match /var (\w);\1="subdir\/#{Date.today.day}"/
     end
 
-    should "compile CSS into any destination directory" do
+    it "compile CSS into any destination directory" do
       compiler = Spontaneous::Asset::AppCompiler.new(fixture_dir, @site.root, :compress => false)
       compiler.compile
       compiled_css_path = Dir["#{@site.root}/public/@spontaneous/assets/*.css"].first
       css = File.read(compiled_css_path)
-      css.should =~ /\.simple \{\s+color: #aaa/
-      css.should =~ /\.basic \{\s+color: #aabbcc/
-      css.should =~ /\.complex \{\s+color: #ddeeff;\s*width: #{Date.today.day}px/
-      css.should =~ /\.subdir\.simple \{\s+color: #000;/
-      css.should =~ /\.subdir\.complex \{\s+color: #aaaaaa;\s+height: #{Date.today.day}px/
+      css.must_match /\.simple \{\s+color: #aaa/
+      css.must_match /\.basic \{\s+color: #aabbcc/
+      css.must_match /\.complex \{\s+color: #ddeeff;\s*width: #{Date.today.day}px/
+      css.must_match /\.subdir\.simple \{\s+color: #000;/
+      css.must_match /\.subdir\.complex \{\s+color: #aaaaaa;\s+height: #{Date.today.day}px/
     end
 
-    should "produce compressed CSS by default" do
+    it "produce compressed CSS by default" do
       compiler = Spontaneous::Asset::AppCompiler.new(fixture_dir, @site.root)
       compiler.compile
       compiled_css_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.css"].first
       css = File.read(compiled_css_path)
-      css.should =~ /\.simple\{color:#aaa\}/
-      css.should =~ /\.basic\{color:#aabbcc\}/
-      css.should =~ /\.complex\{color:#ddeeff;width:#{Date.today.day}px\}/
-      css.should =~ /\.subdir\.simple\{color:#000\}/
-      css.should =~ /\.subdir\.complex\{color:#aaaaaa;height:#{Date.today.day}px\}/
+      css.must_match /\.simple\{color:#aaa\}/
+      css.must_match /\.basic\{color:#aabbcc\}/
+      css.must_match /\.complex\{color:#ddeeff;width:#{Date.today.day}px\}/
+      css.must_match /\.subdir\.simple\{color:#000\}/
+      css.must_match /\.subdir\.complex\{color:#aaaaaa;height:#{Date.today.day}px\}/
     end
   end
 
-  context "Development mode editing app" do
-    setup do
+  describe "Development mode editing app" do
+    before do
       @page = Content.create
     end
 
-    teardown do
+    after do
       Content.delete
     end
 
-    context "unauthorised users" do
-      should "load a non-fingerprinted CSS file" do
+    describe "unauthorised users" do
+      it "load a non-fingerprinted CSS file" do
         get "/@spontaneous/#{@page.id}"
         assert_login_page
-        last_response.body.should =~ %r{/@spontaneous/css/spontaneous\.css}
+        last_response.body.must_match %r{/@spontaneous/css/spontaneous\.css}
       end
     end
 
-    context "authorised users" do
-      setup do
+    describe "authorised users" do
+      before do
         @user = Spontaneous::Permissions::User.create(:email => "test@example.com", :login => "test", :name => "test name", :password => "testpass")
         @site.config.auto_login @user.login
 
@@ -105,62 +105,62 @@ class AssetBundler < MiniTest::Spec
         Spontaneous::Permissions::AccessKey.stubs(:valid?).with(@key, @user).returns(true)
 
       end
-      teardown do
+      after do
         Content.delete
         Spontaneous::Permissions::User.delete
       end
     end
 
-    should "be able to load spontaneous.css" do
+    it "be able to load spontaneous.css" do
       get "/@spontaneous/css/spontaneous.css"
       assert last_response.ok?, "Recieved a #{last_response.status} instead of 200"
-      last_response.body.should =~ /#content/
+      last_response.body.must_match /#content/
     end
   end
 
-  context "Production mode editing app" do
-    setup do
+  describe "Production mode editing app" do
+    before do
       @compiler = Spontaneous::Asset::AppCompiler.new(fixture_dir, @site.root)
       @compiler.compile
       @page = Content.create
     end
 
-    teardown do
+    after do
       Content.delete
     end
 
-    should "be able to retrieve compiled assets" do
+    it "be able to retrieve compiled assets" do
       css_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.css"].first
       css_file = ::File.basename(css_path)
       get "/@spontaneous/assets/#{css_file}"
       assert last_response.ok?, "Recieved #{last_response.status} instead of 200 for /@spontaneous/assets/#{css_file}"
     end
 
-    context "unauthorised users" do
-      should "load a fingerprinted CSS file" do
+    describe "unauthorised users" do
+      it "load a fingerprinted CSS file" do
         get "/@spontaneous/#{@page.id}"
         assert_login_page
         css_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.css"].first
         css_file = ::File.basename(css_path)
-        last_response.body.should =~ %r{/@spontaneous/assets/#{ css_file }}
+        last_response.body.must_match %r{/@spontaneous/assets/#{ css_file }}
       end
 
-      should "load fingerpringed JS files" do
+      it "load fingerpringed JS files" do
         get "/@spontaneous/#{@page.id}"
         assert_login_page
 
         js_path = Dir["#{@site.root}/public/@spontaneous/assets/login*.js"].first
         js_file = ::File.basename(js_path)
-        last_response.body.should =~ %r{/@spontaneous/assets/#{ js_file }}
+        last_response.body.must_match %r{/@spontaneous/assets/#{ js_file }}
 
         js_path = Dir["#{@site.root}/public/@spontaneous/assets/vendor/jquery*.js"].first
         js_file = ::File.basename(js_path)
-        last_response.body.should =~ %r{/@spontaneous/assets/vendor/#{ js_file }}
+        last_response.body.must_match %r{/@spontaneous/assets/vendor/#{ js_file }}
       end
     end
 
-    context "authorised users aaaa" do
-      setup do
+    describe "authorised users aaaa" do
+      before do
         Spontaneous.stubs(:reload!)
         @user = Spontaneous::Permissions::User.create(:email => "test@example.com", :login => "test", :name => "test name", :password => "testpass")
         @user.update(:level => Spontaneous::Permissions[:editor])
@@ -187,34 +187,34 @@ class AssetBundler < MiniTest::Spec
         Spontaneous::Permissions::AccessKey.stubs(:valid?).with(@key, @user).returns(true)
       end
 
-      teardown do
+      after do
         Content.delete
         Spontaneous::Permissions::User.delete
       end
 
-      should "load fingerpringed JS files" do
+      it "load fingerpringed JS files" do
         get "/@spontaneous/"
-        assert last_response.ok?, "User should be authorised but recieving a #{last_response.status}"
+        assert last_response.ok?, "User it be authorised but recieving a #{last_response.status}"
 
         js_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.js"].first
         js_file = ::File.basename(js_path)
         js_size = ::File.size(js_path)
-        last_response.body.should =~ %r{\["/@spontaneous/assets/#{ js_file }", *#{js_size}\]}
+        last_response.body.must_match %r{\["/@spontaneous/assets/#{ js_file }", *#{js_size}\]}
 
         js_path = Dir["#{@site.root}/public/@spontaneous/assets/require*.js"].first
         js_file = ::File.basename(js_path)
-        last_response.body.should =~ %r{/@spontaneous/assets/#{ js_file }}
+        last_response.body.must_match %r{/@spontaneous/assets/#{ js_file }}
 
         js_path = Dir["#{@site.root}/public/@spontaneous/assets/vendor/jquery*.js"].first
         js_file = ::File.basename(js_path)
-        last_response.body.should =~ %r{/@spontaneous/assets/vendor/#{ js_file }}
+        last_response.body.must_match %r{/@spontaneous/assets/vendor/#{ js_file }}
       end
     end
 
-    should "be able to load spontaneous.css" do
+    it "be able to load spontaneous.css" do
       get "/@spontaneous/css/spontaneous.css"
       assert last_response.ok?, "Recieved a #{last_response.status} instead of 200"
-      last_response.body.should =~ /#content/
+      last_response.body.must_match /#content/
     end
   end
 end

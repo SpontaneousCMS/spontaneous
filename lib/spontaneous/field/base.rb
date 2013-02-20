@@ -111,12 +111,24 @@ module Spontaneous
         end
       end
 
+      # Ensures that this update can still run
+      def invalid_update?
+        return true if reload.nil?
+        false
+      end
+
+      # Ensures that the pending value we have hasn't been superceded by
+      # a later one.
       def conflicted_update?
         return false if is_valid_pending_value?
         self.processed_values = @previous_values
         true
       end
 
+      # Reloads the field and compares the timestamps -- if our timestamp
+      # is the same or greater than the reloaded value then we are the
+      # most up-to-date update available. If not then we're not and
+      # should abort.
       def is_valid_pending_value?
         return true if @previous_values.nil?
         reloaded = reload

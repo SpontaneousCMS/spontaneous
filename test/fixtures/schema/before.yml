@@ -1,7 +1,7 @@
 ---
 tttttttttttt: type//Page
 pagetitle000: field/tttttttttttt/title
-bbbbbbbbbbbb: type//SchemaTest::B
+bbbbbbbbbbbb: type//B
 ffffffffffff: field/bbbbbbbbbbbb/description
 author000000: field/bbbbbbbbbbbb/author
 promotions00: box/bbbbbbbbbbbb/promotions
@@ -10,13 +10,13 @@ inline000000: style/bbbbbbbbbbbb/inline
 outline00000: style/bbbbbbbbbbbb/outline
 thinlayout00: layout/bbbbbbbbbbbb/thin
 fatlayout000: layout/bbbbbbbbbbbb/fat
-cccccccccccc: type//SchemaTest::C
-dddddddddddd: type//SchemaTest::D
+cccccccccccc: type//C
+dddddddddddd: type//D
 boxfield0100: field/promotions00/field1
 boxfield0200: field/promotions00/field2
 boxstyle0100: style/promotions00/style1
 boxstyle0200: style/promotions00/style2
-oooooooooooo: type//SchemaTest::O
+oooooooooooo: type//O
 boxfield0300: field/oooooooooooo/ofield1
 boxfield0400: field/oooooooooooo/ofield2
 boxstyle0300: style/oooooooooooo/ostyle1

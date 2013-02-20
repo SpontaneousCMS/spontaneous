@@ -5,31 +5,34 @@ require 'sinatra/base'
 module Spontaneous
   module Rack
     module Front
+      include Spontaneous::Rack::Middleware
+
+      def self.make_controller(controller_class)
+        ::Rack::Builder.app do
+          use Scope::Front
+          run controller_class
+        end
+      end
+
       def self.front_app
         ::Rack::Builder.app do
-          use AroundFront
-          use Reloader if Spontaneous::Site.config.reload_classes
+          use Scope::Front
+          use Reloader if Spontaneous.development?
           run Server.new
         end
       end
+
       def self.application
         app = ::Rack::Builder.new do
-          # use ::Rack::CommonLogger, STDERR  #unless server.name =~ /CGI/
-          # use ::Rack::ShowExceptions
-
-
           use Spontaneous::Rack::Static, :root => Spontaneous.revision_dir / "public",
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
-
-
 
           Spontaneous.instance.front_controllers.each do |namespace, controller_class|
             map namespace do
               run controller_class
             end
           end if Spontaneous.instance
-
 
           # Make all the files available under plugin_name/public/**
           # available under the URL /plugin_name/**

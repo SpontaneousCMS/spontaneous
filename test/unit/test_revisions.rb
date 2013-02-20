@@ -3,541 +3,533 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 
-class RevisionsTest < MiniTest::Spec
+describe "Revisions" do
 
   Revision = Spontaneous::Publishing::Revision
 
-  def setup
+  before do
     @now = Time.now
     @site = setup_site
+    stub_time(@now)
+
+    Content.delete
+
+    class Page
+      field :title, :string, :default => "New Page"
+      box :things
+    end
+    class Piece
+      box :things
+    end
+
+    @root = Page.create(:uid => "root")
+    count = 0
+    2.times do |i|
+      c = Page.new(:uid => i)
+      @root.things << c
+      count += 1
+      2.times do |j|
+        d = Piece.new(:uid => "#{i}.#{j}")
+        c.things << d
+        count += 1
+        2.times do |k|
+          d.things << Page.new(:uid => "#{i}.#{j}.#{k}")
+          d.save
+          count += 1
+        end
+      end
+      c.save
+    end
+    @root.save
   end
 
-  def teardown
+  after do
+    Object.send(:remove_const, :Page) rescue nil
+    Object.send(:remove_const, :Piece) rescue nil
+    Content.delete
     teardown_site
   end
 
-  context "Content revisions" do
-    setup do
-      stub_time(@now)
+  describe "data sources" do
 
-      Content.delete
-
-      class Page < ::Page
-        field :title, :string, :default => "New Page"
-        box :things
-      end
-      class Piece < ::Piece
-        box :things
-      end
-
-      @root = Page.create(:uid => "root")
-      count = 0
-      2.times do |i|
-        c = Page.new(:uid => i)
-        @root.things << c
-        count += 1
-        2.times do |j|
-          d = Piece.new(:uid => "#{i}.#{j}")
-          c.things << d
-          count += 1
-          2.times do |k|
-            d.things << Page.new(:uid => "#{i}.#{j}.#{k}")
-            d.save
-            count += 1
-          end
-        end
-        c.save
-      end
-      @root.save
+    it "have the right names" do
+      Content.revision_table(23).must_equal :'__r00023_content'
+      Content.revision_table(nil).must_equal :'content'
     end
 
-    teardown do
-      RevisionsTest.send(:remove_const, :Page) rescue nil
-      RevisionsTest.send(:remove_const, :Piece) rescue nil
-      Content.delete
+    it "be recognisable" do
+      refute Content.revision_table?('content')
+      assert Content.revision_table?('__r00023_content')
+      refute Content.revision_table?('__r00023_not')
+      refute Content.revision_table?('subscribers')
     end
 
-    context "data sources" do
-
-      should "have the right names" do
-        Content.revision_table(23).should == :'__r00023_content'
-        Content.revision_table(nil).should == :'content'
+    it "be switchable within blocks" do
+      Content.with_revision(23) do
+        Content.revision.must_equal 23
+        Content.mapper.current_revision.must_equal 23
       end
+      Content.mapper.current_revision.must_be_nil
+    end
 
-      should "be recognisable" do
-        Content.revision_table?('content').should be_false
-        Content.revision_table?('__r00023_content').should be_true
-        Content.revision_table?('__r00023_not').should be_false
-        Content.revision_table?('subscribers').should be_false
+    it "know which revision is active" do
+      Content.with_revision(23) do
+        Content.revision.must_equal 23
       end
+    end
 
-      should "be switchable within blocks" do
-        Content.with_revision(23) do
-          Content.revision.should ==23
-          Content.mapper.current_revision.should == 23
-        end
-        Content.mapper.current_revision.should be_nil
-      end
-
-      should "know which revision is active" do
-        Content.with_revision(23) do
-          Content.revision.should == 23
+    it "understand with_editable" do
+      Content.with_revision(23) do
+        Content.mapper.current_revision.must_equal 23
+        Content.with_editable do
+          Content.mapper.current_revision.must_be_nil
         end
       end
+    end
 
-      should "understand with_editable" do
+    it "understand with_published" do
+      S::Site.stubs(:published_revision).returns(99)
+      Content.with_published do
+        Content.mapper.current_revision.must_equal 99
+      end
+    end
+
+    it "be stackable" do
+      Content.with_revision(23) do
+        Content.mapper.current_revision.must_equal 23
+        Content.with_revision(24) do
+          Content.mapper.current_revision.must_equal 24
+        end
+      end
+    end
+
+    it "reset datasource after an exception" do
+      begin
         Content.with_revision(23) do
-          Content.mapper.current_revision.should == 23
+          Content.mapper.current_revision.must_equal 23
+          raise "Fail"
+        end
+      rescue Exception
+      end
+      Content.mapper.current_revision.must_be_nil
+    end
+
+    it "read revision from the environment if present" do
+      ENV["SPOT_REVISION"] = '1001'
+      Content.with_published do
+        Content.mapper.current_revision.must_equal 1001
+      end
+      ENV.delete("SPOT_REVISION")
+    end
+
+    describe "subclasses" do
+      before do
+        class ::Subclass < Page; end
+      end
+
+      after do
+        Object.send(:remove_const, :Subclass)
+      end
+
+      it "set all subclasses to use the same dataset" do
+        Content.with_revision(23) do
+          Subclass.revision.must_equal 23
+          Subclass.mapper.current_revision.must_equal 23
+          # piece wasn't loaded until this point
+          Piece.mapper.current_revision.must_equal 23
+        end
+      end
+    end
+  end
+
+  describe "content revisions" do
+    before do
+      @revision = 1
+      Revision.history_dataset(Content).delete
+      Revision.archive_dataset(Content).delete
+    end
+
+    after do
+      Revision.delete_all(Content)
+    end
+
+    it "be testable for existance" do
+      refute Content.revision_exists?(@revision)
+      Revision.create(Content, @revision)
+      assert Revision.exists?(Content, @revision)
+    end
+
+    it "not be deletable if their revision is nil" do
+      Revision.delete(Content, nil)
+      assert Content.db.table_exists?(:content)
+    end
+
+    it "be deletable en masse" do
+      revisions = (1..10).to_a
+      tables = revisions.map { |i| Content.revision_table(i).to_sym }
+
+      revisions.each do |r|
+        Content.history_dataset.insert(:revision => r, :uid => "revision-#{r}")
+        Content.archive_dataset.insert(:revision => r, :uid => "archive-#{r}")
+      end
+
+      Content.history_dataset.count.must_equal 10
+      Content.archive_dataset.count.must_equal 10
+
+      tables.each do |t|
+        DB.create_table(t){Integer :id} rescue nil
+      end
+
+      tables.each do |t|
+        assert DB.tables.include?(t)
+      end
+
+      Revision.delete_all(Content)
+
+      tables.each do |t|
+        refute DB.tables.include?(t)
+      end
+
+      Content.history_dataset.count.must_equal 0
+      Content.archive_dataset.count.must_equal 0
+    end
+
+    it "be creatable from current content" do
+      refute DB.tables.include?(Content.revision_table(@revision).to_sym)
+      Revision.create(Content, @revision)
+      assert DB.tables.include?(Content.revision_table(@revision).to_sym)
+      count = Content.count
+      Content.with_revision(@revision) do
+        Content.count.must_equal count
+        Content.all.each do |published|
+          published.revision.must_equal @revision
           Content.with_editable do
-            Content.mapper.current_revision.should be_nil
+            e = Content[published.id]
+            assert_content_equal(e, published, :revision)
+            e.revision.must_be_nil
           end
         end
       end
-
-      should "understand with_published" do
-        S::Site.stubs(:published_revision).returns(99)
-        Content.with_published do
-          Content.mapper.current_revision.should == 99
-        end
-      end
-
-      should "be stackable" do
-        Content.with_revision(23) do
-          Content.mapper.current_revision.should == 23
-          Content.with_revision(24) do
-            Content.mapper.current_revision.should == 24
-          end
-        end
-      end
-
-      should "reset datasource after an exception" do
-        begin
-          Content.with_revision(23) do
-            Content.mapper.current_revision.should == 23
-            raise "Fail"
-          end
-        rescue Exception
-        end
-        Content.mapper.current_revision.should be_nil
-      end
-
-      should "read revision from the environment if present" do
-        ENV["SPOT_REVISION"] = '1001'
-        Content.with_published do
-          Content.mapper.current_revision.should == 1001
-        end
-        ENV.delete("SPOT_REVISION")
-      end
-
-      context "subclasses" do
-        setup do
-          class ::Subclass < Page; end
-        end
-
-        teardown do
-          Object.send(:remove_const, :Subclass)
-        end
-
-        should "set all subclasses to use the same dataset" do
-          Content.with_revision(23) do
-            Subclass.revision.should == 23
-            Subclass.mapper.current_revision.should == 23
-            # piece wasn't loaded until this point
-            Piece.mapper.current_revision.should == 23
-          end
-        end
-      end
+      Content.history_dataset(@revision).count.must_equal count
+      Content.history_dataset.select(:revision).group(:revision).all.must_equal [{:revision => 1}]
+      Content.archive_dataset(@revision).count.must_equal count
+      Content.archive_dataset.select(:revision).group(:revision).all.must_equal [{:revision => 1}]
     end
 
-    context "content revisions" do
-      setup do
-        @revision = 1
-        Revision.history_dataset(Content).delete
-        Revision.archive_dataset(Content).delete
+    it "have the correct indexes" do
+      Revision.create(Content, @revision)
+      content_indexes = DB.indexes(:content)
+      published_indexes = DB.indexes(Content.revision_table(@revision))
+      # made slightly complex by the fact that the index names depend on the table names
+      # (which are different)
+      assert_has_elements published_indexes.values, content_indexes.values
+    end
+
+    it "only be kept until a new revision is available" do
+      (0..2).each do |r|
+        Revision.create(Content, @revision+r)
+        Content.history_dataset(@revision+r).count.must_equal 15
+        Content.archive_dataset(@revision+r).count.must_equal 15
       end
-
-      teardown do
-        Revision.delete_all(Content)
-      end
-
-      should "be testable for existance" do
-        Content.revision_exists?(@revision).should be_false
-        Revision.create(Content, @revision)
-        Revision.exists?(Content, @revision).should be_true
-      end
-
-      should "not be deletable if their revision is nil" do
-        Revision.delete(Content, nil)
-        Content.db.table_exists?(:content).should be_true
-      end
-
-      should "be deletable en masse" do
-        revisions = (1..10).to_a
-        tables = revisions.map { |i| Content.revision_table(i).to_sym }
-
-        revisions.each do |r|
-          Content.history_dataset.insert(:revision => r, :uid => "revision-#{r}")
-          Content.archive_dataset.insert(:revision => r, :uid => "archive-#{r}")
-        end
-
-        Content.history_dataset.count.should == 10
-        Content.archive_dataset.count.should == 10
-
-        tables.each do |t|
-          DB.create_table(t){Integer :id} rescue nil
-        end
-
-        tables.each do |t|
-          DB.tables.include?(t).should be_true
-        end
-
-        Revision.delete_all(Content)
-
-        tables.each do |t|
-          DB.tables.include?(t).should be_false
-        end
-
-        Content.history_dataset.count.should == 0
-        Content.archive_dataset.count.should == 0
-      end
-
-      should "be creatable from current content" do
-        DB.tables.include?(Content.revision_table(@revision).to_sym).should be_false
-        Revision.create(Content, @revision)
-        DB.tables.include?(Content.revision_table(@revision).to_sym).should be_true
-        count = Content.count
-        Content.with_revision(@revision) do
-          Content.count.should == count
-          Content.all.each do |published|
-            published.revision.should == @revision
-            Content.with_editable do
-              e = Content[published.id]
-              assert_content_equal(e, published, :revision)
-              e.revision.should be_nil
-            end
-          end
-        end
-        Content.history_dataset(@revision).count.should == count
-        Content.history_dataset.select(:revision).group(:revision).all.should == [{:revision => 1}]
-        Content.archive_dataset(@revision).count.should == count
-        Content.archive_dataset.select(:revision).group(:revision).all.should == [{:revision => 1}]
-      end
-
-      should "have the correct indexes" do
-        Revision.create(Content, @revision)
-        content_indexes = DB.indexes(:content)
-        published_indexes = DB.indexes(Content.revision_table(@revision))
-        # made slightly complex by the fact that the index names depend on the table names
-        # (which are different)
-        assert_same_elements published_indexes.values, content_indexes.values
-      end
-
-      should "only be kept until a new revision is available" do
-        (0..2).each do |r|
-          Revision.create(Content, @revision+r)
-          Content.history_dataset(@revision+r).count.should == 15
-          Content.archive_dataset(@revision+r).count.should == 15
-        end
-        Content.revision_tables.should == [:__r00001_content, :__r00002_content, :__r00003_content]
-        Revision.cleanup(Content, @revision+2, 2)
-        Content.revision_tables.should == [:__r00003_content]
-        Content.history_dataset(@revision).count.should == 0
-        Content.archive_dataset(@revision).count.should == 15
-        Content.history_dataset(@revision+2).count.should == 15
-      end
-
-
-      context "incremental publishing" do
-        setup do
-          @initial_revision = 1
-          @final_revision = 2
-          Revision.create(Content, @initial_revision)
-          Revision.delete(Content, @final_revision) rescue nil
-          Revision.delete(Content, @final_revision+1) rescue nil
-        end
-
-        teardown do
-          Revision.create(Content, @initial_revision) rescue nil
-          Revision.delete(Content, @final_revision) rescue nil
-          Revision.delete(Content, @final_revision+1) rescue nil
-        end
-
-        should "duplicate changes to only a single item" do
-          editable1 = Content.first(:uid => '1.0')
-          editable1.label.should be_nil
-          editable1.label = "published"
-          editable1.save
-          editable2 = Content.first(:uid => '1.1')
-          editable2.label = "unpublished"
-          editable2.save
-          editable2.reload
-          Revision.patch(Content, @final_revision, [editable1.id])
-          editable1.reload
-          Content.with_revision(@final_revision) do
-            published = Content.first :id => editable1.id
-            unpublished = Content.first :id => editable2.id
-            assert_content_equal(published, editable1, :revision)
-            assert_content_unequal(unpublished, editable2, :revision)
-          end
-        end
-
-        should "publish additions to contents of a page" do
-          editable1 = Content.first(:uid => '0')
-          new_content = Piece.new(:uid => "new")
-
-          editable1.things << new_content
-          editable1.save
-          Revision.patch(Content, @final_revision, [editable1.id])
-          new_content.reload
-          editable1.reload
-          Content.with_revision(@final_revision) do
-            published1 = Content[editable1.id]
-            published2 = Content[new_content.id]
-            assert_content_equal(published2, new_content, :revision)
-            assert_content_equal(published1, editable1, :revision)
-          end
-        end
-
-        should "publish deletions to contents of page" do
-          editable1 = Content.first(:uid => '0')
-          deleted = editable1.contents.first
-          editable1.contents.first.destroy
-          Revision.patch(Content, @final_revision, [editable1.id])
-          editable1.reload
-          Content.with_revision(@final_revision) do
-            published1 = Content[editable1.id]
-            assert_content_equal(published1, editable1, :revision)
-            Content[deleted.id].should be_nil
-          end
-        end
-
-        should "not publish page additions" do
-          editable1 = Content.first(:uid => '0')
-          new_page = Page.new(:uid => "new")
-          editable1.things << new_page
-          editable1.save
-          new_page.save
-          Revision.patch(Content, @final_revision, [editable1.id])
-          new_page.reload
-          editable1.reload
-          Content.with_revision(@final_revision) do
-            published1 = Content[editable1.id]
-            published2 = Content[new_page.id]
-            published2.should be_nil
-            assert_content_equal(published1, editable1, :revision)
-          end
-        end
-
-        should "not publish changes to existing pages unless explicitly asked" do
-          editable1 = Content.first(:uid => '0')
-          editable1.things << Piece.new(:uid => "added")
-          editable1.save
-          editable2 = Content.first(:uid => '0.0.0')
-          new_content = Piece.new(:uid => "new")
-          editable2.things << new_content
-          editable2.save
-          Revision.patch(Content, @final_revision, [editable1.id])
-          editable1.reload
-          editable2.reload
-          new_content.reload
-          Content.with_revision(@final_revision) do
-            published1 = Content.first :id => editable1.id
-            Content.first(:uid => "added").should_not be_nil
-            published3 = Content.first :id => editable2.id
-            assert_content_equal(published1, editable1, :revision)
-            assert_content_unequal(published3, editable2, :revision)
-            published3.uid.should_not == "new"
-          end
-          Revision.patch(Content, @final_revision+1, [editable2.id])
-          editable1.reload
-          editable2.reload
-          new_content.reload
-          Content.with_revision(@final_revision+1) do
-            published1 = Content.first :id => editable1.id
-            assert_content_equal(published1, editable1, :revision)
-            published2 = Content.first :id => editable2.id
-            assert_content_equal(published2, editable2, :revision)
-            published3 = Content.first :id => editable2.contents.first.id
-            # published3.should == editable2.contents.first
-            assert_content_equal(published3, editable2.contents.first, :revision)
-          end
-        end
-
-        should "insert an entry value into the parent of a newly added page when that page is published aaa" do
-          editable1 = Content.first(:uid => '0')
-          new_page = Page.new(:uid => "new")
-          editable1.things << new_page
-          editable1.save
-          new_page.save
-          Revision.patch(Content, @final_revision, [new_page.id])
-          new_page.reload
-          editable1.reload
-          Content.with_revision(@final_revision) do
-            published1 = Content[editable1.id]
-            published2 = Content[new_page.id]
-            assert_content_equal(published2, new_page, :revision)
-            editable1.entry_store.should == published1.entry_store
-          end
-        end
-
-        should "choose a sensible position for entry into the parent of a newly added page" do
-          editable1 = Content.first(:uid => '0')
-          new_page1 = Page.new(:uid => "new1")
-          new_page2 = Page.new(:uid => "new2")
-          editable1.things << new_page1
-          editable1.things << new_page2
-          editable1.save
-          new_page1.save
-          new_page2.save
-          Revision.patch(Content, @final_revision, [new_page2.id])
-          new_page1.reload
-          new_page2.reload
-          editable1.reload
-          Content.with_revision(@final_revision) do
-            published1 = Content[editable1.id]
-            published2 = Content[new_page1.id]
-            published3 = Content[new_page2.id]
-            published2.should be_nil
-            assert_content_equal(published3, new_page2, :revision)
-            editable1.entry_store.reject { |e| e[0] == new_page1.id }.should == published1.entry_store
-          end
-        end
-
-        should "not duplicate entries when publishing pages for the first time" do
-          editable1 = Content.first(:uid => '0')
-          new_page1 = Page.new(:uid => "new1")
-          new_page2 = Page.new(:uid => "new2")
-          editable1.things << new_page1
-          editable1.things << new_page2
-          editable1.save
-          new_page1.save
-          new_page2.save
-          Revision.patch(Content, @final_revision, [editable1.id, new_page2.id])
-          new_page1.reload
-          new_page2.reload
-          editable1.reload
-          Content.with_revision(@final_revision) do
-            published1 = Content[editable1.id]
-            published2 = Content[new_page1.id]
-            published3 = Content[new_page2.id]
-            published2.should be_nil
-            assert_content_equal(published3, new_page2, :revision)
-            assert_content_equal(published1, editable1, :revision)
-          end
-        end
-
-        should "remove deleted pages from the published content" do
-          page = Page.first :uid => "0"
-          piece = page.things.first
-          child = piece.things.first
-          page.things.first.destroy
-          Revision.patch(Content, @final_revision, [page.id])
-
-          Content.with_revision(@final_revision) do
-            published_parent = Content[page.id]
-            published_piece = Content[piece.id]
-            published_page = Content[child.id]
-            published_parent.should  == page.reload
-            published_piece.should be_nil
-            published_page.should be_nil
-          end
-        end
-      end
+      Content.revision_tables.must_equal [:__r00001_content, :__r00002_content, :__r00003_content]
+      Revision.cleanup(Content, @revision+2, 2)
+      Content.revision_tables.must_equal [:__r00003_content]
+      Content.history_dataset(@revision).count.must_equal 0
+      Content.archive_dataset(@revision).count.must_equal 15
+      Content.history_dataset(@revision+2).count.must_equal 15
     end
 
 
-    context "publication timestamps" do
-      setup do
-        @revision = 1
-        Revision.delete(Content, @revision+1)
-      end
-      teardown do
-        Revision.delete(Content, @revision)
-        Revision.delete(Content, @revision+1)
-      end
-
-      should "set correct timestamps on first publish" do
-        first = Content.first
-        first.reload.first_published_at.should be_nil
-        first.reload.last_published_at.should be_nil
-        Revision.create(Content, @revision)
-        first.reload.first_published_at.to_i.should == @now.to_i
-        first.reload.last_published_at.to_i.should == @now.to_i
-        first.reload.first_published_revision.should == @revision
-        Content.with_editable do
-          first.reload.first_published_at.to_i.should == @now.to_i
-          first.reload.last_published_at.to_i.should == @now.to_i
-          first.reload.first_published_revision.should == @revision
-        end
-        Content.with_revision(@revision) do
-          first.reload.first_published_at.to_i.should == @now.to_i
-          first.reload.last_published_at.to_i.should == @now.to_i
-          first.reload.first_published_revision.should == @revision
-        end
+    describe "incremental publishing" do
+      before do
+        @initial_revision = 1
+        @final_revision = 2
+        Revision.create(Content, @initial_revision)
+        Revision.delete(Content, @final_revision) rescue nil
+        Revision.delete(Content, @final_revision+1) rescue nil
       end
 
-      should "set correct timestamps on later publishes" do
-        first = Content.first
-        first.first_published_at.should be_nil
-        Revision.create(Content, @revision)
-        first.reload.first_published_at.to_i.should == @now.to_i
-        c = Content.create
-        c.first_published_at.should be_nil
-        stub_time(@now + 100)
-        Revision.create(Content, @revision+1)
-        first.reload.first_published_at.to_i.should == @now.to_i
-        first.reload.last_published_at.to_i.should == @now.to_i + 100
-        Content.with_editable do
-          c = Content.first :id => c.id
-          c.first_published_at.to_i.should == @now.to_i + 100
-        end
-        Content.with_revision(@revision+1) do
-          c = Content.first :id => c.id
-          c.first_published_at.to_i.should == @now.to_i + 100
+      after do
+        Revision.create(Content, @initial_revision) rescue nil
+        Revision.delete(Content, @final_revision) rescue nil
+        Revision.delete(Content, @final_revision+1) rescue nil
+      end
+
+      it "duplicate changes to only a single item" do
+        editable1 = Content.first(:uid => '1.0')
+        editable1.label.must_be_nil
+        editable1.label = "published"
+        editable1.save
+        editable2 = Content.first(:uid => '1.1')
+        editable2.label = "unpublished"
+        editable2.save
+        editable2.reload
+        Revision.patch(Content, @final_revision, [editable1.id])
+        editable1.reload
+        Content.with_revision(@final_revision) do
+          published = Content.first :id => editable1.id
+          unpublished = Content.first :id => editable2.id
+          assert_content_equal(published, editable1, :revision)
+          assert_content_unequal(unpublished, editable2, :revision)
         end
       end
 
-      should "not set publishing date for items not published" do
-        Revision.create(Content, @revision)
-        page = Content.first
-        page.uid = "fish"
-        page.save
-        added = Content.create
-        added.first_published_at.should be_nil
-        Revision.patch(Content, @revision+1, [page])
-        page.first_published_at.to_i.should == @now.to_i
-        added.first_published_at.should be_nil
-        added.last_published_at.should be_nil
+      it "publish additions to contents of a page" do
+        editable1 = Content.first(:uid => '0')
+        new_content = Piece.new(:uid => "new")
+
+        editable1.things << new_content
+        editable1.save
+        Revision.patch(Content, @final_revision, [editable1.id])
+        new_content.reload
+        editable1.reload
+        Content.with_revision(@final_revision) do
+          published1 = Content[editable1.id]
+          published2 = Content[new_content.id]
+          assert_content_equal(published2, new_content, :revision)
+          assert_content_equal(published1, editable1, :revision)
+        end
       end
 
-      should "not set publishing dates if exception raised in passed block xxx" do
-        Content.first.first_published_at.should be_nil
-        begin
-          Revision.create(Content, @revision) do
-            raise "Fail"
-          end
-        rescue Exception; end
-        Content.first.first_published_at.should be_nil
+      it "publish deletions to contents of page" do
+        editable1 = Content.first(:uid => '0')
+        deleted = editable1.contents.first
+        editable1.contents.first.destroy
+        Revision.patch(Content, @final_revision, [editable1.id])
+        editable1.reload
+        Content.with_revision(@final_revision) do
+          published1 = Content[editable1.id]
+          assert_content_equal(published1, editable1, :revision)
+          Content[deleted.id].must_be_nil
+        end
       end
 
-      should "delete revision tables if exception raised in passed block" do
-        Revision.exists?(Content, @revision).should be_false
-        begin
-          Revision.create(Content, @revision) do
-            Revision.exists?(Content, @revision).should be_true
-            Content.revision.should == @revision
-            raise "Fail"
-          end
-        rescue Exception; end
-        Revision.exists?(Content, @revision).should be_false
+      it "not publish page additions" do
+        editable1 = Content.first(:uid => '0')
+        new_page = Page.new(:uid => "new")
+        editable1.things << new_page
+        editable1.save
+        new_page.save
+        Revision.patch(Content, @final_revision, [editable1.id])
+        new_page.reload
+        editable1.reload
+        Content.with_revision(@final_revision) do
+          published1 = Content[editable1.id]
+          published2 = Content[new_page.id]
+          published2.must_be_nil
+          assert_content_equal(published1, editable1, :revision)
+        end
       end
 
-      should "always publish all if no previous revisions exist" do
-        page = Content.first
-        Content.filter(:first_published_at => nil).count.should == Content.count
-        Revision.patch(Content, @revision, [page])
-        Content.filter(:first_published_at => nil).count.should == 0
+      it "not publish changes to existing pages unless explicitly asked" do
+        editable1 = Content.first(:uid => '0')
+        editable1.things << Piece.new(:uid => "added")
+        editable1.save
+        editable2 = Content.first(:uid => '0.0.0')
+        new_content = Piece.new(:uid => "new")
+        editable2.things << new_content
+        editable2.save
+        Revision.patch(Content, @final_revision, [editable1.id])
+        editable1.reload
+        editable2.reload
+        new_content.reload
+        Content.with_revision(@final_revision) do
+          published1 = Content.first :id => editable1.id
+          Content.first(:uid => "added").wont_be_nil
+          published3 = Content.first :id => editable2.id
+          assert_content_equal(published1, editable1, :revision)
+          assert_content_unequal(published3, editable2, :revision)
+          published3.uid.wont_equal "new"
+        end
+        Revision.patch(Content, @final_revision+1, [editable2.id])
+        editable1.reload
+        editable2.reload
+        new_content.reload
+        Content.with_revision(@final_revision+1) do
+          published1 = Content.first :id => editable1.id
+          assert_content_equal(published1, editable1, :revision)
+          published2 = Content.first :id => editable2.id
+          assert_content_equal(published2, editable2, :revision)
+          published3 = Content.first :id => editable2.contents.first.id
+          # published3.must_equal editable2.contents.first
+          assert_content_equal(published3, editable2.contents.first, :revision)
+        end
       end
+
+      it "insert an entry value into the parent of a newly added page when that page is published aaa" do
+        editable1 = Content.first(:uid => '0')
+        new_page = Page.new(:uid => "new")
+        editable1.things << new_page
+        editable1.save
+        new_page.save
+        Revision.patch(Content, @final_revision, [new_page.id])
+        new_page.reload
+        editable1.reload
+        Content.with_revision(@final_revision) do
+          published1 = Content[editable1.id]
+          published2 = Content[new_page.id]
+          assert_content_equal(published2, new_page, :revision)
+          editable1.entry_store.must_equal published1.entry_store
+        end
+      end
+
+      it "choose a sensible position for entry into the parent of a newly added page" do
+        editable1 = Content.first(:uid => '0')
+        new_page1 = Page.new(:uid => "new1")
+        new_page2 = Page.new(:uid => "new2")
+        editable1.things << new_page1
+        editable1.things << new_page2
+        editable1.save
+        new_page1.save
+        new_page2.save
+        Revision.patch(Content, @final_revision, [new_page2.id])
+        new_page1.reload
+        new_page2.reload
+        editable1.reload
+        Content.with_revision(@final_revision) do
+          published1 = Content[editable1.id]
+          published2 = Content[new_page1.id]
+          published3 = Content[new_page2.id]
+          published2.must_be_nil
+          assert_content_equal(published3, new_page2, :revision)
+          editable1.entry_store.reject { |e| e[0] == new_page1.id }.must_equal published1.entry_store
+        end
+      end
+
+      it "not duplicate entries when publishing pages for the first time" do
+        editable1 = Content.first(:uid => '0')
+        new_page1 = Page.new(:uid => "new1")
+        new_page2 = Page.new(:uid => "new2")
+        editable1.things << new_page1
+        editable1.things << new_page2
+        editable1.save
+        new_page1.save
+        new_page2.save
+        Revision.patch(Content, @final_revision, [editable1.id, new_page2.id])
+        new_page1.reload
+        new_page2.reload
+        editable1.reload
+        Content.with_revision(@final_revision) do
+          published1 = Content[editable1.id]
+          published2 = Content[new_page1.id]
+          published3 = Content[new_page2.id]
+          published2.must_be_nil
+          assert_content_equal(published3, new_page2, :revision)
+          assert_content_equal(published1, editable1, :revision)
+        end
+      end
+
+      it "remove deleted pages from the published content" do
+        page = Page.first :uid => "0"
+        piece = page.things.first
+        child = piece.things.first
+        page.things.first.destroy
+        Revision.patch(Content, @final_revision, [page.id])
+
+        Content.with_revision(@final_revision) do
+          published_parent = Content[page.id]
+          published_piece = Content[piece.id]
+          published_page = Content[child.id]
+          published_parent.must_equal page.reload
+          published_piece.must_be_nil
+          published_page.must_be_nil
+        end
+      end
+    end
+  end
+
+
+  describe "publication timestamps" do
+    before do
+      @revision = 1
+      Revision.delete(Content, @revision+1)
+    end
+    after do
+      Revision.delete(Content, @revision)
+      Revision.delete(Content, @revision+1)
+    end
+
+    it "set correct timestamps on first publish" do
+      first = Content.first
+      first.reload.first_published_at.must_be_nil
+      first.reload.last_published_at.must_be_nil
+      Revision.create(Content, @revision)
+      first.reload.first_published_at.to_i.must_equal @now.to_i
+      first.reload.last_published_at.to_i.must_equal @now.to_i
+      first.reload.first_published_revision.must_equal @revision
+      Content.with_editable do
+        first.reload.first_published_at.to_i.must_equal @now.to_i
+        first.reload.last_published_at.to_i.must_equal @now.to_i
+        first.reload.first_published_revision.must_equal @revision
+      end
+      Content.with_revision(@revision) do
+        first.reload.first_published_at.to_i.must_equal @now.to_i
+        first.reload.last_published_at.to_i.must_equal @now.to_i
+        first.reload.first_published_revision.must_equal @revision
+      end
+    end
+
+    it "set correct timestamps on later publishes" do
+      first = Content.first
+      first.first_published_at.must_be_nil
+      Revision.create(Content, @revision)
+      first.reload.first_published_at.to_i.must_equal @now.to_i
+      c = Content.create
+      c.first_published_at.must_be_nil
+      stub_time(@now + 100)
+      Revision.create(Content, @revision+1)
+      first.reload.first_published_at.to_i.must_equal @now.to_i
+      first.reload.last_published_at.to_i.must_equal @now.to_i + 100
+      Content.with_editable do
+        c = Content.first :id => c.id
+        c.first_published_at.to_i.must_equal @now.to_i + 100
+      end
+      Content.with_revision(@revision+1) do
+        c = Content.first :id => c.id
+        c.first_published_at.to_i.must_equal @now.to_i + 100
+      end
+    end
+
+    it "not set publishing date for items not published" do
+      Revision.create(Content, @revision)
+      page = Content.first
+      page.uid = "fish"
+      page.save
+      added = Content.create
+      added.first_published_at.must_be_nil
+      Revision.patch(Content, @revision+1, [page])
+      page.first_published_at.to_i.must_equal @now.to_i
+      added.first_published_at.must_be_nil
+      added.last_published_at.must_be_nil
+    end
+
+    it "not set publishing dates if exception raised in passed block xxx" do
+      Content.first.first_published_at.must_be_nil
+      begin
+        Revision.create(Content, @revision) do
+          raise "Fail"
+        end
+      rescue Exception; end
+      Content.first.first_published_at.must_be_nil
+    end
+
+    it "delete revision tables if exception raised in passed block" do
+      refute Revision.exists?(Content, @revision)
+      begin
+        Revision.create(Content, @revision) do
+          assert Revision.exists?(Content, @revision)
+          Content.revision.must_equal @revision
+          raise "Fail"
+        end
+      rescue Exception; end
+      refute Revision.exists?(Content, @revision)
+    end
+
+    it "always publish all if no previous revisions exist" do
+      page = Content.first
+      Content.filter(:first_published_at => nil).count.must_equal Content.count
+      Revision.patch(Content, @revision, [page])
+      Content.filter(:first_published_at => nil).count.must_equal 0
     end
   end
 end

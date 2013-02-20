@@ -10,6 +10,7 @@ module Spontaneous::Model
     autoload :Entry,            "spontaneous/model/core/entry"
     autoload :Fields,           "spontaneous/model/core/fields"
     autoload :InstanceCode,     "spontaneous/model/core/instance_code"
+    autoload :Locks,            "spontaneous/model/core/locks"
     autoload :Media,            "spontaneous/model/core/media"
     autoload :Modifications,    "spontaneous/model/core/modifications"
     autoload :PageSearch,       "spontaneous/model/core/page_search"
@@ -79,6 +80,7 @@ module Spontaneous::Model
     include ContentGroups
     include SchemaHierarchy
     include PageSearch
+    include Locks
 
     # marker method enabling a simple test for "cms content" vs "everything else"
     def spontaneous_content?
@@ -123,12 +125,19 @@ module Spontaneous::Model
     end
 
     def inspect
-      values = inspecttion_values.map { |(name, value)| "#{name}=#{value.inspect}" }.join(" ")
+      values = inspection_values.map { |(name, value)| "#{name}=#{value.inspect}" }.join(" ")
       %(#<#{self.class.name} #{values}>)
     end
 
-    def inspecttion_values
-      { :id => id, :location => [page.path, container._name, position].join(":") }.merge(inspection_fields)
+    def inspection_values
+      location = if page
+                   [page.path, container._name, position]
+                 elsif container
+                   [container._name, position]
+                 else
+                   []
+                 end
+      { :id => id, :location => location.join(":") }.merge(inspection_fields)
     end
 
     def inspection_fields

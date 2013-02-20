@@ -3,37 +3,37 @@
 require File.expand_path('../../test_helper', __FILE__)
 require 'fog'
 
-class MediaTest < MiniTest::Spec
-  def setup
+describe "Media" do
+  before do
     @site = setup_site
   end
 
-  def teardown
+  after do
     ::Content.delete
     teardown_site
   end
 
-  context "Utility methods" do
-    should "be able to sanitise filenames" do
+  describe "Utility methods" do
+    it "be able to sanitise filenames" do
       filename = "Something with-dodgy 'characters'.many.jpg"
-      S::Media.to_filename(filename).should == "Something-with-dodgy-characters.many.jpg"
+      S::Media.to_filename(filename).must_equal "Something-with-dodgy-characters.many.jpg"
     end
   end
 
-  context "All media files" do
-    should "know their mimetype" do
+  describe "All media files" do
+    it "know their mimetype" do
       file = Spontaneous::Media::File.new(@content, "file name.txt")
-      file.mimetype.should == "text/plain"
+      file.mimetype.must_equal "text/plain"
       file = Spontaneous::Media::File.new(@content, "file name.jpg")
-      file.mimetype.should == "image/jpeg"
+      file.mimetype.must_equal "image/jpeg"
       file = Spontaneous::Media::File.new(@content, "file name.jpg", "text/html")
-      file.mimetype.should == "text/html"
+      file.mimetype.must_equal "text/html"
     end
 
   end
 
-  context "cloud media files" do
-    setup do
+  describe "cloud media files" do
+    before do
       Fog.mock!
       @bucket_name = "media.example.com"
       @aws_credentials = {
@@ -49,46 +49,46 @@ class MediaTest < MiniTest::Spec
       @content.stubs(:id).returns(99)
       Spontaneous::State.stubs(:revision).returns(853)
     end
-    should "return an absolute path for the url" do
+    it "return an absolute path for the url" do
       file = Spontaneous::Media::File.new(@content, "file name.txt")
-      file.url.should == "http://media.example.com/00099-0853-file-name.txt"
+      file.url.must_equal "http://media.example.com/00099-0853-file-name.txt"
     end
 
-    should "create a new instance with a different name" do
+    it "create a new instance with a different name" do
       file1 = Spontaneous::Media::File.new(@content, "file name.txt")
       file2 = file1.rename("another.jpg")
-      file2.owner.should == file1.owner
-      file2.mimetype.should == "image/jpeg"
-      file2.url.should == "http://media.example.com/00099-0853-another.jpg"
+      file2.owner.must_equal file1.owner
+      file2.mimetype.must_equal "image/jpeg"
+      file2.url.must_equal "http://media.example.com/00099-0853-another.jpg"
     end
 
-    should "be able to copy a file into place if passed the path of an existing file" do
+    it "be able to copy a file into place if passed the path of an existing file" do
       @storage.bucket.files.expects(:create).with{ |args|
         args[:key] == "00099-0853-file-name.txt" &&
           args[:body].is_a?(File) &&
           args[:public] == true
       }
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-      ::File.exist?(existing_file).should be_true
+      assert ::File.exist?(existing_file)
       file = Spontaneous::Media::File.new(@content, "file name.txt")
       file.copy(existing_file)
     end
 
-    should "be able to copy a file into place if passed the file handle of an existing file" do
+    it "be able to copy a file into place if passed the file handle of an existing file" do
       @storage.bucket.files.expects(:create).with{ |args|
         args[:key] == "00099-0853-file-name.txt" &&
           args[:body].is_a?(File) &&
           args[:public] == true
       }
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-      ::File.exist?(existing_file).should be_true
+      assert ::File.exist?(existing_file)
       file = Spontaneous::Media::File.new(@content, "file name.txt")
       File.open(existing_file, 'rb') do |f|
         file.copy(f)
       end
     end
 
-    should "provide an open method that writes files to the correct location" do
+    it "provide an open method that writes files to the correct location" do
       @storage.bucket.files.expects(:create).with() { |args|
         args[:key] == "00099-0853-file-name.txt" &&
           (args[:body].is_a?(File) || args[:body].is_a?(Tempfile)) &&
@@ -103,8 +103,8 @@ class MediaTest < MiniTest::Spec
     end
   end
 
-  context "Local media files" do
-    setup do
+  describe "Local media files" do
+    before do
       @media_dir = Dir.mktmpdir
       @storage = Spontaneous::Storage::Local.new(@media_dir, '/media')
       @site.stubs(:storage).with(anything).returns(@storage)
@@ -113,62 +113,62 @@ class MediaTest < MiniTest::Spec
       Spontaneous::State.stubs(:revision).returns(853)
     end
 
-    should "return an absolute path for the url" do
+    it "return an absolute path for the url" do
       file = Spontaneous::Media::File.new(@content, "file name.txt")
-      file.url.should == "/media/00099/0853/file-name.txt"
+      file.url.must_equal "/media/00099/0853/file-name.txt"
     end
 
-    should "place files into its configured root" do
+    it "place files into its configured root" do
       file = Spontaneous::Media::File.new(@content, "file name.txt")
-      file.path.should == File.join(@media_dir, "/00099/0853/file-name.txt")
+      file.path.must_equal File.join(@media_dir, "/00099/0853/file-name.txt")
     end
 
-    should "create a new instance with a different name" do
+    it "create a new instance with a different name" do
       file1 = Spontaneous::Media::File.new(@content, "file name.txt")
       file2 = file1.rename("another.jpg")
-      file2.owner.should == file1.owner
-      file2.mimetype.should == "image/jpeg"
-      file2.url.should == "/media/00099/0853/another.jpg"
+      file2.owner.must_equal file1.owner
+      file2.mimetype.must_equal "image/jpeg"
+      file2.url.must_equal "/media/00099/0853/another.jpg"
     end
 
-    should "be able to copy a file into place if passed the path of an existing file" do
+    it "be able to copy a file into place if passed the path of an existing file" do
       file_path = File.join(@media_dir, "/00099/0853/file-name.txt")
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-      ::File.exist?(file_path).should be_false
-      ::File.exist?(existing_file).should be_true
+      refute ::File.exist?(file_path)
+      assert ::File.exist?(existing_file)
       file = Spontaneous::Media::File.new(@content, "file name.txt")
       file.copy(existing_file)
-      ::File.exist?(file_path).should be_true
-      file.source.should == existing_file
+      assert ::File.exist?(file_path)
+      file.source.must_equal existing_file
     end
 
-    should "be able to copy a file into place if passed the handle of an existing file" do
+    it "be able to copy a file into place if passed the handle of an existing file" do
       file_path = File.join(@media_dir, "/00099/0853/file-name.txt")
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-      ::File.exist?(file_path).should be_false
-      ::File.exist?(existing_file).should be_true
+      refute ::File.exist?(file_path)
+      assert ::File.exist?(existing_file)
       file = Spontaneous::Media::File.new(@content, "file name.txt")
       File.open(existing_file, 'rb') do |f|
         file.copy(f)
       end
-      ::File.exist?(file_path).should be_true
-      file.source.should == existing_file
+      assert ::File.exist?(file_path)
+      file.source.must_equal existing_file
     end
 
-    should "provide an open method that writes files to the correct location" do
+    it "provide an open method that writes files to the correct location" do
       file_path = File.join(@media_dir, "/00099/0853/file-name.txt")
-      ::File.exist?(file_path).should be_false
+      refute ::File.exist?(file_path)
       file = Spontaneous::Media::File.new(@content, "file name.txt")
       content_string = "Hello"
       file.open do |f|
         f.write(content_string)
       end
-      File.read(file_path).should == content_string
+      File.read(file_path).must_equal content_string
     end
   end
 
-  context "temporary media items" do
-    setup do
+  describe "temporary media items" do
+    before do
       # Setup cloud storage as default to ensure that the temp files
       # are bypassing this and being written locally
       Fog.mock!
@@ -190,54 +190,54 @@ class MediaTest < MiniTest::Spec
       @content.stubs(:id).returns(99)
     end
 
-    should "return an absolute path for the url" do
+    it "return an absolute path for the url" do
       file = Spontaneous::Media::TempFile.new(@content, "file name.txt")
-      file.url.should == "/media/tmp/00099/file-name.txt"
+      file.url.must_equal "/media/tmp/00099/file-name.txt"
     end
 
-    should "place files into its configured root" do
+    it "place files into its configured root" do
       file = Spontaneous::Media::TempFile.new(@content, "file name.txt")
-      file.path.should == File.join(@media_dir, "/tmp/00099/file-name.txt")
+      file.path.must_equal File.join(@media_dir, "/tmp/00099/file-name.txt")
     end
 
-    should "be able to copy a file into place if passed the path of an existing file" do
+    it "be able to copy a file into place if passed the path of an existing file" do
       file_path = File.join(@media_dir, "/tmp/00099/file-name.txt")
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-      ::File.exist?(file_path).should be_false
-      ::File.exist?(existing_file).should be_true
+      refute ::File.exist?(file_path)
+      assert ::File.exist?(existing_file)
       file = Spontaneous::Media::TempFile.new(@content, "file name.txt")
       file.copy(existing_file)
-      ::File.exist?(file_path).should be_true
-      file.source.should == existing_file
+      assert ::File.exist?(file_path)
+      file.source.must_equal existing_file
     end
 
-    should "be able to copy a file into place if passed the handle of an existing file" do
+    it "be able to copy a file into place if passed the handle of an existing file" do
       file_path = File.join(@media_dir, "/tmp/00099/file-name.txt")
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
-      ::File.exist?(file_path).should be_false
-      ::File.exist?(existing_file).should be_true
+      refute ::File.exist?(file_path)
+      assert ::File.exist?(existing_file)
       file = Spontaneous::Media::TempFile.new(@content, "file name.txt")
       File.open(existing_file, 'rb') do |f|
         file.copy(f)
       end
-      ::File.exist?(file_path).should be_true
-      file.source.should == existing_file
+      assert ::File.exist?(file_path)
+      file.source.must_equal existing_file
     end
 
-    should "provide an open method that writes files to the correct location" do
+    it "provide an open method that writes files to the correct location" do
       file_path = File.join(@media_dir, "/tmp/00099/file-name.txt")
-      ::File.exist?(file_path).should be_false
+      refute ::File.exist?(file_path)
       file = Spontaneous::Media::TempFile.new(@content, "file name.txt")
       content_string = "Hello"
       file.open do |f|
         f.write(content_string)
       end
-      File.read(file_path).should == content_string
+      File.read(file_path).must_equal content_string
     end
   end
 
-  context "Content items" do
-    setup do
+  describe "Content items" do
+    before do
       # @media_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/media"))
       # Spontaneous.media_dir = @media_dir
       S::Site.stubs(:working_revision).returns(74)
@@ -245,9 +245,9 @@ class MediaTest < MiniTest::Spec
       @instance.stubs(:id).returns(101)
     end
 
-    should "be able to generate a revision and id based media path" do
-      @instance.media_filepath("something.jpg").should == File.join(@site.media_dir, "00101/0074/something.jpg")
-      @instance.media_urlpath("something.jpg").should == "/media/00101/0074/something.jpg"
+    it "be able to generate a revision and id based media path" do
+      @instance.media_filepath("something.jpg").must_equal File.join(@site.media_dir, "00101/0074/something.jpg")
+      @instance.media_urlpath("something.jpg").must_equal "/media/00101/0074/something.jpg"
     end
   end
 end

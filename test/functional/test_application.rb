@@ -4,188 +4,191 @@ require File.expand_path('../../test_helper', __FILE__)
 
 # set :environment, :test
 
-class ApplicationTest < MiniTest::Spec
+describe "Application" do
   include Spontaneous
-  include ::Rack::Test::Methods
 
-  def self.site_root
-    @site_root
-  end
-
-  def self.startup
-    @site_root = Dir.mktmpdir
+  start do
+    site_root = Dir.mktmpdir
     app_root = File.expand_path('../../fixtures/example_application', __FILE__)
-    FileUtils.cp_r(app_root, @site_root)
-    @site_root += "/example_application"
+    FileUtils.cp_r(app_root, site_root)
+    site_root += "/example_application"
     # Force loading of model in dev mode (where we have a db to introspect)
-    Spontaneous.init(:root => @site_root, :mode => :back, :environment => :development)
+    Spontaneous.init(:root => site_root, :mode => :back, :environment => :development)
+    class_variable_set(:@@site_root, site_root)
   end
 
-  def self.shutdown
+  finish do
+    Object.send :remove_const, :Page
+    Object.send :remove_const, :Piece
+    Object.send :remove_const, :Project
+    Object.send :remove_const, :ProjectImage
+    Object.send :remove_const, :ProjectsPage
+    Object.send :remove_const, :Text
+    Object.send :remove_const, :HomePage
+    Object.send :remove_const, :InfoPage
+    Object.send :remove_const, :ClientProject
+    Object.send :remove_const, :ClientProjects
+    Object.send :remove_const, :InlineImage
+
     teardown_site(true)
   end
 
-  def setup
-    # @site = setup_site(self.class.site_root, true)
+  before do
+    @site_root = self.class.class_variable_get(:@@site_root)
   end
 
-  def teardown
-    # teardown_site(false)
-  end
-
-  context "schema" do
-    setup do
-      Spontaneous.init(:root => self.class.site_root, :mode => :back, :environment => :development)
+  describe "schema" do
+    before do
+      Spontaneous.init(:root => @site_root, :mode => :back, :environment => :development)
     end
 
-    should "load" do
+    it "load" do
       Object.const_get(:HomePage).must_be_instance_of(Class)
     end
   end
 
-  context "Site" do
-    setup do
-      Spontaneous.init(:root => self.class.site_root, :mode => :back, :environment => :development)
+  describe "Site" do
+    before do
+      Spontaneous.init(:root => @site_root, :mode => :back, :environment => :development)
     end
-    should "have the same config as Spontaneous" do
-      Site.config.should == Spontaneous.config
+    it "have the same config as Spontaneous" do
+      Site.config.must_equal Spontaneous.config
     end
 
-    should "enable setting config vars on Site" do
+    it "enable setting config vars on Site" do
       Site.config.butter = "yummy"
-      Site.config.butter.should == "yummy"
+      Site.config.butter.must_equal "yummy"
     end
   end
 
-  context "back, development" do
+  describe "back, development" do
 
-    setup do
-      Spontaneous.init(:root => self.class.site_root, :mode => :back, :environment => :development)
+    before do
+      Spontaneous.init(:root => @site_root, :mode => :back, :environment => :development)
       Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
     end
 
-    should "have the right mode setting" do
-      Spontaneous.mode.should == :back
-      Spontaneous.back?.should be_true
-      Spontaneous.front?.should be_false
+    it "have the right mode setting" do
+      Spontaneous.mode.must_equal :back
+      assert Spontaneous.back?
+      refute Spontaneous.front?
     end
 
-    should "have the right env setting" do
-      Spontaneous.environment.should == :development
-      Spontaneous.env.should == :development
-      Spontaneous.development?.should be_true
-      Spontaneous.production?.should be_false
+    it "have the right env setting" do
+      Spontaneous.environment.must_equal :development
+      Spontaneous.env.must_equal :development
+      assert Spontaneous.development?
+      refute Spontaneous.production?
     end
-    should "have correct config dir" do
-      Spontaneous.config_dir.should == Spontaneous.root / "config"
-    end
-
-    should "have correct schema dir" do
-      Spontaneous.schema_root.should == Spontaneous.root / "schema"
+    it "have correct config dir" do
+      Spontaneous.config_dir.must_equal Spontaneous.root / "config"
     end
 
-    should "have correct db settings" do
-      Site.config.db[:adapter].should == "postgres"
-      Site.config.db[:database].should == "spontaneous2_test"
-      # Site.config.db[:user].should == "root"
+    it "have correct schema dir" do
+      Spontaneous.schema_root.must_equal Spontaneous.root / "schema"
+    end
+
+    it "have correct db settings" do
+      Site.config.db[:adapter].must_equal "postgres"
+      Site.config.db[:database].must_equal "spontaneous2_test"
+      # Site.config.db[:user].must_equal "root"
       # Site.config.db[:password].should be_nil
-      # Site.config.db[:host].should == "localhost"
+      # Site.config.db[:host].must_equal "localhost"
     end
 
-    should "configure the datamapper connection" do
+    it "configure the datamapper connection" do
       db = Spontaneous.database
-      db.adapter_scheme.should == :postgres
-      # opts.should == {"username"=>"spontaneous", "adapter"=>"mysql", "database"=>"spontaneous_example", "host"=>"localhost", "password"=>"password"}
+      db.adapter_scheme.must_equal :postgres
+      # opts.must_equal {"username"=>"spontaneous", "adapter"=>"mysql", "database"=>"spontaneous_example", "host"=>"localhost", "password"=>"password"}
     end
 
-    should "have the right rack application" do
-      # Spontaneous::Rack.application.should == Spontaneous::Rack::Back.application
+    it "have the right rack application" do
+      # Spontaneous::Rack.application.must_equal Spontaneous::Rack::Back.application
     end
-    should "have the right rack port" do
-      Spontaneous::Rack.port.should == 9001
+    it "have the right rack port" do
+      Spontaneous::Rack.port.must_equal 9001
     end
-    # should "have the right rack config file" do
-    #   Spontaneous::Rack.config_file.should == Spontaneous.root / ""
+    # it "have the right rack config file" do
+    #   Spontaneous::Rack.config_file.must_equal Spontaneous.root / ""
     # end
   end
 
-  context "front, development" do
+  describe "front, development" do
 
-    setup do
-      Spontaneous.init(:root => self.class.site_root, :mode => :front, :environment => :development)
+    before do
+      Spontaneous.init(:root => @site_root, :mode => :front, :environment => :development)
       Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
     end
 
-    should "have the right mode setting" do
-      Spontaneous.mode.should == :front
-      Spontaneous.back?.should be_false
-      Spontaneous.front?.should be_true
+    it "have the right mode setting" do
+      Spontaneous.mode.must_equal :front
+      refute Spontaneous.back?
+      assert Spontaneous.front?
     end
 
-    should "have the right env setting" do
-      Spontaneous.environment.should == :development
+    it "have the right env setting" do
+      Spontaneous.environment.must_equal :development
     end
 
-    should "have the right rack application" do
-      # Spontaneous::Rack.application.should == Spontaneous::Rack::Front.application
+    it "have the right rack application" do
+      # Spontaneous::Rack.application.must_equal Spontaneous::Rack::Front.application
     end
-    should "have the right rack port" do
-      Spontaneous::Rack.port.should == 9002
-    end
-  end
-
-  context "back, production" do
-    setup do
-      Spontaneous.init(:root => self.class.site_root, :mode => :back, :environment => :production)
-    end
-
-    should "have the right mode setting" do
-      Spontaneous.mode.should == :back
-      Spontaneous.back?.should be_true
-      Spontaneous.front?.should be_false
-    end
-
-    should "have the right env setting" do
-      Spontaneous.environment.should == :production
-      Spontaneous.development?.should be_false
-      Spontaneous.production?.should be_true
-      # Site.config.environment.should == :production
-    end
-
-    should "have correct db settings" do
-      Site.config.db[:adapter].should == "postgres"
-      Site.config.db[:database].should == "spontaneous_example_production"
-      Site.config.db[:user].should == "spontaneous_prod"
-      Site.config.db[:password].should == "Passw0rd"
-      # Site.config.db[:host].should == "localhost"
-    end
-
-    should "have the right rack port" do
-      Spontaneous::Rack.port.should == 3001
+    it "have the right rack port" do
+      Spontaneous::Rack.port.must_equal 9002
     end
   end
 
-  context "front, production" do
-
-    setup do
-      Spontaneous.init(:root => self.class.site_root, :mode => :front, :environment => :production)
+  describe "back, production" do
+    before do
+      Spontaneous.init(:root => @site_root, :mode => :back, :environment => :production)
     end
 
-    should "have the right mode setting" do
-      Spontaneous.mode.should == :front
-      Spontaneous.back?.should be_false
-      Spontaneous.front?.should be_true
+    it "have the right mode setting" do
+      Spontaneous.mode.must_equal :back
+      assert Spontaneous.back?
+      refute Spontaneous.front?
     end
 
-    should "have the right env setting" do
-      Spontaneous.environment.should == :production
-      Spontaneous.development?.should be_false
-      Spontaneous.production?.should be_true
+    it "have the right env setting" do
+      Spontaneous.environment.must_equal :production
+      refute Spontaneous.development?
+      assert Spontaneous.production?
+      # Site.config.environment.must_equal :production
     end
 
-    should "have the right rack port" do
-      Spontaneous::Rack.port.should == 3002
+    it "have correct db settings" do
+      Site.config.db[:adapter].must_equal "postgres"
+      Site.config.db[:database].must_equal "spontaneous_example_production"
+      Site.config.db[:user].must_equal "spontaneous_prod"
+      Site.config.db[:password].must_equal "Passw0rd"
+      # Site.config.db[:host].must_equal "localhost"
+    end
+
+    it "have the right rack port" do
+      Spontaneous::Rack.port.must_equal 3001
+    end
+  end
+
+  describe "front, production" do
+
+    before do
+      Spontaneous.init(:root => @site_root, :mode => :front, :environment => :production)
+    end
+
+    it "have the right mode setting" do
+      Spontaneous.mode.must_equal :front
+      refute Spontaneous.back?
+      assert Spontaneous.front?
+    end
+
+    it "have the right env setting" do
+      Spontaneous.environment.must_equal :production
+      refute Spontaneous.development?
+      assert Spontaneous.production?
+    end
+
+    it "have the right rack port" do
+      Spontaneous::Rack.port.must_equal 3002
     end
   end
 end
-

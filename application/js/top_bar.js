@@ -216,7 +216,6 @@ Spontaneous.TopBar = (function($, S) {
 			this.status = false;
 			this.disabled = true;
 			this.set_interval(this.normal_check);
-			// this.check_status();
 			var update_status = this.update_status.bind(this);
 			S.EventSource.addEventListener('publish_progress', function(event) {
 				update_status($.parseJSON(event.data))
@@ -228,15 +227,6 @@ Spontaneous.TopBar = (function($, S) {
 				this.disabled = false;
 				this.button().removeClass("disabled").fadeIn();
 			}
-		},
-		check_status: function() {
-			S.Ajax.get('/publish/status', this.status_recieved.bind(this));
-		},
-		status_recieved: function(status, response_code) {
-			if (response_code === 'success' && status != this.status) {
-				this.update_status(status);
-			}
-			window.setTimeout(this.check_status.bind(this), this.timer_interval);
 		},
 		update_status: function(status) {
 			if (status === null || status === '') { return; }

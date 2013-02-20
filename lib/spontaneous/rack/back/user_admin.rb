@@ -1,8 +1,5 @@
-module Spontaneous::Rack
-  class UserAdmin < ServerBase
-    helpers UserHelpers
-    helpers Helpers
-
+module Spontaneous::Rack::Back
+  class UserAdmin < Base
     User = Spontaneous::Permissions::User unless defined?(User)
 
     def with_account
