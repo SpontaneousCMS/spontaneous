@@ -123,12 +123,19 @@ module Spontaneous::Model
     end
 
     def inspect
-      values = inspecttion_values.map { |(name, value)| "#{name}=#{value.inspect}" }.join(" ")
+      values = inspection_values.map { |(name, value)| "#{name}=#{value.inspect}" }.join(" ")
       %(#<#{self.class.name} #{values}>)
     end
 
-    def inspecttion_values
-      { :id => id, :location => [page.path, container._name, position].join(":") }.merge(inspection_fields)
+    def inspection_values
+      location = if page
+                   [page.path, container._name, position]
+                 elsif container
+                   [container._name, position]
+                 else
+                   []
+                 end
+      { :id => id, :location => location.join(":") }.merge(inspection_fields)
     end
 
     def inspection_fields

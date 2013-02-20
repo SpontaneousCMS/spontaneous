@@ -3,7 +3,7 @@
 require File.expand_path('../../test_helper', __FILE__)
 require 'ostruct'
 
-class AssetTest < MiniTest::Spec
+describe "Assets" do
 
   module LiveSimulation
     # simulate a production + publishing environment
@@ -24,45 +24,45 @@ class AssetTest < MiniTest::Spec
     context
   end
 
-  def setup
+  before do
     @site = setup_site
     @fixture_root = File.expand_path("../../fixtures/assets", __FILE__)
     @site.paths.add :public, @fixture_root / "public1", @fixture_root / "public2"
     @page = Page.create
   end
 
-  def teardown
+  after do
     Content.delete
     teardown_site
   end
 
-  context "Publishing context" do
-    should "be flagged as live" do
+  describe "Publishing context" do
+    it "be flagged as live" do
       Spontaneous.stubs(:production?).returns(true)
-      new_context.live?.should be_true
+      assert new_context.live?
     end
 
-    should "be flagged as publishing" do
-      new_context.publishing?.should be_true
+    it "be flagged as publishing" do
+      assert new_context.publishing?
     end
   end
 
   Compression = Spontaneous::Output::Assets::Compression
 
-  context "Javascript assets" do
-    should "be compressed in live environment" do
+  describe "Javascript assets" do
+    it "be compressed in live environment" do
       files = [@fixture_root / "public1/js/a.js", @fixture_root / "public2/js/b.js"]
       src = files.map { |p| File.read(p) }.join
       Compression.expects(:compress_js).with(src, {}).once.returns("var A;\nvar B;\n")
       context = new_context
       result = context.scripts("/js/a", "/js/b")
-      result.should =~ /src="\/rev\/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad\.js"/
+      result.must_match /src="\/rev\/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad\.js"/
       on_disk = Spontaneous::Output.revision_root(context.revision) / "rev/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad.js"
       assert File.exist?(on_disk)
-      File.read(on_disk).should == "var A;\nvar B;\n"
+      File.read(on_disk).must_equal "var A;\nvar B;\n"
     end
 
-    should "use a cache to make sure identical file lists are only compressed once" do
+    it "use a cache to make sure identical file lists are only compressed once" do
       files1 = [@fixture_root / "public1/js/a.js", @fixture_root / "public2/js/b.js"]
       files2 = [@fixture_root / "public2/js/b.js", @fixture_root / "public2/js/c.js"]
       src1 = files1.map { |p| File.read(p) }.join
@@ -74,10 +74,10 @@ class AssetTest < MiniTest::Spec
       result = context.scripts("/js/a", "/js/b")
       result = context.scripts("/js/b", "/js/c")
       result = context.scripts("/js/b", "/js/c")
-      result.should =~ /src="\/rev\/1458221916fde33ec803fbbae20af8ded0ee2ca1\.js"/
+      result.must_match /src="\/rev\/1458221916fde33ec803fbbae20af8ded0ee2ca1\.js"/
     end
 
-    should "be compressed when publishing & passed a force_compression option" do
+    it "be compressed when publishing & passed a force_compression option" do
       files = [@fixture_root / "public1/js/a.js", @fixture_root / "public2/js/b.js"]
       src = files.map { |p| File.read(p) }.join
       Compression.expects(:compress_js).with(src, {}).once.returns("var A;\nvar B;\n")
@@ -91,7 +91,7 @@ class AssetTest < MiniTest::Spec
       result = context.scripts("/js/a", "/js/b", :force_compression => true)
     end
 
-    should "support UTF8 scripts" do
+    it "support UTF8 scripts" do
       files = [@fixture_root / "public1/js/a.js", @fixture_root / "public2/js/b.js"]
       src = files.map { |p| File.read(p) }.join
       Compression.expects(:compress_js).with(src, {}).once.returns("var A = \"\xC2\";\nvar B;\n")
@@ -99,34 +99,34 @@ class AssetTest < MiniTest::Spec
       result = context.scripts("/js/a", "/js/b")
     end
 
-    should "support scripts with full urls" do
+    it "support scripts with full urls" do
       context = new_context
       result = context.scripts("http://jquery.com/jquery.js")
-      result.should =~ /src="http:\/\/jquery.com\/jquery.js"/
+      result.must_match /src="http:\/\/jquery.com\/jquery.js"/
     end
   end
 
-  context "CoffeeScript assets" do
-    should "be compiled & compressed in live environment" do
+  describe "CoffeeScript assets" do
+    it "be compiled & compressed in live environment" do
       files = [@fixture_root / "public1/js/m.js", @fixture_root / "public2/js/n.js"]
       Compression.expects(:compress_js).with(regexp_matches(/square = function/), {}).once.returns("var A;\nvar B;\n")
       context = new_context
       result = context.scripts("/js/m", "/js/n")
-      result.should =~ /src="\/rev\/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad\.js"/
+      result.must_match /src="\/rev\/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad\.js"/
       on_disk = Spontaneous::Output.revision_root(context.revision) / "rev/5dde6b3e04ce364ef23f51048006e5dd7e6f62ad.js"
       assert File.exist?(on_disk)
-      File.read(on_disk).should == "var A;\nvar B;\n"
+      File.read(on_disk).must_equal "var A;\nvar B;\n"
     end
 
-    should "be correctly compiled when mixed with plain js" do
+    it "be correctly compiled when mixed with plain js" do
       Compression.expects(:compress_js).with(regexp_matches(/square = function/), {}).once.returns("var A;\nvar B;\n")
       context = new_context
       result = context.scripts("/js/a", "/js/m", "/js/n", "/js/b")
     end
   end
 
-  context "Stylesheet assets" do
-    should "be compressed in live environment" do
+  describe "Stylesheet assets" do
+    it "be compressed in live environment" do
       files = [@fixture_root / "public1/css/a.scss", @fixture_root / "public2/css/b.scss"]
       context = new_context
       Compression.expects(:compress_css).with(<<-CSS).once.returns("/* compressed */\n")
@@ -135,14 +135,14 @@ class AssetTest < MiniTest::Spec
 .b{height:42px}
       CSS
       result = context.stylesheets("/css/a", "/css/c", "/css/b")
-      result.should =~ /href="\/rev\/df3e2b3fa3409d8ca37faac7da80349098f0b28a\.css"/
+      result.must_match /href="\/rev\/df3e2b3fa3409d8ca37faac7da80349098f0b28a\.css"/
       on_disk = Spontaneous::Output.revision_root(context.revision) / "rev/df3e2b3fa3409d8ca37faac7da80349098f0b28a.css"
 
       assert File.exist?(on_disk)
-      File.read(on_disk).should == "/* compressed */\n"
+      File.read(on_disk).must_equal "/* compressed */\n"
     end
 
-    should "be compressed if publishing and passed a force option" do
+    it "be compressed if publishing and passed a force option" do
       files = [@fixture_root / "public1/css/a.scss", @fixture_root / "public2/css/b.scss"]
       context = new_context
       m = Module.new do
@@ -150,17 +150,17 @@ class AssetTest < MiniTest::Spec
         def publishing?; true; end
       end
       context.extend m
-      context.live?.should be_false
+      refute context.live?
       Compression.expects(:compress_css).with(anything).once.returns("/* compressed */\n")
       result = context.stylesheets("/css/a", "/css/c", "/css/b", {:force_compression => true})
 
       def context.publishing?; false; end
-      context.publishing?.should be_false
+      refute context.publishing?
       Compression.expects(:compress_css_string).with(anything).never
       result = context.stylesheets("/css/a", "/css/c", "/css/b", {:force_compression => true})
     end
 
-    should "use a cache to make sure identical file lists are only compressed once" do
+    it "use a cache to make sure identical file lists are only compressed once" do
       context = new_context
       Compression.expects(:compress_css).with(<<-CSS).once.returns("/* compressed1 */\n")
 .a{width:8px}
@@ -172,13 +172,13 @@ class AssetTest < MiniTest::Spec
       CSS
       result = context.stylesheets("/css/a", "/css/b")
       result = context.stylesheets("/css/a", "/css/b")
-      result.should =~ /href="\/rev\/20aac22ae20e78ef1574a3a6635fa353148e9d9a\.css"/
+      result.must_match /href="\/rev\/20aac22ae20e78ef1574a3a6635fa353148e9d9a\.css"/
       result = context.stylesheets("/css/a", "/css/c")
       result = context.stylesheets("/css/a", "/css/c")
-      result.should =~ /href="\/rev\/77ec1b6ee2907c65cf316b99b59c8cf8006dcddf\.css"/
+      result.must_match /href="\/rev\/77ec1b6ee2907c65cf316b99b59c8cf8006dcddf\.css"/
     end
 
-    should "support UTF8 styles" do
+    it "support UTF8 styles" do
       context = new_context
       Compression.expects(:compress_css).with(<<-CSS).once.returns("/* \xC2 */\n")
 .a{width:8px}

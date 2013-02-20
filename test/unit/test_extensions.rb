@@ -3,43 +3,43 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 
-class ExtensionsTest < MiniTest::Spec
-  context "String" do
-    should "create paths with String#/" do
-      ("this" / "that").should == "this/that"
-      ("/this" / "/that").should == "/this/that"
+describe "Extensions" do
+  describe "String" do
+    it  "create paths with String#/" do
+      ("this" / "that").must_equal "this/that"
+      ("/this" / "/that").must_equal "/this/that"
     end
 
-    should "override the | method to return the argument if empty" do
-      ("" | "that").should == "that"
-      ("this" | "that").should == "this"
+    it  "override the | method to return the argument if empty" do
+      ("" | "that").must_equal "that"
+      ("this" | "that").must_equal "this"
     end
 
-    should "override the or method to return the argument if empty" do
-      ("".or("that")).should == "that"
-      ("this".or("that")).should == "this"
+    it  "override the or method to return the argument if empty" do
+      ("".or("that")).must_equal "that"
+      ("this".or("that")).must_equal "this"
     end
 
-    should "return self for #value" do
-      "this".value.should == "this"
-      "this".value(:html).should == "this"
-      "this".value(:smsx).should == "this"
+    it  "return self for #value" do
+      "this".value.must_equal "this"
+      "this".value(:html).must_equal "this"
+      "this".value(:smsx).must_equal "this"
     end
   end
 
-  context "Nil" do
-    should "always return the argument for the slash switch" do
-      (nil / "something").should == "something"
+  describe "Nil" do
+    it  "always return the argument for the slash switch" do
+      (nil / "something").must_equal "something"
     end
-    should "always return the argument for the #or switch" do
-      (nil.or("something")).should == "something"
+    it  "always return the argument for the #or switch" do
+      (nil.or("something")).must_equal "something"
     end
   end
 
-  context "Enumerable" do
-    should "correctly slice_between elements" do
+  describe "Enumerable" do
+    it  "correctly slice_between elements" do
       result = ["js", "coffee", "coffee", "js", "coffee"].slice_between { |prev, current| prev != current }.to_a
-      result.should == [["js"], ["coffee", "coffee"], ["js"], ["coffee"]]
+      result.must_equal [["js"], ["coffee", "coffee"], ["js"], ["coffee"]]
     end
   end
 end

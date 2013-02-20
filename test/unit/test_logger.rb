@@ -1,13 +1,12 @@
 # encoding: UTF-8
 
-
 require File.expand_path('../../test_helper', __FILE__)
 
 # borrowed from Padrino
-class LoggerTest < MiniTest::Spec
+describe "Logger" do
   include Spontaneous
 
-  def setup
+  before do
     Spontaneous.env = :test
     Spontaneous::Logger::Config[:test][:stream] = :null # The default
     Spontaneous::Logger.setup!
@@ -18,44 +17,44 @@ class LoggerTest < MiniTest::Spec
     @logger = Spontaneous::Logger.new(options.merge(:stream => @log))
   end
 
-  context 'for logger functionality' do
+  describe 'for logger functionality' do
 
-    context 'check stream config' do
+    describe 'check stream config' do
 
-      should 'use stdout if stream is nil' do
+      it 'use stdout if stream is nil' do
         Spontaneous::Logger::Config[:test][:stream] = nil
         Spontaneous::Logger.setup!
         assert_equal $stdout, Spontaneous.logger.log
       end
 
-      should 'use StringIO as default for test' do
+      it 'use StringIO as default for test' do
         assert_instance_of StringIO, Spontaneous.logger.log
       end
 
-      should 'use a custom stream' do
+      it 'use a custom stream' do
         my_stream = StringIO.new
         Spontaneous::Logger::Config[:test][:stream] = my_stream
         Spontaneous::Logger.setup!
         assert_equal my_stream, Spontaneous.logger.log
       end
 
-      context "with custom log file path" do
-        setup do
+      describe "with custom log file path" do
+        before do
           @relative_path = "tmp/log/mylogfile.log"
         end
 
-        teardown do
+        after do
           FileUtils.rm_r(@relative_path) if File.exists?(@relative_path)
         end
 
-        should "log to given file" do
+        it "log to given file" do
           logger = Spontaneous::Logger.setup(:logfile => @relative_path)
-          logger.log.path.should == @relative_path
+          logger.log.path.must_equal @relative_path
         end
       end
     end
 
-    should 'log something' do
+    it 'log something' do
       setup_logger(:log_level => :error)
       @logger.error "You log this error?"
       assert_match(/You log this error?/, @log.string)
@@ -65,7 +64,7 @@ class LoggerTest < MiniTest::Spec
       assert_match(/Yep this can be logged/, @log.string)
     end
 
-    should "be silenceable" do
+    it "be silenceable" do
       setup_logger(:log_level => :debug)
       @logger.silent!
       @logger.error "You log this error?"
@@ -75,6 +74,4 @@ class LoggerTest < MiniTest::Spec
       assert_match(/You log this error?/, @log.string)
     end
   end
-
-
 end

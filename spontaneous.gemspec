@@ -56,7 +56,8 @@ Gem::Specification.new do |s|
   s.add_dependency('uglifier',        ["~> 1.3.0"])
   s.add_dependency('yajl-ruby',       ["~> 1.1.0"])
 
-  s.add_development_dependency('minitest', ["~> 2.1.0"])
+  s.add_development_dependency('minitest', ["~> 4.6.0"])
+  s.add_development_dependency('minitest-reporters', ["~> 0.14.7"])
   s.add_development_dependency('mocha', ["~> 0.13.2"])
   s.add_development_dependency('rack-test', ["~> 0.5"])
 

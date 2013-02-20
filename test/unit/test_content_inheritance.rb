@@ -3,10 +3,10 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 
-class ContentInheritanceTest < MiniTest::Spec
+describe "ContentInheritance" do
 
-  context "Single table inheritance" do
-    setup do
+  describe "Single table inheritance" do
+    before do
       @site = setup_site
 
       Content.delete
@@ -35,9 +35,8 @@ class ContentInheritanceTest < MiniTest::Spec
       @piece22 = PieceClass22.create.reload
     end
 
-    teardown do
-      [
-        :PageClass1, :PageClass11, :PageClass111, :PageClass2, :PageClass22,
+    after do
+      [ :PageClass1, :PageClass11, :PageClass111, :PageClass2, :PageClass22,
         :PieceClass1, :PieceClass11, :PieceClass111, :PieceClass2, :PieceClass22
       ].each do |klass|
         Object.send(:remove_const, klass)
@@ -45,46 +44,46 @@ class ContentInheritanceTest < MiniTest::Spec
       teardown_site
     end
 
-    should "correctly type subclasses found via Content" do
-      Set.new(Content.all.map { |c| c.class }).should == \
+    it "correctly type subclasses found via Content" do
+      Set.new(Content.all.map { |c| c.class }).must_equal \
         Set.new([PageClass1, PageClass11, PageClass111, PageClass2, PageClass22,
           PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22])
-      Set.new(Content.all).should == \
+      Set.new(Content.all).must_equal \
         Set.new([@page1, @page11, @page111, @page2, @page22,
           @piece1, @piece11, @piece111, @piece2, @piece22])
     end
 
-    context "Pages" do
+    describe "Pages" do
 
-      should "type subclasses found via Content::Page" do
-        Set.new(Content::Page.all.map { |c| c.class }).should == \
+      it "type subclasses found via Content::Page" do
+        Set.new(Content::Page.all.map { |c| c.class }).must_equal \
           Set.new([PageClass1, PageClass11, PageClass111, PageClass2, PageClass22])
-        Set.new(Content::Page.all).should == Set.new([@page1, @page11, @page111, @page2, @page22])
+        Set.new(Content::Page.all).must_equal Set.new([@page1, @page11, @page111, @page2, @page22])
       end
 
-      should "only find instances of a single class when searching via that subclass" do
-        PageClass1.all.map { |c| c.class }.should == [PageClass1]
-        PageClass2.all.map { |c| c.class }.should == [PageClass2]
-        PageClass22.all.map { |c| c.class }.should == [PageClass22]
-        PageClass1.all.should == [@page1]
-        PageClass11.all.should == [@page11]
+      it "only find instances of a single class when searching via that subclass" do
+        PageClass1.all.map { |c| c.class }.must_equal [PageClass1]
+        PageClass2.all.map { |c| c.class }.must_equal [PageClass2]
+        PageClass22.all.map { |c| c.class }.must_equal [PageClass22]
+        PageClass1.all.must_equal [@page1]
+        PageClass11.all.must_equal [@page11]
       end
     end
 
-    context "Pieces" do
-      should "type subclasses found via Spontaneous::Piece" do
-        Set.new(Content::Piece.all.map { |c| c.class }).should == \
+    describe "Pieces" do
+      it "type subclasses found via Spontaneous::Piece" do
+        Set.new(Content::Piece.all.map { |c| c.class }).must_equal \
           Set.new([PieceClass1, PieceClass11, PieceClass111, PieceClass2, PieceClass22])
-        Set.new(Content::Piece.all).should == Set.new([@piece1, @piece11, @piece111, @piece2, @piece22])
+        Set.new(Content::Piece.all).must_equal Set.new([@piece1, @piece11, @piece111, @piece2, @piece22])
       end
 
-      should "only find instances of a single class when searching via that subclass" do
-        PieceClass1.all.map { |c| c.class }.should == [PieceClass1]
-        PieceClass1.all.should == [@piece1]
-        PieceClass11.all.should == [@piece11]
-        PieceClass2.all.map { |c| c.class }.should == [PieceClass2]
-        PieceClass2.all.should == [@piece2]
-        PieceClass22.all.should == [@piece22]
+      it "only find instances of a single class when searching via that subclass" do
+        PieceClass1.all.map { |c| c.class }.must_equal [PieceClass1]
+        PieceClass1.all.must_equal [@piece1]
+        PieceClass11.all.must_equal [@piece11]
+        PieceClass2.all.map { |c| c.class }.must_equal [PieceClass2]
+        PieceClass2.all.must_equal [@piece2]
+        PieceClass22.all.must_equal [@piece22]
       end
     end
   end

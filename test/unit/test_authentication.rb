@@ -57,11 +57,6 @@ describe "Authentication" do
     @disabled_user
   end
 
-  def login_user(user, params={})
-    post "/@spontaneous/login", {"user[login]" => user.login, "user[password]" => user.password}.merge(params)
-    @user = user
-  end
-
   # Used by the various auth_* methods
   def api_key
     @user.access_keys.first

@@ -12,24 +12,26 @@ describe "Front" do
     @site_root
   end
 
-  def self.startup
-    @site_root = Dir.mktmpdir
-    FileUtils.cp_r(File.expand_path("../../fixtures/public/templates", __FILE__), @site_root)
+  start do
+    site_root = Dir.mktmpdir
+    FileUtils.cp_r(File.expand_path("../../fixtures/public/templates", __FILE__), site_root)
     Spontaneous::Output.write_compiled_scripts = true
+    class_variable_set(:@@site_root, site_root)
   end
 
-  def self.shutdown
+  finish do
     teardown_site(true)
     Spontaneous::Output.write_compiled_scripts = false
   end
 
-  def setup
-    @site = setup_site(self.class.site_root)
+  before do
+    @site_root = self.class.class_variable_get(:@@site_root)
+    @site = setup_site(@site_root)
     Site.background_mode = :immediate
     ::Content.delete
   end
 
-  def teardown
+  after do
     teardown_site(false)
   end
 

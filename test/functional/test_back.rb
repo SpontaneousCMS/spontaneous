@@ -6,20 +6,21 @@ require File.expand_path('../../test_helper', __FILE__)
 describe "Back" do
   include RackTestMethods
 
-  def self.site_root
-    @site_root
-  end
 
-  def self.startup
-    @site_root = Dir.mktmpdir
+  start do
+    root = Dir.mktmpdir
     app_root = File.expand_path('../../fixtures/back', __FILE__)
-    FileUtils.cp_r(app_root, @site_root)
-    @site_root += "/back"
-    FileUtils.mkdir_p(@site_root / "cache")
-    FileUtils.cp_r(File.join(File.dirname(__FILE__), "../fixtures/media"), @site_root / "cache")
+    FileUtils.cp_r(app_root, root)
+    root += "/back"
+    FileUtils.mkdir_p(root / "cache")
+    FileUtils.cp_r(File.join(File.dirname(__FILE__), "../fixtures/media"), root / "cache")
+    Spontaneous::Permissions::UserLevel.reset!
+    @level_file = root / "config/user_levels.yml"
+    Spontaneous::Permissions::UserLevel.stubs(:level_file).returns(@level_file)
+    class_variable_set(:@@site_root, root)
   end
 
-  def self.shutdown
+  finish do
     teardown_site(true)
   end
 
@@ -28,12 +29,10 @@ describe "Back" do
   end
 
   before do
-
     @now = Time.now
     stub_time(@now)
-    @site = setup_site(self.class.site_root, true)
-    Spot::Permissions::UserLevel.reset!
-    Spot::Permissions::UserLevel.init!
+    @site_root = self.class.class_variable_get(:@@site_root)
+    @site = setup_site(@site_root, true)
     @storage = @site.default_storage
     @site.stubs(:storage).with(anything).returns(@storage)
     config = mock()
@@ -140,19 +139,19 @@ describe "Back" do
     @key
   end
 
-  it "retrieves /@spontaneous without a CSRF token yyy" do
+  it "retrieves /@spontaneous without a CSRF token" do
     get("/@spontaneous")
     assert last_response.ok?, "Index retrieval should succeed without CSRF tokens"
     assert_contains_csrf_token(@key)
   end
 
-  it "retrieves /@spontaneous/ without a CSRF token yyy" do
+  it "retrieves /@spontaneous/ without a CSRF token" do
     get("/@spontaneous/")
     assert last_response.ok?, "Index retrieval should succeed without CSRF tokens"
     assert_contains_csrf_token(@key)
   end
 
-  it "retrieves any page identified by an id without a CSRF token yyy" do
+  it "retrieves any page identified by an id without a CSRF token" do
     get("/@spontaneous/#{@project1.id}/edit")
     assert last_response.ok?, "Index retrieval should succeed without CSRF tokens"
     assert_contains_csrf_token(@key)
@@ -166,7 +165,7 @@ describe "Back" do
       Spontaneous.stubs(:application_dir).returns(@app_dir)
     end
 
-    it "returns application page yyy" do
+    it "returns application page" do
       get '/@spontaneous/'
       assert last_response.ok?, "Should have returned 200 but got #{last_response.status}"
       last_response.body.must_match /<title>Spontaneous/
@@ -288,7 +287,7 @@ describe "Back" do
         })
       end
 
-      it "be able to provide a dynamic value list yyy" do
+      it "be able to provide a dynamic value list" do
         @job1.reload
         list = mock()
         options = [["a", "Value A"], ["b", "Value B"]]
@@ -300,7 +299,7 @@ describe "Back" do
         result.must_equal options
       end
 
-      it "be able to provide a dynamic value list for a box field yyy" do
+      it "be able to provide a dynamic value list for a box field" do
         @job1.reload
         list = mock()
         options = [["a", "Value A"], ["b", "Value B"]]
@@ -376,7 +375,7 @@ describe "Back" do
         field[:date_format].must_equal  "%Y %d %a"
       end
 
-      it "provides values for a  static option list yyy" do
+      it "provides values for a  static option list" do
         # static lists should be included in the field definitions
         field = Job.field :client, :select, :options => [["a", "Value A"], ["b", "Value B"]]
         auth_get "/@spontaneous/site"
@@ -396,7 +395,7 @@ describe "Back" do
           last_response.status.must_equal 406
         end
 
-        it "creates a homepage of the specified type yyy" do
+        it "creates a homepage of the specified type" do
           auth_post "/@spontaneous/site/home", 'type' => @root_class.schema_id
           assert last_response.ok?
           S::Site.root.must_be_instance_of(@root_class)
@@ -455,7 +454,7 @@ describe "Back" do
         refute project.has_generated_slug?
       end
 
-      it "updates box field values yyy" do
+      it "updates box field values" do
         box = @job1.images
         box.fields.title.to_s.wont_equal "Updated title"
         params = {
@@ -468,7 +467,7 @@ describe "Back" do
         @job1.images.title.value.must_equal "Updated title"
       end
 
-      it "toggles visibility yyy" do
+      it "toggles visibility" do
         @job1.reload.visible?.must_equal true
         auth_patch "/@spontaneous/content/#{@job1.id}/toggle"
         assert last_response.ok?
@@ -481,7 +480,7 @@ describe "Back" do
         Spot::JSON.parse(last_response.body).must_equal({:id => @job1.id, :hidden => false})
       end
 
-      it "sets the position of pieces yyy" do
+      it "sets the position of pieces" do
         auth_patch "/@spontaneous/content/#{@job2.id}/position/0"
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
@@ -492,7 +491,7 @@ describe "Back" do
         page.in_progress.contents.first.id.must_equal @job2.id
       end
 
-      it "records the currently logged in user yyy" do
+      it "records the currently logged in user" do
         page = @home.in_progress.last
         auth_patch "/@spontaneous/content/#{page.id}/toggle"
         assert last_response.ok?, "Expected status 200 but received #{last_response.status}"
@@ -500,7 +499,7 @@ describe "Back" do
         page.pending_modifications(:visibility).first.user.must_equal @user
       end
 
-      it "allows addition of pages yyy" do
+      it "allows addition of pages" do
         current_count = @home.projects.length
         auth_post "/@spontaneous/content/#{@home.id}/#{@home.projects.schema_id.to_s}/#{Project.schema_id.to_s}"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
@@ -509,7 +508,7 @@ describe "Back" do
         @home.projects.first.must_be_instance_of(Project)
       end
 
-      it "default to adding entries at the top yyy" do
+      it "default to adding entries at the top" do
         current_count = @home.in_progress.contents.length
         first_id = @home.in_progress.contents.first.id
         @home.in_progress.contents.first.class.name.wont_equal "Image"
@@ -527,7 +526,7 @@ describe "Back" do
         Spot::JSON.parse(last_response.body).must_equal required_response
       end
 
-      it "allows adding of entries at the bottom yyy" do
+      it "allows adding of entries at the bottom" do
         current_count = @home.in_progress.contents.length
         last_id = @home.in_progress.contents.last.id
         @home.in_progress.contents.last.class.name.wont_equal "Image"
@@ -545,7 +544,7 @@ describe "Back" do
         Spot::JSON.parse(last_response.body).must_equal required_response
       end
 
-      it "creates entries with the owner set to the logged in user yyy" do
+      it "creates entries with the owner set to the logged in user" do
         auth_post "/@spontaneous/content/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => 0
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         @home.reload
@@ -553,7 +552,7 @@ describe "Back" do
         @home.in_progress.first.created_by.must_equal @user
       end
 
-      it "allows the deletion of items yyy" do
+      it "allows the deletion of items" do
         target = @home.in_progress.first
         auth_delete "/@spontaneous/content/#{target.id}"
         assert last_response.ok?
@@ -627,13 +626,13 @@ describe "Back" do
         @image_digest = S::Media.digest(@image)
       end
 
-      it "has the right setting for shard_dir yyy" do
+      it "has the right setting for shard_dir" do
         shard_path = File.join(@site.root / 'cache/tmp')
         Spontaneous.shard_path.must_equal shard_path
         Spontaneous.shard_path("abcdef0123").must_equal shard_path/ "ab/cd/abcdef0123"
       end
 
-      it "knows when it already has a shard yyy" do
+      it "knows when it already has a shard" do
         hash = '4d68c8f13459c0edb40504de5003ec2a6b74e613'
         FileUtils.touch(Spontaneous.shard_path(hash))
         FileUtils.expects(:touch).with(Spontaneous.shard_path(hash))
@@ -641,25 +640,25 @@ describe "Back" do
         last_response.status.must_equal 200
       end
 
-      it "knows when it doesn't have a shard yyy" do
+      it "knows when it doesn't have a shard" do
         auth_get "/@spontaneous/shard/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         last_response.status.must_equal 404
       end
 
-      it "receives a shard and puts it in the right place yyy" do
+      it "receives a shard and puts it in the right place" do
         auth_post "@spontaneous/shard/#{@image_digest}", "file" => ::Rack::Test::UploadedFile.new(@image, "image/jpeg")
         assert last_response.ok?
         auth_get "/@spontaneous/shard/#{@image_digest}"
         last_response.status.must_equal 200
       end
 
-      it "returns an error if the uploaded file has the wrong hash yyy" do
+      it "returns an error if the uploaded file has the wrong hash" do
         S::Media.expects(:digest).with(anything).returns("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
         auth_post "@spontaneous/shard/#{@image_digest}", "file" => ::Rack::Test::UploadedFile.new(@image, "image/jpeg")
         last_response.status.must_equal 409
       end
 
-      it "reassembles multiple parts into a single file and attaches it to a content item yyy" do
+      it "reassembles multiple parts into a single file and attaches it to a content item" do
         parts = %w(xaa xab xac xad xae xaf xag)
         paths = parts.map { |part| File.expand_path("../../fixtures/sharding/#{part}", __FILE__) }
         hashes = paths.map { |path| S::Media.digest(path) }
@@ -687,7 +686,7 @@ describe "Back" do
         S::Media.digest(S::Media.to_filepath(src)).must_equal @image_digest
       end
 
-      it "wraps pieces around files using default addable class yyy" do
+      it "wraps pieces around files using default addable class" do
         parts = %w(xaa xab xac xad xae xaf xag)
         paths = parts.map { |part| File.expand_path("../../fixtures/sharding/#{part}", __FILE__) }
         hashes = paths.map { |path| S::Media.digest(path) }
@@ -781,7 +780,7 @@ describe "Back" do
         Spot::JSON.parse(last_response.body).must_equal({:path => '/this-is-project', :slug => 'this-is-project' })
       end
 
-      it "allows UID editing by developer level users yyy" do
+      it "allows UID editing by developer level users" do
         @user.update(:level => Spontaneous::Permissions[:root])
         uid = "fishy"
         @project1.uid.wont_equal uid
@@ -791,7 +790,7 @@ describe "Back" do
         @project1.reload.uid.must_equal uid
       end
 
-      it "disallows UID editing by non-developer level users yyy" do
+      it "disallows UID editing by non-developer level users" do
         uid = "boom"
         orig = @project1.uid
         @project1.uid.wont_equal uid
@@ -836,7 +835,7 @@ describe "Back" do
     end
 
     describe "/alias" do
-      it "retrieves a list of potential targets yyy" do
+      it "retrieves a list of potential targets" do
         auth_get "/@spontaneous/alias/#{LinkedJob.schema_id}/#{@home.id}/#{@home.in_progress.schema_id}"
         assert last_response.ok?
         expected = LinkedJob.targets(@home, @home.in_progress)
@@ -1134,7 +1133,7 @@ describe "Back" do
       last_response.body.must_match /color: #ffeeff/
     end
 
-    it "compile CoffeeScript" do
+    it "compile CoffeeScript xxx" do
       get "/js/coffeescript.js"
       assert last_response.ok?, "Should return 200 but got #{last_response.status}"
       last_response.body.must_match /square = function/

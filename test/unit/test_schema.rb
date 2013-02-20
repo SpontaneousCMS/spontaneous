@@ -3,20 +3,21 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 
-class SchemaTest < MiniTest::Spec
-  def setup
+describe "Schema" do
+  before do
     @site = setup_site
     @site.schema_loader_class = Spontaneous::Schema::PersistentMap
+    @user_levels_file = File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml'
     S::Permissions::UserLevel.reset!
-    S::Permissions::UserLevel.stubs(:level_file).returns(File.expand_path('../../fixtures/permissions', __FILE__) / 'config/user_levels.yml')
+    S::Permissions::UserLevel.stubs(:level_file).returns(@user_levels_file)
   end
 
-  def teardown
+  after do
     teardown_site
   end
 
-  context "Configurable names" do
-    setup do
+  describe "Configurable names" do
+    before do
       class ::FunkyContent < Piece; end
       class ::MoreFunkyContent < FunkyContent; end
       class ::ABCDifficultName < Piece; end
@@ -26,40 +27,40 @@ class SchemaTest < MiniTest::Spec
       end
     end
 
-    teardown do
+    after do
       [:FunkyContent, :MoreFunkyContent, :ABCDifficultName, :CustomName].each do |klass|
         Object.send(:remove_const, klass)
       end
     end
 
-    should "default to generated version" do
-      FunkyContent.default_title.should == "Funky Content"
-      FunkyContent.title.should == "Funky Content"
-      MoreFunkyContent.title.should == "More Funky Content"
-      ABCDifficultName.default_title.should == "ABC Difficult Name"
-      ABCDifficultName.title.should == "ABC Difficult Name"
+    it "default to generated version" do
+      FunkyContent.default_title.must_equal "Funky Content"
+      FunkyContent.title.must_equal "Funky Content"
+      MoreFunkyContent.title.must_equal "More Funky Content"
+      ABCDifficultName.default_title.must_equal "ABC Difficult Name"
+      ABCDifficultName.title.must_equal "ABC Difficult Name"
     end
 
-    should "be settable" do
-      CustomName.title.should == "Some Name"
+    it "be settable" do
+      CustomName.title.must_equal "Some Name"
       FunkyContent.title "Content Class"
-      FunkyContent.title.should == "Content Class"
+      FunkyContent.title.must_equal "Content Class"
     end
 
-    should "be settable using =" do
+    it "be settable using =" do
       FunkyContent.title = "Content Class"
-      FunkyContent.title.should == "Content Class"
+      FunkyContent.title.must_equal "Content Class"
     end
 
-    should "not inherit from superclass" do
+    it "not inherit from superclass" do
       FunkyContent.title = "Custom Name"
-      MoreFunkyContent.title.should == "More Funky Content"
+      MoreFunkyContent.title.must_equal "More Funky Content"
     end
   end
 
-  context "Persistent maps" do
-    context "Schema UIDs" do
-      setup do
+  describe "Persistent maps" do
+    describe "Schema UIDs" do
+      before do
         @site.schema.schema_map_file = File.expand_path('../../fixtures/schema/schema.yml', __FILE__)
         class SchemaClass < Page
           field :description
@@ -73,103 +74,95 @@ class SchemaTest < MiniTest::Spec
         @uids = @site.schema.uids
       end
 
-      teardown do
-        SchemaTest.send(:remove_const, :SchemaClass) rescue nil
+      after do
+        Object.send(:remove_const, :SchemaClass) rescue nil
       end
 
-      # should "be 12 characters long" do
-      #   Schema::UID.generate.to_s.length.should == 12
-      # end
-
-      should "be unique" do
+      it "be unique" do
         ids = (0..10000).map { S::Schema::UIDMap.generate }
-        ids.uniq.length.should == ids.length
+        ids.uniq.length.must_equal ids.length
       end
 
 
-      should "be singletons" do
+      it "be singletons" do
         a = @uids["xxxxxxxxxxxx"]
         b = @uids["xxxxxxxxxxxx"]
         c = @uids["ffffffffffff"]
-        a.object_id.should == b.object_id
-        a.should == b
-        c.object_id.should_not == b.object_id
-        c.should_not == b
+        a.object_id.must_equal b.object_id
+        a.must_equal b
+        c.object_id.wont_equal b.object_id
+        c.wont_equal b
       end
 
-      # should "not be creatable" do
-      #   lambda { UID.new('sadf') }.must_raise(NoMethodError)
-      # end
-
-      should "return nil if passed nil" do
-        @uids[nil].should be_nil
+      it "return nil if passed nil" do
+        @uids[nil].must_be_nil
       end
 
-      should "return nil if passed an empty string" do
-        @uids[""].should be_nil
+      it "return nil if passed an empty string" do
+        @uids[""].must_be_nil
       end
 
-      should "return the same UID if passed one" do
+      it "return the same UID if passed one" do
         a = @uids["xxxxxxxxxxxx"]
-        @uids[a].should == a
+        @uids[a].must_be_same_as a
       end
 
-      should "test as equal to its string representation" do
-        @uids["llllllllllll"].should == "llllllllllll"
+      it "test as equal to its string representation" do
+        "llllllllllll".must_equal @uids["llllllllllll"]
       end
 
-      should "test as eql? if they have the same id" do
+      it "test as eql? if they have the same id" do
         a = @uids["llllllllllll"]
         b = a.dup
         assert a.eql?(b), "Identical IDs should pass eql? test"
       end
 
-      should "be readable by content classes" do
-        SchemaClass.schema_id.should == @uids["xxxxxxxxxxxx"]
+      it "be readable by content classes" do
+        SchemaClass.schema_id.must_equal @uids["xxxxxxxxxxxx"]
       end
 
-      should "be readable by fields" do
-        @instance.fields[:description].schema_id.should == @uids["ffffffffffff"]
+      it "be readable by fields" do
+        @instance.fields[:description].schema_id.must_equal @uids["ffffffffffff"]
       end
 
-      should "be readable by boxes" do
-        @instance.boxes[:posts].schema_id.should == @uids["bbbbbbbbbbbb"]
+      it "be readable by boxes" do
+        @instance.boxes[:posts].schema_id.must_equal @uids["bbbbbbbbbbbb"]
       end
 
-      should "be readable by styles" do
-        @instance.styles[:simple].schema_id.should == @uids["ssssssssssss"]
+      it "be readable by styles" do
+        @instance.styles[:simple].schema_id.must_equal @uids["ssssssssssss"]
       end
 
-      should "be readable by layouts" do
-        @instance.layout.name.should == :clean
-        @instance.layout.schema_id.should == @uids["llllllllllll"]
+      it "be readable by layouts" do
+        @instance.layout.name.must_equal :clean
+        @instance.layout.schema_id.must_equal @uids["llllllllllll"]
       end
 
-      context "lookups" do
-        should "return classes" do
-          Site.schema.to_class("xxxxxxxxxxxx").should == SchemaClass
+      describe "lookups" do
+        it "return classes" do
+          Site.schema.to_class("xxxxxxxxxxxx").must_equal SchemaClass
         end
-        should "return fields" do
-          Site.schema.to_class("ffffffffffff").should == SchemaClass.field_prototypes[:description]
+        it "return fields" do
+          Site.schema.to_class("ffffffffffff").must_equal SchemaClass.field_prototypes[:description]
         end
-        should "return boxes" do
-          Site.schema.to_class("bbbbbbbbbbbb").should == SchemaClass.box_prototypes[:posts]
+        it "return boxes" do
+          Site.schema.to_class("bbbbbbbbbbbb").must_equal SchemaClass.box_prototypes[:posts]
         end
-        should "return styles" do
-          Site.schema.to_class("ssssssssssss").should == SchemaClass.style_prototypes[:simple]
+        it "return styles" do
+          Site.schema.to_class("ssssssssssss").must_equal SchemaClass.style_prototypes[:simple]
         end
-        should "return layouts" do
-          Site.schema.to_class("llllllllllll").should == SchemaClass.layout_prototypes[:clean]
+        it "return layouts" do
+          Site.schema.to_class("llllllllllll").must_equal SchemaClass.layout_prototypes[:clean]
         end
       end
 
     end
 
-    context "schema verification" do
-      setup do
+    describe "schema verification" do
+      before do
         @site.schema.schema_map_file = File.expand_path('../../fixtures/schema/before.yml', __FILE__)
         Page.field :title
-        class B < ::Page; end
+        class B < Page; end
         class C < Piece; end
         class D < Piece; end
         class O < Box; end
@@ -192,38 +185,31 @@ class SchemaTest < MiniTest::Spec
         O.style :ostyle1
         O.style :ostyle2
 
-        # have to use mocking because schema class list is totally fecked up
-        # after running other tests
-        # TODO: look into reliable, non-harmful way of clearing out the schema state
-        #       between tests
-        # Schema.stubs(:classes).returns([B, C, D, O])
-        # Schema.classes.should == [B, C, D, O]
         @site.schema.map
         @uids = @site.schema.uids
-        ::Page.schema_id.should == @uids["tttttttttttt"]
-        B.schema_id.should == @uids["bbbbbbbbbbbb"]
-        C.schema_id.should == @uids["cccccccccccc"]
-        D.schema_id.should == @uids["dddddddddddd"]
-        O.schema_id.should == @uids["oooooooooooo"]
+        ::Page.schema_id.must_equal @uids["tttttttttttt"]
+        B.schema_id.must_equal @uids["bbbbbbbbbbbb"]
+        C.schema_id.must_equal @uids["cccccccccccc"]
+        D.schema_id.must_equal @uids["dddddddddddd"]
+        O.schema_id.must_equal @uids["oooooooooooo"]
       end
 
-      teardown do
-        Object.send(:remove_const, :Page) rescue nil
-        SchemaTest.send(:remove_const, :B) rescue nil
-        SchemaTest.send(:remove_const, :C) rescue nil
-        SchemaTest.send(:remove_const, :D) rescue nil
-        SchemaTest.send(:remove_const, :E) rescue nil
-        SchemaTest.send(:remove_const, :F) rescue nil
-        SchemaTest.send(:remove_const, :O) rescue nil
+      after do
+        Object.send(:remove_const, :B) rescue nil
+        Object.send(:remove_const, :C) rescue nil
+        Object.send(:remove_const, :D) rescue nil
+        Object.send(:remove_const, :E) rescue nil
+        Object.send(:remove_const, :F) rescue nil
+        Object.send(:remove_const, :O) rescue nil
       end
 
-      should "return the right schema anme for inherited box fields" do
+      it "return the right schema anme for inherited box fields" do
         f = B.boxes[:publishers].instance_class.field :newfield
-        B.boxes[:publishers].instance_class.fields.first.schema_name.should == "field/oooooooooooo/ofield1"
-        f.schema_name.should == "field/publishers00/newfield"
+        B.boxes[:publishers].instance_class.fields.first.schema_name.must_equal "field/oooooooooooo/ofield1"
+        f.schema_name.must_equal "field/publishers00/newfield"
       end
 
-      should "detect addition of classes" do
+      it "detect addition of classes" do
         class E < ::Piece; end
         @site.schema.stubs(:classes).returns([B, C, D, E])
         exception = nil
@@ -233,15 +219,15 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.added_classes.should == [E]
+        exception.added_classes.must_equal [E]
         # need to explicitly define solution to validation error
         # Schema.expects(:generate).returns('dddddddddddd')
-        # D.schema_id.should == 'dddddddddddd'
+        # D.schema_id.must_equal 'dddddddddddd'
       end
 
-      should "detect removal of classes" do
-        SchemaTest.send(:remove_const, :C) rescue nil
-        SchemaTest.send(:remove_const, :D) rescue nil
+      it "detect removal of classes" do
+        Object.send(:remove_const, :C) rescue nil
+        Object.send(:remove_const, :D) rescue nil
         @site.schema.stubs(:classes).returns([::Page, B, O])
         begin
           @site.schema.validate_schema
@@ -249,12 +235,12 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.removed_classes.map { |c| c.name }.sort.should == ["SchemaTest::C", "SchemaTest::D"]
+        exception.removed_classes.map { |c| c.name }.sort.must_equal ["C", "D"]
       end
 
-      should "detect multiple removals & additions of classes" do
-        SchemaTest.send(:remove_const, :C) rescue nil
-        SchemaTest.send(:remove_const, :D) rescue nil
+      it "detect multiple removals & additions of classes" do
+        Object.send(:remove_const, :C) rescue nil
+        Object.send(:remove_const, :D) rescue nil
         class E < Content; end
         class F < Content; end
         @site.schema.stubs(:classes).returns([::Page, B, E, F, O])
@@ -264,11 +250,11 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.added_classes.should == [E, F]
-        exception.removed_classes.map {|c| c.name}.sort.should == ["SchemaTest::C", "SchemaTest::D"]
+        exception.added_classes.must_equal [E, F]
+        exception.removed_classes.map {|c| c.name}.sort.must_equal ["C", "D"]
       end
 
-      should "detect addition of fields" do
+      it "detect addition of fields" do
         B.field :name
         C.field :location
         C.field :description
@@ -278,10 +264,10 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.added_fields.should == [B.field_prototypes[:name], C.field_prototypes[:location], C.field_prototypes[:description]]
+        exception.added_fields.must_equal [B.field_prototypes[:name], C.field_prototypes[:location], C.field_prototypes[:description]]
       end
 
-      should "detect removal of fields" do
+      it "detect removal of fields" do
         field = B.field_prototypes[:author]
         B.stubs(:field_prototypes).returns({:author => field})
         B.stubs(:fields).returns([field])
@@ -292,12 +278,12 @@ class SchemaTest < MiniTest::Spec
           exception = e
         end
         exception.removed_fields.length == 1
-        exception.removed_fields[0].name.should == "description"
-        exception.removed_fields[0].owner.should == SchemaTest::B
-        exception.removed_fields[0].category.should == :field
+        exception.removed_fields[0].name.must_equal "description"
+        exception.removed_fields[0].owner.must_equal B
+        exception.removed_fields[0].category.must_equal :field
       end
 
-      should "detect addition of boxes" do
+      it "detect addition of boxes" do
         B.box :changes
         B.box :updates
         begin
@@ -306,10 +292,10 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.added_boxes.should == [B.boxes[:changes], B.boxes[:updates]]
+        exception.added_boxes.must_equal [B.boxes[:changes], B.boxes[:updates]]
       end
 
-      should "detect removal of boxes" do
+      it "detect removal of boxes" do
         boxes = S::Collections::PrototypeSet.new
         boxes[:promotions] = B.boxes[:promotions]
 
@@ -320,13 +306,13 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.removed_boxes.length.should == 1
-        exception.removed_boxes[0].name.should == "publishers"
-        exception.removed_boxes[0].owner.should == SchemaTest::B
-        exception.removed_boxes[0].category.should == :box
+        exception.removed_boxes.length.must_equal 1
+        exception.removed_boxes[0].name.must_equal "publishers"
+        exception.removed_boxes[0].owner.must_equal B
+        exception.removed_boxes[0].category.must_equal :box
       end
 
-      should "detect addition of styles" do
+      it "detect addition of styles" do
         B.style :fancy
         B.style :dirty
         begin
@@ -335,10 +321,10 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.added_styles.should == [B.styles.detect{ |s| s.name == :fancy }, B.styles.detect{ |s| s.name == :dirty }]
+        exception.added_styles.must_equal [B.styles.detect{ |s| s.name == :fancy }, B.styles.detect{ |s| s.name == :dirty }]
       end
 
-      should "detect removal of styles" do
+      it "detect removal of styles" do
         style = B.styles[:inline]
         B.styles.expects(:order).returns([:inline])
         B.styles.stubs(:[]).with(:inline).returns(style)
@@ -349,13 +335,13 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.removed_styles.length.should == 1
-        exception.removed_styles[0].name.should == "outline"
-        exception.removed_styles[0].owner.should == SchemaTest::B
-        exception.removed_styles[0].category.should == :style
+        exception.removed_styles.length.must_equal 1
+        exception.removed_styles[0].name.must_equal "outline"
+        exception.removed_styles[0].owner.must_equal B
+        exception.removed_styles[0].category.must_equal :style
       end
 
-      should "detect addition of layouts" do
+      it "detect addition of layouts" do
         B.layout :fancy
         B.layout :dirty
         begin
@@ -364,10 +350,10 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.added_layouts.should == [B.layouts.detect{ |s| s.name == :fancy }, B.layouts.detect{ |s| s.name == :dirty }]
+        exception.added_layouts.must_equal [B.layouts.detect{ |s| s.name == :fancy }, B.layouts.detect{ |s| s.name == :dirty }]
       end
 
-      should "detect removal of layouts" do
+      it "detect removal of layouts" do
         layout = B.layouts[:thin]
         B.layouts.expects(:order).returns([:thin])
         B.layouts.stubs(:[]).with(:thin).returns(layout)
@@ -378,13 +364,13 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.removed_layouts.length.should == 1
-        exception.removed_layouts[0].name.should == "fat"
-        exception.removed_layouts[0].owner.should == SchemaTest::B
-        exception.removed_layouts[0].category.should == :layout
+        exception.removed_layouts.length.must_equal 1
+        exception.removed_layouts[0].name.must_equal "fat"
+        exception.removed_layouts[0].owner.must_equal B
+        exception.removed_layouts[0].category.must_equal :layout
       end
 
-      should "detect addition of fields to anonymous boxes" do
+      it "detect addition of fields to anonymous boxes" do
         f1 = B.boxes[:publishers].instance_class.field :field3
         f2 = B.boxes[:promotions].instance_class.field :field3
         begin
@@ -393,10 +379,10 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        assert_same_elements exception.added_fields, [f2, f1]
+        assert_has_elements exception.added_fields, [f2, f1]
       end
 
-      should "detect removal of fields from anonymous boxes" do
+      it "detect removal of fields from anonymous boxes" do
         f2 = B.boxes[:promotions].instance_class.field_prototypes[:field2]
         B.boxes[:promotions].instance_class.stubs(:field_prototypes).returns({:field2 => f2})
         B.boxes[:promotions].instance_class.stubs(:fields).returns([f2])
@@ -406,13 +392,13 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.removed_fields.length.should == 1
-        exception.removed_fields[0].name.should == "field1"
-        exception.removed_fields[0].owner.instance_class.should == SchemaTest::B.boxes[:promotions].instance_class
-        exception.removed_fields[0].category.should == :field
+        exception.removed_fields.length.must_equal 1
+        exception.removed_fields[0].name.must_equal "field1"
+        exception.removed_fields[0].owner.instance_class.must_equal B.boxes[:promotions].instance_class
+        exception.removed_fields[0].category.must_equal :field
       end
 
-      should "detect addition of fields to box types" do
+      it "detect addition of fields to box types" do
         O.field :name
         begin
           @site.schema.validate_schema
@@ -420,10 +406,10 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.added_fields.should == [O.field_prototypes[:name]]
+        exception.added_fields.must_equal [O.field_prototypes[:name]]
       end
 
-      # should "detect removal of fields from box types" do
+      # it "detect removal of fields from box types" do
       #   skip "stubbing is messing up the field hierarchy in weird ways"
       #   fields = [O.field_prototypes[:ofield1]]
       #   O.stubs(:fields).returns(fields)
@@ -434,15 +420,15 @@ class SchemaTest < MiniTest::Spec
       #     exception = e
       #   end
       #   exception.removed_fields.length == 1
-      #   exception.removed_fields[0].name.should == "ofield2"
-      #   exception.removed_fields[0].owner.should == SchemaTest::O
-      #   exception.removed_fields[0].category.should == :field
+      #   exception.removed_fields[0].name.must_equal "ofield2"
+      #   exception.removed_fields[0].owner.must_equal O
+      #   exception.removed_fields[0].category.must_equal :field
       # end
 
-      should "detect addition of styles to box types"
-      should "detect removal of styles from box types"
+      it "detect addition of styles to box types"
+      it "detect removal of styles from box types"
 
-      should "detect addition of styles to anonymous boxes" do
+      it "detect addition of styles to anonymous boxes" do
         s1 = B.boxes[:publishers].instance_class.style :style3
         s2 = B.boxes[:promotions].instance_class.style :style3
         begin
@@ -451,10 +437,10 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        assert_same_elements exception.added_styles, [s2, s1]
+        assert_has_elements exception.added_styles, [s2, s1]
       end
 
-      should "detect removal of styles from anonymous boxes" do
+      it "detect removal of styles from anonymous boxes" do
         klass = B.boxes[:promotions].instance_class
         style = klass.styles.first
         klass.styles.expects(:order).returns([style.name])
@@ -466,43 +452,43 @@ class SchemaTest < MiniTest::Spec
         rescue Spontaneous::SchemaModificationError => e
           exception = e
         end
-        exception.removed_styles.length.should == 1
-        exception.removed_styles[0].name.should == "style2"
-        exception.removed_styles[0].owner.instance_class.should == SchemaTest::B.boxes[:promotions].instance_class
-        exception.removed_styles[0].category.should == :style
+        exception.removed_styles.length.must_equal 1
+        exception.removed_styles[0].name.must_equal "style2"
+        exception.removed_styles[0].owner.instance_class.must_equal B.boxes[:promotions].instance_class
+        exception.removed_styles[0].category.must_equal :style
       end
     end
   end
 
-  context "Transient (testing) maps" do
-    setup do
+  describe "Transient (testing) maps" do
+    before do
       @site.schema.schema_loader_class = Spontaneous::Schema::TransientMap
       class V < ::Piece; end
       class W < ::Piece; end
     end
-    teardown do
-      self.class.send(:remove_const, :V)
-      self.class.send(:remove_const, :W)
+    after do
+      Object.send(:remove_const, :V)
+      Object.send(:remove_const, :W)
     end
 
-    should "create uids on demand" do
-      V.schema_id.should_not be_nil
-      W.schema_id.should_not be_nil
-      V.schema_id.should_not == W.schema_id
+    it "create uids on demand" do
+      V.schema_id.wont_be_nil
+      W.schema_id.wont_be_nil
+      V.schema_id.wont_equal W.schema_id
     end
 
-    should "return consistent ids within a session" do
+    it "return consistent ids within a session" do
       a = V.schema_id
       b = V.schema_id
-      a.should equal?(b)
+      a.must_be_same_as(b)
     end
 
-    should "return UID objects" do
+    it "return UID objects" do
       V.schema_id.must_be_instance_of(Spontaneous::Schema::UID)
     end
 
-    context "for inherited boxes" do
-      setup do
+    describe "for inherited boxes" do
+      before do
         class ::A < ::Piece
           box :a
         end
@@ -513,22 +499,22 @@ class SchemaTest < MiniTest::Spec
           box :a
         end
       end
-      teardown do
+      after do
         Object.send(:remove_const, :A) rescue nil
         Object.send(:remove_const, :B) rescue nil
         Object.send(:remove_const, :C) rescue nil
       end
-      should "be the same as the box in the supertype" do
-        B.boxes[:a].schema_id.should == A.boxes[:a].schema_id
-        C.boxes[:a].schema_id.should == A.boxes[:a].schema_id
-        B.boxes[:a].instance_class.schema_id.should == A.boxes[:a].instance_class.schema_id
-        C.boxes[:a].instance_class.schema_id.should == A.boxes[:a].instance_class.schema_id
+      it "be the same as the box in the supertype" do
+        B.boxes[:a].schema_id.must_equal A.boxes[:a].schema_id
+        C.boxes[:a].schema_id.must_equal A.boxes[:a].schema_id
+        B.boxes[:a].instance_class.schema_id.must_equal A.boxes[:a].instance_class.schema_id
+        C.boxes[:a].instance_class.schema_id.must_equal A.boxes[:a].instance_class.schema_id
       end
     end
   end
 
-  context "Schema groups" do
-    setup do
+  describe "Schema groups" do
+    before do
       class ::A < ::Page
         group :a, :b, :c
         box :cgroup do
@@ -556,39 +542,39 @@ class SchemaTest < MiniTest::Spec
       end
     end
 
-    teardown do
+    after do
       Object.send(:remove_const, :A) rescue nil
       Object.send(:remove_const, :B) rescue nil
       Object.send(:remove_const, :C) rescue nil
     end
 
-    should "let boxes allow a list of content types" do
-      A.boxes.cgroup.allowed_types(nil).should == [A, B, C]
-      C.boxes.bgroup.allowed_types(nil).should == [A, B]
-      C.boxes.cgroup.allowed_types(nil).should == [A, B, C]
-      B.boxes.agroup.allowed_types(nil).should == [A, B, C]
+    it "let boxes allow a list of content types" do
+      A.boxes.cgroup.allowed_types(nil).must_equal [A, B, C]
+      C.boxes.bgroup.allowed_types(nil).must_equal [A, B]
+      C.boxes.cgroup.allowed_types(nil).must_equal [A, B, C]
+      B.boxes.agroup.allowed_types(nil).must_equal [A, B, C]
     end
 
-    should "apply the options to all the included classes" do
+    it "apply the options to all the included classes" do
       user = mock()
       S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.editor).returns(true)
       S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.root).returns(true)
-      C.boxes.cgroup.allowed_types(user).should == [A, B, C]
+      C.boxes.cgroup.allowed_types(user).must_equal [A, B, C]
       S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.editor).returns(true)
       S::Permissions.stubs(:has_level?).with(user, S::Permissions::UserLevel.root).returns(false)
-      C.boxes.cgroup.allowed_types(user).should == []
-      A.boxes.cgroup.allowed_types(user).should == [A, B, C]
+      C.boxes.cgroup.allowed_types(user).must_equal []
+      A.boxes.cgroup.allowed_types(user).must_equal [A, B, C]
     end
 
-    should "allow for configuring styles" do
+    it "allow for configuring styles" do
       c = C.new
       b = B.new
       styles =  c.bgroup.available_styles(b)
-      styles.length.should == 1
-      styles.first.name.should == :fish
+      styles.length.must_equal 1
+      styles.first.name.must_equal :fish
     end
 
-    should "reload correctly" do
+    it "reload correctly" do
       FileUtils.mkdir(@site.root / "config")
       @site.schema.write_schema
       @site.schema.delete(::B)
@@ -606,14 +592,14 @@ class SchemaTest < MiniTest::Spec
 
       @site.schema.validate!
 
-      A.boxes.cgroup.allowed_types(nil).should == [A, C]
-      C.boxes.bgroup.allowed_types(nil).should == [A, B]
+      A.boxes.cgroup.allowed_types(nil).must_equal [A, C]
+      C.boxes.bgroup.allowed_types(nil).must_equal [A, B]
     end
   end
 
 
-  context "Map writing" do
-    context "Non-existant maps" do
+  describe "Map writing" do
+    describe "Non-existant maps" do
       def expected_schema
         classes = @site.schema.classes#[ Content::Page, Page, Content::Piece, Piece, ::A, ::B]
         expected = Hash[ classes.map { |klass| [ klass.schema_id.to_s, klass.schema_name ] } ]
@@ -629,7 +615,7 @@ class SchemaTest < MiniTest::Spec
         expected
       end
 
-      setup do
+      before do
         @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)
 
         ::FileUtils.rm_f(@map_file) if ::File.exists?(@map_file)
@@ -649,34 +635,34 @@ class SchemaTest < MiniTest::Spec
         end
       end
 
-      teardown do
+      after do
         Object.send(:remove_const, :A) rescue nil
         Object.send(:remove_const, :B) rescue nil
         FileUtils.rm(@map_file) if ::File.exists?(@map_file)
       end
 
-      should "get created with verification" do
+      it "get created with verification" do
         S.schema.validate!
-        File.exists?(@map_file).should be_true
-        YAML.load_file(@map_file).should == expected_schema
+        assert File.exists?(@map_file)
+        YAML.load_file(@map_file).must_equal expected_schema
       end
 
       # Having the generator create an empty config/schema.yml is a useful way of
       # identifying a spontaneous site (for use by bin/spot)
-      should "get overwritten if invalid or empty" do
+      it "get overwritten if invalid or empty" do
         File.open(@map_file, "w") do |f|
           f.write("# schema")
         end
-        File.exists?(@map_file).should be_true
-        S.schema.map.valid?.should be_false
+        assert File.exists?(@map_file)
+        refute S.schema.map.valid?
         S.schema.validate!
-        S.schema.map.valid?.should be_true
-        YAML.load_file(@map_file).should == expected_schema
+        assert S.schema.map.valid?
+        YAML.load_file(@map_file).must_equal expected_schema
       end
     end
 
-    context "change resolution" do
-      setup do
+    describe "change resolution" do
+      before do
         @map_file = File.expand_path('../../../tmp/schema.yml', __FILE__)
         FileUtils.mkdir_p(File.dirname(@map_file))
         FileUtils.cp(File.expand_path('../../fixtures/schema/resolvable.yml', __FILE__), @map_file)
@@ -695,11 +681,11 @@ class SchemaTest < MiniTest::Spec
           style :daring
         end
         @site.schema.validate!
-        A.schema_id.should == S.schema.uids["qLcxinA008"]
+        A.schema_id.must_equal S.schema.uids["qLcxinA008"]
       end
 
-      context "renamed boxes" do
-        setup do
+      describe "renamed boxes" do
+        before do
           S.schema.delete(::A)
           Object.send :remove_const, :A
           class ::A < ::Page
@@ -711,11 +697,11 @@ class SchemaTest < MiniTest::Spec
             end
           end
         end
-        should "raise a validation exception" do
+        it "raise a validation exception" do
           lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
         end
-        context "modification exception" do
-          setup do
+        describe "modification exception" do
+          before do
             begin
               S.schema.validate!
             rescue Spontaneous::SchemaModificationError => e
@@ -724,19 +710,19 @@ class SchemaTest < MiniTest::Spec
             end
           end
 
-          should "not be resolvable" do
-            @modification.resolvable?.should be_false
+          it "not be resolvable" do
+            refute @modification.resolvable?
           end
-          should "have one added & one removed box"do
-            @modification.added_boxes.length.should == 1
-            @modification.added_boxes.first.name.should == :renamed
-            @modification.removed_boxes.length.should == 1
-            @modification.removed_boxes.first.name.should == "posts"
+          it "have one added & one removed box"do
+            @modification.added_boxes.length.must_equal 1
+            @modification.added_boxes.first.name.must_equal :renamed
+            @modification.removed_boxes.length.must_equal 1
+            @modification.removed_boxes.first.name.must_equal "posts"
           end
         end
       end
 
-      teardown do
+      after do
         Object.send(:remove_const, :A) rescue nil
         Object.send(:remove_const, :B) rescue nil
         Object.send(:remove_const, :X) rescue nil
@@ -745,7 +731,7 @@ class SchemaTest < MiniTest::Spec
         FileUtils.rm(@map_file) if ::File.exists?(@map_file) rescue nil
       end
 
-      should "be done automatically if only additions are found" do
+      it "be done automatically if only additions are found" do
         A.field :moose
         class ::X < ::A
           field :wild
@@ -758,32 +744,32 @@ class SchemaTest < MiniTest::Spec
           style :risky
         end
         S.schema.validate!
-        ::X.schema_id.should_not be_nil
-        ::Y.schema_id.should_not be_nil
-        ::A.field_prototypes[:moose].schema_id.should_not be_nil
+        ::X.schema_id.wont_be_nil
+        ::Y.schema_id.wont_be_nil
+        ::A.field_prototypes[:moose].schema_id.wont_be_nil
 
         m = YAML.load_file(@map_file)
-        m[::A.field_prototypes[:moose].schema_id.to_s].should == ::A.field_prototypes[:moose].schema_name
-        m[::X.schema_id.to_s].should == ::X.schema_name
-        m[::Y.schema_id.to_s].should == ::Y.schema_name
-        m[::X.field_prototypes[:wild].schema_id.to_s].should == ::X.field_prototypes[:wild].schema_name
-        m[::X.boxes[:monkeys].schema_id.to_s].should == ::X.boxes[:monkeys].schema_name
-        m[::X.boxes[:monkeys].field_prototypes[:banana].schema_id.to_s].should == ::X.boxes[:monkeys].field_prototypes[:banana].schema_name
-        m[::X.layout_prototypes[:rich].schema_id.to_s].should == ::X.layout_prototypes[:rich].schema_name
+        m[::A.field_prototypes[:moose].schema_id.to_s].must_equal ::A.field_prototypes[:moose].schema_name
+        m[::X.schema_id.to_s].must_equal ::X.schema_name
+        m[::Y.schema_id.to_s].must_equal ::Y.schema_name
+        m[::X.field_prototypes[:wild].schema_id.to_s].must_equal ::X.field_prototypes[:wild].schema_name
+        m[::X.boxes[:monkeys].schema_id.to_s].must_equal ::X.boxes[:monkeys].schema_name
+        m[::X.boxes[:monkeys].field_prototypes[:banana].schema_id.to_s].must_equal ::X.boxes[:monkeys].field_prototypes[:banana].schema_name
+        m[::X.layout_prototypes[:rich].schema_id.to_s].must_equal ::X.layout_prototypes[:rich].schema_name
       end
 
 
-      should "be done automatically if only classes have been removed" do
+      it "be done automatically if only classes have been removed" do
         uid = B.schema_id.to_s
         Object.send(:remove_const, :B)
         S.schema.stubs(:classes).returns([::A])
         S.schema.reload!
         S.schema.validate!
         m = YAML.load_file(@map_file)
-        m.key?(uid).should be_false
+        refute m.key?(uid)
       end
 
-      should "be done automatically if only boxes have been removed" do
+      it "be done automatically if only boxes have been removed" do
         uid = A.boxes[:posts].schema_id.to_s
         Object.send :remove_const, :A
         class ::A < ::Page
@@ -795,10 +781,10 @@ class SchemaTest < MiniTest::Spec
         S.schema.reload!
         S.schema.validate!
         m = YAML.load_file(@map_file)
-        m.key?(uid).should be_false
+        refute m.key?(uid)
       end
 
-      should "be done automatically if only fields have been removed" do
+      it "be done automatically if only fields have been removed" do
         uid = A.fields[:title].schema_id.to_s
         S.schema.delete(::A)
         Object.send :remove_const, :A
@@ -810,24 +796,24 @@ class SchemaTest < MiniTest::Spec
         S.schema.reload!
         S.schema.validate!
         m = YAML.load_file(@map_file)
-        m.key?(uid).should be_false
+        refute m.key?(uid)
       end
 
-      should "be done automatically in presence of independent addition inside type and of type" do
+      it "be done automatically in presence of independent addition inside type and of type" do
         A.field :moose
         uid = B.schema_id.to_s
         Object.send(:remove_const, :B)
         S.schema.stubs(:classes).returns([::A])
         S.schema.reload!
         S.schema.validate!
-        ::A.field_prototypes[:moose].schema_id.should_not be_nil
+        ::A.field_prototypes[:moose].schema_id.wont_be_nil
 
         m = YAML.load_file(@map_file)
-        m[::A.field_prototypes[:moose].schema_id.to_s].should == ::A.field_prototypes[:moose].schema_name
-        m.key?(uid).should be_false
+        m[::A.field_prototypes[:moose].schema_id.to_s].must_equal ::A.field_prototypes[:moose].schema_name
+        refute m.key?(uid)
       end
 
-      should "be done automatically in presence of independent addition & removal of fields" do
+      it "be done automatically in presence of independent addition & removal of fields" do
         A.field :moose
         f1 = B.field_prototypes[:location]
         uid = f1.schema_id.to_s
@@ -837,14 +823,14 @@ class SchemaTest < MiniTest::Spec
         S.schema.reload!
         S.schema.validate!
 
-        ::A.field_prototypes[:moose].schema_id.should_not be_nil
+        ::A.field_prototypes[:moose].schema_id.wont_be_nil
 
         m = YAML.load_file(@map_file)
-        m[::A.field_prototypes[:moose].schema_id.to_s].should == ::A.field_prototypes[:moose].schema_name
-        m.key?(uid).should be_false
+        m[::A.field_prototypes[:moose].schema_id.to_s].must_equal ::A.field_prototypes[:moose].schema_name
+        refute m.key?(uid)
       end
 
-      should "be done automatically in presence of independent changes to boxes & fields" do
+      it "be done automatically in presence of independent changes to boxes & fields" do
         B.field :crisis
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
@@ -852,12 +838,12 @@ class SchemaTest < MiniTest::Spec
         S.schema.reload!
         S.schema.validate!
 
-        ::B.field_prototypes[:crisis].schema_id.should_not be_nil
+        ::B.field_prototypes[:crisis].schema_id.wont_be_nil
         m = YAML.load_file(@map_file)
-        m.key?(uid).should be_false
+        refute m.key?(uid)
       end
 
-      should "be done automatically in presence of independent changes to classes, boxes & fields" do
+      it "be done automatically in presence of independent changes to classes, boxes & fields" do
         class ::X < B; end
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
@@ -868,24 +854,24 @@ class SchemaTest < MiniTest::Spec
         S.schema.reload!
         S.schema.validate!
 
-        ::A.field_prototypes[:crisis].schema_id.should_not be_nil
+        ::A.field_prototypes[:crisis].schema_id.wont_be_nil
         m = YAML.load_file(@map_file)
 
         box = ::B.boxes[:circus]
-        m[box.schema_id.to_s].should == box.schema_name
+        m[box.schema_id.to_s].must_equal box.schema_name
 
         field = ::A.field_prototypes[:crisis]
-        m[field.schema_id.to_s].should == field.schema_name
+        m[field.schema_id.to_s].must_equal field.schema_name
 
         field = ::B.field_prototypes[:crisis]
-        m[field.schema_id.to_s].should == field.schema_name
+        m[field.schema_id.to_s].must_equal field.schema_name
 
-        m.key?(uid).should be_false
+        refute m.key?(uid)
       end
 
 
       # sanity check
-      should "still raise error in case of addition & deletion" do
+      it "still raise error in case of addition & deletion" do
         A.field :added
         f1 = A.field_prototypes[:title]
         f2 = A.field_prototypes[:added]
@@ -897,7 +883,7 @@ class SchemaTest < MiniTest::Spec
         lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
       end
 
-      should "still raise error in case of addition & deletion of classes" do
+      it "still raise error in case of addition & deletion of classes" do
         class ::X < A; end
         uid = B.schema_id.to_s
         Object.send(:remove_const, :B)
@@ -906,7 +892,7 @@ class SchemaTest < MiniTest::Spec
         lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
       end
 
-      should "delete box content when a box is removed" do
+      it "delete box content when a box is removed" do
         instance = A.new
         piece1 = B.new
         piece2 = B.new
@@ -914,20 +900,20 @@ class SchemaTest < MiniTest::Spec
         instance.posts << piece2
         instance.save
         instance = Content[instance.id]
-        instance.posts.contents.length.should == 2
-        Content.count.should == 3
+        instance.posts.contents.length.must_equal 2
+        Content.count.must_equal 3
         uid = A.boxes[:posts].schema_id.to_s
         A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
         S.schema.stubs(:classes).returns([A, B])
         S.schema.reload!
         S.schema.validate!
-        Content.count.should == 1
-        Content[instance.id].should == instance
+        Content.count.must_equal 1
+        Content[instance.id].must_equal instance
       end
 
-      context "which isn't automatically resolvable" do
-        context "with one field removed" do
-          setup do
+      describe "conflict" do
+        describe "-1 field" do
+          before do
             A.field :a
             A.field :b
             @df1 = A.field_prototypes[:title]
@@ -945,27 +931,27 @@ class SchemaTest < MiniTest::Spec
               @modification = e.modification
             end
           end
-          should "return list of solutions for removal of one field" do
+          it "return list of solutions for removal of one field" do
             # add :a, :b, delete :title
             # add :b, rename :title  => :a
             # add :a, rename :title  => :b
-            @modification.actions.description.should =~ /field 'title'/
-            @modification.actions.length.should == 3
+            @modification.actions.description.must_match /field 'title'/
+            @modification.actions.length.must_equal 3
             action = @modification.actions[0]
-            action.action.should == :delete
-            action.source.should == @df1.schema_id
-            action.description.should =~ /delete field 'title'/i
+            action.action.must_equal :delete
+            action.source.must_equal @df1.schema_id
+            action.description.must_match /delete field 'title'/i
             action = @modification.actions[1]
-            action.action.should == :rename
-            action.source.should == @df1.schema_id
-            action.description.should =~ /rename field 'title' to 'a'/i
+            action.action.must_equal :rename
+            action.source.must_equal @df1.schema_id
+            action.description.must_match /rename field 'title' to 'a'/i
             action = @modification.actions[2]
-            action.action.should == :rename
-            action.source.should == @df1.schema_id
-            action.description.should =~ /rename field 'title' to 'b'/i
+            action.action.must_equal :rename
+            action.source.must_equal @df1.schema_id
+            action.description.must_match /rename field 'title' to 'b'/i
           end
 
-          should "enable fixing the problem by deleting field from schema" do
+          it "enable fixing the problem by deleting field from schema" do
             action = @modification.actions[0]
             begin
               S.schema.apply(action)
@@ -974,10 +960,10 @@ class SchemaTest < MiniTest::Spec
             end
 
             m = YAML.load_file(@map_file)
-            m.key?(@uid).should be_false
+            refute m.key?(@uid)
           end
 
-          should "enable fixing the problem by renaming field 'a'" do
+          it "enable fixing the problem by renaming field 'a'" do
             action = @modification.actions[1]
             begin
               S.schema.apply(action)
@@ -985,10 +971,10 @@ class SchemaTest < MiniTest::Spec
               flunk("Renaming of field should have resolved schema error")
             end
             m = YAML.load_file(@map_file)
-            m[@uid].should == @af1.schema_name
+            m[@uid].must_equal @af1.schema_name
           end
 
-          should "enable fixing the problem by renaming field 'b'" do
+          it "enable fixing the problem by renaming field 'b'" do
             action = @modification.actions[2]
             begin
               S.schema.apply(action)
@@ -996,12 +982,12 @@ class SchemaTest < MiniTest::Spec
               flunk("Renaming of field should have resolved schema error")
             end
             m = YAML.load_file(@map_file)
-            m[@uid].should == @af2.schema_name
+            m[@uid].must_equal @af2.schema_name
           end
         end
 
-        context "with two fields removed" do
-          setup do
+        describe "-2 fields" do
+          before do
             A.field :a
             A.field :b
             A.field :c
@@ -1022,7 +1008,7 @@ class SchemaTest < MiniTest::Spec
               @modification = e.modification
             end
           end
-          should "return list of solutions" do
+          it "return list of solutions" do
             # add :a, :b; delete :title, :introduction
             # rename :title  => :a, :introduction  => :b
             # rename :introduction  => :a, :title  => :b
@@ -1030,27 +1016,27 @@ class SchemaTest < MiniTest::Spec
             # add :a; delete :title;        rename :introduction  => :b
             # add :b; delete :introduction; rename :title  => :a
             # add :b; delete :title;        rename :introduction  => :a
-            @modification.actions.description.should =~ /field 'title'/
-            @modification.actions.length.should == 4
+            @modification.actions.description.must_match /field 'title'/
+            @modification.actions.length.must_equal 4
             action = @modification.actions[0]
-            action.action.should == :delete
-            action.source.should == @df1.schema_id
-            action.description.should =~ /delete field 'title'/i
+            action.action.must_equal :delete
+            action.source.must_equal @df1.schema_id
+            action.description.must_match /delete field 'title'/i
             action = @modification.actions[1]
-            action.action.should == :rename
-            action.source.should == @df1.schema_id
-            action.description.should =~ /rename field 'title' to 'a'/i
+            action.action.must_equal :rename
+            action.source.must_equal @df1.schema_id
+            action.description.must_match /rename field 'title' to 'a'/i
             action = @modification.actions[2]
-            action.action.should == :rename
-            action.source.should == @df1.schema_id
-            action.description.should =~ /rename field 'title' to 'b'/i
+            action.action.must_equal :rename
+            action.source.must_equal @df1.schema_id
+            action.description.must_match /rename field 'title' to 'b'/i
             action = @modification.actions[3]
-            action.action.should == :rename
-            action.source.should == @df1.schema_id
-            action.description.should =~ /rename field 'title' to 'c'/i
+            action.action.must_equal :rename
+            action.source.must_equal @df1.schema_id
+            action.description.must_match /rename field 'title' to 'c'/i
           end
 
-          should "enable fixing the problem by deleting both fields" do
+          it "enable fixing the problem by deleting both fields" do
             action = @modification.actions[0]
             begin
               S.schema.apply(action)
@@ -1066,11 +1052,11 @@ class SchemaTest < MiniTest::Spec
               flunk("Deletion of field should have resolved schema error")
             end
             m = YAML.load_file(@map_file)
-            m.key?(@uid1).should be_false
-            m.key?(@uid2).should be_false
+            refute m.key?(@uid1)
+            refute m.key?(@uid2)
           end
 
-          should "enable fixing the problem by deleting one field and renaming other as 'a'" do
+          it "enable fixing the problem by deleting one field and renaming other as 'a'" do
             action = @modification.actions[0]
             begin
               S.schema.apply(action)
@@ -1086,12 +1072,12 @@ class SchemaTest < MiniTest::Spec
               flunk("Deletion of field should have resolved schema error")
             end
             m = YAML.load_file(@map_file)
-            m.key?(@uid1).should be_false
-            m.key?(@uid2).should be_true
-            m[@uid2].should == @af1.schema_name
+            refute m.key?(@uid1)
+            assert m.key?(@uid2)
+            m[@uid2].must_equal @af1.schema_name
           end
 
-          should "enable fixing the problem by renaming one field as 'c' and deleting other" do
+          it "enable fixing the problem by renaming one field as 'c' and deleting other" do
             action = @modification.actions[3]
             begin
               S.schema.apply(action)
@@ -1107,12 +1093,12 @@ class SchemaTest < MiniTest::Spec
               flunk("Deletion of field should have resolved schema error")
             end
             m = YAML.load_file(@map_file)
-            m.key?(@uid1).should be_true
-            m.key?(@uid2).should be_false
-            m[@uid1].should == @af3.schema_name
+            assert m.key?(@uid1)
+            refute m.key?(@uid2)
+            m[@uid1].must_equal @af3.schema_name
           end
 
-          should "enable fixing the problem by renaming one field as 'c' and renaming other as 'b'" do
+          it "enable fixing the problem by renaming one field as 'c' and renaming other as 'b'" do
             action = @modification.actions[3]
             begin
               S.schema.apply(action)
@@ -1128,14 +1114,14 @@ class SchemaTest < MiniTest::Spec
               flunk("Deletion of field should have resolved schema error")
             end
             m = YAML.load_file(@map_file)
-            m.key?(@uid1).should be_true
-            m.key?(@uid2).should be_true
-            m[@uid1].should == @af3.schema_name
-            m[@uid2].should == @af2.schema_name
+            assert m.key?(@uid1)
+            assert m.key?(@uid2)
+            m[@uid1].must_equal @af3.schema_name
+            m[@uid2].must_equal @af2.schema_name
           end
 
-          context "and two boxes removed" do
-            setup do
+          describe "-2 boxes" do
+            before do
               @db1 = A.boxes[:posts]
               A.box :added1
               A.box :added2
@@ -1156,7 +1142,7 @@ class SchemaTest < MiniTest::Spec
                 @modification = e.modification
               end
             end
-            should "enable fixing by deleting both fields and renaming a box" do
+            it "enable fixing by deleting both fields and renaming a box" do
               action = @modification.actions[0]
               begin
                 S.schema.apply(action)

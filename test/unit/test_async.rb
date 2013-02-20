@@ -3,54 +3,33 @@
 require File.expand_path('../../test_helper', __FILE__)
 require 'eventmachine'
 
-class AsyncTest < MiniTest::Spec
+describe "Async" do
 
-  def setup
+  before do
     @site = setup_site
     @filename = Time.now.to_i
     @filepath = @site.root / @filename
-    File.exist?(@filepath).should be_false
+    refute File.exist?(@filepath)
   end
 
-  def teardown
+  after do
     teardown_site
   end
 
-  context "async system calls" do
-    should "be able to test for running EM reactor" do
-      Spontaneous.async?.should be_false
-      EM.run do
-        Spontaneous.async?.should be_true
-        EM.stop
-      end
-      Spontaneous.async?.should be_false
+  it "be able to test for running EM reactor" do
+    refute Spontaneous.async?
+    EM.run do
+      assert Spontaneous.async?
+      EM.stop
     end
+    refute Spontaneous.async?
+  end
 
-    should "use fibers to simulate sync code if running in a fiber" do
-      EM.run do
-        result = Spontaneous.system("touch #{@filepath}") {
-          File.exist?(@filepath).should be_true
-        }
-        EM.stop
-      end
-    end
+  it "run synchronously outside of EM reactor" do
+    Spontaneous.system("touch #{@filepath}") { |result|
+      assert File.exist?(@filepath)
+      assert result
 
-    # TODO: can't get this to work at moment'
-    # should "resort to sync code if execution is not running in a fiber" do
-    #   EM.run do
-    #     result = Spontaneous.system("touch #{@filepath}")
-    #     File.exist?(@filepath).should be_true
-    #     EM.stop
-    #   end
-    # end
-
-
-    should "run synchronously outside of EM reactor" do
-      Spontaneous.system("touch #{@filepath}") { |result|
-        File.exist?(@filepath).should be_true
-        result.should be_true
-
-      }
-    end
+    }
   end
 end

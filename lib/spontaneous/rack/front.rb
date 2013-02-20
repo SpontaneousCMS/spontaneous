@@ -6,6 +6,14 @@ module Spontaneous
   module Rack
     module Front
       include Spontaneous::Rack::Middleware
+
+      def self.make_controller(controller_class)
+        ::Rack::Builder.app do
+          use Scope::Front
+          run controller_class
+        end
+      end
+
       def self.front_app
         ::Rack::Builder.app do
           use Scope::Front

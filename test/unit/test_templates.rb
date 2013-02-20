@@ -4,7 +4,7 @@ require File.expand_path('../../test_helper', __FILE__)
 
 require 'cgi'
 
-class TemplatesTest < MiniTest::Spec
+describe "Templates" do
   def first_pass(base_dir, filename, context=nil)
     render_with_renderer(Cutaneous::PublishRenderer, base_dir, filename, context)
   end
@@ -26,7 +26,7 @@ class TemplatesTest < MiniTest::Spec
     @template_root
   end
 
-  def setup
+  before do
     @site = setup_site
     make_template_root
     @klass = Class.new(Spontaneous::Output.context_class) do
@@ -55,40 +55,40 @@ class TemplatesTest < MiniTest::Spec
     @context = @klass.new(Object.new, :html)
   end
 
-  def teardown
+  after do
     teardown_site
   end
 
-  context "First render" do
-    setup do
+  describe "First render" do
+    before do
       # @template = Cutaneous::PublishTemplate.new
       @engine = S::Output::Template::PublishEngine.new(@template_root)
     end
 
-    should "ignore second level statements" do
+    it "ignore second level statements" do
       input = '<html><title>{{title}}</title>{{unsafe}}</html>'
       output = @engine.render_string(input, @context)
-      output.should ==  '<html><title>{{title}}</title>{{unsafe}}</html>'
+      output.must_equal  '<html><title>{{title}}</title>{{unsafe}}</html>'
     end
 
-    should "evaluate first level expressions" do
+    it "evaluate first level expressions" do
       output = @engine.render_string('<html><title>${title}</title>{{unsafe}}</html>', @context)
-      output.should == '<html><title>THE TITLE</title>{{unsafe}}</html>'
+      output.must_equal '<html><title>THE TITLE</title>{{unsafe}}</html>'
     end
 
-    should "evaluate first level statements" do
+    it "evaluate first level statements" do
       output = @engine.render_string('<html><title>${title}</title>%{ 2.times do }{{unsafe}}%{ end }</html>', @context)
-      output.should == '<html><title>THE TITLE</title>{{unsafe}}{{unsafe}}</html>'
+      output.must_equal '<html><title>THE TITLE</title>{{unsafe}}{{unsafe}}</html>'
     end
 
-    should "generate 2nd render templates" do
+    it "generate 2nd render templates" do
       output = @engine.render_string("<html><title>${title}</title>%{ 2.times do }{{bell}}\n%{ end }</html>", @context)
       second = S::Output::Template::RequestEngine.new(@template_root)
       output = second.render_string(output, @context)
-      output.should == "<html><title>THE TITLE</title>ding\nding\n</html>"
+      output.must_equal "<html><title>THE TITLE</title>ding\nding\n</html>"
     end
 
-    should "handle multiline statements" do
+    it "handle multiline statements" do
       output = @engine.render_string((<<-TEMPLATE), @context)
 %{
  something = 3
@@ -96,10 +96,10 @@ class TemplatesTest < MiniTest::Spec
 -}
 ${ something + nothing + another -}
       TEMPLATE
-      output.should == "12"
+      output.must_equal "12"
     end
 
-    should "correctly handle braces within statements" do
+    it "correctly handle braces within statements" do
       output = @engine.render_string((<<-TEMPLATE), @context)
 %{
 	a = { :a => "a", :b => "b" }
@@ -108,85 +108,85 @@ ${ something + nothing + another -}
 -}
 ${ a[:a] }${ a[:b] -}
       TEMPLATE
-      output.should == "ab"
+      output.must_equal "ab"
     end
   end
 
-  context "Second render" do
-    setup do
+  describe "Second render" do
+    before do
       @engine = S::Output::Template::RequestEngine.new(@template_root)
     end
 
-    should "a render unescaped expressions" do
+    it "a render unescaped expressions" do
       output = @engine.render_string('<html><title>{{title}}</title>{{unsafe}}</html>', @context)
-      output.should == "<html><title>THE TITLE</title><script>alert('bad')</script></html>"
+      output.must_equal "<html><title>THE TITLE</title><script>alert('bad')</script></html>"
     end
 
-    should "render escaped expressions" do
+    it "render escaped expressions" do
       output = @engine.render_string('<html><title>{$ unsafe $}</title></html>', @context)
-      output.should == "<html><title>&lt;script&gt;alert('bad')&lt;/script&gt;</title></html>"
+      output.must_equal "<html><title>&lt;script&gt;alert('bad')&lt;/script&gt;</title></html>"
     end
 
-    should "evaluate expressions" do
+    it "evaluate expressions" do
       output = @engine.render_string('<html>{% 2.times do %}<title>{{title}}</title>{% end %}</html>', @context)
-      output.should == "<html><title>THE TITLE</title><title>THE TITLE</title></html>"
+      output.must_equal "<html><title>THE TITLE</title><title>THE TITLE</title></html>"
     end
   end
 
-  context "Content rendering" do
-    setup do
+  describe "Content" do
+    before do
       @engine = S::Output::Template::PublishEngine.new(@template_root / "content")
     end
 
-    should "render" do
+    it "render" do
       output = @engine.render_template('template', @context)
-      output.should == "<html><title>THE TITLE</title></html>\n"
+      output.must_equal "<html><title>THE TITLE</title></html>\n"
     end
 
-    should "preprocess" do
+    it "preprocess" do
       output = @engine.render_template('preprocess', @context)
-      output.should == "<html><title>THE TITLE</title>{{bell}}</html>\n"
+      output.must_equal "<html><title>THE TITLE</title>{{bell}}</html>\n"
     end
 
-    should "include imports" do
+    it "include imports" do
       output = @engine.render_template('include', @context)
-      output.should == "<html>{{bell}}ding\n</html>\n"
+      output.must_equal "<html>{{bell}}ding\n</html>\n"
     end
 
-    should "include imports in sub-directories" do
+    it "include imports in sub-directories" do
       output = @engine.render_template('include_dir', @context)
-      output.should == "<html>{{ bell }}ding\n</html>\n"
+      output.must_equal "<html>{{ bell }}ding\n</html>\n"
     end
 
-    should "preserve the format across includes" do
+    it "preserve the format across includes" do
       context = @klass.new(Object.new)
       output = @engine.render_template('template', @context, "epub")
-      output.should == "<epub><epub>{{ bell }}ding</epub>\n</epub>\n"
+      output.must_equal "<epub><epub>{{ bell }}ding</epub>\n</epub>\n"
     end
 
-    should "render a second pass" do
+    it "render a second pass" do
       engine = S::Output::Template::RequestEngine.new(@template_root / "content")
       output = engine.render_template('second', @context)
-      output.should == "<html><title>THE TITLE</title>ding</html>\n"
+      output.must_equal "<html><title>THE TITLE</title>ding</html>\n"
     end
 
   end
 
-  context "Template hierarchy" do
+  describe "hierarchy" do
 
-    setup do
+    before do
       @engine = S::Output::Template::PublishEngine.new(@template_root / "extended")
     end
 
-    should "work" do
+    it "work" do
       output = @engine.render_template('main', @context)
       expected = "Main Title {{page.title}}Grandparent Nav\nMain Body\nParent Body\nGrandparent Body\nGrandparent Footer\nParent Footer\n"
-      output.should == expected
+      output.must_equal expected
     end
 
-    should "allow the use of includes" do
+    it "allow the use of includes" do
       output = @engine.render_template('with_includes', @context)
-      output.should == (<<-RENDER)
+      output.must_equal (<<-RENDER)
 Parent Title
 INCLUDE
 PARTIAL
@@ -195,9 +195,9 @@ Parent Footer
       RENDER
     end
 
-    should "allow passing of local variables to included templates" do
+    it "allow passing of local variables to included templates" do
       output = @engine.render_template('with_includes_and_locals', @context)
-      output.should == (<<-RENDER)
+      output.must_equal (<<-RENDER)
 Parent Title
 INCLUDE
 local title
@@ -207,8 +207,8 @@ Parent Footer
     end
   end
 
-  context "Output conversion xxx" do
-    setup do
+  describe "conversion" do
+    before do
 
       @context_class = Class.new(Spontaneous::Output.context_class) do
         include Spontaneous::Output::Context::ContextCore
@@ -249,20 +249,20 @@ Parent Footer
       @context = @context_class.new(Object.new)
     end
 
-    should "call #render(format) if context responds to it" do
+    it "call #render(format) if context responds to it" do
       output = @engine.render_string('${slot} ${ monkey }', @context)
-      output.should == "(html) magic"
+      output.must_equal "(html) magic"
     end
 
-    should "call to_format on non-strings" do
+    it "call to_format on non-strings" do
       output = @engine.render_string('${field} ${ monkey }', @context)
-      output.should == "(html) magic"
+      output.must_equal "(html) magic"
     end
 
-    should "call to_s on non-strings that have no specific handler" do
+    it "call to_s on non-strings that have no specific handler" do
       @context = @context_class.new(Object.new)
       output = @engine.render_string('${field} ${ monkey }', @context, "weird")
-      output.should == "'weird' magic"
+      output.must_equal "'weird' magic"
     end
   end
 end

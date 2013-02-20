@@ -15,14 +15,13 @@ class Spontaneous::Site
     end
 
     def register_back_controller(namespace, controller_class)
-      Spontaneous::Rack.make_back_controller(controller_class)
-      controller_class.requires_authentication!
-      back_controllers << [namespace_url(namespace), controller_class]
+      app = Spontaneous::Rack.make_back_controller(controller_class)
+      back_controllers << [namespace_url(namespace), app]
     end
 
     def register_front_controller(namespace, controller_class)
-      Spontaneous::Rack.make_front_controller(controller_class)
-      front_controllers << [namespace_url(namespace), controller_class]
+      app = Spontaneous::Rack.make_front_controller(controller_class)
+      front_controllers << [namespace_url(namespace), app]
     end
 
     def namespace_url(namespace)

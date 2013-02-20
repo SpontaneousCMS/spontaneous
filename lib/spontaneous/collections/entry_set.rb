@@ -118,7 +118,7 @@ module Spontaneous::Collections
     end
 
     def ==(set)
-      super or entries == set
+      super || (entries == set)
     end
 
     protected

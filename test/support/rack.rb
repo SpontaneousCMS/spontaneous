@@ -20,6 +20,8 @@ module RackTestMethods
     delete(path, params, csrf_header(env))
   end
 
+  alias_method :auth_del, :auth_delete
+
   def auth_patch(path, params={}, env={})
     patch(path, params, csrf_header(env))
   end
@@ -30,5 +32,10 @@ module RackTestMethods
 
   def api_key
     # Override in test suites
+  end
+
+  def login_user(user, params={})
+    post "/@spontaneous/login", {"user[login]" => user.login, "user[password]" => user.password}.merge(params)
+    @user = user
   end
 end

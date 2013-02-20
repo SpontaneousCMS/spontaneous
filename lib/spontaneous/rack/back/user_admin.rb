@@ -23,11 +23,11 @@ module Spontaneous::Rack::Back
       halt 403 unless user.admin?
     }
 
-    get "/users" do
+    get "/" do
       json User.export(user)
     end
 
-    post "/users" do
+    post "/" do
       level   = load_level
       account = User.new params[:user]
       if account.save

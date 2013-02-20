@@ -3,268 +3,263 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 
-class SiteTest < MiniTest::Spec
+describe "Site" do
 
-  def setup
+  before do
     @site = setup_site
+    Content.delete
+    Page.field :title
+    Page.box   :subpages
   end
 
-  def teardown
+  after do
     teardown_site
   end
 
-  context "Site" do
-    setup do
-      Content.delete
-      Page.field :title
-      Page.box   :subpages
+  describe "contents" do
+    before do
+      @root = ::Page.new
+      @root.title = "Homepage"
+      @page1_1 = ::Page.new(:slug => "page1-1")
+      @page1_1.title = "Page 1 1"
+      @page1_2 = ::Page.new(:slug => "page1-2")
+      @page1_2.title = "Page 1 2"
+      @page2_1 = ::Page.new(:slug => "page2-1")
+      @page2_1.title = "Page 2 1"
+      @page3_1 = ::Page.new(:slug => "page3-1")
+      @page3_1.title = "Page 3 1"
+      @page3_2 = ::Page.new(:slug => "page3-2")
+      @page3_2.title = "Page 3 2"
+      @page3_2.uid = "page3_2"
+
+      @root.subpages << @page1_1
+      @root.subpages << @page1_2
+      @page1_1.subpages << @page2_1
+      @page2_1.subpages << @page3_1
+      @page2_1.subpages << @page3_2
+      @root.save.reload
+      @page1_1.save.reload
+      @page1_2.save.reload
+      @page2_1.save.reload
+      @page3_1.save.reload
+      @page3_2.save.reload
     end
+    # describe "site instance" do
+    #   it "be unique" do
+    #     i = Site.instance
+    #     j = Site.instance
+    #     i.must_equal j
+    #     Site.count.must_equal 1
+    #   end
+    # it "be a singleton within a site cache" do
+    #   o = nil
+    #   Site.with_cache do
+    #     i = Site.instance
+    #     j = Site.instance
+    #     i.object_id.must_equal j.object_id
+    #     o = i.object_id
+    #   end
+    #   i = Site.instance
+    #   i.object_id.should_not == o
+    # end
 
-    context "contents" do
-      setup do
-        @root = ::Page.new
-        @root.title = "Homepage"
-        @page1_1 = ::Page.new(:slug => "page1-1")
-        @page1_1.title = "Page 1 1"
-        @page1_2 = ::Page.new(:slug => "page1-2")
-        @page1_2.title = "Page 1 2"
-        @page2_1 = ::Page.new(:slug => "page2-1")
-        @page2_1.title = "Page 2 1"
-        @page3_1 = ::Page.new(:slug => "page3-1")
-        @page3_1.title = "Page 3 1"
-        @page3_2 = ::Page.new(:slug => "page3-2")
-        @page3_2.title = "Page 3 2"
-        @page3_2.uid = "page3_2"
+    # end
+    describe 'mapping' do
+      it "include the necessary details in the map" do
+        @page3_2.map_entry.must_equal({
+          :id => @page3_2.id,
+          :title => "Page 3 2",
+          :path => '/page1-1/page2-1/page3-2',
+          :slug => 'page3-2',
+          :type => 'Page',
+          :type_id => ::Page.schema_id,
+          :depth => 3,
+          :children => {},
+          :ancestors => [
+            { :id => @root.id, :title => "Homepage", :path => '/', :slug => '', :type => 'Page', :type_id => ::Page.schema_id, :depth => 0, :children => 2 },
+            { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :slug => 'page1-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 1, :children => 1 },
+            { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :slug => 'page2-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 2, :children => 2 }
+          ],
+          :generation => { "Subpages" => [
+            { :id => @page3_1.id, :title => "Page 3 1", :path => '/page1-1/page2-1/page3-1', :slug => 'page3-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 3, :children => 0 },
+            { :id => @page3_2.id, :title => "Page 3 2", :path => '/page1-1/page2-1/page3-2', :slug => 'page3-2', :type => 'Page', :type_id => ::Page.schema_id, :depth => 3, :children => 0 }
+          ] }
+        })
 
-        @root.subpages << @page1_1
-        @root.subpages << @page1_2
-        @page1_1.subpages << @page2_1
-        @page2_1.subpages << @page3_1
-        @page2_1.subpages << @page3_2
-        @root.save.reload
-        @page1_1.save.reload
-        @page1_2.save.reload
-        @page2_1.save.reload
-        @page3_1.save.reload
-        @page3_2.save.reload
-      end
-      # context "site instance" do
-      #   should "be unique" do
-      #     i = Site.instance
-      #     j = Site.instance
-      #     i.should == j
-      #     Site.count.should == 1
-      #   end
-      # should "be a singleton within a site cache" do
-      #   o = nil
-      #   Site.with_cache do
-      #     i = Site.instance
-      #     j = Site.instance
-      #     i.object_id.should == j.object_id
-      #     o = i.object_id
-      #   end
-      #   i = Site.instance
-      #   i.object_id.should_not == o
-      # end
-
-      # end
-      context 'mapping' do
-        should "include the necessary details in the map" do
-          @page3_2.map_entry.should == {
-            :id => @page3_2.id,
-            :title => "Page 3 2",
-            :path => '/page1-1/page2-1/page3-2',
-            :slug => 'page3-2',
-            :type => 'Page',
-            :type_id => ::Page.schema_id,
-            :depth => 3,
-            :children => {},
-            :ancestors => [
-              { :id => @root.id, :title => "Homepage", :path => '/', :slug => '', :type => 'Page', :type_id => ::Page.schema_id, :depth => 0, :children => 2 },
-              { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :slug => 'page1-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 1, :children => 1 },
-              { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :slug => 'page2-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 2, :children => 2 }
-            ],
-              :generation => { "Subpages" => [
-                { :id => @page3_1.id, :title => "Page 3 1", :path => '/page1-1/page2-1/page3-1', :slug => 'page3-1', :type => 'Page', :type_id => ::Page.schema_id, :depth => 3, :children => 0 },
-                { :id => @page3_2.id, :title => "Page 3 2", :path => '/page1-1/page2-1/page3-2', :slug => 'page3-2', :type => 'Page', :type_id => ::Page.schema_id, :depth => 3, :children => 0 }
-            ] }
-          }
-
-          @page2_1.map_entry.should == {
-            :id => @page2_1.id,
-            :title => "Page 2 1",
-            :path => '/page1-1/page2-1',
-            :slug => 'page2-1',
-            :type => 'Page',
-            :type_id => ::Page.schema_id.to_s,
-            :depth => 2,
-            :children => {
-              "Subpages" => [
-                {:depth=>3,
-                 :type=>"Page",
-                 :type_id => ::Page.schema_id.to_s,
-                 :children=>0,
-                 :path=>"/page1-1/page2-1/page3-1",
-                 :slug => 'page3-1',
-                 :title=>"Page 3 1",
-                 :id=>@page3_1.id},
-                 {:depth=>3,
-                  :type=>"Page",
-                  :type_id => ::Page.schema_id.to_s,
-                  :children=>0,
-                  :path=>"/page1-1/page2-1/page3-2",
-                  :slug => 'page3-2',
-                  :title=>"Page 3 2",
-                  :id=>@page3_2.id}]},
-                  :ancestors => [
-                    { :id => @root.id, :title => "Homepage", :path => '/', :slug => '',:type => 'Page', :type_id => ::Page.schema_id, :depth => 0, :children => 2 },
-                    { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :slug => 'page1-1',:type => 'Page', :type_id => ::Page.schema_id, :depth => 1, :children => 1 }
-                  ],
-                    :generation => {"Subpages" => [
-                      { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :slug => 'page2-1',:type => 'Page', :type_id => ::Page.schema_id, :depth => 2, :children => 2 }
-                  ]}
-          }
-        end
-
-
-        should "retrieve details of the root by default" do
-          Site.map.should == Page.root.map_entry
-        end
-
-        should "retrieve the details of the children of any page" do
-          Site.map(@root.id).should == Page.root.map_entry
-          Site.map(@page3_2.id).should == @page3_2.map_entry
-        end
+        @page2_1.map_entry.must_equal({
+          :id => @page2_1.id,
+          :title => "Page 2 1",
+          :path => '/page1-1/page2-1',
+          :slug => 'page2-1',
+          :type => 'Page',
+          :type_id => ::Page.schema_id,
+          :depth => 2,
+          :children => {
+            "Subpages" => [
+              {:depth=>3,
+               :type=>"Page",
+               :type_id => ::Page.schema_id,
+               :children=>0,
+               :path=>"/page1-1/page2-1/page3-1",
+               :slug => 'page3-1',
+               :title=>"Page 3 1",
+               :id=>@page3_1.id},
+               {:depth=>3,
+                :type=>"Page",
+                :type_id => ::Page.schema_id,
+                :children=>0,
+                :path=>"/page1-1/page2-1/page3-2",
+                :slug => 'page3-2',
+                :title=>"Page 3 2",
+                :id=>@page3_2.id}]},
+                :ancestors => [
+                  { :id => @root.id, :title => "Homepage", :path => '/', :slug => '',:type => 'Page', :type_id => ::Page.schema_id, :depth => 0, :children => 2 },
+                  { :id => @page1_1.id, :title => "Page 1 1", :path => '/page1-1', :slug => 'page1-1',:type => 'Page', :type_id => ::Page.schema_id, :depth => 1, :children => 1 }
+                ],
+                :generation => {"Subpages" => [
+                  { :id => @page2_1.id, :title => "Page 2 1", :path => '/page1-1/page2-1', :slug => 'page2-1',:type => 'Page', :type_id => ::Page.schema_id, :depth => 2, :children => 2 }
+                ]}
+        })
       end
 
-      context "page retrieval" do
-        should "work with paths" do
-          Site['/page1-1/page2-1'].should == @page2_1.reload
-        end
 
-        should "work with UIDs" do
-          Site["page3_2"].should == @page3_2.reload
-        end
+      it "retrieve details of the root by default" do
+        Site.map.must_equal Page.root.map_entry
+      end
 
-        should "have a shortcut direct method on Site" do
-          Site.page3_2.should == @page3_2.reload
-        end
-
-        should "return section pages in the right order" do
-          Site.at_depth(0).should == @root
-          Site.at_depth(:root).should == @root
-          Site.at_depth(1).should == [@page1_1, @page1_2]
-          Site.at_depth(:section).should == [@page1_1, @page1_2]
-        end
+      it "retrieve the details of the children of any page" do
+        Site.map(@root.id).must_equal Page.root.map_entry
+        Site.map(@page3_2.id).must_equal @page3_2.map_entry
       end
     end
 
-    context "Structure modification times" do
-      setup do
-        S::State.delete
-        # remove microseconds from time value
-        @now = Time.at(Time.now.to_i)
+    describe "page retrieval" do
+      it "work with paths" do
+        Site['/page1-1/page2-1'].must_equal @page2_1.reload
       end
 
-      should "just return the current time if no modifications have been made" do
-        now = @now + 12
-        Time.stubs(:now).returns(now)
-        Site.modified_at.should == now
+      it "work with UIDs" do
+        Site["page3_2"].must_equal @page3_2.reload
       end
 
-      should "be updated when a page is added" do
-        now = @now + 24
-        Time.stubs(:now).returns(now)
-        root = ::Page.create
-        Time.stubs(:now).returns(now + 200)
-        Site.modified_at.should == now
+      it "have a shortcut direct method on Site" do
+        Site.page3_2.must_equal @page3_2.reload
       end
 
-      should "be updated when a page's title changes" do
-        root = ::Page.create
-        now = @now + 98
-        Time.stubs(:now).returns(now)
-        root.update(:title => "Some Title")
-        Site.modified_at.should == now
-      end
-
-      should "be updated when a page's slug changes" do
-        root = ::Page.create
-        now = @now + 98
-        Time.stubs(:now).returns(now)
-        root.update(:slug => "updated-slug")
-        Site.modified_at.should == now
-      end
-
-      should "not be updated when a piece is added" do
-        now1 = @now + 24
-        Time.stubs(:now).returns(now1)
-        root = ::Page.create
-        now2 = @now + 240
-        Time.stubs(:now).returns(now2)
-        root.subpages << Piece.create
-        Site.modified_at.should == now1
-      end
-
-      should "be updated when a page is deleted" do
-        now1 = @now + 24
-        Time.stubs(:now).returns(now1)
-        root = ::Page.create
-        now2 = @now + 48
-        Time.stubs(:now).returns(now2)
-        child = ::Page.new
-        root.subpages << child
-        root.save
-        Site.modified_at.should == now2
-        now3 = @now + 128
-        Time.stubs(:now).returns(now3)
-        child.destroy
-        Site.modified_at.should == now3
-      end
-
-      should "not be updated when a piece is deleted" do
-        now1 = @now + 24
-        Time.stubs(:now).returns(now1)
-        root = ::Page.create
-        now2 = @now + 240
-        Time.stubs(:now).returns(now2)
-        piece = ::Piece.create
-        root.subpages << piece
-        Site.modified_at.should == now1
-        now3 = @now + 480
-        Time.stubs(:now).returns(now3)
-        piece.reload.destroy
-        Site.modified_at.should == now1
+      it "return section pages in the right order" do
+        Site.at_depth(0).must_equal @root
+        Site.at_depth(:root).must_equal @root
+        Site.at_depth(1).must_equal [@page1_1, @page1_2]
+        Site.at_depth(:section).must_equal [@page1_1, @page1_2]
       end
     end
+  end
 
-    context "URLs" do
-      should "use the site_domain config value" do
-        @site.config.site_domain = "spontaneouscms.org"
-        @site.public_url.should == "http://spontaneouscms.org/"
-        @site.public_url("/").should == "http://spontaneouscms.org/"
-        @site.public_url("/something").should == "http://spontaneouscms.org/something"
-        Site.public_url("/something").should == "http://spontaneouscms.org/something"
-      end
+  describe "Structure modification times" do
+    before do
+      S::State.delete
+      # remove microseconds from time value
+      @now = Time.at(Time.now.to_i)
     end
 
-    context "Paths" do
-      setup do
-        FileUtils.mkdir(@site.root / "templates")
-        @template_dir1 = File.expand_path("../../fixtures/templates", __FILE__)
-        @plugin_dir = File.expand_path("../../fixtures/plugins/schema_plugin", __FILE__)
-        @site.paths[:templates] << "non-existant-dir"
-        @site.paths[:templates] << @template_dir1
+    it "just return the current time if no modifications have been made" do
+      now = @now + 12
+      Time.stubs(:now).returns(now)
+      Site.modified_at.must_equal now
+    end
 
-        plugin = @site.load_plugin @plugin_dir
-        plugin.init!
-        plugin.load!
-      end
+    it "be updated when a page is added" do
+      now = @now + 24
+      Time.stubs(:now).returns(now)
+      root = ::Page.create
+      Time.stubs(:now).returns(now + 200)
+      Site.modified_at.must_equal now
+    end
 
-      should "include all facet paths for a particular path group" do
-        dirs = [@site.root / "templates", @template_dir1, @plugin_dir / "templates"]
-        Site.paths(:templates).should == dirs
-      end
+    it "be updated when a page's title changes" do
+      root = ::Page.create
+      now = @now + 98
+      Time.stubs(:now).returns(now)
+      root.update(:title => "Some Title")
+      Site.modified_at.must_equal now
+    end
+
+    it "be updated when a page's slug changes" do
+      root = ::Page.create
+      now = @now + 98
+      Time.stubs(:now).returns(now)
+      root.update(:slug => "updated-slug")
+      Site.modified_at.must_equal now
+    end
+
+    it "not be updated when a piece is added" do
+      now1 = @now + 24
+      Time.stubs(:now).returns(now1)
+      root = ::Page.create
+      now2 = @now + 240
+      Time.stubs(:now).returns(now2)
+      root.subpages << Piece.create
+      Site.modified_at.must_equal now1
+    end
+
+    it "be updated when a page is deleted" do
+      now1 = @now + 24
+      Time.stubs(:now).returns(now1)
+      root = ::Page.create
+      now2 = @now + 48
+      Time.stubs(:now).returns(now2)
+      child = ::Page.new
+      root.subpages << child
+      root.save
+      Site.modified_at.must_equal now2
+      now3 = @now + 128
+      Time.stubs(:now).returns(now3)
+      child.destroy
+      Site.modified_at.must_equal now3
+    end
+
+    it "not be updated when a piece is deleted" do
+      now1 = @now + 24
+      Time.stubs(:now).returns(now1)
+      root = ::Page.create
+      now2 = @now + 240
+      Time.stubs(:now).returns(now2)
+      piece = ::Piece.create
+      root.subpages << piece
+      Site.modified_at.must_equal now1
+      now3 = @now + 480
+      Time.stubs(:now).returns(now3)
+      piece.reload.destroy
+      Site.modified_at.must_equal now1
+    end
+  end
+
+  describe "URLs" do
+    it "use the site_domain config value" do
+      @site.config.site_domain = "spontaneouscms.org"
+      @site.public_url.must_equal "http://spontaneouscms.org/"
+      @site.public_url("/").must_equal "http://spontaneouscms.org/"
+      @site.public_url("/something").must_equal "http://spontaneouscms.org/something"
+      Site.public_url("/something").must_equal "http://spontaneouscms.org/something"
+    end
+  end
+
+  describe "Paths" do
+    before do
+      FileUtils.mkdir(@site.root / "templates")
+      @template_dir1 = File.expand_path("../../fixtures/templates", __FILE__)
+      @plugin_dir = File.expand_path("../../fixtures/plugins/schema_plugin", __FILE__)
+      @site.paths[:templates] << "non-existant-dir"
+      @site.paths[:templates] << @template_dir1
+
+      plugin = @site.load_plugin @plugin_dir
+      plugin.init!
+      plugin.load!
+    end
+
+    it "include all facet paths for a particular path group" do
+      dirs = [@site.root / "templates", @template_dir1, @plugin_dir / "templates"]
+      Site.paths(:templates).must_equal dirs
     end
   end
 end

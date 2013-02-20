@@ -62,54 +62,74 @@ Sequel::Migrator.apply(DB, 'db/migrations')
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spontaneous')
 
+require 'minitest/unit'
 require 'minitest/spec'
+require 'minitest/reporters'
 require 'mocha/setup'
 require 'pp'
 require 'tmpdir'
 require 'json'
 
 require 'support/rack'
+require 'support/matchers'
 
-# require 'support/custom_matchers'
+module MiniTest::StartFinish
+  module Unit
+    def _run_suites(suites, type)
+      begin
+        super(suites, type)
+      ensure
+        if (suite = suites.last.master_suite)
+          suite._run_finish_hook
+        end
+      end
+    end
 
-# Spontaneous.database = DB
-
-class MiniTestWithHooks < MiniTest::Unit
-  def before_suites
-  end
-
-  def after_suites
-  end
-
-  def exclude?(suite)
-    [MiniTest::Spec].include?(suite)
-  end
-
-  def _run_suites(suites, type)
-    names = suites.reject { |s| exclude?(s) }.map { |s| s.to_s.gsub(/Test$/, '') }
-    @max_name_length = names.map(&:length).max
-    begin
-      before_suites
-      super(suites, type)
-    ensure
-      after_suites
+    def _run_suite(suite, type)
+      begin
+        if @_previous_suite && @_previous_suite.master_suite != suite.master_suite
+          @_previous_suite.master_suite._run_finish_hook
+        end
+        suite._run_start_hook
+        super(suite, type)
+      ensure
+        @_previous_suite = suite unless suite == MiniTest::Spec
+      end
     end
   end
 
-  def _run_suite(suite, type)
-    begin
-      unless exclude?(suite)
-        print "\n#{suite.to_s.gsub(/Test$/, '').ljust(@max_name_length, " ")}  "
-      end
-      suite.startup if suite.respond_to?(:startup)
-      super(suite, type)
-    ensure
-      suite.shutdown if suite.respond_to?(:shutdown)
+  module Spec
+    def master_suite
+      ancestors.detect { |a| a.respond_to?(:has_finish_hook?) && a.has_finish_hook? }
+    end
+
+    def has_finish_hook?
+      !@finish_hook.nil?
+    end
+
+    def start(&block)
+      @start_hook = block
+    end
+
+    def finish(&block)
+      @finish_hook = block
+    end
+
+    def _run_start_hook
+      _run_start_finish_hook(@start_hook)
+    end
+
+    def _run_finish_hook
+      _run_start_finish_hook(@finish_hook)
+    end
+
+    def _run_start_finish_hook(hook)
+      hook.call if hook
     end
   end
 end
 
-MiniTest::Unit.runner = MiniTestWithHooks.new
+# MiniTest::Unit.runner = MiniTestWithHooks.new
 
 def silence_logger(&block)
   begin
@@ -123,8 +143,14 @@ def silence_logger(&block)
   end
 end
 
+class Minitest::ReporterRunner
+  include MiniTest::StartFinish::Unit
+end
+
+MiniTest::Reporters.use! MiniTest::Reporters::DefaultReporter.new
+
 class MiniTest::Spec
-  # include CustomMatchers
+  extend MiniTest::StartFinish::Spec
 
   attr_accessor :template_root
   alias :silence_stdout :silence_logger
@@ -177,7 +203,7 @@ class MiniTest::Spec
       assert_equal(result[col], compare[col], "Column '#{col}' should be equal")
     end
     serialised_columns.each do |col|
-      result.send(col).should == compare.send(col)
+      result.send(col).must_equal compare.send(col)
     end
   end
 
@@ -272,3 +298,5 @@ class MiniTest::Spec
 end
 
 require 'minitest/autorun'
+
+

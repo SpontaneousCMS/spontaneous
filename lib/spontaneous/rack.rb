@@ -49,15 +49,11 @@ module Spontaneous
       end
 
       def make_front_controller(controller_class)
-        controller_class.use(Spontaneous::Rack::AroundFront)
+        Spontaneous::Rack::Front.make_controller(controller_class)
       end
 
       def make_back_controller(controller_class)
-        controller_class.helpers Spontaneous::Rack::Helpers
-        controller_class.helpers Spontaneous::Rack::UserHelpers
-        controller_class.use Spontaneous::Rack::CookieAuthentication
-        controller_class.use Spontaneous::Rack::AroundBack
-        controller_class.register Spontaneous::Rack::Authentication
+        Spontaneous::Rack::Back.make_controller(controller_class)
       end
     end
 
