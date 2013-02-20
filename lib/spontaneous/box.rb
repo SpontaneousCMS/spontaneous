@@ -345,5 +345,4 @@ module Spontaneous
       super or (obj.is_a?(Box) && (self._prototype == obj._prototype) && (self.owner == obj.owner))
     end
   end
-
 end
