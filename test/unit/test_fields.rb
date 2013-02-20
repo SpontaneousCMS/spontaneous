@@ -1429,6 +1429,41 @@ describe "Fields" do
           content.instances.title.value.must_equal "Updated Title"
           content.instances.image.value.must_equal "/media/#{S::Media.pad_id(@page.id)}/#{@page.instances.schema_id}/0001/something.gif"
         end
+
+        it "be deleted when their page is deleted xxx" do
+          @page.image.stubs(:page_lock_description).returns("Lock description")
+          lock = Spontaneous::PageLock.lock_field(@page.image)
+          @page.destroy
+          found = Spontaneous::PageLock[lock.id]
+          found.must_be_nil
+        end
+
+        it "be deleted when their owning content is deleted xxx" do
+          LockedPiece.field :title
+          @instance.title.stubs(:page_lock_description).returns("Lock description")
+          lock = Spontaneous::PageLock.lock_field(@instance.title)
+          @instance.destroy
+          found = Spontaneous::PageLock.filter(:content_id => @instance.id).first
+          found.must_be_nil
+        end
+
+        it "deals gracefully with updating content that has been deleted xxx" do
+          field = @page.image
+          Spontaneous::Simultaneous.expects(:fire).at_least_once.with(:update_fields, {
+            "fields" => [field.id]
+          })
+          File.open(@image, "r") do |file|
+            Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          end
+          # Create update but don't run it
+          update = Spontaneous::Field::Update::Immediate.new(field)
+
+          @page.destroy
+
+          update.run
+
+          Content[@page.id].must_be_nil
+        end
       end
     end
 end

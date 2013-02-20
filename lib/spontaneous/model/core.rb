@@ -10,6 +10,7 @@ module Spontaneous::Model
     autoload :Entry,            "spontaneous/model/core/entry"
     autoload :Fields,           "spontaneous/model/core/fields"
     autoload :InstanceCode,     "spontaneous/model/core/instance_code"
+    autoload :Locks,            "spontaneous/model/core/locks"
     autoload :Media,            "spontaneous/model/core/media"
     autoload :Modifications,    "spontaneous/model/core/modifications"
     autoload :PageSearch,       "spontaneous/model/core/page_search"
@@ -79,6 +80,7 @@ module Spontaneous::Model
     include ContentGroups
     include SchemaHierarchy
     include PageSearch
+    include Locks
 
     # marker method enabling a simple test for "cms content" vs "everything else"
     def spontaneous_content?
