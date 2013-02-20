@@ -18,6 +18,18 @@ describe "Application" do
   end
 
   finish do
+    Object.send :remove_const, :Page
+    Object.send :remove_const, :Piece
+    Object.send :remove_const, :Project
+    Object.send :remove_const, :ProjectImage
+    Object.send :remove_const, :ProjectsPage
+    Object.send :remove_const, :Text
+    Object.send :remove_const, :HomePage
+    Object.send :remove_const, :InfoPage
+    Object.send :remove_const, :ClientProject
+    Object.send :remove_const, :ClientProjects
+    Object.send :remove_const, :InlineImage
+
     teardown_site(true)
   end
 

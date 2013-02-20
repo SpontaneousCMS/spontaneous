@@ -159,8 +159,8 @@ describe "Search" do
         include_pages id, "#page11", path
       end
 
-      @all_pages.map{ |page| index.include?(page) }.must_equal
-        [true,false,false,false,false,false,false,false,true,false,false,true,false]
+      included = @all_pages.map{ |page| index.include?(page) }
+      included.must_equal [true,false,false,false,false,false,false,false,true,false,false,true,false]
     end
 
     it "allow restriction to a page and its children" do
@@ -168,8 +168,8 @@ describe "Search" do
         include_pages ">= #page8"
       end
 
-      @all_pages.map{ |page| index.include?(page) }.must_equal
-        [false,false,false,false,false,false,false,false,true,true,true,true,true]
+      included = @all_pages.map{ |page| index.include?(page) }
+      included.must_equal [false,false,false,false,false,false,false,false,true,true,true,true,true]
     end
 
     it "allow restriction to a page's children" do
@@ -177,8 +177,8 @@ describe "Search" do
         include_pages "> #page8"
       end
 
-      @all_pages.map{ |page| index.include?(page) }.must_equal
-        [false,false,false,false,false,false,false,false,false,true,true,true,true]
+      included = @all_pages.map{ |page| index.include?(page) }
+      included.must_equal [false,false,false,false,false,false,false,false,false,true,true,true,true]
     end
 
     it "allow removal of specific pages" do
@@ -186,8 +186,8 @@ describe "Search" do
         exclude_pages "#page8", "/page1"
       end
 
-      @all_pages.map{ |page| index.include?(page) }.must_equal
-        [true,false,true,true,true,true,true,true,false,true,true,true,true]
+      included = @all_pages.map{ |page| index.include?(page) }
+      included.must_equal [true,false,true,true,true,true,true,true,false,true,true,true,true]
     end
 
     it "allow removal of a page and its children" do
@@ -195,8 +195,8 @@ describe "Search" do
         exclude_pages "/page1", ">= #page8"
       end
 
-      @all_pages.map{ |page| index.include?(page) }.must_equal
-        [true,false,true,true,true,true,true,true,false,false,false,false,false]
+      included = @all_pages.map{ |page| index.include?(page) }
+      included.must_equal [true,false,true,true,true,true,true,true,false,false,false,false,false]
     end
 
     it "allow removal of a page's children" do
@@ -204,8 +204,8 @@ describe "Search" do
         exclude_pages "/page1", "> #page8"
       end
 
-      @all_pages.map{ |page| index.include?(page) }.must_equal
-        [true,false,true,true,true,true,true,true,true,false,false,false,false]
+      included = @all_pages.map{ |page| index.include?(page) }
+      included.must_equal [true,false,true,true,true,true,true,true,true,false,false,false,false]
     end
 
     it "allow multiple, mixed, page restrictions" do
@@ -213,8 +213,8 @@ describe "Search" do
         include_pages "#page1", "> #page8"
       end
 
-      @all_pages.map{ |page| index.include?(page) }.must_equal
-        [false,true,false,false,false,false,false,false,false,true,true,true,true]
+      included = @all_pages.map{ |page| index.include?(page) }
+      included.must_equal [false,true,false,false,false,false,false,false,false,true,true,true,true]
     end
 
     it "allow combining of class and page restrictions" do
@@ -223,8 +223,8 @@ describe "Search" do
         include_pages "#page1", "> #page8"
         exclude_pages "#page10"
       end
-      @all_pages.map{ |page| index.include?(page) }.must_equal
-        [false,true,false,false,false,false,false,false,false,true,false,false,false]
+      included = @all_pages.map{ |page| index.include?(page) }
+      included.must_equal [false,true,false,false,false,false,false,false,false,true,false,false,false]
     end
   end
 

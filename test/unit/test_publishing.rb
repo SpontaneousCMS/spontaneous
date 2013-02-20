@@ -4,17 +4,14 @@ require File.expand_path('../../test_helper', __FILE__)
 
 describe "Publishing" do
 
-  def self.site_root
-    @site_root
-  end
-
-  def self.startup
-    @site_root = Dir.mktmpdir
+  start do
+    site_root = Dir.mktmpdir
     template_source = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing/templates")
-    FileUtils.cp_r(template_source, @site_root)
+    FileUtils.cp_r(template_source, site_root)
+    class_variable_set(:@@site_root, site_root)
   end
 
-  def self.shutdown
+  finish do
     ::Content.delete_all_revisions! rescue nil
     teardown_site(true)
   end
@@ -23,7 +20,8 @@ describe "Publishing" do
     @now = Time.now
     stub_time(@now)
 
-    @site = setup_site(self.class.site_root)
+    @site_root = self.class.class_variable_get(:@@site_root)
+    @site = setup_site(@site_root)
     Site.background_mode = :immediate
 
     Content.delete

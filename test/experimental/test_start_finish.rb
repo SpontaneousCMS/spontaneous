@@ -40,7 +40,13 @@ describe "Suite1" do
   end
 end
 
-describe "Suite2" do
+describe "Suite2a" do
+  it "a" do
+    assert $suite1_start == false
+  end
+end
+
+describe "Suite2b" do
   start do
     $suite2_start = true
   end

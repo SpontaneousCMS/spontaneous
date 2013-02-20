@@ -4,7 +4,7 @@ require File.expand_path('../../test_helper', __FILE__)
 
 describe "Permissions" do
 
-  Permissions = Spontaneous::Permissions
+  Permissions = Spontaneous::Permissions unless defined?(Permissions)
 
   before do
     @site = setup_site

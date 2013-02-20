@@ -88,7 +88,7 @@ module MiniTest::StartFinish
     def _run_suite(suite, type)
       begin
         if @_previous_suite && @_previous_suite.master_suite != suite.master_suite
-          @_previous_suite.master_suite._run_finish_hook
+          @_previous_suite.master_suite._run_finish_hook if @_previous_suite.master_suite
         end
         suite._run_start_hook
         super(suite, type)
@@ -98,7 +98,15 @@ module MiniTest::StartFinish
     end
   end
 
-  module Spec
+end
+
+class MiniTest::Spec
+  class << self
+    def parent_suite
+      a = ancestors.take_while { |a| a != MiniTest::Spec }.reject { |a| !(Class === a)}
+      a.last
+    end
+
     def master_suite
       ancestors.detect { |a| a.respond_to?(:has_finish_hook?) && a.has_finish_hook? }
     end
@@ -115,21 +123,51 @@ module MiniTest::StartFinish
       @finish_hook = block
     end
 
+    def _hooks_run
+      @_hooks_run ||= []
+    end
     def _run_start_hook
-      _run_start_finish_hook(@start_hook)
+      _run_start_finish_hook(@start_hook, :start)
     end
 
     def _run_finish_hook
-      _run_start_finish_hook(@finish_hook)
+      if _hooks_run.include?(:start)
+        _run_start_finish_hook(@finish_hook, :finish)
+      end
     end
 
-    def _run_start_finish_hook(hook)
+    def _run_start_finish_hook(hook, label)
+      _hooks_run << label
       hook.call if hook
     end
   end
 end
 
-# MiniTest::Unit.runner = MiniTestWithHooks.new
+class MiniTestWithHooks < MiniTest::Unit
+  include MiniTest::StartFinish::Unit
+  def exclude?(suite)
+    return true if suite.nil?
+    [MiniTest::Spec].include?(suite) || !suite.ancestors.include?(MiniTest::Spec)
+  end
+
+  def _run_suites(suites, type)
+    names = suites.map(&:parent_suite).reject { |s| exclude?(s) }.uniq.map(&:to_s)
+    @max_name_length = names.map(&:length).max
+    super(suites, type)
+  end
+
+  def _run_suite(suite, type)
+    unless exclude?(suite)
+      if (name = suite.parent_suite.name) != @_previous_suite_name
+        print "\n#{name.ljust(@max_name_length, " ")}  "
+        @_previous_suite_name = name
+      end
+    end
+    super(suite, type)
+  end
+end
+
+MiniTest::Unit.runner = MiniTestWithHooks.new
 
 def silence_logger(&block)
   begin
@@ -147,10 +185,9 @@ class Minitest::ReporterRunner
   include MiniTest::StartFinish::Unit
 end
 
-MiniTest::Reporters.use! MiniTest::Reporters::DefaultReporter.new
+# MiniTest::Reporters.use! MiniTest::Reporters::DefaultReporter.new
 
 class MiniTest::Spec
-  extend MiniTest::StartFinish::Spec
 
   attr_accessor :template_root
   alias :silence_stdout :silence_logger
