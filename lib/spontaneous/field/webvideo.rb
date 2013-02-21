@@ -215,7 +215,8 @@ module Spontaneous::Field
         "player_id" => o[:player_id] }
         params.update("color" => o[:color]) if o.key?(:color)
         params = ::Rack::Utils.build_query(params)
-        "http://player.vimeo.com/video/#{value(:video_id)}?#{params}"
+        id = value(:id) || value(:video_id)
+        "http://player.vimeo.com/video/#{id}?#{params}"
     end
 
     def to_youtube_html(options = {})
@@ -290,7 +291,8 @@ module Spontaneous::Field
         "autohide" => o[:autohide],
         "rel" => o[:rel],
         "enablejsapi" => o[:api] })
-        "http://www.youtube.com/embed/#{value(:video_id)}?#{params}"
+        id = value(:id) || value(:video_id)
+        "http://www.youtube.com/embed/#{id}?#{params}"
     end
 
     def make_html_attributes(attributes)
