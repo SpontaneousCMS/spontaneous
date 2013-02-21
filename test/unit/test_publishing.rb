@@ -32,23 +32,6 @@ describe "Publishing" do
     class Piece
       box :things
     end
-
-    count = 0
-    2.times do |i|
-      c = Page.new(:uid => i)
-      count += 1
-      2.times do |j|
-        d = Piece.new(:uid => "#{i}.#{j}")
-        c.things << d
-        count += 1
-        2.times do |k|
-          d.things << Page.new(:uid => "#{i}.#{j}.#{k}")
-          d.save
-          count += 1
-        end
-      end
-      c.save
-    end
   end
 
   after do
