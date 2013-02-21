@@ -7,10 +7,9 @@ describe "Revisions" do
 
   Revision = Spontaneous::Publishing::Revision
 
-  before do
-    @now = Time.now
-    @site = setup_site
-    stub_time(@now)
+  start do
+    site = setup_site
+    let(:site) { site }
 
     Content.delete
 
@@ -22,11 +21,11 @@ describe "Revisions" do
       box :things
     end
 
-    @root = Page.create(:uid => "root")
+    root = Page.create(:uid => "root")
     count = 0
     2.times do |i|
       c = Page.new(:uid => i)
-      @root.things << c
+      root.things << c
       count += 1
       2.times do |j|
         d = Piece.new(:uid => "#{i}.#{j}")
@@ -40,14 +39,25 @@ describe "Revisions" do
       end
       c.save
     end
-    @root.save
+    root.save
+
+    Revision.history_dataset(Content).delete
+    Revision.archive_dataset(Content).delete
+    Revision.delete_all(Content)
+
+    let(:root) { root }
   end
 
-  after do
+  finish do
     Object.send(:remove_const, :Page) rescue nil
     Object.send(:remove_const, :Piece) rescue nil
     Content.delete
     teardown_site
+  end
+
+  before do
+    @now = Time.now
+    stub_time(@now)
   end
 
   describe "data sources" do
@@ -145,12 +155,10 @@ describe "Revisions" do
   describe "content revisions" do
     before do
       @revision = 1
-      Revision.history_dataset(Content).delete
-      Revision.archive_dataset(Content).delete
     end
 
     after do
-      Revision.delete_all(Content)
+      # Revision.delete_all(Content)
     end
 
     it "be testable for existance" do

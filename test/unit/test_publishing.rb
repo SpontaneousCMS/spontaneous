@@ -8,7 +8,7 @@ describe "Publishing" do
     site_root = Dir.mktmpdir
     template_source = File.expand_path(File.dirname(__FILE__) / "../fixtures/templates/publishing/templates")
     FileUtils.cp_r(template_source, site_root)
-    class_variable_set(:@@site_root, site_root)
+    let(:site_root) { site_root }
   end
 
   finish do
@@ -20,8 +20,7 @@ describe "Publishing" do
     @now = Time.now
     stub_time(@now)
 
-    @site_root = self.class.class_variable_get(:@@site_root)
-    @site = setup_site(@site_root)
+    @site = setup_site(site_root)
     Site.background_mode = :immediate
 
     Content.delete

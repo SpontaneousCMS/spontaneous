@@ -73,11 +73,28 @@ require 'json'
 require 'support/rack'
 require 'support/matchers'
 
+    # DB.loggers << ::Logger.new($stdout)
+
+module TransactionalTest
+  def run(runner)
+    result = nil
+    DB.transaction(:rollback => :always) { result = super }
+    result
+  end
+
+  def run_test(name)
+    super
+  end
+
+end
+
 module MiniTest::StartFinish
   module Unit
     def _run_suites(suites, type)
       begin
-        super(suites, type)
+        DB.synchronize do
+          super(suites, type)
+        end
       ensure
         if (suite = suites.last.master_suite)
           suite._run_finish_hook
@@ -101,9 +118,10 @@ module MiniTest::StartFinish
 end
 
 class MiniTest::Spec
+  include TransactionalTest
   class << self
     def parent_suite
-      a = ancestors.take_while { |a| a != MiniTest::Spec }.reject { |a| !(Class === a)}
+      a = ancestors.take_while { |a| a != MiniTest::Spec }.select { |a| Class === a }
       a.last
     end
 

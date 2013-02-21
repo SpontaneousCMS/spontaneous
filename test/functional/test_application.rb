@@ -14,7 +14,7 @@ describe "Application" do
     site_root += "/example_application"
     # Force loading of model in dev mode (where we have a db to introspect)
     Spontaneous.init(:root => site_root, :mode => :back, :environment => :development)
-    class_variable_set(:@@site_root, site_root)
+    let(:site_root) { site_root }
   end
 
   finish do
@@ -34,12 +34,11 @@ describe "Application" do
   end
 
   before do
-    @site_root = self.class.class_variable_get(:@@site_root)
   end
 
   describe "schema" do
     before do
-      Spontaneous.init(:root => @site_root, :mode => :back, :environment => :development)
+      Spontaneous.init(:root => site_root, :mode => :back, :environment => :development)
     end
 
     it "load" do
@@ -49,7 +48,7 @@ describe "Application" do
 
   describe "Site" do
     before do
-      Spontaneous.init(:root => @site_root, :mode => :back, :environment => :development)
+      Spontaneous.init(:root => site_root, :mode => :back, :environment => :development)
     end
     it "have the same config as Spontaneous" do
       Site.config.must_equal Spontaneous.config
@@ -64,7 +63,7 @@ describe "Application" do
   describe "back, development" do
 
     before do
-      Spontaneous.init(:root => @site_root, :mode => :back, :environment => :development)
+      Spontaneous.init(:root => site_root, :mode => :back, :environment => :development)
       Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
     end
 
@@ -116,7 +115,7 @@ describe "Application" do
   describe "front, development" do
 
     before do
-      Spontaneous.init(:root => @site_root, :mode => :front, :environment => :development)
+      Spontaneous.init(:root => site_root, :mode => :front, :environment => :development)
       Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
     end
 
@@ -140,7 +139,7 @@ describe "Application" do
 
   describe "back, production" do
     before do
-      Spontaneous.init(:root => @site_root, :mode => :back, :environment => :production)
+      Spontaneous.init(:root => site_root, :mode => :back, :environment => :production)
     end
 
     it "have the right mode setting" do
@@ -172,7 +171,7 @@ describe "Application" do
   describe "front, production" do
 
     before do
-      Spontaneous.init(:root => @site_root, :mode => :front, :environment => :production)
+      Spontaneous.init(:root => site_root, :mode => :front, :environment => :production)
     end
 
     it "have the right mode setting" do

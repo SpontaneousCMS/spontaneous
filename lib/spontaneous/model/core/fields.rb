@@ -14,7 +14,7 @@ module Spontaneous::Model::Core
         name = name.to_sym
 
         # Because of load conflicts types are likely to be loaded twice
-        return if self.field?(name, false)
+        return self.fields[name] if self.field?(name, false)
 
         if (existing_prototype = field_prototypes[name])
           prototype = existing_prototype.merge(self, type, options, &block)

@@ -17,47 +17,34 @@ describe "Back" do
     Spontaneous::Permissions::UserLevel.reset!
     @level_file = root / "config/user_levels.yml"
     Spontaneous::Permissions::UserLevel.stubs(:level_file).returns(@level_file)
-    class_variable_set(:@@site_root, root)
-  end
-
-  finish do
-    teardown_site(true)
-  end
-
-  def app
-    Spontaneous::Rack::Back.application
-  end
-
-  before do
-    @now = Time.now
-    stub_time(@now)
-    @site_root = self.class.class_variable_get(:@@site_root)
-    @site = setup_site(@site_root, true)
-    @storage = @site.default_storage
-    @site.stubs(:storage).with(anything).returns(@storage)
-    config = mock()
-    config.stubs(:reload_classes).returns(false)
-    config.stubs(:auto_login).returns('root')
-    config.stubs(:default_charset).returns('utf-8')
-    config.stubs(:background_mode).returns(:immediate)
-    config.stubs(:publishing_delay).returns(nil)
-    config.stubs(:services).returns(nil)
-    config.stubs(:site_domain).returns('example.org')
-    config.stubs(:site_id).returns('example_org')
-    config.stubs(:simultaneous_connection).returns('')
-    config.stubs(:spontaneous_binary).returns('')
-    @site.stubs(:config).returns(config)
+    let(:site_root) { root }
 
     Spontaneous::Permissions::User.delete
     # annoying to have to do this, but there you go
-    @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass")
-    @user.update(:level => Spontaneous::Permissions[:editor])
-    @user.save.reload
-    @key = @user.generate_access_key("127.0.0.1")
+    user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass")
+    user.update(:level => Spontaneous::Permissions[:editor])
+    user.save.reload
+    key = user.generate_access_key("127.0.0.1")
 
-    Spontaneous::Permissions::User.stubs(:[]).with(:login => 'root').returns(@user)
-    Spontaneous::Permissions::User.stubs(:[]).with(@user.id).returns(@user)
-    Spontaneous::Permissions::AccessKey.stubs(:authenticate).with(@key.key_id).returns(@key)
+    Spontaneous::Permissions::User.stubs(:[]).with(:login => 'root').returns(user)
+    Spontaneous::Permissions::User.stubs(:[]).with(user.id).returns(user)
+    Spontaneous::Permissions::AccessKey.stubs(:authenticate).with(key.key_id).returns(key)
+
+    let(:user) { user }
+    let(:key) { key }
+
+    site = setup_site(root, true)
+
+    site.config.tap do |c|
+      c.reload_classes = false
+      c.auto_login = 'root'
+      c.default_charset = 'utf-8'
+      c.background_mode = :immediate
+      c.site_domain = 'example.org'
+      c.site_id = 'example_org'
+    end
+
+    let(:site) { site }
 
     Content.delete
 
@@ -71,6 +58,7 @@ describe "Back" do
     class ::Job < Piece
       field :title
       field :image, :image
+      field :client, :select, :options => [["a", "Value A"], ["b", "Value B"]]
 
       box :images do
         field :title
@@ -103,58 +91,87 @@ describe "Back" do
       field :private, :user_level => :root
     end
 
-    @home = HomePage.new(:title => "Home")
-    @project1 = Project.new(:title => "Project 1", :slug => "project1")
-    @project2 = Project.new(:title => "Project 2", :slug => "project2")
-    @project3 = Project.new(:title => "Project 3", :slug => "project3")
-    @home.projects << @project1
-    @home.projects << @project2
-    @home.projects << @project3
+    home = HomePage.new(:title => "Home")
+    project1 = Project.new(:title => "Project 1", :slug => "project1")
+    project2 = Project.new(:title => "Project 2", :slug => "project2")
+    project3 = Project.new(:title => "Project 3", :slug => "project3")
+    home.projects << project1
+    home.projects << project2
+    home.projects << project3
 
-    @job1 = Job.new(:title => "Job 1", :image => "/i/job1.jpg")
-    @job2 = Job.new(:title => "Job 2", :image => "/i/job2.jpg")
-    @job3 = Job.new(:title => "Job 3", :image => "/i/job3.jpg")
-    @image1 = Image.new
-    @job1.images << @image1
-    @home.in_progress << @job1
-    @home.in_progress << @job2
-    @home.in_progress << @job3
+    job1 = Job.new(:title => "Job 1", :image => "/i/job1.jpg")
+    job2 = Job.new(:title => "Job 2", :image => "/i/job2.jpg")
+    job3 = Job.new(:title => "Job 3", :image => "/i/job3.jpg")
+    image1 = Image.new
+    job1.images << image1
+    home.in_progress << job1
+    home.in_progress << job2
+    home.in_progress << job3
 
 
-    @home.save
-    @home = Content[@home.id]
+    home.save
+
+    let(:home_id) { home.id }
+    let(:project1_id) { project1.id }
+    let(:project2_id) { project2.id }
+    let(:project3_id) { project3.id }
+    let(:job1_id) { job1.id }
+    let(:job2_id) { job2.id }
+    let(:job3_id) { job3.id }
+    let(:image1_id) { image1.id }
   end
 
-  after do
+  finish do
     [:Page, :Piece, :HomePage, :Job, :Project, :Image, :LinkedJob, :AdminAccess].each do |klass|
       Object.send(:remove_const, klass) rescue nil
     end
     Spontaneous::Permissions::User.delete
     Content.delete
-    teardown_site(false)
+    teardown_site(true)
   end
+
+  def app
+    Spontaneous::Rack::Back.application
+  end
+
+  let(:home) { Content[home_id] }
+  let(:project1) { Content[project1_id] }
+  let(:project2) { Content[project2_id] }
+  let(:project3) { Content[project3_id] }
+  let(:job1) { Content[job1_id] }
+  let(:job2) { Content[job2_id] }
+  let(:job3) { Content[job3_id] }
+  let(:image1) { Content[image1_id] }
+
+  before do
+    @now = Time.now
+    stub_time(@now)
+    storage = site.default_storage
+    site.stubs(:storage).with(anything).returns(storage)
+  end
+
 
   # Used by the various auth_* methods
   def api_key
-    @key
+    key
   end
 
   it "retrieves /@spontaneous without a CSRF token" do
     get("/@spontaneous")
     assert last_response.ok?, "Index retrieval should succeed without CSRF tokens"
-    assert_contains_csrf_token(@key)
+    assert_contains_csrf_token(key)
   end
 
   it "retrieves /@spontaneous/ without a CSRF token" do
     get("/@spontaneous/")
     assert last_response.ok?, "Index retrieval should succeed without CSRF tokens"
-    assert_contains_csrf_token(@key)
+    assert_contains_csrf_token(key)
   end
 
   it "retrieves any page identified by an id without a CSRF token" do
-    get("/@spontaneous/#{@project1.id}/edit")
+    get("/@spontaneous/#{project1.id}/edit")
     assert last_response.ok?, "Index retrieval should succeed without CSRF tokens"
-    assert_contains_csrf_token(@key)
+    assert_contains_csrf_token(key)
   end
 
   describe "/@spontaneous" do
@@ -180,18 +197,18 @@ describe "Back" do
       end
 
       it "return a site map for any page id" do
-        auth_get "/@spontaneous/map/#{@home.id}"
+        auth_get "/@spontaneous/map/#{home.id}"
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        assert_equal S::Site.map(@home.id).to_json, last_response.body
+        assert_equal S::Site.map(home.id).to_json, last_response.body
       end
 
       it "return a site map for any url" do
-        page = @project1
-        auth_get "/@spontaneous/map/path#{@project1.path}"
+        page = project1
+        auth_get "/@spontaneous/map/path#{project1.path}"
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        assert_equal S::Site.map(@project1.id).to_json, last_response.body
+        assert_equal S::Site.map(project1.id).to_json, last_response.body
       end
 
       it "return 404 when asked for map of non-existant page" do
@@ -206,7 +223,7 @@ describe "Back" do
         Spontaneous::Site.stubs(:modified_at).returns(now)
         auth_get '/@spontaneous/map'
         Time.httpdate(last_response.headers["Last-Modified"]).must_equal now
-        auth_get "/@spontaneous/map/path#{@project1.path}"
+        auth_get "/@spontaneous/map/path#{project1.path}"
         Time.httpdate(last_response.headers["Last-Modified"]).must_equal now
       end
 
@@ -214,11 +231,11 @@ describe "Back" do
         datestring = "Sat, 03 Mar 2012 00:49:44 GMT"
         now = Time.httpdate(datestring)
         Spontaneous::Site.stubs(:modified_at).returns(now)
-        auth_get "/@spontaneous/map/#{@home.id}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
+        auth_get "/@spontaneous/map/#{home.id}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
         last_response.status.must_equal 304
         auth_get "/@spontaneous/map", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
         last_response.status.must_equal 304
-        auth_get "/@spontaneous/map/path#{@project1.path}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
+        auth_get "/@spontaneous/map/path#{project1.path}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
         last_response.status.must_equal 304
       end
 
@@ -227,23 +244,23 @@ describe "Back" do
         datestring2 = "Sat, 03 Mar 2012 01:49:44 GMT"
         now = Time.httpdate(datestring2)
         Spontaneous::Site.stubs(:modified_at).returns(now)
-        auth_get "/@spontaneous/map/#{@home.id}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring1}
+        auth_get "/@spontaneous/map/#{home.id}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring1}
         last_response.status.must_equal 200
-        auth_get "/@spontaneous/map/path#{@project1.path}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring1}
+        auth_get "/@spontaneous/map/path#{project1.path}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring1}
         last_response.status.must_equal 200
       end
     end
 
     describe "/field" do
       it "generates an error if there is a field version conflict" do
-        field = @job1.fields.title
+        field = job1.fields.title
         field.version = 3
-        @job1.save.reload
-        field = @job1.fields.title
+        job1.save.reload
+        field = job1.fields.title
         sid = field.schema_id.to_s
         params = { "fields" => {sid => "2"} }
 
-        auth_post "/@spontaneous/field/conflicts/#{@job1.id}", params
+        auth_post "/@spontaneous/field/conflicts/#{job1.id}", params
         assert last_response.status == 409, "Should have recieved a 409 conflict but instead received a #{last_response.status}"
         last_response.content_type.must_equal "application/json;charset=utf-8"
         result = Spontaneous.deserialise_http(last_response.body)
@@ -253,32 +270,32 @@ describe "Back" do
       end
 
       it "not generate an error if the pending version of the field matches" do
-        field = @job1.fields.title
+        field = job1.fields.title
         field.version = 2
         field.processed_values[:__pending__] = {:value => "something.gif", :version => 3 }
-        @job1.save_fields
-        @job1.reload
-        field = @job1.fields.title
+        job1.save_fields
+        job1.reload
+        field = job1.fields.title
         field.pending_version.must_equal 3
         sid = field.schema_id.to_s
         params = { "fields" => {sid => "3"} }
 
-        auth_post "/@spontaneous/field/conflicts/#{@job1.id}", params
+        auth_post "/@spontaneous/field/conflicts/#{job1.id}", params
         assert last_response.status == 200, "Should have recieved a 200 OK but instead received a #{last_response.status}"
       end
 
 
       it "generate an error if there is a field version conflict for boxes" do
-        box = @job1.images
+        box = job1.images
         field = box.fields.title
         field.version = 3
-        @job1.save.reload
-        box = @job1.images
+        job1.save.reload
+        box = job1.images
         field = box.fields.title
         sid = field.schema_id.to_s
         params = { "fields" => {sid => "2"} }
 
-        auth_post "/@spontaneous/field/conflicts/#{@job1.id}/#{box.schema_id.to_s}", params
+        auth_post "/@spontaneous/field/conflicts/#{job1.id}/#{box.schema_id.to_s}", params
         assert last_response.status == 409, "Should have recieved a 409 conflict but instead received a #{last_response.status}"
         last_response.content_type.must_equal "application/json;charset=utf-8"
         result = Spontaneous.deserialise_http(last_response.body)
@@ -288,24 +305,24 @@ describe "Back" do
       end
 
       it "be able to provide a dynamic value list" do
-        @job1.reload
+        job1.reload
         list = mock()
         options = [["a", "Value A"], ["b", "Value B"]]
-        list.expects(:values).with(@job1).returns(options)
-        field = Job.field :client, :select, :options => proc { |content| list.values(content) }
-        auth_get "/@spontaneous/field/options/#{field.schema_id}/#{@job1.id}"
+        list.expects(:values).with(job1).returns(options)
+        field = Job.field :client_dynamic, :select, :options => proc { |content| list.values(content) }
+        auth_get "/@spontaneous/field/options/#{field.schema_id}/#{job1.id}"
         assert last_response.ok?,  "Expected status 200 but received #{last_response.status}"
         result = Spot::JSON.parse(last_response.body)
         result.must_equal options
       end
 
       it "be able to provide a dynamic value list for a box field" do
-        @job1.reload
+        job1.reload
         list = mock()
         options = [["a", "Value A"], ["b", "Value B"]]
-        list.expects(:values).with(@job1.images).returns(options)
+        list.expects(:values).with(job1.images).returns(options)
         field = Job.boxes.images.instance_class.field :client, :select, :options => proc { |box| list.values(box) }
-        auth_get "/@spontaneous/field/options/#{field.schema_id}/#{@job1.id}/#{Job.boxes.images.schema_id}"
+        auth_get "/@spontaneous/field/options/#{field.schema_id}/#{job1.id}/#{Job.boxes.images.schema_id}"
         assert last_response.ok?,  "Expected status 200 but received #{last_response.status}"
         result = Spot::JSON.parse(last_response.body)
         result.must_equal options
@@ -330,7 +347,7 @@ describe "Back" do
         assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
         last_response.content_type.must_equal "application/json;charset=utf-8"
         result = Spot::JSON.parse(last_response.body)
-        result[:types].stringify_keys.must_equal S::Site.schema.export(@user)
+        result[:types].stringify_keys.must_equal S::Site.schema.export(user)
       end
 
       it "apply the current user's permissions to the exported schema" do
@@ -377,7 +394,7 @@ describe "Back" do
 
       it "provides values for a  static option list" do
         # static lists should be included in the field definitions
-        field = Job.field :client, :select, :options => [["a", "Value A"], ["b", "Value B"]]
+        # field = Job.field :client, :select, :options => [["a", "Value A"], ["b", "Value B"]]
         auth_get "/@spontaneous/site"
 
         schema = Spot::JSON.parse(last_response.body)
@@ -416,37 +433,37 @@ describe "Back" do
     describe "/content" do
       it "updates field values" do
         params = {
-          "field[#{@job1.fields.title.schema_id.to_s}]" => "Updated field_name_1"
+          "field[#{job1.fields.title.schema_id.to_s}]" => "Updated field_name_1"
         }
-        auth_put "/@spontaneous/content/#{@job1.id}", params
+        auth_put "/@spontaneous/content/#{job1.id}", params
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @job1 = Content[@job1.id]
-        last_response.body.must_equal @job1.serialise_http(@user)
-        @job1.fields.title.value.must_equal  "Updated field_name_1"
+        job = Content[job1.id]
+        last_response.body.must_equal job.serialise_http(user)
+        job.fields.title.value.must_equal  "Updated field_name_1"
       end
 
       it "updates page field values" do
         params = {
-          "field[#{@home.fields.title.schema_id.to_s}]" => "Updated title",
-            "field[#{@home.fields.introduction.schema_id.to_s}]" => "Updated intro"
+          "field[#{home.fields.title.schema_id.to_s}]" => "Updated title",
+            "field[#{home.fields.introduction.schema_id.to_s}]" => "Updated intro"
         }
-        auth_put "/@spontaneous/content/#{@home.id}", params
+        auth_put "/@spontaneous/content/#{home.id}", params
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @home = Content[@home.id]
-        last_response.body.must_equal @home.serialise_http(@user)
-        @home.fields.title.value.must_equal  "Updated title"
-        @home.fields.introduction.value.must_equal  "<p>Updated intro</p>\n"
+        reload = Content[home.id]
+        last_response.body.must_equal reload.serialise_http(user)
+        reload.fields.title.value.must_equal  "Updated title"
+        reload.fields.introduction.value.must_equal  "<p>Updated intro</p>\n"
       end
 
       it "triggers replacement of default slug if title is first set" do
         project = Project.new
-        @home.projects << project
-        @home.save
+        home.projects << project
+        home.save
         assert project.has_generated_slug?
         params = {
-          "field[#{@home.fields.title.schema_id.to_s}]" => "Updated title",
+          "field[#{home.fields.title.schema_id.to_s}]" => "Updated title",
         }
         auth_put "/@spontaneous/content/#{project.id}", params
         project.reload
@@ -455,105 +472,105 @@ describe "Back" do
       end
 
       it "updates box field values" do
-        box = @job1.images
+        box = job1.images
         box.fields.title.to_s.wont_equal "Updated title"
         params = {
           "field[#{box.fields.title.schema_id.to_s}]" => "Updated title"
         }
-        auth_put "/@spontaneous/content/#{@job1.id}/#{box.schema_id.to_s}", params
+        auth_put "/@spontaneous/content/#{job1.id}/#{box.schema_id.to_s}", params
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @job1 = Content[@job1.id]
-        @job1.images.title.value.must_equal "Updated title"
+        job = Content[job1.id]
+        job.images.title.value.must_equal "Updated title"
       end
 
       it "toggles visibility" do
-        @job1.reload.visible?.must_equal true
-        auth_patch "/@spontaneous/content/#{@job1.id}/toggle"
+        job1.reload.visible?.must_equal true
+        auth_patch "/@spontaneous/content/#{job1.id}/toggle"
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        Spot::JSON.parse(last_response.body).must_equal({:id => @job1.id, :hidden => true})
-        @job1.reload.visible?.must_equal false
-        auth_patch "/@spontaneous/content/#{@job1.id}/toggle"
+        Spot::JSON.parse(last_response.body).must_equal({:id => job1.id, :hidden => true})
+        job1.reload.visible?.must_equal false
+        auth_patch "/@spontaneous/content/#{job1.id}/toggle"
         assert last_response.ok?, "Expected status 200 but recieved #{last_response.status}"
-        @job1.reload.visible?.must_equal true
-        Spot::JSON.parse(last_response.body).must_equal({:id => @job1.id, :hidden => false})
+        job1.reload.visible?.must_equal true
+        Spot::JSON.parse(last_response.body).must_equal({:id => job1.id, :hidden => false})
       end
 
       it "sets the position of pieces" do
-        auth_patch "/@spontaneous/content/#{@job2.id}/position/0"
+        auth_patch "/@spontaneous/content/#{job2.id}/position/0"
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @home.reload
-        @home.in_progress.contents.first.id.must_equal @job2.id
+        home.reload
+        home.in_progress.contents.first.id.must_equal job2.id
 
-        page = Content[@home.id]
-        page.in_progress.contents.first.id.must_equal @job2.id
+        page = Content[home.id]
+        page.in_progress.contents.first.id.must_equal job2.id
       end
 
       it "records the currently logged in user" do
-        page = @home.in_progress.last
+        page = home.in_progress.last
         auth_patch "/@spontaneous/content/#{page.id}/toggle"
         assert last_response.ok?, "Expected status 200 but received #{last_response.status}"
         page.reload
-        page.pending_modifications(:visibility).first.user.must_equal @user
+        page.pending_modifications(:visibility).first.user.must_equal user
       end
 
       it "allows addition of pages" do
-        current_count = @home.projects.length
-        auth_post "/@spontaneous/content/#{@home.id}/#{@home.projects.schema_id.to_s}/#{Project.schema_id.to_s}"
+        current_count = home.projects.length
+        auth_post "/@spontaneous/content/#{home.id}/#{home.projects.schema_id.to_s}/#{Project.schema_id.to_s}"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        @home.reload
-        @home.projects.length.must_equal current_count+1
-        @home.projects.first.must_be_instance_of(Project)
+        home.reload
+        home.projects.length.must_equal current_count+1
+        home.projects.first.must_be_instance_of(Project)
       end
 
       it "default to adding entries at the top" do
-        current_count = @home.in_progress.contents.length
-        first_id = @home.in_progress.contents.first.id
-        @home.in_progress.contents.first.class.name.wont_equal "Image"
-        auth_post "/@spontaneous/content/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}"
+        current_count = home.in_progress.contents.length
+        first_id = home.in_progress.contents.first.id
+        home.in_progress.contents.first.class.name.wont_equal "Image"
+        auth_post "/@spontaneous/content/#{home.id}/#{home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @home.reload
-        @home.in_progress.contents.length.must_equal current_count+1
-        @home.in_progress.contents.first.id.wont_equal first_id
-        @home.in_progress.contents.first.class.name.must_equal "Image"
+        home.reload
+        home.in_progress.contents.length.must_equal current_count+1
+        home.in_progress.contents.first.id.wont_equal first_id
+        home.in_progress.contents.first.class.name.must_equal "Image"
         required_response = {
           :position => 0,
-          :entry => @home.in_progress.contents.first.export
+          :entry => home.in_progress.contents.first.export
         }
         Spot::JSON.parse(last_response.body).must_equal required_response
       end
 
       it "allows adding of entries at the bottom" do
-        current_count = @home.in_progress.contents.length
-        last_id = @home.in_progress.contents.last.id
-        @home.in_progress.contents.last.class.name.wont_equal "Image"
-        auth_post "/@spontaneous/content/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => -1
+        current_count = home.in_progress.contents.length
+        last_id = home.in_progress.contents.last.id
+        home.in_progress.contents.last.class.name.wont_equal "Image"
+        auth_post "/@spontaneous/content/#{home.id}/#{home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => -1
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @home.reload
-        @home.in_progress.contents.length.must_equal current_count+1
-        @home.in_progress.contents.last.id.wont_equal last_id
-        @home.in_progress.contents.last.class.name.must_equal "Image"
+        home.reload
+        home.in_progress.contents.length.must_equal current_count+1
+        home.in_progress.contents.last.id.wont_equal last_id
+        home.in_progress.contents.last.class.name.must_equal "Image"
         required_response = {
           :position => -1,
-          :entry => @home.in_progress.contents.last.export
+          :entry => home.in_progress.contents.last.export
         }
         Spot::JSON.parse(last_response.body).must_equal required_response
       end
 
       it "creates entries with the owner set to the logged in user" do
-        auth_post "/@spontaneous/content/#{@home.id}/#{@home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => 0
+        auth_post "/@spontaneous/content/#{home.id}/#{home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => 0
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        @home.reload
-        @home.in_progress.first.created_by_id.must_equal @user.id
-        @home.in_progress.first.created_by.must_equal @user
+        home.reload
+        home.in_progress.first.created_by_id.must_equal user.id
+        home.in_progress.first.created_by.must_equal user
       end
 
       it "allows the deletion of items" do
-        target = @home.in_progress.first
+        target = home.in_progress.first
         auth_delete "/@spontaneous/content/#{target.id}"
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
@@ -570,43 +587,43 @@ describe "Back" do
       end
 
       it "replace values of fields immediately when required" do
-        @image1.image.processed_value.must_equal ""
-        auth_put("@spontaneous/file/#{@image1.id}",
-                 "file" => @upload, "field" => @image1.image.schema_id.to_s )
+        image1.image.processed_value.must_equal ""
+        auth_put("@spontaneous/file/#{image1.id}",
+                 "file" => @upload, "field" => image1.image.schema_id.to_s )
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @image1 = Content[@image1.id]
-        src = @image1.image.src
+        image = Content[image1.id]
+        src = image.image.src
         src.must_match /^\/media(.+)\/rose\.jpg$/
-        Spot::JSON.parse(last_response.body).must_equal @image1.image.export
+        Spot::JSON.parse(last_response.body).must_equal image.image.export
         assert File.exist?(S::Media.to_filepath(src))
         get src
         assert last_response.ok?
       end
 
       it "replace values of box file fields" do
-        @job1.images.image.processed_value.must_equal ""
-        auth_put("@spontaneous/file/#{@job1.id}/#{@job1.images.schema_id}",
-                 "file" => @upload, "field" => @job1.images.image.schema_id.to_s)
+        job1.images.image.processed_value.must_equal ""
+        auth_put("@spontaneous/file/#{job1.id}/#{job1.images.schema_id}",
+                 "file" => @upload, "field" => job1.images.image.schema_id.to_s)
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @job1 = Content[@job1.id]
-        src = @job1.images.image.src
+        job = Content[job1.id]
+        src = job.images.image.src
         src.must_match /^\/media(.+)\/rose\.jpg$/
-        Spot::JSON.parse(last_response.body).must_equal @job1.images.image.export
+        Spot::JSON.parse(last_response.body).must_equal job.images.image.export
         assert File.exist?(S::Media.to_filepath(src))
         get src
         assert last_response.ok?
       end
 
       it "be able to wrap pieces around files using default addable class" do
-        box = @job1.images
+        box = job1.images
         current_count = box.contents.length
         first_id = box.contents.first.id.to_s
-        auth_post "/@spontaneous/file/#{@job1.id}/#{box.schema_id.to_s}", "file" => @upload
+        auth_post "/@spontaneous/file/#{job1.id}/#{box.schema_id.to_s}", "file" => @upload
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        box = @job1.reload.images
+        box = job1.reload.images
         first = box.contents.first
         box.contents.length.must_equal current_count+1
         first.image.src.must_match /^\/media(.+)\/#{File.basename(@src_file)}$/
@@ -627,7 +644,7 @@ describe "Back" do
       end
 
       it "has the right setting for shard_dir" do
-        shard_path = File.join(@site.root / 'cache/tmp')
+        shard_path = File.join(site.root / 'cache/tmp')
         Spontaneous.shard_path.must_equal shard_path
         Spontaneous.shard_path("abcdef0123").must_equal shard_path/ "ab/cd/abcdef0123"
       end
@@ -669,19 +686,19 @@ describe "Back" do
           auth_get "/@spontaneous/shard/#{hash}"
           last_response.status.must_equal 200
         end
-        @image1.image.processed_value.must_equal ""
+        image1.image.processed_value.must_equal ""
         dataset = mock()
         ::Content.stubs(:for_update).returns(dataset)
-        dataset.stubs(:get).with(@image1.id.to_s).returns(@image1)
-        dataset.stubs(:get).with(@image1.id).returns(@image1)
-        auth_put "/@spontaneous/shard/#{@image1.id}", "filename" => "rose.jpg",
-        "shards" => hashes, "field" => @image1.image.schema_id.to_s
+        dataset.stubs(:get).with(image1.id.to_s).returns(image1)
+        dataset.stubs(:get).with(image1.id).returns(image1)
+        auth_put "/@spontaneous/shard/#{image1.id}", "filename" => "rose.jpg",
+        "shards" => hashes, "field" => image1.image.schema_id.to_s
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @image1 = Content[@image1.id]
-        src = @image1.image.src
+        image = Content[image1.id]
+        src = image.image.src
         src.must_match %r{^(.+)/rose\.jpg$}
-        Spot::JSON.parse(last_response.body).must_equal @image1.image.export
+        Spot::JSON.parse(last_response.body).must_equal image.image.export
         assert File.exist?(S::Media.to_filepath(src))
         S::Media.digest(S::Media.to_filepath(src)).must_equal @image_digest
       end
@@ -697,14 +714,14 @@ describe "Back" do
           auth_get "/@spontaneous/shard/#{hash}"
           last_response.status.must_equal 200
         end
-        box = @job1.images
+        box = job1.images
         current_count = box.contents.length
         first_id = box.contents.first.id.to_s
 
-        auth_post "/@spontaneous/shard/#{@job1.id}/#{box.schema_id.to_s}", "filename" => "rose.jpg", "shards" => hashes, "mime_type" => "image/jpeg"
+        auth_post "/@spontaneous/shard/#{job1.id}/#{box.schema_id.to_s}", "filename" => "rose.jpg", "shards" => hashes, "mime_type" => "image/jpeg"
         assert last_response.ok?, "Should have got status 200 but got #{last_response.status}"
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        box = @job1.reload.images
+        box = job1.reload.images
         first = box.contents.first
         box.contents.length.must_equal current_count+1
         first.image.src.must_match %r{^(.+)/rose\.jpg$}
@@ -718,8 +735,8 @@ describe "Back" do
 
     describe "/page" do
       before do
-        @update_slug = "/@spontaneous/page/#{@project1.id}/slug"
-        @page = @project1
+        @update_slug = "/@spontaneous/page/#{project1.id}/slug"
+        @page = project1
       end
 
       it "return json for individual pages" do
@@ -781,22 +798,23 @@ describe "Back" do
       end
 
       it "allows UID editing by developer level users" do
-        @user.update(:level => Spontaneous::Permissions[:root])
+        user.update(:level => Spontaneous::Permissions[:root])
         uid = "fishy"
-        @project1.uid.wont_equal uid
-        auth_put "/@spontaneous/page/#{@project1.id}/uid", 'uid' => uid
+        project1.uid.wont_equal uid
+        auth_put "/@spontaneous/page/#{project1.id}/uid", 'uid' => uid
         assert last_response.ok?
         Spot::JSON.parse(last_response.body).must_equal({:uid => uid})
-        @project1.reload.uid.must_equal uid
+        project1.reload.uid.must_equal uid
+        user.update(:level => Spontaneous::Permissions[:editor])
       end
 
       it "disallows UID editing by non-developer level users" do
         uid = "boom"
-        orig = @project1.uid
-        @project1.uid.wont_equal uid
-        auth_put "/@spontaneous/page/#{@project1.id}/uid", 'uid' => uid
+        orig = project1.uid
+        project1.uid.wont_equal uid
+        auth_put "/@spontaneous/page/#{project1.id}/uid", 'uid' => uid
         assert last_response.status == 403
-        @project1.reload.uid.must_equal orig
+        project1.reload.uid.must_equal orig
       end
     end
 
@@ -813,8 +831,8 @@ describe "Back" do
       end
 
       it "be able to start a publish with a set of change sets" do
-        S::Site.expects(:publish_pages).with([@project1.id])
-        auth_post "/@spontaneous/changes", :page_ids => [@project1.id]
+        S::Site.expects(:publish_pages).with([project1.id])
+        auth_post "/@spontaneous/changes", :page_ids => [project1.id]
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
 
@@ -828,17 +846,17 @@ describe "Back" do
       end
 
       it "recognise when the list of changes is complete" do
-        S::Site.expects(:publish_pages).with([@home.id, @project1.id])
-        auth_post "/@spontaneous/changes", :page_ids => [@home.id, @project1.id]
+        S::Site.expects(:publish_pages).with([home.id, project1.id])
+        auth_post "/@spontaneous/changes", :page_ids => [home.id, project1.id]
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
     end
 
     describe "/alias" do
       it "retrieves a list of potential targets" do
-        auth_get "/@spontaneous/alias/#{LinkedJob.schema_id}/#{@home.id}/#{@home.in_progress.schema_id}"
+        auth_get "/@spontaneous/alias/#{LinkedJob.schema_id}/#{home.id}/#{home.in_progress.schema_id}"
         assert last_response.ok?
-        expected = LinkedJob.targets(@home, @home.in_progress)
+        expected = LinkedJob.targets(home, home.in_progress)
         response = Spot::JSON.parse(last_response.body)
         response[:pages].must_equal 1
         response[:page].must_equal 1
@@ -852,9 +870,9 @@ describe "Back" do
       end
 
       it "filters targets using a search string" do
-        auth_get "/@spontaneous/alias/#{LinkedJob.schema_id}/#{@home.id}/#{@home.in_progress.schema_id}", {"query" => "job 3"}
+        auth_get "/@spontaneous/alias/#{LinkedJob.schema_id}/#{home.id}/#{home.in_progress.schema_id}", {"query" => "job 3"}
         assert last_response.ok?
-        expected = [@job3]
+        expected = [job3]
         response = Spot::JSON.parse(last_response.body)
         response[:pages].must_equal 1
         response[:page].must_equal 1
@@ -867,39 +885,39 @@ describe "Back" do
       end
 
       it "adds an alias to a box" do
-        @home.featured_jobs.contents.length.must_equal 0
-        auth_post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 0
+        home.featured_jobs.contents.length.must_equal 0
+        auth_post "/@spontaneous/alias/#{home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 0
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @home.reload
-        @home.featured_jobs.contents.length.must_equal 1
-        a = @home.featured_jobs.first
+        home.reload
+        home.featured_jobs.contents.length.must_equal 1
+        a = home.featured_jobs.first
         assert a.alias?
         a.target.must_equal Job.first
         required_response = {
           :position => 0,
-          :entry => @home.featured_jobs.contents.first.export(@user)
+          :entry => home.featured_jobs.contents.first.export(user)
         }
         Spot::JSON.parse(last_response.body).must_equal required_response
       end
 
       it "adds an alias to a box at any position" do
-        @home.featured_jobs << Job.new
-        @home.featured_jobs << Job.new
-        @home.featured_jobs << Job.new
-        @home.save.reload
-        @home.featured_jobs.contents.length.must_equal 3
-        auth_post "/@spontaneous/alias/#{@home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 2
+        home.featured_jobs << Job.new
+        home.featured_jobs << Job.new
+        home.featured_jobs << Job.new
+        home.save.reload
+        home.featured_jobs.contents.length.must_equal 3
+        auth_post "/@spontaneous/alias/#{home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 2
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        @home.reload
-        @home.featured_jobs.contents.length.must_equal 4
-        a = @home.featured_jobs[2]
+        home.reload
+        home.featured_jobs.contents.length.must_equal 4
+        a = home.featured_jobs[2]
         assert a.alias?
         a.target.must_equal Job.first
         required_response = {
           :position => 2,
-          :entry => @home.featured_jobs[2].export(@user)
+          :entry => home.featured_jobs[2].export(user)
         }
         Spot::JSON.parse(last_response.body).must_equal required_response
       end
@@ -921,12 +939,12 @@ describe "Back" do
               nil
             }
           end
-          box = @home.boxes[:featured_jobs]
+          box = home.boxes[:featured_jobs]
           box._prototype.allow LinkedSomething
-          auth_post "/@spontaneous/alias/#{@home.id}/#{box.schema_id.to_s}", 'alias_id' => LinkedSomething.schema_id.to_s, 'target_id' => @target_id, "position" => 0
+          auth_post "/@spontaneous/alias/#{home.id}/#{box.schema_id.to_s}", 'alias_id' => LinkedSomething.schema_id.to_s, 'target_id' => @target_id, "position" => 0
           assert last_response.status == 200, "Expected a 200 but got #{last_response.status}"
-          @home.reload
-          a = @home.featured_jobs[0]
+          home.reload
+          a = home.featured_jobs[0]
           assert a.alias?
           a.target.must_equal @target
         ensure
@@ -967,38 +985,143 @@ describe "Back" do
       # end
     end
 
+
+    describe "/events" do
+      it "should require CSRF header" do
+        get "/@spontaneous/events"
+        assert last_response.status == 401
+      end
+
+      it "should disable buffering" do
+        auth_get "/@spontaneous/events", {}, {"HTTP_ACCEPT" => "text/event-stream"}
+        last_response.headers["X-Accel-Buffering"].must_equal "no"
+      end
+
+      it "should have a content type of text/event-stream" do
+        auth_get "/@spontaneous/events", {}, {"HTTP_ACCEPT" => "text/event-stream"}
+        last_response.headers["Content-Type"].must_match /^text\/event-stream/
+      end
+    end
+  end
+
+  describe "/" do
+    before do
+      @renderer = Spontaneous::Output.preview_renderer
+    end
+
+    it "return rendered root page" do
+      get "/"
+      assert last_response.ok?
+      last_response.content_type.must_equal "text/html;charset=utf-8"
+      assert_equal @renderer.render(home.output(:html)), last_response.body
+    end
+
+    it "return rendered child-page" do
+      get "/project1"
+      assert last_response.ok?
+      last_response.content_type.must_equal "text/html;charset=utf-8"
+      assert_equal @renderer.render(project1.output(:html)), last_response.body
+    end
+
+    it "return alternate formats" do
+      Project.add_output :js
+      get "/project1.js"
+      assert last_response.ok?
+      last_response.content_type.must_equal "application/javascript;charset=utf-8"
+      assert_equal @renderer.render(project1.output(:js)), last_response.body
+    end
+
+    it "allow pages to have css formats" do
+      Project.add_output :css
+      get "/project1.css"
+      assert last_response.ok?
+      last_response.content_type.must_equal "text/css;charset=utf-8"
+      assert_equal @renderer.render(project1.output(:css)), last_response.body
+    end
+
+    it "return cache-busting headers" do
+      ["/project1", "/"].each do |path|
+        get path
+        assert last_response.ok?
+        last_response.headers['Expires'].must_equal @now.to_formatted_s(:rfc822)
+        last_response.headers['Last-Modified'].must_equal @now.to_formatted_s(:rfc822)
+      end
+    end
+
+    it "return cache-control headers" do
+      ["/project1", "/"].each do |path|
+        get path
+        assert last_response.ok?
+        ["no-store", 'no-cache', 'must-revalidate', 'max-age=0'].each do |p|
+          last_response.headers['Cache-Control'].must_match %r(#{p})
+        end
+      end
+    end
+
+    it "render SASS templates" do
+      get "/css/sass_template.css"
+      assert last_response.ok?, "Should return 200 but got #{last_response.status}"
+      last_response.body.must_match /color: #ffeeff/
+    end
+
+    it "compile CoffeeScript" do
+      get "/js/coffeescript.js"
+      assert last_response.ok?, "Should return 200 but got #{last_response.status}"
+      last_response.body.must_match /square = function/
+      last_response.content_type.must_equal "application/javascript;charset=utf-8"
+    end
+
+    it "accept POST requests" do
+      Project.expects(:posted!).with(project1)
+      Project.request :post do
+        Project.posted!(page)
+      end
+      post "/project1"
+    end
+  end
+
+  describe "/media" do
+    it "should be available under /media" do
+      get "/media/101/003/rose.jpg"
+      assert last_response.ok?
+      last_response.content_type.must_equal "image/jpeg"
+    end
+  end
+
+
     describe "/schema" do
       before do
+        class ::Modifiable < Piece
+          field :title
+          field :image
+        end
         # enable schema validation errors by creating and using a permanent map file
         @schema_map = File.join(Dir.tmpdir, "schema.yml")
         FileUtils.rm(@schema_map) if File.exists?(@schema_map)
-        S.schema.schema_map_file = @schema_map
-        S.schema.validate!
-        S.schema.write_schema
-        S.schema.schema_loader_class = S::Schema::PersistentMap
-        @df1 = Job.field_prototypes[:title]
-        @f1  = Job.field_prototypes[:image]
+        @schema = S.schema
+        @schema.schema_map_file = @schema_map
+        @schema.validate!
+        @schema.write_schema
+        @schema.schema_loader_class = S::Schema::PersistentMap
+        @df1 = Modifiable.field_prototypes[:title]
+        @f1  = Modifiable.field_prototypes[:image]
         @uid = @df1.schema_id.to_s
-        S.schema.delete(::Job)
-        Object.send :remove_const, :Job
+        @schema.delete(::Modifiable)
+        Object.send :remove_const, :Modifiable
 
-        class ::Job < Piece
+        class ::Modifiable < Piece
           field :replaced
-          field :image, :image
-
-          box :images do
-            field :title
-            field :image
-            allow Image
-          end
+          field :image
         end
-        @af1 = Job.field_prototypes[:replaced]
-        lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
+        @af1 = Modifiable.field_prototypes[:replaced]
+        lambda { @schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
         S::Rack::Back::Reloader.any_instance.stubs(:should_reload?).returns(true)
         Spontaneous::Loader.stubs(:reload!)
       end
 
       after do
+        S.schema.delete(::Modifiable)
+        Object.send :remove_const, :Modifiable
         S.schema.schema_loader_class = S::Schema::TransientMap
         FileUtils.rm(@schema_map) if File.exists?(@schema_map)
       end
@@ -1031,129 +1154,21 @@ describe "Back" do
       end
 
       it "perform renames via a link" do
+        S.schema.expects(:apply_fix).with(:rename, @df1.schema_id.to_s, @af1.schema_name)
         action ="/@spontaneous/schema/rename"
         post action, "uid" => @df1.schema_id, "ref" => @af1.schema_name, "origin" => "/@spontaneous", S::Rack::CSRF_PARAM => api_key.generate_csrf_token
         last_response.status.must_equal 302
-        begin
-          S.schema.validate!
-        rescue Spontaneous::SchemaModificationError => e
-          flunk("Schema modification link should have resolved schema errors")
-        end
       end
 
       it "perform deletions via a link" do
+        S.schema.expects(:apply_fix).with(:delete, @df1.schema_id.to_s)
         action ="/@spontaneous/schema/delete"
         post action, "uid" => @df1.schema_id, "origin" => "/@spontaneous", S::Rack::CSRF_PARAM => api_key.generate_csrf_token
         last_response.status.must_equal 302
-        begin
-          S.schema.validate!
-        rescue Spontaneous::SchemaModificationError => e
-          flunk("Schema modification link should have resolved schema errors")
-        end
       end
 
       it "redirects back to original page"
     end
-
-    describe "/events" do
-      it "should require CSRF header" do
-        get "/@spontaneous/events"
-        assert last_response.status == 401
-      end
-
-      it "should disable buffering" do
-        auth_get "/@spontaneous/events", {}, {"HTTP_ACCEPT" => "text/event-stream"}
-        last_response.headers["X-Accel-Buffering"].must_equal "no"
-      end
-
-      it "should have a content type of text/event-stream" do
-        auth_get "/@spontaneous/events", {}, {"HTTP_ACCEPT" => "text/event-stream"}
-        last_response.headers["Content-Type"].must_match /^text\/event-stream/
-      end
-    end
-  end
-
-  describe "/" do
-    before do
-      @renderer = Spontaneous::Output.preview_renderer
-    end
-
-    it "return rendered root page" do
-      get "/"
-      assert last_response.ok?
-      last_response.content_type.must_equal "text/html;charset=utf-8"
-      assert_equal @renderer.render(@home.output(:html)), last_response.body
-    end
-
-    it "return rendered child-page" do
-      get "/project1"
-      assert last_response.ok?
-      last_response.content_type.must_equal "text/html;charset=utf-8"
-      assert_equal @renderer.render(@project1.output(:html)), last_response.body
-    end
-
-    it "return alternate formats" do
-      Project.add_output :js
-      get "/project1.js"
-      assert last_response.ok?
-      last_response.content_type.must_equal "application/javascript;charset=utf-8"
-      assert_equal @renderer.render(@project1.output(:js)), last_response.body
-    end
-
-    it "allow pages to have css formats" do
-      Project.add_output :css
-      get "/project1.css"
-      assert last_response.ok?
-      last_response.content_type.must_equal "text/css;charset=utf-8"
-      assert_equal @renderer.render(@project1.output(:css)), last_response.body
-    end
-
-    it "return cache-busting headers" do
-      ["/project1", "/"].each do |path|
-        get path
-        assert last_response.ok?
-        last_response.headers['Expires'].must_equal @now.to_formatted_s(:rfc822)
-        last_response.headers['Last-Modified'].must_equal @now.to_formatted_s(:rfc822)
-      end
-    end
-
-    it "return cache-control headers" do
-      ["/project1", "/"].each do |path|
-        get path
-        assert last_response.ok?
-        ["no-store", 'no-cache', 'must-revalidate', 'max-age=0'].each do |p|
-          last_response.headers['Cache-Control'].must_match %r(#{p})
-        end
-      end
-    end
-
-    it "render SASS templates" do
-      get "/css/sass_template.css"
-      assert last_response.ok?, "Should return 200 but got #{last_response.status}"
-      last_response.body.must_match /color: #ffeeff/
-    end
-
-    it "compile CoffeeScript xxx" do
-      get "/js/coffeescript.js"
-      assert last_response.ok?, "Should return 200 but got #{last_response.status}"
-      last_response.body.must_match /square = function/
-      last_response.content_type.must_equal "application/javascript;charset=utf-8"
-    end
-
-    it "accept POST requests" do
-      Project.expects(:posted!).with(@project1)
-      Project.request :post do
-        Project.posted!(page)
-      end
-      post "/project1"
-    end
-  end
-
-  describe "/media" do
-    it "should be available under /media" do
-      get "/media/101/003/rose.jpg"
-      assert last_response.ok?
-      last_response.content_type.must_equal "image/jpeg"
-    end
-  end
 end
+
+

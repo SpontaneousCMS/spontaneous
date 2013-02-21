@@ -14,7 +14,7 @@ describe "UserAdmin" do
     app_root = File.expand_path('../../fixtures/user_manager', __FILE__)
     FileUtils.cp_r(app_root + "/", site_root)
     site_root += "/user_manager"
-    class_variable_set(:@@site_root, site_root)
+    let(:site_root) { site_root }
   end
 
   finish do
@@ -26,12 +26,11 @@ describe "UserAdmin" do
   end
 
   def api_key
-    @user.access_keys.first
+    @key
   end
 
   before do
-    @site_root = self.class.class_variable_get(:@@site_root)
-    @site = setup_site(@site_root)
+    @site = setup_site(site_root)
     Spot::Permissions::UserLevel.reset!
     Spot::Permissions::UserLevel.init!
     @editor_user = create_user("editor", S::Permissions[:editor])

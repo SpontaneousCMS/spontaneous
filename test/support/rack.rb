@@ -27,7 +27,8 @@ module RackTestMethods
   end
 
   def csrf_header(env)
-    env.merge(Spontaneous::Rack::CSRF_ENV => api_key.generate_csrf_token)
+    token = api_key.generate_csrf_token
+    env.merge(Spontaneous::Rack::CSRF_ENV => token)
   end
 
   def api_key
@@ -36,6 +37,9 @@ module RackTestMethods
 
   def login_user(user, params={})
     post "/@spontaneous/login", {"user[login]" => user.login, "user[password]" => user.password}.merge(params)
-    @user = user
+    key_id  = rack_mock_session.cookie_jar[Spontaneous::Rack::AUTH_COOKIE]
+    @user   = user
+    @key    = Spontaneous::Permissions::AccessKey.authenticate(key_id)
+    [@user, @key]
   end
 end

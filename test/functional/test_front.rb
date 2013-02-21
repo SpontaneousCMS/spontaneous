@@ -4,63 +4,93 @@ require File.expand_path('../../test_helper', __FILE__)
 
 ENV['RACK_ENV'] = 'test'
 
-
 describe "Front" do
   include RackTestMethods
-
-  def self.site_root
-    @site_root
-  end
 
   start do
     site_root = Dir.mktmpdir
     FileUtils.cp_r(File.expand_path("../../fixtures/public/templates", __FILE__), site_root)
     Spontaneous::Output.write_compiled_scripts = true
-    class_variable_set(:@@site_root, site_root)
+
+
+    site = setup_site(site_root)
+    let(:site) { site  }
+    S::Site.background_mode = :immediate
+    S::State.delete
+
+    Site.background_mode = :immediate
+    ::Content.delete
+
+    class ::SitePage < ::Page
+      layout :default
+      layout :dynamic
+      box :pages
+
+      attr_accessor :status
+    end
+
+    class ::StaticPage < ::Page
+      layout :default
+    end
+    class ::SubPage < SitePage; end
+
+
+    root = ::SitePage.create
+    about = ::SitePage.create(:slug => "about", :uid => "about")
+    subpage = ::SubPage.create(:slug => "now", :uid => "now")
+    news = ::SitePage.create(:slug => "news", :uid => "news")
+    dynamic = ::SitePage.create(:slug => "dynamic", :uid => "dynamic")
+    static  = ::StaticPage.create(:slug => "static", :uid => "static")
+    dynamic.layout = :dynamic
+    root.pages << about
+    root.pages << news
+    root.pages << dynamic
+    root.pages << static
+    about.pages << subpage
+    root.save
+
+    let(:root_id) { root.id }
+    let(:about_id) { about.id }
+    let(:subpage_id) { subpage.id }
+    let(:news_id) { news.id }
+    let(:dynamic_id) { dynamic.id }
+    let(:static_id) { static.id }
+
+    Content.delete_revision(1) rescue nil
+
+    Spontaneous.logger.silent! {
+      S::Site.publish_all
+    }
   end
 
   finish do
+    Object.send(:remove_const, :SitePage) rescue nil
+    Object.send(:remove_const, :SubPage) rescue nil
+    Content.delete
+    S::State.delete
+    Content.delete_revision(1)
     teardown_site(true)
     Spontaneous::Output.write_compiled_scripts = false
   end
 
-  before do
-    @site_root = self.class.class_variable_get(:@@site_root)
-    @site = setup_site(@site_root)
-    Site.background_mode = :immediate
-    ::Content.delete
-  end
-
-  after do
-    teardown_site(false)
-  end
+  let(:root) { Content[root_id] }
+  let(:about) { Content[about_id] }
+  let(:subpage) { Content[subpage_id] }
+  let(:news) { Content[news_id] }
+  let(:dynamic) { Content[dynamic_id] }
+  let(:static) { Content[static_id] }
 
   def app
     Spontaneous::Rack::Front.application
   end
 
-  def root
-    @root
-  end
-
-  def about
-    @about
-  end
-
-  def news
-    @news
-  end
-
-  def subpage
-    @sub
-  end
-
-  def dynamic
-    @dynamic
-  end
-
-  def revision_root
-    @revision_root
+  after do
+    SitePage.instance_variable_set(:@layout_proc, nil)
+    SitePage.instance_variable_set(:@request_blocks, {})
+    [root, about, subpage, news, static].each do |page|
+      page.layout = :default
+    end
+    dynamic.layout = :dynamic
   end
 
   def session
@@ -72,61 +102,9 @@ describe "Front" do
   end
 
   describe "Public pages" do
-    before do
-
-
-      S::Site.background_mode = :immediate
-      S::State.delete
-
-      class ::SitePage < ::Page
-        layout :default
-        layout :dynamic
-        box :pages
-
-        attr_accessor :status
-      end
-
-      class ::SubPage < SitePage; end
-
-
-      # see http://benprew.posterous.com/testing-sessions-with-sinatra
-      # app.send(:set, :sessions, false)
-      # S::Rack::Front::Server.send(:set, :sessions, false)
-
-      # @revision_root = "#{Dir.mktmpdir}/spontaneous-tests/#{Time.now.to_i}"
-      # `mkdir -p #{@revision_root}`
-      # Spontaneous.revision_root = @revision_root
-
-      # @site.stubs(:template_root).returns(File.expand_path("../../fixtures/public/templates", __FILE__))
-      # self.template_root = File.expand_path("../../fixtures/public/templates", __FILE__)
-
-      ::Content.scope do
-        @root = ::SitePage.create
-        @about = ::SitePage.create(:slug => "about", :uid => "about")
-        @sub = ::SubPage.create(:slug => "now", :uid => "now")
-        @news = ::SitePage.create(:slug => "news", :uid => "news")
-        @dynamic = ::SitePage.create(:slug => "dynamic", :uid => "dynamic")
-        @dynamic.layout = :dynamic
-        @root.pages << @about
-        @root.pages << @news
-        @root.pages << @dynamic
-        @about.pages << @sub
-        @root.save
-      end
-
-      Content.delete_revision(1) rescue nil
-
-      Spontaneous.logger.silent! {
-        S::Site.publish_all
-      }
-    end
 
     after do
-      Object.send(:remove_const, :SitePage) rescue nil
-      Object.send(:remove_const, :SubPage) rescue nil
-      Content.delete
-      S::State.delete
-      Content.delete_revision(1)
+      about.class.outputs :html
     end
 
     it "return a 404 if asked for a non-existant page" do
@@ -140,7 +118,7 @@ describe "Front" do
       last_response.body.must_equal "/.html\n"
     end
 
-    it "be available through their path" do
+    it "be available through their path xxx" do
       get '/about'
       assert last_response.ok?
       last_response.body.must_equal "/about.html\n"
@@ -155,7 +133,7 @@ describe "Front" do
     end
 
     it "honor the format of the request" do
-      @about.class.outputs :html, :pdf
+      about.class.outputs :html, :pdf
       get '/about.pdf'
       assert last_response.ok?
       last_response.body.must_equal "/about.pdf\n"
@@ -163,7 +141,7 @@ describe "Front" do
     end
 
     it "provide the default format of the page if none is explicitly given" do
-      @about.class.outputs :rss, :html
+      about.class.outputs :rss, :html
       get '/about'
       assert last_response.ok?
       last_response.content_type.must_equal ::Rack::Mime.mime_type('.rss') + ";charset=utf-8"
@@ -171,7 +149,7 @@ describe "Front" do
     end
 
     it "return a custom content type if one is defined" do
-      @about.class.outputs [:html, {:mimetype => "application/xhtml+xml"}]
+      about.class.outputs [:html, {:mimetype => "application/xhtml+xml"}]
       get '/about'
       assert last_response.ok?
       last_response.content_type.must_equal "application/xhtml+xml;charset=utf-8"
@@ -185,7 +163,7 @@ describe "Front" do
     end
 
     it "raise a 404 when accessing a private format" do
-      @about.class.outputs [:html, {:mimetype => "application/xhtml+xml"}], [:rss, {:private => true}]
+      about.class.outputs [:html, {:mimetype => "application/xhtml+xml"}], [:rss, {:private => true}]
       get '/about.rss'
       assert last_response.status == 404
     end
@@ -193,7 +171,13 @@ describe "Front" do
     describe "Dynamic pages" do
       before do
         Content::Page.stubs(:path).with("/about").returns(about)
+        Content::Page.stubs(:path).with("/static").returns(static)
         Content::Page.stubs(:path).with("/news").returns(news)
+      end
+
+      after do
+        about.layout = :default
+        SitePage.instance_variable_set(:@request_blocks, {})
       end
 
       it "default to static behaviour" do
@@ -203,51 +187,50 @@ describe "Front" do
       end
       it "correctly show a dynamic behaviour" do
         SitePage.request do
-          show "/news"
+          show "/static"
         end
         assert SitePage.dynamic?
         page = SitePage.new
         assert page.dynamic?
       end
 
-      it "render an alternate page if passed a page" do
-        # about.stubs(:request_show).returns(news)
+      it "render an alternate page if passed a page xxx" do
         SitePage.request do
-          show Site['/news']
+          show Site['/static']
         end
         get '/about'
         assert last_response.ok?
-        last_response.body.must_equal "/news.html\n"
+        last_response.body.must_equal "/static.html\n"
       end
 
       it "render an alternate page if passed a path" do
         # about.stubs(:request_show).returns("/news")
         SitePage.request do
-          show "/news"
+          show "/static"
         end
         get '/about'
         assert last_response.ok?
-        last_response.body.must_equal "/news.html\n"
+        last_response.body.must_equal "/static.html\n"
       end
 
       it "render an alternate page if passed a uid with a #" do
         # about.stubs(:request_show).returns("#news")
         SitePage.request do
-          show "#news"
+          show "#static"
         end
         get '/about'
         assert last_response.ok?
-        last_response.body.must_equal "/news.html\n"
+        last_response.body.must_equal "/static.html\n"
       end
 
       it "render an alternate page if passed a uid" do
         # about.stubs(:request_show).returns("news")
         SitePage.request do
-          show "news"
+          show "static"
         end
         get '/about'
         assert last_response.ok?
-        last_response.body.must_equal "/news.html\n"
+        last_response.body.must_equal "/static.html\n"
       end
 
       it "return not found of #request_show returns an invalid uid or path" do
@@ -261,20 +244,20 @@ describe "Front" do
 
       it "return the right status code" do
         SitePage.request do
-          show "#news", 404
+          show "#static", 404
         end
         get '/about'
         assert last_response.status == 404
-        last_response.body.must_equal "/news.html\n"
+        last_response.body.must_equal "/static.html\n"
       end
 
       it "allow handing POST requests" do
         SitePage.request :post do
-          show "#news"
+          show "#static"
         end
         post '/about'
         assert last_response.status == 200, "Expected status 200 but recieved #{last_response.status}"
-        last_response.body.must_equal "/news.html\n"
+        last_response.body.must_equal "/static.html\n"
       end
 
       it "allow returning of any status code without altering content" do
@@ -286,7 +269,7 @@ describe "Front" do
         last_response.body.must_equal "/about.html\n"
       end
 
-      it "allow altering of headers" do
+      it "allow altering of headers xxx" do
         SitePage.request do
           headers["X-Works"] = "Yes"
         end
@@ -306,6 +289,7 @@ describe "Front" do
         get '/about'
         assert last_response.status == 200
         last_response.body.must_equal "white"
+        SitePage.instance_variable_set(:@layout_proc, nil)
       end
 
       it "give access to the request params within the controller" do
@@ -317,6 +301,7 @@ describe "Front" do
         post '/about', :horse => "dancing"
         assert last_response.status == 200
         last_response.body.must_equal "dancing*dancing"
+        SitePage.instance_variable_set(:@layout_proc, nil)
       end
 
       # should "handle anything that responds to #render(format)" do
@@ -411,7 +396,7 @@ describe "Front" do
       describe "caching" do
         it "use pre-rendered versions of the templates" do
           dummy_content = 'cached-version/#{session[\'user_id\']}'
-          dummy_template = File.join(@site.revision_root, "current/dynamic/dynamic.html.cut")
+          dummy_template = File.join(site.revision_root, "current/dynamic/dynamic.html.cut")
           File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
           get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
           last_response.body.must_equal "cached-version/42"
@@ -419,7 +404,7 @@ describe "Front" do
 
         it "cache templates as ruby files" do
           dummy_content = 'cached-version/#{session[\'user_id\']}'
-          dummy_template = File.join(@site.revision_root, "current/dynamic/index.html.cut")
+          dummy_template = File.join(site.revision_root, "current/dynamic/index.html.cut")
           Spontaneous::Output.renderer.write_compiled_scripts = true
           File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
           FileUtils.rm(@cache_file) if File.exists?(@cache_file)
@@ -445,6 +430,7 @@ describe "Front" do
 
     describe "Model controllers" do
       before do
+        SitePage.instance_variable_set(:@request_blocks, {})
         class ::TestController < Spontaneous::Rack::PageController
           get '/' do
             "Magic"
@@ -489,10 +475,12 @@ describe "Front" do
       end
 
       after do
+        SitePage.instance_variable_set(:@request_blocks, {})
         SitePage.send(:remove_const, :StatusController) rescue nil
         SitePage.send(:remove_const, :TestController) rescue nil
         SitePage.send(:remove_const, :Test2Controller) rescue nil
         Object.send(:remove_const, :TestController) rescue nil
+        about.class.outputs :html
       end
 
       it "not be used unless necessary" do
@@ -603,7 +591,6 @@ describe "Front" do
               "Success"
             end
           end
-
         end
 
         after do
@@ -617,6 +604,7 @@ describe "Front" do
         end
       end
     end
+
     describe "Static files" do
       before do
         @revision_dir = Spontaneous.instance.revision_dir(1)

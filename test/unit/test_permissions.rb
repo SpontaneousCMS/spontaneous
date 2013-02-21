@@ -16,9 +16,17 @@ describe "Permissions" do
 
   after do
     teardown_site
+    begin
     Permissions::AccessGroup.delete
     Permissions::AccessKey.delete
     Permissions::User.delete
+    rescue => e
+      # My uniqueness constraint test raises a db error which then causes
+      # a pg transaction error that I can safely ignore
+      unless e.class == Sequel::DatabaseError && e.message =~ /current transaction is aborted/
+        raise
+      end
+    end
   end
 
   it "can generate random strings of any length" do
