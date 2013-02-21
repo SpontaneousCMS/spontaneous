@@ -8,11 +8,11 @@ module Spontaneous::Field
     has_editor
 
     def outputs
-      [:type, :id]
+      [:type, :video_id]
     end
 
-    def id
-      value(:id)
+    def video_id
+      value(:video_id)
     end
 
     def video_type
@@ -27,15 +27,15 @@ module Spontaneous::Field
       when "", nil
         # ignore this
       when /youtube\.com.*\?.*v=([^&]+)/, /youtu.be\/([^&]+)/
-        id = $1
-        values.update(retrieve_youtube_metadata(id))
-        values[:id] = id
+        video_id = $1
+        values.update(retrieve_youtube_metadata(video_id))
+        values[:video_id] = video_id.to_s
         values[:type] = "youtube"
       when /vimeo\.com\/(\d+)/
-        id = $1
+        video_id = $1
         values[:type] = "vimeo"
-        values.update(retrieve_vimeo_metadata(id))
-        values[:id] = id.to_s
+        values.update(retrieve_vimeo_metadata(video_id))
+        values[:video_id] = video_id.to_s
       else
         logger.warn "WebVideo field doesn't recognise the URL '#{input}'"
       end
@@ -98,21 +98,21 @@ module Spontaneous::Field
       src
     end
 
-    def retrieve_vimeo_metadata(id)
-      url = "http://vimeo.com/api/v2/video/%s.json" % id
+    def retrieve_vimeo_metadata(video_id)
+      url = "http://vimeo.com/api/v2/video/%s.json" % video_id
       response = \
         begin
           open(url).read
       rescue => e
-        logger.error("Unable to retrieve metadata for video ##{id} from Vimeo: '#{e}'")
+        logger.error("Unable to retrieve metadata for video ##{video_id} from Vimeo: '#{e}'")
         "[{}]"
       end
       metadata = Spontaneous.parse_json(response) rescue [{}]
       metadata = metadata.first || {}
     end
 
-    def retrieve_youtube_metadata(id)
-      url = "http://gdata.youtube.com/feeds/api/videos/%s?v=2" % id
+    def retrieve_youtube_metadata(video_id)
+      url = "http://gdata.youtube.com/feeds/api/videos/%s?v=2" % video_id
       begin
         doc = Nokogiri::XML(open(url))
         entry = doc.xpath("xmlns:entry")
@@ -193,7 +193,7 @@ module Spontaneous::Field
         :portrait => true,
         :title => true,
         :byline => true,
-        :player_id => "vimeo#{owner.id}id#{value(:id)}"
+        :player_id => "vimeo#{owner.id}id#{value(:video_id)}"
       }.merge(o).merge(vimeo_options).merge(options)
       o
     end
@@ -215,7 +215,8 @@ module Spontaneous::Field
         "player_id" => o[:player_id] }
         params.update("color" => o[:color]) if o.key?(:color)
         params = ::Rack::Utils.build_query(params)
-        "http://player.vimeo.com/video/#{value(:id)}?#{params}"
+        id = value(:id) || value(:video_id)
+        "http://player.vimeo.com/video/#{id}?#{params}"
     end
 
     def to_youtube_html(options = {})
@@ -290,7 +291,8 @@ module Spontaneous::Field
         "autohide" => o[:autohide],
         "rel" => o[:rel],
         "enablejsapi" => o[:api] })
-        "http://www.youtube.com/embed/#{value(:id)}?#{params}"
+        id = value(:id) || value(:video_id)
+        "http://www.youtube.com/embed/#{id}?#{params}"
     end
 
     def make_html_attributes(attributes)

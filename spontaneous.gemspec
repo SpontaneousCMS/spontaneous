@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
 
   s.name              = 'spontaneous'
   s.version           = '0.2.0.beta1'
-  s.date              = '2013-01-26'
+  s.date              = '2013-02-21'
   s.rubyforge_project = 'spontaneous'
 
   s.summary     = "Spontaneous is a next-generation Ruby CMS"
@@ -364,6 +364,7 @@ Gem::Specification.new do |s|
     lib/spontaneous/model/core/entry.rb
     lib/spontaneous/model/core/fields.rb
     lib/spontaneous/model/core/instance_code.rb
+    lib/spontaneous/model/core/locks.rb
     lib/spontaneous/model/core/media.rb
     lib/spontaneous/model/core/modifications.rb
     lib/spontaneous/model/core/page_search.rb
@@ -430,29 +431,39 @@ Gem::Specification.new do |s|
     lib/spontaneous/publishing/simultaneous.rb
     lib/spontaneous/publishing/threaded.rb
     lib/spontaneous/rack.rb
-    lib/spontaneous/rack/around_back.rb
-    lib/spontaneous/rack/around_front.rb
-    lib/spontaneous/rack/around_preview.rb
-    lib/spontaneous/rack/assets.rb
-    lib/spontaneous/rack/authentication.rb
     lib/spontaneous/rack/back.rb
+    lib/spontaneous/rack/back/alias.rb
+    lib/spontaneous/rack/back/assets.rb
+    lib/spontaneous/rack/back/base.rb
+    lib/spontaneous/rack/back/changes.rb
+    lib/spontaneous/rack/back/content.rb
+    lib/spontaneous/rack/back/events.rb
+    lib/spontaneous/rack/back/field.rb
+    lib/spontaneous/rack/back/file.rb
+    lib/spontaneous/rack/back/helpers.rb
+    lib/spontaneous/rack/back/index.rb
+    lib/spontaneous/rack/back/login.rb
+    lib/spontaneous/rack/back/map.rb
+    lib/spontaneous/rack/back/page.rb
+    lib/spontaneous/rack/back/preview.rb
+    lib/spontaneous/rack/back/schema.rb
+    lib/spontaneous/rack/back/site.rb
+    lib/spontaneous/rack/back/unsupported_browser.rb
+    lib/spontaneous/rack/back/user_admin.rb
     lib/spontaneous/rack/cacheable_file.rb
-    lib/spontaneous/rack/cookie_authentication.rb
     lib/spontaneous/rack/css.rb
     lib/spontaneous/rack/event_source.rb
     lib/spontaneous/rack/front.rb
-    lib/spontaneous/rack/helpers.rb
-    lib/spontaneous/rack/http.rb
     lib/spontaneous/rack/js.rb
-    lib/spontaneous/rack/media.rb
+    lib/spontaneous/rack/middleware.rb
+    lib/spontaneous/rack/middleware/authenticate.rb
+    lib/spontaneous/rack/middleware/csrf.rb
+    lib/spontaneous/rack/middleware/reloader.rb
+    lib/spontaneous/rack/middleware/scope.rb
     lib/spontaneous/rack/page_controller.rb
     lib/spontaneous/rack/public.rb
-    lib/spontaneous/rack/query_authentication.rb
-    lib/spontaneous/rack/reloader.rb
     lib/spontaneous/rack/sse.rb
     lib/spontaneous/rack/static.rb
-    lib/spontaneous/rack/user_admin.rb
-    lib/spontaneous/rack/user_helpers.rb
     lib/spontaneous/revision.rb
     lib/spontaneous/schema.rb
     lib/spontaneous/schema/schema_modification.rb
@@ -501,6 +512,7 @@ Gem::Specification.new do |s|
     test/disabled/test_slots.rb
     test/experimental/test_crypt.rb
     test/experimental/test_features.rb
+    test/experimental/test_start_finish.rb
     test/fixtures/application/js/test.js
     test/fixtures/application/static/favicon.ico
     test/fixtures/application/static/test.html
@@ -667,6 +679,8 @@ Gem::Specification.new do |s|
     test/fixtures/templates/aliases/a/a_style.html.cut
     test/fixtures/templates/aliases/a/page.html.cut
     test/fixtures/templates/aliases/a_alias/a_alias_style.html.cut
+    test/fixtures/templates/aliases/aa_alias.html.cut
+    test/fixtures/templates/aliases/aaa.html.cut
     test/fixtures/templates/aliases/layouts/b.html.cut
     test/fixtures/templates/aliases/layouts/b_alias.html.cut
     test/fixtures/templates/aliases/layouts/c_alias.html.cut
@@ -732,6 +746,8 @@ Gem::Specification.new do |s|
     test/javascript/test_dom.rb
     test/javascript/test_markdown.rb
     test/support/custom_matchers.rb
+    test/support/matchers.rb
+    test/support/rack.rb
     test/support/timing.rb
     test/test_helper.rb
     test/test_integration_helper.rb

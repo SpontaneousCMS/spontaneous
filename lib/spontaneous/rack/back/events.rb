@@ -1,3 +1,5 @@
+require 'spontaneous/simultaneous'
+
 module Spontaneous::Rack::Back
   class Events < Base
     def self.messenger
