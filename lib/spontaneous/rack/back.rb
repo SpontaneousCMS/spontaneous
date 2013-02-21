@@ -1,31 +1,28 @@
 # encoding: UTF-8
 
-require 'spontaneous/rack/middleware/csrf'
-require 'spontaneous/rack/middleware/reloader'
-require 'spontaneous/rack/middleware/scope'
-require 'spontaneous/rack/middleware/authenticate'
-
-require 'spontaneous/rack/back/base'
-require 'spontaneous/rack/back/alias'
-require 'spontaneous/rack/back/assets'
-require 'spontaneous/rack/back/changes'
-require 'spontaneous/rack/back/content'
-require 'spontaneous/rack/back/events'
-require 'spontaneous/rack/back/field'
-require 'spontaneous/rack/back/file'
-require 'spontaneous/rack/back/index'
-require 'spontaneous/rack/back/login'
-require 'spontaneous/rack/back/map'
-require 'spontaneous/rack/back/page'
-require 'spontaneous/rack/back/preview'
-require 'spontaneous/rack/back/schema'
-require 'spontaneous/rack/back/site'
-require 'spontaneous/rack/back/unsupported_browser'
-require 'spontaneous/rack/back/user_admin'
-
 module Spontaneous
   module Rack
     module Back
+
+      autoload :Base,               'spontaneous/rack/back/base'
+      autoload :Alias,              'spontaneous/rack/back/alias'
+      autoload :Assets,             'spontaneous/rack/back/assets'
+      autoload :Changes,            'spontaneous/rack/back/changes'
+      autoload :Content,            'spontaneous/rack/back/content'
+      autoload :Events,             'spontaneous/rack/back/events'
+      autoload :Field,              'spontaneous/rack/back/field'
+      autoload :File,               'spontaneous/rack/back/file'
+      autoload :Helpers,            'spontaneous/rack/back/helpers'
+      autoload :Index,              'spontaneous/rack/back/index'
+      autoload :Login,              'spontaneous/rack/back/login'
+      autoload :Map,                'spontaneous/rack/back/map'
+      autoload :Page,               'spontaneous/rack/back/page'
+      autoload :Preview,            'spontaneous/rack/back/preview'
+      autoload :Schema,             'spontaneous/rack/back/schema'
+      autoload :Site,               'spontaneous/rack/back/site'
+      autoload :UnsupportedBrowser, 'spontaneous/rack/back/unsupported_browser'
+      autoload :UserAdmin,          'spontaneous/rack/back/user_admin'
+
       include Spontaneous::Rack::Constants
       include Spontaneous::Rack::Middleware
 
