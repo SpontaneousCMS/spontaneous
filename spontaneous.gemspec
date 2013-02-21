@@ -450,7 +450,6 @@ Gem::Specification.new do |s|
     lib/spontaneous/rack/back/site.rb
     lib/spontaneous/rack/back/unsupported_browser.rb
     lib/spontaneous/rack/back/user_admin.rb
-    lib/spontaneous/rack/back/utils.rb
     lib/spontaneous/rack/cacheable_file.rb
     lib/spontaneous/rack/css.rb
     lib/spontaneous/rack/event_source.rb
