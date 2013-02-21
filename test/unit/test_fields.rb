@@ -656,14 +656,14 @@ describe "Fields" do
       it "recognise youtube URLs" do
         @instance.video = "http://www.youtube.com/watch?v=_0jroAM_pO4&feature=feedrec_grec_index"
         @instance.video.value.must_equal "http://www.youtube.com/watch?v=_0jroAM_pO4&amp;feature=feedrec_grec_index"
-        @instance.video.id.must_equal "_0jroAM_pO4"
+        @instance.video.video_id.must_equal "_0jroAM_pO4"
         @instance.video.video_type.must_equal "youtube"
       end
 
       it "recognise Vimeo URLs" do
         @instance.video = "http://vimeo.com/31836285"
         @instance.video.value.must_equal "http://vimeo.com/31836285"
-        @instance.video.id.must_equal "31836285"
+        @instance.video.video_id.must_equal 31836285
         @instance.video.video_type.must_equal "vimeo"
       end
 
@@ -773,7 +773,7 @@ describe "Fields" do
           doc = Nokogiri::XML(File.open(response_xml_file))
           Nokogiri.expects(:XML).with(connection).returns(doc)
           @field.value = "http://www.youtube.com/watch?v=_0jroAM_pO4"
-          @field.values.must_equal youtube_info.merge(:id => "_0jroAM_pO4", :type => "youtube", :html => "http://www.youtube.com/watch?v=_0jroAM_pO4")
+          @field.values.must_equal youtube_info.merge(:video_id => "_0jroAM_pO4", :type => "youtube", :html => "http://www.youtube.com/watch?v=_0jroAM_pO4")
         end
 
         it "use the Vimeo api to extract video metadata" do
@@ -782,7 +782,7 @@ describe "Fields" do
           connection.expects(:read).returns(Spontaneous.encode_json([vimeo_info]))
           @field.expects(:open).with("http://vimeo.com/api/v2/video/29987529.json").returns(connection)
           @field.value = "http://vimeo.com/29987529"
-          @field.values.must_equal vimeo_info.merge(:id => "29987529", :type => "vimeo", :html => "http://vimeo.com/29987529")
+          @field.values.must_equal vimeo_info.merge(:video_id => "29987529", :type => "vimeo", :html => "http://vimeo.com/29987529")
         end
       end
 

@@ -11,12 +11,14 @@ module Spontaneous::Field
       [:type, :video_id]
     end
 
+    # Earlier versions used :id to store the video id
+    # so to support them I need to try it first.
     def video_id
-      value(:video_id)
+      values[:id] || values[:video_id]
     end
 
     def video_type
-      value(:type)
+      values[:type]
     end
 
 
@@ -215,8 +217,7 @@ module Spontaneous::Field
         "player_id" => o[:player_id] }
         params.update("color" => o[:color]) if o.key?(:color)
         params = ::Rack::Utils.build_query(params)
-        id = value(:id) || value(:video_id)
-        "http://player.vimeo.com/video/#{id}?#{params}"
+        "http://player.vimeo.com/video/#{video_id}?#{params}"
     end
 
     def to_youtube_html(options = {})
@@ -291,8 +292,7 @@ module Spontaneous::Field
         "autohide" => o[:autohide],
         "rel" => o[:rel],
         "enablejsapi" => o[:api] })
-        id = value(:id) || value(:video_id)
-        "http://www.youtube.com/embed/#{id}?#{params}"
+        "http://www.youtube.com/embed/#{video_id}?#{params}"
     end
 
     def make_html_attributes(attributes)
