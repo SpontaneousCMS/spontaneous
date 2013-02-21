@@ -220,9 +220,9 @@ module Spontaneous::Field
           else
             process = self.class.size_definitions[output]
             image.apply(process, output, tempfile)
-          end
+          end.serialize
         end
-        result.serialize
+        # result.serialize
       end
 
 
