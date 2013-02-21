@@ -1,11 +1,7 @@
-require 'spontaneous/rack/back/helpers'
-require 'spontaneous/rack/back/utils'
-
 module Spontaneous::Rack
   module Back
     class Base < ServerBase
       helpers  Helpers
-      register Utils
 
       set :views, Proc.new { Spontaneous.application_dir + '/views' }
 

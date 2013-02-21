@@ -1,4 +1,3 @@
-
 module Spontaneous::Rack::Back
   module TemplateHelpers
     include Spontaneous::Rack::Constants

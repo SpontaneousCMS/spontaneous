@@ -1,4 +1,3 @@
-
 module Spontaneous::Rack::Back
   class Schema < Base
     # Use the CSRF verification step separately from the main app
