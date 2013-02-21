@@ -4,23 +4,13 @@ require File.expand_path('../../test_helper', __FILE__)
 
 describe "Alias" do
 
-  def assert_same_content(c1, c2)
-    assert_equal c2.length, c1.length
-    c1 = c1.dup.sort { |a, b| a.id <=> b.id }
-    c2 = c2.dup.sort { |a, b| a.id <=> b.id }
-    c1.each_with_index do |a, i|
-      b = c2[i]
-      assert_equal b.id, a.id
-      assert_equal b.class, a.class
-    end
-  end
-
-  before do
-    @site = setup_site
-    @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
-    @site.paths.add(:templates, @template_root)
-    @renderer = S::Output::Template::Renderer.new(false)
-    S::Output.renderer = @renderer
+  start do
+    site = setup_site
+    template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
+    let(:template_root) { template_root }
+    site.paths.add(:templates, template_root)
+    renderer = S::Output::Template::Renderer.new(false)
+    S::Output.renderer = renderer
 
     Content.delete
 
@@ -92,21 +82,30 @@ describe "Alias" do
       alias_of proc { Content.root.children }
     end
 
-    @root = ::Page.create
-    @aliases = ::Page.create(:slug => "aliases").reload
-    @root.box1 << @aliases
-    @a = A.create(:a_field1 => "@a.a_field1").reload
-    @aa = AA.create.reload
-    @aaa1 = AAA.create(:aaa_field1 => "aaa1").reload
-    @aaa2 = AAA.create.reload
-    @b = B.new(:slug => "b")
-    @root.box1 << @b
-    @bb = BB.new(:slug => "bb", :bb_field1 => "BB")
-    @root.box1 << @bb
-    @root.save.reload
+    root = ::Page.create
+    aliases = ::Page.create(:slug => "aliases").reload
+    root.box1 << aliases
+    a = A.create(:a_field1 => "@a.a_field1").reload
+    aa = AA.create.reload
+    aaa1 = AAA.create(:aaa_field1 => "aaa1").reload
+    aaa2 = AAA.create.reload
+    b = B.new(:slug => "b")
+    root.box1 << b
+    bb = BB.new(:slug => "bb", :bb_field1 => "BB")
+    root.box1 << bb
+    root.save.reload
+
+    let(:root) { root }
+    let(:aliases) { aliases }
+    let(:a) { a }
+    let(:aa) { aa }
+    let(:aaa1) { aaa1 }
+    let(:aaa2) { aaa2 }
+    let(:b) { b }
+    let(:bb) { bb }
   end
 
-  after do
+  finish do
     [:A, :AA, :AAA, :B, :BB, :AAlias, :AAAlias, :AAAAlias, :BBAlias, :BAlias, :MultipleAlias, :ProcAlias].each do |c|
       Object.send(:remove_const, c) rescue nil
     end
@@ -114,12 +113,29 @@ describe "Alias" do
     teardown_site
   end
 
+  def assert_same_content(c1, c2)
+    assert_equal c2.length, c1.length
+    c1 = c1.dup.sort { |a, b| a.id <=> b.id }
+    c2 = c2.dup.sort { |a, b| a.id <=> b.id }
+    c1.each_with_index do |a, i|
+      b = c2[i]
+      assert_equal b.id, a.id
+      assert_equal b.class, a.class
+    end
+  end
+
+  before do
+  end
+
+  after do
+  end
+
   describe "All alias" do
     describe "class methods" do
       it "provide a list of available instances that includes all subclasses" do
-        assert_same_content AAlias.targets, [@a, @aa, @aaa1, @aaa2]
-        assert_same_content AAAlias.targets, [@aa, @aaa1, @aaa2]
-        assert_same_content AAAAlias.targets, [@aaa1, @aaa2]
+        assert_same_content AAlias.targets, [a, aa, aaa1, aaa2]
+        assert_same_content AAAlias.targets, [aa, aaa1, aaa2]
+        assert_same_content AAAAlias.targets, [aaa1, aaa2]
       end
 
       it "use the first available string field as the alias title" do
@@ -129,23 +145,23 @@ describe "Alias" do
       end
 
       it "allow aliasing multiple classes" do
-        assert_same_content MultipleAlias.targets, [@aa, @aaa1, @aaa2, @b, @bb]
+        assert_same_content MultipleAlias.targets, [aa, aaa1, aaa2, b, bb]
       end
 
       it "be creatable with a target" do
-        instance = AAlias.create(:target => @a).reload
-        instance.target.must_equal @a
-        @a.aliases.must_equal [instance]
+        instance = AAlias.create(:target => a).reload
+        instance.target.must_equal a
+        a.reload.aliases.must_equal [instance]
       end
 
       it "have a back link in the target" do
-        instance1 = AAlias.create(:target => @a).reload
-        instance2 = AAlias.create(:target => @a).reload
-        assert_same_content @a.aliases, [instance1, instance2]
+        instance1 = AAlias.create(:target => a).reload
+        instance2 = AAlias.create(:target => a).reload
+        assert_same_content a.reload.aliases, [instance1, instance2]
       end
 
       it "accept a proc that returns an array as a target list generator" do
-        assert_same_content ProcAlias.targets, @root.children
+        assert_same_content ProcAlias.targets, root.children
       end
 
       describe "with container options" do
@@ -284,9 +300,9 @@ describe "Alias" do
 
     describe "instances" do
       before do
-        @a_alias = AAlias.create(:target => @a).reload
-        @aa_alias = AAAlias.create(:target => @aa).reload
-        @aaa_alias = AAAAlias.create(:target => @aaa1).reload
+        @a_alias = AAlias.create(:target => a).reload
+        @aa_alias = AAAlias.create(:target => aa).reload
+        @aaa_alias = AAAAlias.create(:target => aaa1).reload
       end
 
       it "have their own fields" do
@@ -294,7 +310,7 @@ describe "Alias" do
       end
 
       it "provide access to their target" do
-        @a_alias.target.must_equal @a
+        @a_alias.target.must_equal a
       end
 
 
@@ -303,49 +319,49 @@ describe "Alias" do
 
       it "present their target's fields as their own" do
         assert @a_alias.field?(:a_field1)
-        @a_alias.a_field1.value.must_equal @a.a_field1.value
+        @a_alias.a_field1.value.must_equal a.a_field1.value
       end
 
       it "have access to their target's fields" do
-        @a_alias.target.a_field1.value.must_equal @a.a_field1.value
+        @a_alias.target.a_field1.value.must_equal a.a_field1.value
       end
 
       it "have their own styles" do
-        assert_correct_template(@a_alias,  @template_root / 'a_alias/a_alias_style')
+        assert_correct_template(@a_alias,  template_root / 'a_alias/a_alias_style')
       end
 
       it "present their target's styles as their own" do
         @a_alias.style = :a_style
 
-        assert_correct_template(@a_alias,  @template_root / 'a/a_style')
+        assert_correct_template(@a_alias,  template_root / 'a/a_style')
       end
 
       it "should use templates belonging to the alias class if they exist" do
-        assert_correct_template(@aa_alias,  @template_root / 'aa_alias')
+        assert_correct_template(@aa_alias,  template_root / 'aa_alias')
       end
 
       it "should fallback to the targets default style if no alias template is present" do
-        assert_correct_template(@aaa_alias,  @aaa1.template)
+        assert_correct_template(@aaa_alias,  aaa1.template)
       end
 
       # should "have an independent style setting"
       it "not delete their target when deleted" do
         @a_alias.destroy
-        Content[@a.id].must_equal @a
+        Content[a.id].must_equal a
       end
 
       it "be deleted when target deleted" do
-        @a.destroy
+        a.destroy
         Content[@a_alias.id].must_be_nil
       end
 
       it "include target values in serialisation" do
-        @a_alias.export[:target].must_equal @a.shallow_export(nil)
+        @a_alias.export[:target].must_equal a.shallow_export(nil)
       end
 
       it "include alias title & icon in serialisation" do
-        @a_alias.export[:alias_title].must_equal @a.alias_title
-        @a_alias.export[:alias_icon].must_equal @a.alias_icon_field.export
+        @a_alias.export[:alias_title].must_equal a.alias_title
+        @a_alias.export[:alias_icon].must_equal a.alias_icon_field.export
       end
     end
   end
@@ -386,43 +402,48 @@ describe "Alias" do
 
   describe "Piece aliases" do
     it "be allowed to target pages" do
-      a = BBAlias.create(:target => @bb)
+      a = BBAlias.create(:target => bb)
       a.bb_field1.value.must_equal "BB"
     end
 
     it "not be loadable via their compound path when linked to a page" do
-      a = BBAlias.create(:target => @bb)
-      @aliases.box1 << a
-      @aliases.save
+      a = BBAlias.create(:target => bb)
+      aliases.box1 << a
+      aliases.save
       Site["/aliases/bb"].must_be_nil
     end
 
     it "have their target's path attribute if they alias to a page type" do
-      a = BBAlias.create(:target => @bb)
-      a.path.must_equal @bb.path
+      a = BBAlias.create(:target => bb)
+      a.path.must_equal bb.path
     end
   end
 
   describe "Page aliases" do
+    before do
+      BAlias.instance_variable_set(:@layout_prototypes, nil)
+      aliases.reload
+      b.reload
+    end
     it "be allowed to have piece classes as targets" do
       class ::CAlias < Page
         alias_of :AAA
         layout :c_alias
       end
 
-      c = CAlias.new(:target => @aaa1)
+      c = CAlias.new(:target => aaa1)
       c.render.must_equal "aaa1\n"
     end
 
     it "respond as a page" do
-      a = BAlias.create(:target => @b, :slug => "balias")
+      a = BAlias.create(:target => b, :slug => "balias")
       assert a.page?
     end
 
     it "be discoverable via their compound path" do
-      a = BAlias.create(:target => @b, :slug => "balias")
-      @aliases.box1 << a
-      @aliases.save
+      a = BAlias.create(:target => b, :slug => "balias")
+      aliases.box1 << a
+      aliases.save
       a.save
       a.reload
       a.path.must_equal "/aliases/b"
@@ -431,86 +452,86 @@ describe "Alias" do
     end
 
     it "update their path if their target's slug changes" do
-      a = BAlias.create(:target => @b, :slug => "balias")
-      b = BAlias.create(:target => @b, :slug => "balias")
-      @aliases.box1 << a
-      a.box1 << b
-      @aliases.save
+      al = BAlias.create(:target => b, :slug => "balias")
+      bl = BAlias.create(:target => b, :slug => "balias")
+      aliases.box1 << al
+      al.box1 << bl
+      aliases.save
 
-      a.save
-      a.reload
-      a.path.must_equal "/aliases/b"
-      b.path.must_equal "/aliases/b/b"
-      @b.slug = "newb"
-      @b.save
-      a.reload
-      b.reload
-      a.path.must_equal "/aliases/newb"
-      b.path.must_equal "/aliases/newb/newb"
+      al.save
+      al.reload
+      al.path.must_equal "/aliases/b"
+      bl.path.must_equal "/aliases/b/b"
+      b.slug = "newb"
+      b.save
+      al.reload
+      bl.reload
+      al.path.must_equal "/aliases/newb"
+      bl.path.must_equal "/aliases/newb/newb"
     end
 
     it "update their path if their parent's path changes" do
-      a = BAlias.create(:target => @b, :slug => "balias")
-      b = BAlias.create(:target => @b, :slug => "balias")
-      @aliases.box1 << a
-      a.box1 << b
-      @aliases.save
-      a.save
-      a.reload
-      a.path.must_equal "/aliases/b"
-      b.path.must_equal "/aliases/b/b"
-      @aliases.slug = "newaliases"
-      @aliases.save
-      a.reload
-      b.reload
-      a.path.must_equal "/newaliases/b"
-      b.path.must_equal "/newaliases/b/b"
+      al = BAlias.create(:target => b, :slug => "balias")
+      bl = BAlias.create(:target => b, :slug => "balias")
+      aliases.box1 << al
+      al.box1 << bl
+      aliases.save
+      al.save
+      al.reload
+      al.path.must_equal "/aliases/b"
+      bl.path.must_equal "/aliases/b/b"
+      aliases.slug = "newaliases"
+      aliases.save
+      al.reload
+      bl.reload
+      al.path.must_equal "/newaliases/b"
+      bl.path.must_equal "/newaliases/b/b"
     end
 
     it "show in the parent's list of children" do
-      a = BAlias.create(:target => @b, :slug => "balias")
-      @aliases.box1 << a
-      @aliases.save
-      a.save
-      a.reload
-      @aliases.reload
-      @aliases.children.must_equal [a]
-      a.parent.must_equal @aliases
+      al = BAlias.create(:target => b, :slug => "balias")
+      aliases.box1 << al
+      aliases.save
+      al.save
+      al.reload
+      aliases.reload
+      aliases.children.must_equal [al]
+      al.parent.must_equal aliases
     end
 
     it "render the using target's layout when accessed via the path and no local layouts defined" do
-      a = BAlias.create(:target => @b, :slug => "balias")
-      @aliases.box1 << a
-      @aliases.save
-      a.reload
-      a.render.must_equal @b.render
+      al = BAlias.create(:target => b, :slug => "balias")
+      aliases.box1 << al
+      aliases.save
+      al.reload
+      al.render.must_equal b.render
     end
 
     it "render with locally defined style when available" do
       BAlias.layout :b_alias
-      a = BAlias.create(:target => @b, :slug => "balias")
-      @aliases.box1 << a
-      @aliases.save
-      a.reload
-      a.render.must_equal "alternate\n"
+      al = BAlias.create(:target => b, :slug => "balias")
+      aliases.box1 << al
+      aliases.save
+      al.reload
+      al.render.must_equal "alternate\n"
     end
 
     it "have access to their target's page styles" do
       BAlias.layout :b_alias
-      a = BAlias.create(:target => @b, :slug => "balias")
-      @aliases.box1 << a
-      @aliases.save
+      a = BAlias.create(:target => b, :slug => "balias")
+      aliases.box1 << a
+      aliases.save
       a.reload
       a.layout = :b
-      a.render.must_equal @b.render
+      a.render.must_equal b.render
     end
   end
 
   describe "visibility" do
     it "be linked to the target's visibility" do
-      a = BAlias.create(:target => @b, :slug => "balias")
-      @b.hide!
-      @b.reload
+      a = BAlias.create(:target => b, :slug => "balias")
+      b.hide!
+      b.reload
       a.reload
       refute a.visible?
     end
