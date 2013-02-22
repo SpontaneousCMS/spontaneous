@@ -52,7 +52,7 @@ Spontaneous.PageBrowser = (function($, S) {
 		get_page_list: function() {
 			var path;
 			if (typeof this.origin === 'string') {
-				path = '/location' + this.origin;
+				path = '/map/path' + this.origin;
 			} else {
 				path = '/map/' + this.origin.id;
 			}
