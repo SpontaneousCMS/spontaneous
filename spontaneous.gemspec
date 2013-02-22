@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
 
   s.name              = 'spontaneous'
   s.version           = '0.2.0.beta1'
-  s.date              = '2013-02-21'
+  s.date              = '2013-02-22'
   s.rubyforge_project = 'spontaneous'
 
   s.summary     = "Spontaneous is a next-generation Ruby CMS"
@@ -125,6 +125,7 @@ Gem::Specification.new do |s|
     application/js/field_preview.js
     application/js/image.js
     application/js/init.js
+    application/js/jquery-selection-position.js
     application/js/load.js
     application/js/location.js
     application/js/login.js
@@ -512,7 +513,6 @@ Gem::Specification.new do |s|
     test/disabled/test_slots.rb
     test/experimental/test_crypt.rb
     test/experimental/test_features.rb
-    test/experimental/test_start_finish.rb
     test/fixtures/application/js/test.js
     test/fixtures/application/static/favicon.ico
     test/fixtures/application/static/test.html
@@ -747,7 +747,9 @@ Gem::Specification.new do |s|
     test/javascript/test_markdown.rb
     test/support/custom_matchers.rb
     test/support/matchers.rb
+    test/support/minitest.rb
     test/support/rack.rb
+    test/support/test_start_finish.rb
     test/support/timing.rb
     test/test_helper.rb
     test/test_integration_helper.rb
