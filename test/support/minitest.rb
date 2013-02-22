@@ -87,18 +87,26 @@ module Minitest
 
       case string
       when 'E', 'F'
-        stream.print red(string)
+        stream.print error(string)
       when 'S'
         stream.print bold(string)
       else
         stream.print string
       end
+    end
 
-      stream.puts "\n" << report.shift << "\n" unless report.empty?
+    def error(string)
+      tint([1, 31], string)
     end
 
     def bold(string)
       tint(1, string)
+    end
+
+    def tint(color, string)
+      return string unless color_enabled?
+      effects = Array(color).map { |c| "\e[#{c}m"}.join
+      "#{effects}#{string}\e[0m"
     end
 
     # I want to be able to use these

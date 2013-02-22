@@ -54,7 +54,8 @@ connection_string = \
     end
   end
 
-puts "DB Connection: #{connection_string}"
+puts "SPOT_ADAPTER=#{ENV["SPOT_ADAPTER"]} => #{connection_string}"
+
 DB = Sequel.connect(connection_string) unless defined?(DB)
 # DB.logger = Logger.new($stdout)
 
