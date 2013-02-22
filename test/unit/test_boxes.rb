@@ -185,16 +185,8 @@ describe "Boxes" do
       it "allow a mix of names and indexes" do
         @instance.boxes[0..2, :images5].map { |b| b.box_name }.must_equal [:images1, :images2, :images3, :images5]
       end
-      it "allow access to groups of boxes through tags"
-      #   MyContentClass.box :images5, :tag => :main
-      #   MyContentClass.box :posts, :tag => :main
-      #   MyContentClass.box :comments
-      #   MyContentClass.box :last, :tag => :main
-      #   @instance = MyBoxClass.new
-      #   @instance.boxes.tagged(:main).length.must_equal 3
-      #   @instance.boxes.tagged('main').map {|e| e.name }.must_equal [:images5, :posts, :last]
-      # end
     end
+
     describe "with superclasses" do
       before do
         MyContentClass.box :images6, :tag => :main
@@ -228,8 +220,6 @@ describe "Boxes" do
         instance.boxes.map { |e| e.box_name.to_sym }.must_equal new_order
       end
     end
-
-
 
     it "accept values for the box's fields"
     it "allow overwriting of class definitions using a block"
@@ -380,7 +370,6 @@ describe "Boxes" do
       instance.box3.contents.map { |e| e.label }.must_equal ["0", "1", "c", "2", "3"]
     end
 
-    it "allow selection of subclasses"
   end
 
   describe "Allowed types" do
@@ -580,6 +569,17 @@ describe "Boxes" do
     end
 
     it "successfully allocate boxes" do
+      @a.boxes.inner.must_equal [@a.boxes[:a], @a.boxes[:b]]
+      @a.boxes.outer.must_equal [@a.boxes[:c], @a.boxes[:d]]
+
+      @b.boxes.inner.must_equal [@b.boxes[:a], @b.boxes[:b]]
+      @b.boxes.outer.must_equal [@b.boxes[:c], @b.boxes[:d], @b.boxes[:e]]
+
+      @c.boxes.inner.must_equal [@c.boxes[:a], @c.boxes[:b], @c.boxes[:f]]
+      @c.boxes.outer.must_equal [@c.boxes[:c], @c.boxes[:d], @c.boxes[:e]]
+    end
+
+    it "successfully render groups" do
       @a.boxes.inner.render.must_equal "[a][b]"
       @a.boxes.outer.render.must_equal "[c][d]"
 
