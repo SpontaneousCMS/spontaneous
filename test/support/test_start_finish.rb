@@ -1,4 +1,3 @@
-
 # encoding: UTF-8
 
 require File.expand_path('../../test_helper', __FILE__)
@@ -94,5 +93,11 @@ describe "Suite3" do
     it "2" do
       assert $suite3_start
     end
+  end
+end
+
+MiniTest::Unit.after_tests do
+  if $suite3_start
+    raise "$suite3_start should be false but is #{$suite3_start.inspect}"
   end
 end

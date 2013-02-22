@@ -64,7 +64,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../lib/spontaneous')
 
 require 'minitest/unit'
 require 'minitest/spec'
-require 'minitest/reporters'
+require 'minitest-colorize'
 require 'mocha/setup'
 require 'pp'
 require 'tmpdir'
@@ -72,120 +72,9 @@ require 'json'
 
 require 'support/rack'
 require 'support/matchers'
+require 'support/minitest'
 
-    # DB.loggers << ::Logger.new($stdout)
-
-module TransactionalTest
-  def run(runner)
-    result = nil
-    DB.transaction(:rollback => :always) { result = super }
-    result
-  end
-
-  def run_test(name)
-    super
-  end
-
-end
-
-module MiniTest::StartFinish
-  module Unit
-    def _run_suites(suites, type)
-      begin
-        DB.synchronize do
-          super(suites, type)
-        end
-      ensure
-        if (suite = suites.last.master_suite)
-          suite._run_finish_hook
-        end
-      end
-    end
-
-    def _run_suite(suite, type)
-      begin
-        if @_previous_suite && @_previous_suite.master_suite != suite.master_suite
-          @_previous_suite.master_suite._run_finish_hook if @_previous_suite.master_suite
-        end
-        suite._run_start_hook
-        super(suite, type)
-      ensure
-        @_previous_suite = suite unless suite == MiniTest::Spec
-      end
-    end
-  end
-
-end
-
-class MiniTest::Spec
-  include TransactionalTest
-  class << self
-    def parent_suite
-      a = ancestors.take_while { |a| a != MiniTest::Spec }.select { |a| Class === a }
-      a.last
-    end
-
-    def master_suite
-      ancestors.detect { |a| a.respond_to?(:has_finish_hook?) && a.has_finish_hook? }
-    end
-
-    def has_finish_hook?
-      !@finish_hook.nil?
-    end
-
-    def start(&block)
-      @start_hook = block
-    end
-
-    def finish(&block)
-      @finish_hook = block
-    end
-
-    def _hooks_run
-      @_hooks_run ||= []
-    end
-    def _run_start_hook
-      _run_start_finish_hook(@start_hook, :start)
-    end
-
-    def _run_finish_hook
-      if _hooks_run.include?(:start)
-        _run_start_finish_hook(@finish_hook, :finish)
-      end
-    end
-
-    def _run_start_finish_hook(hook, label)
-      _hooks_run << label
-      hook.call if hook
-    end
-  end
-end
-
-class MiniTestWithHooks < MiniTest::Unit
-  include MiniTest::StartFinish::Unit
-  def exclude?(suite)
-    return true if suite.nil?
-    [MiniTest::Spec].include?(suite) || !suite.ancestors.include?(MiniTest::Spec)
-  end
-
-  def _run_suites(suites, type)
-    names = suites.map(&:parent_suite).reject { |s| exclude?(s) }.uniq.map(&:to_s)
-    @max_name_length = names.map(&:length).max
-    super(suites, type)
-  end
-
-  def _run_suite(suite, type)
-    unless exclude?(suite)
-      if (name = suite.parent_suite.name) != @_previous_suite_name
-        print "\n#{name.ljust(@max_name_length, " ")}  "
-        @_previous_suite_name = name
-      end
-    end
-    super(suite, type)
-  end
-end
-
-MiniTest::Unit.runner = MiniTestWithHooks.new
+MiniTest::Unit.runner = StartFinishRunner.new
 
 def silence_logger(&block)
   begin
@@ -199,14 +88,7 @@ def silence_logger(&block)
   end
 end
 
-class Minitest::ReporterRunner
-  include MiniTest::StartFinish::Unit
-end
-
-# MiniTest::Reporters.use! MiniTest::Reporters::DefaultReporter.new
-
 class MiniTest::Spec
-
   attr_accessor :template_root
   alias :silence_stdout :silence_logger
 
