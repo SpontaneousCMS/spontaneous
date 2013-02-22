@@ -502,6 +502,21 @@ Spontaneous.Field.Markdown = (function($, S) {
 			state = this.fix_selection_whitespace(state)
 			var selected = state.selection, m, n, start = state.start, end = state.end;
 
+			// Catch the case where the selection catches the middle close-brace
+			// open bracket pair
+			m = /\]\(/.exec(selected)
+			if (m) {
+				n = /(\[[^\[]*)?$/.exec(state.before);
+				if (n) {
+					start -= n[1].length;
+					selected = n[1] + selected;
+				}
+				n = /^([^\)]*\))/.exec(state.after);
+				if (n) {
+					end += n[1].length;
+					selected += n[1];
+				}
+			}
 			// cursor is either in the [] or in the ()
 			// first test for being in []
 			m = /(\[[^\]]*)$/.exec(state.before);
