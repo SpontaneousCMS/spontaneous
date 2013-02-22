@@ -637,44 +637,84 @@ Spontaneous.Field.Markdown = (function($, S) {
 			this.callSuper();
 		},
 		toolbar: function() {
-			if (!this._toolbar) {
-				this._wrapper = dom.div([dom.id('editor-'+this.css_id()), '.markdown-editor']);
-				// $(dom.div, {'class':'markdown-editor', 'id':'editor-'+this.css_id()});
-				this._toolbar = dom.div('.md-toolbar');
-				this.commands = [];
-				var input = this.input();
-				for (var i = 0, c = this.actions, ii = c.length; i < ii; i++) {
-					var cmd_class = c[i], cmd = new cmd_class(input);
-					this.commands.push(cmd);
-					this._toolbar.append(cmd.button());
-				}
-				this._wrapper.append(this._toolbar);
-				// input.css('height', '');
+			var self = this;
+			if (!self._toolbar) {
+				self._wrapper = dom.div([dom.id('editor-'+self.css_id()), '.markdown-editor']);
+				self._wrapper.append(self.popupToolbar());
 			}
-			return this._wrapper;
+			return self._wrapper;
+		},
+		popupToolbar: function() {
+			var self = this;
+			if (!self._popupToolbar) {
+				var toolbar = dom.div('.md-toolbar');
+				var arrow = dom.div(".arrow");
+				toolbar.append(arrow);
+				self.commands = [];
+				var input = self.input();
+				for (var i = 0, c = self.actions, ii = c.length; i < ii; i++) {
+					var cmd_class = c[i], cmd = new cmd_class(input);
+					self.commands.push(cmd);
+					toolbar.append(cmd.button());
+				}
+				toolbar.hide();
+				self._popupToolbar = toolbar;
+			}
+			return self._popupToolbar;
 		},
 		edit: function() {
-			this.expanded = false;
-			var input = this.input();
-			input.unbind('select.markdown').unbind('click.markdown').unbind('keyup.markdown');
-			input.bind('select.markdown', this.on_select.bind(this))
-			input.bind('click.markdown', this.on_select.bind(this))
-			input.bind('keyup.markdown', this.on_select.bind(this))
+			var self = this, input = self.input();
+			self.expanded = false;
+			// clear previously assigned bindings
+			input.unbind('select.markdown');
+			input.bind('select.markdown', self.on_select.bind(self))
+			// input.bind('click.markdown', self.on_select.bind(self))
+			// input.bind('keyup.markdown', self.on_select.bind(self))
 			return input;
 		},
 		close_edit: function() {
-			this._input = null;
-			this._toolbar = null;
-			this.commands = [];
-			this.expanded = false;
-			this.callSuper();
+			var self = this;
+			self._input = null;
+			self._toolbar = null;
+			self._popupToolbar = null;
+			self.commands = [];
+			self.expanded = false;
+			self.callSuper();
 		},
 		// iterates through all the buttons and lets them highlight themselves depending on the
 		// currently selected text
 		on_select: function(event) {
-			var state = TextCommand.get_state(this.input());
+			var input = this.input(), toolbar = this.popupToolbar(), state = TextCommand.get_state(input);
 			$.each(this.commands, function() {
 				this.respond_to_selection(state);
+			});
+			input.showSelectionPopup(toolbar, function(position) {
+				var tools = {width: toolbar.width(), height: toolbar.height()},
+				text = { width: input.width(), height: input.height()};
+				// console.log("position", position, tools, text);
+				var place = {
+					left: position.left,
+				  // 5 is half the height of the arrow
+				  // 7 is the padding of the field
+					top: position.top + 7 - 5  - tools.height
+				};
+				var dx = 0;
+				var arrow = toolbar.find(".arrow"),
+				arrowLeft = (position.width / 2) - 5;
+				// if the selection is narrow the arrow can peek over the left
+				// of the toolbar. This shifts everything over and keeps it neat.
+				if (position.width < 40) {
+					place.left = place.left - 15;
+					arrowLeft += 15;
+				}
+				if ((place.left + tools.width) > (text.width)) {
+					dx = ((place.left + tools.width) - (text.width + 20));
+					place.left = place.left - dx;
+					arrowLeft += dx;
+				}
+
+				arrow.css("left", dom.px(arrowLeft));
+				return place;
 			});
 		}
 	});
@@ -688,9 +728,8 @@ Spontaneous.Field.Markdown = (function($, S) {
 		H1: H1,
 		H2: H2,
 		Link: Link
-
-
 	});
+
 	return MarkdownField;
 })(jQuery, Spontaneous);
 

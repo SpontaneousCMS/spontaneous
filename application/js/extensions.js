@@ -48,6 +48,14 @@ function $A(iterable) {
 			};
 		};
 	}
+	if (!(typeof Function.prototype.delay === 'function')) {
+		Function.prototype.delay = function(delay) {
+			var __function__ = this;
+			return function() {
+				window.setTimeout(__function__, delay)
+			};
+		};
+	}
 	$.extend(Function.prototype, {
 		cache: function(name) {
 			var __method = this, id = name || ('__cached__'+(++function_id)), _undefined_;

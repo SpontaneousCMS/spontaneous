@@ -6,6 +6,7 @@
 //= require vendor/diff_match_patch
 //= require vendor/date
 //= require extensions
+//= require jquery-selection-position.js
 //= require properties
 //= require dom
 //= require ajax

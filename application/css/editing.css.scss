@@ -124,9 +124,11 @@ $text-edit-width: 621px;
 				border: none;
 				width: 100%;
 				// padding-right: 64px;
-				padding-left: 0;
-				padding-right: 0;
+				padding-left: 7px;
+				padding-right: 7px;
 				resize:vertical;
+				position: relative;
+				left: -7px;
 			}
 			input[type="text"] {
 				@include text-input;
@@ -312,36 +314,64 @@ $text-edit-width: 621px;
 	}
 }
 .field {
-  .markdown-editor .md-toolbar {
-    @include display-box;
-    @include box-orient;
-    background-color: $editing-blur;
-    a {
-      @include interface;
-      @include no-select;
-      color: $editing-3;
-      display: block;
-      border: solid 1px transparent;
-      padding: 2px 6px;
-      cursor: pointer;
-    }
-    a.active {
-      // border: solid 1px $editing-2;
-      background-color: $editing-2;
-    }
-    a:hover {
-      background-color: $editing-3;
-    }
-    a + a {
-      margin-left: 10px;
-    }
-  }
+	.markdown-editor  {
+		position: relative;
+		.md-toolbar {
+			@include display-box;
+			@include box-orient;
+			@include rounded(5px);
+			position: absolute;
+			z-index: 100;
+			background-color: $action;
+			a {
+				@include interface;
+				@include no-select;
+				color: #333;
+				display: block;
+				border: solid 1px transparent;
+				padding: 2px 6px;
+				cursor: pointer;
+				min-width: 30px;
+				text-align: center;
+			}
+			a:first-of-type {
+				@include rounded-left(5px);
+			}
+			a:last-child {
+				@include rounded-right(5px);
+			}
+			a.active:hover,
+			a.active {
+				// border: solid 1px $editing-2;
+				background-color: $editing-focus;
+				color: #fff;
+			}
+			a:hover {
+				// background-color: $highlight;
+				background-color: $editing-blur;
+			}
+			a + a {
+				// margin-left: 10px;
+				border-left: solid 1px $editing-blur;
+			}
+			.arrow {
+				@include transform(rotate(45deg));
+				position: absolute;
+				width: 10px;
+				height: 10px;
+				bottom: -5px;
+				left: 50%;
+				background-color: $action;
+				z-index: -10;
+			}
+		}
+	}
 }
 .field.focus {
   .markdown-editor .md-toolbar {
-    background-color: $editing-focus;
+		background-color: $action;
+    // background-color: $editing-focus;
     a {
-      color: #333;
     }
   }
 
