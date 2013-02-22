@@ -509,7 +509,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 				n = /^(.*\]\(.+?\))/.exec(state.after);
 				if (n) {
 					start -= m[1].length;
-					selected += m[1];
+					selected = m[1] + selected;
 					end += n[1].length;
 					selected += n[1];
 				}
@@ -520,7 +520,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 				n = /^(.*?\))/.exec(state.after);
 				if (n) {
 					start -= m[1].length;
-					selected += m[1];
+					selected = m[1] + selected;
 					end += n[1].length;
 					selected += n[1];
 				}
@@ -531,7 +531,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 				n = /^(\(.+?\))/.exec(state.after);
 				if (n) {
 					start -= m[1].length;
-					selected += m[1];
+					selected = m[1] + selected;
 					end += n[1].length;
 					selected += n[1];
 				}
