@@ -157,11 +157,9 @@ module Spontaneous::Publishing
     end
 
     def self.delete_all(model)
-      revisions = tables(model).
-        map { |table| revision_from_table(model, table) }.
-        map { |r| new(model, r) }
+      revisions = tables(model).map { |table| for_table(model, table) }
 
-      # Don't call the full #delete because it is much more efficient
+      # Don't call the full Revision#delete because it is much more efficient
       # to delete the contents of the revision tables in a single
       # command rather than revision by revision
       revisions.each(&:delete_table)
@@ -189,6 +187,11 @@ module Spontaneous::Publishing
     def self._filter_dataset(ds, revision, &block)
       return ds.filter(&block) if revision.nil?
       ds.filter(:revision => revision, &block)
+    end
+
+    def self.for_table(model, table)
+      r = revision_from_table(model, table)
+      new(model, r)
     end
 
     def self.revision_from_table(model, table)
