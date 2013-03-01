@@ -213,18 +213,22 @@ module Spontaneous
         public_dirs.each do |public_src|
           next unless public_src.exist?
           public_src = public_src.realpath
-          Dir[public_src.to_s / "**/*"].each do |src|
-            src = Pathname.new(src)
-            # insert facet namespace in front of path to keep URLs consistent across
-            # the back & front servers
-            dest = [facet.file_namespace, src.relative_path_from(public_src).to_s].compact
-            dest = (public_dest + File.join(dest))
-            if src.directory?
-              dest.mkpath
-            else
-              copy_public_file(src, dest)
-            end
+          Dir[public_src.to_s / "**/*"].each do |file|
+            copy_facet_public_dir(facet, file, public_src, public_dest)
           end
+        end
+      end
+
+      def copy_facet_public_dir(facet, original, public_src, public_dest)
+        original = Pathname.new(original)
+        # insert facet namespace in front of path to keep URLs consistent across
+        # the back & front servers
+        dest = File.join [facet.file_namespace, original.relative_path_from(public_src).to_s].compact
+        dest = public_dest + dest
+        if original.directory?
+          dest.mkpath
+        else
+          copy_public_file(original, dest)
         end
       end
 
@@ -284,25 +288,32 @@ module Spontaneous
 
       def after_publish
         update_progress("finalising")
-        S::Revision.create(:revision => revision, :published_at => now)
-        Spontaneous::Site.send(:set_published_revision, revision)
-        tmp = Spontaneous.revision_dir(revision) / "tmp"
-        FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
-        write_revision(revision)
-
         begin
-          Spontaneous::Site.trigger(:after_publish, revision)
-          Spontaneous::Site.send(:pending_revision=, nil)
-          Spontaneous::Content.cleanup_revisions(revision, keep_revisions)
+          tmp = Spontaneous.revision_dir(revision) / "tmp"
+          FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
+          activate_revision
           update_progress("complete")
         rescue => e
           # if a post publish hook raises an exception then we want to roll everything back
-          S::Revision.filter(:revision => revision).delete
-          Spontaneous::Site.send(:set_published_revision, @previous_revision)
-          write_revision(@previous_revision)
-          abort_publish(e)
+          deactivate_revision
           raise e
         end
+      end
+
+      def activate_revision
+        S::Revision.create(:revision => revision, :published_at => now)
+        Spontaneous::Site.send(:set_published_revision, revision)
+        write_revision(revision)
+        Spontaneous::Site.trigger(:after_publish, revision)
+        Spontaneous::Site.send(:pending_revision=, nil)
+        Spontaneous::Content.cleanup_revisions(revision, keep_revisions)
+      end
+
+      def deactivate_revision
+        S::Revision.filter(:revision => revision).delete
+        Spontaneous::Site.send(:set_published_revision, @previous_revision)
+        write_revision(@previous_revision)
+        abort_publish(e)
       end
 
       # Makes the revision live on the filesystem by symlinking the revisions/current
