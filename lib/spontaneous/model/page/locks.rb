@@ -5,7 +5,7 @@ module Spontaneous::Model::Page
     extend Spontaneous::Concern
 
     included do
-      one_to_many :update_locks, :model => Spontaneous::PageLock, :key => :page_id
+      one_to_many :update_locks, :class => Spontaneous::PageLock, :key => :page_id
     end
 
     def locked_for_update?

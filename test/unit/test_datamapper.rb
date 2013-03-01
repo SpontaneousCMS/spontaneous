@@ -988,7 +988,7 @@ describe "DataMapper" do
     before do
       @database.columns = @expected_columns + [:parent_id, :source_id]
       AssocContent = Spontaneous::DataMapper::Model(:content, @database, @schema)
-      AssocContent.has_many :children, key: :parent_id, model: AssocContent
+      AssocContent.has_many_content :children, key: :parent_id#, model: AssocContent
       @database.fetch = { id: 7, type_sid:"AssocContent" }
       @parent = AssocContent.first
       @database.sqls
@@ -1089,7 +1089,7 @@ describe "DataMapper" do
     end
 
     it "destroy dependents if configured" do
-      AssocContent.has_many :destinations, key: :source_id, model: AssocContent, dependent: :destroy
+      AssocContent.has_many_content :destinations, key: :source_id, dependent: :destroy
       @database.fetch = [
         [{ id: 8, type_sid:"AssocContent", source_id:7 }],
         [{ id: 9, type_sid:"AssocContent", source_id:7 }]
@@ -1106,7 +1106,7 @@ describe "DataMapper" do
     end
 
     it "delete dependents if configured" do
-      AssocContent.has_many :destinations, key: :source_id, model: AssocContent, dependent: :delete
+      AssocContent.has_many_content :destinations, key: :source_id, dependent: :delete
       @database.fetch = [
         [{ id: 8, type_sid:"AssocContent", source_id:7 }],
         [{ id: 9, type_sid:"AssocContent", source_id:7 }]
@@ -1118,17 +1118,49 @@ describe "DataMapper" do
       ]
     end
 
-    it "work with non-mapped models" do
-      model = Class.new(Sequel::Model(:other)) do ; end
-      model.db = @database
-      AssocContent.has_many :others, model: model, key: :user_id
-      @database.fetch = { id: 7, type_sid:"AssocContent", parent_id: nil }
-      instance = AssocContent.first
-      @database.sqls
-      instance.others
-      @database.sqls.must_equal [
-        "SELECT * FROM other WHERE (user_id = 7)"
-      ]
+    describe "sequel models" do
+      before do
+        ::Other = Class.new(Sequel::Model(:other)) do ; end
+        Other.db = @database
+        AssocContent.one_to_many :others, key: :user_id
+        @database.fetch = { id: 7, type_sid:"AssocContent", parent_id: nil }
+        @instance = AssocContent.first
+        @database.sqls
+      end
+
+      after do
+          Object.send :remove_const, :Other rescue nil
+      end
+
+      it "can load association members" do
+        @instance.others
+        @database.sqls.must_equal [
+          "SELECT * FROM other WHERE (other.user_id = 7)"
+        ]
+      end
+
+      it "can add new association members" do
+        other = Other.new
+        other.expects(:user_id=).with(7)
+        @instance.add_other other
+      end
+
+      it "can remove association members" do
+        other = Other.new
+        other.expects(:user_id=).with(nil)
+        @instance.remove_other other
+      end
+
+      it "can remove all members" do
+        @instance.remove_all_others
+        @database.sqls.must_equal [
+          "UPDATE other SET user_id = NULL WHERE (user_id = 7)"
+        ]
+      end
+
+      it "can access the association dataset" do
+        @instance.others_dataset.sql.must_equal "SELECT * FROM other WHERE (other.user_id = 7)"
+      end
     end
   end
 
@@ -1136,8 +1168,8 @@ describe "DataMapper" do
     before do
       @database.columns = @expected_columns + [:parent_id]
       AssocContent = Spontaneous::DataMapper::Model(:content, @database, @schema)
-      AssocContent.has_many   :children, key: :parent_id, model: AssocContent, reciprocal: :parent
-      AssocContent.belongs_to :parent,   key: :parent_id, model: AssocContent, reciprocal: :children
+      AssocContent.has_many_content   :children, key: :parent_id, reciprocal: :parent
+      AssocContent.belongs_to_content :parent,   key: :parent_id, reciprocal: :children
       @database.fetch = { id: 8, type_sid:"AssocContent", parent_id: 7 }
 
       @child = AssocContent.first
@@ -1198,6 +1230,106 @@ describe "DataMapper" do
       @database.sqls.must_equal [
         "SELECT * FROM content WHERE (content.parent_id = 7)"
       ]
+    end
+
+    describe "sequel models" do
+      before do
+        ::Other = Class.new(Sequel::Model(:other)) do ; end
+        Other.db = @database
+        AssocContent.many_to_one :other, class: Other, key: :parent_id
+        @database.fetch = { id: 7, type_sid:"AssocContent", parent_id: 34 }
+        @instance = AssocContent.first
+        @database.sqls
+        Other.any_instance.stubs(:parent_id).returns(7)
+        @other = Other.new
+        @other.stubs(:id).returns(34)
+        @other.stubs(:pk).returns(34)
+      end
+
+      after do
+        Object.send :remove_const, :Other rescue nil
+      end
+
+      it "can load association members" do
+        @instance.other
+        @database.sqls.must_equal [
+          "SELECT * FROM other WHERE (other.id = 34) LIMIT 1"
+        ]
+      end
+
+      it "can add new association members" do
+        @database.fetch = { id: 7, type_sid:"AssocContent", parent_id: nil }
+        instance = AssocContent.first
+        instance.other = @other
+        instance.parent_id.must_equal 34
+      end
+
+      it "can remove association members" do
+        @instance.other = nil
+        @instance.parent_id.must_be_nil
+      end
+
+      it "can access the association dataset" do
+        @instance.other_dataset.sql.must_equal "SELECT * FROM other WHERE (other.id = 34) LIMIT 1"
+      end
+
+      it "reloads the association" do
+        @instance.other
+        @instance.reload
+        @database.sqls
+        @instance.other
+        @database.sqls.must_equal [
+          "SELECT * FROM other WHERE (other.id = 34) LIMIT 1"
+        ]
+      end
+    end
+  end
+
+  describe "one_to_one associations" do
+    before do
+      @database.columns = @expected_columns + [:parent_id]
+      AssocContent = Spontaneous::DataMapper::Model(:content, @database, @schema)
+      ::Other = Class.new(Sequel::Model(:other)) do ; end
+      Other.db = @database
+      AssocContent.one_to_one :other, class: Other, key: :parent_id
+      @database.fetch = { id: 7, type_sid:"AssocContent", parent_id: 34 }
+      @instance = AssocContent.first
+      @database.sqls
+      @other = Other.new
+      @other.stubs(:id).returns(34)
+      @other.stubs(:pk).returns(34)
+    end
+
+    after do
+      Object.send :remove_const, :Other rescue nil
+      Object.send :remove_const, :AssocContent rescue nil
+    end
+
+    it "can load association members" do
+      @instance.other
+      @database.sqls.must_equal [
+        "SELECT * FROM other WHERE (other.parent_id = 7) LIMIT 1"
+      ]
+    end
+
+    it "can add new association members" do
+      # @database.fetch = { id: 7, type_sid:"AssocContent", parent_id: nil }
+      # instance = AssocContent.first
+      @other.expects(:parent_id=).with(7)
+      @instance.other = @other
+    end
+
+    it "can remove the association target" do
+      @instance.other = nil
+      @database.sqls.must_equal [
+        "BEGIN",
+        "UPDATE other SET parent_id = NULL WHERE (parent_id = 7)",
+        "COMMIT"
+      ]
+    end
+
+    it "can access the association dataset" do
+      @instance.other_dataset.sql.must_equal "SELECT * FROM other WHERE (other.parent_id = 7) LIMIT 1"
     end
   end
 

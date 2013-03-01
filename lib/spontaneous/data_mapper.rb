@@ -19,7 +19,7 @@ module Spontaneous
     class ScopingMapper
       extend Forwardable
 
-      attr_reader :schema
+      attr_reader :schema, :table
 
       def initialize(table, schema)
         @table, @schema = table, schema

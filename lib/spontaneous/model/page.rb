@@ -26,9 +26,9 @@ module Spontaneous::Model
     include Locks
 
     included do
-      many_to_one :parent, :model => self,   :key => :parent_id, :reciprocal => :unordered_children
-      one_to_many :unordered_children, :model => self, :key => :parent_id, :reciprocal => :parent
-      one_to_many :content, :model => self, :key => :page_id,   :reciprocal => :page
+      many_to_one_content :parent,   :key => :parent_id, :reciprocal => :unordered_children
+      one_to_many_content :unordered_children, :key => :parent_id, :reciprocal => :parent
+      one_to_many_content :content, :key => :page_id,   :reciprocal => :page
     end
 
     # field :title, :string, :default => "New Page"

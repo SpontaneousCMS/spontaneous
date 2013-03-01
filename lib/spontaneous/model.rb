@@ -21,14 +21,14 @@ module Spontaneous
       include_all_types
     end
     model.class_eval do
-      many_to_one :owner,      :key => :owner_id, :model => self, :reciprocal => :_pieces
-      one_to_many :_pieces,    :key => :owner_id, :model => self, :reciprocal => :owner
-      many_to_one :page,       :key => :page_id,  :model => self, :reciprocal => :content
-      many_to_one :created_by, :key => :created_by_id, :model => Spontaneous::Permissions::User
+      many_to_one_content :owner,      :key => :owner_id, :reciprocal => :_pieces
+      one_to_many_content :_pieces,    :key => :owner_id, :reciprocal => :owner
+      many_to_one_content :page,       :key => :page_id, :reciprocal => :content
+      many_to_one :created_by, :key => :created_by_id, :class => Spontaneous::Permissions::User
       # '__target' rather than 'target' because we want to override the behaviour of the
       # Content#target method only on classes that are aliases, and this is defined dynamically
-      many_to_one :__target,   :key => :target_id, :model => self, :reciprocal => :aliases
-      one_to_many :aliases,    :key => :target_id, :model => self, :reciprocal => :__target, :dependent => :destroy
+      many_to_one_content :__target,   :key => :target_id, :reciprocal => :aliases
+      one_to_many_content :aliases,    :key => :target_id, :reciprocal => :__target, :dependent => :destroy
     end
     model.send :extend,  ContentModelClassMethods
     model.send :include, ContentModelInstanceMethods
