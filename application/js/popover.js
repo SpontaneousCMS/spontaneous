@@ -13,7 +13,7 @@ Spontaneous.Popover = (function($, S) {
 		},
 		open: function(event) {
 			var view = this.view;
-			var location = Popover.div();
+			var location = view.attach_to();
 			var wrapper = dom.div('.pop-over');
 			var handle = dom.div('.menuHandle');
 			var header = dom.header();//.append(back_btn).append(title);
@@ -26,34 +26,49 @@ Spontaneous.Popover = (function($, S) {
 				var back_btn = dom.a('.button.back').append(dom.span('.pointer')).append(dom.span('.label').text("Back")).css('visibility', 'hidden');
 				header.append(back_btn);
 			}
+			var target = event.currentTarget;
+			this.set_position(target, wrapper, handle);
+
 			header.append(title);
+
 			if (view.close_text()) {
 				var close_btn = dom.a('.button.close').text(view.close_text()).click(this.close.bind(this));
 				header.append(close_btn);
 			}
 			wrapper.append(handle).append(header).append(view_wrapper);
-			var o = view.position_from_event(event), handle_width = 30, offset = 10, left = -30, top = 18;
+			wrapper.hide();
+			location.append(wrapper);
+
+			var update_position = function(e) {
+				this.set_position(target, wrapper, handle);
+			}.bind(this);
+
+			if (view.scroll) {
+				view.scroll_element().bind("scroll.popover", update_position);
+			}
+			this.wrapper = wrapper;
+			this.is_open = true;
+			wrapper.fadeIn(200, this.after_open.bind(this));
+		},
+
+		set_position: function(target, wrapper, handle) {
+			var view = this.view, o = view.position_from_event(target), handle_width = 30, offset = 10, left = -30, top = 18;
 
 			if (view.align === 'right') {
 				handle.css('left', (view.width() - (offset + handle_width)) + 'px')
 				left = -(view.width() - (offset + handle_width/2) + 8);
 			}
-			// need to subtract the height of the top-bar because the
-			// popover is positioned absolutely inside the data-pane but
-			// given coordinates relative to the body
-			top -= 37 - Popover.div().scrollTop();
-			wrapper.offset({top:(o.top+top), left:(o.left + left)});
-			wrapper.hide();
-			location.append(wrapper);
-			this.wrapper = wrapper;
-			this.is_open = true;
-			wrapper.fadeIn(200, this.after_open.bind(this));
+			wrapper.css({top:(o.top), left:(o.left + left)});
 		},
 
 		after_open: function() {
 			this.view.after_open();
 		},
 		close: function() {
+			var view = this.view;
+			if (view.scroll) {
+				view.scroll_element().unbind("scroll.popover");
+			}
 			Popover.close();
 			return false;
 		},

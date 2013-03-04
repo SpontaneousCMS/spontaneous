@@ -19,9 +19,9 @@ Spontaneous.Views.PieceView = (function($, S) {
 		title: function() {
 			return "Delete this " + (this.parent_view.content.is_page() ? "Page?" : "Piece?");
 		},
-		position_from_event: function(event) {
-			return this.position_from_element(event);
-		},
+		// position_from_event: function(event) {
+		// 	return this.position_from_element(event);
+		// },
 		view: function() {
 			var __entry = this.parent_view;
 			var w = dom.div('#popover-delete').click(function() {
@@ -36,7 +36,8 @@ Spontaneous.Views.PieceView = (function($, S) {
 			var cancel = dom.a('.cancel').text("Cancel");
 			w.append(cancel, ok)
 			return w;
-		}
+		},
+		scroll: true
 	});
 
 	var PieceView = new JS.Class(S.Views.View, {

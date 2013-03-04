@@ -447,7 +447,8 @@ Spontaneous.Field.Markdown = (function($, S) {
 		},
 		page_selected: function(page) {
 			this.url_input.val(page.path);
-		}
+		},
+		scroll: true
 	});
 
 	var PageSelector = new JS.Class({
@@ -700,6 +701,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 					arrowLeft += dx;
 				}
 
+				arrowLeft = Math.min(toolbar.width() - 30, arrowLeft);
 				arrow.css("left", dom.px(arrowLeft));
 				return place;
 			});

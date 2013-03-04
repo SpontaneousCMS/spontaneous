@@ -515,8 +515,8 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 		title: function() {
 			return "Delete user “" + (this.user.get("login")) + "”";
 		},
-		position_from_event: function(event) {
-			var pos = this.position_from_element(event);
+		position_from_event: function(target) {
+			var pos = this.position_from_element(target);
 			pos.left += 40;
 			return pos;
 		},
