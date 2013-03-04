@@ -340,6 +340,7 @@ module Spontaneous
       end
 
       def constants_of(klass)
+        return [] unless klass.respond_to?(:constants)
         klass.constants.
           select { |c| klass.const_defined?(c, false) }.
           map { |c| klass.const_get(c) }
