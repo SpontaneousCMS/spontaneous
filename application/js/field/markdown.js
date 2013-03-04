@@ -502,53 +502,25 @@ Spontaneous.Field.Markdown = (function($, S) {
 			state = this.fix_selection_whitespace(state)
 			var selected = state.selection, m, n, start = state.start, end = state.end;
 
-			// Catch the case where the selection catches the middle close-brace
-			// open bracket pair
-			m = /\]\(/.exec(selected)
-			if (m) {
-				n = /(\[[^\[]*)?$/.exec(state.before);
-				if (n) {
-					start -= n[1].length;
-					selected = n[1] + selected;
-				}
-				n = /^([^\)]*\))/.exec(state.after);
-				if (n) {
-					end += n[1].length;
-					selected += n[1];
-				}
-			}
-			// cursor is either in the [] or in the ()
-			// first test for being in []
-			m = /(\[[^\]]*)$/.exec(state.before);
-			if (m) {
-				n = /^(.*\]\(.+?\))/.exec(state.after);
-				if (n) {
-					start -= m[1].length;
-					selected = m[1] + selected;
-					end += n[1].length;
-					selected += n[1];
-				}
-			}
-			// now test for being in the ()
-			m = /(\[.+?\]\([^\)]*)$/.exec(state.before);
-			if (m) {
-				n = /^(.*?\))/.exec(state.after);
-				if (n) {
-					start -= m[1].length;
-					selected = m[1] + selected;
-					end += n[1].length;
-					selected += n[1];
-				}
-			}
-			// finally check for being exactly between the two
-			m = /(\[.+?\])$/.exec(state.before);
-			if (m) {
-				n = /^(\(.+?\))/.exec(state.after);
-				if (n) {
-					start -= m[1].length;
-					selected = m[1] + selected;
-					end += n[1].length;
-					selected += n[1];
+			var linkExp = /(\[[^\]]*?\]\([^\ ]*?\))/g;
+			var text = this.input.val(), cursor = start, match = 0;
+			// First look at all the text before and move the cursor past any links.
+			// This stops us expanding backwards to grab any link found in the text before
+			// the selection start.
+			do {
+				if ((m = linkExp.exec(state.before))) { match = linkExp.lastIndex; }
+			} while (m && (linkExp.lastIndex < cursor));
+
+			// now we've established where the last whole link lives, and can stop ourselves
+			// including it in the search, we can look backwards
+			// until we find the start of any link that's around the current selection.
+			while ((cursor >= match) && (text[cursor] !== "[")) { cursor--; }
+
+			if (text[cursor] === "[") {
+				if (m = linkExp.exec(text.substr(cursor))) {
+					start = cursor;
+					end = cursor + m[1].length;
+					selected = m[1];
 				}
 			}
 			return {selection:selected, start:start, end:end};
