@@ -224,6 +224,8 @@
 
 			background-color: #fff;
 			padding: $unit 0;
+			max-height: 350px;
+			overflow: auto;
 
 			$deeper-width: 80px;
 
