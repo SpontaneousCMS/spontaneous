@@ -89,7 +89,7 @@ module Minitest
       when 'E', 'F'
         stream.print error(string)
       when 'S'
-        stream.print bold(string)
+        stream.print grey(string)
       else
         stream.print string
       end
@@ -101,6 +101,10 @@ module Minitest
 
     def bold(string)
       tint(1, string)
+    end
+
+    def grey(string)
+      tint([30, 1], string)
     end
 
     def tint(color, string)
