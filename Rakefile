@@ -1,5 +1,9 @@
 Encoding.default_internal = Encoding.default_external = Encoding::UTF_8 if defined?(Encoding)
 
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'spontaneous/version'
+
 require 'rubygems'
 require 'rake'
 
