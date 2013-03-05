@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
 
   s.executables   = ["spot"]
   s.files         = `git ls-files`.split($/)
-  s.test_files    = spec.files.grep(%r{^test/})
+  s.test_files    = s.files.grep(%r{^test/})
   s.require_paths = %w[lib]
 
   s.rdoc_options = ["--charset=UTF-8"]
