@@ -11,19 +11,27 @@ Spontaneous.Ajax = (function($, S) {
 	});
 
 	var csrfToken = S.csrf_token;
+	var requestCache = {};
 
 	var __authenticate = function(request) {
 		request.setRequestHeader(S.csrf_header, csrfToken);
 	};
 	// wraps jQuery.ajax with a auth aware error catcher
 	var __request = function(params) {
-		var requestSuccessHandler = params["success"]
-		, successHandler = function(data, textStatus, xhr) {
+		// console.log("AJAX", params)
+		var requestSuccessHandler = params["success"];
+		var successHandler = function(data, textStatus, xhr) {
+			if (textStatus === "success") {
+				if (params.ifModified) {
+					requestCache[params.url] = data;
+				}
+			} else if (!data && (textStatus === "notmodified")) {
+				data = requestCache[params.url];
+			}
 			requestSuccessHandler(data, textStatus, xhr)
 		};
-		var requestErrorHandler = params["error"]
-		, errorHandler = function(xhr, textStatus, error_thrown) {
-			console.log('caught http error', xhr, textStatus, error_thrown)
+		var requestErrorHandler = params["error"];
+		var errorHandler = function(xhr, textStatus, error_thrown) {
 			if (xhr.status === 401) {
 				S.Ajax.unauthorized();
 			} else if (requestErrorHandler) {
@@ -53,22 +61,12 @@ Spontaneous.Ajax = (function($, S) {
 		authenticateRequest: function(request) {
 			__authenticate(request);
 		},
-		get: function(url, data, callback) {
+		get: function(url, data, callback, options) {
 			if (typeof data === "function") {
 				callback = data;
 				data = {};
 			}
-			// var handle_response = function(data, textStatus, xhr) {
-			// 	callback(data, textStatus, xhr);
-			// };
-			this.makeRequest("GET", url, data, callback)
-			// __request({
-			// 	'url': this.request_url(url),
-			// 	'success': handle_response,
-			// 	'ifModified': false,
-			// 	'data': data,
-			// 	'error': handle_response // pass the error to the handler too
-			// });
+			this.makeRequest("GET", url, data, callback, options)
 		},
 		put: function(url, data, callback) {
 			this.makeRequest("PUT", url, data, callback);
@@ -82,7 +80,7 @@ Spontaneous.Ajax = (function($, S) {
 		patch: function(url, data, callback) {
 			this.makeRequest("PATCH", url, data, callback);
 		},
-		makeRequest: function(method, url, data, callback) {
+		makeRequest: function(method, url, data, callback, options) {
 			var success = function(data, textStatus, xhr) {
 				if (typeof callback === "function") {
 					callback(data, textStatus, xhr);
@@ -98,13 +96,14 @@ Spontaneous.Ajax = (function($, S) {
 				}
 			};
 			data = data || {};
-			__request({
+			var ajaxOptions = $.extend({}, options, {
 				'url': this.request_url(url),
 				'type': method,
 				'data': data,
 				'success': success,
 				'error': error
 			});
+			__request(ajaxOptions);
 		},
 		unauthorized: function() {
 			window.location.href = "/";

@@ -84,7 +84,6 @@ Spontaneous.Location = (function($, S) {
 		load_map: function() {
 		},
 		location_loaded: function(location, status, xhr) {
-			console.log("location_loaded", arguments, xhr.status)
 			if (xhr.status === 406) { // Code returned if site is missing a root page
 				var d = new Spontaneous.AddHomeDialogue(Spontaneous.Types.get('types'));
 				d.open();
@@ -156,31 +155,8 @@ Spontaneous.Location = (function($, S) {
 			}
 			return path;
 		},
-		// easier to create my own 304 sensitive ajax request
-		// than peg on a content cache to jQuery's
 		retrieve: function(url, callback) {
-			ajax.get(url, {}, callback)
-			// var self = this
-			// , req = new XMLHttpRequest()
-			// , data;
-			// req.open("GET", ajax.request_url(url, true), true)
-			// req.setRequestHeader('If-Modified-Since', self.lastModified(url));
-			// req.onreadystatechange = function(event) {
-			// 	if (req.readyState === XMLHttpRequest.DONE) {
-			// 		if (req.status === 200) {
-			// 			data = jQuery.parseJSON(req.responseText);
-			// 			self.setLocationCache(url, req.getResponseHeader("Last-Modified"), data)
-			// 		}
-			// 		if (req.status === 304) {
-			// 			data = self.getLocationCache(url)
-			// 		}
-			// 		if (req.status === 401) {
-			// 			S.Ajax.unauthorized();
-			// 		}
-			// 		callback(data, req);
-			// 	}
-			// };
-			// req.send(null);
+			ajax.get(url, {}, callback, {ifModified: true, cache: true});
 		},
 		lastModified: function(path) {
 			return (this.locationCache[path] || {}).lastModified;
