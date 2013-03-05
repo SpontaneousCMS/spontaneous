@@ -1,6 +1,6 @@
 // console.log('Loading Preview...');
 
-Spontaneous.Preview = (function($, S) {
+Spontaneous.Preview = (function($, S, $window) {
 	var dom = S.Dom, goto_id = 0;
 	var click_param = function() {
 		return "?__click="+(++goto_id);
@@ -24,19 +24,27 @@ Spontaneous.Preview = (function($, S) {
 		display: function(page) {
 
 			// HACK: must be a better way of making sure that updates to the path are
-			// propagated throughout entrie interface
+			// propagated throughout entire interface
 			var path = S.Location.get('path');
-			this.iframe.show().fadeOut(0)
-			this.iframe.bind('load.preview', function() {
-				var _iframe = this;
-				$(this.contentWindow.document).ready(function() {
-					$(_iframe).fadeIn(100);
-				})
-				S.Preview.set({
-					'title': this.contentWindow.document.title,
-					'path': this.contentWindow.location.pathname
-				});
-				S.Location.load_path(this.contentWindow.location.pathname)
+			var preview = this, $iframe = this.iframe, iframe = $iframe[0];
+			var location, monitorInterval = 200, monitor = function() {
+				var currentLocation = iframe.contentWindow.location.pathname;
+				if (currentLocation !== location) {
+					location = currentLocation;
+					S.Preview.set({
+						'title': iframe.contentWindow.document.title,
+						'path': iframe.contentWindow.location.pathname
+					});
+					S.Location.load_path(iframe.contentWindow.location.pathname);
+				}
+			};
+
+			$iframe.hide();
+			$iframe.one("load", function() {
+				$iframe.show();
+				if (!preview.previewPathMonitor) {
+					preview.previewPathMonitor = $window.setInterval(monitor, monitorInterval);
+				}
 			});
 			this.goto_path(path);
 		},
@@ -53,11 +61,16 @@ Spontaneous.Preview = (function($, S) {
 			}
 		},
 		hide: function() {
-			this.iframe.unbind('load.preview').hide();
+			var preview = this;
+			preview.iframe.unbind('load.preview').hide();
+			if (preview.previewPathMonitor) {
+				$window.clearInterval(preview.previewPathMonitor);
+				preview.previewPathMonitor = null;
+			}
 		},
 		show: function() {
 			this.iframe.show();
 		}
 	});
 	return Preview;
-})(jQuery, Spontaneous);
+})(jQuery, Spontaneous, window);
