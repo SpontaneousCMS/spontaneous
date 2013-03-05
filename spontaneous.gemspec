@@ -1,10 +1,12 @@
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'spontaneous/version'
 
 Gem::Specification.new do |s|
   s.required_ruby_version = ">= 1.9.3"
 
   s.name          = 'spontaneous'
-  s.version       = '0.2.0.beta1'
-  s.date          = '2013-02-22'
+  s.version       = Spontaneous::VERSION
 
   s.summary       = "Spontaneous is a next-generation Ruby CMS"
   s.description   = "Spontaneous is a next-generation Ruby CMS"
