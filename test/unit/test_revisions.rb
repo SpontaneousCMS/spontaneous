@@ -60,6 +60,10 @@ describe "Revisions" do
     stub_time(@now)
   end
 
+  after do
+    Revision.delete_all(Content)
+  end
+
   describe "data sources" do
 
     it "have the right names" do
@@ -253,14 +257,6 @@ describe "Revisions" do
         @initial_revision = 1
         @final_revision = 2
         Revision.create(Content, @initial_revision)
-        Revision.delete(Content, @final_revision) rescue nil
-        Revision.delete(Content, @final_revision+1) rescue nil
-      end
-
-      after do
-        Revision.create(Content, @initial_revision) rescue nil
-        Revision.delete(Content, @final_revision) rescue nil
-        Revision.delete(Content, @final_revision+1) rescue nil
       end
 
       it "duplicate changes to only a single item" do
@@ -450,10 +446,6 @@ describe "Revisions" do
   describe "publication timestamps" do
     before do
       @revision = 1
-      Revision.delete(Content, @revision+1)
-    end
-    after do
-      Revision.delete(Content, @revision)
       Revision.delete(Content, @revision+1)
     end
 
