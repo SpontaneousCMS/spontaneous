@@ -49,6 +49,7 @@ module Spontaneous::Rack::Middleware
       def call(env)
         status = headers = body = nil
         env[RENDERER] = @renderer
+        env[REVISION] = Spontaneous::Site.published_revision
         Spontaneous::Content.with_published do
           status, headers, body = @app.call(env)
         end

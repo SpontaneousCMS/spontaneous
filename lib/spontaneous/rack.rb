@@ -22,6 +22,7 @@ module Spontaneous
       ACTIVE_USER    = "spot.user".freeze
       ACTIVE_KEY     = "spot.key".freeze
       RENDERER       = "spot.renderer".freeze
+      REVISION       = "spot.revision".freeze
       CSRF_VALID     = "spot.csrf_valid".freeze
       CSRF_TOKEN     = "spot.csrf_token".freeze
 
@@ -64,6 +65,7 @@ module Spontaneous
     end
 
     autoload :Assets,               'spontaneous/rack/assets'
+    autoload :AssetServer,          'spontaneous/rack/asset_server'
     autoload :Back,                 'spontaneous/rack/back'
     autoload :CSS,                  'spontaneous/rack/css'
     autoload :CacheableFile,        'spontaneous/rack/cacheable_file'

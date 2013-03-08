@@ -47,6 +47,10 @@ module Spontaneous
             run Spontaneous::Rack::CacheableFile.new(Spontaneous.revision_dir / "rev")
           end
 
+          map "/assets" do
+            run Spontaneous::Rack::CacheableFile.new(Spontaneous.revision_dir / "assets")
+          end
+
           map "/media" do
             run Spontaneous::Rack::CacheableFile.new(Spontaneous.media_dir)
           end

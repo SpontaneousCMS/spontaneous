@@ -6,7 +6,7 @@ module Spontaneous
 
       autoload :Base,               'spontaneous/rack/back/base'
       autoload :Alias,              'spontaneous/rack/back/alias'
-      autoload :Assets,             'spontaneous/rack/back/assets'
+      autoload :ApplicationAssets,  'spontaneous/rack/back/application_assets'
       autoload :Changes,            'spontaneous/rack/back/changes'
       autoload :Content,            'spontaneous/rack/back/content'
       autoload :Events,             'spontaneous/rack/back/events'
@@ -20,6 +20,7 @@ module Spontaneous
       autoload :Preview,            'spontaneous/rack/back/preview'
       autoload :Schema,             'spontaneous/rack/back/schema'
       autoload :Site,               'spontaneous/rack/back/site'
+      autoload :SiteAssets,         'spontaneous/rack/back/site_assets'
       autoload :UnsupportedBrowser, 'spontaneous/rack/back/unsupported_browser'
       autoload :UserAdmin,          'spontaneous/rack/back/user_admin'
 
@@ -42,7 +43,7 @@ module Spontaneous
         ::Rack::Builder.app do
           use ::Rack::Lint if Spontaneous.development?
           use Scope::Edit
-          use Assets
+          use ApplicationAssets
           use UnsupportedBrowser
           use Authenticate::Init
           use Login
@@ -85,11 +86,10 @@ module Spontaneous
           # the preview site.
           use Authenticate::Preview
           use CSRF::Header
+          map("/assets") { run SiteAssets.new }
           use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
-          use Spontaneous::Rack::CSS, :root => Spontaneous.instance.paths.expanded(:public)
-          use Spontaneous::Rack::JS,  :root => Spontaneous.instance.paths.expanded(:public)
           use Reloader
           run Preview
         end

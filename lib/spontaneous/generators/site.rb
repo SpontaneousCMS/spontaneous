@@ -54,6 +54,7 @@ module Spontaneous
         directory "schema"
         directory "lib"
         directory "templates"
+        directory "assets"
         directory "public"
         template "Gemfile.tt", "Gemfile"
         template "Capfile.tt", "Capfile"

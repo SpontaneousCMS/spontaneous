@@ -44,7 +44,7 @@ Gem::Specification.new do |s|
   s.add_dependency('simultaneous',    ["~> 0.4.2"])
   s.add_dependency('sinatra',         ["~> 1.3.4"])
   s.add_dependency('sinatra-contrib', ["~> 1.3.1"])
-  s.add_dependency('sprockets',       ["~> 2.7.0"])
+  s.add_dependency('sprockets',       ["~> 2.9.0"])
   s.add_dependency('stringex',        ["=  1.3"])
   s.add_dependency('therubyracer',    ['~> 0.9.10'])
   s.add_dependency('thin',            ["~> 1.2"])

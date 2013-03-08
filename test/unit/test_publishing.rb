@@ -52,7 +52,7 @@ describe "Publishing" do
 
     after do
       Content.delete_revision(@revision)
-      S::Revision.delete
+      S::PublishedRevision.delete
     end
 
     it "delete any conflicting revision tables" do
@@ -71,7 +71,7 @@ describe "Publishing" do
 
     it "record date and time of publish" do
       Content.expects(:publish).with(@revision, nil)
-      S::Revision.expects(:create).with(:revision => @revision, :published_at => @now)
+      S::PublishedRevision.expects(:create).with(:revision => @revision, :published_at => @now)
       S::Site.publish_all
     end
 
@@ -297,7 +297,7 @@ describe "Publishing" do
         Site.pending_revision.must_be_nil
         Site.published_revision.must_equal @revision
         refute Content.revision_exists?(published_revision)
-        S::Revision.first(:revision => published_revision).must_be_nil
+        S::PublishedRevision.first(:revision => published_revision).must_be_nil
         previous_root = Spontaneous.revision_dir(@revision)
         published_root = Spontaneous.revision_dir(published_revision)
         symlink = Pathname.new Spontaneous.revision_dir

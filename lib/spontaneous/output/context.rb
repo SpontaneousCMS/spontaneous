@@ -41,6 +41,14 @@ module Spontaneous::Output::Context
       Spontaneous::Site.root
     end
 
+    def asset_environment
+      @asset_environment ||= Spontaneous::Asset::Environment.new(self)
+    end
+
+    def site
+      Spontaneous::Site.instance
+    end
+
     def publishing?
       false
     end
@@ -147,15 +155,15 @@ module Spontaneous::Output::Context
       end
     end
 
-    def compressed_scripts(scripts)
+    def scripts(*scripts)
       _with_render_cache(scripts.join(",")) do
-        super(scripts)
+        super
       end
     end
 
-    def compressed_stylesheets(stylesheets)
+    def stylesheets(*stylesheets)
       _with_render_cache(stylesheets.join(",")) do
-        super(stylesheets)
+        super
       end
     end
 

@@ -66,8 +66,12 @@ describe "Generators" do
       assert_file_exists(site_root, 'schema/piece.rb')
       assert_file_exists(site_root, 'schema/box.rb')
       assert File.read(site_root / 'schema/piece.rb') =~ /class Piece < Content::Piece/
-      assert_file_exists(site_root, 'public/js')
-      assert_file_exists(site_root, 'public/css')
+      assert_file_exists(site_root, 'assets')
+      assert_file_exists(site_root, 'assets/README.md')
+      assert_file_exists(site_root, 'assets/css/site.scss')
+      assert_file_exists(site_root, 'assets/js/site.js')
+      assert_file_exists(site_root, 'public/favicon.ico')
+      assert_file_exists(site_root, 'public/robots.txt')
       content_rb =  File.read(site_root / 'lib/content.rb')
       assert content_rb =~ /class Content < Spontaneous::Model\(:content\)/
       assert content_rb =~ /^Site = Spontaneous\.site\(Content\)/

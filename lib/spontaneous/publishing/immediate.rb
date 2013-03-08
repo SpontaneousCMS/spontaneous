@@ -301,7 +301,7 @@ module Spontaneous
       end
 
       def activate_revision
-        S::Revision.create(:revision => revision, :published_at => now)
+        S::PublishedRevision.create(:revision => revision, :published_at => now)
         Spontaneous::Site.send(:set_published_revision, revision)
         write_revision(revision)
         Spontaneous::Site.trigger(:after_publish, revision)
@@ -310,7 +310,7 @@ module Spontaneous
       end
 
       def deactivate_revision
-        S::Revision.filter(:revision => revision).delete
+        S::PublishedRevision.filter(:revision => revision).delete
         Spontaneous::Site.send(:set_published_revision, @previous_revision)
         write_revision(@previous_revision)
         abort_publish(e)

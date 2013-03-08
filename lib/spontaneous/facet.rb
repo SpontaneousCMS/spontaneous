@@ -10,6 +10,7 @@ module Spontaneous
       paths.add :templates, "templates"
       paths.add :config, "config"
       paths.add :public, "public"
+      paths.add :assets, "assets"
       paths.add :tasks, ["lib/tasks", "**/*.rake"]
       paths.add :migrations, ["db/migrations", "**/*.rake"]
       paths.add :plugins, ["plugins", "*"]
