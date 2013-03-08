@@ -24,11 +24,5 @@ module Spontaneous::Rack::Back
       end
       Spontaneous::Rack::AssetServer.new(environment, charset)
     end
-
-    def force_encoding(status, headers, body)
-      content_type = headers["Content-Type"]
-      headers.update("Content-Type" => "#{content_type}; charset=#{@charset}")
-      [status, headers, body]
-    end
   end
 end
