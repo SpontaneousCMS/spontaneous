@@ -80,29 +80,35 @@ module Spontaneous::Asset
       # Returns a list of URLs
       def find(sources, options)
         paths   = normalise_sources(sources, options)
-        assets  = paths.map { |path| environment[path] || path }
-        assets.map { |asset| to_url(asset) }
+        if options[:development]
+          assets = paths.flat_map { |path| environment[path].to_a || [path] }
+        else
+          assets = paths.map { |path| environment[path] || path }
+        end
+        assets.map { |asset| to_url(asset, options[:development]) }
       end
 
       def normalise_sources(sources, options)
         sources.map { |path| to_logical(path, options[:type]) }
       end
 
-      def js(sources)
-        find(sources, type: :js)
+      def js(sources, options = {})
+        find(sources, options.merge(type: :js))
       end
 
-      def css(sources)
-        find(sources, type: :css)
+      def css(sources, options = {})
+        find(sources, options.merge(type: :css))
       end
 
       def call(env)
         environment.call(env)
       end
 
-      def to_url(asset)
+      def to_url(asset, body = false)
         return asset if asset.is_a?(String)
-        "/" << asset_mount_point << "/" << asset.logical_path
+        path = asset.logical_path
+        path = "#{path}?body=1" if body
+        "/" << asset_mount_point << "/" << path
       end
 
       def asset_mount_point

@@ -37,6 +37,10 @@ module Spontaneous::Output::Context
       Spontaneous.development?
     end
 
+    def development?
+      Spontaneous.development?
+    end
+
     def root
       Spontaneous::Site.root
     end

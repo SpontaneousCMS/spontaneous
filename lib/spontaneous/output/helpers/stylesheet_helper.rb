@@ -13,13 +13,14 @@ module Spontaneous::Output::Helpers
     end
 
     def stylesheet_urls(*args)
-      asset_environment.css(args.flatten)
+      options = args.extract_options!
+      options.update(:development => development?)
+      asset_environment.css(args.flatten, options)
     end
 
     alias_method :stylesheet, :stylesheets
 
     def stylesheet_tag(href)
-      href = "#{href}.css" unless href =~ /\.css$/o
       %(<link rel="stylesheet" href="#{href}" />)
     end
 

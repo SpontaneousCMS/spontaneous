@@ -13,7 +13,9 @@ module Spontaneous::Output::Helpers
     end
 
     def script_urls(*args)
-      asset_environment.js(args.flatten)
+      options = args.extract_options!
+      options.update(:development => development?)
+      asset_environment.js(args.flatten, options)
     end
 
     alias_method :script, :scripts
