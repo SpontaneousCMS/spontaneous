@@ -31,6 +31,13 @@ describe "Assets" do
     output = content.output(format)
     context = renderer.context(output, params)
     context.extend LiveSimulation if live
+    context.class_eval do
+      # Force us into production environment
+      # which is where most of the magic has to happen
+      def development?
+        false
+      end
+    end
     context
   end
 
