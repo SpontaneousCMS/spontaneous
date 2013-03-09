@@ -116,7 +116,6 @@ module Spontaneous::Asset
       end
 
       ABSOLUTE_URL  = /^(https?:)?\/\//
-      LEADING_SLASH = /^\/?([^\/].*)/ # Needs to avoid changing paths that start with //
 
       def is_absolute_url?(path)
         ABSOLUTE_URL === path
@@ -124,7 +123,7 @@ module Spontaneous::Asset
 
       def to_logical(path, type)
         return path if is_absolute_url?(path)
-        filename_with_extension(path[LEADING_SLASH, 1], type)
+        filename_with_extension(path, type)
       end
 
       EXTENSIONS = {

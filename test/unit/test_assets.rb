@@ -136,7 +136,7 @@ describe "Assets" do
     let(:context) { development_context }
 
     it "includes all js dependencies" do
-      result = context.scripts('js/all', 'js/m', '/js/c', 'x')
+      result = context.scripts('js/all', 'js/m', 'js/c', 'x')
       result.must_equal [
         '<script type="text/javascript" src="/assets/js/a.js?body=1"></script>',
         '<script type="text/javascript" src="/assets/js/b.js?body=1"></script>',
@@ -155,7 +155,7 @@ describe "Assets" do
     end
 
     it "includes all css dependencies" do
-      result = context.stylesheets('css/all', '/css/c', 'x')
+      result = context.stylesheets('css/all', 'css/c', 'x')
       result.must_equal [
         '<link rel="stylesheet" href="/assets/css/b.css?body=1" />',
         '<link rel="stylesheet" href="/assets/css/a.css?body=1" />',
@@ -178,7 +178,7 @@ describe "Assets" do
 
     describe "javascript" do
       it "include scripts as separate files" do
-        result = context.scripts('js/all', 'js/m.js', '/js/c.js', 'x')
+        result = context.scripts('js/all', 'js/m.js', 'js/c.js', 'x')
         result.must_equal [
           '<script type="text/javascript" src="/assets/js/all.js"></script>',
           '<script type="text/javascript" src="/assets/js/m.js"></script>',
@@ -203,6 +203,11 @@ describe "Assets" do
           '<script type="text/javascript" src="/assets/js/all.js"></script>',
           '<script type="text/javascript" src="js/missing.js"></script>'
         ].join("\n")
+      end
+
+      it "should pass through absolute urls" do
+        result = context.scripts('/js/all.js')
+        result.must_equal '<script type="text/javascript" src="/js/all.js"></script>'
       end
 
       it "should bundle assets" do
@@ -242,7 +247,7 @@ describe "Assets" do
 
     describe "css" do
       it "include css files as separate links" do
-        result = context.stylesheets('css/all', '/css/c', 'x')
+        result = context.stylesheets('css/all', 'css/c', 'x')
         result.must_equal [
           '<link rel="stylesheet" href="/assets/css/all.css" />',
           '<link rel="stylesheet" href="/assets/css/c.css" />',
@@ -251,7 +256,7 @@ describe "Assets" do
       end
 
       it "allows passing scripts as an array" do
-        result = context.stylesheets(['css/all', '/css/c', 'x'])
+        result = context.stylesheets(['css/all', 'css/c', 'x'])
         result.must_equal [
           '<link rel="stylesheet" href="/assets/css/all.css" />',
           '<link rel="stylesheet" href="/assets/css/c.css" />',
@@ -334,7 +339,7 @@ describe "Assets" do
 
     describe "javascript" do
       it "bundles & fingerprints local scripts" do
-        result = context.scripts('js/all', 'js/m.js', '/js/c.js', 'x')
+        result = context.scripts('js/all', 'js/m.js', 'js/c.js', 'x')
         result.must_equal [
           '<script type="text/javascript" src="/assets/js/all-22505bbfb6293f6996de75f281c97fe7.js"></script>',
           '<script type="text/javascript" src="/assets/js/m-7daf13cf52ad1c0306a55982228f0dc3.js"></script>',
@@ -387,7 +392,7 @@ describe "Assets" do
 
     describe "css" do
       it "bundles & fingerprints local stylesheets" do
-        result = context.stylesheets('css/all', '/css/a.css', 'x')
+        result = context.stylesheets('css/all', 'css/a.css', 'x')
         result.must_equal [
           '<link rel="stylesheet" href="/assets/css/all-5a2bcfb191dd15394a00b096d5978593.css" />',
           '<link rel="stylesheet" href="/assets/css/a-603fe41a590a542843a288327e6bf9b7.css" />',
@@ -396,15 +401,16 @@ describe "Assets" do
       end
 
       it "ignores missing stylesheets" do
-        result = context.stylesheets('css/all', '/css/notfound')
+        result = context.stylesheets('css/all', '/css/notfound', 'css/notfound')
         result.must_equal [
           '<link rel="stylesheet" href="/assets/css/all-5a2bcfb191dd15394a00b096d5978593.css" />',
-          '<link rel="stylesheet" href="/css/notfound" />'
+          '<link rel="stylesheet" href="/css/notfound" />',
+          '<link rel="stylesheet" href="css/notfound" />'
         ].join("\n")
       end
 
       it "bundles locals scripts and includes remote ones" do
-        result = context.stylesheets('/css/all.css', '//stylesheet.com/responsive', 'http://cdn.google.com/normalize.css', 'x')
+        result = context.stylesheets('css/all.css', '//stylesheet.com/responsive', 'http://cdn.google.com/normalize.css', 'x')
         result.must_equal [
           '<link rel="stylesheet" href="/assets/css/all-5a2bcfb191dd15394a00b096d5978593.css" />',
           '<link rel="stylesheet" href="//stylesheet.com/responsive" />',
