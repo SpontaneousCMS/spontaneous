@@ -49,6 +49,14 @@ module Spontaneous::Output::Context
       @asset_environment ||= Spontaneous::Asset::Environment.new(self)
     end
 
+    def asset_path(path, options = {})
+      asset_environment.find(path, options).try(:first)
+    end
+
+    def asset_url(path, options = {})
+      "url(#{asset_path(path, options)})"
+    end
+
     def site
       Spontaneous::Site.instance
     end
@@ -187,5 +195,4 @@ module Spontaneous::Output::Context
 
   module RequestContext
   end
-
 end

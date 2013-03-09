@@ -89,7 +89,7 @@ module Spontaneous::Asset
       end
 
       def normalise_sources(sources, options)
-        sources.map { |path| to_logical(path, options[:type]) }
+        Array(sources).map { |path| to_logical(path, options[:type]) }
       end
 
       def js(sources, options = {})

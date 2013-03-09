@@ -295,6 +295,19 @@ describe "Assets" do
         result.must_match /width: 8px;/
       end
     end
+
+    describe "templates" do
+      let(:renderer)  { Spontaneous::Output::Template::PreviewRenderer.new }
+
+      it "should allow for embedding asset images into templates xxx" do
+        result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
+        result.must_equal "/assets/i/y.png"
+      end
+      it "should allow for embedding asset urls into templates" do
+        result = renderer.render_string("${ asset_url 'i/y.png' }", @page.output(:html))
+        result.must_equal "url(/assets/i/y.png)"
+      end
+    end
   end
 
   describe "publishing" do
@@ -453,6 +466,19 @@ describe "Assets" do
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
         result.must_match %r{background-image:url\(data:image/png;base64}
+      end
+    end
+
+    describe "templates" do
+      let(:renderer)  { Spontaneous::Output::Template::PublishRenderer.new }
+
+      it "should allow for embedding asset images into templates xxx" do
+        result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
+        result.must_equal "/assets/i/y-9cf98219611ef5a9fdf0d970af30084a.png"
+      end
+      it "should allow for embedding asset urls into templates" do
+        result = renderer.render_string("${ asset_url 'i/y.png' }", @page.output(:html))
+        result.must_equal "url(/assets/i/y-9cf98219611ef5a9fdf0d970af30084a.png)"
       end
     end
   end
