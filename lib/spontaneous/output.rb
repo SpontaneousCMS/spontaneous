@@ -155,7 +155,6 @@ module Spontaneous
     autoload :Template, "spontaneous/output/template"
     autoload :Context,  "spontaneous/output/context"
     autoload :Helpers,  "spontaneous/output/helpers"
-    autoload :Assets,   "spontaneous/output/assets"
   end
 end
 

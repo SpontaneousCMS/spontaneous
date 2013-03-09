@@ -130,8 +130,6 @@ describe "Assets" do
     end
   end
 
-  Compression = Spontaneous::Output::Assets::Compression
-
   describe "development" do
     let(:context) { development_context }
 
