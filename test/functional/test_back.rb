@@ -1058,13 +1058,13 @@ describe "Back" do
       end
     end
 
-    it "render SASS templates xxx" do
+    it "render SASS templates" do
       get "/assets/css/sass_template.css"
       assert last_response.ok?, "Should return 200 but got #{last_response.status}"
       last_response.body.must_match /color: #ffeeff/
     end
 
-    it "compile CoffeeScript xxx" do
+    it "compile CoffeeScript" do
       get "/assets/js/coffeescript.js"
       assert last_response.ok?, "Should return 200 but got #{last_response.status}"
       last_response.body.must_match /square = function/
@@ -1077,6 +1077,15 @@ describe "Back" do
         Project.posted!(page)
       end
       post "/project1"
+    end
+
+    it "previews hidden pages" do
+      get "/project1"
+      body = last_response.body
+      project1.hide!
+      get "/project1"
+      assert last_response.ok?, "Expected 200 got #{last_response.status}"
+      last_response.body.must_equal body
     end
   end
 

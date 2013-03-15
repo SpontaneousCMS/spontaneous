@@ -7,8 +7,6 @@ module Spontaneous
       include Constants
       include Sinatra::Helpers unless method_defined?(:redirect)
 
-
-
       attr_reader :env, :response, :request
       attr_accessor :page
 
@@ -129,7 +127,11 @@ module Spontaneous
 
       def find_page!(path)
         @path, @output, @action = parse_path(path)
-        @page = Spontaneous::Site[@path]
+        @page = find_page_by_path(@path)
+      end
+
+      def find_page_by_path(path)
+        Spontaneous::Site.by_path(path)
       end
 
       def output
