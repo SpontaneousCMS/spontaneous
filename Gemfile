@@ -26,8 +26,8 @@ platforms :jruby do
 end
 
 platforms :mri do
-  gem 'mysql2', "~> 0.3.11"
-  gem 'pg',     "~> 0.14.1"
-  gem 'xapian-ruby', "~> 1.2.12"
-  gem 'xapian-fu', "~> 1.3"
+  gem 'mysql2',      '~> 0.3.11'
+  gem 'pg',          '~> 0.14.1'
+  gem 'xapian-ruby', '~> 1.2.12'
+  gem 'xapian-fu',   '~> 1.3'
 end
