@@ -7,6 +7,12 @@ gem 'spontaneous', '~> <%= Spontaneous::VERSION %>'
 
 gem '<%= @database[:gem].name %>', '<%= @database[:gem].requirement %>'
 
+# Your favorite ExecJS compatible engine
+gem 'therubyracer',    '~> 0.9.10'
+
+gem 'coffee-script',   "~> 2.2.0"
+gem 'uglifier',        "~> 1.3.0"
+
 # Deploy with Capistrano
 gem 'capistrano', '~> 2.9'
 
