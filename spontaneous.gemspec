@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = %w[LICENSE]
 
   s.add_dependency('activesupport',   ["~> 3.2.0"])
+  s.add_dependency('coffee-script',   ['~> 2.2.0'])
   s.add_dependency('bcrypt-ruby',     ["~> 3.0.1"])
   s.add_dependency('bundler',         [">  1.0.15"])
   s.add_dependency('cutaneous',       ["~> 0.1.3"])
@@ -45,7 +46,10 @@ Gem::Specification.new do |s|
   s.add_dependency('stringex',        ["=  1.3"])
   s.add_dependency('thin',            ["~> 1.2"])
   s.add_dependency('thor',            ["~> 0.16.0"])
+  s.add_dependency('uglifier',        ['~> 1.3.0'])
+  s.add_dependency('xapian-fu',       ['~> 1.5'])
   s.add_dependency('yajl-ruby',       ["~> 1.1.0"])
+
 
   s.add_development_dependency('minitest',  ["~> 4.6.0"])
   s.add_development_dependency('minitest-colorize', ["~> 0.0.5"])
