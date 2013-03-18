@@ -1,6 +1,6 @@
 //= require compatibility
 //= require vendor/jquery-ui-1.8.18.custom.min
-//= require vendor/JS.Class-2.1.5/min/core
+//= require vendor/js.class-2.1.5.min
 //= require vendor/crypto-2.3.0-crypto
 //= require vendor/crypto-2.3.0-sha1
 //= require vendor/diff_match_patch
