@@ -11,12 +11,17 @@ module Spontaneous::Rack::Back
       # Find a way to move this into a more de-centralised place
       # at some point we are going to want to have some configurable, extendable
       # list of event handlers
-      ::Simultaneous.on_event("publish_progress") { |event|
-        messenger.deliver_event(event)
-      }
-      ::Simultaneous.on_event("page_lock_status") { |event|
-        messenger.deliver_event(event)
-      }
+      begin
+        ::Simultaneous.on_event("publish_progress") { |event|
+          messenger.deliver_event(event)
+        }
+        ::Simultaneous.on_event("page_lock_status") { |event|
+          messenger.deliver_event(event)
+        }
+      rescue => e
+        logger.error "Error while connecting to Simultaneous server"
+        logger.error e.inspect
+      end
       messenger
     end
 
