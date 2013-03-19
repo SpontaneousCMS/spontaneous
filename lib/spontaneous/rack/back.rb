@@ -41,7 +41,6 @@ module Spontaneous
 
       def self.editing_app
         ::Rack::Builder.app do
-          use ::Rack::Lint if Spontaneous.development?
           use Scope::Edit
           use ApplicationAssets
           use UnsupportedBrowser
