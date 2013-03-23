@@ -52,7 +52,6 @@ module Spontaneous
   autoload :Facet,              "spontaneous/facet"
   autoload :Field,              "spontaneous/field"
   autoload :Generators,         "spontaneous/generators"
-  autoload :ImageSize,          "spontaneous/image_size"
   autoload :Layout,             "spontaneous/layout"
   autoload :Media,              "spontaneous/media"
   autoload :Output,             "spontaneous/output"

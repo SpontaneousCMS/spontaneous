@@ -35,8 +35,13 @@ describe "Images" do
     end
   end
 
-  describe "Image fields" do
+  describe "uploaded files" do
     before do
+      # I'm both testing for this and avoiding it happening
+      # (optimization can be slow...)
+      optim = Spontaneous::Media::Image::Optimizer
+      optim.expects(:run).at_least_once
+
       tmp = File.join(@site.root, "tmp/media")
       # Spontaneous.media_dir = tmp
       @tmp_dir = Pathname.new(tmp)
@@ -52,27 +57,19 @@ describe "Images" do
       @origin_image = @origin_image.realpath.to_s
 
       class ::ResizingImageField < S::Field::Image
-        size :preview do
+        size :preview, :optimize => false do
           width 200
-          optimize!
         end
         size :tall do
           height 200
         end
         size :thumbnail do
-          fit 50, 50
+          fit width: 50, height: 50
         end
         size :icon do
-          crop 50, 50
+          fill width: 50, height: 50
         end
-        size :greyscale do
-          fit 50, 50
-          greyscale
-          gaussian_blur 10
-        end
-        size :reformatted do
-          format 'png'
-        end
+        size :reformatted, :format => :png
       end
 
       ResizingImageField.register
@@ -86,10 +83,6 @@ describe "Images" do
       @content_id = 234
       @instance.stubs(:id).returns(@content_id)
       @image = @instance.photo
-      @image.owner.must_equal @instance
-      @image.value = @origin_image.to_s
-
-      @instance.save
     end
 
     after do
@@ -97,167 +90,172 @@ describe "Images" do
       Object.send(:remove_const, :ResizingImageField) rescue nil
     end
 
-    describe "with defined sizes" do
+    describe "local storage" do
       before do
-      end
 
-      it "create resized versions of the input image" do
-        S::ImageSize.read(@image.preview.filepath).must_equal [200, 267]
-        S::ImageSize.read(@image.tall.filepath).must_equal [150, 200]
-        S::ImageSize.read(@image.thumbnail.filepath).must_equal [38, 50]
-        S::ImageSize.read(@image.icon.filepath).must_equal [50, 50]
-        S::ImageSize.read(@image.greyscale.filepath).must_equal [38, 50]
-      end
-
-      it "preserve new format if processing has altered it" do
-        @image.reformatted.src.must_match /\.png$/
-      end
-    end
-
-    describe "with optimization" do
-      it "run jpegoptim" do
-        Spontaneous.expects(:system).with(regexp_matches(/jpegoptim/)).at_least_once
-        Spontaneous.expects(:system).with(regexp_matches(/jpegtran/)).at_least_once
+        @image.owner.must_equal @instance
         @image.value = @origin_image.to_s
-      end
-    end
 
-    describe "in templates" do
-
-      it "render an <img/> tag in HTML format" do
-        assert_has_elements @image.to_html.split(' '), %(<img src="#{@image.src}" width="400" height="533" alt="" />).split(" ")
-      end
-
-      it "use passed hash to overwrite tag attributes" do
-        attr = {
-          :alt => "Magic",
-          :class => "magic",
-          :rel => "lightbox",
-          :random => "present"
-        }
-        assert_has_elements @image.to_html(attr).split(" "), %(<img src="#{@image.src}" width="400" height="533" alt="Magic" class="magic" rel="lightbox" random="present" />).split(" ")
-      end
-
-      it "be intelligent about setting width & height" do
-        @image.to_html({ :width => 100 }).split(" ").must_have_elements %(<img src="#{@image.src}" width="100" alt="" />).split(" ")
-        assert_has_elements @image.to_html({ :height => 100 }).split(" "), %(<img src="#{@image.src}" height="100" alt="" />).split(" ")
-        assert_has_elements @image.to_html({ :width => 100, :height => 100 }).split(" "), %(<img src="#{@image.src}" width="100" height="100" alt="" />).split(" ")
-      end
-
-      it "turn off setting with & height if either is passed as false" do
-        assert_has_elements @image.to_html({ :width => false }).split(" "), %(<img src="#{@image.src}" alt="" />).split(" ")
-      end
-
-      it "escape values in params" do
-        assert_has_elements @image.to_html({ :alt => "<danger\">" }).split(" "), %(<img src="#{@image.src}" width="400" height="533" alt="&lt;danger&quot;&gt;" />).split(" ")
-      end
-
-      it "not include size parameters unless known" do
-        @image.value = "/somethingunknown.gif"
-        @image.src.must_equal  "/somethingunknown.gif"
-        assert_has_elements @image.to_html.split(" "), %(<img src="#{@image.src}" alt="" />).split(" ")
-      end
-
-      it "output image tags for its sizes too" do
-        assert_has_elements @image.thumbnail.to_html(:alt => "Thumb").split(' '), %(<img src="#{@image.thumbnail.src}" width="38" height="50" alt="Thumb" />).split(" ")
-      end
-    end
-    describe "defined by classes" do
-      before do
-      end
-
-      after do
-      end
-
-      it "have image dimension and filesize information" do
-        @image.src.must_equal "/media/00234/0010/rose.jpg"
-        @image.filesize.must_equal 54746
-        @image.width.must_equal 400
-        @image.height.must_equal 533
-      end
-
-      it "have access to the original uploaded file through field.original xxx" do
-        @image.src.must_equal "/media/00234/0010/rose.jpg"
-        @image.original.width.must_equal @image.width
-        @image.original.height.must_equal @image.height
-        @image.original.filesize.must_equal @image.filesize
-        @image.filepath.must_equal File.expand_path(File.join(Spontaneous.media_dir, "00234/0010/rose.jpg"))
-      end
-
-
-      it "have a 'sizes' config option that generates resized versions" do
-        assert_has_elements ResizingImageField.size_definitions.keys, [:__ui__, :preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
-      end
-
-      it "serialise attributes" do
-        serialised = S::Field.deserialize_field(@image.serialize_db)[:processed_values]
-        [:preview, :thumbnail, :icon, :tall].each do |size|
-          assert serialised.key?(size)
-          serialised[size][:src].must_equal "/media/00234/0010/rose.#{size}.jpg"
-        end
-        serialised[:preview][:width].must_equal 200
-        serialised[:tall][:height].must_equal 200
-        serialised[:thumbnail][:width].must_equal 38
-        serialised[:thumbnail][:height].must_equal 50
-        serialised[:icon][:width].must_equal 50
-        serialised[:icon][:height].must_equal 50
-      end
-
-      it "persist attributes" do
         @instance.save
-        @instance = ContentWithImage[@instance[:id]]
-        @instance.photo.thumbnail.src.must_equal "/media/00234/0010/rose.thumbnail.jpg"
-        @instance.photo.original.src.must_equal "/media/00234/0010/rose.jpg"
       end
 
-      it "not throw errors when accessing size before value has been assigned" do
-        instance = ContentWithImage.new
-        instance.photo.thumbnail.wont_be_nil
-        instance.photo.thumbnail.src.must_equal ""
-      end
-    end
 
-    describe "defined anonymously" do
-      it "have image dimension and filesize information" do
-        @image.src.must_equal "/media/00234/0010/rose.jpg"
-        @image.filesize.must_equal 54746
-        @image.width.must_equal 400
-        @image.height.must_equal 533
-      end
-
-      it "have access to the original uploaded file through field.original" do
-        @image.original.width.must_equal @image.width
-        @image.original.height.must_equal @image.height
-        @image.original.filesize.must_equal @image.filesize
-      end
-      it "have a 'sizes' config option that generates resized versions" do
-        assert_has_elements @image.class.size_definitions.keys, [:__ui__, :preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
-        assert_has_elements @image.class.sizes.keys, [:__ui__, :preview, :thumbnail, :icon, :tall, :greyscale, :reformatted]
-      end
-
-      it "serialise attributes" do
-        serialised = S::Field.deserialize_field(@image.serialize_db)[:processed_values]
-        [:preview, :thumbnail, :icon, :tall].each do |size|
-          assert serialised.key?(size)
-          serialised[size][:src].must_equal "/media/00234/0010/rose.#{size}.jpg"
+      describe "with defined sizes" do
+        before do
         end
-        serialised[:preview][:width].must_equal 200
-        serialised[:tall][:height].must_equal 200
-        serialised[:thumbnail][:width].must_equal 38
-        serialised[:thumbnail][:height].must_equal 50
-        serialised[:icon][:width].must_equal 50
-        serialised[:icon][:height].must_equal 50
+
+        it "create resized versions of the input image" do
+          S::Media::Image.dimensions(@image.preview.filepath).must_equal [200, 267]
+          S::Media::Image.dimensions(@image.tall.filepath).must_equal [150, 200]
+          S::Media::Image.dimensions(@image.thumbnail.filepath).must_equal [38, 50]
+          S::Media::Image.dimensions(@image.icon.filepath).must_equal [50, 50]
+        end
+
+        it "preserve new format if processing has altered it" do
+          @image.reformatted.src.must_match /\.png$/
+        end
       end
 
-      it "persist attributes" do
-        @instance.save
-        @instance = ContentWithImage[@instance[:id]]
-        @instance.photo.thumbnail.src.must_equal "/media/00234/0010/rose.thumbnail.jpg"
-        @instance.photo.original.src.must_equal "/media/00234/0010/rose.jpg"
+      describe "optimization xxx" do
+        it "should be enabled by default" do
+          @image.value = @origin_image.to_s
+        end
       end
+
+      describe "in templates" do
+
+        it "render an <img/> tag in HTML format" do
+          assert_has_elements @image.to_html.split(' '), %(<img src="#{@image.src}" width="400" height="533" alt="" />).split(" ")
+        end
+
+        it "use passed hash to overwrite tag attributes" do
+          attr = {
+            :alt => "Magic",
+            :class => "magic",
+            :rel => "lightbox",
+            :random => "present"
+          }
+          assert_has_elements @image.to_html(attr).split(" "), %(<img src="#{@image.src}" width="400" height="533" alt="Magic" class="magic" rel="lightbox" random="present" />).split(" ")
+        end
+
+        it "be intelligent about setting width & height" do
+          @image.to_html({ :width => 100 }).split(" ").must_have_elements %(<img src="#{@image.src}" width="100" alt="" />).split(" ")
+          assert_has_elements @image.to_html({ :height => 100 }).split(" "), %(<img src="#{@image.src}" height="100" alt="" />).split(" ")
+          assert_has_elements @image.to_html({ :width => 100, :height => 100 }).split(" "), %(<img src="#{@image.src}" width="100" height="100" alt="" />).split(" ")
+        end
+
+        it "turn off setting with & height if either is passed as false" do
+          assert_has_elements @image.to_html({ :width => false }).split(" "), %(<img src="#{@image.src}" alt="" />).split(" ")
+        end
+
+        it "escape values in params" do
+          assert_has_elements @image.to_html({ :alt => "<danger\">" }).split(" "), %(<img src="#{@image.src}" width="400" height="533" alt="&lt;danger&quot;&gt;" />).split(" ")
+        end
+
+        it "not include size parameters unless known" do
+          @image.value = "/somethingunknown.gif"
+          @image.src.must_equal  "/somethingunknown.gif"
+          assert_has_elements @image.to_html.split(" "), %(<img src="#{@image.src}" alt="" />).split(" ")
+        end
+
+        it "output image tags for its sizes too" do
+          assert_has_elements @image.thumbnail.to_html(:alt => "Thumb").split(' '), %(<img src="#{@image.thumbnail.src}" width="38" height="50" alt="Thumb" />).split(" ")
+        end
+      end
+      describe "defined by classes" do
+        before do
+        end
+
+        after do
+        end
+
+        it "have image dimension and filesize information xxx" do
+          @image.src.must_equal "/media/00234/0010/rose.jpg"
+          @image.width.must_equal 400
+          @image.height.must_equal 533
+        end
+
+        it "have access to the original uploaded file through field.original yyy" do
+          @image.src.must_equal "/media/00234/0010/rose.jpg"
+          @image.original.width.must_equal @image.width
+          @image.original.height.must_equal @image.height
+          @image.filepath.must_equal File.expand_path(File.join(Spontaneous.media_dir, "00234/0010/rose.jpg"))
+        end
+
+
+        it "have a 'sizes' config option that generates resized versions" do
+          assert_has_elements ResizingImageField.size_definitions.keys, [:original, :__ui__, :preview, :thumbnail, :icon, :tall, :reformatted]
+        end
+
+        it "serialise attributes" do
+          serialised = S::Field.deserialize_field(@image.serialize_db)[:processed_values]
+          [:preview, :thumbnail, :icon, :tall].each do |size|
+            assert serialised.key?(size)
+            serialised[size][:src].must_equal "/media/00234/0010/rose.#{size}.jpg"
+          end
+          serialised[:preview][:width].must_equal 200
+          serialised[:tall][:height].must_equal 200
+          serialised[:thumbnail][:width].must_equal 38
+          serialised[:thumbnail][:height].must_equal 50
+          serialised[:icon][:width].must_equal 50
+          serialised[:icon][:height].must_equal 50
+        end
+
+        it "persist attributes" do
+          @instance.save
+          @instance = ContentWithImage[@instance[:id]]
+          @instance.photo.thumbnail.src.must_equal "/media/00234/0010/rose.thumbnail.jpg"
+          @instance.photo.original.src.must_equal "/media/00234/0010/rose.jpg"
+        end
+
+        it "not throw errors when accessing size before value has been assigned" do
+          instance = ContentWithImage.new
+          instance.photo.thumbnail.wont_be_nil
+          instance.photo.thumbnail.src.must_equal ""
+        end
+      end
+
+      describe "defined anonymously" do
+        it "have image dimension and filesize information" do
+          @image.src.must_equal "/media/00234/0010/rose.jpg"
+          @image.width.must_equal 400
+          @image.height.must_equal 533
+        end
+
+        it "have access to the original uploaded file through field.original" do
+          @image.original.width.must_equal @image.width
+          @image.original.height.must_equal @image.height
+        end
+        it "have a 'sizes' config option that generates resized versions" do
+          assert_has_elements @image.class.size_definitions.keys, [:original, :__ui__, :preview, :thumbnail, :icon, :tall, :reformatted]
+          assert_has_elements @image.class.sizes.keys, [:original, :__ui__, :preview, :thumbnail, :icon, :tall, :reformatted]
+        end
+
+        it "serialise attributes" do
+          serialised = S::Field.deserialize_field(@image.serialize_db)[:processed_values]
+          [:preview, :thumbnail, :icon, :tall].each do |size|
+            assert serialised.key?(size)
+            serialised[size][:src].must_equal "/media/00234/0010/rose.#{size}.jpg"
+          end
+          serialised[:preview][:width].must_equal 200
+          serialised[:tall][:height].must_equal 200
+          serialised[:thumbnail][:width].must_equal 38
+          serialised[:thumbnail][:height].must_equal 50
+          serialised[:icon][:width].must_equal 50
+          serialised[:icon][:height].must_equal 50
+        end
+
+        it "persist attributes" do
+          @instance.save
+          @instance = ContentWithImage[@instance[:id]]
+          @instance.photo.thumbnail.src.must_equal "/media/00234/0010/rose.thumbnail.jpg"
+          @instance.photo.original.src.must_equal "/media/00234/0010/rose.jpg"
+        end
+      end
+
     end
 
-    describe "with cloud storage" do
+    describe "cloud storage yyy" do
       before do
         @bucket_name = "media.example.com"
         @aws_credentials = {
@@ -272,6 +270,7 @@ describe "Images" do
         @site.stubs(:storage).with(anything).returns(@storage)
         @image.value = @origin_image.to_s
       end
+
       after do
         ::Fog::Mock.reset
       end

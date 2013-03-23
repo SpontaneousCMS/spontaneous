@@ -1,23 +1,17 @@
-module Spontaneous::Field
-  class Image
+module Spontaneous::Media
+  module Image
     class Attributes
-      include Utilities
+      include Renderable
 
       attr_reader  :src, :width, :height, :filesize, :filepath
 
       def initialize(params={})
         params ||= {}
-        @src, @width, @height, @filesize, @filepath = params[:src], params[:width], params[:height], params[:filesize], params[:path]
+        @src, @width, @height, @filesize, @filepath = params.values_at(:src, :width, :height, :filesize, :path)
       end
 
       def serialize
-        {
-          :src => src,
-          :width => width,
-          :height => height,
-          :filesize => filesize,
-          :path => filepath
-        }
+        { :src => src, :width => width, :height => height, :filesize => filesize }
       end
 
       def inspect
@@ -26,6 +20,11 @@ module Spontaneous::Field
 
       def blank?
         src.blank?
+      end
+
+      # Will only work for files in local storage
+      def filepath
+        Spontaneous::Media.to_filepath(src)
       end
 
       alias_method :empty?, :blank?

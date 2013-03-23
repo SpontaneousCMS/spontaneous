@@ -965,7 +965,7 @@ describe "Fields" do
     describe "Asynchronous processing" do
       before do
         S::Site.background_mode = :simultaneous
-        @image = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+        @image = File.expand_path("../../fixtures/images/size.gif", __FILE__)
         @model = (::Piece)
         @model.field :title
         @model.field :image
@@ -1083,8 +1083,8 @@ describe "Fields" do
             :timestamp => S::Field.timestamp(@now),
             :version => 1,
             :value => {
-              :width=>400, :height=>533, :filesize=>54746,
-              :type=>"image/gif",
+              :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
+              :type=>"image/gif", :format => "gif",
               :tempfile=>"#{@site.root}/cache/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif",
               :filename=>"something.gif",
               :src => "/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif"
@@ -1108,8 +1108,8 @@ describe "Fields" do
             :timestamp => S::Field.timestamp(@now),
             :version => 1,
             :value => {
-              :width=>400, :height=>533, :filesize=>54746,
-              :type=>"image/gif",
+              :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
+              :type=>"image/gif", :format => "gif",
               :tempfile=>"#{@site.root}/cache/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif",
               :filename=>"something.gif",
               :src => "/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif"
@@ -1152,8 +1152,8 @@ describe "Fields" do
             :timestamp => S::Field.timestamp(@now),
             :version => 1,
             :value => {
-              :width=>400, :height=>533, :filesize=>54746,
-              :type=>"image/gif",
+              :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
+              :type=>"image/gif", :format => "gif",
               :tempfile=>"#{@site.root}/cache/media/tmp/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/something.gif",
               :filename=>"something.gif",
               :src => "/media/tmp/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/something.gif"
