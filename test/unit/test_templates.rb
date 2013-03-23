@@ -124,7 +124,7 @@ ${ a[:a] }${ a[:b] -}
 
     it "render escaped expressions" do
       output = @engine.render_string('<html><title>{$ unsafe $}</title></html>', @context)
-      output.must_equal "<html><title>&lt;script&gt;alert('bad')&lt;/script&gt;</title></html>"
+      output.must_equal "<html><title>#{ERB::Util.html_escape(@context.unsafe)}</title></html>"
     end
 
     it "evaluate expressions" do
