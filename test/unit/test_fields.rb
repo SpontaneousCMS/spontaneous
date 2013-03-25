@@ -657,15 +657,31 @@ describe "Fields" do
         @instance.video = "http://www.youtube.com/watch?v=_0jroAM_pO4&feature=feedrec_grec_index"
         @instance.video.value.must_equal "http://www.youtube.com/watch?v=_0jroAM_pO4&amp;feature=feedrec_grec_index"
         @instance.video.video_id.must_equal "_0jroAM_pO4"
-        @instance.video.video_type.must_equal "youtube"
+        @instance.video.provider_id.must_equal "youtube"
       end
 
       it "recognise Vimeo URLs" do
         @instance.video = "http://vimeo.com/31836285"
         @instance.video.value.must_equal "http://vimeo.com/31836285"
         @instance.video.video_id.must_equal 31836285
-        @instance.video.video_type.must_equal "vimeo"
+        @instance.video.provider_id.must_equal "vimeo"
       end
+
+      it "recognise Vine URLs" do
+        @instance.video = "https://vine.co/v/brI7pTPb3qU"
+        @instance.video.value.must_equal "https://vine.co/v/brI7pTPb3qU"
+        @instance.video.video_id.must_equal "brI7pTPb3qU"
+        @instance.video.provider_id.must_equal "vine"
+      end
+
+      it "silently handles unknown providers xxx" do
+        @instance.video = "https://idontdovideo.com/video?id=brI7pTPb3qU"
+        @instance.video.value.must_equal "https://idontdovideo.com/video?id=brI7pTPb3qU"
+        @instance.video.video_id.must_equal "https://idontdovideo.com/video?id=brI7pTPb3qU"
+        @instance.video.provider_id.must_equal nil
+        @instance.video.render.must_equal ""
+      end
+
 
       describe "with player settings" do
         before do
@@ -769,20 +785,30 @@ describe "Fields" do
 
           response_xml_file = File.expand_path("../../fixtures/fields/youtube_api_response.xml", __FILE__)
           connection = mock()
-          @field.expects(:open).with("http://gdata.youtube.com/feeds/api/videos/_0jroAM_pO4?v=2").returns(connection)
+          Spontaneous::Field::WebVideo::YouTube.any_instance.expects(:open).with("http://gdata.youtube.com/feeds/api/videos/_0jroAM_pO4?v=2").returns(connection)
           doc = Nokogiri::XML(File.open(response_xml_file))
           Nokogiri.expects(:XML).with(connection).returns(doc)
           @field.value = "http://www.youtube.com/watch?v=_0jroAM_pO4"
-          @field.values.must_equal youtube_info.merge(:video_id => "_0jroAM_pO4", :type => "youtube", :html => "http://www.youtube.com/watch?v=_0jroAM_pO4")
+          @field.values.must_equal youtube_info.merge(:video_id => "_0jroAM_pO4", :provider => "youtube", :html => "http://www.youtube.com/watch?v=_0jroAM_pO4")
         end
 
         it "use the Vimeo api to extract video metadata" do
-          vimeo_info = {"id"=>29987529, "title"=>"Neon Indian Plays The UO Music Shop", "description"=>"Neon Indian plays electronic instruments from the UO Music Shop, Fall 2011. Read more at blog.urbanoutfitters.com.", "url"=>"http://vimeo.com/29987529", "upload_date"=>"2011-10-03 18:32:47", "mobile_url"=>"http://vimeo.com/m/29987529", "thumbnail_small"=>"http://b.vimeocdn.com/ts/203/565/203565974_100.jpg", "thumbnail_medium"=>"http://b.vimeocdn.com/ts/203/565/203565974_200.jpg", "thumbnail_large"=>"http://b.vimeocdn.com/ts/203/565/203565974_640.jpg", "user_name"=>"Urban Outfitters", "user_url"=>"http://vimeo.com/urbanoutfitters", "user_portrait_small"=>"http://b.vimeocdn.com/ps/251/111/2511118_30.jpg", "user_portrait_medium"=>"http://b.vimeocdn.com/ps/251/111/2511118_75.jpg", "user_portrait_large"=>"http://b.vimeocdn.com/ps/251/111/2511118_100.jpg", "user_portrait_huge"=>"http://b.vimeocdn.com/ps/251/111/2511118_300.jpg", "stats_number_of_likes"=>85, "stats_number_of_plays"=>26633, "stats_number_of_comments"=>0, "duration"=>100, "width"=>640, "height"=>360, "tags"=>"neon indian, analog, korg, moog, theremin, micropiano, microkorg, kaossilator, kaossilator pro", "embed_privacy"=>"anywhere"}.symbolize_keys
+          vimeo_info = {"id"=>29987529, "title"=>"Neon Indian Plays The UO Music Shop", "description"=>"Neon Indian plays electronic instruments from the UO Music Shop, Fall 2011. Read more at blog.urbanoutfitters.com.", "url"=>"http://vimeo.com/29987529", "upload_date"=>"2011-10-03 18:32:47", "mobile_url"=>"http://vimeo.com/m/29987529", "thumbnail_small"=>"http://b.vimeocdn.com/ts/203/565/203565974_100.jpg", "thumbnail_medium"=>"http://b.vimeocdn.com/ts/203/565/203565974_200.jpg", "thumbnail_large"=>"http://b.vimeocdn.com/ts/203/565/203565974_640.jpg", "user_name"=>"Urban Outfitters", "user_url"=>"http://vimeo.com/urbanoutfitters", "user_portrait_small"=>"http://b.vimeocdn.com/ps/251/111/2511118_30.jpg", "user_portrait_medium"=>"http://b.vimeocdn.com/ps/251/111/2511118_75.jpg", "user_portrait_large"=>"http://b.vimeocdn.com/ps/251/111/2511118_100.jpg", "user_portrait_huge"=>"http://b.vimeocdn.com/ps/251/111/2511118_300.jpg", "stats_number_of_likes"=>85, "stats_number_of_plays"=>26633, "stats_number_of_comments"=>0, "duration"=>100, "width"=>1280, "height"=>360, "tags"=>"neon indian, analog, korg, moog, theremin, micropiano, microkorg, kaossilator, kaossilator pro", "embed_privacy"=>"anywhere"}.symbolize_keys
+
           connection = mock()
           connection.expects(:read).returns(Spontaneous.encode_json([vimeo_info]))
-          @field.expects(:open).with("http://vimeo.com/api/v2/video/29987529.json").returns(connection)
+          Spontaneous::Field::WebVideo::Vimeo.any_instance.expects(:open).with("http://vimeo.com/api/v2/video/29987529.json").returns(connection)
           @field.value = "http://vimeo.com/29987529"
-          @field.values.must_equal vimeo_info.merge(:video_id => "29987529", :type => "vimeo", :html => "http://vimeo.com/29987529")
+          @field.values.must_equal vimeo_info.merge(:video_id => "29987529", :provider => "vimeo", :html => "http://vimeo.com/29987529")
+        end
+        it "can properly embed a Vine video" do
+          @field.value = "https://vine.co/v/brI7pTPb3qU"
+          embed = @field.render(:html)
+          embed.must_match %r(iframe)
+          embed.must_match %r(src=["']https://vine\.co/v/brI7pTPb3qU/card["'])
+          # Vine videos are square
+          embed.must_match %r(width=["']680["'])
+          embed.must_match %r(height=["']680["'])
         end
       end
 
