@@ -23,8 +23,8 @@ Gem::Specification.new do |s|
   s.rdoc_options  = ['--charset=UTF-8']
   s.extra_rdoc_files = %w[LICENSE]
 
-  s.signing_key   = '/Volumes/Keys/rubygems-garry-magnetised-net-private_key.pem'
-  s.cert_chain    = ['gem-public_cert.pem']
+  # s.signing_key   = '/Volumes/Keys/rubygems-garry-magnetised-net-private_key.pem'
+  # s.cert_chain    = ['gem-public_cert.pem']
 
   s.add_dependency('activesupport',   ['~> 3.2.0'])
   s.add_dependency('coffee-script',   ['~> 2.2.0'])
