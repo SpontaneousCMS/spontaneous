@@ -674,7 +674,7 @@ describe "Fields" do
         @instance.video.provider_id.must_equal "vine"
       end
 
-      it "silently handles unknown providers xxx" do
+      it "silently handles unknown providers" do
         @instance.video = "https://idontdovideo.com/video?id=brI7pTPb3qU"
         @instance.video.value.must_equal "https://idontdovideo.com/video?id=brI7pTPb3qU"
         @instance.video.video_id.must_equal "https://idontdovideo.com/video?id=brI7pTPb3qU"
@@ -812,6 +812,22 @@ describe "Fields" do
         end
       end
 
+    end
+
+    describe "HTML fields" do
+      before do
+        @content_class = Class.new(::Piece) do
+          field :raw, :html
+        end
+        @content_class.stubs(:name).returns("ContentClass")
+        @instance = @content_class.new
+        @field = @instance.raw
+      end
+
+      it "does no escaping of input" do
+        @field.value = "<script>\n</script>"
+        @field.value(:html).must_equal "<script>\n</script>"
+      end
     end
 
     describe "Location fields" do
