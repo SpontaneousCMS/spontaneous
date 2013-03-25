@@ -5,9 +5,7 @@ require "rbconfig"
 require "rubygems"
 
 # 1.9.2's minitest is way out of date
-if RUBY_VERSION < "1.9.3"
-  gem "minitest"
-end
+gem "minitest"
 
 require "minitest/unit"
 require "minitest/autorun"

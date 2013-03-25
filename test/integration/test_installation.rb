@@ -72,7 +72,7 @@ class SpontaneousInstallationTest < OrderedTestCase
   end
 
   def test_step_001__gem_installation
-    assert_raises "Precondition failed, spontaneous gem is already installed", Gem::LoadError do
+    assert_raises Gem::LoadError, "Precondition failed, spontaneous gem is already installed" do
       Gem::Specification.find_by_name("spontaneous")
     end
     system "gem install #{$_gem} --no-rdoc --no-ri"
