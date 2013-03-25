@@ -39,6 +39,20 @@ module Spontaneous
         end
       end
 
+      def self.api_handlers
+        [["/events", Events],
+         ["/users", UserAdmin],
+         ["/site", Site],
+         ["/map", Map],
+         ["/field", Field],
+         ["/page", Page],
+         ["/content", Content],
+         ["/alias", Alias],
+         ["/changes", Changes],
+         ["/file", File::Simple],
+         ["/shard", File::Sharded]]
+      end
+
       def self.editing_app
         ::Rack::Builder.app do
           use Scope::Edit
@@ -57,17 +71,10 @@ module Spontaneous
           use Index
           # Everything after this middleware requires a valid CSRF token
           use CSRF::Verification
-          map("/events")  { run Events }
-          map("/users")   { run UserAdmin }
-          map("/site")    { run Site }
-          map("/map")     { run Map }
-          map("/field")   { run Field }
-          map("/page")    { run Page }
-          map("/content") { run Content }
-          map("/alias")   { run Alias }
-          map("/changes") { run Changes }
-          map("/file")    { run File::Simple }
-          map("/shard")   { run File::Sharded }
+
+          Back.api_handlers.each do |path, app|
+            map(path)  { run app }
+          end
           run lambda { |env| [ 404, {}, ["Not Found"] ] }
         end
       end
@@ -97,13 +104,14 @@ module Spontaneous
       def self.application
         app = ::Rack::Builder.new do
           Spontaneous.instance.back_controllers.each do |namespace, controller_class|
-            map namespace do
-              run controller_class
-            end
+            map namespace { run controller_class }
           end if Spontaneous.instance
 
           # Make all the files available under plugin_name/public/**
           # available under the URL /plugin_name/**
+          # This needs to be handled by the asset system
+          # so that /assets/<plugin_name>/file.css is properly found
+          # and processed through sprockets
           Spontaneous.instance.plugins.each do |plugin|
             root = plugin.paths.expanded(:public)
             map "/#{plugin.file_namespace}" do
@@ -117,13 +125,8 @@ module Spontaneous
             run Spontaneous::Rack::CacheableFile.new(Spontaneous.media_dir)
           end
 
-          map NAMESPACE do
-            run Spontaneous::Rack::Back.editing_app
-          end
-
-          map "/" do
-            run Spontaneous::Rack::Back.preview_app
-          end
+          map(NAMESPACE) { run Spontaneous::Rack::Back.editing_app }
+          map("/")       { run Spontaneous::Rack::Back.preview_app }
         end
       end
     end
