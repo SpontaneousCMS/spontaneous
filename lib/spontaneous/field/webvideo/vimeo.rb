@@ -39,7 +39,7 @@ module Spontaneous::Field
         %(<iframe #{attributes}></iframe>)
       end
 
-      def to_json(options = {})
+      def as_json(options = {})
         player_attributes(options)
       end
 

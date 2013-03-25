@@ -667,6 +667,22 @@ describe "Fields" do
         @instance.video.provider_id.must_equal "vimeo"
       end
 
+      it "recognise Vine URLs" do
+        @instance.video = "https://vine.co/v/brI7pTPb3qU"
+        @instance.video.value.must_equal "https://vine.co/v/brI7pTPb3qU"
+        @instance.video.video_id.must_equal "brI7pTPb3qU"
+        @instance.video.provider_id.must_equal "vine"
+      end
+
+      it "silently handles unknown providers xxx" do
+        @instance.video = "https://idontdovideo.com/video?id=brI7pTPb3qU"
+        @instance.video.value.must_equal "https://idontdovideo.com/video?id=brI7pTPb3qU"
+        @instance.video.video_id.must_equal "https://idontdovideo.com/video?id=brI7pTPb3qU"
+        @instance.video.provider_id.must_equal nil
+        @instance.video.render.must_equal ""
+      end
+
+
       describe "with player settings" do
         before do
           @content_class.field :video2, :webvideo, :player => {
@@ -784,6 +800,15 @@ describe "Fields" do
           Spontaneous::Field::WebVideo::Vimeo.any_instance.expects(:open).with("http://vimeo.com/api/v2/video/29987529.json").returns(connection)
           @field.value = "http://vimeo.com/29987529"
           @field.values.must_equal vimeo_info.merge(:video_id => "29987529", :provider => "vimeo", :html => "http://vimeo.com/29987529")
+        end
+        it "can properly embed a Vine video" do
+          @field.value = "https://vine.co/v/brI7pTPb3qU"
+          embed = @field.render(:html)
+          embed.must_match %r(iframe)
+          embed.must_match %r(src=["']https://vine\.co/v/brI7pTPb3qU/card["'])
+          # Vine videos are square
+          embed.must_match %r(width=["']680["'])
+          embed.must_match %r(height=["']680["'])
         end
       end
 
