@@ -2,10 +2,79 @@
 
 require 'open-uri'
 require 'nokogiri'
+require 'erb'
 
 module Spontaneous::Field
   class WebVideo < Base
     has_editor
+
+    class Provider
+      def self.id
+        name.demodulize.underscore
+      end
+
+      def self.match(field, url)
+        # Implement in subclasses
+      end
+
+      attr_reader :attributes
+
+      def initialize(field, attributes = {})
+        @field, @attributes = field, attributes
+      end
+
+      def video_id
+        attributes[:video_id]
+      end
+
+      def src(options = {})
+        # Implement in subclasses
+      end
+
+      def to_html(options = {})
+        values[:html]
+      end
+
+      def to_json(options = {})
+        "{}"
+      end
+
+      def default_player_options
+        { :width => 640,
+          :height => 360,
+          :fullscreen => true,
+          :api => false,
+          :autoplay => false,
+          :loop => false,
+          :showinfo => true
+        }.merge(@field.prototype.options[:player] || {})
+      end
+
+      def hash_to_attributes(attributes)
+        attributes.to_a.map { |name, value| "#{name}=\"#{escape_html(value)}\"" }.join(" ")
+      end
+
+      def escape_html(input)
+        ERB::Util.html_escape(input)
+      end
+
+      def make_query_options!(hash)
+        hash.each { |k, v|
+          hash[k] = 1 if v == true
+          hash[k] = 0 if v == false
+        }
+      end
+    end
+
+    def self.providers
+      @providers ||= {
+        nil => Spontaneous::Field::WebVideo::Provider
+      }
+    end
+
+    def self.provider(provider)
+      providers[provider.id] = provider
+    end
 
     def outputs
       [:type, :video_id]
@@ -17,31 +86,37 @@ module Spontaneous::Field
       values[:id] || values[:video_id]
     end
 
-    def video_type
-      values[:type]
+    def provider_id
+      values[:provider]
     end
 
 
     def generate_outputs(input)
       values = {}
       values[:html] = escape_html(input)
-      case input
-      when "", nil
-        # ignore this
-      when /youtube\.com.*\?.*v=([^&]+)/, /youtu.be\/([^&]+)/
-        video_id = $1
-        values.update(retrieve_youtube_metadata(video_id))
-        values[:video_id] = video_id.to_s
-        values[:type] = "youtube"
-      when /vimeo\.com\/(\d+)/
-        video_id = $1
-        values[:type] = "vimeo"
-        values.update(retrieve_vimeo_metadata(video_id))
-        values[:video_id] = video_id.to_s
-      else
-        logger.warn "WebVideo field doesn't recognise the URL '#{input}'"
+
+      metadata = nil
+      Spontaneous::Field::WebVideo.providers.each do |_, p|
+        break if metadata = p.match(self, input)
       end
-      values
+      # p metadata
+      # case input
+      # when "", nil
+      #   # ignore this
+      # when /youtube\\.com.*\\?.*v=([^&]+)/, /youtu.be\\/([^&]+)/
+      #   video_id = $1
+      #   values.update(retrieve_youtube_metadata(video_id))
+      #   values[:video_id] = video_id.to_s
+      #   values[:type] = "youtube"
+      # when /vimeo\\.com\\/(\\d+)/
+      #   video_id = $1
+      #   values[:type] = "vimeo"
+      #   values.update(retrieve_vimeo_metadata(video_id))
+      #   values[:video_id] = video_id.to_s
+      # else
+      #   logger.warn "WebVideo field doesn't recognise the URL '#{input}'"
+      # end
+      values.merge(metadata || {})
     end
 
 
@@ -58,41 +133,22 @@ module Spontaneous::Field
 
 
     def to_html(*args)
-      opts = args.extract_options!
-      case video_type
-      when "youtube"
-        to_youtube_html(opts)
-      when "vimeo"
-        to_vimeo_html(opts)
-      else
-        value(:html)
-      end
+      provider.to_html(*args)
+    end
+
+    def provider
+      provider = Spontaneous::Field::WebVideo.providers[provider_id]
+      provider.new(self, values)
     end
 
 
     def to_json(*args)
       opts = args.extract_options!
-      params = \
-        case video_type
-      when "youtube"
-        youtube_attributes(opts)
-      when "vimeo"
-        vimeo_attributes(opts)
-      else
-        {:tagname => "iframe", :tag => "<iframe/>", :attr => {:src => value(:html)}}
-      end
-      Spontaneous.encode_json(params)
+      Spontaneous.encode_json(provider.to_json(opts))
     end
 
     def src(opts = {})
-      case video_type
-      when "youtube"
-        youtube_src(opts)
-      when "vimeo"
-        vimeo_src(opts)
-      else
-        value(:html)
-      end
+      provider.src(opts)
     end
 
     def ui_preview_value
@@ -309,4 +365,8 @@ module Spontaneous::Field
 
     self.register(:webvideo)
   end
+end
+
+Dir[::File.dirname(__FILE__) + "/webvideo/*.rb"].each do |provider|
+  require provider
 end
