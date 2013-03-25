@@ -68,7 +68,6 @@ module Spontaneous::Field
         "#{base}#{size}#{extname}"
       end
 
-
       def inspect
         %(#<Spontaneous::Field::Image::Size name=:#{@name} options=#{@options.inspect}>)
       end

@@ -81,7 +81,7 @@ module Spontaneous::Media
     end
 
     def serialize
-      { :url => url, :mimetype => mimetype, :path => path, :filename => filename }
+      { :url => url, :type => mimetype, :filename => filename }
     end
   end
 end

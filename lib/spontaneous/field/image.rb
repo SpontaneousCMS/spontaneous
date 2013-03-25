@@ -7,7 +7,7 @@ require 'delegate'
 
 module Spontaneous::Field
   class Image < File
-    autoload :Size,       'spontaneous/field/image/size'
+    autoload :Size, 'spontaneous/field/image/size'
 
     include Spontaneous::Media::Image::Renderable
 
@@ -66,9 +66,7 @@ module Spontaneous::Field
     def serialize_pending_file(file)
       attrs = file.serialize
       url   = attrs.delete(:url)
-      path  = attrs.delete(:path)
-      type  = attrs.delete(:mimetype)
-      image = Spontaneous::Media::Image.new(path)
+      image = Spontaneous::Media::Image.new(file.path)
       attrs.merge(image.serialize).merge(super)
     end
 

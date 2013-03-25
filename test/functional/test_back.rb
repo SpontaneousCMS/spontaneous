@@ -700,8 +700,6 @@ describe "Back" do
         src.must_match %r{^(.+)/rose\.jpg$}
         Spot::JSON.parse(last_response.body).must_equal image.image.export
         assert File.exist?(S::Media.to_filepath(src))
-        # The image processing alters the file to I have to hard code this value
-        S::Media.digest(S::Media.to_filepath(src)).must_equal "b36ac0554836c6cf22f76bf1cab4b29c5c535271"
       end
 
       it "wraps pieces around files using default addable class" do

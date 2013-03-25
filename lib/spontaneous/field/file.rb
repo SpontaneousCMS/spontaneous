@@ -63,7 +63,6 @@ module Spontaneous::Field
       [file, filename, mimetype]
     end
 
-
     def generate_filesize(input)
       if input.respond_to?(:filesize)
         input.filesize
