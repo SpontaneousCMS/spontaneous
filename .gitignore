@@ -19,3 +19,5 @@ Gemfile.lock
 pkg
 .rbx
 .travis/gemfiles/*.lock
+.ruby-gemset
+.ruby-version

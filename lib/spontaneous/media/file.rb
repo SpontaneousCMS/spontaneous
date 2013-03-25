@@ -38,6 +38,8 @@ module Spontaneous::Media
       F.extname(filename)
     end
 
+    alias_method :extname, :ext
+
     def filesize
       F.size(source)
     end
@@ -78,10 +80,8 @@ module Spontaneous::Media
       F.join(storage.root, media_dir)
     end
 
-    alias_method :filepath, :path
-
     def serialize
-      { :url => url, :mimetype => mimetype, :path => path, :filename => filename }
+      { :url => url, :type => mimetype, :filename => filename }
     end
   end
 end
