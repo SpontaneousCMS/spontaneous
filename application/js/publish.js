@@ -37,7 +37,14 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		body: function() {
 			var wrapper = dom.div('#publishing-dialogue');
+			var spinner = dom.div(".spinner");
+			wrapper.append(spinner);
+
+			this.spinnerWrap = spinner;
 			this.wrapper = wrapper;
+			this.spinner = S.Progress(spinner[0], 48, {period: 800, segment_length: 0.30});
+			this.spinner.start()
+			spinner.append(dom.div().append(dom.p().text("Loading changes...")))
 			Spontaneous.Ajax.get('/changes', this.change_list_loaded.bind(this));
 			return wrapper;
 		},
@@ -67,15 +74,14 @@ Spontaneous.Publishing = (function($, S) {
 			var change_list = outstanding.changes
 			, w = this.wrapper
 			, self = this
-			, changed_wrap = dom.div("#changes.change-list")
-			, publish_wrap = dom.div("#to-publish.change-list")
+			, changed_wrap = dom.div("#changes.change-list").css("opacity", 0)
+			, publish_wrap = dom.div("#to-publish.change-list").css("opacity", 0)
 			, first_publish = outstanding.first_publish
+			, spinner = this.spinner
 			, append_to;
 			if (first_publish) {
 				w.addClass("first-publish");
 			}
-			w.empty();
-			w.append(changed_wrap, publish_wrap)
 			if (change_list.length === 0) {
 				var summary = dom.p('.publish-up-to-date').text("The site is up to date");
 				w.append(summary);
@@ -108,7 +114,11 @@ Spontaneous.Publishing = (function($, S) {
 				if (!first_publish) {
 					publish_entries.append(dom.div('.instructions').text('Add pages to publish from the list on the left'));
 				}
-
+				spinner.stop();
+				this.spinnerWrap.remove();
+				w.empty();
+				w.append(changed_wrap, publish_wrap)
+				changed_wrap.add(publish_wrap).animate({opacity: 1});
 				self.changed_entries = changed_entries;
 				self.publish_entries = publish_entries;
 			}

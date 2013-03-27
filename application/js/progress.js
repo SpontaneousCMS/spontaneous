@@ -125,6 +125,7 @@ Spontaneous.Progress = (function($, S) {
 				ctx.closePath();
 				ctx.fillStyle = colour;    // color
 				ctx.fill();
+				return this;
 			},
 
 			_redraw: function() {

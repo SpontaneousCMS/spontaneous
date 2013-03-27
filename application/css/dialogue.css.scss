@@ -146,6 +146,31 @@ $dialogue-title-height: 32px;
 	@include display-box;
 	@include box-orient(horizontal);
 
+	.spinner {
+		position: absolute;
+		width: 48px;
+		height: 48px;
+		left: 50%;
+		top: 40%;
+		canvas {
+			position: relative;
+			left: -50%;
+		}
+		div {
+			left: -50%;
+			width: 100%;
+			p {
+				@include interface;
+				width: 200px;
+				position: relative;
+				left: -100px;
+				top: 10px;
+				text-align: center;
+				color: #ccc;
+				margin: 0;
+			}
+		}
+	}
 	.change-list {
 		@include box-flex;
 		position: absolute;
