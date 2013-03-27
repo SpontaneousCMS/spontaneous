@@ -348,7 +348,7 @@ module Spontaneous::Publishing
     end
 
     def archive_dataset(&block)
-      _dataset(history_table, &block)
+      _dataset(archive_table, &block)
     end
 
     def _dataset(table, &block)

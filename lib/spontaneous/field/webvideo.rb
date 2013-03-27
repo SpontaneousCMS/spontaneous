@@ -88,13 +88,13 @@ module Spontaneous::Field
     end
 
     def outputs
-      [:type, :video_id]
+      [:provider, :video_id]
     end
 
     # Earlier versions used :id to store the video id
     # so to support them I need to try it first.
     def video_id
-      values[:id] || values[:video_id]
+      values[:video_id]
     end
 
     def generate_outputs(input)
