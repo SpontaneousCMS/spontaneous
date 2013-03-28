@@ -121,6 +121,7 @@ Spontaneous.Publishing = (function($, S) {
 				changed_wrap.add(publish_wrap).animate({opacity: 1});
 				self.changed_entries = changed_entries;
 				self.publish_entries = publish_entries;
+				this.spinner = this.spinnerWrap = null;
 			}
 		},
 		set_publish_all: function(state) {
