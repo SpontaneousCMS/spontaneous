@@ -15,15 +15,15 @@ Spontaneous.Progress = (function($, S) {
 			segment_width: 0.6, // spinner bar thickness. 1 means inner edges form unbroken circle
 			trail_length: 1.1, // trail length of 1 means shaded bars go all the way around
 			rounded: true,
-			shaded: false,
-		}
+			shaded: false
+		};
 		if (typeof options == 'undefined') options = {};
 		var settings = {};
-		for (k in defaults) {
+		for (var k in defaults) {
 			settings[k] = defaults[k];
 		}
 
-		for (k in options) {
+		for (var k in options) {
 			settings[k] = options[k];
 		}
 		return {
@@ -141,16 +141,16 @@ Spontaneous.Progress = (function($, S) {
 				var __spinner = this;
 				var __spinning = function() {
 					__spinner._update_indeterminate();
-				}
+				};
 				this._draw_indeterminate();
 
 				this._indeterminate_interval = setInterval(__spinning, parseFloat(this.options.period) / this.options.segments);
 			},
-			spin: function() {this.indeterminate()},
-			start: function() {this.indeterminate()},
+			spin: function() { this.indeterminate(); },
+			start: function() { this.indeterminate(); },
 
 			_spin_angle: 0,
-			_spin_increment: function() { return 2 / this.options.segments },
+			_spin_increment: function() { return 2 / this.options.segments; },
 
 			_update_indeterminate: function() {
 				if (!this._indeterminate) {
@@ -183,9 +183,9 @@ Spontaneous.Progress = (function($, S) {
 					ctx.beginPath();
 
 					if (this.options.rounded) {
-						this._draw_rounded(ctx, center, r1, r2, a, p)
+						this._draw_rounded(ctx, center, r1, r2, a, p);
 					} else {
-						this._draw_square(ctx, center, r1, r2, a, p)
+						this._draw_square(ctx, center, r1, r2, a, p);
 					}
 					ctx.closePath();
 					ctx.fillStyle = this._fill(ctx, i);
@@ -227,10 +227,10 @@ Spontaneous.Progress = (function($, S) {
 				var x0 = c + r1 * sin;
 				var y0 = c + r1 * cos;
 
-				var x1 = c + r1 * sin + dx
+				var x1 = c + r1 * sin + dx;
 				var y1 = c + r1 * cos - dy;
 
-				var x2 = c + r2 * sin + dx
+				var x2 = c + r2 * sin + dx;
 				var y2 = c + r2 * cos - dy;
 
 				var x3 = c + r2 * sin - dx;
@@ -288,18 +288,18 @@ Spontaneous.Progress = (function($, S) {
 				}
 				css_colour = css_colour.replace(/ /g,'');
 				css_colour = css_colour.toLowerCase();
-				var hex = [];
+				var i, hex = [];
 				if (css_colour.length == 3) {
-					for (var i = 0; i < 3; i++) {
+					for (i = 0; i < 3; i++) {
 						hex[hex.length] = css_colour.charAt(i) + css_colour.charAt(i);
 					}
 				} else {
-					for (var i = 0; i < 3; i++) {
+					for (i = 0; i < 3; i++) {
 						hex[hex.length] = css_colour.substr(i*2, 2);
 					}
 				}
 				var rgb = [];
-				for (var i = 0; i < hex.length; i++) {
+				for (i = 0; i < hex.length; i++) {
 					rgb[i] = parseInt(hex[i], 16);
 				}
 				return rgb;
@@ -337,7 +337,7 @@ Spontaneous.Progress = (function($, S) {
 						var now = (new Date()).valueOf(), remaining = (finish_time - now)/duration;
 						disappearing.options.spinner_alpha = orig_alpha * remaining;
 					}
-				}
+				};
 
 				this._disappear_interval = setInterval(disappear, 50);
 			},
@@ -350,10 +350,10 @@ Spontaneous.Progress = (function($, S) {
 					this.stop();
 					this.indeterminate();
 				} else {
-					this._redraw()
+					this._redraw();
 				}
 			}
-		}
-	}
+		};
+	};
 	return Progress;
 })(jQuery, Spontaneous);
