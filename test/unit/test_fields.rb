@@ -663,7 +663,7 @@ describe "Fields" do
       it "recognise Vimeo URLs" do
         @instance.video = "http://vimeo.com/31836285"
         @instance.video.value.must_equal "http://vimeo.com/31836285"
-        @instance.video.video_id.must_equal 31836285
+        @instance.video.video_id.must_equal "31836285"
         @instance.video.provider_id.must_equal "vimeo"
       end
 
