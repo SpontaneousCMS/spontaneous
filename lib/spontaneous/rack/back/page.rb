@@ -28,7 +28,7 @@ module Spontaneous::Rack::Back
 
     put '/:id/slug/sync' do
       content_for_request do |page|
-        page.slug = page.title.unprocessed_value
+        page.sync_slug_to_title
         page.save
         json({:path => page.path, :slug => page.slug })
       end

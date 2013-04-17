@@ -39,11 +39,11 @@ module Spontaneous::Model::Page
     end
 
     def fix_generated_slug_conflicts
-      s = slug || generate_default_slug
+      o = s = slug || generate_default_slug
       n = 0
       while is_conflicting_slug?(s)
         n += 1
-        s = "#{s}-#{n.to_s.rjust(2, "0")}"
+        s = "#{o}-#{n.to_s.rjust(2, "0")}"
       end
       self.slug = s
     end
@@ -60,6 +60,7 @@ module Spontaneous::Model::Page
           set_slug_from_title(title)
         end
       end
+      fix_generated_slug_conflicts
       super
     end
 
@@ -75,6 +76,10 @@ module Spontaneous::Model::Page
       if title.modified? and !title.blank? and has_generated_slug?
         self.slug = title.value
       end
+    end
+
+    def sync_slug_to_title
+      self.slug = title.unprocessed_value
     end
 
     def has_generated_slug?
@@ -146,8 +151,8 @@ module Spontaneous::Model::Page
     end
 
     def slug=(s)
-      if (new_slug = s.to_url) != self.slug
-        @__slug_changed = self.slug
+      if (new_slug = s.to_url) != slug
+        @__slug_changed = slug
         # slugs can be max 255 characters long
         self[:slug] = new_slug[0..254]
         self.update_path
@@ -157,7 +162,6 @@ module Spontaneous::Model::Page
     def check_for_path_changes(force = false)
       if @__slug_changed || force
         @__slug_changed = false
-        fix_generated_slug_conflicts
         children.each do |child|
           child.propagate_path_changes
         end

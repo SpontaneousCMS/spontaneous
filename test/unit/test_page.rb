@@ -105,6 +105,23 @@ describe "Page" do
       p.slug = "my-slug"
       p.save
       o.slug.wont_equal p.slug
+      p.path.must_equal "/my-slug-01"
+    end
+
+    it "fixes conflicting slugs created from titles automatically" do
+      r = Page.create
+      o = Page.create(:title => "New Page", :slug => "my-slug")
+      r.sub << o
+      o.save
+
+      p = Page.create(:title => "New Page")
+      r.sub << p
+      p.save
+      p.title = "My Slug"
+      p.save
+      p.slug.must_equal "my-slug-01"
+      o.slug.wont_equal p.slug
+      p.path.must_equal "/my-slug-01"
     end
 
     it "not be longer than 255 chars" do
