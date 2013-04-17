@@ -8,7 +8,7 @@ Spontaneous.TopBar = (function($, S) {
 		this.id = page.id;
 		this.url = page.url;
 		this.title = S.site_domain;
-	}
+	};
 	RootNode.prototype = {
 		element: function() {
 			var li = dom.li('.root');
@@ -25,7 +25,7 @@ Spontaneous.TopBar = (function($, S) {
 		set_title: function(new_title) {
 			this.link.text(new_title);
 		}
-	}
+	};
 
 	var AncestorNode = function(page) {
 		this.page = page;
@@ -50,7 +50,7 @@ Spontaneous.TopBar = (function($, S) {
 		self.path = page.path;
 		self.title = page.slug;
 		self.pages = page.generation;
-	}
+	};
 
 	CurrentNode.prototype = {
 		element: function() {
@@ -79,7 +79,7 @@ Spontaneous.TopBar = (function($, S) {
 						self.title_option = option;
 					}
 					optgroup.append(option);
-				};
+				}
 				select.append(optgroup);
 			});
 			li.append(select);
@@ -88,11 +88,11 @@ Spontaneous.TopBar = (function($, S) {
 		set_title: function(new_title) {
 			this.title_option.text(new_title);
 		}
-	}
+	};
 
 	var ChildrenNode = function(children) {
 		this.children = children;
-	}
+	};
 
 	ChildrenNode.prototype = {
 		element: function() {
@@ -116,8 +116,8 @@ Spontaneous.TopBar = (function($, S) {
 					for (var i = 0, ii = cc.length; i < ii; i++) {
 						var p = cc[i];
 						optgroup.append(this.option_for_entry(p));
-					};
-					select.append(optgroup)
+					}
+					select.append(optgroup);
 				}
 			}
 			li.append(select);
@@ -168,7 +168,7 @@ Spontaneous.TopBar = (function($, S) {
 			, container = page.container
 			, name = container.name()
 			, children = self.children
-			, optgroup = self.select.find('optgroup[label="'+name+'"]')
+			, optgroup = self.select.find('optgroup[label="'+name+'"]');
 			if (optgroup.length === 0) {
 				optgroup = this.optgroup(name);
 				this.select.append(optgroup);
@@ -182,9 +182,9 @@ Spontaneous.TopBar = (function($, S) {
 			if (!children[name]) { children[name] = []; }
 
 			if (position === -1) {
-				children[name].push(page)
+				children[name].push(page);
 			} else {
-				children[name].splice(position, 0, page)
+				children[name].splice(position, 0, page);
 			}
 			self.update_status();
 		},
@@ -197,7 +197,7 @@ Spontaneous.TopBar = (function($, S) {
 					if (children.hasOwnProperty(boxname)) {
 						var cc = children[boxname];
 						for (var i = 0, ii = cc.length; i < ii; i++) {
-							if (cc[i].id() === page.id()) { return i; };
+							if (cc[i].id() === page.id()) { return i; }
 						}
 					}
 				}
@@ -207,7 +207,7 @@ Spontaneous.TopBar = (function($, S) {
 			this.children[container].splice(index, 1);
 			this.update_status();
 		}
-	}
+	};
 
 	var PublishButton = new JS.Class({
 		rapid_check: 2000,
@@ -218,11 +218,10 @@ Spontaneous.TopBar = (function($, S) {
 			this.set_interval(this.normal_check);
 			var update_status = this.update_status.bind(this);
 			S.EventSource.addEventListener('publish_progress', function(event) {
-				update_status($.parseJSON(event.data))
+				update_status($.parseJSON(event.data));
 			});
 		},
 		user_loaded: function(user) {
-			console.log("user loaded", user)
 			if (user.can_publish()) {
 				this.disabled = false;
 				this.button().removeClass("disabled").fadeIn();
@@ -230,7 +229,7 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		update_status: function(status) {
 			if (status === null || status === '') { return; }
-			var state = status.state, progress = status.progress
+			var state = status.state, progress = status.progress;
 			// if (this.in_progress && (state == this.current_action && progress == this.current_progress)) { return; }
 			this.current_action = state;
 			this.current_progress = progress;
@@ -240,11 +239,11 @@ Spontaneous.TopBar = (function($, S) {
 					this.progress().stop();
 					// this.set_interval(this.normal_check);
 					this.set_label("Publish");
-					this.button().switchClass('progress', '')
+					this.button().switchClass('progress', '');
 					this.current_action = this.current_progress = null;
 				// }
 				if (state === 'error') {
-					alert('There was a problem publishing: ' + progress)
+					alert('There was a problem publishing: ' + progress);
 				}
 			} else {
 				this.publishing_state();
@@ -287,7 +286,7 @@ Spontaneous.TopBar = (function($, S) {
 					}
 				}.bind(this));
 			}
-			return this._button
+			return this._button;
 		},
 		progress: function() {
 			if (!this._progress) {
@@ -331,7 +330,7 @@ Spontaneous.TopBar = (function($, S) {
 				self.wrap.append(self.location);
 				self.wrap.append(self.publish_button.button());
 				self.wrap.append(self.mode_switch);
-				S.User.watch("user", function(user) { self.publish_button.user_loaded(user);  })
+				S.User.watch("user", function(user) { self.publish_button.user_loaded(user);  });
 			}
 			return self.wrap;
 		},
@@ -385,7 +384,7 @@ Spontaneous.TopBar = (function($, S) {
 			// var location = this.get('location');
 			var $location_bar = this.location;
 			var ancestors = location.ancestors.slice(0);
-			var root, is_root = false, root_node, children_node, current_node;
+			var i, node, root, is_root = false, root_node, children_node, current_node;
 			if (ancestors.length === 0) {
 				root = location;
 				is_root = true;
@@ -394,26 +393,26 @@ Spontaneous.TopBar = (function($, S) {
 			}
 			root_node = new RootNode(root);
 			nodes.push(root_node);
-			for (var i=0, ii=ancestors.length; i < ii; i++) {
+			for (i=0, ii=ancestors.length; i < ii; i++) {
 				var page = ancestors[i];
-				var node = new AncestorNode(page)
+				node = new AncestorNode(page);
 				nodes.push(node);
-			};
+			}
 			if (!is_root) {
-				current_node = new CurrentNode(location)
+				current_node = new CurrentNode(location);
 				nodes.push(current_node);
 			} else {
 				current_node = root_node;
 			}
 			$('li', $location_bar).remove();
-			var children_node;
+
 			if (location.children.length > 0) {
 				//  children_node = new ChildrenNode(location.children);
 				// $location_bar.append(children_node.element())
 			}
-			for (var i = 0, ii = nodes.length; i < ii; i++) {
-				var node = nodes[i];
-				$location_bar.append(node.element())
+			for (i = 0, ii = nodes.length; i < ii; i++) {
+				node = nodes[i];
+				$location_bar.append(node.element());
 			}
 			this.navigation_current = current_node;
 		},
@@ -437,12 +436,12 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		panel: function() {
 			var self = this;
-			this.wrap = dom.div("#service-navigation")
+			this.wrap = dom.div("#service-navigation");
 			var title = dom.h2().text(this.service.title);
 			var close = dom.a(".button").text("Close").click(function() {
 				S.Services.close();
-			})
-			this.wrap.append(title, close)
+			});
+			this.wrap.append(title, close);
 			return this.wrap;
 		}
 	});
@@ -452,8 +451,8 @@ Spontaneous.TopBar = (function($, S) {
 		panel: function() {
 			this.wrap = dom.div('#top');
 			// this.icon = dom.div('#spontaneous-root');
-			this.icon = this.rootMenu()
-			this.holder = dom.div('#service-outer')
+			this.icon = this.rootMenu();
+			this.holder = dom.div('#service-outer');
 			this.navigationView = new CMSNavigationView();
 			this.serviceStation = dom.div("#service-inner");
 			this.holder.append(this.navigationView.panel(), this.serviceStation);
@@ -492,7 +491,7 @@ Spontaneous.TopBar = (function($, S) {
 			this.navigationView.publishing_started();
 		},
 		location_changed: function(new_location) {
-			Spontaneous.set_browser_title(new_location.title)
+			Spontaneous.set_browser_title(new_location.title);
 			this.set('location', new_location);
 			this.navigationView.update_navigation(new_location);
 			this.page_loaded = function(page) {
@@ -510,12 +509,12 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		set_mode: function(mode) {
 			this.set('mode', mode);
-			this.navigationView.mode_set(mode)
+			this.navigationView.mode_set(mode);
 		},
 		showService: function(service) {
 			this.navigationView.hide();
 			this.serviceView = new ServiceNavigationView(service);
-			this.serviceStation.empty().append(this.serviceView.panel())
+			this.serviceStation.empty().append(this.serviceView.panel());
 		},
 		showNavigationView: function() {
 			this.serviceStation.empty();
