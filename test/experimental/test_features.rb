@@ -34,6 +34,7 @@ describe "Features" do
       config.stubs(:auto_login).returns('root')
       config.stubs(:default_charset).returns('utf-8')
       config.stubs(:publishing_method).returns(:immediate)
+      config.stubs(:simultaneous_connection).returns("")
       config.stubs(:site_domain).returns('example.org')
       config.stubs(:site_id).returns('example_org')
       @site.stubs(:config).returns(config)
