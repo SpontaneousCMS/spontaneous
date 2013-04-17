@@ -23,15 +23,15 @@ describe "Modifications" do
     @root = Page.create(:uid => "root")
     count = 0
     2.times do |i|
-      c = Page.new(:uid => i)
+      c = Page.new(:uid => i, :slug => "p-#{i}")
       @root.things << c
       count += 1
       2.times do |j|
-        d = Piece.new(:uid => "#{i}.#{j}")
+        d = Piece.new(:uid => "#{i}.#{j}", :slug => "p-#{i}-#{j}")
         c.things << d
         count += 1
         2.times do |k|
-          d.things << Page.new(:uid => "#{i}.#{j}.#{k}")
+          d.things << Page.new(:uid => "#{i}.#{j}.#{k}", :slug => "p-#{i}-#{j}-#{k}")
           d.save
           count += 1
         end
@@ -328,7 +328,7 @@ describe "Modifications" do
     mods.length.must_equal 0
   end
 
-  it "have an empty modification if the visibility has been reverted to original value" do
+  it "have an empty modification if the visibility has been reverted to original value xxx" do
     stub_time(@now+3600)
     page = Page.first :uid => "1"
     page.things.first.hide!

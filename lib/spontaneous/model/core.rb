@@ -130,8 +130,11 @@ module Spontaneous::Model
     end
 
     def inspection_values
-      location = if page
-                   [page.path, container._name, position]
+
+      location = if is_root?
+                   ["/"]
+                 elsif page
+                   [page.path, container._name, position].compact
                  elsif container
                    [container._name, position]
                  else

@@ -79,6 +79,34 @@ describe "Page" do
       o.slug.must_equal "new-title"
     end
 
+    it "doesn't set a conflicting url on creation" do
+      r = Page.create
+      o = Page.create(:title => "New Page")
+      r.sub << o
+      o.save
+
+      p = Page.create(:title => "New Page")
+      r.sub << p
+      p.save
+      slug_o = o.slug
+      slug_p = p.slug
+      o.slug.wont_equal p.slug
+    end
+
+    it "fixes conflicting slugs automatically" do
+      r = Page.create
+      o = Page.create(:title => "New Page", :slug => "my-slug")
+      r.sub << o
+      o.save
+
+      p = Page.create(:title => "New Page")
+      r.sub << p
+      p.save
+      p.slug = "my-slug"
+      p.save
+      o.slug.wont_equal p.slug
+    end
+
     it "not be longer than 255 chars" do
       o = Page.create
       long_slug = (["bang"]*100)

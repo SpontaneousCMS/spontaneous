@@ -20,12 +20,32 @@ module Spontaneous::Model::Page
 
     def after_initialize
       super
-      self.slug = default_slug if slug.nil?
+      set_generated_slug
     end
 
     def before_create
       place_in_page_tree
       super
+    end
+
+    def after_insertion
+      super
+      fix_generated_slug_conflicts
+    end
+
+    def set_generated_slug
+      return unless slug.nil?
+      self.slug = generate_default_slug
+    end
+
+    def fix_generated_slug_conflicts
+      s = slug || generate_default_slug
+      n = 0
+      while is_conflicting_slug?(s)
+        n += 1
+        s = "#{s}-#{n.to_s.rjust(2, "0")}"
+      end
+      self.slug = s
     end
 
     # Test for title changes and update the slug to match if it hasn't already
@@ -66,8 +86,12 @@ module Spontaneous::Model::Page
       check_for_path_changes
     end
 
-    def default_slug
+    def generate_default_slug
       self.class.generate_default_slug
+    end
+
+    def is_conflicting_slug?(slug)
+      siblings.compact.map(&:slug).include?(slug)
     end
 
     def parent=(parent)
@@ -77,7 +101,7 @@ module Spontaneous::Model::Page
     end
 
     def place_in_page_tree
-      if self.parent_id.nil?
+      if parent_id.nil?
         make_root unless content_model.has_root?
       else
         update_path
@@ -133,6 +157,7 @@ module Spontaneous::Model::Page
     def check_for_path_changes(force = false)
       if @__slug_changed || force
         @__slug_changed = false
+        fix_generated_slug_conflicts
         children.each do |child|
           child.propagate_path_changes
         end

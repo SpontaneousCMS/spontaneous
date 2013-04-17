@@ -56,6 +56,7 @@ module Spontaneous::Model::Core
 
     def position
       return box.index(self) if box
+      return 0 if owner.nil? # special case for root
       owner.pieces.index(self)
     end
 
