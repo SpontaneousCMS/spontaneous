@@ -363,7 +363,7 @@ describe "Authentication" do
     end
 
     it "be able to logout" do
-      auth_post "/@spontaneous/logout"
+      auth_delete "/@spontaneous/logout"
       assert last_response.status == 401
       rack_mock_session.cookie_jar.merge(last_response.headers["set-cookie"])
       rack_mock_session.cookie_jar[Spontaneous::Rack::AUTH_COOKIE].value.must_equal ""
