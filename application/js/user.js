@@ -35,7 +35,7 @@ Spontaneous.User = (function($, S) {
 			this.set('user', this.user);
 		},
 		logout: function() {
-			ajax.put("/logout", {}, function() {
+			ajax.del("/logout", {}, function() {
 				// S.Ajax.unauthorized();
 			});
 		},

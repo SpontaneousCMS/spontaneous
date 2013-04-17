@@ -22,7 +22,6 @@
 			return outer;
 		},
 		after_close: function() {
-			console.log("root menu after close")
 			if (this.afterCloseCallback && (typeof this.afterCloseCallback === "function")) {
 				this.afterCloseCallback();
 			}

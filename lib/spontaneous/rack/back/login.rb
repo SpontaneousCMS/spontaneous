@@ -39,7 +39,7 @@ module Spontaneous::Rack::Back
       end
     end
 
-    post "/logout" do
+    delete "/logout" do
       unset_authentication_cookie
       401
     end
