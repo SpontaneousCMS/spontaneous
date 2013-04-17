@@ -104,7 +104,7 @@ module Spontaneous
       def self.application
         app = ::Rack::Builder.new do
           Spontaneous.instance.back_controllers.each do |namespace, controller_class|
-            map namespace { run controller_class }
+            map(namespace) { run controller_class }
           end if Spontaneous.instance
 
           # Make all the files available under plugin_name/public/**
