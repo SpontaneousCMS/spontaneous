@@ -54,14 +54,36 @@ module Spontaneous
       extend ClassMethods
 
       attr_accessor :owner, :name, :unprocessed_value, :template_params, :version
-      attr_reader   :processed_values
-
-      alias_method :values, :processed_values
+      attr_accessor :prototype
 
 
       def initialize(params={}, default_values=true)
         @processed_values = {}
         deserialize(params, default_values)
+        @values = nil
+      end
+
+      def processed_values
+        @values ||= processed_values_with_fallback
+      end
+
+      alias_method :values, :processed_values
+
+      ValueHash = Spontaneous::Collections::HashWithFallback
+
+      def processed_values_with_fallback
+        return @processed_values if owner.nil? || prototype.fallback.nil?
+        fallback = owner.fields[prototype.fallback]
+        if fallback.nil?
+          logger.warn("Missing field '#{prototype.fallback}' specified as fallback for field #{owner.class}::#{name}")
+          return @processed_values
+        end
+        test     = proc { |val| self.blank? }
+        ValueHash.new(fallback, test).update(@processed_values)
+      end
+
+      def [](key)
+        processed_values[key]
       end
 
       def id
@@ -280,6 +302,7 @@ module Spontaneous
       def value(format=:html)
         processed_values[format.to_sym] || unprocessed_value
       end
+
       alias_method :processed_value, :value
 
       def image?
@@ -327,11 +350,6 @@ module Spontaneous
       def modified?
         @modified
       end
-
-      attr_accessor :prototype
-      # def prototype
-      #   self.class.prototype
-      # end
 
       def schema_id
         self.prototype.schema_id
@@ -445,6 +463,7 @@ module Spontaneous
       end
 
       def processed_values=(values)
+        @values = nil
         @processed_values = values
       end
 

@@ -97,6 +97,9 @@ module Spontaneous::Prototypes
       @options[:comment]
     end
 
+    def fallback
+      @options[:fallback]
+    end
 
     # default read level is None, i.e. every logged in user can read the field
     def read_level

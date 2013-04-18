@@ -229,6 +229,47 @@ describe "Fields" do
           @reordered_class.field_names.must_equal [:child_field, :complex, :title, :synopsis, :distant_relation]
         end
       end
+
+      describe "fallback values" do
+        before do
+          @content_class = Class.new(Piece) do
+            field :title
+            field :desc1, :fallback => :title
+            field :desc2, :fallback => :desc1
+            field :desc3, :fallback => :desc9
+          end
+          Object.send :const_set, :FieldWithFallbacks, @content_class
+          @instance = @content_class.new(:title => "TITLE")
+        end
+
+        after do
+          Object.send :remove_const, :FieldWithFallbacks rescue nil
+        end
+
+        it "uses the fallback value for empty fields" do
+          @instance.desc1.value.must_equal "TITLE"
+        end
+
+        it "cascades the fallback" do
+          @instance.desc2.value.must_equal "TITLE"
+        end
+
+        it "uses the field value if present" do
+          @instance.desc2 = "DESC2"
+          @instance.desc2.value.must_equal "DESC2"
+        end
+
+        it "deserializes values properly" do
+          @instance.desc2 = "DESC2"
+          @instance.save
+          @instance.reload
+          @instance.desc2.processed_values[:html].must_equal "DESC2"
+        end
+
+        it "ignores invalid field names" do
+          @instance.desc3.value.must_equal ""
+        end
+      end
     end
 
     describe "Values" do
@@ -1208,7 +1249,7 @@ describe "Fields" do
         end
       end
 
-      it "deletes used temp files after processing xxx" do
+      it "deletes used temp files after processing" do
         field = @instance.image
         tempfile = "#{@site.root}/cache/media/tmp/#{field.media_id}/something.gif"
         Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {

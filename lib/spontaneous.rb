@@ -85,6 +85,7 @@ module Spontaneous
     autoload :ChangeSet,        "spontaneous/collections/change_set"
     autoload :EntrySet,         "spontaneous/collections/entry_set"
     autoload :FieldSet,         "spontaneous/collections/field_set"
+    autoload :HashWithFallback, "spontaneous/collections/hash_with_fallback"
     autoload :PrototypeSet,     "spontaneous/collections/prototype_set"
     autoload :StyleSet,         "spontaneous/collections/style_set"
   end
