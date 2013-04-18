@@ -19,5 +19,9 @@ module Spontaneous::Media
     def storage_path
       ["tmp", padded_id, filename]
     end
+
+    def padded_id
+      Spontaneous::Media.pad_id(owner.media_id)
+    end
   end
 end

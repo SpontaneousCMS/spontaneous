@@ -1089,6 +1089,7 @@ describe "Fields" do
       end
 
       it "immediately update a group of fields passed in parameter format" do
+        field = @instance.image
         File.open(@image, "r") do |file|
           fields = {
             @instance.title.schema_id.to_s => "Updated title",
@@ -1099,13 +1100,14 @@ describe "Fields" do
           @instance.reload
           @instance.title.value.must_equal "Updated title"
           @instance.description.value.must_equal "<p>Updated description</p>\n"
-          @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+          field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         end
       end
 
       it "asynchronously update a group of fields passed in parameter format" do
+        field = @instance.image
         Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
-          "fields" => [@instance.image.id]
+          "fields" => [field.id]
         })
 
         File.open(@image, "r") do |file|
@@ -1120,46 +1122,47 @@ describe "Fields" do
 
           @instance.title.value.must_equal "Updated title"
           @instance.description.value.must_equal "<p>Updated description</p>\n"
-          @instance.image.value.must_equal ""
-          @instance.image.pending_value.must_equal({
+          field.value.must_equal ""
+          field.pending_value.must_equal({
             :timestamp => S::Field.timestamp(@now),
             :version => 1,
             :value => {
               :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
               :type=>"image/gif", :format => "gif",
-              :tempfile=>"#{@site.root}/cache/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif",
+              :tempfile=>"#{@site.root}/cache/media/tmp/#{field.media_id}/something.gif",
               :filename=>"something.gif",
-              :src => "/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif"
+              :src => "/media/tmp/#{field.media_id}/something.gif"
             }
           })
-          @instance.image.process_pending_value
-          @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
-          @instance.image.pending_value.must_be_nil
+          field.process_pending_value
+          field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+          field.pending_value.must_be_nil
         end
       end
 
       it "asynchronously update a single field value" do
+        field = @instance.image
         Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
-          "fields" => [@instance.image.id]
+          "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          @instance.image.pending_version.must_equal 0
-          Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
-          @instance.image.value.must_equal ""
-          @instance.image.pending_value.must_equal({
+          field.pending_version.must_equal 0
+          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          field.value.must_equal ""
+          field.pending_value.must_equal({
             :timestamp => S::Field.timestamp(@now),
             :version => 1,
             :value => {
               :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
               :type=>"image/gif", :format => "gif",
-              :tempfile=>"#{@site.root}/cache/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif",
+              :tempfile=>"#{@site.root}/cache/media/tmp/#{field.media_id}/something.gif",
               :filename=>"something.gif",
-              :src => "/media/tmp/#{S::Media.pad_id(@instance.id)}/something.gif"
+              :src => "/media/tmp/#{field.media_id}/something.gif"
             }
           })
-          @instance.image.pending_version.must_equal 1
-          @instance.image.process_pending_value
-          @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+          field.pending_version.must_equal 1
+          field.process_pending_value
+          field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         end
       end
 
@@ -1179,8 +1182,9 @@ describe "Fields" do
 
       it "asynchronously update box fields" do
         box = @instance.items
+        field = box.image
         Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
-          "fields" => [box.image.id]
+          "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
           fields = {
@@ -1189,19 +1193,48 @@ describe "Fields" do
           }
           Spontaneous::Field.update(box, fields, nil, true)
           box.title.value.must_equal "Updated title"
-          box.image.value.must_equal ""
-          box.image.pending_value.must_equal({
+          field.value.must_equal ""
+          field.pending_value.must_equal({
             :timestamp => S::Field.timestamp(@now),
             :version => 1,
             :value => {
               :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
               :type=>"image/gif", :format => "gif",
-              :tempfile=>"#{@site.root}/cache/media/tmp/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/something.gif",
+              :tempfile=>"#{@site.root}/cache/media/tmp/#{field.media_id}/something.gif",
               :filename=>"something.gif",
-              :src => "/media/tmp/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/something.gif"
+              :src => "/media/tmp/#{field.media_id}/something.gif"
             }
           })
         end
+      end
+
+      it "deletes used temp files after processing xxx" do
+        field = @instance.image
+        tempfile = "#{@site.root}/cache/media/tmp/#{field.media_id}/something.gif"
+        Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+          "fields" => [field.id]
+        })
+        File.open(@image, "r") do |file|
+          field.pending_version.must_equal 0
+          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          field.value.must_equal ""
+          field.pending_value.must_equal({
+            :timestamp => S::Field.timestamp(@now),
+            :version => 1,
+            :value => {
+              :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
+              :type=>"image/gif", :format => "gif",
+              :tempfile=>"#{@site.root}/cache/media/tmp/#{field.media_id}/something.gif",
+              :filename=>"something.gif",
+              :src => "/media/tmp/#{field.media_id}/something.gif"
+            }
+          })
+          field.pending_version.must_equal 1
+          assert ::File.exist?(tempfile)
+          field.process_pending_value
+          field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        end
+        refute ::File.exist?(tempfile)
       end
 
       it "immediately update asynchronous fields if background mode is :immediate" do
@@ -1416,7 +1449,7 @@ describe "Fields" do
           pending[:value][:filename].must_equal "else.gif"
         end
 
-        it "merge async updates with synchronous ones effected during processing" do
+        it "merge async updates with synchronous ones affected during processing" do
           # Scenario:
           # - User uploads file to content item which gets scheduled for async processing
           # - User modifies synchronous field of same content item that gets immediately updated
@@ -1446,7 +1479,7 @@ describe "Fields" do
           content.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         end
 
-        it "merge async updates to box fields with synchronous ones effected during processing" do
+        it "merge async updates to box fields with synchronous ones affected during processing" do
           # The scenario for boxes is more complex because their fields are stored by their owner
           # not directly by themselves
           field = @page.instances.image
@@ -1470,6 +1503,9 @@ describe "Fields" do
           content = ::Content.get(@page.id)
           content.instances.title.value.must_equal "Updated Title"
           content.instances.image.value.must_equal "/media/#{S::Media.pad_id(@page.id)}/#{@page.instances.schema_id}/0001/something.gif"
+        end
+
+        it "removes temporary files after processing" do
         end
 
         it "be deleted when their page is deleted" do

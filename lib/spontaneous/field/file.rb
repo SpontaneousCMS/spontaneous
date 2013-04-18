@@ -46,7 +46,7 @@ module Spontaneous::Field
 
     def process_upload(value)
       file, filename, mimetype = fileinfo(value)
-      media_file = Spontaneous::Media::TempFile.new(owner, filename, mimetype)
+      media_file = Spontaneous::Media::TempFile.new(self, filename, mimetype)
       media_file.copy(file)
       media_file
     end

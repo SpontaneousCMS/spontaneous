@@ -68,6 +68,21 @@ module Spontaneous
         [owner.id, schema_id].join("/")
       end
 
+      # This is used exclusively to compute the filename/path of
+      # temp files.
+      #
+      # To avoid creating a deep hierarchy under /media/tmp
+      # which would be hard to cleanup we replace all dir separators
+      # with underscores.
+      #
+      # The timestamp is added because otherwise serial modifications
+      # to the same field might overwrite the value (though this is
+      # unlikely)
+      def media_id
+        ids = [owner.id, schema_id, timestamp]
+        ids.join("_").gsub(/\//, "_")
+      end
+
       def writable?(user)
         owner.field_writable?(user, name)
       end
@@ -83,8 +98,16 @@ module Spontaneous
         values[:__pending__] = {
           :value => value,
           :version => version + 1,
-          :timestamp => Spontaneous::Field.timestamp
+          :timestamp => timestamp
         }
+      end
+
+      # A timestamp value consistent for a particular field instance
+      #
+      # This is used to solve conflicts for async updates and to
+      # tag a tempfile to a particular pending value.
+      def timestamp
+        @timestamp ||= Spontaneous::Field.timestamp
       end
 
       def pending_value
@@ -100,14 +123,18 @@ module Spontaneous
       end
 
       def process_pending_value
-        process_pending_value!
+        if (pending = process_pending_value!)
+          cleanup_pending_value!(pending)
+        end
         save
       end
 
       def process_pending_value!
         if has_pending_value?
+          pending = pending_value
           @previous_values = values.dup
           set_value!(pending_value[:value])
+          pending
         end
       end
 
@@ -140,6 +167,15 @@ module Spontaneous
         else
           @previous_values = reloaded.values
           false
+        end
+      end
+
+      def cleanup_pending_value!(pending)
+        clear_pending_value
+        if pending && (v = pending[:value]) && v.is_a?(Hash)
+          if (tempfile = v[:tempfile]) && ::File.exist?(tempfile)
+            FileUtils.rm_r(::File.dirname(tempfile))
+          end
         end
       end
 
