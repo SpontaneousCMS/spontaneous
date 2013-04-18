@@ -81,7 +81,7 @@ module Spontaneous::Asset
       def find(sources, options)
         paths   = normalise_sources(sources, options)
         if options[:development]
-          assets = paths.flat_map { |path| environment[path].to_a || [path] }
+          assets = paths.flat_map { |path| a = environment[path].to_a ; a.empty? ? [path] : a }
         else
           assets = paths.map { |path| environment[path] || path }
         end

@@ -168,6 +168,12 @@ describe "Assets" do
       result = last_response.body
       result.must_match %r(/\*\s+\*/)
     end
+
+    it "allows for protocol agnostic absolute script urls" do
+      result = context.scripts('//use.typekit.com/abcde')
+      result.must_equal '<script type="text/javascript" src="//use.typekit.com/abcde"></script>'
+    end
+
   end
 
   describe "preview" do
@@ -309,7 +315,7 @@ describe "Assets" do
     describe "templates" do
       let(:renderer)  { Spontaneous::Output::Template::PreviewRenderer.new }
 
-      it "should allow for embedding asset images into templates xxx" do
+      it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
         result.must_equal "/assets/i/y.png"
       end
@@ -483,7 +489,7 @@ describe "Assets" do
     describe "templates" do
       let(:renderer)  { Spontaneous::Output::Template::PublishRenderer.new }
 
-      it "should allow for embedding asset images into templates xxx" do
+      it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
         result.must_equal "/assets/i/y-9cf98219611ef5a9fdf0d970af30084a.png"
       end
