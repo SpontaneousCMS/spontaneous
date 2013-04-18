@@ -77,11 +77,11 @@ describe "Storage" do
         file.content_type.must_equal "image/jpeg"
       end
 
-      it "be given a far future expiry" do
+      it "is given a far future cache value" do
         now = DateTime.now
         DateTime.stubs(:now).returns(now)
         file = @storage.copy(@existing_file, @media_path, "image/jpeg")
-        file.expires.must_equal (now + 20.years).to_s(:rfc822)
+        file.cache_control.must_equal "max-age=31557600, public"
       end
 
       it "be set as publicly visible" do

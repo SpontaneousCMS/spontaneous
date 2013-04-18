@@ -61,7 +61,7 @@ module Spontaneous::Storage
         :idempotent => false,
         :body => existing_file,
         :public => true,
-        :expires => (DateTime.now + 20.years).to_s(:rfc822),
+        :cache_control => "max-age=#{1.year.to_i}, public",
         :content_type => mimetype
       }
       # Reopen file handles to catch updated contents
