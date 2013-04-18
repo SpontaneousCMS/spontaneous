@@ -54,11 +54,11 @@ module Spontaneous::Model::Page
     end
 
     def generation
-      parent ? parent.children : [root]
+      parent ? parent.children : [root].compact
     end
 
     def siblings
-      generation.reject { |p| p === self }
+      generation.reject { |p| p.id == id }
     end
 
     def >(page)
