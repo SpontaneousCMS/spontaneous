@@ -44,6 +44,7 @@ module Spontaneous::Media::Image
       exe = binary(lib)
       return unless exe
       command = [exe, args].join(" ")
+      logger.debug(command)
       measure do
         process = POSIX::Spawn::Child.new(command)
         unless process.success?
@@ -54,10 +55,10 @@ module Spontaneous::Media::Image
     end
 
     def measure
-      before = ::File.size(@image)
+      before, start = ::File.size(@image), Time.now
       result = yield
-      after  = ::File.size(@image)
-      logger.debug("#{(100 * (1 - after.to_f/before.to_f)).round(1)}% optimization of '#{::File.basename(@image)}' [#{before} -> #{after}]")
+      after, _end  = ::File.size(@image), Time.now
+      logger.debug("#{(100 * (1 - after.to_f/before.to_f)).round(1)}% optimization of '#{::File.basename(@image)}' [#{before} -> #{after}] in #{_end - start}s")
       result
     end
 
