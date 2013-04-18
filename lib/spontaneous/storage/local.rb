@@ -17,10 +17,15 @@ module Spontaneous::Storage
 
     def copy_file(existing_file, dest_path)
       if existing_file.respond_to?(:read)
-        File.open(dest_path, "wb") do |f|
-          f.binmode
-          while chunk = existing_file.read(8192)
-            f.write(chunk)
+        # Re-open the file because it's been modified on disk by the optimisation process
+        # and if we don't re-open it the copy will take the unmodified version
+        File.open(existing_file.path, "rb") do |src|
+          src.binmode
+          File.open(dest_path, "wb") do |f|
+            f.binmode
+            while chunk = src.read(8192)
+              f.write(chunk)
+            end
           end
         end
       else

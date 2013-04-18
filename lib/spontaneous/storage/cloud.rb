@@ -64,8 +64,13 @@ module Spontaneous::Storage
         :expires => (DateTime.now + 20.years).to_s(:rfc822),
         :content_type => mimetype
       }
-      params[:body] = File.open(existing_file) if existing_file.is_a?(String)
-      bucket.files.create(params)
+      # Reopen file handles to catch updated contents
+      src_path = existing_file.respond_to?(:read) ? existing_file.path : existing_file
+      File.open(src_path, "rb") do |src|
+        src.binmode
+        params[:body] = src
+        bucket.files.create(params)
+      end
     end
 
     def join_path(path)
