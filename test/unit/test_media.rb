@@ -235,19 +235,4 @@ describe "Media" do
       File.read(file_path).must_equal content_string
     end
   end
-
-  describe "Content items" do
-    before do
-      # @media_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../tmp/media"))
-      # Spontaneous.media_dir = @media_dir
-      S::Site.stubs(:working_revision).returns(74)
-      @instance = ::Piece.new
-      @instance.stubs(:id).returns(101)
-    end
-
-    it "be able to generate a revision and id based media path" do
-      @instance.media_filepath("something.jpg").must_equal File.join(@site.media_dir, "00101/0074/something.jpg")
-      @instance.media_urlpath("something.jpg").must_equal "/media/00101/0074/something.jpg"
-    end
-  end
 end
