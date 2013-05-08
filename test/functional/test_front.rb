@@ -303,6 +303,21 @@ describe "Front" do
         last_response.body.must_equal "dancing*dancing"
         SitePage.instance_variable_set(:@layout_procs, nil)
       end
+
+      it "allows for dynamically setting the output" do
+        SitePage.add_output :mobile
+        SitePage.layout do
+          "${ path }.${ __format }"
+        end
+        SitePage.request :get do
+          if request.user_agent =~ /iPhone/
+            output :mobile
+          end
+        end
+        get "/about", {}, { "HTTP_USER_AGENT" => "Desktop" }
+        last_response.body.must_equal "/about.html"
+        get "/about", {}, { "HTTP_USER_AGENT" => "iPhone" }
+        last_response.body.must_equal "/about.mobile"
       end
 
       # should "handle anything that responds to #render(format)" do

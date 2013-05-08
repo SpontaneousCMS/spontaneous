@@ -134,8 +134,8 @@ module Spontaneous
         Spontaneous::Site.by_path(path)
       end
 
-      def output
-        @output
+      def output(name)
+        @output = name.to_s
       end
 
       def action
@@ -166,7 +166,7 @@ module Spontaneous
       end
 
       def call_action!
-        status, headers, result = @page.process_action(action, request.env, output)
+        status, headers, result = @page.process_action(action, request.env, @output)
         if status == 404
           not_found!
         else
