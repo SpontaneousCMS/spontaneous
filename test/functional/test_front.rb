@@ -85,7 +85,7 @@ describe "Front" do
   end
 
   after do
-    SitePage.instance_variable_set(:@layout_proc, nil)
+    SitePage.instance_variable_set(:@layout_procs, nil)
     SitePage.instance_variable_set(:@request_blocks, {})
     [root, about, subpage, news, static].each do |page|
       page.layout = :default
@@ -118,7 +118,7 @@ describe "Front" do
       last_response.body.must_equal "/.html\n"
     end
 
-    it "be available through their path xxx" do
+    it "be available through their path" do
       get '/about'
       assert last_response.ok?
       last_response.body.must_equal "/about.html\n"
@@ -194,7 +194,7 @@ describe "Front" do
         assert page.dynamic?
       end
 
-      it "render an alternate page if passed a page xxx" do
+      it "render an alternate page if passed a page" do
         SitePage.request do
           show Site['/static']
         end
@@ -269,7 +269,7 @@ describe "Front" do
         last_response.body.must_equal "/about.html\n"
       end
 
-      it "allow altering of headers xxx" do
+      it "allow altering of headers" do
         SitePage.request do
           headers["X-Works"] = "Yes"
         end
@@ -289,7 +289,7 @@ describe "Front" do
         get '/about'
         assert last_response.status == 200
         last_response.body.must_equal "white"
-        SitePage.instance_variable_set(:@layout_proc, nil)
+        SitePage.instance_variable_set(:@layout_procs, nil)
       end
 
       it "give access to the request params within the controller" do
@@ -301,7 +301,8 @@ describe "Front" do
         post '/about', :horse => "dancing"
         assert last_response.status == 200
         last_response.body.must_equal "dancing*dancing"
-        SitePage.instance_variable_set(:@layout_proc, nil)
+        SitePage.instance_variable_set(:@layout_procs, nil)
+      end
       end
 
       # should "handle anything that responds to #render(format)" do

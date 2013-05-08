@@ -117,6 +117,30 @@ describe "Layouts" do
     page = LayoutPage.new(:title => "john")
     page.render.must_equal "john!"
   end
+
+  it "allows assigning a layout block to a particular output" do
+    LayoutPage.add_output :rss
+    LayoutPage.layout :html do
+      "HTML"
+    end
+    LayoutPage.layout :rss do
+      "RSS"
+    end
+    page = LayoutPage.new
+    page.render(:html).must_equal "HTML"
+    page.render(:rss).must_equal  "RSS"
+  end
+
+  it "allows a fallback layout block to render all formats" do
+    LayoutPage.add_output :rss
+    LayoutPage.layout do
+      "${ __format }"
+    end
+    page = LayoutPage.new
+    page.render(:html).must_equal "html"
+    page.render(:rss).must_equal  "rss"
+  end
+
   # it "raise error when setting unknown layout" do
   #   LayoutPage.layout :custom1
   #   LayoutPage.layout :custom2

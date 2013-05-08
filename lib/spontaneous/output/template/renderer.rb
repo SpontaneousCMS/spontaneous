@@ -18,13 +18,13 @@ module Spontaneous::Output::Template
 
     def render(output, params = {})
       output.model.with_visible do
-        engine.render(output.content, context(output, params), output.name.to_s)
+        engine.render(output.content, context(output, params), output.name)
       end
     end
 
     def render_string(template_string, output, params = {})
       output.model.with_visible do
-        engine.render_string(template_string, context(output, params), output.name.to_s)
+        engine.render_string(template_string, context(output, params), output.name)
       end
     end
 

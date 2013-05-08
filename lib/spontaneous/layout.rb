@@ -17,16 +17,15 @@ module Spontaneous
     end
 
     class Anonymous
-      def initialize(template_proc)
-        @template_proc = template_proc
+      def initialize(templates = {})
+        @templates = templates
       end
 
       def template(format = :html)
-        @template_proc
-      end
-
-      def exists?(format = :html)
-        true
+        template = @templates[format]
+        # a layout without a format is used as a fallback
+        template ||= @templates[nil]
+        template
       end
 
       def name

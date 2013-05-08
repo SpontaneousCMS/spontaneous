@@ -149,10 +149,6 @@ module Spontaneous
         Proc.new { @template_code }
       end
 
-      def exists?(format = :html)
-        true
-      end
-
       def name
         nil
       end

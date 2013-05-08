@@ -106,10 +106,7 @@ module Spontaneous::Model::Page
     end
 
     def render(format=:html, params={}, *args)
-      if format.is_a?(Hash)
-        params = format
-        format = :html
-      end
+      params, format = format, :html if format.is_a?(Hash)
       output = output(format)
       output.render(params, *args)
     end

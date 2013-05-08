@@ -7,11 +7,15 @@ module Spontaneous::Model::Page
     module ClassMethods
       def layout(name = nil, options = {}, &block)
         if block_given?
-          @layout_proc = block
+          layout_procs[name] = block
         else
           raise "Layouts must be given a name" if name.blank?
           layout_prototypes[name] = Spontaneous::Prototypes::LayoutPrototype.new(self, name, options)
         end
+      end
+
+      def layout_procs
+        @layout_procs ||= {}
       end
 
       def layout_prototypes
@@ -29,7 +33,7 @@ module Spontaneous::Model::Page
       end
 
       def default_layout
-        return Spontaneous::Layout::Anonymous.new(@layout_proc) unless @layout_proc.nil?
+        return Spontaneous::Layout::Anonymous.new(layout_procs) unless layout_procs.empty?
         if prototype = (layouts.hierarchy_detect { |prototype| prototype.default? } || layouts.local_first)
           prototype.layout(self)
         else
