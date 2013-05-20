@@ -216,7 +216,7 @@ describe "Front" do
       it "render an alternate page if passed a uid with a #" do
         # about.stubs(:request_show).returns("#news")
         SitePage.request do
-          show "#static"
+          show "static"
         end
         get '/about'
         assert last_response.ok?
@@ -244,7 +244,7 @@ describe "Front" do
 
       it "return the right status code" do
         SitePage.request do
-          show "#static", 404
+          show "static", 404
         end
         get '/about'
         assert last_response.status == 404
@@ -253,7 +253,7 @@ describe "Front" do
 
       it "allow handing POST requests" do
         SitePage.request :post do
-          show "#static"
+          show "static"
         end
         post '/about'
         assert last_response.status == 200, "Expected status 200 but recieved #{last_response.status}"
@@ -355,7 +355,7 @@ describe "Front" do
 
       it "respond appropriately to redirects to a UID" do
         SitePage.request do
-          redirect "#news"
+          redirect "news"
         end
         get '/about'
         assert last_response.status == 302

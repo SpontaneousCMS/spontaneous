@@ -46,6 +46,12 @@ module Spontaneous
 
   class InvalidPrototypeDefinitionError < Error; end
 
+  class AnonymousRootException < Error
+    def initialize
+      super("Content roots must have a valid slug")
+    end
+  end
+
   class SchemaModificationError < Error
     extend Forwardable
 

@@ -184,10 +184,10 @@ describe "Alias" do
 
         it "allow for selecting only content from within one box" do
           class ::X < ::Piece
-            alias_of :A, :container => Proc.new { S::Site['#thepage'].box1 }
+            alias_of :A, :container => Proc.new { S::Site['$thepage'].box1 }
           end
           class ::XX < ::Piece
-            alias_of :AA, :container => Proc.new { S::Site['#thepage'].box1 }
+            alias_of :AA, :container => Proc.new { S::Site['$thepage'].box1 }
           end
           targets = lambda { |a, target|
             [(a.targets), @page.box1.select { |p| target === p }].map { |a| Set.new(a) }
@@ -200,10 +200,10 @@ describe "Alias" do
 
         it "allow for selecting only content from a range of boxes" do
           class ::X < ::Piece
-            alias_of :A, :container => Proc.new { [S::Site['#thepage'].box1, S::Site['#thepage'].box2] }
+            alias_of :A, :container => Proc.new { [S::Site['$thepage'].box1, S::Site['$thepage'].box2] }
           end
           class ::XX < ::Piece
-            alias_of :AA, :container => Proc.new { [S::Site['#thepage'].box1, S::Site['#thepage'].box2] }
+            alias_of :AA, :container => Proc.new { [S::Site['$thepage'].box1, S::Site['$thepage'].box2] }
           end
           assert_same_content X.targets, @page.box1.select { |p| A === p } + @page.box2.select { |p| A === p }
           assert_same_content XX.targets, @page.box1.select { |p| AA === p } + @page.box2.select { |p| AA === p }
@@ -211,10 +211,10 @@ describe "Alias" do
 
         it "allow for selecting only content from within one page" do
           class ::X < ::Piece
-            alias_of :A, :container => Proc.new { S::Site['#thepage'] }
+            alias_of :A, :container => Proc.new { S::Site['$thepage'] }
           end
           class ::XX < ::Piece
-            alias_of :AA, :container => Proc.new { S::Site['#thepage'] }
+            alias_of :AA, :container => Proc.new { S::Site['$thepage'] }
           end
           assert_same_content X.targets, @page.content.select { |p| A === p }
           assert_same_content XX.targets, @page.content.select { |p| AA === p }
@@ -230,10 +230,10 @@ describe "Alias" do
           }
           page2.save.reload
           class ::X < ::Piece
-            alias_of :A, :AA, :container => Proc.new { [S::Site['#thepage'].box1, S::Site['#thepage2']] }
+            alias_of :A, :AA, :container => Proc.new { [S::Site['$thepage'].box1, S::Site['$thepage2']] }
           end
           class ::XX < ::Piece
-            alias_of :AA, :container => Proc.new { [S::Site['#thepage'], S::Site['#thepage2'].box2] }
+            alias_of :AA, :container => Proc.new { [S::Site['$thepage'], S::Site['$thepage2'].box2] }
           end
           assert_same_content X.targets(@page, @page.box1), @page.box1.contents + page2.content
           assert_same_content XX.targets, @page.content.select { |p| AA === p } + page2.box2.select { |p| AA === p }

@@ -156,7 +156,7 @@ describe "Search" do
       id = @root0.id
       path = @page8.path
       index = S::Site.index :all do
-        include_pages id, "#page11", path
+        include_pages id, "$page11", path
       end
 
       included = @all_pages.map{ |page| index.include?(page) }
@@ -165,7 +165,7 @@ describe "Search" do
 
     it "allow restriction to a page and its children" do
       index = S::Site.index :all do
-        include_pages ">= #page8"
+        include_pages ">= $page8"
       end
 
       included = @all_pages.map{ |page| index.include?(page) }
@@ -174,7 +174,7 @@ describe "Search" do
 
     it "allow restriction to a page's children" do
       index = S::Site.index :all do
-        include_pages "> #page8"
+        include_pages "> $page8"
       end
 
       included = @all_pages.map{ |page| index.include?(page) }
@@ -183,7 +183,7 @@ describe "Search" do
 
     it "allow removal of specific pages" do
       index = S::Site.index :all do
-        exclude_pages "#page8", "/page1"
+        exclude_pages "$page8", "/page1"
       end
 
       included = @all_pages.map{ |page| index.include?(page) }
@@ -192,7 +192,7 @@ describe "Search" do
 
     it "allow removal of a page and its children" do
       index = S::Site.index :all do
-        exclude_pages "/page1", ">= #page8"
+        exclude_pages "/page1", ">= $page8"
       end
 
       included = @all_pages.map{ |page| index.include?(page) }
@@ -201,7 +201,7 @@ describe "Search" do
 
     it "allow removal of a page's children" do
       index = S::Site.index :all do
-        exclude_pages "/page1", "> #page8"
+        exclude_pages "/page1", "> $page8"
       end
 
       included = @all_pages.map{ |page| index.include?(page) }
@@ -210,7 +210,7 @@ describe "Search" do
 
     it "allow multiple, mixed, page restrictions" do
       index = S::Site.index :all do
-        include_pages "#page1", "> #page8"
+        include_pages "$page1", "> $page8"
       end
 
       included = @all_pages.map{ |page| index.include?(page) }
@@ -220,8 +220,8 @@ describe "Search" do
     it "allow combining of class and page restrictions" do
       index = S::Site.index :all do
         exclude_types PageClass3, PageClass4
-        include_pages "#page1", "> #page8"
-        exclude_pages "#page10"
+        include_pages "$page1", "> $page8"
+        exclude_pages "$page10"
       end
       included = @all_pages.map{ |page| index.include?(page) }
       included.must_equal [false,true,false,false,false,false,false,false,false,true,false,false,false]

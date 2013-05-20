@@ -20,9 +20,9 @@ Spontaneous.Init = (function($, S) {
 		b.append(content_area.init());
 		b.append(S.StatusBar.init());
 
-		S.Metadata.load(function() {
+		S.Metadata.load(function(metadata) {
 			location.init(function() {
-				top_bar.init();
+				top_bar.init(metadata);
 			});
 		});
 	};

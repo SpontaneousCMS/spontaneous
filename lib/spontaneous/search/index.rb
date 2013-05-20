@@ -182,11 +182,11 @@ module Spontaneous::Search
       case selector
       when Fixnum, /\A\d+\z/
         page.id == selector.to_i
-      when /\A#(.+)\z/
+      when /\A\$?([a-zA-Z].*)\z/
         page.uid == $1
-      when /\A\//
+      when /\A[\/#]/
         page.path == selector
-      when /\A(>=|>)\s+(.+)\z/
+      when /\A(>=?)\s+(.+)\z/
         rule, root = $1, S::Site[$2]
         root.send(rule, page)
       else

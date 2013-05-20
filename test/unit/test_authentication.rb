@@ -425,7 +425,7 @@ describe "Authentication" do
         assert last_response.ok?
       end
 
-      it "not be able to update fields from root level box xxx" do
+      it "not be able to update fields from root level box" do
         value = "Updated #{version}"
         field = root.fields[:editor_level]
         auth_put "/@spontaneous/content/#{root.id}/#{root.boxes[:root_level].schema_id}", "field[#{field.schema_id}]" => value

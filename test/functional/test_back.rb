@@ -367,6 +367,18 @@ describe "Back" do
         result[:user][:developer].must_equal false # although the login is root, the level is :editor
       end
 
+      it "returns a list of site roots in the metadata" do
+        hidden = Page.create slug: "hidden"
+        auth_get "/@spontaneous/site"
+        assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
+        result = Spot::JSON.parse(last_response.body)
+        roots = result[:roots]
+        roots.must_equal({
+          :public => "example.org",
+          :roots => { :"example.org"=>home.id, :"#hidden"=>hidden.id }
+        })
+      end
+
       it "return an empty list of service URLs by default" do
         auth_get "/@spontaneous/site"
         assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"

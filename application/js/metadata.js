@@ -7,7 +7,7 @@ Spontaneous.Metadata = (function($, S) {
 			S.Types.loaded(metadata.types);
 			S.User.loaded(metadata.user);
 			S.Services.loaded(metadata.services);
-			if (callback) { callback.call(); };
+			if (callback) { callback(metadata); };
 		};
 	};
 	return {

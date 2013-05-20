@@ -7,6 +7,9 @@ describe "Site" do
 
   before do
     @site = setup_site
+    @site.config.tap do |c|
+      c.site_domain = "spontaneous.io"
+    end
     Content.delete
     Page.field :title
     Page.box   :subpages
@@ -134,12 +137,33 @@ describe "Site" do
     end
 
     describe "page retrieval" do
+      it "finds the root" do
+        Site.root.must_equal @root
+      end
+
+      it "returns all roots" do
+        hidden = Page.create slug: "hidden"
+        roots = Site.roots
+        roots["public"].must_equal "spontaneous.io"
+        roots["roots"].keys.must_equal ["spontaneous.io", "#hidden"]
+      end
+
       it "work with paths" do
         Site['/page1-1/page2-1'].must_equal @page2_1.reload
       end
 
       it "work with UIDs" do
         Site["page3_2"].must_equal @page3_2.reload
+        Site["$page3_2"].must_equal @page3_2.reload
+      end
+
+      it "finds hidden roots" do
+        root = Page.create slug: "hidden"
+        Site["#hidden"].must_equal root.reload
+        child = Page.create slug: "something"
+        root.subpages << child
+        root.save
+        Site["#hidden/something"].must_equal child.reload
       end
 
       it "have a shortcut direct method on Site" do

@@ -96,7 +96,7 @@ module Spontaneous::Model::Page
     end
 
     def is_conflicting_slug?(slug)
-      siblings.compact.map(&:slug).include?(slug)
+      siblings.reject { |s| s.root? }.compact.map(&:slug).include?(slug)
     end
 
     def parent=(parent)
@@ -107,7 +107,11 @@ module Spontaneous::Model::Page
 
     def place_in_page_tree
       if parent_id.nil?
-        make_root unless content_model.has_root?
+        if content_model.has_root?
+          make_hidden_root
+        else
+          make_root
+        end
       else
         update_path
       end
@@ -116,6 +120,12 @@ module Spontaneous::Model::Page
     def make_root
       self[:path] = "/"
       self[:slug] = ""
+      self[:ancestor_path] = ""
+    end
+
+    def make_hidden_root
+      raise Spontaneous::AnonymousRootException.new if slug.blank?
+      self[:path] = "##{slug}"
       self[:ancestor_path] = ""
     end
 
@@ -144,7 +154,7 @@ module Spontaneous::Model::Page
 
     def calculate_path_with_slug(slug)
       if parent.nil?
-        root? ? Spontaneous::SLASH : '' # bad case, no parent but not root
+        root? ? Spontaneous::SLASH : "##{slug}"
       else
         File.join(parent.path, slug)
       end

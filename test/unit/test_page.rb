@@ -36,6 +36,53 @@ describe "Page" do
     end
   end
 
+  describe "invisible roots" do
+    before do
+      @root = Page.create
+      assert @root.root?
+      class ::ErrorPage < Page; end
+      ErrorPage.box :pages
+    end
+    after do
+      Object.send :remove_const, :ErrorPage rescue nil
+    end
+
+    it "is given a path starting with '#'" do
+      root = Page.create slug: "error"
+      root.path.must_equal "#error"
+    end
+
+    it "re-calculates its path using '#'" do
+      root = ErrorPage.create slug: "error"
+      page = Page.new slug: "404"
+      root.pages << page
+      root.save
+      root.path.must_equal "#error"
+      root.slug = "changed"
+      root.save
+      root.path.must_equal "#changed"
+      page.reload.path.must_equal "#changed/404"
+    end
+
+    it "has paths that start with '#'" do
+      root = ErrorPage.create slug: "error"
+      page = Page.new slug: "404"
+      root.pages << page
+      root.save
+      page.path.must_equal "#error/404"
+    end
+
+    it "has a depth of 0" do
+      root = ErrorPage.create slug: "error"
+      root.depth.must_equal 0
+    end
+
+    it "raises an error if the alternate root doesn't have a slug" do
+      lambda { Page.create slug: "" }.must_raise Spontaneous::AnonymousRootException
+    end
+
+  end
+
   describe "Slugs" do
     it "be generated if missing" do
       o = Page.create

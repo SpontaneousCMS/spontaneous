@@ -1,23 +1,130 @@
 // console.log("Loading TopBar...")
 
 Spontaneous.TopBar = (function($, S) {
-	var dom = S.Dom;
+	var dom = S.Dom, Ajax = S.Ajax;
 
-	var RootNode = function(page) {
+	var disableParent = function(el) {
+			el.hover(function() {
+				$(this).parent().addClass("disabled");
+			}, function() {
+				$(this).parent().removeClass("disabled");
+			});
+		return el;
+	};
+
+	var slugComparator = function(a, b) {
+		var at = a.slug, bt = b.slug;
+		if (at > bt) { return  1; }
+		if (at < bt) { return -1; }
+		return 0;
+	};
+
+	var RootBrowser = new JS.Class(Spontaneous.PopoverView, {
+		initialize: function(roots) {
+			this.roots = roots;
+		},
+		width: function() { return 300; },
+		title: function() { return "Choose Root"; },
+		view:  function() {
+			var self = this, w = dom.div('#navigation-page-browser.pop-root-browser'), list = dom.div(".pages"), roots = this.roots.roots;
+			var click = function(page_id) {
+				return function() { self.close(); S.Location.load_id(page_id); };
+			};
+			for (var key in roots) {
+				if (roots.hasOwnProperty(key)) {
+					var r = dom.div(".page").text(key).click(click(roots[key]));
+					list.append(r);
+				}
+			}
+			w.append(list);
+			this.wrapper = w;
+			return w;
+		}
+	});
+
+	var PageBrowser = new JS.Class(Spontaneous.PopoverView, {
+		initialize: function(origin, pages) {
+			this.origin = origin;
+			this.pages = pages;
+		},
+		width: function() { return 300; },
+		title: function() { return "Go to Page"; },
+		view:  function() {
+			var self = this, w = dom.div('#navigation-page-browser.pop-root-browser'), list = dom.div(".pages");
+			self.wrapper = w;
+			self.list = list;
+			w.append(list)
+			this.loadPages();
+			return w;
+		},
+		loadPages: function() {
+			if (this.pages) {
+				this.listPages(this.pages);
+			} else {
+				var path = ["/map", this.origin.id].join("/")
+				S.Location.retrieve(path, this.pagesLoaded.bind(this));
+			}
+		},
+		pagesLoaded: function(pages) {
+			this.listPages(pages.generation);
+		},
+		listPages: function(generation) {
+			var self = this, origin = self.origin, load_page = function(p) {
+				return function() {
+					self.close();
+					S.Location.load_id(p.id);
+				}
+			};
+			$.each(generation, function(boxname, pages) {
+				pages.sort(slugComparator);
+				var box = dom.div(".box").append(dom.h4().text(boxname));
+				for (var i = 0, ii = pages.length; i < ii; i++) {
+					var p = pages[i], page = dom.div(".page").text(p.slug).data('page', p);
+					if (origin && p.id === origin.id) {
+						page.addClass("current");
+					}
+					page.click(load_page(p));
+					box.append(page);
+				}
+				self.list.append(box);
+			});
+		}
+	});
+
+	var RootNode = function(page, roots) {
 		this.page = page;
+		this.roots = roots;
 		this.id = page.id;
 		this.url = page.url;
-		this.title = S.site_domain;
+		this.title = this.title(); //page.title; //S.site_domain;
 	};
 	RootNode.prototype = {
+		title: function() {
+			var roots = this.roots.roots;
+
+			for (var key in roots) {
+				if (roots.hasOwnProperty(key)) {
+					if (roots[key] === this.id) { return key; }
+				}
+			}
+			return S.site_domain;
+		},
 		element: function() {
-			var li = dom.li('.root');
+			var self = this, li = dom.li('.root');
+			if (Object.keys(this.roots.roots).length === 1) {
+				li.addClass("singluar");
+			}
 			var link = dom.a({'href': this.url}).text(this.title).data('page', this.page);
+			li.click(function(event) {
+				var browser = new RootBrowser(self.roots);
+				Spontaneous.Popover.open(event, browser);
+			});
 			link.click(function() {
 				var page = $(this).data('page');
 				S.Location.load_id(page.id);
 				return false;
 			});
+			disableParent(link);
 			li.append(link);
 			this.link = link;
 			return li;
@@ -35,12 +142,21 @@ Spontaneous.TopBar = (function($, S) {
 	};
 	AncestorNode.prototype = {
 		element: function() {
-			var link = dom.li().append($('<a/>').data('page', this.page).click(function() {
+			var page = this.page, li = dom.li(), link = $('<a/>').data('page', page).click(function() {
 				var page = $(this).data('page');
 				S.Location.load_id(page.id);
-			}).text(this.title));
+				return false;
+			}).text(this.title);
 
-			return link;
+			disableParent(link);
+			li.append(link);
+
+			li.click(function() {
+				var browser = new PageBrowser(page);
+				Spontaneous.Popover.open(event, browser);
+			});
+
+			return li;
 		}
 	};
 	var CurrentNode = function(page) {
@@ -56,141 +172,99 @@ Spontaneous.TopBar = (function($, S) {
 		element: function() {
 			var self = this
 			, li = dom.li()
-			, select = dom.select()
-			, comparator = function(a, b) {
-				var at = a.slug, bt = b.slug;
-				if (at > bt) { return 1; }
-				if (at < bt) { return -1; }
-				return 0;
-			};
-			select.change(function() {
-				var page = $(this.options[this.selectedIndex]).data('page');
-				S.Location.load_id(page.id);
-				return false;
+			, link = dom.a().text(self.title);
+			li.click(function(event) {
+				var browser = new PageBrowser(self.page, self.pages);
+				Spontaneous.Popover.open(event, browser);
 			});
-
-			$.each(this.pages, function(boxname, pages) {
-				pages.sort(comparator);
-				var optgroup = dom.optgroup().attr('label', boxname);
-				for (var i = 0, ii = pages.length; i < ii; i++) {
-					var p = pages[i],
-					option = dom.option({'value': p.id, 'selected':(p.id == self.id) }).text(p.slug).data('page', p);
-					if (p.id === self.id) {
-						self.title_option = option;
-					}
-					optgroup.append(option);
-				}
-				select.append(optgroup);
-			});
-			li.append(select);
+			li.append(link);
+			this.title_element = link;
 			return li;
 		},
 		set_title: function(new_title) {
-			this.title_option.text(new_title);
+			this.title_element.text(new_title);
 		}
 	};
 
-	var ChildrenNode = function(children) {
-		this.children = children;
+	var ChildrenNode = function(origin) {
+		this.origin = origin;
 	};
 
 	ChildrenNode.prototype = {
 		element: function() {
-			var li = dom.li('.children')
-			, select = dom.select('.unselected')
-			, children = this.children;
+			var self = this, li = dom.li('.children'), link = dom.a('.unselected'), children = this.children;
 			this.li = li;
-			this.select = select;
-			this.status = dom.option().text(this.status_text());
-			select.append(this.status);
-			select.change(function() {
-				var p = $(this.options[this.selectedIndex]).data('page');
-				if (p) {
-					S.Location.load_id(p.id());
-				}
-				return false;
+			this.link = link.text(this.status_text());
+			li.append(link);
+			li.click(function(event) {
+				var browser = new PageBrowser(self.origin, self.children());
+				Spontaneous.Popover.open(event, browser);
 			});
-			for (var boxname in children) {
-				if (children.hasOwnProperty(boxname)) {
-					var optgroup = this.optgroup(boxname), cc = this.sort_children(children[boxname]);
-					for (var i = 0, ii = cc.length; i < ii; i++) {
-						var p = cc[i];
-						optgroup.append(this.option_for_entry(p));
-					}
-					select.append(optgroup);
-				}
-			}
-			li.append(select);
 			return li;
 		}.cache(),
 
-		sort_children: function(children) {
-			var comparator = function(a, b) {
-				var at = a.slug(), bt = b.slug();
-				if (at > bt) { return 1; }
-				if (at < bt) { return -1; }
-				return 0;
-			};
-			return children.sort(comparator);
+		each: function(block) {
+			var self = this, children = this.origin.children();
+			for (var boxname in children) {
+				if (children.hasOwnProperty(boxname)) {
+					for (var i = 0, box = children[boxname], ii = box.length; i < ii; ++i) {
+						block(box[i])
+					}
+				}
+			}
+		},
+		children: function() {
+			var self = this, children = this.origin.children();
+			var boxes = {};
+			for (var boxname in children) {
+				if (children.hasOwnProperty(boxname)) {
+					boxes[boxname] = [];
+					for (var i = 0, box = children[boxname], ii = box.length; i < ii; ++i) {
+						var child = box[i];
+						boxes[boxname].push({
+							id: child.id(),
+							slug: child.slug()
+						});
+					}
+				}
+			}
+			return boxes;
 		},
 
 		status_text: function() {
-			var children = this.children, count = 0;
+			var children = this.origin.children(), count = 0;
 			for (var boxname in children) {
 				if (children.hasOwnProperty(boxname)) { count += children[boxname].length; }
 			}
 			if (count === 0) {
-				this.select.hide();
+				this.li.hide();
 			} else {
-				this.select.show();
+				this.li.show();
 			}
 			return '('+(count)+' page'+(count === 1 ? '' : 's')+')';
 		},
-		optgroup: function(boxname) {
-			return dom.optgroup().attr('label', boxname);
-		},
-		option_for_entry: function(p) {
-			var opt = dom.option({'value': p.id()}).text(p.slug()).data('page', p);
-			if (p.watch) {
-				p.watch('slug', function(value) {
-					opt.text(value);
-				}.bind(this));
-			}
-			return opt;
-		},
 		update_status: function() {
-			this.status.text(this.status_text());
-			return this.status;
+			this.link.text(this.status_text());
+			return this.link;
 		},
 		add_page: function(page, position) {
 			var self = this
-			, option = self.option_for_entry(page)
 			, container = page.container
 			, name = container.name()
-			, children = self.children
-			, optgroup = self.select.find('optgroup[label="'+name+'"]');
-			if (optgroup.length === 0) {
-				optgroup = this.optgroup(name);
-				this.select.append(optgroup);
-			}
-			optgroup.prepend(option);
-			// since the navigation lists are ordered differently from the entries, it's
-			// difficult to insert into the right position
-			// TODO: re-sort the this.children entries and use this list to find the position in the select
+			, children = self.origin.children
+			, box = children[name];
 
-			// happens when we're adding the first item
-			if (!children[name]) { children[name] = []; }
-
-			if (position === -1) {
-				children[name].push(page);
-			} else {
-				children[name].splice(position, 0, page);
+			if (!box) {
+				box = [];
+				self.origin.children[name] = box;
 			}
+			box.push(page);
 			self.update_status();
 		},
 
 		remove_page: function(page) {
 			var self = this
+			, children = self.origin.children()
 			, container = page.container.name()
 			, index = (function(children) {
 				for (var boxname in children) {
@@ -201,11 +275,9 @@ Spontaneous.TopBar = (function($, S) {
 						}
 					}
 				}
-			}(self.children))
-			, optgroup = this.select.find('optgroup[label="'+container+'"]');
-			optgroup.find('option[value="'+page.id()+'"]').remove();
-			this.children[container].splice(index, 1);
-			this.update_status();
+			}(children));
+			children[container].splice(index, 1);
+			self.update_status();
 		}
 	};
 
@@ -334,27 +406,15 @@ Spontaneous.TopBar = (function($, S) {
 			}
 			return self.wrap;
 		},
+		roots: function(roots) {
+			this.roots = roots;
+		},
 		location_loaded: function(location) {
 			var children = {};
-
-			for (var boxname in location.children) {
-				if (location.children.hasOwnProperty(boxname)) {
-					children[boxname] = [];
-					for (var i = 0, cc = location.children[boxname], ii = cc.length; i < ii; i++) {
-						children[boxname].push(new LocationChildProxy(cc[i]));
-					}
-				}
-			}
-			var children_node = new ChildrenNode(children);
-			this.location.append(children_node.element());
-			this.children_node = children_node;
 		},
 		page_loaded: function(page) {
 			var self = this;
-			if (self.children_node) {
-				self.children_node.element().remove();
-			}
-			var children_node = new ChildrenNode(page.children());
+			var children_node = new ChildrenNode(page);
 			self.location.append(children_node.element());
 			page.bind('entry_added', function(entry, position) {
 				if (entry.is_page()) {
@@ -391,7 +451,7 @@ Spontaneous.TopBar = (function($, S) {
 			} else {
 				root = ancestors.shift();
 			}
-			root_node = new RootNode(root);
+			root_node = new RootNode(root, this.roots);
 			nodes.push(root_node);
 			for (i=0, ii=ancestors.length; i < ii; i++) {
 				var page = ancestors[i];
@@ -468,10 +528,11 @@ Spontaneous.TopBar = (function($, S) {
 			});
 			return li.append(dom.span());
 		},
-		init: function() {
+		init: function(metadata) {
 			if (!this.get('mode')) {
 				this.set('mode', S.ContentArea.mode);
 			}
+			this.navigationView.roots(metadata.roots)
 			S.Editing.watch('page', this.page_loaded.bind(this));
 			S.Location.watch('location', this.location_loaded.bind(this));
 		},
@@ -522,6 +583,4 @@ Spontaneous.TopBar = (function($, S) {
 		}
 	});
 	return TopBar;
-})(jQuery, Spontaneous);
-
-
+}(jQuery, Spontaneous));

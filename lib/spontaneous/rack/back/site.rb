@@ -5,6 +5,7 @@ module Spontaneous::Rack::Back
     get '/?' do
       json({
         :types => SS.schema.export(user),
+        :roots => SS.roots(user, content_model),
         :user  => user.export,
         :services => (SS.config.services || [])
       })
