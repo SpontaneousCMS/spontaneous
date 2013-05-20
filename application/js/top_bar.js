@@ -36,7 +36,7 @@ Spontaneous.TopBar = (function($, S) {
 					list.append(r);
 				}
 			}
-			w.append(list);
+			frame.append(list);
 			this.wrapper = w;
 			return w;
 		}
@@ -50,12 +50,51 @@ Spontaneous.TopBar = (function($, S) {
 		width: function() { return 300; },
 		title: function() { return "Go to Page"; },
 		view:  function() {
-			var self = this, w = dom.div('#navigation-page-browser.pop-root-browser'), list = dom.div(".pages");
+			var self = this, w = dom.div('#navigation-page-browser.pop-root-browser')
+			, list = dom.div(".pages")
+			, frame = dom.div(".frame")
+			, searchArea = dom.div(".search")
+			, searchInput = dom.input({type: "search", placeholder:"Search"});
+			searchArea.append(searchInput);
+			searchInput.bind("change keyup search", self.updateSearch.bind(self, searchInput));
 			self.wrapper = w;
 			self.list = list;
-			w.append(list)
+			frame.append(list);
+			w.append(searchArea, frame)
 			this.loadPages();
 			return w;
+		},
+		updateSearch: function(input) {
+			if (!this.pages) { return; }
+
+			var self = this, boxes = {}, query = input.val(), search = new RegExp(query, "i");
+			// need to bubble up the event if the query is identical as this event
+			// is also triggered on input blur when a page is clicked.
+			if (query === this.query) {
+				return true;
+			}
+
+			this.query = query;
+			if (query === "") {
+				self.listPages(this.pages);
+				return;
+			}
+			$.each(self.pages, function(boxname, pages) {
+				var box = [];
+				for (var i = 0, ii = pages.length; i < ii; i++) {
+					var page = pages[i];
+					if (search.test(page.slug) || search.test(page.title)) {
+						box.push(page);
+					}
+				}
+				if (box.length > 0) {
+					boxes[boxname] = box;
+				}
+			});
+			self.listPages(boxes, query);
+		},
+		clearList: function() {
+			this.list.empty();
 		},
 		loadPages: function() {
 			if (this.pages) {
@@ -66,15 +105,22 @@ Spontaneous.TopBar = (function($, S) {
 			}
 		},
 		pagesLoaded: function(pages) {
+			this.pages = pages.generation;
 			this.listPages(pages.generation);
 		},
-		listPages: function(generation) {
+		listPages: function(generation, filter) {
 			var self = this, origin = self.origin, load_page = function(p) {
 				return function() {
 					self.close();
 					S.Location.load_id(p.id);
 				}
 			};
+			self.clearList();
+			if (Object.keys(generation).length === 0) {
+				var msg = filter ? "No matches for ‘"+filter+"’" : "No pages";
+				self.list.append(dom.h3().text(msg))
+				return;
+			}
 			$.each(generation, function(boxname, pages) {
 				pages.sort(slugComparator);
 				var box = dom.div(".box").append(dom.h4().text(boxname));

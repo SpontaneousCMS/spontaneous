@@ -173,11 +173,23 @@ $navigation-color: #555;
 #navigation-page-browser {
 	@include interface;
 	@include box-sizing;
-	max-height: 508px;
-	overflow: auto;
 
+	.search {
+		@include rounded-top();
+		background-color: #666;
+		padding: 2px;
+		input {
+			display: block;
+			margin: 0;
+			width: 100%;
+		}
+	}
+	.frame {
+		max-height: 508px;
+		overflow: auto;
+	}
 	.pages {
-		@include rounded();
+		@include rounded-bottom();
 		background-color: #fff;
 		color: #333;
 		font-size: 110.0%;
@@ -188,6 +200,11 @@ $navigation-color: #555;
 		}
 		h4 {
 			border-bottom: solid 1px #999;
+			color: #666;
+		}
+		h3 {
+			padding: 4px;
+			text-transform: none;
 			color: #666;
 		}
 		.page {
