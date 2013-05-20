@@ -92,9 +92,9 @@ $navigation-color: #555;
 		li.root {
 			min-width: 100px;
 		}
-		li.root.singular a {
-			background-image: none;
-			padding-right: 5px;
+		li.singular:before {
+			display: none;
+			content: "";
 		}
 	}
   #spontaneous-root {

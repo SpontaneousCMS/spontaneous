@@ -157,14 +157,15 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		element: function() {
 			var self = this, li = dom.li('.root');
+			var link = dom.a({'href': this.url}).text(this.title).data('page', this.page);
 			if (Object.keys(this.roots.roots).length === 1) {
 				li.addClass("singluar");
+			} else {
+				li.click(function(event) {
+					var browser = new RootBrowser(self.roots);
+					Spontaneous.Popover.open(event, browser);
+				});
 			}
-			var link = dom.a({'href': this.url}).text(this.title).data('page', this.page);
-			li.click(function(event) {
-				var browser = new RootBrowser(self.roots);
-				Spontaneous.Popover.open(event, browser);
-			});
 			link.click(function() {
 				var page = $(this).data('page');
 				S.Location.load_id(page.id);
