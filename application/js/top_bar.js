@@ -4,11 +4,11 @@ Spontaneous.TopBar = (function($, S) {
 	var dom = S.Dom, Ajax = S.Ajax;
 
 	var disableParent = function(el) {
-			el.hover(function() {
-				$(this).parent().addClass("disabled");
-			}, function() {
-				$(this).parent().removeClass("disabled");
-			});
+		el.hover(function() {
+			$(this).parent().addClass("disabled");
+		}, function() {
+			$(this).parent().removeClass("disabled");
+		});
 		return el;
 	};
 
