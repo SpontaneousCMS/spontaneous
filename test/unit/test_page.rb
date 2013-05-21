@@ -43,6 +43,7 @@ describe "Page" do
       class ::ErrorPage < Page; end
       ErrorPage.box :pages
     end
+
     after do
       Object.send :remove_const, :ErrorPage rescue nil
     end
@@ -81,6 +82,13 @@ describe "Page" do
       lambda { Page.create slug: "" }.must_raise Spontaneous::AnonymousRootException
     end
 
+    it "allows the creation of invisible roots without a visible root" do
+      Page.root.destroy
+      Page.root.must_equal nil
+      root = ErrorPage.create_root "error"
+      Page.root.must_equal nil
+      Site["#error"].must_equal root
+    end
   end
 
   describe "Slugs" do
