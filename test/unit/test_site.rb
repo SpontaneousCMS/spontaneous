@@ -148,6 +148,12 @@ describe "Site" do
         roots["roots"].keys.must_equal ["spontaneous.io", "#hidden"]
       end
 
+      it "returns an empty roots object if no root exists" do
+        @root.destroy
+        roots = Site.roots
+        roots['roots'].must_equal({})
+      end
+
       it "work with paths" do
         Site['/page1-1/page2-1'].must_equal @page2_1.reload
       end

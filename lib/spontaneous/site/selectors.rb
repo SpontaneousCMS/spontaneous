@@ -17,8 +17,9 @@ class Spontaneous::Site
       def roots(user = nil, content_model = Spontaneous::Content)
         domain = config.site_domain
         roots  = pages_dataset(content_model).where(depth: 0).all
-        pub, hidden   = roots.partition { |p| p.root? }
-        map = { domain => pub.first.id }
+        pub, hidden = roots.partition { |p| p.root? }
+        map = {}
+        map[domain] = pub.first.id unless pub.empty?
         hidden.each { |p| map[p.path] = p.id }
         { "public" => domain, "roots" => map }
       end
