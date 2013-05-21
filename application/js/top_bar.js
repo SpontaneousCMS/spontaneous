@@ -251,7 +251,7 @@ Spontaneous.TopBar = (function($, S) {
 		}.cache(),
 
 		each: function(block) {
-			var self = this, children = this.origin.children();
+			var self = this, children = this.origin.children;
 			for (var boxname in children) {
 				if (children.hasOwnProperty(boxname)) {
 					for (var i = 0, box = children[boxname], ii = box.length; i < ii; ++i) {
@@ -261,25 +261,11 @@ Spontaneous.TopBar = (function($, S) {
 			}
 		},
 		children: function() {
-			var self = this, children = this.origin.children();
-			var boxes = {};
-			for (var boxname in children) {
-				if (children.hasOwnProperty(boxname)) {
-					boxes[boxname] = [];
-					for (var i = 0, box = children[boxname], ii = box.length; i < ii; ++i) {
-						var child = box[i];
-						boxes[boxname].push({
-							id: child.id(),
-							slug: child.slug()
-						});
-					}
-				}
-			}
-			return boxes;
+			return this.origin.children;
 		},
 
 		status_text: function() {
-			var children = this.origin.children(), count = 0;
+			var children = this.origin.children, count = 0;
 			for (var boxname in children) {
 				if (children.hasOwnProperty(boxname)) { count += children[boxname].length; }
 			}
@@ -305,20 +291,29 @@ Spontaneous.TopBar = (function($, S) {
 				box = [];
 				self.origin.children[name] = box;
 			}
-			box.push(page);
+			// make the new entry as much like the originals as possible
+			var entry = {
+				id: page.id(),
+				children: 0,
+				slug: page.slug(),
+				title: page.title(),
+				type_id: page.content.type_id
+			};
+			box.push(entry);
 			self.update_status();
 		},
 
 		remove_page: function(page) {
 			var self = this
-			, children = self.origin.children()
+			, children = self.origin.children
 			, container = page.container.name()
+			, page_id = page.id()
 			, index = (function(children) {
 				for (var boxname in children) {
 					if (children.hasOwnProperty(boxname)) {
 						var cc = children[boxname];
 						for (var i = 0, ii = cc.length; i < ii; i++) {
-							if (cc[i].id() === page.id()) { return i; }
+							if (cc[i].id === page_id) { return i; }
 						}
 					}
 				}
@@ -457,17 +452,20 @@ Spontaneous.TopBar = (function($, S) {
 			this.roots = roots;
 		},
 		location_loaded: function(location) {
-			var children = {};
+			var self = this;
+			var children_node = new ChildrenNode(location);
+			self.location.append(children_node.element());
+			self.children_node = children_node;
 		},
 		page_loaded: function(page) {
-			var self = this;
-			var children_node = new ChildrenNode(page);
-			self.location.append(children_node.element());
+			var self = this, children_node = self.children_node;
+
 			page.bind('entry_added', function(entry, position) {
 				if (entry.is_page()) {
 					children_node.add_page(entry, position);
 				}
 			});
+
 			page.bind('removed_entry', function(entry) {
 				if (entry.is_page()) {
 					children_node.remove_page(entry);
@@ -483,8 +481,6 @@ Spontaneous.TopBar = (function($, S) {
 			page.title_field().watch('value', function(title) {
 				Spontaneous.set_browser_title(title);
 			});
-
-			self.children_node = children_node;
 		},
 		update_navigation: function(location) {
 			var nodes = [];
