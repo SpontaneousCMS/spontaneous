@@ -233,7 +233,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 		},
 
 		save_path: function() {
-			return ['/savebox', this.id()].join('/');
+			return ['/content', this.id()].join('/');
 		},
 
 		add_content: function(content_type, position) {
