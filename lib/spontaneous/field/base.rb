@@ -2,8 +2,8 @@ module Spontaneous
   module Field
     class Base
       module ClassMethods
-        def has_editor
-          define_singleton_method(:editor_class) { ui_class }
+        def has_editor(js_class = ui_class)
+          define_singleton_method(:editor_class) { js_class }
         end
 
         def register(*labels)

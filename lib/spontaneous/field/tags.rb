@@ -2,6 +2,9 @@
 
 module Spontaneous::Field
   class Tags < Base
+    # Just use the standard String editor for now.
+    # TODO: This should be replaced with a tags specific one asap.
+    has_editor "Spontaneous.Field.String"
 
     include Enumerable
 
