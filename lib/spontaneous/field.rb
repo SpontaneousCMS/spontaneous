@@ -75,6 +75,6 @@ module Spontaneous
   end
 end
 
-[:string, :long_string, :html, :file, :image, :date, :markdown, :location, :webvideo, :select].each do |type|
+[:string, :long_string, :html, :file, :image, :date, :markdown, :location, :webvideo, :select, :tags].each do |type|
   require "spontaneous/field/#{type}"
 end
