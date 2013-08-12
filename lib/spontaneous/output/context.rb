@@ -77,6 +77,10 @@ module Spontaneous::Output::Context
       content.map { |c| yield(c) } if block_given?
     end
 
+    def this
+      __target
+    end
+
     def content
       __target.iterable
     end
