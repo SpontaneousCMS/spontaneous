@@ -2,7 +2,7 @@
 // Bundle your stylesheets using Sprocket's directives and then
 // reference the stylesheets in your page using the `stylesheets` helper:
 //
-//   ${ stylesheets('css/site') }
+//   ${ stylesheets('/assets/css/site') }
 //
 // e.g.
-// = require reset
+// = require css/reset

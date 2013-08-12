@@ -8,7 +8,7 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>${ title } ­ <%= @domain %></title>
-	${ stylesheets '/css/site' }
+	${ stylesheets '/assets/css/site' }
 </head>
 <body>
   %{ block :content }
@@ -16,6 +16,6 @@
 		${ fields }
 		${ boxes  }
   %{ endblock :content }
-	${ scripts %w(/js/site) }
+	${ scripts %w(/assets/js/site) }
 </body>
 </html>
