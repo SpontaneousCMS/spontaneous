@@ -17,10 +17,25 @@ module Spontaneous::Field
       %w{image/(png|jpeg|gif)}
     end
 
+    class TemplateParameters
+      def initialize(image, args)
+        @image, @args = image, args.extract_options!
+      end
+
+      def render(format = :html, *args)
+        __render_inline(format, *args)
+      end
+
+      def __render_inline(format = :html, *args)
+        opts = @args.merge(args.extract_options!)
+        @image.render(format, opts)
+      end
+    end
+
     def self.size(name, options = {}, &process)
       self.sizes[name.to_sym] = [options, process]
       unless method_defined?(name)
-        class_eval "def #{name}; sizes[:#{name}]; end"
+        class_eval "def #{name}(*args); TemplateParameters.new(sizes[:#{name}], args); end"
       end
     end
 

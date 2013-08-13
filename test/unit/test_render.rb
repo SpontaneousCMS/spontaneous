@@ -189,6 +189,36 @@ describe "Render" do
           lines[i].must_match /<div.+?>#{field.render(:html)}<\/div>/
         end
       end
+
+      it "passes arguments onto the render" do
+        Page.field :image do
+          size :large do; end
+          size :small do; end
+        end
+        Page.layout do
+          %{${ image(width: 10, height: 50, alt: "Fish")}}
+        end
+        @page.image = "/photo.jpg"
+        output =  @page.render
+        output.must_match /width=['"]10['"]/
+        output.must_match /height=['"]50['"]/
+        output.must_match /alt=['"]Fish['"]/
+      end
+
+      it "passes arguments onto the render for image sizes" do
+        Page.field :image do
+          size :large do; end
+          size :small do; end
+        end
+        Page.layout do
+          %{${ image.large(width: 10, height: 50)}}
+        end
+        @page.image = "/photo.jpg"
+        output =  @page.render
+        output.must_match /width=['"]10['"]/
+        output.must_match /height=['"]50['"]/
+      end
+
     end
     describe "boxes" do
       before do
