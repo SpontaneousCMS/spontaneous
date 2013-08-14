@@ -69,7 +69,10 @@ $navigation-color: #555;
 				height: 31px;
 				padding-top: 8px;
 				display: block;
-			}
+				max-width: 200px;
+				white-space: nowrap;
+				overflow: hidden;
+				}
 			a:hover, select:hover {
 				color: white;
 			}

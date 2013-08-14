@@ -86,18 +86,23 @@ img.missing {
 	#page-info {
 		@extend .container-padding;
 		@include vertical-gradient(#3a3a3a, #222222);
-		height: 64px - 10px;
+		min-height: 64px - 10;
+		height: auto;
 		padding-top: 10px;
+		padding-bottom: 0px;
 		position: relative;
 		h1, h3 {
 			position: relative;
 		}
 		h1 {
+			// position: absolute;
+			// top: 0;
 			font-family: $headline-font-family;
 			font-weight: 100;
 			color: white;
 			font-size: 24px;
-			line-height: 21px;
+			line-height: 100%;
+			padding-bottom: 30px;
 			span {
 				color: #888888;
 			}
@@ -123,7 +128,7 @@ img.missing {
 		& > .path {
 			@include display-box;
 			position: absolute;
-			bottom: 12px;
+			bottom: 10px;
 		}
     .path .titlesync {
       margin-left: $unit;

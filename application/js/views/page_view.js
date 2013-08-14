@@ -54,11 +54,22 @@ Spontaneous.Views.PageView = (function($, S) {
 			return this.panel;
 		},
 		set_title: function(title) {
+			var self = this;
 			title = title || this.page.title();
 			this.title.html(title);
 			if (this.page.content.hidden) {
-				this.title.append(dom.span().text(' (hidden)'));
+				self.title.append(dom.span().text(' (hidden)'));
 			}
+			var maxHeight = 36;
+			window.setTimeout(function()  {
+				var t = self.title
+				, height = function() { return t.height();  }
+				, fs =  window.parseInt(t.css('font-size'), 10);
+				;
+				while (height() > maxHeight && fs > 10) {
+					t.css('font-size', --fs);
+				}
+			}, 0);
 		},
 		unavailable_loaded: function(response) {
 			var u = {};
