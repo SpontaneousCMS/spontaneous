@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   # s.signing_key   = '/Volumes/Keys/rubygems-garry-magnetised-net-private_key.pem'
   # s.cert_chain    = ['gem-public_cert.pem']
 
-  s.add_dependency('activesupport',   ['~> 3.2.0'])
+  s.add_dependency('activesupport',   ['~> 4.0.0'])
   s.add_dependency('coffee-script',   ['~> 2.2.0'])
   s.add_dependency('bcrypt-ruby',     ['~> 3.0.1'])
   s.add_dependency('bundler',         ['>  1.0.15'])
