@@ -17,18 +17,16 @@ module Spontaneous::Field
       %w{image/(png|jpeg|gif)}
     end
 
-    class TemplateParameters
+    class TemplateParameters < DelegateClass(S::Media::Image::Attributes)
+      attr_reader :image
+
       def initialize(image, args)
+        super(image)
         @image, @args = image, args.extract_options!
       end
 
-      def render(format = :html, *args)
-        __render_inline(format, *args)
-      end
-
-      def __render_inline(format = :html, *args)
-        opts = @args.merge(args.extract_options!)
-        @image.render(format, opts)
+      def to_html(attributes = {})
+        @image.to_html(@args.merge(attributes))
       end
     end
 
