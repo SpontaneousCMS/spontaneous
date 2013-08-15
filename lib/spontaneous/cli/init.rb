@@ -16,6 +16,7 @@ module Spontaneous::Cli
     method_option :user, :type => :string, :default => nil, :aliases => "-u", :desc => "Database admin user"
     method_option :password, :type => :string, :default => "", :aliases => "-p", :desc => "Database admin password"
     method_option :account, :type => :hash, :default => {}, :aliases => "-a", :desc => "Details of the root login"
+    method_option :user, :type => :bool, :default => true, :desc => "Enable creation of a root user"
 
     def init
       prepare :init

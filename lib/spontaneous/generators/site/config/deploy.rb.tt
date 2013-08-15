@@ -10,6 +10,7 @@ default_run_options[:pty]   = true
 ssh_options[:port]          = 22
 ssh_options[:forward_agent] = true
 
+set :domain,                "<%= @domain %>"
 set :application,           "<%= @domain %>"
 server                      "<%= @domain %>", :app, :web, :db, :media
 set :user,                  "<%= @username %>"
