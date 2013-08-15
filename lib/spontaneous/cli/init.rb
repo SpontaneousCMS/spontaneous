@@ -16,7 +16,7 @@ module Spontaneous::Cli
     method_option :user, :type => :string, :default => nil, :aliases => "-u", :desc => "Database admin user"
     method_option :password, :type => :string, :default => "", :aliases => "-p", :desc => "Database admin password"
     method_option :account, :type => :hash, :default => {}, :aliases => "-a", :desc => "Details of the root login"
-    method_option :user, :type => :bool, :default => true, :desc => "Enable creation of a root user"
+    method_option :create_user, :type => :boolean, :default => true, :desc => "Enable creation of a root user"
 
     def init
       prepare :init
@@ -36,7 +36,7 @@ module Spontaneous::Cli
       boot!
 
       # Add a root user if this is a new site
-      insert_root_user if ::Spontaneous::Permissions::User.count == 0
+      insert_root_user if (options.create_user && ::Spontaneous::Permissions::User.count == 0)
 
     end
 
