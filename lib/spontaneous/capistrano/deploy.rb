@@ -19,7 +19,7 @@ Capistrano::Configuration.instance(:must_exist).load do
     end
 
     task :symlink_application do
-      run "cd #{release_path} && ln -s `bundle show spontaneous`/application public/.spontaneous"
+      run "cd #{release_path} && ln -s `#{fetch(:bundle_cmd, 'bundle')} show spontaneous`/application public/.spontaneous"
     end
 
     # Capistrano automatically creates a tmp directory - I don't like that

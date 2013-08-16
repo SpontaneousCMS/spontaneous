@@ -53,7 +53,7 @@ Capistrano::Configuration.instance(:must_exist).load do
         dumper.dump(dump_file)
         remote_dump_file = File.join(deploy_to, dumpfilename)
         top.upload(dump_file, remote_dump_file)
-        run %(cd #{current_path} && bundle exec rake db:load dumpfile=#{remote_dump_file} )
+        run %(cd #{current_path} && #{fetch(:bundle_cmd, 'bundle')} exec rake db:load dumpfile=#{remote_dump_file} )
       end
     end
 
