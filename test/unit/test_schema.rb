@@ -117,6 +117,12 @@ describe "Schema" do
         assert a.eql?(b), "Identical IDs should pass eql? test"
       end
 
+      it "should be serializable to JSON" do
+        a = SchemaClass.schema_id
+        json = Spontaneous::JSON.encode a
+        json.must_equal "xxxxxxxxxxxx"
+      end
+
       it "be readable by content classes" do
         SchemaClass.schema_id.must_equal @uids["xxxxxxxxxxxx"]
       end

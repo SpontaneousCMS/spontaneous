@@ -129,6 +129,10 @@ module Spontaneous
         self.to_s <=> other.to_s
       end
 
+      def to_json
+        to_s
+      end
+
       def inspect
         %(#<#{self.class}:"#{@id}" => "#{reference}">)
       end
