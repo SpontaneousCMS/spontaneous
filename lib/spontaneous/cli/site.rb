@@ -130,6 +130,7 @@ module Spontaneous
         end
         # Rescue all errors to feed back to the UI
       rescue => e
+        $stderr.puts(e.message)
         send_error_notification(e)
       end
 
