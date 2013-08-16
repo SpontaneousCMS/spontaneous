@@ -120,7 +120,7 @@ describe "Schema" do
       it "should be serializable to JSON" do
         a = SchemaClass.schema_id
         json = Spontaneous::JSON.encode a
-        json.must_equal "xxxxxxxxxxxx"
+        json.must_equal '"xxxxxxxxxxxx"'
       end
 
       it "be readable by content classes" do
