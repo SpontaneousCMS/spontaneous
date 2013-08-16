@@ -205,6 +205,15 @@ Grandparent Footer
 Parent Footer
       RENDER
     end
+
+    it "keeps a reference to the render cache in included templates" do
+      # The render cache is kept on the renderer so it needs to be passed by the
+      # context#clone method
+      @context._renderer = "renderer"
+
+      output = @engine.render_template('with_includes_and_renderer', @context)
+      output.must_equal "renderer\nrenderer\n"
+    end
   end
 
   describe "conversion" do

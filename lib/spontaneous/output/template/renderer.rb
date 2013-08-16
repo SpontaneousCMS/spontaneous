@@ -30,7 +30,7 @@ module Spontaneous::Output::Template
 
     def context(output, params)
       context_class(output).new(output.content, params).tap do |context|
-        context.__renderer = self
+        context._renderer = self
       end
     end
 

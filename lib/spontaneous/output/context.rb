@@ -1,7 +1,7 @@
 
 module Spontaneous::Output::Context
   module ContextCore
-    attr_accessor :__renderer
+    attr_accessor :_renderer
 
     def navigation(depth = 1, &block)
       case depth
@@ -133,7 +133,7 @@ module Spontaneous::Output::Context
     # use of shared caches that are held by it.
     def __render_content(content)
       if content.respond_to?(:render_using)
-        content.render_using(__renderer, __format, self)
+        content.render_using(_renderer, __format, self)
       else
         content.render(__format, self)
       end
@@ -142,15 +142,15 @@ module Spontaneous::Output::Context
 
   module RenderCache
     def _render_cache_value(key)
-      __renderer.render_cache[key]
+      _renderer.render_cache[key]
     end
 
     def _render_cache_set_value(key, value)
-      __renderer.render_cache[key] = value
+      _renderer.render_cache[key] = value
     end
 
     def _render_cache_key?(key)
-      __renderer.render_cache.key?(key)
+      _renderer.render_cache.key?(key)
     end
 
     def _with_render_cache(key, &value_block)
