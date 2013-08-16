@@ -129,8 +129,8 @@ module Spontaneous
         self.to_s <=> other.to_s
       end
 
-      def to_json
-        to_s.to_json
+      def to_json(options = {})
+        to_s.to_json(options)
       end
 
       def inspect
