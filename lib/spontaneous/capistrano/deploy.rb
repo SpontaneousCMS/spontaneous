@@ -3,7 +3,7 @@ Capistrano::Configuration.instance(:must_exist).load do
   set :normalize_asset_timestamps, false
 
   set :bundle_cmd,              "bundle"
-  set :bundle_flags,            "--deployment --quiet --binstubs --shebang ruby-local-exec"
+  set :bundle_flags,            "--deployment --quiet --binstubs"
 
   # Remove tmp/pids from list of shared dirs that get symlinked into the release
   set :shared_children,   %w(public/system log)
