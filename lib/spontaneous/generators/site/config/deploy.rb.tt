@@ -10,6 +10,8 @@ default_run_options[:pty]   = true
 ssh_options[:port]          = 22
 ssh_options[:forward_agent] = true
 
+set :ruby_version,          "<%= RUBY_VERSION %>-p<%= RUBY_PATCHLEVEL %>"
+
 set :domain,                "<%= @domain %>"
 set :cms,                   "edit.<%= @domain %>"
 set :application,           "<%= @domain %>"
