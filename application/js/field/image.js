@@ -61,6 +61,7 @@ Spontaneous.Field.Image = (function($, S) {
 		currentValue: function() {
 			var pending, v = this.get('value');
 			if ((pending = v['__pending__'])) {
+				pending['path'] = pending['src'];
 				return pending['value'];
 			}
 			return v['__ui__'] || v['original'];
@@ -79,6 +80,10 @@ Spontaneous.Field.Image = (function($, S) {
 			return value;
 		},
 
+		currentFilename: function() {
+			var v = this.currentValue();
+			return v['filename'];
+		},
 		/*
 		* HACK: The async nature of image updates means that the version setting
 		* may be out of date not because of the actions of another, but because
@@ -364,8 +369,8 @@ Spontaneous.Field.Image = (function($, S) {
 			wrap.append(img, actions, info);
 
 			if (value) {
-				var s = value.path.split('/'), filename = s[s.length - 1];
-				set_info(filename, value.filesize, value.width, value.height);
+				// var s = value.path.split('/'), filename = s[s.length - 1];
+				set_info(this.currentFilename(), value.filesize, value.width, value.height);
 			}
 			this.preview_img = img;
 			return wrap;
