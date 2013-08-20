@@ -4,11 +4,41 @@ Spontaneous.Field.File = (function($, S) {
 	var FileField = new JS.Class(Spontaneous.Field.String, {
 		selected_files: false,
 
+		currentValue: function() {
+			var pending, v = this.get('value');
+			if ((pending = v['__pending__'])) {
+				return pending['value'];
+			}
+			return v;
+		},
+
+		currentFilename: function() {
+			return this.currentValue()['filename'];
+		},
+
+		currentFilesize: function() {
+			return this.currentValue()['filesize'];
+		},
+
+		currentEditValue: function() {
+			var value, pending, ui, v = this.get('value');
+			if ((pending = v['__pending__'])) {
+				return pending['value'];
+			}
+			value = v['original'];
+			if ((ui = v['__ui__'])) {
+				value['path'] = value['src'];
+				value['src'] = ui['src'];
+			}
+			return value;
+		},
+
 		preview: function() {
 			Spontaneous.UploadManager.register(this);
 			var self = this
-			, value = this.get('value')
-			, filename = this.filename(value);
+			, value = this.currentValue()
+			, filename = this.currentFilename();
+			console.log('value, filename', value, filename);
 			var wrap = dom.div('.file-field');
 			var dropper = dom.div('.file-drop');
 
@@ -61,7 +91,7 @@ Spontaneous.Field.File = (function($, S) {
 				}
 			};
 			if (value) {
-				set_info(value.html, this.filename(value), value.filesize);
+				set_info(value.html, this.currentFilename(), this.currentFilesize());
 			}
 
 			dropper.append(this.progress_bar().parent());

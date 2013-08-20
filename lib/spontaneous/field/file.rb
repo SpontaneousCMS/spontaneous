@@ -11,7 +11,7 @@ module Spontaneous::Field
     end
 
     def outputs
-      [:html, :filesize, :filename]
+      [:html, :path, :filesize, :filename]
     end
 
     def pending_value=(value)
@@ -30,7 +30,7 @@ module Spontaneous::Field
     end
 
     def serialize_pending_file(file)
-      { :tempfile => file.path, :type => file.mimetype, :filename => file.filename, :src => file.url }
+      { :tempfile => file.path, :type => file.mimetype, :filename => file.filename, :filesize => file.filesize, :src => file.url }
     end
 
     def storage_headers(content_type, filename)
@@ -87,9 +87,13 @@ module Spontaneous::Field
       end
     end
 
-    def generate_html(input)
+    def generate_path(input)
       return input if input.is_a?(::String)
       input.url
+    end
+
+    def generate_html(input)
+      generate_path(input)
     end
 
     def export(user = nil)

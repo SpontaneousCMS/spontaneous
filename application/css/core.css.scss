@@ -578,13 +578,14 @@ img.missing {
 	}
 }
 
-.editing-panel .field-group .fieldtypes-filefield {
+.editing-panel .field-group .field.field-file {
 	.value {
 		// padding: 0;
 	}
 	.file-field {
 		// height: 36px;
 		cursor: pointer;
+		line-height: 1.3em;
 
 		.file-drop:hover {
 			// border-color: $action;
@@ -603,6 +604,10 @@ img.missing {
 			display: block;
 			padding-left: 6px;
 			padding-right: 6px;
+		}
+		.choose + .filename,
+		.choose + .filename + .filesize {
+			position:relative;
 		}
 		&:hover .choose {
 			@include button;
