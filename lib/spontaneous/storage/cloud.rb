@@ -73,7 +73,7 @@ module Spontaneous::Storage
     end
 
     def join_path(path)
-      path.join("-")
+      path.join("/")
     end
 
     def local?

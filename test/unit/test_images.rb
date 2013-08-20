@@ -276,8 +276,8 @@ describe "Images" do
       end
 
       it "have full urls for all the src attributes" do
-        @image.original.src.must_equal "http://media.example.com/00234-0010-rose.jpg"
-        @image.thumbnail.src.must_equal "http://media.example.com/00234-0010-rose.thumbnail.jpg"
+        @image.original.src.must_equal "http://media.example.com/00234/0010/rose.jpg"
+        @image.thumbnail.src.must_equal "http://media.example.com/00234/0010/rose.thumbnail.jpg"
       end
     end
   end

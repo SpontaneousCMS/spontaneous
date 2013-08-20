@@ -105,7 +105,7 @@ describe "Storage" do
       end
 
       it "have the correct base url" do
-        @storage.public_url(@media_path).must_equal "https://media.example.com.s3.amazonaws.com/0003-0567-rose.jpg"
+        @storage.public_url(@media_path).must_equal "https://media.example.com.s3.amazonaws.com/0003/0567/rose.jpg"
       end
 
 
@@ -113,7 +113,7 @@ describe "Storage" do
         storage = Spontaneous::Storage::Cloud.new(@aws_credentials.merge({
           :public_host => "http://media.example.com",
         }), @bucket_name)
-        storage.public_url(@media_path).must_equal "http://media.example.com/0003-0567-rose.jpg"
+        storage.public_url(@media_path).must_equal "http://media.example.com/0003/0567/rose.jpg"
       end
     end
   end

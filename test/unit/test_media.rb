@@ -51,7 +51,7 @@ describe "Media" do
     end
     it "return an absolute path for the url" do
       file = Spontaneous::Media::File.new(@content, "file name.txt")
-      file.url.must_equal "http://media.example.com/00099-0853-file-name.txt"
+      file.url.must_equal "http://media.example.com/00099/0853/file-name.txt"
     end
 
     it "create a new instance with a different name" do
@@ -59,12 +59,12 @@ describe "Media" do
       file2 = file1.rename("another.jpg")
       file2.owner.must_equal file1.owner
       file2.mimetype.must_equal "image/jpeg"
-      file2.url.must_equal "http://media.example.com/00099-0853-another.jpg"
+      file2.url.must_equal "http://media.example.com/00099/0853/another.jpg"
     end
 
     it "be able to copy a file into place if passed the path of an existing file" do
       @storage.bucket.files.expects(:create).with{ |args|
-        args[:key] == "00099-0853-file-name.txt" &&
+        args[:key] == "00099/0853/file-name.txt" &&
           args[:body].is_a?(File) &&
           args[:public] == true
       }
@@ -76,7 +76,7 @@ describe "Media" do
 
     it "be able to copy a file into place if passed the file handle of an existing file" do
       @storage.bucket.files.expects(:create).with{ |args|
-        args[:key] == "00099-0853-file-name.txt" &&
+        args[:key] == "00099/0853/file-name.txt" &&
           args[:body].is_a?(File) &&
           args[:public] == true
       }
@@ -90,7 +90,7 @@ describe "Media" do
 
     it "provide an open method that writes files to the correct location" do
       @storage.bucket.files.expects(:create).with() { |args|
-        args[:key] == "00099-0853-file-name.txt" &&
+        args[:key] == "00099/0853/file-name.txt" &&
           (args[:body].is_a?(File) || args[:body].is_a?(Tempfile)) &&
           args[:public] == true
       }
