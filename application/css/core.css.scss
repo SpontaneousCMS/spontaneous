@@ -576,6 +576,12 @@ img.missing {
 			display: none;
 		}
 	}
+	// highlight filename when hovering over filedrop area
+	// too confusing to have the filenames active though as it
+	// would interfere with the 'click to edit' thing
+	// .file-drop:hover + .filename {
+	// 	color: $action;
+	// }
 }
 
 .editing-panel .field-group .field.field-file {
