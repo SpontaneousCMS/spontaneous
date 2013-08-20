@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require File.expand_path('../../test_helper', __FILE__)
+require 'fog'
 
 describe "Fields" do
 
@@ -1004,6 +1005,27 @@ describe "Fields" do
       @field.value.must_match %r{/media/.+/vimlogo.pdf$}
       @field.filename.must_equal "vimlogo.pdf"
       @field.filesize.must_equal 2254
+    end
+
+    describe "with cloud storage" do
+      before do
+        ::Fog.mock!
+      @aws_credentials = {
+        :provider=>"AWS",
+        :aws_secret_access_key=>"SECRET_ACCESS_KEY",
+        :aws_access_key_id=>"ACCESS_KEY_ID"
+      }
+        @storage = S::Storage::Cloud.new(@aws_credentials, "media.example.com")
+        @site.expects(:storage).returns(@storage)
+      end
+
+      it "sets the content-disposition header if defined as an 'attachment'" do
+        prototype = @content_class.field :attachment, :file, attachment: true
+        field = @instance.attachment
+        path = File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__)
+        @storage.expects(:copy).with(path, is_a(Array), { content_type: "application/pdf", content_disposition: 'attachment; filename=vimlogo.pdf'})
+        field.value = path
+      end
     end
   end
   describe "Date fields" do

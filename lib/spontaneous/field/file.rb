@@ -33,12 +33,20 @@ module Spontaneous::Field
       { :tempfile => file.path, :type => file.mimetype, :filename => file.filename, :src => file.url }
     end
 
+    def storage_headers(content_type, filename)
+      headers = { content_type: content_type }
+      if prototype.options[:attachment]
+        headers.update(content_disposition: %(attachment; filename=#{Rack::Utils.escape(filename)}))
+      end
+      headers
+    end
+
     def preprocess(image)
       file, filename, mimetype = fileinfo(image)
       return "" if file.nil?
       return file unless ::File.exist?(file)
 
-      media_file = Spontaneous::Media::File.new(owner, filename, mimetype)
+      media_file = Spontaneous::Media::File.new(owner, filename, storage_headers(mimetype, filename))
       media_file.copy(file)
       set_unprocessed_value(media_file.path)
       media_file
@@ -46,7 +54,7 @@ module Spontaneous::Field
 
     def process_upload(value)
       file, filename, mimetype = fileinfo(value)
-      media_file = Spontaneous::Media::TempFile.new(self, filename, mimetype)
+      media_file = Spontaneous::Media::TempFile.new(self, filename, storage_headers(mimetype, filename))
       media_file.copy(file)
       media_file
     end

@@ -8,7 +8,7 @@ module Spontaneous::Storage
       @root, @url_path, @accepts = ::File.expand_path(root_directory), url_path, accepts
     end
 
-    def copy(existing_file, media_path, mimetype)
+    def copy(existing_file, media_path, headers = {})
       dest_path = create_absolute_path(media_path)
       copy_file(existing_file, dest_path)
       set_permissions(dest_path)
@@ -33,7 +33,7 @@ module Spontaneous::Storage
       end
     end
 
-    def open(relative_path, mimetype, mode, &block)
+    def open(relative_path, headers, mode, &block)
       dest_path = create_absolute_path(relative_path)
       File.open(dest_path, mode) do |f|
         f.binmode

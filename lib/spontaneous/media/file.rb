@@ -8,22 +8,35 @@ module Spontaneous::Media
 
     attr_reader :filename, :owner, :source
 
-    def initialize(owner, filename, mimetype = nil)
-      @owner, @filename, @mimetype = owner, Spontaneous::Media.to_filename(filename), mimetype
+    def initialize(owner, filename, headers = {})
+      headers = { content_type: headers } if headers.is_a?(String)
+      @owner, @filename, @headers = owner, Spontaneous::Media.to_filename(filename), headers
     end
 
+    # Create a new File instance with a new name.
+    # This new file instance should take its content type from the new name
+    # because one of the uses of this is during image size creation where we
+    # might be converting from one format to another.
     def rename(new_filename)
-      self.class.new(owner, new_filename, nil)
+      headers = storage_headers
+      headers.delete(:content_type)
+      self.class.new(owner, new_filename, headers)
     end
 
     def open(mode = 'wb', &block)
-      storage.open(storage_path, mimetype, mode, &block)
+      storage.open(storage_path, storage_headers, mode, &block)
     end
 
     def copy(existing_file)
       @source = existing_file.respond_to?(:path) ? existing_file.path : existing_file
-      storage.copy(existing_file, storage_path, mimetype)
+      storage.copy(existing_file, storage_path, storage_headers)
       self
+    end
+
+    def storage_headers
+      headers = @headers.dup
+      headers[:content_type] ||= mimetype
+      headers
     end
 
     def url
@@ -31,7 +44,7 @@ module Spontaneous::Media
     end
 
     def mimetype
-      @mimetype ||= ::Rack::Mime.mime_type(ext)
+      @mimetype ||= ( @headers[:content_type] || ::Rack::Mime.mime_type(ext) )
     end
 
     def ext

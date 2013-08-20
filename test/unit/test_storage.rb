@@ -46,7 +46,7 @@ describe "Storage" do
       }
       ::Fog.mock!
       @connection = Fog::Storage.new(@aws_credentials)
-      @connection.directories.create(:key => @bucket_name)
+      @bucket = @connection.directories.create(:key => @bucket_name)
       @site.paths.add :config, File.expand_path(@config_dir / "cloud", __FILE__)
       @site.load_config!
       # sanity check
@@ -73,31 +73,35 @@ describe "Storage" do
       end
 
       it "have the correct mimetype" do
-        file = @storage.copy(@existing_file, @media_path, "image/jpeg")
+        file = @storage.copy(@existing_file, @media_path, { content_type: "image/jpeg" })
         file.content_type.must_equal "image/jpeg"
       end
 
       it "is given a far future cache value" do
         now = DateTime.now
         DateTime.stubs(:now).returns(now)
-        file = @storage.copy(@existing_file, @media_path, "image/jpeg")
+        file = @storage.copy(@existing_file, @media_path, { content_type: "image/jpeg" })
         file.cache_control.must_equal "max-age=31557600, public"
       end
 
       it "be set as publicly visible" do
-        file = @storage.copy(@existing_file, @media_path, "image/jpeg")
+        file = @storage.copy(@existing_file, @media_path, { content_type: "image/jpeg" })
         acl = file.connection.get_object_acl(file.directory.key, file.key).body['AccessControlList']
         perms = acl.detect {|grant| grant['Grantee']['URI'] == 'http://acs.amazonaws.com/groups/global/AllUsers' }
         perms["Permission"].must_equal "READ"
       end
 
+      it "sets any additional headers passed to the copy method" do
+        file = @storage.copy(@existing_file, @media_path, { content_type: "image/jpeg", content_disposition: "attachment; filename='something.jpg'" })
+        file.content_disposition.must_equal "attachment; filename='something.jpg'"
+      end
     end
 
     describe "public urls" do
       before do
         existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
         @media_path = %w(0003 0567 rose.jpg)
-        @storage.copy(existing_file, @media_path, "image/jpeg")
+        @storage.copy(existing_file, @media_path, { content_type: "image/jpeg" })
       end
 
       it "have the correct base url" do

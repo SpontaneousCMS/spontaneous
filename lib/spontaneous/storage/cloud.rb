@@ -46,24 +46,23 @@ module Spontaneous::Storage
       @public_host = @config.delete(:public_host)
     end
 
-    def open(relative_path, mimetype, mode, &block)
+    def open(relative_path, headers, mode, &block)
       Tempfile.open("spontaneous-cloud") do |tempfile|
         tempfile.binmode
         block.call(tempfile)
         tempfile.rewind
-        self.copy(tempfile, relative_path, mimetype)
+        self.copy(tempfile, relative_path, headers)
       end
     end
 
-    def copy(existing_file, media_path, mimetype)
+    def copy(existing_file, media_path, headers = {})
       params = {
         :key => join_path(media_path),
         :idempotent => false,
         :body => existing_file,
         :public => true,
         :cache_control => "max-age=#{1.year.to_i}, public",
-        :content_type => mimetype
-      }
+      }.merge(headers)
       # Reopen file handles to catch updated contents
       src_path = existing_file.respond_to?(:read) ? existing_file.path : existing_file
       File.open(src_path, "rb") do |src|
