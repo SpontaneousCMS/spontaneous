@@ -38,7 +38,6 @@ Spontaneous.Field.File = (function($, S) {
 			var self = this
 			, value = this.currentValue()
 			, filename = this.currentFilename();
-			console.log('value, filename', value, filename);
 			var wrap = dom.div('.file-field');
 			var dropper = dom.div('.file-drop');
 
@@ -267,7 +266,6 @@ Spontaneous.Field.File = (function($, S) {
 			this.processed_value();
 		},
 		set_edited_value: function(value) {
-			console.log('set_edited_value', value, this.edited_value(), this.original_value())
 			if (value === this.edited_value()) {
 				// do nothing
 			} else {
