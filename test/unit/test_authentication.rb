@@ -353,7 +353,7 @@ describe "Authentication" do
     end
 
     it "be able to view the preview" do
-      get "/"
+      get "/", preview: true
       assert last_response.ok?
     end
 
