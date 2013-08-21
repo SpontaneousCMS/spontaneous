@@ -11,9 +11,19 @@ module Spontaneous::Rack::Back
       end
     end
 
+    # Redirect to the edit UI if a preview page is being accessed directly
+    def ensure_edit_preview(path)
+      referer = env['HTTP_REFERER']
+      return true if Spontaneous.development? || referer || params.key?('preview')
+      home = find_page_by_path(path)
+      redirect "#{NAMESPACE}/#{home.id}/preview"
+      false
+    end
+
     # Forward all GETs to the page resolution method
     get '*' do
-      render_path(params[:splat][0])
+      path = params[:splat][0]
+      ensure_edit_preview(path) && render_path(path)
     end
 
     # Forward all POSTs to the page resolution method

@@ -1020,15 +1020,36 @@ describe "Back" do
       @renderer = Spontaneous::Output.preview_renderer
     end
 
-    it "return rendered root page" do
+    def get_preview(path, params = {}, env = {})
+      get path, params, env.merge("HTTP_REFERER" => "http://example.com/@spontaneous/234/edit")
+    end
+
+    it "redirects to /@spontaneous unless called from the editing UI" do
       get "/"
+      assert last_response.status == 302
+      last_response.headers['Location'].must_equal "http://example.org/@spontaneous/#{home.id}/preview"
+    end
+
+    it "redirects to the page's preview unless called from the editing UI" do
+      get project1.path
+      assert last_response.status == 302
+      last_response.headers['Location'].must_equal "http://example.org/@spontaneous/#{project1.id}/preview"
+    end
+
+    it "shows the page without UI if the 'preview' parameter is set" do
+      get project1.path, preview: true
+      assert last_response.status == 200
+    end
+
+    it "return rendered root page" do
+      get_preview "/"
       assert last_response.ok?
       last_response.content_type.must_equal "text/html;charset=utf-8"
       assert_equal @renderer.render(home.output(:html)), last_response.body
     end
 
     it "return rendered child-page" do
-      get "/project1"
+      get_preview "/project1"
       assert last_response.ok?
       last_response.content_type.must_equal "text/html;charset=utf-8"
       assert_equal @renderer.render(project1.output(:html)), last_response.body
@@ -1036,7 +1057,7 @@ describe "Back" do
 
     it "return alternate formats" do
       Project.add_output :js
-      get "/project1.js"
+      get_preview "/project1.js"
       assert last_response.ok?
       last_response.content_type.must_equal "application/javascript;charset=utf-8"
       assert_equal @renderer.render(project1.output(:js)), last_response.body
@@ -1044,7 +1065,7 @@ describe "Back" do
 
     it "allow pages to have css formats" do
       Project.add_output :css
-      get "/project1.css"
+      get_preview "/project1.css"
       assert last_response.ok?
       last_response.content_type.must_equal "text/css;charset=utf-8"
       assert_equal @renderer.render(project1.output(:css)), last_response.body
@@ -1052,7 +1073,7 @@ describe "Back" do
 
     it "return cache-busting headers" do
       ["/project1", "/"].each do |path|
-        get path
+        get_preview path
         assert last_response.ok?
         last_response.headers['Expires'].must_equal @now.to_formatted_s(:rfc822)
         last_response.headers['Last-Modified'].must_equal @now.to_formatted_s(:rfc822)
@@ -1061,7 +1082,7 @@ describe "Back" do
 
     it "return cache-control headers" do
       ["/project1", "/"].each do |path|
-        get path
+        get_preview path
         assert last_response.ok?
         ["no-store", 'no-cache', 'must-revalidate', 'max-age=0'].each do |p|
           last_response.headers['Cache-Control'].must_match %r(#{p})
@@ -1091,10 +1112,10 @@ describe "Back" do
     end
 
     it "previews hidden pages" do
-      get "/project1"
+      get_preview "/project1"
       body = last_response.body
       project1.hide!
-      get "/project1"
+      get_preview "/project1"
       assert last_response.ok?, "Expected 200 got #{last_response.status}"
       last_response.body.must_equal body
     end
