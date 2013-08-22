@@ -603,6 +603,20 @@ describe "Search" do
       FileUtils.rm_r(db_path)
     end
 
+    it "returns pages based on the contents of their boxes" do
+      db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
+      S::Site.stubs(:published_revision).returns(@revision)
+      db = @index1.create_db(@revision)
+      db << @page1
+      db << @page2
+      db << @page3
+      db.close
+
+      results = @index1.search('h value')
+      results.to_a.first.id.must_equal @page1.id
+    end
+
+
     it "respect weighting factors given to fields" do
       db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
       S::Site.stubs(:published_revision).returns(@revision)
