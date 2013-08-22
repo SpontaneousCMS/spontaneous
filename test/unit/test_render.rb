@@ -423,8 +423,13 @@ describe "Render" do
       class ::PreviewRender < Page
         field :title, :string
       end
+      class ::Image < Piece
+        field :src
+        template :html, "${ src }/ q={{ query }}"
+      end
+
       PreviewRender.style :inline
-      PreviewRender.box :images
+      PreviewRender.box(:images) { allow :Image }
       PreviewRender.field :description, :markdown
       @page = PreviewRender.new(:title => "PAGE", :description => "DESCRIPTION")
       @page.save
@@ -446,6 +451,15 @@ describe "Render" do
         @now = Time.now
         ::Time.stubs(:now).returns(@now)
         @renderer.render_string('${title} {{ Time.now }}', @page.output(:html), {}).must_equal "PAGE #{@now.to_s}"
+      end
+
+      it "renders all includes before calling the request render stage" do
+        PreviewRender.layout do
+          "q={{ query }} <${ images }>"
+        end
+        @page.images << Image.new(src: 'fish.jpg')
+        result = @page.render_using(@renderer, :html, { query: 'frog'})
+        result.must_equal "q=frog <fish.jpg/ q=frog>"
       end
 
 #       it "render all tags & include preview edit markers" do

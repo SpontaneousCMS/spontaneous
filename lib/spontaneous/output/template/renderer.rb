@@ -30,8 +30,12 @@ module Spontaneous::Output::Template
 
     def context(output, params)
       context_class(output).new(output.content, params).tap do |context|
-        context._renderer = self
+        context._renderer = renderer_for_context
       end
+    end
+
+    def renderer_for_context
+      self
     end
 
     def context_class(output)
@@ -146,8 +150,12 @@ module Spontaneous::Output::Template
       request_renderer.render_string(rendered, output, params)
     end
 
+    def renderer_for_context
+      @renderer_for_context ||= PublishRenderer.new(@cache)
+    end
+
     def request_renderer
-      @request_renderer ||= RequestRenderer.new
+      @request_renderer ||= RequestRenderer.new(@cache)
     end
   end
 end
