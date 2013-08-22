@@ -461,7 +461,7 @@ describe "Front" do
             page
           end
           get '/format' do
-            format.to_s
+            output.to_s
           end
         end
 
@@ -474,6 +474,20 @@ describe "Front" do
           post '/:status' do
             page.status = params[:status]
             page
+          end
+        end
+
+        SitePage.controller :search do
+          get '/render/:query' do
+            render({ results: %w(a b c)})
+          end
+
+          get '/renderpapeparams/:query' do
+            render page, { results: %w(a b c)}
+          end
+
+          get '/renderoutput/:query' do
+            render page, :xml, { results: %w(a b c)}
           end
         end
 
@@ -559,7 +573,7 @@ describe "Front" do
         about.action_url(:status, "/good").must_equal "/about/@status/good"
       end
 
-      it "pass the format onto the page if the action returns it to the render call" do
+      it "pass the output onto the page if the action returns it to the render call" do
         about.class.outputs :html, :xml
         about.class.layout do
           "${path}.${__format}"
@@ -592,6 +606,28 @@ describe "Front" do
         get "/about/@test2/block"
         assert last_response.ok?
         last_response.body.must_equal "Block"
+      end
+
+      it "allows passing parameters to the page render" do
+        about.class.outputs :html, :xml
+        about.class.layout do
+          "{{results.join(',')}}"
+        end
+
+        get "/about/@search/render/query.xml"
+        assert last_response.ok?, "Expected 200 OK but got #{last_response.status}"
+        last_response.body.must_equal "a,b,c"
+      end
+
+      it "allows passing an output to the page render" do
+        about.class.outputs :html, :xml
+        about.class.layout do
+          "{{results.join(',')}}"
+        end
+
+        get "/about/@search/renderoutput/query"
+        assert last_response.ok?, "Expected 200 OK but got #{last_response.status}"
+        last_response.body.must_equal "a,b,c"
       end
 
       describe "overriding base controller class" do

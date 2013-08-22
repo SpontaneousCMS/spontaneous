@@ -191,14 +191,18 @@ module Spontaneous
       end
 
       def render_page_with_output
-        return not_found! if     @page.nil?
-        return not_found! unless @page.provides_output?(@output)
+        _render_page_with_output(@page, @output, @template_params)
+      end
 
-        output = @page.output(@output)
+      def _render_page_with_output(page, output, template_params)
+        return not_found! if     page.nil?
+        return not_found! unless page.provides_output?(output)
+
+        output = page.output(output)
 
         if output.public?
           content_type(output.mime_type)
-          render_page(@page, output, @template_params)
+          render_page(page, output, template_params)
         else
           not_found!
         end
