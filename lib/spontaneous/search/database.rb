@@ -46,6 +46,14 @@ module Spontaneous::Search
       @database ||= open_database
     end
 
+    def stemmer
+      @index.stemmer
+    end
+
+    def stopper
+      @index.stopper
+    end
+
     def open_database
       XapianFu::XapianDb.new(xapian_options)
     end
