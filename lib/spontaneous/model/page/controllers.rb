@@ -45,8 +45,8 @@ module Spontaneous::Model::Page
 
     # generate an action URL of the form
     # <path to page>/@<action namespace>/<action path>
-    def action_url(namespace, path)
-      [self.path, "#{ACTION_SEPARATOR}#{namespace}", path].join(S::Constants::SLASH).gsub(%r{//}, '/')
+    def action_url(namespace, path = nil)
+      [self.path, "#{ACTION_SEPARATOR}#{namespace}", path].compact.join(S::Constants::SLASH).gsub(%r{//}, '/')
     end
   end # Controllers
 end

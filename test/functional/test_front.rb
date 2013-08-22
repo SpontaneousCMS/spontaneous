@@ -573,6 +573,10 @@ describe "Front" do
         about.action_url(:status, "/good").must_equal "/about/@status/good"
       end
 
+      it "be able to generate urls for actions with no path" do
+        about.action_url(:status).must_equal "/about/@status"
+      end
+
       it "pass the output onto the page if the action returns it to the render call" do
         about.class.outputs :html, :xml
         about.class.layout do
