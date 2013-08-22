@@ -298,6 +298,17 @@ describe "Search" do
       assert prototype_a.in_index?(@index3)
     end
 
+    it "must be included in all indexes with if passed a hash with no name key" do
+      prototype_a = PageClass1.field :a, :index => {weight: 16}
+      assert prototype_a.in_index?(@index1)
+      assert prototype_a.in_index?(@index2)
+      assert prototype_a.in_index?(@index3)
+      [:one, :two, :three].each do |name|
+        index = S::Site.indexes[name]
+        index.fields[PageClass1.fields[:a].schema_id.to_s][:weight].must_equal 16
+      end
+    end
+
     it "be included in indexes referenced by name" do
       prototype_a = PageClass1.field :a, :index => [:one, :two]
       assert prototype_a.in_index?(@index1)
