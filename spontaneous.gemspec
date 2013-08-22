@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   s.add_dependency('coffee-script',   ['~> 2.2.0'])
   s.add_dependency('bcrypt-ruby',     ['~> 3.0.1'])
   s.add_dependency('bundler',         ['>  1.0.15'])
-  s.add_dependency('cutaneous',       ['~> 0.1.3'])
+  s.add_dependency('cutaneous',       ['~> 0.1.5'])
   s.add_dependency('erubis',          ['~> 2.6'])
   s.add_dependency('fog',             ['~> 1.6.0'])
   s.add_dependency('foreman',         ['~> 0.60.2'])
