@@ -88,7 +88,7 @@ module Spontaneous::Search
 
     def find_index(name)
       index = S::Site.indexes[name]
-      logger.warn("Invalid index :#{opts} for field #{@prototype.owner}.#{@prototype.name}") unless index
+      logger.warn("Invalid index :#{name} for field #{@prototype.owner}.#{@prototype.name}") unless index
       index
     end
   end
