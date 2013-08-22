@@ -259,7 +259,7 @@ describe "Publishing" do
       File.read("#{@site.revision_root}/00003/dynamic/index.rtf.cut").must_equal "RICH!\n"
     end
 
-    it "run the content revision cleanup task after the revision is live xxx" do
+    it "run the content revision cleanup task after the revision is live" do
       Content.expects(:cleanup_revisions).with(@revision+1, 8)
       Site.publish_all
     end

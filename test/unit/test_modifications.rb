@@ -328,7 +328,7 @@ describe "Modifications" do
     mods.length.must_equal 0
   end
 
-  it "have an empty modification if the visibility has been reverted to original value xxx" do
+  it "have an empty modification if the visibility has been reverted to original value" do
     stub_time(@now+3600)
     page = Page.first :uid => "1"
     page.things.first.hide!

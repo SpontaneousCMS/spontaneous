@@ -392,7 +392,7 @@ describe "Styles" do
           @piece.dongles.render.must_equal "named2.html.cut\n"
         end
 
-        it "use styles assigned in a subclass xxx" do
+        it "use styles assigned in a subclass" do
           ::TemplateSubClass = Class.new(TemplateClass)
           ::TemplateSubSubClass = Class.new(TemplateSubClass)
 

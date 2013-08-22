@@ -503,7 +503,7 @@ describe "Revisions" do
       added.last_published_at.must_be_nil
     end
 
-    it "not set publishing dates if exception raised in passed block xxx" do
+    it "not set publishing dates if exception raised in passed block" do
       Content.first.first_published_at.must_be_nil
       begin
         Revision.create(Content, @revision) do

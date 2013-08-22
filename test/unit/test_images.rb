@@ -116,7 +116,7 @@ describe "Images" do
         end
       end
 
-      describe "optimization xxx" do
+      describe "optimization" do
         it "should be enabled by default" do
           @image.value = @origin_image.to_s
         end
@@ -169,7 +169,7 @@ describe "Images" do
         after do
         end
 
-        it "have image dimension and filesize information xxx" do
+        it "have image dimension and filesize information" do
           @image.src.must_equal "/media/00234/0010/rose.jpg"
           @image.width.must_equal 400
           @image.height.must_equal 533

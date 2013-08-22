@@ -87,7 +87,7 @@ describe "Serialisation" do
     it "include the title field name in the serialisation of page types" do
       SerialisedPage.export(nil)[:title_field].must_equal 'title'
     end
-    it "use JS friendly names for type keys xxx" do
+    it "use JS friendly names for type keys" do
       class ::SerialisedPage
         class InnerClass < Piece
         end
