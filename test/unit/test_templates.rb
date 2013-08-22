@@ -118,12 +118,12 @@ ${ a[:a] }${ a[:b] -}
     end
 
     it "a render unescaped expressions" do
-      output = @engine.render_string('<html><title>{{title}}</title>{{unsafe}}</html>', @context)
+      output = @engine.render_string('<html><title>{{title}}</title>{{{unsafe}}}</html>', @context)
       output.must_equal "<html><title>THE TITLE</title><script>alert('bad')</script></html>"
     end
 
     it "render escaped expressions" do
-      output = @engine.render_string('<html><title>{$ unsafe $}</title></html>', @context)
+      output = @engine.render_string('<html><title>{{ unsafe }}</title></html>', @context)
       output.must_equal "<html><title>#{ERB::Util.html_escape(@context.unsafe)}</title></html>"
     end
 
