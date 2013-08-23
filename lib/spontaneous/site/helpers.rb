@@ -43,7 +43,7 @@ class Spontaneous::Site
             helpers[format.to_sym] << helper_module
           end
         end
-        Spontaneous::Site::Helpers.const_set(module_name, helper_module)
+        # Spontaneous::Site::Helpers.const_set(module_name, helper_module)
         def helper_module.__finalize
           Spontaneous::Site.unregister_helper(self)
         end
