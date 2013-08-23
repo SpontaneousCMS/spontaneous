@@ -12,17 +12,9 @@ module Spontaneous::Collections
       @store = Hash.new { |hash, key| hash[key] = [] }
       (piece_store || []).each do |data|
         id = data[0]
-        entry = \
-          if data.length == 2
-            page = @owner._pieces.detect { |piece| piece.id == id }
-            if page
-              Spontaneous::PagePiece.new(@owner, page, data[1])
-            else
-              nil
-            end
-          else
-            @owner._pieces.detect { |piece| piece.id == id }
-          end
+        entry = if (content = @owner._pieces.detect { |piece| piece.id == id })
+          content.page? ? Spontaneous::PagePiece.new(@owner, content, data[1]) : content
+        end
         # if the piece/page has been deleted or is invisible
         # then we just want to silently skip it
         if entry
