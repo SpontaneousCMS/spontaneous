@@ -438,6 +438,7 @@ describe "Render" do
 
     after do
       Object.send(:remove_const, :PreviewRender)
+      Object.send(:remove_const, :Image)
     end
 
     describe "Preview render" do
