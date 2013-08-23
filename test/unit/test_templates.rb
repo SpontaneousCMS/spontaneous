@@ -110,6 +110,12 @@ ${ a[:a] }${ a[:b] -}
       TEMPLATE
       output.must_equal "ab"
     end
+
+    it "can convert a first-pass template to a second-pass template xxx" do
+      input = "${ template 'content/template' }"
+      output = @engine.render_string(input, @context)
+      output.must_equal "<html><title>{{{ title }}}</title></html>\n"
+    end
   end
 
   describe "Second render" do

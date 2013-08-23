@@ -111,6 +111,17 @@ module Spontaneous::Output::Context
       __target.owner.pieces.last == self
     end
 
+    # template takes an existing first-pass template, converts it to a second pass template
+    # and then returns the result for inclusion.
+    # This lets you share templates between the publish step and the request step.
+    # Useful for things like search results where you want to list the results using the same
+    # layout that you used in the static list
+    def template(template_path)
+      __loader.template(template_path).convert(Spontaneous::Output::Template::RequestSyntax)
+    end
+
+    alias_method :defer, :template
+
     def __format
       __loader.format
     end
