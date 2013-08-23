@@ -39,7 +39,11 @@ module Spontaneous::Output::Template
     end
 
     def context_class(output)
-      context_cache[output.name] ||= generate_context_class(output)
+      if Spontaneous.development?
+        generate_context_class(output)
+      else
+        context_cache[output.name] ||= generate_context_class(output)
+      end
     end
 
     def context_cache

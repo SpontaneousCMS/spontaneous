@@ -7,8 +7,13 @@ class Spontaneous::Site
     module ClassMethods
       def helper(*formats, &block)
         helper_module = Module.new(&block)
-        register_helper(helper_module, *formats.flatten)
+        register_helper(helper_module, helper_module_name(caller), *formats.flatten)
         helper_module
+      end
+
+      def helper_module_name(_caller)
+        path = _caller.first.split(':').first.split('/')[-5..-1]
+        path.join('_').gsub(/[^A-Za-z_]/, '_').gsub(/_+/, '_').gsub(/^_+/, '').capitalize
       end
 
       # Private: Generates a module including all helper methods for the requested format(s)
@@ -28,14 +33,26 @@ class Spontaneous::Site
         helper_module
       end
 
-      def register_helper(helper_module, *formats)
-        site = instance
+      def register_helper(helper_module, module_name, *formats)
+        site    = instance
+        helpers = site.registered_helpers
         if formats.empty?
-          site.registered_helpers[:*] << helper_module
+           helpers[:*] << helper_module
         else
           formats.each do |format|
-            site.registered_helpers[format.to_sym] << helper_module
+            helpers[format.to_sym] << helper_module
           end
+        end
+        Spontaneous::Site::Helpers.const_set(module_name, helper_module)
+        def helper_module.__finalize
+          Spontaneous::Site.unregister_helper(self)
+        end
+      end
+
+      def unregister_helper(helper_module)
+        helpers = instance.registered_helpers
+        helpers.each do |format, helpers|
+          helpers.delete(helper_module)
         end
       end
 
