@@ -297,6 +297,13 @@ describe "Assets" do
         result.must_match /background: url\(i\/missing\.png\)/
       end
 
+      it "can understand urls with hashes" do
+        get "/assets/css/urlhash.css"
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        result = last_response.body
+        result.must_match %r{background: url\(/assets/i/y\.png\?query=true#hash\)}
+      end
+
       it "embeds image data" do
         get "/assets/css/data.css"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
@@ -483,6 +490,16 @@ describe "Assets" do
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
         result.must_match %r{background-image:url\(data:image/png;base64}
+      end
+
+      it "can understand urls with hashes" do
+        path = context.stylesheet_urls('css/urlhash').first
+        get path
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        result = last_response.body
+        result.must_match %r{background:url\(/assets/i/y-d5ca7c01801a5a9985b92aa2d6a81c91\.png\?query=true#hash\)}
+        asset_path = revision.path("/assets/i/y-d5ca7c01801a5a9985b92aa2d6a81c91.png")
+        assert asset_path.exist?
       end
     end
 
