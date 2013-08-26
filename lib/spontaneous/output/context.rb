@@ -45,6 +45,10 @@ module Spontaneous::Output::Context
       Spontaneous::Site.root
     end
 
+    def site_page(path)
+      Spontaneous::Site[path]
+    end
+
     def asset_environment
       @asset_environment ||= Spontaneous::Asset::Environment.new(self)
     end
@@ -178,6 +182,12 @@ module Spontaneous::Output::Context
 
     def root
       _with_render_cache("site.root") do
+        super
+      end
+    end
+
+    def site_page(path)
+      _with_render_cache("site_page.#{path}") do
         super
       end
     end

@@ -57,7 +57,7 @@ describe "Render" do
 
       @page.sections1 << @content
 
-      @section1 = ::Page.new(:title => "Section 1")
+      @section1 = ::Page.new(:title => "Section 1", :uid => "section1")
       @section2 = ::Page.new(:title => "Section 2")
       @section3 = ::Page.new(:title => "Section 3")
       @section4 = ::Page.new(:title => "Section 4")
@@ -85,6 +85,13 @@ describe "Render" do
         a = @renderer.render_string('#{root.object_id} #{root.object_id}', @page.output(:html), {})
         a.wont_equal "#{nil.object_id} #{nil.object_id}"
         a.split.uniq.length.must_equal 1
+    end
+
+    it "uses a cache for site pages" do
+      a = @renderer.render_string("${site_page('$section1').object_id}", @page.output(:html), {})
+      a.wont_equal "#{nil.object_id} #{nil.object_id}"
+      b = @renderer.render_string("${site_page('$section1').object_id}", @page.output(:html), {})
+      a.must_equal b
     end
 
     it "iterate through the sections" do
