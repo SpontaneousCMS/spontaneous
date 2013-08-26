@@ -5,23 +5,26 @@ module Spontaneous::Plugins::Application
     extend Spontaneous::Concern
 
     module ClassMethods
+      @@semaphore = Mutex.new
+
       def init(options={})
-        # return false if loaded?
-        self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
-        self.mode = options.delete(:mode) || ENV["SPOT_MODE"] || :back
-        root = options.delete(:root) || ENV["SPOT_ROOT"] || Dir.pwd
-        site = Spontaneous::Site.instantiate(root, environment, mode)
-        lib = File.expand_path(File.join(root, "lib"))
-        $:.push(lib) unless $:.include?(lib)
-        Spontaneous::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
-        site.initialize!
-        site.schema.validate! if self.mode == :console
-        if site.config.auto_login && mode == :back
-          logger.warn "Auto login is enabled and set to '#{site.config.auto_login}'.\n" \
+        @@semaphore.synchronize do
+          self.environment = (options.delete(:environment) || ENV["SPOT_ENV"] || :development)
+          self.mode = options.delete(:mode) || ENV["SPOT_MODE"] || :back
+          root = options.delete(:root) || ENV["SPOT_ROOT"] || Dir.pwd
+          site = Spontaneous::Site.instantiate(root, environment, mode)
+          lib = File.expand_path(File.join(root, "lib"))
+          $:.push(lib) unless $:.include?(lib)
+          Spontaneous::Logger.setup(:log_level => options[:log_level], :logfile => options[:logfile], :cli => options[:cli])
+          site.initialize!
+          site.schema.validate! if self.mode == :console
+          if site.config.auto_login && mode == :back
+            logger.warn "Auto login is enabled and set to '#{site.config.auto_login}'.\n" \
             "   Please ensure this is disabled in production mode by removing the\n" \
             "   'auto_login' setting from your environment file."
+          end
+          Thread.current[:spontaneous_loaded] = true
         end
-        Thread.current[:spontaneous_loaded] = true
       end
 
       # This is called after definition of the Content model.
