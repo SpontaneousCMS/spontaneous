@@ -1,6 +1,9 @@
 
 module Spontaneous::Output::Context
+  autoload :RenderCache, 'spontaneous/output/context/render_cache'
+
   module ContextCore
+    include RenderCache
     attr_accessor :_renderer
 
     def navigation(depth = 1, &block)
@@ -50,7 +53,9 @@ module Spontaneous::Output::Context
     end
 
     def asset_environment
-      @asset_environment ||= Spontaneous::Asset::Environment.new(self)
+      _with_render_cache('asset.environment') do
+        Spontaneous::Asset::Environment.new(self)
+      end
     end
 
     def asset_path(path, options = {})
@@ -155,30 +160,7 @@ module Spontaneous::Output::Context
     end
   end
 
-  module RenderCache
-    def _render_cache_value(key)
-      _renderer.render_cache[key]
-    end
-
-    def _render_cache_set_value(key, value)
-      _renderer.render_cache[key] = value
-    end
-
-    def _render_cache_key?(key)
-      _renderer.render_cache.key?(key)
-    end
-
-    def _with_render_cache(key, &value_block)
-      if _render_cache_key?(key)
-        _render_cache_value(key)
-      else
-        _render_cache_set_value(key, yield)
-      end
-    end
-  end
-
   module PublishContext
-    include RenderCache
 
     def root
       _with_render_cache("site.root") do
