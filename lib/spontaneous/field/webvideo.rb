@@ -79,7 +79,7 @@ module Spontaneous::Field
 
     def self.providers
       @providers ||= {
-        nil => Spontaneous::Field::WebVideo::Provider
+        nil => Spontaneous::Field::WebVideo::Fallback
       }
     end
 
@@ -129,8 +129,12 @@ module Spontaneous::Field
     end
 
     def provider
-      provider = Spontaneous::Field::WebVideo.providers[provider_id]
+      provider = Spontaneous::Field::WebVideo.providers.fetch(provider_id, fallback_provider)
       provider.new(self, values)
+    end
+
+    def fallback_provider
+      Spontaneous::Field::WebVideo.providers.fetch("fallback")
     end
 
     def to_json(*args)

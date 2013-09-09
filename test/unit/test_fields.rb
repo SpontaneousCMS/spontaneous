@@ -725,6 +725,28 @@ describe "Fields" do
     end
 
 
+    it "use the YouTube api to extract video metadata" do
+      youtube_info = {"thumbnail_large" => "http://i.ytimg.com/vi/_0jroAM_pO4/hqdefault.jpg", "thumbnail_small"=>"http://i.ytimg.com/vi/_0jroAM_pO4/default.jpg", "title" => "Hilarious QI Moment - Cricket", "description" => "Rob Brydon makes a rather embarassing choice of words whilst discussing the relationship between a cricket's chirping and the temperature. Taken from QI XL Series H episode 11 - Highs and Lows", "user_name" => "morthasa", "upload_date" => "2011-01-14 19:49:44", "tags" => "Hilarious, QI, Moment, Cricket, fun, 11, stephen, fry, alan, davies, Rob, Brydon, SeriesH, Fred, MacAulay, Sandi, Toksvig", "duration" => 78, "stats_number_of_likes" => 297, "stats_number_of_plays" => 53295, "stats_number_of_comments" => 46}#.symbolize_keys
+
+      response_xml_file = File.expand_path("../../fixtures/fields/youtube_api_response.xml", __FILE__)
+      connection = mock()
+      Spontaneous::Field::WebVideo::YouTube.any_instance.expects(:open).with("http://gdata.youtube.com/feeds/api/videos/_0jroAM_pO4?v=2").returns(connection)
+      doc = Nokogiri::XML(File.open(response_xml_file))
+      Nokogiri.expects(:XML).with(connection).returns(doc)
+      @field.value = "http://www.youtube.com/watch?v=_0jroAM_pO4"
+      @field.values.must_equal youtube_info.merge(:video_id => "_0jroAM_pO4", :provider => "youtube", :html => "http://www.youtube.com/watch?v=_0jroAM_pO4")
+    end
+
+    it "use the Vimeo api to extract video metadata" do
+      vimeo_info = {"id"=>29987529, "title"=>"Neon Indian Plays The UO Music Shop", "description"=>"Neon Indian plays electronic instruments from the UO Music Shop, Fall 2011. Read more at blog.urbanoutfitters.com.", "url"=>"http://vimeo.com/29987529", "upload_date"=>"2011-10-03 18:32:47", "mobile_url"=>"http://vimeo.com/m/29987529", "thumbnail_small"=>"http://b.vimeocdn.com/ts/203/565/203565974_100.jpg", "thumbnail_medium"=>"http://b.vimeocdn.com/ts/203/565/203565974_200.jpg", "thumbnail_large"=>"http://b.vimeocdn.com/ts/203/565/203565974_640.jpg", "user_name"=>"Urban Outfitters", "user_url"=>"http://vimeo.com/urbanoutfitters", "user_portrait_small"=>"http://b.vimeocdn.com/ps/251/111/2511118_30.jpg", "user_portrait_medium"=>"http://b.vimeocdn.com/ps/251/111/2511118_75.jpg", "user_portrait_large"=>"http://b.vimeocdn.com/ps/251/111/2511118_100.jpg", "user_portrait_huge"=>"http://b.vimeocdn.com/ps/251/111/2511118_300.jpg", "stats_number_of_likes"=>85, "stats_number_of_plays"=>26633, "stats_number_of_comments"=>0, "duration"=>100, "width"=>1280, "height"=>360, "tags"=>"neon indian, analog, korg, moog, theremin, micropiano, microkorg, kaossilator, kaossilator pro", "embed_privacy"=>"anywhere"}.symbolize_keys
+
+      connection = mock()
+      connection.expects(:read).returns(Spontaneous.encode_json([vimeo_info]))
+      Spontaneous::Field::WebVideo::Vimeo.any_instance.expects(:open).with("http://vimeo.com/api/v2/video/29987529.json").returns(connection)
+      @field.value = "http://vimeo.com/29987529"
+      @field.values.must_equal vimeo_info.merge(:video_id => "29987529", :provider => "vimeo", :html => "http://vimeo.com/29987529")
+    end
+
     describe "with player settings" do
       before do
         @content_class.field :video2, :webvideo, :player => {
@@ -822,27 +844,6 @@ describe "Fields" do
       end
 
 
-      it "use the YouTube api to extract video metadata" do
-        youtube_info = {"thumbnail_large" => "http://i.ytimg.com/vi/_0jroAM_pO4/hqdefault.jpg", "thumbnail_small"=>"http://i.ytimg.com/vi/_0jroAM_pO4/default.jpg", "title" => "Hilarious QI Moment - Cricket", "description" => "Rob Brydon makes a rather embarassing choice of words whilst discussing the relationship between a cricket's chirping and the temperature. Taken from QI XL Series H episode 11 - Highs and Lows", "user_name" => "morthasa", "upload_date" => "2011-01-14 19:49:44", "tags" => "Hilarious, QI, Moment, Cricket, fun, 11, stephen, fry, alan, davies, Rob, Brydon, SeriesH, Fred, MacAulay, Sandi, Toksvig", "duration" => 78, "stats_number_of_likes" => 297, "stats_number_of_plays" => 53295, "stats_number_of_comments" => 46}#.symbolize_keys
-
-        response_xml_file = File.expand_path("../../fixtures/fields/youtube_api_response.xml", __FILE__)
-        connection = mock()
-        Spontaneous::Field::WebVideo::YouTube.any_instance.expects(:open).with("http://gdata.youtube.com/feeds/api/videos/_0jroAM_pO4?v=2").returns(connection)
-        doc = Nokogiri::XML(File.open(response_xml_file))
-        Nokogiri.expects(:XML).with(connection).returns(doc)
-        @field.value = "http://www.youtube.com/watch?v=_0jroAM_pO4"
-        @field.values.must_equal youtube_info.merge(:video_id => "_0jroAM_pO4", :provider => "youtube", :html => "http://www.youtube.com/watch?v=_0jroAM_pO4")
-      end
-
-      it "use the Vimeo api to extract video metadata" do
-        vimeo_info = {"id"=>29987529, "title"=>"Neon Indian Plays The UO Music Shop", "description"=>"Neon Indian plays electronic instruments from the UO Music Shop, Fall 2011. Read more at blog.urbanoutfitters.com.", "url"=>"http://vimeo.com/29987529", "upload_date"=>"2011-10-03 18:32:47", "mobile_url"=>"http://vimeo.com/m/29987529", "thumbnail_small"=>"http://b.vimeocdn.com/ts/203/565/203565974_100.jpg", "thumbnail_medium"=>"http://b.vimeocdn.com/ts/203/565/203565974_200.jpg", "thumbnail_large"=>"http://b.vimeocdn.com/ts/203/565/203565974_640.jpg", "user_name"=>"Urban Outfitters", "user_url"=>"http://vimeo.com/urbanoutfitters", "user_portrait_small"=>"http://b.vimeocdn.com/ps/251/111/2511118_30.jpg", "user_portrait_medium"=>"http://b.vimeocdn.com/ps/251/111/2511118_75.jpg", "user_portrait_large"=>"http://b.vimeocdn.com/ps/251/111/2511118_100.jpg", "user_portrait_huge"=>"http://b.vimeocdn.com/ps/251/111/2511118_300.jpg", "stats_number_of_likes"=>85, "stats_number_of_plays"=>26633, "stats_number_of_comments"=>0, "duration"=>100, "width"=>1280, "height"=>360, "tags"=>"neon indian, analog, korg, moog, theremin, micropiano, microkorg, kaossilator, kaossilator pro", "embed_privacy"=>"anywhere"}.symbolize_keys
-
-        connection = mock()
-        connection.expects(:read).returns(Spontaneous.encode_json([vimeo_info]))
-        Spontaneous::Field::WebVideo::Vimeo.any_instance.expects(:open).with("http://vimeo.com/api/v2/video/29987529.json").returns(connection)
-        @field.value = "http://vimeo.com/29987529"
-        @field.values.must_equal vimeo_info.merge(:video_id => "29987529", :provider => "vimeo", :html => "http://vimeo.com/29987529")
-      end
       it "can properly embed a Vine video" do
         @field.value = "https://vine.co/v/brI7pTPb3qU"
         embed = @field.render(:html)
@@ -851,6 +852,15 @@ describe "Fields" do
         # Vine videos are square
         embed.must_match %r(width=["']680["'])
         embed.must_match %r(height=["']680["'])
+      end
+
+      it "falls back to a simple iframe for unknown providers xxx" do
+        @field.value = "https://unknownprovider.net/xx/brI7pTPb3qU"
+        embed = @field.render(:html)
+        embed.must_match %r(iframe)
+        embed.must_match %r(src=["']https://unknownprovider.net/xx/brI7pTPb3qU["'])
+        embed.must_match %r(width=["']680["'])
+        embed.must_match %r(height=["']384["'])
       end
     end
 
