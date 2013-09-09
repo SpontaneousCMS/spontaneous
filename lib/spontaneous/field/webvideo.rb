@@ -155,6 +155,6 @@ module Spontaneous::Field
   end
 end
 
-Dir[::File.dirname(__FILE__) + "/webvideo/*.rb"].each do |provider|
-  require provider
+%w(fallback vimeo youtube vine).each do |provider|
+  require ::File.dirname(__FILE__) + "/webvideo/#{provider}.rb"
 end
