@@ -22,7 +22,7 @@ module Spontaneous
         Version.subclasses.sort { |v1, v2| v1.version <=> v2.version }
       end
 
-      def hash(password)
+      def hash_password(password)
         current.create(password)
       end
 
@@ -71,7 +71,7 @@ module Spontaneous
       alias_method :needs_upgrade?, :outdated?
 
       def upgrade
-        Spontaneous::Crypt.hash(@password)
+        Spontaneous::Crypt.hash_password(@password)
       end
 
       def salt

@@ -98,7 +98,7 @@ module Spontaneous::Permissions
     end
 
     def encrypt_password(clear_password)
-      Spontaneous::Crypt.hash(clear_password)
+      Spontaneous::Crypt.hash_password(clear_password)
     end
 
     def upgrade_authentication(auth)
