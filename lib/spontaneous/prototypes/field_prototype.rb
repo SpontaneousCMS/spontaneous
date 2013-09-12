@@ -10,11 +10,12 @@ module Spontaneous::Prototypes
       @name = name
       @extend = [blocks].flatten.push(block).compact
 
-      parse_options(options)
-
       # if the type is nil then try the name, this will assign sensible defaults
       # to fields like 'image' or 'date'
       @base_class = Spontaneous::Field[type || name]
+
+      parse_options(@base_class, options)
+
 
       field_class_name = "#{name.to_s.camelize}Field"
       owner.const_set(field_class_name, instance_class)
@@ -53,11 +54,12 @@ module Spontaneous::Prototypes
       @name.to_s.titleize
     end
 
-    def parse_options(options)
-      @options = {
-        :default => '',
-        :comment => false
-      }.merge(options)
+    def parse_options(field_class, options)
+      @options = default_options(field_class).merge(options)
+    end
+
+    def default_options(field_class)
+      {:default => '', :comment => false }.merge(field_class.default_options)
     end
 
     def instance_class

@@ -44,6 +44,10 @@ module Spontaneous
           end
         end
 
+        def default_options
+          {}
+        end
+
         # Provides the ability for specific field types to customize the schema values
         # they return to the UI
         def export(user)
@@ -300,7 +304,9 @@ module Spontaneous
       # override this to return custom values derived from (un)processed_value
       # alias_method :value, :processed_value
       def value(format=:html)
-        processed_values[format.to_sym] || unprocessed_value
+        format = format.to_sym
+        return unprocessed_value unless processed_values.key?(format)
+        processed_values[format]
       end
 
       alias_method :processed_value, :value
