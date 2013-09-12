@@ -90,8 +90,6 @@ module Spontaneous::Search
 
     def each_indexable(page)
       indexable = [page]
-      # not sure that I need the include? test here as page.content only returns Pieces
-      # and I'm not sure that there is a particular need to exclude Pieces from indexes
       indexable.concat(page.pieces.select { |content| include?(content) })
       indexable += page.boxes.select { |box| include?(box) }
       indexable.each do |content|
