@@ -4,7 +4,7 @@ require 'spontaneous'
 require 'benchmark'
 
 Sequel.migration do
-  ContentTable = S::DataMapper::ContentTable
+  ::ContentTable = S::DataMapper::ContentTable unless defined?(::ContentTable)
   revision_table = :spontaneous_content_revisions
   archive_table  = :spontaneous_content_archive
   content_table  = :content
