@@ -1186,6 +1186,19 @@ describe "Fields" do
       field = prototype.to_field(@instance)
       field.to_s.must_equal "Off"
     end
+
+    it "has shortcut accessors" do
+      state = @field.value(:boolean)
+      @field.on?.must_equal state
+      @field.checked?.must_equal state
+      @field.enabled?.must_equal state
+    end
+
+    it "exports the labels to the interface" do
+      prototype = @content_class.field :boolean, default: false, true: "Yes Please", false: "No Thanks"
+      exported = prototype.instance_class.export(nil)
+      exported.must_equal({:labels=>{:true=>"Yes Please", :false=>"No Thanks"}})
+    end
   end
 
   describe "Asynchronous processing" do

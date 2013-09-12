@@ -244,6 +244,7 @@ Spontaneous.EditPanel = (function($, S) {
 			}
 		},
 		field_edit: function(field) {
+			field.editor = this;
 			var d = dom.div('.field');
 			// console.log("field_edit", field.type)
 			d.addClass(field.type.type.toLowerCase().split(".").splice(1).join("-"));

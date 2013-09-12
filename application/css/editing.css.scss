@@ -445,3 +445,15 @@ $text-edit-width: 621px;
 	background: url(/@spontaneous/static/editing-textarea-resize-s-b5af62365eb7e19ea4beccf7242d508e.png) repeat-x;
 	cursor: ns-resize;
 }
+
+.field-boolean {
+	.value {
+		label {
+			@include interface;
+			color: #333;
+		}
+		label + label {
+			margin-left: 20px;
+		}
+	}
+}
