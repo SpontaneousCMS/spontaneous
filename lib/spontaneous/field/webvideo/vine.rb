@@ -84,7 +84,7 @@ module Spontaneous::Field
         #   "player_id" => o[:player_id] }
         # params.update("color" => o[:color]) if o.key?(:color)
         # params = ::Rack::Utils.build_query(params)
-        "https://vine.co/v/#{video_id}/card"
+        "//vine.co/v/#{video_id}/card"
       end
     end
 

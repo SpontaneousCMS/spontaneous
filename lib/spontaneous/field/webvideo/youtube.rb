@@ -101,7 +101,7 @@ module Spontaneous::Field
           "autohide" => o[:autohide],
           "rel" => o[:rel],
           "enablejsapi" => o[:api] })
-        "http://www.youtube.com/embed/#{video_id}?#{params}"
+        "//www.youtube.com/embed/#{video_id}?#{params}"
       end
 
       def download_metadata

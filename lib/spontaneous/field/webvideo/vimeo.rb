@@ -104,7 +104,7 @@ module Spontaneous::Field
           "player_id" => o[:player_id] }
         params.update("color" => o[:color]) if o.key?(:color)
         params = ::Rack::Utils.build_query(params)
-        "http://player.vimeo.com/video/#{video_id}?#{params}"
+        "//player.vimeo.com/video/#{video_id}?#{params}"
       end
     end
 
