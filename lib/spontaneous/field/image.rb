@@ -1,9 +1,7 @@
 # encoding: UTF-8
 
 require 'tempfile'
-require 'mini_magick'
 require 'delegate'
-
 
 module Spontaneous::Field
   class Image < File
@@ -143,4 +141,3 @@ module Spontaneous::Field
     self.register(:image, :photo)
   end
 end
-
