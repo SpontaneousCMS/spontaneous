@@ -144,6 +144,10 @@ describe "Schema" do
         @instance.layout.schema_id.must_equal @uids["llllllllllll"]
       end
 
+      it "should encode to JSON" do
+        @uids["llllllllllll"].to_json.must_equal '"llllllllllll"'
+      end
+
       describe "lookups" do
         it "return classes" do
           Site.schema.to_class("xxxxxxxxxxxx").must_equal SchemaClass

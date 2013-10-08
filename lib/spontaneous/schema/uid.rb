@@ -130,7 +130,7 @@ module Spontaneous
       end
 
       def to_json(options = {})
-        to_s.to_json(options)
+        Spontaneous::JSON.encode(to_s)
       end
 
       def inspect
