@@ -784,6 +784,10 @@ describe "Permissions" do
     end
 
     it "only list allowed types addable by the user" do
+      allowed_type_names = Proc.new do |a|
+        a[:type]
+      end
+
       expected = [
         ["editor_level", ["D", "C"]],
         ["admin_level", ["C"]],
@@ -791,16 +795,16 @@ describe "Permissions" do
         ["mixed_level", ["C"]],
         ["default_level", ["C"]]
       ]
-      C.export[:boxes].map { |b| [b[:name], b[:allowed_types]] }.must_equal expected
+      C.export[:boxes].map { |b| [b[:name], b[:allowed_types].map(&allowed_type_names)] }.must_equal expected
 
       # Permissions.with_user(@root) do
-        C.export(@root)[:boxes].map { |b| [b[:name], b[:allowed_types]] }.must_equal expected
+        C.export(@root)[:boxes].map { |b| [b[:name], b[:allowed_types].map(&allowed_type_names)] }.must_equal expected
       # end
       # Permissions.with_user(@visitor) do
         expected = [
           ["default_level", []]
         ]
-        C.export(@visitor)[:boxes].map { |b| [b[:name], b[:allowed_types]] }.must_equal expected
+        C.export(@visitor)[:boxes].map { |b| [b[:name], b[:allowed_types].map(&allowed_type_names)] }.must_equal expected
       # end
       # Permissions.with_user(@editor) do
         expected = [
@@ -808,7 +812,7 @@ describe "Permissions" do
           ["mixed_level", []],
           ["default_level", ["C"]]
         ]
-        C.export(@editor)[:boxes].map { |b| [b[:name], b[:allowed_types]] }.must_equal expected
+        C.export(@editor)[:boxes].map { |b| [b[:name], b[:allowed_types].map(&allowed_type_names)] }.must_equal expected
       # end
       # Permissions.with_user(@admin) do
         expected = [
@@ -817,7 +821,7 @@ describe "Permissions" do
           ["mixed_level", []],
           ["default_level", ["C"]]
         ]
-        C.export(@admin)[:boxes].map { |b| [b[:name], b[:allowed_types]] }.must_equal expected
+        C.export(@admin)[:boxes].map { |b| [b[:name], b[:allowed_types].map(&allowed_type_names)] }.must_equal expected
       # end
     end
 

@@ -152,8 +152,9 @@ Spontaneous.Views.BoxView = (function($, S) {
 			dropper.get(0).addEventListener('drop', drop, true);
 			dropper.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
 
-			$.each(allowed, function(i, type) {
-				var a = dom.a().text(type.title), add_allowed;
+			$.each(allowed, function(i, allow) {
+				var type = allow.type, as = allow.as || type.title;
+				var a = dom.a().text(as), add_allowed;
 				if (type.is_alias()) {
 					a.addClass('alias')
 					add_allowed = function(type) {

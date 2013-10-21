@@ -84,6 +84,17 @@ module Spontaneous::Model::Box
         end
       end
 
+      def export
+        if allow_subclasses
+          # can't configure interface name using allow_subclasses
+          instance_class.subclasses.map { |c| { type: c.ui_class } }
+        else
+          exported = {type: instance_class.ui_class }
+          exported[:as] = @options[:as] if @options.key?(:as)
+          [exported]
+        end
+      end
+
       def prototype
         @options[:prototype]
       end

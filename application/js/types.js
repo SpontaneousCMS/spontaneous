@@ -19,10 +19,11 @@ Spontaneous.Types = (function($, S) {
 			}
 		},
 		allowed_types: function() {
-			var types = [];
-			if (this.data.allowed_types.length > 0) {
-				for (var i = 0, ii = this.data.allowed_types.length; i < ii; i++) {
-					types.push(Spontaneous.Types.type(this.data.allowed_types[i]));
+			var allowed_types = this.data.allowed_types, types = [], a;
+			if (allowed_types.length > 0) {
+				for (var i = 0, ii = allowed_types.length; i < ii; i++) {
+					a = allowed_types[i];
+					types.push({type: Spontaneous.Types.type(a.type), as: a.as});
 				}
 			}
 			return types;
@@ -54,15 +55,6 @@ Spontaneous.Types = (function($, S) {
 		},
 		box_prototype: function(box_id) {
 			return this.box_prototypes[box_id];
-		},
-		allowed_types: function() {
-			var types = [];
-			if (this.data.allowed_types.length > 0) {
-				for (var i = 0, ii = this.data.allowed_types.length; i < ii; i++) {
-					types.push(Spontaneous.Types.type(this.data.allowed_types[i]));
-				}
-			}
-			return types;
 		},
 		is_page: function() {
 			return this.data.is_page;
