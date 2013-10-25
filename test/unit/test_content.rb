@@ -330,4 +330,19 @@ describe "Content" do
       skip "Implement this"
     end
   end
+
+  describe "filtering" do
+    before do
+      @instances = [P.create, C.create, P.create, C.create]
+    end
+
+    after do
+      C.delete
+      P.delete
+    end
+
+    it "provides a to_proc method that makes filtering by class easy" do
+      @instances.select(&C).map(&:class).must_equal [C, C]
+    end
+  end
 end
