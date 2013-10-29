@@ -15,7 +15,7 @@ Capistrano::Configuration.instance(:must_exist).load do
   namespace :spot do
     task :symlink_cache do
       cache_dir = File.join(latest_release, 'cache')
-      run "mkdir #{cache_dir}; ln -s #{deploy_to}/media #{cache_dir}; ln -s #{deploy_to}/revisions #{cache_dir}; ln -s #{deploy_to}/uploadcache #{cache_dir}/tmp"
+      run "if [[ -d #{cache_dir} ]]; then rm -r #{cache_dir}; fi ; mkdir #{cache_dir}; ln -s #{deploy_to}/media #{cache_dir}; ln -s #{deploy_to}/revisions #{cache_dir}; ln -s #{deploy_to}/uploadcache #{cache_dir}/tmp"
     end
 
     task :symlink_application do
