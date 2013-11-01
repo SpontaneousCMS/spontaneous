@@ -43,7 +43,7 @@ describe "DataMapperContent" do
       @database.sqls # clear sql log
       ::Content.all
       @database.sqls.must_equal [
-        "SELECT * FROM content"
+        "SELECT * FROM content WHERE (type_sid IN ('Content'))"
       ]
     end
 
@@ -63,7 +63,7 @@ describe "DataMapperContent" do
         b = ::Content.root
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (path = '/') LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('Content')) AND (path = '/')) LIMIT 1"
       ]
     end
 
@@ -75,7 +75,7 @@ describe "DataMapperContent" do
         b = ::Content.path("/this")
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (path = '/this') LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('Content')) AND (path = '/this')) LIMIT 1"
       ]
     end
 
@@ -87,7 +87,7 @@ describe "DataMapperContent" do
         b = ::Content.uid("fish")
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (uid = 'fish') LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('Content')) AND (uid = 'fish')) LIMIT 1"
       ]
     end
 
@@ -144,7 +144,7 @@ describe "DataMapperContent" do
         @database.sqls # clear sql log
         P2.root
         @database.sqls.must_equal [
-          "SELECT * FROM content WHERE (path = '/') LIMIT 1"
+          "SELECT * FROM content WHERE ((type_sid IN ('Content', 'Content::Page', 'Page', 'P1', 'P2')) AND (path = '/')) LIMIT 1"
         ]
       end
 

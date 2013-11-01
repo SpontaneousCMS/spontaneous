@@ -275,6 +275,7 @@ module Spontaneous
       end
 
       def excluded_types
+        return [] unless defined?(Spontaneous::Content)
         [Spontaneous::Content, Spontaneous::Content::Page, Spontaneous::Content::Piece]
       end
 
@@ -302,7 +303,11 @@ module Spontaneous
       # TODO: Find a way to filter out the top-level classes without hard-coding
       # them here.
       def content_classes
-        classes.reject { |k| k.is_box? }.uniq
+        classes.select { |k| k.is_a?(Spontaneous::DataMapper::ContentModel) }.uniq
+      end
+
+      def types
+        content_classes
       end
 
       def recurse_classes(root_class, list)
@@ -314,12 +319,13 @@ module Spontaneous
 
       def reset!
         @classes         = []
+        @types           = []
         @inheritance_map = nil
         reload!
       end
 
       def reload!
-        @map             = nil
+        @map = nil
         initialize_uid_map
       end
 

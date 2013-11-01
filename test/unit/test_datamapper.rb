@@ -33,12 +33,14 @@ describe "DataMapper" do
     end
     # having timestamps on makes testing the sql very difficult/tedious
     MockContent2 = Class.new(MockContent)
+    MockContent3 = Class.new(MockContent)
     @database.sqls # clear sql log -- column introspection makes a query to the db
   end
 
   after do
     Object.send :remove_const, :MockContent rescue nil
     Object.send :remove_const, :MockContent2 rescue nil
+    Object.send :remove_const, :MockContent3 rescue nil
     teardown_site
   end
 
@@ -50,12 +52,12 @@ describe "DataMapper" do
 
   describe "instances" do
     it "insert model data when saving a new model instance" do
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
-      instance = MockContent.new(:label => "column1")
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
+      instance = MockContent2.new(:label => "column1")
       assert instance.new?
       @mapper.create(instance)
       @database.sqls.must_equal [
-        "INSERT INTO content (label, type_sid) VALUES ('column1', 'MockContent')",
+        "INSERT INTO content (label, type_sid) VALUES ('column1', 'MockContent2')",
         "SELECT * FROM content WHERE (id = 1) LIMIT 1"
       ]
       refute instance.new?
@@ -63,10 +65,10 @@ describe "DataMapper" do
     end
 
     it "insert models using the DataMapper.create method" do
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
-      instance = @mapper.instance MockContent, :label => "column1"
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
+      instance = @mapper.instance MockContent2, :label => "column1"
       @database.sqls.must_equal [
-        "INSERT INTO content (label, type_sid) VALUES ('column1', 'MockContent')",
+        "INSERT INTO content (label, type_sid) VALUES ('column1', 'MockContent2')",
         "SELECT * FROM content WHERE (id = 1) LIMIT 1"
       ]
       refute instance.new?
@@ -74,66 +76,66 @@ describe "DataMapper" do
     end
 
     it "update an existing model" do
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
-      instance = @mapper.instance MockContent, :label => "column1"
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
+      instance = @mapper.instance MockContent2, :label => "column1"
       instance.set label: "changed"
       @mapper.save(instance)
       @database.sqls.must_equal [
-        "INSERT INTO content (label, type_sid) VALUES ('column1', 'MockContent')",
+        "INSERT INTO content (label, type_sid) VALUES ('column1', 'MockContent2')",
         "SELECT * FROM content WHERE (id = 1) LIMIT 1",
         "UPDATE content SET label = 'changed' WHERE (id = 1)"
       ]
     end
 
     it "update model rows directly" do
-      @mapper.update([MockContent], label: "changed")
+      @mapper.update([MockContent2], label: "changed")
       @database.sqls.must_equal [
-        "UPDATE content SET label = 'changed' WHERE (type_sid IN ('MockContent'))"
+        "UPDATE content SET label = 'changed' WHERE (type_sid IN ('MockContent2'))"
       ]
     end
 
     it "find an existing model" do
-      instance = @mapper.instance MockContent, :label => "column1"
+      instance = @mapper.instance MockContent2, :label => "column1"
       @database.sqls # clear the sql log
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
       instance = @mapper.get(1)
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (id = 1) LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1"
       ]
-      instance.must_be_instance_of MockContent
+      instance.must_be_instance_of MockContent2
       instance.id.must_equal 1
       instance.attributes[:label].must_equal "column1"
     end
 
     it "retirieve a list of objects in the specified order" do
-      instance = @mapper.instance MockContent, :label => "column1"
+      # instance = @mapper.instance MockContent2, :label => "column1"
       @database.sqls # clear the sql log
       @database.fetch = [
-        { id:1, type_sid:"MockContent" },
-        { id:2, type_sid:"MockContent" },
-        { id:3, type_sid:"MockContent" },
-        { id:4, type_sid:"MockContent" }
+        { id:1, type_sid:"MockContent2" },
+        { id:2, type_sid:"MockContent2" },
+        { id:3, type_sid:"MockContent2" },
+        { id:4, type_sid:"MockContent2" }
       ]
       results = @mapper.get([2, 3, 4, 1])
       results.map(&:id).must_equal [2, 3, 4, 1]
     end
 
     it "allow for finding the first instance of a model" do
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
-      instance = @mapper.first([MockContent], id: 1)
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
+      instance = @mapper.first([MockContent2], id: 1)
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((type_sid IN ('MockContent')) AND (id = 1)) LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2')) AND (id = 1)) LIMIT 1"
       ]
     end
 
     it "be scopable to a revision" do
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
       @mapper.revision(10) do
-        instance = @mapper.instance MockContent, :label => "column1"
+        instance = @mapper.instance MockContent2, :label => "column1"
         instance.set label: "changed"
         @mapper.save(instance)
         @database.sqls.must_equal [
-          "INSERT INTO __r00010_content (label, type_sid) VALUES ('column1', 'MockContent')",
+          "INSERT INTO __r00010_content (label, type_sid) VALUES ('column1', 'MockContent2')",
           "SELECT * FROM __r00010_content WHERE (id = 1) LIMIT 1",
           "UPDATE __r00010_content SET label = 'changed' WHERE (id = 1)"
         ]
@@ -148,16 +150,16 @@ describe "DataMapper" do
     end
 
     it "allow for retrieval of rows from a specific revision" do
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
       instance = @mapper.revision(20).get(1)
-      @database.sqls.must_equal ["SELECT * FROM __r00020_content WHERE (id = 1) LIMIT 1"]
-      instance.must_be_instance_of MockContent
+      @database.sqls.must_equal ["SELECT * FROM __r00020_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1"]
+      instance.must_be_instance_of MockContent2
       instance.id.must_equal 1
       instance.attributes[:label].must_equal "column1"
     end
 
     it "support nested revision scopes" do
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
       @mapper.revision(10) do
         instance = @mapper.get(1)
         instance.label = "changed1"
@@ -170,130 +172,124 @@ describe "DataMapper" do
         end
       end
       @database.sqls.must_equal [
-        "SELECT * FROM __r00010_content WHERE (id = 1) LIMIT 1",
+        "SELECT * FROM __r00010_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1",
         "UPDATE __r00010_content SET label = 'changed1' WHERE (id = 1)",
-        "SELECT * FROM __r00020_content WHERE (id = 1) LIMIT 1",
+        "SELECT * FROM __r00020_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1",
         "UPDATE __r00020_content SET label = 'changed2' WHERE (id = 1)",
-        "SELECT * FROM content WHERE (id = 3) LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 3)) LIMIT 1"
       ]
     end
 
     it "allow for finding all instances of a class with DataMapper#all" do
       @database.fetch = [
-        { id:1, label:"column1", type_sid:"MockContent" },
-        { id:2, label:"column2", type_sid:"MockContent2" }
+        { id:1, label:"column1", type_sid:"MockContent2" },
+        { id:2, label:"column2", type_sid:"MockContent3" }
       ]
-      results = @mapper.all([MockContent, MockContent2])
+      results = @mapper.all([MockContent2, MockContent3])
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (type_sid IN ('MockContent', 'MockContent2'))"
+        "SELECT * FROM content WHERE (type_sid IN ('MockContent2', 'MockContent3'))"
       ]
-      results.map(&:class).must_equal [MockContent, MockContent2]
-      results.map(&:id).must_equal [1, 2]
-    end
-
-    it "allow for finding all instances of a class with DataMapper#types" do
-      @database.fetch = [
-        { id:1, label:"column1", type_sid:"MockContent" },
-        { id:2, label:"column2", type_sid:"MockContent2" }
-      ]
-      results = @mapper.all([MockContent, MockContent2])
-      @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (type_sid IN ('MockContent', 'MockContent2'))"
-      ]
-      results.map(&:class).must_equal [MockContent, MockContent2]
+      results.map(&:class).must_equal [MockContent2, MockContent3]
       results.map(&:id).must_equal [1, 2]
     end
 
     it "allow for counting type rows" do
-      @mapper.count([MockContent, MockContent2])
+      @mapper.count([MockContent2, MockContent3])
       @database.sqls.must_equal [
-        "SELECT COUNT(*) AS count FROM content WHERE (type_sid IN ('MockContent', 'MockContent2')) LIMIT 1"
+        "SELECT COUNT(*) AS count FROM content WHERE (type_sid IN ('MockContent2', 'MockContent3')) LIMIT 1"
       ]
     end
 
     it "allow for use of block iterator when loading all model instances" do
       ids = []
       @database.fetch = [
-        { id:1, label:"column1", type_sid:"MockContent" },
-        { id:2, label:"column2", type_sid:"MockContent2" }
+        { id:1, label:"column1", type_sid:"MockContent2" },
+        { id:2, label:"column2", type_sid:"MockContent3" }
       ]
-      results = @mapper.all([MockContent, MockContent2]) do |i|
+      results = @mapper.all([MockContent2, MockContent3]) do |i|
         ids << i.id
       end
       ids.must_equal [1, 2]
-      results.map(&:class).must_equal [MockContent, MockContent2]
+      results.map(&:class).must_equal [MockContent2, MockContent3]
     end
 
     it "allow for defining an order" do
-      ds = @mapper.order([MockContent], "column1").all
+      ds = @mapper.order([MockContent2], "column1").all
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (type_sid IN ('MockContent')) ORDER BY 'column1'"
+        "SELECT * FROM content WHERE (type_sid IN ('MockContent2')) ORDER BY 'column1'"
       ]
     end
 
     it "allow for defining a limit" do
-      ds = @mapper.limit([MockContent], 10...20).all
+      ds = @mapper.limit([MockContent2], 10...20).all
       ds = @mapper.filter([], label: "this").limit(10).all
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (type_sid IN ('MockContent')) LIMIT 10 OFFSET 10",
-        "SELECT * FROM content WHERE (label = 'this') LIMIT 10"
+        "SELECT * FROM content WHERE (type_sid IN ('MockContent2')) LIMIT 10 OFFSET 10",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (label = 'this')) LIMIT 10"
       ]
     end
 
     it "support chained filters" do
       @database.fetch = [
-        { id:1, label:"column1", type_sid:"MockContent" }
+        { id:1, label:"column1", type_sid:"MockContent2" }
       ]
-      ds = @mapper.filter([MockContent, MockContent2], id:1)
+      ds = @mapper.filter([MockContent2, MockContent3], id:1)
       results = ds.all
-      results.map(&:class).must_equal [MockContent]
+      results.map(&:class).must_equal [MockContent2]
       results.map(&:id).must_equal [1]
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((type_sid IN ('MockContent', 'MockContent2')) AND (id = 1))"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1))"
       ]
     end
 
     it "support filtering using virtual rows" do
       @database.fetch = [
-        { id:1, label:"column1", type_sid:"MockContent" },
-        { id:2, label:"column2", type_sid:"MockContent2" }
+        { id:1, label:"column1", type_sid:"MockContent2" },
+        { id:2, label:"column2", type_sid:"MockContent3" }
       ]
-      ds = @mapper.filter([MockContent, MockContent2]) { id > 0 }
+      ds = @mapper.filter([MockContent2, MockContent3]) { id > 0 }
       results = ds.all
-      results.map(&:class).must_equal [MockContent, MockContent2]
+      results.map(&:class).must_equal [MockContent2, MockContent3]
       results.map(&:id).must_equal [1, 2]
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((type_sid IN ('MockContent', 'MockContent2')) AND (id > 0))"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id > 0))"
       ]
     end
 
     it "support multiple concurrent filters" do
       # want to be sure that each dataset is independent
-      ds1 = @mapper.filter([MockContent], id: 1)
-      ds2 = @mapper.filter([MockContent2])
+      ds1 = @mapper.filter([MockContent2], id: 1)
+      ds2 = @mapper.filter([MockContent3])
 
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
-      ds1.first([]).must_be_instance_of MockContent
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
+      ds1.first([]).must_be_instance_of MockContent2
 
-      @database.fetch = { id:2, label:"column2", type_sid:"MockContent2" }
-      ds2.first([]).must_be_instance_of MockContent2
+      @database.fetch = { id:2, label:"column2", type_sid:"MockContent3" }
+      ds2.first([]).must_be_instance_of MockContent3
 
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((type_sid IN ('MockContent')) AND (id = 1)) LIMIT 1",
-        "SELECT * FROM content WHERE (type_sid IN ('MockContent2')) LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2')) AND (id = 1)) LIMIT 1",
+        "SELECT * FROM content WHERE (type_sid IN ('MockContent3')) LIMIT 1"
+      ]
+    end
+
+    it "allow you to delete all content" do
+      @mapper.delete
+      @database.sqls.must_equal [
+        "DELETE FROM content"
       ]
     end
 
     it "allow you to delete datasets" do
-      @mapper.delete([MockContent])
+      @mapper.delete([MockContent2])
       @database.sqls.must_equal [
-        "DELETE FROM content WHERE (type_sid IN ('MockContent'))"
+        "DELETE FROM content WHERE (type_sid IN ('MockContent2'))"
       ]
     end
 
     it "allow you to delete instances" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      instance = @mapper.instance MockContent, label: "label"
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      instance = @mapper.instance MockContent2, label: "label"
       @database.sqls
       @mapper.delete_instance instance
       @database.sqls.must_equal [
@@ -302,8 +298,8 @@ describe "DataMapper" do
     end
 
     it "allow you to delete instances within a revision" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      instance = @mapper.instance MockContent, label: "label"
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      instance = @mapper.instance MockContent2, label: "label"
       @database.sqls
       @mapper.revision(20) do
         @mapper.delete_instance instance
@@ -314,8 +310,8 @@ describe "DataMapper" do
     end
 
     it "allow you to destroy model instances" do
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
-      instance = @mapper.instance MockContent, :label => "column1"
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
+      instance = @mapper.instance MockContent2, :label => "column1"
       @database.sqls # clear sql log
       @mapper.delete_instance instance
       instance.id.must_equal 1
@@ -325,7 +321,7 @@ describe "DataMapper" do
     end
 
     it "support visibility contexts" do
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
       @mapper.visible do
         @mapper.get(1)
         @mapper.visible(false) do
@@ -334,27 +330,27 @@ describe "DataMapper" do
         end
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((hidden IS FALSE) AND (id = 1)) LIMIT 1",
-        "SELECT * FROM content WHERE (id = 1) LIMIT 1",
-        "SELECT * FROM content WHERE ((hidden IS FALSE) AND (id = 1)) LIMIT 1",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (hidden IS FALSE) AND (id = 1)) LIMIT 1",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (hidden IS FALSE) AND (id = 1)) LIMIT 1",
       ]
     end
 
     it "support mixed revision & visibility states" do
-      @database.fetch = { id:1, label:"column1", type_sid:"MockContent" }
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
       @mapper.revision(25) do
         @mapper.visible do
           @mapper.get(1)
         end
       end
       @database.sqls.must_equal [
-        "SELECT * FROM __r00025_content WHERE ((hidden IS FALSE) AND (id = 1)) LIMIT 1",
+        "SELECT * FROM __r00025_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (hidden IS FALSE) AND (id = 1)) LIMIT 1",
       ]
     end
 
     it "ignore visibility filter for deletes" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      instance = @mapper.instance MockContent, label: "label"
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      instance = @mapper.instance MockContent2, label: "label"
       @database.sqls
       @mapper.visible do
         @mapper.delete_instance(instance)
@@ -367,36 +363,46 @@ describe "DataMapper" do
     it "ignore visibility setting for creates" do
       @mapper.visible do
         @mapper.revision(99) do
-          instance = @mapper.instance MockContent, :label => "column1"
+          instance = @mapper.instance MockContent2, :label => "column1"
         end
       end
       @database.sqls.must_equal [
-        "INSERT INTO __r00099_content (label, type_sid) VALUES ('column1', 'MockContent')",
+        "INSERT INTO __r00099_content (label, type_sid) VALUES ('column1', 'MockContent2')",
         "SELECT * FROM __r00099_content WHERE (id = 1) LIMIT 1"
       ]
     end
 
     it "allow for inserting raw attributes" do
-      @mapper.insert type_sid: "MockContent", label: "label"
+      @mapper.insert type_sid: "MockContent2", label: "label"
       @database.sqls.must_equal [
-        "INSERT INTO content (type_sid, label) VALUES ('MockContent', 'label')"
+        "INSERT INTO content (type_sid, label) VALUES ('MockContent2', 'label')"
       ]
     end
   end
 
   describe "models" do
-    it "be deletable" do
+    it "can clean the db completely" do
+      def MockContent.types
+        nil
+      end
       MockContent.delete
       @database.sqls.must_equal [
-        "DELETE FROM content WHERE (type_sid IN ('MockContent'))"
+        "DELETE FROM content"
+      ]
+    end
+
+    it "be deletable" do
+      MockContent2.delete
+      @database.sqls.must_equal [
+        "DELETE FROM content WHERE (type_sid IN ('MockContent2'))"
       ]
     end
 
     it "be creatable using Model.create" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.create(label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.create(label: "value")
       @database.sqls.must_equal [
-        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent')",
+        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent2')",
         "SELECT * FROM content WHERE (id = 1) LIMIT 1"
       ]
       refute instance.new?
@@ -404,40 +410,40 @@ describe "DataMapper" do
     end
 
     it "be instantiable using Model.new" do
-      instance = MockContent.new(label: "value")
+      instance = MockContent2.new(label: "value")
       assert instance.new?
     end
 
     it "be creatable using Model.new" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.new(label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.new(label: "value")
       instance.save
       refute instance.new?
       @database.sqls.must_equal [
-        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent')",
+        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent2')",
         "SELECT * FROM content WHERE (id = 1) LIMIT 1"
       ]
       instance.id.must_equal 1
     end
 
     it "be updatable" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.create(label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.create(label: "value")
       instance.update(label: "changed")
       @database.sqls.must_equal [
-        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent')",
+        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent2')",
         "SELECT * FROM content WHERE (id = 1) LIMIT 1",
         "UPDATE content SET label = 'changed' WHERE (id = 1)"
       ]
     end
 
     it "exclude id column from updates" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.create(id: 103, label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.create(id: 103, label: "value")
       instance.id.must_equal 1
       instance.update(id: 99, label: "changed")
       @database.sqls.must_equal [
-        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent')",
+        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent2')",
         "SELECT * FROM content WHERE (id = 1) LIMIT 1",
         "UPDATE content SET label = 'changed' WHERE (id = 1)"
       ]
@@ -445,11 +451,11 @@ describe "DataMapper" do
     end
 
     it "exclude type_sid column from updates" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.create(type_sid: "Nothing", label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.create(type_sid: "Nothing", label: "value")
       instance.update(type_sid: "Invalid", label: "changed")
       @database.sqls.must_equal [
-        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent')",
+        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent2')",
         "SELECT * FROM content WHERE (id = 1) LIMIT 1",
         "UPDATE content SET label = 'changed' WHERE (id = 1)"
       ]
@@ -457,8 +463,8 @@ describe "DataMapper" do
     end
 
     it "only update changed columns" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.create(label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.create(label: "value")
       @database.sqls
       instance.changed_columns.must_equal []
       instance.label = "changed"
@@ -472,46 +478,46 @@ describe "DataMapper" do
     end
 
     it "mark new instances as modified" do
-      instance = MockContent.new(label: "value")
+      instance = MockContent2.new(label: "value")
       assert instance.modified?
     end
 
     it "updated modified flag after save" do
-      instance = MockContent.new(label: "value")
+      instance = MockContent2.new(label: "value")
       instance.save
       refute instance.modified?
     end
 
     it "have a modified flag if columns changed" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.create(label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.create(label: "value")
       refute instance.modified?
       instance.label = "changed"
       assert instance.modified?
     end
 
     it "not make a db call if no values have been modified" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.create(label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.create(label: "value")
       @database.sqls
       instance.save
       @database.sqls.must_equal []
     end
 
     it "allow you to force a save" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.create(label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.create(label: "value")
       @database.sqls
       instance.mark_modified!
       instance.save
       @database.sqls.must_equal [
-        "UPDATE content SET label = 'value', type_sid = 'MockContent' WHERE (id = 1)"
+        "UPDATE content SET label = 'value', type_sid = 'MockContent2' WHERE (id = 1)"
       ]
     end
 
     it "allow you to force an update to a specific column" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.create(label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.create(label: "value")
       @database.sqls
       instance.mark_modified!(:label)
       instance.save
@@ -521,12 +527,12 @@ describe "DataMapper" do
     end
 
     it "be destroyable" do
-      @database.fetch = { id:1, label:"value", type_sid:"MockContent" }
-      instance = MockContent.create(label: "value")
+      @database.fetch = { id:1, label:"value", type_sid:"MockContent2" }
+      instance = MockContent2.create(label: "value")
       instance.id.must_equal 1
       instance.destroy
       @database.sqls.must_equal [
-        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent')",
+        "INSERT INTO content (label, type_sid) VALUES ('value', 'MockContent2')",
         "SELECT * FROM content WHERE (id = 1) LIMIT 1",
         "DELETE FROM content WHERE (id = 1)"
       ]
@@ -534,53 +540,53 @@ describe "DataMapper" do
 
     it "allow for searching for all instances of a class" do
       @database.fetch = [
-        { id:1, label:"column1", type_sid:"MockContent" },
-        { id:2, label:"column2", type_sid:"MockContent" }
+        { id:1, label:"column1", type_sid:"MockContent2" },
+        { id:2, label:"column2", type_sid:"MockContent2" }
       ]
-      results = MockContent.all
+      results = MockContent2.all
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (type_sid IN ('MockContent'))"
+        "SELECT * FROM content WHERE (type_sid IN ('MockContent2'))"
       ]
       results.length.must_equal 2
-      results.map(&:class).must_equal [MockContent, MockContent]
+      results.map(&:class).must_equal [MockContent2, MockContent2]
       results.map(&:id).must_equal [1, 2]
     end
 
     it "allow for finding first instance of a type" do
       @database.fetch = [
-        { id:1, label:"column1", type_sid:"MockContent" }
+        { id:1, label:"column1", type_sid:"MockContent2" }
       ]
-      instance = MockContent.first
-      MockContent.first(id: 1)
-      MockContent.first { id > 0}
+      instance = MockContent2.first
+      MockContent2.first(id: 1)
+      MockContent2.first { id > 0}
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (type_sid IN ('MockContent')) LIMIT 1",
-        "SELECT * FROM content WHERE ((type_sid IN ('MockContent')) AND (id = 1)) LIMIT 1",
-        "SELECT * FROM content WHERE ((type_sid IN ('MockContent')) AND (id > 0)) LIMIT 1"
+        "SELECT * FROM content WHERE (type_sid IN ('MockContent2')) LIMIT 1",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2')) AND (id = 1)) LIMIT 1",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2')) AND (id > 0)) LIMIT 1"
       ]
-      instance.must_be_instance_of MockContent
+      instance.must_be_instance_of MockContent2
       instance.id.must_equal 1
     end
 
     it "return nil if no instance matching filter is found" do
       @database.fetch = []
-      instance = MockContent.first(id: 1)
+      instance = MockContent2.first(id: 1)
       instance.must_be_nil
     end
 
     it "retrieve by primary key using []" do
-      instance = MockContent[1]
+      instance = MockContent2[1]
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (id = 1) LIMIT 1",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1",
       ]
     end
 
     it "have correct equality test" do
       @database.fetch = [
-        { id:1, label:"column1", type_sid:"MockContent" }
+        { id:1, label:"column1", type_sid:"MockContent2" }
       ]
-      a = MockContent[1]
-      b = MockContent[1]
+      a = MockContent2[1]
+      b = MockContent2[1]
       a.must_equal b
 
       a.label = "changed"
@@ -589,39 +595,39 @@ describe "DataMapper" do
 
     it "allow for filtering model instances" do
       @database.fetch = [
-        { id:100, label:"column1", type_sid:"MockContent" }
+        { id:100, label:"column1", type_sid:"MockContent2" }
       ]
-      results = MockContent.filter(hidden: false).all
+      results = MockContent2.filter(hidden: false).all
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((type_sid IN ('MockContent')) AND (hidden IS FALSE))"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2')) AND (hidden IS FALSE))"
       ]
       results.length.must_equal 1
-      results.map(&:class).must_equal [MockContent]
+      results.map(&:class).must_equal [MockContent2]
       results.map(&:id).must_equal [100]
     end
 
     it "use the current mapper revision to save" do
       @database.fetch = [
-        { id:100, label:"column1", type_sid:"MockContent" }
+        { id:100, label:"column1", type_sid:"MockContent2" }
       ]
       instance = nil
       @mapper.revision(99) do
-        instance = MockContent.first
+        instance = MockContent2.first
       end
       instance.update(label: "changed")
       @mapper.revision(99) do
         instance.update(label: "changed2")
       end
       @database.sqls.must_equal [
-        "SELECT * FROM __r00099_content WHERE (type_sid IN ('MockContent')) LIMIT 1",
+        "SELECT * FROM __r00099_content WHERE (type_sid IN ('MockContent2')) LIMIT 1",
         "UPDATE content SET label = 'changed' WHERE (id = 100)",
         "UPDATE __r00099_content SET label = 'changed2' WHERE (id = 100)"
       ]
     end
 
     it "allow for reloading values from the db" do
-      @database.fetch = { id:100, label:"column1", type_sid:"MockContent" }
-      instance = MockContent.first
+      @database.fetch = { id:100, label:"column1", type_sid:"MockContent2" }
+      instance = MockContent2.first
       instance.set(label:"changed")
       instance.attributes[:label].must_equal "changed"
       instance.changed_columns.must_equal [:label]
@@ -629,27 +635,27 @@ describe "DataMapper" do
       instance.attributes[:label].must_equal "column1"
       instance.changed_columns.must_equal []
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (type_sid IN ('MockContent')) LIMIT 1",
+        "SELECT * FROM content WHERE (type_sid IN ('MockContent2')) LIMIT 1",
         "SELECT * FROM content WHERE (id = 100) LIMIT 1"
       ]
     end
 
 
     it "update model rows directly" do
-      MockContent.update(label: "changed")
+      MockContent2.update(label: "changed")
       @database.sqls.must_equal [
-        "UPDATE content SET label = 'changed' WHERE (type_sid IN ('MockContent'))"
+        "UPDATE content SET label = 'changed' WHERE (type_sid IN ('MockContent2'))"
       ]
     end
 
     it "introspect columns" do
-      MockContent.columns.must_equal @expected_columns
+      MockContent2.columns.must_equal @expected_columns
     end
 
     it "create getters & setters for all columns except id & type_sid" do
       columns = (@expected_columns - [:id, :type_sid])
       attrs = Hash[columns.map { |c| [c, "#{c}_value"] } ]
-      c = MockContent.new attrs
+      c = MockContent2.new attrs
 
       columns.each do |column|
         assert c.respond_to?(column), "Instance it respond to ##{column}"
@@ -670,7 +676,7 @@ describe "DataMapper" do
     end
 
     it "support after_initialize hooks" do
-      model = Class.new(MockContent) do
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def after_initialize
           self.param = true
@@ -681,7 +687,7 @@ describe "DataMapper" do
     end
 
     it "support before create triggers" do
-      model = Class.new(MockContent) do
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def before_create
           self.param = true
@@ -692,7 +698,7 @@ describe "DataMapper" do
     end
 
     it "support after create triggers" do
-      model = Class.new(MockContent) do
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def after_create
           self.param = true
@@ -703,7 +709,7 @@ describe "DataMapper" do
     end
 
     it "not insert instance & return nil if before_create throws :halt" do
-      model = Class.new(MockContent) do
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def before_create
           throw :halt
@@ -715,7 +721,7 @@ describe "DataMapper" do
     end
 
     it "call before save triggers on model create" do
-      model = Class.new(MockContent) do
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def before_save
           self.param = true
@@ -726,8 +732,8 @@ describe "DataMapper" do
     end
 
     it "call before save triggers on existing instances" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      model = Class.new(MockContent) do
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def before_save
           self.param = true
@@ -742,7 +748,7 @@ describe "DataMapper" do
     end
 
     it "call after save triggers after create" do
-      model = Class.new(MockContent) do
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def after_save
           self.param = true
@@ -753,8 +759,8 @@ describe "DataMapper" do
     end
 
     it "call after save triggers on existing instances" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      model = Class.new(MockContent) do
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def after_save
           self.param = true
@@ -769,8 +775,8 @@ describe "DataMapper" do
     end
 
     it "support before_update triggers" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      model = Class.new(MockContent) do
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def before_update
           self.param = true
@@ -784,8 +790,8 @@ describe "DataMapper" do
     end
 
     it "fail to save instance if before_update throws halt" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      model = Class.new(MockContent) do
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def before_update
           throw :halt
@@ -800,8 +806,8 @@ describe "DataMapper" do
     end
 
     it "support after update triggers" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      model = Class.new(MockContent) do
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def after_update
           self.param = true
@@ -815,8 +821,8 @@ describe "DataMapper" do
     end
 
     it "support before destroy triggers" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      model = Class.new(MockContent) do
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def before_destroy
           self.param = true
@@ -832,8 +838,8 @@ describe "DataMapper" do
     end
 
     it "not delete an instance if before_destroy throws halt" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      model = Class.new(MockContent) do
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def before_destroy
           throw :halt
@@ -847,8 +853,8 @@ describe "DataMapper" do
     end
 
     it "support after destroy triggers" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      model = Class.new(MockContent) do
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def after_destroy
           self.param = true
@@ -861,8 +867,8 @@ describe "DataMapper" do
     end
 
     it "not trigger before destroy hooks when calling #delete" do
-      @database.fetch = { id:1, label:"label", type_sid:"MockContent" }
-      model = Class.new(MockContent) do
+      @database.fetch = { id:1, label:"label", type_sid:"MockContent2" }
+      model = Class.new(MockContent2) do
         attr_accessor :param
         def before_destroy
           throw :halt
@@ -875,33 +881,33 @@ describe "DataMapper" do
     end
 
     it "serialize column to JSON" do
-      row = { id: 1, type_sid:"MockContent" }
+      row = { id: 1, type_sid:"MockContent2" }
       object = {name:"value"}
       serialized = Spontaneous::JSON.encode(object)
-      MockContent.serialized_columns.each do |column|
+      MockContent2.serialized_columns.each do |column|
         @database.fetch = row
-        instance = MockContent.create({column => object})
-        @database.sqls.first.must_equal "INSERT INTO content (#{column}, type_sid) VALUES ('#{serialized}', 'MockContent')"
+        instance = MockContent2.create({column => object})
+        @database.sqls.first.must_equal "INSERT INTO content (#{column}, type_sid) VALUES ('#{serialized}', 'MockContent2')"
       end
     end
 
     it "deserialize objects stored in the db" do
-      row = { id: 1, type_sid:"MockContent" }
+      row = { id: 1, type_sid:"MockContent2" }
       object = {name:"value"}
       serialized = Spontaneous::JSON.encode(object)
-      MockContent.serialized_columns.each do |column|
+      MockContent2.serialized_columns.each do |column|
         @database.fetch = row.merge(column => serialized)
-        instance = MockContent.first
+        instance = MockContent2.first
         instance.send(column).must_equal object
       end
     end
     it "save updates to serialized columns" do
-      row = { id: 1, type_sid:"MockContent" }
+      row = { id: 1, type_sid:"MockContent2" }
       object = {name:"value"}
       serialized = Spontaneous::JSON.encode(object)
-      MockContent.serialized_columns.each do |column|
+      MockContent2.serialized_columns.each do |column|
         @database.fetch = row.merge(column => serialized)
-        instance = MockContent.first
+        instance = MockContent2.first
         @database.sqls
         instance.send(column).must_equal object
         changed = {name:"it's different", value:[99, 100]}
@@ -961,14 +967,14 @@ describe "DataMapper" do
         Set.new(A1.subclasses).must_equal Set.new([B1, C1])
         A2.subclasses.must_equal [B2]
         C1.subclasses.must_equal []
-        Set.new(MockContent.subclasses).must_equal Set.new([MockContent2, A1, A2, B1, B2, C1])
+        Set.new(MockContent.subclasses).must_equal Set.new([MockContent2, MockContent3, A1, A2, B1, B2, C1])
       end
     end
   end
 
   it "allow for the creation of instance after save hooks" do
-    @database.fetch = { id: 1, type_sid:"MockContent" }
-    instance = MockContent.create label: "something"
+    @database.fetch = { id: 1, type_sid:"MockContent2" }
+    instance = MockContent2.create label: "something"
     test = false
     instance.after_save_hook do
       test = true
@@ -978,9 +984,9 @@ describe "DataMapper" do
   end
 
   it "let you count available instances" do
-    result = MockContent.count
+    result = MockContent2.count
     @database.sqls.must_equal [
-      "SELECT COUNT(*) AS count FROM content WHERE (type_sid IN ('MockContent')) LIMIT 1"
+      "SELECT COUNT(*) AS count FROM content WHERE (type_sid IN ('MockContent2')) LIMIT 1"
     ]
   end
 
@@ -1003,21 +1009,21 @@ describe "DataMapper" do
       parent = AssocContent.first
       @database.sqls
       @database.fetch = [
-        { id: 8, type_sid:"MockContent" },
+        { id: 8, type_sid:"MockContent2" },
         { id: 9, type_sid:"AssocContent" }
       ]
       children = parent.children
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (content.parent_id = 7)"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.parent_id = 7))"
       ]
       children.map(&:id).must_equal [8, 9]
-      children.map(&:class).must_equal [MockContent, AssocContent]
+      children.map(&:class).must_equal [MockContent2, AssocContent]
     end
 
     it "cache the result" do
       children = @parent.children
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (content.parent_id = 7)"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.parent_id = 7))"
       ]
       children = @parent.children
       @database.sqls.must_equal [ ]
@@ -1026,11 +1032,11 @@ describe "DataMapper" do
     it "reload the result if forced" do
       children = @parent.children
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (content.parent_id = 7)"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.parent_id = 7))"
       ]
       children = @parent.children(reload: true)
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (content.parent_id = 7)"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.parent_id = 7))"
       ]
     end
 
@@ -1038,18 +1044,18 @@ describe "DataMapper" do
       ds = @parent.children_dataset
       ds.filter { id > 3}.all
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((content.parent_id = 7) AND (id > 3))"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.parent_id = 7) AND (id > 3))"
       ]
     end
 
     it "return correctly typed results" do
       @database.fetch = [
-        { id: 8, type_sid:"MockContent" },
+        { id: 8, type_sid:"MockContent2" },
         { id: 9, type_sid:"AssocContent" }
       ]
       children = @parent.children
       children.map(&:id).must_equal [8, 9]
-      children.map(&:class).must_equal [MockContent, AssocContent]
+      children.map(&:class).must_equal [MockContent2, AssocContent]
     end
 
     it "correctly set the relation key when adding members" do
@@ -1069,7 +1075,7 @@ describe "DataMapper" do
         children = parent.children
       end
       @database.sqls.must_equal [
-        "SELECT * FROM __r00099_content WHERE (__r00099_content.parent_id = 7)"
+        "SELECT * FROM __r00099_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (__r00099_content.parent_id = 7))"
       ]
     end
 
@@ -1084,7 +1090,7 @@ describe "DataMapper" do
         end
       end
       @database.sqls.must_equal [
-        "SELECT * FROM __r00011_content WHERE (__r00011_content.parent_id = 7)"
+        "SELECT * FROM __r00011_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (__r00011_content.parent_id = 7))"
       ]
     end
 
@@ -1096,9 +1102,9 @@ describe "DataMapper" do
       ]
       @parent.destroy
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (content.source_id = 7)",
-        "SELECT * FROM content WHERE (content.source_id = 8)",
-        "SELECT * FROM content WHERE (content.source_id = 9)",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.source_id = 7))",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.source_id = 8))",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.source_id = 9))",
         "DELETE FROM content WHERE (id = 9)",
         "DELETE FROM content WHERE (id = 8)",
         "DELETE FROM content WHERE (id = 7)"
@@ -1113,7 +1119,7 @@ describe "DataMapper" do
       ]
       @parent.destroy
       @database.sqls.must_equal [
-        "DELETE FROM content WHERE (content.source_id = 7)",
+        "DELETE FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.source_id = 7))",
         "DELETE FROM content WHERE (id = 7)"
       ]
     end
@@ -1183,28 +1189,28 @@ describe "DataMapper" do
     it "load the owner" do
       @database.fetch = { id: 7, type_sid:"AssocContent", parent_id: nil }
       parent = @child.parent
-      @database.sqls.must_equal ["SELECT * FROM content WHERE (id = 7) LIMIT 1"]
+      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 7)) LIMIT 1"]
       parent.must_be_instance_of AssocContent
       parent.id.must_equal 7
     end
 
     it "cache the result" do
       parent = @child.parent
-      @database.sqls.must_equal ["SELECT * FROM content WHERE (id = 7) LIMIT 1"]
+      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 7)) LIMIT 1"]
       parent = @child.parent
       @database.sqls.must_equal [ ]
     end
 
     it "reload the result if asked" do
       parent = @child.parent
-      @database.sqls.must_equal ["SELECT * FROM content WHERE (id = 7) LIMIT 1"]
+      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 7)) LIMIT 1"]
       parent = @child.parent(reload: true)
-      @database.sqls.must_equal ["SELECT * FROM content WHERE (id = 7) LIMIT 1"]
+      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 7)) LIMIT 1"]
     end
 
     it "allow access to the relation dataset" do
       results = @child.parent_dataset.filter { id > 3 }.first
-      @database.sqls.must_equal ["SELECT * FROM content WHERE ((content.id = 7) AND (id > 3)) LIMIT 1"]
+      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.id = 7) AND (id > 3)) LIMIT 1"]
     end
 
     it "allow setting of owner for instance" do
@@ -1228,7 +1234,7 @@ describe "DataMapper" do
       children = parent.children
       children.map { |c| c.parent.object_id }.uniq.must_equal [parent.object_id]
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (content.parent_id = 7)"
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.parent_id = 7))"
       ]
     end
 
@@ -1409,7 +1415,7 @@ describe "DataMapper" do
         b = @mapper.with_cache("key") { @mapper.filter(nil, label: "frog").first }
       end
       @database.sqls.must_equal [
-        "SELECT * FROM __r00020_content WHERE (label = 'frog') LIMIT 1"
+        "SELECT * FROM __r00020_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (label = 'frog')) LIMIT 1"
       ]
     end
 
