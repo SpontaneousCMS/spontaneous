@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_dependency('bundler',         ['>  1.0.15'])
   s.add_dependency('cutaneous',       ['~> 0.1.6'])
   s.add_dependency('erubis',          ['~> 2.6'])
-  s.add_dependency('fog',             ['~> 1.6.0'])
+  s.add_dependency('fog',             ['~> 1.17'])
   s.add_dependency('foreman',         ['~> 0.60.2'])
   s.add_dependency('kramdown',        ['~> 0.14.0'])
   s.add_dependency('launchy',         ['~> 2.1.2'])
