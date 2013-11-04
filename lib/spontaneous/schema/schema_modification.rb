@@ -67,7 +67,7 @@ module Spontaneous
       end
 
       def simple_change?
-        only_removed_items? or only_added_items?
+        only_removed_fields? or only_added_items?
       end
 
       def only_added_items?
@@ -75,6 +75,14 @@ module Spontaneous
           !added_items.empty?
         else
           false
+        end
+      end
+
+      def only_removed_fields?
+        if removed_items.empty?
+          false
+        else
+          added_items.empty? && removed_items.all? { |uid| uid.category == :field }
         end
       end
 

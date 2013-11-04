@@ -769,30 +769,6 @@ describe "Schema" do
       end
 
 
-      it "be done automatically if only classes have been removed" do
-        uid = B.schema_id.to_s
-        Object.send(:remove_const, :B)
-        S.schema.stubs(:classes).returns([::A])
-        S.schema.reload!
-        S.schema.validate!
-        m = YAML.load_file(@map_file)
-        refute m.key?(uid)
-      end
-
-      it "be done automatically if only boxes have been removed" do
-        uid = A.boxes[:posts].schema_id.to_s
-        Object.send :remove_const, :A
-        class ::A < ::Page
-          field :title
-          field :introduction
-          layout :sparse
-        end
-        S.schema.stubs(:classes).returns([A, B])
-        S.schema.reload!
-        S.schema.validate!
-        m = YAML.load_file(@map_file)
-        refute m.key?(uid)
-      end
 
       it "be done automatically if only fields have been removed" do
         uid = A.fields[:title].schema_id.to_s
@@ -806,20 +782,6 @@ describe "Schema" do
         S.schema.reload!
         S.schema.validate!
         m = YAML.load_file(@map_file)
-        refute m.key?(uid)
-      end
-
-      it "be done automatically in presence of independent addition inside type and of type" do
-        A.field :moose
-        uid = B.schema_id.to_s
-        Object.send(:remove_const, :B)
-        S.schema.stubs(:classes).returns([::A])
-        S.schema.reload!
-        S.schema.validate!
-        ::A.field_prototypes[:moose].schema_id.wont_be_nil
-
-        m = YAML.load_file(@map_file)
-        m[::A.field_prototypes[:moose].schema_id.to_s].must_equal ::A.field_prototypes[:moose].schema_name
         refute m.key?(uid)
       end
 
@@ -840,46 +802,6 @@ describe "Schema" do
         refute m.key?(uid)
       end
 
-      it "be done automatically in presence of independent changes to boxes & fields" do
-        B.field :crisis
-        uid = A.boxes[:posts].schema_id.to_s
-        A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
-        S.schema.stubs(:classes).returns([A, B])
-        S.schema.reload!
-        S.schema.validate!
-
-        ::B.field_prototypes[:crisis].schema_id.wont_be_nil
-        m = YAML.load_file(@map_file)
-        refute m.key?(uid)
-      end
-
-      it "be done automatically in presence of independent changes to classes, boxes & fields" do
-        class ::X < B; end
-        uid = A.boxes[:posts].schema_id.to_s
-        A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
-        B.field :crisis
-        B.box :circus
-        A.field :crisis
-        S.schema.stubs(:classes).returns([::A, ::B, ::X])
-        S.schema.reload!
-        S.schema.validate!
-
-        ::A.field_prototypes[:crisis].schema_id.wont_be_nil
-        m = YAML.load_file(@map_file)
-
-        box = ::B.boxes[:circus]
-        m[box.schema_id.to_s].must_equal box.schema_name
-
-        field = ::A.field_prototypes[:crisis]
-        m[field.schema_id.to_s].must_equal field.schema_name
-
-        field = ::B.field_prototypes[:crisis]
-        m[field.schema_id.to_s].must_equal field.schema_name
-
-        refute m.key?(uid)
-      end
-
-
       # sanity check
       it "still raise error in case of addition & deletion" do
         A.field :added
@@ -898,6 +820,28 @@ describe "Schema" do
         uid = B.schema_id.to_s
         Object.send(:remove_const, :B)
         S.schema.stubs(:classes).returns([::A, ::X])
+        S.schema.reload!
+        lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
+      end
+
+      it "raise an error if classes have been removed" do
+        uid = B.schema_id.to_s
+        Object.send(:remove_const, :B)
+        S.schema.stubs(:classes).returns([::A])
+        S.schema.reload!
+
+        lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
+      end
+
+      it "raise an error if boxes have been removed" do
+        uid = A.boxes[:posts].schema_id.to_s
+        Object.send :remove_const, :A
+        class ::A < ::Page
+          field :title
+          field :introduction
+          layout :sparse
+        end
+        S.schema.stubs(:classes).returns([A, B])
         S.schema.reload!
         lambda { S.schema.validate! }.must_raise(Spontaneous::SchemaModificationError)
       end
