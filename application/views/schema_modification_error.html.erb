@@ -30,10 +30,10 @@
     <div id="container">
 
       <%
-          types = modification.actions.map { |a| a.source.owner}.uniq
+          types = modification.actions.map { |a| a.source.owner}.uniq.compact
       %>
 
-    <h1>There are unresolved changes to <%= types.length > 1 ? "s" : "" %> <%= types.map { |o| "<strong>&lsquo;#{o}&rsquo;</strong>"}.join(', ')%></h1>
+    <h1>There are unresolved changes to <%= types.length == 0 ? "the schema" : types.map { |o| "<strong>&lsquo;#{o}&rsquo;</strong>"}.join(', ')%></h1>
     <% source_file = modification.actions[0].source.source_file %>
     <p class="src"><a href="mvim://open?url=file://<%= source_file %>"><%= source_file %></a></p>
 
@@ -55,7 +55,17 @@
           to &lsquo;<em><%= action.dest.name %></em>&rsquo;
           <% end %>
         </a>
-        <p id="<%= id %>" style="display: none">Are you sure? <a class="button cancel" onclick="_cancel('#<%= id %>')">No</a> <button class="button" onclick="solution('<%= action.action %>', '<%= action.source.name %>', '<%= action.dest ? action.dest.name : '' %>')">Yes</button></p>
+        <div id="<%= id %>" style="display: none">
+        <% if action.action == :delete %>
+          <% case action.category %>
+          <% when :type %>
+          <p class="warning">Deleting a type will delete all instances of it from the db and any of their descendents. This cannot be undone so snapshot your database with <code>spot site dump</code> before proceeding.</p>
+          <% when :box %>
+          <p class="warning">Deleting a box will delete the contents of all boxes of that type. This cannot be undone so snapshot your database with <code>spot site dump</code> before proceeding.</p>
+          <% end %>
+        <% end %>
+        <p>Are you sure? <a class="button cancel" onclick="_cancel('#<%= id %>')">No</a> <button class="button" onclick="solution('<%= action.action %>', '<%= action.source.name %>', '<%= action.dest ? action.dest.name : '' %>')">Yes</button></p>
+        </div>
         </form>
         </li>
       <% end %>

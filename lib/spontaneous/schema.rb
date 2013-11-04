@@ -179,7 +179,9 @@ module Spontaneous
       # type is removed it becomes difficult to instantiate any entries that remain
       # in the db
       def after_delete(uid)
-        Spontaneous::Model::Action::Clean.run(Spontaneous::Content)
+        result = Spontaneous::Model::Action::Clean.run(Spontaneous::Content)
+        logger.warn("Deleted #{result[:invalid]} invalid and #{result[:orphans]} orphaned content instances.")
+        logger.warn("Site must_publish_all flag has been set") if result[:publish]
       end
 
       def generate_new_schema
