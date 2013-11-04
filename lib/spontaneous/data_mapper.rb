@@ -34,6 +34,7 @@ module Spontaneous
       def_delegators :dataset,
         :filter, :where,
         :filter!, :where!,
+        :untyped,
         :count, :count!,
         :order, :limit,
         :all, :get, :[], :first,

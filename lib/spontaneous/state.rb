@@ -53,6 +53,14 @@ module Spontaneous
         instance.modified_at || Time.now
       end
 
+      def must_publish_all?
+        instance.must_publish_all
+      end
+
+      def must_publish_all!(state = true)
+        instance.update must_publish_all: state
+      end
+
       # Called by Page.after_create and Page.after_destroy in order to update
       # the Site's modification time
       def site_modified!

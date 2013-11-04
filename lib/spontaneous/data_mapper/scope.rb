@@ -18,6 +18,10 @@ module Spontaneous
         count(nil)
       end
 
+      def untyped
+        untyped_dataset
+      end
+
       def filter(types, *cond, &block)
         dataset(types).filter(*cond, &block)
       end

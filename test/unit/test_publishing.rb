@@ -131,6 +131,12 @@ describe "Publishing" do
       Site.pending_revision.must_be_nil
       refute Content.revision_exists?(@revision)
     end
+
+    it "resets the must_publish_all flag after a successful publish" do
+      Site.must_publish_all!
+      Site.publish_all
+      Site.must_publish_all?.must_equal false
+    end
   end
 
 

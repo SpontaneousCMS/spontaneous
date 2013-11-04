@@ -163,6 +163,7 @@ module Spontaneous
         case action
         when :delete
           uids.destroy(uid)
+          after_delete(uid)
         when :rename
           uid.rewrite!(dest)
         end
@@ -170,6 +171,15 @@ module Spontaneous
         reload!
         validate!
         logger.info("✓ Schema updated successfully")
+      end
+
+      # now I want to clean up the content, removing any types associated with UIDs
+      # that no longer exist and then cleaning up after that by looking for any
+      # instances with an invalid content path. This can happen because when a
+      # type is removed it becomes difficult to instantiate any entries that remain
+      # in the db
+      def after_delete(uid)
+        Spontaneous::Model::Action::Clean.run(Spontaneous::Content)
       end
 
       def generate_new_schema

@@ -28,6 +28,7 @@ describe "Change" do
     Content.delete_revision(@revision) rescue nil
     Content.delete_revision(@revision+1) rescue nil
     Content.delete
+    Site.must_publish_all!(false)
     teardown_site
   end
 
@@ -38,6 +39,13 @@ describe "Change" do
     assert result.key?(:published_revision)
     result[:published_revision].must_equal 0
     assert result[:first_publish]
+  end
+
+  it "honors the site must_publish_all? flag" do
+    Site.must_publish_all!
+    root = Page.create(:title => "root")
+    result = S::Change.outstanding
+    result[:must_publish_all].must_equal true
   end
 
 

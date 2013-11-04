@@ -76,10 +76,10 @@ Spontaneous.Publishing = (function($, S) {
 			, self = this
 			, changed_wrap = dom.div("#changes.change-list").css("opacity", 0)
 			, publish_wrap = dom.div("#to-publish.change-list").css("opacity", 0)
-			, first_publish = outstanding.first_publish
+			, must_publish_all = outstanding.first_publish || outstanding.must_publish_all
 			, spinner = this.spinner
 			, append_to;
-			if (first_publish) {
+			if (must_publish_all) {
 				w.addClass("first-publish");
 			}
 			if (change_list.length === 0) {
@@ -96,22 +96,22 @@ Spontaneous.Publishing = (function($, S) {
 
 				var changed_toolbar = dom.div('.actions').append(dom.div().text("Modified pages")).append(publish_all);
 				var publish_toolbar = dom.div('.actions').append(dom.div().text("Publish pages"));
-				if (!first_publish) {
+				if (!must_publish_all) {
 					publish_toolbar.append(clear_all);
 				}
 				var changed_entries = dom.div('.change-sets'), publish_entries = dom.div('.change-sets')
 				changed_wrap.append(changed_toolbar, changed_entries);
 				publish_wrap.append(publish_toolbar, publish_entries);
 				append_to = changed_entries;
-				if (first_publish) {
+				if (must_publish_all) {
 					append_to = publish_entries;
 				}
 				for (var i = 0, ii = change_list.length; i < ii; i++) {
-					var cs = new ChangeSet(i, self, change_list[i], first_publish);
+					var cs = new ChangeSet(i, self, change_list[i], must_publish_all);
 					self.change_sets.push(cs);
 					append_to.append(cs.panel())
 				}
-				if (!first_publish) {
+				if (!must_publish_all) {
 					publish_entries.append(dom.div('.instructions').text('Add pages to publish from the list on the left'));
 				}
 				spinner.stop();

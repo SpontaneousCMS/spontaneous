@@ -6,7 +6,7 @@ module Spontaneous
 
     class << self
       def outstanding
-        outstanding = { :published_revision => Spontaneous::Site.published_revision,
+        outstanding = { :published_revision => Spontaneous::Site.published_revision, :must_publish_all => Spontaneous::Site.must_publish_all?,
           :changes => unpublished_changes }
         outstanding[:first_publish] = true if outstanding[:published_revision] == 0
         outstanding

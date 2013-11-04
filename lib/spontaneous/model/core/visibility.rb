@@ -127,8 +127,12 @@ module Spontaneous::Model::Core
     end
 
     def visibility_ancestors
+      visibility_ancestor_ids.map { |id| content_model[id] }
+    end
+
+    def visibility_ancestor_ids
       return [] if visibility_path.blank?
-      visibility_path.split(Spontaneous::VISIBILITY_PATH_SEP).map { |id| content_model[id] }
+      visibility_path.split(Spontaneous::VISIBILITY_PATH_SEP).map(&:to_i)
     end
 
     def recalculated_hidden

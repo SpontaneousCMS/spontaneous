@@ -273,6 +273,14 @@ describe "DataMapper" do
       ]
     end
 
+
+    it "allows you to invert the conditions" do
+      ds = @mapper.filter([MockContent2]).invert.all
+      @database.sqls.must_equal [
+        "SELECT * FROM content WHERE (type_sid NOT IN ('MockContent2'))",
+      ]
+    end
+
     it "allow you to delete all content" do
       @mapper.delete
       @database.sqls.must_equal [
