@@ -543,6 +543,37 @@ describe "Fields" do
     end
   end
 
+  describe "LongString fields" do
+    before do
+      class ::LongStringContent < Piece
+        field :long1, :longstring
+        field :long2, :long_string
+        field :long3, :text
+      end
+      @instance = LongStringContent.new
+    end
+    after do
+      Object.send(:remove_const, :LongStringContent)
+    end
+
+    it "is available as the :longstring type" do
+      assert LongStringContent.field_prototypes[:long1].field_class < Spontaneous::Field::LongString
+    end
+
+    it "is available as the :long_string type" do
+      assert LongStringContent.field_prototypes[:long2].field_class < Spontaneous::Field::LongString
+    end
+
+    it "is available as the :text type" do
+      assert LongStringContent.field_prototypes[:long3].field_class < Spontaneous::Field::LongString
+    end
+
+    it "translates newlines to <br/> tags" do
+      @instance.long1 = "this\nlong\nstring"
+      @instance.long1.value.must_equal "this<br />\nlong<br />\nstring"
+    end
+  end
+
   describe "Editor classes" do
     it "be defined in base types" do
       base_class = Spontaneous::Field::Image
