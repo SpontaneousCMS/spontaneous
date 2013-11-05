@@ -511,7 +511,8 @@ describe "Fields" do
     before do
       class ::MarkdownContent < Piece
         field :text1, :markdown
-        field :text2, :text
+        field :text2, :richtext
+        field :text3, :markup
       end
       @instance = MarkdownContent.new
     end
@@ -522,8 +523,11 @@ describe "Fields" do
     it "be available as the :markdown type" do
       assert MarkdownContent.field_prototypes[:text1].field_class < Spontaneous::Field::Markdown
     end
-    it "be available as the :text type" do
+    it "be available as the :richtext type" do
       assert MarkdownContent.field_prototypes[:text2].field_class < Spontaneous::Field::Markdown
+    end
+    it "be available as the :markup type" do
+      assert MarkdownContent.field_prototypes[:text3].field_class < Spontaneous::Field::Markdown
     end
 
     it "process input into HTML" do
