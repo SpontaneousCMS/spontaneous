@@ -19,8 +19,8 @@ module Spontaneous::Media::Image
         :height => height,
         :alt => ""
       }
-      default_attr.delete(:width) if width.nil?
-      default_attr.delete(:height) if height.nil?
+      default_attr.delete(:width) if (width.nil? || width == 0)
+      default_attr.delete(:height) if (height.nil? || height == 0)
       if template_params && template_params.length > 0 && template_params[0].is_a?(Hash)
         attr = template_params[0].merge(attr)
       end

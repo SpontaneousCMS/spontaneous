@@ -281,4 +281,41 @@ describe "Images" do
       end
     end
   end
+
+  describe "clearing" do
+    def assert_image_field_empty
+      @field.value.must_equal ''
+      @field.src.must_equal ''
+      @field.filesize.must_equal 0
+      @field.smaller.value.must_equal ''
+    end
+
+    before do
+      class ::ContentWithImage < ::Content::Piece
+        field :photo, :image do
+          size :smaller do
+            fit width: 100, height: 100
+          end
+        end
+      end
+
+      @instance = ContentWithImage.new
+
+      @content_id = 234
+      @instance.stubs(:id).returns(@content_id)
+      @field = @instance.photo
+      path = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+      @field.value = path
+    end
+
+    after do
+      Object.send(:remove_const, :ContentWithImage) rescue nil
+    end
+
+    it "clears the value if set to the empty string" do
+      @field.value = ''
+      assert_image_field_empty
+    end
+  end
+
 end

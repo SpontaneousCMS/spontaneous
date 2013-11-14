@@ -78,15 +78,15 @@ module Spontaneous::Field
     end
 
     def width
-      original.width
+      original.width || 0
     end
 
     def height
-      original.height
+      original.height || 0
     end
 
     def filesize
-      original.filesize
+      original.filesize || 0
     end
 
     def src
