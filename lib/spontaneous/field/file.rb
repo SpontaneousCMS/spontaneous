@@ -35,7 +35,7 @@ module Spontaneous::Field
 
     def storage_headers(content_type, filename)
       headers = { content_type: content_type }
-      if prototype.options[:attachment]
+      if prototype && prototype.options[:attachment]
         headers.update(content_disposition: %(attachment; filename=#{Rack::Utils.escape(filename)}))
       end
       headers
