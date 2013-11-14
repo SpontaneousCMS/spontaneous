@@ -1,4 +1,4 @@
-# encoding: UTF-8
+
 
 require File.expand_path('../../test_helper', __FILE__)
 
@@ -72,7 +72,7 @@ describe "Back" do
     end
 
     class ::HomePage < Page
-      field :introduction, :text
+      field :introduction, :richtext
       box :projects do
         allow Project
       end
