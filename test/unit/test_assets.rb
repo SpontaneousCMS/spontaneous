@@ -29,7 +29,7 @@ describe "Assets" do
                  Spontaneous::Output::Template::PreviewRenderer.new
                end
     output = content.output(format)
-    context = renderer.context(output, params)
+    context = renderer.context(output, params, nil)
     context.extend LiveSimulation if live
     context.class_eval do
       # Force us into production environment

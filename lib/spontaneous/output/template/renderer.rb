@@ -16,20 +16,20 @@ module Spontaneous::Output::Template
       @cache = cache
     end
 
-    def render(output, params = {})
+    def render(output, params = {}, parent_context = nil)
       output.model.with_visible do
-        engine.render(output.content, context(output, params), output.name)
+        engine.render(output.content, context(output, params, parent_context), output.name)
       end
     end
 
-    def render_string(template_string, output, params = {})
+    def render_string(template_string, output, params = {}, parent_context = nil)
       output.model.with_visible do
-        engine.render_string(template_string, context(output, params), output.name)
+        engine.render_string(template_string, context(output, params, parent_context), output.name)
       end
     end
 
-    def context(output, params)
-      context_class(output).new(output.content, params).tap do |context|
+    def context(output, params, parent)
+      context_class(output).new(Spontaneous::Output::Renderable.new(output.content), params, parent).tap do |context|
         context._renderer = renderer_for_context
       end
     end
@@ -108,7 +108,7 @@ module Spontaneous::Output::Template
       @revision = revision
     end
 
-    def render(output, params = {})
+    def render(output, params = {}, parent_context = nil)
       request  = params[:request]
       response = params[:response]
       headers  = request.env
@@ -144,14 +144,14 @@ module Spontaneous::Output::Template
   end
 
   class PreviewRenderer < Renderer
-    def render(output, params = {})
+    def render(output, params = {}, parent_context = nil)
       rendered = super(output)
-      request_renderer.render_string(rendered, output, params)
+      request_renderer.render_string(rendered, output, params, parent_context)
     end
 
-    def render_string(template_string, output, params = {})
+    def render_string(template_string, output, params = {}, parent_context = nil)
       rendered = super(template_string, output)
-      request_renderer.render_string(rendered, output, params)
+      request_renderer.render_string(rendered, output, params, parent_context)
     end
 
     def renderer_for_context

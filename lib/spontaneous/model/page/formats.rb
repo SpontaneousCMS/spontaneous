@@ -105,10 +105,10 @@ module Spontaneous::Model::Page
       self.class.mime_type(format)
     end
 
-    def render(format=:html, params={}, *args)
-      params, format = format, :html if format.is_a?(Hash)
+    def render(format = :html, locals = {}, parent_context = nil)
+      locals, format = format, :html if format.is_a?(Hash)
       output = output(format)
-      output.render(params, *args)
+      output.render(locals, parent_context)
     end
   end # Formats
 end # Spontaneous::Plugins::Page

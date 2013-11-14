@@ -3,10 +3,10 @@ module Spontaneous::Media::Image
   module Renderable
     attr_accessor :template_params
 
-    def render(format=:html, *args)
+    def render(format=:html, params = {}, parent_context = nil)
       case format
       when "html", :html
-        to_html(*args)
+        to_html(params)
       else
         value
       end

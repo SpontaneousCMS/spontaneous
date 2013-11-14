@@ -35,9 +35,19 @@ describe "Render" do
           end
         end
         field :description do
+          def render(format = :html, locals = {}, parent_context = nil)
+            case format
+            when :pdf
+              to_pdf
+            else
+              super
+            end
+          end
+
           def to_pdf
             "{#{value}}"
           end
+
           def to_epub
             to_html
           end

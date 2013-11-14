@@ -52,7 +52,7 @@ describe "Templates" do
         true
       end
     end
-    @context = @klass.new(Object.new, :html)
+    @context = @klass.new(Object.new)
   end
 
   after do
@@ -240,10 +240,14 @@ Parent Footer
         def field
           @klass ||= Class.new(Object) do
             attr_accessor :_format
-            def to_html
-              "(#{_format})"
+            def render(format, locals = {}, parent_context = nil)
+              case format
+              when :html
+                "(#{_format})"
+              else
+                to_s
+              end
             end
-
             def to_s
               "'#{_format}'"
             end

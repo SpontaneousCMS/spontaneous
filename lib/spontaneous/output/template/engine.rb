@@ -19,15 +19,15 @@ module Spontaneous::Output::Template
       @engine.roots
     end
 
-    def render(content, context, format = "html")
+    def render(content, context, format = :html)
       render_template(template_path(content, format), context, format)
     end
 
-    def render_template(template_path, context, format = "html")
+    def render_template(template_path, context, format = :html)
       @engine.render(template_path, context, format)
     end
 
-    def render_string(template_string, context, format = "html")
+    def render_string(template_string, context, format = :html)
       @engine.render_string(template_string, context, format)
     end
 
