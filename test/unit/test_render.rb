@@ -35,9 +35,19 @@ describe "Render" do
           end
         end
         field :description do
+          def render(format = :html, locals = {}, parent_context = nil)
+            case format
+            when :pdf
+              to_pdf
+            else
+              super
+            end
+          end
+
           def to_pdf
             "{#{value}}"
           end
+
           def to_epub
             to_html
           end
@@ -82,9 +92,9 @@ describe "Render" do
     end
 
     it "use a cache for the site root" do
-        a = @renderer.render_string('#{root.object_id} #{root.object_id}', @page.output(:html), {})
-        a.wont_equal "#{nil.object_id} #{nil.object_id}"
-        a.split.uniq.length.must_equal 1
+      a = @renderer.render_string('#{root.object_id} #{root.object_id}', @page.output(:html), {})
+      a.wont_equal "#{nil.object_id} #{nil.object_id}"
+      a.split.uniq.length.must_equal 1
     end
 
     it "uses a cache for site pages" do
@@ -222,8 +232,8 @@ describe "Render" do
         end
         @page.image = "/photo.jpg"
         output =  @page.render
-        output.must_match /width=['"]10['"]/
-        output.must_match /height=['"]50['"]/
+        output.must_match /width=['"]10["']/
+        output.must_match /height=["']50['"]/
       end
 
     end

@@ -121,13 +121,13 @@ module Spontaneous::Output
       content.model
     end
 
-    def render(params = {}, *args)
-      render_using(default_renderer, params, *args)
+    def render(params = {}, parent_context = nil)
+      render_using(default_renderer, params, parent_context)
     end
 
-    def render_using(renderer, params, *args)
+    def render_using(renderer, params = {}, parent_context = nil)
       before_render
-      output = render_page(renderer, params, *args)
+      output = render_page(renderer, params, parent_context)
       output = postprocess(output)
       after_render(output)
       output
@@ -150,8 +150,8 @@ module Spontaneous::Output
       output
     end
 
-    def render_page(renderer, params = {}, *args)
-      renderer.render(self, params, *args)
+    def render_page(renderer, params = {}, parent_context = nil)
+      renderer.render(self, params, parent_context)
     end
 
     def publish_page(renderer, revision)

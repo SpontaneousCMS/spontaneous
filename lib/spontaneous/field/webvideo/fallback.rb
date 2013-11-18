@@ -7,8 +7,8 @@ module Spontaneous::Field
         "fallback"
       end
 
-      def to_html(options = {})
-        params = player_attributes(options)
+      def to_html(locals = {})
+        params = player_attributes(locals)
         attributes = hash_to_attributes(params[:attr])
         %(<iframe #{attributes}></iframe>)
       end

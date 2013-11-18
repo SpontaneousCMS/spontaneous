@@ -152,9 +152,10 @@ module Spontaneous
       Spontaneous.revision_dir(revision) / asset_url
     end
 
-    autoload :Template, "spontaneous/output/template"
-    autoload :Context,  "spontaneous/output/context"
-    autoload :Helpers,  "spontaneous/output/helpers"
+    autoload :Template,   "spontaneous/output/template"
+    autoload :Context,    "spontaneous/output/context"
+    autoload :Helpers,    "spontaneous/output/helpers"
+    autoload :Renderable, "spontaneous/output/renderable"
   end
 end
 

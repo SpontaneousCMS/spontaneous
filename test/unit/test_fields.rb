@@ -1067,6 +1067,24 @@ describe "Fields" do
       @field.filesize.must_equal 2254
     end
 
+    describe "clearing" do
+      def assert_file_field_empty
+        @field.value.must_equal ''
+        @field.filename.must_equal ''
+        @field.filesize.must_equal 0
+      end
+
+      before do
+        path = File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__)
+        @field.value = path
+      end
+
+      it "clears the value if set to the empty string" do
+        @field.value = ''
+        assert_file_field_empty
+      end
+    end
+
     describe "with cloud storage" do
       before do
         ::Fog.mock!

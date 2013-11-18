@@ -28,6 +28,10 @@ module Spontaneous::Media
       end
 
       alias_method :empty?, :blank?
+
+      def value(format = :html)
+        src
+      end
     end
   end
 end

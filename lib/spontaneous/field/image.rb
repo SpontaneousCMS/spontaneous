@@ -15,23 +15,10 @@ module Spontaneous::Field
       %w{image/(png|jpeg|gif)}
     end
 
-    class TemplateParameters < DelegateClass(S::Media::Image::Attributes)
-      attr_reader :image
-
-      def initialize(image, args)
-        super(image)
-        @image, @args = image, args.extract_options!
-      end
-
-      def to_html(attributes = {})
-        @image.to_html(@args.merge(attributes))
-      end
-    end
-
     def self.size(name, options = {}, &process)
       self.sizes[name.to_sym] = [options, process]
       unless method_defined?(name)
-        class_eval "def #{name}(*args); TemplateParameters.new(sizes[:#{name}], args); end"
+        class_eval "def #{name}(*args); sizes[:#{name}]; end"
       end
     end
 
@@ -91,15 +78,15 @@ module Spontaneous::Field
     end
 
     def width
-      original.width
+      original.width || 0
     end
 
     def height
-      original.height
+      original.height || 0
     end
 
     def filesize
-      original.filesize
+      original.filesize || 0
     end
 
     def src

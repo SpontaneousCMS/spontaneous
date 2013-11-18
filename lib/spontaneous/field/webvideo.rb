@@ -109,19 +109,19 @@ module Spontaneous::Field
       values.merge(metadata || {})
     end
 
-    def render(format=:html, *args)
+    def render(format=:html, locals = {}, *args)
       case format
       when :html
-        to_html(*args)
+        to_html(locals)
       when :json
-        to_json(*args)
+        to_json(locals)
       else
         value(format)
       end
     end
 
-    def to_html(*args)
-      provider.to_html(*args)
+    def to_html(locals = {})
+      provider.to_html(locals)
     end
 
     def provider_id

@@ -136,15 +136,9 @@ module Spontaneous::Output::Context
     end
 
     def __decode_params(param)
-      unless param.is_a?(String)
-        @_render_method ||= "to_#{__loader.format}".to_sym
-        if param.respond_to?(@_render_method)
-          param = param.send(@_render_method)
-        else
-          if param.respond_to?(:render)
-            param = __render_content(param) #render(param, param.template)
-          end
-        end
+      return param if param.is_a?(String)
+      if param.respond_to?(:render)
+        param = __render_content(param) #render(param, param.template)
       end
       param.to_s
     end
@@ -153,9 +147,9 @@ module Spontaneous::Output::Context
     # use of shared caches that are held by it.
     def __render_content(content)
       if content.respond_to?(:render_using)
-        content.render_using(_renderer, __format, self)
+        content.render_using(_renderer, __format, {}, self)
       else
-        content.render(__format, self)
+        content.render(__format, {}, self)
       end
     end
   end

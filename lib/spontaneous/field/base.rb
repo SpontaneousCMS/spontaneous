@@ -323,16 +323,16 @@ module Spontaneous
         value(format).to_s
       end
 
-      def render(format=:html, *args)
+      def render(format = :html, locals = {}, *args)
         value(format)
       end
 
-      def render_using(renderer, format=:html, *args)
-        render(format)
+      def render_using(renderer, format = :html, locals = {}, *args)
+        render(format, locals)
       end
 
-      def to_html(*args)
-        render(:html, *args)
+      def to_html(locals = {})
+        value(:html)
       end
 
       def to_pdf(*args)
