@@ -295,6 +295,32 @@ describe "Front" do
         SitePage.instance_variable_set(:@layout_procs, nil)
       end
 
+      it "allows setting status code and passing parameters to the show call" do
+        SitePage.layout do
+          "{{ teeth }}${ path }"
+        end
+        SitePage.request do
+          show "$news", 401, :teeth => "white"
+        end
+        get '/about'
+        assert last_response.status == 401
+        last_response.body.must_equal "white/news"
+        SitePage.instance_variable_set(:@layout_procs, nil)
+      end
+
+      it "allows passing parameters to the show call" do
+        SitePage.layout do
+          "{{ teeth }}${ path }"
+        end
+        SitePage.request do
+          show "$news", :teeth => "white"
+        end
+        get '/about'
+        assert last_response.status == 200
+        last_response.body.must_equal "white/news"
+        SitePage.instance_variable_set(:@layout_procs, nil)
+      end
+
       it "give access to the request params within the controller" do
         SitePage.layout { "{{ params[:horse] }}*{{ equine }}" }
         SitePage.request :post do
