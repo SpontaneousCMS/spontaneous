@@ -60,7 +60,11 @@ module Spontaneous::Model::Page
       end
 
       def request_blocks
-        @request_blocks ||= {}
+        @request_blocks ||= supertype_request_blocks
+      end
+
+      def supertype_request_blocks
+        supertype && supertype.respond_to?(:request_blocks) ? supertype.request_blocks.dup : {}
       end
 
 
