@@ -94,6 +94,7 @@ module Spontaneous
     autoload :Site,     "spontaneous/cli/site"
     autoload :Sync,     "spontaneous/cli/sync"
     autoload :User,     "spontaneous/cli/user"
+    autoload :Content,  "spontaneous/cli/content"
 
     class Root < ::Thor
       register Spontaneous::Cli::Console,  "console",  "console",           "Gives you console access to the current site"
@@ -109,6 +110,7 @@ module Spontaneous
       register Spontaneous::Cli::Migrate,  "migrate",  "migrate",           "Runs Spontaneous migrations"
       register Spontaneous::Cli::Assets,   "assets",   "assets [ACTION]",   "Manage Spontaneous assets"
       register Spontaneous::Cli::Fields,   "fields",   "fields [ACTION]",   "Manage Spontaneous fields"
+      register Spontaneous::Cli::Content,  "content",  "content [ACTION]",   "Manage Spontaneous content"
 
       desc :browse, "Launces a browser pointing to the current development CMS"
       def browse

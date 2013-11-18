@@ -31,6 +31,6 @@ module Spontaneous::Field
       Kramdown::Document.new(output)
     end
 
-    self.register(:markdown, :text, :richtext)
+    self.register(:markdown, :markup, :richtext)
   end
 end

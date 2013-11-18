@@ -6,6 +6,7 @@ module Spontaneous
         @revision, @visible  = revision, visible
         @table, @schema      = table, schema
         @identity_map        = {}
+        @schema_types        = @schema.types
       end
 
       def count(types = nil)
@@ -15,6 +16,10 @@ module Spontaneous
       # A type free version of #count
       def count!
         count(nil)
+      end
+
+      def untyped
+        untyped_dataset
       end
 
       def filter(types, *cond, &block)
@@ -84,8 +89,8 @@ module Spontaneous
         dataset.for_update
       end
 
-      def delete(types)
-        dataset(types).delete
+      def delete(types = nil)
+        dataset(types, {}).delete
       end
 
       def delete_instance(instance)
@@ -93,7 +98,7 @@ module Spontaneous
       end
 
       def reload(instance)
-        dataset.reload(instance)
+        untyped_dataset.reload(instance)
       end
 
       def create(instance)
@@ -101,7 +106,7 @@ module Spontaneous
       end
 
       def save(instance)
-        dataset.save(instance)
+        untyped_dataset.save(instance)
       end
 
       def order(types, *columns, &block)
@@ -164,30 +169,41 @@ module Spontaneous
         @visible || false
       end
 
-      def dataset(types = nil)
-        Dataset.new(table_dataset(types), @schema, @identity_map)
+      def dataset(types = nil, fallback_type_condition = all_types_condition)
+        Dataset.new(table_dataset(types, fallback_type_condition), @schema, @identity_map)
+      end
+
+      def untyped_dataset
+        Dataset.new(naked_dataset, @schema, @identity_map)
       end
 
       private
 
-      def table_dataset(types)
-        naked_dataset.filter(conditions(types))
+      def table_dataset(types, fallback_type_condition)
+        naked_dataset.filter(conditions(types, fallback_type_condition))
       end
 
       def naked_dataset
         @table.dataset(@revision)
       end
 
-      def conditions(types)
-        cond = type_conditions(types)
+      def conditions(types, fallback_type_condition)
+        cond = type_conditions(types, fallback_type_condition)
         cond[:hidden] = false if @visible
         cond
       end
 
-      def type_conditions(types)
-        return {} if types.nil?
+      def type_conditions(types, fallback_type_condition)
         types = Array(types)
-        return {} if types.empty?
+        return fallback_type_condition if types.empty?
+        { :type_sid => types.flatten.map { |model| @schema.to_id(model) } }
+      end
+
+      def all_types_condition
+        type_condition(@schema_types)
+      end
+
+      def type_condition(types)
         { :type_sid => types.flatten.map { |model| @schema.to_id(model) } }
       end
     end

@@ -474,7 +474,7 @@ describe "Revisions" do
       first.first_published_at.must_be_nil
       Revision.create(Content, @revision)
       first.reload.first_published_at.to_i.must_equal @now.to_i
-      c = Content.create
+      c = Page.create
       c.first_published_at.must_be_nil
       stub_time(@now + 100)
       Revision.create(Content, @revision+1)

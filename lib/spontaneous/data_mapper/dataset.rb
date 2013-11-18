@@ -134,6 +134,11 @@ module Spontaneous
         self
       end
 
+      def invert
+        @dataset.invert!
+        self
+      end
+
       def qualify_to_first_source
         @dataset = @dataset.qualify_to_first_source
         self

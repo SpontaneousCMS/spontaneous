@@ -31,6 +31,16 @@ Capistrano::Configuration.instance(:must_exist).load do
     task :bundle_assets do
       run "cd #{release_path} && ./bin/spot assets compile --destination=#{release_path}"
     end
+
+    task :migrate, :roles => :db do
+      spot_env = fetch(:spot_env, "production")
+      run "cd #{release_path} && SPOT_ENV=#{spot_env} ./bin/spot migrate"
+    end
+
+    task :content_clean, :roles => :db do
+      spot_env = fetch(:spot_env, "production")
+      run "cd #{release_path} && SPOT_ENV=#{spot_env} ./bin/spot content clean"
+    end
   end
 
   namespace :deploy do
@@ -44,4 +54,6 @@ Capistrano::Configuration.instance(:must_exist).load do
   after 'deploy:finalize_update', 'spot:symlink_tmpdir'
   after 'bundle:install', 'spot:symlink_application'
   after 'bundle:install', 'spot:bundle_assets'
+  after 'bundle:install', 'spot:migrate'
+  after 'bundle:install', 'spot:content_clean'
 end

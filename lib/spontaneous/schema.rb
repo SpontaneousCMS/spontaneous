@@ -163,6 +163,7 @@ module Spontaneous
         case action
         when :delete
           uids.destroy(uid)
+          after_delete(uid)
         when :rename
           uid.rewrite!(dest)
         end
@@ -170,6 +171,17 @@ module Spontaneous
         reload!
         validate!
         logger.info("✓ Schema updated successfully")
+      end
+
+      # now I want to clean up the content, removing any types associated with UIDs
+      # that no longer exist and then cleaning up after that by looking for any
+      # instances with an invalid content path. This can happen because when a
+      # type is removed it becomes difficult to instantiate any entries that remain
+      # in the db
+      def after_delete(uid)
+        result = Spontaneous::Model::Action::Clean.run(Spontaneous::Content)
+        logger.warn("Deleted #{result[:invalid]} invalid and #{result[:orphans]} orphaned content instances.")
+        logger.warn("Site must_publish_all flag has been set") if result[:publish]
       end
 
       def generate_new_schema
@@ -275,6 +287,7 @@ module Spontaneous
       end
 
       def excluded_types
+        return [] unless defined?(Spontaneous::Content)
         [Spontaneous::Content, Spontaneous::Content::Page, Spontaneous::Content::Piece]
       end
 
@@ -302,7 +315,11 @@ module Spontaneous
       # TODO: Find a way to filter out the top-level classes without hard-coding
       # them here.
       def content_classes
-        classes.reject { |k| k.is_box? }.uniq
+        classes.select { |k| k.is_a?(Spontaneous::DataMapper::ContentModel) }.uniq
+      end
+
+      def types
+        content_classes
       end
 
       def recurse_classes(root_class, list)
@@ -314,12 +331,13 @@ module Spontaneous
 
       def reset!
         @classes         = []
+        @types           = []
         @inheritance_map = nil
         reload!
       end
 
       def reload!
-        @map             = nil
+        @map = nil
         initialize_uid_map
       end
 

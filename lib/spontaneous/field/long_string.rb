@@ -5,9 +5,9 @@ module Spontaneous::Field
     has_editor
 
     def generate_html(value)
-      escape_html(value).gsub(/[\r\n]+/, "<br />")
+      escape_html(value).gsub(/[\r\n]+/, "<br />\n")
     end
 
-    self.register
+    self.register(:long_string, :longstring, :text)
   end # LongStringField
 end

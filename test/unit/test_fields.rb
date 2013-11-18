@@ -511,7 +511,8 @@ describe "Fields" do
     before do
       class ::MarkdownContent < Piece
         field :text1, :markdown
-        field :text2, :text
+        field :text2, :richtext
+        field :text3, :markup
       end
       @instance = MarkdownContent.new
     end
@@ -522,8 +523,11 @@ describe "Fields" do
     it "be available as the :markdown type" do
       assert MarkdownContent.field_prototypes[:text1].field_class < Spontaneous::Field::Markdown
     end
-    it "be available as the :text type" do
+    it "be available as the :richtext type" do
       assert MarkdownContent.field_prototypes[:text2].field_class < Spontaneous::Field::Markdown
+    end
+    it "be available as the :markup type" do
+      assert MarkdownContent.field_prototypes[:text3].field_class < Spontaneous::Field::Markdown
     end
 
     it "process input into HTML" do
@@ -536,6 +540,37 @@ describe "Fields" do
       @instance.text1.value.must_equal "<p>With<br />\nLinebreak</p>\n"
       @instance.text2 = "With  \nLinebreak"
       @instance.text2.value.must_equal "<p>With<br />\nLinebreak</p>\n"
+    end
+  end
+
+  describe "LongString fields" do
+    before do
+      class ::LongStringContent < Piece
+        field :long1, :longstring
+        field :long2, :long_string
+        field :long3, :text
+      end
+      @instance = LongStringContent.new
+    end
+    after do
+      Object.send(:remove_const, :LongStringContent)
+    end
+
+    it "is available as the :longstring type" do
+      assert LongStringContent.field_prototypes[:long1].field_class < Spontaneous::Field::LongString
+    end
+
+    it "is available as the :long_string type" do
+      assert LongStringContent.field_prototypes[:long2].field_class < Spontaneous::Field::LongString
+    end
+
+    it "is available as the :text type" do
+      assert LongStringContent.field_prototypes[:long3].field_class < Spontaneous::Field::LongString
+    end
+
+    it "translates newlines to <br/> tags" do
+      @instance.long1 = "this\nlong\nstring"
+      @instance.long1.value.must_equal "this<br />\nlong<br />\nstring"
     end
   end
 

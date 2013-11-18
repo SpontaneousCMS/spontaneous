@@ -1,10 +1,11 @@
 module Spontaneous
 
   module Model
-    autoload :Core,  "spontaneous/model/core"
-    autoload :Page,  "spontaneous/model/page"
-    autoload :Piece, "spontaneous/model/piece"
-    autoload :Box,   "spontaneous/model/box"
+    autoload :Core,   "spontaneous/model/core"
+    autoload :Page,   "spontaneous/model/page"
+    autoload :Piece,  "spontaneous/model/piece"
+    autoload :Box,    "spontaneous/model/box"
+    autoload :Action, "spontaneous/model/action"
   end
 
   def self.models

@@ -1,4 +1,5 @@
 @import "definitions.css.scss";
+@import "font.css.scss";
 
 body#schema-error {
 	@extend .meta-background;
@@ -64,6 +65,21 @@ body#schema-error {
 				}
 			}
 
+			.warning {
+				font-size: 0.9em;
+				margin-bottom: 0.5em;
+				padding-bottom: 0;
+				color: #888;
+				position: relative;
+			}
+			.warning:before {
+				font-family: 'FontAwesome';
+				content: "\f071";
+				color: $highlight;
+				position: absolute;
+				left: -12px;
+				font-size: 1.1em;
+			}
 		}
 		li:last-child {
 			margin-bottom: 0;
@@ -86,5 +102,11 @@ body#schema-error {
 				color: $highlight;
 			}
 		}
+	}
+	code {
+		font-size: 0.9em;
+		background-color: rgba(255, 255, 255, 0.1);
+		padding-left: 4px;
+		padding-right: 4px;
 	}
 }

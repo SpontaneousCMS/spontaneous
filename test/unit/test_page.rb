@@ -473,5 +473,12 @@ describe "Page" do
     it "know their owner" do
       @page_piece.owner.must_equal @piece
     end
+
+    it "tests as equal to the page target" do
+      @piece.reload
+      assert @piece.things.first == @child, "PagePiece must == its target"
+      assert @child == @piece.things.first, "Page must == a PagePiece that wraps it"
+      refute @parent == @piece.things.first
+    end
   end
 end

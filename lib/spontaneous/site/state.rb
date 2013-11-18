@@ -25,6 +25,14 @@ class Spontaneous::Site
         Spontaneous::State.modified_at
       end
 
+      def must_publish_all?
+        Spontaneous::State.must_publish_all?
+      end
+
+      def must_publish_all!(state = true)
+        Spontaneous::State.must_publish_all!(state)
+      end
+
       def revision_root(*path)
         instance.revision_root(*path)
       end

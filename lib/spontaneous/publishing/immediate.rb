@@ -292,6 +292,7 @@ module Spontaneous
           tmp = Spontaneous.revision_dir(revision) / "tmp"
           FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
           activate_revision
+          Spontaneous::Site.must_publish_all!(false)
           update_progress("complete")
         rescue => e
           # if a post publish hook raises an exception then we want to roll everything back
