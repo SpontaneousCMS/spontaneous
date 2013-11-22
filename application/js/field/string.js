@@ -78,7 +78,7 @@ Spontaneous.Field.String = (function($, S) {
 			this.set('unprocessed_value', values.unprocessed_value);
 		},
 		preview: function() {
-			return this.get('value')
+			return this.get('value');
 		},
 		activate: function(el) {
 			el.find('a[href^="/"]').click(function() {

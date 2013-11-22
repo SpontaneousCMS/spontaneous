@@ -16,19 +16,19 @@ Spontaneous.FieldPreview = (function($, S) {
 			return this.view.has_fields();
 		},
 		panel: function() {
-			var wrapper = dom.div([dom.id(this.wrap_id), 'fields-preview', this.depth_class()])
+			var wrapper = dom.div([dom.id(this.wrap_id), 'fields-preview', this.depth_class()]);
 			// $(dom.div, {'id':this.wrap_id, 'class':'fields-preview ' + this.depth_class()});
 			wrapper.append(this.fields_panel(this.view.text_fields(), 'text'));
 			wrapper.append(this.fields_panel(this.view.image_fields(), 'image', true));
 			if (this.view.mouseover) {
-				wrapper.mouseover(this.view.mouseover.bind(this.view))
+				wrapper.mouseover(this.view.mouseover.bind(this.view));
 			}
 			if (this.view.mouseout) {
-				wrapper.mouseout(this.view.mouseout.bind(this.view))
+				wrapper.mouseout(this.view.mouseout.bind(this.view));
 			}
 			wrapper.click(function() {
 				this.view.edit(this.field_to_edit);
-			}.bind(this))
+			}.bind(this));
 			return wrapper;
 		},
 		fields_panel: function(fields, type, ignore_changes) {

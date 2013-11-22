@@ -25,7 +25,7 @@ Spontaneous.Content = (function($, S) {
 			return this.content.target;
 		},
 		developer_description: function() {
-			return this.type().type + "["+this.id()+']'
+			return this.type().type + "["+this.id()+']';
 		},
 		developer_edit_url: function() {
 			return this.type().edit_url();

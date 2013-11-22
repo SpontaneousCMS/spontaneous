@@ -24,7 +24,7 @@ Spontaneous.Field.Image = (function($, S) {
 				edited.addClass('selected');
 			}.bind(this));
 			labels.append(local_label, server_label);
-			image_outer.append(original, edited)
+			image_outer.append(original, edited);
 			outer.append(labels, image_outer);
 			return outer;
 		}
@@ -309,11 +309,11 @@ Spontaneous.Field.Image = (function($, S) {
 					var file = files[0], url = window.URL.createObjectURL(file);
 					img.attr('src', url).removeClass('empty');
 					this.select_files(files);
-					img.attr('src', url)
+					img.attr('src', url);
 					this._edited_value = url;
-					this.image.attr('src', url)
+					this.image.attr('src', url);
 					window.URL.revokeObjectURL(url);
-					set_info(File.filename(file), file.fileSize, null, null)
+					set_info(File.filename(file), file.fileSize, null, null);
 				}
 			}.bind(this);
 
