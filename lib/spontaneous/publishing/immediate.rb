@@ -296,7 +296,7 @@ module Spontaneous
           update_progress("complete")
         rescue => e
           # if a post publish hook raises an exception then we want to roll everything back
-          deactivate_revision
+          deactivate_revision(e)
           raise e
         end
       end
@@ -310,11 +310,11 @@ module Spontaneous
         Spontaneous::Content.cleanup_revisions(revision, keep_revisions)
       end
 
-      def deactivate_revision
+      def deactivate_revision(exception)
         S::PublishedRevision.filter(:revision => revision).delete
         Spontaneous::Site.send(:set_published_revision, @previous_revision)
         write_revision(@previous_revision)
-        abort_publish(e)
+        abort_publish(exception)
       end
 
       # Makes the revision live on the filesystem by symlinking the revisions/current
