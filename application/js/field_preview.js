@@ -40,11 +40,13 @@ Spontaneous.FieldPreview = (function($, S) {
 				var value = dom.div('.value');
 				li.click(function() {
 					__this.field_to_edit = field;
-				})
+				});
 				field.activate(value);
-				if (!ignore_changes) {
-					field.watch('value', function(field, v) { $(this).html(field.preview()) }.bind(value, field));
-				}
+				// if (!ignore_changes) {
+					field.watch('value', function(field, v) {
+						$(this).html(field.preview());
+					}.bind(value, field));
+				// }
 				li.append(name).append(value);
 				wrapper.append(li);
 				value.html(field.preview(value));

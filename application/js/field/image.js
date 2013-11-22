@@ -64,7 +64,7 @@ Spontaneous.Field.Image = (function($, S) {
 				pending['path'] = pending['src'];
 				return pending['value'];
 			}
-			return v['__ui__'] || v['original'];
+			return v['__ui__'] || v['original'] || {};
 		},
 
 		currentEditValue: function() {
@@ -81,8 +81,8 @@ Spontaneous.Field.Image = (function($, S) {
 		},
 
 		currentFilename: function() {
-			var v = this.currentValue();
-			return v['filename'];
+			var v = this.get('value');
+			return (v['__pending__'] || v['original'])['filename'];
 		},
 		/*
 		* HACK: The async nature of image updates means that the version setting
@@ -106,24 +106,24 @@ Spontaneous.Field.Image = (function($, S) {
 			return this.data.version;
 		},
 
-		preview: function(container) {
+		preview: function() {
 			Spontaneous.UploadManager.register(this);
 			var self = this
 			, value = this.currentValue()
 			, src = value.src
 			, img = null
-			, dim = 45
-			, container = container.parent('li');
+			, dim = 45;
+			// , container = container.parent('li');
 
 			if (src === "") {
-				img = dom.img('.missing-image', {'src':'/@spontaneous/static/px.gif'});
+				img = dom.img('.missing-image', {'src':''});
 			} else {
 				img = dom.img();
 				img.load(function() {
 					var r = this.width/this.height, $this = $(this), h = $this.height(), dh = 0;
 					if (r >= 1) { // landscape -- fit image vertically
 						// tag for extra css styles applicable to landscape images
-						container.addClass('landscape');
+						// container.addClass('landscape');
 						if (h <= dim) {
 							dh = (dim - h)/2;
 						}
@@ -171,9 +171,9 @@ Spontaneous.Field.Image = (function($, S) {
 						}
 						var img = image[0], w = img.width, h = img.height, r = w/h;
 						if (r > 1) {
-							container.addClass('landscape');
+							// container.addClass('landscape');
 						} else {
-							container.removeClass('landscape');
+							// container.removeClass('landscape');
 						}
 					}.bind(this))
 					image.attr('src', url)
@@ -263,7 +263,8 @@ Spontaneous.Field.Image = (function($, S) {
 			return 0;
 		},
 		edit: function() {
-			var wrap = dom.div({'style':'position:relative;'}),
+			var wrap = dom.div(),
+			drop_wrap = dom.div({'style':'position:relative;'}),
 				value = this.currentEditValue(),
 				src = value.src,
 				img = dom.img({'src':src}),
@@ -296,7 +297,10 @@ Spontaneous.Field.Image = (function($, S) {
 				filename_info.text(filename);
 				if (filesize) {
 					filesize_info.text(parseFloat(filesize, 10).to_filesize());
+				} else if (filesize === 0 || filesize === "0") {
+					filesize_info.text('');
 				}
+
 				set_dimensions(width, height);
 			};
 
@@ -324,14 +328,18 @@ Spontaneous.Field.Image = (function($, S) {
 				return false;
 			};
 
-			if (src == '') { img.addClass('empty'); }
+			if (src === '') { img.addClass('empty'); }
 
 			var dropper = dom.div('.image-drop').click(onclick);
 
 			var actions = dom.div('.actions');
-			// var clear = dom.a('.button.clear').text('Clear');
-			actions.append(input)//.append(clear);
-			wrap.append(dropper);
+			var clear = dom.a('.button.clear').text('Clear').click(function() {
+				img.css({width: dom.px(img.width()), height: dom.px(img.height())}).attr('src', '/@spontaneous/static/px.gif');
+				set_info('', 0, null, null);
+				this.clear_file();
+			}.bind(this));
+			actions.append(input, clear);
+			drop_wrap.append(dropper);
 
 
 			var drop = function(event) {
@@ -366,7 +374,8 @@ Spontaneous.Field.Image = (function($, S) {
 			dropper.get(0).addEventListener('drop', drop, true);
 			dropper.bind('dragenter', drag_enter).bind('dragover', drag_over).bind('dragleave', drag_leave);
 
-			wrap.append(img, actions, info);
+			drop_wrap.append(img, info);
+			wrap.append(drop_wrap, actions);
 
 			if (value) {
 				// var s = value.path.split('/'), filename = s[s.length - 1];
@@ -402,7 +411,7 @@ Spontaneous.Field.Image = (function($, S) {
 			this.preview_img.attr('src', value);
 			this.callSuper(value);
 		},
-		accept_mimetype: "image/*",
+		accept_mimetype: "image/*"
 	});
 
 	ImageField.ConflictView = ImageFieldConflictView;

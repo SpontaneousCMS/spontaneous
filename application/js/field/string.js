@@ -196,6 +196,9 @@ Spontaneous.Field.String = (function($, S) {
 		conflict_view: function(dialogue, conflict) {
 			return new StringFieldConflictView(dialogue, conflict);
 		},
+		stringValue: function() {
+			return this.serializedValue();
+		},
 		serializedValue: function() {
 			return {
 				name: this.form_name(),

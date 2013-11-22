@@ -1499,6 +1499,27 @@ describe "Fields" do
       end
     end
 
+    it "immediately updates file fields when their new value is empty" do
+      Spontaneous::Simultaneous.stubs(:fire)
+      field = @instance.image
+      File.open(@image, "r") do |file|
+        fields = {
+          field.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+        }
+        Spontaneous::Field.update(@instance, fields, nil, false)
+        @instance.reload
+        field = @instance.image
+        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        field.pending_value.must_be_nil
+      end
+      fields = {field.schema_id.to_s => ""}
+      Spontaneous::Field.update(@instance, fields, nil, true)
+      @instance.reload
+      field = @instance.image
+      field.value.must_equal ""
+      field.pending_value.must_be_nil
+    end
+
     it "not update a field if user does not have necessary permissions" do
       user = mock()
       @instance.title.expects(:writable?).with(user).at_least_once.returns(false)

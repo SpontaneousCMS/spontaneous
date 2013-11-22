@@ -68,8 +68,16 @@ Spontaneous.Content = (function($, S) {
 			return this.filter_fields(function(f) { return !f.is_image(); });
 		},
 		// fields that should be saved as strings
-		string_fields: function() {
-			return this.filter_fields(function(f) { return !f.is_file(); });
+		string_values: function() {
+			var i, ii, v, values = [], fields = this.field_list();
+			for (i = 0, ii = fields.length; i < ii; i++) {
+				v = fields[i].stringValue();
+				if (v) {
+					values.push(v);
+				}
+			}
+			// return this.filter_fields(function(f) { return !f.is_file(); });
+			return values;
 		},
 		image_fields: function() {
 			return this.filter_fields(function(f) { return f.is_image(); });
