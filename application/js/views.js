@@ -37,8 +37,8 @@ Spontaneous.Views = (function($, S) {
 		text_fields: function() {
 			return this.content.text_fields();
 		},
-		string_fields: function() {
-			return this.content.string_fields();
+		string_values: function() {
+			return this.content.string_values();
 		},
 		file_fields: function() {
 			return this.content.file_fields();

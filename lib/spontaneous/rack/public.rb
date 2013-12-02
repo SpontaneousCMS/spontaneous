@@ -81,15 +81,17 @@ module Spontaneous
       DOT = '.'.freeze
       ACTION = "/#{S::Model::Page::Controllers::ACTION_SEPARATOR}".freeze
 
-      def show(page, status=200)
+      def show(page, *args)
+        template_params = args.extract_options!
+        status, _       = *args
         page = Spontaneous::Site[page] if String === page
+        @template_params = template_params
         @page = page
         status(status)
       end
 
       def render(page, template_params = {})
-        @template_params = template_params
-        show(page)
+        show(page, 200, template_params)
       end
 
       REDIRECTS = {

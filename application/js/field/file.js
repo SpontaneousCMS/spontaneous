@@ -272,7 +272,24 @@ Spontaneous.Field.File = (function($, S) {
 				this.selected_files = null;
 				this.set('value', value);
 			}
+		},
+		stringValue: function() {
+			if (this.mark_cleared) {
+				this.mark_cleared = false;
+				return { name: this.form_name(), value: '' };
+			}
+			return false; // don't upload this field as text
+		},
+
+		mark_cleared: false,
+
+		clear_file: function() {
+			// this.set('value', {});
+			this.mark_cleared = true;
+			this.selected_files = null;
+			this.mark_modified();
 		}
+
 	});
 	return FileField;
 })(jQuery, Spontaneous);

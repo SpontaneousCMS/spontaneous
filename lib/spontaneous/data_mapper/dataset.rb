@@ -190,6 +190,7 @@ module Spontaneous
           instance
         else
           model = @schema.to_class(attributes[:type_sid])
+          return nil if model.nil?
           instance = model.new(attributes, true)
           @identity_map[instance.id] = instance
         end

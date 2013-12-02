@@ -6,7 +6,10 @@ module Spontaneous::Field
   class File < Base
     has_editor
 
+    # In the case of clearing the field we will have been given a pending_value of ""
+    # we don't want that to run asynchronously
     def asynchronous?
+      return false if (pending_value && pending_value[:value].blank?)
       true
     end
 
@@ -17,6 +20,8 @@ module Spontaneous::Field
     def pending_value=(value)
       file = process_upload(value)
       pending = case file
+        when nil
+          ""
         when String
           { :tempfile => file }
         else
@@ -53,6 +58,7 @@ module Spontaneous::Field
     end
 
     def process_upload(value)
+      return nil if value.blank?
       file, filename, mimetype = fileinfo(value)
       media_file = Spontaneous::Media::TempFile.new(self, filename, storage_headers(mimetype, filename))
       media_file.copy(file)

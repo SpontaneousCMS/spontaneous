@@ -32,10 +32,7 @@ Spontaneous.EditPanel = (function($, S) {
 		},
 
 		upload_values: function() {
-			var fields = this.parent_view.string_fields();
-			var values = fields.map(function(field) {
-				return field.serializedValue();
-			});
+			var values = this.parent_view.string_values();
 			// console.log("field values", values)
 			// var values = this.form.serializeArray();
 			var field_data = new FormData();

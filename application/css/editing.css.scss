@@ -235,18 +235,14 @@ $text-edit-width: 621px;
         }
       }
 			.actions {
-				margin: 0px;
-				margin-left: 0;
-				position: absolute;
-				top: 0;
-				right: 0;
-				width: 60px;
+				margin: 8px 0 0 0;
 				.button {
 					display: block;
 				}
 				.button.clear {
-					color: #5b5b5b;
-					background-color: #d1d1d1;
+					@include button-color($highlight, $action);
+					// color: #5b5b5b;
+					// background-color: #d1d1d1;
 					width: 100%;
 				}
 			}
@@ -274,24 +270,6 @@ $text-edit-width: 621px;
 			.landscape {
 				img {
 					max-width: 200px;
-					// max-height: 100px;
-				}
-				.actions {
-					width: auto;
-					display: block;
-					margin: 8px 0 0 0;
-					position: relative;
-					.button {
-						display: inline-block;
-						width: 109px;
-					}
-					.button.clear {
-						position: static;
-					}
-					.button.change {
-						position: absolute;
-						right: 0;
-					}
 				}
 			}
 		}

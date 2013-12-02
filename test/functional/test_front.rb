@@ -170,13 +170,16 @@ describe "Front" do
 
     describe "Dynamic pages" do
       before do
+        Content::Page.stubs(:path).with("/").returns(root)
         Content::Page.stubs(:path).with("/about").returns(about)
         Content::Page.stubs(:path).with("/static").returns(static)
         Content::Page.stubs(:path).with("/news").returns(news)
+        Content::Page.stubs(:path).with("/about/now").returns(subpage)
       end
 
       after do
         about.layout = :default
+        subpage.layout = :default
         SitePage.instance_variable_set(:@request_blocks, {})
       end
 
@@ -292,6 +295,32 @@ describe "Front" do
         SitePage.instance_variable_set(:@layout_procs, nil)
       end
 
+      it "allows setting status code and passing parameters to the show call" do
+        SitePage.layout do
+          "{{ teeth }}${ path }"
+        end
+        SitePage.request do
+          show "$news", 401, :teeth => "white"
+        end
+        get '/about'
+        assert last_response.status == 401
+        last_response.body.must_equal "white/news"
+        SitePage.instance_variable_set(:@layout_procs, nil)
+      end
+
+      it "allows passing parameters to the show call" do
+        SitePage.layout do
+          "{{ teeth }}${ path }"
+        end
+        SitePage.request do
+          show "$news", :teeth => "white"
+        end
+        get '/about'
+        assert last_response.status == 200
+        last_response.body.must_equal "white/news"
+        SitePage.instance_variable_set(:@layout_procs, nil)
+      end
+
       it "give access to the request params within the controller" do
         SitePage.layout { "{{ params[:horse] }}*{{ equine }}" }
         SitePage.request :post do
@@ -318,6 +347,29 @@ describe "Front" do
         last_response.body.must_equal "/about.html"
         get "/about", {}, { "HTTP_USER_AGENT" => "iPhone" }
         last_response.body.must_equal "/about.mobile"
+      end
+
+      it "inherits any request handlers from superclasses" do
+        # request block inheritance is done at type creation & is not dynamic
+        # so we need to create a new class that will inherit the newly minted
+        # :get request handler
+        SitePage.request do
+          show "about"
+        end
+
+        class ::TempPage < SitePage; end
+
+        temp = ::TempPage.create(:slug => "temp", :uid => "temp")
+        root.pages << temp
+        root.save
+        Spontaneous::Content.stubs(:path).with("/temp").returns(temp)
+
+        get "/temp"
+        last_response.status.must_equal 200
+        last_response.body.must_equal "/about.html\n"
+
+        temp.destroy
+        Object.send(:remove_const, "TempPage")
       end
 
       # should "handle anything that responds to #render(format)" do
