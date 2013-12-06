@@ -113,6 +113,18 @@ describe "Features" do
         assert last_response.ok?
         assert last_response.body == "Cruel World"
       end
+
+      it "allows injection of rack apps into the the back application" do
+        Spontaneous.mode = :back
+        Spontaneous.register_back_controller(:myfeature, proc { |env| [200, {}, "hello"] })
+
+        get "/@myfeature"
+        assert last_response.status == 401, "Expected an Unauthorised 401 response but got #{last_response.status}"
+
+        auth_get "/@myfeature"
+        assert last_response.ok?
+        assert last_response.body == "hello"
+      end
     end
   end
 end

@@ -27,15 +27,15 @@ module Spontaneous
       include Spontaneous::Rack::Constants
       include Spontaneous::Rack::Middleware
 
-      def self.make_controller(controller_class)
-        controller_class.helpers Helpers
+      def self.make_controller(app)
+        app.helpers Helpers if app.respond_to?(:helpers)
         ::Rack::Builder.app do
           use Scope::Edit
           use Authenticate::Init
           use Authenticate::Edit
           use CSRF::Header
           use CSRF::Verification
-          run controller_class
+          run app
         end
       end
 
