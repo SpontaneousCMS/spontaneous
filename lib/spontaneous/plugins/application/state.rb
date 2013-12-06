@@ -24,6 +24,7 @@ module Spontaneous::Plugins::Application
             "   'auto_login' setting from your environment file."
           end
           Thread.current[:spontaneous_loaded] = true
+          site
         end
       end
 

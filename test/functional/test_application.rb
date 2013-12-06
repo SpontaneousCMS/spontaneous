@@ -48,8 +48,13 @@ describe "Application" do
 
   describe "Site" do
     before do
-      Spontaneous.init(:root => site_root, :mode => :back, :environment => :development)
+      @site = Spontaneous.init(:root => site_root, :mode => :back, :environment => :development)
     end
+
+    it "returns an instance of the site from Spontaneous.init" do
+      @site.must_be_instance_of Spontaneous::Site
+    end
+
     it "have the same config as Spontaneous" do
       Site.config.must_equal Spontaneous.config
     end
