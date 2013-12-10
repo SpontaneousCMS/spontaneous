@@ -86,7 +86,7 @@ describe "Storage" do
 
       it "be set as publicly visible" do
         file = @storage.copy(@existing_file, @media_path, { content_type: "image/jpeg" })
-        acl = file.connection.get_object_acl(file.directory.key, file.key).body['AccessControlList']
+        acl = file.service.get_object_acl(file.directory.key, file.key).body['AccessControlList']
         perms = acl.detect {|grant| grant['Grantee']['URI'] == 'http://acs.amazonaws.com/groups/global/AllUsers' }
         perms["Permission"].must_equal "READ"
       end
