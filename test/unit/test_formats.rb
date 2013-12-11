@@ -242,6 +242,16 @@ describe "Formats" do
         refute @page.provides_output?(:xyz)
       end
 
+      it "recognises its own output" do
+        assert @page.provides_output?(@page.output(:html))
+      end
+
+      it "doesn't recognise another page's output" do
+        other = FPage.new(slug: "other")
+        refute @page == other
+        refute @page.provides_output?(other.output(:html))
+      end
+
       it "provide a symbol version of the output name" do
         @page.output(:html).to_sym.must_equal :html
       end

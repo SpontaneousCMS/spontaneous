@@ -65,6 +65,10 @@ module Spontaneous::Output
         @name
       end
 
+      def to_s
+        to_sym.to_s
+      end
+
       def extension(is_dynamic = false, dynamic_extension = Spontaneous::Output::Template.extension)
         if (override = @options[:extension])
           return normalise_extension(override.to_s)
