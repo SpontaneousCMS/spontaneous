@@ -154,6 +154,13 @@ describe "Site" do
         roots['roots'].must_equal({})
       end
 
+      it "finds ids" do
+        @page3_2.reload
+        [@page3_2.id, @page3_2.id.to_s].each do |id|
+          Site[id].must_equal @page3_2
+        end
+      end
+
       it "work with paths" do
         Site['/page1-1/page2-1'].must_equal @page2_1.reload
       end
@@ -161,6 +168,10 @@ describe "Site" do
       it "work with UIDs" do
         Site["page3_2"].must_equal @page3_2.reload
         Site["$page3_2"].must_equal @page3_2.reload
+      end
+
+      it "maps symbols to UIDs" do
+        Site[:page3_2].must_equal @page3_2.reload
       end
 
       it "finds hidden roots" do

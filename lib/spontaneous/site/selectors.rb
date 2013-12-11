@@ -5,7 +5,11 @@ class Spontaneous::Site
     extend Spontaneous::Concern
 
     module ClassMethods
-      def root(content_model = Spontaneous::Content)
+      def default_content_model
+        Spontaneous::Content
+      end
+
+      def root(content_model = default_content_model)
         content_model.root
       end
 
@@ -14,7 +18,7 @@ class Spontaneous::Site
       # configured site domain.
       #
       # The rest are "hidden" roots.
-      def roots(user = nil, content_model = Spontaneous::Content)
+      def roots(user = nil, content_model = default_content_model)
         domain = config.site_domain
         roots  = pages_dataset(content_model).where(depth: 0).all
         pub, hidden = roots.partition { |p| p.root? }
@@ -24,45 +28,53 @@ class Spontaneous::Site
         { "public" => domain, "roots" => map }
       end
 
-      def pages(content_model = Spontaneous::Content)
+      def pages(content_model = default_content_model)
         pages_dataset(content_model).all
       end
 
-      def pages_dataset(content_model = Spontaneous::Content)
+      def pages_dataset(content_model = default_content_model)
         content_model::Page.order(:depth)
       end
 
-      ID_PATH   = /\A\d+\z/o
-      PATH_PATH = /^[\/#]/o
-      UID_PATH  = /^\$/o
+      ID_SELECTOR   = /\A\d+\z/o
+      PATH_SELECTOR = /\A[\/#]/o
+      UID_SELECTOR  = /\A\$/o
 
-      def [](path_or_uid)
-        case path_or_uid
-        when Fixnum, ID_PATH
-          by_id(path_or_uid)
-        when PATH_PATH
-          by_path(path_or_uid)
-        when UID_PATH
-          by_uid(path_or_uid[1..-1])
+      def [](selector)
+        fetch(selector, default_content_model)
+      end
+
+      def fetch(selector, content_model = default_content_model)
+        case selector
+        when Symbol
+          by_uid(selector.to_s, content_model)
+        when Fixnum
+          by_id(selector, content_model)
+        when ID_SELECTOR
+          by_id(selector, content_model)
+        when PATH_SELECTOR
+          by_path(selector, content_model)
+        when UID_SELECTOR
+          by_uid(selector[1..-1], content_model)
         else
-          by_uid(path_or_uid)
+          by_uid(selector, content_model)
         end
       end
 
-      def by_id(id)
-        Spontaneous::Content[id]
+      def by_id(id, content_model = default_content_model)
+        content_model.id(id)
       end
 
-      def by_path(path)
-        Spontaneous::Content.path(path)
+      def by_path(path, content_model = default_content_model)
+        content_model.path(path)
       end
 
-      def by_uid(uid)
-        Spontaneous::Content.uid(uid)
+      def by_uid(uid, content_model = default_content_model)
+        content_model.uid(uid)
       end
 
       def method_missing(method, *args)
-        if page = self[method.to_s]
+        if (page = fetch(method))
           page
         else
           super
