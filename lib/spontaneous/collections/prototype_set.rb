@@ -6,10 +6,11 @@ module Spontaneous::Collections
 
     attr_reader :store, :local_order
 
-    def initialize(superobject = nil, superset_name = nil)
+    def initialize(superobject = nil, superset_name = nil, &default_proc)
       @superobject, @superset_name = superobject, superset_name
       @has_superset = !!(@superobject && @superobject.respond_to?(@superset_name))
-      @store = {}
+      @store = Hash.new
+      @default_proc = default_proc
       @local_order = []
     end
 
@@ -128,13 +129,20 @@ module Spontaneous::Collections
 
     alias_method :names, :order
 
-
     def indexed(index)
       named(order[index])
     end
 
     def named(name)
-      @store[name.to_sym] || (superset? ? superset.named(name) : nil)
+      key = name.to_sym
+      return @store[key] if @store.key?(key)
+      value = (superset? ? superset.named(name) : nil)
+      return value unless value.nil?
+      if @default_proc
+        @default_proc.call(self, key)
+      else
+        nil
+      end
     end
 
     def index(entry)

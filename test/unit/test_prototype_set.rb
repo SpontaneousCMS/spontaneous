@@ -89,6 +89,13 @@ describe "PrototypeSet" do
     lambda { @set.nine }.must_raise(NoMethodError)
   end
 
+  it "uses the given block to set default values" do
+    set = Spontaneous::Collections::PrototypeSet.new { |set, key| set[key] = key.to_s.upcase }
+    set.key?(:one).must_equal false
+    set[:one].must_equal "ONE"
+    set.keys.must_equal [:one]
+  end
+
   describe "with superset" do
     before do
       @superset = @set.dup
@@ -96,7 +103,7 @@ describe "PrototypeSet" do
       @superset.order = [:three, :one, :two]
       @super = Super.new
       @super.prototypes = @superset
-      @set = Spontaneous::Collections::PrototypeSet.new(@super, :prototypes)
+      @set = Spontaneous::Collections::PrototypeSet.new(@super, :prototypes) { |set, key| set[key] = key.to_s.upcase }
       @four = "Four"
       @five = "Five"
       @four.stubs(:schema_id).returns("four_id")
