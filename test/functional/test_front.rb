@@ -204,7 +204,7 @@ describe "Front" do
 
       it "render an alternate page if passed a page" do
         SitePage.controller do
-          get { show Site['/static'] }
+          get { render Site['/static'] }
         end
         get '/about'
         assert last_response.ok?
@@ -214,7 +214,7 @@ describe "Front" do
       it "render an alternate page if passed a path" do
         # about.stubs(:request_show).returns("/news")
         SitePage.controller do
-          get { show "/static" }
+          get { render "/static" }
         end
         get '/about'
         assert last_response.ok?
@@ -224,7 +224,7 @@ describe "Front" do
       it "render an alternate page if passed a uid with a #" do
         # about.stubs(:request_show).returns("#news")
         SitePage.controller do
-          get { show "static" }
+          get { render "static" }
         end
         get '/about'
         assert last_response.ok?
@@ -234,7 +234,7 @@ describe "Front" do
       it "render an alternate page if passed a uid" do
         # about.stubs(:request_show).returns("news")
         SitePage.controller do
-          get { show "static" }
+          get { render "static" }
         end
         get '/about'
         assert last_response.ok?
@@ -244,7 +244,7 @@ describe "Front" do
       it "return not found of #request_show returns an invalid uid or path" do
         # about.stubs(:request_show).returns("caterpillars")
         SitePage.controller do
-          get { show "caterpillars" }
+          get { render "caterpillars" }
         end
         get '/about'
         assert last_response.status == 404
@@ -252,7 +252,7 @@ describe "Front" do
 
       it "return the right status code" do
         SitePage.controller do
-          get { show "static", 403 }
+          get { render "static", 403 }
         end
         get '/about'
         assert last_response.status == 403
@@ -261,7 +261,7 @@ describe "Front" do
 
       it "allow handing POST requests" do
         SitePage.controller do
-          post { show "static" }
+          post { render "static" }
         end
         post '/about'
         assert last_response.status == 200, "Expected status 200 but recieved #{last_response.status}"
@@ -308,7 +308,7 @@ describe "Front" do
           "{{ teeth }}${ path }"
         end
         SitePage.controller do
-          get { show "$news", 401, :teeth => "white" }
+          get { render "$news", 401, :teeth => "white" }
         end
         get '/about'
         assert last_response.status == 401
@@ -316,12 +316,12 @@ describe "Front" do
         SitePage.instance_variable_set(:@layout_procs, nil)
       end
 
-      it "allows passing parameters to the show call" do
+      it "allows passing parameters to the render call" do
         SitePage.layout do
           "{{ teeth }}${ path }"
         end
         SitePage.controller do
-          get { show "$news", :teeth => "white" }
+          get { render "$news", :teeth => "white" }
         end
         get '/about'
         assert last_response.status == 200
@@ -368,7 +368,7 @@ describe "Front" do
         # so we need to create a new class that will inherit the newly minted
         # :get request handler
         SitePage.controller do
-          get { show "about" }
+          get { render "about" }
         end
 
         class ::TempPage < SitePage; end

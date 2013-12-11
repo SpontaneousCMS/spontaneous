@@ -46,33 +46,35 @@ module Spontaneous::Rack
     attr_reader :content
 
     def initialize(content, output)
-      @content, @output = content, output
+      @content, @output, @locals = content, output, {}
       @page = content.page
       super(nil)
     end
 
-    def show(page, *args)
-      locals    = args.extract_options!
-      status, _ = *args
-      page(page)
-      status(status) if status
-      render_body(locals)
-    end
-
-    # * #render [instance (Content), output (Symbol), status (Fixnum), locals (Hash)]
-    # * #render [uid (Symbol), status (Fixnum), locals (Hash)] => [instance, output, status, locals]
-    # * #render [uid (Symbol)]       => [uid, output, 200, {}]
-    # * #render [instance (Content)] => [instance, output, 200, {}]
-    # * #render [locals (Hash)] => [page, output, 200, locals]
-    # * #render [status (Fixnum)] => [page, output, status, {}]
+    # render [instance (Content), output (Symbol), status (Fixnum), locals (Hash)]
+    # render [uid (Symbol), status (Fixnum), locals (Hash)] => [instance, output, status, locals]
+    # render [uid (Symbol)]       => [uid, output, 200, {}]
+    # render [instance (Content)] => [instance, output, 200, {}]
+    # render [locals (Hash)] => [page, output, 200, locals]
+    # render [status (Fixnum)] => [page, output, status, {}]
     # render(:home, :xml, 200, {logged_in: true}) # => :home => uid, :xml => output
     # render(:home, 200, {logged_in: true}) # => :home => uid
     # render(:home, {logged_in: true}) # => :home => uid
     # render(:xml, 200, {logged_in: true}) # NOT ALLOWED: if you want to specify the output then you must also specify the page
     # render(403, {logged_in: false})
-
+    #
+    # Every controller *must* include a call to render
     def render(*args)
-      locals = args.extract_options!
+      @locals = args.extract_options!
+      show(*args)
+      render_body
+    end
+
+    # Show provides a way to configure future calls to render without the overhead of
+    # calling #render itself. Good if you want to set up a default state & then override
+    # it later.
+    # Only #render accepts a locals hash that is passed into the render call
+    def show(*args)
       page, output, status = self.page, self.output, self.status
       case args.length
       when 3
@@ -96,8 +98,8 @@ module Spontaneous::Rack
       page(page)
       status(status)
       output(output)
-      render_body(locals)
     end
+
 
     REDIRECTS = {
       :permanent => 301,
@@ -145,28 +147,28 @@ module Spontaneous::Rack
       page
     end
 
-    def render_body(locals = {})
-      body(render_page(locals))
+    def render_body
+      body(render_page)
     end
 
-    def render_page(locals = {})
+    def render_page
       not_found if     page.nil?
       not_found unless page.provides_output?(self.output)
       output = page.output(self.output)
-      render_output(output, locals)
+      render_output(output)
     end
 
-    def render_output(output, locals = {})
+    def render_output(output)
       if output.public?
         content_type(output.mime_type)
-        do_render(output, locals)
+        do_render(output, @locals)
       else
         not_found
       end
     end
 
-    def do_render(output, locals = {})
-      locals.update({
+    def do_render(output, locals)
+      locals = locals.merge({
         :params  => params, # use sinatras indifferent params
         :request => request,
         :session => request.session
