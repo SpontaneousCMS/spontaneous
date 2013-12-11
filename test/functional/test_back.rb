@@ -1105,8 +1105,8 @@ describe "Back" do
 
     it "accept POST requests" do
       Project.expects(:posted!).with(project1)
-      Project.request :post do
-        Project.posted!(page)
+      Project.controller do
+        post { Project.posted!(page) }
       end
       post "/project1"
     end

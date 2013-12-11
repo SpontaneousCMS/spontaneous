@@ -6,7 +6,6 @@ require "spontaneous/model/page/layouts"
 require "spontaneous/model/page/locks"
 require "spontaneous/model/page/page_tree"
 require "spontaneous/model/page/paths"
-require "spontaneous/model/page/request"
 require "spontaneous/model/page/site_map"
 require "spontaneous/model/page/site_timestamps"
 
@@ -20,7 +19,6 @@ module Spontaneous::Model
     include Layouts
     include PageTree
     include Paths
-    include Request
     include SiteMap
     include SiteTimestamps
     include Locks

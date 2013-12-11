@@ -8,6 +8,8 @@ describe "Front" do
   include RackTestMethods
 
   start do
+    @warn_level = $VERBOSE
+    $VERBOSE = nil
     site_root = Dir.mktmpdir
     FileUtils.cp_r(File.expand_path("../../fixtures/public/templates", __FILE__), site_root)
     Spontaneous::Output.write_compiled_scripts = true
@@ -21,6 +23,13 @@ describe "Front" do
     Site.background_mode = :immediate
     ::Content.delete
 
+    class ::Page
+      controller do
+        set :show_exceptions, false
+        set :raise_errors, true
+        set :dump_errors, true
+      end
+    end
     class ::SitePage < ::Page
       layout :default
       layout :dynamic
@@ -32,12 +41,10 @@ describe "Front" do
     class ::StaticPage < ::Page
       layout :default
     end
-    class ::SubPage < SitePage; end
 
 
     root = ::SitePage.create
     about = ::SitePage.create(:slug => "about", :uid => "about")
-    subpage = ::SubPage.create(:slug => "now", :uid => "now")
     news = ::SitePage.create(:slug => "news", :uid => "news")
     dynamic = ::SitePage.create(:slug => "dynamic", :uid => "dynamic")
     static  = ::StaticPage.create(:slug => "static", :uid => "static")
@@ -46,12 +53,10 @@ describe "Front" do
     root.pages << news
     root.pages << dynamic
     root.pages << static
-    about.pages << subpage
     root.save
 
     let(:root_id) { root.id }
     let(:about_id) { about.id }
-    let(:subpage_id) { subpage.id }
     let(:news_id) { news.id }
     let(:dynamic_id) { dynamic.id }
     let(:static_id) { static.id }
@@ -65,17 +70,16 @@ describe "Front" do
 
   finish do
     Object.send(:remove_const, :SitePage) rescue nil
-    Object.send(:remove_const, :SubPage) rescue nil
     Content.delete
     S::State.delete
     Content.delete_revision(1)
     teardown_site(true)
     Spontaneous::Output.write_compiled_scripts = false
+    $VERBOSE = @warn_level
   end
 
   let(:root) { Content[root_id] }
   let(:about) { Content[about_id] }
-  let(:subpage) { Content[subpage_id] }
   let(:news) { Content[news_id] }
   let(:dynamic) { Content[dynamic_id] }
   let(:static) { Content[static_id] }
@@ -86,8 +90,8 @@ describe "Front" do
 
   after do
     SitePage.instance_variable_set(:@layout_procs, nil)
-    SitePage.instance_variable_set(:@request_blocks, {})
-    [root, about, subpage, news, static].each do |page|
+    SitePage.instance_variable_set(:@controllers, nil)
+    [root, about, news, static].each do |page|
       page.layout = :default
     end
     dynamic.layout = :dynamic
@@ -174,12 +178,12 @@ describe "Front" do
         Content::Page.stubs(:path).with("/about").returns(about)
         Content::Page.stubs(:path).with("/static").returns(static)
         Content::Page.stubs(:path).with("/news").returns(news)
-        Content::Page.stubs(:path).with("/about/now").returns(subpage)
+        # Content::Page.stubs(:path).with("/about/now").returns(subpage)
       end
 
       after do
         about.layout = :default
-        subpage.layout = :default
+        # subpage.layout = :default
         SitePage.instance_variable_set(:@request_blocks, {})
       end
 
@@ -188,9 +192,10 @@ describe "Front" do
         page = SitePage.new
         refute page.dynamic?
       end
+
       it "correctly show a dynamic behaviour" do
-        SitePage.request do
-          show "/static"
+        SitePage.controller do
+          get { show "/static" }
         end
         assert SitePage.dynamic?
         page = SitePage.new
@@ -198,8 +203,8 @@ describe "Front" do
       end
 
       it "render an alternate page if passed a page" do
-        SitePage.request do
-          show Site['/static']
+        SitePage.controller do
+          get { show Site['/static'] }
         end
         get '/about'
         assert last_response.ok?
@@ -208,8 +213,8 @@ describe "Front" do
 
       it "render an alternate page if passed a path" do
         # about.stubs(:request_show).returns("/news")
-        SitePage.request do
-          show "/static"
+        SitePage.controller do
+          get { show "/static" }
         end
         get '/about'
         assert last_response.ok?
@@ -218,8 +223,8 @@ describe "Front" do
 
       it "render an alternate page if passed a uid with a #" do
         # about.stubs(:request_show).returns("#news")
-        SitePage.request do
-          show "static"
+        SitePage.controller do
+          get { show "static" }
         end
         get '/about'
         assert last_response.ok?
@@ -228,8 +233,8 @@ describe "Front" do
 
       it "render an alternate page if passed a uid" do
         # about.stubs(:request_show).returns("news")
-        SitePage.request do
-          show "static"
+        SitePage.controller do
+          get { show "static" }
         end
         get '/about'
         assert last_response.ok?
@@ -238,25 +243,25 @@ describe "Front" do
 
       it "return not found of #request_show returns an invalid uid or path" do
         # about.stubs(:request_show).returns("caterpillars")
-        SitePage.request do
-          show "caterpillars"
+        SitePage.controller do
+          get { show "caterpillars" }
         end
         get '/about'
         assert last_response.status == 404
       end
 
       it "return the right status code" do
-        SitePage.request do
-          show "static", 404
+        SitePage.controller do
+          get { show "static", 403 }
         end
         get '/about'
-        assert last_response.status == 404
+        assert last_response.status == 403
         last_response.body.must_equal "/static.html\n"
       end
 
       it "allow handing POST requests" do
-        SitePage.request :post do
-          show "static"
+        SitePage.controller do
+          post { show "static" }
         end
         post '/about'
         assert last_response.status == 200, "Expected status 200 but recieved #{last_response.status}"
@@ -264,17 +269,20 @@ describe "Front" do
       end
 
       it "allow returning of any status code without altering content" do
-        SitePage.request do
-          404
+        SitePage.controller do
+          get { render 403 }
         end
         get '/about'
-        assert last_response.status == 404
+        assert last_response.status == 403
         last_response.body.must_equal "/about.html\n"
       end
 
       it "allow altering of headers" do
-        SitePage.request do
-          headers["X-Works"] = "Yes"
+        SitePage.controller do
+          get {
+            headers["X-Works"] = "Yes"
+            render
+          }
         end
         get '/about'
         assert last_response.status == 200
@@ -286,8 +294,8 @@ describe "Front" do
         SitePage.layout do
           "{{ teeth }}"
         end
-        SitePage.request do
-          render page, :teeth => "white"
+        SitePage.controller do
+          get { render page, :teeth => "white" }
         end
         get '/about'
         assert last_response.status == 200
@@ -299,8 +307,8 @@ describe "Front" do
         SitePage.layout do
           "{{ teeth }}${ path }"
         end
-        SitePage.request do
-          show "$news", 401, :teeth => "white"
+        SitePage.controller do
+          get { show "$news", 401, :teeth => "white" }
         end
         get '/about'
         assert last_response.status == 401
@@ -312,8 +320,8 @@ describe "Front" do
         SitePage.layout do
           "{{ teeth }}${ path }"
         end
-        SitePage.request do
-          show "$news", :teeth => "white"
+        SitePage.controller do
+          get { show "$news", :teeth => "white" }
         end
         get '/about'
         assert last_response.status == 200
@@ -323,9 +331,11 @@ describe "Front" do
 
       it "give access to the request params within the controller" do
         SitePage.layout { "{{ params[:horse] }}*{{ equine }}" }
-        SitePage.request :post do
-          value = params[:horse]
-          render page, :equine => value
+        SitePage.controller do
+          post do
+            value = params[:horse]
+            render page, :equine => value
+          end
         end
         post '/about', :horse => "dancing"
         assert last_response.status == 200
@@ -338,12 +348,16 @@ describe "Front" do
         SitePage.layout do
           "${ path }.${ __format }"
         end
-        SitePage.request :get do
-          if request.user_agent =~ /iPhone/
-            output :mobile
+        SitePage.controller do
+          get do
+            if request.user_agent =~ /iPhone/
+              output :mobile
+            end
+            render
           end
         end
         get "/about", {}, { "HTTP_USER_AGENT" => "Desktop" }
+        assert last_response.status == 200, "Expected status 200 but got #{last_response.status}"
         last_response.body.must_equal "/about.html"
         get "/about", {}, { "HTTP_USER_AGENT" => "iPhone" }
         last_response.body.must_equal "/about.mobile"
@@ -353,8 +367,8 @@ describe "Front" do
         # request block inheritance is done at type creation & is not dynamic
         # so we need to create a new class that will inherit the newly minted
         # :get request handler
-        SitePage.request do
-          show "about"
+        SitePage.controller do
+          get { show "about" }
         end
 
         class ::TempPage < SitePage; end
@@ -388,8 +402,10 @@ describe "Front" do
       end
 
       it "respond appropriatly to redirects to path" do
-        SitePage.request do
-          redirect "/news"
+        SitePage.controller do
+          get do
+            redirect "/news"
+          end
         end
         get '/about'
         assert last_response.status == 302
@@ -397,8 +413,8 @@ describe "Front" do
       end
 
       it "respond appropriately to redirects to a Page instance" do
-        SitePage.request do
-          redirect Page.path("/news")
+        SitePage.controller do
+          get { redirect Page.path("/news") }
         end
         get '/about'
         assert last_response.status == 302
@@ -406,8 +422,8 @@ describe "Front" do
       end
 
       it "respond appropriately to redirects to a UID" do
-        SitePage.request do
-          redirect "news"
+        SitePage.controller do
+          get { redirect "news" }
         end
         get '/about'
         assert last_response.status == 302
@@ -415,8 +431,8 @@ describe "Front" do
       end
 
       it "recognise a :temporary redirect" do
-        SitePage.request do
-          redirect "/news", :temporary
+        SitePage.controller do
+          get { redirect "/news", :temporary }
         end
         get '/about'
         assert last_response.status == 302
@@ -424,8 +440,8 @@ describe "Front" do
       end
 
       it "recognise a :permanent redirect" do
-        SitePage.request do
-          redirect "/news", :permanent
+        SitePage.controller do
+          get { redirect "/news", :permanent }
         end
         get '/about'
         assert last_response.status == 301
@@ -433,8 +449,8 @@ describe "Front" do
       end
 
       it "correctly apply numeric status codes" do
-        SitePage.request do
-          redirect "/news", 307
+        SitePage.controller do
+          get { redirect "/news", 307 }
         end
         get '/about'
         last_response.headers["Location"].must_equal "http://example.org/news"
@@ -498,7 +514,6 @@ describe "Front" do
 
     describe "Model controllers" do
       before do
-        SitePage.instance_variable_set(:@request_blocks, {})
         class ::TestController < Spontaneous::Rack::PageController
           get '/' do
             "Magic"
@@ -551,12 +566,19 @@ describe "Front" do
           end
         end
 
+        class ::SubPage < SitePage; end
+        @subpage = ::SubPage.create(:slug => "now", :uid => "now")
+        about.pages << @subpage
+
+        @subpage.reload
+
         Content.stubs(:path).with("/").returns(root)
         Content.stubs(:path).with("/about").returns(about)
-        Content.stubs(:path).with("/about/now").returns(subpage)
+        Content.stubs(:path).with("/about/now").returns(@subpage)
       end
 
       after do
+        Object.send(:remove_const, :SubPage) rescue nil
         SitePage.instance_variable_set(:@request_blocks, {})
         SitePage.send(:remove_const, :StatusController) rescue nil
         SitePage.send(:remove_const, :TestController) rescue nil
@@ -707,7 +729,7 @@ describe "Front" do
 
         it "affect all controller actions" do
           get "/about/@drummer/nothing"
-          assert last_response.ok?
+          assert last_response.ok?, "Expected 200 got #{last_response.status}"
           last_response.body.must_equal "Something"
         end
       end

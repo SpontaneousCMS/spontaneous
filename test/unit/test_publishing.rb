@@ -160,7 +160,9 @@ describe "Publishing" do
       DynamicPublishablePage.layout :"static"
       DynamicPublishablePage.layout :"dynamic"
 
-      DynamicPublishablePage.request { show "/about" }
+      DynamicPublishablePage.controller do
+        get { show "/about" }
+      end
 
       @home = PublishablePage.create(:title => 'Home')
       @home.layout = :"dynamic"
