@@ -1,32 +1,14 @@
 
 module Spontaneous::Output::Context
   autoload :RenderCache, 'spontaneous/output/context/render_cache'
+  autoload :Navigation,  'spontaneous/output/context/navigation'
 
   module ContextCore
     include RenderCache
+    include Navigation
+
     attr_accessor :_renderer
 
-    def navigation(depth = 1, &block)
-      case depth
-      when 0, :root
-        root
-      when 1, :section
-        navigation_at_depth(1, &block)
-      else
-        navigation_at_depth(depth, &block)
-      end
-    end
-
-    def navigation_at_depth(depth = 1)
-      current_page = __target.page
-      __pages_at_depth(current_page, depth).each do |p|
-        yield(p, current_page.active?(p))
-      end
-    end
-
-    def __pages_at_depth(origin_page, depth)
-      origin_page.at_depth(depth)
-    end
 
     def page
       __target.page
@@ -180,7 +162,7 @@ module Spontaneous::Output::Context
       end
     end
 
-    def __pages_at_depth(origin_page, depth)
+    def __pages_at_depth(origin_page, depth, opts = {})
       _with_render_cache("pages_at_depth.#{origin_page.id}.#{depth}") do
         super
       end

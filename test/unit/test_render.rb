@@ -108,9 +108,9 @@ describe "Render" do
       template = '%%{ navigation(%s) do |section, active| }${section.title}/${active} %%{ end }'
       a = @renderer.render_string(template % "", @section1.output(:html), {})
       a.must_equal "Section 1/true Section 2/false Section 4/false Section 3/false "
-      a = @renderer.render_string(template % "1", @section2.output(:html), {})
+      a = @renderer.render_string(template % "depth: 1", @section2.output(:html), {})
       a.must_equal "Section 1/false Section 2/true Section 4/false Section 3/false "
-      a = @renderer.render_string(template % ":section", @section1.output(:html), {})
+      a = @renderer.render_string(template % "depth: :section", @section1.output(:html), {})
       a.must_equal "Section 1/true Section 2/false Section 4/false Section 3/false "
     end
 
