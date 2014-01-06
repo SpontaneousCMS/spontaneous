@@ -114,6 +114,14 @@ describe "Features" do
         assert last_response.body == "Cruel World"
       end
 
+      it "gives access to all mounted front apps in preview mode" do
+        Spontaneous.mode = :back
+        Spontaneous.register_front_controller(:myfeature, FeatureFrontController)
+        get "/@myfeature/hello"
+        assert last_response.ok?
+        assert last_response.body == "World"
+      end
+
       it "allows injection of rack apps into the the back application" do
         Spontaneous.mode = :back
         Spontaneous.register_back_controller(:myfeature, proc { |env| [200, {}, "hello"] })

@@ -97,6 +97,11 @@ module Spontaneous
             :urls => %w[/],
             :try => ['.html', 'index.html', '/index.html']
           use Reloader
+          Spontaneous.instance.front_controllers.each do |namespace, controller_class|
+            map namespace do
+              run controller_class
+            end
+          end if Spontaneous.instance
           run Preview
         end
       end
