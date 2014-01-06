@@ -93,9 +93,7 @@ module Spontaneous
           use Authenticate::Preview
           use CSRF::Header
           map("/assets") { run SiteAssets.new }
-          use Spontaneous::Rack::Static, :root => Spontaneous.root / "public",
-            :urls => %w[/],
-            :try => ['.html', 'index.html', '/index.html']
+          use Spontaneous::Rack::Static, root: Spontaneous.root / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
           use Reloader
           Spontaneous.instance.front_controllers.each do |namespace, controller_class|
             map namespace do
@@ -120,7 +118,7 @@ module Spontaneous
           Spontaneous.instance.plugins.each do |plugin|
             root = plugin.paths.expanded(:public)
             map "/#{plugin.file_namespace}" do
-              use Spontaneous::Rack::CSS, :root => root
+              use Spontaneous::Rack::CSS, root: root
               run ::Rack::File.new(root)
             end
           end if Spontaneous.instance

@@ -24,9 +24,7 @@ module Spontaneous
 
       def self.application
         app = ::Rack::Builder.new do
-          use Spontaneous::Rack::Static, :root => Spontaneous.revision_dir / "public",
-            :urls => %w[/],
-            :try => ['.html', 'index.html', '/index.html']
+          use Spontaneous::Rack::Static, root: Spontaneous.revision_dir / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
 
           Spontaneous.instance.front_controllers.each do |namespace, controller_class|
             map namespace do
