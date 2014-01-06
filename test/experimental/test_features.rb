@@ -102,6 +102,14 @@ describe "Features" do
         assert last_response.body == "Cruel Editor"
       end
 
+      it "be able to injectable into the back application with custom path prefixes" do
+        Spontaneous.mode = :back
+        Spontaneous.register_back_controller(:myfeature, FeatureBackController, path_prefix: "/something")
+        auth_get "/something/hello"
+        assert last_response.ok?
+        assert last_response.body == "Editor"
+      end
+
       it "be able to inject controllers into the front application" do
         Spontaneous.mode = :front
         Spontaneous.register_front_controller(:myfeature, FeatureFrontController)
@@ -112,6 +120,14 @@ describe "Features" do
         post "/@myfeature/goodbye"
         assert last_response.ok?
         assert last_response.body == "Cruel World"
+      end
+
+      it "be able to inject controllers into the front application with custom path prefixes" do
+        Spontaneous.mode = :front
+        Spontaneous.register_front_controller(:myfeature, FeatureFrontController, path_prefix: "/something/else")
+        get "/something/else/hello"
+        assert last_response.ok?
+        assert last_response.body == "World"
       end
 
       it "gives access to all mounted front apps in preview mode" do
