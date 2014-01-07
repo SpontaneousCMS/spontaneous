@@ -14,7 +14,7 @@ module Spontaneous::Rack::Back
     # Redirect to the edit UI if a preview page is being accessed directly
     def ensure_edit_preview(path)
       referer = env['HTTP_REFERER']
-      development_preview = Spontaneous.development? && Content::Page.has_root?
+      development_preview = Spontaneous.development? && ::Content::Page.has_root?
       return true if development_preview || referer || params.key?('preview')
       home = find_page_by_path(path)
       # Need to handle the site initialisation where there is no homepage
