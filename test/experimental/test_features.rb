@@ -7,12 +7,18 @@ require 'sinatra/base'
 describe "Features" do
   include RackTestMethods
 
+  start do
+    S::State.delete
+  end
+
   before do
+    S::Site.background_mode = :immediate
     @site = setup_site
   end
 
   after do
     teardown_site
+    S::State.delete
   end
 
   def app
@@ -34,6 +40,8 @@ describe "Features" do
       config.stubs(:auto_login).returns('root')
       config.stubs(:default_charset).returns('utf-8')
       config.stubs(:publishing_method).returns(:immediate)
+      config.stubs(:publishing_delay).returns(nil)
+      config.stubs(:keep_revisions).returns(5)
       config.stubs(:simultaneous_connection).returns("")
       config.stubs(:site_domain).returns('example.org')
       config.stubs(:site_id).returns('example_org')
@@ -49,6 +57,12 @@ describe "Features" do
       Spontaneous::Permissions::AccessKey.stubs(:valid?).with(nil, nil).returns(false)
       Spontaneous::Permissions::AccessKey.stubs(:valid?).with(nil, @user).returns(false)
       Spontaneous::Permissions::AccessKey.stubs(:valid?).with(@key, @user).returns(true)
+
+      @root = ::Page.create
+      Content.delete_revision(1) rescue nil
+      Spontaneous.logger.silent! {
+        S::Site.publish_all
+      }
     end
 
     after do
@@ -56,6 +70,37 @@ describe "Features" do
       #   Object.send(:remove_const, klass) rescue nil
       # } rescue nil
       Content.delete
+    end
+
+    describe "middleware" do
+      before do
+        @middleware = Class.new do
+          def initialize(app, options = {})
+            @app, @options = app, options
+          end
+
+          def call(env)
+            status, headers, body = @app.call(env)
+            [status, headers.merge('X-Middleware' => @options[:header] || "present"), body]
+          end
+        end
+      end
+
+      it "allows for insertion of custom middleware into the front app" do
+        Spontaneous.mode = :front
+        Spontaneous.front.use @middleware, header: "inserted"
+        get "/"
+        assert last_response.status == 200, "Expected an 200 OK response but got #{last_response.status}"
+        last_response.headers['X-Middleware'].must_equal "inserted"
+      end
+
+      it "inserts defined middleware into the preview app" do
+        Spontaneous.mode = :back
+        Spontaneous.front.use @middleware, header: "inserted"
+        auth_get "/", preview: true
+        assert last_response.status == 200, "Expected an 200 OK response but got #{last_response.status}"
+        last_response.headers['X-Middleware'].must_equal "inserted"
+      end
     end
 
     describe "controllers" do

@@ -359,6 +359,7 @@ module Spontaneous
 
       def constants_of(klass)
         return [] unless klass.respond_to?(:constants)
+        return [] if klass == ::BasicObject
         klass.constants.
           select { |c| klass.const_defined?(c, false) }.
           map { |c| klass.const_get(c) }

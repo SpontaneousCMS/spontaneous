@@ -95,6 +95,11 @@ module Spontaneous
           map("/assets") { run SiteAssets.new }
           use Spontaneous::Rack::Static, root: Spontaneous.root / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
           use Reloader
+
+          Spontaneous.instance.front.middleware.each do |args, block|
+            use *args, &block
+          end
+
           Spontaneous.instance.front_controllers.each do |namespace, controller_class|
             map namespace do
               run controller_class
@@ -106,6 +111,7 @@ module Spontaneous
 
       def self.application
         app = ::Rack::Builder.new do
+
           Spontaneous.instance.back_controllers.each do |namespace, controller_class|
             map(namespace) { run controller_class }
           end if Spontaneous.instance

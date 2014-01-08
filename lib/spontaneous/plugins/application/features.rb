@@ -12,6 +12,10 @@ module Spontaneous::Plugins::Application
       def register_front_controller(namespace, controller_class, opts = {})
         instance.register_front_controller(namespace, controller_class, opts)
       end
+
+      def front
+        instance.front
+      end
     end # ClassMethods
   end # Features
 end
