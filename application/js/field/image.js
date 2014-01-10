@@ -364,7 +364,11 @@ Spontaneous.Field.Image = (function($, S) {
 			wrap.append(img, actions, info);
 
 			if (value) {
-				var s = value.path.split('/'), filename = s[s.length - 1];
+				var s, filename;
+				if (value.path) {
+					s = value.path.split('/');
+					filename = s[s.length - 1];
+				}
 				set_info(filename, value.filesize, value.width, value.height);
 			}
 			this.preview_img = img;
