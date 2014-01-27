@@ -59,7 +59,7 @@ module Spontaneous::Prototypes
     end
 
     def default_options(field_class)
-      {:default => '', :comment => false }.merge(field_class.default_options)
+      {default: '', comment: false, list: true}.merge(field_class.default_options)
     end
 
     def instance_class
@@ -155,12 +155,13 @@ module Spontaneous::Prototypes
 
     def export(user)
       {
-        :name => name.to_s,
-        :schema_id => schema_id.to_s,
-        :type => instance_class.editor_class,
-        :title => title,
-        :comment => comment || "",
-        :writable => Spontaneous::Permissions.has_level?(user, write_level)
+        name: name.to_s,
+        schema_id: schema_id.to_s,
+        type: instance_class.editor_class,
+        title: title,
+        comment: comment || "",
+        list: @options[:list] || false,
+        writable: Spontaneous::Permissions.has_level?(user, write_level)
       }.merge(instance_class.export(user))
     end
   end

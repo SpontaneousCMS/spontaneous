@@ -41,6 +41,7 @@ describe "Serialisation" do
           width 50
         end
       end
+      field :another, list: false
 
       style :freezing
       style :boiling
