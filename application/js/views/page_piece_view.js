@@ -19,7 +19,7 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 
 			contents.append(this.page_title_panel());
 			var entry = dom.div('.entry');
-			var fields = new Spontaneous.FieldPreview(this, '');
+			var fields = new Spontaneous.FieldPreview(this, '', true);
 			var fields_panel = fields.panel();
 			entry.append(fields_panel);
 			inside.append(entry);

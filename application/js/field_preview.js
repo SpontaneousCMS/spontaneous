@@ -4,9 +4,10 @@ Spontaneous.FieldPreview = (function($, S) {
 	var dom = S.Dom;
 
 	var FieldPreview = new JS.Class({
-		initialize: function(view, wrap_id) {
+		initialize: function(view, wrap_id, listView) {
 			this.view = view;
 			this.wrap_id = wrap_id;
+			this.listView = listView;
 		},
 
 		depth_class: function() {
@@ -35,7 +36,7 @@ Spontaneous.FieldPreview = (function($, S) {
 			var wrapper = dom.ul('.fields-preview-'+type), __this = this;
 			if (fields.length === 0) { wrapper.addClass('empty'); }
 			$.each(fields, function(i, field) {
-				if (field.type.list) {
+				if (!__this.listView || field.type.list) {
 					var li = dom.li();
 					var name = dom.div('.name').text(field.title);
 					var value = dom.div('.value');
