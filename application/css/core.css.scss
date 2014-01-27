@@ -640,6 +640,7 @@ img.missing {
 			float: left;
 			height: 32px;
 			padding-left: 16px;
+			padding-right: 16px;
 			min-width: 130px;
 			max-width: 160px;
 			padding-top: 9px;
@@ -670,6 +671,18 @@ img.missing {
 					padding-left: $container-padding;
 				}
 			}
+		}
+		li:hover:first-child:before,
+		li.active:first-child:before {
+			@include vertical-gradient($highlight + #111111, $highlight);
+			background-color: $highlight;
+			content: "";
+			position: absolute;
+			width: $container-padding;
+			height: 32px;
+			// outline: solid 1px red;
+			left: -$container-padding - 1;
+			top: 0;
 		}
 		li.active + li:hover {
 			border-left-color: $highlight - #151515;
@@ -1000,6 +1013,8 @@ img.missing {
 				margin-right: 1px;
 				width: 100%;
 				background: none;
+				padding-left: 0;
+				padding-right: 0;
 				li {
 					@include box-sizing;
 					@include interface;
@@ -1015,8 +1030,10 @@ img.missing {
 					color: #666666;
 					// color: #f2f2f2;
 				}
-				li:first-child {
+				li:first-child:before {
 					// @include rounded-top-left;
+					// padding-left: 0;
+					display: none;
 				}
 				li:nth-child(4) {
 					// @include rounded-top-right;
@@ -1058,7 +1075,7 @@ img.missing {
 				a {
 					@include button(#6b6b6b);
 					// background-color: #6b6b6b;
-					padding-left: 8px;
+					padding-left: 16px;
 					padding-right: 8px;
 					& + a {
 						margin-left: $unit;
