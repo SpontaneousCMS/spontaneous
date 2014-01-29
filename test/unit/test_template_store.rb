@@ -237,6 +237,15 @@ describe "Template store" do
       end
     end
 
+    it "ignores a rollback after a commit" do
+      transaction.store(output_html, true, "*template*")
+      transaction.store(output_xml, false, "*template*")
+      transaction.store(output_json, false, "*template*")
+      transaction.commit
+      transaction.rollback
+      store.revisions.must_equal [ 100 ]
+    end
+
     it "writes to index.xxx when given the site root" do
       store.expects(:store_static).with(r, "/index.html", "*template*", transaction)
       transaction.store(home.output(:html), false, "*template*")

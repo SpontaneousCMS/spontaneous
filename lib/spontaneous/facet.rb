@@ -34,6 +34,10 @@ module Spontaneous
     end
 
     def paths
+      _paths
+    end
+
+    def _paths
       @paths ||= Spontaneous::Paths.new(@root)
     end
 

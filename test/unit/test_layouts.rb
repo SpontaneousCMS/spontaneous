@@ -24,9 +24,11 @@ describe "Layouts" do
     teardown_site
   end
 
+  let(:renderer) { Spontaneous::Output.default_renderer(@site) }
+
   it "default to layouts/standard.html... if nothing defined" do
     page = LayoutPage.new
-    assert_correct_template(page, @template_root / 'layouts/standard')
+    assert_correct_template(page, @template_root / 'layouts/standard', renderer)
     page.render.must_equal "layouts/standard.html.cut\n"
   end
 
@@ -37,7 +39,7 @@ describe "Layouts" do
         file.write("layouts/layout_page.html.cut\n")
       end
       page = LayoutPage.new
-      assert_correct_template(page, @template_root / 'layouts/layout_page')
+      assert_correct_template(page, @template_root / 'layouts/layout_page', renderer)
       page.render.must_equal "layouts/layout_page.html.cut\n"
     ensure
       FileUtils.rm(layout)
@@ -48,7 +50,7 @@ describe "Layouts" do
     LayoutPage.layout :custom1
     LayoutPage.layout :custom2
     page = LayoutPage.new
-    assert_correct_template(page, @template_root / 'layouts/custom1')
+    assert_correct_template(page, @template_root / 'layouts/custom1', renderer)
     page.render.must_equal "layouts/custom1.html.cut\n"
   end
 
@@ -56,7 +58,7 @@ describe "Layouts" do
     LayoutPage.layout :custom1
     LayoutPage.layout :custom2, :default => true
     page = LayoutPage.new
-    assert_correct_template(page, @template_root / 'layouts/custom2')
+    assert_correct_template(page, @template_root / 'layouts/custom2', renderer)
     page.render.must_equal "layouts/custom2.html.cut\n"
   end
 
@@ -64,7 +66,7 @@ describe "Layouts" do
     LayoutPage.layout :custom1
     LayoutPage.layout :custom2, :default => true
     page = SubPage.new
-    assert_correct_template(page, @template_root / 'layouts/custom2')
+    assert_correct_template(page, @template_root / 'layouts/custom2', renderer)
   end
 
   it "be able to overwrite inherited templates from superclass" do
@@ -73,17 +75,17 @@ describe "Layouts" do
     SubPage.layout :custom3
     page = SubPage.new
     # page.layout.template.must_equal 'layouts/custom2'
-    assert_correct_template(page, @template_root / 'layouts/custom2')
+    assert_correct_template(page, @template_root / 'layouts/custom2', renderer)
   end
 
   it "allow setting of style used" do
     LayoutPage.layout :custom1
     LayoutPage.layout :custom2
     page = LayoutPage.new
-    assert_correct_template(page, @template_root / 'layouts/custom1')
+    assert_correct_template(page, @template_root / 'layouts/custom1', renderer)
     # page.layout.template.must_equal 'layouts/custom1'
     page.layout = :custom2
-    assert_correct_template(page, @template_root / 'layouts/custom2')
+    assert_correct_template(page, @template_root / 'layouts/custom2', renderer)
     # page.layout.template.must_equal 'layouts/custom2'
   end
 
@@ -93,9 +95,9 @@ describe "Layouts" do
     SubPage.layout :custom3
     SubPage.layout :custom4
     page = SubPage.new
-    assert_correct_template(page, @template_root / 'layouts/custom3')
+    assert_correct_template(page, @template_root / 'layouts/custom3', renderer)
     page.layout = :custom2
-    assert_correct_template(page, @template_root / 'layouts/custom2')
+    assert_correct_template(page, @template_root / 'layouts/custom2', renderer)
   end
 
   it "allow defining of default layout in sub-classes" do
@@ -104,9 +106,9 @@ describe "Layouts" do
     SubPage.layout :custom3
     SubPage.layout :custom4, :default => true
     page = SubPage.new
-    assert_correct_template(page, @template_root / 'layouts/custom4')
+    assert_correct_template(page, @template_root / 'layouts/custom4', renderer)
     page.layout = :custom3
-    assert_correct_template(page, @template_root / 'layouts/custom3')
+    assert_correct_template(page, @template_root / 'layouts/custom3', renderer)
   end
 
   it "support blocks to set simple templates" do

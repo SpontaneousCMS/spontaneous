@@ -18,17 +18,23 @@ describe "DataMapperContent" do
   end
 
   before do
+    root ||= Dir.mktmpdir
     @expected_columns = DB[:content].columns
     @database = ::Sequel.mock(autoid: 1)
     @database.columns = @expected_columns
-    @schema = Spontaneous::Schema.new(Dir.pwd, NameMap)
-    content_super = Spontaneous::Model(:content, @database, @schema)
+    @site = Spontaneous::Site.instantiate(root, :test, :back)
+    @schema = Spontaneous::Schema.new(@site, Dir.pwd, NameMap)
+    content_super = Spontaneous::Model!(:content, @database, @schema)
     content_class = Class.new(content_super)
+    page_class    = Class.new(content_class::Page)
+    @site.model = content_class
     Object.const_set(:Content, content_class)
+    Object.const_set(:Page, page_class)
   end
 
   after do
     Object.send :remove_const, :Content rescue nil
+    Object.send :remove_const, :Page rescue nil
   end
 
     it  "be defined as a top-level constant" do
@@ -43,7 +49,7 @@ describe "DataMapperContent" do
       @database.sqls # clear sql log
       ::Content.all
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (type_sid IN ('Content'))"
+        "SELECT * FROM content WHERE (type_sid IN ('Page'))"
       ]
     end
 
@@ -63,7 +69,7 @@ describe "DataMapperContent" do
         b = ::Content.root
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((type_sid IN ('Content')) AND (path = '/')) LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('Page')) AND (path = '/')) LIMIT 1"
       ]
     end
 
@@ -75,7 +81,7 @@ describe "DataMapperContent" do
         b = ::Content.path("/this")
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((type_sid IN ('Content')) AND (path = '/this')) LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('Page')) AND (path = '/this')) LIMIT 1"
       ]
     end
 
@@ -87,20 +93,17 @@ describe "DataMapperContent" do
         b = ::Content.uid("fish")
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((type_sid IN ('Content')) AND (uid = 'fish')) LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('Page')) AND (uid = 'fish')) LIMIT 1"
       ]
     end
 
     describe "Pages" do
       before do
-        page_class = Class.new(::Content::Page)
-        Object.const_set(:Page, page_class)
-        Object.const_set(:P1, Class.new(page_class))
-        Object.const_set(:P2, Class.new(page_class))
+        Object.const_set(:P1, Class.new(::Page))
+        Object.const_set(:P2, Class.new(::Page))
       end
 
       after do
-        Object.send :remove_const, :Page rescue nil
         Object.send :remove_const, :P1   rescue nil
         Object.send :remove_const, :P2   rescue nil
       end
@@ -144,7 +147,7 @@ describe "DataMapperContent" do
         @database.sqls # clear sql log
         P2.root
         @database.sqls.must_equal [
-          "SELECT * FROM content WHERE ((type_sid IN ('Content', 'Content::Page', 'Page', 'P1', 'P2')) AND (path = '/')) LIMIT 1"
+          "SELECT * FROM content WHERE ((type_sid IN ('Page', 'P1', 'P2')) AND (path = '/')) LIMIT 1"
         ]
       end
 

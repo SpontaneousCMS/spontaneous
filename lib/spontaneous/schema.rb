@@ -99,16 +99,16 @@ module Spontaneous
       end
     end
 
-    def self.new(root, schema_loader_class = Spontaneous::Schema::PersistentMap)
-      Schema.new(root, schema_loader_class)
+    def self.new(site, root, schema_loader_class = Spontaneous::Schema::PersistentMap)
+      Schema.new(site, root, schema_loader_class)
     end
 
     class Schema
       attr_accessor :schema_loader_class
       attr_reader   :uids
 
-      def initialize(root, schema_loader_class = Spontaneous::Schema::PersistentMap)
-        @root = root
+      def initialize(site, root, schema_loader_class = Spontaneous::Schema::PersistentMap)
+        @site, @root = site, root
         @schema_loader_class = schema_loader_class
         @subclass_map = Hash.new { |h, k| h[k] = [] }
         initialize_uid_map
@@ -179,7 +179,7 @@ module Spontaneous
       # type is removed it becomes difficult to instantiate any entries that remain
       # in the db
       def after_delete(uid)
-        result = Spontaneous::Model::Action::Clean.run(Spontaneous::Content)
+        result = Spontaneous::Model::Action::Clean.run(@site)
         logger.warn("Deleted #{result[:invalid]} invalid and #{result[:orphans]} orphaned content instances.")
         logger.warn("Site must_publish_all flag has been set") if result[:publish]
       end
@@ -287,8 +287,8 @@ module Spontaneous
       end
 
       def excluded_types
-        return [] unless defined?(Spontaneous::Content)
-        [Spontaneous::Content, Spontaneous::Content::Page, Spontaneous::Content::Piece]
+        model = @site.model
+        [model, model::Page, model::Piece]
       end
 
       def inheritance_map
@@ -342,7 +342,7 @@ module Spontaneous
       end
 
       def initialize_uid_map
-        @uids = Spontaneous::Schema::UIDMap.new
+        @uids = Spontaneous::Schema::UIDMap.new(@site)
       end
 
       # It's obvious from this method that schema classes are

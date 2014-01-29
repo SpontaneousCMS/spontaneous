@@ -87,7 +87,7 @@ describe "Page" do
       Page.root.must_equal nil
       root = ErrorPage.create_root "error"
       Page.root.must_equal nil
-      Site["#error"].must_equal root
+      @site["#error"].must_equal root
     end
   end
 

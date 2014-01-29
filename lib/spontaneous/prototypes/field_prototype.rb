@@ -116,19 +116,26 @@ module Spontaneous::Prototypes
     end
 
     def in_index?(index)
-      search.in_index?(index)
+      search(index.site).in_index?(index)
     end
 
     def index_id(index)
-      search.index_id(index)
+      search(index.site).index_id(index)
     end
 
     def options_for_index(index)
-      search.field_definition(index)
+      search(index.site).field_definition(index)
     end
 
-    def search
-      @search ||= S::Search::Field.new(self, @options[:index])
+    # TODO: it's wrong to have to be passing the site to this call
+    # as there's only ever one site and we shouldn't be memoizing
+    # a method call with a param.
+    # Must centralize the testing of a prototype for inclusion into
+    # an index - either into the index or the site itself.
+    # We can't just recalculate this on the fly because indexing
+    # needs to be reasonably performant.
+    def search(site)
+      @search ||= S::Search::Field.new(site, self, @options[:index])
     end
 
     def inherit_schema_id(schema_id)
@@ -148,9 +155,9 @@ module Spontaneous::Prototypes
       values = { :name => self.name }
       values[:unprocessed_value] = default(instance) if using_default_values
       values.update(database_values || {})
-      self.instance_class.new(values, using_default_values).tap do |field|
-        field.prototype = self
-      end
+      field = self.instance_class.new(values, using_default_values)
+      field.prototype = self
+      field
     end
 
     def export(user)

@@ -1,33 +1,39 @@
 module Spontaneous::Rack::Middleware
   module Scope
-    class Edit
-
-      def initialize(app)
-        @app = app
+    class Base
+      def initialize(app, site, options = {})
+        raise "Missing site instance" if site.nil?
+        @app, @site, @options = app, site, options
       end
 
       def call(env)
+        env[Spontaneous::Rack::SITE] = @site
+        call!(env)
+      end
+    end
+
+    class Edit < Base
+      def call!(env)
         response = nil
-        Spontaneous::Content.scope(nil, false) do
+        @site.model.scope(nil, false) do
           response = @app.call(env)
         end
         response
       end
     end
 
-    class Preview
+    class Preview < Base
       include Spontaneous::Rack::Constants
 
-      def initialize(app)
-        @app = app
-        @renderer = Spontaneous::Output.preview_renderer
-        Spontaneous::Output.renderer = @renderer
+      def initialize(app, site, options = {})
+        super
+        @renderer = Spontaneous::Output.preview_renderer(@site)
       end
 
-      def call(env)
+      def call!(env)
         env[RENDERER] = @renderer
         response = nil
-        Spontaneous::Content.scope(nil, true) do
+        @site.model.scope(nil, true) do
           response = @app.call(env)
         end
         response
@@ -38,19 +44,19 @@ module Spontaneous::Rack::Middleware
       "X-Powered-By" => "Spontaneous CMS v#{Spontaneous::VERSION}"
     }
 
-    class Front
+    class Front < Base
       include Spontaneous::Rack::Constants
 
-      def initialize(app)
-        @app = app
-        @renderer = Spontaneous::Output.published_renderer
+      def initialize(app, site, options = {})
+        super
+        @renderer = Spontaneous::Output.published_renderer(@site)
       end
 
-      def call(env)
+      def call!(env)
         status = headers = body = nil
         env[RENDERER] = @renderer
-        env[REVISION] = Spontaneous::Site.published_revision
-        Spontaneous::Content.with_published do
+        env[REVISION] = @site.published_revision
+        @site.model.with_published(@site) do
           status, headers, body = @app.call(env)
         end
         [status, headers.merge(POWERED_BY), body]

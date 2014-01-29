@@ -86,8 +86,8 @@ module Spontaneous::Model::Page
       self.class.find_named_layout(layout_name)
     end
 
-    def template(format = :html)
-      layout.template(format)
+    def template(format = :html, renderer = Spontaneous::Output::default_renderer)
+      layout.template(format, renderer)
     end
   end # Layouts
 end # Spontaneous::Plugins

@@ -95,13 +95,13 @@ class MiniTest::Spec
 
   def self.setup_site(root = nil, define_models = true)
     root ||= Dir.mktmpdir
-    instance = Spontaneous::Site.instantiate(root, :test, :back)
-    instance.schema_loader_class = Spontaneous::Schema::TransientMap
-    instance.logger.silent!
-    instance.database = DB
-    Spontaneous::Site.background_mode = :immediate
+    site = Spontaneous::Site.instantiate(root, :test, :back)
+    site.schema_loader_class = Spontaneous::Schema::TransientMap
+    site.logger.silent!
+    site.database = DB
+    site.background_mode = :immediate
     unless Object.const_defined?(:Content)
-      content_class = Class.new(Spontaneous::Model(:content, DB, instance.schema))
+      content_class = Class.new(Spontaneous::Model!(:content, DB, site.schema))
       Object.const_set :Content, content_class
       if define_models
         Object.const_set :Page, Class.new(::Content::Page)
@@ -109,10 +109,10 @@ class MiniTest::Spec
         Object.const_set :Box, Class.new(::Content::Box)
       end
     end
-    Object.const_set :Site,  Spontaneous.site!(::Content)
+    site.model = ::Content
     # Use the fast version of the password hashing algorithm
     Spontaneous::Crypt.force_version(0)
-    instance
+    site
   end
 
   def self.teardown_site(clear_disk = true, clear_const = true)
@@ -120,7 +120,7 @@ class MiniTest::Spec
       FileUtils.rm_r(Spontaneous.instance.root) rescue nil
     end
     return unless clear_const
-    %w(Piece Page Box Content Site).each do |klass|
+    %w(Piece Page Box Content).each do |klass|
       Object.send :remove_const, klass if Object.const_defined?(klass)
     end
     Spontaneous.send :remove_const, :Content rescue nil
@@ -174,8 +174,8 @@ class MiniTest::Spec
     self.class.teardown_site(clear_disk, clear_const)
   end
 
-  def assert_correct_template(content, expected_path, format = :html)
-    assert_equal(expected_path, content.template(format))
+  def assert_correct_template(content, expected_path, renderer, format = :html)
+    assert_equal(expected_path, content.template(format, renderer))
   end
 
   def assert_file_exists(*path)

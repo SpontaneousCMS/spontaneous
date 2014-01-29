@@ -44,7 +44,7 @@ module Spontaneous
       # stolen from Sinatra
       def parse_response(response)
         case
-        when response.is_a?(Spontaneous::Content)
+        when response.is_a?(site.model)
           @page = response
         when response.respond_to?(:to_str)
           @response.body = [response]
@@ -80,7 +80,7 @@ module Spontaneous
         fail "Unknown media type: %p" % type if mime_type.nil?
         mime_type = mime_type.dup
         unless params.include? :charset
-          params[:charset] = params.delete('charset') || ::Spontaneous.config.default_charset || 'utf-8'
+          params[:charset] = params.delete('charset') || site.config.default_charset || 'utf-8'
         end
         mime_type << ";#{params.map { |kv| kv.join('=') }.join(', ')}" unless params.empty?
         response['Content-Type'] = mime_type
@@ -92,7 +92,7 @@ module Spontaneous
       end
 
       def find_page_by_path(path)
-        Spontaneous::Site.by_path(path)
+        site.by_path(path)
       end
 
       def output(name)
@@ -106,7 +106,7 @@ module Spontaneous
       def render_get
         return call_action! if @action
         if page.dynamic?(request.request_method)
-          invoke_action { page.process_root_action(env.dup, @output) }
+          invoke_action { page.process_root_action(site, env.dup, @output) }
         else
           render_page_with_output
         end
@@ -119,11 +119,11 @@ module Spontaneous
 
         return call_action! if @action
 
-        invoke_action { page.process_root_action(env.dup, @output) }
+        invoke_action { page.process_root_action(site, env.dup, @output) }
       end
 
       def call_action!
-        invoke_action { @page.process_action(action, env.dup, @output) }
+        invoke_action { @page.process_action(site, action, env.dup, @output) }
       end
 
       def invoke_action
@@ -131,7 +131,7 @@ module Spontaneous
         if status == 404
           not_found!
         else
-          if result.is_a?(Spontaneous::Content)
+          if result.is_a?(site.model)
             @page = result
             render_page_with_output
           else

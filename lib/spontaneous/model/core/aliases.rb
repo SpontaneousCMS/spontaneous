@@ -167,7 +167,7 @@ module Spontaneous::Model::Core
 
       def exported_target(user = nil)
         case target
-        when Spontaneous::Content
+        when content_model
           target.shallow_export(user)
         else
           target.to_json

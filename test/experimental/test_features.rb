@@ -16,7 +16,7 @@ describe "Features" do
   end
 
   def app
-    Spontaneous::Rack.application
+    Spontaneous::Rack.application(@site)
   end
 
   def api_key
@@ -85,7 +85,7 @@ describe "Features" do
 
       it "be able to injectable into the back application" do
         Spontaneous.mode = :back
-        Spontaneous.register_back_controller(:myfeature, FeatureBackController)
+        @site.register_back_controller(:myfeature, FeatureBackController)
 
         get "/@myfeature/hello"
         assert last_response.status == 401, "Expected an Unauthorised 401 response but got #{last_response.status}"
@@ -104,7 +104,7 @@ describe "Features" do
 
       it "be able to injectable into the back application with custom path prefixes" do
         Spontaneous.mode = :back
-        Spontaneous.register_back_controller(:myfeature, FeatureBackController, path_prefix: "/something")
+        @site.register_back_controller(:myfeature, FeatureBackController, path_prefix: "/something")
         auth_get "/something/hello"
         assert last_response.ok?
         assert last_response.body == "Editor"
@@ -112,7 +112,7 @@ describe "Features" do
 
       it "be able to inject controllers into the front application" do
         Spontaneous.mode = :front
-        Spontaneous.register_front_controller(:myfeature, FeatureFrontController)
+        @site.register_front_controller(:myfeature, FeatureFrontController)
         get "/@myfeature/hello"
         assert last_response.ok?
         assert last_response.body == "World"
@@ -124,7 +124,7 @@ describe "Features" do
 
       it "be able to inject controllers into the front application with custom path prefixes" do
         Spontaneous.mode = :front
-        Spontaneous.register_front_controller(:myfeature, FeatureFrontController, path_prefix: "/something/else")
+        @site.register_front_controller(:myfeature, FeatureFrontController, path_prefix: "/something/else")
         get "/something/else/hello"
         assert last_response.ok?
         assert last_response.body == "World"
@@ -132,7 +132,7 @@ describe "Features" do
 
       it "gives access to all mounted front apps in preview mode" do
         Spontaneous.mode = :back
-        Spontaneous.register_front_controller(:myfeature, FeatureFrontController)
+        @site.register_front_controller(:myfeature, FeatureFrontController)
         get "/@myfeature/hello"
         assert last_response.ok?
         assert last_response.body == "World"
@@ -140,7 +140,7 @@ describe "Features" do
 
       it "allows injection of rack apps into the the back application" do
         Spontaneous.mode = :back
-        Spontaneous.register_back_controller(:myfeature, proc { |env| [200, {}, "hello"] })
+        @site.register_back_controller(:myfeature, proc { |env| [200, {}, "hello"] })
 
         get "/@myfeature"
         assert last_response.status == 401, "Expected an Unauthorised 401 response but got #{last_response.status}"

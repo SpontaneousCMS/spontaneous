@@ -27,16 +27,9 @@ module Spontaneous
       include Spontaneous::Rack::Constants
       include Spontaneous::Rack::Middleware
 
-      def self.make_controller(app)
+      def self.make_controller(app, site)
         app.helpers Helpers if app.respond_to?(:helpers)
-        ::Rack::Builder.app do
-          use Scope::Edit
-          use Authenticate::Init
-          use Authenticate::Edit
-          use CSRF::Header
-          use CSRF::Verification
-          run app
-        end
+        app
       end
 
       def self.api_handlers
@@ -53,40 +46,37 @@ module Spontaneous
          ["/shard", File::Sharded]]
       end
 
-      def self.editing_app
+      def self.editing_app(site)
         ::Rack::Builder.app do
-          use Scope::Edit
+          use Scope::Edit, site
           use ApplicationAssets
           use UnsupportedBrowser
-          use Authenticate::Init
+          use Authenticate::Init, site
           use Login
-          # Everything after this handler requires authentication
-          use Authenticate::Edit
+          use Authenticate::Edit # Everything after this handler requires authentication
           use CSRF::Header
           # Schema has to come before Reloader because we need to be able to
           # present the conflict resolution interface without running through
           # the schema validation step
           map("/schema")  { run Schema }
-          use Reloader
+          use Reloader, site
           use Index
-          # Everything after this middleware requires a valid CSRF token
-          use CSRF::Verification
-
+          use CSRF::Verification # Everything after this middleware requires a valid CSRF token
           Back.api_handlers.each do |path, app|
-            map(path)  { run app }
+            map(path) { run app }
           end
           run lambda { |env| [ 404, {}, ["Not Found"] ] }
         end
       end
 
 
-      def self.preview_app
+      def self.preview_app(site)
         ::Rack::Builder.app do
           use ::Rack::Lint if Spontaneous.development?
-          use Scope::Preview
-          use Authenticate::Init
+          use Scope::Preview, site
+          use Authenticate::Init, site
           # Preview authentication redirects to /@spontaneous rather than
-          # showing a login screen. This way if you go to rhe root of the site
+          # showing a login screen. This way if you go to the root of the site
           # as an unauthorised user (say for the first time) you will get sent
           # to the editing interface wrapper rather than being presented with
           # the preview site.
@@ -94,42 +84,52 @@ module Spontaneous
           use CSRF::Header
           map("/assets") { run SiteAssets.new }
           use Spontaneous::Rack::Static, root: Spontaneous.root / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
-          use Reloader
-          Spontaneous.instance.front_controllers.each do |namespace, controller_class|
+          use Reloader, site
+          # inject the front controllers into the preview so that this is a
+          # full duplicate of the live site
+          site.front_controllers.each do |namespace, controller_class|
             map namespace do
               run controller_class
             end
-          end if Spontaneous.instance
+          end
           run Preview
         end
       end
 
-      def self.application
+      def self.application(site)
         app = ::Rack::Builder.new do
-          Spontaneous.instance.back_controllers.each do |namespace, controller_class|
-            map(namespace) { run controller_class }
-          end if Spontaneous.instance
+          site.back_controllers.each do |namespace, controller|
+            map(namespace) do
+              use Scope::Edit, site
+              use Authenticate::Init, site
+              use Authenticate::Edit
+              use CSRF::Header
+              use CSRF::Verification
+              run controller
+            end
+          end
 
           # Make all the files available under plugin_name/public/**
           # available under the URL /plugin_name/**
           # This needs to be handled by the asset system
           # so that /assets/<plugin_name>/file.css is properly found
           # and processed through sprockets
-          Spontaneous.instance.plugins.each do |plugin|
+          site.plugins.each do |plugin|
             root = plugin.paths.expanded(:public)
+
             map "/#{plugin.file_namespace}" do
               use Spontaneous::Rack::CSS, root: root
               run ::Rack::File.new(root)
             end
-          end if Spontaneous.instance
+          end if site
 
           map "/media" do
             use ::Rack::Lint
             run Spontaneous::Rack::CacheableFile.new(Spontaneous.media_dir)
           end
 
-          map(NAMESPACE) { run Spontaneous::Rack::Back.editing_app }
-          map("/")       { run Spontaneous::Rack::Back.preview_app }
+          map(NAMESPACE) { run Spontaneous::Rack::Back.editing_app(site) }
+          map("/")       { run Spontaneous::Rack::Back.preview_app(site) }
         end
       end
     end

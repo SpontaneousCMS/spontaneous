@@ -150,19 +150,19 @@ describe "Schema" do
 
       describe "lookups" do
         it "return classes" do
-          Site.schema.to_class("xxxxxxxxxxxx").must_equal SchemaClass
+          @site.schema.to_class("xxxxxxxxxxxx").must_equal SchemaClass
         end
         it "return fields" do
-          Site.schema.to_class("ffffffffffff").must_equal SchemaClass.field_prototypes[:description]
+          @site.schema.to_class("ffffffffffff").must_equal SchemaClass.field_prototypes[:description]
         end
         it "return boxes" do
-          Site.schema.to_class("bbbbbbbbbbbb").must_equal SchemaClass.box_prototypes[:posts]
+          @site.schema.to_class("bbbbbbbbbbbb").must_equal SchemaClass.box_prototypes[:posts]
         end
         it "return styles" do
-          Site.schema.to_class("ssssssssssss").must_equal SchemaClass.style_prototypes[:simple]
+          @site.schema.to_class("ssssssssssss").must_equal SchemaClass.style_prototypes[:simple]
         end
         it "return layouts" do
-          Site.schema.to_class("llllllllllll").must_equal SchemaClass.layout_prototypes[:clean]
+          @site.schema.to_class("llllllllllll").must_equal SchemaClass.layout_prototypes[:clean]
         end
       end
 
@@ -875,7 +875,7 @@ describe "Schema" do
 
       it "deletes type instances when a type is removed" do
         Spontaneous::State.instance.update(must_publish_all: false)
-        Site.must_publish_all?.must_equal false
+        @site.must_publish_all?.must_equal false
         B.box :pages
         A.box :pages
         # a1
@@ -914,12 +914,12 @@ describe "Schema" do
         content = S.database[:content].all
         content.length.must_equal 2
         content.map { |c| c[:type_sid] }.must_equal [A.schema_id.to_s, A.schema_id.to_s]
-        Site.must_publish_all?.must_equal true
+        @site.must_publish_all?.must_equal true
       end
 
       it "doesn't mark the site as 'dirty' if no instances are deleted by the change in the schema" do
         Spontaneous::State.instance.update(must_publish_all: false)
-        Site.must_publish_all?.must_equal false
+        @site.must_publish_all?.must_equal false
         A.box :pages
         # a1
         #  |- b2
@@ -943,7 +943,7 @@ describe "Schema" do
         action = @modification.actions.first
         S.schema.apply(action)
         Content.count.must_equal 1
-        Site.must_publish_all?.must_equal false
+        @site.must_publish_all?.must_equal false
       end
 
       describe "conflict" do

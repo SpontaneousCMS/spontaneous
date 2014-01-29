@@ -7,22 +7,19 @@ module Spontaneous
     module Front
       include Spontaneous::Rack::Middleware
 
-      def self.make_controller(controller_class)
-        ::Rack::Builder.app do
-          use Scope::Front
-          run controller_class
-        end
+      def self.make_controller(controller_class, site)
+        controller_class
       end
 
-      def self.front_app
+      def self.front_app(site)
         ::Rack::Builder.app do
-          use Scope::Front
-          use Reloader if Spontaneous.development?
+          use Scope::Front, site
+          use Reloader, site if Spontaneous.development?
           run Server.new
         end
       end
 
-      def self.application
+      def self.application(site)
         app = ::Rack::Builder.new do
           use Spontaneous::Rack::Static, root: Spontaneous.revision_dir / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
 
@@ -30,16 +27,16 @@ module Spontaneous
             map namespace do
               run controller_class
             end
-          end if Spontaneous.instance
+          end
 
           # Make all the files available under plugin_name/public/**
           # available under the URL /plugin_name/**
           # Only used in preview mode
-          Spontaneous.instance.plugins.each do |plugin|
+          site.plugins.each do |plugin|
             map "/#{plugin.name}" do
               run ::Rack::File.new(plugin.paths.expanded(:public))
             end
-          end if Spontaneous.instance
+          end
 
           map "/rev" do
             run Spontaneous::Rack::CacheableFile.new(Spontaneous.revision_dir / "rev")
@@ -54,7 +51,7 @@ module Spontaneous
           end
 
           map "/" do
-            run Spontaneous::Rack::Front.front_app
+            run Spontaneous::Rack::Front.front_app(site)
           end
         end
       end
@@ -69,6 +66,10 @@ module Spontaneous
           @params   = indifferent_params(@request.params)
 
           render_path(@request.path_info)
+        end
+
+        def site
+          @site ||= env[Spontaneous::Rack::SITE]
         end
       end
     end

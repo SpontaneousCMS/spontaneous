@@ -61,22 +61,22 @@ module Spontaneous::Model::Page
     end
 
     # resolve and call the relevant action handler and return the results to the controller
-    def process_action(action_path, env, format)
+    def process_action(site, action_path, env, format)
       namespace, *parts = action_path.split(S::Constants::SLASH)
       path = "/" << parts.join(S::Constants::SLASH)
       env[S::Constants::PATH_INFO] = path
-      run_controller(namespace, env, format)
+      run_controller(site, namespace, env, format)
     end
 
-    def process_root_action(env, format)
+    def process_root_action(site, env, format)
       env[S::Constants::PATH_INFO] = S::Constants::SLASH
-      run_controller(:__nil__, env, format)
+      run_controller(site, :__nil__, env, format)
     end
 
-    def run_controller(namespace, env, format)
+    def run_controller(site, namespace, env, format)
       controller_class = self.class.controllers[namespace.to_sym]
       return 404 if controller_class.nil?
-      app = controller_class.new(self, format)
+      app = controller_class.new(site, self, format)
       status, headers, body = app.call(env)
       [status, headers, body]
     end

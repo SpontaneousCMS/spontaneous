@@ -97,7 +97,7 @@ module Spontaneous::Field
       values[:video_id]
     end
 
-    def generate_outputs(input)
+    def generate_outputs(input, site)
       values = {}
       values[:html] = escape_html(input)
 

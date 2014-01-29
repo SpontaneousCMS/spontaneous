@@ -72,8 +72,8 @@ module Spontaneous
       target.resolve_style(style_id)
     end
 
-    def template(format = :html)
-      style.template(format)
+    def template(format = :html, renderer = Spontaneous::Output.default_renderer)
+      style.template(format, renderer)
     end
   end
 end

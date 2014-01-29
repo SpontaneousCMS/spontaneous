@@ -29,7 +29,7 @@ module Spontaneous::Field
     alias_method :on?, :checked?
     alias_method :enabled?, :checked?
 
-    def preprocess(value)
+    def preprocess(value, site)
       case value
       when TrueClass, FalseClass
         value
@@ -44,15 +44,15 @@ module Spontaneous::Field
       end
     end
 
-    def generate_boolean(state)
+    def generate_boolean(state, site)
       state
     end
 
-    def generate_html(state)
+    def generate_html(state, site)
       string_value(state)
     end
 
-    def generate_string(state)
+    def generate_string(state, site)
       string_value(state)
     end
 

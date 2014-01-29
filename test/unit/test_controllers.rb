@@ -75,7 +75,7 @@ describe "Controllers" do
     @deep_page = ::DeepPage.new(slug: 'deep')
   end
 
-  let(:app) { Spontaneous::Rack::Front.application }
+  let(:app) { Spontaneous::Rack::Front.application(@site) }
 
   after do
     Object.send(:remove_const, :SubPage) rescue nil
@@ -85,8 +85,8 @@ describe "Controllers" do
 
   describe "requests" do
     before do
-      Spontaneous::Site.stubs(:by_path).with('/something').returns(@page)
-      Spontaneous::Site.stubs(:by_path).with('/deep').returns(@deep_page)
+      @site.stubs(:by_path).with('/something').returns(@page)
+      @site.stubs(:by_path).with('/deep').returns(@deep_page)
     end
 
     it "propagates settings to sub-classes" do
@@ -121,8 +121,8 @@ describe "Controllers" do
   describe "PageController" do
     let(:owner) { SubPage.new(uid: "owner") }
     let(:other) { SubPage.new(uid: "other") }
-    let(:ctrl)  { Spontaneous::Rack::PageController.new!(owner, :html) }
-    let(:env)   { {Spontaneous::Rack::RENDERER => Spontaneous::Output.published_renderer} }
+    let(:ctrl)  { Spontaneous::Rack::PageController.new!(@site, owner, :html) }
+    let(:env)   { {Spontaneous::Rack::RENDERER => Spontaneous::Output.published_renderer(@site) } }
 
     before do
       ctrl.env = env
@@ -130,8 +130,8 @@ describe "Controllers" do
       ctrl.response = Rack::Response.new
       SubPage.layout { "${uid}:{{success}}" }
       SubPage.add_output :xml
-      Spontaneous::Site.stubs(:by_uid).with('other', Content).returns(other)
-      Spontaneous::Site.stubs(:by_uid).with(:other, Content).returns(other)
+      @site.stubs(:by_uid).with('other').returns(other)
+      @site.stubs(:by_uid).with(:other).returns(other)
     end
 
     it "allows setting the output format" do

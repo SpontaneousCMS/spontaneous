@@ -4,10 +4,10 @@ class Spontaneous::Site
   module Paths
     extend Spontaneous::Concern
 
-    module ClassMethods
-      def paths(group)
-        instance.facets.flat_map { |facet| facet.paths.expanded(group) }
-      end
-    end # ClassMethods
+    def paths(*args)
+      return _paths if args.empty?
+      group = args.first
+      facets.flat_map { |facet| facet._paths.expanded(group) }
+    end
   end # Paths
 end

@@ -32,15 +32,15 @@ describe "Plugins" do
   end
 
   def app
-    Spontaneous::Rack.application
+    Spontaneous::Rack.application(@site)
   end
 
 
   before do
-    S::Site.background_mode = :immediate
     S::State.delete
     Content.delete
     @site = Spontaneous.instance
+    @site.background_mode = :immediate
     page = ::Page.new
     page.save
 
@@ -91,7 +91,7 @@ describe "Plugins" do
         Content.delete_revision(1) rescue nil
 
         Spontaneous.logger.silent! {
-          S::Site.publish_all
+          @site.publish_all
         }
       end
 

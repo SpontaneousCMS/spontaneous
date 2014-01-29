@@ -8,9 +8,10 @@ module Spontaneous::Media
 
     attr_reader :filename, :owner, :source
 
-    def initialize(owner, filename, headers = {})
+    def initialize(site, owner, filename, headers = {})
       headers = { content_type: headers } if headers.is_a?(String)
-      @owner, @filename, @headers = owner, Spontaneous::Media.to_filename(filename), headers
+      headers ||= {}
+      @site, @owner, @filename, @headers = site, owner, Spontaneous::Media.to_filename(filename), headers
     end
 
     # Create a new File instance with a new name.
@@ -20,7 +21,7 @@ module Spontaneous::Media
     def rename(new_filename)
       headers = storage_headers
       headers.delete(:content_type)
-      self.class.new(owner, new_filename, headers)
+      self.class.new(@site, owner, new_filename, headers)
     end
 
     def open(mode = 'wb', &block)
@@ -58,7 +59,7 @@ module Spontaneous::Media
     end
 
     def storage
-      @storage ||= Spontaneous::Site.storage(mimetype)
+      @storage ||= @site.storage(mimetype)
     end
 
     def padded_id
@@ -70,7 +71,7 @@ module Spontaneous::Media
     end
 
     def revision
-      Spontaneous::Site.working_revision
+      @site.working_revision
     end
 
     def media_dir

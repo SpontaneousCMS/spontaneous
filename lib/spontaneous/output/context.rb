@@ -7,7 +7,7 @@ module Spontaneous::Output::Context
     include RenderCache
     include Navigation
 
-    attr_accessor :_renderer
+    attr_accessor :_renderer, :site
 
 
     def page
@@ -27,11 +27,11 @@ module Spontaneous::Output::Context
     end
 
     def root
-      Spontaneous::Site.root
+      site.home
     end
 
     def site_page(path)
-      Spontaneous::Site[path]
+      site[path]
     end
 
     def asset_environment
@@ -46,10 +46,6 @@ module Spontaneous::Output::Context
 
     def asset_url(path, options = {})
       "url(#{asset_path(path, options)})"
-    end
-
-    def site
-      Spontaneous::Site.instance
     end
 
     def publishing?

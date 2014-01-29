@@ -22,7 +22,7 @@ describe "UserAdmin" do
   end
 
   def app
-    Spontaneous::Rack::Back.application
+    Spontaneous::Rack::Back.application(@site)
   end
 
   def api_key

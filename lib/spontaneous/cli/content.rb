@@ -11,7 +11,7 @@ module Spontaneous
         prepare!(:clean)
         say "==> Cleaning content table..."
         say ""
-        result = Spontaneous::Model::Action::Clean.run(Spontaneous::Content)
+        result = Spontaneous::Model::Action::Clean.run(Spontaneous::instance)
         say "----> Deleted ", :bold
         say "#{result[:invalid]} ", [:red, :bold]
         say "entries with invalid schema types"

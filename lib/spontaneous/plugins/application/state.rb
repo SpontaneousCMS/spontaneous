@@ -40,7 +40,7 @@ module Spontaneous::Plugins::Application
       # a nice way to create the ::Site constant in the user/site code
       def site(content_model)
         site!(content_model) unless defined?(Spontaneous::Content)
-        Spontaneous::Site
+        Spontaneous::Site.instance
       end
 
       # This forces the assignment of Spontaneous::Content, overwriting any
@@ -49,10 +49,11 @@ module Spontaneous::Plugins::Application
       # Used in tests.
       #
       def site!(content_model)
-        spot = ::Spontaneous
-        Spontaneous.send :remove_const, :Content if defined?(Spontaneous::Content)
-        Spontaneous.const_set(:Content, content_model)
-        Spontaneous::Site
+        site = Spontaneous::Site.instance
+        # Spontaneous.send :remove_const, :Content if defined?(Spontaneous::Content)
+        # Spontaneous.const_set(:Content, content_model)
+        site.model = content_model
+        site
       end
 
       def loaded?
@@ -60,8 +61,12 @@ module Spontaneous::Plugins::Application
       end
 
 
+      def instance
+        Spontaneous::Site.instance
+      end
+
       def config
-        Spontaneous::Site.instance.config
+        instance.config
       end
 
       def db_settings

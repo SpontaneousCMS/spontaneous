@@ -3,27 +3,27 @@
 module Spontaneous::Field
 
   class Update
-    def self.perform(fields, user, asynchronous = false)
-      self.new(fields, user).run(asynchronous)
+    def self.perform(site, fields, user, asynchronous = false)
+      self.new(site, fields, user).run(asynchronous)
     end
 
 
-    def self.asynchronous_update_class
-      Spontaneous::Site.resolve_background_mode(self)
+    def self.asynchronous_update_class(site)
+      site.resolve_background_mode(self)
     end
 
-    def initialize(fields, user)
-      @fields, @user = fields, user
+    def initialize(site, fields, user)
+      @site, @fields, @user = site, fields, user
     end
 
     def run(asynchronous = false)
       fields.each do |field, value|
-        field.pending_value = value
+        field.set_pending_value(value, @site)
       end
 
       immediate, asynchronous = partition_fields(asynchronous)
 
-      Immediate.process(immediate)
+      Immediate.process(@site, immediate)
 
       launch_asynchronous_update(asynchronous)
     end
@@ -58,8 +58,8 @@ module Spontaneous::Field
       fields.each do |field|
         prepare_asynchronous_update(field)
       end
-      updater = self.class.asynchronous_update_class
-      updater.process(fields)
+      updater = self.class.asynchronous_update_class(@site)
+      updater.process(@site, fields)
     end
 
     def prepare_asynchronous_update(field)
@@ -68,17 +68,17 @@ module Spontaneous::Field
     end
 
     class Immediate
-      def self.process(fields)
-        self.new(fields).run
+      def self.process(site, fields)
+        self.new(site, fields).run
       end
 
-      def initialize(fields)
-        @fields = Array(fields)
+      def initialize(site, fields)
+        @site, @fields = site, Array(fields)
       end
 
       def run
         @fields.each do |field|
-          field.process_pending_value
+          field.process_pending_value(@site)
         end
         save
       end
@@ -114,8 +114,8 @@ module Spontaneous::Field
       # so we can update the fields we have updated without over-writing the db
       # versions of any other fields.
       def reload(owner)
-        Spontaneous::Content.scope! do
-          o = Spontaneous::Content.get(owner.content_instance.id)
+        owner.model.scope! do
+          o = owner.model.get(owner.content_instance.id)
           return o.boxes[owner.box_name] if Spontaneous::Box === owner
           o
         end
@@ -135,8 +135,9 @@ module Spontaneous::Field
       # Load these everytime to ensure they are updated with their
       # correct lock status
       def pages
-        page_ids = owners.map(&:page).uniq.compact.map(&:id)
-        page_ids.map { |id| Spontaneous::Content.get(id) }
+        pages = owners.map { |owner| [owner.model, owner.page] }.uniq
+        pages = pages.reject { |model, page| page.nil? }.map { |model, page| [model, page.id] }
+        pages.map { |model, id| model.get(id) }
       end
     end
 
@@ -146,7 +147,7 @@ module Spontaneous::Field
         begin
           Spontaneous::Simultaneous.fire(:update_fields, params)
         rescue Spontaneous::Simultaneous::Error
-          Immediate.process(@fields)
+          Immediate.process(@site, @fields)
         end
       end
     end

@@ -5,14 +5,14 @@ module Spontaneous::Rack::Back
     end
 
     get '/?' do
-      json(Spontaneous::Change)
+      json(Spontaneous::Change.export(site))
     end
 
     post '/?' do
       ids = params[:page_ids]
       halt 400 if ids.blank? || ids.empty?
       pages = ids.map(&:to_i)
-      Spontaneous::Site.publish_pages(pages)
+      site.publish_pages(pages)
       json({})
     end
   end

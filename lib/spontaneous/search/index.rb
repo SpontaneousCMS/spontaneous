@@ -5,9 +5,10 @@ require 'xapian-fu'
 module Spontaneous::Search
   class Index
 
-    attr_reader :name, :search_types
+    attr_reader :name, :search_types, :site
 
-    def initialize(name, &definition)
+    def initialize(site, name, &definition)
+      @site = site
       @name = name
       @search_types = base_search_types
       @include_pages = nil
@@ -43,7 +44,7 @@ module Spontaneous::Search
       database.search(query, options)
     end
 
-    def database(revision = Spontaneous::Site.published_revision)
+    def database(revision = @site.published_revision)
       Database.new(self, revision)
     end
 
@@ -156,6 +157,10 @@ module Spontaneous::Search
       include_type?(content.class) and include_page?(content.page)
     end
 
+    def model
+      @site.model
+    end
+
   protected
 
     def include_type?(type)
@@ -185,7 +190,7 @@ module Spontaneous::Search
       when /\A[\/#]/
         page.path == selector
       when /\A(>=?)\s+(.+)\z/
-        rule, root = $1, S::Site[$2]
+        rule, root = $1, @site[$2]
         root.send(rule, page)
       else
         false
@@ -193,7 +198,7 @@ module Spontaneous::Search
     end
 
     def resolve_page_list(pages)
-      pages.map { |p| S::Site[p] }
+      pages.map { |p| @site[p] }
     end
 
     def base_search_types
@@ -216,11 +221,11 @@ module Spontaneous::Search
     end
 
     def all_types
-      S.schema.classes
+      @site.schema.classes
     end
 
     def all_page_types
-      S.schema.classes.select { |klass| klass.page? }
+      @site.schema.classes.select { |klass| klass.page? }
     end
   end # Index
 end # Spontaneous

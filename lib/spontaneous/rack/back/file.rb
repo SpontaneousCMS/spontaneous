@@ -9,7 +9,7 @@ module Spontaneous::Rack::Back
           forbidden! unless target.field_writable?(user, field.name)
           # version = params[:version].to_i
           # if version == field.version
-          Spontaneous::Field.set_asynchronously(field, file, user)
+          Spontaneous::Field.set_asynchronously(site, field, file, user)
           json(field.export(user))
           # else
           #   errors = [[field.schema_id.to_s, [field.version, field.conflicted_value]]]
@@ -28,7 +28,7 @@ module Spontaneous::Rack::Back
             instance = type.new
             box.insert(position, instance)
             field = instance.field_for_mime_type(file[:type])
-            Spontaneous::Field.set_asynchronously(field, file, user)
+            Spontaneous::Field.set_asynchronously(site, field, file, user)
             content.save
             json({
               :position => position,
@@ -71,20 +71,6 @@ module Spontaneous::Rack::Back
         end
       end
 
-      def replace_with_shard(target, target_id)
-        field = target.fields.sid(params[:field])
-        forbidden! unless target.field_writable?(user, field.name)
-        # version = params[:version].to_i
-        # if version == field.version
-        Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-          Spontaneous::Field.set_asynchronously(field, {
-            :filename => params[:filename],
-            :tempfile => combined
-          }, user)
-        end
-        json(field.export(user))
-      end
-
       # TODO: remove duplication here
       post '/:id/:box_id' do
         content_for_request(true) do |content, box|
@@ -96,15 +82,9 @@ module Spontaneous::Rack::Back
             box.insert(position, instance)
             field = instance.field_for_mime_type(params[:mime_type])
             Spontaneous::Media.combine_shards(params[:shards]) do |combined|
-              Spontaneous::Field.set_asynchronously(field, {
-                :filename => params[:filename],
-                :tempfile => combined
-              }, user)
+              tempfile = { :filename => params[:filename], :tempfile => combined }
+              Spontaneous::Field.set_asynchronously(site, field, tempfile, user)
               content.save
-              # field.value = {
-              #   :filename => params[:filename],
-              #   :tempfile => combined
-              # }
             end
             json({
               :position => position,
@@ -112,6 +92,18 @@ module Spontaneous::Rack::Back
             })
           end
         end
+      end
+
+      def replace_with_shard(target, target_id)
+        field = target.fields.sid(params[:field])
+        forbidden! unless target.field_writable?(user, field.name)
+        # version = params[:version].to_i
+        # if version == field.version
+        Spontaneous::Media.combine_shards(params[:shards]) do |combined|
+          tempfile = { :filename => params[:filename], :tempfile => combined }
+          Spontaneous::Field.set_asynchronously(site, field, tempfile, user)
+        end
+        json(field.export(user))
       end
     end
   end

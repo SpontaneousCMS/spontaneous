@@ -127,71 +127,72 @@ describe "Site" do
 
 
       it "retrieve details of the root by default" do
-        Site.map.must_equal Page.root.map_entry
+        @site.map.must_equal Page.root.map_entry
       end
 
       it "retrieve the details of the children of any page" do
-        Site.map(@root.id).must_equal Page.root.map_entry
-        Site.map(@page3_2.id).must_equal @page3_2.map_entry
+        @site.map(@root.id).must_equal Page.root.map_entry
+        @site.map(@page3_2.id).must_equal @page3_2.map_entry
       end
     end
 
     describe "page retrieval" do
       it "finds the root" do
-        Site.root.must_equal @root
+        @site.home.must_equal @root
       end
 
       it "returns all roots" do
         hidden = Page.create slug: "hidden"
-        roots = Site.roots
+        roots = @site.roots
         roots["public"].must_equal "spontaneous.io"
         roots["roots"].keys.must_equal ["spontaneous.io", "#hidden"]
       end
 
       it "returns an empty roots object if no root exists" do
         @root.destroy
-        roots = Site.roots
+        roots = @site.roots
         roots['roots'].must_equal({})
       end
 
       it "finds ids" do
         @page3_2.reload
         [@page3_2.id, @page3_2.id.to_s].each do |id|
-          Site[id].must_equal @page3_2
+          @site[id].must_equal @page3_2
         end
       end
 
       it "work with paths" do
-        Site['/page1-1/page2-1'].must_equal @page2_1.reload
+        @site['/page1-1/page2-1'].must_equal @page2_1.reload
       end
 
       it "work with UIDs" do
-        Site["page3_2"].must_equal @page3_2.reload
-        Site["$page3_2"].must_equal @page3_2.reload
+        @site["page3_2"].must_equal @page3_2.reload
+        @site["$page3_2"].must_equal @page3_2.reload
       end
 
       it "maps symbols to UIDs" do
-        Site[:page3_2].must_equal @page3_2.reload
+        @site[:page3_2].must_equal @page3_2.reload
       end
 
       it "finds hidden roots" do
         root = Page.create slug: "hidden"
-        Site["#hidden"].must_equal root.reload
+        @site["#hidden"].must_equal root.reload
         child = Page.create slug: "something"
         root.subpages << child
         root.save
-        Site["#hidden/something"].must_equal child.reload
+        @site["#hidden/something"].must_equal child.reload
       end
 
       it "have a shortcut direct method on Site" do
-        Site.page3_2.must_equal @page3_2.reload
+        @site.page3_2.must_equal @page3_2.reload
       end
 
       it "return section pages in the right order" do
-        Site.at_depth(0).must_equal @root
-        Site.at_depth(:root).must_equal @root
-        Site.at_depth(1).must_equal [@page1_1, @page1_2]
-        Site.at_depth(:section).must_equal [@page1_1, @page1_2]
+        @site.at_depth(0).must_equal @root
+        @site.at_depth(:root).must_equal @root
+        @site.at_depth(:home).must_equal @root
+        @site.at_depth(1).must_equal [@page1_1, @page1_2]
+        @site.at_depth(:section).must_equal [@page1_1, @page1_2]
       end
     end
   end
@@ -206,7 +207,7 @@ describe "Site" do
     it "just return the current time if no modifications have been made" do
       now = @now + 12
       Time.stubs(:now).returns(now)
-      Site.modified_at.must_equal now
+      @site.modified_at.must_equal now
     end
 
     it "be updated when a page is added" do
@@ -214,7 +215,7 @@ describe "Site" do
       Time.stubs(:now).returns(now)
       root = ::Page.create
       Time.stubs(:now).returns(now + 200)
-      Site.modified_at.must_equal now
+      @site.modified_at.must_equal now
     end
 
     it "be updated when a page's title changes" do
@@ -222,7 +223,7 @@ describe "Site" do
       now = @now + 98
       Time.stubs(:now).returns(now)
       root.update(:title => "Some Title")
-      Site.modified_at.must_equal now
+      @site.modified_at.must_equal now
     end
 
     it "be updated when a page's slug changes" do
@@ -230,7 +231,7 @@ describe "Site" do
       now = @now + 98
       Time.stubs(:now).returns(now)
       root.update(:slug => "updated-slug")
-      Site.modified_at.must_equal now
+      @site.modified_at.must_equal now
     end
 
     it "not be updated when a piece is added" do
@@ -240,7 +241,7 @@ describe "Site" do
       now2 = @now + 240
       Time.stubs(:now).returns(now2)
       root.subpages << Piece.create
-      Site.modified_at.must_equal now1
+      @site.modified_at.must_equal now1
     end
 
     it "be updated when a page is deleted" do
@@ -252,11 +253,11 @@ describe "Site" do
       child = ::Page.new
       root.subpages << child
       root.save
-      Site.modified_at.must_equal now2
+      @site.modified_at.must_equal now2
       now3 = @now + 128
       Time.stubs(:now).returns(now3)
       child.destroy
-      Site.modified_at.must_equal now3
+      @site.modified_at.must_equal now3
     end
 
     it "not be updated when a piece is deleted" do
@@ -267,11 +268,11 @@ describe "Site" do
       Time.stubs(:now).returns(now2)
       piece = ::Piece.create
       root.subpages << piece
-      Site.modified_at.must_equal now1
+      @site.modified_at.must_equal now1
       now3 = @now + 480
       Time.stubs(:now).returns(now3)
       piece.reload.destroy
-      Site.modified_at.must_equal now1
+      @site.modified_at.must_equal now1
     end
   end
 
@@ -281,7 +282,7 @@ describe "Site" do
       @site.public_url.must_equal "http://spontaneouscms.org/"
       @site.public_url("/").must_equal "http://spontaneouscms.org/"
       @site.public_url("/something").must_equal "http://spontaneouscms.org/something"
-      Site.public_url("/something").must_equal "http://spontaneouscms.org/something"
+      @site.public_url("/something").must_equal "http://spontaneouscms.org/something"
     end
   end
 
@@ -300,7 +301,7 @@ describe "Site" do
 
     it "include all facet paths for a particular path group" do
       dirs = [@site.root / "templates", @template_dir1, @plugin_dir / "templates"]
-      Site.paths(:templates).must_equal dirs
+      @site.paths(:templates).must_equal dirs
     end
   end
 end

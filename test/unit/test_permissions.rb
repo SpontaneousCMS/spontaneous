@@ -894,7 +894,7 @@ describe "Permissions" do
     end
 
     it "determine what fields are visible in the exoported schema" do
-      schema = Site.schema.export(@editor)
+      schema = @site.schema.export(@editor)
       c_schema = schema["C"]
       c_schema[:fields].map { |f| f[:name] }.must_equal %w(editor_level mixed_level default_level)
       c_schema[:boxes].map { |b| b[:name] }.must_equal %w(editor_level mixed_level default_level)

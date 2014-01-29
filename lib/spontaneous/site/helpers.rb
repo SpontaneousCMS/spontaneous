@@ -4,7 +4,7 @@ class Spontaneous::Site
   module Helpers
     extend Spontaneous::Concern
 
-    module ClassMethods
+    # module ClassMethods
       def helper(*formats, &block)
         helper_module = Module.new(&block)
         register_helper(helper_module, helper_module_name(caller), *formats.flatten)
@@ -12,7 +12,8 @@ class Spontaneous::Site
       end
 
       def helper_module_name(_caller)
-        path = _caller.first.split(':').first.split('/')[-5..-1]
+        parts = _caller.first.split(':').first.split('/')
+        path = parts[-([5, parts.length].min)..-1]
         path.join('_').gsub(/[^A-Za-z_]/, '_').gsub(/_+/, '_').gsub(/^_+/, '').capitalize
       end
 
@@ -25,7 +26,7 @@ class Spontaneous::Site
             helper_module.send :include, mod
             helper_module.send :extend,  mod
           end
-          Spontaneous::Site.registered_helpers[format].each do |mod|
+          registered_helpers[format].each do |mod|
             helper_module.send :include, mod
             helper_module.send :extend,  mod
           end
@@ -34,8 +35,8 @@ class Spontaneous::Site
       end
 
       def register_helper(helper_module, module_name, *formats)
-        site    = instance
-        helpers = site.registered_helpers
+        site = self
+        helpers = registered_helpers
         if formats.empty?
            helpers[:*] << helper_module
         else
@@ -43,23 +44,19 @@ class Spontaneous::Site
             helpers[format.to_sym] << helper_module
           end
         end
-        # Spontaneous::Site::Helpers.const_set(module_name, helper_module)
         def helper_module.__finalize
-          Spontaneous::Site.unregister_helper(self)
+          site.unregister_helper(self)
         end
       end
 
       def unregister_helper(helper_module)
-        helpers = instance.registered_helpers
+        helpers = registered_helpers
         helpers.each do |format, helpers|
           helpers.delete(helper_module)
         end
       end
 
-      def registered_helpers
-        instance.registered_helpers
-      end
-    end
+    # end
 
     def registered_helpers
       @registered_helpers ||= Hash.new { |hash, key| hash[key] = [] }

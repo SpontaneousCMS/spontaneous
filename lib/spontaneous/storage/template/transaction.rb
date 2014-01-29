@@ -9,6 +9,7 @@ module Spontaneous::Storage::Template
     def initialize(revision, store)
       @revision, @store = revision, store
       @index = []
+      @committed = false
     end
 
     def store(output, dynamic, template)
@@ -33,10 +34,11 @@ module Spontaneous::Storage::Template
 
     def commit
       @store.add_revision(@revision, @index)
+      @committed = true
     end
 
     def rollback
-      @store.delete_revision(@revision, @index)
+      @store.delete_revision(@revision, @index) unless @committed
     end
   end
 end

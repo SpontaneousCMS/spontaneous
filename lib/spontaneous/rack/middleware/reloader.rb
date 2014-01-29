@@ -10,9 +10,10 @@ module Spontaneous::Rack::Middleware
   class Reloader
     include Spontaneous::Rack::Back::TemplateHelpers
 
-    def initialize(app, *args)
+    def initialize(app, site, *args)
       @app      = app
-      @active   = Spontaneous::Site.config.reload_classes
+      @site     = site
+      @active   = @site.config.reload_classes
       config    = args.first || {}
       @cooldown = config[:cooldown] || 3
       @last     = (Time.now - @cooldown)

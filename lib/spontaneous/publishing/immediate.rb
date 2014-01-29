@@ -12,14 +12,14 @@ module Spontaneous
 
       attr_reader :revision, :now
 
-      def initialize(revision, content_model)
-        @revision, @content_model = revision, content_model
-        @previous_revision = Spontaneous::Site.published_revision
+      def initialize(site, revision)
+        @site, @revision, @content_model = site, revision, site.model
+        @previous_revision = @site.published_revision
         @now = Time.now
       end
 
       def renderer
-        @renderer ||= Spontaneous::Output::Template::PublishRenderer.new(true)
+        @renderer ||= Spontaneous::Output::Template::PublishRenderer.new(@site, true)
       end
 
       def publish_pages(page_list)
@@ -71,14 +71,14 @@ module Spontaneous
 
 
       def pages
-        @pages ||= Spontaneous::Site.pages(@content_model)
+        @pages ||= @site.pages
       end
 
       # The number of times the publisher has to run through the site's pages
       # in order to generate the search indexes.
       # Returns either 0 or 1
       def index_stages
-        [1, S::Site.indexes.length].min
+        [1, @site.indexes.length].min
       end
 
       def publish(modified_page_list)
@@ -97,7 +97,6 @@ module Spontaneous
       end
 
       def render_revision
-        S::Output.renderer = renderer
         update_progress("rendering", 0)
         @pages_rendered = 0
         @content_model.scope(@revision, true) do
@@ -109,24 +108,27 @@ module Spontaneous
       end
 
       def render_pages
-        # the delay is purely used in interface testing
-        delay = Spontaneous::Site.config.publishing_delay
+        template_revision = @site.template_store.revision(@revision)
+        @render_transaction = template_revision.transaction
+        delay = @site.config.publishing_delay # the delay is purely used in interface testing
         pages.each do |page|
           page.outputs.each do |output|
-            render_page(page, output)
+            render_page(page, output, @render_transaction)
           end
           sleep(delay) if delay
         end
+        @render_transaction.commit
+        @render_transaction = nil
       end
 
-      def render_page(page, output)
+      def render_page(page, output, transaction)
         logger.info { "#{page.path}" }
-        output.publish_page(renderer, revision)
+        output.publish_page(renderer, revision, transaction)
         page_rendered(page, "rendering", output.format)
       end
 
       def index_pages
-        S::Site.indexer(revision) do |indexer|
+        @site.indexer(revision) do |indexer|
           pages.each { |page|
             indexer << page
             page_rendered(page, 'indexing')
@@ -283,7 +285,7 @@ module Spontaneous
         # when working with multiple instances it's possible to rollback the revision number
         # leaving behind old revisions > the current published_revision.
         @content_model.delete_revision(revision)
-        Spontaneous::Site.send(:pending_revision=, revision)
+        @site.send(:pending_revision=, revision)
       end
 
       def after_publish
@@ -292,7 +294,7 @@ module Spontaneous
           tmp = Spontaneous.revision_dir(revision) / "tmp"
           FileUtils.mkdir_p(tmp) unless ::File.exists?(tmp)
           activate_revision
-          Spontaneous::Site.must_publish_all!(false)
+          @site.must_publish_all!(false)
           update_progress("complete")
         rescue => e
           # if a post publish hook raises an exception then we want to roll everything back
@@ -303,16 +305,16 @@ module Spontaneous
 
       def activate_revision
         S::PublishedRevision.create(:revision => revision, :published_at => now)
-        Spontaneous::Site.send(:set_published_revision, revision)
+        @site.send(:set_published_revision, revision)
         write_revision(revision)
-        Spontaneous::Site.trigger(:after_publish, revision)
-        Spontaneous::Site.send(:pending_revision=, nil)
-        Spontaneous::Content.cleanup_revisions(revision, keep_revisions)
+        @site.trigger(:after_publish, revision)
+        @site.send(:pending_revision=, nil)
+        @content_model.cleanup_revisions(revision, keep_revisions)
       end
 
       def deactivate_revision(exception)
         S::PublishedRevision.filter(:revision => revision).delete
-        Spontaneous::Site.send(:set_published_revision, @previous_revision)
+        @site.send(:set_published_revision, @previous_revision)
         write_revision(@previous_revision)
         abort_publish(exception)
       end
@@ -334,17 +336,18 @@ module Spontaneous
       end
 
       def abort_publish(exception)
-        if (r = S::Site.pending_revision)
+        if (r = @site.pending_revision)
           update_progress("aborting")
-          FileUtils.rm_r(Spontaneous.revision_dir(revision)) if File.exists?(Spontaneous.revision_dir(revision))
-          Spontaneous::Site.send(:pending_revision=, nil)
+          @render_transaction.rollback if @render_transaction
+          @site.template_store.revision(r).delete # we might have committed the transaction
+          @site.send(:pending_revision=, nil)
           @content_model.delete_revision(revision)
           puts exception.backtrace.join("\n") if exception
         end
       end
 
       def keep_revisions
-        Spontaneous::Site.config.keep_revisions || KEEP_REVISIONS
+        @site.config.keep_revisions || KEEP_REVISIONS
       end
     end # Immediate
   end # Publishing

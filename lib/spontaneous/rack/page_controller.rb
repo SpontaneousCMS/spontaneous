@@ -41,12 +41,10 @@ module Spontaneous::Rack
       end
     end
 
-    # reset!
+    attr_reader :content, :site
 
-    attr_reader :content
-
-    def initialize(content, output)
-      @content, @output, @locals = content, output, {}
+    def initialize(site, content, output)
+      @site, @content, @output, @locals = site, content, output, {}
       @page = content.page
       super(nil)
     end
@@ -108,7 +106,7 @@ module Spontaneous::Rack
 
     def redirect(location, redirect_code=:temporary)
       if String === location
-        destination = Spontaneous::Site[location]
+        destination = @site[location]
         location = destination.path if destination and destination.respond_to?(:path)
       else
         location = location.path if location.respond_to?(:path)
@@ -143,7 +141,7 @@ module Spontaneous::Rack
     end
 
     def fetch_page(page)
-      return Spontaneous::Site[page] if (String === page) || (Symbol === page)
+      return @site[page] if (String === page) || (Symbol === page)
       page
     end
 
@@ -169,9 +167,10 @@ module Spontaneous::Rack
 
     def do_render(output, locals)
       locals = locals.merge({
-        :params  => params, # use sinatras indifferent params
-        :request => request,
-        :session => request.session
+        params: params, # use sinatras indifferent params
+        request: request,
+        session: request.session,
+        env: request.env
       })
       output.render_using(renderer, locals)
     end

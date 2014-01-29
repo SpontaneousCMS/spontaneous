@@ -12,13 +12,13 @@ module Spontaneous::Field
       [:html, :tags]
     end
 
-    def generate_html(value)
+    def generate_html(value, site)
       value
     end
 
     TAG_PARSER_RE = /"([^"]+)"|([^ ]+)/
 
-    def generate_tags(value)
+    def generate_tags(value, site)
       return [] if value.blank?
       (value).scan(TAG_PARSER_RE).flatten.compact
     end

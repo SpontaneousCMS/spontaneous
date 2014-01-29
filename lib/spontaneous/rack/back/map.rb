@@ -1,8 +1,8 @@
 module Spontaneous::Rack::Back
   class Map < Base
     get '/?:id?' do
-      last_modified(Spontaneous::Site.modified_at)
-      map = Spontaneous::Site.map(params[:id])
+      last_modified(site.modified_at)
+      map = site.map(params[:id])
       if map
         json(map)
       else
@@ -11,13 +11,13 @@ module Spontaneous::Rack::Back
     end
 
     get '/path*' do
-      last_modified(Spontaneous::Site.modified_at)
+      last_modified(site.modified_at)
       if content_model::Page.count == 0
         406
       else
         path = params[:splat].first
-        page = Spontaneous::Site[path]
-        json Spontaneous::Site.map(page.id)
+        page = site[path]
+        json site.map(page.id)
       end
     end
   end

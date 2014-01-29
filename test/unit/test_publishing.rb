@@ -21,7 +21,8 @@ describe "Publishing" do
     stub_time(@now)
 
     @site = setup_site(site_root)
-    Site.background_mode = :immediate
+    @site.background_mode = :immediate
+    @template_store = @site.template_store(:Memory)
 
     Content.delete
 
@@ -57,7 +58,7 @@ describe "Publishing" do
 
     it "delete any conflicting revision tables" do
       S::Publishing::Revision.create(Content, 3)
-      S::Site.publish_all
+      @site.publish_all
     end
 
     it "issue a publish_all if passed page id list including all pages (in any order)" do
@@ -66,19 +67,19 @@ describe "Publishing" do
 
     it "publish all" do
       Content.expects(:publish).with(@revision, nil)
-      S::Site.publish_all
+      @site.publish_all
     end
 
     it "record date and time of publish" do
       Content.expects(:publish).with(@revision, nil)
       S::PublishedRevision.expects(:create).with(:revision => @revision, :published_at => @now)
-      S::Site.publish_all
+      @site.publish_all
     end
 
     it "bump revision after a publish" do
-      S::Site.publish_all
-      S::Site.revision.must_equal @revision + 1
-      S::Site.published_revision.must_equal @revision
+      @site.publish_all
+      @site.revision.must_equal @revision + 1
+      @site.published_revision.must_equal @revision
     end
 
     it "not delete scheduled changes after an exception during publish" do
@@ -86,23 +87,22 @@ describe "Publishing" do
     end
 
     it "set Site.pending_revision before publishing" do
-      Content.expects(:publish).with(@revision, nil) { Site.pending_revision == @revision }
-      Site.publish_all
+      Content.expects(:publish).with(@revision, nil) { @site.pending_revision == @revision }
+      @site.publish_all
     end
 
     it "reset Site.pending_revision after publishing" do
-      Site.publish_all
-      Site.pending_revision.must_be_nil
+      @site.publish_all
+      @site.pending_revision.must_be_nil
     end
 
     it "not update first_published or last_published if rendering fails" do
       c = Content.create
       c.first_published_at.must_be_nil
-      Spontaneous::Site.expects(:pages).returns([c])
+      @site.expects(:pages).returns([c])
       # c.expects(:render).raises(Exception)
       begin
-        silence_logger { Site.publish_all }
-        # Site.publish_all
+        silence_logger { @site.publish_all }
       rescue Exception; end
       c.reload
       Content.with_editable do
@@ -111,31 +111,38 @@ describe "Publishing" do
     end
 
     it "clean up state on publishing failure" do
-      Site.pending_revision.must_be_nil
+      @site.pending_revision.must_be_nil
       refute Content.revision_exists?(@revision)
       # don't like peeking into implementation here but don't know how else
       # to simulate the right error
       root = Page.create()
-      Spontaneous::Site.expects(:pages).returns([root])
+      @site.expects(:pages).returns([root])
       output = root.output(:html)
       output.expects(:render_using).raises(Exception)
       root.expects(:outputs).at_least_once.returns([output])
+      revision_store = @template_store.revision(@revision)
+      @template_store.expects(:revision).with(@revision).at_least_once.returns(revision_store)
+      transaction = []
+      revision_store.expects(:delete)
+      revision_store.expects(:transaction).returns(transaction)
+      transaction.expects(:rollback)
       begin
-        silence_logger { Site.publish_all }
+        silence_logger { @site.publish_all }
       rescue Exception; end
-      Site.pending_revision.must_be_nil
+      @site.pending_revision.must_be_nil
+      @template_store.revisions.must_equal []
       refute Content.revision_exists?(@revision)
       begin
-        silence_logger { Site.publish_pages([change1]) }
+        silence_logger { @site.publish_pages([change1]) }
       rescue Exception; end
-      Site.pending_revision.must_be_nil
+      @site.pending_revision.must_be_nil
       refute Content.revision_exists?(@revision)
     end
 
     it "resets the must_publish_all flag after a successful publish" do
-      Site.must_publish_all!
-      Site.publish_all
-      Site.must_publish_all?.must_equal false
+      @site.must_publish_all!
+      @site.publish_all
+      @site.must_publish_all?.must_equal false
     end
   end
 
@@ -147,7 +154,7 @@ describe "Publishing" do
       Content.delete
       S::State.delete
       S::State.create(:revision => @revision, :published_revision => 2)
-      S::Site.revision.must_equal @revision
+      @site.revision.must_equal @revision
 
 
       class ::PublishablePage < Page; end
@@ -183,7 +190,8 @@ describe "Publishing" do
       @blog.box1 << @post3
       @pages = [@home, @about, @blog, @news, @post1, @post2, @post3]
       @pages.each { |p| p.save }
-      Site.publish_all
+      @site.publish_all
+      @template_revision = @template_store.revision(2)
     end
 
     after do
@@ -195,10 +203,6 @@ describe "Publishing" do
       Object.send(:remove_const, :DynamicPublishablePage) rescue nil
     end
 
-    it "put its files into a numbered revision directory" do
-      Spontaneous.revision_dir(2).must_equal Pathname.new(@site.root / 'cache/revisions' / "00002").realpath.to_s
-    end
-
     it "symlink the latest revision to 'current'" do
       revision_dir = @site.revision_root / "00002"
       current_dir = @site.revision_root / "current"
@@ -208,30 +212,29 @@ describe "Publishing" do
     end
 
     it "have access to the current revision within the templates" do
-      revision_dir = @site.revision_root / "00002"
-      File.read(revision_dir / "static/about.html").must_equal "Page: 'About' 2\n"
+      @template_revision.static_template(@about.output(:html)).read.must_equal "Page: 'About' 2\n"
     end
 
     it "produce rendered versions of each page" do
       revision_dir = @site.revision_root / "00002"
-      file = result = nil
+      file = result = expected = nil
       @pages.each do |page|
+        output = page.output(:html)
         case page.slug
         when "" # root is a dynamic page with no request handler
-          file = revision_dir / "dynamic/index.html.cut"
-          result = "Page: '#{page.title}' {{Time.now.to_i}}\n"
+          expected = "Page: '#{page.title}' {{Time.now.to_i}}\n"
+          result = @template_revision.dynamic_template(output)
         when "news" # news produces a static template but has a request handler
-          file = revision_dir / "protected/news.html"
-          result = "Page: 'News' 2\n"
+          expected = "Page: 'News' 2\n"
+          result = @template_revision.static_template(output)
         when "contact" # contact is both dynamic and has a request handler
-          file = revision_dir / "dynamic/contact.html.cut"
-          result = "Page: 'Contact' {{Time.now.to_i}}\n"
+          expected = "Page: 'Contact' {{Time.now.to_i}}\n"
+          result = @template_revision.dynamic_template(output)
         else # the other pages are static
-          file = revision_dir / "static#{page.path}.html"
-          result = "Page: '#{page.title}' 2\n"
+          expected = "Page: '#{page.title}' 2\n"
+          result = @template_revision.static_template(output)
         end
-        assert File.exists?(file), "File '#{file}' should exist"
-        File.read(file).must_equal result
+        assert_equal expected, result.read
       end
       revision_dir = @site.revision_root / "00002"
       Dir[S.root / "public/**/*"].each do |public_file|
@@ -256,20 +259,22 @@ describe "Publishing" do
     it "transparently support previously unknown formats by assuming a simple HTML like rendering model" do
       PublishablePage.add_output :rtf
       Content.delete_revision(@revision+1)
-      Site.publish_all
-      File.read("#{@site.revision_root}/00003/static/index.rtf").must_equal "RICH!\n"
+      @site.publish_all
+      template_revision = @template_store.revision(@revision+1)
+      render = template_revision.static_template(@home.output(:rtf))
+      render.read.must_equal "RICH!\n"
     end
 
     it "respect a format's #dynamic? setting when deciding a rendered templates location" do
       PublishablePage.add_output :rtf, :dynamic => true
       Content.delete_revision(@revision+1)
-      Site.publish_all
-      File.read("#{@site.revision_root}/00003/dynamic/index.rtf.cut").must_equal "RICH!\n"
+      @site.publish_all
+      @template_store.revision(@revision + 1).dynamic_template(@home.output(:rtf)).read.must_equal "RICH!\n"
     end
 
     it "run the content revision cleanup task after the revision is live" do
       Content.expects(:cleanup_revisions).with(@revision+1, 8)
-      Site.publish_all
+      @site.publish_all
     end
 
     describe "hooks & triggers" do
@@ -278,32 +283,32 @@ describe "Publishing" do
         publish1.expects(:finished).with(@revision+1)
         publish2 = mock
         publish2.expects(:finished)
-        Site.after_publish do |revision|
+        @site.after_publish do |revision|
           publish1.finished(revision)
         end
-        Site.after_publish do
+        @site.after_publish do
           publish2.finished
         end
         Content.delete_revision(@revision+1)
-        Site.publish_all
-        Site.published_revision.must_equal @revision+1
+        @site.publish_all
+        @site.published_revision.must_equal @revision+1
       end
 
       it "abort publish if hook raises error" do
         published_revision = @revision+1
-        Site.pending_revision.must_be_nil
+        @site.pending_revision.must_be_nil
         refute Content.revision_exists?(published_revision)
 
-        Site.after_publish do |revision|
+        @site.after_publish do |revision|
           raise "Boom"
         end
 
         begin
-          silence_logger { Site.publish_all }
+          silence_logger { @site.publish_all }
         rescue Exception; end
 
-        Site.pending_revision.must_be_nil
-        Site.published_revision.must_equal @revision
+        @site.pending_revision.must_be_nil
+        @site.published_revision.must_equal @revision
         refute Content.revision_exists?(published_revision)
         S::PublishedRevision.first(:revision => published_revision).must_be_nil
         previous_root = Spontaneous.revision_dir(@revision)

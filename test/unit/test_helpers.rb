@@ -8,7 +8,6 @@ describe "ContextHelpers" do
     @site = setup_site
     @site.paths.add :templates, File.expand_path("../../fixtures/helpers/templates", __FILE__)
     @renderer = S::Output::Template::Renderer.new(false)
-    S::Output.renderer = @renderer
   end
 
   after do
@@ -16,7 +15,7 @@ describe "ContextHelpers" do
   end
 
   it "be assignable to a particular format" do
-    CustomHelper1 = Site.helper :html do
+    CustomHelper1 = @site.helper :html do
       def here_is_my_custom_helper1; end
     end
 
@@ -27,24 +26,24 @@ describe "ContextHelpers" do
       Spontaneous::Output::Helpers::ScriptHelper,
       Spontaneous::Output::Helpers::StylesheetHelper
     ]
-    helper_module = Site.context :html
+    helper_module = @site.context :html
     join = included_helpers & helper_module.ancestors
     Set.new(join).must_equal Set.new(included_helpers)
     assert helper_module.respond_to?(:here_is_my_custom_helper1)
   end
 
   it "be assigned to all formats if none given" do
-    CustomHelper2 = Site.helper do
+    CustomHelper2 = @site.helper do
       extend self
       def here_is_my_custom_helper2; end
     end
 
     assert CustomHelper2.respond_to?(:here_is_my_custom_helper2)
 
-    helper_module = Site.context :html
+    helper_module = @site.context :html
     assert helper_module.ancestors.include?(CustomHelper2)
 
-    helper_module = Site.context :pdf
+    helper_module = @site.context :pdf
     assert helper_module.ancestors.include?(CustomHelper2)
   end
 
@@ -53,14 +52,14 @@ describe "ContextHelpers" do
       add_output :mobile
     end
 
-    Site.helper :html do
+    @site.helper :html do
       def here_is_my_custom_helper3
         "here_is_my_custom_helper3"
       end
       extend self
     end
 
-    Site.helper :mobile do
+    @site.helper :mobile do
       def here_is_my_custom_helper4
         "here_is_my_custom_helper4"
       end

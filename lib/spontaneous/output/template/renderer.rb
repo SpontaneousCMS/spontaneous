@@ -12,7 +12,8 @@ module Spontaneous::Output::Template
   # caching can be effective
 
   class Renderer
-    def initialize(cache = Spontaneous::Output.cache_templates?)
+    def initialize(site, cache = Spontaneous::Output.cache_templates?)
+      @site  = site
       @cache = cache
     end
 
@@ -30,6 +31,7 @@ module Spontaneous::Output::Template
 
     def context(output, params, parent)
       context_class(output).new(Spontaneous::Output::Renderable.new(output.content), params, parent).tap do |context|
+        context.site = @site
         context._renderer = renderer_for_context
       end
     end
@@ -51,9 +53,10 @@ module Spontaneous::Output::Template
     end
 
     def generate_context_class(output)
+      site = @site
       context_class = Class.new(Spontaneous::Output.context_class) do
         include Spontaneous::Output::Context::ContextCore
-        include output.context
+        include output.context(site)
       end
       context_extensions.each do |mod|
         context_class.send :include, mod
@@ -68,17 +71,37 @@ module Spontaneous::Output::Template
     def write_compiled_scripts=(state)
     end
 
-    def template_exists?(root, template, format)
-      engine.template_exists?(root, template, format)
+    def template_exists?(template, format)
+      engine.template_exists?(template, format)
+    end
+
+    def template_location(template, format)
+      engine.template_location(template, format)
+    end
+
+    def is_dynamic_template?(template_string)
+      second_pass_engine.dynamic_template?(template_string)
+    end
+
+    def is_model?(klass)
+      klass < @site.model
     end
 
     def engine
-      @engine ||= Spontaneous::Output::Template::PublishEngine.new(Spontaneous::Site.paths(:templates), @cache)
+      @engine ||= create_engine(:PublishEngine)
+    end
+
+    def second_pass_engine
+      @second_pass_engine ||= create_engine(:RequestEngine)
+    end
+
+    def create_engine(engine_class, template_roots = @site.paths(:templates))
+      Spontaneous::Output::Template.const_get(engine_class).new(template_roots, @cache)
     end
   end
 
   class PublishRenderer < Renderer
-    def initialize(cache = Spontaneous::Output.cache_templates?)
+    def initialize(site, cache = Spontaneous::Output.cache_templates?)
       super
       Thread.current[:_render_cache] = {}
     end
@@ -87,8 +110,9 @@ module Spontaneous::Output::Template
       Thread.current[:_render_cache]
     end
 
+    # Disabled for moment
     def write_compiled_scripts=(state)
-      engine.write_compiled_scripts = state
+      engine.write_compiled_scripts = false # state
     end
 
     def context_extensions
@@ -98,48 +122,50 @@ module Spontaneous::Output::Template
 
   class RequestRenderer < Renderer
     def engine
-      @engine ||= Spontaneous::Output::Template::RequestEngine.new(Spontaneous::Site.paths(:templates), @cache)
+      @engine ||= create_engine(:RequestEngine)
     end
   end
 
   class PublishedRenderer < Renderer
-    def initialize(revision, cache = Spontaneous::Output.cache_templates?)
-      super(cache)
+    def initialize(site, revision, cache = Spontaneous::Output.cache_templates?)
+      super(site, cache)
       @revision = revision
+      @template_store = @site.template_store.revision(@revision)
     end
 
     def render(output, params = {}, parent_context = nil)
-      request  = params[:request]
-      response = params[:response]
-      headers  = request.env
-      # Test for static template
-      path = template_path(output, false, request)
-      return static_template(path) if ::File.exist?(path)
-      # Attempt to render a published template
-      super
+      render!(output, params, parent_context)
     rescue Cutaneous::UnknownTemplateError => e
+      render_on_demand(output, params, parent_context)
+    end
+
+    def render!(output, params, parent_context)
+      if (template = @template_store.static_template(output))
+        return template
+      end
+      # Attempt to render a published template
+      if (template = @template_store.dynamic_template(output))
+        return engine.render_template(template, context(output, params, parent_context), output.name)
+      end
+      logger.warn("missing template for #{output}")
+      render_on_demand(output, params, parent_context)
+    end
+
+    def render_on_demand(output, params, parent_context)
       template = publish_renderer.render(output, params)
       render_string(template, output, params)
     end
 
-    def static_template(template_path)
-      File.open(template_path)
-    end
-
-    def template_path(output, dynamic, request)
-      Spontaneous::Output.output_path(@revision, output, dynamic, request.request_method)
-    end
-
     def engine
-      @engine ||= Spontaneous::Output::Template::RequestEngine.new(revision_root, @cache)
+      @engine ||= create_engine(:RequestEngine, revision_root)
     end
 
     def publish_renderer
-      @publish_renderer ||= PublishRenderer.new
+      @publish_renderer ||= PublishRenderer.new(@site)
     end
 
     def revision_root
-      [Spontaneous::Site.revision_dir(@revision)/ "dynamic"]
+      [@site.revision_dir(@revision)/ "dynamic"]
     end
   end
 
@@ -155,11 +181,11 @@ module Spontaneous::Output::Template
     end
 
     def renderer_for_context
-      @renderer_for_context ||= PublishRenderer.new(@cache)
+      @renderer_for_context ||= PublishRenderer.new(@site, @cache)
     end
 
     def request_renderer
-      @request_renderer ||= RequestRenderer.new(@cache)
+      @request_renderer ||= RequestRenderer.new(@site, @cache)
     end
   end
 end

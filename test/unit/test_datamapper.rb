@@ -24,7 +24,7 @@ describe "DataMapper" do
     @expected_columns = [:id, :type_sid, :label, :object1, :object2]
     @database = ::Sequel.mock(autoid: 1)
     @table = Spontaneous::DataMapper::ContentTable.new(:content, @database)
-    @schema = Spontaneous::Schema.new(Dir.pwd, NameMap)
+    @schema = Spontaneous::Schema.new(@site, Dir.pwd, NameMap)
     @mapper = Spontaneous::DataMapper.new(@table, @schema)
     @database.columns = @expected_columns
     Spontaneous::DataMapper.stubs(:timestamp).returns(@now)

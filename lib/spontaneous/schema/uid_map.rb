@@ -25,7 +25,8 @@ module Spontaneous::Schema
 
     include Enumerable
 
-    def initialize
+    def initialize(site)
+      @site = site
       @instance_lock  = Mutex.new
       @instances = {}
     end
@@ -66,7 +67,7 @@ module Spontaneous::Schema
     def destroy(uid)
       @instance_lock.synchronize do
         @instances.delete(uid.to_s)
-        uid.after_destroy
+        uid.after_destroy(@site)
       end
     end
 

@@ -9,8 +9,7 @@ describe "Styles" do
     @site = setup_site
     @template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/styles"))
     @site.paths.add(:templates, @template_root)
-    @renderer = S::Output::Template::PreviewRenderer.new
-    S::Output.renderer = @renderer
+    @renderer = S::Output::Template::PreviewRenderer.new(@site)
   end
 
   after do
@@ -53,12 +52,11 @@ describe "Styles" do
         it "return anonymous style if no templates are found" do
           piece = MissingClass.new
           piece.style.class.must_equal Spontaneous::Style::Default
-          # piece.style.template.must_be_instance_of(Proc)
-          piece.style.template.call.must_equal ""
+          piece.style.template(:html, @renderer).call.must_equal ""
         end
 
         it "derive path from owning class and name" do
-          assert_correct_template(@piece, @template_root / 'template_class')
+          assert_correct_template(@piece, @template_root / 'template_class', @renderer)
         end
 
         it "render using correct template" do
@@ -87,28 +85,27 @@ describe "Styles" do
 
         it "use template found in class directory if exists" do
           TemplateClass.style :named1
-          assert_correct_template(@piece, @template_root / 'template_class/named1')
+          assert_correct_template(@piece, @template_root / 'template_class/named1', @renderer)
           @piece.render.must_equal "template_class/named1.html.cut\n"
         end
 
         it "use template in template root with correct name if it exists" do
           TemplateClass.style :named2
-          assert_correct_template(@piece, @template_root / 'named2')
+          assert_correct_template(@piece, @template_root / 'named2', @renderer)
           @piece.render.must_equal "named2.html.cut\n"
         end
 
         it "allow passing of directory/stylename" do
           TemplateClass.style :'orange/apple'
           # piece.style.template.must_equal 'orange/apple'
-          assert_correct_template(@piece, @template_root / 'orange/apple')
+          assert_correct_template(@piece, @template_root / 'orange/apple', @renderer)
           @piece.render.must_equal "orange/apple.html.cut\n"
         end
 
         it "default to styles marked as 'default'" do
           TemplateClass.style :named1
           TemplateClass.style :named2, :default => true
-          assert_correct_template(@piece, @template_root / 'named2')
-          # @piece.style.template.must_equal 'named2'
+          assert_correct_template(@piece, @template_root / 'named2', @renderer)
           @piece.render.must_equal "named2.html.cut\n"
         end
       end
@@ -120,14 +117,13 @@ describe "Styles" do
           @page  = ::Page.new
           @piece = TemplateClass.new
           @page.box1 << @piece
-          assert_correct_template(@piece, @template_root / 'named2')
-          # @piece.style.template.must_equal 'named2'
+          assert_correct_template(@piece, @template_root / 'named2', @renderer)
           @piece.render.must_equal "named2.html.cut\n"
         end
 
         it "be possible" do
           @piece.style = :named1
-          assert_correct_template(@piece, @template_root / 'template_class/named1')
+          assert_correct_template(@piece, @template_root / 'template_class/named1', @renderer)
           @piece.render.must_equal "template_class/named1.html.cut\n"
         end
 
@@ -135,27 +131,24 @@ describe "Styles" do
           @piece.style = :named1
           @piece.save
           @piece = Content[@piece.id]
-          # @piece.style.template.must_equal 'template_class/named1'
-          assert_correct_template(@piece, @template_root / 'template_class/named1')
+          assert_correct_template(@piece, @template_root / 'template_class/named1', @renderer)
         end
       end
 
       describe "inheriting styles" do
         it "use default for sub class if it exists" do
           piece = TemplateSubClass1.new
-          assert_correct_template(piece, @template_root / 'template_sub_class1')
+          assert_correct_template(piece, @template_root / 'template_sub_class1', @renderer)
         end
 
         it "fall back to default style for superclass if default for class doesn't exist" do
           piece = TemplateSubClass2.new
-          assert_correct_template(piece, @template_root / 'template_class')
-          # piece.style.template.must_equal 'template_class'
+          assert_correct_template(piece, @template_root / 'template_class', @renderer)
         end
         it "fall back to defined default style for superclass if default for class doesn't exist" do
           TemplateClass.style :named1
           piece = TemplateSubClass2.new
-          # piece.style.template.must_equal 'template_class/named1'
-          assert_correct_template(piece, @template_root / 'template_class/named1')
+          assert_correct_template(piece, @template_root / 'template_class/named1', @renderer)
         end
       end
 
@@ -288,11 +281,11 @@ describe "Styles" do
         end
 
         it "be used to render the content" do
-          @a.render.must_equal  "html: Total Title"
+          @a.render_using(@renderer).must_equal  "html: Total Title"
         end
 
         it "be used to render the content with the right format" do
-          @a.render(:pdf).must_equal  "pdf: Total Title"
+          @a.render_using(@renderer, :pdf).must_equal  "pdf: Total Title"
         end
       end
 
@@ -362,7 +355,7 @@ describe "Styles" do
 
         it "use template with their name inside container class template dir if it exists" do
           @piece.results << TemplateClass.new
-          assert_correct_template(@piece.results, @template_root / 'template_class/results')
+          assert_correct_template(@piece.results, @template_root / 'template_class/results', @renderer)
           @piece.results.render.must_equal "template_class/results.html.cut\n"
         end
 
@@ -370,7 +363,7 @@ describe "Styles" do
           @piece.entities << TemplateClass.new
           @piece.entities << TemplateClass.new
           @piece.entities.render.must_equal "template_class.html.cut\n\ntemplate_class.html.cut\n"
-          @piece.entities.style.template.call.must_equal '${ render_content }'
+          @piece.entities.style.template(:html, @renderer).call.must_equal '${ render_content }'
         end
 
 
@@ -380,7 +373,7 @@ describe "Styles" do
           end
           @piece = TemplateClass.new
           @page.box1 << @piece
-          assert_correct_template(@piece.things, @template_root / 'template_class/named1')
+          assert_correct_template(@piece.things, @template_root / 'template_class/named1', @renderer)
           @piece.things.render.must_equal "template_class/named1.html.cut\n"
 
           TemplateClass.box :dongles do
@@ -388,7 +381,7 @@ describe "Styles" do
           end
           @piece = TemplateClass.new
           @page.box1 << @piece
-          assert_correct_template(@piece.dongles, @template_root / 'named2')
+          assert_correct_template(@piece.dongles, @template_root / 'named2', @renderer)
           @piece.dongles.render.must_equal "named2.html.cut\n"
         end
 
@@ -422,7 +415,7 @@ describe "Styles" do
                 FileUtils.mkdir_p(File.dirname(path))
                 FileUtils.touch(path + '.html.cut')
 
-                assert_correct_template(box, template_root / "templates" / test_template)
+                assert_correct_template(box, template_root / "templates" / test_template, @renderer)
 
                 FileUtils.rm_r(template_root / "templates")
               end
@@ -445,12 +438,12 @@ describe "Styles" do
         end
 
         it "use the box name template if it exists" do
-          assert_correct_template(@piece.results, @template_root / 'template_class/results')
+          assert_correct_template(@piece.results, @template_root / 'template_class/results', @renderer)
           @piece.results.render.must_equal "template_class/results.html.cut\n"
         end
 
         it "use the box classes default template if box name template is missing" do
-          assert_correct_template(@piece.entities, @template_root / 'box_a')
+          assert_correct_template(@piece.entities, @template_root / 'box_a', @renderer)
           @piece.entities.render.must_equal "box_a.html.cut\n"
         end
 
@@ -463,7 +456,7 @@ describe "Styles" do
           end
           piece = TemplateSubClass.new
           @page.box1 << piece
-          assert_correct_template(piece.lastly, @template_root / 'box_a')
+          assert_correct_template(piece.lastly, @template_root / 'box_a', @renderer)
           Object.send(:remove_const, :BoxASubclass) rescue nil
           Object.send(:remove_const, :TemplateSubClass) rescue nil
         end
@@ -480,8 +473,8 @@ describe "Styles" do
             page = ::Page.new
             piece = TemplateClass.new
             page.box1 << piece
-            assert_correct_template(piece.strollers, @template_root / 'template_class/walky')
-            assert_correct_template(piece.sprinters, @template_root / 'box_a/runny')
+            assert_correct_template(piece.strollers, @template_root / 'template_class/walky', @renderer)
+            assert_correct_template(piece.sprinters, @template_root / 'box_a/runny', @renderer)
           end
         end
       end

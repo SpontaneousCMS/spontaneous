@@ -103,8 +103,8 @@ module Spontaneous::Output
         @options[:postprocess]
       end
 
-      def context
-        Spontaneous::Site.context (helper_formats + [name]).uniq.compact
+      def context(site = Spontaneous.instance)
+        site.context (helper_formats + [name]).uniq.compact
       end
     end
 
@@ -138,7 +138,7 @@ module Spontaneous::Output
     end
 
     def default_renderer
-      Spontaneous::Output.renderer
+      Spontaneous::Output.default_renderer
     end
 
     def before_render
@@ -158,17 +158,9 @@ module Spontaneous::Output
       renderer.render(self, params, parent_context)
     end
 
-    def publish_page(renderer, revision)
+    def publish_page(renderer, revision, transaction)
       rendered = render_using(renderer, {:revision => revision})
-      path = output_path(revision, rendered)
-      File.open(path, 'w') do |file|
-        case rendered
-        when IO
-          IO.copy_stream(rendered, file)
-        else
-          file.write(rendered.to_s)
-        end
-      end
+      transaction.store(self, renderer.is_dynamic_template?(rendered), rendered)
     end
 
     def output_path(revision, render)

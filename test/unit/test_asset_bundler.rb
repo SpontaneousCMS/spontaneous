@@ -6,7 +6,7 @@ describe "AssetBundler" do
   include RackTestMethods
 
   def app
-    Spontaneous::Rack::Back.application
+    Spontaneous::Rack::Back.application(@site)
   end
 
   def fixture_dir

@@ -121,6 +121,10 @@ module Spontaneous
       end
 
       def pending_value=(value)
+        set_pending_value(value, Spontaneous::Site.instance)
+      end
+
+      def set_pending_value(value, site)
         values[:__pending__] = {
           :value => value,
           :version => version + 1,
@@ -148,18 +152,18 @@ module Spontaneous
         values.delete(:__pending__)
       end
 
-      def process_pending_value
-        if (pending = process_pending_value!)
+      def process_pending_value(site = Spontaneous::Site.instance)
+        if (pending = process_pending_value!(site))
           cleanup_pending_value!(pending)
         end
         save
       end
 
-      def process_pending_value!
+      def process_pending_value!(site)
         if has_pending_value?
           pending = pending_value
           @previous_values = values.dup
-          set_value!(pending_value[:value])
+          set_value!(pending_value[:value], true, site)
           pending
         end
       end
@@ -206,8 +210,8 @@ module Spontaneous
       end
 
       def reload
-        Spontaneous::Content.scope! do
-          Spontaneous::Field.find(self.id)
+        owner.model.scope! do
+          Spontaneous::Field.find(owner.model, id)
         end
       end
 
@@ -224,20 +228,20 @@ module Spontaneous
         [:html, :plain]
       end
 
-      def process_value(value)
+      def process_value(value, site)
         @modified = (@initial_value != value)
         increment_version if @modified
-        self.processed_values = generate_outputs(@unprocessed_value)
+        self.processed_values = generate_outputs(@unprocessed_value, site)
       end
 
       def set_value(v, process = true)
-        set_value!(v, process)
+        set_value!(v, process, Spontaneous::Site.instance)
         save
       end
 
-      def set_value!(v, process = true)
+      def set_value!(v, process = true, site = nil)
         set_unprocessed_value(v)
-        process_value(v) if process
+        process_value(v, site) if process
       end
 
       def modified!
@@ -266,16 +270,16 @@ module Spontaneous
         unprocessed_value
       end
 
-      def generate_outputs(value)
+      def generate_outputs(value, site)
         values = {}
-        value = preprocess(value)
+        value = preprocess(value, site)
         outputs.each do |output|
           process_method = "generate_#{output}"
           values[output] = \
             if respond_to?(process_method)
-              send(process_method, value)
+              send(process_method, value, site)
             else
-              generate(output, value)
+              generate(output, value, site)
             end
         end
         values
@@ -283,7 +287,7 @@ module Spontaneous
 
       # should be overwritten in subclasses that actually do something
       # with the field value
-      def preprocess(value)
+      def preprocess(value, site)
         value
       end
 
@@ -295,7 +299,7 @@ module Spontaneous
         value.to_s.gsub(%r{[#{HTML_ESCAPE_TABLE.keys.join}]}) { |s| HTML_ESCAPE_TABLE[s] }
       end
 
-      def generate(output, value)
+      def generate(output, value, site)
         value
       end
 
@@ -460,6 +464,7 @@ module Spontaneous
         data = params.dup
         unprocessed_value = data.delete(:unprocessed_value) || ""
         processed_values  = data.delete(:processed_values)  || {}
+        set_unprocessed_value(unprocessed_value)
         @processed_values = processed_values
         set_value(unprocessed_value, default_values)
         data.each do |property, value|

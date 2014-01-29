@@ -52,37 +52,6 @@ module Spontaneous
       end
     end
 
-    def self.output_path(revision, output, template_dynamic = false, request_method = "GET")
-      output_path_with_root(revision_root(revision), revision, output, template_dynamic, request_method)
-    end
-
-    def self.output_path_with_root(root, revision, output, template_dynamic = false, request_method = "GET")
-      segment = case
-                when template_dynamic || output.dynamic?
-                  "dynamic"
-                when output.page.dynamic?(request_method)
-                  "protected"
-                else
-                  "static"
-                end
-      path = output.page.path
-      dir  = root / segment / path
-      ext  = output.extension(template_dynamic)
-
-      file = "#{dir}#{ext}"
-      file = dir / "/index#{ext}" if path == "/" # root is a special case, as always
-      file
-    end
-
-    # TODO: Is this ever used? Delete it & see what breaks
-    def self.revision_dir(revision=nil, root = nil)
-      Spontaneous::Site.instance.revision_dir(revision, root)
-    end
-
-    def self.revision_root(revision)
-      Spontaneous::Site.instance.revision_dir(revision)
-    end
-
     def self.context_class
       Cutaneous::Context
     end
@@ -120,28 +89,19 @@ module Spontaneous
       Cutaneous::Engine
     end
 
-    def self.renderer
-      @renderer ||= default_renderer
+    # Used in the console or any other place where we want to render
+    # content outside of the Rack applications or publishing
+    # system
+    def self.default_renderer(site = Spontaneous::Site.instance)
+      Template::Renderer.new(site)
     end
 
-    def self.renderer=(renderer)
-      @renderer = renderer
+    def self.published_renderer(site, revision = Spontaneous::State.published_revision)
+      Template::PublishedRenderer.new(site, revision)
     end
 
-    def self.default_renderer
-      Template::Renderer.new
-    end
-
-    def self.published_renderer(revision = Spontaneous::State.published_revision)
-      Template::PublishedRenderer.new(revision)
-    end
-
-    def self.preview_renderer
-      Template::PreviewRenderer.new
-    end
-
-    def self.template_exists?(root, template, format)
-      renderer.template_exists?(root, template, format)
+    def self.preview_renderer(site)
+      Template::PreviewRenderer.new(site)
     end
 
     def self.asset_url(file = nil)

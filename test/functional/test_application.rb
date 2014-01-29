@@ -18,18 +18,9 @@ describe "Application" do
   end
 
   finish do
-    Object.send :remove_const, :Page
-    Object.send :remove_const, :Piece
-    Object.send :remove_const, :Project
-    Object.send :remove_const, :ProjectImage
-    Object.send :remove_const, :ProjectsPage
-    Object.send :remove_const, :Text
-    Object.send :remove_const, :HomePage
-    Object.send :remove_const, :InfoPage
-    Object.send :remove_const, :ClientProject
-    Object.send :remove_const, :ClientProjects
-    Object.send :remove_const, :InlineImage
-
+    [:Page, :Piece, :Project, :ProjectImage, :ProjectsPage, :Text, :HomePage, :InfoPage, :ClientProject, :ClientProjects, :InlineImage].each do |klass|
+      Object.send :remove_const, klass rescue nil
+    end
     teardown_site(true)
   end
 
@@ -56,19 +47,19 @@ describe "Application" do
     end
 
     it "have the same config as Spontaneous" do
-      Site.config.must_equal Spontaneous.config
+      @site.config.must_equal Spontaneous.config
     end
 
     it "enable setting config vars on Site" do
-      Site.config.butter = "yummy"
-      Site.config.butter.must_equal "yummy"
+      @site.config.butter = "yummy"
+      @site.config.butter.must_equal "yummy"
     end
   end
 
   describe "back, development" do
 
     before do
-      Spontaneous.init(:root => site_root, :mode => :back, :environment => :development)
+      @site = Spontaneous.init(:root => site_root, :mode => :back, :environment => :development)
       Sequel::Migrator.apply(Spontaneous.database, 'db/migrations')
     end
 
@@ -93,8 +84,8 @@ describe "Application" do
     end
 
     it "have correct db settings" do
-      Site.config.db[:adapter].must_equal "postgres"
-      Site.config.db[:database].must_equal "spontaneous2_test"
+      @site.config.db[:adapter].must_equal "postgres"
+      @site.config.db[:database].must_equal "spontaneous2_test"
       # Site.config.db[:user].must_equal "root"
       # Site.config.db[:password].should be_nil
       # Site.config.db[:host].must_equal "localhost"
@@ -144,7 +135,7 @@ describe "Application" do
 
   describe "back, production" do
     before do
-      Spontaneous.init(:root => site_root, :mode => :back, :environment => :production)
+      @site = Spontaneous.init(:root => site_root, :mode => :back, :environment => :production)
     end
 
     it "have the right mode setting" do
@@ -161,10 +152,10 @@ describe "Application" do
     end
 
     it "have correct db settings" do
-      Site.config.db[:adapter].must_equal "postgres"
-      Site.config.db[:database].must_equal "spontaneous_example_production"
-      Site.config.db[:user].must_equal "spontaneous_prod"
-      Site.config.db[:password].must_equal "Passw0rd"
+      @site.config.db[:adapter].must_equal "postgres"
+      @site.config.db[:database].must_equal "spontaneous_example_production"
+      @site.config.db[:user].must_equal "spontaneous_prod"
+      @site.config.db[:password].must_equal "Passw0rd"
       # Site.config.db[:host].must_equal "localhost"
     end
 

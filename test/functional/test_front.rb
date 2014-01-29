@@ -17,10 +17,10 @@ describe "Front" do
 
     site = setup_site(site_root)
     let(:site) { site  }
-    S::Site.background_mode = :immediate
     S::State.delete
 
-    Site.background_mode = :immediate
+    site.background_mode = :immediate
+    site.template_store :Memory
     ::Content.delete
 
     class ::Page
@@ -31,6 +31,7 @@ describe "Front" do
       end
     end
     class ::SitePage < ::Page
+      add_output :pdf
       layout :default
       layout :dynamic
       box :pages
@@ -42,37 +43,78 @@ describe "Front" do
       layout :default
     end
 
+    class ::DynamicRequestParams < ::Page
+      layout(:html) { "{{ params[:horse] }}*{{ equine }}" }
+    end
+
+    class ::DynamicRenderParams < ::Page
+      add_output :mobile
+      add_output :session
+      add_output :params
+      layout(:html) { "{{ teeth }}${ path }.${ __format }" }
+      layout(:mobile) { "${ path }.${ __format }" }
+      layout(:session) { %[{{session['user_id']}}/{{params['wendy']}}/{{request.env["SERVER_NAME"]}}] }
+      layout(:params) { "{{ something }}"}
+    end
+
+    class ::CommentablePage < ::Page
+      attr_accessor :status
+
+      add_output :xml
+      add_output :post
+      layout(:html) { "${path}.${ __format }" }
+      layout(:post) { "{{results.join(',')}}" }
+      layout(:xml) { "${ path}.${ __format }" }
+      box :pages
+    end
+
+    class ::FeedPage < ::Page
+      outputs :rss, [:html, {:mimetype => "application/xhtml+xml"}], [:pdf, {:private => true}]
+      layout { "${ path }.${ __format }" }
+    end
 
     root = ::SitePage.create
     about = ::SitePage.create(:slug => "about", :uid => "about")
+    feed = ::FeedPage.create(:slug => "feed", :uid => "feed")
     news = ::SitePage.create(:slug => "news", :uid => "news")
-    dynamic = ::SitePage.create(:slug => "dynamic", :uid => "dynamic")
     static  = ::StaticPage.create(:slug => "static", :uid => "static")
-    dynamic.layout = :dynamic
+    dynamic_request_params = ::DynamicRequestParams.create(slug: "dynamic-request-params", uid: "dynamic_request_params")
+    dynamic_render_params = ::DynamicRenderParams.create(slug: "dynamic-render-params", uid: "dynamic_render_params")
+    commentable = ::CommentablePage.create(slug:"commentable", uid: "commentable")
     root.pages << about
+    root.pages << feed
     root.pages << news
-    root.pages << dynamic
+    root.pages << dynamic_request_params
+    root.pages << dynamic_render_params
     root.pages << static
+    root.pages << commentable
     root.save
 
     let(:root_id) { root.id }
     let(:about_id) { about.id }
+    let(:feed_id) { feed.id }
     let(:news_id) { news.id }
-    let(:dynamic_id) { dynamic.id }
+    let(:dynamic_request_params_id) { dynamic_request_params.id }
+    let(:dynamic_render_params_id) { dynamic_render_params.id }
     let(:static_id) { static.id }
+    let(:commentable_id) { commentable.id }
 
     Content.delete_revision(1) rescue nil
 
     Spontaneous.logger.silent! {
-      S::Site.publish_all
+      site.publish_all
     }
   end
 
   finish do
-    Object.send(:remove_const, :SitePage) rescue nil
-    Content.delete
+    [:SitePage, :StaticPage, :DynamicRequestParams, :DynamicRenderParams, :CommentablePage, :FeedPage].each do |const|
+      Object.send(:remove_const, const) rescue nil
+    end
+    if defined?(Content)
+      Content.delete
+      Content.delete_revision(1)
+    end
     S::State.delete
-    Content.delete_revision(1)
     teardown_site(true)
     Spontaneous::Output.write_compiled_scripts = false
     $VERBOSE = @warn_level
@@ -80,21 +122,19 @@ describe "Front" do
 
   let(:root) { Content[root_id] }
   let(:about) { Content[about_id] }
+  let(:feed) { Content[feed_id] }
   let(:news) { Content[news_id] }
-  let(:dynamic) { Content[dynamic_id] }
+  let(:dynamic_request_params) { Content[dynamic_request_params_id] }
+  let(:dynamic_render_params) { Content[dynamic_render_params_id] }
   let(:static) { Content[static_id] }
+  let(:commentable) { Content[commentable_id] }
 
   def app
-    Spontaneous::Rack::Front.application
+    @app ||= Spontaneous::Rack::Front.application(site)
   end
 
-  after do
-    SitePage.instance_variable_set(:@layout_procs, nil)
-    SitePage.instance_variable_set(:@controllers, nil)
-    [root, about, news, static].each do |page|
-      page.layout = :default
-    end
-    dynamic.layout = :dynamic
+  def renderer
+    @renderer ||= Spontaneous::Output::Template::PublishRenderer.new(site, true)
   end
 
   def session
@@ -106,10 +146,6 @@ describe "Front" do
   end
 
   describe "Public pages" do
-
-    after do
-      about.class.outputs :html
-    end
 
     it "return a 404 if asked for a non-existant page" do
       get '/not-bloody-likely'
@@ -137,7 +173,6 @@ describe "Front" do
     end
 
     it "honor the format of the request" do
-      about.class.outputs :html, :pdf
       get '/about.pdf'
       assert last_response.ok?
       last_response.body.must_equal "/about.pdf\n"
@@ -145,19 +180,17 @@ describe "Front" do
     end
 
     it "provide the default format of the page if none is explicitly given" do
-      about.class.outputs :rss, :html
-      get '/about'
+      get '/feed'
       assert last_response.ok?
       last_response.content_type.must_equal ::Rack::Mime.mime_type('.rss') + ";charset=utf-8"
-      last_response.body.must_equal "/about.rss\n"
+      last_response.body.must_equal "/feed.rss"
     end
 
     it "return a custom content type if one is defined" do
-      about.class.outputs [:html, {:mimetype => "application/xhtml+xml"}]
-      get '/about'
+      get '/feed.html'
       assert last_response.ok?
       last_response.content_type.must_equal "application/xhtml+xml;charset=utf-8"
-      last_response.body.must_equal "/about.html\n"
+      last_response.body.must_equal "/feed.html"
     end
 
 
@@ -167,8 +200,7 @@ describe "Front" do
     end
 
     it "raise a 404 when accessing a private format" do
-      about.class.outputs [:html, {:mimetype => "application/xhtml+xml"}], [:rss, {:private => true}]
-      get '/about.rss'
+      get '/feed.pdf'
       assert last_response.status == 404
     end
 
@@ -178,13 +210,9 @@ describe "Front" do
         Content::Page.stubs(:path).with("/about").returns(about)
         Content::Page.stubs(:path).with("/static").returns(static)
         Content::Page.stubs(:path).with("/news").returns(news)
-        # Content::Page.stubs(:path).with("/about/now").returns(subpage)
       end
 
       after do
-        about.layout = :default
-        # subpage.layout = :default
-        SitePage.instance_variable_set(:@request_blocks, {})
       end
 
       it "default to static behaviour" do
@@ -194,189 +222,167 @@ describe "Front" do
       end
 
       it "correctly show a dynamic behaviour" do
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { show "/static" }
         end
-        assert SitePage.dynamic?
-        page = SitePage.new
+        assert DynamicRenderParams.dynamic?
+        page = DynamicRenderParams.new
         assert page.dynamic?
       end
 
       it "render an alternate page if passed a page" do
-        SitePage.controller do
-          get { render Site['/static'] }
+        DynamicRenderParams.controller do
+          get { render site['/static'] }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.ok?
         last_response.body.must_equal "/static.html\n"
       end
 
       it "render an alternate page if passed a path" do
-        # about.stubs(:request_show).returns("/news")
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { render "/static" }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.ok?
         last_response.body.must_equal "/static.html\n"
       end
 
       it "render an alternate page if passed a uid with a #" do
-        # about.stubs(:request_show).returns("#news")
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { render "static" }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.ok?
         last_response.body.must_equal "/static.html\n"
       end
 
       it "render an alternate page if passed a uid" do
-        # about.stubs(:request_show).returns("news")
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { render "static" }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.ok?
         last_response.body.must_equal "/static.html\n"
       end
 
       it "return not found of #request_show returns an invalid uid or path" do
-        # about.stubs(:request_show).returns("caterpillars")
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { render "caterpillars" }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 404
       end
 
       it "return the right status code" do
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { render "static", 403 }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 403
         last_response.body.must_equal "/static.html\n"
       end
 
       it "allow handing POST requests" do
-        SitePage.controller do
+        DynamicRenderParams.controller do
           post { render "static" }
         end
-        post '/about'
+        post '/dynamic-render-params'
         assert last_response.status == 200, "Expected status 200 but recieved #{last_response.status}"
         last_response.body.must_equal "/static.html\n"
       end
 
       it "allow returning of any status code without altering content" do
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { render 403 }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 403
-        last_response.body.must_equal "/about.html\n"
+        last_response.body.must_equal "/dynamic-render-params.html"
       end
 
       it "allow altering of headers" do
-        SitePage.controller do
-          get {
+        DynamicRenderParams.controller do
+          get do
             headers["X-Works"] = "Yes"
             render
-          }
+          end
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 200
-        last_response.body.must_equal "/about.html\n"
+        last_response.body.must_equal "/dynamic-render-params.html"
         last_response.headers["X-Works"].must_equal "Yes"
       end
 
       it "allow passing of template params & a page to the render call" do
-        SitePage.layout do
-          "{{ teeth }}"
+        DynamicRenderParams.controller do
+          get { render page, :teeth => "blue" }
         end
-        SitePage.controller do
-          get { render page, :teeth => "white" }
-        end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 200
-        last_response.body.must_equal "white"
-        SitePage.instance_variable_set(:@layout_procs, nil)
+        last_response.body.must_equal "blue/dynamic-render-params.html"
       end
 
       it "allows setting status code and passing parameters to the show call" do
-        SitePage.layout do
-          "{{ teeth }}${ path }"
+        DynamicRenderParams.controller do
+          get { render "$dynamic_render_params", 401, :teeth => "white" }
         end
-        SitePage.controller do
-          get { render "$news", 401, :teeth => "white" }
-        end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 401
-        last_response.body.must_equal "white/news"
-        SitePage.instance_variable_set(:@layout_procs, nil)
+        last_response.body.must_equal "white/dynamic-render-params.html"
       end
 
       it "allows passing parameters to the render call" do
-        SitePage.layout do
-          "{{ teeth }}${ path }"
+        DynamicRenderParams.controller do
+          get { render "$dynamic_render_params", :teeth => "white" }
         end
-        SitePage.controller do
-          get { render "$news", :teeth => "white" }
-        end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 200
-        last_response.body.must_equal "white/news"
-        SitePage.instance_variable_set(:@layout_procs, nil)
+        last_response.body.must_equal "white/dynamic-render-params.html"
       end
 
       it "give access to the request params within the controller" do
-        SitePage.layout { "{{ params[:horse] }}*{{ equine }}" }
-        SitePage.controller do
+        DynamicRequestParams.controller do
           post do
             value = params[:horse]
             render page, :equine => value
           end
         end
-        post '/about', :horse => "dancing"
+        post '/dynamic-request-params', :horse => "dancing"
         assert last_response.status == 200
         last_response.body.must_equal "dancing*dancing"
-        SitePage.instance_variable_set(:@layout_procs, nil)
       end
 
       it "allows for dynamically setting the output" do
-        SitePage.add_output :mobile
-        SitePage.layout do
-          "${ path }.${ __format }"
-        end
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get do
             if request.user_agent =~ /iPhone/
               output :mobile
             end
-            render
+            render teeth: "clean"
           end
         end
-        get "/about", {}, { "HTTP_USER_AGENT" => "Desktop" }
+        get "/dynamic-render-params", {}, { "HTTP_USER_AGENT" => "Desktop" }
         assert last_response.status == 200, "Expected status 200 but got #{last_response.status}"
-        last_response.body.must_equal "/about.html"
-        get "/about", {}, { "HTTP_USER_AGENT" => "iPhone" }
-        last_response.body.must_equal "/about.mobile"
+        last_response.body.must_equal "clean/dynamic-render-params.html"
+        get "/dynamic-render-params", {}, { "HTTP_USER_AGENT" => "iPhone" }
+        last_response.body.must_equal "/dynamic-render-params.mobile"
       end
 
       it "inherits any request handlers from superclasses" do
         # request block inheritance is done at type creation & is not dynamic
         # so we need to create a new class that will inherit the newly minted
         # :get request handler
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { render "about" }
         end
 
-        class ::TempPage < SitePage; end
+        class ::TempPage < DynamicRenderParams; end
 
         temp = ::TempPage.create(:slug => "temp", :uid => "temp")
         root.pages << temp
         root.save
-        Spontaneous::Content.stubs(:path).with("/temp").returns(temp)
+        site.model.stubs(:path).with("/temp").returns(temp)
 
         get "/temp"
         last_response.status.must_equal 200
@@ -402,57 +408,57 @@ describe "Front" do
       end
 
       it "respond appropriatly to redirects to path" do
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get do
             redirect "/news"
           end
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 302
         last_response.headers["Location"].must_equal "http://example.org/news"
       end
 
       it "respond appropriately to redirects to a Page instance" do
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { redirect Page.path("/news") }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 302
         last_response.headers["Location"].must_equal "http://example.org/news"
       end
 
       it "respond appropriately to redirects to a UID" do
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { redirect "news" }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 302
         last_response.headers["Location"].must_equal "http://example.org/news"
       end
 
       it "recognise a :temporary redirect" do
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { redirect "/news", :temporary }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 302
         last_response.headers["Location"].must_equal "http://example.org/news"
       end
 
       it "recognise a :permanent redirect" do
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { redirect "/news", :permanent }
         end
-        get '/about'
+        get '/dynamic-render-params'
         assert last_response.status == 301
         last_response.headers["Location"].must_equal "http://example.org/news"
       end
 
       it "correctly apply numeric status codes" do
-        SitePage.controller do
+        DynamicRenderParams.controller do
           get { redirect "/news", 307 }
         end
-        get '/about'
+        get '/dynamic-render-params'
         last_response.headers["Location"].must_equal "http://example.org/news"
         assert last_response.status == 307
       end
@@ -472,43 +478,49 @@ describe "Front" do
       end
 
       it "have access to the params, request & session object" do
-        get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
-        assert last_response.ok?
-        last_response.body.must_equal "42/peter/example.org\n"
+        DynamicRenderParams.controller do
+          get { render }
+        end
+        get '/dynamic-render-params.session', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+        assert last_response.ok?, "Expected status 200 but got #{last_response.status}"
+        last_response.body.must_equal "42/peter/example.org"
       end
 
+      # Disabled for the moment while I think about the implications of the
+      # template store & if there isn't a better way to optimise the render
+      # by using a LRU cache of the compiled classes or something like that.
       describe "caching" do
-        it "use pre-rendered versions of the templates" do
-          dummy_content = 'cached-version/#{session[\'user_id\']}'
-          dummy_template = File.join(site.revision_root, "current/dynamic/dynamic.html.cut")
-          File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
-          get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
-          last_response.body.must_equal "cached-version/42"
-        end
+        # it "use pre-rendered versions of the templates" do
+        #   dummy_content = 'cached-version/#{session[\'user_id\']}'
+        #   dummy_template = File.join(site.revision_root, "current/dynamic/dynamic.html.cut")
+        #   File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
+        #   get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+        #   last_response.body.must_equal "cached-version/42"
+        # end
 
-        it "cache templates as ruby files" do
-          dummy_content = 'cached-version/#{session[\'user_id\']}'
-          dummy_template = File.join(site.revision_root, "current/dynamic/index.html.cut")
-          Spontaneous::Output.renderer.write_compiled_scripts = true
-          File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
-          FileUtils.rm(@cache_file) if File.exists?(@cache_file)
-          refute File.exists?(@cache_file)
-          get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+        # it "cache templates as ruby files" do
+        #   dummy_content = 'cached-version/#{session[\'user_id\']}'
+        #   dummy_template = File.join(site.revision_root, "current/dynamic/index.html.cut")
+        #   # Spontaneous::Output.renderer.write_compiled_scripts = true
+        #   File.open(dummy_template, 'w') { |f| f.write(dummy_content) }
+        #   FileUtils.rm(@cache_file) if File.exists?(@cache_file)
+        #   refute File.exists?(@cache_file)
+        #   get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
 
-          assert File.exists?(@cache_file)
-          File.open(@cache_file, 'w') { |f| f.write('@__buf << %Q`@cache_filed-version/#{params[\'wendy\']}`;')}
-          # Force compiled file to have a later timestamp
-          File.utime(Time.now, Time.now + 1, @cache_file)
-          get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
-          last_response.body.must_equal "@cache_filed-version/peter"
-        end
+        #   assert File.exists?(@cache_file)
+        #   File.open(@cache_file, 'w') { |f| f.write('@__buf << %Q`@cache_filed-version/#{params[\'wendy\']}`;')}
+        #   # Force compiled file to have a later timestamp
+        #   File.utime(Time.now, Time.now + 1, @cache_file)
+        #   get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+        #   last_response.body.must_equal "@cache_filed-version/peter"
+        # end
 
-        it "not cache templates if caching turned off" do
-          Spontaneous::Output.cache_templates = false
-          refute File.exists?(@cache_file)
-          get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
-          refute File.exists?(@cache_file)
-        end
+        # it "not cache templates if caching turned off" do
+        #   Spontaneous::Output.cache_templates = false
+        #   refute File.exists?(@cache_file)
+        #   get '/dynamic', {'wendy' => 'peter'}, 'rack.session' => { 'user_id' => 42 }
+        #   refute File.exists?(@cache_file)
+        # end
       end
     end
 
@@ -519,7 +531,7 @@ describe "Front" do
             "Magic"
           end
         end
-        SitePage.controller :comments do
+        CommentablePage.controller :comments do
           get '/' do
             "Success"
           end
@@ -532,7 +544,7 @@ describe "Front" do
           end
         end
 
-        SitePage.controller :status do
+        CommentablePage.controller :status do
           get '/:status' do
             page.status = params[:status]
             page
@@ -544,7 +556,7 @@ describe "Front" do
           end
         end
 
-        SitePage.controller :search do
+        CommentablePage.controller :search do
           get '/render/:query' do
             render({ results: %w(a b c)})
           end
@@ -554,156 +566,141 @@ describe "Front" do
           end
 
           get '/renderoutput/:query' do
-            render page, :xml, { results: %w(a b c)}
+            render page, :post, { results: %w(a b c)}
           end
         end
 
-        SitePage.controller :test, ::TestController
+        CommentablePage.controller :test, ::TestController
 
-        SitePage.controller :test2, ::TestController do
+        CommentablePage.controller :test2, ::TestController do
           get "/block" do
             "Block"
           end
         end
 
-        class ::SubPage < SitePage; end
+        class ::SubPage < CommentablePage; end
         @subpage = ::SubPage.create(:slug => "now", :uid => "now")
-        about.pages << @subpage
+        commentable.pages << @subpage
 
         @subpage.reload
 
         Content.stubs(:path).with("/").returns(root)
-        Content.stubs(:path).with("/about").returns(about)
-        Content.stubs(:path).with("/about/now").returns(@subpage)
+        Content.stubs(:path).with("/commentable").returns(commentable)
+        Content.stubs(:path).with("/commentable/now").returns(@subpage)
+        @renderer = Spontaneous::Output.published_renderer(site)
       end
 
       after do
         Object.send(:remove_const, :SubPage) rescue nil
-        SitePage.instance_variable_set(:@request_blocks, {})
-        SitePage.send(:remove_const, :StatusController) rescue nil
-        SitePage.send(:remove_const, :TestController) rescue nil
-        SitePage.send(:remove_const, :Test2Controller) rescue nil
+        CommentablePage.instance_variable_set(:@request_blocks, {})
+        CommentablePage.send(:remove_const, :StatusController) rescue nil
+        CommentablePage.send(:remove_const, :TestController) rescue nil
+        CommentablePage.send(:remove_const, :Test2Controller) rescue nil
         Object.send(:remove_const, :TestController) rescue nil
-        about.class.outputs :html
       end
 
       it "not be used unless necessary" do
-        get "/about"
+        get "/commentable"
         assert last_response.ok?
-        last_response.body.must_equal about.render
+        last_response.body.must_equal commentable.render_using(@renderer).read
       end
 
-      it "work on the homepage" do
-        get "/@comments"
+      it "work on sub classes" do
+        get "/commentable/now/@comments"
         assert last_response.ok?
         last_response.body.must_equal "Success"
       end
 
 
       it "be recognised" do
-        get "/about/@comments"
+        get "/commentable/@comments"
         assert last_response.ok?
         last_response.body.must_equal "Success"
       end
 
       it "render the page correctly if action returns page object" do
-        get "/about/@comments/page"
+        get "/commentable/@comments/page"
         assert last_response.ok?
-        last_response.body.must_equal about.render
+        last_response.body.must_equal commentable.render_using(@renderer).read
       end
 
       it "return 404 if trying unknown namespace" do
-        get "/about/@missing/action"
+        get "/commentable/@missing/action"
         assert last_response.status == 404
       end
 
       it "respond to multiple namespaces" do
-        get "/about/@status/good"
+        get "/commentable/@status/good"
         assert last_response.ok?
-        last_response.body.must_equal about.render
-        about.status.must_equal "good"
+        last_response.body.must_equal commentable.render_using(@renderer).read
+        commentable.status.must_equal "good"
       end
 
       it "accept POST requests" do
-        post "/about/@status/good"
+        post "/commentable/@status/good"
         assert last_response.ok?
-        last_response.body.must_equal about.render
-        about.status.must_equal "good"
+        last_response.body.must_equal commentable.render_using(@renderer).read
+        commentable.status.must_equal "good"
       end
 
       it "return 404 unless post request has an action" do
-        Page.expects(:path).with("/about").never
-        post "/about"
+        Page.expects(:path).with("/commentable").never
+        post "/commentable"
         assert last_response.status == 404
       end
 
       it "return 404 for post requests to unknown actions" do
-        post "/about/@status/missing/action"
+        post "/commentable/@status/missing/action"
         assert last_response.status == 404
       end
 
       # probably the wrong place to test this -- should be in units -- but what the heck
       it "be able to generate urls for actions" do
-        about.action_url(:status, "/good").must_equal "/about/@status/good"
+        commentable.action_url(:status, "/good").must_equal "/commentable/@status/good"
       end
 
       it "be able to generate urls for actions with no path" do
-        about.action_url(:status).must_equal "/about/@status"
+        commentable.action_url(:status).must_equal "/commentable/@status"
       end
 
       it "pass the output onto the page if the action returns it to the render call" do
-        about.class.outputs :html, :xml
-        about.class.layout do
-          "${path}.${__format}"
-        end
-        get "/about/@comments/page.xml"
+        get "/commentable/@comments/page.xml"
         assert last_response.ok?
-        last_response.body.must_equal "/about.xml"
+        last_response.body.must_equal "/commentable.xml"
       end
 
       it "use the format within the action if required" do
-        about.class.outputs :html, :xml
-        get "/about/@comments/format.xml"
-        assert last_response.ok?
+        get "/commentable/@comments/format.xml"
+        assert last_response.ok?, "Expected status 200 but got #{last_response.status}"
         last_response.body.must_equal "xml"
       end
 
       it "be inherited by subclasses" do
-        get "/about/now/@comments"
+        get "/commentable/now/@comments"
         assert last_response.ok?
         last_response.body.must_equal "Success"
       end
 
       it "allow definition of controller using class" do
-        get "/about/@test"
+        get "/commentable/@test"
         assert last_response.ok?
         last_response.body.must_equal "Magic"
       end
 
       it "allow definition of controller using class and extend it using block" do
-        get "/about/@test2/block"
+        get "/commentable/@test2/block"
         assert last_response.ok?
         last_response.body.must_equal "Block"
       end
 
       it "allows passing parameters to the page render" do
-        about.class.outputs :html, :xml
-        about.class.layout do
-          "{{results.join(',')}}"
-        end
-
-        get "/about/@search/render/query.xml"
+        get "/commentable/@search/render/query.post"
         assert last_response.ok?, "Expected 200 OK but got #{last_response.status}"
         last_response.body.must_equal "a,b,c"
       end
 
       it "allows passing an output to the page render" do
-        about.class.outputs :html, :xml
-        about.class.layout do
-          "{{results.join(',')}}"
-        end
-
-        get "/about/@search/renderoutput/query"
+        get "/commentable/@search/renderoutput/query"
         assert last_response.ok?, "Expected 200 OK but got #{last_response.status}"
         last_response.body.must_equal "a,b,c"
       end
@@ -716,7 +713,7 @@ describe "Front" do
             end
           end
 
-          SitePage.controller :drummer do
+          CommentablePage.controller :drummer do
             get '/' do
               "Success"
             end
@@ -728,7 +725,7 @@ describe "Front" do
         end
 
         it "affect all controller actions" do
-          get "/about/@drummer/nothing"
+          get "/commentable/@drummer/nothing"
           assert last_response.ok?, "Expected 200 got #{last_response.status}"
           last_response.body.must_equal "Something"
         end

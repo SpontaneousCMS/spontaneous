@@ -4,7 +4,9 @@ module Spontaneous::Search
   class Field
     attr_reader :prototype, :options
 
-    def initialize(prototype, options)
+    # TODO: options seems redundant as its available as prototype.options
+    def initialize(site, prototype, options)
+      @site = site
       @prototype = prototype
       @options = options
     end
@@ -58,7 +60,7 @@ module Spontaneous::Search
     # options. Each entry contains the index to which it pertains and then
     # the options that should be applied to this field within that index
     def parse_indexes(opts)
-      all_indexes = S::Site.indexes.values
+      all_indexes = @site.indexes.values
       case opts
       when  true
         all_indexes.map { |index| default_index_options(index) }
@@ -87,7 +89,7 @@ module Spontaneous::Search
     end
 
     def find_index(name)
-      index = S::Site.indexes[name]
+      index = @site.indexes[name]
       logger.warn("Invalid index :#{name} for field #{@prototype.owner}.#{@prototype.name}") unless index
       index
     end

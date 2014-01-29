@@ -11,8 +11,9 @@ module Spontaneous
       method_option :fields, :type => :array, :desc => "List of field IDs to update"
       def update
         prepare! :update, :console
-        fields = Spontaneous::Field.find(*options.fields)
-        updater = Spontaneous::Field::Update::Immediate.new(fields)
+        site = Spontaneous::Site.instance
+        fields = Spontaneous::Field.find(site.model, *options.fields)
+        updater = Spontaneous::Field::Update::Immediate.new(site, fields)
         updater.run
         send_completion_event(updater)
       end

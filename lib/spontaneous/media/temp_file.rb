@@ -9,7 +9,7 @@ module Spontaneous::Media
   class TempFile < File
 
     def storage
-      Spontaneous::Site.default_storage
+      @site.default_storage
     end
 
     def media_dir

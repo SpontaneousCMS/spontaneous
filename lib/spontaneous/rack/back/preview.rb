@@ -2,12 +2,11 @@ module Spontaneous::Rack::Back
   class Preview < Base
     include Spontaneous::Rack::Public
 
-
     # In preview mode we want to find pages even if they're
     # invisible.
     def find_page_by_path(path)
-      Spontaneous::Content.scope do
-        Spontaneous::Site.by_path(path)
+      site.model.scope do
+        site.by_path(path)
       end
     end
 

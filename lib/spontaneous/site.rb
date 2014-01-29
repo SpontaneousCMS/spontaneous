@@ -35,11 +35,15 @@ module Spontaneous
     include URL
 
     attr_accessor :database
-    attr_reader :environment, :mode
+    attr_reader :environment, :mode, :model
 
     def initialize(root, env, mode)
       super(root)
       @environment, @mode = env, mode
+    end
+
+    def model=(content_model)
+      @model = content_model
     end
 
     def initialize!

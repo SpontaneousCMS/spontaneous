@@ -26,10 +26,10 @@ module Spontaneous
         map.destroy(self)
       end
 
-      def after_destroy
+      def after_destroy(site)
         case @category
         when :box
-          Spontaneous::Content.filter(:box_sid  => @id).delete
+          site.model.filter(:box_sid  => @id).delete
         end
       end
 

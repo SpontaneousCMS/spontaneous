@@ -49,7 +49,7 @@ describe "Images" do
       @upload_dir.mkpath
 
       @revision = 10
-      S::Site.stubs(:working_revision).returns(@revision)
+      @site.stubs(:working_revision).returns(@revision)
 
       @src_image =  Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg")).realpath
       @origin_image = @upload_dir + "rose.jpg"

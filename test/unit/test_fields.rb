@@ -279,14 +279,14 @@ describe "Fields" do
         def outputs
           [:html, :plain, :fancy]
         end
-        def generate_html(value)
+        def generate_html(value, site)
           "<#{value}>"
         end
-        def generate_plain(value)
+        def generate_plain(value, site)
           "*#{value}*"
         end
 
-        def generate(output, value)
+        def generate(output, value, site)
           case output
           when :fancy
             "#{value}!"
@@ -347,7 +347,7 @@ describe "Fields" do
       end
       $transform = lambda { |value| "<#{value}>" }
       ContentClass1.field :title do
-        def generate_html(value)
+        def generate_html(value, site)
           $transform[value]
         end
       end
@@ -366,7 +366,7 @@ describe "Fields" do
     before do
       ::CC = Class.new(Piece) do
         field :title, :default => "Magic" do
-          def generate_html(value)
+          def generate_html(value, site)
             "*#{value}*"
           end
         end
@@ -1256,7 +1256,7 @@ describe "Fields" do
 
   describe "Asynchronous processing" do
     before do
-      S::Site.background_mode = :simultaneous
+      @site.background_mode = :simultaneous
       @image = File.expand_path("../../fixtures/images/size.gif", __FILE__)
       @model = (::Piece)
       @model.field :title
@@ -1280,17 +1280,17 @@ describe "Fields" do
     # end
 
     it "be able to resolve fields id" do
-      S::Field.find(@instance.image.id, @instance.items.title.id).must_equal [
+      S::Field.find(@site.model, @instance.image.id, @instance.items.title.id).must_equal [
         @instance.image, @instance.items.title
       ]
     end
 
     it "not raise errors for invalid fields" do
-      S::Field.find("0", "#{@instance.id}/xxx/#{@instance.items.title.schema_id}", "#{@instance.items.id}/nnn", @instance.items.title.id).must_equal [ @instance.items.title ]
+      S::Field.find(@site.model, "0", "#{@instance.id}/xxx/#{@instance.items.title.schema_id}", "#{@instance.items.id}/nnn", @instance.items.title.id).must_equal [ @instance.items.title ]
     end
 
     it "return a single field if given a single id" do
-      S::Field.find(@instance.image.id).must_equal @instance.image
+      S::Field.find(@site.model, @instance.image.id).must_equal @instance.image
     end
 
     it "be disabled for Date fields" do
@@ -1346,7 +1346,7 @@ describe "Fields" do
           @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
           @instance.description.schema_id.to_s => "Updated description"
         }
-        Spontaneous::Field.update(@instance, fields, nil, false)
+        Spontaneous::Field.update(@site, @instance, fields, nil, false)
         @instance.reload
         @instance.title.value.must_equal "Updated title"
         @instance.description.value.must_equal "<p>Updated description</p>\n"
@@ -1368,7 +1368,7 @@ describe "Fields" do
         }
         @instance.expects(:save).at_least_once
 
-        Spontaneous::Field.update(@instance, fields, nil, true)
+        Spontaneous::Field.update(@site, @instance, fields, nil, true)
 
         @instance.title.value.must_equal "Updated title"
         @instance.description.value.must_equal "<p>Updated description</p>\n"
@@ -1397,7 +1397,7 @@ describe "Fields" do
       })
       File.open(@image, "r") do |file|
         field.pending_version.must_equal 0
-        Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+        Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         field.value.must_equal ""
         field.pending_value.must_equal({
           :timestamp => S::Field.timestamp(@now),
@@ -1421,9 +1421,9 @@ describe "Fields" do
       File.open(@image, "r") do |file|
         fields = {
           box.title.schema_id.to_s => "Updated title",
-          box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+          box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
         }
-        Spontaneous::Field.update(box, fields, nil, false)
+        Spontaneous::Field.update(@site, box, fields, nil, false)
         box.title.value.must_equal "Updated title"
         box.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/0001/something.gif"
         box.image.pending_version.must_equal 1
@@ -1439,9 +1439,9 @@ describe "Fields" do
       File.open(@image, "r") do |file|
         fields = {
           box.title.schema_id.to_s => "Updated title",
-          box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+          box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
         }
-        Spontaneous::Field.update(box, fields, nil, true)
+        Spontaneous::Field.update(@site, box, fields, nil, true)
         box.title.value.must_equal "Updated title"
         field.value.must_equal ""
         field.pending_value.must_equal({
@@ -1466,7 +1466,7 @@ describe "Fields" do
       })
       File.open(@image, "r") do |file|
         field.pending_version.must_equal 0
-        Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+        Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         field.value.must_equal ""
         field.pending_value.must_equal({
           :timestamp => S::Field.timestamp(@now),
@@ -1488,13 +1488,14 @@ describe "Fields" do
     end
 
     it "immediately update asynchronous fields if background mode is :immediate" do
-      S::Site.background_mode = :immediate
+      @site.background_mode = :immediate
+      field = @instance.image
       File.open(@image, "r") do |file|
         fields = {
-          @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
+          field.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
         }
         Spontaneous::Simultaneous.expects(:fire).never
-        Spontaneous::Field.update(@instance, fields, nil, true)
+        Spontaneous::Field.update(@site, @instance, fields, nil, true)
         @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
       end
     end
@@ -1504,16 +1505,16 @@ describe "Fields" do
       field = @instance.image
       File.open(@image, "r") do |file|
         fields = {
-          field.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+          field.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
         }
-        Spontaneous::Field.update(@instance, fields, nil, false)
+        Spontaneous::Field.update(@site, @instance, fields, nil, false)
         @instance.reload
         field = @instance.image
         field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         field.pending_value.must_be_nil
       end
       fields = {field.schema_id.to_s => ""}
-      Spontaneous::Field.update(@instance, fields, nil, true)
+      Spontaneous::Field.update(@site, @instance, fields, nil, true)
       @instance.reload
       field = @instance.image
       field.value.must_equal ""
@@ -1526,7 +1527,7 @@ describe "Fields" do
       fields = {
         @instance.title.schema_id.to_s => "Updated title"
       }
-      Spontaneous::Field.update(@instance, fields, user, true)
+      Spontaneous::Field.update(@site, @instance, fields, user, true)
       @instance.title.value.must_equal ""
     end
 
@@ -1534,7 +1535,7 @@ describe "Fields" do
       immediate = mock()
       immediate.expects(:pages).returns([])
       immediate.expects(:run)
-      Spontaneous::Field::Update::Immediate.expects(:new).with([@instance.image, @instance.items.title]).returns(immediate)
+      Spontaneous::Field::Update::Immediate.expects(:new).with(@site, [@instance.image, @instance.items.title]).returns(immediate)
       # Thor generates a warning about creating a task with no 'desc'
       silence_logger {
         Spontaneous::Cli::Fields.any_instance.stubs(:prepare!)
@@ -1551,7 +1552,7 @@ describe "Fields" do
 
     it "revert to immediate updating if connection to simultaneous fails" do
       File.open(@image, "r") do |file|
-        Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+        Spontaneous::Field.set(@site, @instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         @instance.image.pending_value.must_be_nil
       end
@@ -1593,7 +1594,7 @@ describe "Fields" do
           "fields" => [@page.image.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(@page.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, @page.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           @page.image.value.must_equal ""
           @page.update_locks.length.must_equal 1
           lock = @page.update_locks.first
@@ -1609,7 +1610,7 @@ describe "Fields" do
 
       it "not create locks for fields processed immediately" do
         field = @instance.title
-        Spontaneous::Field.set(field, "Updated Title", nil, true)
+        Spontaneous::Field.set(@site, field, "Updated Title", nil, true)
         field.value.must_equal "Updated Title"
         @page.update_locks.length.must_equal 0
         refute @page.locked_for_update?
@@ -1621,7 +1622,7 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           field.value.must_equal ""
           @page.update_locks.length.must_equal 1
           lock = @page.update_locks.first
@@ -1641,7 +1642,7 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           field.value.must_equal ""
           @page.update_locks.length.must_equal 1
           lock = @page.update_locks.first
@@ -1660,14 +1661,14 @@ describe "Fields" do
           "fields" => [@page.image.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(@page.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, @page.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           @page.image.value.must_equal ""
           @page.update_locks.length.must_equal 1
           assert @page.locked_for_update?
           # The lock manipulation is done by the updater
           # so calling update_pending_value on the field
           # won't clear any locks
-          Spontaneous::Field::Update::Immediate.process([@page.image])
+          Spontaneous::Field::Update::Immediate.process(@site, [@page.image])
           @page.image.value.must_equal "/media/#{@page.id.to_s.rjust(5, "0")}/0001/something.gif"
           refute @page.reload.locked_for_update?
         end
@@ -1681,7 +1682,7 @@ describe "Fields" do
         Simultaneous.expects(:send_event).with('page_lock_status', "[#{@page.id}]")
 
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           assert @page.locked_for_update?
           silence_logger {
             Spontaneous::Cli::Fields.any_instance.stubs(:prepare!)
@@ -1704,15 +1705,15 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         end
-        update = Spontaneous::Field::Update::Immediate.new(field)
+        update = Spontaneous::Field::Update::Immediate.new(@site, field)
         old, field = field, field.reload
         later = @now + 1
         t = S::Field.timestamp(later)
         S::Field.stubs(:timestamp).returns(t)
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "else.gif", :type => "image/jpeg"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "else.gif", :type => "image/jpeg"}, nil, true)
         end
         update.run
 
@@ -1733,10 +1734,10 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         end
         # Create update but don't run it
-        update = Spontaneous::Field::Update::Immediate.new(field)
+        update = Spontaneous::Field::Update::Immediate.new(@site, field)
         # Someone updates a field before the async update is run...
         content = ::Content.get(@instance.id)
         content.title = "Updated Title"
@@ -1758,10 +1759,10 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         end
         # Create update but don't run it
-        update = Spontaneous::Field::Update::Immediate.new(field)
+        update = Spontaneous::Field::Update::Immediate.new(@site, field)
         # Someone updates a field before the async update is run...
         content = ::Content.get(@page.id)
         content.instances.title = "Updated Title"
@@ -1802,10 +1803,10 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         end
         # Create update but don't run it
-        update = Spontaneous::Field::Update::Immediate.new(field)
+        update = Spontaneous::Field::Update::Immediate.new(@site, field)
 
         @page.destroy
 

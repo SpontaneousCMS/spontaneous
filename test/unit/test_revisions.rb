@@ -102,8 +102,8 @@ describe "Revisions" do
     end
 
     it "understand with_published" do
-      S::Site.stubs(:published_revision).returns(99)
-      Content.with_published do
+      site.stubs(:published_revision).returns(99)
+      Content.with_published(site) do
         Content.mapper.current_revision.must_equal 99
       end
     end
@@ -130,7 +130,7 @@ describe "Revisions" do
 
     it "read revision from the environment if present" do
       ENV["SPOT_REVISION"] = '1001'
-      Content.with_published do
+      Content.with_published(site) do
         Content.mapper.current_revision.must_equal 1001
       end
       ENV.delete("SPOT_REVISION")

@@ -12,7 +12,7 @@ module Spontaneous
     Handlers = %w[thin] unless const_defined?(:Handlers)
 
 
-    def self.run!(options={})
+    def self.run!(site, options={})
       host = options["host"] || Spontaneous::Site.config.host || "0.0.0.0"
       port = options["port"] || Spontaneous::Site.config.port || 2012
       adapter = options["adapter"] || Spontaneous::Site.config.adapter
@@ -33,7 +33,7 @@ module Spontaneous
       end
       puts "=> Spontaneous:#{Spontaneous.mode.to_s.ljust(5, " ")} running on port #{host}:#{port} (PID #{$$})"
 
-      handler.run Spontaneous::Rack.application.to_app, :Host => host, :Port => port do |server|
+      handler.run Spontaneous::Rack.application(site).to_app, :Host => host, :Port => port do |server|
         term = Proc.new do
           server.respond_to?(:stop!) ? server.stop! : server.stop
           puts "=> Spontaneous:#{Spontaneous.mode.to_s.ljust(5, " ")} exiting..."

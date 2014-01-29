@@ -13,7 +13,7 @@ describe "Serialisation" do
 
     class ::SerialisedPage < ::Page
       field :direction, :title => "Pointing Direction", :comment => "NSEW" do
-        def preprocess(value)
+        def preprocess(value, site)
           ({
             "N" => "North",
             "S" => "South",
@@ -92,7 +92,7 @@ describe "Serialisation" do
         class InnerClass < Piece
         end
       end
-      Site.schema.export['SerialisedPage.InnerClass'].must_equal  ::SerialisedPage::InnerClass.export
+      @site.schema.export['SerialisedPage.InnerClass'].must_equal  ::SerialisedPage::InnerClass.export
     end
   end
 

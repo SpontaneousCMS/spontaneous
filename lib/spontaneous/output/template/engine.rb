@@ -4,7 +4,9 @@ module Spontaneous::Output::Template
     # Should be initialized with the Site template roots
     def initialize(template_roots, cache = Spontaneous::Output.cache_templates?)
       @engine = template_engine_class(cache).new(template_roots, syntax)
-      self.write_compiled_scripts = Spontaneous::Output.write_compiled_scripts?
+      # disabled until I figure out where to write compiled scripts when using a
+      # non-File based template store
+      self.write_compiled_scripts = false # Spontaneous::Output.write_compiled_scripts?
     end
 
     def write_compiled_scripts=(state)
@@ -32,15 +34,23 @@ module Spontaneous::Output::Template
     end
 
     def template_path(content, format)
-      content.template(format)
+      content.template(format, self)
     end
 
-    def template_exists?(root, template, format)
-      @engine.template_exists?(root, template, format)
+    def template_exists?(template, format)
+      @engine.template_exists?(template, format)
+    end
+
+    def template_location(template, format)
+      @engine.template_location(template, format)
     end
 
     def template_engine_class(cache)
       ::Spontaneous::Output.template_engine_class(cache)
+    end
+
+    def dynamic_template?(template_string)
+      @engine.dynamic_template?(template_string)
     end
   end
 

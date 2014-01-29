@@ -6,8 +6,8 @@ module Spontaneous::Rack::Middleware
     class Init
       include Spontaneous::Rack::Constants
 
-      def initialize(app)
-        @app = app
+      def initialize(app, site)
+        @app, @site = app, site
       end
 
       def call(env)
@@ -20,7 +20,7 @@ module Spontaneous::Rack::Middleware
 
       def authenticate(env)
         remote_addr = env["REMOTE_ADDR"]
-        if (login = Spontaneous::Site.config.auto_login)
+        if (login = @site.config.auto_login)
           auto_login(login, remote_addr)
         else
           cookie_login(env, remote_addr)

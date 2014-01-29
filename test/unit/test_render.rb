@@ -78,8 +78,7 @@ describe "Render" do
 
       @root.sections2.entries.last.set_position(0)
       @root.save.reload
-      @renderer = Spontaneous::Output::Template::PublishRenderer.new
-      Spontaneous::Output.renderer = @renderer
+      @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
     end
 
     after do
@@ -117,18 +116,18 @@ describe "Render" do
     it "use a cache for navigation pages" do
       a = b = c = nil
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
-      renderer = Spontaneous::Output::Template::PreviewRenderer.new
+      renderer = Spontaneous::Output::Template::PreviewRenderer.new(@site)
       a = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       b = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.wont_equal b
 
-      renderer = Spontaneous::Output::Template::PublishRenderer.new
+      renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
       a = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       b = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.must_equal b
 
-      renderer = Spontaneous::Output::Template::PublishRenderer.new
+      renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
       c = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.wont_equal c
@@ -398,7 +397,7 @@ describe "Render" do
       it "use their default page style when accessed directly" do
         @page = PageClass[@page.id]
         @page.layout.must_equal PageClass.default_layout
-        assert_correct_template(@parent, template_root / 'layouts/page_style')
+        assert_correct_template(@parent, template_root / 'layouts/page_style', @renderer)
         @page.render.must_equal "<html></html>\n"
       end
 
@@ -408,7 +407,7 @@ describe "Render" do
       end
 
       it "render using the inline style" do
-        assert_correct_template(@parent.contents.first, template_root / 'page_class/inline_style')
+        assert_correct_template(@parent.contents.first, template_root / 'page_class/inline_style', @renderer)
         @parent.contents.first.render.must_equal "Child\n"
         @parent.things.render.must_equal "Child\n"
         @parent.render.must_equal "<html>Child\n</html>\n"
@@ -460,8 +459,7 @@ describe "Render" do
 
     describe "Preview render" do
       before do
-        @renderer = Spontaneous::Output::Template::PreviewRenderer.new
-        Spontaneous::Output.renderer = @renderer
+        @renderer = Spontaneous::Output::Template::PreviewRenderer.new(@site)
         PreviewRender.layout :preview_render
       end
 
@@ -492,13 +490,12 @@ describe "Render" do
     end
     describe "Request rendering" do
       before do
-        @renderer = Spontaneous::Output::Template::PreviewRenderer.new
-        Spontaneous::Output.renderer = @renderer
+        @renderer = Spontaneous::Output::Template::PreviewRenderer.new(@site)
         PreviewRender.layout :params
       end
 
       it "pass on passed params" do
-        result = @page.render({
+        result = @page.render_using(@renderer, :html, {
           :welcome => "hello"
         })
         result.must_equal "PAGE hello\n"
@@ -508,8 +505,7 @@ describe "Render" do
 
     describe "entry parameters" do
       before do
-        @renderer = Spontaneous::Output::Template::PreviewRenderer.new
-        Spontaneous::Output.renderer = @renderer
+        @renderer = Spontaneous::Output::Template::PreviewRenderer.new(@site)
         PreviewRender.layout :entries
         @first = PreviewRender.new(:title => "first")
         @second = PreviewRender.new(:title => "second")
@@ -532,8 +528,7 @@ describe "Render" do
         FileUtils.mkdir_p(@temp_template_root / "layouts")
         @site.paths.add(:templates, @temp_template_root)
 
-        @renderer = Spontaneous::Output::Template::PublishRenderer.new(true)
-        Spontaneous::Output.renderer = @renderer
+        @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site, true)
 
         @template_path = @temp_template_root / "layouts/standard.html.cut"
         @compiled_path = @temp_template_root / "layouts/standard.html.rb"
@@ -552,27 +547,75 @@ describe "Render" do
         @first.save
       end
 
-      it "ignore compiled template file if it is older than the template" do
-        @first.render.must_equal "compiled"
-        File.open(@temp_template_root / "layouts/standard.html.cut", "w") do |t|
-          t.write("updated template")
+      # Disabled pending decision about the best way to optimize templates
+      # in the case of this example, where we are optimizing the first render
+      # of a site template (not a rendered page) I'm not sure that it's worth it
+      # at all...
+      it "ignore compiled template file if it is older than the template"
+      #   @first.render_using(@renderer).must_equal "compiled"
+      #   File.open(@temp_template_root / "layouts/standard.html.cut", "w") do |t|
+      #     t.write("updated template")
+      #   end
+      #   later = Time.now + 1000
+      #   File.utime(later, later, @template_path)
+      #   template_mtime = File.mtime(@template_path)
+      #   compiled_mtime = File.mtime(@compiled_path)
+      #   assert template_mtime > compiled_mtime, "Template file should register as newer"
+      #   # Need to use a new renderer because the existing one will have cached the compiled template
+      #   @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
+      #   @first.render.must_equal "updated template"
+      # end
+    end
+
+    describe "PublishedRenderer" do
+      before do
+        @site.background_mode = :immediate
+        @site.template_store :Memory
+
+        ::Content.delete
+        ::Content.delete_revision(1) rescue nil
+        @renderer = Spontaneous::Output::Template::PublishedRenderer.new(@site, 1)
+        Page.box :other
+        class ::DynamicPage < Page
+          layout(:html) { "${path}.${ __format }:{{ something }}"}
         end
-        later = Time.now + 1000
-        File.utime(later, later, @template_path)
-        template_mtime = File.mtime(@template_path)
-        compiled_mtime = File.mtime(@compiled_path)
-        assert template_mtime > compiled_mtime, "Template file should register as newer"
-        # Need to use a new renderer because the existing one will have cached the compiled template
-        @renderer = Spontaneous::Output::Template::PublishRenderer.new
-        Spontaneous::Output.renderer = @renderer
-        @first.render.must_equal "updated template"
+        class ::StaticPage < Page
+          layout(:html) { "${ path }.${ __format }"}
+        end
+
+        @root = Page.create
+        assert @root.is_root?
+
+        @dynamic = DynamicPage.new(slug: "dynamic", uid: "dynamic")
+        @static = StaticPage.new(slug: "static", uid: "static")
+        @root.other << @dynamic
+        @root.other << @static
+
+        [@root, @dynamic, @static].each(&:save)
+
+        @site.publish_all
+      end
+
+      after do
+        Object.send :remove_const, :StaticPage
+        Object.send :remove_const, :DynamicPage
+        ::Content.delete
+      end
+
+      it "should render dynamic pages from the template store xxx" do
+        result = @renderer.render!(@dynamic.output(:html), { something: "something here" }, nil)
+        result.must_equal "/dynamic.html:something here"
+      end
+
+      it "should render static pages from the template store xxx" do
+        result = @renderer.render!(@static.output(:html), { something: "something here" }, nil)
+        result.read.must_equal "/static.html"
       end
     end
 
     describe "variables in render command" do
       before do
-        @renderer = Spontaneous::Output::Template::PublishRenderer.new
-        Spontaneous::Output.renderer = @renderer
+        @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
 
         PreviewRender.layout :variables
         PreviewRender.style :variables

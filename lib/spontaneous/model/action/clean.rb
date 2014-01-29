@@ -17,14 +17,15 @@ module Spontaneous::Model::Action
   class Clean
     extend Spontaneous::Concern
 
-    def self.run(model)
-      new(model).run
+    def self.run(site)
+      new(site).run
     end
 
     attr_reader :stats
 
-    def initialize(model)
-      @model = model
+    def initialize(site)
+      @site  = site
+      @model = site.model
       @dirty = false
     end
 
@@ -64,8 +65,8 @@ module Spontaneous::Model::Action
     # a full publish to reset our change tracking and make sure the live
     # site is a proper reflection of the edited content
     def configure_force_publish
-      Spontaneous::Site.must_publish_all! if @dirty
-      Spontaneous::Site.must_publish_all?
+      @site.must_publish_all! if @dirty
+      @site.must_publish_all?
     end
 
     # Use our set of existing ids to check that every entry in an instance's

@@ -79,13 +79,13 @@ module Spontaneous::Search
       if autocorrect and xapian_results.empty? and !corrected_query.blank?
         xapian_results = database.search(corrected_query, options)
       end
-      Results.new(xapian_results, corrected_query)
+      Results.new(@index.model, xapian_results, corrected_query)
     end
 
     alias_method :<<, :add
 
     def directory
-      S::Site.revision_dir(@revision) / "indexes" / @index.name
+      @index.site.revision_dir(@revision) / "indexes" / @index.name
     end
   end # Database
 end

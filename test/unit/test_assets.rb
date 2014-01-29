@@ -7,7 +7,7 @@ describe "Assets" do
   include RackTestMethods
 
   def app
-    Spontaneous::Rack::Back.application
+    Spontaneous::Rack::Back.application(site)
   end
 
   module LiveSimulation
@@ -24,9 +24,9 @@ describe "Assets" do
 
   def new_context(live, content = @page, format = :html, params = {})
     renderer = if live
-                 Spontaneous::Output::Template::PublishRenderer.new
+                 Spontaneous::Output::Template::PublishRenderer.new(site)
                else
-                 Spontaneous::Output::Template::PreviewRenderer.new
+                 Spontaneous::Output::Template::PreviewRenderer.new(site)
                end
     output = content.output(format)
     context = renderer.context(output, params, nil)
@@ -67,6 +67,7 @@ describe "Assets" do
     site.config.tap do |c|
       c.auto_login = 'root'
     end
+    site.template_store(:Memory)
     Spontaneous::Permissions::User.delete
     user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass")
     user.update(:level => Spontaneous::Permissions[:editor])
@@ -177,7 +178,7 @@ describe "Assets" do
   end
 
   describe "preview" do
-    let(:app) { Spontaneous::Rack::Back.application }
+    let(:app) { Spontaneous::Rack::Back.application(site) }
     let(:context) { preview_context }
 
     describe "javascript" do
@@ -320,7 +321,7 @@ describe "Assets" do
     end
 
     describe "templates" do
-      let(:renderer)  { Spontaneous::Output::Template::PreviewRenderer.new }
+      let(:renderer)  { Spontaneous::Output::Template::PreviewRenderer.new(site) }
 
       it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
@@ -334,7 +335,7 @@ describe "Assets" do
   end
 
   describe "publishing" do
-    let(:app) { Spontaneous::Rack::Front.application }
+    let(:app) { Spontaneous::Rack::Front.application(site) }
     let(:context) { live_context }
     let(:revision) { S::Revision.new(context.revision) }
 
@@ -504,7 +505,7 @@ describe "Assets" do
     end
 
     describe "templates" do
-      let(:renderer)  { Spontaneous::Output::Template::PublishRenderer.new }
+      let(:renderer)  { Spontaneous::Output::Template::PublishRenderer.new(site) }
 
       it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))

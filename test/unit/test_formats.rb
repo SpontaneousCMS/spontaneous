@@ -191,7 +191,7 @@ describe "Formats" do
         module CustomHelper1
           def here_is_my_custom_helper1; end
         end
-        Site.register_helper CustomHelper1, :newhtml
+        @site.register_helper CustomHelper1, :newhtml
 
         class NewHTMLFormat < S::Output::HTML
           provides_format :newhtml

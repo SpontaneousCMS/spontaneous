@@ -14,6 +14,10 @@ module Spontaneous::Model::Box
         define_instance_class(definition) if definition
       end
 
+      def schema
+        @box_class.mapper.schema
+      end
+
       def check_instance_class
         instance_class
       end
@@ -131,7 +135,6 @@ module Spontaneous::Model::Box
       end
 
       def instance_classes
-        schema = Spontaneous::Site.schema
         names = groups.flat_map { |name| schema.groups[name] }
         names.map { |name| resolve_instance_class(name) }.uniq
       end
