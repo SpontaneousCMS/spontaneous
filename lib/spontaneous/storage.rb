@@ -5,6 +5,7 @@ module Spontaneous
     autoload :Backend, "spontaneous/storage/backend"
     autoload :Local,   "spontaneous/storage/local"
     autoload :Cloud,   "spontaneous/storage/cloud"
+    autoload :Template,   "spontaneous/storage/template"
 
     extend self
 
