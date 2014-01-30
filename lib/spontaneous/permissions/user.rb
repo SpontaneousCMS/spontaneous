@@ -189,6 +189,7 @@ module Spontaneous::Permissions
       errors.add(:email, 'is invalid')  unless email.blank? or email =~ /\A[^@]+@.+\z/
 
       validate_login
+      validate_login_uniqueness
       validate_password
     end
 
@@ -199,7 +200,9 @@ module Spontaneous::Permissions
         errors.add(:login, 'should only contain letters, numbers & underscore') unless login =~ /\A[a-zA-Z0-9_]+\z/
         errors.add(:login, 'should be at least 3 letters long') if login.length < 3
       end
+    end
 
+    def validate_login_uniqueness
       if (u = User[:login => login]) && (u.id != id)
         errors.add(:login, "must be unique, login '#{login}' already exists")
       end
