@@ -188,6 +188,11 @@ module Spontaneous::Permissions
       errors.add(:email, 'is required') if email.blank?
       errors.add(:email, 'is invalid')  unless email.blank? or email =~ /\A[^@]+@.+\z/
 
+      validate_login
+      validate_password
+    end
+
+    def validate_login
       if login.blank?
         errors.add(:login, 'is required')
       else
@@ -198,7 +203,9 @@ module Spontaneous::Permissions
       if (u = User[:login => login]) && (u.id != id)
         errors.add(:login, "must be unique, login '#{login}' already exists")
       end
+    end
 
+    def validate_password
       if new? || updating_password?
         if password.blank?
           errors.add(:password, 'is required')
