@@ -18,12 +18,14 @@
   :title: Title
   :comment: ""
   :writable: true
+  :list: true
 - :name: location
   :schema_id: <%= @fp[:location].schema_id.to_s %>
   :type: Spontaneous.Field.String
   :title: Where
   :comment: Fill in the address
   :writable: true
+  :list: true
 - :name: date
   :schema_id: <%= @fp[:date].schema_id.to_s %>
   :type: Spontaneous.Field.Date
@@ -31,12 +33,21 @@
   :comment: ""
   :writable: true
   :date_format: "%A, %-d %B, %Y"
+  :list: true
 - :name: image
   :schema_id: <%= @fp[:image].schema_id.to_s %>
   :type: Spontaneous.Field.Image
   :title: Image
   :comment: ""
   :writable: true
+  :list: true
+- :name: another
+  :schema_id: <%= @fp[:another].schema_id.to_s %>
+  :type: Spontaneous.Field.String
+  :title: Another
+  :comment: ""
+  :writable: true
+  :list: false
 :boxes:
 - :name: things
   :id: <%= SerialisedPiece.boxes[:things].schema_id.to_s %>
@@ -51,4 +62,5 @@
     :title: Title
     :comment: ""
     :writable: true
+    :list: true
 :source: <%= source %>

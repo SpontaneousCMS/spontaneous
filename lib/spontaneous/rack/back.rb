@@ -87,6 +87,9 @@ module Spontaneous
           use Reloader, site
           # inject the front controllers into the preview so that this is a
           # full duplicate of the live site
+          site.front.middleware.each do |args, block|
+            use *args, &block
+          end
           site.front_controllers.each do |namespace, controller_class|
             map namespace do
               run controller_class

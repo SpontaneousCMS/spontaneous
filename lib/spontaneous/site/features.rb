@@ -5,6 +5,16 @@ class Spontaneous::Site
   module Features
     extend Spontaneous::Concern
 
+    class Middleware
+      def use(*args, &block)
+        middleware << [args, block]
+      end
+
+      def middleware
+        @middleware ||= []
+      end
+    end
+
     # InstanceMethods
     def back_controllers
       @back_controllers ||= []
@@ -28,6 +38,10 @@ class Spontaneous::Site
       app = Spontaneous::Rack.make_front_controller(app, self)
       path_prefix = opts.fetch(:path_prefix, namespace_url(namespace))
       front_controllers << [path_prefix, app]
+    end
+
+    def front
+      @front_middleware ||= Middleware.new
     end
 
     def namespace_url(namespace)

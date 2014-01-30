@@ -2,6 +2,49 @@
 
 
 module Spontaneous::Prototypes
+  # FieldPrototype represents the class-level view of a type field.
+  # It contains information on the type of the field and the options
+  # passed in the type declaration and is responsible for transforming
+  # serialized field data from the db into a field instance.
+  #
+  # options - A hash containing options that control the behaviour of the
+  #           field (default: {})
+  #
+  #           :default  - The default value for new fields. This accepts either a
+  #                       value (which is either a String or responds to #to_s)
+  #                       or a Proc value generator which can accept 1 argument
+  #                       that is the instance that the field is attached to.
+  #           :title    - The title that should be used to label the field in the UI.
+  #                       This defaults to the 'titleized' version of the field name,
+  #                       e.g. ':field_name' becomes 'Field Name'.
+  #           :comment  - An optional String comment to be displayed in the UI
+  #                       (default: "").
+  #           :list     - A Boolean flag determining whether to show the field in the
+  #                       list view (default: true).
+  #           :fallback - Provides a way of supplying a fallback value for an empty
+  #                       field.
+  #
+  #           Other options are dependent on the type of field.
+  #
+  # Examples
+  #
+  # Pass a Proc as the default value for a field:
+  #
+  #   field :title, default: proc { |page| "This is page #{page.slug}" }
+  #
+  # Assign a field with a fallback:
+  #
+  #   class Something < Piece
+  #     field :a
+  #     field :b, fallback: :a
+  #   end
+  #
+  #   instance = Something.new(a: "The value of A")
+  #   instance.a.value #=> "The value of A"
+  #   instance.b.value #=> "The value of A"
+  #   instance.b = "Now B"
+  #   instance.b.value #=> "Now B"
+  #
   class FieldPrototype
     attr_reader :owner, :name, :options
 
@@ -59,7 +102,7 @@ module Spontaneous::Prototypes
     end
 
     def default_options(field_class)
-      {:default => '', :comment => false }.merge(field_class.default_options)
+      {default: '', comment: false, list: true}.merge(field_class.default_options)
     end
 
     def instance_class
@@ -162,12 +205,13 @@ module Spontaneous::Prototypes
 
     def export(user)
       {
-        :name => name.to_s,
-        :schema_id => schema_id.to_s,
-        :type => instance_class.editor_class,
-        :title => title,
-        :comment => comment || "",
-        :writable => Spontaneous::Permissions.has_level?(user, write_level)
+        name: name.to_s,
+        schema_id: schema_id.to_s,
+        type: instance_class.editor_class,
+        title: title,
+        comment: comment || "",
+        list: @options[:list] || false,
+        writable: Spontaneous::Permissions.has_level?(user, write_level)
       }.merge(instance_class.export(user))
     end
   end

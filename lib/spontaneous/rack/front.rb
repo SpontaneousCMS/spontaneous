@@ -23,6 +23,10 @@ module Spontaneous
         app = ::Rack::Builder.new do
           use Spontaneous::Rack::Static, root: Spontaneous.revision_dir / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
 
+          Spontaneous.instance.front.middleware.each do |args, block|
+            use *args, &block
+          end
+
           Spontaneous.instance.front_controllers.each do |namespace, controller_class|
             map namespace do
               run controller_class
