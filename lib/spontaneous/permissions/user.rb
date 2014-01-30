@@ -194,12 +194,9 @@ module Spontaneous::Permissions
     end
 
     def validate_login
-      if login.blank?
-        errors.add(:login, 'is required')
-      else
-        errors.add(:login, 'should only contain letters, numbers & underscore') unless login =~ /\A[a-zA-Z0-9_]+\z/
-        errors.add(:login, 'should be at least 3 letters long') if login.length < 3
-      end
+      return errors.add(:login, 'is required') if login.blank?
+      errors.add(:login, 'should only contain letters, numbers & underscore') unless login =~ /\A[a-zA-Z0-9_]+\z/
+      errors.add(:login, 'should be at least 3 letters long') if login.length < 3
     end
 
     def validate_login_uniqueness
