@@ -1,4 +1,4 @@
-module Spontaneous::Storage::Template
+module Spontaneous::Output::Store
   # A Transaction is a write-only view of the template store.
   # It provides #commit & #rollback mechanisms that function
   # like their DB equivalents, either preserving or removing the

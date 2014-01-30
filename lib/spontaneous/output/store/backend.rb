@@ -1,4 +1,4 @@
-module Spontaneous::Storage::Template
+module Spontaneous::Output::Store
   class Backend
     unless defined?(STATIC_PATH)
       STATIC_PATH, PROTECTED_PATH, DYNAMIC_PATH = %w(static protected dynamic).map(&:freeze)

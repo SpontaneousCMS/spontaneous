@@ -29,12 +29,12 @@ class Spontaneous::Site
     end
 
     def template_store(*args)
-      return _template_store if args.empty?
-      @template_store = Spontaneous::Storage::Template.new(*args)
+      return current_template_store if args.empty?
+      @template_store = Spontaneous::Output::Store.new(*args)
     end
 
-    def _template_store
-      @template_store ||= Spontaneous::Storage::Template.new(:File, root: revision_root)
+    def current_template_store
+      @template_store ||= Spontaneous::Output::Store.new(:File, root: revision_root)
     end
 
     def publish_pages(page_list=nil)

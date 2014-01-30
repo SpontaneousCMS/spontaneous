@@ -1,4 +1,4 @@
-module Spontaneous::Storage::Template
+module Spontaneous::Output::Store
   class Revision
     attr_reader :revision, :store
 

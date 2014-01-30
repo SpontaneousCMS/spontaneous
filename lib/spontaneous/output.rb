@@ -116,6 +116,7 @@ module Spontaneous
     autoload :Context,    "spontaneous/output/context"
     autoload :Helpers,    "spontaneous/output/helpers"
     autoload :Renderable, "spontaneous/output/renderable"
+    autoload :Store,      "spontaneous/output/store"
   end
 end
 

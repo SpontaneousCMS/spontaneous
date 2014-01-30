@@ -1,7 +1,7 @@
 require 'moneta'
 require 'json'
 
-module Spontaneous::Storage::Template
+module Spontaneous::Output::Store
   # Implements the template store API on top of a Moneta key-value store.
   #
   # Unlike the File backend, we don't need to differentiate the storage

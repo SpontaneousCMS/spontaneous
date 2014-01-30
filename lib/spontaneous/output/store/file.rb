@@ -1,6 +1,6 @@
 require 'fileutils'
 
-module Spontaneous::Storage::Template
+module Spontaneous::Output::Store
   # The basic template storage backend.
   #
   # It stores static, protected & dynamic templates in different

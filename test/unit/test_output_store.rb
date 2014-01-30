@@ -21,7 +21,7 @@ require File.expand_path('../../test_helper', __FILE__)
 # Backend#delete_revision(revision)
 # Backend#revisions #=> [Fixnum]
 
-describe "Template store" do
+describe "Output store" do
   start do
     site = setup_site
     let(:site) { site  }
@@ -49,7 +49,7 @@ describe "Template store" do
 
   describe "File" do
     let(:root)  { Dir.mktmpdir }
-    let(:store) { Spontaneous::Storage::Template::File.new(root) }
+    let(:store) { Spontaneous::Output::Store::File.new(root) }
     let(:revision) { 100 }
     let(:revision_path) { ::File.join(root, "00100") }
 
@@ -134,9 +134,9 @@ describe "Template store" do
   end
 
   describe "Moneta" do
-    let(:store) { Spontaneous::Storage::Template::Moneta.new(:Memory) }
+    let(:store) { Spontaneous::Output::Store::Moneta.new(:Memory) }
     let(:r) { 100 }
-    let(:revision) { Spontaneous::Storage::Template::Revision.new(r, store) }
+    let(:revision) { Spontaneous::Output::Store::Revision.new(r, store) }
     let(:transaction) { revision.transaction }
 
 
@@ -209,9 +209,9 @@ describe "Template store" do
   end
 
   describe "Transaction" do
-    let(:store) { Spontaneous::Storage::Template::Moneta.new(:Memory) }
+    let(:store) { Spontaneous::Output::Store::Moneta.new(:Memory) }
     let(:r) { 100 }
-    let(:transaction) { Spontaneous::Storage::Template::Transaction.new(r, store) }
+    let(:transaction) { Spontaneous::Output::Store::Transaction.new(r, store) }
     let(:output_html) { page.output(:html) }
     let(:output_xml) { page.output(:xml) }
     let(:output_json) { page.output(:json) }
@@ -279,8 +279,8 @@ describe "Template store" do
 
   describe "Revision" do
     let(:r) { 100 }
-    let(:store) { Spontaneous::Storage::Template::Moneta.new(:Memory) }
-    let(:revision) { Spontaneous::Storage::Template::Revision.new(r, store) }
+    let(:store) { Spontaneous::Output::Store::Moneta.new(:Memory) }
+    let(:revision) { Spontaneous::Output::Store::Revision.new(r, store) }
     let(:output_html) { page.output(:html) }
     let(:output_xml) { page.output(:xml) }
     let(:output_json) { page.output(:json) }
@@ -293,7 +293,7 @@ describe "Template store" do
     end
 
     it "provides a transaction for writing" do
-      revision.transaction.must_be_instance_of Spontaneous::Storage::Template::Transaction
+      revision.transaction.must_be_instance_of Spontaneous::Output::Store::Transaction
       revision.transaction.revision.must_equal r
     end
 
@@ -319,7 +319,7 @@ describe "Template store" do
   end
 
   describe "Store" do
-    let(:store) { Spontaneous::Storage::Template.new(:Memory) }
+    let(:store) { Spontaneous::Output::Store.new(:Memory) }
     let(:output_html) { page.output(:html) }
     let(:output_xml) { page.output(:xml) }
 
@@ -331,7 +331,7 @@ describe "Template store" do
     end
 
     it "will provide a revision instance" do
-      store.revision(20).must_be_instance_of Spontaneous::Storage::Template::Revision
+      store.revision(20).must_be_instance_of Spontaneous::Output::Store::Revision
       store.revision(20).revision.must_equal 20
     end
 
