@@ -50,7 +50,7 @@ describe "Media" do
         :aws_access_key_id=>"ACCESS_KEY_ID",
         :public_host => "http://media.example.com"
       }
-      @storage = Spontaneous::Storage::Cloud.new(@aws_credentials, 'media.example.com')
+      @storage = Spontaneous::Media::Store::Cloud.new(@aws_credentials, 'media.example.com')
       @storage.backend.directories.create(:key => @bucket_name)
       @site.stubs(:storage).with(anything).returns(@storage)
       @content = ::Piece.create
@@ -115,7 +115,7 @@ describe "Media" do
   describe "Local media files" do
     before do
       @media_dir = Dir.mktmpdir
-      @storage = Spontaneous::Storage::Local.new(@media_dir, '/media')
+      @storage = Spontaneous::Media::Store::Local.new(@media_dir, '/media')
       @site.stubs(:storage).with(anything).returns(@storage)
       @content = ::Piece.create
       @content.stubs(:id).returns(99)
@@ -188,11 +188,11 @@ describe "Media" do
         :aws_access_key_id=>"ACCESS_KEY_ID",
         :public_host => "http://media.example.com"
       }
-      cloud = Spontaneous::Storage::Cloud.new(@aws_credentials, 'media.example.com')
+      cloud = Spontaneous::Media::Store::Cloud.new(@aws_credentials, 'media.example.com')
       cloud.backend.directories.create(:key => @bucket_name)
       @site.stubs(:storage).with(anything).returns(cloud)
       @media_dir = Dir.mktmpdir
-      @storage = Spontaneous::Storage::Local.new(@media_dir, '/media')
+      @storage = Spontaneous::Media::Store::Local.new(@media_dir, '/media')
       @site.stubs(:local_storage).with(anything).returns(@storage)
       @site.stubs(:default_storage).with(anything).returns(@storage)
       @content = ::Piece.create

@@ -3,7 +3,7 @@
 require 'fog'
 require 'tempfile'
 
-module Spontaneous::Storage
+module Spontaneous::Media::Store
   class Cloud < Backend
     # Thanks thoughtbot (via paperclip)
     # http://rdoc.info/github/thoughtbot/paperclip/Paperclip/Storage/Fog

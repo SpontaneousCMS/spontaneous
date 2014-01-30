@@ -1093,7 +1093,7 @@ describe "Fields" do
         :aws_secret_access_key=>"SECRET_ACCESS_KEY",
         :aws_access_key_id=>"ACCESS_KEY_ID"
       }
-        @storage = S::Storage::Cloud.new(@aws_credentials, "media.example.com")
+        @storage = S::Media::Store::Cloud.new(@aws_credentials, "media.example.com")
         @site.expects(:storage).returns(@storage)
       end
 

@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module Spontaneous::Storage
+module Spontaneous::Media::Store
   class Local < Backend
     attr_reader :root
 

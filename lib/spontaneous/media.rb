@@ -8,6 +8,7 @@ module Spontaneous
     autoload :File,     "spontaneous/media/file"
     autoload :Image,    "spontaneous/media/image"
     autoload :TempFile, "spontaneous/media/temp_file"
+    autoload :Store,    "spontaneous/media/store"
 
     include Spontaneous::Constants
 

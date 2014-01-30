@@ -3,7 +3,7 @@
 require File.expand_path('../../test_helper', __FILE__)
 require 'fog'
 
-describe "Storage" do
+describe "Media Store" do
   before do
     @site = setup_site
     @config_dir = File.expand_path("../../fixtures/storage", __FILE__)
@@ -22,7 +22,7 @@ describe "Storage" do
       @storage = @site.storage
     end
     it "be the default" do
-      @storage.must_be_instance_of Spontaneous::Storage::Local
+      @storage.must_be_instance_of Spontaneous::Media::Store::Local
     end
     it "have the right base url" do
       @storage.public_url("test.jpg").must_equal "/media/test.jpg"
@@ -55,7 +55,7 @@ describe "Storage" do
     end
 
     it "be detected by configuration" do
-      @storage.must_be_instance_of Spontaneous::Storage::Cloud
+      @storage.must_be_instance_of Spontaneous::Media::Store::Cloud
     end
 
     it "have the correct bucket name" do
@@ -110,7 +110,7 @@ describe "Storage" do
 
 
       it "use custom urls if configured" do
-        storage = Spontaneous::Storage::Cloud.new(@aws_credentials.merge({
+        storage = Spontaneous::Media::Store::Cloud.new(@aws_credentials.merge({
           :public_host => "http://media.example.com",
         }), @bucket_name)
         storage.public_url(@media_path).must_equal "http://media.example.com/0003/0567/rose.jpg"

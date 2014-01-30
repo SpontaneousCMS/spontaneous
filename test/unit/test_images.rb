@@ -265,7 +265,7 @@ describe "Images" do
           :public_host => "http://media.example.com"
         }
         ::Fog.mock!
-        @storage = Spontaneous::Storage::Cloud.new(@aws_credentials, 'media.example.com')
+        @storage = Spontaneous::Media::Store::Cloud.new(@aws_credentials, 'media.example.com')
         @storage.backend.directories.create(:key => @bucket_name)
         @site.stubs(:storage).with(anything).returns(@storage)
         @image.value = @origin_image.to_s

@@ -40,14 +40,14 @@ class Spontaneous::Site
       storage_backends = []
       storage_settings = config[:storage] || []
       storage_settings.each do |name, config|
-        backend = Spontaneous::Storage.create(config)
+        backend = Spontaneous::Media::Store.create(config)
         storage_backends << backend
       end
       storage_backends << default_storage
     end
 
     def default_storage
-      @default_storage ||= Spontaneous::Storage::Local.new(Spontaneous.media_dir, '/media', accepts=nil)
+      @default_storage ||= Spontaneous::Media::Store::Local.new(Spontaneous.media_dir, '/media', accepts=nil)
     end
 
     def file(owner, filename, headers = {})
