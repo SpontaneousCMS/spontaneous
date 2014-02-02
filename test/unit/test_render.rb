@@ -570,7 +570,7 @@ describe "Render" do
     describe "PublishedRenderer" do
       before do
         @site.background_mode = :immediate
-        @site.template_store :Memory
+        @site.output_store :Memory
 
         ::Content.delete
         ::Content.delete_revision(1) rescue nil

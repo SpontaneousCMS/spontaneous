@@ -22,7 +22,7 @@ describe "Publishing" do
 
     @site = setup_site(site_root)
     @site.background_mode = :immediate
-    @template_store = @site.template_store(:Memory)
+    @output_store = @site.output_store(:Memory)
 
     Content.delete
 
@@ -120,8 +120,8 @@ describe "Publishing" do
       output = root.output(:html)
       output.expects(:render_using).raises(Exception)
       root.expects(:outputs).at_least_once.returns([output])
-      revision_store = @template_store.revision(@revision)
-      @template_store.expects(:revision).with(@revision).at_least_once.returns(revision_store)
+      revision_store = @output_store.revision(@revision)
+      @output_store.expects(:revision).with(@revision).at_least_once.returns(revision_store)
       transaction = []
       revision_store.expects(:delete)
       revision_store.expects(:transaction).returns(transaction)
@@ -130,7 +130,7 @@ describe "Publishing" do
         silence_logger { @site.publish_all }
       rescue Exception; end
       @site.pending_revision.must_be_nil
-      @template_store.revisions.must_equal []
+      @output_store.revisions.must_equal []
       refute Content.revision_exists?(@revision)
       begin
         silence_logger { @site.publish_pages([change1]) }
@@ -191,7 +191,7 @@ describe "Publishing" do
       @pages = [@home, @about, @blog, @news, @post1, @post2, @post3]
       @pages.each { |p| p.save }
       @site.publish_all
-      @template_revision = @template_store.revision(2)
+      @template_revision = @output_store.revision(2)
     end
 
     after do
@@ -260,7 +260,7 @@ describe "Publishing" do
       PublishablePage.add_output :rtf
       Content.delete_revision(@revision+1)
       @site.publish_all
-      template_revision = @template_store.revision(@revision+1)
+      template_revision = @output_store.revision(@revision+1)
       render = template_revision.static_template(@home.output(:rtf))
       render.read.must_equal "RICH!\n"
     end
@@ -269,7 +269,7 @@ describe "Publishing" do
       PublishablePage.add_output :rtf, :dynamic => true
       Content.delete_revision(@revision+1)
       @site.publish_all
-      @template_store.revision(@revision + 1).dynamic_template(@home.output(:rtf)).read.must_equal "RICH!\n"
+      @output_store.revision(@revision + 1).dynamic_template(@home.output(:rtf)).read.must_equal "RICH!\n"
     end
 
     it "run the content revision cleanup task after the revision is live" do

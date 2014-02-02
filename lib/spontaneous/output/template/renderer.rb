@@ -130,7 +130,7 @@ module Spontaneous::Output::Template
     def initialize(site, revision, cache = Spontaneous::Output.cache_templates?)
       super(site, cache)
       @revision = revision
-      @template_store = @site.template_store.revision(@revision)
+      @output_store = @site.output_store.revision(@revision)
     end
 
     def render(output, params = {}, parent_context = nil)
@@ -140,11 +140,11 @@ module Spontaneous::Output::Template
     end
 
     def render!(output, params, parent_context)
-      if (template = @template_store.static_template(output))
+      if (template = @output_store.static_template(output))
         return template
       end
       # Attempt to render a published template
-      if (template = @template_store.dynamic_template(output))
+      if (template = @output_store.dynamic_template(output))
         return engine.render_template(template, context(output, params, parent_context), output.name)
       end
       logger.warn("missing template for #{output}")

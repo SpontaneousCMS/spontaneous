@@ -67,7 +67,7 @@ describe "Assets" do
     site.config.tap do |c|
       c.auto_login = 'root'
     end
-    site.template_store(:Memory)
+    site.output_store(:Memory)
     Spontaneous::Permissions::User.delete
     user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass")
     user.update(:level => Spontaneous::Permissions[:editor])

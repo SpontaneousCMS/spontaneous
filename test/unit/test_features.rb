@@ -14,7 +14,7 @@ describe "Features" do
   before do
     @site = setup_site
     @site.background_mode = :immediate
-    @site.template_store :Memory
+    @site.output_store :Memory
   end
 
   after do

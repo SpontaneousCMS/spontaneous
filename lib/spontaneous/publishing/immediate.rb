@@ -108,7 +108,7 @@ module Spontaneous
       end
 
       def render_pages
-        template_revision = @site.template_store.revision(@revision)
+        template_revision = @site.output_store.revision(@revision)
         @render_transaction = template_revision.transaction
         delay = @site.config.publishing_delay # the delay is purely used in interface testing
         pages.each do |page|
@@ -339,7 +339,7 @@ module Spontaneous
         if (r = @site.pending_revision)
           update_progress("aborting")
           @render_transaction.rollback if @render_transaction
-          @site.template_store.revision(r).delete # we might have committed the transaction
+          @site.output_store.revision(r).delete # we might have committed the transaction
           @site.send(:pending_revision=, nil)
           @content_model.delete_revision(revision)
           puts exception.backtrace.join("\n") if exception

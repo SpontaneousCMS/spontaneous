@@ -20,7 +20,7 @@ describe "Front" do
     S::State.delete
 
     site.background_mode = :immediate
-    site.template_store :Memory
+    site.output_store :Memory
     ::Content.delete
 
     class ::Page

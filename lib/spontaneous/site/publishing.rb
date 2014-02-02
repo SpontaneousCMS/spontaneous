@@ -28,13 +28,13 @@ class Spontaneous::Site
       resolve_background_mode(Spontaneous::Publishing)
     end
 
-    def template_store(*args)
-      return current_template_store if args.empty?
-      @template_store = Spontaneous::Output::Store.new(*args)
+    def output_store(*args)
+      return current_output_store if args.empty?
+      @output_store = Spontaneous::Output::Store.new(*args)
     end
 
-    def current_template_store
-      @template_store ||= Spontaneous::Output::Store.new(:File, root: revision_root)
+    def current_output_store
+      @output_store ||= Spontaneous::Output::Store.new(:File, root: revision_root)
     end
 
     def publish_pages(page_list=nil)
