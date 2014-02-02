@@ -19,7 +19,7 @@ end
 
 platforms :mri, :rbx do
   gem 'mysql2',      '~> 0.3.11'
-  gem 'pg',          '~> 0.14.1'
+  gem 'sequel_pg',   '~> 1.6', require: 'sequel'
   gem 'xapian-ruby', '~> 1.2.12'
 end
 

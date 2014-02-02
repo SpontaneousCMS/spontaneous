@@ -83,8 +83,11 @@ module Spontaneous
 
 
     def connect_to_database!
-      self.database = Sequel.connect(db_settings)
-      self.database.logger = logger if config.log_queries
+      db = Sequel.connect(db_settings)
+      db.logger = logger if config.log_queries
+      # Improve performance for postgres
+      db.optimize_model_load = true if db.respond_to?(:optimize_model_load)
+      self.database = db
     end
 
     def db_settings
