@@ -65,8 +65,8 @@ module Spontaneous
       end
 
       def start_server(mode)
-        prepare! :server, mode
-        Spontaneous::Server.run!(options)
+        site = prepare! :server, mode
+        Spontaneous::Server.run!(site, options)
       end
     end
   end

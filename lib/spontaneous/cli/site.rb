@@ -117,16 +117,16 @@ module Spontaneous
       method_option :pages, :type => :array, :desc => "List of pages to publish"
       method_option :logfile, :type => :string, :desc => "Location of logfile"
       def publish
-        prepare! :publish
-        Spontaneous::Site.background_mode = :immediate
+        site = prepare! :publish
+        site.background_mode = :immediate
         ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
-        say "Creating revision #{Spontaneous::Site.revision}", :green, true
+        say "Creating revision #{site.revision}", :green, true
         if options.pages
           say ">  Publishing pages #{options.pages.inspect}", :green, true
-          Spontaneous::Site.publish_pages(options.pages)
+          site.publish_pages(options.pages)
         else
           say ">  Publishing all", :green, true
-          Spontaneous::Site.publish_all
+          site.publish_all
         end
         # Rescue all errors to feed back to the UI
       rescue => e
@@ -136,23 +136,23 @@ module Spontaneous
 
       desc "render", "Re-renders the current content"
       def render
-        prepare! :render
-        Spontaneous::Site.background_mode = :immediate
-        Spontaneous::Site.rerender
+        site = prepare! :render
+        site.background_mode = :immediate
+        site.rerender
       end
 
       desc "revision", "Shows the site status"
       def revision
-        prepare! :revision
-        say "Site is at revision #{Spontaneous::Site.revision}", :green
+        site = prepare! :revision
+        say "Site is at revision #{site.revision}", :green
       end
 
       desc "browse", "Launches a browser pointing to the current development CMS"
       def browse
-        prepare :browse
+        site = prepare :browse
         require 'launchy'
         boot!
-        ::Launchy.open("http://localhost:#{Spontaneous::Site.config.port}/@spontaneous")
+        ::Launchy.open("http://localhost:#{site.config.port}/@spontaneous")
       end
 
       private

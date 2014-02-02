@@ -66,6 +66,7 @@ module Spontaneous
       def boot!
         begin
           require File.expand_path('config/boot.rb')
+          Spontaneous::Site.instance
         rescue Spontaneous::SchemaModificationError => error
           fix_schema(error)
         end
