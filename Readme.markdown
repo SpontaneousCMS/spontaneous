@@ -11,6 +11,8 @@ pages out of simple, easily editable blocks.
 
 ## Status
 
+[![Code Climate](https://codeclimate.com/github/SpontaneousCMS/spontaneous.png)](https://codeclimate.com/github/SpontaneousCMS/spontaneous)
+
 Spontaneous is very much a work-in-progress but is currently almost feature
 complete. It has been used with great success on multiple sites. However the
 gem release is still marked as 'alpha' because the APIs are in constant flux.
