@@ -107,6 +107,15 @@ describe "DataMapper" do
       instance.attributes[:label].must_equal "column1"
     end
 
+    it "responds to Sequel's #primary_key_lookup" do
+      @database.sqls # clear the sql log
+      @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
+      instance = @mapper.primary_key_lookup(1)
+      @database.sqls.must_equal [
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1"
+      ]
+    end
+
     it "retirieve a list of objects in the specified order" do
       # instance = @mapper.instance MockContent2, :label => "column1"
       @database.sqls # clear the sql log
@@ -1267,7 +1276,7 @@ describe "DataMapper" do
       it "can load association members" do
         @instance.other
         @database.sqls.must_equal [
-          "SELECT * FROM other WHERE (other.id = 34) LIMIT 1"
+          "SELECT * FROM other WHERE (id = 34) LIMIT 1"
         ]
       end
 
@@ -1293,7 +1302,7 @@ describe "DataMapper" do
         @database.sqls
         @instance.other
         @database.sqls.must_equal [
-          "SELECT * FROM other WHERE (other.id = 34) LIMIT 1"
+          "SELECT * FROM other WHERE (id = 34) LIMIT 1"
         ]
       end
     end

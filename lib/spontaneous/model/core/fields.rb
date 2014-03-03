@@ -84,7 +84,7 @@ module Spontaneous::Model::Core
     end
 
     def field_versions(field)
-      Spontaneous::Field::FieldVersion.filter(:content_id => self.id, :field_sid => field.schema_id.to_s).order(:created_at.desc)
+      Spontaneous::Field::FieldVersion.filter(:content_id => self.id, :field_sid => field.schema_id.to_s).order(Sequel.desc(:created_at))
     end
 
     def save_field_versions

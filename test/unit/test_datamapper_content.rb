@@ -50,11 +50,20 @@ describe "DataMapperContent" do
       ds.must_be_instance_of Spontaneous::DataMapper::Dataset
       ds.sql.must_equal "SELECT * FROM content WHERE (type_sid IN ('Page'))"
     end
+
     it  "search without type filters" do
       @database.sqls # clear sql log
       ::Content.all
       @database.sqls.must_equal [
         "SELECT * FROM content WHERE (type_sid IN ('Page'))"
+      ]
+    end
+
+    it "allows for retrieval of a single instance by primary key" do
+      @database.sqls # clear sql log
+      ::Content.primary_key_lookup(23)
+      @database.sqls.must_equal [
+        "SELECT * FROM content WHERE ((type_sid IN ('Page')) AND (id = 23)) LIMIT 1"
       ]
     end
 

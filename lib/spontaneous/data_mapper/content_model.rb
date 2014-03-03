@@ -87,6 +87,10 @@ module Spontaneous
 
       alias_method :[], :get
 
+      def primary_key_lookup(id)
+        mapper.primary_key_lookup(id)
+      end
+
       def count
         mapper.count(types)
       end

@@ -43,7 +43,7 @@ Gem::Specification.new do |s|
   s.add_dependency('rack',            ['~> 1.5'])
   s.add_dependency('rake',            ['~> 0.9'])
   s.add_dependency('sass',            ['~> 3.2'])
-  s.add_dependency('sequel',          ['~> 3.43'])
+  s.add_dependency('sequel',          ['~> 4.8'])
   s.add_dependency('simultaneous',    ['~> 0.4.2'])
   s.add_dependency('sinatra',         ['~> 1.3'])
   s.add_dependency('skeptick',        ['~> 0.1'])

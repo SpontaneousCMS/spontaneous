@@ -39,6 +39,7 @@ module Spontaneous
         :count, :count!,
         :order, :limit,
         :all, :get, :[], :first,
+        :primary_key_lookup,
         :all!, :first!,
         :reload,
         :instance,

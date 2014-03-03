@@ -16,7 +16,7 @@ module Spontaneous
         if (instance = @identity_map[id])
           instance
         else
-          first(id: id)
+          primary_key_lookup(id)
         end
       end
 
@@ -36,6 +36,10 @@ module Spontaneous
         filter(:id => id_list).all.sort { |i1, i2|
           order[i1.id] <=> order[i2.id]
         }
+      end
+
+      def primary_key_lookup(pk)
+        first(id: pk)
       end
 
       def first(*args, &block)

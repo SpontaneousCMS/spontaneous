@@ -66,6 +66,10 @@ module Spontaneous
         dataset.get(id)
       end
 
+      def primary_key_lookup(id)
+        dataset.primary_key_lookup(id)
+      end
+
       alias_method :[], :get
 
       def insert(*values, &block)
