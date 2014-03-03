@@ -6,8 +6,8 @@ module Spontaneous
   module Generators
     class Site < Thor::Group
       def self.available_dbs
-        postgres = { :gem => "pg", :adapter => "postgres", :user => nil }
-        { "mysql"      => { :gem => "mysql2", :adapter => "mysql2", :user => "root" },
+        postgres = { :gem => "sequel_pg", :adapter => "postgres", :user => nil }
+        { "mysql"  => { :gem => "mysql2", :adapter => "mysql2", :user => "root" },
           "pg" => postgres,  "postgresql" =>  postgres, "postgres"   =>  postgres }
       end
 

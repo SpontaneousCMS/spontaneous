@@ -122,7 +122,7 @@ describe "Generators" do
       it "configure the correct gem" do
         generate(:site, "example.com", "--root=#{@tmp}", "--database=postgresql")
         gemfile = File.read(File.join(@site_root, "Gemfile"))
-        gemfile.must_match /^gem 'pg'/
+        gemfile.must_match /^gem 'sequel_pg'.+require: 'sequel'/
       end
 
       it "setup the right db parameters" do
@@ -188,7 +188,7 @@ describe "Generators" do
       site_root = File.join(@tmp, 'example_com')
       generate(:site, "example.com", "--root=#{@tmp}", "--database=postgres", "--user=spontaneous", "--password=s3cret")
       gemfile = File.read(File.join(site_root, "Gemfile"))
-      gemfile.must_match /^gem 'pg'/
+      gemfile.must_match /^gem 'sequel_pg'.+require: 'sequel'/
       config = database_config("example_com")
       [:development, :test].each do |environment|
         config[environment][:user].must_equal "spontaneous"
