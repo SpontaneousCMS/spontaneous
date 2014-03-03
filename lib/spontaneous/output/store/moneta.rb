@@ -68,15 +68,14 @@ module Spontaneous::Output::Store
     #
     # The IO methods provide an #each method for Rack, and
     # the #path method can be used by the rendering engine for caching.
+    #
+    # We don't provide a #to_path method for Rack because there
+    # is no file represantation of this object for passing to a proxy
+    # server
     class Template < StringIO
-      def initialize(string, path)
+      def initialize(template, path)
         @path = path
-        super(string)
-      end
-
-      # Useful to be able to read the template more than once
-      def read(*args)
-        rewind ; super
+        super(template)
       end
 
       attr_reader :path
