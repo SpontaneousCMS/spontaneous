@@ -26,7 +26,7 @@ module Spontaneous::Model::Core
       end
 
       def dataset
-        path_like = :ancestor_path.like("#{owner[:ancestor_path]}.#{owner.id}%")
+        path_like = Sequel.like(:ancestor_path, "#{owner[:ancestor_path]}.#{owner.id}%")
         owner.content_model.filter(path_like)
       end
 
@@ -76,7 +76,7 @@ module Spontaneous::Model::Core
       end
 
       def dataset
-        path_like = :visibility_path.like("#{owner[:visibility_path]}.#{owner.id}%")
+        path_like = Sequel.like(:visibility_path, "#{owner[:visibility_path]}.#{owner.id}%")
         owner.content_model::Page.filter(path_like)
       end
     end

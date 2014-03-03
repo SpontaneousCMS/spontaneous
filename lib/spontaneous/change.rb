@@ -15,7 +15,7 @@ module Spontaneous
       end
 
       def unpublished_pages(site)
-        site.model::Page.filter { (modified_at > last_published_at) | {:first_published_at => nil} }.order(:modified_at.desc).all
+        site.model::Page.filter { (modified_at > last_published_at) | {:first_published_at => nil} }.order(Sequel.desc(:modified_at)).all
       end
 
       def include_dependencies(page_list)

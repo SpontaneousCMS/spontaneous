@@ -10,7 +10,7 @@ module Spontaneous::Permissions
     many_to_many :groups,       :class => :'Spontaneous::Permissions::AccessGroup', :join_table => :spontaneous_groups_users
     one_to_many  :access_keys,  :class => :'Spontaneous::Permissions::AccessKey', :reciprocal => :user
 
-    set_restricted_columns(:crypted_password)
+    set_allowed_columns(:name, :login, :email, :disabled, :password, :level)
 
     def_delegators :group, :level, :access_selector
 
