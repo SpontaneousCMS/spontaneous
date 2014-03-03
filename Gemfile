@@ -2,10 +2,10 @@ source "https://rubygems.org"
 
 gemspec
 
-gem 'selenium-client', '~> 1.2.18', :platforms => [:mri_18]
+gem 'selenium-client', '~> 1.2', :platforms => [:mri_18]
 gem 'mocha', :require => false
 
-gem 'therubyracer',    '~> 0.11.1'
+gem 'therubyracer',    '~> 0.11'
 
 # group :development do
 #   # gem 'Selenium', '~> 1.1.14'
@@ -18,9 +18,9 @@ platforms :jruby do
 end
 
 platforms :mri, :rbx do
-  gem 'mysql2',      '~> 0.3.11'
+  gem 'mysql2',      '~> 0.3'
   gem 'sequel_pg',   '~> 1.6', require: 'sequel'
-  gem 'xapian-ruby', '~> 1.2.12'
+  gem 'xapian-ruby', '~> 1.2'
 end
 
 

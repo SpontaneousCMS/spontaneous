@@ -45,6 +45,11 @@ describe "DataMapperContent" do
       ::Content.serialized_columns.must_equal [:field_store, :entry_store, :box_store, :serialized_modifications]
     end
 
+    it "has a dataset that doesnt filter by type" do
+      ds = ::Content.dataset
+      ds.must_be_instance_of Spontaneous::DataMapper::Dataset
+      ds.sql.must_equal "SELECT * FROM content WHERE (type_sid IN ('Page'))"
+    end
     it  "search without type filters" do
       @database.sqls # clear sql log
       ::Content.all
@@ -115,6 +120,13 @@ describe "DataMapperContent" do
           "SELECT * FROM content WHERE (type_sid IN ('Page', 'P1', 'P2'))"
         ]
       end
+
+      it "has a dataset that filters for pages" do
+        ds = ::Content::Page.dataset
+        ds.must_be_instance_of Spontaneous::DataMapper::Dataset
+        ds.sql.must_equal "SELECT * FROM content WHERE (type_sid IN ('Page', 'P1', 'P2'))"
+      end
+
 
       it  "limit searches to a single class for all other page types" do
         @database.sqls # clear sql log
@@ -188,6 +200,12 @@ describe "DataMapperContent" do
         @database.sqls.must_equal [
           "SELECT * FROM content WHERE (type_sid IN ('Piece', 'P1', 'P2'))"
         ]
+      end
+
+      it "has a dataset that filters for pieces" do
+        ds = ::Content::Piece.dataset
+        ds.must_be_instance_of Spontaneous::DataMapper::Dataset
+        ds.sql.must_equal "SELECT * FROM content WHERE (type_sid IN ('Piece', 'P1', 'P2'))"
       end
 
       it  "limit searches to a single class for all other page types" do

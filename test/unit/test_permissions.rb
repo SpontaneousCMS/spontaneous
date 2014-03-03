@@ -409,7 +409,7 @@ describe "Permissions" do
     it "be guaranteed unique" do
       Permissions.stubs(:random_string).returns("xxxx")
       key1 = Permissions::AccessKey.create()
-      lambda { Permissions::AccessKey.create() }.must_raise(Sequel::DatabaseError)
+      lambda { Permissions::AccessKey.create() }.must_raise(Sequel::UniqueConstraintViolation)
     end
 
     it "have a creation date" do

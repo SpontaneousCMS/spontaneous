@@ -21,6 +21,10 @@ require 'logger'
 
 Sequel.extension :migration
 
+# http://sequel.jeremyevans.net/rdoc-plugins/index.html
+# The scissors plugin adds class methods for update, delete, and destroy
+Sequel::Model.plugin :scissors
+
 # for future integration with travis
 ENV["SPOT_ADAPTER"] ||= "postgres"
 

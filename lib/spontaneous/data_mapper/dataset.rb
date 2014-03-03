@@ -149,8 +149,10 @@ module Spontaneous
       end
 
       def to_sql
-        @dataset.inspect
+        @dataset.sql
       end
+
+      alias_method :sql, :to_sql
 
       private
 

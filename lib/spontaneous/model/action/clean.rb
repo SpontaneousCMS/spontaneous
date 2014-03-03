@@ -41,7 +41,7 @@ module Spontaneous::Model::Action
 
     # Delete all instances whose schema id is invalid
     def delete_invalid_type_instances
-      invalid = mapper.dataset.filter(nil).invert
+      invalid = mapper.filter(nil).invert
       count   = invalid.delete
       @dirty ||= (count > 0)
       count

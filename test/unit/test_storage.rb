@@ -46,12 +46,15 @@ describe "Media Store" do
       }
       ::Fog.mock!
       @connection = Fog::Storage.new(@aws_credentials)
-      @bucket = @connection.directories.create(:key => @bucket_name)
+      @bucket = @connection.directories.create(key: @bucket_name)
       @site.paths.add :config, File.expand_path(@config_dir / "cloud", __FILE__)
       @site.load_config!
       # sanity check
       assert @site.config.test_setting
       @storage = @site.storage
+      # Fog's mocks used to apply directory additions globally but latest version
+      # doesn't so I have to stub it out :(
+      @storage.stubs(:backend).returns(@connection)
     end
 
     it "be detected by configuration" do

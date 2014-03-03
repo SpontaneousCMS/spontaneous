@@ -196,7 +196,7 @@ describe "DataMapper" do
     it "allow for counting type rows" do
       @mapper.count([MockContent2, MockContent3])
       @database.sqls.must_equal [
-        "SELECT COUNT(*) AS count FROM content WHERE (type_sid IN ('MockContent2', 'MockContent3')) LIMIT 1"
+        "SELECT count(*) AS count FROM content WHERE (type_sid IN ('MockContent2', 'MockContent3')) LIMIT 1"
       ]
     end
 
@@ -994,7 +994,7 @@ describe "DataMapper" do
   it "let you count available instances" do
     result = MockContent2.count
     @database.sqls.must_equal [
-      "SELECT COUNT(*) AS count FROM content WHERE (type_sid IN ('MockContent2')) LIMIT 1"
+      "SELECT count(*) AS count FROM content WHERE (type_sid IN ('MockContent2')) LIMIT 1"
     ]
   end
 
@@ -1350,7 +1350,7 @@ describe "DataMapper" do
   describe "performance" do
     it "use a cached version within revision blocks" do
       @mapper.revision(20) do
-        assert @mapper.dataset.equal?(@mapper.dataset), "Dataset it be the same object"
+        assert @mapper.active_scope.equal?(@mapper.active_scope), "Dataset it be the same object"
       end
     end
 
@@ -1383,9 +1383,9 @@ describe "DataMapper" do
     it "not create new scope if revisions are the same" do
       a = b = nil
       @mapper.revision(20) do
-        a = @mapper.dataset
+        a = @mapper.active_scope
         @mapper.revision(20) do
-          b = @mapper.dataset
+          b = @mapper.active_scope
         end
       end
       assert a.object_id == b.object_id, "Mappers it be same object"
@@ -1394,9 +1394,9 @@ describe "DataMapper" do
     it "not create new scope if visibility are the same" do
       a = b = nil
       @mapper.scope(20, true) do
-        a = @mapper.dataset
+        a = @mapper.active_scope
         @mapper.visible do
-          b = @mapper.dataset
+          b = @mapper.active_scope
         end
       end
       assert a.object_id == b.object_id, "Mappers it be same object"
@@ -1405,9 +1405,9 @@ describe "DataMapper" do
     it "not create new scope if parameters are the same" do
       a = b = nil
       @mapper.scope(20, true) do
-        a = @mapper.dataset
+        a = @mapper.active_scope
         @mapper.scope(20, true) do
-          b = @mapper.dataset
+          b = @mapper.active_scope
         end
       end
       assert a.object_id == b.object_id, "Mappers it be same object"

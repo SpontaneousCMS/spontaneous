@@ -91,6 +91,10 @@ module Spontaneous
         mapper.count(types)
       end
 
+      def dataset
+        mapper.dataset(types)
+      end
+
       def all
         mapper.all(*types)
       end
