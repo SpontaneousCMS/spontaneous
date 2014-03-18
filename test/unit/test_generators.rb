@@ -101,6 +101,12 @@ describe "Generators" do
       [:development, :test, :production].each do |environment|
         config[environment][:adapter].must_equal "mysql2"
         config[environment][:database].must_match /^example_com(_test)?/
+        case environment
+        when :production
+          config[environment][:user].must_equal "example_com"
+        else
+          config[environment][:user].must_equal "root"
+        end
         # db connections seem to work if you exclude the host
         config[environment][:host].must_equal "127.0.0.1"
       end
@@ -130,7 +136,7 @@ describe "Generators" do
         config = database_config("example_com")
         [:development, :test].each do |environment|
           config[environment][:adapter].must_equal "postgres"
-          config[environment][:user].must_be_nil
+          config[environment][:user].must_equal ENV["USER"]
           config[environment][:database].must_match /^example_com(_test)?/
           refute config[environment].key?(:host)
         end

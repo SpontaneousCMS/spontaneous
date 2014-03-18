@@ -6,7 +6,7 @@ module Spontaneous
   module Generators
     class Site < Thor::Group
       def self.available_dbs
-        postgres = { :gem => "sequel_pg", :adapter => "postgres", :user => nil }
+        postgres = { :gem => "sequel_pg", :adapter => "postgres", :user => ENV["USER"] }
         { "mysql"  => { :gem => "mysql2", :adapter => "mysql2", :user => "root" },
           "pg" => postgres,  "postgresql" =>  postgres, "postgres"   =>  postgres }
       end
@@ -32,6 +32,7 @@ module Spontaneous
           @domain    = domain
           @site_name = domain.to_s.gsub(/\./, "_")
           @username  = domain.split(/\./).first
+          p [:user, options.user, adapter[:user]]
           @database  = {
             :user => options.user || adapter[:user],
             :adapter => adapter[:adapter],
