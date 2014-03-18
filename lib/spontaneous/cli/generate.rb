@@ -32,6 +32,8 @@ module Spontaneous::Cli
       end
     end
 
+    protected
+
     def generate_site(args)
       ::Spontaneous::Generators::Site.start(args.drop_while { |e| %w(generate site).include?(e) })
     end
