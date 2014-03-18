@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.add_dependency('activesupport',   ['~> 4.0'])
   s.add_dependency('coffee-script',   ['~> 2.2'])
   s.add_dependency('bcrypt',          ['~> 3.1'])
-  s.add_dependency('bundler',         ['>  1.0'])
+  s.add_dependency('bundler',         ['~> 1.5'])
   s.add_dependency('cutaneous',       ['~> 0.2'])
   s.add_dependency('erubis',          ['~> 2.6'])
   s.add_dependency('fog',             ['~> 1.17'])
