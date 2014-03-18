@@ -23,7 +23,7 @@ module Spontaneous
       # method_option :adapter, :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
       method_option :host, :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
       method_option :port, :type => :numeric, :aliases => "-p", :desc => "Use PORT"
-      def front
+      def front(*args)
         start_server(:front)
       end
 
@@ -31,16 +31,14 @@ module Spontaneous
       # method_option :adapter, :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
       method_option :host, :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
       method_option :port, :type => :numeric, :aliases => "-p", :desc => "Use PORT"
-      def back
+      def back(*args)
         start_server(:back)
       end
 
       desc "simultaneous", "Launches the Simultaneous server"
       method_option :connection, :type => :string, :aliases => "-c", :desc => "Use CONNECTION"
-      def simultaneous
-        prepare! :start
-        connection = options[:connection] || ::Spontaneous.config.simultaneous_connection
-        exec({"BUNDLE_GEMFILE" => nil}, "#{::Simultaneous.server_binary} -c #{connection} --debug")
+      def simultaneous(*args)
+        start_simultaneous
       end
 
       # A shorter name for the 'simultaneous' task is useful (Foreman appends
@@ -67,6 +65,12 @@ module Spontaneous
       def start_server(mode)
         site = prepare! :server, mode
         Spontaneous::Server.run!(site, options)
+      end
+
+      def start_simultaneous
+        prepare! :start
+        connection = options[:connection] || ::Spontaneous.config.simultaneous_connection
+        exec({"BUNDLE_GEMFILE" => nil}, "#{::Simultaneous.server_binary} -c #{connection} --debug")
       end
     end
   end

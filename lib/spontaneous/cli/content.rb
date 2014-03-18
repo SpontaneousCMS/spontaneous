@@ -7,7 +7,13 @@ module Spontaneous
 
       desc "clean", "Cleans up the content after schema migration(s) by deleting instances belonging to deleted types and their children"
 
-      def clean
+      def clean(*args)
+        clean_content
+      end
+
+      protected
+
+      def clean_content
         prepare!(:clean)
         say "==> Cleaning content table..."
         say ""

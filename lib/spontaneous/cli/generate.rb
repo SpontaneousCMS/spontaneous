@@ -18,8 +18,7 @@ module Spontaneous::Cli
     method_option :password, :type => :string, :default => "", :aliases => "-p", :desc => "Database admin user"
 
     def site(*args)
-      # require "spontaneous"
-      ::Spontaneous::Generators::Site.start(ARGV.drop_while { |e| %w(generate site).include?(e) })
+      generate_site(args)
     end
 
     def method_missing(method, *args)
@@ -31,6 +30,10 @@ module Spontaneous::Cli
       else
         super
       end
+    end
+
+    def generate_site(args)
+      ::Spontaneous::Generators::Site.start(args.drop_while { |e| %w(generate site).include?(e) })
     end
   end # Generate
 end # Spontaneous::Cli

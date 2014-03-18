@@ -11,7 +11,13 @@ module ::Spontaneous::Cli
     default_task :open
 
     desc "open", "Gives you console access to the current site"
-    def open
+    def open(*args)
+      open_console
+    end
+
+    protected
+
+    def open_console
       prepare! :console
 
       ARGV.clear

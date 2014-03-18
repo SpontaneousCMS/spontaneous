@@ -20,7 +20,32 @@ module ::Spontaneous
       method_option :level, :type => :string, :aliases => "-a",
         :desc => "The user's access level"
 
-      def add
+      def add(*args)
+        add_user
+      end
+
+
+      desc "list", "List the current users"
+      method_option :bare, :type => :boolean, :default => false, :aliases => %w(-b),
+        :desc => "Remove descriptive text from result"
+      def list(*args)
+        list_users
+      end
+
+
+      desc "authenticate LOGIN PASSWORD", "Test a user/password combination"
+      method_option :bare, :type => :boolean, :default => false, :aliases => %w(-b),
+        :desc => "Remove descriptive text from result"
+
+      def authenticate(*args)
+        args.shift if args.first == "authenticate"
+        login, password = args[0], args[1]
+        authenticate_user(login, password)
+      end
+
+      protected
+
+      def add_user
         prepare! :adduser, :console
 
         users = ::Spontaneous::Permissions::User.count
@@ -45,21 +70,12 @@ module ::Spontaneous
         end
       end
 
-
-      desc "list", "List the current users"
-      method_option :bare, :type => :boolean, :default => false, :aliases => %w(-b),
-        :desc => "Remove descriptive text from result"
-      def list
+      def list_users
         prepare! :listusers, :console
         user_table(::Spontaneous::Permissions::User.all, options.bare)
       end
 
-
-      desc "authenticate LOGIN PASSWORD", "Test a user/password combination"
-      method_option :bare, :type => :boolean, :default => false, :aliases => %w(-b),
-        :desc => "Remove descriptive text from result"
-
-      def authenticate(login, password)
+      def authenticate_user(login, password)
         prepare! :user_authenticate, :console
         key = Spontaneous::Permissions::User.authenticate login, password
         if key
@@ -70,8 +86,6 @@ module ::Spontaneous
           exit 127
         end
       end
-
-      protected
 
       def user_table(users, hide_headers = false)
         columns = [:login, :name, :email, :level]
