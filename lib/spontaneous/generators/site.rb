@@ -32,7 +32,6 @@ module Spontaneous
           @domain    = domain
           @site_name = domain.to_s.gsub(/\./, "_")
           @username  = domain.split(/\./).first
-          p [:user, options.user, adapter[:user]]
           @database  = {
             :user => options.user || adapter[:user],
             :adapter => adapter[:adapter],
