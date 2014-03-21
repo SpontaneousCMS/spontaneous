@@ -19,6 +19,12 @@ module Spontaneous::Cli
     method_option :create_user, :type => :boolean, :default => true, :desc => "Enable creation of a root user"
 
     def init
+      initialize_size
+    end
+
+    protected
+
+    def initialize_size
       prepare :init
 
       site = ::Spontaneous::Site.instantiate(Dir.pwd, options.environment, :console)
@@ -39,8 +45,6 @@ module Spontaneous::Cli
       insert_root_user if (options.create_user && ::Spontaneous::Permissions::User.count == 0)
 
     end
-
-    protected
 
     def insert_root_user
       invoke "user:add", [],  options.account

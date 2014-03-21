@@ -102,21 +102,54 @@ module Spontaneous
       end
 
       desc "dump", "Dumps the current site to an archive on the local machine"
-      def dump
-        prepare! :dump
-        Dump.start
+      def dump(*args)
+        dump_site_data
       end
 
       desc "load", "Uploads a dump of the current site to a remote server"
-      def load
-        prepare! :load
-        Load.start
+      def load(*args)
+        load_site_data
       end
 
       desc "publish", "Publishes the site"
       method_option :pages, :type => :array, :desc => "List of pages to publish"
       method_option :logfile, :type => :string, :desc => "Location of logfile"
-      def publish
+      def publish(*args)
+        publish_site
+      rescue => e
+        $stderr.puts(e.message)
+        send_error_notification(e)
+      end
+
+      desc "render", "Re-renders the current content"
+      def render(*args)
+        render_site
+      end
+
+      desc "revision", "Shows the site status"
+      def revision(*args)
+        show_site_revision
+      end
+
+      desc "browse", "Launches a browser pointing to the current development CMS"
+      def browse(*args)
+        browse_site
+      end
+
+      private
+
+      def dump_site_data
+        prepare! :dump
+        Dump.start
+      end
+
+
+      def load_site_data
+        prepare! :load
+        Load.start
+      end
+
+      def publish_site
         site = prepare! :publish
         site.background_mode = :immediate
         ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
@@ -129,33 +162,25 @@ module Spontaneous
           site.publish_all
         end
         # Rescue all errors to feed back to the UI
-      rescue => e
-        $stderr.puts(e.message)
-        send_error_notification(e)
       end
 
-      desc "render", "Re-renders the current content"
-      def render
+      def render_site
         site = prepare! :render
         site.background_mode = :immediate
         site.rerender
       end
 
-      desc "revision", "Shows the site status"
-      def revision
+      def show_site_revision
         site = prepare! :revision
         say "Site is at revision #{site.revision}", :green
       end
 
-      desc "browse", "Launches a browser pointing to the current development CMS"
-      def browse
+      def browse_site
         site = prepare :browse
         require 'launchy'
         boot!
         ::Launchy.open("http://localhost:#{site.config.port}/@spontaneous")
       end
-
-      private
 
       def send_error_notification(error)
         simultaneous_event('publish_progress', {:state => "error", :progress => error}.to_json)
