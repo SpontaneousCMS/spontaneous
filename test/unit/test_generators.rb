@@ -51,7 +51,7 @@ describe "Generators" do
       %w(development.rb production.rb).each do |f|
         assert_file_exists(site_root, 'config/environments', f)
       end
-      %w(back.ru front.ru boot.rb database.yml deploy.rb environment.rb user_levels.yml indexes.rb).each do |f|
+      %w(back.ru front.ru boot.rb database.yml deploy.rb environment.rb user_levels.yml).each do |f|
         assert_file_exists(site_root, 'config', f)
       end
       %w(favicon.ico robots.txt).each do |f|
@@ -60,6 +60,7 @@ describe "Generators" do
       %w(standard.html.cut).each do |f|
         assert_file_exists(site_root, 'templates/layouts', f)
       end
+      assert_file_exists(site_root, 'config/initializers/indexes.rb')
       assert_file_exists(site_root, 'schema')
       assert_file_exists(site_root, 'schema/page.rb')
       assert File.read(site_root / 'schema/page.rb') =~ /class Page < Content::Page/

@@ -52,7 +52,7 @@ module Spontaneous
       find_plugins!
       load_facets!
       init_facets!
-      init_indexes!
+      run_initializers!
     end
 
 
@@ -62,9 +62,9 @@ module Spontaneous
       end
     end
 
-    def init_indexes!
+    def run_initializers!
       facets.each do |facet|
-        facet.load_indexes!
+        facet.run_initializers
       end
     end
 

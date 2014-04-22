@@ -51,10 +51,12 @@ module Spontaneous
       end
     end
 
-    def load_indexes!
+    # use Rails' alphabetical load order for initializers
+    def run_initializers
       paths.expanded(:config).each do |config_path|
-        index_file = config_path / "indexes.rb"
-        Kernel.load(index_file) if File.exists?(index_file)
+        Dir["#{config_path / "initializers"}/*.rb"].sort.each do |initializer|
+          require initializer
+        end
       end
     end
 

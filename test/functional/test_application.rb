@@ -56,6 +56,16 @@ describe "Application" do
     end
   end
 
+
+  describe "initializers" do
+    it "all run" do
+      defined?(INITIALIZER1_RUN).must_equal "constant"
+      INITIALIZER1_RUN.must_equal true
+      defined?(INITIALIZER2_RUN).must_equal "constant"
+      INITIALIZER2_RUN.must_equal true
+    end
+  end
+
   describe "back, development" do
 
     before do
