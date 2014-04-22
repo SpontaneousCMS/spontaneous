@@ -83,13 +83,11 @@ module Spontaneous
 
     def loaders
       @loaders ||= \
-        begin
-          use_reloader = config.reload_classes
-          {
-            :schema => Spontaneous::SchemaLoader.new(schema_load_paths, use_reloader),
-            :lib => Spontaneous::Loader.new(load_paths, use_reloader)
-          }
-        end
+      begin
+        use_reloader = config.reload_classes
+        {:schema => Spontaneous::SchemaLoader.new(schema_load_paths, use_reloader),
+         :lib => Spontaneous::Loader.new(load_paths, use_reloader) }
+      end
     end
 
     def load_paths
