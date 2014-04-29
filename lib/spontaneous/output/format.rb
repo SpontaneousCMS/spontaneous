@@ -59,8 +59,6 @@ module Spontaneous::Output
         @name
       end
 
-      alias_method :extension, :name
-
       def to_sym
         @name
       end
@@ -103,6 +101,10 @@ module Spontaneous::Output
         @options[:postprocess]
       end
 
+      def options
+        @options
+      end
+
       def context(site = Spontaneous.instance)
         site.context (helper_formats + [name]).uniq.compact
       end
@@ -114,7 +116,7 @@ module Spontaneous::Output
     attr_reader :page
     attr_accessor :content
 
-    def_delegators "self.class", :format, :dynamic?, :extension, :to_sym, :mimetype, :mime_type, :public?, :private?, :context, :name, :extension
+    def_delegators "self.class", :format, :dynamic?, :extension, :to_sym, :mimetype, :mime_type, :public?, :private?, :context, :name, :extension, :options
 
     def initialize(page, content = nil)
       @page, @content = page, content
@@ -171,6 +173,18 @@ module Spontaneous::Output
       dir = File.dirname(path)
       FileUtils.mkdir_p(dir) unless File.exist?(dir)
       path
+    end
+
+    def ==(other)
+      eql?(other)
+    end
+
+    def eql?(other)
+      other.class == self.class && other.page == self.page
+    end
+
+    def hash
+      [self.class, page, options].hash
     end
   end
 end

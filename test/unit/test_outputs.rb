@@ -2,18 +2,23 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 
-describe "Formats" do
+describe "Outputs" do
+  before do
+    @site = setup_site
+    @site.paths.add :templates, File.expand_path('../../fixtures/outputs/templates', __FILE__)
+  end
+
+  after do
+    teardown_site
+  end
+
   describe "Pages" do
     before do
-      @site = setup_site
-      @site.paths.add :templates, File.expand_path('../../fixtures/outputs/templates', __FILE__)
-      # class Page < ::Page; end
       class FPage < ::Page; end
     end
 
     after do
       Object.send(:remove_const, :FPage) rescue nil
-      teardown_site
     end
 
     describe "default output" do
@@ -260,6 +265,23 @@ describe "Formats" do
         output = @page.output(:html)
         @page.output(output).must_equal output
       end
+
+      it "marks identical outputs from identical pages as equal" do
+        assert @page.output(:html) == @page.output(:html)
+      end
+
+      it "marks identical outputs from different pages as different" do
+        page = FPage.create
+        refute @page.output(:html) == page.output(:html)
+      end
+
+      it "marks different outputs from same page as different" do
+        refute @page.output(:html) == @page.output(:pdf)
+      end
+
+      it "gives identical hashes for identical outputs" do
+        assert @page.output(:html).hash == @page.output(:html).hash
+      end
     end
 
     describe "with custom formats" do
@@ -295,7 +317,7 @@ describe "Formats" do
       it "allow custom post-processing of render" do
         FPage.add_output :atom, :postprocess => lambda { |page, output| output.gsub(/a/, 'x') }
         page = FPage.new
-        page.render(:atom).must_match /<xtom>/
+        page.render(:atom).must_match %r{<xtom>}
       end
     end
 
@@ -368,6 +390,53 @@ describe "Formats" do
         FPage.output(:html).extension.must_equal ".html.mako"
         FPage.output(:alternate).extension.must_equal ".alternate.mako"
       end
+    end
+  end
+
+  describe "publishing" do
+    let(:revision) { 2 }
+    let(:renderer) { Spontaneous::Output::Template::PublishRenderer.new(@site, false) }
+    let(:transaction) { mock }
+    let(:page) { P.new(title: "Godot") }
+    let(:output) { page.output(:html) }
+
+    before do
+      class ::P < ::Page
+        field :title
+      end
+    end
+    after do
+      Object.send :remove_const, :P
+    end
+
+    it "renders static layouts for static pages" do
+      P.layout { "'${ title }'" }
+      transaction.expects(:store).with(output, false, "'Godot'")
+      output.publish_page(renderer, revision, transaction)
+    end
+
+    it "renders dynamic layouts for static pages" do
+      P.layout { "'${ title }' {{Time.now.to_i}}" }
+      transaction.expects(:store).with(output, true, "'Godot' {{Time.now.to_i}}")
+      output.publish_page(renderer, revision, transaction)
+    end
+
+    it "renders static layouts for dynamic pages" do
+      P.controller do
+        get { "Hello" }
+      end
+      P.layout { "'${ title }'" }
+      transaction.expects(:store).with(output, false, "'Godot'")
+      output.publish_page(renderer, revision, transaction)
+    end
+
+    it "renders dynamic layouts for dynamic pages" do
+      P.controller do
+        get { "Hello" }
+      end
+      P.layout { "'${ title }' {{Time.now.to_i}}" }
+      transaction.expects(:store).with(output, true, "'Godot' {{Time.now.to_i}}")
+      output.publish_page(renderer, revision, transaction)
     end
   end
 end
