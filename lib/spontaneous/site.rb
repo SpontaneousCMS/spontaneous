@@ -131,10 +131,10 @@ module Spontaneous
 
     def revision_root
       @revision_dir ||= begin
-                          path = Pathname.new(@root / 'cache/revisions')
-                          path.mkpath unless path.exist?
-                          path.realpath.to_s
-                        end
+        path = Pathname.new(@root / 'cache/revisions')
+        path.mkpath unless path.exist?
+        path.realpath.to_s
+      end
     end
 
     def revision_dir(revision=nil, root = revision_root)
