@@ -1,0 +1,72 @@
+# Configure the template filesystem.
+#
+# Spontaneous accepts any Moneta[1] compatible key-value store as a
+# template destination. The arguments to #output_store should be
+# identical to those you would use to configure a Moneta instance,
+# e.g.
+#
+#     Site.output_store(:Memcached, server: 'localhost:11211)
+#
+# [1]: https://github.com/minad/moneta
+
+Site.output_store(:File, dir: Site.revision_root)
+
+# Configure the site publishing pipeline
+#
+# `run` inserts a step in the publishing pipeline.
+
+# The core steps can be referenced by a symbol that is mapped to
+# the corresponding step class.
+#
+# Custom steps *must* respond to `call` with four parameters:
+#
+# site: the current site instance
+# revision: the revision that is being created
+# pages: the list of pages that are being published
+# progress: a progress object
+#
+# `call` can optionally return an object that responds to #rollback
+# which should undo any actions made by the #call method.
+#
+# They can also, optionally, respond to:
+#
+# #count(site, revision, pages, progress): returns the number of
+#     discrete actions that this step comprises. During the #call
+#     the step *must* call progress#step exactly the number of times
+#     returned by this call
+#
+# Examples:
+#
+# Run a proc as part of the publishing process:
+#     run proc { |site, revision, pages, progress| puts "Publishing revision #revision}" }
+#
+# Run a custom publishing step:
+#
+#     class NotifyMe
+#       def initialize(options)
+#         @options = options
+#       end
+#       def count(site, revision, pages, progress)
+#         1
+#       end
+#       def call(site, revision, pages, progress)
+#         # send me a tweet when the site publishes...
+#       end
+#     end
+#
+#     Site.publish do
+#       run NotifyMe.new(handle: "my_twitter_name")
+#     end
+#
+
+# NOTE: Do not remove or re-order the core steps declared below
+# unless you are really sure of what you're doing
+Site.publish do
+  # Start core steps
+  <%- Spontaneous::Publishing::Steps::CORE_STEPS.each do |step| -%>
+  run <%= step.inspect %>
+  <%- end -%>
+  # Finish core steps
+  # At this point the site is published & most probably live to the public
+  # This is a good place to run any notification steps
+end

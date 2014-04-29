@@ -28,7 +28,7 @@ module Spontaneous::Publishing
             yield if block_given?
           end
           set_source_timestamps
-        rescue => e
+        rescue Exception => e # Want to catch everything, including the "uncatchable"
           @revision.delete
           raise e
         end

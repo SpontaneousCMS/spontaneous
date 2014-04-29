@@ -57,6 +57,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency('minitest',  ['~> 4.7.0'])
   s.add_development_dependency('minitest-colorize', ['~> 0.0.5'])
+  s.add_development_dependency('timecop',   ['~> 0.7'])
   s.add_development_dependency('mocha',     ['~> 0.13.2'])
   s.add_development_dependency('rack-test', ['~> 0.5'])
 end

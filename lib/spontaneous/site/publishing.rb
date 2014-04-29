@@ -24,6 +24,14 @@ class Spontaneous::Site
       end
     end
 
+    def publish(&block)
+      @publish_steps = Spontaneous::Publishing::Steps.new(&block)
+    end
+
+    def publish_steps
+      @publish_steps
+    end
+
     def publishing_method
       resolve_background_mode(Spontaneous::Publishing)
     end
@@ -38,11 +46,11 @@ class Spontaneous::Site
     end
 
     def publish_pages(page_list=nil)
-      publishing_method.new(self, self.revision).publish_pages(page_list)
+      publishing_method.new(self, revision, publish_steps).publish_pages(page_list)
     end
 
     def publish_all
-      publishing_method.new(self, self.revision).publish_all
+      publishing_method.new(self, revision, publish_steps).publish_all
     end
 
     def rerender

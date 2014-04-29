@@ -14,7 +14,7 @@ module Spontaneous::Output
     def self.new(backend_class, options = {})
       backend = case backend_class
       when :File
-        File.new(options[:root])
+        File.new(options[:root] || options[:dir])
       else
         Moneta.new(backend_class, options)
       end

@@ -17,6 +17,7 @@ $:.unshift(test_path) if File.directory?(test_path) && !$:.include?(test_path)
 $:.unshift(spot_path) if File.directory?(spot_path) && !$:.include?(spot_path)
 
 require 'rack'
+require 'timecop'
 require 'logger'
 
 Sequel.extension :migration

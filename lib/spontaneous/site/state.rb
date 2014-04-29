@@ -4,6 +4,10 @@ class Spontaneous::Site
   module State
     extend Spontaneous::Concern
 
+    def state
+      Spontaneous::State.instance
+    end
+
     def working_revision
       Spontaneous::State.revision
     end
