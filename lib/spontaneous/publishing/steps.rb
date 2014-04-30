@@ -1,8 +1,22 @@
 
 module Spontaneous::Publishing
   module Steps
+    class InvalidStepException < Spontaneous::Error
+      def initialize(step)
+        super("Unknown/invalid step #{step.inspect}")
+      end
+    end
+
     def self.new(&block)
       Steps.new(&block)
+    end
+
+    def self.register_step(step_class)
+      registered_steps[step_class.to_sym] = step_class
+    end
+
+    def self.registered_steps
+      @registered_steps ||= {}
     end
 
     class DSL
@@ -12,7 +26,22 @@ module Spontaneous::Publishing
       end
 
       def run(step)
-        @steps.push(step)
+        @steps.push(validate_step(make_step(step)))
+      end
+
+      def validate_step(step)
+        raise InvalidStepException.new(step) unless step && step.respond_to?(:call)
+        step
+      end
+
+      def make_step(step)
+        return step if step.respond_to?(:call)
+        case step
+        when Symbol
+          Spontaneous::Publishing::Steps.registered_steps[step]
+        else
+          raise InvalidStepException.new(step)
+        end
       end
     end
 
@@ -44,47 +73,25 @@ module Spontaneous::Publishing
       end
     end
 
-    class BaseStep
-      def self.count(site, revision, pages, progress = Spontaneous::Publishing::Progress::Silent.new)
-        new(site, revision, pages, progress).count
-      end
-
-      # create, run & return an instance that does the actual work
-      def self.call(site, revision, pages, progress = Spontaneous::Publishing::Progress::Silent.new)
-        new(site, revision, pages, progress).tap do |instance|
-          instance.call
-        end
-      end
-
-      attr_reader :revision, :site, :progress
-
-      def initialize(site, revision, pages, progress)
-        @site, @revision, @pages, @progress = site, revision, pages, progress
-      end
-
-      # Does the actual work
-      def call
-        # implement in subclasses
-      end
-
-      # Should return the number of steps we're going to make
-      def count
-        # implement in subclasses
-      end
-
-      # Undo what we did in #call in case of exceptions
-      def rollback
-        # implement in subclasses
-      end
-    end
+    CORE_STEPS = [
+      :create_revision_directory,
+      :render_revision,
+      :generate_search_indexes,
+      :copy_static_files,
+      :generate_rackup_file,
+      :activate_revision,
+      :write_revision_file,
+      :archive_old_revisions
+    ].freeze
   end
 end
 
+require 'spontaneous/publishing/steps/base_step'
+require 'spontaneous/publishing/steps/create_revision_directory'
 require 'spontaneous/publishing/steps/render_revision'
 require 'spontaneous/publishing/steps/generate_search_indexes'
 require 'spontaneous/publishing/steps/copy_static_files'
 require 'spontaneous/publishing/steps/generate_rackup_file'
-require 'spontaneous/publishing/steps/write_revision_file'
-require 'spontaneous/publishing/steps/create_revision_directory'
 require 'spontaneous/publishing/steps/activate_revision'
+require 'spontaneous/publishing/steps/write_revision_file'
 require 'spontaneous/publishing/steps/archive_old_revisions'
