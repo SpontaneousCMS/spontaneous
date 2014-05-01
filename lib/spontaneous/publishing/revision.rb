@@ -30,7 +30,7 @@ module Spontaneous::Publishing
           set_source_timestamps
         rescue Exception => e # Want to catch everything, including the "uncatchable"
           @revision.delete
-          raise e
+          raise
         end
       end
 

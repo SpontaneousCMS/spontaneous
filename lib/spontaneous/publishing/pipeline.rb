@@ -17,7 +17,7 @@ module Spontaneous::Publishing
         run_steps!(site, revision, pages, progress)
       rescue Exception => e
         rollback_steps!(site, revision, pages, progress)
-        raise e
+        raise
       end
     end
 

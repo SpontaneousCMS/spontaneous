@@ -27,7 +27,7 @@ module Spontaneous::Publishing
       end
     rescue Exception => e
       abort_publish(e)
-      raise e
+      raise
     end
 
     def publish!(pages)
