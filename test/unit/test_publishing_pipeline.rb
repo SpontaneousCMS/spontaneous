@@ -208,6 +208,14 @@ describe "Publishing Pipeline" do
       instance.rollback
       refute File.exist?(path)
     end
+
+    it "runs rollback after throwing an exception" do
+      instance = mock
+      step.expects(:new).returns(instance)
+      instance.expects(:call).raises(Exception)
+      instance.expects(:rollback)
+      lambda{ run_step }.must_raise(Exception)
+    end
   end
 
   describe "RenderRevision" do
@@ -250,6 +258,14 @@ describe "Publishing Pipeline" do
       store = @output_store.revision(revision).store
       store.expects(:delete_revision).with(revision)
       instance.rollback
+    end
+
+    it "runs rollback after throwing an exception" do
+      instance = mock
+      step.expects(:new).returns(instance)
+      instance.expects(:call).raises(Exception)
+      instance.expects(:rollback)
+      lambda{ run_step }.must_raise(Exception)
     end
   end
 
@@ -324,6 +340,14 @@ describe "Publishing Pipeline" do
       # to integrate with other search engines then we're gonna need/have an api
       # call to delete a revision
       it "deletes the indexes on rollback"
+
+      it "runs rollback after throwing an exception" do
+        instance = mock
+        step.expects(:new).returns(instance)
+        instance.expects(:call).raises(Exception)
+        instance.expects(:rollback)
+        lambda{ run_step }.must_raise(Exception)
+      end
     end
   end
 
@@ -380,6 +404,14 @@ describe "Publishing Pipeline" do
       refute File.exist?(File.join(revision_root, "public"))
     end
 
+    it "runs rollback after throwing an exception" do
+      instance = mock
+      step.expects(:new).returns(instance)
+      instance.expects(:call).raises(Exception)
+      instance.expects(:rollback)
+      lambda{ run_step }.must_raise(Exception)
+    end
+
     describe "facets" do
       before do
         @site.load_plugin(application_path)
@@ -434,6 +466,14 @@ describe "Publishing Pipeline" do
       instance = run_step
       instance.rollback
       refute File.exist?(rackup_path)
+    end
+
+    it "runs rollback after throwing an exception" do
+      instance = mock
+      step.expects(:new).returns(instance)
+      instance.expects(:call).raises(Exception)
+      instance.expects(:rollback)
+      lambda{ run_step }.must_raise(Exception)
     end
 
     describe "config.ru" do
@@ -495,6 +535,14 @@ describe "Publishing Pipeline" do
       state = @site.state.reload
       state.published_revision.must_equal 2
       state.revision.must_equal revision
+    end
+
+    it "runs rollback after throwing an exception" do
+      instance = mock
+      step.expects(:new).returns(instance)
+      instance.expects(:call).raises(Exception)
+      instance.expects(:rollback)
+      lambda{ run_step }.must_raise(Exception)
     end
 
     describe "with previous revision" do
@@ -596,6 +644,14 @@ describe "Publishing Pipeline" do
       instance.rollback
       assert File.exist?(path)
       File.read(path).must_equal "PREVIOUS"
+    end
+
+    it "runs rollback after throwing an exception" do
+      instance = mock
+      step.expects(:new).returns(instance)
+      instance.expects(:call).raises(Exception)
+      instance.expects(:rollback)
+      lambda{ run_step }.must_raise(Exception)
     end
   end
 

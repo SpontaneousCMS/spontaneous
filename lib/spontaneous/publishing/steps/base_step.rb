@@ -12,7 +12,12 @@ module Spontaneous::Publishing::Steps
     # create, run & return an instance that does the actual work
     def self.call(site, revision, pages, progress = Spontaneous::Publishing::Progress::Silent.new)
       new(site, revision, pages, progress).tap do |instance|
-        instance.call
+        begin
+          instance.call
+        rescue Exception => e
+          instance.rollback #if instance.respond_to?(:rollback)
+          raise
+        end
       end
     end
 
