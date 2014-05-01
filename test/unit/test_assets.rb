@@ -350,25 +350,27 @@ describe "Assets" do
     end
 
     describe "javascript" do
+      let(:all_sha) { "b1d3d85feff4d68e16d2b4da97717aa0" }
+      let(:x_sha) { "cf638f60cff3ce84f156cb4621a914b4" }
       it "bundles & fingerprints local scripts" do
         result = context.scripts('js/all', 'js/m.js', 'js/c.js', 'x')
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all-ceb12af81123a85bc4d15f23c2cf1069.js"></script>',
-          '<script type="text/javascript" src="/assets/js/m-262ca357844c1eeaee7688fe5bafa4ca.js"></script>',
-          '<script type="text/javascript" src="/assets/js/c-e405b6a6ea9a29a46905bd10627a53a8.js"></script>',
-          '<script type="text/javascript" src="/assets/x-e613ff07e2bd683e0c9f519c94abcb00.js"></script>'
+          %(<script type="text/javascript" src="/assets/js/all-#{all_sha}.js"></script>),
+          '<script type="text/javascript" src="/assets/js/m-424bd92768589875beac31e333399631.js"></script>',
+          '<script type="text/javascript" src="/assets/js/c-ac0d40982cc84fc656234ef2a57e09e8.js"></script>',
+          %(<script type="text/javascript" src="/assets/x-#{x_sha}.js"></script>)
         ].join("\n")
       end
 
       it "writes bundled assets to the revision directory" do
         result = context.scripts('js/all')
-        asset_path = revision.path("assets/js/all-ceb12af81123a85bc4d15f23c2cf1069.js")
+        asset_path = revision.path("assets/js/all-#{all_sha}.js")
         assert asset_path.exist?
       end
 
       it "compresses local scripts" do
         result = context.scripts('js/all')
-        asset_path = revision.path("assets/js/all-ceb12af81123a85bc4d15f23c2cf1069.js")
+        asset_path = revision.path("assets/js/all-#{all_sha}.js")
         js = asset_path.read
         js.index("\n").must_be_nil
       end
@@ -376,23 +378,23 @@ describe "Assets" do
       it "bundles locals scripts and includes remote ones" do
         result = context.scripts('js/all', '//use.typekit.com/abcde', 'http://cdn.google.com/jquery.js', 'x')
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all-ceb12af81123a85bc4d15f23c2cf1069.js"></script>',
+          %(<script type="text/javascript" src="/assets/js/all-#{all_sha}.js"></script>),
           '<script type="text/javascript" src="//use.typekit.com/abcde"></script>',
           '<script type="text/javascript" src="http://cdn.google.com/jquery.js"></script>',
-          '<script type="text/javascript" src="/assets/x-e613ff07e2bd683e0c9f519c94abcb00.js"></script>'
+          %(<script type="text/javascript" src="/assets/x-#{x_sha}.js"></script>)
         ].join("\n")
       end
 
       it "makes bundled scripts available under /assets" do
         context.scripts('js/all')
-        get "/assets/js/all-ceb12af81123a85bc4d15f23c2cf1069.js"
-        asset_path = revision.path("assets/js/all-ceb12af81123a85bc4d15f23c2cf1069.js")
+        get "/assets/js/all-#{all_sha}.js"
+        asset_path = revision.path("assets/js/all-#{all_sha}.js")
         last_response.body.must_equal asset_path.read
       end
 
       it "only bundles & compresses once" do
         context.scripts('js/all')
-        asset_path = revision.path("assets/js/all-ceb12af81123a85bc4d15f23c2cf1069.js")
+        asset_path = revision.path("assets/js/all-#{all_sha}.js")
         assert asset_path.exist?
         asset_path.open("w") do |file|
           file.write("var cached = true;")
@@ -403,19 +405,22 @@ describe "Assets" do
     end
 
     describe "css" do
+      let(:all_sha) { "2468ffc5102b6bfcaf69a4fc8db59fdd" }
+      let(:x_sha)   { "ae3ee1dc79a34d24e28456118c1b9623" }
+
       it "bundles & fingerprints local stylesheets" do
         result = context.stylesheets('css/all', 'css/a.css', 'x')
         result.must_equal [
-          '<link rel="stylesheet" href="/assets/css/all-c80e50bd55af79647f771d421c0e732a.css" />',
-          '<link rel="stylesheet" href="/assets/css/a-2709bcba844511c3afc19fa1805e5834.css" />',
-          '<link rel="stylesheet" href="/assets/x-6c1e7ede5bbe3a4ff80314f43fd6ef57.css" />'
+          %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
+          '<link rel="stylesheet" href="/assets/css/a-35b26d0cd9c7ebff494c8627e0d4ed14.css" />',
+          %(<link rel="stylesheet" href="/assets/x-#{x_sha}.css" />)
         ].join("\n")
       end
 
       it "ignores missing stylesheets" do
         result = context.stylesheets('css/all', '/css/notfound', 'css/notfound')
         result.must_equal [
-          '<link rel="stylesheet" href="/assets/css/all-c80e50bd55af79647f771d421c0e732a.css" />',
+          %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
           '<link rel="stylesheet" href="/css/notfound" />',
           '<link rel="stylesheet" href="css/notfound" />'
         ].join("\n")
@@ -424,10 +429,10 @@ describe "Assets" do
       it "bundles locals scripts and includes remote ones" do
         result = context.stylesheets('css/all.css', '//stylesheet.com/responsive', 'http://cdn.google.com/normalize.css', 'x')
         result.must_equal [
-          '<link rel="stylesheet" href="/assets/css/all-c80e50bd55af79647f771d421c0e732a.css" />',
+          %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
           '<link rel="stylesheet" href="//stylesheet.com/responsive" />',
           '<link rel="stylesheet" href="http://cdn.google.com/normalize.css" />',
-          '<link rel="stylesheet" href="/assets/x-6c1e7ede5bbe3a4ff80314f43fd6ef57.css" />'
+          %(<link rel="stylesheet" href="/assets/x-#{x_sha}.css" />)
         ].join("\n")
       end
 
@@ -473,15 +478,17 @@ describe "Assets" do
       end
     end
 
+    let(:y_sha) { "e2b6a69468b467c7414ae0e12124a66e" }
+
     describe "images" do
       it "bundles images and links using fingerprinted asset url" do
         path = context.stylesheet_urls('css/image1').first
         get path
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match %r{background:url\(/assets/i/y-e75e0b52344f0e16c0564a3a7b0b8ace\.png\)}
+        result.must_match %r{background:url\(/assets/i/y-#{y_sha}\.png\)}
 
-        asset_path = revision.path("/assets/i/y-e75e0b52344f0e16c0564a3a7b0b8ace.png")
+        asset_path = revision.path("/assets/i/y-#{y_sha}.png")
         assert asset_path.exist?
       end
 
@@ -498,8 +505,8 @@ describe "Assets" do
         get path
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match %r{background:url\(/assets/i/y-e75e0b52344f0e16c0564a3a7b0b8ace\.png\?query=true#hash\)}
-        asset_path = revision.path("/assets/i/y-e75e0b52344f0e16c0564a3a7b0b8ace.png")
+        result.must_match %r{background:url\(/assets/i/y-#{y_sha}\.png\?query=true#hash\)}
+        asset_path = revision.path("/assets/i/y-#{y_sha}.png")
         assert asset_path.exist?
       end
     end
@@ -509,11 +516,11 @@ describe "Assets" do
 
       it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
-        result.must_equal "/assets/i/y-e75e0b52344f0e16c0564a3a7b0b8ace.png"
+        result.must_equal "/assets/i/y-#{y_sha}.png"
       end
       it "should allow for embedding asset urls into templates" do
         result = renderer.render_string("${ asset_url 'i/y.png' }", @page.output(:html))
-        result.must_equal "url(/assets/i/y-e75e0b52344f0e16c0564a3a7b0b8ace.png)"
+        result.must_equal "url(/assets/i/y-#{y_sha}.png)"
       end
     end
   end
