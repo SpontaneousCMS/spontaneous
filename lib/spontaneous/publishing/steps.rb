@@ -6,9 +6,14 @@ module Spontaneous::Publishing
         super("Unknown/invalid step #{step.inspect}")
       end
     end
+    class InvalidProgressException < Spontaneous::Error
+      def initialize(progress)
+        super("Unknown/invalid progress #{progress.inspect}")
+      end
+    end
 
-    def self.new(&block)
-      Steps.new(&block)
+    def self.new(steps = [], progress = [], &block)
+      Steps.new(steps, progress, &block)
     end
 
     def self.minimal
@@ -36,11 +41,38 @@ module Spontaneous::Publishing
     class DSL
       def initialize(steps, &block)
         @steps = steps
-        instance_eval(&block)
+        instance_eval(&block) if block
       end
 
+      def notify(progress, *args)
+        @steps.add_progress(validate_progress(make_progress(progress, args)))
+      end
+
+      alias_method :log, :notify
+
       def run(step)
-        @steps.push(validate_step(make_step(step)))
+        @steps.add_step(validate_step(make_step(step)))
+      end
+
+      def validate_progress(progress)
+        raise InvalidProgressException.new(progress) unless progress && is_progress?(progress)
+        progress
+      end
+
+      def make_progress(progress, args)
+        return progress if is_progress?(progress)
+        progress_class = case progress
+        when Symbol
+          Spontaneous::Publishing::Progress.registered[progress]
+        else
+          raise InvalidProgressException.new(progress)
+        end
+        return nil if progress_class.nil?
+        progress_class.new(*args)
+      end
+
+      def is_progress?(obj)
+        [:start, :stage, :step, :log, :done].all? { |method| obj.respond_to?(method) }
       end
 
       def validate_step(step)
@@ -60,15 +92,18 @@ module Spontaneous::Publishing
     end
 
     class Steps
-      def initialize(&block)
+      attr_reader :steps, :progress
+
+      def initialize(steps = [], progress = [], &block)
+        @steps, @progress = steps, progress
         DSL.new(self, &block)
       end
 
-      def steps
-        @steps ||= []
+      def add_progress(reporter)
+        progress << reporter
       end
 
-      def push(step)
+      def add_step(step)
         steps << step
       end
 
@@ -97,6 +132,8 @@ module Spontaneous::Publishing
       :write_revision_file,
       :archive_old_revisions
     ].freeze
+
+    CORE_PROGRESS = [:browser, :stdout].freeze
   end
 end
 

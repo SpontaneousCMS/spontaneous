@@ -73,6 +73,7 @@ describe "Publishing Pipeline" do
     describe "Silent" do
       let(:progress_class) { Spontaneous::Publishing::Progress::Silent }
 
+
       it "starts at 0%" do
         progress.percentage.must_equal 0.0
       end
@@ -775,7 +776,8 @@ describe "Publishing Pipeline" do
       end
     }
     let(:mprogress)   { Spontaneous::Publishing::Progress }
-    let(:publish) { Spontaneous::Publishing::Publish.new(site, revision, steps) }
+    let(:publish) { Spontaneous::Publishing::Publish.new(site, revision, actions) }
+    let(:actions)  { Spontaneous::Publishing::Steps.new(steps, []) }
 
     def modify_some_pages
       @modified_pages = @pages[0..1].map { |page, _| page }
@@ -787,12 +789,6 @@ describe "Publishing Pipeline" do
 
     before do
       modify_some_pages
-    end
-
-
-    it "constructs a multi progress object with a logger & a simultaneous client" do
-      mprogress::Multi.expects(:new).with(instance_of(mprogress::Log), instance_of(mprogress::Simultaneous)).returns(mprogress::Silent.new)
-      publish.publish_all
     end
 
     it "publishes all if passed every page" do
@@ -954,21 +950,69 @@ describe "Publishing Pipeline" do
       end
     }
 
-    it "maps symbols to step classes" do
-      @site.publish do
-        run :create_revision_directory
+    describe "steps" do
+      it "maps symbols to step classes" do
+        @site.publish do
+          run :create_revision_directory
+        end
+        @site.publish_steps.steps.first.must_equal Spontaneous::Publishing::Steps::CreateRevisionDirectory
       end
-      @site.publish_steps.to_a.first.must_equal Spontaneous::Publishing::Steps::CreateRevisionDirectory
+
+      it "passes all configured steps onto the publish system" do
+        steps.each do |step|
+          step.expects(:call).with(site, revision, anything, anything)
+        end
+        @site.publish do
+          run FakeStep
+        end
+        @site.publish_all
+      end
     end
 
-    it "passes all configured steps onto the publish system" do
-      steps.each do |step|
-        step.expects(:call).with(site, revision, anything, anything)
+    describe "progess" do
+      def mock_progress
+        progress = mock
+        progress.stubs(:log)
+        progress.stubs(:step)
+        progress.expects(:start)
+        progress.stubs(:stage)
+        progress.expects(:done)
+        progress
       end
-      @site.publish do
-        run FakeStep
+
+      it "maps symbols to progress classes" do
+        [
+          [:none, Spontaneous::Publishing::Progress::Silent],
+          [:silent, Spontaneous::Publishing::Progress::Silent],
+          [:stdout, Spontaneous::Publishing::Progress::Stdout],
+          [:log, Spontaneous::Publishing::Progress::Log],
+          [:browser, Spontaneous::Publishing::Progress::Simultaneous],
+          [:simultaneous, Spontaneous::Publishing::Progress::Simultaneous]
+        ].each do |symbol, klass|
+          @site.publish do
+            log symbol
+          end
+          @site.publish_steps.progress.first.must_be_instance_of klass
+        end
       end
-      @site.publish_all
+
+      it "sends progress to configured object" do
+        progress = mock_progress
+        progress.expects(:stage).with("something")
+        @site.publish do
+          notify progress
+          run proc { progress.stage("something") }
+        end
+        @site.publish_all
+      end
+
+      it "passes arguments to progress obj" do
+        Spontaneous::Publishing::Progress::Log.expects(:new).with("publish.log").returns(mock_progress)
+        @site.publish do
+          notify :log, "publish.log"
+        end
+        @site.publish_all
+      end
     end
   end
 end

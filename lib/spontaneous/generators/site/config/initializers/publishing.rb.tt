@@ -62,6 +62,12 @@ Site.output_store(:File, dir: Site.revision_root)
 # NOTE: Do not remove or re-order the core steps declared below
 # unless you are really sure of what you're doing
 Site.publish do
+  # List of notification targets.
+  # If you remove the :browser target then publishing progress will not
+  # be shown in the browser
+  <%- Spontaneous::Publishing::Steps::CORE_PROGRESS.each do |progress| -%>
+  notify <%= progress.inspect %>
+  <%- end -%>
   # Start core steps
   <%- Spontaneous::Publishing::Steps::CORE_STEPS.each do |step| -%>
   run <%= step.inspect %>

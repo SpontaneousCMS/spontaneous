@@ -1,10 +1,10 @@
 
 module Spontaneous::Publishing
   class Publish
-    attr_reader :site, :revision, :steps
+    attr_reader :site, :revision, :actions
 
-    def initialize(site, revision, steps)
-      @site, @revision, @steps = site, revision, steps
+    def initialize(site, revision, actions)
+      @site, @revision, @actions = site, revision, actions
     end
 
     def publish_pages(modified_pages)
@@ -40,8 +40,11 @@ module Spontaneous::Publishing
 
     def run_pipeline(pages)
       pages ||= all_unpublished_pages
-      pipeline = Pipeline.new(steps)
       pipeline.run(site, revision, pages, progress)
+    end
+
+    def pipeline
+      @pipeline ||= Pipeline.new(actions.steps)
     end
 
     def start_publish
@@ -70,11 +73,7 @@ module Spontaneous::Publishing
     end
 
     def progress
-      @progress ||= Progress::Multi.new(*progress_clients)
-    end
-
-    def progress_clients
-      [Progress::Log.new($stdout), Progress::Simultaneous.new]
+      @progress ||= Progress::Multi.new(*actions.progress)
     end
 
     def normalise_page_list(pages)

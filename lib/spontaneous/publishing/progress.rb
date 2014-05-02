@@ -18,8 +18,22 @@ module Spontaneous::Publishing
       end
     end
 
-    class Silent
+    def self.registered
+      @registered ||= {}
+    end
+
+    class Progress
+      def self.register(klass, *names)
+        names.each do |name|
+          Spontaneous::Publishing::Progress.registered[name] = klass
+        end
+      end
+    end
+
+    class Silent < Progress
       attr_reader :total, :stage
+
+      register self, :silent, :none
 
       def initialize
         @total = 0
@@ -67,7 +81,9 @@ module Spontaneous::Publishing
     end
 
     class Log < Silent
-      def initialize(io, label = "Publish")
+      register self, :log
+
+      def initialize(io = $stdout, label = "Publish")
         super()
         # don't call close on stdout or stderr
         @closable = !((io == STDOUT) || (io == STDERR))
@@ -96,7 +112,16 @@ module Spontaneous::Publishing
       end
     end
 
+    class Stdout < Log
+      register self, :stdout
+
+      def initialize
+        super($stdout)
+      end
+    end
+
     class Simultaneous < Silent
+      register self, :simultaneous, :browser
 
       def stage(name)
         super
@@ -120,7 +145,7 @@ module Spontaneous::Publishing
       end
     end
 
-    class Multi
+    class Multi < Progress
       def initialize(*outputs)
         @outputs = outputs
       end
