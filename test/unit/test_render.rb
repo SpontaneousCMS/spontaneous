@@ -572,6 +572,7 @@ describe "Render" do
         @site.background_mode = :immediate
         @site.output_store :Memory
 
+        ::Spontaneous::State.delete
         ::Content.delete
         ::Content.delete_revision(1) rescue nil
         @renderer = Spontaneous::Output::Template::PublishedRenderer.new(@site, 1)
@@ -593,6 +594,10 @@ describe "Render" do
 
         [@root, @dynamic, @static].each(&:save)
 
+        @site.publish do
+          run :render_revision
+          run :activate_revision
+        end
         @site.publish_all
       end
 

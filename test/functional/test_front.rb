@@ -101,6 +101,8 @@ describe "Front" do
 
     Content.delete_revision(1) rescue nil
 
+    site.publish_steps = Spontaneous::Publishing::Steps.default
+
     Spontaneous.logger.silent! {
       site.publish_all
     }

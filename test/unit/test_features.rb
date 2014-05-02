@@ -67,9 +67,6 @@ describe "Features" do
     end
 
     after do
-      # (@all_classes.map { |k| k.name.to_sym }).each { |klass|
-      #   Object.send(:remove_const, klass) rescue nil
-      # } rescue nil
       Content.delete
     end
 

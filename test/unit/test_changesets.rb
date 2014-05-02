@@ -13,6 +13,7 @@ describe "Change" do
     @revision = 1
 
     Content.delete
+    Spontaneous::State.delete
 
     class ::Page
       field :title, :string, :default => "New Page"
