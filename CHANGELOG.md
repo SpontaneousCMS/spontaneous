@@ -1,3 +1,22 @@
+## 0.2.0.beta6, released 2014-xx-xx
+
+#### New Features
+
+- Startup now requires each file in the `config/initializers` directory after intializing and configuring the site instance. This allows for Rails-style extensions to the site state & functionality.
+- Publishing is now managed by a configurable pipeline declared in `config/initializers/publishing.rb`. This greatly clarifies the publishing process and also allows for the insertion of custom actions that will run on each publish.
+
+#### Misc
+
+- The site generator now takes the current user name as the default
+  database user for postgres installs. This will hopefully make installation easier.
+- Changed dependency from 'bcrypt-ruby' to 'bcrypt' (as instructed)
+- Made bundler version dependency more explicit (as instructed)
+- Removed warning about declaring task 'generate_site'
+- Add some documentation about templating into the generated layout
+
+#### Fixes
+
+- Fix broken publish command
 
 ## 0.2.0.beta5, released 2014-03-18
 
