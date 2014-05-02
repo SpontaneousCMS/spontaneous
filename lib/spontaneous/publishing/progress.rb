@@ -6,15 +6,15 @@ module Spontaneous::Publishing
   module Progress
     class Duration < DelegateClass(Float)
       def to_s
-        d = self.to_i
-        h, d = _factor(d, 3600)
-        m, s = _factor(d, 60)
-        str = (h > 0) ? "#{h}h " : ""
-        str << "#{m}m #{s}s"
+        d = self.to_f
+        h, r = _factor(d, 3600)
+        m, _ = _factor(r, 60)
+        s = (d - (h*3600 + m * 60)).round(2)
+        "%02dh %02dm %02.2fs" % [h, m,s]
       end
 
       def _factor(d, f)
-        [d/f, d%f]
+        [d.to_i/f, d.to_i%f]
       end
     end
 
@@ -36,6 +36,9 @@ module Spontaneous::Publishing
         @stage = name
       end
 
+      def current_stage
+        @stage
+      end
 
       def step(n = 1, msg = "")
         @position += n
@@ -51,7 +54,7 @@ module Spontaneous::Publishing
       end
 
       def percentage
-        ((@position.to_f / @total.to_f) * 100).round(1)
+        ((@position.to_f / @total.to_f) * 100).round(2)
       end
 
       def position
@@ -70,7 +73,8 @@ module Spontaneous::Publishing
         @closable = !((io == STDOUT) || (io == STDERR))
         @logger = Logger.new(io, File::APPEND)
         @logger.formatter = proc do |severity, datetime, progname, msg|
-          "#{label}:#{severity}: [#{datetime.strftime('%Y-%m-%d %H:%M:%S.%3N')}] #{stage} #{msg}\n"
+          pct = ("%03.2f" % [percentage]).rjust(6, " ")
+          "#{label}:#{severity}: [#{datetime.strftime('%Y-%m-%d %H:%M:%S.%3N')}] #{duration} #{pct}% #{current_stage} #{msg}\n"
         end
       end
 
@@ -81,7 +85,7 @@ module Spontaneous::Publishing
 
       def step(n = 1, msg = "")
         super
-        @logger.info("#{msg} #{percentage}%")
+        @logger.info("#{msg}")
       end
 
       def error(exception)
@@ -105,7 +109,7 @@ module Spontaneous::Publishing
       end
 
       def send_event(percentage = percentage)
-        ::Simultaneous.send_event('publish_progress', {:state => @stage, :progress => percentage}.to_json)
+        ::Simultaneous.send_event('publish_progress', {:state => current_stage, :progress => percentage}.to_json)
       rescue Errno::ECONNREFUSED
       rescue Errno::ENOENT
       end

@@ -7,14 +7,19 @@ module Spontaneous::Publishing::Steps
 
     def call
       @progress.stage("copying files")
+      ensure_public_dir
       facets.each do |facet|
         copy_facet(facet)
-        @progress.step(1)
+        @progress.step(1, "from #{facet.name.inspect}")
       end
     end
 
     def rollback
       FileUtils.rm_r(revision_public) if File.exists?(revision_public)
+    end
+
+    def ensure_public_dir
+      dir = revision_public
     end
 
     def copy_facet(facet)

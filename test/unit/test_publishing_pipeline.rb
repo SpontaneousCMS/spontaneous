@@ -63,8 +63,8 @@ describe "Publishing Pipeline" do
   describe "Progress" do
     let(:total_steps) { 150 }
     let(:progress) { progress_class.new }
-    let(:duration) { 205 }
-    let(:later) { now + duration } # 3m 25s
+    let(:duration) { 205.635 }
+    let(:later) { now + duration } # 3m 25.635s
 
     before do
       progress.start(total_steps)
@@ -80,7 +80,7 @@ describe "Publishing Pipeline" do
       it "calculates progress % for a 1 step" do
         progress.step
         progress.position.must_equal 1
-        progress.percentage.must_equal 0.7
+        progress.percentage.must_equal 0.67
       end
 
       it "increases position by 1 for each step" do
@@ -98,22 +98,22 @@ describe "Publishing Pipeline" do
       it "calculates duration correctly" do
         _ = progress # initialize the progress instance with time set to `now`
         Timecop.travel(later) do |time|
-          progress.duration.to_i.must_equal duration
+          progress.duration.round(1).must_equal duration.round(1)
         end
       end
 
       it "gives a readable version of the duration" do
         _ = progress # initialize the progress instance with time set to `now`
         Timecop.travel(later) do |time|
-          progress.duration.to_s.must_equal "3m 25s"
+          progress.duration.to_s.must_equal "00h 03m 25.64s"
         end
       end
 
       it "gives a readable version of the duration" do
         _ = progress # initialize the progress instance with time set to `now`
-        h = 3; m = 36; s = 53
+        h = 3; m = 36; s = 53.862
         Timecop.travel(now + (h * 3600) + (m * 60) + s) do |time|
-          progress.duration.to_s.must_equal "3h 36m 53s"
+          progress.duration.to_s.must_equal "03h 36m 53.86s"
         end
       end
     end
@@ -199,7 +199,7 @@ describe "Publishing Pipeline" do
     it "updates the progress object" do
       progress = mock()
       progress.expects(:stage).with("creating revision directory")
-      progress.expects(:step).with(1).once
+      progress.expects(:step).with(1, instance_of(String)).once
       run_step(progress)
     end
 
@@ -245,7 +245,7 @@ describe "Publishing Pipeline" do
     it "updates the progress object" do
       progress = mock()
       progress.expects(:stage).with("rendering")
-      progress.expects(:step).with(1).times(@pages.length * 2)
+      progress.expects(:step).with(1, instance_of(String)).times(@pages.length * 2)
       run_step(progress)
     end
 
@@ -331,7 +331,7 @@ describe "Publishing Pipeline" do
 
       it "updates the progress object with each page" do
         progress = Spontaneous::Publishing::Progress::Silent.new
-        progress.expects(:step).with(1).times(@pages.count)
+        progress.expects(:step).with(1, instance_of(String)).times(@pages.count)
         run_step(progress)
       end
 
@@ -385,7 +385,7 @@ describe "Publishing Pipeline" do
     it "steps the progress once for each facet" do
       progress = mock
       progress.stubs(:stage)
-      progress.expects(:step).with(1).once
+      progress.expects(:step).with(1, instance_of(String)).once
       run_step(progress)
     end
 
@@ -430,7 +430,7 @@ describe "Publishing Pipeline" do
       it "steps the progress once for each facet" do
         progress = mock
         progress.stubs(:stage)
-        progress.expects(:step).with(1).times(2)
+        progress.expects(:step).with(1, instance_of(String)).times(2)
         run_step(progress)
       end
     end
@@ -458,7 +458,7 @@ describe "Publishing Pipeline" do
     it "increments the progress step by 1" do
       progress = mock
       progress.stubs(:stage)
-      progress.expects(:step).with(1).once
+      progress.expects(:step).with(1, instance_of(String)).once
       run_step(progress)
     end
 
@@ -514,7 +514,7 @@ describe "Publishing Pipeline" do
     it "increments the progress step by 2" do
       progress = mock
       progress.stubs(:stage)
-      progress.expects(:step).with(1).times(2)
+      progress.expects(:step).with(1, instance_of(String)).times(2)
       run_step(progress)
     end
 
@@ -621,7 +621,7 @@ describe "Publishing Pipeline" do
     it "increments the progress step by 1" do
       progress = mock
       progress.stubs(:stage)
-      progress.expects(:step).with(1).once
+      progress.expects(:step).with(1, instance_of(String)).once
       run_step(progress)
     end
 

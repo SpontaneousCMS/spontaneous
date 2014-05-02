@@ -35,7 +35,7 @@ module Spontaneous::Publishing::Steps
 
     def render_output(output)
       output.publish_page(renderer, revision, render_transaction)
-      @progress.step(1)
+      @progress.step(1, output.url_path.inspect)
     end
 
     def renderer

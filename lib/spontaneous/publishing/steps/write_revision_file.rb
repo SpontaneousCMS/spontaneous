@@ -5,8 +5,9 @@ module Spontaneous::Publishing::Steps
     def call
       @progress.stage("writing revision file")
       save_state
-      write_revision_file(Spontaneous::Paths.pad_revision_number(revision))
-      @progress.step(count)
+      padded_revision = Spontaneous::Paths.pad_revision_number(revision)
+      write_revision_file(padded_revision)
+      @progress.step(count, "#{path.inspect} => #{padded_revision.inspect}")
     end
 
     def count

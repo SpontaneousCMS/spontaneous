@@ -25,11 +25,21 @@ class Spontaneous::Site
     end
 
     def publish(&block)
-      @publish_steps = Spontaneous::Publishing::Steps.new(&block)
+      self.publish_steps = Spontaneous::Publishing::Steps.new(&block)
+    end
+
+    def publish_steps=(steps)
+      @publish_steps = steps
     end
 
     def publish_steps
-      @publish_steps
+      @publish_steps || minimal_publish_steps
+    end
+
+    # Provides a fallback publishing pipeline in case none has been defined
+    # used really only in tests
+    def minimal_publish_steps
+      Spontaneous::Publishing::Steps.minimal
     end
 
     def publishing_method

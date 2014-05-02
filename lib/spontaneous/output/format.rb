@@ -186,6 +186,12 @@ module Spontaneous::Output
     def hash
       [self.class, page, options].hash
     end
+
+    def url_path
+      path = page.path
+      path = "/index" if path == "/"
+      [path, name].join(".")
+    end
   end
 end
 

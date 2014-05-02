@@ -11,6 +11,20 @@ module Spontaneous::Publishing
       Steps.new(&block)
     end
 
+    def self.minimal
+      new do
+        run :activate_revision
+      end
+    end
+
+    def self.default
+      new do
+        CORE_STEPS.each do |step|
+          run step
+        end
+      end
+    end
+
     def self.register_step(step_class)
       registered_steps[step_class.to_sym] = step_class
     end

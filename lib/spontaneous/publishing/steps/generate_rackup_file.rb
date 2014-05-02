@@ -6,7 +6,7 @@ module Spontaneous::Publishing::Steps
       File.open(config_path, "w:UTF-8") do |file|
         file.write(config)
       end
-      @progress.step(count)
+      @progress.step(count, config_path.inspect)
     end
 
     def count

@@ -7,7 +7,7 @@ module Spontaneous::Publishing::Steps
       @site.indexer(revision) do |indexer|
         @site.pages.each do |page|
           indexer << page
-          @progress.step(1)
+          @progress.step(1, page.path.inspect)
         end
       end
     end

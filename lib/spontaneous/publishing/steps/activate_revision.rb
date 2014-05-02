@@ -8,10 +8,8 @@ module Spontaneous::Publishing::Steps
     def call
       save_state
       @progress.stage("activating revision")
-      @site.send(:set_published_revision, revision)
-      @progress.step(1)
+      set_published_revision
       symlink_revision(revision)
-      @progress.step(1)
     end
 
     def rollback
@@ -23,8 +21,15 @@ module Spontaneous::Publishing::Steps
       end
     end
 
+    def set_published_revision
+      @site.send(:set_published_revision, revision)
+      @progress.step(1, "published revision => #{revision}")
+    end
+
     def symlink_revision(r)
-      symlink_path(@site.revision_dir(r))
+      path = @site.revision_dir(r)
+      symlink_path(path)
+      @progress.step(1, %(symlinking "revisions/current" => "#{path}"))
     end
 
     def symlink_path(path)
