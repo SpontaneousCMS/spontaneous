@@ -686,7 +686,7 @@ describe "Search" do
       FileUtils.cp_r(File.expand_path("../../fixtures/search/config", __FILE__), @site.root)
     end
 
-    it "load the config/indexes.rb file" do
+    it "load the search initializer file" do
       @site.expects(:connect_to_database!)
       @site.initialize!
       index = @site.indexes[:fast]
