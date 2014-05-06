@@ -228,10 +228,21 @@ describe "Revisions" do
       Content.archive_dataset.select(:revision).group(:revision).all.must_equal [{:revision => 1}]
     end
 
+    it "adds an index for the primary key" do
+      Revision.create(Content, @revision)
+      pk = Content.primary_key
+      published_indexes = DB.indexes(Content.revision_table(@revision))
+      pk_index = published_indexes.detect { |name, index| index[:columns] == [pk] }
+      pk_index.wont_equal nil
+      name, options = pk_index
+      options[:unique].must_equal true
+    end
+
     it "have the correct indexes" do
       Revision.create(Content, @revision)
       content_indexes = DB.indexes(:content)
-      published_indexes = DB.indexes(Content.revision_table(@revision))
+      # filter out the pk index as the DB::indexes call doesn't include it
+      published_indexes = DB.indexes(Content.revision_table(@revision)).reject { |name, index| index[:columns] == [:id] }
       # made slightly complex by the fact that the index names depend on the table names
       # (which are different)
       assert_has_elements published_indexes.values, content_indexes.values

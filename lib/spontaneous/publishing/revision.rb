@@ -48,6 +48,8 @@ module Spontaneous::Publishing
       end
 
       def copy_indexes
+        pk = @revision.model.primary_key
+        db.add_index(@revision.table, Array(pk), unique: true)
         indexes = db.indexes(@revision.content_table)
         indexes.each do |name, options|
           columns = options.delete(:columns)
@@ -211,7 +213,7 @@ module Spontaneous::Publishing
       model.mapper.revision_table?(table)
     end
 
-    attr_reader :revision
+    attr_reader :model, :revision
 
     def initialize(model, revision)
       @model, @revision = model, revision
