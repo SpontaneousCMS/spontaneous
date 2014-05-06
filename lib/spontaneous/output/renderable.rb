@@ -80,6 +80,10 @@ module Spontaneous::Output
       @target.render_using(renderer, format, __render_locals__(locals), parent_context)
     end
 
+    def to_ary
+      @target.to_ary
+    end
+
     private
 
     def __render_locals__(locals)
