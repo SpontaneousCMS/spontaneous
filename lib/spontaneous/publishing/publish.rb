@@ -39,6 +39,12 @@ module Spontaneous::Publishing
     end
 
     def run_pipeline(pages)
+      model.scope(revision, true) do
+        run_pipeline!(pages)
+      end
+    end
+
+    def run_pipeline!(pages)
       pages ||= all_unpublished_pages
       pipeline.run(site, revision, pages, progress)
     end
