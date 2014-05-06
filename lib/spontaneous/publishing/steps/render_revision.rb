@@ -1,6 +1,16 @@
 module Spontaneous::Publishing::Steps
   class RenderRevision < BaseStep
 
+    # Wrap any exceptions raised during the render with information
+    # about the page+output that raised the error (preserving the
+    # stack trace)
+    class RenderException < Spontaneous::Error
+      def initialize(output, exception)
+        super("Exception rendering page #{output.url_path.inspect}: #{exception}")
+        set_backtrace(exception.backtrace)
+      end
+    end
+
     def call
       @progress.stage("rendering")
       render_pages
@@ -36,6 +46,8 @@ module Spontaneous::Publishing::Steps
     def render_output(output)
       output.publish_page(renderer, revision, render_transaction)
       @progress.step(1, output.url_path.inspect)
+    rescue => e
+      raise RenderException.new(output, e)
     end
 
     def renderer
