@@ -105,6 +105,9 @@ module Spontaneous::Publishing
       end
 
       def error(exception)
+        super
+        msg = [exception.to_s].concat(exception.backtrace).join("\n")
+        @logger.error(msg)
       end
 
       def done
