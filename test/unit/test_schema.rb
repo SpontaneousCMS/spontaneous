@@ -605,6 +605,10 @@ describe "Schema" do
       A.boxes.cgroup.allowed_types(nil).must_equal [A, C]
       C.boxes.bgroup.allowed_types(nil).must_equal [A, B]
     end
+
+    it "exports the list of allowed types to the ui" do
+      B.boxes.agroup.export(nil)[:allowed_types].must_equal [{type:"A"}, {type:"B"}, {type:"C"}]
+    end
   end
 
 
