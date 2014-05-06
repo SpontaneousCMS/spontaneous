@@ -385,7 +385,7 @@ module Spontaneous
       end
 
       def is_schema_class?(klass)
-        (klass < Spontaneous::Content or klass < Content::Box)
+        (klass < schema.site.model or klass < schema.site.model::Box)
       end
 
       def remove_constant(const)

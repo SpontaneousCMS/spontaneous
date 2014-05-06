@@ -106,6 +106,7 @@ module Spontaneous
     class Schema
       attr_accessor :schema_loader_class
       attr_reader   :uids
+      attr_reader   :site
 
       def initialize(site, root, schema_loader_class = Spontaneous::Schema::PersistentMap)
         @site, @root = site, root
