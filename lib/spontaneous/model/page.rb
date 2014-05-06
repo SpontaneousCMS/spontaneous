@@ -6,7 +6,6 @@ require "spontaneous/model/page/layouts"
 require "spontaneous/model/page/locks"
 require "spontaneous/model/page/page_tree"
 require "spontaneous/model/page/paths"
-require "spontaneous/model/page/request"
 require "spontaneous/model/page/site_map"
 require "spontaneous/model/page/site_timestamps"
 
@@ -20,7 +19,6 @@ module Spontaneous::Model
     include Layouts
     include PageTree
     include Paths
-    include Request
     include SiteMap
     include SiteTimestamps
     include Locks
@@ -146,6 +144,12 @@ module Spontaneous::Model
 
     def inspecttion_values
       { :id => id, :uid => uid, :path => path }.merge(inspection_fields)
+    end
+
+    # PagePieces are == to their target but we must enforce the reverse,
+    # that Pages are == to a PagePiece that encloses them
+    def eql?(obj)
+      super || (Spontaneous::PagePiece === obj && obj.target.eql?(self))
     end
   end
 end

@@ -21,3 +21,5 @@ pkg
 .travis/gemfiles/*.lock
 .ruby-gemset
 .ruby-version
+.tags
+.DS_Store

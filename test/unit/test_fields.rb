@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require File.expand_path('../../test_helper', __FILE__)
+require 'fog'
 
 describe "Fields" do
 
@@ -278,14 +279,14 @@ describe "Fields" do
         def outputs
           [:html, :plain, :fancy]
         end
-        def generate_html(value)
+        def generate_html(value, site)
           "<#{value}>"
         end
-        def generate_plain(value)
+        def generate_plain(value, site)
           "*#{value}*"
         end
 
-        def generate(output, value)
+        def generate(output, value, site)
           case output
           when :fancy
             "#{value}!"
@@ -346,7 +347,7 @@ describe "Fields" do
       end
       $transform = lambda { |value| "<#{value}>" }
       ContentClass1.field :title do
-        def generate_html(value)
+        def generate_html(value, site)
           $transform[value]
         end
       end
@@ -365,7 +366,7 @@ describe "Fields" do
     before do
       ::CC = Class.new(Piece) do
         field :title, :default => "Magic" do
-          def generate_html(value)
+          def generate_html(value, site)
             "*#{value}*"
           end
         end
@@ -491,11 +492,27 @@ describe "Fields" do
     end
   end
 
+  describe "String Fields" do
+    before do
+      @content_class = Class.new(::Piece) do
+        field :title, :string
+      end
+      @instance = @content_class.new
+      @field = @instance.title
+    end
+
+    it "should escape ampersands for the html format" do
+      @field.value = "This & That"
+      @field.value(:html).must_equal "This &amp; That"
+    end
+  end
+
   describe "Markdown fields" do
     before do
       class ::MarkdownContent < Piece
         field :text1, :markdown
-        field :text2, :text
+        field :text2, :richtext
+        field :text3, :markup
       end
       @instance = MarkdownContent.new
     end
@@ -506,8 +523,11 @@ describe "Fields" do
     it "be available as the :markdown type" do
       assert MarkdownContent.field_prototypes[:text1].field_class < Spontaneous::Field::Markdown
     end
-    it "be available as the :text type" do
+    it "be available as the :richtext type" do
       assert MarkdownContent.field_prototypes[:text2].field_class < Spontaneous::Field::Markdown
+    end
+    it "be available as the :markup type" do
+      assert MarkdownContent.field_prototypes[:text3].field_class < Spontaneous::Field::Markdown
     end
 
     it "process input into HTML" do
@@ -520,6 +540,37 @@ describe "Fields" do
       @instance.text1.value.must_equal "<p>With<br />\nLinebreak</p>\n"
       @instance.text2 = "With  \nLinebreak"
       @instance.text2.value.must_equal "<p>With<br />\nLinebreak</p>\n"
+    end
+  end
+
+  describe "LongString fields" do
+    before do
+      class ::LongStringContent < Piece
+        field :long1, :longstring
+        field :long2, :long_string
+        field :long3, :text
+      end
+      @instance = LongStringContent.new
+    end
+    after do
+      Object.send(:remove_const, :LongStringContent)
+    end
+
+    it "is available as the :longstring type" do
+      assert LongStringContent.field_prototypes[:long1].field_class < Spontaneous::Field::LongString
+    end
+
+    it "is available as the :long_string type" do
+      assert LongStringContent.field_prototypes[:long2].field_class < Spontaneous::Field::LongString
+    end
+
+    it "is available as the :text type" do
+      assert LongStringContent.field_prototypes[:long3].field_class < Spontaneous::Field::LongString
+    end
+
+    it "translates newlines to <br/> tags" do
+      @instance.long1 = "this\nlong\nstring"
+      @instance.long1.value.must_equal "this<br />\nlong<br />\nstring"
     end
   end
 
@@ -685,6 +736,7 @@ describe "Fields" do
       end
       @content_class.stubs(:name).returns("ContentClass")
       @instance = @content_class.new
+      @field = @instance.video
     end
 
     it "have their own editor type" do
@@ -720,9 +772,30 @@ describe "Fields" do
       @instance.video.value.must_equal "https://idontdovideo.com/video?id=brI7pTPb3qU"
       @instance.video.video_id.must_equal "https://idontdovideo.com/video?id=brI7pTPb3qU"
       @instance.video.provider_id.must_equal nil
-      @instance.video.render.must_equal ""
     end
 
+
+    it "use the YouTube api to extract video metadata" do
+      youtube_info = {"thumbnail_large" => "http://i.ytimg.com/vi/_0jroAM_pO4/hqdefault.jpg", "thumbnail_small"=>"http://i.ytimg.com/vi/_0jroAM_pO4/default.jpg", "title" => "Hilarious QI Moment - Cricket", "description" => "Rob Brydon makes a rather embarassing choice of words whilst discussing the relationship between a cricket's chirping and the temperature. Taken from QI XL Series H episode 11 - Highs and Lows", "user_name" => "morthasa", "upload_date" => "2011-01-14 19:49:44", "tags" => "Hilarious, QI, Moment, Cricket, fun, 11, stephen, fry, alan, davies, Rob, Brydon, SeriesH, Fred, MacAulay, Sandi, Toksvig", "duration" => 78, "stats_number_of_likes" => 297, "stats_number_of_plays" => 53295, "stats_number_of_comments" => 46}#.symbolize_keys
+
+      response_xml_file = File.expand_path("../../fixtures/fields/youtube_api_response.xml", __FILE__)
+      connection = mock()
+      Spontaneous::Field::WebVideo::YouTube.any_instance.expects(:open).with("http://gdata.youtube.com/feeds/api/videos/_0jroAM_pO4?v=2").returns(connection)
+      doc = Nokogiri::XML(File.open(response_xml_file))
+      Nokogiri.expects(:XML).with(connection).returns(doc)
+      @field.value = "http://www.youtube.com/watch?v=_0jroAM_pO4"
+      @field.values.must_equal youtube_info.merge(:video_id => "_0jroAM_pO4", :provider => "youtube", :html => "http://www.youtube.com/watch?v=_0jroAM_pO4")
+    end
+
+    it "use the Vimeo api to extract video metadata" do
+      vimeo_info = {"id"=>29987529, "title"=>"Neon Indian Plays The UO Music Shop", "description"=>"Neon Indian plays electronic instruments from the UO Music Shop, Fall 2011. Read more at blog.urbanoutfitters.com.", "url"=>"http://vimeo.com/29987529", "upload_date"=>"2011-10-03 18:32:47", "mobile_url"=>"http://vimeo.com/m/29987529", "thumbnail_small"=>"http://b.vimeocdn.com/ts/203/565/203565974_100.jpg", "thumbnail_medium"=>"http://b.vimeocdn.com/ts/203/565/203565974_200.jpg", "thumbnail_large"=>"http://b.vimeocdn.com/ts/203/565/203565974_640.jpg", "user_name"=>"Urban Outfitters", "user_url"=>"http://vimeo.com/urbanoutfitters", "user_portrait_small"=>"http://b.vimeocdn.com/ps/251/111/2511118_30.jpg", "user_portrait_medium"=>"http://b.vimeocdn.com/ps/251/111/2511118_75.jpg", "user_portrait_large"=>"http://b.vimeocdn.com/ps/251/111/2511118_100.jpg", "user_portrait_huge"=>"http://b.vimeocdn.com/ps/251/111/2511118_300.jpg", "stats_number_of_likes"=>85, "stats_number_of_plays"=>26633, "stats_number_of_comments"=>0, "duration"=>100, "width"=>1280, "height"=>360, "tags"=>"neon indian, analog, korg, moog, theremin, micropiano, microkorg, kaossilator, kaossilator pro", "embed_privacy"=>"anywhere"}.symbolize_keys
+
+      connection = mock()
+      connection.expects(:read).returns(Spontaneous.encode_json([vimeo_info]))
+      Spontaneous::Field::WebVideo::Vimeo.any_instance.expects(:open).with("http://vimeo.com/api/v2/video/29987529.json").returns(connection)
+      @field.value = "http://vimeo.com/29987529"
+      @field.values.must_equal vimeo_info.merge(:video_id => "29987529", :provider => "vimeo", :html => "http://vimeo.com/29987529")
+    end
 
     describe "with player settings" do
       before do
@@ -821,27 +894,6 @@ describe "Fields" do
       end
 
 
-      it "use the YouTube api to extract video metadata" do
-        youtube_info = {"thumbnail_large" => "http://i.ytimg.com/vi/_0jroAM_pO4/hqdefault.jpg", "thumbnail_small"=>"http://i.ytimg.com/vi/_0jroAM_pO4/default.jpg", "title" => "Hilarious QI Moment - Cricket", "description" => "Rob Brydon makes a rather embarassing choice of words whilst discussing the relationship between a cricket's chirping and the temperature. Taken from QI XL Series H episode 11 - Highs and Lows", "user_name" => "morthasa", "upload_date" => "2011-01-14 19:49:44", "tags" => "Hilarious, QI, Moment, Cricket, fun, 11, stephen, fry, alan, davies, Rob, Brydon, SeriesH, Fred, MacAulay, Sandi, Toksvig", "duration" => 78, "stats_number_of_likes" => 297, "stats_number_of_plays" => 53295, "stats_number_of_comments" => 46}#.symbolize_keys
-
-        response_xml_file = File.expand_path("../../fixtures/fields/youtube_api_response.xml", __FILE__)
-        connection = mock()
-        Spontaneous::Field::WebVideo::YouTube.any_instance.expects(:open).with("http://gdata.youtube.com/feeds/api/videos/_0jroAM_pO4?v=2").returns(connection)
-        doc = Nokogiri::XML(File.open(response_xml_file))
-        Nokogiri.expects(:XML).with(connection).returns(doc)
-        @field.value = "http://www.youtube.com/watch?v=_0jroAM_pO4"
-        @field.values.must_equal youtube_info.merge(:video_id => "_0jroAM_pO4", :provider => "youtube", :html => "http://www.youtube.com/watch?v=_0jroAM_pO4")
-      end
-
-      it "use the Vimeo api to extract video metadata" do
-        vimeo_info = {"id"=>29987529, "title"=>"Neon Indian Plays The UO Music Shop", "description"=>"Neon Indian plays electronic instruments from the UO Music Shop, Fall 2011. Read more at blog.urbanoutfitters.com.", "url"=>"http://vimeo.com/29987529", "upload_date"=>"2011-10-03 18:32:47", "mobile_url"=>"http://vimeo.com/m/29987529", "thumbnail_small"=>"http://b.vimeocdn.com/ts/203/565/203565974_100.jpg", "thumbnail_medium"=>"http://b.vimeocdn.com/ts/203/565/203565974_200.jpg", "thumbnail_large"=>"http://b.vimeocdn.com/ts/203/565/203565974_640.jpg", "user_name"=>"Urban Outfitters", "user_url"=>"http://vimeo.com/urbanoutfitters", "user_portrait_small"=>"http://b.vimeocdn.com/ps/251/111/2511118_30.jpg", "user_portrait_medium"=>"http://b.vimeocdn.com/ps/251/111/2511118_75.jpg", "user_portrait_large"=>"http://b.vimeocdn.com/ps/251/111/2511118_100.jpg", "user_portrait_huge"=>"http://b.vimeocdn.com/ps/251/111/2511118_300.jpg", "stats_number_of_likes"=>85, "stats_number_of_plays"=>26633, "stats_number_of_comments"=>0, "duration"=>100, "width"=>1280, "height"=>360, "tags"=>"neon indian, analog, korg, moog, theremin, micropiano, microkorg, kaossilator, kaossilator pro", "embed_privacy"=>"anywhere"}.symbolize_keys
-
-        connection = mock()
-        connection.expects(:read).returns(Spontaneous.encode_json([vimeo_info]))
-        Spontaneous::Field::WebVideo::Vimeo.any_instance.expects(:open).with("http://vimeo.com/api/v2/video/29987529.json").returns(connection)
-        @field.value = "http://vimeo.com/29987529"
-        @field.values.must_equal vimeo_info.merge(:video_id => "29987529", :provider => "vimeo", :html => "http://vimeo.com/29987529")
-      end
       it "can properly embed a Vine video" do
         @field.value = "https://vine.co/v/brI7pTPb3qU"
         embed = @field.render(:html)
@@ -850,6 +902,15 @@ describe "Fields" do
         # Vine videos are square
         embed.must_match %r(width=["']680["'])
         embed.must_match %r(height=["']680["'])
+      end
+
+      it "falls back to a simple iframe for unknown providers xxx" do
+        @field.value = "https://unknownprovider.net/xx/brI7pTPb3qU"
+        embed = @field.render(:html)
+        embed.must_match %r(iframe)
+        embed.must_match %r(src=["']https://unknownprovider.net/xx/brI7pTPb3qU["'])
+        embed.must_match %r(width=["']680["'])
+        embed.must_match %r(height=["']384["'])
       end
     end
 
@@ -1005,6 +1066,45 @@ describe "Fields" do
       @field.filename.must_equal "vimlogo.pdf"
       @field.filesize.must_equal 2254
     end
+
+    describe "clearing" do
+      def assert_file_field_empty
+        @field.value.must_equal ''
+        @field.filename.must_equal ''
+        @field.filesize.must_equal 0
+      end
+
+      before do
+        path = File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__)
+        @field.value = path
+      end
+
+      it "clears the value if set to the empty string" do
+        @field.value = ''
+        assert_file_field_empty
+      end
+    end
+
+    describe "with cloud storage" do
+      before do
+        ::Fog.mock!
+      @aws_credentials = {
+        :provider=>"AWS",
+        :aws_secret_access_key=>"SECRET_ACCESS_KEY",
+        :aws_access_key_id=>"ACCESS_KEY_ID"
+      }
+        @storage = S::Media::Store::Cloud.new(@aws_credentials, "media.example.com")
+        @site.expects(:storage).returns(@storage)
+      end
+
+      it "sets the content-disposition header if defined as an 'attachment'" do
+        prototype = @content_class.field :attachment, :file, attachment: true
+        field = @instance.attachment
+        path = File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__)
+        @storage.expects(:copy).with(path, is_a(Array), { content_type: "application/pdf", content_disposition: 'attachment; filename=vimlogo.pdf'})
+        field.value = path
+      end
+    end
   end
   describe "Date fields" do
     before do
@@ -1045,9 +1145,118 @@ describe "Fields" do
     end
   end
 
+  describe "Tag list fields" do
+    before do
+      @content_class = Class.new(::Piece)
+      @prototype = @content_class.field :tags
+      @content_class.stubs(:name).returns("ContentClass")
+      @instance = @content_class.create
+      @field = @instance.tags
+    end
+
+    it "has a distinct editor class" # eventually...
+
+    it "adopts any field called 'tags'" do
+      assert @field.is_a?(Spontaneous::Field::Tags), "Field should be an instance of TagsField but instead has the following ancestors #{ @prototype.instance_class.ancestors }"
+    end
+
+    it "defaults to an empty list" do
+      @field.value(:html).must_equal ""
+      @field.value(:tags).must_equal []
+    end
+
+    it "correctly parses strings" do
+      @field.value = 'this that "the other" more'
+      @field.value(:html).must_equal 'this that "the other" more'
+      @field.value(:tags).must_equal ["this", "that", "the other", "more"]
+    end
+
+    it "includes Enumerable" do
+      @field.value = 'this that "the other" more'
+      @field.map(&:upcase).must_equal  ["THIS", "THAT", "THE OTHER", "MORE"]
+    end
+
+    it "allows for tags with commas" do
+      @field.value = %(this that "the, other" more)
+      @field.map(&:upcase).must_equal  ["THIS", "THAT", "THE, OTHER", "MORE"]
+    end
+  end
+
+  describe "Boolean fields" do
+
+    before do
+      @content_class = Class.new(::Piece)
+      @prototype = @content_class.field :switch
+      @content_class.stubs(:name).returns("ContentClass")
+      @instance = @content_class.create
+      @field = @instance.switch
+    end
+
+    it "has a distinct editor class" do
+      @prototype.instance_class.editor_class.must_equal "Spontaneous.Field.Boolean"
+    end
+
+    it "adopts any field called 'switch'" do
+      assert @field.is_a?(Spontaneous::Field::Boolean), "Field should be an instance of Boolean but instead has the following ancestors #{ @prototype.instance_class.ancestors }"
+    end
+
+    it "defaults to true" do
+      @field.value.must_equal true
+      @field.value(:html).must_equal "Yes"
+      @field.value(:string).must_equal "Yes"
+    end
+
+    it "changes string value to 'No'" do
+      @field.value = false
+      @field.value(:string).must_equal "No"
+    end
+
+    it "flags itself as 'empty' if false" do # I think...
+      @field.empty?.must_equal false
+      @field.value = false
+      @field.empty?.must_equal true
+    end
+
+    it "uses the given state labels" do
+      prototype = @content_class.field :boolean, true: "Enabled", false: "Disabled"
+      field = prototype.to_field(@instance)
+      field.value.must_equal true
+      field.value(:string).must_equal "Enabled"
+      field.value = false
+      field.value(:string).must_equal "Disabled"
+      field.value(:html).must_equal "Disabled"
+    end
+
+    it "uses the given default" do
+      prototype = @content_class.field :boolean, default: false, true: "On", false: "Off"
+      field = prototype.to_field(@instance)
+      field.value.must_equal false
+      field.value(:string).must_equal "Off"
+    end
+
+    it "returns the string value from #to_s" do
+      prototype = @content_class.field :boolean, default: false, true: "On", false: "Off"
+      field = prototype.to_field(@instance)
+      field.to_s.must_equal "Off"
+    end
+
+    it "has shortcut accessors" do
+      state = @field.value(:boolean)
+      @field.on?.must_equal state
+      @field.checked?.must_equal state
+      @field.enabled?.must_equal state
+    end
+
+    it "exports the labels to the interface" do
+      prototype = @content_class.field :boolean, default: false, true: "Yes Please", false: "No Thanks"
+      exported = prototype.instance_class.export(nil)
+      exported.must_equal({:labels=>{:true=>"Yes Please", :false=>"No Thanks"}})
+    end
+  end
+
   describe "Asynchronous processing" do
     before do
-      S::Site.background_mode = :simultaneous
+      @site.background_mode = :simultaneous
       @image = File.expand_path("../../fixtures/images/size.gif", __FILE__)
       @model = (::Piece)
       @model.field :title
@@ -1071,17 +1280,17 @@ describe "Fields" do
     # end
 
     it "be able to resolve fields id" do
-      S::Field.find(@instance.image.id, @instance.items.title.id).must_equal [
+      S::Field.find(@site.model, @instance.image.id, @instance.items.title.id).must_equal [
         @instance.image, @instance.items.title
       ]
     end
 
     it "not raise errors for invalid fields" do
-      S::Field.find("0", "#{@instance.id}/xxx/#{@instance.items.title.schema_id}", "#{@instance.items.id}/nnn", @instance.items.title.id).must_equal [ @instance.items.title ]
+      S::Field.find(@site.model, "0", "#{@instance.id}/xxx/#{@instance.items.title.schema_id}", "#{@instance.items.id}/nnn", @instance.items.title.id).must_equal [ @instance.items.title ]
     end
 
     it "return a single field if given a single id" do
-      S::Field.find(@instance.image.id).must_equal @instance.image
+      S::Field.find(@site.model, @instance.image.id).must_equal @instance.image
     end
 
     it "be disabled for Date fields" do
@@ -1137,7 +1346,7 @@ describe "Fields" do
           @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
           @instance.description.schema_id.to_s => "Updated description"
         }
-        Spontaneous::Field.update(@instance, fields, nil, false)
+        Spontaneous::Field.update(@site, @instance, fields, nil, false)
         @instance.reload
         @instance.title.value.must_equal "Updated title"
         @instance.description.value.must_equal "<p>Updated description</p>\n"
@@ -1159,7 +1368,7 @@ describe "Fields" do
         }
         @instance.expects(:save).at_least_once
 
-        Spontaneous::Field.update(@instance, fields, nil, true)
+        Spontaneous::Field.update(@site, @instance, fields, nil, true)
 
         @instance.title.value.must_equal "Updated title"
         @instance.description.value.must_equal "<p>Updated description</p>\n"
@@ -1188,7 +1397,7 @@ describe "Fields" do
       })
       File.open(@image, "r") do |file|
         field.pending_version.must_equal 0
-        Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+        Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         field.value.must_equal ""
         field.pending_value.must_equal({
           :timestamp => S::Field.timestamp(@now),
@@ -1212,9 +1421,9 @@ describe "Fields" do
       File.open(@image, "r") do |file|
         fields = {
           box.title.schema_id.to_s => "Updated title",
-          box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+          box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
         }
-        Spontaneous::Field.update(box, fields, nil, false)
+        Spontaneous::Field.update(@site, box, fields, nil, false)
         box.title.value.must_equal "Updated title"
         box.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/0001/something.gif"
         box.image.pending_version.must_equal 1
@@ -1230,9 +1439,9 @@ describe "Fields" do
       File.open(@image, "r") do |file|
         fields = {
           box.title.schema_id.to_s => "Updated title",
-          box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"},
+          box.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
         }
-        Spontaneous::Field.update(box, fields, nil, true)
+        Spontaneous::Field.update(@site, box, fields, nil, true)
         box.title.value.must_equal "Updated title"
         field.value.must_equal ""
         field.pending_value.must_equal({
@@ -1257,7 +1466,7 @@ describe "Fields" do
       })
       File.open(@image, "r") do |file|
         field.pending_version.must_equal 0
-        Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+        Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         field.value.must_equal ""
         field.pending_value.must_equal({
           :timestamp => S::Field.timestamp(@now),
@@ -1279,15 +1488,37 @@ describe "Fields" do
     end
 
     it "immediately update asynchronous fields if background mode is :immediate" do
-      S::Site.background_mode = :immediate
+      @site.background_mode = :immediate
+      field = @instance.image
       File.open(@image, "r") do |file|
         fields = {
-          @instance.image.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
+          field.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
         }
         Spontaneous::Simultaneous.expects(:fire).never
-        Spontaneous::Field.update(@instance, fields, nil, true)
+        Spontaneous::Field.update(@site, @instance, fields, nil, true)
         @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
       end
+    end
+
+    it "immediately updates file fields when their new value is empty" do
+      Spontaneous::Simultaneous.stubs(:fire)
+      field = @instance.image
+      File.open(@image, "r") do |file|
+        fields = {
+          field.schema_id.to_s => {:tempfile => file, :filename => "something.gif", :type => "image/gif"}
+        }
+        Spontaneous::Field.update(@site, @instance, fields, nil, false)
+        @instance.reload
+        field = @instance.image
+        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        field.pending_value.must_be_nil
+      end
+      fields = {field.schema_id.to_s => ""}
+      Spontaneous::Field.update(@site, @instance, fields, nil, true)
+      @instance.reload
+      field = @instance.image
+      field.value.must_equal ""
+      field.pending_value.must_be_nil
     end
 
     it "not update a field if user does not have necessary permissions" do
@@ -1296,7 +1527,7 @@ describe "Fields" do
       fields = {
         @instance.title.schema_id.to_s => "Updated title"
       }
-      Spontaneous::Field.update(@instance, fields, user, true)
+      Spontaneous::Field.update(@site, @instance, fields, user, true)
       @instance.title.value.must_equal ""
     end
 
@@ -1304,7 +1535,7 @@ describe "Fields" do
       immediate = mock()
       immediate.expects(:pages).returns([])
       immediate.expects(:run)
-      Spontaneous::Field::Update::Immediate.expects(:new).with([@instance.image, @instance.items.title]).returns(immediate)
+      Spontaneous::Field::Update::Immediate.expects(:new).with(@site, [@instance.image, @instance.items.title]).returns(immediate)
       # Thor generates a warning about creating a task with no 'desc'
       silence_logger {
         Spontaneous::Cli::Fields.any_instance.stubs(:prepare!)
@@ -1321,7 +1552,7 @@ describe "Fields" do
 
     it "revert to immediate updating if connection to simultaneous fails" do
       File.open(@image, "r") do |file|
-        Spontaneous::Field.set(@instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+        Spontaneous::Field.set(@site, @instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         @instance.image.pending_value.must_be_nil
       end
@@ -1363,7 +1594,7 @@ describe "Fields" do
           "fields" => [@page.image.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(@page.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, @page.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           @page.image.value.must_equal ""
           @page.update_locks.length.must_equal 1
           lock = @page.update_locks.first
@@ -1379,7 +1610,7 @@ describe "Fields" do
 
       it "not create locks for fields processed immediately" do
         field = @instance.title
-        Spontaneous::Field.set(field, "Updated Title", nil, true)
+        Spontaneous::Field.set(@site, field, "Updated Title", nil, true)
         field.value.must_equal "Updated Title"
         @page.update_locks.length.must_equal 0
         refute @page.locked_for_update?
@@ -1391,7 +1622,7 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           field.value.must_equal ""
           @page.update_locks.length.must_equal 1
           lock = @page.update_locks.first
@@ -1411,7 +1642,7 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           field.value.must_equal ""
           @page.update_locks.length.must_equal 1
           lock = @page.update_locks.first
@@ -1430,14 +1661,14 @@ describe "Fields" do
           "fields" => [@page.image.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(@page.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, @page.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           @page.image.value.must_equal ""
           @page.update_locks.length.must_equal 1
           assert @page.locked_for_update?
           # The lock manipulation is done by the updater
           # so calling update_pending_value on the field
           # won't clear any locks
-          Spontaneous::Field::Update::Immediate.process([@page.image])
+          Spontaneous::Field::Update::Immediate.process(@site, [@page.image])
           @page.image.value.must_equal "/media/#{@page.id.to_s.rjust(5, "0")}/0001/something.gif"
           refute @page.reload.locked_for_update?
         end
@@ -1451,7 +1682,7 @@ describe "Fields" do
         Simultaneous.expects(:send_event).with('page_lock_status', "[#{@page.id}]")
 
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
           assert @page.locked_for_update?
           silence_logger {
             Spontaneous::Cli::Fields.any_instance.stubs(:prepare!)
@@ -1474,15 +1705,15 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         end
-        update = Spontaneous::Field::Update::Immediate.new(field)
+        update = Spontaneous::Field::Update::Immediate.new(@site, field)
         old, field = field, field.reload
         later = @now + 1
         t = S::Field.timestamp(later)
         S::Field.stubs(:timestamp).returns(t)
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "else.gif", :type => "image/jpeg"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "else.gif", :type => "image/jpeg"}, nil, true)
         end
         update.run
 
@@ -1503,10 +1734,10 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         end
         # Create update but don't run it
-        update = Spontaneous::Field::Update::Immediate.new(field)
+        update = Spontaneous::Field::Update::Immediate.new(@site, field)
         # Someone updates a field before the async update is run...
         content = ::Content.get(@instance.id)
         content.title = "Updated Title"
@@ -1528,10 +1759,10 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         end
         # Create update but don't run it
-        update = Spontaneous::Field::Update::Immediate.new(field)
+        update = Spontaneous::Field::Update::Immediate.new(@site, field)
         # Someone updates a field before the async update is run...
         content = ::Content.get(@page.id)
         content.instances.title = "Updated Title"
@@ -1572,10 +1803,10 @@ describe "Fields" do
           "fields" => [field.id]
         })
         File.open(@image, "r") do |file|
-          Spontaneous::Field.set(field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+          Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         end
         # Create update but don't run it
-        update = Spontaneous::Field::Update::Immediate.new(field)
+        update = Spontaneous::Field::Update::Immediate.new(@site, field)
 
         @page.destroy
 

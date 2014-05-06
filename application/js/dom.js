@@ -48,6 +48,11 @@ Spontaneous.Dom = (function($, S) {
 				result['class'] = classes.join(' ')
 			}
 			return result;
+		},
+		radio: function(selector, params) {
+			var input = this.input(selector, params);
+			input.attr('type', 'radio');
+			return input;
 		}
 	};
 	var generate = function(tag_name) {

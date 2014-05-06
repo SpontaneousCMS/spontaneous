@@ -174,14 +174,26 @@ module Spontaneous::Model::Page
       end
     end
 
+    # slugs can be max 64 characters long
     def slug=(s)
-      if (new_slug = s.to_url) != slug
+      if (new_slug = fit_slug_to_length(s, 64)) != slug
         @__slug_changed = slug
-        # slugs can be max 255 characters long
-        self[:slug] = new_slug[0..254]
+        self[:slug] = new_slug
         self.update_path
       end
     end
+
+    def fit_slug_to_length(s, max_length)
+      original = s.to_url
+      parts    = original.split('-')
+      url      = [parts.shift]
+      while !parts.empty? && ((url + [parts[0]]).join('-').length <= max_length)
+        url << parts.shift
+      end
+      url.join('-')[0...max_length]
+    end
+
+    protected :fit_slug_to_length
 
     def check_for_path_changes(force = false)
       if @__slug_changed || force

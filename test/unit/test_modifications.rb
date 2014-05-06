@@ -58,10 +58,9 @@ describe "Modifications" do
   it "update modification date of page when page fields are updated" do
     now = @now + 100
     stub_time(now)
-    c = Content.first
+    c = Page.first
     (c.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
-    c.label = "changed"
-    c.save
+    c.update(title: "changed")
     (c.modified_at - now).abs.must_be :<=, 1
   end
 
@@ -328,7 +327,7 @@ describe "Modifications" do
     mods.length.must_equal 0
   end
 
-  it "have an empty modification if the visibility has been reverted to original value xxx" do
+  it "have an empty modification if the visibility has been reverted to original value" do
     stub_time(@now+3600)
     page = Page.first :uid => "1"
     page.things.first.hide!

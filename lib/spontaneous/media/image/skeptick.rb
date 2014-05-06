@@ -36,6 +36,8 @@ module Skeptick
         set :crop,     geometry(options)
       end
 
+      alias_method :crop, :fill
+
       def greyscale
         set :type, "Grayscale"
       end

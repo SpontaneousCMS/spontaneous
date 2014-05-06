@@ -121,9 +121,9 @@ Spontaneous.Box = (function($, S) {
 			this.trigger('entry_removed', entry);
 		},
 
-		save_path: function() {
-			return ['/savebox', this.id()].join('/');
-		},
+		// save_path: function() {
+		// 	return [this.id()].join('/');
+		// },
 		entry_wrappers: function() {
 			return this._entry_container.find('> .'+this.entry_class())
 		}

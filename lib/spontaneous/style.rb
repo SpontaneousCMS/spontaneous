@@ -3,11 +3,6 @@
 
 module Spontaneous
   class Style
-    def self.to_directory_name(klass)
-      return nil if klass.name.blank?
-      klass.name.demodulize.underscore
-    end
-
     attr_reader :owner, :prototype
 
     def initialize(owner, prototype = nil)
@@ -18,52 +13,47 @@ module Spontaneous
       self.prototype.schema_id
     end
 
-    def template(format = :html)
-      inline_template(format) || external_template(format)
+    def template(format = :html, renderer = default_renderer)
+      inline_template(format) || external_template(format, renderer)
     end
 
-    def external_template(format = :html)
-      unless (template = (file_template(format) || supertype_template(format)))
+    def external_template(format = :html, renderer)
+      unless (template = (file_template(format, renderer) || supertype_template(format, renderer)))
         logger.warn("No template file found for style #{owner}:#{name}.#{format}")
         template = anonymous_template
       end
       template
     end
 
-    def file_template(format)
-      local_template(format)
+    def file_template(format, renderer)
+      local_template(format, renderer)
     end
 
     # Tests to see if a template file exists for the specified format.
     # If one doesn't exist then the style would fall back to an
     # 'anonymous' template.
-    def template?(format = :html)
-      !(inline_template(format) || file_template(format)).nil?
+    def template?(format = :html, renderer = default_renderer)
+      !(inline_template(format) || file_template(format, renderer)).nil?
     end
 
     alias_method :path, :template
 
-    def local_template(format)
-      template_path = nil
-      Spontaneous::Site.paths(:templates).each do |template_root|
-        template_path = try_template_paths.detect do |path|
-          Spontaneous::Output.template_exists?(template_root, path, format)
-        end
-        return (template_root / template_path) if template_path
-      end
-      nil
+    def local_template(format, renderer)
+      template_path = try_template_paths.map { |path|
+        renderer.template_location(path, format)
+      }.detect { |path| !path.nil? }
     end
 
-    def supertype_template(format)
-      template = try_supertype_styles.each { |style|
-        template = style.template(format)
+    def supertype_template(format, renderer)
+      template = try_supertype_styles(renderer).each { |style|
+        template = style.template(format, renderer)
         return template unless template.nil?
       }
       nil
     end
 
-    def try_supertype_styles
-      class_ancestors(owner).take_while { |a| a and a < Spontaneous::Content }.
+    def try_supertype_styles(renderer)
+      class_ancestors(owner).take_while { |a| a and a < owner.model }.
         map { |s| supertype_style_class.new(s, prototype) }
     end
 
@@ -106,8 +96,13 @@ module Spontaneous
     end
 
     def owner_directory_names
-      classes = [owner].concat(owner.ancestors.take_while { |klass| klass < owner.content_model::Page or klass < owner.content_model::Piece })
-      classes.map { |klass| self.class.to_directory_name(klass) }
+      classes = [owner].concat(owner.ancestors.take_while { |klass| klass < owner.model::Page or klass < owner.model::Piece })
+      classes.map { |klass| to_directory_name(klass) }
+    end
+
+    def to_directory_name(klass)
+      return nil if klass.name.blank?
+      klass.name.demodulize.underscore
     end
 
     def owner_directory_paths(basename)
@@ -124,6 +119,10 @@ module Spontaneous
 
     def ==(other)
       other.class == self.class && other.prototype == self.prototype && other.owner == self.owner
+    end
+
+    def default_renderer
+      Spontaneous::Output.default_renderer
     end
 
     class Default < Style
@@ -145,7 +144,7 @@ module Spontaneous
         @template_code = template_code
       end
 
-      def template(format = :html)
+      def template(format = :html, renderer = Spontaneous::Output.default_renderer)
         Proc.new { @template_code }
       end
 
@@ -167,13 +166,13 @@ module Spontaneous
         @instance = instance
       end
 
-      def template(format = :html)
+      def template(format = :html, renderer = Spontaneous::Output.default_renderer)
         target_is_content = @instance.target.respond_to?(:resolve_style)
         if (style = @instance.resolve_style(@instance.style_sid))
-          return style.template(format) if !target_is_content || style.template?(format)
+          return style.template(format, renderer) if !target_is_content || style.template?(format, renderer)
         end
         style = @instance.target.resolve_style(@instance.style_sid)
-        style.template(format)
+        style.template(format, renderer)
       end
     end
   end

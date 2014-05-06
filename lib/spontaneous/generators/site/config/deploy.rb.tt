@@ -6,10 +6,19 @@ require "spontaneous/capistrano"
 require "bundler/capistrano"
 
 default_run_options[:pty]   = true
+# run capistrano in a login shell so that ruby version managers can do their thing
+# otherwise it's just a constant problem trying to use the installed/configured
+# version of ruby
+default_run_options[:shell] = '/bin/bash -l'
+
 
 ssh_options[:port]          = 22
 ssh_options[:forward_agent] = true
 
+set :ruby_version,          "<%= RUBY_VERSION %>-p<%= RUBY_PATCHLEVEL %>"
+
+set :domain,                "<%= @domain %>"
+set :cms,                   "edit.<%= @domain %>"
 set :application,           "<%= @domain %>"
 server                      "<%= @domain %>", :app, :web, :db, :media
 set :user,                  "<%= @username %>"

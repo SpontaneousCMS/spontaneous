@@ -20,20 +20,6 @@ class Spontaneous::Site
   module Storage
     extend Spontaneous::Concern
 
-    module ClassMethods
-      def storage(mimetype = nil)
-        instance.storage(mimetype)
-      end
-
-      def local_storage
-        instance.local_storage
-      end
-
-      def default_storage
-        instance.default_storage
-      end
-    end # ClassMethods
-
     def storage(mimetype = nil)
       storage_for_mimetype(mimetype)
     end
@@ -54,14 +40,22 @@ class Spontaneous::Site
       storage_backends = []
       storage_settings = config[:storage] || []
       storage_settings.each do |name, config|
-        backend = Spontaneous::Storage.create(config)
+        backend = Spontaneous::Media::Store.create(config)
         storage_backends << backend
       end
       storage_backends << default_storage
     end
 
     def default_storage
-      @default_storage ||= Spontaneous::Storage::Local.new(Spontaneous.media_dir, '/media', accepts=nil)
+      @default_storage ||= Spontaneous::Media::Store::Local.new(Spontaneous.media_dir, '/media', accepts=nil)
+    end
+
+    def file(owner, filename, headers = {})
+      Spontaneous::Media::File.new(self, owner, filename, headers)
+    end
+
+    def tempfile(owner, filename, headers = {})
+      Spontaneous::Media::TempFile.new(self, owner, filename, headers)
     end
   end
 end

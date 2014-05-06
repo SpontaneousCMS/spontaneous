@@ -68,7 +68,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			// this.dialogue_box = $(dom.div, {'class':'dialogue', 'style':'display: none'});
 			// contents.append(this.dialogue_box);
 			var entry = dom.div('.entry');
-			var fields = new Spontaneous.FieldPreview(this, '');
+			var fields = new Spontaneous.FieldPreview(this, '', true);
 			if (fields.has_fields()) {
 				var fields_panel = fields.panel();
 				entry.append(fields_panel);

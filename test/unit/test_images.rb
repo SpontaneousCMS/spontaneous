@@ -49,7 +49,7 @@ describe "Images" do
       @upload_dir.mkpath
 
       @revision = 10
-      S::Site.stubs(:working_revision).returns(@revision)
+      @site.stubs(:working_revision).returns(@revision)
 
       @src_image =  Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg")).realpath
       @origin_image = @upload_dir + "rose.jpg"
@@ -116,7 +116,7 @@ describe "Images" do
         end
       end
 
-      describe "optimization xxx" do
+      describe "optimization" do
         it "should be enabled by default" do
           @image.value = @origin_image.to_s
         end
@@ -169,7 +169,7 @@ describe "Images" do
         after do
         end
 
-        it "have image dimension and filesize information xxx" do
+        it "have image dimension and filesize information" do
           @image.src.must_equal "/media/00234/0010/rose.jpg"
           @image.width.must_equal 400
           @image.height.must_equal 533
@@ -265,7 +265,7 @@ describe "Images" do
           :public_host => "http://media.example.com"
         }
         ::Fog.mock!
-        @storage = Spontaneous::Storage::Cloud.new(@aws_credentials, 'media.example.com')
+        @storage = Spontaneous::Media::Store::Cloud.new(@aws_credentials, 'media.example.com')
         @storage.backend.directories.create(:key => @bucket_name)
         @site.stubs(:storage).with(anything).returns(@storage)
         @image.value = @origin_image.to_s
@@ -276,9 +276,46 @@ describe "Images" do
       end
 
       it "have full urls for all the src attributes" do
-        @image.original.src.must_equal "http://media.example.com/00234-0010-rose.jpg"
-        @image.thumbnail.src.must_equal "http://media.example.com/00234-0010-rose.thumbnail.jpg"
+        @image.original.src.must_equal "http://media.example.com/00234/0010/rose.jpg"
+        @image.thumbnail.src.must_equal "http://media.example.com/00234/0010/rose.thumbnail.jpg"
       end
     end
   end
+
+  describe "clearing" do
+    def assert_image_field_empty
+      @field.value.must_equal ''
+      @field.src.must_equal ''
+      @field.filesize.must_equal 0
+      @field.smaller.value.must_equal ''
+    end
+
+    before do
+      class ::ContentWithImage < ::Content::Piece
+        field :photo, :image do
+          size :smaller do
+            fit width: 100, height: 100
+          end
+        end
+      end
+
+      @instance = ContentWithImage.new
+
+      @content_id = 234
+      @instance.stubs(:id).returns(@content_id)
+      @field = @instance.photo
+      path = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+      @field.value = path
+    end
+
+    after do
+      Object.send(:remove_const, :ContentWithImage) rescue nil
+    end
+
+    it "clears the value if set to the empty string" do
+      @field.value = ''
+      assert_image_field_empty
+    end
+  end
+
 end

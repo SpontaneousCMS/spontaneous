@@ -14,6 +14,10 @@ module Spontaneous::Model::Core
         path(Spontaneous::SLASH)
       end
 
+      def id(id)
+        first_visible("id:#{id}", :id => id)
+      end
+
       def uid(uid)
         first_visible("uid:#{uid}", :uid => uid)
       end

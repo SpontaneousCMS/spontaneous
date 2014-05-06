@@ -3,20 +3,31 @@
 # Feel free to add your own
 # the 'root' user level is added automatically and
 # will always be higher than any you add here
+#
 # Similary the 'none' level will always be lower
 # The order is important -- later leves are higher levels
-# higher levels will always be able to do everything that a lower level can do
-# 'publish' defines the particular level's access to the publishing process
-# This is set per-level -- higher levels don't inherit the value from lower levels
+#
+# Higher levels will always be able to do everything that a lower level can do
+#
+# Flags:
+#
+# Flags are set per-level -- higher levels don't inherit the value from lower levels.
+#
+# - 'publish' defines the particular level's access to the publishing process. The default is false
+#
+# - 'admin' allows users to administer the site's user accounts. The default is false
+
 
 - :name:    editor
   :publish: false
 
 - :name:    admin
   :publish: true
+  :admin: true
 
 - :name:    designer
   :publish: true
+  :admin: true
 
 # - :name:    my_level
 #   :publish: true

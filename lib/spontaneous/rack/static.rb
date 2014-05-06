@@ -7,9 +7,8 @@ module Spontaneous
       def initialize(app, options)
         @app = app
         @try = ['', *options.delete(:try)].compact
-        @static = ::Rack::Static.new(
-          lambda { |env| [404, {}, []] },
-          options)
+        fallback_app = lambda { |env| [404, {}, []] }
+        @static = ::Rack::Static.new(fallback_app, options)
       end
 
       def call(env)

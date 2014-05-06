@@ -10,11 +10,11 @@ module Spontaneous::Field
       [:html]
     end
 
-    def generate_html(input)
+    def generate_html(input, site)
       input.to_html
     end
 
-    def preprocess(input)
+    def preprocess(input, site)
       # convert lines ending with newlines into a <br/>
       # as official Markdown syntax isn't suitable for
       # casual users
@@ -31,6 +31,6 @@ module Spontaneous::Field
       Kramdown::Document.new(output)
     end
 
-    self.register(:markdown, :text, :richtext)
+    self.register(:markdown, :markup, :richtext)
   end
 end

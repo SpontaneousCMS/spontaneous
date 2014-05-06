@@ -93,7 +93,7 @@ describe "Visibility" do
     end
   end
 
-  it "hide page content xxx" do
+  it "hide page content" do
     @child.hide!
     @child.reload
     Content::Piece.all.select { |f| f.visible? }.length.must_equal 20

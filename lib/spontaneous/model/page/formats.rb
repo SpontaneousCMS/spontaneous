@@ -55,10 +55,15 @@ module Spontaneous::Model::Page
         output_list.first
       end
 
-      def provides_format?(format)
+      def provides_format?(format, instance = nil)
         return true if format.blank?
-        format = format.to_s
-        outputs.any? { |output| (output == format) or (output.name.to_s == format) }
+        format_name = format.to_s
+        case format
+        when Spontaneous::Output::Format
+          (instance.nil? || (format.page == instance)) && outputs.any? { |output| (output.to_sym == format.to_sym) }
+        else
+          outputs.any? { |output| output.name.to_s == format_name }
+        end
       end
 
       alias_method :provides_output?, :provides_format?
@@ -92,7 +97,7 @@ module Spontaneous::Model::Page
     end
 
     def provides_output?(format)
-      self.class.provides_output?(format)
+      self.class.provides_output?(format, self)
     end
 
     def output(format, content = nil)
@@ -105,10 +110,10 @@ module Spontaneous::Model::Page
       self.class.mime_type(format)
     end
 
-    def render(format=:html, params={}, *args)
-      params, format = format, :html if format.is_a?(Hash)
+    def render(format = :html, locals = {}, parent_context = nil)
+      locals, format = format, :html if format.is_a?(Hash)
       output = output(format)
-      output.render(params, *args)
+      output.render(locals, parent_context)
     end
   end # Formats
 end # Spontaneous::Plugins::Page

@@ -1,21 +1,22 @@
 module Spontaneous
 
   module Model
-    autoload :Core,  "spontaneous/model/core"
-    autoload :Page,  "spontaneous/model/page"
-    autoload :Piece, "spontaneous/model/piece"
-    autoload :Box,   "spontaneous/model/box"
+    autoload :Core,   "spontaneous/model/core"
+    autoload :Page,   "spontaneous/model/page"
+    autoload :Piece,  "spontaneous/model/piece"
+    autoload :Box,    "spontaneous/model/box"
+    autoload :Action, "spontaneous/model/action"
   end
 
   def self.models
     @models ||= {}
   end
 
-  def self.Model(table_name, database = Spontaneous.database, schema = Site.schema)
-    define_content_model(table_name, database, schema)
+  def self.Model(table_name)
+    Model!(table_name, Spontaneous.database, Spontaneous.instance.schema)
   end
 
-  def self.define_content_model(table_name, database = Spontaneous.database, schema = Site.schema)
+  def self.Model!(table_name, database, schema)
     model = Spontaneous::DataMapper::Model(table_name, database, schema) do
       serialize_columns :field_store, :entry_store, :box_store, :serialized_modifications
       include_all_types
@@ -41,6 +42,8 @@ module Spontaneous
     def content_model
       class_variable_get(:@@content_model)
     end
+
+    alias_method :model, :content_model
 
     # This is fiddly because we want the Content.content_model to refer to the
     # first subclass of the Spontaneous::Content call as that is going to be our

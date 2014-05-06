@@ -90,19 +90,19 @@ describe "Crypt" do
     end
 
     it "be verifiable" do
-      hash = Crypt::hash(@password)
+      hash = Crypt::hash_password(@password)
       assert Crypt.new(@password, hash).valid?
     end
 
     it "use the latest version" do
-      hash = Crypt::hash(@password)
+      hash = Crypt::hash_password(@password)
       version, _ = Crypt.version_split(hash)
       version.must_equal Crypt.current.version
     end
 
     it "take at least half a second to compute" do
       hash = nil
-      bm = Benchmark.measure { hash = Crypt::hash(@password) }
+      bm = Benchmark.measure { hash = Crypt::hash_password(@password) }
       bm.real.must_be :>=, 0.5
       bm = Benchmark.measure { Crypt::valid?(@password, hash) }
       bm.real.must_be :>=, 0.5

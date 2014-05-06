@@ -66,6 +66,7 @@ module Spontaneous
       def boot!
         begin
           require File.expand_path('config/boot.rb')
+          Spontaneous::Site.instance
         rescue Spontaneous::SchemaModificationError => error
           fix_schema(error)
         end
@@ -94,6 +95,7 @@ module Spontaneous
     autoload :Site,     "spontaneous/cli/site"
     autoload :Sync,     "spontaneous/cli/sync"
     autoload :User,     "spontaneous/cli/user"
+    autoload :Content,  "spontaneous/cli/content"
 
     class Root < ::Thor
       register Spontaneous::Cli::Console,  "console",  "console",           "Gives you console access to the current site"
@@ -104,11 +106,12 @@ module Spontaneous
       register Spontaneous::Cli::Init,     "init",     "init",              "Creates databases and initialises a new Spontaneous site"
       register Spontaneous::Cli::Server,   "server",   "server [ACTION]",   "Launch development server(s)"
       register Spontaneous::Cli::Server,   "s",   "s [ACTION]",   "Launch development server(s)"
-      register Spontaneous::Cli::Media,    "media",    "media [ACTION]",    "Manage site media"
-      register Spontaneous::Cli::Sync,     "sync",     "sync [DIRECTION]",  "Sync database and media to and from the production server"
+      # register Spontaneous::Cli::Media,    "media",    "media [ACTION]",    "Manage site media"
+      # register Spontaneous::Cli::Sync,     "sync",     "sync [DIRECTION]",  "Sync database and media to and from the production server"
       register Spontaneous::Cli::Migrate,  "migrate",  "migrate",           "Runs Spontaneous migrations"
       register Spontaneous::Cli::Assets,   "assets",   "assets [ACTION]",   "Manage Spontaneous assets"
       register Spontaneous::Cli::Fields,   "fields",   "fields [ACTION]",   "Manage Spontaneous fields"
+      register Spontaneous::Cli::Content,  "content",  "content [ACTION]",   "Manage Spontaneous content"
 
       desc :browse, "Launces a browser pointing to the current development CMS"
       def browse

@@ -5,7 +5,7 @@ module Spontaneous
   module Rack
     module Public
       include Constants
-      include Sinatra::Helpers unless method_defined?(:redirect)
+      # include Sinatra::Helpers unless method_defined?(:redirect)
 
       attr_reader :env, :response, :request
       attr_accessor :page
@@ -17,10 +17,10 @@ module Spontaneous
         response = catch(:halt) do
           if @page
             case @request.request_method
-            when METHOD_GET
+            when METHOD_GET, METHOD_HEAD
               render_get
             else
-              render_post
+              render_other
             end
           else
             not_found!
@@ -41,17 +41,10 @@ module Spontaneous
         [status, header, body]
       end
 
-      def halt(*response)
-        response = response.first if response.length == 1
-        throw :halt, response
-      end
-
-
-
       # stolen from Sinatra
       def parse_response(response)
         case
-        when response.is_a?(Spontaneous::Content)
+        when response.is_a?(site.model)
           @page = response
         when response.respond_to?(:to_str)
           @response.body = [response]
@@ -81,45 +74,13 @@ module Spontaneous
       DOT = '.'.freeze
       ACTION = "/#{S::Model::Page::Controllers::ACTION_SEPARATOR}".freeze
 
-      def show(page, status=200)
-        page = Spontaneous::Site[page] if String === page
-        @page = page
-        status(status)
-      end
-
-      def render(page, template_params = {})
-        @template_params = template_params
-        show(page)
-      end
-
-      REDIRECTS = {
-        :permanent => 301,
-        :temporary => 302
-      }
-
-      def redirect(location, redirect_code=:temporary)
-        if String === location
-          destination = Spontaneous::Site[location]
-          location = destination.path if destination and destination.respond_to?(:path)
-        else
-          location = location.path if location.respond_to?(:path)
-        end
-        redirect_code = REDIRECTS[redirect_code] if Symbol === redirect_code
-        redirect_code ||= REDIRECTS[:temporary]
-        # let Sinatra's helper method set up the proper Location headers for us
-        catch(:halt) { super(location) }
-        status(redirect_code)
-        # then re-throw the :halt
-        halt
-      end
-
       def content_type(type, params={})
-        default = params.delete :default
+        default   = params.delete :default
         mime_type = mime_type(type) || default
         fail "Unknown media type: %p" % type if mime_type.nil?
         mime_type = mime_type.dup
         unless params.include? :charset
-          params[:charset] = params.delete('charset') || ::Spontaneous.config.default_charset || 'utf-8'
+          params[:charset] = params.delete('charset') || site.config.default_charset || 'utf-8'
         end
         mime_type << ";#{params.map { |kv| kv.join('=') }.join(', ')}" unless params.empty?
         response['Content-Type'] = mime_type
@@ -131,7 +92,7 @@ module Spontaneous
       end
 
       def find_page_by_path(path)
-        Spontaneous::Site.by_path(path)
+        site.by_path(path)
       end
 
       def output(name)
@@ -143,34 +104,34 @@ module Spontaneous
       end
 
       def render_get
-        if @action
-          call_action!
+        return call_action! if @action
+        if page.dynamic?(request.request_method)
+          invoke_action { page.process_root_action(site, env.dup, @output) }
         else
-          block = page.request_block(request)
-          parse_response(instance_eval(&block)) if (block)
           render_page_with_output
         end
       end
 
-      # non-action urls shouldn't respond to post requests
-      def render_post
-        block = page.request_block(request)
-        return not_found! unless (block or @action)
+      # Only pages that provide a controller for the current URL should respond
+      # to anything other than GET or HEAD
+      def render_other
+        return not_found! unless (page.dynamic?(request.request_method) or @action)
 
-        if @action
-          call_action!
-        else
-          parse_response(instance_eval(&block)) if (block)
-          render_page_with_output
-        end
+        return call_action! if @action
+
+        invoke_action { page.process_root_action(site, env.dup, @output) }
       end
 
       def call_action!
-        status, headers, result = @page.process_action(action, request.env, @output)
+        invoke_action { @page.process_action(site, action, env.dup, @output) }
+      end
+
+      def invoke_action
+        status, headers, result = yield
         if status == 404
           not_found!
         else
-          if result.is_a?(Spontaneous::Content)
+          if result.is_a?(site.model)
             @page = result
             render_page_with_output
           else
@@ -191,14 +152,18 @@ module Spontaneous
       end
 
       def render_page_with_output
-        return not_found! if     @page.nil?
-        return not_found! unless @page.provides_output?(@output)
+        _render_page_with_output(@page, @output, @template_params)
+      end
 
-        output = @page.output(@output)
+      def _render_page_with_output(page, output, template_params)
+        return not_found! if     page.nil?
+        return not_found! unless page.provides_output?(output)
+
+        output = page.output(output)
 
         if output.public?
           content_type(output.mime_type)
-          render_page(@page, output, @template_params)
+          render_page(page, output, template_params)
         else
           not_found!
         end

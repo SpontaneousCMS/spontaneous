@@ -1,9 +1,7 @@
 # encoding: UTF-8
 
 require 'tempfile'
-require 'mini_magick'
 require 'delegate'
-
 
 module Spontaneous::Field
   class Image < File
@@ -20,7 +18,7 @@ module Spontaneous::Field
     def self.size(name, options = {}, &process)
       self.sizes[name.to_sym] = [options, process]
       unless method_defined?(name)
-        class_eval "def #{name}; sizes[:#{name}]; end"
+        class_eval "def #{name}(*args); sizes[:#{name}]; end"
       end
     end
 
@@ -80,15 +78,15 @@ module Spontaneous::Field
     end
 
     def width
-      original.width
+      original.width || 0
     end
 
     def height
-      original.height
+      original.height || 0
     end
 
     def filesize
-      original.filesize
+      original.filesize || 0
     end
 
     def src
@@ -108,12 +106,12 @@ module Spontaneous::Field
       sizes[:original].src
     end
 
-    def set_value!(value, process = true)
+    def set_value!(value, process = true, site = nil)
       @sizes = nil
       super
     end
 
-    def generate(name, media_file)
+    def generate(name, media_file, site)
       return { :src => media_file } if media_file.is_a?(::String)
       options, process = self.class.size_definitions[name]
       size = Size.new(media_file, name, options, process)
@@ -130,4 +128,3 @@ module Spontaneous::Field
     self.register(:image, :photo)
   end
 end
-

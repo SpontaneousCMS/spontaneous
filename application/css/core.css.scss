@@ -86,18 +86,23 @@ img.missing {
 	#page-info {
 		@extend .container-padding;
 		@include vertical-gradient(#3a3a3a, #222222);
-		height: 64px - 10px;
+		min-height: 64px - 10;
+		height: auto;
 		padding-top: 10px;
+		padding-bottom: 0px;
 		position: relative;
 		h1, h3 {
 			position: relative;
 		}
 		h1 {
+			// position: absolute;
+			// top: 0;
 			font-family: $headline-font-family;
 			font-weight: 100;
 			color: white;
 			font-size: 24px;
-			line-height: 21px;
+			line-height: 100%;
+			padding-bottom: 30px;
 			span {
 				color: #888888;
 			}
@@ -123,7 +128,7 @@ img.missing {
 		& > .path {
 			@include display-box;
 			position: absolute;
-			bottom: 12px;
+			bottom: 10px;
 		}
     .path .titlesync {
       margin-left: $unit;
@@ -571,15 +576,22 @@ img.missing {
 			display: none;
 		}
 	}
+	// highlight filename when hovering over filedrop area
+	// too confusing to have the filenames active though as it
+	// would interfere with the 'click to edit' thing
+	// .file-drop:hover + .filename {
+	// 	color: $action;
+	// }
 }
 
-.editing-panel .field-group .fieldtypes-filefield {
+.editing-panel .field-group .field.field-file {
 	.value {
 		// padding: 0;
 	}
 	.file-field {
 		// height: 36px;
 		cursor: pointer;
+		line-height: 1.3em;
 
 		.file-drop:hover {
 			// border-color: $action;
@@ -599,6 +611,10 @@ img.missing {
 			padding-left: 6px;
 			padding-right: 6px;
 		}
+		.choose + .filename,
+		.choose + .filename + .filesize {
+			position:relative;
+		}
 		&:hover .choose {
 			@include button;
 		}
@@ -610,9 +626,11 @@ img.missing {
 
 	.slot-tabs {
 		@extend .clearfix;
-		height: 32px;
+		min-height: 32px;
 		vertical-align: top;
 		@include vertical-gradient(#666666, #4d4d4d);
+		padding-left: $container-padding;
+		padding-right: $container-padding;
 		li {
 			@include box-sizing;
 			@include interface;
@@ -620,9 +638,11 @@ img.missing {
 			color: #dddddd;
 			display: block;
 			float: left;
-			height: 100%;
+			height: 32px;
 			padding-left: 16px;
-			width: 160px;
+			padding-right: 16px;
+			min-width: 130px;
+			max-width: 160px;
 			padding-top: 9px;
 			cursor: pointer;
 			border-left: solid 1px transparent;
@@ -644,13 +664,25 @@ img.missing {
 			}
 		}
 		li:first-child {
-			padding-left: $container-padding;
-			width: 160px + $container-padding;
+			padding-left: 0;
+			// width: 160px + $container-padding;
 			&.active {
 				.down {
 					padding-left: $container-padding;
 				}
 			}
+		}
+		li:hover:first-child:before,
+		li.active:first-child:before {
+			@include vertical-gradient($highlight + #111111, $highlight);
+			background-color: $highlight;
+			content: "";
+			position: absolute;
+			width: $container-padding;
+			height: 32px;
+			// outline: solid 1px red;
+			left: -$container-padding - 1;
+			top: 0;
 		}
 		li.active + li:hover {
 			border-left-color: $highlight - #151515;
@@ -981,6 +1013,8 @@ img.missing {
 				margin-right: 1px;
 				width: 100%;
 				background: none;
+				padding-left: 0;
+				padding-right: 0;
 				li {
 					@include box-sizing;
 					@include interface;
@@ -996,8 +1030,10 @@ img.missing {
 					color: #666666;
 					// color: #f2f2f2;
 				}
-				li:first-child {
+				li:first-child:before {
 					// @include rounded-top-left;
+					// padding-left: 0;
+					display: none;
 				}
 				li:nth-child(4) {
 					// @include rounded-top-right;
@@ -1039,7 +1075,7 @@ img.missing {
 				a {
 					@include button(#6b6b6b);
 					// background-color: #6b6b6b;
-					padding-left: 8px;
+					padding-left: 16px;
 					padding-right: 8px;
 					& + a {
 						margin-left: $unit;

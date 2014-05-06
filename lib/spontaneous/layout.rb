@@ -11,7 +11,7 @@ module Spontaneous
       # matching the class of our owner, then default to the 'standard'
       # layout.
       def try_paths
-        named_layout = self.class.to_directory_name(owner)
+        named_layout = to_directory_name(owner)
         [["layouts", named_layout], ["layouts", "standard"]]
       end
     end
@@ -21,7 +21,7 @@ module Spontaneous
         @templates = templates
       end
 
-      def template(format = :html)
+      def template(format = :html, renderer)
         template = @templates[format]
         # a layout without a format is used as a fallback
         template ||= @templates[nil]

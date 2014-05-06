@@ -79,7 +79,7 @@ module Spontaneous::Field
 
     def self.providers
       @providers ||= {
-        nil => Spontaneous::Field::WebVideo::Provider
+        nil => Spontaneous::Field::WebVideo::Fallback
       }
     end
 
@@ -97,7 +97,7 @@ module Spontaneous::Field
       values[:video_id]
     end
 
-    def generate_outputs(input)
+    def generate_outputs(input, site)
       values = {}
       values[:html] = escape_html(input)
 
@@ -109,19 +109,19 @@ module Spontaneous::Field
       values.merge(metadata || {})
     end
 
-    def render(format=:html, *args)
+    def render(format=:html, locals = {}, *args)
       case format
       when :html
-        to_html(*args)
+        to_html(locals)
       when :json
-        to_json(*args)
+        to_json(locals)
       else
         value(format)
       end
     end
 
-    def to_html(*args)
-      provider.to_html(*args)
+    def to_html(locals = {})
+      provider.to_html(locals)
     end
 
     def provider_id
@@ -129,8 +129,12 @@ module Spontaneous::Field
     end
 
     def provider
-      provider = Spontaneous::Field::WebVideo.providers[provider_id]
+      provider = Spontaneous::Field::WebVideo.providers.fetch(provider_id, fallback_provider)
       provider.new(self, values)
+    end
+
+    def fallback_provider
+      Spontaneous::Field::WebVideo.providers.fetch("fallback")
     end
 
     def to_json(*args)
@@ -151,6 +155,6 @@ module Spontaneous::Field
   end
 end
 
-Dir[::File.dirname(__FILE__) + "/webvideo/*.rb"].each do |provider|
-  require provider
+%w(fallback vimeo youtube vine).each do |provider|
+  require ::File.dirname(__FILE__) + "/webvideo/#{provider}.rb"
 end

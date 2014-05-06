@@ -78,7 +78,7 @@ Spontaneous.Field.String = (function($, S) {
 			this.set('unprocessed_value', values.unprocessed_value);
 		},
 		preview: function() {
-			return this.get('value')
+			return this.get('value');
 		},
 		activate: function(el) {
 			el.find('a[href^="/"]').click(function() {
@@ -195,6 +195,9 @@ Spontaneous.Field.String = (function($, S) {
 		},
 		conflict_view: function(dialogue, conflict) {
 			return new StringFieldConflictView(dialogue, conflict);
+		},
+		stringValue: function() {
+			return this.serializedValue();
 		},
 		serializedValue: function() {
 			return {

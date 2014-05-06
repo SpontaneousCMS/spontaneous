@@ -6,23 +6,28 @@ module Spontaneous::Field
   class File < Base
     has_editor
 
+    # In the case of clearing the field we will have been given a pending_value of ""
+    # we don't want that to run asynchronously
     def asynchronous?
+      return false if (pending_value && pending_value[:value].blank?)
       true
     end
 
     def outputs
-      [:html, :filesize, :filename]
+      [:html, :path, :filesize, :filename]
     end
 
-    def pending_value=(value)
-      file = process_upload(value)
+    def set_pending_value(value, site)
+      file = process_upload(value, site)
       pending = case file
+        when nil
+          ""
         when String
           { :tempfile => file }
         else
           serialize_pending_file(file)
         end
-      super(pending)
+      super(pending, site)
     end
 
     def page_lock_description
@@ -30,24 +35,33 @@ module Spontaneous::Field
     end
 
     def serialize_pending_file(file)
-      { :tempfile => file.path, :type => file.mimetype, :filename => file.filename, :src => file.url }
+      { :tempfile => file.path, :type => file.mimetype, :filename => file.filename, :filesize => file.filesize, :src => file.url }
     end
 
-    def preprocess(image)
+    def storage_headers(content_type, filename)
+      headers = { content_type: content_type }
+      if prototype && prototype.options[:attachment]
+        headers.update(content_disposition: %(attachment; filename=#{Rack::Utils.escape(filename)}))
+      end
+      headers
+    end
+
+    def process_upload(value, site)
+      return nil if value.blank?
+      file, filename, mimetype = fileinfo(value)
+      media_file = site.tempfile(self, filename, storage_headers(mimetype, filename))
+      media_file.copy(file)
+      media_file
+    end
+
+    def preprocess(image, site)
       file, filename, mimetype = fileinfo(image)
       return "" if file.nil?
       return file unless ::File.exist?(file)
 
-      media_file = Spontaneous::Media::File.new(owner, filename, mimetype)
+      media_file = site.file(owner, filename, storage_headers(mimetype, filename))
       media_file.copy(file)
       set_unprocessed_value(media_file.path)
-      media_file
-    end
-
-    def process_upload(value)
-      file, filename, mimetype = fileinfo(value)
-      media_file = Spontaneous::Media::TempFile.new(self, filename, mimetype)
-      media_file.copy(file)
       media_file
     end
 
@@ -63,7 +77,7 @@ module Spontaneous::Field
       [file, filename, mimetype]
     end
 
-    def generate_filesize(input)
+    def generate_filesize(input, site)
       if input.respond_to?(:filesize)
         input.filesize
       else
@@ -71,7 +85,7 @@ module Spontaneous::Field
       end
     end
 
-    def generate_filename(input)
+    def generate_filename(input, site)
       if input.respond_to?(:filename)
         input.filename
       else
@@ -79,9 +93,13 @@ module Spontaneous::Field
       end
     end
 
-    def generate_html(input)
+    def generate_path(input, site)
       return input if input.is_a?(::String)
       input.url
+    end
+
+    def generate_html(input, site)
+      generate_path(input, site)
     end
 
     def export(user = nil)

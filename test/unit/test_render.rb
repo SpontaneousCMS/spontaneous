@@ -35,9 +35,19 @@ describe "Render" do
           end
         end
         field :description do
+          def render(format = :html, locals = {}, parent_context = nil)
+            case format
+            when :pdf
+              to_pdf
+            else
+              super
+            end
+          end
+
           def to_pdf
             "{#{value}}"
           end
+
           def to_epub
             to_html
           end
@@ -57,7 +67,7 @@ describe "Render" do
 
       @page.sections1 << @content
 
-      @section1 = ::Page.new(:title => "Section 1")
+      @section1 = ::Page.new(:title => "Section 1", :uid => "section1")
       @section2 = ::Page.new(:title => "Section 2")
       @section3 = ::Page.new(:title => "Section 3")
       @section4 = ::Page.new(:title => "Section 4")
@@ -68,8 +78,7 @@ describe "Render" do
 
       @root.sections2.entries.last.set_position(0)
       @root.save.reload
-      @renderer = Spontaneous::Output::Template::PublishRenderer.new
-      Spontaneous::Output.renderer = @renderer
+      @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
     end
 
     after do
@@ -82,36 +91,43 @@ describe "Render" do
     end
 
     it "use a cache for the site root" do
-        a = @renderer.render_string('#{root.object_id} #{root.object_id}', @page.output(:html), {})
-        a.wont_equal "#{nil.object_id} #{nil.object_id}"
-        a.split.uniq.length.must_equal 1
+      a = @renderer.render_string('#{root.object_id} #{root.object_id}', @page.output(:html), {})
+      a.wont_equal "#{nil.object_id} #{nil.object_id}"
+      a.split.uniq.length.must_equal 1
+    end
+
+    it "uses a cache for site pages" do
+      a = @renderer.render_string("${site_page('$section1').object_id}", @page.output(:html), {})
+      a.wont_equal "#{nil.object_id} #{nil.object_id}"
+      b = @renderer.render_string("${site_page('$section1').object_id}", @page.output(:html), {})
+      a.must_equal b
     end
 
     it "iterate through the sections" do
       template = '%%{ navigation(%s) do |section, active| }${section.title}/${active} %%{ end }'
       a = @renderer.render_string(template % "", @section1.output(:html), {})
       a.must_equal "Section 1/true Section 2/false Section 4/false Section 3/false "
-      a = @renderer.render_string(template % "1", @section2.output(:html), {})
+      a = @renderer.render_string(template % "depth: 1", @section2.output(:html), {})
       a.must_equal "Section 1/false Section 2/true Section 4/false Section 3/false "
-      a = @renderer.render_string(template % ":section", @section1.output(:html), {})
+      a = @renderer.render_string(template % "depth: :section", @section1.output(:html), {})
       a.must_equal "Section 1/true Section 2/false Section 4/false Section 3/false "
     end
 
     it "use a cache for navigation pages" do
       a = b = c = nil
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
-      renderer = Spontaneous::Output::Template::PreviewRenderer.new
+      renderer = Spontaneous::Output::Template::PreviewRenderer.new(@site)
       a = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       b = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.wont_equal b
 
-      renderer = Spontaneous::Output::Template::PublishRenderer.new
+      renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
       a = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       b = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.must_equal b
 
-      renderer = Spontaneous::Output::Template::PublishRenderer.new
+      renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
       c = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.wont_equal c
@@ -189,6 +205,36 @@ describe "Render" do
           lines[i].must_match /<div.+?>#{field.render(:html)}<\/div>/
         end
       end
+
+      it "passes arguments onto the render" do
+        Page.field :image do
+          size :large do; end
+          size :small do; end
+        end
+        Page.layout do
+          %{${ image(width: 10, height: 50, alt: "Fish")}}
+        end
+        @page.image = "/photo.jpg"
+        output =  @page.render
+        output.must_match /width=['"]10['"]/
+        output.must_match /height=['"]50['"]/
+        output.must_match /alt=['"]Fish['"]/
+      end
+
+      it "passes arguments onto the render for image sizes" do
+        Page.field :image do
+          size :large do; end
+          size :small do; end
+        end
+        Page.layout do
+          %{${ image.large(width: 10, height: 50)}}
+        end
+        @page.image = "/photo.jpg"
+        output =  @page.render
+        output.must_match /width=['"]10["']/
+        output.must_match /height=["']50['"]/
+      end
+
     end
     describe "boxes" do
       before do
@@ -351,7 +397,7 @@ describe "Render" do
       it "use their default page style when accessed directly" do
         @page = PageClass[@page.id]
         @page.layout.must_equal PageClass.default_layout
-        assert_correct_template(@parent, template_root / 'layouts/page_style')
+        assert_correct_template(@parent, template_root / 'layouts/page_style', @renderer)
         @page.render.must_equal "<html></html>\n"
       end
 
@@ -361,7 +407,7 @@ describe "Render" do
       end
 
       it "render using the inline style" do
-        assert_correct_template(@parent.contents.first, template_root / 'page_class/inline_style')
+        assert_correct_template(@parent.contents.first, template_root / 'page_class/inline_style', @renderer)
         @parent.contents.first.render.must_equal "Child\n"
         @parent.things.render.must_equal "Child\n"
         @parent.render.must_equal "<html>Child\n</html>\n"
@@ -393,8 +439,13 @@ describe "Render" do
       class ::PreviewRender < Page
         field :title, :string
       end
+      class ::Image < Piece
+        field :src
+        template :html, "${ src }/ q={{ query }}"
+      end
+
       PreviewRender.style :inline
-      PreviewRender.box :images
+      PreviewRender.box(:images) { allow :Image }
       PreviewRender.field :description, :markdown
       @page = PreviewRender.new(:title => "PAGE", :description => "DESCRIPTION")
       @page.save
@@ -403,12 +454,12 @@ describe "Render" do
 
     after do
       Object.send(:remove_const, :PreviewRender)
+      Object.send(:remove_const, :Image)
     end
 
     describe "Preview render" do
       before do
-        @renderer = Spontaneous::Output::Template::PreviewRenderer.new
-        Spontaneous::Output.renderer = @renderer
+        @renderer = Spontaneous::Output::Template::PreviewRenderer.new(@site)
         PreviewRender.layout :preview_render
       end
 
@@ -416,6 +467,15 @@ describe "Render" do
         @now = Time.now
         ::Time.stubs(:now).returns(@now)
         @renderer.render_string('${title} {{ Time.now }}', @page.output(:html), {}).must_equal "PAGE #{@now.to_s}"
+      end
+
+      it "renders all includes before calling the request render stage" do
+        PreviewRender.layout do
+          "q={{ query }} <${ images }>"
+        end
+        @page.images << Image.new(src: 'fish.jpg')
+        result = @page.render_using(@renderer, :html, { query: 'frog'})
+        result.must_equal "q=frog <fish.jpg/ q=frog>"
       end
 
 #       it "render all tags & include preview edit markers" do
@@ -430,13 +490,12 @@ describe "Render" do
     end
     describe "Request rendering" do
       before do
-        @renderer = Spontaneous::Output::Template::PreviewRenderer.new
-        Spontaneous::Output.renderer = @renderer
+        @renderer = Spontaneous::Output::Template::PreviewRenderer.new(@site)
         PreviewRender.layout :params
       end
 
       it "pass on passed params" do
-        result = @page.render({
+        result = @page.render_using(@renderer, :html, {
           :welcome => "hello"
         })
         result.must_equal "PAGE hello\n"
@@ -446,8 +505,7 @@ describe "Render" do
 
     describe "entry parameters" do
       before do
-        @renderer = Spontaneous::Output::Template::PreviewRenderer.new
-        Spontaneous::Output.renderer = @renderer
+        @renderer = Spontaneous::Output::Template::PreviewRenderer.new(@site)
         PreviewRender.layout :entries
         @first = PreviewRender.new(:title => "first")
         @second = PreviewRender.new(:title => "second")
@@ -470,8 +528,7 @@ describe "Render" do
         FileUtils.mkdir_p(@temp_template_root / "layouts")
         @site.paths.add(:templates, @temp_template_root)
 
-        @renderer = Spontaneous::Output::Template::PublishRenderer.new(true)
-        Spontaneous::Output.renderer = @renderer
+        @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site, true)
 
         @template_path = @temp_template_root / "layouts/standard.html.cut"
         @compiled_path = @temp_template_root / "layouts/standard.html.rb"
@@ -490,27 +547,80 @@ describe "Render" do
         @first.save
       end
 
-      it "ignore compiled template file if it is older than the template" do
-        @first.render.must_equal "compiled"
-        File.open(@temp_template_root / "layouts/standard.html.cut", "w") do |t|
-          t.write("updated template")
+      # Disabled pending decision about the best way to optimize templates
+      # in the case of this example, where we are optimizing the first render
+      # of a site template (not a rendered page) I'm not sure that it's worth it
+      # at all...
+      it "ignore compiled template file if it is older than the template"
+      #   @first.render_using(@renderer).must_equal "compiled"
+      #   File.open(@temp_template_root / "layouts/standard.html.cut", "w") do |t|
+      #     t.write("updated template")
+      #   end
+      #   later = Time.now + 1000
+      #   File.utime(later, later, @template_path)
+      #   template_mtime = File.mtime(@template_path)
+      #   compiled_mtime = File.mtime(@compiled_path)
+      #   assert template_mtime > compiled_mtime, "Template file should register as newer"
+      #   # Need to use a new renderer because the existing one will have cached the compiled template
+      #   @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
+      #   @first.render.must_equal "updated template"
+      # end
+    end
+
+    describe "PublishedRenderer" do
+      before do
+        @site.background_mode = :immediate
+        @site.output_store :Memory
+
+        ::Spontaneous::State.delete
+        ::Content.delete
+        ::Content.delete_revision(1) rescue nil
+        @renderer = Spontaneous::Output::Template::PublishedRenderer.new(@site, 1)
+        Page.box :other
+        class ::DynamicPage < Page
+          layout(:html) { "${path}.${ __format }:{{ something }}"}
         end
-        later = Time.now + 1000
-        File.utime(later, later, @template_path)
-        template_mtime = File.mtime(@template_path)
-        compiled_mtime = File.mtime(@compiled_path)
-        assert template_mtime > compiled_mtime, "Template file should register as newer"
-        # Need to use a new renderer because the existing one will have cached the compiled template
-        @renderer = Spontaneous::Output::Template::PublishRenderer.new
-        Spontaneous::Output.renderer = @renderer
-        @first.render.must_equal "updated template"
+        class ::StaticPage < Page
+          layout(:html) { "${ path }.${ __format }"}
+        end
+
+        @root = Page.create
+        assert @root.is_root?
+
+        @dynamic = DynamicPage.new(slug: "dynamic", uid: "dynamic")
+        @static = StaticPage.new(slug: "static", uid: "static")
+        @root.other << @dynamic
+        @root.other << @static
+
+        [@root, @dynamic, @static].each(&:save)
+
+        @site.publish do
+          run :render_revision
+          run :activate_revision
+        end
+        @site.publish_all
+      end
+
+      after do
+        Object.send :remove_const, :StaticPage
+        Object.send :remove_const, :DynamicPage
+        ::Content.delete
+      end
+
+      it "should render dynamic pages from the template store xxx" do
+        result = @renderer.render!(@dynamic.output(:html), { something: "something here" }, nil)
+        result.must_equal "/dynamic.html:something here"
+      end
+
+      it "should render static pages from the template store xxx" do
+        result = @renderer.render!(@static.output(:html), { something: "something here" }, nil)
+        result.read.must_equal "/static.html"
       end
     end
 
     describe "variables in render command" do
       before do
-        @renderer = Spontaneous::Output::Template::PublishRenderer.new
-        Spontaneous::Output.renderer = @renderer
+        @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
 
         PreviewRender.layout :variables
         PreviewRender.style :variables

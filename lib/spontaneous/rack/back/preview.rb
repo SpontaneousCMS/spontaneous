@@ -2,18 +2,35 @@ module Spontaneous::Rack::Back
   class Preview < Base
     include Spontaneous::Rack::Public
 
-
     # In preview mode we want to find pages even if they're
     # invisible.
     def find_page_by_path(path)
-      Spontaneous::Content.scope do
-        Spontaneous::Site.by_path(path)
+      site.model.scope do
+        site.by_path(path)
       end
+    end
+
+    # Redirect to the edit UI if a preview page is being accessed directly
+    def ensure_edit_preview(path)
+      referer = env['HTTP_REFERER']
+      development_preview = Spontaneous.development? && site.model::Page.has_root?
+      return true if development_preview || referer || params.key?('preview')
+      home = find_page_by_path(path)
+      # Need to handle the site initialisation where there is no homepage
+      # so we want to force a load of the CMS to offer up the 'add home'
+      # dialogue
+      if home.nil?
+        redirect NAMESPACE
+        return false
+      end
+      redirect "#{NAMESPACE}/#{home.id}/preview"
+      false
     end
 
     # Forward all GETs to the page resolution method
     get '*' do
-      render_path(params[:splat][0])
+      path = params[:splat][0]
+      ensure_edit_preview(path) && render_path(path)
     end
 
     # Forward all POSTs to the page resolution method

@@ -34,6 +34,10 @@ module Spontaneous
     end
 
     def paths
+      _paths
+    end
+
+    def _paths
       @paths ||= Spontaneous::Paths.new(@root)
     end
 
@@ -47,10 +51,12 @@ module Spontaneous
       end
     end
 
-    def load_indexes!
+    # use Rails' alphabetical load order for initializers
+    def run_initializers
       paths.expanded(:config).each do |config_path|
-        index_file = config_path / "indexes.rb"
-        Kernel.load(index_file) if File.exists?(index_file)
+        Dir["#{config_path / "initializers"}/*.rb"].sort.each do |initializer|
+          require initializer
+        end
       end
     end
 
@@ -77,13 +83,11 @@ module Spontaneous
 
     def loaders
       @loaders ||= \
-        begin
-          use_reloader = config.reload_classes
-          {
-            :schema => Spontaneous::SchemaLoader.new(schema_load_paths, use_reloader),
-            :lib => Spontaneous::Loader.new(load_paths, use_reloader)
-          }
-        end
+      begin
+        use_reloader = config.reload_classes
+        {:schema => Spontaneous::SchemaLoader.new(schema_load_paths, use_reloader),
+         :lib => Spontaneous::Loader.new(load_paths, use_reloader) }
+      end
     end
 
     def load_paths

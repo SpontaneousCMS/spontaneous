@@ -4,12 +4,6 @@ class Spontaneous::Site
   module Schema
     extend Spontaneous::Concern
 
-    module ClassMethods
-      def schema
-        instance.schema
-      end
-    end # ClassMethods
-
     def uid
       schema.uids
     end
@@ -19,7 +13,7 @@ class Spontaneous::Site
     end
 
     def schema
-      @schema ||= Spontaneous::Schema::Schema.new(root, schema_loader_class)
+      @schema ||= Spontaneous::Schema::Schema.new(self, root, schema_loader_class)
     end
 
     def schema_loader_class

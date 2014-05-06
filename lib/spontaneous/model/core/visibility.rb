@@ -104,7 +104,7 @@ module Spontaneous::Model::Core
     end
 
     def hide_descendents(visible)
-      path_like = :visibility_path.like("#{self[:visibility_path]}.#{self.id}%")
+      path_like = Sequel.like(:visibility_path, "#{self[:visibility_path]}.#{self.id}%")
       origin = visible ? nil : self.id
       dataset = content_model.filter(path_like).filter(:hidden => visible)
       # if a child item has been made invisible *before* its parent then it exists
@@ -127,8 +127,12 @@ module Spontaneous::Model::Core
     end
 
     def visibility_ancestors
+      visibility_ancestor_ids.map { |id| content_model[id] }
+    end
+
+    def visibility_ancestor_ids
       return [] if visibility_path.blank?
-      visibility_path.split(Spontaneous::VISIBILITY_PATH_SEP).map { |id| content_model[id] }
+      visibility_path.split(Spontaneous::VISIBILITY_PATH_SEP).map(&:to_i)
     end
 
     def recalculated_hidden

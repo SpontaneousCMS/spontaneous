@@ -11,8 +11,10 @@ module Spontaneous::Search
 
     def_delegators :@results, :current_page, :per_page, :total_pages, :next_page, :offset, :previous_page, :total_entries
 
-    def initialize(result_set, corrected_query = nil)
-      @results, @corrected_query = result_set, corrected_query
+    def initialize(model, result_set, corrected_query = nil)
+      @model = model
+      @results = result_set
+      @corrected_query = corrected_query
     end
 
     def corrected_query
@@ -28,7 +30,7 @@ module Spontaneous::Search
     end
 
     def pages
-      @page_list ||= Spontaneous::Content.get(@results.map { |doc| doc.id })
+      @page_list ||= @model.get(@results.map { |doc| doc.id })
     end
   end # Results
 end

@@ -4,24 +4,14 @@ class Spontaneous::Site
   module Search
     extend Spontaneous::Concern
 
-    module ClassMethods
-      def index(name, &definition)
-        instance.index(name, &definition)
+    def indexer(revision)
+      indexer = S::Search::CompoundIndexer.new(revision, indexes.values)
+      begin
+        yield(indexer)
+      ensure
+        indexer.close
       end
-
-      def indexes
-        instance.indexes
-      end
-
-      def indexer(revision)
-        indexer = S::Search::CompoundIndexer.new(revision, indexes.values)
-        begin
-          yield(indexer)
-        ensure
-          indexer.close
-        end
-      end
-    end # ClassMethods
+    end
 
     def indexes
       @indexes ||= {}
@@ -36,7 +26,7 @@ class Spontaneous::Site
     end
 
     def index(name, &definition)
-      index = S::Search::Index.new(name, &definition)
+      index = S::Search::Index.new(self, name, &definition)
       self[name] = index
     end
   end

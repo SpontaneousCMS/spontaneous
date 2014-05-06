@@ -1,0 +1,2 @@
+${ _renderer }
+%{ include 'partial_with_renderer', :newtitle => "local title" -}

@@ -26,7 +26,7 @@ module Spontaneous::Field
       [:julian]
     end
 
-    def preprocess(value)
+    def preprocess(value, site)
       return value if value.blank?
       ::Date.parse(value)
     end
@@ -35,7 +35,7 @@ module Spontaneous::Field
       %(<time datetime="%Y-%m-%d">#{ format }</time>)
     end
 
-    def generate_julian(date)
+    def generate_julian(date, site)
       return date.jd if date.is_a?(::Date)
       date.to_s
     end

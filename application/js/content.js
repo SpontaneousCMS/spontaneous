@@ -25,7 +25,7 @@ Spontaneous.Content = (function($, S) {
 			return this.content.target;
 		},
 		developer_description: function() {
-			return this.type().type + "["+this.id()+']'
+			return this.type().type + "["+this.id()+']';
 		},
 		developer_edit_url: function() {
 			return this.type().edit_url();
@@ -68,8 +68,16 @@ Spontaneous.Content = (function($, S) {
 			return this.filter_fields(function(f) { return !f.is_image(); });
 		},
 		// fields that should be saved as strings
-		string_fields: function() {
-			return this.filter_fields(function(f) { return !f.is_file(); });
+		string_values: function() {
+			var i, ii, v, values = [], fields = this.field_list();
+			for (i = 0, ii = fields.length; i < ii; i++) {
+				v = fields[i].stringValue();
+				if (v) {
+					values.push(v);
+				}
+			}
+			// return this.filter_fields(function(f) { return !f.is_file(); });
+			return values;
 		},
 		image_fields: function() {
 			return this.filter_fields(function(f) { return f.is_image(); });

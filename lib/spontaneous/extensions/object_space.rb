@@ -7,6 +7,12 @@ module ObjectSpace
       ObjectSpace.each_object(Class)  { |o| klasses << o }
       klasses
     end
+
+    def modules
+      modules = []
+      ObjectSpace.each_object(Module)  { |o| modules << o }
+      modules
+    end
   end
 end unless ObjectSpace.respond_to?(:classes)
 

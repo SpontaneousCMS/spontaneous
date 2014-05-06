@@ -25,18 +25,18 @@ module Spontaneous::Field
         response = \
           begin
             open(url).read
-        rescue => e
-          logger.error("Unable to retrieve metadata for video ##{video_id} from Vimeo: '#{e}'")
-          "[{}]"
-        end
+          rescue => e
+            logger.error("Unable to retrieve metadata for video ##{video_id} from Vimeo: '#{e}'")
+            fallback_response
+          end
         metadata = Spontaneous.parse_json(response) rescue [{}]
-        metadata = metadata.first || {}
+        metadata = (metadata || [{}]).first || {}
       end
 
       def to_html(options = {})
         params = player_attributes(options)
         attributes = hash_to_attributes(params[:attr])
-        %(<iframe #{attributes}></iframe>)
+        "<iframe #{attributes}></iframe>"
       end
 
       def as_json(options = {})
@@ -101,7 +101,7 @@ module Spontaneous::Field
           "autoplay" => o[:autoplay],
           "loop" => o[:loop],
           "api" => o[:api],
-          "player_id" => o[:player_id] }
+        "player_id" => o[:player_id] }
         params.update("color" => o[:color]) if o.key?(:color)
         params = ::Rack::Utils.build_query(params)
         "//player.vimeo.com/video/#{video_id}?#{params}"

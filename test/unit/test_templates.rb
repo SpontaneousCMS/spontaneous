@@ -52,7 +52,7 @@ describe "Templates" do
         true
       end
     end
-    @context = @klass.new(Object.new, :html)
+    @context = @klass.new(Object.new)
   end
 
   after do
@@ -110,6 +110,12 @@ ${ a[:a] }${ a[:b] -}
       TEMPLATE
       output.must_equal "ab"
     end
+
+    it "can convert a first-pass template to a second-pass template xxx" do
+      input = "${ template 'content/template' }"
+      output = @engine.render_string(input, @context)
+      output.must_equal "<html><title>{{{ title }}}</title></html>\n"
+    end
   end
 
   describe "Second render" do
@@ -118,12 +124,12 @@ ${ a[:a] }${ a[:b] -}
     end
 
     it "a render unescaped expressions" do
-      output = @engine.render_string('<html><title>{{title}}</title>{{unsafe}}</html>', @context)
+      output = @engine.render_string('<html><title>{{title}}</title>{{{unsafe}}}</html>', @context)
       output.must_equal "<html><title>THE TITLE</title><script>alert('bad')</script></html>"
     end
 
     it "render escaped expressions" do
-      output = @engine.render_string('<html><title>{$ unsafe $}</title></html>', @context)
+      output = @engine.render_string('<html><title>{{ unsafe }}</title></html>', @context)
       output.must_equal "<html><title>#{ERB::Util.html_escape(@context.unsafe)}</title></html>"
     end
 
@@ -205,6 +211,15 @@ Grandparent Footer
 Parent Footer
       RENDER
     end
+
+    it "keeps a reference to the render cache in included templates" do
+      # The render cache is kept on the renderer so it needs to be passed by the
+      # context#clone method
+      @context._renderer = "renderer"
+
+      output = @engine.render_template('with_includes_and_renderer', @context)
+      output.must_equal "renderer\nrenderer\n"
+    end
   end
 
   describe "conversion" do
@@ -225,10 +240,14 @@ Parent Footer
         def field
           @klass ||= Class.new(Object) do
             attr_accessor :_format
-            def to_html
-              "(#{_format})"
+            def render(format, locals = {}, parent_context = nil)
+              case format
+              when :html
+                "(#{_format})"
+              else
+                to_s
+              end
             end
-
             def to_s
               "'#{_format}'"
             end

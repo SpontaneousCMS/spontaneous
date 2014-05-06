@@ -51,7 +51,7 @@ describe "Generators" do
       %w(development.rb production.rb).each do |f|
         assert_file_exists(site_root, 'config/environments', f)
       end
-      %w(back.ru front.ru boot.rb database.yml deploy.rb environment.rb user_levels.yml indexes.rb).each do |f|
+      %w(back.ru front.ru boot.rb database.yml deploy.rb environment.rb user_levels.yml).each do |f|
         assert_file_exists(site_root, 'config', f)
       end
       %w(favicon.ico robots.txt).each do |f|
@@ -60,6 +60,7 @@ describe "Generators" do
       %w(standard.html.cut).each do |f|
         assert_file_exists(site_root, 'templates/layouts', f)
       end
+      assert_file_exists(site_root, 'config/initializers/indexes.rb')
       assert_file_exists(site_root, 'schema')
       assert_file_exists(site_root, 'schema/page.rb')
       assert File.read(site_root / 'schema/page.rb') =~ /class Page < Content::Page/
@@ -101,6 +102,12 @@ describe "Generators" do
       [:development, :test, :production].each do |environment|
         config[environment][:adapter].must_equal "mysql2"
         config[environment][:database].must_match /^example_com(_test)?/
+        case environment
+        when :production
+          config[environment][:user].must_equal "example_com"
+        else
+          config[environment][:user].must_equal "root"
+        end
         # db connections seem to work if you exclude the host
         config[environment][:host].must_equal "127.0.0.1"
       end
@@ -122,7 +129,7 @@ describe "Generators" do
       it "configure the correct gem" do
         generate(:site, "example.com", "--root=#{@tmp}", "--database=postgresql")
         gemfile = File.read(File.join(@site_root, "Gemfile"))
-        gemfile.must_match /^gem 'pg'/
+        gemfile.must_match /^gem 'sequel_pg'.+require: 'sequel'/
       end
 
       it "setup the right db parameters" do
@@ -130,7 +137,7 @@ describe "Generators" do
         config = database_config("example_com")
         [:development, :test].each do |environment|
           config[environment][:adapter].must_equal "postgres"
-          config[environment][:user].must_be_nil
+          config[environment][:user].must_equal ENV["USER"]
           config[environment][:database].must_match /^example_com(_test)?/
           refute config[environment].key?(:host)
         end
@@ -188,7 +195,7 @@ describe "Generators" do
       site_root = File.join(@tmp, 'example_com')
       generate(:site, "example.com", "--root=#{@tmp}", "--database=postgres", "--user=spontaneous", "--password=s3cret")
       gemfile = File.read(File.join(site_root, "Gemfile"))
-      gemfile.must_match /^gem 'pg'/
+      gemfile.must_match /^gem 'sequel_pg'.+require: 'sequel'/
       config = database_config("example_com")
       [:development, :test].each do |environment|
         config[environment][:user].must_equal "spontaneous"

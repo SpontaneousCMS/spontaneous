@@ -22,18 +22,20 @@ Spontaneous.Preview = (function($, S, $window) {
 			return this;
 		},
 		display: function(page) {
-
 			// HACK: must be a better way of making sure that updates to the path are
 			// propagated throughout entire interface
 			var path = S.Location.get('path');
 			var preview = this, $iframe = this.iframe, iframe = $iframe[0];
 			var location, monitorInterval = 200, monitor = function() {
-				var currentLocation = iframe.contentWindow.location.pathname;
+				var icw = iframe.contentWindow, currentLocation = icw.location.pathname;
 				if (currentLocation !== location) {
 					location = currentLocation;
 					S.Preview.set({
 						'title': iframe.contentWindow.document.title,
 						'path': iframe.contentWindow.location.pathname
+					});
+					$(icw).bind('unload', function(e) {
+						// trigger a progress indicator here
 					});
 					S.Location.load_path(iframe.contentWindow.location.pathname);
 				}

@@ -40,33 +40,33 @@ module Spontaneous
       (time.to_f * 10000000).to_i
     end
 
-    def self.update(content, params, user, asynchronous = false)
+    def self.update(site, content, params, user, asynchronous = false)
       fields = Hash[params.map { |sid, value| [content.fields.sid(sid), value] }]
-      Update.perform(fields, user, asynchronous)
+      Update.perform(site, fields, user, asynchronous)
     end
 
-    def self.update_asynchronously(content, params, user)
-      update(content, params, user, true)
+    def self.update_asynchronously(site, content, params, user)
+      update(site, content, params, user, true)
     end
 
-    def self.set(field, value, user, asynchronous = false)
-      Update.perform({field => value}, user, asynchronous)
+    def self.set(site, field, value, user, asynchronous = false)
+      Update.perform(site, {field => value}, user, asynchronous)
     end
 
-    def self.set_asynchronously(field, value, user)
-      set(field, value, user, true)
+    def self.set_asynchronously(site, field, value, user)
+      set(site, field, value, user, true)
     end
 
-    def self.find(*ids)
-      fields = ids.map { |id| resolve_id(id) }.compact
+    def self.find(content_model, *ids)
+      fields = ids.map { |id| resolve_id(content_model, id) }.compact
       return fields.first if ids.length == 1
       fields
     end
 
-    def self.resolve_id(id)
+    def self.resolve_id(content_model, id)
       content_id, box_sid, field_sid = id.split("/")
       field_sid, box_sid = box_sid, field_sid if field_sid.nil?
-      content = target = Spontaneous::Content.get(content_id)
+      content = target = content_model.get(content_id)
       return nil if target.nil?
       target  = content.boxes.sid(box_sid) if box_sid
       return nil if target.nil?
@@ -75,6 +75,6 @@ module Spontaneous
   end
 end
 
-[:string, :long_string, :html, :file, :image, :date, :markdown, :location, :webvideo, :select].each do |type|
+[:string, :long_string, :html, :file, :image, :date, :markdown, :location, :webvideo, :select, :tags, :boolean].each do |type|
   require "spontaneous/field/#{type}"
 end

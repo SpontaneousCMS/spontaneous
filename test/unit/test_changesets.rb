@@ -13,6 +13,7 @@ describe "Change" do
     @revision = 1
 
     Content.delete
+    Spontaneous::State.delete
 
     class ::Page
       field :title, :string, :default => "New Page"
@@ -28,16 +29,28 @@ describe "Change" do
     Content.delete_revision(@revision) rescue nil
     Content.delete_revision(@revision+1) rescue nil
     Content.delete
+    @site.must_publish_all!(false)
     teardown_site
+  end
+
+  def outstanding_changes
+    S::Change.outstanding(@site)
   end
 
   it "flag if the site has never been published" do
     root = Page.create(:title => "root")
     5.times { |i| root.things << Page.create(:title => "Page #{i+1}") }
-    result = S::Change.outstanding
+    result = outstanding_changes
     assert result.key?(:published_revision)
     result[:published_revision].must_equal 0
     assert result[:first_publish]
+  end
+
+  it "honors the site must_publish_all? flag" do
+    @site.must_publish_all!
+    root = Page.create(:title => "root")
+    result = outstanding_changes
+    result[:must_publish_all].must_equal true
   end
 
 
@@ -48,7 +61,7 @@ describe "Change" do
 
     5.times { |i| root.things << Page.create(:title => "Page #{i+1}") }
 
-    result = S::Change.outstanding
+    result = outstanding_changes
     result.must_be_instance_of(Hash)
 
     pages = result[:changes]
@@ -68,7 +81,7 @@ describe "Change" do
     root[:first_published_at] = root[:last_published_at] = root.modified_at - 1000
     root.things << Piece.new
     root.save.reload
-    result = S::Change.outstanding[:changes]
+    result = outstanding_changes[:changes]
     result.length.must_equal 1
     result.first.page.must_equal root
   end
@@ -83,7 +96,7 @@ describe "Change" do
 
     Content.publish(@revision+1, [root.id, root.things.first.id])
 
-    result = S::Change.outstanding[:changes]
+    result = outstanding_changes[:changes]
     result.length.must_equal 4
     Set.new(result.map(&:page_id).flatten).must_equal Set.new(root.things[1..-1].map(&:id))
   end
@@ -110,7 +123,7 @@ describe "Change" do
 
 
     Content.publish(@revision+1, [root.id])
-    result = S::Change.outstanding[:changes]
+    result = outstanding_changes[:changes]
 
     result.length.must_equal 5
 
@@ -148,7 +161,7 @@ describe "Change" do
 
 
     Content.publish(@revision+1, [root.id])
-    result = S::Change.outstanding[:changes]
+    result = outstanding_changes[:changes]
 
     e = nil
     begin
@@ -174,7 +187,7 @@ describe "Change" do
     root.save
 
     Content.publish(@revision+1, [root.id])
-    result = S::Change.outstanding[:changes]
+    result = outstanding_changes[:changes]
     change = result.detect { |change| change.page.id == new_child1.id }
     change.export.must_equal({
       :id => new_child1.id,
@@ -212,7 +225,7 @@ describe "Change" do
     root.save
     last = Time.now + 100
     ::Content.filter(:id => new_child1.id).update(:modified_at => last)
-    result = S::Change.outstanding[:changes]
+    result = outstanding_changes[:changes]
     assert result.first.modified_at > result.last.modified_at, "Change list in incorrect order"
   end
 
@@ -235,7 +248,7 @@ describe "Change" do
     page1.slug = "changed"
     page1.save
 
-    result = S::Change.outstanding[:changes]
+    result = outstanding_changes[:changes]
 
     change = result.detect { |change| change.page.id == page1.id }
     change.export[:side_effects].must_equal({
@@ -261,7 +274,7 @@ describe "Change" do
     page1.hide!
 
     page1.reload
-    result = S::Change.outstanding[:changes]
+    result = outstanding_changes[:changes]
     change = result.detect { |change| change.page.id == page1.id }
     change.export[:side_effects].must_equal({
       :visibility => [{ :count => 1, :created_at => later.httpdate, :old_value => false, :new_value => true}]
@@ -281,7 +294,7 @@ describe "Change" do
 
     lock = Spontaneous::PageLock.create(:page_id => page.id, :content_id => piece.id, :field_id => piece.async.id, :description => "Update Lock")
     assert page.locked_for_update?
-    result = S::Change.outstanding[:changes]
+    result = outstanding_changes[:changes]
     change = result.detect { |change| change.page.id == page.id }
     change.export[:update_locks].must_equal [{
       id: lock.id,

@@ -56,6 +56,16 @@ module Spontaneous::Model
       ensure
         mapper.logger = nil
       end
+
+      # Provide a Content.to_proc implementation to
+      # enable filtering of content lists like so:
+      #
+      #   Content.all.select(&ContentClass)
+      #   => [#<ContentClass...>, #<ContentClass...>]
+      #
+      def to_proc
+        Proc.new { |obj| self === obj }
+      end
     end
 
     include Enumerable

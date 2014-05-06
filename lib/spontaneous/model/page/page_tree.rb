@@ -15,18 +15,52 @@ module Spontaneous::Model::Page
     end
 
     # Returns a list of all the pages at a certain depth in the page tree for any page
-    def at_depth(depth)
+    def at_depth(depth, opts = {})
       return root_at_depth(depth) if is_root?
       parent_depth = [0, depth - 1].max
-      parent = ancestor(parent_depth)
-      unordered_pages = parent.children
+      parent       = ancestor(parent_depth)
       # This is made more complex because the #children method is unordered
       # whereas the actual page order must come from the boxes
-      return unordered_pages if parent.boxes.empty?
-      ordered_pages = []
+      return parent.children if parent.boxes.empty?
+
       # Iterate through the list of boxes and pull out of the
       # unordered page list each page that belongs to the current box
-      parent.boxes.each do |box|
+      boxes = parent.boxes
+
+      filter_proc = filter_list = nil
+
+      if (filter_list = (opts.delete(:only) || opts.delete(:box) || opts.delete(:boxes)))
+        filter_proc = proc { |box| filter_list.include?(box._name) }
+      elsif (filter_list = opts.delete(:except))
+        filter_proc = proc { |box| !filter_list.include?(box._name) }
+      end
+
+      if filter_list && filter_proc
+        filter_list = Array(filter_list).map(&:to_sym)
+        boxes  = boxes.select(&filter_proc)
+      end
+
+      ordered_pages = parent.ordered_pages(boxes)
+
+      filter_proc = filter_list = nil
+
+      if (filter_list = opts.delete(:include))
+        filter_proc = proc { |p| filter_list.include?(p.class) }
+      elsif (filter_list = opts.delete(:exclude))
+        filter_proc = proc { |p| !filter_list.include?(p.class) }
+      end
+
+      if filter_list && filter_proc
+        filter_list = Array(filter_list).map { |s| Class === s ? s : s.to_s.constantize }
+        ordered_pages = ordered_pages.select(&filter_proc)
+      end
+      ordered_pages
+    end
+
+    def ordered_pages(boxes)
+      unordered_pages = self.children
+      ordered_pages   = []
+      boxes.each do |box|
         box_id = box.schema_id.to_s
         in_box, unordered_pages = unordered_pages.partition { |p| p.box_sid == box_id }
         ordered_pages.concat in_box.sort { |a, b| a.position <=> b.position }

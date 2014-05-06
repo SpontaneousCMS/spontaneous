@@ -14,6 +14,10 @@ module Spontaneous::Model::Box
         define_instance_class(definition) if definition
       end
 
+      def schema
+        @box_class.mapper.schema
+      end
+
       def check_instance_class
         instance_class
       end
@@ -84,6 +88,17 @@ module Spontaneous::Model::Box
         end
       end
 
+      def export
+        if allow_subclasses
+          # can't configure interface name using allow_subclasses
+          instance_class.subclasses.map { |c| { type: c.ui_class } }
+        else
+          exported = {type: instance_class.ui_class }
+          exported[:as] = @options[:as] if @options.key?(:as)
+          [exported]
+        end
+      end
+
       def prototype
         @options[:prototype]
       end
@@ -120,7 +135,6 @@ module Spontaneous::Model::Box
       end
 
       def instance_classes
-        schema = Spontaneous::Site.schema
         names = groups.flat_map { |name| schema.groups[name] }
         names.map { |name| resolve_instance_class(name) }.uniq
       end

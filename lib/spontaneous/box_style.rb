@@ -5,12 +5,6 @@ module Spontaneous
   class BoxStyle < Style
     attr_reader :box
 
-    def self.excluded_classes
-      [Spontaneous::Box, Spontaneous::Content::Box].tap do |classes|
-        classes.push(::Box) if defined?(::Box)
-      end
-    end
-
     def self.to_directory_name(klass)
       return nil if excluded_classes.include?(klass)
       super
@@ -25,7 +19,7 @@ module Spontaneous
       nil
     end
 
-    def try_supertype_styles
+    def try_supertype_styles(renderer)
       []
     end
 
@@ -64,9 +58,21 @@ module Spontaneous
 
     def box_directory_names
       box_class = box._prototype.box_base_class
-      box_supertypes = [box_class].concat(class_ancestors(box_class)).reject { |type| self.class.excluded_classes.include?(type) }
+      box_supertypes = [box_class].concat(class_ancestors(box_class)).reject { |type| excluded_classes.include?(type) }
       return [nil] if box_supertypes.empty?
-      box_supertypes.map { |type| self.class.to_directory_name(type) }
+      box_supertypes.map { |type| to_directory_name(type) }
+    end
+
+    def excluded_classes
+      model = box.model.content_model
+      [Spontaneous::Box, model::Box].tap do |classes|
+        classes.push(::Box) if defined?(::Box)
+      end
+    end
+
+    def to_directory_name(klass)
+      return nil if excluded_classes.include?(klass)
+      super
     end
 
     def box_directory_paths(name)

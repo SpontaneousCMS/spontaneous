@@ -7,15 +7,66 @@
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  !{
+
+      A quick guide to spontaneous templating:
+
+        ${ ... } inserts a value, e.g. `${ title }` inserts the value of the page's title field
+
+        %{ ... } creates a code block with no output into the template,
+                 e.g. `%{ total_entries = boxes.map { |box| box.length }.sum }`
+
+        !{ ... } inserts a comment, e.g. `!{ this is a comment }`
+
+        Adding a '-' before the closing bracket removes whitespace after the tag, e.g. `${ title -}`
+
+  }
   <title>${ title } ­ <%= @domain %></title>
-	${ stylesheets '/css/site' }
+
+  !{ inserts a CSS link to assets/css/site.css which is a Sprockets 'manifest' file }
+
+	${ stylesheets 'css/site' }
+
 </head>
 <body>
   %{ block :content }
 		<h2>Welcome to <%= @domain %></h2>
+
+    !{ 'fields' dumps all the page fields into the template with no layout
+       you won't be wanting to do this in your actual templates but its useful
+       for instant feedback in the early stages... }
+
 		${ fields }
+
+    !{  'boxes' is useful however:
+
+        `${ boxes }` is the same as doing
+
+        %{ boxes.each do |box| }
+          ${ box }
+        %{ end }
+
+        Which is different to:
+
+        %{ boxes.each do |box| }
+          %{ box.each do |entry| }
+            ${ entry }
+          %{ end }
+        %{ end }
+
+        because it also renders any template that belongs to the box.
+
+        Since the default template for a box is `${ contents }` you will always get a valid output
+        from `${ box }`.
+    }
+
 		${ boxes  }
+
   %{ endblock :content }
-	${ scripts %w(/js/site) }
+
+  !{ inserts a script tag pointing to assets/js/site.js which is a Sprockets 'manifest' file }
+
+	${ scripts %w(js/site) }
+
 </body>
 </html>

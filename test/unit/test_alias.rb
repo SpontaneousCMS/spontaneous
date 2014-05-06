@@ -9,8 +9,9 @@ describe "Alias" do
     template_root = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/templates/aliases"))
     let(:template_root) { template_root }
     site.paths.add(:templates, template_root)
-    renderer = S::Output::Template::Renderer.new(false)
-    S::Output.renderer = renderer
+    renderer = S::Output::Template::Renderer.new(site, false)
+    let(:renderer) { renderer }
+    let(:site) { site }
 
     Content.delete
 
@@ -125,6 +126,7 @@ describe "Alias" do
   end
 
   before do
+    @site = site
   end
 
   after do
@@ -183,11 +185,12 @@ describe "Alias" do
         end
 
         it "allow for selecting only content from within one box" do
-          class ::X < ::Piece
-            alias_of :A, :container => Proc.new { S::Site['$thepage'].box1 }
+          container_proc = Proc.new { site['$thepage'].box1 }
+          ::X = Class.new(::Piece) do
+            alias_of :A, :container => container_proc
           end
-          class ::XX < ::Piece
-            alias_of :AA, :container => Proc.new { S::Site['$thepage'].box1 }
+          ::XX = Class.new(::Piece) do
+            alias_of :AA, :container => container_proc
           end
           targets = lambda { |a, target|
             [(a.targets), @page.box1.select { |p| target === p }].map { |a| Set.new(a) }
@@ -199,22 +202,24 @@ describe "Alias" do
         end
 
         it "allow for selecting only content from a range of boxes" do
-          class ::X < ::Piece
-            alias_of :A, :container => Proc.new { [S::Site['$thepage'].box1, S::Site['$thepage'].box2] }
+          container_proc = Proc.new { [site['$thepage'].box1, site['$thepage'].box2] }
+          ::X = Class.new(::Piece) do
+            alias_of :A, :container => container_proc
           end
-          class ::XX < ::Piece
-            alias_of :AA, :container => Proc.new { [S::Site['$thepage'].box1, S::Site['$thepage'].box2] }
+          ::XX = Class.new(::Piece) do
+            alias_of :AA, :container => container_proc
           end
           assert_same_content X.targets, @page.box1.select { |p| A === p } + @page.box2.select { |p| A === p }
           assert_same_content XX.targets, @page.box1.select { |p| AA === p } + @page.box2.select { |p| AA === p }
         end
 
         it "allow for selecting only content from within one page" do
-          class ::X < ::Piece
-            alias_of :A, :container => Proc.new { S::Site['$thepage'] }
+          container_proc = Proc.new { site['$thepage'] }
+          ::X = Class.new(::Piece) do
+            alias_of :A, :container => container_proc
           end
-          class ::XX < ::Piece
-            alias_of :AA, :container => Proc.new { S::Site['$thepage'] }
+          ::XX = Class.new(::Piece) do
+            alias_of :AA, :container => container_proc
           end
           assert_same_content X.targets, @page.content.select { |p| A === p }
           assert_same_content XX.targets, @page.content.select { |p| AA === p }
@@ -229,11 +234,13 @@ describe "Alias" do
             page2.box2 << AA.new
           }
           page2.save.reload
-          class ::X < ::Piece
-            alias_of :A, :AA, :container => Proc.new { [S::Site['$thepage'].box1, S::Site['$thepage2']] }
+          container_proc = Proc.new { [site['$thepage'].box1, site['$thepage2']] }
+          ::X = Class.new(::Piece) do
+            alias_of :A, :AA, :container => container_proc
           end
-          class ::XX < ::Piece
-            alias_of :AA, :container => Proc.new { [S::Site['$thepage'], S::Site['$thepage2'].box2] }
+          container_proc = Proc.new { [site['$thepage'], site['$thepage2'].box2] }
+          ::XX = Class.new(::Piece) do
+            alias_of :AA, :container => container_proc
           end
           assert_same_content X.targets(@page, @page.box1), @page.box1.contents + page2.content
           assert_same_content XX.targets, @page.content.select { |p| AA === p } + page2.box2.select { |p| AA === p }
@@ -327,21 +334,21 @@ describe "Alias" do
       end
 
       it "have their own styles" do
-        assert_correct_template(@a_alias,  template_root / 'a_alias/a_alias_style')
+        assert_correct_template(@a_alias,  template_root / 'a_alias/a_alias_style', renderer)
       end
 
       it "present their target's styles as their own" do
         @a_alias.style = :a_style
 
-        assert_correct_template(@a_alias,  template_root / 'a/a_style')
+        assert_correct_template(@a_alias,  template_root / 'a/a_style', renderer)
       end
 
       it "should use templates belonging to the alias class if they exist" do
-        assert_correct_template(@aa_alias,  template_root / 'aa_alias')
+        assert_correct_template(@aa_alias,  template_root / 'aa_alias', renderer)
       end
 
       it "should fallback to the targets default style if no alias template is present" do
-        assert_correct_template(@aaa_alias,  aaa1.template)
+        assert_correct_template(@aaa_alias,  aaa1.template, renderer)
       end
 
       # should "have an independent style setting"
@@ -410,7 +417,7 @@ describe "Alias" do
       a = BBAlias.create(:target => bb)
       aliases.box1 << a
       aliases.save
-      Site["/aliases/bb"].must_be_nil
+      site["/aliases/bb"].must_be_nil
     end
 
     it "have their target's path attribute if they alias to a page type" do
@@ -447,8 +454,8 @@ describe "Alias" do
       a.save
       a.reload
       a.path.must_equal "/aliases/b"
-      Site["/aliases/balias"].must_be_nil
-      Site["/aliases/b"].must_equal a
+      site["/aliases/balias"].must_be_nil
+      site["/aliases/b"].must_equal a
     end
 
     it "update their path if their target's slug changes" do

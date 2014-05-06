@@ -59,10 +59,12 @@ module Spontaneous::Output
         @name
       end
 
-      alias_method :extension, :name
-
       def to_sym
         @name
+      end
+
+      def to_s
+        to_sym.to_s
       end
 
       def extension(is_dynamic = false, dynamic_extension = Spontaneous::Output::Template.extension)
@@ -99,8 +101,12 @@ module Spontaneous::Output
         @options[:postprocess]
       end
 
-      def context
-        Spontaneous::Site.context (helper_formats + [name]).uniq.compact
+      def options
+        @options
+      end
+
+      def context(site = Spontaneous.instance)
+        site.context (helper_formats + [name]).uniq.compact
       end
     end
 
@@ -110,7 +116,7 @@ module Spontaneous::Output
     attr_reader :page
     attr_accessor :content
 
-    def_delegators "self.class", :format, :dynamic?, :extension, :to_sym, :mimetype, :mime_type, :public?, :private?, :context, :name, :extension
+    def_delegators "self.class", :format, :dynamic?, :extension, :to_sym, :mimetype, :mime_type, :public?, :private?, :context, :name, :extension, :options
 
     def initialize(page, content = nil)
       @page, @content = page, content
@@ -121,20 +127,20 @@ module Spontaneous::Output
       content.model
     end
 
-    def render(params = {}, *args)
-      render_using(default_renderer, params, *args)
+    def render(params = {}, parent_context = nil)
+      render_using(default_renderer, params, parent_context)
     end
 
-    def render_using(renderer, params, *args)
+    def render_using(renderer, params = {}, parent_context = nil)
       before_render
-      output = render_page(renderer, params, *args)
+      output = render_page(renderer, params, parent_context)
       output = postprocess(output)
       after_render(output)
       output
     end
 
     def default_renderer
-      Spontaneous::Output.renderer
+      Spontaneous::Output.default_renderer
     end
 
     def before_render
@@ -150,21 +156,13 @@ module Spontaneous::Output
       output
     end
 
-    def render_page(renderer, params = {}, *args)
-      renderer.render(self, params, *args)
+    def render_page(renderer, params = {}, parent_context = nil)
+      renderer.render(self, params, parent_context)
     end
 
-    def publish_page(renderer, revision)
+    def publish_page(renderer, revision, transaction)
       rendered = render_using(renderer, {:revision => revision})
-      path = output_path(revision, rendered)
-      File.open(path, 'w') do |file|
-        case rendered
-        when IO
-          IO.copy_stream(rendered, file)
-        else
-          file.write(rendered.to_s)
-        end
-      end
+      transaction.store(self, renderer.is_dynamic_template?(rendered), rendered)
     end
 
     def output_path(revision, render)
@@ -175,6 +173,24 @@ module Spontaneous::Output
       dir = File.dirname(path)
       FileUtils.mkdir_p(dir) unless File.exist?(dir)
       path
+    end
+
+    def ==(other)
+      eql?(other)
+    end
+
+    def eql?(other)
+      other.class == self.class && other.page == self.page
+    end
+
+    def hash
+      [self.class, page, options].hash
+    end
+
+    def url_path
+      path = page.path
+      path = "/index" if path == "/"
+      [path, name].join(".")
     end
   end
 end

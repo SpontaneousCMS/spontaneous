@@ -207,7 +207,7 @@ module Spontaneous
           end
 
           def load_one_to_many_association(assoc)
-            members = self.send(assoc[:dataset_method]).all
+            members = self.send(assoc[:dataset_method]).all.compact
             if (reciprocal = assoc[:reciprocal])
               members.each do |member|
                 member.send :set_association_cache, reciprocal, self

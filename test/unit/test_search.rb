@@ -92,61 +92,61 @@ describe "Search" do
 
   describe "indexes" do
     it "be retrievable by name" do
-      index = S::Site.index :arthur
-      S::Site.indexes[:arthur].must_be_instance_of Spontaneous::Search::Index
-      S::Site.indexes[:arthur].name.must_equal :arthur
-      S::Site.indexes[:arthur].must_equal index
+      index = @site.index :arthur
+      @site.indexes[:arthur].must_be_instance_of Spontaneous::Search::Index
+      @site.indexes[:arthur].name.must_equal :arthur
+      @site.indexes[:arthur].must_equal index
     end
 
     it "default to indexing all content classes" do
-      index = S::Site.index :all
+      index = @site.index :all
       assert_has_elements (@all_classes), index.search_types
     end
 
     it "allow restriction to particular classes" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         include_types ::PageClass1, "PageClass2", :PageClass3
       end
       assert_has_elements [::PageClass1, ::PageClass2, ::PageClass3], index.search_types
     end
 
     it "allow restriction to a class & its subclasses" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         include_types ">= PageClass1"
       end
       assert_has_elements [::PageClass1, ::PageClass3, ::PageClass5, ::PageClass6], index.search_types
     end
 
     it "allow restriction to a class's subclasses" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         include_types "> PageClass1"
       end
       assert_has_elements [::PageClass3, ::PageClass5, ::PageClass6], index.search_types
     end
 
     it "allow removal of particular classes" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         exclude_types ::PageClass1, "PageClass2"
       end
       assert_has_elements (@all_classes - [PageClass1, PageClass2]), index.search_types
     end
 
     it "allow removal of a class and its subclasses" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         exclude_types ">= PageClass1", PieceClass1
       end
       assert_has_elements (@all_classes - [::PageClass1, ::PageClass3, ::PageClass5, ::PageClass6, PieceClass1]), index.search_types
     end
 
     it "allow removal of a class's subclasses" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         exclude_types "> PageClass1"
       end
       assert_has_elements (@all_classes - [::PageClass3, ::PageClass5, ::PageClass6]), index.search_types
     end
 
     it "default to including all content" do
-      index = S::Site.index :all
+      index = @site.index :all
       @all_pages.each do |page|
         assert index.include?(page)
       end
@@ -155,7 +155,7 @@ describe "Search" do
     it "allow restriction to a set of specific pages" do
       id = @root0.id
       path = @page8.path
-      index = S::Site.index :all do
+      index = @site.index :all do
         include_pages id, "$page11", path
       end
 
@@ -164,7 +164,7 @@ describe "Search" do
     end
 
     it "allow restriction to a page and its children" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         include_pages ">= $page8"
       end
 
@@ -173,7 +173,7 @@ describe "Search" do
     end
 
     it "allow restriction to a page's children" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         include_pages "> $page8"
       end
 
@@ -182,7 +182,7 @@ describe "Search" do
     end
 
     it "allow removal of specific pages" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         exclude_pages "$page8", "/page1"
       end
 
@@ -191,7 +191,7 @@ describe "Search" do
     end
 
     it "allow removal of a page and its children" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         exclude_pages "/page1", ">= $page8"
       end
 
@@ -200,7 +200,7 @@ describe "Search" do
     end
 
     it "allow removal of a page's children" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         exclude_pages "/page1", "> $page8"
       end
 
@@ -209,7 +209,7 @@ describe "Search" do
     end
 
     it "allow multiple, mixed, page restrictions" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         include_pages "$page1", "> $page8"
       end
 
@@ -218,7 +218,7 @@ describe "Search" do
     end
 
     it "allow combining of class and page restrictions" do
-      index = S::Site.index :all do
+      index = @site.index :all do
         exclude_types PageClass3, PageClass4
         include_pages "$page1", "> $page8"
         exclude_pages "$page10"
@@ -281,9 +281,9 @@ describe "Search" do
     #
     #
     before do
-      @index1 = S::Site.index(:one)
-      @index2 = S::Site.index(:two)
-      @index3 = S::Site.index(:three) do
+      @index1 = @site.index(:one)
+      @index2 = @site.index(:two)
+      @index3 = @site.index(:three) do
         include_types PageClass1
       end
     end
@@ -296,6 +296,17 @@ describe "Search" do
       assert prototype_a.in_index?(@index1)
       assert prototype_a.in_index?(@index2)
       assert prototype_a.in_index?(@index3)
+    end
+
+    it "must be included in all indexes with if passed a hash with no name key" do
+      prototype_a = PageClass1.field :a, :index => {weight: 16}
+      assert prototype_a.in_index?(@index1)
+      assert prototype_a.in_index?(@index2)
+      assert prototype_a.in_index?(@index3)
+      [:one, :two, :three].each do |name|
+        index = @site.indexes[name]
+        index.fields[PageClass1.fields[:a].schema_id.to_s][:weight].must_equal 16
+      end
     end
 
     it "be included in indexes referenced by name" do
@@ -337,20 +348,20 @@ describe "Search" do
 
       h = ::PageClass1.boxes.pages.instance_class.field :h, :index => :two
 
-      S::Site.indexes[:one].fields.must_equal({
+      @site.indexes[:one].fields.must_equal({
         a.schema_id.to_s => { :type => String, :store => true, :index => false},
         b.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true},
         c.schema_id.to_s => { :type => String, :store => true, :weight => 4, :index => true},
         g.schema_id.to_s => { :type => String, :store => true, :weight => 16, :index => true}
       })
 
-      S::Site.indexes[:two].fields.must_equal({
+      @site.indexes[:two].fields.must_equal({
         :a => { :type => String, :store => true, :weight => 2, :index => true},
         g.schema_id.to_s => { :type => String, :store => true, :weight => 16, :index => true},
         h.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true}
       })
 
-      S::Site.indexes[:three].fields.must_equal({
+      @site.indexes[:three].fields.must_equal({
         e.schema_id.to_s => { :type => String, :store => true, :weight => 1, :index => true}
       })
     end
@@ -360,10 +371,10 @@ describe "Search" do
     before do
       @revision = 99
 
-      @index1 = S::Site.index :one do
+      @index1 = @site.index :one do
         exclude_types PageClass3
       end
-      @index2 = S::Site.index :two
+      @index2 = @site.index :two
 
       @a = PageClass1.field  :a, :index => true
       @b = PageClass2.field  :b, :index => true
@@ -419,7 +430,7 @@ describe "Search" do
     end
 
     it "only include specified pieces" do
-      index = S::Site.index :four do
+      index = @site.index :four do
         include_types PageClass1, PieceClass1
       end
 
@@ -431,7 +442,7 @@ describe "Search" do
     end
 
     it "allow for page types to append their own custom indexable values" do
-      index = S::Site.index :four do
+      index = @site.index :four do
         include_types PageClass1, PieceClass1
       end
       class ::PageClass1
@@ -450,7 +461,7 @@ describe "Search" do
     end
 
     it "deal with arrays of additional search index values" do
-      index = S::Site.index :four do
+      index = @site.index :four do
         include_types PageClass1, PieceClass1
       end
       class ::PageClass1
@@ -471,7 +482,7 @@ describe "Search" do
     end
 
     it "allow for pieces to append their own custom indexable values" do
-      index = S::Site.index :four do
+      index = @site.index :four do
         include_types PageClass1, PieceClass1
       end
       class ::PieceClass1
@@ -491,7 +502,7 @@ describe "Search" do
 
     it "create database in the right directory" do
       db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
-      Site.stubs(:published_revision).returns(@revision)
+      @site.stubs(:published_revision).returns(@revision)
       mset = mock()
       mset.stubs(:matches).returns([])
       xapian = mock()
@@ -520,7 +531,7 @@ describe "Search" do
     it "pass on index configuration to the xapian db" do
       db_path = @site.revision_dir(@revision) / 'indexes' / 'name'
 
-      index = Site.index :name do
+      index = @site.index :name do
         language :italian
       end
 
@@ -535,7 +546,7 @@ describe "Search" do
 
       db = index.create_db(@revision)
 
-      index = Site.index :name do
+      index = @site.index :name do
         language :french
         stopper  false
         stemmer  false
@@ -559,7 +570,7 @@ describe "Search" do
 
     it "return (reasonable) results to searches" do
       db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
-      S::Site.stubs(:published_revision).returns(@revision)
+      @site.stubs(:published_revision).returns(@revision)
       db = @index1.create_db(@revision)
       db << @page1
       db << @page2
@@ -592,9 +603,23 @@ describe "Search" do
       FileUtils.rm_r(db_path)
     end
 
+    it "returns pages based on the contents of their boxes" do
+      db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
+      @site.stubs(:published_revision).returns(@revision)
+      db = @index1.create_db(@revision)
+      db << @page1
+      db << @page2
+      db << @page3
+      db.close
+
+      results = @index1.search('h value')
+      results.to_a.first.id.must_equal @page1.id
+    end
+
+
     it "respect weighting factors given to fields" do
       db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
-      S::Site.stubs(:published_revision).returns(@revision)
+      @site.stubs(:published_revision).returns(@revision)
       db = @index1.create_db(@revision)
       @w = PieceClass1.field :w, :index => { :weight => 100 }
       @page1.pages << PieceClass1.new(:w => "findme")
@@ -616,11 +641,11 @@ describe "Search" do
 
     it "use the weighting specific to a subclass" do
       db_path = @site.revision_dir(@revision) / 'indexes' / 'one'
-      S::Site.stubs(:published_revision).returns(@revision)
+      @site.stubs(:published_revision).returns(@revision)
       @w = PieceClass1.field :w, :index => { :weight => 100 }
       WeightedPiece = Class.new(PieceClass1)
       WeightedPiece.field :w, :index => { :weight => 1}
-      index = Site.index :weighted do
+      index = @site.index :weighted do
       end
       @page1.pages << WeightedPiece.new(:w => "findme")
       @page2.pages << PieceClass2.new(:h => "findme findme")
@@ -649,7 +674,7 @@ describe "Search" do
       db2.expects(:<<).with(@page1)
       db1.expects(:close)
       db2.expects(:close)
-      S::Site.indexer(@revision) do |indexer|
+      @site.indexer(@revision) do |indexer|
         indexer.length.must_equal 2
         indexer << @page1
       end
@@ -661,7 +686,7 @@ describe "Search" do
       FileUtils.cp_r(File.expand_path("../../fixtures/search/config", __FILE__), @site.root)
     end
 
-    it "load the config/indexes.rb file" do
+    it "load the search initializer file" do
       @site.expects(:connect_to_database!)
       @site.initialize!
       index = @site.indexes[:fast]

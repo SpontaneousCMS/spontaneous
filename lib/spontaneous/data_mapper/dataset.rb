@@ -16,7 +16,7 @@ module Spontaneous
         if (instance = @identity_map[id])
           instance
         else
-          first(id: id)
+          primary_key_lookup(id)
         end
       end
 
@@ -36,6 +36,10 @@ module Spontaneous
         filter(:id => id_list).all.sort { |i1, i2|
           order[i1.id] <=> order[i2.id]
         }
+      end
+
+      def primary_key_lookup(pk)
+        first(id: pk)
       end
 
       def first(*args, &block)
@@ -134,6 +138,11 @@ module Spontaneous
         self
       end
 
+      def invert
+        @dataset.invert!
+        self
+      end
+
       def qualify_to_first_source
         @dataset = @dataset.qualify_to_first_source
         self
@@ -144,8 +153,10 @@ module Spontaneous
       end
 
       def to_sql
-        @dataset.inspect
+        @dataset.sql
       end
+
+      alias_method :sql, :to_sql
 
       private
 
@@ -185,6 +196,7 @@ module Spontaneous
           instance
         else
           model = @schema.to_class(attributes[:type_sid])
+          return nil if model.nil?
           instance = model.new(attributes, true)
           @identity_map[instance.id] = instance
         end

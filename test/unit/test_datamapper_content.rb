@@ -18,17 +18,23 @@ describe "DataMapperContent" do
   end
 
   before do
+    root ||= Dir.mktmpdir
     @expected_columns = DB[:content].columns
     @database = ::Sequel.mock(autoid: 1)
     @database.columns = @expected_columns
-    @schema = Spontaneous::Schema.new(Dir.pwd, NameMap)
-    content_super = Spontaneous::Model(:content, @database, @schema)
+    @site = Spontaneous::Site.instantiate(root, :test, :back)
+    @schema = Spontaneous::Schema.new(@site, Dir.pwd, NameMap)
+    content_super = Spontaneous::Model!(:content, @database, @schema)
     content_class = Class.new(content_super)
+    page_class    = Class.new(content_class::Page)
+    @site.model = content_class
     Object.const_set(:Content, content_class)
+    Object.const_set(:Page, page_class)
   end
 
   after do
     Object.send :remove_const, :Content rescue nil
+    Object.send :remove_const, :Page rescue nil
   end
 
     it  "be defined as a top-level constant" do
@@ -39,11 +45,25 @@ describe "DataMapperContent" do
       ::Content.serialized_columns.must_equal [:field_store, :entry_store, :box_store, :serialized_modifications]
     end
 
+    it "has a dataset that doesnt filter by type" do
+      ds = ::Content.dataset
+      ds.must_be_instance_of Spontaneous::DataMapper::Dataset
+      ds.sql.must_equal "SELECT * FROM content WHERE (type_sid IN ('Page'))"
+    end
+
     it  "search without type filters" do
       @database.sqls # clear sql log
       ::Content.all
       @database.sqls.must_equal [
-        "SELECT * FROM content"
+        "SELECT * FROM content WHERE (type_sid IN ('Page'))"
+      ]
+    end
+
+    it "allows for retrieval of a single instance by primary key" do
+      @database.sqls # clear sql log
+      ::Content.primary_key_lookup(23)
+      @database.sqls.must_equal [
+        "SELECT * FROM content WHERE ((type_sid IN ('Page')) AND (id = 23)) LIMIT 1"
       ]
     end
 
@@ -63,7 +83,7 @@ describe "DataMapperContent" do
         b = ::Content.root
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (path = '/') LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('Page')) AND (path = '/')) LIMIT 1"
       ]
     end
 
@@ -75,7 +95,7 @@ describe "DataMapperContent" do
         b = ::Content.path("/this")
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (path = '/this') LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('Page')) AND (path = '/this')) LIMIT 1"
       ]
     end
 
@@ -87,20 +107,17 @@ describe "DataMapperContent" do
         b = ::Content.uid("fish")
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE (uid = 'fish') LIMIT 1"
+        "SELECT * FROM content WHERE ((type_sid IN ('Page')) AND (uid = 'fish')) LIMIT 1"
       ]
     end
 
     describe "Pages" do
       before do
-        page_class = Class.new(::Content::Page)
-        Object.const_set(:Page, page_class)
-        Object.const_set(:P1, Class.new(page_class))
-        Object.const_set(:P2, Class.new(page_class))
+        Object.const_set(:P1, Class.new(::Page))
+        Object.const_set(:P2, Class.new(::Page))
       end
 
       after do
-        Object.send :remove_const, :Page rescue nil
         Object.send :remove_const, :P1   rescue nil
         Object.send :remove_const, :P2   rescue nil
       end
@@ -112,6 +129,13 @@ describe "DataMapperContent" do
           "SELECT * FROM content WHERE (type_sid IN ('Page', 'P1', 'P2'))"
         ]
       end
+
+      it "has a dataset that filters for pages" do
+        ds = ::Content::Page.dataset
+        ds.must_be_instance_of Spontaneous::DataMapper::Dataset
+        ds.sql.must_equal "SELECT * FROM content WHERE (type_sid IN ('Page', 'P1', 'P2'))"
+      end
+
 
       it  "limit searches to a single class for all other page types" do
         @database.sqls # clear sql log
@@ -144,7 +168,7 @@ describe "DataMapperContent" do
         @database.sqls # clear sql log
         P2.root
         @database.sqls.must_equal [
-          "SELECT * FROM content WHERE (path = '/') LIMIT 1"
+          "SELECT * FROM content WHERE ((type_sid IN ('Page', 'P1', 'P2')) AND (path = '/')) LIMIT 1"
         ]
       end
 
@@ -185,6 +209,12 @@ describe "DataMapperContent" do
         @database.sqls.must_equal [
           "SELECT * FROM content WHERE (type_sid IN ('Piece', 'P1', 'P2'))"
         ]
+      end
+
+      it "has a dataset that filters for pieces" do
+        ds = ::Content::Piece.dataset
+        ds.must_be_instance_of Spontaneous::DataMapper::Dataset
+        ds.sql.must_equal "SELECT * FROM content WHERE (type_sid IN ('Piece', 'P1', 'P2'))"
       end
 
       it  "limit searches to a single class for all other page types" do

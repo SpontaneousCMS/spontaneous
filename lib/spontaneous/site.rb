@@ -35,11 +35,15 @@ module Spontaneous
     include URL
 
     attr_accessor :database
-    attr_reader :environment, :mode
+    attr_reader :environment, :mode, :model
 
     def initialize(root, env, mode)
       super(root)
       @environment, @mode = env, mode
+    end
+
+    def model=(content_model)
+      @model = content_model
     end
 
     def initialize!
@@ -48,7 +52,7 @@ module Spontaneous
       find_plugins!
       load_facets!
       init_facets!
-      init_indexes!
+      run_initializers!
     end
 
 
@@ -58,9 +62,9 @@ module Spontaneous
       end
     end
 
-    def init_indexes!
+    def run_initializers!
       facets.each do |facet|
-        facet.load_indexes!
+        facet.run_initializers
       end
     end
 
@@ -79,8 +83,11 @@ module Spontaneous
 
 
     def connect_to_database!
-      self.database = Sequel.connect(db_settings)
-      self.database.logger = logger if config.log_queries
+      db = Sequel.connect(db_settings)
+      db.logger = logger if config.log_queries
+      # Improve performance for postgres
+      db.optimize_model_load = true if db.respond_to?(:optimize_model_load)
+      self.database = db
     end
 
     def db_settings
@@ -124,10 +131,10 @@ module Spontaneous
 
     def revision_root
       @revision_dir ||= begin
-                          path = Pathname.new(@root / 'cache/revisions')
-                          path.mkpath unless path.exist?
-                          path.realpath.to_s
-                        end
+        path = Pathname.new(@root / 'cache/revisions')
+        path.mkpath unless path.exist?
+        path.realpath.to_s
+      end
     end
 
     def revision_dir(revision=nil, root = revision_root)

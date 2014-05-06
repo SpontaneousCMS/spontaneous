@@ -7,7 +7,7 @@ describe "Assets" do
   include RackTestMethods
 
   def app
-    Spontaneous::Rack::Back.application
+    Spontaneous::Rack::Back.application(site)
   end
 
   module LiveSimulation
@@ -24,12 +24,12 @@ describe "Assets" do
 
   def new_context(live, content = @page, format = :html, params = {})
     renderer = if live
-                 Spontaneous::Output::Template::PublishRenderer.new
+                 Spontaneous::Output::Template::PublishRenderer.new(site)
                else
-                 Spontaneous::Output::Template::PreviewRenderer.new
+                 Spontaneous::Output::Template::PreviewRenderer.new(site)
                end
     output = content.output(format)
-    context = renderer.context(output, params)
+    context = renderer.context(output, params, nil)
     context.extend LiveSimulation if live
     context.class_eval do
       # Force us into production environment
@@ -67,6 +67,7 @@ describe "Assets" do
     site.config.tap do |c|
       c.auto_login = 'root'
     end
+    site.output_store(:Memory)
     Spontaneous::Permissions::User.delete
     user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass")
     user.update(:level => Spontaneous::Permissions[:editor])
@@ -177,7 +178,7 @@ describe "Assets" do
   end
 
   describe "preview" do
-    let(:app) { Spontaneous::Rack::Back.application }
+    let(:app) { Spontaneous::Rack::Back.application(site) }
     let(:context) { preview_context }
 
     describe "javascript" do
@@ -297,23 +298,30 @@ describe "Assets" do
         result.must_match /background: url\(i\/missing\.png\)/
       end
 
+      it "can understand urls with hashes" do
+        get "/assets/css/urlhash.css"
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        result = last_response.body
+        result.must_match %r{background: url\(/assets/i/y\.png\?query=true#hash\)}
+      end
+
       it "embeds image data" do
         get "/assets/css/data.css"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match /background-image: url\(data:image\/png;base64,/
+        result.must_match %r{background-image: url\(data:image\/png;base64,}
       end
 
       it "can include other assets" do
         get "/assets/css/import.css"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match /width: 8px;/
+        result.must_match %r{width: 8px;}
       end
     end
 
     describe "templates" do
-      let(:renderer)  { Spontaneous::Output::Template::PreviewRenderer.new }
+      let(:renderer)  { Spontaneous::Output::Template::PreviewRenderer.new(site) }
 
       it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
@@ -327,7 +335,7 @@ describe "Assets" do
   end
 
   describe "publishing" do
-    let(:app) { Spontaneous::Rack::Front.application }
+    let(:app) { Spontaneous::Rack::Front.application(site) }
     let(:context) { live_context }
     let(:revision) { S::Revision.new(context.revision) }
 
@@ -342,25 +350,27 @@ describe "Assets" do
     end
 
     describe "javascript" do
+      let(:all_sha) { "b1d3d85feff4d68e16d2b4da97717aa0" }
+      let(:x_sha) { "cf638f60cff3ce84f156cb4621a914b4" }
       it "bundles & fingerprints local scripts" do
         result = context.scripts('js/all', 'js/m.js', 'js/c.js', 'x')
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all-22505bbfb6293f6996de75f281c97fe7.js"></script>',
-          '<script type="text/javascript" src="/assets/js/m-7daf13cf52ad1c0306a55982228f0dc3.js"></script>',
-          '<script type="text/javascript" src="/assets/js/c-3183d7b34185b5095c679ecdbe50fd92.js"></script>',
-          '<script type="text/javascript" src="/assets/x-61d00c5233906a8f06ac5f236c1200a6.js"></script>'
+          %(<script type="text/javascript" src="/assets/js/all-#{all_sha}.js"></script>),
+          '<script type="text/javascript" src="/assets/js/m-424bd92768589875beac31e333399631.js"></script>',
+          '<script type="text/javascript" src="/assets/js/c-ac0d40982cc84fc656234ef2a57e09e8.js"></script>',
+          %(<script type="text/javascript" src="/assets/x-#{x_sha}.js"></script>)
         ].join("\n")
       end
 
       it "writes bundled assets to the revision directory" do
         result = context.scripts('js/all')
-        asset_path = revision.path("assets/js/all-22505bbfb6293f6996de75f281c97fe7.js")
+        asset_path = revision.path("assets/js/all-#{all_sha}.js")
         assert asset_path.exist?
       end
 
       it "compresses local scripts" do
         result = context.scripts('js/all')
-        asset_path = revision.path("assets/js/all-22505bbfb6293f6996de75f281c97fe7.js")
+        asset_path = revision.path("assets/js/all-#{all_sha}.js")
         js = asset_path.read
         js.index("\n").must_be_nil
       end
@@ -368,23 +378,23 @@ describe "Assets" do
       it "bundles locals scripts and includes remote ones" do
         result = context.scripts('js/all', '//use.typekit.com/abcde', 'http://cdn.google.com/jquery.js', 'x')
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all-22505bbfb6293f6996de75f281c97fe7.js"></script>',
+          %(<script type="text/javascript" src="/assets/js/all-#{all_sha}.js"></script>),
           '<script type="text/javascript" src="//use.typekit.com/abcde"></script>',
           '<script type="text/javascript" src="http://cdn.google.com/jquery.js"></script>',
-          '<script type="text/javascript" src="/assets/x-61d00c5233906a8f06ac5f236c1200a6.js"></script>'
+          %(<script type="text/javascript" src="/assets/x-#{x_sha}.js"></script>)
         ].join("\n")
       end
 
       it "makes bundled scripts available under /assets" do
         context.scripts('js/all')
-        get "/assets/js/all-22505bbfb6293f6996de75f281c97fe7.js"
-        asset_path = revision.path("assets/js/all-22505bbfb6293f6996de75f281c97fe7.js")
+        get "/assets/js/all-#{all_sha}.js"
+        asset_path = revision.path("assets/js/all-#{all_sha}.js")
         last_response.body.must_equal asset_path.read
       end
 
       it "only bundles & compresses once" do
         context.scripts('js/all')
-        asset_path = revision.path("assets/js/all-22505bbfb6293f6996de75f281c97fe7.js")
+        asset_path = revision.path("assets/js/all-#{all_sha}.js")
         assert asset_path.exist?
         asset_path.open("w") do |file|
           file.write("var cached = true;")
@@ -395,19 +405,22 @@ describe "Assets" do
     end
 
     describe "css" do
+      let(:all_sha) { "2468ffc5102b6bfcaf69a4fc8db59fdd" }
+      let(:x_sha)   { "ae3ee1dc79a34d24e28456118c1b9623" }
+
       it "bundles & fingerprints local stylesheets" do
         result = context.stylesheets('css/all', 'css/a.css', 'x')
         result.must_equal [
-          '<link rel="stylesheet" href="/assets/css/all-5a2bcfb191dd15394a00b096d5978593.css" />',
-          '<link rel="stylesheet" href="/assets/css/a-603fe41a590a542843a288327e6bf9b7.css" />',
-          '<link rel="stylesheet" href="/assets/x-0d6f7e6ce6f1553544acb14682c8eb07.css" />'
+          %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
+          '<link rel="stylesheet" href="/assets/css/a-35b26d0cd9c7ebff494c8627e0d4ed14.css" />',
+          %(<link rel="stylesheet" href="/assets/x-#{x_sha}.css" />)
         ].join("\n")
       end
 
       it "ignores missing stylesheets" do
         result = context.stylesheets('css/all', '/css/notfound', 'css/notfound')
         result.must_equal [
-          '<link rel="stylesheet" href="/assets/css/all-5a2bcfb191dd15394a00b096d5978593.css" />',
+          %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
           '<link rel="stylesheet" href="/css/notfound" />',
           '<link rel="stylesheet" href="css/notfound" />'
         ].join("\n")
@@ -416,10 +429,10 @@ describe "Assets" do
       it "bundles locals scripts and includes remote ones" do
         result = context.stylesheets('css/all.css', '//stylesheet.com/responsive', 'http://cdn.google.com/normalize.css', 'x')
         result.must_equal [
-          '<link rel="stylesheet" href="/assets/css/all-5a2bcfb191dd15394a00b096d5978593.css" />',
+          %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
           '<link rel="stylesheet" href="//stylesheet.com/responsive" />',
           '<link rel="stylesheet" href="http://cdn.google.com/normalize.css" />',
-          '<link rel="stylesheet" href="/assets/x-0d6f7e6ce6f1553544acb14682c8eb07.css" />'
+          %(<link rel="stylesheet" href="/assets/x-#{x_sha}.css" />)
         ].join("\n")
       end
 
@@ -465,15 +478,17 @@ describe "Assets" do
       end
     end
 
+    let(:y_sha) { "e2b6a69468b467c7414ae0e12124a66e" }
+
     describe "images" do
       it "bundles images and links using fingerprinted asset url" do
         path = context.stylesheet_urls('css/image1').first
         get path
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match %r{background:url\(/assets/i/y-9cf98219611ef5a9fdf0d970af30084a\.png\)}
+        result.must_match %r{background:url\(/assets/i/y-#{y_sha}\.png\)}
 
-        asset_path = revision.path("/assets/i/y-9cf98219611ef5a9fdf0d970af30084a.png")
+        asset_path = revision.path("/assets/i/y-#{y_sha}.png")
         assert asset_path.exist?
       end
 
@@ -484,18 +499,28 @@ describe "Assets" do
         result = last_response.body
         result.must_match %r{background-image:url\(data:image/png;base64}
       end
+
+      it "can understand urls with hashes" do
+        path = context.stylesheet_urls('css/urlhash').first
+        get path
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        result = last_response.body
+        result.must_match %r{background:url\(/assets/i/y-#{y_sha}\.png\?query=true#hash\)}
+        asset_path = revision.path("/assets/i/y-#{y_sha}.png")
+        assert asset_path.exist?
+      end
     end
 
     describe "templates" do
-      let(:renderer)  { Spontaneous::Output::Template::PublishRenderer.new }
+      let(:renderer)  { Spontaneous::Output::Template::PublishRenderer.new(site) }
 
       it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
-        result.must_equal "/assets/i/y-9cf98219611ef5a9fdf0d970af30084a.png"
+        result.must_equal "/assets/i/y-#{y_sha}.png"
       end
       it "should allow for embedding asset urls into templates" do
         result = renderer.render_string("${ asset_url 'i/y.png' }", @page.output(:html))
-        result.must_equal "url(/assets/i/y-9cf98219611ef5a9fdf0d970af30084a.png)"
+        result.must_equal "url(/assets/i/y-#{y_sha}.png)"
       end
     end
   end

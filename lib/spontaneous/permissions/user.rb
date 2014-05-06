@@ -10,7 +10,7 @@ module Spontaneous::Permissions
     many_to_many :groups,       :class => :'Spontaneous::Permissions::AccessGroup', :join_table => :spontaneous_groups_users
     one_to_many  :access_keys,  :class => :'Spontaneous::Permissions::AccessKey', :reciprocal => :user
 
-    set_restricted_columns(:crypted_password)
+    set_allowed_columns(:name, :login, :email, :disabled, :password, :level)
 
     def_delegators :group, :level, :access_selector
 
@@ -98,7 +98,7 @@ module Spontaneous::Permissions
     end
 
     def encrypt_password(clear_password)
-      Spontaneous::Crypt.hash(clear_password)
+      Spontaneous::Crypt.hash_password(clear_password)
     end
 
     def upgrade_authentication(auth)
@@ -188,17 +188,24 @@ module Spontaneous::Permissions
       errors.add(:email, 'is required') if email.blank?
       errors.add(:email, 'is invalid')  unless email.blank? or email =~ /\A[^@]+@.+\z/
 
-      if login.blank?
-        errors.add(:login, 'is required')
-      else
-        errors.add(:login, 'should only contain letters, numbers & underscore') unless login =~ /\A[a-zA-Z0-9_]+\z/
-        errors.add(:login, 'should be at least 3 letters long') if login.length < 3
-      end
+      validate_login
+      validate_login_uniqueness
+      validate_password
+    end
 
+    def validate_login
+      return errors.add(:login, 'is required') if login.blank?
+      errors.add(:login, 'should only contain letters, numbers & underscore') unless login =~ /\A[a-zA-Z0-9_]+\z/
+      errors.add(:login, 'should be at least 3 letters long') if login.length < 3
+    end
+
+    def validate_login_uniqueness
       if (u = User[:login => login]) && (u.id != id)
         errors.add(:login, "must be unique, login '#{login}' already exists")
       end
+    end
 
+    def validate_password
       if new? || updating_password?
         if password.blank?
           errors.add(:password, 'is required')

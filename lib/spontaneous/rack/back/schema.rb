@@ -8,7 +8,7 @@ module Spontaneous::Rack::Back
     use Spontaneous::Rack::Middleware::CSRF::Verification
 
     def schema
-      Spontaneous.schema
+      site.schema
     end
 
     post "/delete" do

@@ -1,4 +1,5 @@
 require 'sprockets'
+require 'uri'
 
 module Spontaneous::Asset
   module Environment
@@ -12,6 +13,23 @@ module Spontaneous::Asset
 
     def self.preview(site = Spontaneous::Site.instance)
       Preview.new(site)
+    end
+
+    # takes a path that has optional hash & query parts and splits
+    # out the real asset path.
+    def self.split_asset_path(path)
+      uri = URI(path)
+      [uri.path, uri.query, uri.fragment]
+    end
+
+
+    # takes a path that has optional hash & query parts and splits
+    # out the real asset path.
+    def self.join_asset_path(path, query, hash)
+      joined = path.dup
+      joined << "?#{query}" if query
+      joined << "##{hash}"  if hash
+      joined
     end
 
     module SassFunctions
@@ -55,9 +73,10 @@ module Spontaneous::Asset
           end
 
           def asset_path(path, options = {})
-            asset = environment[path]
+            asset_path, query, fragment = Spontaneous::Asset::Environment.split_asset_path(path)
+            asset = environment[asset_path]
             return path if asset.nil?
-            make_absolute asset.logical_path
+            Spontaneous::Asset::Environment.join_asset_path(make_absolute(asset.logical_path), query, fragment)
           end
 
           def make_absolute(logical)
@@ -81,7 +100,7 @@ module Spontaneous::Asset
       def find(sources, options)
         paths   = normalise_sources(sources, options)
         if options[:development]
-          assets = paths.flat_map { |path| a = environment[path].to_a ; a.empty? ? [path] : a }
+          assets = paths.flat_map { |path| a = environment[path, bundle: true].to_a ; a.empty? ? [path] : a }
         else
           assets = paths.map { |path| environment[path] || path }
         end
@@ -188,11 +207,12 @@ module Spontaneous::Asset
 
           # Too easy to be right
           def asset_path(path, options = {})
+            asset_path, query, fragment = Spontaneous::Asset::Environment.split_asset_path(path)
             manifest = self.class.manifest
-            manifest.compile(path)
-            asset = manifest.assets[path]
+            manifest.compile(asset_path)
+            asset = manifest.assets[asset_path]
             return path if asset.nil?
-            make_absolute asset
+            Spontaneous::Asset::Environment.join_asset_path(make_absolute(asset), query, fragment)
           end
 
           def make_absolute(logical)

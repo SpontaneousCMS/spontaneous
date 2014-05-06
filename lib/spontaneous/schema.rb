@@ -99,16 +99,16 @@ module Spontaneous
       end
     end
 
-    def self.new(root, schema_loader_class = Spontaneous::Schema::PersistentMap)
-      Schema.new(root, schema_loader_class)
+    def self.new(site, root, schema_loader_class = Spontaneous::Schema::PersistentMap)
+      Schema.new(site, root, schema_loader_class)
     end
 
     class Schema
       attr_accessor :schema_loader_class
       attr_reader   :uids
 
-      def initialize(root, schema_loader_class = Spontaneous::Schema::PersistentMap)
-        @root = root
+      def initialize(site, root, schema_loader_class = Spontaneous::Schema::PersistentMap)
+        @site, @root = site, root
         @schema_loader_class = schema_loader_class
         @subclass_map = Hash.new { |h, k| h[k] = [] }
         initialize_uid_map
@@ -163,6 +163,7 @@ module Spontaneous
         case action
         when :delete
           uids.destroy(uid)
+          after_delete(uid)
         when :rename
           uid.rewrite!(dest)
         end
@@ -170,6 +171,17 @@ module Spontaneous
         reload!
         validate!
         logger.info("✓ Schema updated successfully")
+      end
+
+      # now I want to clean up the content, removing any types associated with UIDs
+      # that no longer exist and then cleaning up after that by looking for any
+      # instances with an invalid content path. This can happen because when a
+      # type is removed it becomes difficult to instantiate any entries that remain
+      # in the db
+      def after_delete(uid)
+        result = Spontaneous::Model::Action::Clean.run(@site)
+        logger.warn("Deleted #{result[:invalid]} invalid and #{result[:orphans]} orphaned content instances.")
+        logger.warn("Site must_publish_all flag has been set") if result[:publish]
       end
 
       def generate_new_schema
@@ -275,7 +287,8 @@ module Spontaneous
       end
 
       def excluded_types
-        [Spontaneous::Content, Spontaneous::Content::Page, Spontaneous::Content::Piece]
+        model = @site.model
+        [model, model::Page, model::Piece]
       end
 
       def inheritance_map
@@ -302,7 +315,11 @@ module Spontaneous
       # TODO: Find a way to filter out the top-level classes without hard-coding
       # them here.
       def content_classes
-        classes.reject { |k| k.is_box? }.uniq
+        classes.select { |k| k.is_a?(Spontaneous::DataMapper::ContentModel) }.uniq
+      end
+
+      def types
+        content_classes
       end
 
       def recurse_classes(root_class, list)
@@ -314,17 +331,18 @@ module Spontaneous
 
       def reset!
         @classes         = []
+        @types           = []
         @inheritance_map = nil
         reload!
       end
 
       def reload!
-        @map             = nil
+        @map = nil
         initialize_uid_map
       end
 
       def initialize_uid_map
-        @uids = Spontaneous::Schema::UIDMap.new
+        @uids = Spontaneous::Schema::UIDMap.new(@site)
       end
 
       # It's obvious from this method that schema classes are
@@ -341,6 +359,7 @@ module Spontaneous
 
       def constants_of(klass)
         return [] unless klass.respond_to?(:constants)
+        return [] if klass == ::BasicObject
         klass.constants.
           select { |c| klass.const_defined?(c, false) }.
           map { |c| klass.const_get(c) }

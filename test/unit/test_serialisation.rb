@@ -13,7 +13,7 @@ describe "Serialisation" do
 
     class ::SerialisedPage < ::Page
       field :direction, :title => "Pointing Direction", :comment => "NSEW" do
-        def preprocess(value)
+        def preprocess(value, site)
           ({
             "N" => "North",
             "S" => "South",
@@ -41,6 +41,7 @@ describe "Serialisation" do
           width 50
         end
       end
+      field :another, list: false
 
       style :freezing
       style :boiling
@@ -87,12 +88,12 @@ describe "Serialisation" do
     it "include the title field name in the serialisation of page types" do
       SerialisedPage.export(nil)[:title_field].must_equal 'title'
     end
-    it "use JS friendly names for type keys xxx" do
+    it "use JS friendly names for type keys" do
       class ::SerialisedPage
         class InnerClass < Piece
         end
       end
-      Site.schema.export['SerialisedPage.InnerClass'].must_equal  ::SerialisedPage::InnerClass.export
+      @site.schema.export['SerialisedPage.InnerClass'].must_equal  ::SerialisedPage::InnerClass.export
     end
   end
 

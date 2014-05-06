@@ -39,6 +39,7 @@
 //= require field/date
 //= require field/webvideo
 //= require field/select
+//= require field/boolean
 //= require content_area
 //= require preview
 //= require editing

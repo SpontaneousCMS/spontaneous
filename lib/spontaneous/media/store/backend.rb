@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module Spontaneous::Storage
+module Spontaneous::Media::Store
   class Backend
     def accepts?(mimetype)
       return true if @accepts.nil?

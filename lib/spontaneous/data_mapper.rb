@@ -27,16 +27,19 @@ module Spontaneous
         @keys = {
           :visible  => :"#{name}_mapper_visibility",
           :revision => :"#{name}_mapper_revision",
-          :dataset => :"#{name}_mapper_dataset"
+          :active_scope => :"#{name}_mapper_dataset"
         }
       end
 
-      def_delegators :dataset,
+      def_delegators :active_scope,
+        :dataset,
         :filter, :where,
         :filter!, :where!,
+        :untyped,
         :count, :count!,
         :order, :limit,
         :all, :get, :[], :first,
+        :primary_key_lookup,
         :all!, :first!,
         :reload,
         :instance,
@@ -47,6 +50,7 @@ module Spontaneous
         :columns, :table_name,
         :qualify_column, :quote_identifier,
         :with_cache,
+        :sql, :to_sql,
         :logger=, :logger
 
       def_delegators :@schema,
@@ -88,7 +92,7 @@ module Spontaneous
           if block_given?
             yield
           else
-            dataset
+            active_scope
           end
         else
           scope!(revision, visible, &block)
@@ -97,7 +101,7 @@ module Spontaneous
 
       def scope!(revision, visible, &block)
         if block_given?
-          r, v, d  = @keys.values_at(:revision, :visible, :dataset)
+          r, v, d  = @keys.values_at(:revision, :visible, :active_scope)
           thread   = Thread.current
           state    = [thread[r], thread[v], thread[d]]
           begin
@@ -113,12 +117,12 @@ module Spontaneous
         end
       end
 
-      def dataset
-        Thread.current[@keys[:dataset]] || current_scope
+      def active_scope
+        Thread.current[@keys[:active_scope]] || current_scope
       end
 
       def cached_dataset?
-        !Thread.current[@keys[:dataset]].nil?
+        !Thread.current[@keys[:active_scope]].nil?
       end
 
       def use_current_scope?(revision, visible)

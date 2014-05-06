@@ -176,19 +176,18 @@ module Spontaneous::Prototypes
     end
 
     def allowed_types(user)
-      if writable?(user)
-        types = []
-        instance_class.allowed.select { |a| a.readable?(user) }.each do  |a|
-          types.concat(a.instance_classes)
-        end
-        types
-      else
-        []
-      end
+      _allowed(user).flat_map { |allow| allow.instance_classes }
     end
 
+    def _allowed(user)
+      return [] unless writable?(user)
+      instance_class.allowed.select { |a| a.readable?(user) }
+    end
+
+    private :_allowed
+
     def export(user)
-      allowed = allowed_types(user).map { |c| c.ui_class }
+      allowed = _allowed(user).flat_map { |a| a.export }
       {
         :name => name.to_s,
         :id => schema_id.to_s,

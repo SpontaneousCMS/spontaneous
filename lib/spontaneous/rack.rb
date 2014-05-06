@@ -21,6 +21,7 @@ module Spontaneous
       # Rack env params
       ACTIVE_USER    = "spot.user".freeze
       ACTIVE_KEY     = "spot.key".freeze
+      SITE           = "spot.site".freeze
       RENDERER       = "spot.renderer".freeze
       REVISION       = "spot.revision".freeze
       CSRF_VALID     = "spot.csrf_valid".freeze
@@ -36,12 +37,12 @@ module Spontaneous
     include Constants
 
     class << self
-      def application
+      def application(site)
         case Spontaneous.mode
         when :back
-          Back.application
+          Back.application(site)
         when :front
-          Front.application
+          Front.application(site)
         end
       end
 
@@ -49,12 +50,12 @@ module Spontaneous
         Site.config.port
       end
 
-      def make_front_controller(controller_class)
-        Spontaneous::Rack::Front.make_controller(controller_class)
+      def make_front_controller(controller_class, site)
+        Spontaneous::Rack::Front.make_controller(controller_class, site)
       end
 
-      def make_back_controller(controller_class)
-        Spontaneous::Rack::Back.make_controller(controller_class)
+      def make_back_controller(controller_class, site)
+        Spontaneous::Rack::Back.make_controller(controller_class, site)
       end
     end
 
@@ -62,6 +63,10 @@ module Spontaneous
       include Constants
 
       set :environment, Proc.new { Spontaneous.environment }
+
+      def site
+        @site ||= env[Spontaneous::Rack::SITE]
+      end
     end
 
     autoload :Assets,               'spontaneous/rack/assets'

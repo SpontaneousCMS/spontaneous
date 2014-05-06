@@ -11,7 +11,13 @@ module Spontaneous
 
       method_option :destination, :type => :string, :aliases => "-d", :required => true, :desc => "Compile assets into DESTINATION"
 
-      def compile
+      def compile(*args)
+        compile_assets
+      end
+
+      protected
+
+      def compile_assets
         prepare(:compile)
         # options[:mode] = :console
         # Find path to install of Spontaneous using bundler and then

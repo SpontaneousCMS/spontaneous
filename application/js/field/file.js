@@ -4,11 +4,40 @@ Spontaneous.Field.File = (function($, S) {
 	var FileField = new JS.Class(Spontaneous.Field.String, {
 		selected_files: false,
 
+		currentValue: function() {
+			var pending, v = this.get('value');
+			if ((pending = v['__pending__'])) {
+				return pending['value'];
+			}
+			return v;
+		},
+
+		currentFilename: function() {
+			return this.currentValue()['filename'];
+		},
+
+		currentFilesize: function() {
+			return this.currentValue()['filesize'];
+		},
+
+		currentEditValue: function() {
+			var value, pending, ui, v = this.get('value');
+			if ((pending = v['__pending__'])) {
+				return pending['value'];
+			}
+			value = v['original'];
+			if ((ui = v['__ui__'])) {
+				value['path'] = value['src'];
+				value['src'] = ui['src'];
+			}
+			return value;
+		},
+
 		preview: function() {
 			Spontaneous.UploadManager.register(this);
 			var self = this
-			, value = this.get('value')
-			, filename = this.filename(value);
+			, value = this.currentValue()
+			, filename = this.currentFilename();
 			var wrap = dom.div('.file-field');
 			var dropper = dom.div('.file-drop');
 
@@ -61,7 +90,7 @@ Spontaneous.Field.File = (function($, S) {
 				}
 			};
 			if (value) {
-				set_info(value.html, this.filename(value), value.filesize);
+				set_info(value.html, this.currentFilename(), this.currentFilesize());
 			}
 
 			dropper.append(this.progress_bar().parent());
@@ -237,14 +266,30 @@ Spontaneous.Field.File = (function($, S) {
 			this.processed_value();
 		},
 		set_edited_value: function(value) {
-			console.log('set_edited_value', value, this.edited_value(), this.original_value())
 			if (value === this.edited_value()) {
 				// do nothing
 			} else {
 				this.selected_files = null;
 				this.set('value', value);
 			}
+		},
+		stringValue: function() {
+			if (this.mark_cleared) {
+				this.mark_cleared = false;
+				return { name: this.form_name(), value: '' };
+			}
+			return false; // don't upload this field as text
+		},
+
+		mark_cleared: false,
+
+		clear_file: function() {
+			// this.set('value', {});
+			this.mark_cleared = true;
+			this.selected_files = null;
+			this.mark_modified();
 		}
+
 	});
 	return FileField;
 })(jQuery, Spontaneous);

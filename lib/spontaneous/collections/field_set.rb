@@ -36,12 +36,12 @@ module Spontaneous::Collections
     # this #render method.
     # This should only be used during development
     #
-    def render(format = :html, params = {}, *args)
-      map { |field| wrap_field_value(field, field.render(format, params, *args), format) }.join("\n")
+    def render(format = :html, locals = {}, parent_context = nil)
+      map { |field| wrap_field_value(field, field.render(format, locals), format) }.join("\n")
     end
 
-    def render_using(renderer, format = :html, params = {}, *args)
-      map { |field| wrap_field_value(field, field.render_using(renderer, format, params, *args), format) }.join("\n")
+    def render_using(renderer, format = :html, locals = {}, parent_context = nil)
+      map { |field| wrap_field_value(field, field.render_using(renderer, format, locals), format) }.join("\n")
     end
 
     protected

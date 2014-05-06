@@ -9,7 +9,7 @@ module Spontaneous::Field
       [:html, :lat, :lng]
     end
 
-    def generate_outputs(input)
+    def generate_outputs(input, site)
       values = {}
       values[:html] = escape_html(input)
       values.update(geolocate(input))

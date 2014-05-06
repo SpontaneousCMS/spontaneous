@@ -5,7 +5,11 @@ gem 'spontaneous', '~> <%= Spontaneous::VERSION %>'
 # Or point it at a git repository to use the cutting edge or your custom version
 # gem 'spontaneous', :git => "https://github.com/SpontaneousCMS/spontaneous.git"
 
-gem '<%= @database[:gem].name %>', '<%= @database[:gem].requirement %>'
+gem '<%= @database[:gem].name %>', '<%= @database[:gem].requirement %>'<%
+  if (requires = @database[:gem].autorequire) && (requires.length > 0)
+    requires = requires.first if requires.length == 1 -%>
+, require: '<%= requires %>'
+<%- end -%>
 
 # Your favorite ExecJS compatible engine
 gem 'therubyracer',    '~> 0.11.1'

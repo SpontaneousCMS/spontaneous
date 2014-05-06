@@ -90,9 +90,13 @@ $target-name-size: 14px;
   -moz-border-radius: $radius 0 0 $radius;
   border-radius: $radius 0 0 $radius; }
 
+@mixin shadow {
+	-webkit-box-shadow: 0px 3px 30px #cccccc;
+	-moz-box-shadow: 0px 3px 30px #cccccc;
+}
 .shadow {
-  -webkit-box-shadow: 0px 3px 30px #cccccc;
-  -moz-box-shadow: 0px 3px 30px #cccccc; }
+	@include shadow;
+}
 
 .clearfix:after {
   content: ".";
@@ -144,6 +148,7 @@ $target-name-size: 14px;
 }
 
 @mixin interface {
+	@include no-select;
   font-family: $interface-font-family;
   -webkit-font-smoothing: antialiased;
   text-transform: uppercase;
@@ -151,7 +156,6 @@ $target-name-size: 14px;
   line-height: 13px;
   //font-weight: bold;
   font-weight: 600;
-  @extend .no-select;
 }
 
 @mixin button($background-color: $action) {

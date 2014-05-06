@@ -187,6 +187,7 @@ module Spontaneous
 
         # Duplicate objects and loaded features in the file
         klasses = ObjectSpace.classes.dup
+        modules = ObjectSpace.modules.dup
         already_loaded = $LOADED_FEATURES.dup
 
         # Start to re-require old dependencies
@@ -230,7 +231,8 @@ module Spontaneous
           # added to the list of loaded classes for a file.
           # Without this a long file with an error will only record classes
           # loaded after the error has been resolved.
-          loaded_classes[file].concat(ObjectSpace.classes - klasses)
+          new_objects = (ObjectSpace.classes - klasses) + (ObjectSpace.modules - modules)
+          loaded_classes[file].concat(new_objects)
           mtimes[file] = mtime if mtime
         end
 
@@ -249,6 +251,7 @@ module Spontaneous
       # Removes the specified class and constant.
       #
       def remove_constant(const)
+        const.__finalize if const.respond_to?(:__finalize)
         Spontaneous.schema.delete(const)
 
         parts = const.to_s.split("::")

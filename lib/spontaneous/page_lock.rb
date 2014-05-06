@@ -6,9 +6,6 @@ module Spontaneous
 
     plugin :timestamps
 
-    many_to_one :page, :class => "Spontaneous::Content", :key => :page_id
-    many_to_one :content, :class => "Spontaneous::Content", :key => :content_id
-
     def self.lock_field(field)
       create(field_attributes(field).merge(
         :description => field.page_lock_description
@@ -40,7 +37,7 @@ module Spontaneous
     end
 
     def field
-      @field ||= Spontaneous::Field.find(field_id)
+      @field ||= Spontaneous::Field.find(content.model, field_id)
     end
 
     def field_name
@@ -49,12 +46,13 @@ module Spontaneous
 
     def location
       field, owner = self.field, self.field.owner
+      model = owner.model.content_model
       case owner
-      when Spontaneous::Content::Box
+      when model::Box
         "Field ‘#{field.name}’ of box ‘#{owner.box_name}’"
-      when Spontaneous::Content::Page
+      when model::Page
         "Field ‘#{field.name}’"
-      when Spontaneous::Content::Piece
+      when model::Piece
         "Field ‘#{field.name}’ of entry #{owner.position + 1} in box ‘#{owner.container.box_name}’"
       end
     end

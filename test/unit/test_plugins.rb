@@ -32,15 +32,15 @@ describe "Plugins" do
   end
 
   def app
-    Spontaneous::Rack.application
+    Spontaneous::Rack.application(@site)
   end
 
 
   before do
-    S::Site.background_mode = :immediate
     S::State.delete
     Content.delete
     @site = Spontaneous.instance
+    @site.background_mode = :immediate
     page = ::Page.new
     page.save
 
@@ -82,50 +82,10 @@ describe "Plugins" do
       Spontaneous.mode = :back
       get "/schema_plugin/subdir/sass.css"
       assert last_response.ok?, "Static file /schema_plugin/subdir/sass.css returned error code #{last_response.status}"
-      last_response.body.must_match /^\s+color: #005a55;/
-      last_response.body.must_match /^\s+padding: 42px;/
-    end
-
-    describe "during publishing" do
-      before do
-        Content.delete_revision(1) rescue nil
-
-        Spontaneous.logger.silent! {
-          S::Site.publish_all
-        }
-      end
-
-      after do
-        FileUtils.rm_rf(@revision_root) rescue nil
-        Content.delete
-        S::State.delete
-        Content.delete_revision(1)
-      end
-
-      it "have their public files copied into the revision sandbox" do
-        @static.each do |file|
-          path = File.join(@site.revision_root, '00001', 'public', 'schema_plugin', file)
-          assert File.exists?(path), "File '#{path}' should exist"
-        end
-      end
-
-      it "have their SASS & Less templates rendered to static css" do
-        sass_files =['subdir/sass.css']
-        sass_files.each do |file|
-          path = File.join(@site.revision_root, '00001', 'public', 'schema_plugin', file)
-          assert File.exists?(path), "File '#{path}' should exist"
-          css = File.read(path)
-          css.must_match /color:#005a55;?/
-          css.must_match /padding:42px;?/
-        end
-      end
+      last_response.body.must_match %r{^\s+color: #005a55;}
+      last_response.body.must_match %r{^\s+padding: 42px;}
     end
   end
-
-
-  # describe "Functional plugins" do
-  #   # do I need anything here?
-  # end
 
   describe "with schemas" do
     it "make content classes available to rest of app" do

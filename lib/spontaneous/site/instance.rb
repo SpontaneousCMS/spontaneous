@@ -8,11 +8,11 @@ class Spontaneous::Site
       extend Forwardable
 
       def instantiate(root, env, mode)
-        Thread.current[:spontaneous_site_instance] = Spontaneous::Site.new(root, env, mode)
+        @__instance__ = Spontaneous::Site.new(root, env, mode)
       end
 
       def instance
-        Thread.current[:spontaneous_site_instance]
+        @__instance__
       end
 
       def_delegators :instance, :config, :database, :database=

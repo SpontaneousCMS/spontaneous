@@ -86,12 +86,12 @@ module Spontaneous::Field
       [:html, :label]
     end
 
-    def generate(output, value)
+    def generate(output, value, site)
       return "" if value.blank?
       value[[:html, :label].index(output)]
     end
 
-    def preprocess(value)
+    def preprocess(value, site)
       Spontaneous::JSON.parse(value)
     end
 

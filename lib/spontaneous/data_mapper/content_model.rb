@@ -87,8 +87,16 @@ module Spontaneous
 
       alias_method :[], :get
 
+      def primary_key_lookup(id)
+        mapper.primary_key_lookup(id)
+      end
+
       def count
         mapper.count(types)
+      end
+
+      def dataset
+        mapper.dataset(types)
       end
 
       def all
@@ -335,7 +343,7 @@ module Spontaneous
         end
 
         def hash
-          [model, id.nil? ? @values.sort_by{|k,v| k.to_s} : id].hash
+          [model, id.nil? ? (@values || {}).sort_by{|k,v| k.to_s} : id].hash
         end
       end
     end

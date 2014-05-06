@@ -87,7 +87,7 @@ describe "Page" do
       Page.root.must_equal nil
       root = ErrorPage.create_root "error"
       Page.root.must_equal nil
-      Site["#error"].must_equal root
+      @site["#error"].must_equal root
     end
   end
 
@@ -179,12 +179,27 @@ describe "Page" do
       p.path.must_equal "/my-slug-01"
     end
 
-    it "not be longer than 255 chars" do
+    it "not be longer than 64 chars" do
       o = Page.create
       long_slug = (["bang"]*100)
       o.slug = long_slug.join(' ')
-      o.slug.length.must_equal 255
-      o.slug.must_equal long_slug.join('-')[0..254]
+      o.slug.length.must_equal 64
+      o.slug.must_equal long_slug.join('-')[0..63]
+    end
+
+    it "should crop titles at word boundaries" do
+      o = Page.create
+      long_slug = (["bangor"]*100)
+      expected = %w(bangor bangor bangor bangor bangor bangor bangor bangor bangor).join('-')
+      o.slug = long_slug.join(' ')
+      o.slug.length.must_equal expected.length
+      o.slug.must_equal expected
+    end
+
+    it "should just crop a very long word to the max length" do
+      o = Page.create
+      o.slug = "a"*100
+      o.slug.length.must_equal 64
     end
   end
 
@@ -457,6 +472,13 @@ describe "Page" do
 
     it "know their owner" do
       @page_piece.owner.must_equal @piece
+    end
+
+    it "tests as equal to the page target" do
+      @piece.reload
+      assert @piece.things.first == @child, "PagePiece must == its target"
+      assert @child == @piece.things.first, "Page must == a PagePiece that wraps it"
+      refute @parent == @piece.things.first
     end
   end
 end

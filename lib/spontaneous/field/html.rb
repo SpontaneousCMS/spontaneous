@@ -4,7 +4,7 @@ module Spontaneous::Field
   class HTML < LongString
 
     # Just pass through the value without any kind of escaping
-    def generate_html(value)
+    def generate_html(value, site)
       value
     end
 

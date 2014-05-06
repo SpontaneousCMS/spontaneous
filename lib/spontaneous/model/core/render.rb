@@ -9,13 +9,13 @@ module Spontaneous::Model::Core
       raise "Cannot render content without enclosing page"
     end
 
-    def render(format = :html, params = {}, *args)
+    def render(format = :html, params = {}, parent_context = nil)
       params, format = format, :html if format.is_a?(Hash)
-      output(format).render(params, *args)
+      output(format).render(params, parent_context)
     end
 
-    def render_using(renderer, format = :html, params = {}, *args)
-      output(format).render_using(renderer, params, *args)
+    def render_using(renderer, format = :html, params = {}, parent_context = nil)
+      output(format).render_using(renderer, params, parent_context)
     end
   end
 end

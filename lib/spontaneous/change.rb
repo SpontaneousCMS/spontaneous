@@ -2,22 +2,20 @@
 
 module Spontaneous
   class Change
-
-
     class << self
-      def outstanding
-        outstanding = { :published_revision => Spontaneous::Site.published_revision,
-          :changes => unpublished_changes }
+      def outstanding(site)
+        outstanding = { :published_revision => site.published_revision, :must_publish_all => site.must_publish_all?,
+          :changes => unpublished_changes(site) }
         outstanding[:first_publish] = true if outstanding[:published_revision] == 0
         outstanding
       end
 
-      def unpublished_changes
-        changes = unpublished_pages.map { |page| Change.new(page) }
+      def unpublished_changes(site)
+        changes = unpublished_pages(site).map { |page| Change.new(page) }
       end
 
-      def unpublished_pages
-        Spontaneous::Content::Page.filter { (modified_at > last_published_at) | {:first_published_at => nil} }.order(:modified_at.desc).all
+      def unpublished_pages(site)
+        site.model::Page.filter { (modified_at > last_published_at) | {:first_published_at => nil} }.order(Sequel.desc(:modified_at)).all
       end
 
       def include_dependencies(page_list)
@@ -26,9 +24,9 @@ module Spontaneous
         pages
       end
 
-      def export
+      def export(site)
         exported = {}
-        outstanding.each do |k, v|
+        outstanding(site).each do |k, v|
           case k
           when :changes
             exported[k] = v.map { |change_set| change_set.export }
@@ -39,8 +37,8 @@ module Spontaneous
         exported
       end
 
-      def serialise_http(user = nil)
-        Spontaneous.serialise_http(export)
+      def serialise_http(site)
+        Spontaneous.serialise_http(export(site))
       end
     end
 

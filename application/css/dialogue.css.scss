@@ -234,7 +234,7 @@ $dialogue-title-height: 32px;
 	// padding-bottom: $container-padding / 2;
 	.publish-up-to-date {
 		@include rounded;
-		@extend shadow;
+		@extend .shadow;
 		position: absolute;
 		left: 0;
 		right: 0;

@@ -1,4 +1,4 @@
-# encoding: UTF-8
+
 
 require File.expand_path('../../test_helper', __FILE__)
 
@@ -72,7 +72,7 @@ describe "Back" do
     end
 
     class ::HomePage < Page
-      field :introduction, :text
+      field :introduction, :richtext
       box :projects do
         allow Project
       end
@@ -126,12 +126,12 @@ describe "Back" do
       Object.send(:remove_const, klass) rescue nil
     end
     Spontaneous::Permissions::User.delete
-    Content.delete
+    Content.delete if defined?(Content)
     teardown_site(true)
   end
 
   def app
-    Spontaneous::Rack::Back.application
+    @app ||= Spontaneous::Rack::Back.application(site)
   end
 
   let(:home) { Content[home_id] }
@@ -193,14 +193,14 @@ describe "Back" do
         auth_get '/@spontaneous/map'
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        assert_equal S::Site.map.to_json, last_response.body
+        assert_equal site.map.to_json, last_response.body
       end
 
       it "return a site map for any page id" do
         auth_get "/@spontaneous/map/#{home.id}"
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        assert_equal S::Site.map(home.id).to_json, last_response.body
+        assert_equal site.map(home.id).to_json, last_response.body
       end
 
       it "return a site map for any url" do
@@ -208,7 +208,7 @@ describe "Back" do
         auth_get "/@spontaneous/map/path#{project1.path}"
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        assert_equal S::Site.map(project1.id).to_json, last_response.body
+        assert_equal site.map(project1.id).to_json, last_response.body
       end
 
       it "return 404 when asked for map of non-existant page" do
@@ -220,7 +220,7 @@ describe "Back" do
 
       it "return the correct Last-Modified header for the site map" do
         now = Time.at(Time.now.to_i + 10000)
-        Spontaneous::Site.stubs(:modified_at).returns(now)
+        site.stubs(:modified_at).returns(now)
         auth_get '/@spontaneous/map'
         Time.httpdate(last_response.headers["Last-Modified"]).must_equal now
         auth_get "/@spontaneous/map/path#{project1.path}"
@@ -230,7 +230,7 @@ describe "Back" do
       it "reply with a 304 Not Modified if the site hasn't been updated since last request" do
         datestring = "Sat, 03 Mar 2012 00:49:44 GMT"
         now = Time.httpdate(datestring)
-        Spontaneous::Site.stubs(:modified_at).returns(now)
+        site.stubs(:modified_at).returns(now)
         auth_get "/@spontaneous/map/#{home.id}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
         last_response.status.must_equal 304
         auth_get "/@spontaneous/map", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring}
@@ -243,7 +243,7 @@ describe "Back" do
         datestring1 = "Sat, 03 Mar 2012 00:49:44 GMT"
         datestring2 = "Sat, 03 Mar 2012 01:49:44 GMT"
         now = Time.httpdate(datestring2)
-        Spontaneous::Site.stubs(:modified_at).returns(now)
+        site.stubs(:modified_at).returns(now)
         auth_get "/@spontaneous/map/#{home.id}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring1}
         last_response.status.must_equal 200
         auth_get "/@spontaneous/map/path#{project1.path}", {}, {"HTTP_IF_MODIFIED_SINCE" => datestring1}
@@ -332,14 +332,14 @@ describe "Back" do
 
     describe "/site" do
       before do
-        @root_class = S::Site.root.class
+        @root_class = site.home.class
       end
 
       it "return json for home page" do
         auth_get '/@spontaneous/site/home'
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        assert_equal S::JSON.encode(S::Site.root.export), last_response.body
+        assert_equal S::JSON.encode(site.home.export), last_response.body
       end
 
       it "return the typelist as part of the site metadata" do
@@ -347,7 +347,7 @@ describe "Back" do
         assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
         last_response.content_type.must_equal "application/json;charset=utf-8"
         result = Spot::JSON.parse(last_response.body)
-        result[:types].stringify_keys.must_equal S::Site.schema.export(user)
+        result[:types].stringify_keys.must_equal site.schema.export(user)
       end
 
       it "apply the current user's permissions to the exported schema" do
@@ -387,14 +387,14 @@ describe "Back" do
       end
 
       it "return the configured list of service URLs in the metadata" do
-        S::Site.config.stubs(:services).returns([
+        site.config.stubs(:services).returns([
           {:title => "Google Analytics", :url => "http://google.com/analytics"},
           {:title => "Facebook", :url => "http://facebook.com/spontaneous"}
         ])
         auth_get "/@spontaneous/site"
         assert last_response.ok?, "Should have recieved a 200 OK but got a #{ last_response.status }"
         result = Spot::JSON.parse(last_response.body)
-        result[:services].must_equal S::Site.config.services
+        result[:services].must_equal site.config.services
       end
       it "provides a format value for date fields" do
         field = Job.field :date, :date, :format => "%Y %d %a"
@@ -427,8 +427,8 @@ describe "Back" do
         it "creates a homepage of the specified type" do
           auth_post "/@spontaneous/site/home", 'type' => @root_class.schema_id
           assert last_response.ok?
-          S::Site.root.must_be_instance_of(@root_class)
-          S::Site.root.title.value.must_match /Home/
+          site.home.must_be_instance_of(@root_class)
+          site.home.title.value.must_match /Home/
         end
 
         it "only creates one homepage" do
@@ -600,8 +600,7 @@ describe "Back" do
 
       it "replace values of fields immediately when required" do
         image1.image.processed_value.must_equal ""
-        auth_put("@spontaneous/file/#{image1.id}",
-                 "file" => @upload, "field" => image1.image.schema_id.to_s )
+        auth_put("@spontaneous/file/#{image1.id}", "file" => @upload, "field" => image1.image.schema_id.to_s )
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
         image = Content[image1.id]
@@ -751,7 +750,7 @@ describe "Back" do
       end
 
       it "return json for individual pages" do
-        page = S::Site.root.children.first
+        page = site.home.children.first
         auth_get "/@spontaneous/page/#{page.id}"
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
@@ -838,17 +837,17 @@ describe "Back" do
         auth_get "/@spontaneous/changes"
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        last_response.body.must_equal S::Change.serialise_http
+        last_response.body.must_equal S::Change.serialise_http(site)
       end
 
       it "be able to start a publish with a set of change sets" do
-        S::Site.expects(:publish_pages).with([project1.id])
+        site.expects(:publish_pages).with([project1.id])
         auth_post "/@spontaneous/changes", :page_ids => [project1.id]
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
 
       it "not launch publish if list of changes is empty" do
-        S::Site.expects(:publish_pages).with().never
+        site.expects(:publish_pages).with().never
         auth_post "/@spontaneous/changes", :change_set_ids => ""
         assert last_response.status == 400, "Expected 400, recieved #{last_response.status}"
 
@@ -857,7 +856,7 @@ describe "Back" do
       end
 
       it "recognise when the list of changes is complete" do
-        S::Site.expects(:publish_pages).with([home.id, project1.id])
+        site.expects(:publish_pages).with([home.id, project1.id])
         auth_post "/@spontaneous/changes", :page_ids => [home.id, project1.id]
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
@@ -1017,18 +1016,39 @@ describe "Back" do
 
   describe "/" do
     before do
-      @renderer = Spontaneous::Output.preview_renderer
+      @renderer = Spontaneous::Output.preview_renderer(site)
+    end
+
+    def get_preview(path, params = {}, env = {})
+      get path, params, env.merge("HTTP_REFERER" => "http://example.com/@spontaneous/234/edit")
+    end
+
+    it "redirects to /@spontaneous unless called from the editing UI" do
+      get "/"
+      assert last_response.status == 302
+      last_response.headers['Location'].must_equal "http://example.org/@spontaneous/#{home.id}/preview"
+    end
+
+    it "redirects to the page's preview unless called from the editing UI" do
+      get project1.path
+      assert last_response.status == 302
+      last_response.headers['Location'].must_equal "http://example.org/@spontaneous/#{project1.id}/preview"
+    end
+
+    it "shows the page without UI if the 'preview' parameter is set" do
+      get project1.path, preview: true
+      assert last_response.status == 200
     end
 
     it "return rendered root page" do
-      get "/"
+      get_preview "/"
       assert last_response.ok?
       last_response.content_type.must_equal "text/html;charset=utf-8"
       assert_equal @renderer.render(home.output(:html)), last_response.body
     end
 
     it "return rendered child-page" do
-      get "/project1"
+      get_preview "/project1"
       assert last_response.ok?
       last_response.content_type.must_equal "text/html;charset=utf-8"
       assert_equal @renderer.render(project1.output(:html)), last_response.body
@@ -1036,7 +1056,7 @@ describe "Back" do
 
     it "return alternate formats" do
       Project.add_output :js
-      get "/project1.js"
+      get_preview "/project1.js"
       assert last_response.ok?
       last_response.content_type.must_equal "application/javascript;charset=utf-8"
       assert_equal @renderer.render(project1.output(:js)), last_response.body
@@ -1044,7 +1064,7 @@ describe "Back" do
 
     it "allow pages to have css formats" do
       Project.add_output :css
-      get "/project1.css"
+      get_preview "/project1.css"
       assert last_response.ok?
       last_response.content_type.must_equal "text/css;charset=utf-8"
       assert_equal @renderer.render(project1.output(:css)), last_response.body
@@ -1052,7 +1072,7 @@ describe "Back" do
 
     it "return cache-busting headers" do
       ["/project1", "/"].each do |path|
-        get path
+        get_preview path
         assert last_response.ok?
         last_response.headers['Expires'].must_equal @now.to_formatted_s(:rfc822)
         last_response.headers['Last-Modified'].must_equal @now.to_formatted_s(:rfc822)
@@ -1061,7 +1081,7 @@ describe "Back" do
 
     it "return cache-control headers" do
       ["/project1", "/"].each do |path|
-        get path
+        get_preview path
         assert last_response.ok?
         ["no-store", 'no-cache', 'must-revalidate', 'max-age=0'].each do |p|
           last_response.headers['Cache-Control'].must_match %r(#{p})
@@ -1084,17 +1104,17 @@ describe "Back" do
 
     it "accept POST requests" do
       Project.expects(:posted!).with(project1)
-      Project.request :post do
-        Project.posted!(page)
+      Project.controller do
+        post { Project.posted!(page) }
       end
       post "/project1"
     end
 
     it "previews hidden pages" do
-      get "/project1"
+      get_preview "/project1"
       body = last_response.body
       project1.hide!
-      get "/project1"
+      get_preview "/project1"
       assert last_response.ok?, "Expected 200 got #{last_response.status}"
       last_response.body.must_equal body
     end

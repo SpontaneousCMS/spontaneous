@@ -6,13 +6,13 @@ module Spontaneous::Rack
       set :views, Proc.new { Spontaneous.application_dir + '/views' }
 
       def content_model
-        Spontaneous::Content
+        site.model
       end
 
-      def update_fields(model, field_data)
+      def update_fields(content, field_data)
         return unless field_data
-        Spontaneous::Field.update_asynchronously(model, field_data, user)
-        json(model)
+        Spontaneous::Field.update_asynchronously(site, content, field_data, user)
+        json(content)
       end
 
       def content_for_request(lock = false)

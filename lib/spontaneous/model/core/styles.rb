@@ -108,8 +108,8 @@ module Spontaneous::Model::Core
       self.class.styles
     end
 
-    def template(format = :html)
-      style.template(format)
+    def template(format = :html, renderer = Spontaneous::Output.default_renderer)
+      style.template(format, renderer)
     end
   end
 end

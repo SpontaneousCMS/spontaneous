@@ -410,11 +410,13 @@ describe "Boxes" do
         allow_subclasses :Allowed1
       end
 
-
+      class ::AllowedAs < Box
+        allow :Allowed1, as: "Something Else"
+      end
     end
 
     after do
-      [:Parent, :Allowed1, :Allowed11, :Allowed111, :Allowed2, :Allowed3, :Allowed4, :ChildClass, :Allowable, :Mixed].each { |k| Object.send(:remove_const, k) } rescue nil
+      [:Parent, :Allowed1, :Allowed11, :Allowed111, :Allowed2, :Allowed3, :Allowed4, :ChildClass, :Allowable, :Mixed, :AllowedAs].each { |k| Object.send(:remove_const, k) } rescue nil
     end
 
     it "have a list of allowed types" do
@@ -522,6 +524,18 @@ describe "Boxes" do
         field :title
       end
       assert @site.schema.classes.map(&:to_s).include?("ChildClass::InlineType"), "#{@site.schema.classes} does not include ChildClass::InlineType"
+    end
+
+    it "lets you define the name of the allowed type in the interface using 'as'" do
+      Page.box :as, class: :AllowedAs
+      page_schema = @site.schema.export['Page']
+      box_schema = page_schema[:boxes].first
+      allowed = box_schema[:allowed_types]
+      allowed.length.must_equal 1
+      defn = allowed.first
+      defn.must_be_instance_of Hash
+      defn[:type].must_equal "Allowed1"
+      defn[:as].must_equal "Something Else"
     end
   end
 

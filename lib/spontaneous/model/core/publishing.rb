@@ -7,19 +7,6 @@ module Spontaneous::Model::Core
 
     module ClassMethods
 
-      # def current_revision_table
-      #   revision_table(revision)
-      # end
-
-      # def base_table
-      #   mapper.base_table
-      # end
-
-      # make sure that the table name is always the correct revision
-      # def simple_table
-      #   current_revision_table
-      # end
-
       def revision_table(revision=nil)
         mapper.revision_table(revision)
       end
@@ -66,12 +53,12 @@ module Spontaneous::Model::Core
         mapper.editable!(&block)
       end
 
-      def with_published(&block)
-        scope(Spontaneous::Site.published_revision, true, &block)
+      def with_published(site, &block)
+        scope(site.published_revision, true, &block)
       end
 
-      def with_published!(&block)
-        scope!(Spontaneous::Site.published_revision, true, &block)
+      def with_published!(site, &block)
+        scope!(site.published_revision, true, &block)
       end
 
       def database

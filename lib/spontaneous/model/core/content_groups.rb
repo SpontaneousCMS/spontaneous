@@ -9,7 +9,7 @@ module Spontaneous::Model::Core
 
       def group(*group_names)
         @group_memberships = group_names
-        Spontaneous::Site.schema.add_group_member(self, group_names)
+        model.schema.add_group_member(self, group_names)
       end
     end
   end

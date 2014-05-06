@@ -69,7 +69,6 @@ module Spontaneous
   autoload :Simultaneous,       "spontaneous/simultaneous"
   autoload :Site,               "spontaneous/site"
   autoload :State,              "spontaneous/state"
-  autoload :Storage,            "spontaneous/storage"
   autoload :Style,              "spontaneous/style"
   autoload :Utils,              "spontaneous/utils"
 
