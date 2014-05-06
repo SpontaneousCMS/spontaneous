@@ -10,7 +10,7 @@ describe "Fields" do
     @now = Time.now
     stub_time(@now)
     Spontaneous::State.delete
-    Site.background_mode = :immediate
+    @site.background_mode = :immediate
   end
 
   after do
@@ -814,7 +814,7 @@ describe "Fields" do
         @field.value = "http://www.youtube.com/watch?v=_0jroAM_pO4&feature=feedrec_grec_index"
         html = @field.render(:html)
         html.must_match /^<iframe/
-        html.must_match %r{src="http://www\.youtube\.com/embed/_0jroAM_pO4}
+        html.must_match %r{src="//www\.youtube\.com/embed/_0jroAM_pO4}
         html.must_match /width="680"/
         html.must_match /height="384"/
         html.must_match /theme=light/
@@ -834,7 +834,7 @@ describe "Fields" do
         @field.value = "http://vimeo.com/31836285"
         html = @field.render(:html)
         html.must_match /^<iframe/
-        html.must_match %r{src="http://player\.vimeo\.com/video/31836285}
+        html.must_match %r{src="//player\.vimeo\.com/video/31836285}
         html.must_match /width="680"/
         html.must_match /height="384"/
         html.must_match /color=ccc/
@@ -858,7 +858,7 @@ describe "Fields" do
         json[:"tag"].must_equal "<iframe/>"
         attr = json[:"attr"]
         attr.must_be_instance_of(Hash)
-        attr[:"src"].must_match %r{^http://www\.youtube\.com/embed/_0jroAM_pO4}
+        attr[:"src"].must_match %r{^//www\.youtube\.com/embed/_0jroAM_pO4}
         attr[:"src"].must_match /theme=light/
         attr[:"src"].must_match /hd=1/
         attr[:"src"].must_match /fs=1/
@@ -898,7 +898,7 @@ describe "Fields" do
         @field.value = "https://vine.co/v/brI7pTPb3qU"
         embed = @field.render(:html)
         embed.must_match %r(iframe)
-        embed.must_match %r(src=["']https://vine\.co/v/brI7pTPb3qU/card["'])
+        embed.must_match %r(src=["']//vine\.co/v/brI7pTPb3qU/card["'])
         # Vine videos are square
         embed.must_match %r(width=["']680["'])
         embed.must_match %r(height=["']680["'])
