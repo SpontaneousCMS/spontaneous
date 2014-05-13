@@ -37,10 +37,7 @@ module Spontaneous::Publishing
       protected
 
       def create_revision
-        db.run(<<-SQL)
-          CREATE TABLE #{db.literal(@revision.table)}
-            AS #{source_dataset.select_sql}
-        SQL
+        db.create_table(@revision.table, as: source_dataset)
       end
 
       def source_dataset
