@@ -87,6 +87,14 @@ module Spontaneous
         revision!(nil, &block)
       end
 
+      def with(dataset, &block)
+        with!(dataset, &block)
+      end
+
+      def with!(dataset, &block)
+        scope!(nil, false, dataset, &block)
+      end
+
       def scope(revision, visible, &block)
         if use_current_scope?(revision, visible)
           if block_given?
@@ -99,7 +107,7 @@ module Spontaneous
         end
       end
 
-      def scope!(revision, visible, &block)
+      def scope!(revision, visible, dataset = nil, &block)
         if block_given?
           r, v, d  = @keys.values_at(:revision, :visible, :active_scope)
           thread   = Thread.current
@@ -107,7 +115,7 @@ module Spontaneous
           begin
             thread[r] = to_revision(revision)
             thread[v] = visible
-            thread[d] = current_scope
+            thread[d] = configured_scope_or_dataset(dataset)
             yield
           ensure
             thread[r], thread[v], thread[d] = state
@@ -118,15 +126,15 @@ module Spontaneous
       end
 
       def active_scope
-        Thread.current[@keys[:active_scope]] || current_scope
+        Thread.current[@keys[:active_scope]] || configured_scope
       end
 
-      def cached_dataset?
+      def cached_scope?
         !Thread.current[@keys[:active_scope]].nil?
       end
 
       def use_current_scope?(revision, visible)
-        cached_dataset? &&
+        cached_scope? &&
           (current_revision == to_revision(revision)) &&
           ((visible || false) == visible_only?)
       end
@@ -153,15 +161,24 @@ module Spontaneous
 
       private
 
-      def current_scope
+      def configured_scope_or_dataset(dataset = nil)
+        return configured_scope if dataset.nil?
+        scope_with(dataset)
+      end
+
+      def configured_scope
         scope_for(current_revision, visible_only?)
       end
 
       def scope_for(revision, visibility)
-        Scope.new(dataset_for(revision, visibility), @schema)
+        scope_with(ds(revision, visibility))
       end
 
-      def dataset_for(revision, visibility)
+      def scope_with(dataset)
+        Scope.new(dataset, @schema)
+      end
+
+      def ds(revision, visibility)
         @table.dataset(revision, visibility)
       end
     end

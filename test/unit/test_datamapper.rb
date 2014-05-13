@@ -1422,6 +1422,34 @@ describe "DataMapper" do
       assert a.object_id == b.object_id, "Mappers it be same object"
     end
 
+    it "allows for passing any dataset to base a scope on" do
+      ds = @database[:something].filter(socks: "green")
+      @mapper.with(ds) do
+        @mapper.get(23)
+      end
+      @database.sqls.must_equal [
+        "SELECT * FROM something WHERE ((socks = 'green') AND (type_sid IN ('MockContent2', 'MockContent3')) AND (id = 23)) LIMIT 1"
+      ]
+    end
+
+    it "gives an empty revision & visibility setting for dataset scopes" do
+      ds = @database[:something].filter(socks: "green")
+      @mapper.scope(23, true) do
+        @mapper.with(ds) do
+          refute @mapper.visible_only?
+          @mapper.current_revision.must_be_nil
+        end
+      end
+    end
+
+    it "allows for separate configuration of revision & visibility" do
+      ds = @database[:something].filter(socks: "green")
+      @mapper.scope!(23, true, ds) do
+        assert @mapper.visible_only?
+        @mapper.current_revision.must_equal 23
+      end
+    end
+
     it "allow for using a custom cache key" do
       @database.fetch = [
         { id: 20, type_sid:"MockContent", parent_id: 7 }
