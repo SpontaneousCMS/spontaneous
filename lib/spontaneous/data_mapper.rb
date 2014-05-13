@@ -158,7 +158,11 @@ module Spontaneous
       end
 
       def scope_for(revision, visibility)
-        Scope.new(revision, visibility, @table, @schema)
+        Scope.new(dataset_for(revision, visibility), @schema)
+      end
+
+      def dataset_for(revision, visibility)
+        @table.dataset(revision, visibility)
       end
     end
   end

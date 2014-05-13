@@ -347,9 +347,9 @@ describe "DataMapper" do
         end
       end
       @database.sqls.must_equal [
-        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (hidden IS FALSE) AND (id = 1)) LIMIT 1",
+        "SELECT * FROM content WHERE ((hidden IS FALSE) AND (type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1",
         "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1",
-        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (hidden IS FALSE) AND (id = 1)) LIMIT 1",
+        "SELECT * FROM content WHERE ((hidden IS FALSE) AND (type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1",
       ]
     end
 
@@ -361,7 +361,7 @@ describe "DataMapper" do
         end
       end
       @database.sqls.must_equal [
-        "SELECT * FROM __r00025_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (hidden IS FALSE) AND (id = 1)) LIMIT 1",
+        "SELECT * FROM __r00025_content WHERE ((hidden IS FALSE) AND (type_sid IN ('MockContent2', 'MockContent3')) AND (id = 1)) LIMIT 1",
       ]
     end
 

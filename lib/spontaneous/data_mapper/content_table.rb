@@ -45,8 +45,10 @@ module Spontaneous
         :id
       end
 
-      def dataset(revision = nil)
-        @database[revision_table(revision)]
+      def dataset(revision = nil, visible_only = false)
+        ds = @database[revision_table(revision)]
+        ds.filter!(hidden: false) if visible_only
+        ds
       end
 
       def logger

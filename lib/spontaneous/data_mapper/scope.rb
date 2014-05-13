@@ -2,11 +2,11 @@ module Spontaneous
   module DataMapper
     class Scope
 
-      def initialize(revision, visible, table, schema)
-        @revision, @visible  = revision, visible
-        @table, @schema      = table, schema
-        @identity_map        = {}
-        @schema_types        = @schema.types
+      def initialize(dataset, schema)
+        @dataset      = dataset
+        @schema       = schema
+        @identity_map = {}
+        @schema_types = @schema.types
       end
 
       def count(types = nil)
@@ -130,11 +130,11 @@ module Spontaneous
       end
 
       def columns
-        @table.columns
+        @dataset.columns
       end
 
       def qualify_column(col)
-        @table.qualify(@revision, col)
+        Sequel::SQL::QualifiedIdentifier.new(@dataset.first_source, col)
       end
 
       def each(&block)
@@ -150,27 +150,23 @@ module Spontaneous
       end
 
       def pk
-        @table.pk
+        @dataset.db.primary_key(@dataset.first_source).to_sym
       end
 
       def table_name
-        naked_dataset.first_source_alias
+        naked_dataset.first_source_table
       end
 
       def logger
-        @table.logger
+        @dataset.logger
       end
 
       def logger=(logger)
-        @table.logger = logger
+        @dataset.db.logger = logger
       end
 
       def revision
         self
-      end
-
-      def visible_only?
-        @visible || false
       end
 
       def dataset(types = nil, fallback_type_condition = all_types_condition)
@@ -188,13 +184,11 @@ module Spontaneous
       end
 
       def naked_dataset
-        @table.dataset(@revision)
+        @dataset.dup
       end
 
       def conditions(types, fallback_type_condition)
-        cond = type_conditions(types, fallback_type_condition)
-        cond[:hidden] = false if @visible
-        cond
+        type_conditions(types, fallback_type_condition)
       end
 
       def type_conditions(types, fallback_type_condition)
