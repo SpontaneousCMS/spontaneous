@@ -414,6 +414,10 @@ module Spontaneous
           members.delete(type)
         end
       end
+
+      def inspect
+        %(#<#{self.class} root="#{@root}">)
+      end
     end
   end
 end
