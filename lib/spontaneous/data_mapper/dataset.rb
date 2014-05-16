@@ -156,6 +156,10 @@ module Spontaneous
         @dataset.sql
       end
 
+      def unfiltered
+        @dataset.unfiltered
+      end
+
       alias_method :sql, :to_sql
 
       private
