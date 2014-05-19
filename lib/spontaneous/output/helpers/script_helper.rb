@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require 'coffee-script'
+require 'simultaneous'
 
 module Spontaneous::Output::Helpers
   module ScriptHelper
@@ -13,6 +14,13 @@ module Spontaneous::Output::Helpers
     end
 
     def script_urls(*args)
+      unless site.model.mapper.editable?
+        begin
+          ::Simultaneous.send_event('publish_progress', {:state => "compiling assets", :progress => "*"}.to_json)
+        rescue Errno::ECONNREFUSED
+        rescue Errno::ENOENT
+        end
+      end
       options = args.extract_options!
       options.update(:development => development?)
       asset_environment.js(args.flatten, options)

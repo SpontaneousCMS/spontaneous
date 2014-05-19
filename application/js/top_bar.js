@@ -362,11 +362,11 @@ Spontaneous.TopBar = (function($, S) {
 			} else {
 				this.publishing_state();
 				// don't turn off intermediate and replace it with an empty progress dial
-				// by making sure our progress is > 0 before switching to progress view
-				if ((progress !== "*")) {
-					this.progress().update(progress);
-				} else {
+				// by making sure our progress is > 1 before switching to progress view
+				if ((progress === "*") || (progress < 1.0)) {
 					this.progress().indeterminate();
+				} else {
+					this.progress().update(progress);
 				}
 			}
 		},
