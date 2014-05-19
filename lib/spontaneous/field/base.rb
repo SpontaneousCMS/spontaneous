@@ -62,10 +62,18 @@ module Spontaneous
 
 
       def initialize(params={}, default_values=true)
+        @default_values = default_values
         @processed_values = {}
         deserialize(params, default_values)
         @values = nil
       end
+
+      def content_hash
+        Spontaneous::Model.content_hash(processed_values)
+      end
+
+      alias_method :calculate_content_hash, :content_hash
+      alias_method :calculate_content_hash!, :content_hash
 
       def processed_values
         @values ||= processed_values_with_fallback
@@ -358,7 +366,7 @@ module Spontaneous
       end
 
       def modified?
-        @modified
+        @modified || false
       end
 
       def schema_id
@@ -437,6 +445,7 @@ module Spontaneous
           :version => version,
           :value => @initial_value,
           :user => owner.current_editor)
+        mark_unmodified
       end
 
       def <=>(o)

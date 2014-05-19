@@ -75,5 +75,13 @@ module Spontaneous
     def template(format = :html, renderer = Spontaneous::Output.default_renderer)
       style.template(format, renderer)
     end
+
+    # Because pages all publish independently we don't want the content hash
+    # of boxes to change if a contained page is modified, so make the hash
+    # of pages inside boxes only depend on the id (so the box hash does change
+    # when the page is added, moved or deleted)
+    def content_hash
+      Spontaneous::Model.content_hash(id)
+    end
   end
 end

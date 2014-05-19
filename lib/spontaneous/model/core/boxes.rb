@@ -78,6 +78,12 @@ module Spontaneous::Model::Core
       @boxes ||= Spontaneous::Collections::BoxSet.new(self)
     end
 
+    # Used by #content_hash to attempt to preserve content hashes across
+    # schema changes
+    def boxes_with_consistent_order
+      boxes.sort { |b1, b2| b1.schema_id <=> b2.schema_id }
+    end
+
     def pieces
       boxes.flat_map { |b| b.pieces }
     end

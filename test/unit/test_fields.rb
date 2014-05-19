@@ -643,6 +643,12 @@ describe "Fields" do
       v.count.must_equal 1
     end
 
+    it "marks a field as unmodified after save" do
+      @instance.title.value = "one"
+      @instance.save.reload
+      @instance.title.modified?.must_equal false
+    end
+
     it "have a creation date" do
       now = Time.now + 1000
       stub_time(now)
@@ -1648,7 +1654,7 @@ describe "Fields" do
           lock = @page.update_locks.first
           lock.field.must_equal field
           lock.content.must_equal @instance
-          lock.page.must_equal @page
+          lock.page.reload.must_equal @page.reload
           lock.description.must_match /something\.gif/
           lock.created_at.must_equal @now
           lock.location.must_equal "Field ‘image’ of entry 1 in box ‘instances’"

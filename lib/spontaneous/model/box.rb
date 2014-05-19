@@ -3,6 +3,7 @@
 module Spontaneous::Model
   module Box
     autoload :AllowedTypes,     "spontaneous/model/box/allowed_types"
+    autoload :ContentHash,      "spontaneous/model/box/content_hash"
 
     extend Spontaneous::Concern
 

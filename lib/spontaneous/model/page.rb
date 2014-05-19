@@ -151,5 +151,10 @@ module Spontaneous::Model
     def eql?(obj)
       super || (Spontaneous::PagePiece === obj && obj.target.eql?(self))
     end
+
+    # Make page modification state depend on its path
+    def content_hash_dependencies
+      super.push(path)
+    end
   end
 end

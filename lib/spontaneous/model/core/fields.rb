@@ -106,6 +106,12 @@ module Spontaneous::Model::Core
       @field_set ||= Spontaneous::Collections::FieldSet.new(self, field_store)
     end
 
+    # Used by #content_hash to attempt to preserve content hashes across
+    # schema changes
+    def fields_with_consistent_order
+      fields.sort { |f1, f2| f1.schema_id <=> f2.schema_id }
+    end
+
     def field?(field_name)
       self.class.field?(field_name)
     end

@@ -708,7 +708,7 @@ describe "Publishing Pipeline" do
     end
 
     def modify_some_pages
-      @modified_pages = @pages[0..1].map { |page, _| page }
+      @modified_pages = @pages[0..1].map { |page, _| page.reload }
       @modified_pages.each { |page| page.update(title: "Changed!") }
     end
 
@@ -780,7 +780,7 @@ describe "Publishing Pipeline" do
     let(:actions)  { Spontaneous::Publishing::Steps.new(steps, []) }
 
     def modify_some_pages
-      @modified_pages = @pages[0..1].map { |page, _| page }
+      @modified_pages = @pages[0..1].map { |page, _| page.reload }
       Timecop.travel(later) do
         @modified_pages.each { |page| page.update(title: "Changed!") }
       end
@@ -826,7 +826,7 @@ describe "Publishing Pipeline" do
       page.first_published_at.must_equal nil
       publish.publish_pages([page])
       @site.model.with_editable do
-        page.reload.first_published_at.must_equal now
+        (page.reload.first_published_at - now).must_be :<=, 1
       end
     end
 
@@ -850,7 +850,7 @@ describe "Publishing Pipeline" do
     # which pages have been published (say if you want to send a tweet for new pages)
     # so a publish all should convert the nil used internally into a list of all
     # the modified pages for use by the steps
-    it "passes the list of modified pages to the publish steps aaa" do
+    it "passes the list of modified pages to the publish steps" do
       pages_matcher = all_of(*@modified_pages.map { |page| PageMatcher.new(page)})
       steps.each do |step|
         step.expects(:call).with(site, revision, pages_matcher, instance_of(mprogress::Multi))

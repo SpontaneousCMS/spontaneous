@@ -23,11 +23,13 @@ module Spontaneous::Publishing
           sync_revision
           set_revision_timestamps
           set_revision_version
+          set_revision_content_hash
           @revision.complete
           @revision.scope do
             yield if block_given?
           end
           set_source_timestamps
+          set_source_content_hash
         rescue Exception => e # Want to catch everything, including the "uncatchable"
           @revision.delete
           raise
@@ -58,6 +60,18 @@ module Spontaneous::Publishing
         # To be overwritten in Patch subclass
       end
 
+      def set_source_content_hash
+        set_content_hash(@revision.content_dataset)
+      end
+
+      def set_revision_content_hash
+        set_content_hash(@revision.dataset)
+      end
+
+      def set_content_hash(dataset)
+        filter_dataset(dataset).update(published_content_hash: :content_hash, content_hash_changed: false)
+      end
+
       def set_revision_timestamps
         set_timestamps(@revision.dataset)
       end
@@ -82,11 +96,11 @@ module Spontaneous::Publishing
       end
 
       def published_dataset(ds)
-        ds
+        filter_dataset(ds)
       end
 
       def first_published_dataset(ds)
-        ds.filter(:first_published_at => nil)
+        filter_dataset(ds.filter(:first_published_at => nil))
       end
 
       def set_revision_version
@@ -103,6 +117,10 @@ module Spontaneous::Publishing
 
       def revision
         @revision.revision
+      end
+
+      def filter_dataset(ds)
+        ds
       end
     end
 
@@ -125,15 +143,7 @@ module Spontaneous::Publishing
         end
       end
 
-      def published_dataset(ds)
-        filter_ids(super)
-      end
-
-      def first_published_dataset(ds)
-        filter_ids(super)
-      end
-
-      def filter_ids(ds)
+      def filter_dataset(ds)
         ds.filter(:id => @modified.map(&:id))
       end
     end

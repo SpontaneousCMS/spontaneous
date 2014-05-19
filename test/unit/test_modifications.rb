@@ -8,7 +8,7 @@ describe "Modifications" do
   before do
     @now = Time.now
     @site = setup_site
-    stub_time(@now)
+    Timecop.travel(@now)
 
     Content.delete
 
@@ -50,27 +50,29 @@ describe "Modifications" do
 
   it "register creation date of all content" do
     c = Content.create
-    c.created_at.to_i.must_equal @now.to_i
+    (c.created_at - @now).must_be :<=, 1
     page = Page.create
-    page.created_at.to_i.must_equal @now.to_i
+    (page.created_at - @now).must_be :<=, 1
   end
 
   it "update modification date of page when page fields are updated" do
     now = @now + 100
-    stub_time(now)
-    c = Page.first
-    (c.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
-    c.update(title: "changed")
-    (c.modified_at - now).abs.must_be :<=, 1
+    Timecop.travel(now) do
+      c = Page.first
+      (c.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
+      c.update(title: "changed")
+      (c.modified_at - now).abs.must_be :<=, 1
+    end
   end
 
   it "update modification date of path when page visibility is changed" do
     now = @now + 100
-    stub_time(now)
-    c = Page.uid("0")
-    (c.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
-    c.toggle_visibility!
-    (c.modified_at - now).abs.must_be :<=, 1
+    Timecop.travel(now) do
+      c = Page.uid("0")
+      (c.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
+      c.toggle_visibility!
+      (c.modified_at - now).abs.must_be :<=, 1
+    end
   end
 
   it "update page timestamps on modification of its box fields" do
@@ -78,58 +80,54 @@ describe "Modifications" do
       field :title
     end
 
-    stub_time(@now+3600)
-    page = Page.first :uid => "0"
-    (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
-    page.with_fields.title.value = "updated"
-    page.save.reload
-    page.modified_at.to_i.must_equal @now.to_i + 3600
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "0"
+      (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
+      page.with_fields.title.value = "updated"
+      page.save.reload
+      page.modified_at.to_i.must_equal @now.to_i + 3600
+    end
   end
 
   it "update page timestamps on modification of a piece" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "0"
-    (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
-    content = page.contents.first
-    content.page.must_equal page
-    content.label = "changed"
-    content.save
-    page.reload
-    page.modified_at.to_i.must_equal @now.to_i + 3600
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "0"
+      (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
+      content = page.contents.first
+      content.page.must_equal page
+      content.label = "changed"
+      content.save
+      page.reload
+      page.modified_at.to_i.must_equal @now.to_i + 3600
+    end
   end
 
   it "update page timestamps on modification of a piece's box fields" do
     Piece.box :with_fields do
       field :title
     end
-    stub_time(@now+3600)
-    page = Page.first :uid => "0"
-    (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
-    content = page.contents.first
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "0"
+      (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
+      content = page.contents.first
 
-    content.with_fields.title.value = "updated"
-    content.save
-    page.reload
-    page.modified_at.to_i.must_equal @now.to_i + 3600
+      content.with_fields.title.value = "updated"
+      content.save
+      page.reload
+      page.modified_at.to_i.must_equal @now.to_i + 3600
+    end
   end
 
   it "update page timestamp on addition of piece" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "0"
-    content = Content[page.contents.first.id]
-    content.things << Piece.new
-    content.save
-    content.modified_at.to_i.must_equal @now.to_i + 3600
-    page.reload
-    page.modified_at.to_i.must_equal @now.to_i + 3600
-  end
-
-  it "not update the parent page's timestamp on addition of a child page yyyy" do
-    stub_time(@now+1000)
-    page = Page.first :uid => "0"
-    page.things << Page.new
-    page.save.reload
-    page.modified_at.to_i.must_equal @now.to_i
+    Timecop.travel(@now + 3600) do
+      page = Page.first :uid => "0"
+      content = Content[page.contents.first.id]
+      content.things << Piece.new
+      content.save
+      content.modified_at.to_i.must_equal @now.to_i + 3600
+      page.reload
+      page.modified_at.to_i.must_equal @now.to_i + 3600
+    end
   end
 
   it "update the parent page's modification time if child pages are re-ordered" do
@@ -138,204 +136,209 @@ describe "Modifications" do
     page.things << Page.new(:uid => "0.0.0.1")
     page.save
     page = Page.first :uid => "0.0.0"
-    stub_time(@now+1000)
-    child = page.things.first
-    child.update_position(1)
-    page.reload.modified_at.to_i.must_equal @now.to_i + 1000
+    Timecop.travel(@now + 1000) do
+      child = page.things.first
+      child.update_position(1)
+      page.reload.modified_at.to_i.must_equal @now.to_i + 1000
+    end
   end
 
   it "update a page's timestamp on modification of its slug" do
-    stub_time(@now+1000)
-    page = Page.first :uid => "0"
-    page.slug = "changed"
-    page.save.reload
-    page.modified_at.to_i.must_equal @now.to_i + 1000
-  end
-
-  it "not update child pages timestamps after changing their parent's slug" do
-    page = Page.first :uid => "0.0.0"
-    modified = page.modified_at.to_i
-    stub_time(@now+1000)
-    page = Page.first :uid => "0"
-    page.slug = "changed"
-    page.save.reload
-    page.modified_at.to_i.must_equal @now.to_i + 1000
-    page = Page.first :uid => "0.0.0"
-    page.modified_at.to_i.must_equal modified
+    Timecop.travel(@now + 1000) do
+      page = Page.first :uid => "0"
+      page.slug = "changed"
+      page.save.reload
+      page.modified_at.to_i.must_equal @now.to_i + 1000
+    end
   end
 
   it "update the pages timestamp if a boxes order is changed" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "0"
-    content = Content[page.contents.first.id]
-    content.update_position(1)
-    page.reload.modified_at.to_i.must_equal @now.to_i + 3600
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "0"
+      content = Content[page.contents.first.id]
+      content.update_position(1)
+      page.reload.modified_at.to_i.must_equal @now.to_i + 3600
+    end
   end
 
   it "update the parent page's modification time if the contents of a piece's box are re-ordered" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "0"
-    content = page.things.first.things.first
-    content.update_position(1)
-    page.reload.modified_at.to_i.must_equal @now.to_i + 3600
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "0"
+      content = page.things.first.things.first
+      content.update_position(1)
+      page.reload.modified_at.to_i.must_equal @now.to_i + 3600
+    end
   end
 
   it "update the parent page's modification date if a piece is deleted" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "0"
-    content = Content[page.contents.first.id]
-    content.destroy
-    page.reload.modified_at.to_i.must_equal @now.to_i + 3600
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "0"
+      content = Content[page.contents.first.id]
+      content.destroy
+      page.reload.modified_at.to_i.must_equal @now.to_i + 3600
+    end
   end
 
   it "update the parent page's modification date if a page is deleted" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "0"
-    content = Content[page.things.first.things.first.id]
-    content.destroy
-    page.reload.modified_at.to_i.must_equal @now.to_i + 3600
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "0"
+      content = Content[page.things.first.things.first.id]
+      content.destroy
+      page.reload.modified_at.to_i.must_equal @now.to_i + 3600
+    end
   end
 
   it "add entry to the list of side effects for a visibility change" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "1"
-    old_slug = page.slug
-    page.slug = "changed"
-    page.save
-    page.reload
-    page.pending_modifications.length.must_equal 1
-    mods = page.pending_modifications(:slug)
-    mods.length.must_equal 1
-    mod = mods.first
-    mod.must_be_instance_of Spontaneous::Model::Core::Modifications::SlugModification
-    mod.old_value.must_equal old_slug
-    mod.new_value.must_equal "changed"
-    mod.created_at.to_i.must_equal @now.to_i + 3600
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "1"
+      old_slug = page.slug
+      page.slug = "changed"
+      page.save
+      page.reload
+      page.pending_modifications.length.must_equal 1
+      mods = page.pending_modifications(:slug)
+      mods.length.must_equal 1
+      mod = mods.first
+      mod.must_be_instance_of Spontaneous::Model::Core::Modifications::SlugModification
+      mod.old_value.must_equal old_slug
+      mod.new_value.must_equal "changed"
+      mod.created_at.to_i.must_equal @now.to_i + 3600
+    end
   end
 
   it "serialize page modifications" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "1"
-    page.slug = "changed"
-    page.save
-    page.pending_modifications.length.must_equal 1
-    mod = page.pending_modifications(:slug).first
-    page = Page.first :id => page.id
-    page.pending_modifications.length.must_equal 1
-    page.pending_modifications(:slug).first.must_equal mod
-    page.pending_modifications(:slug).first.created_at.to_i.must_equal @now.to_i + 3600
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "1"
+      page.slug = "changed"
+      page.save
+      page.pending_modifications.length.must_equal 1
+      mod = page.pending_modifications(:slug).first
+      page = Page.first :id => page.id
+      page.pending_modifications.length.must_equal 1
+      page.pending_modifications(:slug).first.must_equal mod
+      page.pending_modifications(:slug).first.created_at.to_i.must_equal @now.to_i + 3600
+    end
   end
 
   it "concatenate multiple slug modifications together" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "1"
-    old_slug = page.slug
-    page.slug = "changed"
-    page.save
-    page.pending_modifications.length.must_equal 1
-    page.slug = "changed-again"
-    page.save
-    mod = page.pending_modifications(:slug).first
-    mod.old_value.must_equal old_slug
-    mod.new_value.must_equal "changed-again"
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "1"
+      old_slug = page.slug
+      page.slug = "changed"
+      page.save
+      page.pending_modifications.length.must_equal 1
+      page.slug = "changed-again"
+      page.save
+      mod = page.pending_modifications(:slug).first
+      mod.old_value.must_equal old_slug
+      mod.new_value.must_equal "changed-again"
+    end
   end
 
   it "know the number of pages affected by slug modification" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "1"
-    page.slug = "changed"
-    page.save
-    mod = page.pending_modifications(:slug).first
-    mod.count.must_equal 4
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "1"
+      page.slug = "changed"
+      page.save
+      mod = page.pending_modifications(:slug).first
+      mod.count.must_equal 4
+    end
   end
 
   it "show the number of pages whose visibility is affected in the case of a visibility change" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "1"
-    page.hide!
-    page.reload
-    mods = page.pending_modifications(:visibility)
-    mods.length.must_equal 1
-    mod = mods.first
-    mod.count.must_equal 4
-    mod.owner.must_equal page
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "1"
+      page.hide!
+      page.reload
+      mods = page.pending_modifications(:visibility)
+      mods.length.must_equal 1
+      mod = mods.first
+      mod.count.must_equal 4
+      mod.owner.must_equal page
+    end
   end
 
   it "record visibility changes that originate from a content piece" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "1"
-    page.things.first.hide!
-    page.reload
-    mods = page.pending_modifications(:visibility)
-    mods.length.must_equal 1
-    mod = mods.first
-    mod.count.must_equal 2
-    mod.owner.must_equal page.things.first
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "1"
+      page.things.first.hide!
+      page.reload
+      mods = page.pending_modifications(:visibility)
+      mods.length.must_equal 1
+      mod = mods.first
+      mod.count.must_equal 2
+      mod.owner.must_equal page.things.first
+    end
   end
 
   it "show number of pages that are to be deleted in the case of a deletion" do
-    stub_time(@now+3600)
-    page = Page.first(:uid => "1")
-    owner = page.owner
-    page.destroy
-    page = Page.first(:uid => "root")
-    mods = page.pending_modifications(:deletion)
-    mod = mods.first
-    # count is number of children of deleted page + 1 (for deleted page)
-    mod.count.must_equal 5
-    mod.owner.must_equal owner.reload
+    Timecop.travel(@now+3600) do
+      page = Page.first(:uid => "1")
+      owner = page.owner
+      page.destroy
+      page = Page.first(:uid => "root")
+      mods = page.pending_modifications(:deletion)
+      mod = mods.first
+      # count is number of children of deleted page + 1 (for deleted page)
+      mod.count.must_equal 5
+      mod.owner.must_equal owner.reload
+    end
   end
 
   it "show number of pages deleted if piece with pages is deleted" do
-    stub_time(@now+3600)
-    page = Page.first(:uid => "1")
-    piece = page.things.first
-    owner = piece.owner
-    piece.destroy
-    page = Page.first(:uid => "1")
-    mods = page.pending_modifications(:deletion)
-    mod = mods.first
-    mod.count.must_equal 2
-    mod.owner.must_equal owner.reload
+    Timecop.travel(@now+3600) do
+      page = Page.first(:uid => "1")
+      piece = page.things.first
+      owner = piece.owner
+      piece.destroy
+      page = Page.first(:uid => "1")
+      mods = page.pending_modifications(:deletion)
+      mod = mods.first
+      mod.count.must_equal 2
+      mod.owner.must_equal owner.reload
+    end
   end
 
   it "show number of pages deleted if page belonging to piece is deleted" do
-    stub_time(@now+3600)
-    page = Page.first(:uid => "1")
-    child = page.things.first.things.first
-    owner = child.owner
-    child.destroy
-    page = Page.first(:uid => "1")
-    mods = page.pending_modifications(:deletion)
-    mod = mods.first
-    mod.count.must_equal 1
-    mod.owner.must_equal owner.reload
+    Timecop.travel(@now+3600) do
+      page = Page.first(:uid => "1")
+      child = page.things.first.things.first
+      owner = child.owner
+      child.destroy
+      page = Page.first(:uid => "1")
+      mods = page.pending_modifications(:deletion)
+      mod = mods.first
+      mod.count.must_equal 1
+      mod.owner.must_equal owner.reload
+    end
   end
 
   it "have an empty modification if the slug has been reverted to original value" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "1"
-    old_slug = page.slug
-    page.slug = "changed"
-    page.save
-    page.pending_modifications.length.must_equal 1
-    page.slug = "changed-again"
-    page.save
-    page.slug = old_slug
-    page.save
-    mods = page.reload.pending_modifications(:slug)
-    mods.length.must_equal 0
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "1"
+      old_slug = page.slug
+      page.slug = "changed"
+      page.save
+      page.pending_modifications.length.must_equal 1
+      page.slug = "changed-again"
+      page.save
+      page.slug = old_slug
+      page.save
+      mods = page.reload.pending_modifications(:slug)
+      mods.length.must_equal 0
+    end
   end
 
   it "have an empty modification if the visibility has been reverted to original value" do
-    stub_time(@now+3600)
-    page = Page.first :uid => "1"
-    page.things.first.hide!
-    page.reload
-    page.things.first.show!
-    page.reload
-    mods = page.pending_modifications(:visibility)
-    mods.length.must_equal 0
+    Timecop.travel(@now+3600) do
+      page = Page.first :uid => "1"
+      page.things.first.hide!
+      page.reload
+      page.things.first.show!
+      page.reload
+      mods = page.pending_modifications(:visibility)
+      mods.length.must_equal 0
+    end
   end
 
   describe "during publish" do
@@ -612,24 +615,26 @@ describe "Modifications" do
     end
 
     it "add the editor to any modifications" do
-      stub_time(@now+3600)
-      page = Page.first :uid => "1"
-      page.current_editor = @user
-      page.slug = "changed"
-      page.save
-      mod = page.pending_modifications(:slug).first
-      mod.user.must_equal @user
+      Timecop.travel(@now+3600) do
+        page = Page.first :uid => "1"
+        page.current_editor = @user
+        page.slug = "changed"
+        page.save
+        mod = page.pending_modifications(:slug).first
+        mod.user.must_equal @user
+      end
     end
 
     it "persist the user" do
-      stub_time(@now+3600)
-      page = Page.first :uid => "1"
-      page.current_editor = @user
-      page.slug = "changed"
-      page.save
-      page = Page.first :uid => "1"
-      mod = page.pending_modifications(:slug).first
-      mod.user.must_equal @user
+      Timecop.travel(@now+3600) do
+        page = Page.first :uid => "1"
+        page.current_editor = @user
+        page.slug = "changed"
+        page.save
+        page = Page.first :uid => "1"
+        mod = page.pending_modifications(:slug).first
+        mod.user.must_equal @user
+      end
     end
   end
 end

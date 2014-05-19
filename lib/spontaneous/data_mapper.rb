@@ -87,6 +87,10 @@ module Spontaneous
         revision!(nil, &block)
       end
 
+      def editable?
+        current_revision.nil?
+      end
+
       def with(dataset, &block)
         with!(dataset, &block)
       end

@@ -12,6 +12,7 @@ module Spontaneous
     include Spontaneous::Model::Box::AllowedTypes
     include Spontaneous::Model::Core::Permissions
     include Spontaneous::Model::Core::Media
+    include Spontaneous::Model::Box::ContentHash
 
     # use underscores to protect against field name conflicts
     attr_reader :_name, :_prototype, :owner

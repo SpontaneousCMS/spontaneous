@@ -84,6 +84,7 @@ module Spontaneous::Prototypes
         owner.const_set("#{name.to_s.camelize}Box", instance_class)
         box_owner = owner
         box_name = name
+        marked_as_generated = generated?
         instance_class.instance_eval do
           singleton_class.__send__(:define_method, :schema_name) do
             "box/#{box_owner.schema_id}/#{box_name}"
@@ -94,6 +95,11 @@ module Spontaneous::Prototypes
           singleton_class.__send__(:define_method, :owner_sid) do
             box_owner.schema_id
           end
+          singleton_class.__send__(:define_method, :method_added) do |method|
+            if [:contents].include?(method) # maybe need to expand the list of 'dangerous' methods
+              logger.warn("#{box_owner} box '#{box_name}': redefining the #contents method. You should set 'generated: true' in the box options unless the box contents are entirely under user control")
+            end
+          end unless marked_as_generated
         end
         @extend.each { |block|
           instance_class.class_eval(&block) if block
@@ -132,6 +138,13 @@ module Spontaneous::Prototypes
 
     def default_style
       @options[:style]
+    end
+
+    # If a box is marked as 'generated' then its contents
+    # are not under user control & it should be skipped when
+    # calculating the owner's content hash
+    def generated?
+      @options[:generated] || false
     end
 
     def default_title

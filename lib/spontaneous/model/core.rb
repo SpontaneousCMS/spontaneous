@@ -5,6 +5,7 @@ module Spontaneous::Model
     autoload :Aliases,          "spontaneous/model/core/aliases"
     autoload :Boxes,            "spontaneous/model/core/boxes"
     autoload :ContentGroups,    "spontaneous/model/core/content_groups"
+    autoload :ContentHash,      "spontaneous/model/core/content_hash"
     autoload :EditorClass,      "spontaneous/model/core/editor_class"
     autoload :Entries,          "spontaneous/model/core/entries"
     autoload :Entry,            "spontaneous/model/core/entry"
@@ -25,6 +26,7 @@ module Spontaneous::Model
     autoload :Styles,           "spontaneous/model/core/styles"
     autoload :Supertype,        "spontaneous/model/core/supertype"
     autoload :Visibility,       "spontaneous/model/core/visibility"
+    autoload :CascadingChange,  "spontaneous/model/core/cascading_change"
 
     extend Spontaneous::Concern
 
@@ -70,6 +72,7 @@ module Spontaneous::Model
 
     include Enumerable
 
+    include CascadingChange
     include SchemaId
     include Entry
     include Boxes
@@ -88,6 +91,7 @@ module Spontaneous::Model
     include Prototypes
     include Permissions
     include ContentGroups
+    include ContentHash
     include SchemaHierarchy
     include PageSearch
     include Locks

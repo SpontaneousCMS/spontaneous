@@ -19,6 +19,10 @@ describe "Site" do
     teardown_site
   end
 
+  def assert_site_modified(time)
+    (@site.modified_at - time).must_be :<=, 1
+  end
+
   describe "contents" do
     before do
       @root = ::Page.new
@@ -206,73 +210,87 @@ describe "Site" do
 
     it "just return the current time if no modifications have been made" do
       now = @now + 12
-      Time.stubs(:now).returns(now)
-      @site.modified_at.must_equal now
+      Timecop.travel(now) do
+        assert_site_modified(now)
+      end
     end
 
     it "be updated when a page is added" do
       now = @now + 24
-      Time.stubs(:now).returns(now)
-      root = ::Page.create
-      Time.stubs(:now).returns(now + 200)
-      @site.modified_at.must_equal now
+      Timecop.travel(now) do
+        root = ::Page.create
+      end
+      assert_site_modified(now)
     end
 
     it "be updated when a page's title changes" do
       root = ::Page.create
       now = @now + 98
-      Time.stubs(:now).returns(now)
-      root.update(:title => "Some Title")
-      @site.modified_at.must_equal now
+      Timecop.travel(now) do
+        root.update(:title => "Some Title")
+      end
+      assert_site_modified(now)
     end
 
     it "be updated when a page's slug changes" do
       root = ::Page.create
       now = @now + 98
-      Time.stubs(:now).returns(now)
-      root.update(:slug => "updated-slug")
-      @site.modified_at.must_equal now
+      Timecop.travel(now) do
+        root.update(:slug => "updated-slug")
+      end
+      assert_site_modified(now)
     end
 
     it "not be updated when a piece is added" do
       now1 = @now + 24
-      Time.stubs(:now).returns(now1)
-      root = ::Page.create
+      root = nil
+      Timecop.travel(now1) do
+        root = ::Page.create
+      end
       now2 = @now + 240
-      Time.stubs(:now).returns(now2)
-      root.subpages << Piece.create
-      @site.modified_at.must_equal now1
+      Timecop.travel(now2) do
+        root.subpages << Piece.create
+      end
+      assert_site_modified(now1)
     end
 
     it "be updated when a page is deleted" do
       now1 = @now + 24
-      Time.stubs(:now).returns(now1)
-      root = ::Page.create
+      root = child = nil
+      Timecop.travel(now1) do
+        root = ::Page.create
+      end
       now2 = @now + 48
-      Time.stubs(:now).returns(now2)
-      child = ::Page.new
-      root.subpages << child
-      root.save
-      @site.modified_at.must_equal now2
+      Timecop.travel(now2) do
+        child = ::Page.new
+        root.subpages << child
+        root.save
+      end
+      assert_site_modified(now2)
       now3 = @now + 128
-      Time.stubs(:now).returns(now3)
-      child.destroy
-      @site.modified_at.must_equal now3
+      Timecop.travel(now3) do
+        child.destroy
+      end
+      assert_site_modified(now3)
     end
 
     it "not be updated when a piece is deleted" do
       now1 = @now + 24
-      Time.stubs(:now).returns(now1)
-      root = ::Page.create
+      root = piece = nil
+      Timecop.travel(now1) do
+        root = ::Page.create
+      end
       now2 = @now + 240
-      Time.stubs(:now).returns(now2)
-      piece = ::Piece.create
-      root.subpages << piece
-      @site.modified_at.must_equal now1
+      Timecop.travel(now2) do
+        piece = ::Piece.create
+        root.subpages << piece
+      end
+      assert_site_modified(now1)
       now3 = @now + 480
-      Time.stubs(:now).returns(now3)
-      piece.reload.destroy
-      @site.modified_at.must_equal now1
+      Timecop.travel(now3) do
+        piece.reload.destroy
+      end
+      assert_site_modified(now1)
     end
   end
 

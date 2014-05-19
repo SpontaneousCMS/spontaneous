@@ -158,6 +158,15 @@ describe "DataMapper" do
       end
     end
 
+    it "knows if the scope is editable" do
+      @mapper.revision(10) do
+        @mapper.editable?.must_equal false
+      end
+      @mapper.editable do
+        @mapper.editable?.must_equal true
+      end
+    end
+
     it "allow for retrieval of rows from a specific revision" do
       @database.fetch = { id:1, label:"column1", type_sid:"MockContent2" }
       instance = @mapper.revision(20).get(1)

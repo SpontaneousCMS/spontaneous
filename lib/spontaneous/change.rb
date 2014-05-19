@@ -15,7 +15,9 @@ module Spontaneous
       end
 
       def unpublished_pages(site)
-        site.model::Page.filter { (modified_at > last_published_at) | {:first_published_at => nil} }.order(Sequel.desc(:modified_at)).all
+        site.model.with_editable { # published content never has changes...
+          site.model::Page.filter(content_hash_changed: true).order(Sequel.desc(:content_hash_changed_at)).all
+        }
       end
 
       def include_dependencies(page_list)

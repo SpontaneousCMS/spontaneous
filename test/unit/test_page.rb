@@ -87,7 +87,7 @@ describe "Page" do
       Page.root.must_equal nil
       root = ErrorPage.create_root "error"
       Page.root.must_equal nil
-      @site["#error"].must_equal root
+      @site["#error"].must_equal root.reload
     end
   end
 
@@ -442,9 +442,9 @@ describe "Page" do
       @child = Page.new
       @parent.things << @piece
       @piece.things << @child
-      @parent.save
-      @piece.save
-      @child.save
+      @parent.save.reload
+      @piece.save.reload
+      @child.save.reload
       @page_piece = @parent.things.first.things.first
     end
 
@@ -455,7 +455,7 @@ describe "Page" do
     end
 
     it "know their page" do
-      @page_piece.page.must_equal @parent
+      @page_piece.page.reload.must_equal @parent.reload
     end
 
     it "know their container" do
@@ -467,11 +467,11 @@ describe "Page" do
     end
 
     it "know their parent" do
-      @page_piece.parent.must_equal @piece
+      @page_piece.parent.reload.must_equal @piece
     end
 
     it "know their owner" do
-      @page_piece.owner.must_equal @piece
+      @page_piece.owner.reload.must_equal @piece
     end
 
     it "tests as equal to the page target" do

@@ -171,7 +171,8 @@ module Spontaneous::Model::Core
     end
 
     def create_slug_modifications
-      return unless (old_slug = @__slug_changed)
+      return unless (old_slug = @__slug_changed) && (@__slug_changed != @__slug_modification)
+      @__slug_modification = old_slug
       if (previous_modification = local_modifications.detect { |mod| mod.type == :slug })
         if previous_modification.old_value == self[:slug]
           remove_modification(:slug)

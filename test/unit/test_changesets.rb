@@ -56,8 +56,9 @@ describe "Change" do
 
   it "list all newly created pages" do
     root = Page.create(:title => "root")
-    root[:first_published_at] = root[:last_published_at] = root.modified_at + 1000
     root.save
+    Content.publish(@revision)
+
 
     5.times { |i| root.things << Page.create(:title => "Page #{i+1}") }
 
@@ -76,9 +77,6 @@ describe "Change" do
   it "not list new pieces as available for publish" do
     root = Page.create(:title => "root")
     Content.publish(@revision)
-    # force root to appear in the modified lists -- need this because otherwise the changes happen
-    # more quickly than the resolution of the timestamps can register
-    root[:first_published_at] = root[:last_published_at] = root.modified_at - 1000
     root.things << Piece.new
     root.save.reload
     result = outstanding_changes[:changes]
@@ -239,18 +237,21 @@ describe "Change" do
     new_child1  = Page.new(:title => "New Child 1")
     page1.things << new_child1
     root.save
+    new_child1.save
 
     Content.publish(@revision)
+    page1.reload
 
     later = @now + 10
     stub_time(later)
     old_slug = page1.slug
     page1.slug = "changed"
-    page1.save
+    page1.save.reload
 
     result = outstanding_changes[:changes]
 
     change = result.detect { |change| change.page.id == page1.id }
+    refute change.nil?
     change.export[:side_effects].must_equal({
       :slug => [{ :count => 1, :created_at => later.httpdate, :old_value => old_slug, :new_value => "changed"}]
     })
@@ -268,14 +269,16 @@ describe "Change" do
     root.save
 
     Content.publish(@revision)
+    page1.reload
 
     later = @now + 10
     stub_time(later)
     page1.hide!
 
-    page1.reload
+
     result = outstanding_changes[:changes]
     change = result.detect { |change| change.page.id == page1.id }
+    refute change.nil?
     change.export[:side_effects].must_equal({
       :visibility => [{ :count => 1, :created_at => later.httpdate, :old_value => false, :new_value => true}]
     })

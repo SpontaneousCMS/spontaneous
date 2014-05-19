@@ -371,7 +371,7 @@ describe "Revisions" do
         end
       end
 
-      it "insert an entry value into the parent of a newly added page when that page is published aaa" do
+      it "insert an entry value into the parent of a newly added page when that page is published" do
         editable1 = Content.first(:uid => '0')
         new_page = Page.new(:uid => "new")
         editable1.things << new_page
@@ -453,6 +453,103 @@ describe "Revisions" do
     end
   end
 
+  describe "reverting changes" do
+    it "reverts page fields"
+    it "reverts piece fields"
+    it "removes added pieces"
+    it "restores removed pieces"
+    it "restores deleted pages"
+  end
+
+  describe "content hashes" do
+    before do
+      @revision = 1
+      Revision.delete(Content, @revision+1)
+    end
+    it "starts with a published_content_hash of nil" do
+      first = Content.first
+      first.published_content_hash.must_equal nil
+      first.content_hash.wont_equal nil
+      first.content_hash.length.must_equal 32
+    end
+
+    it "sets the published_content_hash on first publish" do
+      first = Content.first
+      content_hash = first.content_hash
+      first.reload.published_content_hash.must_be_nil
+      first.content_hash_changed.must_equal true
+      Revision.create(Content, @revision)
+      first.reload.published_content_hash.must_equal  content_hash
+      first.content_hash_changed.must_equal false
+      Content.with_editable do
+        first.reload.published_content_hash.must_equal content_hash
+        first.content_hash_changed.must_equal false
+      end
+      Content.with_revision(@revision) do
+        first.reload.published_content_hash.must_equal content_hash
+      end
+    end
+
+    it "updates the published_content_hash on later publishes" do
+      first = Page.first
+      content_hash = first.content_hash
+      Revision.create(Content, @revision)
+      first.reload.published_content_hash.must_equal content_hash
+      first.update(title: "not the same")
+      content_hash2 = first.content_hash
+      content_hash2.wont_equal content_hash
+      added = Page.create
+      added.published_content_hash.must_be_nil
+      added.content_hash_changed.must_equal true
+      content_hash_added = added.content_hash
+      Revision.create(Content, @revision+1)
+      first.reload.published_content_hash.must_equal content_hash2
+      first.content_hash_changed.must_equal false
+      Content.with_editable do
+        c = Page.first :id => added.id
+        c.published_content_hash.must_equal content_hash_added
+        c.content_hash_changed.must_equal false
+        c = Page.first :id => first.id
+        c.published_content_hash.must_equal content_hash2
+        c.content_hash_changed.must_equal false
+      end
+      Content.with_revision(@revision+1) do
+        c = Page.first :id => added.id
+        c.published_content_hash.must_equal content_hash_added
+        c.content_hash_changed.must_equal false
+        c = Page.first :id => first.id
+        c.published_content_hash.must_equal content_hash2
+        c.content_hash_changed.must_equal false
+      end
+    end
+
+    it "doesn't set published_content_hash for items not published" do
+      Revision.create(Content, @revision)
+      page = Page.first
+      page.title = "changed"
+      page.save
+      page.content_hash_changed.must_equal true
+      content_hash = page.content_hash
+      added = Page.create
+      added.published_content_hash.must_be_nil
+      added.reload.content_hash_changed.must_equal true
+      Revision.patch(Content, @revision+1, [page])
+      page.reload.published_content_hash.must_equal content_hash
+      page.content_hash_changed.must_equal false
+      added.reload.published_content_hash.must_be_nil
+      added.reload.content_hash_changed.must_equal true
+    end
+
+    it "doesn't set published_content_hash if exception raised in passed block" do
+      Content.first.published_content_hash.must_be_nil
+      begin
+        Revision.create(Content, @revision) do
+          raise "Fail"
+        end
+      rescue Exception; end
+      Content.first.published_content_hash.must_be_nil
+    end
+  end
 
   describe "publication timestamps" do
     before do
