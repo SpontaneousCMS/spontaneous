@@ -5,7 +5,9 @@ module Spontaneous::Publishing
     end
 
     def rerender
-      pipeline.run(site, revision, [], progress)
+      model.scope(revision, true) do
+        pipeline.run(site, revision, [], progress)
+      end
     end
 
     def progress
