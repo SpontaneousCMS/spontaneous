@@ -143,6 +143,28 @@ module Spontaneous
         self
       end
 
+      class PreparedStatement
+        def initialize(ds, ps)
+          @ds = ds
+          @ps = ps
+        end
+
+        def call(vars = {})
+          results = @ps.call(vars)
+          case results
+          when Array
+            @ds.load_instances(results)
+          else
+            @ds.load_instance(results)
+          end
+        end
+      end
+
+      def prepare(type, name, *values)
+        ps = @dataset.prepare(type, name, *values)
+        PreparedStatement.new(self, ps)
+      end
+
       def qualify_to_first_source
         @dataset = @dataset.qualify_to_first_source
         self
@@ -161,8 +183,6 @@ module Spontaneous
       end
 
       alias_method :sql, :to_sql
-
-      private
 
       def get_raw(id)
         @dataset.first(id: id)

@@ -63,6 +63,14 @@ module Spontaneous
         :revision_history_dataset, :revision_archive_dataset,
         :quote_identifier
 
+      def prepare(type, name, *values, &block)
+        active_scope.prepare(type, prepared_statement_namespace(name), &block)
+      end
+
+      def prepared_statement_namespace(name)
+        "#{name}_#{current_revision || "editable"}_#{visible_only?}".to_sym
+      end
+
       def visible(visible_only = true, &block)
         scope(current_revision, visible_only, &block)
       end

@@ -125,6 +125,17 @@ module Spontaneous
         dataset(types).select(*columns, &block)
       end
 
+      def prepare(type, name, *values, &block)
+        prepared_statements[name] ||= begin
+          ds = block.call
+          ds.prepare(type, name, *values)
+        end
+      end
+
+      def prepared_statements
+        @prepared_statements ||= {}
+      end
+
       def schema_uid(id_string)
         @schema.uids[id_string]
       end
@@ -180,7 +191,19 @@ module Spontaneous
       private
 
       def table_dataset(types, fallback_type_condition)
-        naked_dataset.filter(conditions(types, fallback_type_condition))
+        conditions = conditions(types, fallback_type_condition)
+        return naked_dataset.filter(conditions)
+        ds = nil
+        unless (ds = cached_datasets[conditions])
+          p [:new_dataset, conditions]
+          cached_datasets[conditions] = ds = naked_dataset.filter(conditions)
+        end
+        p [:ds, ds]
+        ds
+      end
+
+      def cached_datasets
+        @cached_datasets ||= {}
       end
 
       def naked_dataset

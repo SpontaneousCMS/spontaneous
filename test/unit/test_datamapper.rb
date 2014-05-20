@@ -406,6 +406,29 @@ describe "DataMapper" do
     end
   end
 
+  describe "prepared statements" do
+    it "allows for defining the same prepared statements in multiple scopes" do
+      sqls = []
+      ps0 = @mapper.prepare(:select, :something) { @mapper.filter(MockContent2, label: :$label) }
+      @mapper.visible do
+        ps1 = @mapper.prepare(:select, :something) { @mapper.filter(MockContent2, label: :$label) }
+        ps2 = @mapper.prepare(:select, :something) { @mapper.filter(MockContent2, label: :$label) }
+        ps1.object_id.must_equal ps2.object_id
+        ps0.object_id.wont_equal ps1.object_id
+        @mapper.scope(23, true) do
+          ps3 = @mapper.prepare(:select, :something) { @mapper.filter(MockContent2, label: :$label) }
+          ps1.object_id.wont_equal ps3.object_id
+          ps0.object_id.wont_equal ps3.object_id
+        end
+      end
+      @database.prepared_statements.values.map(&:sql).must_equal [
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2')) AND (label = $label))",
+        "SELECT * FROM content WHERE ((hidden IS FALSE) AND (type_sid IN ('MockContent2')) AND (label = $label))",
+        "SELECT * FROM __r00023_content WHERE ((hidden IS FALSE) AND (type_sid IN ('MockContent2')) AND (label = $label))"
+      ]
+    end
+  end
+
   describe "models" do
     it "can clean the db completely" do
       def MockContent.types
