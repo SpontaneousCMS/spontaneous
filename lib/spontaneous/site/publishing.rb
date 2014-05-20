@@ -42,6 +42,10 @@ class Spontaneous::Site
       Spontaneous::Publishing::Steps.minimal
     end
 
+    def rerender_steps
+      Spontaneous::Publishing::Steps.rerender
+    end
+
     def publishing_method
       resolve_background_mode(Spontaneous::Publishing)
     end
@@ -64,7 +68,7 @@ class Spontaneous::Site
     end
 
     def rerender
-      publishing_method.new(self, self.published_revision).rerender_revision
+      publishing_method.new(self, published_revision, rerender_steps).rerender
     end
 
     def publishing_status

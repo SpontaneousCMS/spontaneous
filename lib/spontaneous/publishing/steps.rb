@@ -22,6 +22,12 @@ module Spontaneous::Publishing
       end
     end
 
+    def self.rerender
+      new do
+        run :render_revision
+      end
+    end
+
     def self.default
       new do
         CORE_STEPS.each do |step|
