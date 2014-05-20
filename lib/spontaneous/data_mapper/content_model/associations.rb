@@ -62,6 +62,7 @@ module Spontaneous
           opts[:association]    = :one_to_many
           opts[:dataset_method] = "#{name}_dataset"
           opts[:add_method]     = "add_#{name.to_s.singularize}"
+          opts[:load_method]    = "load_#{opts[:association]}_association".to_sym
           mod = opts[:module] ||= association_method_module
 
           define_association_method(mod, opts[:dataset_method]) {
@@ -83,6 +84,7 @@ module Spontaneous
           opts[:association]    = :many_to_one
           opts[:dataset_method] = "#{name}_dataset"
           opts[:add_method]     = "#{name}="
+          opts[:load_method]    = "load_#{opts[:association]}_association".to_sym
           mod = opts[:module] ||= association_method_module
 
           define_association_method(mod, opts[:dataset_method]) {
@@ -221,8 +223,7 @@ module Spontaneous
             clear_association_cache(name) if options[:reload]
             ac = associations_cache
             unless ac.key?(name)
-              load_method = "load_#{assoc[:association]}_association"
-              ac[name] = send(load_method, assoc)
+              ac[name] = send(assoc[:load_method], assoc)
             end
             ac[name]
           end
