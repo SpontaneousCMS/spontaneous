@@ -61,13 +61,25 @@ module Spontaneous
         def has_many_content(name, opts = {})
           opts[:association]    = :one_to_many
           opts[:dataset_method] = "#{name}_dataset"
+          opts[:load_ps_method] = "load_#{name}_association_prepared_statement".to_sym
+          opts[:ps_method]      = "#{name}_prepared_statement".to_sym
+          opts[:ps_name]        = "#{name}_#{opts[:association]}_association".to_sym
           opts[:add_method]     = "add_#{name.to_s.singularize}"
           opts[:load_method]    = "load_#{opts[:association]}_association".to_sym
+          opts[:dataset] = Proc.new do |var|
+            mapper.where!([[mapper.qualify_column(opts[:key]), var]])
+          end
           mod = opts[:module] ||= association_method_module
 
+          define_association_method(mod, opts[:load_ps_method]) {
+            ps = self.send(opts[:ps_method])
+            ps.call(id: id)
+          }
+          define_association_method(mod, opts[:ps_method]) {
+            mapper.prepare(:select, opts[:ps_name]) { opts[:dataset].call(:$id) }
+          }
           define_association_method(mod, opts[:dataset_method]) {
-            m = mapper
-            m.where!([[m.qualify_column(opts[:key]), id]])
+            opts[:dataset].call(id)
           }
           define_association_method(mod, name) { |options = {}|
             load_cached_association(name, options)
@@ -85,11 +97,26 @@ module Spontaneous
           opts[:dataset_method] = "#{name}_dataset"
           opts[:add_method]     = "#{name}="
           opts[:load_method]    = "load_#{opts[:association]}_association".to_sym
+          opts[:load_ps_method] = "load_#{name}_association_prepared_statement".to_sym
+          opts[:ps_method]      = "#{name}_prepared_statement".to_sym
+          opts[:ps_name]        = "load_#{name}_#{opts[:association]}_association".to_sym
+          opts[:dataset] = Proc.new do |var|
+            m = mapper
+            m.where!([[m.qualify_column(:id), var]])
+          end
           mod = opts[:module] ||= association_method_module
 
+          define_association_method(mod, opts[:load_ps_method]) {
+            id = send(opts[:key])
+            return nil if id.nil?
+            ps = self.send(opts[:ps_method])
+            ps.call(id: id)
+          }
+          define_association_method(mod, opts[:ps_method]) {
+            mapper.prepare(:first, opts[:ps_name]) { opts[:dataset].call(:$id) }
+          }
           define_association_method(mod, opts[:dataset_method]) {
-            m  = mapper
-            m.where!([[m.qualify_column(:id), send(opts[:key])]])
+            opts[:dataset].call(send(opts[:key]))
           }
           define_association_method(mod, name) { |options = {}|
             load_cached_association(name, options)
@@ -203,13 +230,11 @@ module Spontaneous
           end
 
           def load_many_to_one_association(assoc)
-            id = send(assoc[:key])
-            return nil if id.nil?
-            mapper[id]
+            self.send(assoc[:load_ps_method])
           end
 
           def load_one_to_many_association(assoc)
-            members = self.send(assoc[:dataset_method]).all.compact
+            members = self.send(assoc[:load_ps_method])#.all.compact
             if (reciprocal = assoc[:reciprocal])
               members.each do |member|
                 member.send :set_association_cache, reciprocal, self

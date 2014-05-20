@@ -1047,6 +1047,7 @@ describe "DataMapper" do
       @database.fetch = { id: 7, type_sid:"AssocContent" }
       @parent = AssocContent.first
       @database.sqls
+      @database.columns = nil
     end
 
     after do
@@ -1221,7 +1222,8 @@ describe "DataMapper" do
 
   describe "belongs_to associations" do
     before do
-      @database.columns = @expected_columns + [:parent_id]
+      @columns = @expected_columns + [:parent_id]
+      @database.columns = @columns
       AssocContent = Spontaneous::DataMapper::Model(:content, @database, @schema)
       AssocContent.has_many_content   :children, key: :parent_id, reciprocal: :parent
       AssocContent.belongs_to_content :parent,   key: :parent_id, reciprocal: :children
@@ -1229,6 +1231,8 @@ describe "DataMapper" do
 
       @child = AssocContent.first
       @database.sqls
+      # reset the columns because it messes up prepared statments in the mock adapter
+      @database.columns = nil
     end
 
     after do
@@ -1238,23 +1242,34 @@ describe "DataMapper" do
     it "load the owner" do
       @database.fetch = { id: 7, type_sid:"AssocContent", parent_id: nil }
       parent = @child.parent
-      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 7)) LIMIT 1"]
+      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.id = 7)) LIMIT 1"]
+      parent.must_be_instance_of AssocContent
+      parent.id.must_equal 7
+    end
+
+    it "loads the owner in a revision" do
+      @database.fetch = { id: 7, type_sid:"AssocContent", parent_id: nil }
+      parent = nil
+      @mapper.scope(23, true) do
+        parent = @child.parent
+      end
+      @database.sqls.must_equal ["SELECT * FROM __r00023_content WHERE ((hidden IS FALSE) AND (type_sid IN ('MockContent2', 'MockContent3')) AND (__r00023_content.id = 7)) LIMIT 1"]
       parent.must_be_instance_of AssocContent
       parent.id.must_equal 7
     end
 
     it "cache the result" do
       parent = @child.parent
-      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 7)) LIMIT 1"]
+      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.id = 7)) LIMIT 1"]
       parent = @child.parent
       @database.sqls.must_equal [ ]
     end
 
     it "reload the result if asked" do
       parent = @child.parent
-      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 7)) LIMIT 1"]
+      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.id = 7)) LIMIT 1"]
       parent = @child.parent(reload: true)
-      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 7)) LIMIT 1"]
+      @database.sqls.must_equal ["SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (content.id = 7)) LIMIT 1"]
     end
 
     it "allow access to the relation dataset" do
@@ -1289,6 +1304,7 @@ describe "DataMapper" do
 
     describe "sequel models" do
       before do
+        @database.columns = @columns
         ::Other = Class.new(Sequel::Model(:other)) do ; end
         Other.db = @database
         AssocContent.many_to_one :other, class: Other, key: :parent_id
