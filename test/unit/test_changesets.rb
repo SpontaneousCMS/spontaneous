@@ -9,7 +9,7 @@ describe "Change" do
     @now = Time.now
     @site = setup_site
 
-    stub_time(@now)
+    Timecop.freeze(@now)
     @revision = 1
 
     Content.delete
@@ -26,6 +26,7 @@ describe "Change" do
   end
 
   after do
+    Timecop.return
     Content.delete_revision(@revision) rescue nil
     Content.delete_revision(@revision+1) rescue nil
     Content.delete
@@ -218,11 +219,14 @@ describe "Change" do
     root.reload
     page1 = Page.new(:title => "Page 1")
     root.things << page1
+    root.save.reload
+    page1.save.reload
+    last = Time.now + 100
+    Timecop.travel(last)
     new_child1  = Page.new(:title => "New Child 1")
     page1.things << new_child1
-    root.save
-    last = Time.now + 100
-    ::Content.filter(:id => new_child1.id).update(:modified_at => last)
+    page1.save
+    new_child1.save
     result = outstanding_changes[:changes]
     assert result.first.modified_at > result.last.modified_at, "Change list in incorrect order"
   end
@@ -243,7 +247,7 @@ describe "Change" do
     page1.reload
 
     later = @now + 10
-    stub_time(later)
+    Timecop.travel(later)
     old_slug = page1.slug
     page1.slug = "changed"
     page1.save.reload
@@ -272,7 +276,7 @@ describe "Change" do
     page1.reload
 
     later = @now + 10
-    stub_time(later)
+    Timecop.travel(later)
     page1.hide!
 
 

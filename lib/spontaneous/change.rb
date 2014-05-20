@@ -92,7 +92,7 @@ module Spontaneous
     end
 
     def modified_at
-      page.modified_at
+      page.content_hash_changed_at
     end
 
     def export_timestamp(timestamp)
