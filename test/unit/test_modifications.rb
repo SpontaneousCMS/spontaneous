@@ -8,7 +8,7 @@ describe "Modifications" do
   before do
     @now = Time.now
     @site = setup_site
-    Timecop.travel(@now)
+    Timecop.freeze(@now)
 
     Content.delete
 
@@ -42,6 +42,7 @@ describe "Modifications" do
   end
 
   after do
+    Timecop.return
     Object.send(:remove_const, :Page) rescue nil
     Object.send(:remove_const, :Piece) rescue nil
     Content.delete
@@ -57,7 +58,7 @@ describe "Modifications" do
 
   it "update modification date of page when page fields are updated" do
     now = @now + 100
-    Timecop.travel(now) do
+    Timecop.freeze(now) do
       c = Page.first
       (c.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
       c.update(title: "changed")
@@ -67,7 +68,7 @@ describe "Modifications" do
 
   it "update modification date of path when page visibility is changed" do
     now = @now + 100
-    Timecop.travel(now) do
+    Timecop.freeze(now) do
       c = Page.uid("0")
       (c.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
       c.toggle_visibility!
@@ -80,7 +81,7 @@ describe "Modifications" do
       field :title
     end
 
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "0"
       (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
       page.with_fields.title.value = "updated"
@@ -90,7 +91,7 @@ describe "Modifications" do
   end
 
   it "update page timestamps on modification of a piece" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "0"
       (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
       content = page.contents.first
@@ -106,7 +107,7 @@ describe "Modifications" do
     Piece.box :with_fields do
       field :title
     end
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "0"
       (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
       content = page.contents.first
@@ -119,7 +120,7 @@ describe "Modifications" do
   end
 
   it "update page timestamp on addition of piece" do
-    Timecop.travel(@now + 3600) do
+    Timecop.freeze(@now + 3600) do
       page = Page.first :uid => "0"
       content = Content[page.contents.first.id]
       content.things << Piece.new
@@ -136,7 +137,7 @@ describe "Modifications" do
     page.things << Page.new(:uid => "0.0.0.1")
     page.save
     page = Page.first :uid => "0.0.0"
-    Timecop.travel(@now + 1000) do
+    Timecop.freeze(@now + 1000) do
       child = page.things.first
       child.update_position(1)
       page.reload.modified_at.to_i.must_equal @now.to_i + 1000
@@ -144,7 +145,7 @@ describe "Modifications" do
   end
 
   it "update a page's timestamp on modification of its slug" do
-    Timecop.travel(@now + 1000) do
+    Timecop.freeze(@now + 1000) do
       page = Page.first :uid => "0"
       page.slug = "changed"
       page.save.reload
@@ -153,7 +154,7 @@ describe "Modifications" do
   end
 
   it "update the pages timestamp if a boxes order is changed" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "0"
       content = Content[page.contents.first.id]
       content.update_position(1)
@@ -162,7 +163,7 @@ describe "Modifications" do
   end
 
   it "update the parent page's modification time if the contents of a piece's box are re-ordered" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "0"
       content = page.things.first.things.first
       content.update_position(1)
@@ -171,7 +172,7 @@ describe "Modifications" do
   end
 
   it "update the parent page's modification date if a piece is deleted" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "0"
       content = Content[page.contents.first.id]
       content.destroy
@@ -180,7 +181,7 @@ describe "Modifications" do
   end
 
   it "update the parent page's modification date if a page is deleted" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "0"
       content = Content[page.things.first.things.first.id]
       content.destroy
@@ -189,7 +190,7 @@ describe "Modifications" do
   end
 
   it "add entry to the list of side effects for a visibility change" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "1"
       old_slug = page.slug
       page.slug = "changed"
@@ -207,7 +208,7 @@ describe "Modifications" do
   end
 
   it "serialize page modifications" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "1"
       page.slug = "changed"
       page.save
@@ -221,7 +222,7 @@ describe "Modifications" do
   end
 
   it "concatenate multiple slug modifications together" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "1"
       old_slug = page.slug
       page.slug = "changed"
@@ -236,7 +237,7 @@ describe "Modifications" do
   end
 
   it "know the number of pages affected by slug modification" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "1"
       page.slug = "changed"
       page.save
@@ -246,7 +247,7 @@ describe "Modifications" do
   end
 
   it "show the number of pages whose visibility is affected in the case of a visibility change" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "1"
       page.hide!
       page.reload
@@ -259,7 +260,7 @@ describe "Modifications" do
   end
 
   it "record visibility changes that originate from a content piece" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "1"
       page.things.first.hide!
       page.reload
@@ -272,7 +273,7 @@ describe "Modifications" do
   end
 
   it "show number of pages that are to be deleted in the case of a deletion" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first(:uid => "1")
       owner = page.owner
       page.destroy
@@ -286,7 +287,7 @@ describe "Modifications" do
   end
 
   it "show number of pages deleted if piece with pages is deleted" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first(:uid => "1")
       piece = page.things.first
       owner = piece.owner
@@ -300,7 +301,7 @@ describe "Modifications" do
   end
 
   it "show number of pages deleted if page belonging to piece is deleted" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first(:uid => "1")
       child = page.things.first.things.first
       owner = child.owner
@@ -314,7 +315,7 @@ describe "Modifications" do
   end
 
   it "have an empty modification if the slug has been reverted to original value" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "1"
       old_slug = page.slug
       page.slug = "changed"
@@ -330,7 +331,7 @@ describe "Modifications" do
   end
 
   it "have an empty modification if the visibility has been reverted to original value" do
-    Timecop.travel(@now+3600) do
+    Timecop.freeze(@now+3600) do
       page = Page.first :uid => "1"
       page.things.first.hide!
       page.reload
@@ -615,7 +616,7 @@ describe "Modifications" do
     end
 
     it "add the editor to any modifications" do
-      Timecop.travel(@now+3600) do
+      Timecop.freeze(@now+3600) do
         page = Page.first :uid => "1"
         page.current_editor = @user
         page.slug = "changed"
@@ -626,7 +627,7 @@ describe "Modifications" do
     end
 
     it "persist the user" do
-      Timecop.travel(@now+3600) do
+      Timecop.freeze(@now+3600) do
         page = Page.first :uid => "1"
         page.current_editor = @user
         page.slug = "changed"
