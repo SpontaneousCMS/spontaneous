@@ -334,12 +334,39 @@ describe "Content Hash" do
       assert_uniq_hashes 2
     end
 
+    it "doesn't update the parent page hash when a child page is added" do
+      hashes << middle[:content_hash]
+      middle.box1 << page_class.create(slug: "added", title: "added")
+      middle.save
+      hashes << middle.reload[:content_hash]
+      assert_uniq_hashes 1
+    end
+
+    it "doesn't update the parent page hash when a child page is added to an entry" do
+      hashes << page[:content_hash]
+      Content.scope do
+        grand_child.box1 << page_class.create(slug: "added", title: "added")
+        grand_child.save
+      end
+      hashes << page.reload[:content_hash]
+      assert_uniq_hashes 1
+    end
+
     it "doesn't update the parent page hash when the child page is updated" do
       hashes << middle[:content_hash]
       grand_child.box1.field1 = "different"
       grand_child.save
       hashes << middle.reload[:content_hash]
       assert_uniq_hashes 1
+    end
+
+    it "doesn't cascade content modifications up the page tree" do
+      page.reload
+      ancestors = page.ancestors
+      page_class.dataset.filter(id: ancestors.map(&:id)).update(content_hash: "generated")
+      page.box1 << page_class.new(slug: "added")
+      page.save
+      ancestors.map { |a| a.reload.content_hash }.must_equal ["generated"]*ancestors.length
     end
   end
 

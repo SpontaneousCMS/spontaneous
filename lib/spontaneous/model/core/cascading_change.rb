@@ -5,9 +5,9 @@ module Spontaneous::Model::Core
     extend Spontaneous::Concern
 
     module ClassMethods
-      def cascading_change(attr_name, change_propagator_class)
+      def cascading_change(attr_name, &block)
         define_method "#{attr_name}=" do |value|
-          append_cascading_change(change_propagator_class, self[attr_name], value)
+          append_cascading_change(self[attr_name], value, &block)
           super(value)
         end
       end
@@ -19,8 +19,8 @@ module Spontaneous::Model::Core
       @changes_to_cascade ||= []
     end
 
-    def append_cascading_change(change_propagator_class, old_value, new_value)
-      changes_to_cascade << change_propagator_class.new(self, old_value, new_value) if new_value != old_value
+    def append_cascading_change(old_value, new_value, &block)
+      changes_to_cascade << block.call(self, old_value, new_value) if new_value != old_value
     end
 
     def after_save

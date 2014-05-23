@@ -6,16 +6,20 @@ module Spontaneous::Model::Core
     extend Spontaneous::Concern
 
     class ContentHashChange
-      def initialize(origin, old_value, new_value)
-        @origin, @old_value, @new_value = origin, old_value, new_value
+      def initialize(origin)
+        @origin = origin
       end
 
       def propagate
-        owner.recalculate_content_hash! if propagate_to_owner?
+        content = owner
+        while propagate_to?(content)# && content.modification_tracking_enabled?
+          content.recalculate_content_hash!# if propagate_to_owner?
+          content = content.owner
+        end
       end
 
-      def propagate_to_owner?
-        !owner.nil?
+      def propagate_to?(content)
+        !(content.nil? || (@origin.page? && content.page?)) && content.modification_tracking_enabled?
       end
 
       def owner
@@ -24,7 +28,9 @@ module Spontaneous::Model::Core
     end
 
     included do
-      cascading_change :content_hash, ContentHashChange
+      cascading_change :content_hash do |origin, old_value, new_value|
+        ContentHashChange.new(origin)
+      end
     end
 
     def content_hash_changed?
@@ -52,23 +58,41 @@ module Spontaneous::Model::Core
     def after_save
       # Only recalculate the content hash if we're in the editable dataset, otherwise
       # the published data can end up with a different content hash even after being published
-      recalculate_content_hash if mapper.editable?
+      recalculate_content_hash if modification_tracking_enabled?
+      enable_modification_tracking
       super
     end
 
     def recalculate_content_hash
-      db, current, published = self[:content_hash], calculate_content_hash, published_content_hash
-      changed = published.blank? || current != published
-      self.update(content_hash: current, content_hash_changed: changed, content_hash_changed_at: ::Sequel.datetime_class.now) if db != current
+      attrs, changed = content_hash_attributes
+      self.update(attrs) if changed
     end
 
-    # Recalculate the current content hash ensuring that we're taking all
-    # content_hash values from the db not Used by content hash change
-    # propagation -- without the #reload call existing cached versions of the
+    # Update the instances content hash by writing direct to the db & without triggering any futher cascading changes
+    # Without the #reload call existing cached versions of the
     # content tree may be used and changes will not propagate
     def recalculate_content_hash!
       reload unless modified?
-      recalculate_content_hash
+      attrs, changed = content_hash_attributes
+      model.where(id: id).update(attrs) if changed
+    end
+
+    def content_hash_attributes
+      db, current, published = self[:content_hash], calculate_content_hash, published_content_hash
+      changed = published.blank? || current != published
+      [{content_hash: current, content_hash_changed: changed, content_hash_changed_at: ::Sequel.datetime_class.now}, db != current]
+    end
+
+    def modification_tracking_enabled?
+      mapper.editable? && !@modification_tracking_disabled
+    end
+
+    def disable_modification_tracking!
+      @modification_tracking_disabled = true
+    end
+
+    def enable_modification_tracking
+      @modification_tracking_disabled = false
     end
   end
 end

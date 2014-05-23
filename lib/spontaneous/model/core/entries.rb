@@ -128,6 +128,7 @@ module Spontaneous::Model::Core
       child_page.owner = self
       if page
         child_page.depth = page.depth + 1
+        page.disable_modification_tracking!
         page.unordered_children << child_page
         child_page.parent = page
         child_page.update_path
