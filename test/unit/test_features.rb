@@ -61,7 +61,7 @@ describe "Features" do
 
       @root = ::Page.create
       Content.delete_revision(1) rescue nil
-      Spontaneous.logger.silent! {
+      quietly {
         @site.publish_all
       }
     end
