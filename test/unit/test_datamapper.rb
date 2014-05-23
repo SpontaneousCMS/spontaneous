@@ -950,27 +950,27 @@ describe "DataMapper" do
       before do
         @time = @table.dataset.send :format_timestamp, @now
         @database.columns = @expected_columns + [:created_at, :modified_at]
-        TimestampedContent = Spontaneous::DataMapper::Model(:content, @database, @schema)
+        ::TimestampedContent = Spontaneous::DataMapper::Model(:content, @database, @schema)
         @database.sqls
       end
 
       after do
-        DataMapperTest.send :remove_const, :TimestampedContent rescue nil
+        Object.send :remove_const, :TimestampedContent rescue nil
       end
 
       it "set created_at timestamp on creation" do
         instance = TimestampedContent.create label: "something"
-        @database.sqls.first.must_equal "INSERT INTO content (label, created_at, type_sid) VALUES ('something', #{@time}, 'TimestampedContent')"
+        @database.sqls.first.must_equal "INSERT INTO content (label, created_at, modified_at, type_sid) VALUES ('something', #{@time}, #{@time}, 'TimestampedContent')"
       end
 
-      # it "update the modified_at value on update" do
-      #   @database.fetch = { id: 1, type_sid:"TimestampedContent" }
-      #   instance = TimestampedContent.create label: "something"
-      #   @database.sqls
-      #   instance.set label: "changed"
-      #   instance.save
-      #   @database.sqls.first.must_equal "UPDATE content SET label = 'changed', modified_at = #{@time} WHERE (id = 1)"
-      # end
+      it "update the modified_at value on update" do
+        @database.fetch = { id: 1, type_sid:"TimestampedContent" }
+        instance = TimestampedContent.create label: "something"
+        @database.sqls
+        instance.set label: "changed"
+        instance.save
+        @database.sqls.first.must_equal "UPDATE content SET label = 'changed', modified_at = #{@time} WHERE (id = 1)"
+      end
     end
 
     describe "schema" do

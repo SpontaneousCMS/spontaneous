@@ -73,9 +73,6 @@ module Spontaneous::Model::Core
     end
 
     def entry_modified!(modified_entry)
-      # See plugins/modifications.rb for details of __ignore_page_modification ... basically
-      # it stops the parent page appearing in the publishing list when a new page is added.
-      @__ignore_page_modification = modified_entry && modified_entry.added? && modified_entry.page?
       self.entry_store = all_contents.serialize_db
     end
 

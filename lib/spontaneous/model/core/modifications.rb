@@ -110,13 +110,6 @@ module Spontaneous::Model::Core
     end
 
     def before_save
-      # Home of many hacks.
-      #
-      # @__ignore_page_modification is set if a box has been modified by the addition of a page.
-      # This is to correctly map changes to a list of pages to publish. In the case of a page
-      # addition the change is owned by the new page.
-      self.modified_at = Time.now unless @__ignore_page_modification or changed_columns.empty?
-      @__ignore_page_modification = false
       # marks this object as the modified object appending modifications to the list
       # needed in order to know if changes to the modification list will be saved automatically
       # or if we need an explicit call to #save
