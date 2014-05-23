@@ -265,8 +265,12 @@ module Spontaneous
             associations_cache.delete(name)
           end
 
-          def refresh
+          def clear_association_cache!
             associations_cache.clear
+          end
+
+          def refresh
+            clear_association_cache!
             @association_proxy_instance = nil
             super
           end
