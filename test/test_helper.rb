@@ -26,38 +26,48 @@ Sequel.extension :migration
 # The scissors plugin adds class methods for update, delete, and destroy
 Sequel::Model.plugin :scissors
 
-# for future integration with travis
 ENV["SPOT_ADAPTER"] ||= "postgres"
 
 jruby = case RUBY_PLATFORM
-           when "java"
-             true
-           else
-             false
-           end
+when "java"
+  true
+else
+  false
+end
 
 
 connection_string = \
-  case ENV["SPOT_ADAPTER"]
-  when "postgres"
-    if jruby
-      require 'jdbc/postgres'
-      Jdbc::Postgres.load_driver
-      "jdbc:postgresql:///spontaneous2_test"
-    else
-      require 'pg'
-      "postgres:///spontaneous2_test"
-    end
-  when "mysql"
-    if jruby
-      require 'jdbc/mysql'
-      Jdbc::MySQL.load_driver
-      "jdbc:mysql://localhost/spontaneous2_test?user=root"
-    else
-      require 'mysql2'
-      "mysql2://root@localhost/spontaneous2_test"
-    end
+case ENV["SPOT_ADAPTER"]
+when "postgres"
+  if jruby
+    require 'jdbc/postgres'
+    Jdbc::Postgres.load_driver
+    "jdbc:postgresql:///spontaneous2_test"
+  else
+    require 'pg'
+    "postgres:///spontaneous2_test"
   end
+when "mysql"
+  if jruby
+    require 'jdbc/mysql'
+    Jdbc::MySQL.load_driver
+    "jdbc:mysql://localhost/spontaneous2_test?user=root"
+  else
+    require 'mysql2'
+    "mysql2://root@localhost/spontaneous2_test"
+  end
+when "sqlite"
+  puts "SQLite is currently not supported"
+  exit 1
+  if jruby
+    require 'jdbc/sqlite3'
+    Jdbc::SQLite3.load_driver
+    "jdbc:sqlite::memory:"
+  else
+    require 'sqlite3'
+    "sqlite:/" # in-memory
+  end
+end
 
 puts "SPOT_ADAPTER=#{ENV["SPOT_ADAPTER"]} => #{connection_string}"
 
@@ -241,5 +251,3 @@ class MiniTest::Spec
 end
 
 require 'minitest/autorun'
-
-

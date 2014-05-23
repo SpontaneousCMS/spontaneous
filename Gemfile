@@ -15,12 +15,14 @@ platforms :jruby do
   gem 'jruby-openssl'
   gem 'jdbc-postgres'
   gem 'jdbc-mysql'
+  gem 'jdbc-sqlite3'
 end
 
 platforms :mri, :rbx do
   gem 'mysql2',      '~> 0.3'
   gem 'sequel_pg',   '~> 1.6', require: 'sequel'
   gem 'xapian-ruby', '~> 1.2'
+  # gem 'sqlite3', '~> 1.3'
 end
 
 
