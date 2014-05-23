@@ -99,15 +99,8 @@ describe "Crypt" do
       version, _ = Crypt.version_split(hash)
       version.must_equal Crypt.current.version
     end
-
-    it "take at least half a second to compute" do
-      hash = nil
-      bm = Benchmark.measure { hash = Crypt::hash_password(@password) }
-      bm.real.must_be :>=, 0.5
-      bm = Benchmark.measure { Crypt::valid?(@password, hash) }
-      bm.real.must_be :>=, 0.5
-    end
   end
+
   describe "users" do
     before do
       S::Permissions::User.delete
