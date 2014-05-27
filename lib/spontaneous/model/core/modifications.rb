@@ -127,9 +127,7 @@ module Spontaneous::Model::Core
     end
 
     def generate_modification_list
-      create_slug_modifications
-      create_visibility_modifications
-      serialize_pending_modifications
+      serialize_pending_modifications if [create_slug_modifications, create_visibility_modifications].any? { |result| result }
     end
 
     def child_page_deleted!
@@ -152,29 +150,32 @@ module Spontaneous::Model::Core
     def create_visibility_modifications
       # We only want to record visibility changes that originate from user action, not ones propagated
       # from higher up the tree, hence the check against the hidden_origin.
-      if changed_columns.include?(:hidden) && hidden_origin.nil?
-        if (previous_modification = local_modifications.detect { |mod| mod.type == :visibility })
-          if previous_modification.old_value == hidden?
-            remove_modification(:visibility)
-            return nil
-          end
+      return false unless changed_columns.include?(:hidden) && hidden_origin.nil?
+      if (previous_modification = local_modifications.detect { |mod| mod.type == :visibility })
+        if previous_modification.old_value == hidden?
+          remove_modification(:visibility)
         end
+      else
         append_modification HiddenModification.new(self, current_editor, Time.now, !hidden?, hidden)
       end
+      true
     end
 
     def create_slug_modifications
-      return unless (old_slug = @__slug_changed) && (@__slug_changed != @__slug_modification)
-      @__slug_modification = old_slug
+      change = changes_to_cascade[:slug]
+      return false if change.nil?
+      old_slug, new_slug = change.old_value, self[:slug]
+      return false if old_slug.nil? # ignore first change of slug from nil to provided or generated
       if (previous_modification = local_modifications.detect { |mod| mod.type == :slug })
-        if previous_modification.old_value == self[:slug]
+        if previous_modification.old_value == new_slug
           remove_modification(:slug)
-          return nil
+        else
+          previous_modification.new_value = new_slug
         end
-        previous_modification.new_value = self[:slug]
       else
-        append_modification SlugModification.new(self, current_editor, Time.now, old_slug, self[:slug])
+        append_modification SlugModification.new(self, current_editor, Time.now, old_slug, new_slug)
       end
+      true
     end
 
     def remove_modification(type)
@@ -186,6 +187,12 @@ module Spontaneous::Model::Core
     end
 
     def pending_modifications(filter_type = nil)
+      mods = all_pending_modifications
+      return mods if filter_type.nil?
+      mods.select { |mod| mod.type == filter_type }
+    end
+
+    def all_pending_modifications
       (local_modifications + pieces.flat_map { |piece| piece.local_modifications })
     end
 

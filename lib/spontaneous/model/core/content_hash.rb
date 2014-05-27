@@ -62,20 +62,21 @@ module Spontaneous::Model::Core
     def content_hash_dependencies(&calculation)
       fields = fields_with_consistent_order.map(&calculation)
       boxes = boxes_with_consistent_order.reject(&:generated?).map(&calculation)
-      [schema_id, hidden].concat(fields).concat(boxes)
+      [schema_id, hidden?].concat(fields).concat(boxes)
     end
 
-    def after_save
+    def before_save
       # Only recalculate the content hash if we're in the editable dataset, otherwise
       # the published data can end up with a different content hash even after being published
       recalculate_content_hash if modification_tracking_enabled?
       enable_modification_tracking
       super
+      true
     end
 
     def recalculate_content_hash
       attrs, changed = content_hash_attributes
-      self.update(attrs) if changed
+      set(attrs) if changed
     end
 
     # Update the instances content hash by writing direct to the db & without triggering any futher cascading changes

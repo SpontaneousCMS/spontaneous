@@ -212,6 +212,15 @@ describe "Content Hash" do
       hashes << page.calculate_content_hash
     end
 
+    it "calculates the correct content hash at creation" do
+      hashes.clear
+      page = page_class.create(slug: 'funny', title: 'haha')
+      hashes << page.content_hash
+      page.save
+      hashes << page.content_hash
+      hashes.uniq.length.must_equal 1
+    end
+
     it "updates the content hash when field values change" do
       page.title = 'different'
       hashes << page.calculate_content_hash
@@ -399,7 +408,7 @@ describe "Content Hash" do
 
     describe "after publishing" do
       before do
-        page.update(published_content_hash: page.content_hash, content_hash_changed: false)
+        page.update(published_content_hash: page.calculate_content_hash, content_hash_changed: false)
       end
 
       it "sets the changed flag when content_hash differs" do
@@ -416,9 +425,10 @@ describe "Content Hash" do
       end
 
       it "leaves the changed flag when content_hash differs" do
+        original_title =  page.title.value
         page.update(title: "different")
         page.content_hash_changed.must_equal true
-        page.update(title: "something")
+        page.update(title: original_title)
         page.content_hash_changed.must_equal false
       end
     end

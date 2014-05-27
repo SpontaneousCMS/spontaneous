@@ -100,17 +100,12 @@ module Spontaneous::Model::Page
       self.class.is_default_slug?(slug)
     end
 
-    def after_save
-      super
-      check_for_path_changes
-    end
-
     def generate_default_slug
       self.class.generate_default_slug
     end
 
     def is_conflicting_slug?(slug)
-      siblings.reject { |s| s.root? }.compact.map(&:slug).include?(slug)
+      siblings(true).reject { |s| s.root? }.compact.map(&:slug).include?(slug)
     end
 
     def parent=(parent)
@@ -163,7 +158,7 @@ module Spontaneous::Model::Page
 
 
     def calculate_path
-      calculate_path_with_slug(self.slug)
+      calculate_path_with_slug(slug)
     end
 
     def calculate_path_with_slug(slug)
@@ -174,12 +169,29 @@ module Spontaneous::Model::Page
       end
     end
 
+    class SlugChange
+      attr_reader :old_value, :new_value
+      def initialize(origin, old_value, new_value)
+        @origin, @old_value, @new_value = origin, old_value, new_value
+      end
+
+      def propagate
+        return if @old_value == @new_value
+        @origin.force_path_changes
+      end
+    end
+
+    included do
+      cascading_change :slug do |origin, old_value, new_value|
+        SlugChange.new(origin, old_value, new_value)
+      end
+    end
+
     # slugs can be max 64 characters long
     def slug=(s)
       if (new_slug = fit_slug_to_length(s, 64)) != slug
-        @__slug_changed = slug
-        self[:slug] = new_slug
-        self.update_path
+        super(new_slug)
+        update_path
       end
     end
 
@@ -195,25 +207,18 @@ module Spontaneous::Model::Page
 
     protected :fit_slug_to_length
 
-    def check_for_path_changes(force = false)
-      if @__slug_changed || force
-        @__slug_changed = false
-        children.each do |child|
-          child.propagate_path_changes
-        end
-        aliases.each do |link|
-          link.propagate_path_changes if link.page?
-        end
+    def force_path_changes
+      children.each do |child|
+        child.propagate_path_changes
+      end
+      aliases.each do |link|
+        link.propagate_path_changes if link.page?
       end
     end
 
-    def force_path_changes
-      check_for_path_changes(true)
-    end
-
     def propagate_path_changes
-      self.update_path
-      self.save
+      update_path
+      save
       children.each do |child|
         child.propagate_path_changes
       end

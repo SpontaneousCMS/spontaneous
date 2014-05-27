@@ -87,12 +87,12 @@ module Spontaneous::Model::Page
       page.id == self.id or ancestor?(page)
     end
 
-    def generation
-      parent ? parent.children : [root].compact
+    def generation(reload = false)
+      parent ? parent.children(reload) : [root].compact
     end
 
-    def siblings
-      generation.reject { |p| p.id == id }
+    def siblings(reload = false)
+      generation(reload).reject { |p| p.id == id }
     end
 
     def >(page)

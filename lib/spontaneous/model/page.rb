@@ -61,8 +61,9 @@ module Spontaneous::Model
       end
     end
 
-    def children
-      @ordered_children ||= generate_ordered_children(unordered_children)
+    def children(reload = false)
+      @ordered_children = nil if reload
+      @ordered_children ||= generate_ordered_children(unordered_children(reload: reload))
     end
 
     def generate_ordered_children(unordered_children)

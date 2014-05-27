@@ -58,7 +58,9 @@ describe "Page" do
       page = Page.new slug: "404"
       root.pages << page
       root.save
+      page.save
       root.path.must_equal "#error"
+      page.reload.path.must_equal "#error/404"
       root.slug = "changed"
       root.save
       root.path.must_equal "#changed"
@@ -154,13 +156,13 @@ describe "Page" do
       r.sub << o
       o.save
 
-      p = Page.create(:title => "New Page")
-      r.sub << p
-      p.save
-      p.slug = "my-slug"
-      p.save
-      o.slug.wont_equal p.slug
-      p.path.must_equal "/my-slug-01"
+      page = Page.create(:title => "New Page")
+      r.sub << page
+      page.save
+      page.slug = "my-slug"
+      page.save
+      o.slug.wont_equal page.slug
+      page.path.must_equal "/my-slug-01"
     end
 
     it "fixes conflicting slugs created from titles automatically" do

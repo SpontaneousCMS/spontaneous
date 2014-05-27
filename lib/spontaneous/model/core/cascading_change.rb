@@ -7,7 +7,7 @@ module Spontaneous::Model::Core
     module ClassMethods
       def cascading_change(attr_name, &block)
         define_method "#{attr_name}=" do |value|
-          append_cascading_change(self[attr_name], value, &block)
+          append_cascading_change(attr_name, self[attr_name], value, &block)
           super(value)
         end
       end
@@ -16,11 +16,11 @@ module Spontaneous::Model::Core
     private
 
     def changes_to_cascade
-      @changes_to_cascade ||= []
+      @changes_to_cascade ||= {}
     end
 
-    def append_cascading_change(old_value, new_value, &block)
-      changes_to_cascade << block.call(self, old_value, new_value) if new_value != old_value
+    def append_cascading_change(attribute, old_value, new_value, &block)
+      changes_to_cascade[attribute] = block.call(self, old_value, new_value) if new_value != old_value
     end
 
     def after_save
@@ -29,7 +29,7 @@ module Spontaneous::Model::Core
     end
 
     def cascade_all_changes
-      changes_to_cascade.each do |propagator|
+      changes_to_cascade.each do |attribute, propagator|
         propagator.propagate
       end
       changes_to_cascade.clear
