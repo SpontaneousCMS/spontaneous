@@ -233,20 +233,6 @@ describe "Content Hash" do
       hashes.first.must_equal hashes.last
     end
 
-    it "changes the content hash when the page path changes" do
-      middle.update(slug: 'updated')
-      hashes << page.reload.calculate_content_hash
-      hashes.uniq.length.must_equal 2
-    end
-
-    it "reverts the content hash when the page path reverts" do
-      middle.update(slug: 'updated')
-      hashes << page.reload.calculate_content_hash
-      middle.update(slug: 'middle')
-      hashes << page.reload.calculate_content_hash
-      hashes.uniq.length.must_equal 2
-    end
-
     it "is dependent on box hashes" do
       page.box1.expects(:content_hash).returns('unlikely')
       hashes << page.calculate_content_hash
@@ -367,6 +353,22 @@ describe "Content Hash" do
       page.box1 << page_class.new(slug: "added")
       page.save
       ancestors.map { |a| a.reload.content_hash }.must_equal ["generated"]*ancestors.length
+    end
+
+    it "updates the page hash when its slug changes" do
+      hashes << page.content_hash
+      page.update(slug: "wow-im-different")
+      hashes << page.reload.content_hash
+      hashes.length.must_equal 2
+      hashes.uniq.length.must_equal 2
+    end
+
+    it "doesn't update the child hash when the parent slug changes" do
+      hashes << page.content_hash
+      middle.update(slug: "wow-im-different")
+      hashes << page.reload.content_hash
+      hashes.length.must_equal 2
+      hashes.uniq.length.must_equal 1
     end
   end
 

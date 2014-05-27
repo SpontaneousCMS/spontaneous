@@ -154,7 +154,7 @@ module Spontaneous::Model
 
     # Make page modification state depend on its path
     def content_hash_dependencies
-      super.push(path)
+      super.push(slug)
     end
   end
 end
