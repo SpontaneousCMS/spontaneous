@@ -56,6 +56,7 @@ module Spontaneous
       end
 
       extend ClassMethods
+      include Spontaneous::Model::Core::ContentHash::FieldMethods
 
       attr_accessor :owner, :name, :unprocessed_value, :template_params, :version
       attr_accessor :prototype
@@ -67,13 +68,6 @@ module Spontaneous
         deserialize(params, default_values)
         @values = nil
       end
-
-      def content_hash
-        Spontaneous::Model.content_hash(processed_values)
-      end
-
-      alias_method :calculate_content_hash, :content_hash
-      alias_method :calculate_content_hash!, :content_hash
 
       def processed_values
         @values ||= processed_values_with_fallback

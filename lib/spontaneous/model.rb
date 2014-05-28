@@ -1,9 +1,7 @@
-require 'spontaneous/model/content_hash'
 
 module Spontaneous
 
   module Model
-    extend ContentHash
     autoload :Core,   "spontaneous/model/core"
     autoload :Page,   "spontaneous/model/page"
     autoload :Piece,  "spontaneous/model/piece"

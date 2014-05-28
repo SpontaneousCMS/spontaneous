@@ -22,6 +22,7 @@ module Spontaneous::Model
     include SiteMap
     include SiteTimestamps
     include Locks
+    include Spontaneous::Model::Core::ContentHash::PageMethods
 
     included do
       many_to_one_content :parent,   :key => :parent_id, :reciprocal => :unordered_children
@@ -150,11 +151,6 @@ module Spontaneous::Model
     # that Pages are == to a PagePiece that encloses them
     def eql?(obj)
       super || (Spontaneous::PagePiece === obj && obj.target.eql?(self))
-    end
-
-    # Make page modification state depend on its path
-    def content_hash_dependencies
-      super.push(slug)
     end
   end
 end
