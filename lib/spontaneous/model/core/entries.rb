@@ -4,22 +4,6 @@ module Spontaneous::Model::Core
   module Entries
     extend Spontaneous::Concern
 
-    # before_include do
-    #   puts "owner= defined?"
-    #   p method_defined?(:owner=)
-    # end
-
-    # included do
-    #   # alias_method :<<, :push
-    # end
-    #
-    #     def self.configure(base)
-    #       base.__send__(:alias_method,  :<<, :push)
-    #     end
-
-    # InstanceMethods
-
-
     # because it's possible to build content out of order
     # some relations don't necessarily get created straight away
     def before_save
