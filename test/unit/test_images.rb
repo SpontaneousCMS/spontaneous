@@ -17,6 +17,7 @@ describe "Images" do
   describe "Image fields set using absolute values" do
     before do
       @image = S::Field::Image.new(:name => "image")
+      @image.prototype = Spontaneous::Prototypes::FieldPrototype.new(@site.model, :image, :image)
     end
     it "accept and not alter URL values" do
       url =  "http://example.com/image.png"
@@ -179,7 +180,8 @@ describe "Images" do
           @image.src.must_equal "/media/00234/0010/rose.jpg"
           @image.original.width.must_equal @image.width
           @image.original.height.must_equal @image.height
-          @image.filepath.must_equal File.expand_path(File.join(Spontaneous.media_dir, "00234/0010/rose.jpg"))
+          md5 = Digest::MD5.file(@src_image).hexdigest
+          @image.filepath.must_equal ["rose.jpg", md5].to_json
         end
 
 

@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require 'tempfile'
+require 'digest/md5'
 
 module Spontaneous::Field
   class File < Base
@@ -56,13 +57,25 @@ module Spontaneous::Field
 
     def preprocess(image, site)
       file, filename, mimetype = fileinfo(image)
-      return "" if file.nil?
-      return file unless ::File.exist?(file)
+      if file.nil?
+        set_unprocessed_value(["", ""].to_json)
+        return ""
+      end
+      unless ::File.exist?(file)
+        set_unprocessed_value([file, ""].to_json)
+        return file
+      end
+      set_unprocessed_value([filename, file_digest(file)].to_json)
 
       media_file = site.file(owner, filename, storage_headers(mimetype, filename))
       media_file.copy(file)
-      set_unprocessed_value(media_file.path)
       media_file
+    end
+
+    def file_digest(file)
+      Digest::MD5.file(file).hexdigest
+    rescue Errno::ENOENT => e
+      ""
     end
 
     def fileinfo(fileinfo)
@@ -106,6 +119,18 @@ module Spontaneous::Field
       super(user).merge({
         :processed_value => processed_values
       })
+    end
+
+    def original_filename
+      file_info[0]
+    end
+
+    def file_hash
+      file_info[1]
+    end
+
+    def file_info
+      @file_info ||= Spontaneous::JSON.parse(unprocessed_value)
     end
 
     def path

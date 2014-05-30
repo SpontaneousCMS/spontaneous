@@ -106,6 +106,8 @@ module Spontaneous::Field
       sizes[:original].src
     end
 
+    alias_method :processed_value, :value
+
     def set_value!(value, process = true, site = nil)
       @sizes = nil
       super

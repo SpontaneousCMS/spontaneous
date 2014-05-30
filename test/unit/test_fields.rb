@@ -1008,7 +1008,10 @@ describe "Fields" do
   end
 
   describe "File fields" do
+    let(:path) { File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__) }
+
     before do
+      assert File.exists?(path), "Test file #{path} does not exist"
       @content_class = Class.new(::Piece)
       @prototype = @content_class.field :file
       @content_class.stubs(:name).returns("ContentClass")
@@ -1025,8 +1028,6 @@ describe "Fields" do
     end
 
     it "copy files to the media folder" do
-      path = File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__)
-      assert File.exists?(path), "Test file #{path} does not exist"
       File.open(path, 'rb') do |file|
         @field.value = {
           :tempfile => file,
@@ -1040,8 +1041,6 @@ describe "Fields" do
     end
 
     it "generate the requisite file metadata" do
-      path = File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__)
-      assert File.exists?(path), "Test file #{path} does not exist"
       File.open(path, 'rb') do |file|
         @field.value = {
           :tempfile => file,
@@ -1066,11 +1065,36 @@ describe "Fields" do
     end
 
     it "copy the given file if passed a path to an existing file" do
-      path = File.expand_path("../../fixtures/images/vimlogo.pdf", __FILE__)
       @field.value = path
       @field.value.must_match %r{/media/.+/vimlogo.pdf$}
       @field.filename.must_equal "vimlogo.pdf"
       @field.filesize.must_equal 2254
+    end
+
+    it "sets the unprocessed value to a JSON encoded array of MD5 hash & filename" do
+      @field.value = path
+      @instance.save
+      @field.unprocessed_value.must_equal ["vimlogo.pdf", "1de7e866d69c2f56b4a3f59ed1c98b74"].to_json
+    end
+
+    it "sets the field hash to the MD5 hash of the file" do
+      @field.value = path
+      @field.file_hash.must_equal "1de7e866d69c2f56b4a3f59ed1c98b74"
+    end
+
+    it "sets the original filename of the file" do
+      @field.value = path
+      @field.original_filename.must_equal "vimlogo.pdf"
+    end
+
+    it "doesn't set the hash of a file that can't be found" do
+      @field.value = "/images/nosuchfile.rtf"
+      @field.file_hash.must_equal ""
+    end
+
+    it "sets the original filename of a file that can't be found" do
+      @field.value = "/images/nosuchfile.rtf"
+      @field.original_filename.must_equal "/images/nosuchfile.rtf"
     end
 
     describe "clearing" do
