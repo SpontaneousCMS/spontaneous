@@ -40,7 +40,7 @@ Sequel.migration do
       end
 
       Content::Piece.dataset.order(Sequel.desc(:depth)).each(&update_content_hashes)
-      Content::Page.dataset.each(&update_content_hashes)
+      Content::Page.dataset.order(Sequel.desc(:depth)).each(&update_content_hashes)
     end
   end
 
