@@ -41,7 +41,7 @@ $text-edit-width: 621px;
 		}
 		.buttons {
 			@include display-box;
-			@include box-orient(horizontal);
+			@include box-orient(row);
 			@include box-pack(justify);
 			width: $text-edit-width;
 			.save, .cancel {
@@ -161,7 +161,7 @@ $text-edit-width: 621px;
 
 		.editing-fields {
 			padding: 0;
-      @include box-orient(vertical);
+      @include box-orient(column);
 		}
 		.editing-toolbar {
 			padding-left: $unit;
@@ -256,14 +256,14 @@ $text-edit-width: 621px;
 				@include interface;
 				text-transform: none;
 				@include display-box;
-				@include box-orient(vertical);
+				@include box-orient(column);
         .filename {
           word-wrap: break-word;
         }
 				.sizes {
 					padding-top: $unit/2;
 					@include display-box;
-					@include box-orient(horizontal);
+					@include box-orient(row);
 					@include box-pack(justify);
 				}
 			}
@@ -406,7 +406,7 @@ $text-edit-width: 621px;
 	.image-field-conflict.changes {
 		.diff {
 			@include display-box;
-			@include box-orient(horizontal);
+			@include box-orient(row);
 			@include box-pack(center);
 			@include box-align(center);
 			img {

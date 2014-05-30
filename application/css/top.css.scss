@@ -147,7 +147,7 @@ $navigation-color: #555;
 	#switch-mode, #open-publish {
 		@include button;
 		@include display-box;
-		@include box-orient(vertical);
+		@include box-orient(column);
 		@include box-align(center);
 		margin: 0;
 		width: 70px;

@@ -111,9 +111,9 @@ $target-name-size: 14px;
 }
 
 @mixin display-box {
-  display: -webkit-box;
-  display: -moz-box;
-  display: box;
+  // display: -webkit-box;
+  // display: -moz-box;
+  display: flex;
 }
 @mixin box-sizing($model: border-box) {
   -webkit-box-sizing: $model;
@@ -121,25 +121,17 @@ $target-name-size: 14px;
   box-sizing: $model;
 }
 
-@mixin box-orient($direction: horizontal) {
-  box-orient: $direction;
-  -webkit-box-orient: $direction;
-  -moz-box-orient: $direction;
+@mixin box-orient($direction: row) {
+  flex-direction: $direction;
 }
 @mixin box-pack($packing: center) {
-  box-pack: $packing;
-  -webkit-box-pack: $packing;
-  -moz-box-pack: $packing;
+  justify-content: $packing;
 }
 @mixin box-align($aligning: start) {
-  box-align: $aligning;
-  -webkit-box-align: $aligning;
-  -moz-box-align: $aligning;
+  align-items: $aligning;
 }
 @mixin box-flex($flex: 1) {
-	-webkit-box-flex: $flex;
-	-moz-box-flex: $flex;
-	box-flex: $flex;
+	flex-grow: $flex;
 }
 
 @mixin no-select {

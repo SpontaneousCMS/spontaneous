@@ -152,7 +152,7 @@ img.missing {
     }
 		.path .edit {
 			@include display-box;
-			@include box-orient(horizontal);
+			@include box-orient(row);
 			@include box-align(center);
 			.input-error {
 				display: block;
@@ -293,7 +293,7 @@ img.missing {
 	@extend .clearfix;
 	@include box-sizing;
 	@include display-box;
-	@include box-orient(horizontal);
+	@include box-orient(row);
 	@include box-align(stretch);
 	@include box-pack(top);
 	background-color: #fff;
@@ -327,7 +327,7 @@ img.missing {
 	margin-right: 16px;
 	li {
 		@include display-box;
-		@include box-orient(horizontal);
+		@include box-orient(row);
 		@include box-align(stretch);
 		@include box-pack(top);
 		@extend .clearfix;
@@ -877,7 +877,7 @@ img.missing {
 			height: auto;
 			.actions {
 				@include display-box;
-				@include box-orient(vertical);
+				@include box-orient(column);
 				@include rounded-bottom;
 				top: $unit/2;
 				a {

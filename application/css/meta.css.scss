@@ -18,7 +18,7 @@
 	$user-admin-dialogue-width: 680px;
 	@include calc(max-height, "100% - #{ 2 * $container-margin }");
 	@include display-box;
-	@include box-orient(vertical);
+	@include box-orient(column);
 
 	@include rounded;
 	min-height: 450px;
@@ -134,7 +134,7 @@
 			}
 			.admin {
 				@include display-box;
-				@include box-orient(horizontal);
+				@include box-orient(row);
 				@include box-align(stretch);
 				margin-bottom: $container-padding / 2;
 				p {
@@ -178,7 +178,7 @@
 			}
 			.save {
 				@include display-box;
-				@include box-orient(horizontal);
+				@include box-orient(row);
 				@include box-align(stretch);
 				margin-top: ($container-padding / 2);
 				.button {
@@ -212,7 +212,7 @@
 					.level {
 						@include display-box;
 						@include box-align(stretch);
-						@include box-orient(horizontal);
+						@include box-orient(row);
 						padding: $unit/2 $unit;
 						// position: relative;
 						span {
@@ -259,7 +259,7 @@
 			@include box-sizing;
 			@include display-box;
 			@include box-align(stretch);
-			@include box-orient(horizontal);
+			@include box-orient(row);
 			@include box-pack(top);
 			@include rounded;
 

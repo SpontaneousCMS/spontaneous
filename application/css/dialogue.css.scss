@@ -144,7 +144,7 @@ $dialogue-title-height: 32px;
 #publishing-dialogue {
 	@include fullsize;
 	@include display-box;
-	@include box-orient(horizontal);
+	@include box-orient(row);
 
 	.spinner {
 		position: absolute;
@@ -184,7 +184,7 @@ $dialogue-title-height: 32px;
 		.actions {
 			@include interface;
 			@include display-box;
-			@include box-orient(horizontal);
+			@include box-orient(row);
 			@include box-align(center);
 			@include box-sizing;
 			position: absolute;

@@ -105,7 +105,7 @@
 	}
 	header {
 		@include display-box;
-		@include box-orient(horizontal);
+		@include box-orient(row);
 		@include box-align(stretch);
 	}
 	.menuHandle {
@@ -167,7 +167,7 @@
 	}
 	.buttons {
 		@include display-box;
-		@include box-orient(horizontal);
+		@include box-orient(row);
 		@include box-pack(justify);
 		a {
 			display: block;
@@ -286,7 +286,7 @@
 
 			ul {
 				@include display-box;
-				@include box-orient(horizontal);
+				@include box-orient(row);
 				margin: 0;
 				padding: 0;
 				// outline: solid 1px red;
@@ -318,7 +318,7 @@
 	}
 	#popover-delete {
 		@include display-box;
-		@include box-orient(horizontal);
+		@include box-orient(row);
 		@include box-pack(justify);
 
 		a.ok {
