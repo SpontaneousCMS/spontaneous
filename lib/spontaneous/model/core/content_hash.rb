@@ -24,6 +24,7 @@ module Spontaneous::Model::Core
         content = owner
         while propagate_to?(content)# && content.modification_tracking_enabled?
           content.recalculate_content_hash!# if propagate_to_owner?
+          break if content == @origin.page
           content = content.owner
         end
       end

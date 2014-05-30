@@ -348,14 +348,13 @@ describe "Content Hash" do
     end
 
     it "doesn't update the parent page hash when the child page is updated" do
-      hashes << middle[:content_hash]
+      page_class.dataset.filter(id: middle.id).update(content_hash: "generated")
       grand_child.box1.field1 = "different"
       grand_child.save
-      hashes << middle.reload[:content_hash]
-      assert_uniq_hashes 1
+      middle.reload.content_hash.must_equal "generated"
     end
 
-    it "doesn't cascade content modifications up the page tree" do
+    it "doesn't cascade content modifications up the page tree when a new page is added" do
       page.reload
       ancestors = page.ancestors
       page_class.dataset.filter(id: ancestors.map(&:id)).update(content_hash: "generated")
