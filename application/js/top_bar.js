@@ -198,9 +198,9 @@ Spontaneous.TopBar = (function($, S) {
 			disableParent(link);
 			li.append(link);
 
-			li.click(function() {
+			li.click(function(e) {
 				var browser = new PageBrowser(page);
-				Spontaneous.Popover.open(event, browser);
+				Spontaneous.Popover.open(e, browser);
 			});
 
 			return li;
