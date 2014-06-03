@@ -30,6 +30,10 @@ module Spontaneous::Output::Context
       site.home
     end
 
+    def home
+      site.home
+    end
+
     def site_page(path)
       site[path]
     end
