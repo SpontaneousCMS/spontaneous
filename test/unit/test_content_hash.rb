@@ -145,6 +145,7 @@ describe "Content Hash" do
         hashes << box.calculate_content_hash
         hashes.uniq.length.must_equal 2
       end
+
     end
   end
 
@@ -377,6 +378,20 @@ describe "Content Hash" do
       hashes << page.reload.content_hash
       hashes.length.must_equal 2
       hashes.uniq.length.must_equal 1
+    end
+
+    it "updates the parent page hash if child pages are re-ordered" do
+      page2 = page_class.new(slug: 'page3', title: 'page2')
+      middle.box1 << page2
+      middle.save
+      page2.save
+      page2.reload
+      middle.reload
+      hashes << middle.content_hash
+      page2.update_position(0)
+      hashes << middle.reload[:content_hash]
+      hashes.length.must_equal 2
+      hashes.uniq.length.must_equal 2
     end
   end
 
