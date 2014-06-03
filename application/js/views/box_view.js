@@ -303,7 +303,9 @@ Spontaneous.Views.BoxView = (function($, S) {
 				if (!entry_spacer.data("auto-height")) {
 					entry_spacer.data("auto-height", entry_spacer.height());
 				}
-				entry_spacer.animate({height:bar.find('.addable-inner').outerHeight() + 12}, 200)
+				var newHeight = bar.find('.addable-inner').outerHeight() + 11, currentHeight = entry_spacer.outerHeight();
+				newHeight = Math.max(newHeight, currentHeight);
+				entry_spacer.animate({height:newHeight}, 200)
 			}
 		},
 		hide_add_after: function(entry, entry_spacer) {
