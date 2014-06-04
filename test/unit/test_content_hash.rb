@@ -130,6 +130,13 @@ describe "Content Hash" do
       before do
         root
         hashes << box.calculate_content_hash
+        box << new_page
+      end
+
+      it "should give identical values for #calculate_content_hash! and #calculate_content_hash" do
+        piece = box.first
+        piece.calculate_content_hash.must_equal piece.content_hash
+        piece.calculate_content_hash.must_equal piece.calculate_content_hash!
       end
 
       it "should update the boxes content hash if a page is added" do

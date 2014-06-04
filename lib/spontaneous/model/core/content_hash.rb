@@ -160,6 +160,8 @@ module Spontaneous::Model::Core
       def content_hash
         Spontaneous::Model::Core::ContentHash.calculate(id)
       end
+      alias_method :calculate_content_hash,  :content_hash
+      alias_method :calculate_content_hash!, :content_hash
     end
   end
 end
