@@ -71,6 +71,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 					axis:'y',
 					distance: 5,
 					tolerance: 'pointer',
+					helper: 'clone',
 					// tolerance: 'intersect',
 					scrollSpeed: 40,
 					containment: 'parent',
