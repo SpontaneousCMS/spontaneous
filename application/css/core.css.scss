@@ -360,6 +360,7 @@ img.missing {
 	.value {
 		@extend .preview-value;
 		@include box-flex;
+		max-width: $field-text-preview-width - 100px;
 		a {
 			color: $highlight;
 		}
