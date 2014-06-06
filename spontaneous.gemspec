@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'spontaneous/version'
 
 Gem::Specification.new do |s|
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 2.0.0'
 
   s.name          = 'spontaneous'
   s.version       = Spontaneous::VERSION
