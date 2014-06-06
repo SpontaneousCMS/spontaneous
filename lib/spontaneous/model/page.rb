@@ -40,7 +40,7 @@ module Spontaneous::Model
       end
 
       def export(user = nil)
-        super(user).merge(:title_field => self.title_field.to_s)
+        super(user).merge(title_field: self.title_field.to_s)
       end
 
       def title_field
