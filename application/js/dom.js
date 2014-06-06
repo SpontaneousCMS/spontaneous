@@ -56,7 +56,6 @@ Spontaneous.Dom = (function($, S) {
 		}
 	};
 	var generate = function(tag_name) {
-		var tag = '<'+tag_name+'/>';
 		return function(selector, params) {
 			if (typeof selector === 'object') {
 				if (!$.isArray(selector)) {
@@ -65,7 +64,7 @@ Spontaneous.Dom = (function($, S) {
 				}
 			}
 			var attrs = $.extend((params || {}), Dom.parse_selector(selector));
-			return $(tag, attrs);
+			return $(document.createElement(tag_name)).attr(attrs);
 		};
 	};
 	for (var i = 0, ii = tags.length; i < ii; i++) {
