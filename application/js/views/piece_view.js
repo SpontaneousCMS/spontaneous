@@ -103,7 +103,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 		},
 		alias_target_panel: function() {
 			var content = this.content,
-			click = function() { S.Location.load_id(content.target().id); },
+			click = function() { S.Location.load_id(content.target().page_id); },
 			wrap = dom.div('.alias-target').click(click),
 			icon = content.alias_icon,
 			type = dom.span(".content-type").text(content.type().display_title(content));

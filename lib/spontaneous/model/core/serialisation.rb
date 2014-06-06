@@ -7,15 +7,15 @@ module Spontaneous::Model::Core
     module ClassMethods
       def export(user = nil)
         {
-          :type=> self.ui_class,
-          :id => self.schema_id.to_s,
-          :is_page => self.page?,
-          :is_alias => self.alias?,
-          :title=> self.title,
-          :fields => readable_fields(user).map { |name| field_prototypes[name].export(user) },
-          :styles => readable_styles(user).map { |style| style.export(user) },
-          :boxes => readable_boxes(user).map { |box| box.export(user) },
-          :source => self.__source_file
+          type: ui_class,
+          id: schema_id.to_s,
+          is_page: page?,
+          is_alias: alias?,
+          title: title,
+          fields: readable_fields(user).map { |name| field_prototypes[name].export(user) },
+          styles: readable_styles(user).map { |style| style.export(user) },
+          boxes: readable_boxes(user).map { |box| box.export(user) },
+          source: __source_file
         }
       end
 
@@ -40,14 +40,15 @@ module Spontaneous::Model::Core
     # InstanceMethods
 
     def shallow_export(user)
-      { :id => id,
-        :type => self.class.ui_class,
-        :type_id => self.class.schema_id.to_s,
-        :is_page => page?,
-        :hidden => (hidden? ? true : false),
-        :depth => content_depth,
-        :fields  => fields.export(user),
-        :label => label }
+      { id: id,
+        type: model.ui_class,
+        type_id: model.schema_id.to_s,
+        is_page: page?,
+        page_id: page_id || id,
+        hidden: (hidden? ? true : false),
+        depth: content_depth,
+        fields: fields.export(user),
+        label: label }
     end
 
     def export(user = nil)

@@ -7,6 +7,7 @@
 :path: /
 :hidden: false
 :is_page: true
+:page_id: <%= @root.id %>
 :slug: ""
 :type_id: <%= SerialisedPage.schema_id.to_s %>
 :fields:
@@ -103,6 +104,7 @@
         :is_page: true
         :slug: about
         :id: <%= @child.id %>
+        :page_id: <%= @child.id %>
         :type_id: <%= SerialisedPage.schema_id.to_s %>
         :path: /about
         :depth: 2
@@ -135,6 +137,7 @@
 
     :is_page: false
     :id: <%= @piece1.id %>
+    :page_id: <%= @root.id %>
   - :type: SerialisedPiece
     :type_id: <%= SerialisedPiece.schema_id.to_s %>
     :label: label2
@@ -183,6 +186,7 @@
     :hidden: false
     :is_page: false
     :id: <%= @piece2.id %>
+    :page_id: <%= @root.id %>
     :boxes:
     - :entries: []
 
