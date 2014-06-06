@@ -34,10 +34,6 @@ module Spontaneous::Output::Context
       site.home
     end
 
-    def site_page(path)
-      site[path]
-    end
-
     def asset_environment
       _with_render_cache('asset.environment') do
         Spontaneous::Asset::Environment.new(self)
