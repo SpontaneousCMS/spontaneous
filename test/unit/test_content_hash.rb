@@ -263,6 +263,45 @@ describe "Content Hash" do
     end
   end
 
+  describe "Alias" do
+    let(:page1) { page_class.create(slug: "page1", title: "Page 1") }
+    let(:page2) { page_class.create(slug: "page2", title: "Page 2") }
+    before do
+      class ::PieceAlias < ::Piece
+        alias_of :Page
+        field :title
+      end
+    end
+
+    after do
+      Object.send :remove_const, :PieceAlias
+    end
+
+    it "aliases of same content with same fields must have same hashes" do
+      al1 = PieceAlias.create(target: page1, title: "the same")
+      al2 = PieceAlias.create(target: page1, title: "the same")
+      al1.content_hash.must_equal al2.content_hash
+    end
+
+    it "aliases of same content with different fields must have different hashes" do
+      al1 = PieceAlias.create(target: page1, title: "the same")
+      al2 = PieceAlias.create(target: page1, title: "different")
+      al1.content_hash.wont_equal al2.content_hash
+    end
+
+    it "aliases of different content with same fields must have different hashes" do
+      al1 = PieceAlias.create(target: page1, title: "the same")
+      al2 = PieceAlias.create(target: page2, title: "the same")
+      al1.content_hash.wont_equal al2.content_hash
+    end
+
+    it "aliases of different content with different fields must have different hashes" do
+      al1 = PieceAlias.create(target: page1, title: "the same")
+      al2 = PieceAlias.create(target: page2, title: "different")
+      al1.content_hash.wont_equal al2.content_hash
+    end
+  end
+
   describe "Content Tree" do
     let(:middle) { page_class.create(slug: 'middle', title: 'middle') }
     let(:page) { page_class.create(slug: 'page', title: 'original') }

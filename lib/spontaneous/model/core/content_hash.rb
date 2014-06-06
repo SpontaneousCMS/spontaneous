@@ -63,7 +63,11 @@ module Spontaneous::Model::Core
     def content_hash_dependencies(&calculation)
       fields = fields_with_consistent_order.map(&calculation)
       boxes = boxes_with_consistent_order.reject(&:generated?).map(&calculation)
-      [schema_id, hidden?].concat(fields).concat(boxes)
+      content_hash_columns.concat(fields).concat(boxes)
+    end
+
+    def content_hash_columns
+      [schema_id, hidden?, target_id]
     end
 
     def before_save
