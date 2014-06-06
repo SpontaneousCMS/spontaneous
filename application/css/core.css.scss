@@ -626,24 +626,26 @@ img.missing {
 	height: 100%;
 
 	.slot-tabs {
-		@extend .clearfix;
 		min-height: 32px;
 		vertical-align: top;
 		@include vertical-gradient(#666666, #4d4d4d);
 		padding-left: $container-padding;
 		padding-right: $container-padding;
+		display: flex;
+		flex-direction: row;
 		li {
 			@include box-sizing;
 			@include interface;
+			flex: 1 1 auto;
 			font-size: 11px;
 			color: #dddddd;
 			display: block;
-			float: left;
+			// float: left;
 			height: 32px;
 			padding-left: 16px;
 			padding-right: 16px;
 			min-width: 130px;
-			max-width: 160px;
+			// max-width: 160px;
 			padding-top: 9px;
 			cursor: pointer;
 			border-left: solid 1px transparent;
@@ -684,6 +686,24 @@ img.missing {
 			// outline: solid 1px red;
 			left: -$container-padding - 1;
 			top: 0;
+		}
+		li:last-child {
+			border-right: none;
+			&:hover, &.active {
+				// border-right: none;
+				&:after {
+				@include vertical-gradient($highlight + #111111, $highlight);
+				background-color: $highlight;
+				content: "";
+				position: absolute;
+				width: $container-padding;
+				height: 32px;
+				// outline: solid 1px red;
+				right: -$container-padding;
+				top: 0;
+
+				}
+			}
 		}
 		li.active + li:hover {
 			border-left-color: $highlight - #151515;
