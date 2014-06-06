@@ -33,7 +33,9 @@ module Spontaneous
       end
       puts "=> Spontaneous:#{Spontaneous.mode.to_s.ljust(5, " ")} running on port #{host}:#{port} (PID #{$$})"
 
-      handler.run Spontaneous::Rack.application(site).to_app, :Host => host, :Port => port do |server|
+      handler.run Spontaneous::Rack.application(site).to_app, Host: host, Port: port do |server|
+        # set connection timeout to 0 (infinite) because otherwise we constantly lose our event connection
+        server.timeout = 0 if server.respond_to?(:timeout=)
         term = Proc.new do
           server.respond_to?(:stop!) ? server.stop! : server.stop
           puts "=> Spontaneous:#{Spontaneous.mode.to_s.ljust(5, " ")} exiting..."
