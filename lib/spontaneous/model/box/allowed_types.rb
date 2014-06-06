@@ -5,6 +5,8 @@ module Spontaneous::Model::Box
     extend Spontaneous::Concern
 
     class AllowedType
+      prepend Spontaneous::Model::Page::Singleton::AllowedTypeMethods
+
       attr_accessor :allow_subclasses
 
       def initialize(box, type, options={}, &definition)
@@ -81,11 +83,19 @@ module Spontaneous::Model::Box
       end
 
       def instance_classes
+        unfiltered_instance_classes.reject {|type| exclude_type?(type) }
+      end
+
+      def unfiltered_instance_classes
         if allow_subclasses
           instance_class.subclasses
         else
           [instance_class]
         end
+      end
+
+      def exclude_type?(type)
+        false
       end
 
       def export
@@ -129,6 +139,7 @@ module Spontaneous::Model::Box
           name.to_s.constantize
         end
       end
+
     end
 
     class AllowedGroup < AllowedType
@@ -136,7 +147,7 @@ module Spontaneous::Model::Box
         @type
       end
 
-      def instance_classes
+      def unfiltered_instance_classes
         names = groups.flat_map { |name| schema.groups[name] }
         names.map { |name| resolve_instance_class(name) }.uniq
       end

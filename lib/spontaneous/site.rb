@@ -33,6 +33,7 @@ module Spontaneous
     include State
     include Storage
     include URL
+    include Spontaneous::Model::Page::Singleton::SiteMethods
 
     attr_accessor :database
     attr_reader :environment, :mode, :model

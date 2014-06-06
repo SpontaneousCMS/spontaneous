@@ -31,6 +31,8 @@ module Spontaneous::Model
     extend Spontaneous::Concern
 
     module ClassMethods
+      include Spontaneous::Model::Page::Singleton::ContentClassMethods
+
       def page?
         false
       end

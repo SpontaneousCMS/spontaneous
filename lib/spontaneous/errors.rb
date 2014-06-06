@@ -52,6 +52,12 @@ module Spontaneous
     end
   end
 
+  class SingletonException < Error
+    def initialize(type)
+      super("Attempt to create a second instance of #{type}")
+    end
+  end
+
   class SchemaModificationError < Error
     extend Forwardable
 

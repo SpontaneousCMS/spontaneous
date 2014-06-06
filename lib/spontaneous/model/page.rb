@@ -8,6 +8,7 @@ require "spontaneous/model/page/page_tree"
 require "spontaneous/model/page/paths"
 require "spontaneous/model/page/site_map"
 require "spontaneous/model/page/site_timestamps"
+require "spontaneous/model/page/singleton"
 
 module Spontaneous::Model
   module Page
@@ -22,6 +23,7 @@ module Spontaneous::Model
     include SiteMap
     include SiteTimestamps
     include Locks
+    include Singleton
     include Spontaneous::Model::Core::ContentHash::PageMethods
 
     included do

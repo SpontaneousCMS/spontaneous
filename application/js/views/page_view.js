@@ -36,11 +36,11 @@ Spontaneous.Views.PageView = (function($, S) {
 
 
 			if (user.is_developer()) {
-				var uid_text = dom.h3('.developer.uid' + (!this.page.content.uid ? '.missing' : '')).text('#' + (this.page.content.uid || "----")).click(function() {
-					this.open_uid_editor();
-				}.bind(this));
+				// var uid_text = dom.h3('.developer.uid' + (!this.page.content.uid ? '.missing' : '')).text('#' + (this.page.content.uid || "----")).click(function() {
+				// 	this.open_uid_editor();
+				// }.bind(this));
 				var dev_desc = dom.h3('.developer').append(dom.a().attr('href', this.page.developer_edit_url()).text(this.page.developer_description()));
-				path_wrap.append(uid_text, dev_desc);
+				path_wrap.append(dev_desc);
 			}
 
 			path_wrap.append(dom.div('.edit'));
