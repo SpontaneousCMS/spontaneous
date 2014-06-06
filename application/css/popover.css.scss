@@ -168,7 +168,7 @@
 	.buttons {
 		@include display-box;
 		@include box-orient(row);
-		@include box-pack(justify);
+		@include box-pack(space-between);
 		a {
 			display: block;
 		}
@@ -319,7 +319,7 @@
 	#popover-delete {
 		@include display-box;
 		@include box-orient(row);
-		@include box-pack(justify);
+		@include box-pack(space-between);
 
 		a.ok {
 			@include button;

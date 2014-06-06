@@ -260,7 +260,7 @@
 			@include display-box;
 			@include box-align(stretch);
 			@include box-orient(row);
-			@include box-pack(top);
+			@include box-pack(flex-start);
 			@include rounded;
 
 			cursor: pointer;

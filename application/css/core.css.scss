@@ -295,7 +295,7 @@ img.missing {
 	@include display-box;
 	@include box-orient(row);
 	@include box-align(stretch);
-	@include box-pack(top);
+	@include box-pack(flex-start);
 	background-color: #fff;
 	// border: solid 3px transparent;
 	cursor: pointer;
@@ -329,7 +329,7 @@ img.missing {
 		@include display-box;
 		@include box-orient(row);
 		@include box-align(stretch);
-		@include box-pack(top);
+		@include box-pack(flex-start);
 		@extend .clearfix;
 		border-bottom: solid 1px $entry-background-colour;
 		padding-top: 3px;

@@ -42,7 +42,7 @@ $text-edit-width: 621px;
 		.buttons {
 			@include display-box;
 			@include box-orient(row);
-			@include box-pack(justify);
+			@include box-pack(space-between);
 			width: $text-edit-width;
 			.save, .cancel {
 				@include button($action);
@@ -264,7 +264,7 @@ $text-edit-width: 621px;
 					padding-top: $unit/2;
 					@include display-box;
 					@include box-orient(row);
-					@include box-pack(justify);
+					@include box-pack(space-between);
 				}
 			}
 			.landscape {
