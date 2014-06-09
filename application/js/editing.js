@@ -48,6 +48,12 @@ Spontaneous.Editing = (function($, S) {
 		},
 		show: function() {
 			this.container.show();
+		},
+		showLoading: function() {
+			this.container.animate({'opacity': 0}, 150);
+		},
+		hideLoading: function() {
+			this.container.animate({'opacity': 1}, 150);
 		}
 	});
 	return Editing;

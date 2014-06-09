@@ -66,6 +66,24 @@ img.missing {
 		right: 0;
 		bottom: 0;
 		top: 0;
+		#content-loading {
+			@include header;
+			text-align: center;
+			display: none;
+			color: #888888;
+			position: relative;
+			top: 150px;
+		}
+		#content-loading:before {
+      @include awesome-icon("\f1ce");
+      @include animation(spin, 1s, infinite, linear);
+      display: inline-block;
+      position: relative;
+      left: -4px;
+		}
+		#content-loading:after {
+			content: "Loading…";
+		}
 	}
 	#data_pane,
   #preview_pane,
@@ -80,6 +98,15 @@ img.missing {
 		width: 100%;
 		height: 100%;
 	}
+}
+
+#content-outer.loading {
+	#content {
+		#content-loading {
+			display: block;
+		}
+	}
+
 }
 
 #page-content {
@@ -129,6 +156,8 @@ img.missing {
 			@include display-box;
 			position: absolute;
 			bottom: 10px;
+			left: $container-padding;
+			right: $container-padding;
 		}
     .path .titlesync {
       margin-left: $unit;
@@ -149,6 +178,9 @@ img.missing {
           opacity: 1.0;
         }
       }
+    }
+    .path .path-spacer {
+    	@include box-flex(1);
     }
 		.path .edit {
 			@include display-box;

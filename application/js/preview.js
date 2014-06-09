@@ -72,6 +72,12 @@ Spontaneous.Preview = (function($, S, $window) {
 		},
 		show: function() {
 			this.iframe.show();
+		},
+		showLoading: function() {
+			// best to just ignore this message
+		},
+		hideLoading: function() {
+			// best to just ignore this message
 		}
 	});
 	return Preview;

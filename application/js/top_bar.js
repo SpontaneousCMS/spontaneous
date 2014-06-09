@@ -189,7 +189,7 @@ Spontaneous.TopBar = (function($, S) {
 	};
 	AncestorNode.prototype = {
 		element: function() {
-			var page = this.page, li = dom.li(), link = $('<a/>').data('page', page).click(function() {
+			var page = this.page, li = dom.li('.ancestor-node'), link = $('<a/>').data('page', page).click(function() {
 				var page = $(this).data('page');
 				S.Location.load_id(page.id);
 				return false;
@@ -201,6 +201,8 @@ Spontaneous.TopBar = (function($, S) {
 			li.click(function(e) {
 				var browser = new PageBrowser(page);
 				Spontaneous.Popover.open(e, browser);
+				e.preventDefault();
+				return false;
 			});
 
 			return li;
@@ -218,11 +220,12 @@ Spontaneous.TopBar = (function($, S) {
 	CurrentNode.prototype = {
 		element: function() {
 			var self = this
-			, li = dom.li()
+			, li = dom.li('.current-node')
 			, link = dom.a().text(self.title);
 			li.click(function(event) {
 				var browser = new PageBrowser(self.page, self.pages);
 				Spontaneous.Popover.open(event, browser);
+				return false;
 			});
 			li.append(link);
 			this.title_element = link;
@@ -246,6 +249,7 @@ Spontaneous.TopBar = (function($, S) {
 			li.click(function(event) {
 				var browser = new PageBrowser(self.origin, self.children());
 				Spontaneous.Popover.open(event, browser);
+				return false;
 			});
 			return li;
 		}.cache(),

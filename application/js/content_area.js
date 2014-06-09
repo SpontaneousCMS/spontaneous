@@ -14,11 +14,22 @@ Spontaneous.ContentArea = (function($, S) {
 			this.wrap  = dom.div("#content-outer");
 			this.metaWrap = dom.div("#content-meta").hide();
 			this.inner = dom.div('#content');
+			this.inner.append(dom.div("#content-loading"));
 			this.preview = S.Preview.init(this.inner);
 			this.editing = S.Editing.init(this.inner);
 			this.service = S.Services.init(this.inner);
 			this.wrap.append(this.metaWrap, this.inner);
 			return this.wrap;
+		},
+
+		location_loading: function(destination) {
+			if (destination) {
+				this.wrap.addClass('loading');
+				this.current().showLoading();
+			} else {
+				this.wrap.removeClass('loading');
+				this.current().hideLoading();
+			}
 		},
 
 		location_changed: function(location) {

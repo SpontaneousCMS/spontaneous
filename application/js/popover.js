@@ -12,6 +12,7 @@ Spontaneous.Popover = (function($, S) {
 			this.depth = 0;
 		},
 		open: function(event) {
+			event.preventDefault();
 			var view = this.view;
 			var location = view.attach_to();
 			var wrapper = dom.div('.pop-over');

@@ -1,7 +1,7 @@
 // console.log('Loading DOM...');
 
 Spontaneous.Dom = (function($, S) {
-	var tags = 'div p iframe a span strong img select option label ul li dl dt dd table tr td h1 h2 h3 h4 header input button form textarea optgroup'.split(' ');
+	var tags = 'div p iframe a span strong i img select option label ul li dl dt dd table tr td h1 h2 h3 h4 header input button form textarea optgroup'.split(' ');
 	var Dom = {
 		body: function() {
 			return $(document.body);

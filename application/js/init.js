@@ -9,6 +9,7 @@ Spontaneous.Init = (function($, S) {
 
 		location.watch('location', top_bar.location_changed.bind(top_bar));
 		location.watch('location', content_area.location_changed.bind(content_area));
+		location.watch('loading_location', content_area.location_loading.bind(content_area));
 
 		top_bar.watch('mode',       content_area.display.bind(content_area));
 		top_bar.watch('mode',       location.view_mode_changed.bind(location));

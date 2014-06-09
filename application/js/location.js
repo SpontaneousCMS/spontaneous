@@ -94,6 +94,7 @@ Spontaneous.Location = (function($, S) {
 				this.set('path', location.path);
 				this.update_state(location, this.get('view_mode'));
 			}
+			this.set('loading_location', null);
 		},
 		update_state: function(location, mode) {
 			State.page(location, mode);
@@ -128,13 +129,13 @@ Spontaneous.Location = (function($, S) {
 			if (this.location() && path === this.location().path) {
 				return this.location();
 			}
-			this.retrieve('/map/path'+path, this.location_loaded.bind(this));
+			this.retrieve_with_progress('/map/path'+path, this.location_loaded.bind(this));
 		},
 		find_id: function(id) {
 			if (this.location() && id === this.location().id) {
 				return this.location();
 			}
-			this.retrieve('/map/'+id, this.location_loaded.bind(this));
+			this.retrieve_with_progress('/map/'+id, this.location_loaded.bind(this));
 		},
 		path_from_url: function(url) {
 			var map = this.get('map'),
@@ -155,6 +156,10 @@ Spontaneous.Location = (function($, S) {
 				position += 1;
 			}
 			return path;
+		},
+		retrieve_with_progress: function(url, callback) {
+			this.set('loading_location', url);
+			return this.retrieve(url, callback);
 		},
 		retrieve: function(url, callback) {
 			ajax.get(url, {}, callback, {ifModified: true, cache: true});
