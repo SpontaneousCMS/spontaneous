@@ -34,6 +34,7 @@ Spontaneous.Views.PageView = (function($, S) {
 				path_wrap.append( dom.h3('.titlesync').append(resync));
 			}
 
+			path_wrap.append(dom.div('.path-spacer'));
 
 			if (user.is_developer()) {
 				// var uid_text = dom.h3('.developer.uid' + (!this.page.content.uid ? '.missing' : '')).text('#' + (this.page.content.uid || "----")).click(function() {
