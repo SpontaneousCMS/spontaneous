@@ -54,7 +54,7 @@ module Spontaneous::Model::Page
 
     module SingletonInstanceMethods
       def before_save
-        raise Spontaneous::SingletonException.new(self) if model.exists?
+        raise Spontaneous::SingletonException.new(self) if (new? && model.exists?)
         super
       end
     end

@@ -30,6 +30,12 @@ describe "Singletons" do
     SingletonPage.count.must_equal 1
   end
 
+  it "allows saving of existing singleton instances" do
+    a = SingletonPage.create
+    a.uid = "changed"
+    a.save
+  end
+
   it "::singleton?" do
     ::Piece.singleton?.must_equal false
     ::Page.singleton?.must_equal false
