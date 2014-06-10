@@ -1,5 +1,6 @@
 log/*
 tmp/*
 cache/*
+assets/tmp/*
 .irb_history
 

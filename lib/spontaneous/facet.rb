@@ -23,6 +23,16 @@ module Spontaneous
       File.join(@root, path)
     end
 
+    def path(*args)
+      Pathname.new(@root).join(*args)
+    end
+
+    def path!(*args)
+      self.path(*args).tap do |path|
+        path.mkpath
+      end
+    end
+
     def name
       File.basename(root)
     end

@@ -4,15 +4,15 @@ class Spontaneous::Site
   module State
     extend Spontaneous::Concern
 
+    def revision(revision)
+      Spontaneous::Revision.new(revision, self)
+    end
+
     def state
       Spontaneous::State.instance
     end
 
     def working_revision
-      Spontaneous::State.revision
-    end
-
-    def revision
       Spontaneous::State.revision
     end
 

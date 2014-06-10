@@ -108,7 +108,6 @@ module Spontaneous
   include Plugins::Application::Serialisation
   include Plugins::Application::Features
   include Plugins::Application::System
-  extend  Revision::GlobalMethods
 end
 
 Dir["#{File.expand_path("../spontaneous", __FILE__)}/extensions/*.rb"].each { |file| require file }

@@ -60,11 +60,11 @@ class Spontaneous::Site
     end
 
     def publish_pages(page_list=nil)
-      publishing_method.new(self, revision, publish_steps).publish_pages(page_list)
+      publishing_method.new(self, working_revision, publish_steps).publish_pages(page_list)
     end
 
     def publish_all
-      publishing_method.new(self, revision, publish_steps).publish_all
+      publishing_method.new(self, working_revision, publish_steps).publish_all
     end
 
     def rerender

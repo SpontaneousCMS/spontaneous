@@ -93,6 +93,8 @@ describe "Assets" do
   end
 
   after do
+    tmp = site.path('assets/tmp')
+    FileUtils.rm_r(tmp) if tmp.exist?
     Content.delete
   end
 
@@ -221,7 +223,7 @@ describe "Assets" do
         result = last_response.body
         result.must_match /var a = 1/
         result.must_match /var b = 2/
-        result.must_match /alert\("I knew it!"\);/
+        result.must_match %r{alert\("I knew it!"\);}
       end
 
       it "should preprocess coffeescript" do
@@ -235,7 +237,7 @@ describe "Assets" do
         get "/assets/x.js"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match /var x = 1;/
+        result.must_match %r{var x = 1;}
       end
 
       it "should use absolute URLs when encountered" do
@@ -273,15 +275,15 @@ describe "Assets" do
         get "/assets/css/all.css"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match /height: 42px;/
-        result.must_match /width: 8px;/
+        result.must_match %r{height: 42px;}
+        result.must_match %r{width: 8px;}
       end
 
       it "should compile sass" do
         get "/assets/css/b.css"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match /height: 42px;/
+        result.must_match %r{height: 42px;}
       end
 
       it "links to images" do
@@ -295,7 +297,7 @@ describe "Assets" do
         get "/assets/css/missing.css"
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match /background: url\(i\/missing\.png\)/
+        result.must_match %r{background: url\(i\/missing\.png\)}
       end
 
       it "can understand urls with hashes" do
@@ -337,7 +339,7 @@ describe "Assets" do
   describe "publishing" do
     let(:app) { Spontaneous::Rack::Front.application(site) }
     let(:context) { live_context }
-    let(:revision) { S::Revision.new(context.revision) }
+    let(:revision) { site.revision(context.revision) }
 
     before do
       FileUtils.rm_f(Spontaneous.revision_dir) if File.exist?(Spontaneous.revision_dir)
@@ -401,6 +403,25 @@ describe "Assets" do
         end
         context.scripts('js/all')
         asset_path.read.must_equal "var cached = true;"
+      end
+      describe "re-use" do
+        before do
+          @result = context.scripts('js/all', 'x')
+        end
+
+        it "uses assets from a previous publish if present" do
+          context = live_context
+          def context.revision; 100 end
+          revision = site.revision(context.revision)
+          manifest = Spontaneous::JSON.parse File.read(site.path("assets/tmp") + "manifest.json")
+          compiled = manifest[:assets][:"js/all.js"]
+          ::File.open(site.path("assets/tmp")+compiled, 'w') do |file|
+            file.write("var reused = true;")
+          end
+          result = context.scripts('js/all', 'x')
+          rev = revision.path("assets") + compiled
+          File.read(rev).must_equal "var reused = true;"
+        end
       end
     end
 

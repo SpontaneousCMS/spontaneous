@@ -5,7 +5,7 @@ module Spontaneous::Asset
   module Environment
     def self.new(context)
       if context.publishing?
-        Publish.new(context.site, context.revision)
+        Publish.new(context.site, context.revision, context.development?)
       else
         Preview.new(context.site)
       end
@@ -42,7 +42,7 @@ module Spontaneous::Asset
 
 
     class Preview
-      attr_reader :environment
+      attr_reader :environment, :site
 
       def initialize(site)
         @site = site
@@ -160,21 +160,88 @@ module Spontaneous::Asset
     end
 
     class Publish < Preview
-      def initialize(site, revision)
+      def initialize(site, revision, development)
         super(site)
-        @revision = Spontaneous.revision(revision)
+        @revision = site.revision(revision)
+        @development = development
+        # environment.logger = Logger.new($stdout)
         environment.css_compressor = :scss
         environment.js_compressor  = :uglifier
         environment.context_class.manifest = manifest
         environment.context_class.asset_mount_point = asset_mount_point
       end
 
-      def manifest
-        @manifest ||= Sprockets::Manifest.new(environment, manifest_file)
+      def development?
+        @development || false
       end
 
-      def manifest_file
-        File.join(bundle_dir, "manifest.json")
+      # A proxy to the sprockets manifest that compiles assets on the first run
+      # then re-uses them on the second
+      class Manifest
+        def initialize(environment, revision, development)
+          @environment = environment
+          @revision = revision
+          @development = development || false
+          @manifest = Sprockets::Manifest.new(environment.environment, manifest_file)
+        end
+
+        def development?
+          @development
+        end
+
+        def manifest_file
+          File.join(asset_compilation_dir, "manifest.json")
+        end
+
+        def assets
+          @manifest.assets
+        end
+
+        def compile(*args)
+          assets = @manifest.assets
+          unless (args.all? { |key| assets.key?(key) })
+            compile!(*args)
+          end
+          copy_assets_to_revision(args)
+        end
+
+        def compile!(*args)
+          @manifest.compile(*args)
+          copy_assets_to_revision(args)
+        end
+
+        def copy_assets_to_revision(logical_paths)
+          assets = @manifest.assets
+          paths = logical_paths.map { |a| assets[a] }.compact
+          source, dest = shared_asset_dir, revision_asset_dir
+          paths.each do |asset|
+            copy_asset_to_revision(source, dest, asset)
+          end
+        end
+
+        def copy_asset_to_revision(source, dest, asset)
+          to = dest + asset
+          return if to.exist?
+          from = source + asset
+          to.dirname.mkpath
+          FileUtils.cp(from, to)
+        end
+
+        def asset_compilation_dir
+          development? ? revision_asset_dir : shared_asset_dir
+        end
+
+        def revision_asset_dir
+          @revision.path(@environment.asset_mount_point)
+        end
+
+        def shared_asset_dir
+          @environment.site.path!('assets/tmp')
+        end
+      end
+
+      def manifest
+        @manifest ||= Manifest.new(self, @revision, development?)
       end
 
       def find(sources, options)
@@ -189,18 +256,13 @@ module Spontaneous::Asset
         assets.concat(remote).sort { |a, b| a[1] <=> b[1] }.map(&:first)
       end
 
-      def bundle_dir
-        @revision.path(asset_mount_point)
-      end
-
       def to_url(asset)
         return nil if asset.nil?
         "/" << asset_mount_point << "/" << asset
       end
 
       def context_extension
-        Proc.new {
-
+        Proc.new do
           class << self
             attr_accessor :manifest, :asset_mount_point
           end
@@ -218,7 +280,7 @@ module Spontaneous::Asset
           def make_absolute(logical)
             "/" << self.class.asset_mount_point << "/" << logical
           end
-        }
+        end
       end
     end
   end

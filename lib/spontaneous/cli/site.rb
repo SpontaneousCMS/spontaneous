@@ -153,7 +153,7 @@ module Spontaneous
         site = prepare! :publish
         site.background_mode = :immediate
         ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
-        say "Creating revision #{site.revision}", :green, true
+        say "Creating revision #{site.working_revision}", :green, true
         if options.pages
           say ">  Publishing pages #{options.pages.inspect}", :green, true
           site.publish_pages(options.pages)
@@ -172,7 +172,7 @@ module Spontaneous
 
       def show_site_revision
         site = prepare! :revision
-        say "Site is at revision #{site.revision}", :green
+        say "Site is at revision #{site.working_revision}", :green
       end
 
       def browse_site
