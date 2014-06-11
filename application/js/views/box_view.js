@@ -42,13 +42,13 @@ Spontaneous.Views.BoxView = (function($, S) {
 			if (!this._panel) {
 				// var panel = $(dom.div, {'class': 'slot-content'});
 				var panel = dom.div('.slot-content');
-				panel.addClass('empty')
+				panel.addClass('empty');
 				if (this.box.has_fields()) {
 					var w = dom.div('.box-fields');
 					var fields = new Spontaneous.FieldPreview(this, '');
 					this._subviews.push(fields);
 					var fields_preview = fields.panel();
-					fields_preview.prepend(dom.div('.overlay'))
+					fields_preview.prepend(dom.div('.overlay'));
 					var preview_area = this.create_edit_wrapper(fields_preview);
 
 					w.append(preview_area);
@@ -72,7 +72,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 							position += increment;
 						};
 					}(this, preload, this.entries(), entries);
-					this.watchOther(S.ContentArea, 'scroll_bottom', scrollLoad)
+					this.watchOther(S.ContentArea, 'scroll_bottom', scrollLoad);
 				}
 				for (var i = 0, ee = this.entries(), ii = preload;i < ii; i++) {
 					var entry = ee[i];
@@ -92,13 +92,13 @@ Spontaneous.Views.BoxView = (function($, S) {
 					stop: function(event, ui) {
 						this.re_sort(ui.item);
 					}.bind(this)
-				})
+				});
 				panel.append(entries);
 			// this.floating_add_bar = this.add_allowed_types_bar('floating', -1).hide();
 			// var _bottom_add_bar = this.add_allowed_types_bar('bottom', -1).hide();
 			// panel.append(_bottom_add_bar);
 			panel.hide();
-			this.dom_container.append(panel)
+			this.dom_container.append(panel);
 			this._panel = panel;
 				this._entry_container = entries;
 				// this._bottom_add_bar = _bottom_add_bar;
@@ -108,7 +108,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 		},
 		check_if_empty: function() {
 			var _view = this, _panel = this._panel;
-			if (_view.box.entries().length == 0) {
+			if (_view.box.entries().length === 0) {
 				_panel.addClass('empty');
 				// _view._bottom_add_bar.fadeOut($.fn.appear.height_change_duration/2, function() {
 				// })
@@ -170,7 +170,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 				var type = allow.type, as = allow.as || type.title;
 				var a = dom.a().text(as), add_allowed;
 				if (type.is_alias()) {
-					a.addClass('alias')
+					a.addClass('alias');
 					add_allowed = function(type) {
 						var d = new Spontaneous.AddAliasDialogue(_box, type, insert_at);
 						d.open();
@@ -181,7 +181,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 					}.bind(_box, type);
 				}
 				a.click(add_allowed);
-				inner.append(a)
+				inner.append(a);
 			});
 			allowed_bar.data("allowed-count", allowed.length);
 			allowed_bar.append(inner, dom.span('.down'));
@@ -195,7 +195,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			}
 			var id = css_id.split('-')[1], entry, old_position = 0;
 
-			for (var i = 0, ii = entries.length; i < ii; i++) {
+			for (i = 0, ii = entries.length; i < ii; i++) {
 				if (entries[i].id() == id) {
 					old_position = i;
 					entry = entries[i];
@@ -206,7 +206,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			entries.splice(old_position, 1);
 			entries.splice(new_position, 0, entry);
 			entry.reposition(new_position, function(entry) {
-				this.sorted(entry)
+				this.sorted(entry);
 			}.bind(this));
 		},
 		sorted: function(entry) {
@@ -302,7 +302,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			this.check_if_empty();
 		},
 		entry_wrappers: function() {
-			return this._entry_container.find('> .'+this.entry_class())
+			return this._entry_container.find('> .'+this.entry_class());
 		},
 		show_add_after: function(entry, entry_spacer) {
 			var bar, position = 0;
@@ -320,7 +320,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 				}
 				var newHeight = bar.find('.addable-inner').outerHeight() + 11, currentHeight = entry_spacer.outerHeight();
 				newHeight = Math.max(newHeight, currentHeight);
-				entry_spacer.animate({height:newHeight}, 200)
+				entry_spacer.animate({height:newHeight}, 200);
 			}
 		},
 		hide_add_after: function(entry, entry_spacer) {
