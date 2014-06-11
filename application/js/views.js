@@ -5,6 +5,24 @@ Spontaneous.Views = (function($, S) {
 		include: Spontaneous.Properties,
 		initialize: function(content) {
 			this.content = content;
+			this._subviews = [];
+		},
+		unload: function() {
+			this.unwatchOthers();
+			this.unloadView();
+			this.unloadChildren();
+		},
+		unloadView: function() {
+			// cleanup
+		},
+		unloadChildren: function() {
+			for (var i = 0, c = this._subviews, ii = c.length; i < ii; i++) {
+				if (typeof c[i].unload === 'function') {
+					c[i].unload();
+				} else {
+					console.warn('unable to unload child view', c[i])
+				}
+			}
 		},
 		id: function() {
 			return this.content.id();

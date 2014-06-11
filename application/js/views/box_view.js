@@ -46,6 +46,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 				if (this.box.has_fields()) {
 					var w = dom.div('.box-fields');
 					var fields = new Spontaneous.FieldPreview(this, '');
+					this._subviews.push(fields);
 					var fields_preview = fields.panel();
 					fields_preview.prepend(dom.div('.overlay'))
 					var preview_area = this.create_edit_wrapper(fields_preview);
@@ -56,12 +57,24 @@ Spontaneous.Views.BoxView = (function($, S) {
 				}
 
 				panel.append(this.add_allowed_types_bar('top', 0));
-				// var entries = $(dom.div, {'class':'slot-entries'});
 				var entries = dom.div('.slot-entries');
 				var instructions = dom.div('.slot-instructions').text("Add items using the buttons above");
 				entries.append(instructions);
-				// panel.append();
-				for (var i = 0, ee = this.entries(), ii = ee.length;i < ii; i++) {
+				var entry_total = this.entries().length, preload = Math.min(entry_total, 6);
+				if (preload < entry_total) {
+					var scrollLoad = function(view, loadedCount, entries, container) {
+						var position = loadedCount, increment = 3, total = entries.length;
+						return function() {
+							if (position >= total) { return; }
+							for (var i = position, ii = Math.min(position + increment, total); i < ii; i++) {
+								container.append(view.claim_entry(entries[i]));
+							}
+							position += increment;
+						};
+					}(this, preload, this.entries(), entries);
+					this.watchOther(S.ContentArea, 'scroll_bottom', scrollLoad)
+				}
+				for (var i = 0, ee = this.entries(), ii = preload;i < ii; i++) {
 					var entry = ee[i];
 					entries.append(this.claim_entry(entry));
 				}
@@ -221,6 +234,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			return view;
 		},
 		claim_entry: function(entry) {
+			this._subviews.push(entry);
 			var div = entry.panel();
 			entry.bind('removed', this.entry_removed.bind(this));
 			return div.attr('id', this.entry_id(entry)).addClass(this.entry_class());

@@ -65,10 +65,13 @@ Spontaneous.BoxContainer = (function($, S) {
 			this.activate(0);
 		},
 		boxes: function() {
+			var self = this;
 			if (!this._boxes) {
 				var _boxes = [], content_container = this.box_content_container;
 				var f = function(i, box) {
-					_boxes.push(new Spontaneous.Views.BoxView(box, content_container))
+					var box = new Spontaneous.Views.BoxView(box, content_container)
+					self._subviews.push(box);
+					_boxes.push(box);
 				}.bind(this);
 				$.each(this.content.boxes(), f);
 				this._boxes = _boxes;

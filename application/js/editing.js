@@ -23,13 +23,16 @@ Spontaneous.Editing = (function($, S) {
 		},
 		page_loaded: function(page_data) {
 			var page = this.get('page');
+			var view = this.get('view');
 			if (page) { page.unload(); }
+			if (view) { view.unload(); }
 			page = new Page(page_data);
 			page.watch('path', this.path_updated.bind(this));
 			view = new S.Views.PageView(page);
 			this.container.empty();
 			this.container.append(view.panel());
 			this.set('page', page);
+			this.set('view', view);
 			this.container.fadeIn(300);
 		},
 		path_updated: function(path) {

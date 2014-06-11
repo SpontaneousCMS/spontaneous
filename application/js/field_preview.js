@@ -55,6 +55,9 @@ Spontaneous.FieldPreview = (function($, S) {
 			}
 		});
 			return wrapper;
+		},
+		unload: function() {
+			// keep compatibility with the view api
 		}
 	});
 	return FieldPreview;

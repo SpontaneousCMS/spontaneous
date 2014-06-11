@@ -54,6 +54,9 @@ Spontaneous.Views.PageView = (function($, S) {
 			this.path_wrap = path_wrap
 			return this.panel;
 		},
+		unload: function() {
+			// fit with the view prototype
+		},
 		set_title: function(title) {
 			var self = this;
 			title = title || this.page.title();
@@ -266,17 +269,22 @@ Spontaneous.Views.PageView = (function($, S) {
 			if (this.page.hidden()) {
 				this.panel.addClass('hidden')
 			}
-			this.panel.append(new FunctionBar(this.page).panel());
+			var functionbar = new FunctionBar(this.page);
+			this._subviews.push(functionbar);
+			this.panel.append(functionbar.panel());
 
 			var fields = dom.div('#page-fields')
 			var fp = new Spontaneous.FieldPreview(this, '');
+			this._subviews.push(fp);
 			var p = fp.panel();
 			p.prepend(dom.div('.overlay'))
 
 			var preview_area = this.create_edit_wrapper(p);
 			fields.append(preview_area)
 			this.panel.append(fields);
-			this.panel.append(new Spontaneous.BoxContainer(this.page, 'page-slots').panel());
+			var boxes = new Spontaneous.BoxContainer(this.page, 'page-slots');
+			this._subviews.push(boxes);
+			this.panel.append(boxes.panel());
 			this.fields_preview = p;
 			return this.panel;
 		},
@@ -292,6 +300,8 @@ Spontaneous.Views.PageView = (function($, S) {
 		},
 		depth: function() {
 			return this.page.depth();
+		},
+		unloadView: function() {
 		}
 	});
 

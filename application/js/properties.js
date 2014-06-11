@@ -49,8 +49,19 @@ Spontaneous.Properties = (function($, S) {
 		},
 		_props_add_listener: function(name, callback) {
 			var current_listeners = this._props_listeners()[name] || [];
+			// console.log('current_listeners', name, current_listeners.length)
 			current_listeners.push({'callback': callback});
 			this._props_listeners()[name] = current_listeners;
+		},
+		_props_remove_listener: function(name, callback) {
+			var current_listeners = this._props_listeners()[name] || [], listeners = [];
+			for (var i = 0, ii = current_listeners.length; i < ii; i++) {
+				var l = current_listeners[i];
+				if (l.callback !== callback) {
+					listeners.push(l);
+				}
+			}
+			this._props_listeners()[name] = listeners;
 		},
 		// get the value of a property
 		get: function(property_name) {
@@ -73,6 +84,9 @@ Spontaneous.Properties = (function($, S) {
 		watch: function(property_name, callback) {
 			return this._props_add_listener(property_name, callback)
 		},
+		unwatch: function(property_name, callback) {
+			return this._props_remove_listener(property_name, callback)
+		},
 		// assign a callback to an event to be called when that event is triggered
 		bind: function(event_name, callback) {
 			return this._props_add_listener(event_name, callback)
@@ -83,6 +97,21 @@ Spontaneous.Properties = (function($, S) {
 			var event_name = args.shift(), listeners = this._props_listeners_for(event_name);
 			for (var i = 0, ii = listeners.length; i < ii; i++) {
 				listeners[i].callback.apply(null, args);
+			}
+		},
+		// set a listener on the 'property_name' property of the object `target`
+		// and remember it so we can remove it later (using 'unwatchOthers')
+		watchOther: function(target, property_name, callback) {
+			var others = this._props_watching || [];
+			others.push({target: target, property_name: property_name, callback: callback});
+			this._props_watching = others;
+			return target.watch(property_name, callback);
+		},
+		unwatchOthers: function() {
+			var others = this._props_watching || [];
+			for (var i = 0, ii = others.length; i < ii; i++) {
+				var watcher = others[i];
+				watcher.target.unwatch(watcher.property_name, watcher.callback);
 			}
 		}
 	});

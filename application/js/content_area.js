@@ -11,17 +11,37 @@ Spontaneous.ContentArea = (function($, S) {
 		mode: 'edit',
 
 		init: function() {
-			this.wrap  = dom.div("#content-outer");
-			this.metaWrap = dom.div("#content-meta").hide();
-			this.inner = dom.div('#content');
-			this.inner.append(dom.div("#content-loading"));
-			this.preview = S.Preview.init(this.inner);
-			this.editing = S.Editing.init(this.inner);
-			this.service = S.Services.init(this.inner);
-			this.wrap.append(this.metaWrap, this.inner);
-			return this.wrap;
+			var self = this;
+			self.wrap  = dom.div("#content-outer");
+			self.metaWrap = dom.div("#content-meta").hide();
+			self.inner = dom.div('#content');
+			self.inner.append(dom.div("#content-loading"));
+			self.configureScrollBottomHandler(self.inner);
+			self.preview = S.Preview.init(self.inner);
+			self.editing = S.Editing.init(self.inner);
+			self.service = S.Services.init(self.inner);
+			self.wrap.append(self.metaWrap, self.inner);
+			return self.wrap;
 		},
-
+		configureScrollBottomHandler: function(inner) {
+			inner.scroll(function(contentArea, div) {
+				var count = 0;
+				return function(e) {
+					var st = div.scrollTop()
+					, ih = div.innerHeight()
+					, sh = div[0].scrollHeight
+					// don't wait until we're at the exact bottom, but trigger a little bit earlier
+					// this should ideally be context sensitive, so that the trigger for short containers
+					// loads a bit earlier. This would mean that the first load of additional content would
+					// happen more promptly than later ones. Currently it's the inverse of that.
+					, margin = 0.95
+					, bottom = ((st + ih) >= (sh * margin));
+					if (bottom) {
+						contentArea.set('scroll_bottom', (++count));
+					}
+				}
+			}(this, inner));
+		},
 		location_loading: function(destination) {
 			if (destination) {
 				this.wrap.addClass('loading');
