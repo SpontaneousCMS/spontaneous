@@ -17,7 +17,7 @@ Spontaneous.PopoverView = (function($, S) {
 		align: 'left',
 		has_navigation: true,
 		title: function() {
-			return "Popover";
+			return 'Popover';
 		},
 		width: function() {
 			return 400;
@@ -31,10 +31,10 @@ Spontaneous.PopoverView = (function($, S) {
 			return p;
 		},
 		position_from_element: function(t) {
-			var t = $(t), o = this.element_position(t);
-			o.top += t.outerHeight();
-			o.left += t.outerWidth() / 2;
-			return o
+			var $t = $(t), o = this.element_position($t);
+			o.top += $t.outerHeight();
+			o.left += $t.outerWidth() / 2;
+			return o;
 		},
 		element_position: function(el) {
 			return $(el).offset();

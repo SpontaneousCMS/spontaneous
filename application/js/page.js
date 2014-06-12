@@ -10,13 +10,13 @@ Spontaneous.Page = (function($, S) {
 		},
 
 		save_complete: function(values) {
-			this.callSuper(values)
+			this.callSuper(values);
 			this.set('slug', values.slug);
 			this.set('path', values.path);
 		},
 
 		is_root: function() {
-			return (this.get('path') === "/");
+			return (this.get('path') === '/');
 		},
 		depth: function() {
 			// depth in this case refers to content depth which is always 0 for pages

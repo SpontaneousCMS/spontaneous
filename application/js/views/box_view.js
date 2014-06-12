@@ -1,7 +1,7 @@
 // console.log('Loading BoxView...')
 
 Spontaneous.Views.BoxView = (function($, S) {
-	"use strict";
+	'use strict';
 	var dom = S.Dom;
 
 	var BoxView = new JS.Class(Spontaneous.Views.View, {
@@ -59,7 +59,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 
 				panel.append(this.add_allowed_types_bar('top', 0));
 				var entries = dom.div('.slot-entries');
-				var instructions = dom.div('.slot-instructions').text("Add items using the buttons above");
+				var instructions = dom.div('.slot-instructions').text('Add items using the buttons above');
 				entries.append(instructions);
 				var entry_total = this.entries().length, preload = Math.min(entry_total, 6);
 				if (preload < entry_total) {
@@ -121,12 +121,12 @@ Spontaneous.Views.BoxView = (function($, S) {
 		},
 		add_allowed_types_bar: function(position, insert_at) {
 			var allowed = this.box.allowed_types();
-			if (allowed.length === 0) { return ""; }
+			if (allowed.length === 0) { return ''; }
 			var _box = this
-			, allowed_bar = dom.div('.slot-addable')
-			, inner = dom.div(".addable-inner")
+, allowed_bar = dom.div('.slot-addable')
+			, inner = dom.div('.addable-inner')
 			, dropper = allowed_bar
-			, drop = function(event) {
+, drop = function(event) {
 				dropper.removeClass('drop-active').addClass('uploading');
 				// var progress_outer = $(dom.div, {'class':'drop-upload-outer'});
 				// var progress_inner = $(dom.div, {'class':'drop-upload-inner'}).css('width', 0);
@@ -184,7 +184,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 				a.click(add_allowed);
 				inner.append(a);
 			});
-			allowed_bar.data("allowed-count", allowed.length);
+			allowed_bar.data('allowed-count', allowed.length);
 			allowed_bar.append(inner, dom.span('.down'));
 
 			return allowed_bar;
@@ -242,7 +242,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 		},
 
 		entry_id: function(entry) {
-			return "entry-" + entry.content.id();
+			return 'entry-' + entry.content.id();
 		},
 
 		entry_class: function() {
@@ -314,10 +314,10 @@ Spontaneous.Views.BoxView = (function($, S) {
 				}
 			}
 			bar = this.add_allowed_types_bar('floating', position + 1);
-			if (bar && bar.data("allowed-count") > 0) {
+			if (bar && bar.data('allowed-count') > 0) {
 				entry_spacer.addClass('add-entry').append(bar.show());
-				if (!entry_spacer.data("auto-height")) {
-					entry_spacer.data("auto-height", entry_spacer.height());
+				if (!entry_spacer.data('auto-height')) {
+					entry_spacer.data('auto-height', entry_spacer.height());
 				}
 				var newHeight = bar.find('.addable-inner').outerHeight() + 11, currentHeight = entry_spacer.outerHeight();
 				newHeight = Math.max(newHeight, currentHeight);
@@ -326,7 +326,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 		},
 		hide_add_after: function(entry, entry_spacer) {
 			entry_spacer.empty();
-			entry_spacer.removeClass('add-entry').velocity({height: entry_spacer.data("auto-height")}, 200);
+			entry_spacer.removeClass('add-entry').velocity({height: entry_spacer.data('auto-height')}, 200);
 		}
 	});
 

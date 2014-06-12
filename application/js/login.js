@@ -31,7 +31,7 @@
 			var $this = $(this);
 			$.ajax({
 				url: $this.attr('action'),
-				type: "POST",
+				type: 'POST',
 				data:$this.serialize(),
 				success: function(data) {
 					if (data.key) {
@@ -44,7 +44,7 @@
 						$('#failed-name').text($('#user-login').val());
 						$(this).fadeIn();
 					});
-					$("#error-message:hidden").slideDown(200);
+					$('#error-message:hidden').slideDown(200);
 				},
 				dataType: 'json'
 			});

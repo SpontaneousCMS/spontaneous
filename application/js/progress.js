@@ -3,9 +3,9 @@
 Spontaneous.Progress = (function($, S) {
 	var Progress = function(parent, size, options) {
 		var defaults = {
-			spinner_fg_color: "#000000", // colour
+			spinner_fg_color: '#000000', // colour
 			spinner_bg_color: null, // null  or false for transparent
-			progress_fg_color: "#000000", // colour
+			progress_fg_color: '#000000', // colour
 			progress_bg_color: false, // null  or false for transparent
 			spinner_alpha: 1,
 			progress_alpha: 1,
@@ -23,7 +23,7 @@ Spontaneous.Progress = (function($, S) {
 			settings[k] = defaults[k];
 		}
 
-		for (var k in options) {
+		for (k in options) {
 			settings[k] = options[k];
 		}
 		return {
@@ -51,7 +51,7 @@ Spontaneous.Progress = (function($, S) {
 				if (!this._color[c]) {
 					this._color[c] = this._parse_color(this.options[c]);
 				}
-				return "rgba("+this._color[c][0]+", "+this._color[c][1]+", "+this._color[c][2]+", " +alpha+ ")";
+				return 'rgba('+this._color[c][0]+', '+this._color[c][1]+', '+this._color[c][2]+', ' +alpha+ ')';
 			},
 
 			canvas: function() {
@@ -171,7 +171,7 @@ Spontaneous.Progress = (function($, S) {
 				ctx.clearRect(0,0,this.size,this.size);
 				var r1 = radius - (radius * this.options.segment_length);
 
-				var p = ((2.0 * Math.PI * r1) / this.options.segments) * this.options.segment_width ;
+				var p = ((2.0 * Math.PI * r1) / this.options.segments) * this.options.segment_width;
 				var r2 = radius;
 
 				if (this.options.rounded) r2 -= p/2;

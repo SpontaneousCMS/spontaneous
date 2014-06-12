@@ -27,10 +27,10 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 		var levels = this.levels;
 		var nonePosition = function() {
 			for (var i = 0, ii = levels.length; i < ii; i++) {
-				if (levels[i].levelName() === "none") {
+				if (levels[i].levelName() === 'none') {
 					return i;
 				}
-			};
+			}
 		}();
 		return levels[nonePosition + 1];
 	};
@@ -43,17 +43,17 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 		element: function(cancelCallback) {
 			var self = this;
 			var levels = Level.levels;
-			var currentLevel = Level.get(this.user.get("level")) || Level.defaultLevel();
-			var outer = dom.div(".level-select");
-			var input = dom.input({type: "hidden", name: Input.inputName(this.name), value: currentLevel.levelName()});
-			var select = dom.div(".select").hide();
-			var value = dom.div(".level-value").text(currentLevel.title());
+			var currentLevel = Level.get(this.user.get('level')) || Level.defaultLevel();
+			var outer = dom.div('.level-select');
+			var input = dom.input({type: 'hidden', name: Input.inputName(this.name), value: currentLevel.levelName()});
+			var select = dom.div('.select').hide();
+			var value = dom.div('.level-value').text(currentLevel.title());
 			levels.forEach(function(level) {
-				var row = dom.div(".level").addClass("level-" + level.levelName());
-				row.append(dom.span(".level-name").text(level.title()));
-				row.append(dom.span(".level-publish").text("Publish").addClass(""+level.canPublish()));
-				row.append(dom.span(".level-admin").text("Admin").addClass(""+level.isAdmin()));
-				row.data("level", level);
+				var row = dom.div('.level').addClass('level-' + level.levelName());
+				row.append(dom.span('.level-name').text(level.title()));
+				row.append(dom.span('.level-publish').text('Publish').addClass(''+level.canPublish()));
+				row.append(dom.span('.level-admin').text('Admin').addClass(''+level.isAdmin()));
+				row.data('level', level);
 				row.click(function() {
 					self.choose(level);
 					return false;
@@ -75,12 +75,12 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 			var pulldown = this.pulldown;
 			pulldown.fadeIn(100);
 			var level = this.currentLevel();
-			var options = pulldown.find(".level");
+			var options = pulldown.find('.level');
 			var levelDiv = options.filter(function(div) {
-				return $(this).data("level").levelName() == level.levelName();
+				return $(this).data('level').levelName() == level.levelName();
 			})[0];
 			var pos = $(levelDiv).position();
-			pulldown.css("top", dom.px(-pos.top));
+			pulldown.css('top', dom.px(-pos.top));
 		},
 
 		choose: function(level) {
@@ -89,7 +89,7 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 
 			this.close();
 		},
-		close: function( ) {
+		close: function() {
 			this.pulldown.fadeOut(100);
 		},
 		activate: function() {
@@ -113,21 +113,21 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 			this.value = value;
 		},
 		element: function(cancelCallback) {
-			var type = (this.name === "email" ? "email" : "text");
+			var type = (this.name === 'email' ? 'email' : 'text');
 			var input = dom.input({
 				name: this.inputName(),
 				value: this.value,
 				type: type
 			}).focus(function() {
-				$(this).parents("p").addClass("focus");
+				$(this).parents('p').addClass('focus');
 			}).blur(function() {
-				$(this).parents("p").removeClass("focus");
+				$(this).parents('p').removeClass('focus');
 			}).keydown(function(event) {
 				if (event.keyCode === 27) { cancelCallback(); }
 			});
 			// TODO: catch RETURN and ESCAPE
 			return input;
-		}.cache("input"),
+		}.cache('input'),
 		inputName: function() { return Input.inputName(this.name); },
 		isModified: function() {
 			// TODO: compare current value of input against original value
@@ -136,12 +136,12 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 		showError: function(errors) {
 			var error = errors[0]
 			, element = this.element()
-			, errorWrap = dom.div(".error").append(dom.span().text(error)).hide();
+			, errorWrap = dom.div('.error').append(dom.span().text(error)).hide();
 			element.after(errorWrap);
 			errorWrap.fadeIn(300);
 		},
 		hideError: function() {
-			var error = this.element().next(".error");
+			var error = this.element().next('.error');
 			error.fadeOut(100, function() {
 				error.remove();
 			});
@@ -149,71 +149,71 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 	});
 
 	Input.inputName = function(name) {
-		return "user[" + name + "]";
+		return 'user[' + name + ']';
 	};
 
 	var responseCallback = function(complete, successCallback, failCallback) {
-		var isFunction = function(f) { return (typeof f === "function"); }
+		var isFunction = function(f) { return (typeof f === 'function'); };
 		return function(result, status) {
-			if (status === "success") {
+			if (status === 'success') {
 				if (isFunction(complete)) { complete(result); }
 				if (isFunction(successCallback)) { successCallback(result); }
 			} else {
 				if (isFunction(failCallback)) { failCallback(result); }
 			}
-		}
+		};
 	};
 
 	var UserController = {
-		save:   function(user, params, successCallback, failCallback) {
-			var url = ["/users", user.get("id")].join("/");
+		save: function(user, params, successCallback, failCallback) {
+			var url = ['/users', user.get('id')].join('/');
 			ajax.put(url, params, responseCallback(function(result) {
 				user.update(result);
 			}, successCallback, failCallback));
 		},
 		create: function(user, params, successCallback, failCallback) {
-			var url = "/users";
+			var url = '/users';
 			ajax.post(url, params, responseCallback(function(result) {
 				user.update(result);
 			}, successCallback, failCallback));
 		},
 		delete: function(user, successCallback, failCallback) {
-			var url = ["/users", user.get("id")].join("/");
+			var url = ['/users', user.get('id')].join('/');
 			ajax.del(url, {}, responseCallback(function(result) {
 
 			}, successCallback, failCallback));
 		},
 		enable: function(user, enabled, successCallback, failCallback) {
-			var action = (enabled ? "enable" : "disable")
-			, url = ["/users", action, user.get("id")].join("/");
+			var action = (enabled ? 'enable' : 'disable')
+			, url = ['/users', action, user.get('id')].join('/');
 			ajax.put(url, {}, responseCallback(function(result) {
-				user.set("disabled", !enabled);
+				user.set('disabled', !enabled);
 			}, successCallback, failCallback));
 		},
 		logout: function(user, successCallback, failCallback) {
-			var url = ["/users", "keys", user.get("id")].join("/");
+			var url = ['/users', 'keys', user.get('id')].join('/');
 			ajax.del(url, {}, responseCallback(function(result) {
 
 			},successCallback, failCallback));
-		},
+		}
 	};
 
 	var EditUserView = new JS.Class({
 		initialize: function(parent, user) {
 			this.parent = parent;
-			this.user   = user;
+			this.user = user;
 		},
 		titleText: function() {
-			return "Editing User “" + this.user.get("name") + "”";
+			return 'Editing User “' + this.user.get('name') + '”';
 		},
 		view: function() {
 			var self = this;
 			var user = this.user;
 			var wrap = dom.div();
-			var form = dom.form({method: "post", action: ajax.request_url("/users/"+ user.get("id"))})
+			var form = dom.form({method: 'post', action: ajax.request_url('/users/'+ user.get('id'))});
 			var inputs = {};
 			var p, label, input, value;
-			var titleBar = dom.div(".title").append(dom.span().text(this.titleText()));
+			var titleBar = dom.div('.title').append(dom.span().text(this.titleText()));
 
 			form.append(self.aboveUserAttributes());
 
@@ -221,10 +221,10 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 				self.parent.closeUser();
 			};
 			self.editableAttributes().forEach(function(name) {
-				p = dom.p()
+				p = dom.p();
 				label = dom.label().text(name);
 				input = self.inputForAttribute(name);
-				value = dom.div(".value").append(input.element(cancel));
+				value = dom.div('.value').append(input.element(cancel));
 				p.append(label, value);
 				form.append(p);
 				inputs[name] = input;
@@ -241,14 +241,14 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 				self.save(form, saveComplete, saveFail);
 				return false;
 			};
-			var cancelBtn = dom.a(".button.cancel").text("Cancel").click(cancel);
-			var saveBtn = dom.button(".button", {type: "submit"}).text(self.saveButtonText()).click(performSave);
-			p.append(cancelBtn, dom.div(".gap"), saveBtn);
+			var cancelBtn = dom.a('.button.cancel').text('Cancel').click(cancel);
+			var saveBtn = dom.button('.button', {type: 'submit'}).text(self.saveButtonText()).click(performSave);
+			p.append(cancelBtn, dom.div('.gap'), saveBtn);
 			form.append(p);
 			form.submit(performSave);
 			this.inputs = inputs;
 			form.find('input[type="text"]:first').focus().select();
-			wrap.append(titleBar, form)
+			wrap.append(titleBar, form);
 			return wrap;
 		},
 		verificationErrors: function(errors) {
@@ -258,42 +258,42 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 			});
 		},
 		saveButtonText: function() {
-			return "Save";
+			return 'Save';
 		},
 		inputForAttribute: function(name) {
-			if (name === "level") {
+			if (name === 'level') {
 				return new LevelSelect(name, this.user);
 			}
 			return new Input(name, this.user.get(name));
 		},
 		editableAttributes: function() {
-			return ["login", "name", "email", "level"];
+			return ['login', 'name', 'email', 'level'];
 		},
 		aboveUserAttributes: function() {
 			var self = this;
-			var user = this.user
-			var admin = dom.div(".admin");
-			p = dom.p(".enabled");
-			label = dom.label().text("Enabled");
-			var checkbox = dom.input({type:"checkbox", checked: (!user.get("disabled"))}).click(function() {
-				var enabled = $(this).attr("checked") === "checked";
+			var user = this.user;
+			var admin = dom.div('.admin');
+			p = dom.p('.enabled');
+			label = dom.label().text('Enabled');
+			var checkbox = dom.input({type:'checkbox', checked: (!user.get('disabled'))}).click(function() {
+				var enabled = $(this).attr('checked') === 'checked';
 				UserController.enable(user, enabled);
 				return false;
 			});
-			user.watch("disabled", function(disabled) {
-				checkbox.attr("checked", !disabled);
+			user.watch('disabled', function(disabled) {
+				checkbox.attr('checked', !disabled);
 			});
 			label.append(checkbox);
 			p.append(label);
 			admin.append(p);
 
-			admin.append(dom.p(".gap"));
-			p = dom.p(".log-off");
-			var btn = dom.a(".button.log-out").text("Log "+user.get("login")+" Out").click(function() {
+			admin.append(dom.p('.gap'));
+			p = dom.p('.log-off');
+			var btn = dom.a('.button.log-out').text('Log '+user.get('login')+' Out').click(function() {
 				var $this = $(this);
-				$this.addClass("pending");
+				$this.addClass('pending');
 				UserController.logout(user, function() {
-					$this.removeClass("pending").addClass("complete").text("Logged Out");
+					$this.removeClass('pending').addClass('complete').text('Logged Out');
 				});
 			});
 			p.append(btn);
@@ -324,32 +324,32 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 		},
 		save: function(form, successCallback, failCallback) {
 			var self = this
-			, params = self.serialiseForm(form)
+, params = self.serialiseForm(form);
 			UserController.save(self.user, params, successCallback, failCallback);
 		}
 	});
 
 	var CreateUserView = new JS.Class(EditUserView, {
 		titleText: function() {
-			return "Create User";
+			return 'Create User';
 		},
 		aboveUserAttributes: function() {
-			return "";
+			return '';
 		},
 		belowUserAttributes: function() {
-			return "";
+			return '';
 		},
 		editableAttributes: function() {
-			return ["login", "name", "email", "password", "level"];
+			return ['login', 'name', 'email', 'password', 'level'];
 		},
 		saveButtonText: function() {
-			return "Create";
+			return 'Create';
 		},
 		save: function(form, successCallback, failCallback) {
 			var self = this
-			, params = self.serialiseForm(form)
+, params = self.serialiseForm(form)
 			, callback = function(params) {
-				if (typeof successCallback === "function") {
+				if (typeof successCallback === 'function') {
 					successCallback(params);
 				}
 				self.parent.addUser(self.user);
@@ -371,7 +371,7 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 			$.each(attributes, function(key, val) {
 				self.set(key, val);
 			});
-		},
+		}
 	});
 
 	var UserAdmin = new JS.Class({
@@ -385,15 +385,15 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 				return;
 			}
 			var self = this;
-			var outer = dom.div("#user-admin-container");
-			var title = dom.div(".title.main").append(dom.span().text("CMS Users"));
-			var contents = dom.div(".contents");
-			var edit = dom.div(".edit").hide();
-			var done = dom.a(".button.done").text("Done").click(function() {
+			var outer = dom.div('#user-admin-container');
+			var title = dom.div('.title.main').append(dom.span().text('CMS Users'));
+			var contents = dom.div('.contents');
+			var edit = dom.div('.edit').hide();
+			var done = dom.a('.button.done').text('Done').click(function() {
 				self.close();
 			});
-			var addWrapper = dom.div(".add-user")
-			var addButton  = dom.a(".button.add").text("Create User").click(function() {
+			var addWrapper = dom.div('.add-user');
+			var addButton = dom.a('.button.add').text('Create User').click(function() {
 				self.createUser();
 			});
 			addWrapper.append(addButton);
@@ -404,8 +404,8 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 			this.titleContainer = title;
 			this.contentsContainer = contents;
 			this.editContainer = edit;
-			container.append(outer)
-			ajax.get("/users", this.ready.bind(this));
+			container.append(outer);
+			ajax.get('/users', this.ready.bind(this));
 		},
 		createUser: function() {
 			var user = new User(this, {});
@@ -434,11 +434,11 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 		},
 		listEntry: function(user) {
 			var self = this;
-			var row = dom.div(".user");
-			row.attr("id", "user-admin-" + user.get("id"));
-			var cells = ["name", "level"].map(function(attr) {
+			var row = dom.div('.user');
+			row.attr('id', 'user-admin-' + user.get('id'));
+			var cells = ['name', 'level'].map(function(attr) {
 				var div = dom.div().addClass(attr).text(user.get(attr)).click(function() {
-					self.editUser(user)
+					self.editUser(user);
 					return false;
 				});
 				user.watch(attr, function(newValue) {
@@ -448,19 +448,19 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 			});
 			var disabledState = function(disabled) {
 				if (disabled) {
-					row.addClass("disabled");
+					row.addClass('disabled');
 				} else {
-					row.removeClass("disabled");
+					row.removeClass('disabled');
 				}
 			};
-			user.watch("disabled", disabledState);
-			disabledState(user.get("disabled"));
-			var del = dom.div(".delete").click(function() {
+			user.watch('disabled', disabledState);
+			disabledState(user.get('disabled'));
+			var del = dom.div('.delete').click(function() {
 				self.confirmDeleteUser(user);
 				return false;
 			});
 			cells.push(del);
-			row.append.apply(row, cells)
+			row.append.apply(row, cells);
 			return row;
 		},
 		animationDuration: 300,
@@ -472,11 +472,11 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 			var animationDuration = self.animationDuration;
 			var edit = this.editContainer.empty();
 			var list = this.contentsContainer;
-			var back = dom.div(".back");
+			var back = dom.div('.back');
 			edit.append(back, viewInstance.view());
-			edit.css({ left: "100%", opacity: 0 }).show();
+			edit.css({ left: '100%', opacity: 0 }).show();
 			list.velocity({ opacity: 0.2 }, animationDuration);
-			edit.velocity({ left: "48px", opacity: 1 }, animationDuration, "swing")
+			edit.velocity({ left: '48px', opacity: 1 }, animationDuration, 'swing');
 			viewInstance.activate();
 		},
 		closeUser: function() {
@@ -484,7 +484,7 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 			var edit = this.editContainer.empty();
 			var list = this.contentsContainer;
 			list.velocity({ opacity: 1 }, animationDuration);
-			edit.velocity({ left: "100%", opacity: 0 }, animationDuration, function() {
+			edit.velocity({ left: '100%', opacity: 0 }, animationDuration, function() {
 				edit.empty().hide();
 			});
 		},
@@ -492,9 +492,9 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 			var dialogue = Spontaneous.Popover.open(event, new ConfirmDeletePopup(this, user));
 		},
 		deleteUser: function(user) {
-			var url = ["/users", user.get("id")].join("/");
+			var url = ['/users', user.get('id')].join('/');
 			ajax.del(url, {}, function(result, status) {
-				if (status === "success") {
+				if (status === 'success') {
 					user.listEntry.disappear();
 				}
 			});
@@ -513,7 +513,7 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 		// 	return 208;
 		// },
 		title: function() {
-			return "Delete user “" + (this.user.get("login")) + "”";
+			return 'Delete user “' + (this.user.get('login')) + '”';
 		},
 		position_from_event: function(target) {
 			var pos = this.position_from_element(target);
@@ -527,13 +527,13 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 				return false;
 			});
 
-			var ok = dom.a('.ok').text("Delete").click(function() {
+			var ok = dom.a('.ok').text('Delete').click(function() {
 				self.close();
 				__entry.deleteUser(self.user);
 				return false;
 			});
-			var cancel = dom.a('.cancel').text("Cancel");
-			w.append(cancel, ok)
+			var cancel = dom.a('.cancel').text('Cancel');
+			w.append(cancel, ok);
 			return w;
 		}
 	});

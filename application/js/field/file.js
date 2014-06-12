@@ -6,29 +6,29 @@ Spontaneous.Field.File = (function($, S) {
 
 		currentValue: function() {
 			var pending, v = this.get('value');
-			if ((pending = v['__pending__'])) {
-				return pending['value'];
+			if ((pending = v.__pending__)) {
+				return pending.value;
 			}
 			return v;
 		},
 
 		currentFilename: function() {
-			return this.currentValue()['filename'];
+			return this.currentValue().filename;
 		},
 
 		currentFilesize: function() {
-			return this.currentValue()['filesize'];
+			return this.currentValue().filesize;
 		},
 
 		currentEditValue: function() {
 			var value, pending, ui, v = this.get('value');
-			if ((pending = v['__pending__'])) {
-				return pending['value'];
+			if ((pending = v.__pending__)) {
+				return pending.value;
 			}
-			value = v['original'];
-			if ((ui = v['__ui__'])) {
-				value['path'] = value['src'];
-				value['src'] = ui['src'];
+			value = v.original;
+			if ((ui = v.__ui__)) {
+				value.path = value.src;
+				value.src = ui.src;
 			}
 			return value;
 		},
@@ -36,7 +36,7 @@ Spontaneous.Field.File = (function($, S) {
 		preview: function() {
 			Spontaneous.UploadManager.register(this);
 			var self = this
-			, value = this.currentValue()
+, value = this.currentValue()
 			, filename = this.currentFilename();
 			var wrap = dom.div('.file-field');
 			var dropper = dom.div('.file-drop');
@@ -98,7 +98,7 @@ Spontaneous.Field.File = (function($, S) {
 			wrap.append(dropper, filename_info, filesize_info);
 
 			this.drop_target = dropper;
-			this.value_wrap =  wrap;
+			this.value_wrap = wrap;
 
 			return wrap;
 		},
@@ -133,7 +133,7 @@ Spontaneous.Field.File = (function($, S) {
 		},
 		disable_progress: function() {
 			this.progress_bar().parent().hide();
-			this.drop_target.add(this.value_wrap).removeClass('uploading')
+			this.drop_target.add(this.value_wrap).removeClass('uploading');
 		},
 		upload_progress: function(position, total) {
 			if (!this.drop_target.hasClass('uploading')) {
@@ -148,12 +148,12 @@ Spontaneous.Field.File = (function($, S) {
 
 		edit: function() {
 			var self = this;
-			var wrap = dom.div(".file-field", {'style':'position:relative;'});
+			var wrap = dom.div('.file-field', {'style':'position:relative;'});
 			var value = this.value();
 			var input = this.input();
 			var filename_info = dom.div('.filename');
 			var filesize_info = dom.div('.filesize');
-			var choose_files  = dom.a('.choose').text("Choose file...");
+			var choose_files = dom.a('.choose').text('Choose file...');
 
 			var set_info = function(filename, filesize) {
 				filename_info.text(filename);
@@ -168,7 +168,7 @@ Spontaneous.Field.File = (function($, S) {
 					this.selected_files = files;
 					this._edited_value = url;
 					window.URL.revokeObjectURL(url);
-					set_info(File.filename(file), file.fileSize)
+					set_info(File.filename(file), file.fileSize);
 				}
 			}.bind(this);
 
@@ -240,7 +240,7 @@ Spontaneous.Field.File = (function($, S) {
 			return filename;
 		},
 
-		accept_mimetype: "*/*",
+		accept_mimetype: '*/*',
 		generate_input: function() {
 			return dom.input({'type':'file', 'name':this.form_name(), 'accept':this.accept_mimetype});
 		},

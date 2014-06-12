@@ -10,14 +10,14 @@ Spontaneous.ConflictedFieldDialogue = (function($, S) {
 			this.wrap = dom.div('#conflicted-fields-dialogue');
 		},
 		title: function() {
-			return "Conflicted Fields";
+			return 'Conflicted Fields';
 		},
 		width: function() {
 			return '90%';
 		},
 		buttons: function() {
 			var btns = {};
-			btns["Use"] = this.conflict_resolved.bind(this);
+			btns['Use'] = this.conflict_resolved.bind(this);
 			return btns;
 		},
 
@@ -41,7 +41,7 @@ Spontaneous.ConflictedFieldDialogue = (function($, S) {
 			}
 		},
 		home_created: function(data) {
-			window.location.href = S.Ajax.namespace
+			window.location.href = S.Ajax.namespace;
 		},
 		select_type: function(type) {
 			this.type = type;
@@ -59,7 +59,7 @@ Spontaneous.ConflictedFieldDialogue = (function($, S) {
 			var conflict = this.current_conflict(),
 			field = conflict.field,
 			instructions = dom.p('.instructions');
-			instructions.html("The field '"+field.label()+"' has been modified by another person. Please select which version you want to use.")
+			instructions.html("The field '"+field.label()+"' has been modified by another person. Please select which version you want to use.");
 			var view = field.conflict_view(this, conflict);
 			outer.append(instructions);
 			outer.append(view.panel());
@@ -83,7 +83,7 @@ Spontaneous.ConflictedFieldDialogue = (function($, S) {
 		},
 		cancel_button: function() {
 			return false;
-		},
+		}
 	});
 	return ConflictedFieldDialogue;
 })(jQuery, Spontaneous);

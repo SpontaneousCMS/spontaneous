@@ -22,13 +22,13 @@ Spontaneous.Box = (function($, S) {
 
 		type: function() {
 			if (!this._type) {
-				this._type = this.container.type().box_prototype(this.content.id)
+				this._type = this.container.type().box_prototype(this.content.id);
 			}
 			return this._type;
 		},
 
 		id: function() {
-			return this.container.id() + "/" + this.schema_id();
+			return this.container.id() + '/' + this.schema_id();
 		},
 
 		schema_id: function() {
@@ -42,7 +42,7 @@ Spontaneous.Box = (function($, S) {
 		mouseover: function() {
 			if (this.fields_preview) {
 				this.fields_preview.addClass('hover');
-			};
+			}
 		},
 		mouseout: function() {
 			if (this.fields_preview) {
@@ -57,11 +57,11 @@ Spontaneous.Box = (function($, S) {
 			}
 			var id = css_id.split('-')[1], entry;
 
-			for (var i = 0, entries = this.entries(), ii = entries.length; i < ii; i++) {
+			for (i = 0, entries = this.entries(), ii = entries.length; i < ii; i++) {
 				if (entries[i].id() == id) { entry = entries[i]; break; }
 			}
 			entry.reposition(position, function(entry) {
-				this.sorted(entry)
+				this.sorted(entry);
 			}.bind(this));
 		},
 		sorted: function(entry) {
@@ -73,7 +73,7 @@ Spontaneous.Box = (function($, S) {
 		},
 
 		entry_id: function(entry) {
-			return "entry-" + entry.id();
+			return 'entry-' + entry.id();
 		},
 
 		entry_class: function() {
@@ -85,14 +85,14 @@ Spontaneous.Box = (function($, S) {
 		},
 
 		add_alias: function(alias_target_id, type, position) {
-			S.Ajax.post(["/alias", this.id()].join("/"), {'alias_id':type.schema_id, 'target_id':alias_target_id, 'position':position}, this.entry_added.bind(this));
+			S.Ajax.post(['/alias', this.id()].join('/'), {'alias_id':type.schema_id, 'target_id':alias_target_id, 'position':position}, this.entry_added.bind(this));
 		},
 
 		entry_added: function(result) {
 			var box = this
-			,position = result.position
-			, e = result.entry
-			, entry = this.wrap_entry(e);
+,position = result.position
+, e = result.entry
+, entry = this.wrap_entry(e);
 
 			entry.bind('destroyed', function(entry) {
 				box.entry_removed(entry);
@@ -125,7 +125,7 @@ Spontaneous.Box = (function($, S) {
 		// 	return [this.id()].join('/');
 		// },
 		entry_wrappers: function() {
-			return this._entry_container.find('> .'+this.entry_class())
+			return this._entry_container.find('> .'+this.entry_class());
 		}
 	});
 

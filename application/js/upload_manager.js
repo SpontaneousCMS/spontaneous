@@ -8,21 +8,21 @@ Spontaneous.UploadManager = (function($, S) {
 		start: function() {
 			var form = new FormData();
 			form.append('file', this.file);
-			this.post(["/file", this.target_id].join('/'), form);
+			this.post(['/file', this.target_id].join('/'), form);
 		}
 	});
 	var ShardedWrapUpload = new JS.Class(S.ShardedUpload, {
 		path: function() {
-			return ["/shard", this.target_id].join('/');
+			return ['/shard', this.target_id].join('/');
 		},
-		method: "POST"
+		method: 'POST'
 	});
 	var FormUpload = new JS.Class(Upload, {
 		initialize: function(manager, target, form_data, size) {
-			this.callSuper(manager, target, form_data)
+			this.callSuper(manager, target, form_data);
 			this.form_data = this.file;
 			this._total = size;
-			this.name = "Saving...";
+			this.name = 'Saving...';
 		},
 		start: function() {
 			this.put(this.target.save_path(), this.form_data);
@@ -54,10 +54,10 @@ Spontaneous.UploadManager = (function($, S) {
 		replace: function(field, file) {
 			var uploader_class = Upload;
 			if (S.ShardedUpload.supported()) {
-				console.log('Using sharded uploader')
+				console.log('Using sharded uploader');
 				uploader_class = S.ShardedUpload;
 			}
-			this.add(field, new uploader_class(this, field, file))
+			this.add(field, new uploader_class(this, field, file));
 			if (!this.current) {
 				this.next();
 			}
@@ -67,11 +67,11 @@ Spontaneous.UploadManager = (function($, S) {
 			for (var i = 0, ii = files.length; i < ii; i++) {
 				var file = files[i], upload, upload_class = WrapUpload;
 				if (S.ShardedUpload.supported()) {
-					console.log('Using sharded uploader')
+					console.log('Using sharded uploader');
 					upload_class = ShardedWrapUpload;
 				}
 				upload = new upload_class(this, slot, file, position);
-				this.add(slot, upload)
+				this.add(slot, upload);
 			}
 			if (!this.current) {
 				this.next();
@@ -79,7 +79,7 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		form: function(content, form_data, file_size) {
 			var upload = new FormUpload(this, content, form_data, file_size);
-			this.add(content, upload)
+			this.add(content, upload);
 			if (!this.current) {
 				this.next();
 			}
@@ -92,12 +92,12 @@ Spontaneous.UploadManager = (function($, S) {
 					this.finished();
 				} else {
 					var upload = this.failed.pop(), delay = Math.pow(2, upload.failure_count);
-					console.log("UploadManager.next", "scheduling re-try of failed upload after", delay, "seconds");
+					console.log('UploadManager.next', 'scheduling re-try of failed upload after', delay, 'seconds');
 					this.pending.push(upload);
 					window.setTimeout(function() {
-						console.log("UploadManager.next", "re-trying failed upload");
+						console.log('UploadManager.next', 're-trying failed upload');
 						this.next();
-					}.bind(this),  delay * 1000);
+					}.bind(this), delay * 1000);
 				}
 				return;
 			}
@@ -137,7 +137,7 @@ Spontaneous.UploadManager = (function($, S) {
 			for (var i = 0, ii = this.completed.length; i < ii; i++) {
 				total += this.completed[i].total();
 			}
-			for (var i = 0, ii = this.pending.length; i < ii; i++) {
+			for (i = 0, ii = this.pending.length; i < ii; i++) {
 				total += this.pending[i].total();
 			}
 			if (this.current) {
@@ -182,11 +182,11 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		set_bar_length: function(bar_name, position, total) {
 			var bar = this.bars[bar_name], percent = (position/total) * 100;
-			bar.css('width', percent+"%");
+			bar.css('width', percent+'%');
 		},
 		upload_progress: function(upload) {
 			if (upload !== this.current) {
-				console.warn("UploadManager#upload_progress", "completed upload does not match current")
+				console.warn('UploadManager#upload_progress', 'completed upload does not match current');
 			}
 			var target = this.targets[upload.uid];
 			if (target) {
@@ -196,7 +196,7 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		upload_complete: function(upload, result) {
 			if (upload !== this.current) {
-				console.warn("UploadManager#upload_complete", "completed upload does not match current")
+				console.warn('UploadManager#upload_complete', 'completed upload does not match current');
 			}
 			this.completed.push(this.current);
 			this.total_time += this.current.time;
@@ -210,7 +210,7 @@ Spontaneous.UploadManager = (function($, S) {
 		},
 		upload_failed: function(upload, event) {
 			if (upload !== this.current) {
-				console.warn("UploadManager#upload_complete", "completed upload does not match current")
+				console.warn('UploadManager#upload_complete', 'completed upload does not match current');
 			}
 			this.failed.push(this.current);
 			var target = this.targets[upload.uid];
@@ -218,19 +218,19 @@ Spontaneous.UploadManager = (function($, S) {
 				target.upload_failed(event);
 			}
 			this.current = null;
-			console.error("UploadManager#upload_failed", upload, this.failed)
+			console.error('UploadManager#upload_failed', upload, this.failed);
 			this.next();
 		},
 		upload_conflict: function(upload, event) {
 			if (upload !== this.current) {
-				console.warn("UploadManager#upload_complete", "completed upload does not match current")
+				console.warn('UploadManager#upload_complete', 'completed upload does not match current');
 			}
 			var target = this.targets[upload.uid];
 			if (target) {
 				target.upload_conflict($.parseJSON(event.currentTarget.response));
 			}
 			this.current = null;
-			console.error("UploadManager#upload_conflict", upload, event)
+			console.error('UploadManager#upload_conflict', upload, event);
 			this.next();
 		},
 		FormUpload: FormUpload,

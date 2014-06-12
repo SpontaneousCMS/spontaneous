@@ -24,7 +24,7 @@ Spontaneous.Popover = (function($, S) {
 			view_wrapper.append(view.view());
 
 			if (view.has_navigation) {
-				var back_btn = dom.a('.button.back').append(dom.span('.pointer')).append(dom.span('.label').text("Back")).css('visibility', 'hidden');
+				var back_btn = dom.a('.button.back').append(dom.span('.pointer')).append(dom.span('.label').text('Back')).css('visibility', 'hidden');
 				header.append(back_btn);
 			}
 			var target = event.currentTarget;
@@ -45,7 +45,7 @@ Spontaneous.Popover = (function($, S) {
 			}.bind(this);
 
 			if (view.scroll) {
-				view.scroll_element().bind("scroll.popover", update_position);
+				view.scroll_element().bind('scroll.popover', update_position);
 			}
 			this.wrapper = wrapper;
 			this.is_open = true;
@@ -56,7 +56,7 @@ Spontaneous.Popover = (function($, S) {
 			var view = this.view, o = view.position_from_event(target), handle_width = 30, offset = 10, left = -30, top = 18;
 
 			if (view.align === 'right') {
-				handle.css('left', (view.width() - (offset + handle_width)) + 'px')
+				handle.css('left', (view.width() - (offset + handle_width)) + 'px');
 				left = -(view.width() - (offset + handle_width/2) + 8);
 			}
 			wrapper.css({top:(o.top), left:(o.left + left)});
@@ -68,7 +68,7 @@ Spontaneous.Popover = (function($, S) {
 		close: function() {
 			var view = this.view;
 			if (view.scroll) {
-				view.scroll_element().unbind("scroll.popover");
+				view.scroll_element().unbind('scroll.popover');
 			}
 			Popover.close();
 			return false;
@@ -108,7 +108,7 @@ Spontaneous.Popover = (function($, S) {
 		if (event.keyCode === 27) {
 			Popover.close();
 		}
-	})
+	});
 	return Popover;
 })(jQuery, Spontaneous);
 

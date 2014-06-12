@@ -19,8 +19,8 @@ Spontaneous.Location = (function($, S) {
 		},
 		restore: function() {
 			if (this.mode) {
-				Spontaneous.Location.view_mode_changed(this.mode)
-				Spontaneous.TopBar.set_mode(this.mode)
+				Spontaneous.Location.view_mode_changed(this.mode);
+				Spontaneous.TopBar.set_mode(this.mode);
 			}
 			if (this.page_id) {
 				Spontaneous.Location.load_id(this.page_id);
@@ -32,29 +32,29 @@ Spontaneous.Location = (function($, S) {
 			return '#/'+(this.page_id || '') + (this.mode ? ('@' + this.mode) : '');
 		},
 		to_path: function() {
-			return [ajax.namespace, (this.page_id || ''), this.mode].join("/")
+			return [ajax.namespace, (this.page_id || ''), this.mode].join('/');
 		},
 		to_obj: function() {
 			return {
 				page_id: this.page_id,
 				mode: this.mode
-			}
+			};
 		}
 	});
 
 	State.extend({
 		// currently just produces some kind of loop
 		popstate: function(event) {
-			State.restore(event)
+			State.restore(event);
 			return false;
 		},
 		restore: function(event) {
-			var state = new State(window.location.pathname)
+			var state = new State(window.location.pathname);
 			state.restore();
 		},
 
 		page: function(location, mode) {
-			var s = new State
+			var s = new State();
 			s.page_id = location.id;
 			s.mode = mode;
 			window.history.replaceState(s.to_obj(), ''+s.page_id, s.to_path());
@@ -113,14 +113,14 @@ Spontaneous.Location = (function($, S) {
 		},
 		url: function() {
 			var l = this.location();
-			return (l ? l.url : "/about");
+			return (l ? l.url : '/about');
 		},
 		location: function() {
 			return this.get('location');
 		},
 		update: function(location) {
 			this.set('location', location);
-			this.path_from_url(location.url)
+			this.path_from_url(location.url);
 		},
 		current_path: function() {
 			return this.path_from_url(this.url());
@@ -143,7 +143,7 @@ Spontaneous.Location = (function($, S) {
 			path = [], i, ii,
 			parts = url.split('/').slice(1), position = 0;
 			// add root to path
-			path.push({selected:0, pages:[ map ], root:true});;
+			path.push({selected:0, pages:[map], root:true});
 			while (position < parts.length) {
 				for (i = 0, ii = children.length; i < ii; i++) {
 					var child = children[i], slug = child.url.split('/').slice(-1)[0];

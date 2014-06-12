@@ -3,7 +3,7 @@
 
 Spontaneous.PageBrowser = (function($, S) {
 	var dom = S.Dom
-	, flattenPageList = function(pageList) {
+, flattenPageList = function(pageList) {
 		var pages = []
 		, comparator = function(a, b) {
 			var at = a.title, bt = b.title;
@@ -17,7 +17,7 @@ Spontaneous.PageBrowser = (function($, S) {
 	};
 	var PageBrowser = new JS.Class(Spontaneous.PopoverView, {
 		initialize: function(origin) {
-			origin = String(origin || "");
+			origin = String(origin || '');
 			if (/^\//.test(origin)) {
 				this.origin = origin || '/';
 				this.selected = this.origin;
@@ -32,22 +32,22 @@ Spontaneous.PageBrowser = (function($, S) {
 		origin_list: function() {
 			return function(location) {
 				return flattenPageList(location.generation);
-			}
+			};
 		},
 		children_list: function() {
 			return function(location) {
 				return flattenPageList(location.children);
-			}
+			};
 		},
 		origin_ancestors: function() {
 			return function(location) {
 				return location.ancestors;
-			}
+			};
 		},
 		children_ancestors: function() {
 			return function(location) {
 				return location.ancestors.concat(location);
-			}
+			};
 		},
 		get_page_list: function() {
 			var path;
@@ -89,12 +89,12 @@ Spontaneous.PageBrowser = (function($, S) {
 				};
 			};
 
-			for (var i = 0, ii = ancestors.length; i < ii; i++) {
-				var a = ancestors[i], li = dom.li().append(dom.a().text(a.title)).append(dom.span().text("/")).click(click(a));
+			for (i = 0, ii = ancestors.length; i < ii; i++) {
+				var a = ancestors[i], li = dom.li().append(dom.a().text(a.title)).append(dom.span().text('/')).click(click(a));
 				list.append(li);
 			}
 			if (ancestors.length === 0) {
-				list.append(dom.li().append(dom.a().text('Choose a page...')))
+				list.append(dom.li().append(dom.a().text('Choose a page...')));
 			}
 			this.ancestors.append(list);
 		},
@@ -108,11 +108,11 @@ Spontaneous.PageBrowser = (function($, S) {
 			var next_click = function() {
 				_browser.next_level(page);
 				return false;
-			}
+			};
 
 			var row = dom.div('.page').click(selected(page)), title = dom.a().text(page.title);
 			if (page.children > 0) {
-				var next = dom.span()
+				var next = dom.span();
 				next.click(next_click);
 				row.append(next);
 			}
@@ -142,11 +142,11 @@ Spontaneous.PageBrowser = (function($, S) {
 			this.manager.page_selected(page);
 		},
 		title: function() {
-			return "Choose Page";
+			return 'Choose Page';
 		},
 		width: function() {
 			return 400;
-		},
+		}
 		// position_from_event: function(event) {
 		// 	return {top: event.clientX, left: event.clientY};
 		// },

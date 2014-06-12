@@ -13,19 +13,19 @@ Spontaneous.Dom = (function($, S) {
 			return dim + 'px';
 		},
 		cmd_key_label: function(text, key) {
-			var cmd = ((window.navigator.platform.indexOf("Mac") === 0) ? "Cmd" : "Ctrl");
+			var cmd = ((window.navigator.platform.indexOf('Mac') === 0) ? 'Cmd' : 'Ctrl');
 			// var alt =  '<span class="key-combo">(' + cmd  + "+"+key+')</span>';
-			return this.key_label(text, cmd  + "+" +key);
+			return this.key_label(text, cmd + '+' +key);
 		},
 		key_label: function(text, key) {
-			var alt =  '<span class="key-combo">('+key+')</span>';
-			return text + " " + alt;
+			var alt = '<span class="key-combo">('+key+')</span>';
+			return text + ' ' + alt;
 		},
 		parse_selector: function(selector) {
 			var p, id = '', classes = [], result = {};
 			selector = selector || '';
 			if (typeof selector === 'string') {
-				p = selector.split('.')
+				p = selector.split('.');
 			} else if ($.isArray(selector)) {
 				p = selector;
 			}
@@ -42,10 +42,10 @@ Spontaneous.Dom = (function($, S) {
 				}
 			}
 			if (id !== '') {
-				result['id'] = id;
+				result.id = id;
 			}
 			if (classes.length > 0) {
-				result['class'] = classes.join(' ')
+				result['class'] = classes.join(' ');
 			}
 			return result;
 		},

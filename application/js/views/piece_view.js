@@ -17,7 +17,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			return false;
 		},
 		title: function() {
-			return "Delete this " + (this.parent_view.content.is_page() ? "Page?" : "Piece?");
+			return 'Delete this ' + (this.parent_view.content.is_page() ? 'Page?' : 'Piece?');
 		},
 		// position_from_event: function(event) {
 		// 	return this.position_from_element(event);
@@ -29,12 +29,12 @@ Spontaneous.Views.PieceView = (function($, S) {
 				return false;
 			});
 
-			var ok = dom.a('.ok').text("Delete").click(function() {
+			var ok = dom.a('.ok').text('Delete').click(function() {
 				__entry.destroy();
 				return false;
 			});
-			var cancel = dom.a('.cancel').text("Cancel");
-			w.append(cancel, ok)
+			var cancel = dom.a('.cancel').text('Cancel');
+			w.append(cancel, ok);
 			return w;
 		},
 		scroll: true
@@ -46,7 +46,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			this.container_view = container_view;
 		},
 		panel: function() {
-			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class(), this.boxes_class()])
+			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class(), this.boxes_class()]);
 			var contents = dom.div('.entry-contents');
 			var inside = dom.div('.entry-inner');
 			var outline = dom.div('.white-bg').
@@ -61,7 +61,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			if (!this.content.type().is_alias()) {
 				wrapper.append(this.content_type_info());
 			}
-			contents.append( this.action_buttons(contents));
+			contents.append(this.action_buttons(contents));
 			if (this.content.type().is_alias()) {
 				contents.append(this.alias_target_panel());
 			}
@@ -69,8 +69,9 @@ Spontaneous.Views.PieceView = (function($, S) {
 			// contents.append(this.dialogue_box);
 			var entry = dom.div('.entry');
 			var fields = new Spontaneous.FieldPreview(this, '', true);
+			var fields_panel;
 			if (fields.has_fields()) {
-				var fields_panel = fields.panel();
+				fields_panel = fields.panel();
 				entry.append(fields_panel);
 			}
 			var box_container = new Spontaneous.BoxContainer(this.content);
@@ -94,7 +95,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			return entry_spacer;
 		},
 		edit: function(focus_field) {
-			this.wrapper.addClass('editing')
+			this.wrapper.addClass('editing');
 			this.callSuper(focus_field);
 		},
 		edit_closed: function() {
@@ -106,20 +107,20 @@ Spontaneous.Views.PieceView = (function($, S) {
 			click = function() { S.Location.load_id(content.target().page_id); },
 			wrap = dom.div('.alias-target').click(click),
 			icon = content.alias_icon,
-			type = dom.span(".content-type").text(content.type().display_title(content));
+			type = dom.span('.content-type').text(content.type().display_title(content));
 			title = dom.a().html(content.content.alias_title);
 
 			if (!content.has_fields()) { wrap.addClass('no-fields'); }
 
 			if (icon) {
 				var img = new Spontaneous.Image(icon);
-				wrap.append(img.icon(60, 60).click(click))
+				wrap.append(img.icon(60, 60).click(click));
 			}
 
-			return wrap.append(title, type)
+			return wrap.append(title, type);
 		},
 		content_type_info: function() {
-			var type = dom.div(".content-type.piece").text(this.content.type().display_title(this.content));
+			var type = dom.div('.content-type.piece').text(this.content.type().display_title(this.content));
 			return type;
 		},
 		action_buttons: function(wrapper) {

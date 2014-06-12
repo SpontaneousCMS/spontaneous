@@ -2,7 +2,7 @@ if (!window.console) {
 	window.console = {
 		log: function() {},
 		warn: function() {},
-		error: function() {},
+		error: function() {}
 	};
 } else {
 	// var debug = Spontaneous.debug;
@@ -29,7 +29,7 @@ function $A(iterable) {
 	var length = iterable.length || 0, results = new Array(length);
 	while (length--) results[length] = iterable[length];
 	return results;
-};
+}
 
 (function($) {
 
@@ -40,7 +40,7 @@ function $A(iterable) {
 
 	var function_id = 0;
 
-	if (!(typeof Function.prototype.bind === 'function')) {
+	if (typeof Function.prototype.bind !== 'function') {
 		Function.prototype.bind = function() {
 			var __method = this, args = $A(arguments), object = args.shift();
 			return function() {
@@ -48,11 +48,11 @@ function $A(iterable) {
 			};
 		};
 	}
-	if (!(typeof Function.prototype.delay === 'function')) {
+	if (typeof Function.prototype.delay !== 'function') {
 		Function.prototype.delay = function(delay) {
 			var __function__ = this;
 			return function() {
-				window.setTimeout(__function__, delay)
+				window.setTimeout(__function__, delay);
 			};
 		};
 	}
@@ -71,9 +71,9 @@ function $A(iterable) {
 
 	$.extend(Number.prototype, {
 		to_filesize: function() {
-			var thou = 1000, units = [" B", ' kB', ' MB', ' GB'],
-			power = Math.floor(Math.log(this) / Math.log(thou))
-			return Math.round(this / (Math.pow(thou, power))) + units[power]
+			var thou = 1000, units = [' B', ' kB', ' MB', ' GB'],
+			power = Math.floor(Math.log(this) / Math.log(thou));
+			return Math.round(this / (Math.pow(thou, power))) + units[power];
 		}
 	});
 
@@ -87,7 +87,7 @@ function $A(iterable) {
 			});
 		};
 
-		if (siblings.length == 0) {
+		if (siblings.length === 0) {
 			// skip height animation and just fade the element in
 			// otherwise there's this weird gap where nothing seems to be
 			// happening. this only happens when the item being 'appeared' is

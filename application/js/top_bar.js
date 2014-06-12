@@ -5,16 +5,16 @@ Spontaneous.TopBar = (function($, S) {
 
 	var disableParent = function(el) {
 		el.hover(function() {
-			$(this).parent().addClass("disabled");
+			$(this).parent().addClass('disabled');
 		}, function() {
-			$(this).parent().removeClass("disabled");
+			$(this).parent().removeClass('disabled');
 		});
 		return el;
 	};
 
 	var slugComparator = function(a, b) {
 		var at = a.slug, bt = b.slug;
-		if (at > bt) { return  1; }
+		if (at > bt) { return 1; }
 		if (at < bt) { return -1; }
 		return 0;
 	};
@@ -24,15 +24,15 @@ Spontaneous.TopBar = (function($, S) {
 			this.roots = roots;
 		},
 		width: function() { return 300; },
-		title: function() { return "Choose Root"; },
-		view:  function() {
-			var self = this, w = dom.div('#navigation-page-browser.pop-root-browser'), list = dom.div(".pages"), roots = this.roots.roots;
+		title: function() { return 'Choose Root'; },
+		view: function() {
+			var self = this, w = dom.div('#navigation-page-browser.pop-root-browser'), list = dom.div('.pages'), roots = this.roots.roots;
 			var click = function(page_id) {
 				return function() { self.close(); S.Location.load_id(page_id); };
 			};
 			for (var key in roots) {
 				if (roots.hasOwnProperty(key)) {
-					var r = dom.div(".page").text(key).click(click(roots[key]));
+					var r = dom.div('.page').text(key).click(click(roots[key]));
 					list.append(r);
 				}
 			}
@@ -48,26 +48,26 @@ Spontaneous.TopBar = (function($, S) {
 			this.pages = pages;
 		},
 		width: function() { return 300; },
-		title: function() { return "Go to Page"; },
-		view:  function() {
+		title: function() { return 'Go to Page'; },
+		view: function() {
 			var self = this, w = dom.div('#navigation-page-browser.pop-root-browser')
-			, list = dom.div(".pages")
-			, frame = dom.div(".frame")
-			, searchArea = dom.div(".search")
-			, searchInput = dom.input({type: "search", placeholder:"Search"});
+			, list = dom.div('.pages')
+			, frame = dom.div('.frame')
+			, searchArea = dom.div('.search')
+			, searchInput = dom.input({type: 'search', placeholder:'Search'});
 			searchArea.append(searchInput);
-			searchInput.bind("change keyup search", self.updateSearch.bind(self, searchInput));
+			searchInput.bind('change keyup search', self.updateSearch.bind(self, searchInput));
 			self.wrapper = w;
 			self.list = list;
 			frame.append(list);
-			w.append(searchArea, frame)
+			w.append(searchArea, frame);
 			this.loadPages();
 			return w;
 		},
 		updateSearch: function(input) {
 			if (!this.pages) { return; }
 
-			var self = this, boxes = {}, query = input.val(), search = new RegExp(query, "i");
+			var self = this, boxes = {}, query = input.val(), search = new RegExp(query, 'i');
 			// need to bubble up the event if the query is identical as this event
 			// is also triggered on input blur when a page is clicked.
 			if (query === this.query) {
@@ -75,7 +75,7 @@ Spontaneous.TopBar = (function($, S) {
 			}
 
 			this.query = query;
-			if (query === "") {
+			if (query === '') {
 				self.listPages(this.pages);
 				return;
 			}
@@ -100,7 +100,7 @@ Spontaneous.TopBar = (function($, S) {
 			if (this.pages) {
 				this.listPages(this.pages);
 			} else {
-				var path = ["/map", this.origin.id].join("/")
+				var path = ['/map', this.origin.id].join('/');
 				S.Location.retrieve(path, this.pagesLoaded.bind(this));
 			}
 		},
@@ -113,21 +113,21 @@ Spontaneous.TopBar = (function($, S) {
 				return function() {
 					self.close();
 					S.Location.load_id(p.id);
-				}
+				};
 			};
 			self.clearList();
 			if (Object.keys(generation).length === 0) {
-				var msg = filter ? "No matches for ‘"+filter+"’" : "No pages";
-				self.list.append(dom.h3().text(msg))
+				var msg = filter ? 'No matches for ‘'+filter+'’' : 'No pages';
+				self.list.append(dom.h3().text(msg));
 				return;
 			}
 			$.each(generation, function(boxname, pages) {
 				pages.sort(slugComparator);
-				var box = dom.div(".box").append(dom.h4().text(boxname));
+				var box = dom.div('.box').append(dom.h4().text(boxname));
 				for (var i = 0, ii = pages.length; i < ii; i++) {
-					var p = pages[i], page = dom.div(".page").text(p.slug).data('page', p);
+					var p = pages[i], page = dom.div('.page').text(p.slug).data('page', p);
 					if (origin && p.id === origin.id) {
-						page.addClass("current");
+						page.addClass('current');
 					}
 					page.click(load_page(p));
 					box.append(page);
@@ -159,7 +159,7 @@ Spontaneous.TopBar = (function($, S) {
 			var self = this, li = dom.li('.root');
 			var link = dom.a({'href': this.url}).text(this.title).data('page', this.page);
 			if (Object.keys(this.roots.roots).length === 1) {
-				li.addClass("singluar");
+				li.addClass('singluar');
 			} else {
 				li.click(function(event) {
 					var browser = new RootBrowser(self.roots);
@@ -220,7 +220,7 @@ Spontaneous.TopBar = (function($, S) {
 	CurrentNode.prototype = {
 		element: function() {
 			var self = this
-			, li = dom.li('.current-node')
+, li = dom.li('.current-node')
 			, link = dom.a().text(self.title);
 			li.click(function(event) {
 				var browser = new PageBrowser(self.page, self.pages);
@@ -259,7 +259,7 @@ Spontaneous.TopBar = (function($, S) {
 			for (var boxname in children) {
 				if (children.hasOwnProperty(boxname)) {
 					for (var i = 0, box = children[boxname], ii = box.length; i < ii; ++i) {
-						block(box[i])
+						block(box[i]);
 					}
 				}
 			}
@@ -286,10 +286,10 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		add_page: function(page, position) {
 			var self = this
-			, container = page.container
-			, name = container.name()
+, container = page.container
+, name = container.name()
 			, children = self.origin.children
-			, box = children[name];
+, box = children[name];
 
 			if (!box) {
 				box = [];
@@ -309,8 +309,8 @@ Spontaneous.TopBar = (function($, S) {
 
 		remove_page: function(page) {
 			var self = this
-			, children = self.origin.children
-			, container = page.container.name()
+, children = self.origin.children
+, container = page.container.name()
 			, page_id = page.id()
 			, index = (function(children) {
 				for (var boxname in children) {
@@ -342,7 +342,7 @@ Spontaneous.TopBar = (function($, S) {
 		user_loaded: function(user) {
 			if (user.can_publish()) {
 				this.disabled = false;
-				this.button().removeClass("disabled").velocity('fadeIn');
+				this.button().removeClass('disabled').velocity('fadeIn');
 			}
 		},
 		update_status: function(status) {
@@ -356,7 +356,7 @@ Spontaneous.TopBar = (function($, S) {
 					this.in_progress = false;
 					this.progress().stop();
 					// this.set_interval(this.normal_check);
-					this.set_label("Publish");
+					this.set_label('Publish');
 					this.button().switchClass('progress', '');
 					this.current_action = this.current_progress = null;
 				// }
@@ -367,7 +367,7 @@ Spontaneous.TopBar = (function($, S) {
 				this.publishing_state();
 				// don't turn off intermediate and replace it with an empty progress dial
 				// by making sure our progress is > 1 before switching to progress view
-				if ((progress === "*") || (progress < 1.0)) {
+				if ((progress === '*') || (progress < 1.0)) {
 					this.progress().indeterminate();
 				} else {
 					this.progress().update(progress);
@@ -380,7 +380,7 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		publishing_state: function() {
 			// this.set_interval(this.rapid_check);
-			this.set_label("Publishing");
+			this.set_label('Publishing');
 			var b = this.button();
 			this.current_action = this.current_progress = null;
 			if (!b.hasClass('progress')) { b.switchClass('', 'progress'); }
@@ -397,7 +397,7 @@ Spontaneous.TopBar = (function($, S) {
 				this._progress_container = dom.span('#publish-progress');
 				this._label = dom.span();
 				this._button = dom.a('#open-publish.disabled').append(this._progress_container).append(this._label).hide();
-				this.set_label("Publish");
+				this.set_label('Publish');
 				this._button.click(function() {
 					if (!this.disabled && !this.in_progress) {
 						S.Publishing.open_dialogue();
@@ -436,7 +436,7 @@ Spontaneous.TopBar = (function($, S) {
 		panel: function() {
 			var self = this;
 			if (!self.wrap) {
-				self.wrap = dom.div("#cms-navigation-view");
+				self.wrap = dom.div('#cms-navigation-view');
 				self.location = dom.ul('#navigation');
 				self.mode_switch = dom.a('#switch-mode').
 					text(S.TopBar.opposite_mode(S.ContentArea.mode)).
@@ -448,7 +448,7 @@ Spontaneous.TopBar = (function($, S) {
 				self.wrap.append(self.location);
 				self.wrap.append(self.publish_button.button());
 				self.wrap.append(self.mode_switch);
-				S.User.watch("user", function(user) { self.publish_button.user_loaded(user);  });
+				S.User.watch('user', function(user) { self.publish_button.user_loaded(user); });
 			}
 			return self.wrap;
 		},
@@ -543,9 +543,9 @@ Spontaneous.TopBar = (function($, S) {
 		},
 		panel: function() {
 			var self = this;
-			this.wrap = dom.div("#service-navigation");
+			this.wrap = dom.div('#service-navigation');
 			var title = dom.h2().text(this.service.title);
-			var close = dom.a(".button").text("Close").click(function() {
+			var close = dom.a('.button').text('Close').click(function() {
 				S.Services.close();
 			});
 			this.wrap.append(title, close);
@@ -554,23 +554,23 @@ Spontaneous.TopBar = (function($, S) {
 	});
 	var TopBar = new JS.Singleton({
 		include: Spontaneous.Properties,
-		location: "/",
+		location: '/',
 		panel: function() {
 			this.wrap = dom.div('#top');
 			// this.icon = dom.div('#spontaneous-root');
 			this.icon = this.rootMenu();
 			this.holder = dom.div('#service-outer');
 			this.navigationView = new CMSNavigationView();
-			this.serviceStation = dom.div("#service-inner");
+			this.serviceStation = dom.div('#service-inner');
 			this.holder.append(this.navigationView.panel(), this.serviceStation);
 			this.wrap.append(this.icon, this.holder);
 			return this.wrap;
 		},
 		rootMenu: function() {
 			var li = dom.div('#spontaneous-root').click(function(event) {
-				$(this).addClass("active"); // no easy way to remove this
+				$(this).addClass('active'); // no easy way to remove this
 				Spontaneous.Popover.open(event, new Spontaneous.RootMenuView(function() {
-					li.removeClass("active");
+					li.removeClass('active');
 				}));
 			});
 			return li.append(dom.span());
@@ -579,7 +579,7 @@ Spontaneous.TopBar = (function($, S) {
 			if (!this.get('mode')) {
 				this.set('mode', S.ContentArea.mode);
 			}
-			this.navigationView.roots(metadata.roots)
+			this.navigationView.roots(metadata.roots);
 			S.Editing.watch('page', this.page_loaded.bind(this));
 			S.Location.watch('location', this.location_loaded.bind(this));
 		},

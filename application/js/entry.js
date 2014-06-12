@@ -7,7 +7,7 @@ Spontaneous.Entry = (function($, S) {
 		initialize: function(content, container) {
 			this.container = container;
 			this.callSuper(content);
-		},
+		}
 	});
 	return Entry;
 })(jQuery, Spontaneous);

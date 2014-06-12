@@ -1,11 +1,12 @@
 
-Spontaneous.AddAliasDialogue = (function($, S) {
+Spontaneous.AddAliasDialogue = (function($, S, window) {
+	'use strict';
 	var dom = S.Dom, Dialogue = Spontaneous.Dialogue;
 
 	var AddAliasDialogue = new JS.Class(Dialogue, {
 		initialize: function(box_view, type, position) {
 			this.box_view = box_view;
-			this.box_view.bind('entry_added', this.alias_added.bind(this))
+			this.box_view.bind('entry_added', this.alias_added.bind(this));
 			this.type = type;
 			this.insert_position = position;
 		},
@@ -14,7 +15,7 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 		},
 		buttons: function() {
 			var btns = {};
-			btns["Add"] = this.add_alias.bind(this);
+			btns['Add'] = this.add_alias.bind(this);
 			return btns;
 		},
 
@@ -40,53 +41,53 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 		},
 		body: function() {
 			var self = this
-			, editing = dom.div('#add-alias-dialogue')
+, editing = dom.div('#add-alias-dialogue')
 				, outer = dom.div('.typelist')
-				, paging = dom.div(".paging")
-				, search = dom.div(".search")
-				, progress = dom.div(".progress")
+				, paging = dom.div('.paging')
+				, search = dom.div('.search')
+				, progress = dom.div('.progress')
 				, instructions = dom.p('.instructions')
 				, __dialogue = this
-				, timeout = null
-				, searchDelay = 200
+, timeout = null
+, searchDelay = 200
 				, clearTimeout = function() {
 					if (timeout) { window.clearTimeout(timeout); timeout = null; }
 				}
 				, load_targets = function(query) {
 					clearTimeout();
 					var params = {};
-					if (query !== "") {
-						params["query"] = query;
+					if (query !== '') {
+						params.query = query;
 					}
 
 					self.spinner.start();
 					Spontaneous.Ajax.get(['/alias', self.type.schema_id, self.box().id()].join('/'), params, self.targets_loaded.bind(self));
 				}
-				, input = dom.input({"type":"search", "placeholder":"Search..."}).keydown(function(event) {
+				, input = dom.input({'type':'search', 'placeholder':'Search...'}).keydown(function(event) {
 					if (event.keyCode === 13) {
 						load_targets(input.val());
 					}
 					if (event.keyCode === 27) {
-						if (input.val() === "") {
+						if (input.val() === '') {
 							return true;
 						}
-						input.val("");
+						input.val('');
 						load_targets();
 						return false;
 					}
 				}).keyup(function() {
 					clearTimeout();
 					var val = input.val();
-					if (val === "" || val.length > 1) {
+					if (val === '' || val.length > 1) {
 						timeout = window.setTimeout(function() {
 							load_targets(val);
 						}, searchDelay);
 					}
-				})
-			instructions.html("Choose a target:");
+				});
+			instructions.html('Choose a target:');
 
-			search.append(input)
-			paging.append(progress, search)
+			search.append(input);
+			paging.append(progress, search);
 			this.spinner = S.Progress(progress[0], 16);
 			editing.append(paging, outer);
 			load_targets();
@@ -96,22 +97,22 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 		},
 
 		targets_loaded: function(results) {
-			var outer = this._outer, wrap, self = __dialogue = this, targets = results.targets;
-			window.setTimeout(function() { self.spinner.stop() }, 300);
-			this.targets = this.sort_targets(targets);
+			var outer = this._outer, wrap, self = this, targets = results.targets;
+			window.setTimeout(function() { self.spinner.stop(); }, 300);
+			self.targets = self.sort_targets(targets);
 			outer.empty();
 			wrap = dom.div();
 			$.each(targets, function(i, target) {
 				var d = dom.div('.type').html(target.title).click(function() {
 					$('.type', outer).removeClass('selected');
-					__dialogue.select_target(target);
-					$(this).addClass('selected');;
+					self.select_target(target);
+					$(this).addClass('selected');
 				});
-				wrap.append(d)
+				wrap.append(d);
 			});
-			outer.append(wrap)
-			this._contents = wrap;
-			this.manager.updateLayout();
+			outer.append(wrap);
+			self._contents = wrap;
+			self.manager.updateLayout();
 		},
 		contentsHeight: function() {
 			return this.paging.outerHeight() + this._contents.outerHeight();
@@ -122,10 +123,10 @@ Spontaneous.AddAliasDialogue = (function($, S) {
 				if (at > bt) { return 1; }
 				if (at < bt) { return -1; }
 				return 0;
-			}
+			};
 			return targets.sort(comparator);
 		}
 	});
 	return AddAliasDialogue;
-})(jQuery, Spontaneous);
+})(jQuery, Spontaneous, window);
 

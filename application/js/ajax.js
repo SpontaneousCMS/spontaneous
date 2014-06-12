@@ -1,7 +1,7 @@
 // console.log("Loading Ajax...");
 
 Spontaneous.Ajax = (function($, S) {
-	"use strict";
+	'use strict';
 
 	$.ajaxSetup({
 		'async': true,
@@ -19,18 +19,18 @@ Spontaneous.Ajax = (function($, S) {
 	// wraps jQuery.ajax with a auth aware error catcher
 	var __request = function(params) {
 		// console.log("AJAX", params)
-		var requestSuccessHandler = params["success"];
+		var requestSuccessHandler = params.success;
 		var successHandler = function(data, textStatus, xhr) {
-			if (textStatus === "success") {
+			if (textStatus === 'success') {
 				if (params.ifModified) {
 					requestCache[params.url] = data;
 				}
-			} else if (!data && (textStatus === "notmodified")) {
+			} else if (!data && (textStatus === 'notmodified')) {
 				data = requestCache[params.url];
 			}
-			requestSuccessHandler(data, textStatus, xhr)
+			requestSuccessHandler(data, textStatus, xhr);
 		};
-		var requestErrorHandler = params["error"];
+		var requestErrorHandler = params.error;
 		var errorHandler = function(xhr, textStatus, error_thrown) {
 			if (xhr.status === 401) {
 				S.Ajax.unauthorized();
@@ -38,15 +38,15 @@ Spontaneous.Ajax = (function($, S) {
 				requestErrorHandler(xhr, textStatus, error_thrown);
 			}
 		};
-		params['error'] = errorHandler;
-		params['success'] = successHandler;
-		params['beforeSend'] = function (request) {
+		params.error = errorHandler;
+		params.success = successHandler;
+		params.beforeSend = function(request) {
 			__authenticate(request);
 		};
 		$.ajax(params);
 	};
 	return {
-		namespace: "/@spontaneous",
+		namespace: '/@spontaneous',
 		// returns a modified xmlhttprequest that adds csrf headers
 		// after #open is called.
 		authenticatedRequest: function(request) {
@@ -62,27 +62,27 @@ Spontaneous.Ajax = (function($, S) {
 			__authenticate(request);
 		},
 		get: function(url, data, callback, options) {
-			if (typeof data === "function") {
+			if (typeof data === 'function') {
 				callback = data;
 				data = {};
 			}
-			this.makeRequest("GET", url, data, callback, options)
+			this.makeRequest('GET', url, data, callback, options);
 		},
 		put: function(url, data, callback) {
-			this.makeRequest("PUT", url, data, callback);
+			this.makeRequest('PUT', url, data, callback);
 		},
 		del: function(url, data, callback) {
-			this.makeRequest("DELETE", url, data, callback);
+			this.makeRequest('DELETE', url, data, callback);
 		},
 		post: function(url, data, callback) {
-			this.makeRequest("POST", url, data, callback);
+			this.makeRequest('POST', url, data, callback);
 		},
 		patch: function(url, data, callback) {
-			this.makeRequest("PATCH", url, data, callback);
+			this.makeRequest('PATCH', url, data, callback);
 		},
 		makeRequest: function(method, url, data, callback, options) {
 			var success = function(data, textStatus, xhr) {
-				if (typeof callback === "function") {
+				if (typeof callback === 'function') {
 					callback(data, textStatus, xhr);
 				}
 			};
@@ -91,7 +91,7 @@ Spontaneous.Ajax = (function($, S) {
 				try {
 					result = $.parseJSON(xhr.responseText);
 				} catch (e) { }
-				if (typeof callback === "function") {
+				if (typeof callback === 'function') {
 					callback(result, textStatus, xhr);
 				}
 			};
@@ -106,12 +106,12 @@ Spontaneous.Ajax = (function($, S) {
 			__request(ajaxOptions);
 		},
 		unauthorized: function() {
-			window.location.href = "/";
+			window.location.href = '/';
 		},
 		test_field_versions: function(target, fields, success, failure) {
 			var version_data = {}, modified = 0;
 			for (var i = 0, ii = fields.length; i < ii; i++) {
-				var field = fields[i], key = "[fields]["+field.schema_id()+"]";
+				var field = fields[i], key = '[fields]['+field.schema_id()+']';
 				if (field.is_modified()) {
 					version_data[key] = field.version();
 					modified++;
@@ -138,26 +138,26 @@ Spontaneous.Ajax = (function($, S) {
 									version: values[0],
 									values: {
 										server_original: values[1],
-										local_edited:  field.edited_value(),
-										local_original:  field.original_value()
+										local_edited: field.edited_value(),
+										local_original: field.original_value()
 									}
 								});
 							}
 						}
-						failure(conflicted_fields)
+						failure(conflicted_fields);
 					}
 				}
 			});
 		},
 		csrf_token: function() {
-			return {'__token':csrfToken }
+			return {'__token':csrfToken };
 		},
 		request_url: function(url, needs_key) {
 			var path = this.namespace + url;
 			if (needs_key) {
-				path += "?"+$.param(this.csrf_token())
+				path += '?'+$.param(this.csrf_token());
 			}
-			return path
+			return path;
 		}
 	};
 }(jQuery, Spontaneous));

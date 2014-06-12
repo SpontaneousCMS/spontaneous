@@ -26,7 +26,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 
 		initialize: function(input) {
 			this.input = input.bind('keydown.markdown', function(event) {
-				var key = String.fromCharCode(event.keyCode)
+				var key = String.fromCharCode(event.keyCode);
 				if ((event.ctrlKey || event.metaKey) && key === this.key_shortcut()) {
 					this.execute(event);
 					return false;
@@ -34,7 +34,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 			}.bind(this));
 		},
 		key_shortcut: function() {
-			return "";
+			return '';
 		},
 		execute: function(event) {
 			this.wrap();
@@ -44,7 +44,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 				before = s.before, middle = s.selection, after = s.after, wrapped;
 			// if ((end - start) <= 0 ) { return; }
 			if (this.matches_selection(middle)) {
-				wrapped  = this.remove(middle)
+				wrapped = this.remove(middle);
 			} else {
 				wrapped = this.surround(middle);
 			}
@@ -59,13 +59,13 @@ Spontaneous.Field.Markdown = (function($, S) {
 			var selected = state.selection, m, l;
 			m = /^( +)/.exec(selected);
 			if (m) {
-				l = m[1].length
+				l = m[1].length;
 				state.start += l;
 				state.selection = selected.substr(l);
 			}
 			m = /( +)$/.exec(selected);
 			if (m) {
-				l = m[1].length
+				l = m[1].length;
 				state.end -= l;
 				state.selection = selected.substr(0, selected.length-l);
 			}
@@ -74,23 +74,23 @@ Spontaneous.Field.Markdown = (function($, S) {
 		expand_selection: function(state) {
 			state = this.fix_selection_whitespace(state);
 			var selected = state.selection, m, start = state.start, end = state.end,
-				_pre_ = this.pre.replace(/\*/g, "\\*"), _post_ = this.post.replace(/\*/g, "\\*");
+				_pre_ = this.pre.replace(/\*/g, '\\*'), _post_ = this.post.replace(/\*/g, '\\*');
 
-			m = (new RegExp('(?:^| )('+_pre_+'[^('+_pre_+')]*)$', 'm')).exec(state.before)
+			m = (new RegExp('(?:^| )('+_pre_+'[^('+_pre_+')]*)$', 'm')).exec(state.before);
 			if (m) {
 				start -= m[1].length;
 				selected = m[1] + selected;
 			}
-			m = (new RegExp('^([^('+_post_+')]*?'+_post_+')[^('+_post_+')\w ]*?( |$)', '')).exec(state.after)
+			m = (new RegExp('^([^('+_post_+')]*?'+_post_+')[^('+_post_+')\w ]*?( |$)', '')).exec(state.after);
 			if (m) {
 				end += m[1].length;
 				selected += m[1];
 			}
 			// fix condition where half of the pre/post markers are selected
+			var sel, i, ii;
 			if ((end - start) > 0) {
 				if (selected.indexOf(this.pre) !== 0) {
-					var sel;
-					for (var i = 0, ii = this.pre.length; i < ii; i++) {
+					for (i = 0, ii = this.pre.length; i < ii; i++) {
 						sel = state.before.substr(-(i+1)) + selected;
 						if (sel.indexOf(this.pre) === 0) {
 							start -= (i+1);
@@ -100,8 +100,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 					}
 				}
 				if (selected.substr(-this.post.length) !== this.post) {
-					var sel;
-					for (var i = 0, ii = this.post.length; i < ii; i++) {
+					for (i = 0, ii = this.post.length; i < ii; i++) {
 						sel = selected + state.after.substr(0, (i+1));
 						if (sel.substr(-this.post.length) === this.post) {
 							end += (i+1);
@@ -113,7 +112,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 			} else {
 				// expand selection to current word if selection is empty
 				var exclude = '\\s\\b\\.,';
-				m = (new RegExp('(?:['+exclude+']|^)([^'+exclude+']+)$', '')).exec(state.before)
+				m = (new RegExp('(?:['+exclude+']|^)([^'+exclude+']+)$', '')).exec(state.before);
 				if (m) {
 					start -= m[1].length;
 					selected = m[1] + selected;
@@ -129,7 +128,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 		fix_selection: function() {
 			var state = this.get_state(), change;
 			if (!this.matches_selection(state.selection)) {
-				change = this.expand_selection(state)
+				change = this.expand_selection(state);
 				$.extend(state, change);
 				state = this.update_state(state);
 			}
@@ -179,7 +178,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 			return this.matches_selection(selection);
 		},
 		matches_selection: function(selection) {
-			return (selection.indexOf(this.pre) === 0 && selection.lastIndexOf(this.post) === (selection.length - this.post.length))
+			return (selection.indexOf(this.pre) === 0 && selection.lastIndexOf(this.post) === (selection.length - this.post.length));
 		}
 	});
 
@@ -188,8 +187,8 @@ Spontaneous.Field.Markdown = (function($, S) {
 		pre: '**',
 		post: '**',
 		key_shortcut: function() {
-			return "B"; // "b"
-		},
+			return 'B'; // "b"
+		}
 	});
 
 	var Italic = new JS.Class(TextCommand, {
@@ -197,8 +196,8 @@ Spontaneous.Field.Markdown = (function($, S) {
 		pre: '_',
 		post: '_',
 		key_shortcut: function() {
-			return "I";
-		},
+			return 'I';
+		}
 	});
 
 	var UL = new JS.Class(TextCommand, {
@@ -216,14 +215,14 @@ Spontaneous.Field.Markdown = (function($, S) {
 					lines[i] = this.bullet_for(i) + lines[i].replace(this.strip_bullet, '');
 				}
 			}
-			return lines.join("\n")
+			return lines.join('\n');
 		},
 		remove: function(text) {
 			var lines = text.split(this.br);
 			for (var i = 0, ii = lines.length; i < ii; i++) {
 				lines[i] = lines[i].replace(this.strip_bullet, '');
 			}
-			return lines.join("\n")
+			return lines.join('\n');
 		},
 		expand_selection: function(state) {
 			var selected = (state.selection || ''), m, start = state.start, end = state.end, br = /\r?\n/;
@@ -243,10 +242,10 @@ Spontaneous.Field.Markdown = (function($, S) {
 			return {selection:selected, start:start, end:end};
 		},
 		bullet_for: function(n) {
-			return "* ";
+			return '* ';
 		},
 		matches_selection: function(selection) {
-			return /^ *\* +/.test(selection)
+			return /^ *\* +/.test(selection);
 		}
 
 	});
@@ -254,44 +253,44 @@ Spontaneous.Field.Markdown = (function($, S) {
 		name: 'OL',
 		is_list_entry:/(?:\r?\n)( *\d+\..+?)$/,
 		bullet_for: function(n) {
-			return (n+1)+". ";
+			return (n+1)+'. ';
 		},
 		matches_selection: function(selection) {
-			return /^ *\d+\./.test(selection)
+			return /^ *\d+\./.test(selection);
 		}
 	});
 
 	var H1 = new JS.Class(TextCommand, {
-		name: "H1",
+		name: 'H1',
 		pre: '',
-		post: "=",
+		post: '=',
 		scale: 1.0,
 		key_shortcut: function() {
-			return "1";
+			return '1';
 		},
 		surround: function(text) {
 			// remove existing header (which must be different from this version)
 			if (this.matches_removal(text)) { text = this.remove(text); }
 			var line = '', n = Math.floor(this.input.attr('cols')*0.5), newline = /([\r\n]+)$/, newlines = newline.exec(text), undef;
-			newlines = (!newlines || (newlines === undef) ? "" : newlines[1])
+			newlines = (!newlines || (newlines === undef) ? '' : newlines[1]);
 			for (var i = 0; i < n; i++) { line += this.post; }
-			return text.replace(newline, '') + "\n" + line + newlines;
+			return text.replace(newline, '') + '\n' + line + newlines;
 		},
 		// removes either h1 or h2
 		remove: function(text) {
-			var r = new RegExp('[\r\n][=-]+'), s =  text.replace(r, '')
+			var r = new RegExp('[\r\n][=-]+'), s = text.replace(r, '');
 			return s.replace(/ +$/, '');
 		},
 		// matches either h1 or h2
 		matches_removal: function(selection) {
-			return (new RegExp('[\r\n][=\\-]+[\r\n ]*$')).exec(selection)
+			return (new RegExp('[\r\n][=\\-]+[\r\n ]*$')).exec(selection);
 		},
 		// matches only the current header class
 		matches_selection: function(selection) {
-			return (new RegExp('[\r\n]?'+this.post+'+[\r\n ]*$', 'm')).exec(selection)
+			return (new RegExp('[\r\n]?'+this.post+'+[\r\n ]*$', 'm')).exec(selection);
 		},
 		expand_selection: function(state) {
-			var selected = (state.selection || ''), m, start = state.start, end = state.end, br = /\r?\n/, below = false;
+			var selected = (state.selection || ''), m, s, l, start = state.start, end = state.end, br = /\r?\n/, below = false;
 			// detect & deal with the cursor being on the line below
 			// (the one with the -'s or ='s)
 			// TODO: deal with the case where the cursor is at the start of the =- line
@@ -300,12 +299,12 @@ Spontaneous.Field.Markdown = (function($, S) {
 			if (m || n) {
 				m = /(?:[\n]|^)(.+[\n]+([=-]+))$/.exec(state.before);
 				if (m) {
-					var s = m[1];
+					s = m[1];
 					start -= s.length;
 					selected = s + selected;
 				}
 				if (n) {
-					var s = n[1];
+					s = n[1];
 					end += s.length;
 					selected += s;
 				}
@@ -316,19 +315,19 @@ Spontaneous.Field.Markdown = (function($, S) {
 				// expand to select current line
 				m = /(.+)$/.exec(state.before);
 				if (m) {
-					var s = m[1];
+					s = m[1];
 					start -= s.length;
 					selected = m[1] + selected;
 				}
 				m = /^(.+)/.exec(state.after);
 				if (m) {
-					var s = m[1];
+					s = m[1];
 					end += s.length;
 					selected += m[1];
 				}
 				var lines = selected.split(br), underline = new RegExp('^[=-]+$'), found = false;
 				for (var i = 0, ii = lines.length; i < ii; i++) {
-					var l = lines[i];
+					l = lines[i];
 					if (underline.test(l)) {
 						found = true;
 						break;
@@ -337,8 +336,8 @@ Spontaneous.Field.Markdown = (function($, S) {
 				if (!found) {
 					// expand selection down by one line
 					lines = state.after.split(br, 2);
-					for (var i = 0, ii = lines.length; i < ii; i++) {
-						var l = lines[i];
+					for (i = 0, ii = lines.length; i < ii; i++) {
+						l = lines[i];
 						if (underline.test(l)) {
 							end += l.length + i;
 							selected += l;
@@ -347,7 +346,8 @@ Spontaneous.Field.Markdown = (function($, S) {
 					}
 				} else {
 					// make sure that we have the whole of the underline included in the selection
-					var r = new RegExp('^([=-]+)'), m = r.exec(state.after);
+					var r = new RegExp('^([=-]+)');
+					m = r.exec(state.after);
 					if (m) {
 						var extra = m[1];
 						end += extra.length;
@@ -360,12 +360,12 @@ Spontaneous.Field.Markdown = (function($, S) {
 	});
 
 	var H2 = new JS.Class(H1, {
-		name: "H2",
-		post: "-",
+		name: 'H2',
+		post: '-',
 		scale: 1.2, // hyphens are narrower than equals and narrower than the average char
 		key_shortcut: function() {
-			return "2";
-		},
+			return '2';
+		}
 	});
 
 
@@ -380,7 +380,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 			return 300;
 		},
 		title: function() {
-			return "Insert Link";
+			return 'Insert Link';
 		},
 		// position_from_event: function(event) {
 		// 	var t = $(event.currentTarget), o = t.offset();
@@ -403,23 +403,24 @@ Spontaneous.Field.Markdown = (function($, S) {
 				}).val(value);
 				l = dom.label().append(dom.span().text(label)).append(i);
 				return l;
-			}
-			text_input = input("Text", this.link_text);
-			url_input = input("URL", this.url, 'textarea');
+			};
+			text_input = input('Text', this.link_text);
+			url_input = input('URL', this.url, 'textarea');
 			url_input.find('textarea').attr('rows', 3);
 
-			cancel = dom.a('.button.cancel').text('Clear').click(function() {
+			var cancel = dom.a('.button.cancel').text('Clear').click(function() {
 				// this.close();
 				this.insert_link_and_close(text_input, url_input.val(''));
 				return false;
-			}.bind(this)), insert = dom.a('.button').text('OK').click(function() {
+			}.bind(this))
+			, insert = dom.a('.button').text('OK').click(function() {
 				this.insert_link_and_close(text_input, url_input);
 				return false;
-			}.bind(this))
+			}.bind(this));
 			w.append(dom.p().append(text_input)).append(dom.p().append(url_input));
 			var buttons = dom.div('.buttons');
-			url_input = url_input.find(':input')
-			text_input = text_input.find(':input')
+			url_input = url_input.find(':input');
+			text_input = text_input.find(':input');
 			this.text_input = text_input;
 			this.url_input = url_input;
 			this.page_browser = new PageSelector(this.url, this);
@@ -454,12 +455,12 @@ Spontaneous.Field.Markdown = (function($, S) {
 	var PageSelector = new JS.Class({
 		initialize: function(location, parent) {
 			this.parent = parent;
-			this.location = location
+			this.location = location;
 			this.browser = new Spontaneous.PageBrowser(this.location);
 			this.browser.set_manager(this);
 		},
 		view: function() {
-			var w = dom.div();
+			var w = dom.div(),
 			text = dom.span().text('Page Browser'),
 			inner = dom.div('.link-page-browser');
 			inner.append(dom.label().append(text)).append(this.browser.view());
@@ -472,7 +473,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 			this.parent.page_selected(page);
 		},
 		next_level: function(page) {
-			this.location = page
+			this.location = page;
 		}
 	});
 
@@ -500,7 +501,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 			}
 		},
 		expand_selection: function(state) {
-			state = this.fix_selection_whitespace(state)
+			state = this.fix_selection_whitespace(state);
 			var selected = state.selection, m, n, start = state.start, end = state.end;
 
 			var linkExp = /(\[[^\]]*?\]\([^\ ]*?\))/g;
@@ -515,10 +516,10 @@ Spontaneous.Field.Markdown = (function($, S) {
 			// now we've established where the last whole link lives, and can stop ourselves
 			// including it in the search, we can look backwards
 			// until we find the start of any link that's around the current selection.
-			while ((cursor >= match) && (text[cursor] !== "[")) { cursor--; }
+			while ((cursor >= match) && (text[cursor] !== '[')) { cursor--; }
 
-			if (text[cursor] === "[") {
-				if (m = linkExp.exec(text.substr(cursor))) {
+			if (text[cursor] === '[') {
+				if ((m = linkExp.exec(text.substr(cursor)))) {
 					start = cursor;
 					end = cursor + m[1].length;
 					selected = m[1];
@@ -546,7 +547,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 					// need a flag saying that the string doesn't look like URL because
 					// this function is used in two places and each one needs to respond
 					// differently to this condition
-					return false
+					return false;
 				}
 			}
 			return url;
@@ -606,7 +607,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 			if (!this.expanded) {
 				var input = this.input(), h = input.innerHeight();
 
-				input.data('original-height', h)
+				input.data('original-height', h);
 				var text_height = input[0].scrollHeight, max_height = 500, resize_height = Math.min(text_height, max_height);
 				// console.log(resize_height, h)
 				if (Math.abs(resize_height - h) > 20) {
@@ -636,7 +637,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 			var self = this;
 			if (!self._popupToolbar) {
 				var toolbar = dom.div('.md-toolbar');
-				var arrow = dom.div(".arrow");
+				var arrow = dom.div('.arrow');
 				toolbar.append(arrow);
 				self.commands = [];
 				var input = self.input();
@@ -655,7 +656,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 			self.expanded = false;
 			// clear previously assigned bindings
 			input.unbind('select.markdown');
-			input.bind('select.markdown', self.on_select.bind(self))
+			input.bind('select.markdown', self.on_select.bind(self));
 			// input.bind('click.markdown', self.on_select.bind(self))
 			// input.bind('keyup.markdown', self.on_select.bind(self))
 			return input;
@@ -684,10 +685,10 @@ Spontaneous.Field.Markdown = (function($, S) {
 					left: position.left,
 				  // 5 is half the height of the arrow
 				  // 7 is the padding of the field
-					top: position.top + 7 - 5  - tools.height
+					top: position.top + 7 - 5 - tools.height
 				};
 				var dx = 0;
-				var arrow = toolbar.find(".arrow"),
+				var arrow = toolbar.find('.arrow'),
 				arrowLeft = (position.width / 2) - 5;
 				// if the selection is narrow the arrow can peek over the left
 				// of the toolbar. This shifts everything over and keeps it neat.
@@ -702,7 +703,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 				}
 
 				arrowLeft = Math.min(toolbar.width() - 30, arrowLeft);
-				arrow.css("left", dom.px(arrowLeft));
+				arrow.css('left', dom.px(arrowLeft));
 				return place;
 			});
 		}

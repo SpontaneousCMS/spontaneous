@@ -8,7 +8,7 @@ Spontaneous.Services = (function($, S) {
 			this.set('services', serviceData);
 		},
 		serviceList: function() {
-			return this.get("services");
+			return this.get('services');
 		},
 		open: function(service) {
 			S.TopBar.showService(service);
@@ -19,7 +19,7 @@ Spontaneous.Services = (function($, S) {
 			S.ContentArea.hideService();
 		},
 		init: function(container) {
-			this.iframe = dom.iframe("#services_pane", {'src':'about:blank'})
+			this.iframe = dom.iframe('#services_pane', {'src':'about:blank'});
 			this.iframe.hide();
 			container.append(this.iframe);
 			return this;

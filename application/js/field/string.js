@@ -11,8 +11,8 @@ Spontaneous.Field.String = (function($, S) {
 		},
 		panel: function() {
 			var labels = dom.div('.string-field-conflict.labels.differences'), outer = dom.div(), diff_outer = dom.div('.string-field-conflict.changes.differences'), local_diff = dom.div('.original.diff'), computed_diff = dom.div('.final.diff');
-			var local_diff_label = dom.div('.diff').text("Changes made by other person");
-			var final_diff_label = dom.div('.diff').text("Their changes merged with yours");
+			var local_diff_label = dom.div('.diff').text('Changes made by other person');
+			var final_diff_label = dom.div('.diff').text('Their changes merged with yours');
 			var server_change = this.diff(this.values.local_original, this.values.server_original);
 			var local_change = this.diff(this.values.local_original, this.values.local_edited);
 			var merge = this.differ.patch_apply(local_change.patches, this.values.server_original);
@@ -129,7 +129,7 @@ Spontaneous.Field.String = (function($, S) {
 			return this.title;
 		},
 		generate_input: function() {
-			return dom.input(dom.id(this.css_id()), {'type':'text', 'name':this.form_name(), 'value':this.unprocessed_value()})
+			return dom.input(dom.id(this.css_id()), {'type':'text', 'name':this.form_name(), 'value':this.unprocessed_value()});
 		},
 		input: function() {
 			if (!this._input) {

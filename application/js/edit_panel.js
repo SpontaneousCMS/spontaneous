@@ -8,7 +8,7 @@ Spontaneous.EditPanel = (function($, S) {
 			this.parent_view = parent_view;
 		},
 		buttons: function() {
-			var save_label = "Save (" + ((window.navigator.platform.indexOf("Mac") === 0) ? "Cmd" : "Ctrl") + "+s)", btns = {};
+			var save_label = 'Save (' + ((window.navigator.platform.indexOf('Mac') === 0) ? 'Cmd' : 'Ctrl') + '+s)', btns = {};
 			btns[save_label] = this.save.bind(this);
 			return btns;
 		},
@@ -78,13 +78,14 @@ Spontaneous.EditPanel = (function($, S) {
 
 		conflicts_resolved: function(conflict_list) {
 			// console.log('conflicts resolved', conflict_list)
-			var ff = this.parent_view.field_list(), conflicts = {};
+			var ff = this.parent_view.field_list(), conflicts = {}, conflict, field;
 			for (var i =0, ii = conflict_list.length; i < ii; i++) {
-				var conflict = conflict_list[i];
+				conflict = conflict_list[i];
 				conflicts[conflict.field.schema_id()] = conflict;
 			}
-			for (var i = 0, ii = ff.length; i < ii; i++) {
-				var field = ff[i], conflict = conflicts[field.schema_id()];
+			for (i = 0, ii = ff.length; i < ii; i++) {
+				field = ff[i];
+				conflict = conflicts[field.schema_id()];
 				if (conflict) {
 					// console.log(">>> conflicts_resolved", field, conflict.version)
 					field.set_edited_value(conflict.value);
@@ -129,7 +130,7 @@ Spontaneous.EditPanel = (function($, S) {
 				if (class_name) { toolbar.addClass(class_name); }
 				return toolbar;
 			};
-			var editing = dom.form(['.editing-panel', this.parent_view.depth_class()], {'enctype':'multipart/form-data', 'accept-charset':'UTF-8', 'method':'post'})
+			var editing = dom.form(['.editing-panel', this.parent_view.depth_class()], {'enctype':'multipart/form-data', 'accept-charset':'UTF-8', 'method':'post'});
 			var toolbar = get_toolbar();
 			var outer = dom.div('.editing-fields');
 			var text_field_wrap = dom.div('.field-group.text');
@@ -137,10 +138,11 @@ Spontaneous.EditPanel = (function($, S) {
 			var text_fields = this.parent_view.text_fields();
 			var submit = dom.input({'type':'submit'});
 			var __dialogue = this;
-			var fieldViews = [];
+			var fieldViews = [], field, view;
 			editing.append(toolbar);
 			for (var i = 0, ii = text_fields.length; i < ii; i++) {
-				var field = text_fields[i], view = this.field_edit(field);
+				field = text_fields[i];
+				view = this.field_edit(field);
 				fieldViews.push(view);
 				text_field_wrap.append(view);
 			}
@@ -148,10 +150,13 @@ Spontaneous.EditPanel = (function($, S) {
 			if (text_fields.length > 0) {
 				outer.append(text_field_wrap);
 			}
-			var image_fields = this.parent_view.image_fields();
+			var image_fields = this.parent_view.image_fields()
+			, click = function() { __dialogue.field_focus(this); }
+			;
 
-			for (var i = 0, ii = image_fields.length; i < ii; i++) {
-				var field = image_fields[i], view = this.field_edit(field).click(function() { __dialogue.field_focus(this); });
+			for (i = 0, ii = image_fields.length; i < ii; i++) {
+				field = image_fields[i];
+				view = this.field_edit(field).click(click);
 				fieldViews.push(view);
 				image_field_wrap.append(view);
 			}
@@ -191,7 +196,7 @@ Spontaneous.EditPanel = (function($, S) {
 		tab_to_next: function(input, upwards) {
 			var active_field = $(input).data('field')
 			, text_fields = this.parent_view.text_fields(), position = 0, next_position, next_field
-			, direction = upwards ? -1 : 1;
+, direction = upwards ? -1 : 1;
 			for (var i = 0, ii = text_fields.length; i < ii; i++) {
 				if (text_fields[i] === active_field) {
 					position = i;
@@ -207,15 +212,15 @@ Spontaneous.EditPanel = (function($, S) {
 			var fields = this.parent_view.field_list();
 			$.each(fields, function(n, f) {
 				f.on_show();
-			})
-			if (!focus_field || !(focus_field['focus']) || !focus_field.accepts_focus) { focus_field = null; }
-			var focus_field = focus_field || this.parent_view.text_fields()[0];
+			});
+			if (!focus_field || !(focus_field.focus) || !focus_field.accepts_focus) { focus_field = null; }
+			focus_field = focus_field || this.parent_view.text_fields()[0];
 			if (focus_field) {
 				focus_field.focus();
 			}
 		},
 		field_focus: function(input) {
-			var active_field = $(input).data('field')
+			var active_field = $(input).data('field');
 			if (active_field === this.active_field) { return; }
 			if (active_field) {
 				this.active_field = active_field;
@@ -223,7 +228,7 @@ Spontaneous.EditPanel = (function($, S) {
 			}
 		},
 		field_blur: function(input) {
-			var active_field = $(input).data('field')
+			var active_field = $(input).data('field');
 			if (active_field) {
 				active_field.on_blur();
 			}
@@ -244,12 +249,12 @@ Spontaneous.EditPanel = (function($, S) {
 			field.editor = this;
 			var d = dom.div('.field');
 			// console.log("field_edit", field.type)
-			d.addClass(field.type.type.toLowerCase().split(".").splice(1).join("-"));
+			d.addClass(field.type.type.toLowerCase().split('.').splice(1).join('-'));
 			// d.append($(dom.label, {'class':'name', 'for':field.css_id()}).html(field.label()));
 			var label = dom.label('.name', {'for':field.css_id()}).html(field.label());
 			if (field.type.comment) {
 			var comment = dom.span('.comment').text('('+field.type.comment+')');
-			label.append(comment)
+			label.append(comment);
 			}
 			d.append(label);
 			var toolbar = field.toolbar();

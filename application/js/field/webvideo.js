@@ -16,11 +16,11 @@ Spontaneous.Field.WebVideo = (function($, S) {
 			// at the same time I want to replace an immediately inserted video player with an
 			// image + play button to reduce the impact of multiple videos on the cms ui load time
 			var value = this.get('value').replace(/autoplay=1/, '')
-			, iframe = dom.iframe({src:value, frameborder: 0, border: 0}).css({position: "absolute", top:0, left:0, height: "100%", width: "100%"});
+			, iframe = dom.iframe({src:value, frameborder: 0, border: 0}).css({position: 'absolute', top:0, left:0, height: '100%', width: '100%'});
 			if (!value) { // don't fill up the page with empty iframes...
 				return dom.div();
 			}
-			return dom.div().css({width: "100%", position: "relative", "padding-bottom":"56.25%", height: 0}).append(iframe)
+			return dom.div().css({width: '100%', position: 'relative', 'padding-bottom':'56.25%', height: 0}).append(iframe);
 		}
 	});
 

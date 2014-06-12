@@ -27,7 +27,7 @@ Spontaneous.ShardedUpload = (function($, S) {
 		compute_hash: function(array_buffer) {
 			var bytes = new Uint8Array(array_buffer);
 			var sha = Crypto.SHA1(bytes);
-			this.hash = sha
+			this.hash = sha;
 			this.begin_upload();
 			this.failure_count = 0;
 		},
@@ -39,7 +39,7 @@ Spontaneous.ShardedUpload = (function($, S) {
 			S.Ajax.get(['/shard', this.hash].join('/'), this.status_complete.bind(this));
 		},
 		status_complete: function(data, status, xhr) {
-			if (status === "success") {
+			if (status === 'success') {
 				// we're actually done
 				this.complete();
 			} else {
@@ -63,7 +63,7 @@ Spontaneous.ShardedUpload = (function($, S) {
 			var xhr = S.Ajax.authenticatedRequest();
 			var upload = xhr.upload;
 
-			xhr.open("POST", path, true);
+			xhr.open('POST', path, true);
 			upload.onprogress = this.onprogress.bind(this);
 			upload.onload = this.onload.bind(this);
 			upload.onloadend = this.onloadend.bind(this);
@@ -121,16 +121,17 @@ Spontaneous.ShardedUpload = (function($, S) {
 			this.start_with_index(0);
 		},
 		start_with_index: function(index) {
+			var shard;
 			if (index < this.shard_count()) {
-				var shard = new Shard(this, index, this.slice(index));
+				shard = new Shard(this, index, this.slice(index));
 				this.current = shard;
 				shard.start();
 			} else {
 				if (this.failed.length === 0) {
 					this.finalize();
 				} else {
-					var shard = this.failed.pop();
-					console.warn('retrying failed shard', shard)
+					shard = this.failed.pop();
+					console.warn('retrying failed shard', shard);
 					this.current = shard;
 					shard.retry();
 				}
@@ -146,9 +147,9 @@ Spontaneous.ShardedUpload = (function($, S) {
 			this.request(this.method, this.path(), form);
 		},
 		path: function() {
-			return ["/shard", this.target_id].join('/');
+			return ['/shard', this.target_id].join('/');
 		},
-		method: "PUT",
+		method: 'PUT',
 		hashes: function() {
 			var hashes = [];
 			for (var i = 0, ii = this.completed.length; i < ii; i++) {

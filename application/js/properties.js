@@ -23,14 +23,14 @@ Spontaneous.Properties = (function($, S) {
 		},
 		_props_set_individual: function(property_name, value) {
 			if (this._props_set_individual_wo_callbacks(property_name, value)) {
-				this._props_notify_changed([ property_name ]);
+				this._props_notify_changed([property_name]);
 			}
 		},
 		_props_set_individual_wo_callbacks: function(property_name, value) {
-			if (this._props_debug) { console.log("setting ", property_name, value) }
+			if (this._props_debug) { console.log('setting ', property_name, value); }
 			orig_value = this._props_properties()[property_name];
 			this._props_properties()[property_name] = value;
-			var changed = (value !== orig_value)
+			var changed = (value !== orig_value);
 			return changed;
 		},
 		_props_set_multiple: function(values) {
@@ -74,7 +74,7 @@ Spontaneous.Properties = (function($, S) {
 		// all watchers of this property will be notified of the change
 		// (only if the value acutally changes)
 		set: function() {
-			if (arguments.length === 1 && typeof arguments[0] === "object") {
+			if (arguments.length === 1 && typeof arguments[0] === 'object') {
 				this._props_set_multiple(arguments[0]);
 			} else if (arguments.length ===2) {
 				this._props_set_individual(arguments[0], arguments[1]);
@@ -82,14 +82,14 @@ Spontaneous.Properties = (function($, S) {
 		},
 		// assign a callback function to a property to be called when that property changes
 		watch: function(property_name, callback) {
-			return this._props_add_listener(property_name, callback)
+			return this._props_add_listener(property_name, callback);
 		},
 		unwatch: function(property_name, callback) {
-			return this._props_remove_listener(property_name, callback)
+			return this._props_remove_listener(property_name, callback);
 		},
 		// assign a callback to an event to be called when that event is triggered
 		bind: function(event_name, callback) {
-			return this._props_add_listener(event_name, callback)
+			return this._props_add_listener(event_name, callback);
 		},
 		// trigger a particular event
 		trigger: function() {

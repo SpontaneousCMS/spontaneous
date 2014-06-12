@@ -8,21 +8,21 @@ Spontaneous.Require = {
 		this.async = asynchronous;
 		var body = document.body;
 		var splash = document.createElement('div');
-		splash.id = "script-load-splash";
+		splash.id = 'script-load-splash';
 			var progress_outer = document.createElement('div');
-			progress_outer.id = "script-load-progress";
+			progress_outer.id = 'script-load-progress';
 		if (this.async) {
 			var progress_inner = document.createElement('div');
 			progress_outer.appendChild(progress_inner);
 			this.bar = progress_inner;
 			this.progress(0);
 		} else {
-			progress_outer.className = "synchronous";
-			progress_outer.innerHTML = "Loading...";
+			progress_outer.className = 'synchronous';
+			progress_outer.innerHTML = 'Loading...';
 		}
 		splash.appendChild(progress_outer);
 		body.appendChild(splash);
-		this.container = splash
+		this.container = splash;
 	},
 	remove: function() {
 		document.body.removeChild(this.container);
@@ -49,19 +49,19 @@ Spontaneous.Require = {
 		if (this.current) {
 			total += this.current[1];
 		}
-		for (var i = 0, ii = this._completed.length; i < ii; i++) {
+		for (i = 0, ii = this._completed.length; i < ii; i++) {
 			total += this._completed[i][1];
 		}
 		return total;
 	},
 	add: function(script) {
-		this.pending.push(script)
+		this.pending.push(script);
 		if (!this.current) { this.next(); }
 	},
 	script_url: function(src) {
 		var url = src;
 		if (Spontaneous.development) {
-			url += "?"+(new Date()).valueOf();
+			url += '?'+(new Date()).valueOf();
 		}
 		return url;
 	},
@@ -76,16 +76,16 @@ Spontaneous.Require = {
 		this.current = s;
 		if (this.async) {
 			var xhr = new XMLHttpRequest();
-			xhr.open("GET", this.script_url(s[0]), true);
+			xhr.open('GET', this.script_url(s[0]), true);
 			var onprogress = (function(req) {
 				return function(event) {
 					req.onprogress(event);
-				}
+				};
 			})(this);
 			var onreadystatechange = (function(req) {
 				return function(event) {
 					req.onreadystatechange(event);
-				}
+				};
 			})(this);
 			xhr.onprogress = onprogress;
 			xhr.onreadystatechange = onreadystatechange;
@@ -117,7 +117,7 @@ Spontaneous.Require = {
 			var script = document.createElement('script');
 			script.type = 'text/javascript';
 			script.text = xhr.responseText;
-			body.appendChild(script)
+			body.appendChild(script);
 			this._completed.push(this.current);
 			this.position = 0;
 			this.next();
@@ -125,5 +125,5 @@ Spontaneous.Require = {
 	}
 };
 Spontaneous.require = function(script) {
-	Spontaneous.Require.add(script)
-}
+	Spontaneous.Require.add(script);
+};

@@ -3,7 +3,7 @@
 Spontaneous.Preview = (function($, S, $window) {
 	var dom = S.Dom, goto_id = 0;
 	var click_param = function() {
-		return "?__click="+(++goto_id);
+		return '?__click='+(++goto_id);
 	};
 	var Preview = new JS.Singleton({
 		include: Spontaneous.Properties,
@@ -13,10 +13,10 @@ Spontaneous.Preview = (function($, S, $window) {
 		},
 
 		title: function() {
-			return this.get('title') || "";
+			return this.get('title') || '';
 		},
 		init: function(container) {
-			this.iframe = dom.iframe("#preview_pane", {'src':'about:blank'})
+			this.iframe = dom.iframe('#preview_pane', {'src':'about:blank'});
 			this.iframe.hide();
 			container.append(this.iframe);
 			return this;
@@ -42,7 +42,7 @@ Spontaneous.Preview = (function($, S, $window) {
 			};
 
 			$iframe.hide();
-			$iframe.one("load", function() {
+			$iframe.one('load', function() {
 				$iframe.show();
 				if (!preview.previewPathMonitor) {
 					preview.previewPathMonitor = $window.setInterval(monitor, monitorInterval);

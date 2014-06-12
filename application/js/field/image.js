@@ -1,6 +1,6 @@
 // console.log('Loading ImageField...')
 Spontaneous.Field.Image = (function($, S) {
-	"use strict";
+	'use strict';
 	var dom = S.Dom;
 	var ImageFieldConflictView = new JS.Class(S.Field.String.ConflictView, {
 
@@ -10,8 +10,8 @@ Spontaneous.Field.Image = (function($, S) {
 				image_outer = dom.div('.image-field-conflict.changes.differences'),
 				original = dom.div('.original.diff'),
 				edited = dom.div('.final.diff');
-			var local_label = dom.div('.diff').text("Server version");
-			var server_label = dom.div('.diff').text("Your version");
+			var local_label = dom.div('.diff').text('Server version');
+			var server_label = dom.div('.diff').text('Your version');
 			original.append(dom.img().attr('src', this.values.server_original)).click(function() {
 				this.useValue(this.values.server_original);
 				edited.add(original).removeClass('selected');
@@ -60,29 +60,29 @@ Spontaneous.Field.Image = (function($, S) {
 
 		currentValue: function() {
 			var pending, v = this.get('value');
-			if ((pending = v['__pending__'])) {
-				pending['path'] = pending['src'];
-				return pending['value'];
+			if ((pending = v.__pending__)) {
+				pending.path = pending.src;
+				return pending.value;
 			}
-			return v['__ui__'] || v['original'] || {};
+			return v.__ui__ || v.original || {};
 		},
 
 		currentEditValue: function() {
 			var value, pending, ui, v = this.get('value');
-			if ((pending = v['__pending__'])) {
-				return pending['value'];
+			if ((pending = v.__pending__)) {
+				return pending.value;
 			}
-			value = v['original'];
-			if ((ui = v['__ui__'])) {
-				value['path'] = value['src'];
-				value['src'] = ui['src'];
+			value = v.original;
+			if ((ui = v.__ui__)) {
+				value.path = value.src;
+				value.src = ui.src;
 			}
 			return value;
 		},
 
 		currentFilename: function() {
 			var v = this.get('value');
-			return (v['__pending__'] || v['original'])['filename'];
+			return (v.__pending__ || v.original).filename;
 		},
 		/*
 		* HACK: The async nature of image updates means that the version setting
@@ -99,9 +99,9 @@ Spontaneous.Field.Image = (function($, S) {
 		* weird problems with simultaneous updates.
 		*/
 		version: function() {
-			var pending, value = this.get("value");
-			if ((pending = value["__pending__"])) {
-				return pending["version"];
+			var pending, value = this.get('value');
+			if ((pending = value.__pending__)) {
+				return pending.version;
 			}
 			return this.data.version;
 		},
@@ -109,13 +109,13 @@ Spontaneous.Field.Image = (function($, S) {
 		preview: function() {
 			Spontaneous.UploadManager.register(this);
 			var self = this
-			, value = this.currentValue()
+, value = this.currentValue()
 			, src = value.src
-			, img = null
-			, dim = 45;
+, img = null
+, dim = 45;
 			// , container = container.parent('li');
 
-			if (src === "") {
+			if (src === '') {
 				img = dom.img('.missing-image', {'src':''});
 			} else {
 				img = dom.img();
@@ -175,8 +175,8 @@ Spontaneous.Field.Image = (function($, S) {
 						} else {
 							// container.removeClass('landscape');
 						}
-					}.bind(this))
-					image.attr('src', url)
+					}.bind(this));
+					image.attr('src', url);
 					// see http://www.htmlfivewow.com/slide25
 					window.URL.revokeObjectURL(url);
 				}
@@ -237,11 +237,11 @@ Spontaneous.Field.Image = (function($, S) {
 		},
 		upload_complete: function(values) {
 			this.mark_unmodified();
-			this.callSuper(values)
+			this.callSuper(values);
 			if (values) {
 				var value = this.currentValue();
 				if (this.image) {
-					var img = new Image()
+					var img = new Image();
 					img.onload = function() {
 						this.image.attr('src', value.src);
 					}.bind(this);
@@ -297,7 +297,7 @@ Spontaneous.Field.Image = (function($, S) {
 				filename_info.text(filename);
 				if (filesize) {
 					filesize_info.text(parseFloat(filesize, 10).to_filesize());
-				} else if (filesize === 0 || filesize === "0") {
+				} else if (filesize === 0 || filesize === '0') {
 					filesize_info.text('');
 				}
 
@@ -411,7 +411,7 @@ Spontaneous.Field.Image = (function($, S) {
 			this.preview_img.attr('src', value);
 			this.callSuper(value);
 		},
-		accept_mimetype: "image/*"
+		accept_mimetype: 'image/*'
 	});
 
 	ImageField.ConflictView = ImageFieldConflictView;

@@ -1,16 +1,16 @@
 
 Spontaneous.Field.Select = (function($, S) {
-	"use strict";
+	'use strict';
 
 	var dom = S.Dom
-	, ajax = S.Ajax;
+, ajax = S.Ajax;
 
 	var SelectField = new JS.Class(Spontaneous.Field.String, {
 		edit: function() {
 			var self = this
-			, type = this.type
-			, option_list = type.option_list
-			, wrapper = dom.div(".select-field-type")
+, type = this.type
+, option_list = type.option_list
+, wrapper = dom.div('.select-field-type')
 			, callback;
 			if (!option_list) {
 				// dynamic, make ajax call
@@ -25,7 +25,7 @@ Spontaneous.Field.Select = (function($, S) {
 		},
 
 		optionsURL: function() {
-			return ["/field/options", this.type.schema_id, this.content.id()].join("/");
+			return ['/field/options', this.type.schema_id, this.content.id()].join('/');
 		},
 
 		append_select: function(wrapper, option_list) {
@@ -35,10 +35,10 @@ Spontaneous.Field.Select = (function($, S) {
 			option_list.forEach(function(val) {
 				var value = val[0]
 				, label = val[1]
-				, option = dom.option({"value": value}).text(label);
+				, option = dom.option({'value': value}).text(label);
 				options[value] = label;
 				if (value == selected) { // only == so that strings successfully match ints
-					option.attr("selected", "selected");
+					option.attr('selected', 'selected');
 				}
 				select.append(option);
 			});
@@ -52,7 +52,7 @@ Spontaneous.Field.Select = (function($, S) {
 		},
 
 		parsedValue: function() {
-			var value = this.get("value")
+			var value = this.get('value');
 			if (!value) { return []; }
 			return JSON.parse(this.get('value'));
 		},

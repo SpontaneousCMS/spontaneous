@@ -4,7 +4,7 @@ Spontaneous.Auth = (function($, S) {
 	return {
 		Key: {
 			key: function(site) {
-				return site + '_api_key'
+				return site + '_api_key';
 			},
 			save: function(site, key) {
 				localStorage.setItem(this.key(site), key);
@@ -14,7 +14,7 @@ Spontaneous.Auth = (function($, S) {
 			},
 			loadAutoLogin: function() {
 				if (!this._autoLoginKey) {
-					console.warn("Using auto login key for user", "'"+S.auto_login+"'");
+					console.warn('Using auto login key for user', "'"+S.auto_login+"'");
 					this._autoLoginKey = S.user_key;
 				}
 				return this._autoLoginKey;

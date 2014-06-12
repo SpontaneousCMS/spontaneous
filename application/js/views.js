@@ -20,7 +20,7 @@ Spontaneous.Views = (function($, S) {
 				if (typeof c[i].unload === 'function') {
 					c[i].unload();
 				} else {
-					console.warn('unable to unload child view', c[i])
+					console.warn('unable to unload child view', c[i]);
 				}
 			}
 		},
@@ -69,9 +69,9 @@ Spontaneous.Views = (function($, S) {
 			return this.content.save_path();
 		},
 		create_edit_wrapper: function(read_content) {
-			var s = {'style':'position: relative; overflow: hidden;'}
+			var s = {'style':'position: relative; overflow: hidden;'};
 			var outer = dom.div(s);
-			var write = dom.div({'style':'position: absolute; height: 0; overflow: hidden;'})
+			var write = dom.div({'style':'position: absolute; height: 0; overflow: hidden;'});
 			var write_inner = dom.div();
 			var read = dom.div(s);
 			var read_inner = dom.div();
@@ -100,8 +100,8 @@ Spontaneous.Views = (function($, S) {
 			o.add(r).animate({'height':h}, { queue: false, duration: time_to_reveal });
 			w.css({'position':'relative'});
 			r.css({'position':'absolute', 'top':0, 'right':0, 'left':0}).animate({'top':h}, { queue: false, duration: time_to_reveal, complete:function() {
-				w.css({'z-index': front, 'position':'relative', 'height':'auto'})
-				r.css({'z-index': back, 'position':'absolute', 'display':'none'})
+				w.css({'z-index': front, 'position':'relative', 'height':'auto'});
+				r.css({'z-index': back, 'position':'absolute', 'display':'none'});
 				o.css('height', 'auto');
 				panel.on_show(focus_field);
 			}});
@@ -115,8 +115,8 @@ Spontaneous.Views = (function($, S) {
 			o.add(r).animate({'height':h}, { queue: false, duration: time_to_reveal });
 			r.css({'z-index':front, 'height':h, 'top':wi.outerHeight()+'px'}).animate({'top':0}, { queue: true, duration: time_to_reveal, complete: function() {
 				w.css({'position':'absolute', 'z-index':back});
-				r.css({'position':'relative', 'height':'auto', 'z-index':front})
-				o.css('height', 'auto')
+				r.css({'position':'relative', 'height':'auto', 'z-index':front});
+				o.css('height', 'auto');
 				wi.empty();
 				__content.edit_closing = false;
 			}});
@@ -127,5 +127,5 @@ Spontaneous.Views = (function($, S) {
 	});
 	return {
 		View: View
-	}
+	};
 }(jQuery, Spontaneous));

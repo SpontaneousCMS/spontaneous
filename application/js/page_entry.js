@@ -8,7 +8,7 @@ Spontaneous.PageEntry = (function($, S) {
 		},
 		save_complete: function(values) {
 			var _this = this;
-			_this.callSuper(values)
+			_this.callSuper(values);
 			_this.set('slug', values.slug);
 			_this.set('path', values.path);
 		}

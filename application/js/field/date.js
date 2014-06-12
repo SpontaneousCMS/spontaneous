@@ -4,7 +4,7 @@ Spontaneous.Field.Date = (function($, S) {
 	var DateField = new JS.Class(Spontaneous.Field.String, {
 		input: function() {
 			var input = this.callSuper();
-			input.datepicker({ "dateFormat": "DD, d MM yy" });
+			input.datepicker({ 'dateFormat': 'DD, d MM yy' });
 			return input;
 		},
 		dateFormat: function() {

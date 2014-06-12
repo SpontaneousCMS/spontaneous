@@ -21,18 +21,21 @@ Spontaneous.BoxContainer = (function($, S) {
 			return wrapper;
 		},
 		tab_bar: function() {
+			var self = this;
 			if (this.boxes().length === 0) { return ''; }
 			if (!this._tab_bar) {
 				var bar = dom.ul('.slot-tabs');
+				var clickFunction = function(i) {
+					return function() {
+						this.activate(i, true);
+					}.bind(self);
+				};
 				for (var i = 0, boxes = this.boxes(), ii = boxes.length; i < ii; i++) {
 					var box = boxes[i];
 					var li = dom.li();
-					li.text(box.name())
+					li.text(box.name());
 					li.append(dom.span('.down'));
-					var click = function(index) {
-						this.activate(index, true);
-					}.bind(this, i);
-					li.click(click);
+					li.click(clickFunction(i));
 					bar.append(li);
 				}
 				this._tab_bar = bar;
@@ -43,7 +46,7 @@ Spontaneous.BoxContainer = (function($, S) {
 			var box = this.boxes()[box_index];
 			if (box === this._active_box) { return; }
 			$('li', this.tab_bar()).removeClass('active');
-			$('li:nth-child('+(box_index+1)+')', this.tab_bar()).addClass('active')
+			$('li:nth-child('+(box_index+1)+')', this.tab_bar()).addClass('active');
 			box.activate();
 			this._active_box = box;
 			if (manually) {
@@ -69,9 +72,9 @@ Spontaneous.BoxContainer = (function($, S) {
 			if (!this._boxes) {
 				var _boxes = [], content_container = this.box_content_container;
 				var f = function(i, box) {
-					var box = new Spontaneous.Views.BoxView(box, content_container)
-					self._subviews.push(box);
-					_boxes.push(box);
+					var view = new Spontaneous.Views.BoxView(box, content_container);
+					self._subviews.push(view);
+					_boxes.push(view);
 				}.bind(this);
 				$.each(this.content.boxes(), f);
 				this._boxes = _boxes;

@@ -12,20 +12,22 @@
 // 2. Regularise access to the various APIs, removing vendor prefixes and providing the spec defined methods
 // 3. Add some useful CSS-visible attributes to the HTML element
 (function() {
+	'use strict';
 	var _window = window, _document = document;
 	var testFlexBoxCompatibility = false;
+	var i, ii;
 	var prefixes = ' -webkit- -moz- -o- -ms- -khtml- '.split(' ');
 	try {
 
 		///////////////////////////// Flexible Box model
-		function set_prefixed_property_css(element, property, value, extra) {
+		var set_prefixed_property_css = function(element, property, value, extra) {
 			element.style.cssText = prefixes.join(property + ':' + value + ';') + (extra || '');
-		}
+		};
 
-		function set_prefixed_value_css(element, property, value, extra) {
+		var set_prefixed_value_css = function(element, property, value, extra) {
 			property += ':';
 			element.style.cssText = (property + prefixes.join(value + ';' + property)).slice(0, -property.length) + (extra || '');
-		}
+		};
 
 
 		if (testFlexBoxCompatibility) {
@@ -39,32 +41,32 @@
 
 			c.appendChild(elem);
 			docElement.appendChild(c);
-			w = elem.offsetWidth
+			w = elem.offsetWidth;
 			c.removeChild(elem);
 			docElement.removeChild(c);
 
 			if (w !== 42) {
 				// console.error(w)
-				throw (w) + " Flexible Box Model not supported"
+				throw (w) + ' Flexible Box Model not supported';
 			}
 		}
 
 		///////////////////////////// XHR Uploads
 		var xhr = new XMLHttpRequest();
 		if (!xhr.upload) {
-			throw "XMLHttpRequestUpload not supported";
+			throw 'XMLHttpRequestUpload not supported';
 		}
 
 		///////////////////////////// FormData
 		try {
 			var f = new FormData();
 		} catch (e) {
-			throw "FormData not supported";
+			throw 'FormData not supported';
 		}
 
 		///////////////////////////// File API / File objects
 		if (!_window.File) {
-			throw "File API not supported";
+			throw 'File API not supported';
 		}
 
 		///////////////////////////// File API / objectURLs
@@ -89,7 +91,7 @@
 					//// would seriously limit users ability to make quick changes on the go, for instance)
 					_window.URL[createObjectURL] = function(file) {
 						return '';
-					}
+					};
 					// throw "File API not supported";
 				}
 				if (_window.revokeBlobURL) {
@@ -106,7 +108,7 @@
 					//// would seriously limit users ability to make quick changes on the go, for instance)
 					_window.URL[revokeObjectURL] = function(file) {
 						return '';
-					}
+					};
 					// throw "File API not supported";
 				}
 			}
@@ -116,7 +118,7 @@
 		var proto = _window.File.prototype;
 		if (!proto.slice) {
 			var methods = ['webkitSlice', 'mozSlice'];
-			for (var i = 0, ii = methods.length; i < ii; i++) {
+			for (i = 0, ii = methods.length; i < ii; i++) {
 				var method = methods[i];
 				if (proto[method]) { proto.slice = proto[method]; }
 			}
@@ -129,15 +131,15 @@
 
 		///////////////////////////// localStorage
 		try {
-			var i = localStorage.getItem;
+			i = localStorage.getItem;
 		} catch(e) {
-			throw "Local Storage not supported"
+			throw 'Local Storage not supported';
 		}
 
 		var b = _document.documentElement;
-		b.setAttribute('data-useragent',  navigator.userAgent);
-		b.setAttribute('data-platform', navigator.platform );
+		b.setAttribute('data-useragent', navigator.userAgent);
+		b.setAttribute('data-platform', navigator.platform);
 	} catch (e) {
-		_window.location.href = "/@spontaneous/unsupported?msg=" + _window.encodeURIComponent(e) + "&useragent=" + _window.encodeURIComponent(_window.navigator.userAgent);
+		_window.location.href = '/@spontaneous/unsupported?msg=' + _window.encodeURIComponent(e) + '&useragent=' + _window.encodeURIComponent(_window.navigator.userAgent);
 	}
 }());

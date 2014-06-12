@@ -1,6 +1,7 @@
 // console.log('Loading Content...')
 
 Spontaneous.Content = (function($, S) {
+	'use strict';
 	var dom = S.Dom;
 
 	var Content = new JS.Class({
@@ -25,7 +26,7 @@ Spontaneous.Content = (function($, S) {
 			return this.content.target;
 		},
 		developer_description: function() {
-			return this.type().type + "["+this.id()+']';
+			return this.type().type + '['+this.id()+']';
 		},
 		developer_edit_url: function() {
 			return this.type().edit_url();
@@ -51,9 +52,6 @@ Spontaneous.Content = (function($, S) {
 			$.each(this.entries(), function(i, e) { e.unload(); });
 		},
 
-		has_fields: function() {
-			return this.field_list().length > 0;
-		},
 		field_list: function() {
 			var type = this.type(), prototypes = type.field_prototypes, names = type.field_names;
 			var fields = this.fields(), list = [];
@@ -103,19 +101,19 @@ Spontaneous.Content = (function($, S) {
 					type_class = this.constantize(prototype.type);
 					if (!type_class) {
 						console.warn(
-							"Content#fields:",
-							"Field has invalid type", prototype.type,
-							"content_id:", this.content.id,
-							"type:", "'"+type.title+"'",
-							"field_name:", f.name
+							'Content#fields:',
+							'Field has invalid type', prototype.type,
+							'content_id:', this.content.id,
+							'type:', "'"+type.title+"'",
+							'field_name:', f.name
 						);
 						type_class = Spontaneous.Field.String;
 					}
-					var field = new type_class(this, f);
+					var field = new type_class(this, f); // jshint ignore:line
 					// field.watch('value', this.field_updated.bind(this, field));
 					fields[f.name] = field;
 				}
-			};
+			}
 			return fields;
 		}.cache(),
 
@@ -147,7 +145,7 @@ Spontaneous.Content = (function($, S) {
 		},
 
 		has_fields: function() {
-			return (this.content.fields.length > 0)
+			return this.field_list().length > 0;
 		},
 
 		title: function() {
@@ -185,7 +183,7 @@ Spontaneous.Content = (function($, S) {
 		}.cache(),
 
 		has_boxes: function() {
-			return (this.boxes().length > 0)
+			return (this.boxes().length > 0);
 		},
 
 		wrap_entry: function(entry) {
@@ -193,7 +191,7 @@ Spontaneous.Content = (function($, S) {
 			if (entry.is_page) {
 				entry_class = Spontaneous.PageEntry;
 			}
-			return new entry_class(entry, this);
+			return new entry_class(entry, this); // jshint ignore:line
 		},
 
 		allowed_types: function() {
@@ -208,7 +206,7 @@ Spontaneous.Content = (function($, S) {
 			Spontaneous.Ajax.del(['/content', this.content.id].join('/'), {}, this.destroyed.bind(this));
 		},
 		toggle_visibility: function() {
-			Spontaneous.Ajax.patch(['/content', this.content.id, "toggle"].join('/'), {}, this.visibility_toggled.bind(this));
+			Spontaneous.Ajax.patch(['/content', this.content.id, 'toggle'].join('/'), {}, this.visibility_toggled.bind(this));
 		},
 		visibility_toggled: function(result) {
 			this.set('hidden', result.hidden);

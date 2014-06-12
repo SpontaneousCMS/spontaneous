@@ -28,10 +28,10 @@ Spontaneous.Views.PageView = (function($, S) {
 			path_wrap.append(path_text);
 
 			if (!self.page.is_root()) {
-				var resync = dom.a({ "title":"Sync the path to the page title"}).click(function() {
-					Spontaneous.Ajax.put(['/page', self.page.id(), "slug/sync"].join("/"), {}, self.save_complete.bind(self));
+				var resync = dom.a({ 'title':'Sync the path to the page title'}).click(function() {
+					Spontaneous.Ajax.put(['/page', self.page.id(), 'slug/sync'].join('/'), {}, self.save_complete.bind(self));
 				});
-				path_wrap.append( dom.h3('.titlesync').append(resync));
+				path_wrap.append(dom.h3('.titlesync').append(resync));
 			}
 
 			path_wrap.append(dom.div('.path-spacer'));
@@ -51,7 +51,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			}.bind(this));
 
 			this.panel.append(path_wrap);
-			this.path_wrap = path_wrap
+			this.path_wrap = path_wrap;
 			return this.panel;
 		},
 		unload: function() {
@@ -67,9 +67,8 @@ Spontaneous.Views.PageView = (function($, S) {
 			var maxHeight = 36;
 			window.setTimeout(function()  {
 				var t = self.title
-				, height = function() { return t.height();  }
-				, fs =  window.parseInt(t.css('font-size'), 10);
-				;
+        , height = function() { return t.height(); }
+				, fs = window.parseInt(t.css('font-size'), 10);
 				while (height() > maxHeight && fs > 10) {
 					t.css('font-size', --fs);
 				}
@@ -122,11 +121,11 @@ Spontaneous.Views.PageView = (function($, S) {
 			}.bind(this));
 		},
 		save_uid: function(uid) {
-			Spontaneous.Ajax.put(['/page',this.page.id(), "uid"].join("/"), {'uid':uid}, this.uid_save_complete.bind(this));
+			Spontaneous.Ajax.put(['/page',this.page.id(), 'uid'].join('/'), {'uid':uid}, this.uid_save_complete.bind(this));
 		},
 		uid_save_complete: function(response, status, xhr) {
 			if (status === 'success') {
-				var view = $('h3.uid', this.panel), edit = $('.edit', this.panel), uid = (response.uid == "" ? "----" : response.uid);
+				var view = $('h3.uid', this.panel), edit = $('.edit', this.panel), uid = (response.uid === '' ? '----' : response.uid);
 				// nasty but the value is only used for display
 				this.page.content.uid = response.uid;
 				view.text('#'+uid);
@@ -141,16 +140,17 @@ Spontaneous.Views.PageView = (function($, S) {
 				var view = $('h3', this.panel), edit = $('.edit', this.panel);
 				view.hide();
 				edit.hide().empty();
-				var path = [""], parts = this.page.get('path').split('/'), slug = parts.pop();
+				var path = [''], parts = this.page.get('path').split('/'), slug = parts.pop();
 				parts.shift(); // remove empty entry caused by leading '/'
-				edit.append(dom.span().text('/'))
+				edit.append(dom.span().text('/'));
+				var click = function() {
+					S.Location.load_path($(this).attr('href'));
+					return false;
+				};
 				for (var i = 0, ii = parts.length; i < ii; i++) {
 					var p = parts[i];
-					path.push(p)
-					edit.append(dom.a('.path').text(p).attr('href', path.join('/')).click(function() {
-						S.Location.load_path($(this).attr('href'));
-						return false;
-					}));
+					path.push(p);
+					edit.append(dom.a('.path').text(p).attr('href', path.join('/')).click(click));
 					edit.append(dom.span().text('/'));
 				}
 				var input_and_error = dom.span('.input-error');
@@ -216,7 +216,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			}.bind(this));
 		},
 		show_path_error: function(error_text) {
-			error_text = (error_text || "Duplicate URL");
+			error_text = (error_text || 'Duplicate URL');
 			this.error.text(error_text).velocity('fadeIn', 100);
 			this.input.addClass('error');
 		},
@@ -226,7 +226,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			if (this.input && this.input.hasClass('error')) { this.input.removeClass('error'); }
 		},
 		save: function(slug) {
-			Spontaneous.Ajax.put(['/page',this.page.id(), "slug"].join("/"), {'slug':slug}, this.save_complete.bind(this));
+			Spontaneous.Ajax.put(['/page',this.page.id(), 'slug'].join('/'), {'slug':slug}, this.save_complete.bind(this));
 		},
 
 		save_complete: function(response, status, xhr) {
@@ -240,7 +240,7 @@ Spontaneous.Views.PageView = (function($, S) {
 				this.page.set('path', response.path);
 				this.page.set('slug', response.slug);
 				// HACK: see preview.js (Preview.display)
-				Spontaneous.Location.set('path', this.page.get('path'))
+				Spontaneous.Location.set('path', this.page.get('path'));
 			} else {
 				if (xhr.status === 409) { // duplicate path
 					this.show_path_error();
@@ -255,7 +255,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			var view = $('h3', this.panel), edit = $('.edit', this.panel);
 			view.show();
 			edit.hide();
-			this.panel.velocity({'height': '-=14'}, 200)
+			this.panel.velocity({'height': '-=14'}, 200);
 		}
 	};
 	var PageView = new JS.Class(Spontaneous.Views.View, {
@@ -267,20 +267,20 @@ Spontaneous.Views.PageView = (function($, S) {
 		panel: function() {
 			this.panel = dom.div('#page-content');
 			if (this.page.hidden()) {
-				this.panel.addClass('hidden')
+				this.panel.addClass('hidden');
 			}
 			var functionbar = new FunctionBar(this.page);
 			this._subviews.push(functionbar);
 			this.panel.append(functionbar.panel());
 
-			var fields = dom.div('#page-fields')
+			var fields = dom.div('#page-fields');
 			var fp = new Spontaneous.FieldPreview(this, '');
 			this._subviews.push(fp);
 			var p = fp.panel();
-			p.prepend(dom.div('.overlay'))
+			p.prepend(dom.div('.overlay'));
 
 			var preview_area = this.create_edit_wrapper(p);
-			fields.append(preview_area)
+			fields.append(preview_area);
 			this.panel.append(fields);
 			var boxes = new Spontaneous.BoxContainer(this.page, 'page-slots');
 			this._subviews.push(boxes);

@@ -2,8 +2,8 @@
 
 Spontaneous.Types = (function($, S) {
 	var ajax = S.Ajax
-	, user = S.User
-	, type_map = {};
+, user = S.User
+, type_map = {};
 
 	var BoxPrototype = new JS.Class({
 		initialize: function(type_data) {
@@ -47,7 +47,7 @@ Spontaneous.Types = (function($, S) {
 				this.field_names.push(f.name);
 				this.field_prototypes[f.name] = f;
 			}
-			for (var i = 0, ii = boxes.length; i < ii; i++) {
+			for (i = 0, ii = boxes.length; i < ii; i++) {
 				var b = boxes[i];
 				this.box_ids.push(b.id);
 				this.box_prototypes[b.id] = new BoxPrototype(b);
@@ -63,12 +63,12 @@ Spontaneous.Types = (function($, S) {
 			return this.data.is_alias;
 		},
 		edit_url: function() {
-			return S.editor_protocol + "://open?url=file://"+this.data.source;
+			return S.editor_protocol + '://open?url=file://'+this.data.source;
 		},
 		display_title: function(content) {
 			var t = this.title;
 			if (user.is_developer()) {
-				t += "/" + content.id();
+				t += '/' + content.id();
 			}
 			return t;
 		}
@@ -77,7 +77,7 @@ Spontaneous.Types = (function($, S) {
 		include: Spontaneous.Properties,
 		loaded: function(typeData) {
 			var types = {};
-			for (id in typeData) {
+			for (var id in typeData) {
 				if (typeData.hasOwnProperty(id)) {
 					types[id] = new Type(typeData[id]);
 				}

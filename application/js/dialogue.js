@@ -28,16 +28,16 @@ Spontaneous.Dialogue = (function($, S) {
 			return ['button', (this.is_default ? 'default' : ''), this.label.toLowerCase().split(' ')[0]].join(' ');
 		},
 		disable: function() {
-			this.set_disabled(true)
+			this.set_disabled(true);
 		},
 		enable: function() {
-			this.set_disabled(false)
+			this.set_disabled(false);
 		},
 		set_disabled: function(state) {
 			this.disabled = state;
 			this.button.removeClass('disabled');
 			if (this.disabled) {
-				this.button.addClass('disabled')
+				this.button.addClass('disabled');
 			}
 		}
 	});
@@ -62,7 +62,7 @@ Spontaneous.Dialogue = (function($, S) {
 			return '50%';
 		},
 		title: function() {
-			return "Dialogue";
+			return 'Dialogue';
 		},
 		class_name: function() {
 			return '';
@@ -103,14 +103,14 @@ Spontaneous.Dialogue = (function($, S) {
 			if (this._open || !instance) { return; }
 			this._instance = instance;
 			instance.manager = this;
-			$('body').css("overflow", "hidden");
+			$('body').css('overflow', 'hidden');
 			this.overlay().velocity('fadeIn', {duration: 200});
 			var c = this.container(), a = this._actions, b;
 			var buttons = instance.buttons(), button_map = {};
 			a.empty().append(dom.div('.spacer'));
 			b = instance.cancel_button();
 			if (b) {
-				button_map['cancel'] = b;
+				button_map.cancel = b;
 				button_map[instance.cancel_label().toLowerCase()] = b;
 				a.append(b.html());
 				$(document).bind('keydown.dialogue', function(event) {
@@ -148,12 +148,12 @@ Spontaneous.Dialogue = (function($, S) {
 			, dialogueHeight = (+contentsHeight) + this._actions.outerHeight() + this._title.outerHeight()
 			, el = this._frame;
 			dialogueHeight = Math.max(dialogueHeight, 100);
-			if (contentsHeight && dialogueHeight <  this._originalHeight) {
+			if (contentsHeight && dialogueHeight < this._originalHeight) {
 				el.velocity({'height': dialogueHeight}, 400);
 			}
 		},
 		disable_button: function(button_name) {
-			var button = this.button_map[button_name.toLowerCase()]
+			var button = this.button_map[button_name.toLowerCase()];
 			button.disable();
 		},
 		close: function() {
@@ -161,7 +161,7 @@ Spontaneous.Dialogue = (function($, S) {
 			this._instance.cleanup();
 			this.container().remove();
 			this.overlay().velocity('fadeOut', 200, function() {
-				$('body').css("overflow", "auto");
+				$('body').css('overflow', 'auto');
 			});
 			this._instance = this._container = this._open = false;
 			$(document).unbind('keydown.dialogue');
@@ -185,10 +185,10 @@ Spontaneous.Dialogue = (function($, S) {
 				outline.append(title);
 				outline.append(body);
 				outline.append(controls_wrap);
-				wrap.append(outline)
+				wrap.append(outline);
 				$('#content').append(wrap);
 				this._originalHeight = outline.outerHeight();
-				console.log('orig height', this._originalHeight)
+				console.log('orig height', this._originalHeight);
 				this._frame = outline;
 				this._actions = actions;
 				this._title = title;
@@ -200,7 +200,7 @@ Spontaneous.Dialogue = (function($, S) {
 		overlay: function() {
 			if (!this._overlay) {
 				var o = dom.div('#dialogue-overlay').css('z-index', this.z_index()).hide();
-				$('#content').append(o)
+				$('#content').append(o);
 				this._overlay = o;
 			}
 			return this._overlay;

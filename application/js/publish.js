@@ -8,7 +8,7 @@ Spontaneous.Publishing = (function($, S) {
 			this.change_sets = [];
 			var callback = this.page_lock_removed.bind(this);
 			var page_lock_removed = function(event) {
-				callback($.parseJSON(event.data))
+				callback($.parseJSON(event.data));
 			};
 			S.EventSource.addEventListener('page_lock_status', page_lock_removed);
 			this.page_lock_removed_listener = page_lock_removed;
@@ -16,7 +16,7 @@ Spontaneous.Publishing = (function($, S) {
 		page_lock_removed: function(page_ids) {
 			var changes = this.change_sets, toUnlock = [];
 			page_ids.forEach(function(id) {
-				toUnlock = toUnlock.concat(changes.filter(function(c) { return c.change.id == id }))
+				toUnlock = toUnlock.concat(changes.filter(function(c) { return c.change.id == id; }));
 			});
 
 			toUnlock.forEach(function(cs) {
@@ -30,21 +30,21 @@ Spontaneous.Publishing = (function($, S) {
 			return '90%';
 		},
 		title: function() {
-			return "Publish Changes";
+			return 'Publish Changes';
 		},
 		class_name: function() {
-			return "publishing";
+			return 'publishing';
 		},
 		body: function() {
 			var wrapper = dom.div('#publishing-dialogue');
-			var spinner = dom.div(".spinner");
+			var spinner = dom.div('.spinner');
 			wrapper.append(spinner);
 
 			this.spinnerWrap = spinner;
 			this.wrapper = wrapper;
 			this.spinner = S.Progress(spinner[0], 48, {period: 800, segment_length: 0.30});
-			this.spinner.start()
-			spinner.append(dom.div().append(dom.p().text("Loading changes...")))
+			this.spinner.start();
+			spinner.append(dom.div().append(dom.p().text('Loading changes...')));
 			Spontaneous.Ajax.get('/changes', this.change_list_loaded.bind(this));
 			return wrapper;
 		},
@@ -72,18 +72,18 @@ Spontaneous.Publishing = (function($, S) {
 
 		change_list_loaded: function(outstanding) {
 			var change_list = outstanding.changes
-			, w = this.wrapper
-			, self = this
-			, changed_wrap = dom.div("#changes.change-list").css("opacity", 0)
-			, publish_wrap = dom.div("#to-publish.change-list").css("opacity", 0)
+, w = this.wrapper
+, self = this
+, changed_wrap = dom.div('#changes.change-list').css('opacity', 0)
+			, publish_wrap = dom.div('#to-publish.change-list').css('opacity', 0)
 			, must_publish_all = outstanding.first_publish || outstanding.must_publish_all
-			, spinner = this.spinner
-			, append_to;
+, spinner = this.spinner
+, append_to;
 			if (must_publish_all) {
-				w.addClass("first-publish");
+				w.addClass('first-publish');
 			}
 			if (change_list.length === 0) {
-				var summary = dom.p('.publish-up-to-date').text("The site is up to date");
+				var summary = dom.p('.publish-up-to-date').text('The site is up to date');
 				w.append(summary);
 				self.disable_button('Publish');
 			} else {
@@ -94,12 +94,12 @@ Spontaneous.Publishing = (function($, S) {
 					self.set_publish_all(false);
 				}.bind(self));
 
-				var changed_toolbar = dom.div('.actions').append(dom.div().text("Modified pages")).append(publish_all);
-				var publish_toolbar = dom.div('.actions').append(dom.div().text("Publish pages"));
+				var changed_toolbar = dom.div('.actions').append(dom.div().text('Modified pages')).append(publish_all);
+				var publish_toolbar = dom.div('.actions').append(dom.div().text('Publish pages'));
 				if (!must_publish_all) {
 					publish_toolbar.append(clear_all);
 				}
-				var changed_entries = dom.div('.change-sets'), publish_entries = dom.div('.change-sets')
+				var changed_entries = dom.div('.change-sets'), publish_entries = dom.div('.change-sets');
 				changed_wrap.append(changed_toolbar, changed_entries);
 				publish_wrap.append(publish_toolbar, publish_entries);
 				append_to = changed_entries;
@@ -109,7 +109,7 @@ Spontaneous.Publishing = (function($, S) {
 				for (var i = 0, ii = change_list.length; i < ii; i++) {
 					var cs = new ChangeSet(i, self, change_list[i], must_publish_all);
 					self.change_sets.push(cs);
-					append_to.append(cs.panel())
+					append_to.append(cs.panel());
 				}
 				if (!must_publish_all) {
 					publish_entries.append(dom.div('.instructions').text('Add pages to publish from the list on the left'));
@@ -117,7 +117,7 @@ Spontaneous.Publishing = (function($, S) {
 				spinner.stop();
 				this.spinnerWrap.remove();
 				w.empty();
-				w.append(changed_wrap, publish_wrap)
+				w.append(changed_wrap, publish_wrap);
 				changed_wrap.add(publish_wrap).velocity({opacity: 1});
 				self.changed_entries = changed_entries;
 				self.publish_entries = publish_entries;
@@ -139,11 +139,11 @@ Spontaneous.Publishing = (function($, S) {
 				change_set.panel().disappear();
 				panel.appear();
 			} else {
-				panel = this.publish_entries.find('#'+id)
+				panel = this.publish_entries.find('#'+id);
 				panel.disappear(function() {
 					panel.remove();
 					var entries = __this.publish_entries;
-					if (entries.find('.change-set').length == 0) {
+					if (entries.find('.change-set').length === 0) {
 						entries.find('.instructions').fadeIn();
 					}
 				});
@@ -158,7 +158,7 @@ Spontaneous.Publishing = (function($, S) {
 			var dependentGraph = this.change_sets.filter(function(set) {
 				return set.has_dependency(dependentPage);
 			});
-			var group = dependentSet.concat(dependentGraph)
+			var group = dependentSet.concat(dependentGraph);
 			group.forEach(function(set) {
 				set.select(true);
 			});
@@ -194,18 +194,18 @@ Spontaneous.Publishing = (function($, S) {
 			return !this.published_at;
 		},
 		isDependent: function() {
-			return !this.hasOwnProperty("dependent");
+			return !this.hasOwnProperty('dependent');
 		},
 
 		panel: function() {
 			var self = this
-			, pageTitle = dom.span(".page-title").html(this.title)
-			, classes = ".title" + (this.isDependent() ? ".dependent" : "")
+, pageTitle = dom.span('.page-title').html(this.title)
+			, classes = '.title' + (this.isDependent() ? '.dependent' : '')
 			, modificationDate = dom.div('.modification-date').html(this.modifiedAt())
 			, publicationDate = dom.div('.publication-date').html(this.publishedAt())
-			, metadata = dom.div(".dates").append(modificationDate, publicationDate)
+			, metadata = dom.div('.dates').append(modificationDate, publicationDate);
 			if (this.isUnpublished()) {
-				pageTitle.attr("title", "This page is new and has never been published");
+				pageTitle.attr('title', 'This page is new and has never been published');
 			}
 			return dom.div(classes).append(pageTitle, dom.div('.url').text(this.url)).append(metadata).click(function() {
 				S.Dialogue.close();
@@ -213,7 +213,7 @@ Spontaneous.Publishing = (function($, S) {
 			});
 		},
 		modifiedAt: function() {
-			return "Modified: " + this.formatDate(this.modified_at);
+			return 'Modified: ' + this.formatDate(this.modified_at);
 		},
 		publishedAt: function() {
 			var date;
@@ -222,13 +222,13 @@ Spontaneous.Publishing = (function($, S) {
 			} else {
 				date = this.formatDate(this.published_at);
 			}
-			return "Published: " + date;
+			return 'Published: ' + date;
 		},
 		formatDate: function(dateString) {
-			if (!dateString) { return ""; }
+			if (!dateString) { return ''; }
 			var d = new Date(dateString);
 			// use date.js formatting
-			return d.toString("d MMM yyyy, HH:mm");
+			return d.toString('d MMM yyyy, HH:mm');
 		}
 	});
 	var ChangeSet = new JS.Class({
@@ -236,7 +236,7 @@ Spontaneous.Publishing = (function($, S) {
 			this.id = id;
 			this.dialogue = dialogue;
 			this.change = change;
-			this.selected    = selected || false;
+			this.selected = selected || false;
 			this.mustPublish = selected || false;
 		},
 		locks: function(){
@@ -247,7 +247,7 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		unlock: function() {
 			var w = this.wrapper;
-			w.removeClass("locked").find(".lock-state").remove();
+			w.removeClass('locked').find('.lock-state').remove();
 			this.locks().length = 0;
 		},
 		page_ids: function() {
@@ -269,16 +269,16 @@ Spontaneous.Publishing = (function($, S) {
 			, page = this.page()
 			, pages = this.dependent_pages()
 			, locked = this.isLocked()
-			, info = dom.div(".info").hide();
+			, info = dom.div('.info').hide();
 
 			if (page.isUnpublished()) {
 				w.addClass('unpublished');
 			}
 			if (locked) {
 				w.addClass('locked');
-				var lockState = dom.div(".lock-state")
-				, title = dom.h3().html("<strong>Cannot publish page</strong> until the following actions have completed:")
-				, details = dom.div(".locks")
+				var lockState = dom.div('.lock-state')
+				, title = dom.h3().html('<strong>Cannot publish page</strong> until the following actions have completed:')
+				, details = dom.div('.locks')
 				, locks = this.locks();
 				locks.forEach(function(lock) {
 					var line = dom.p();
@@ -286,13 +286,13 @@ Spontaneous.Publishing = (function($, S) {
 					line.prepend(dom.strong().text(lock.location));
 					details.append(line);
 				});
-				lockState.append(title, details)
+				lockState.append(title, details);
 				info.append(lockState);
 				page_list.append(info);
 				add.hover(function() {
-					info.show().velocity({"width": "100%"}, 150);
+					info.show().velocity({'width': '100%'}, 150);
 				}, function() {
-					info.hide().css("width", 0);
+					info.hide().css('width', 0);
 				});
 			}
 			page_list.append(page.panel());
@@ -319,7 +319,7 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		select: function(state) {
 			var self = this;
-			if (this.isLocked()) { return ; }
+			if (this.isLocked()) { return; }
 			if (state === self.selected) { return; }
 			if (!state && self.dependency_forces_publish()) {
 				return;
@@ -337,18 +337,18 @@ Spontaneous.Publishing = (function($, S) {
 			}
 		},
 		select_toggle: function() {
-			this.select(!this.selected)
+			this.select(!this.selected);
 		},
 		update_view: function() {
 			if (this.selected) {
-				this.wrapper.addClass('selected')
+				this.wrapper.addClass('selected');
 			} else {
-				this.wrapper.removeClass('selected')
+				this.wrapper.removeClass('selected');
 			}
 		},
 		page: function() {
 			return new Page(this.change);
-		}.cache("_page_"),
+		}.cache('_page_'),
 
 		dependency_forces_publish: function() {
 			return this.dialogue.dependency_forces_publish(this);

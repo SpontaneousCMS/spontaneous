@@ -34,14 +34,14 @@ Spontaneous.Upload = (function($, S) {
 			if (this.target_version) {
 				form.append('version', this.target_version);
 			}
-			this.put("/file/"+this.target_id, form);
+			this.put('/file/'+this.target_id, form);
 		},
 
 		post: function(url, form_data) {
-			this.request("POST", url, form_data)
+			this.request('POST', url, form_data);
 		},
 		put: function(url, form_data) {
-			this.request("PUT", url, form_data)
+			this.request('PUT', url, form_data);
 		},
 		request: function(verb, url, form_data) {
 			this.xhr = S.Ajax.authenticatedRequest();
@@ -78,7 +78,7 @@ Spontaneous.Upload = (function($, S) {
 			if (xhr.readyState == 4) {
 				if (xhr.status === 200) {
 					if (!this.complete) {
-						console.log(xhr)
+						console.log(xhr);
 						var result = JSON.parse(xhr.responseText);
 						this.manager.upload_complete(this, result);
 						this.complete = true;

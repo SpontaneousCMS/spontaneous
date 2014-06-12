@@ -7,7 +7,7 @@
  * @author Bevis Zhao (i@bevis.me, http://bevis.me)
  */
 (function($) {
-	"use strict";
+	'use strict';
 
 	var calculator = {
 		// key styles
@@ -26,7 +26,7 @@ specificStyle: {
 'overflow-y': 'auto'
 },
 
-simulator : $('<div id="textarea_simulator"/>').css({
+simulator: $('<div id="textarea_simulator"/>').css({
 	position: 'absolute',
 top: 0,
 left: 0,
@@ -53,7 +53,7 @@ visibility: 'hidden'
 								selectStart = element.selectionStart,
 								selectEnd = element.selectionEnd;
 
-						if (selectEnd === selectStart) { return false; };
+						if (selectEnd === selectStart) { return false; }
 
 						var beforeText = value.substring(0, selectStart),
 								selectedText = value.substring(selectStart, selectEnd),
@@ -69,7 +69,7 @@ visibility: 'hidden'
 
 						return {
 							top: focusOffset.top - simulatorOffset.top - element.scrollTop,
-								left: focus[0].offsetLeft -  cal.simulator[0].offsetLeft - element.scrollLeft,
+								left: focus[0].offsetLeft - cal.simulator[0].offsetLeft - element.scrollLeft,
 								width: focus.width(),
 								height: focus.height()
 						};
@@ -87,22 +87,22 @@ var showPopup = function(textarea, popup, offsetCalculator) {
 
 	// In order to use the size of the popup in the positioning calculations
 	// it needs to be visible in the dom.
-	popup.css("visibility", "hidden").show();
+	popup.css('visibility', 'hidden').show();
 	var place = offsetCalculator(pos);
-	popup.hide().css("visibility", "visible");
+	popup.hide().css('visibility', 'visible');
 	if (top >= position.top && top < bottom) {
 		popup.css({
 			left: place.left,
 			top: place.top
-		}).velocity('fadeIn', 100)
+		}).velocity('fadeIn', 100);
 	} else {
 		popup.velocity('fadeOut', 100);
 	}
 	return true;
-}
+};
 $.fn.extend({
 	getComputedStyle: function(styleName) {
-		if (this.length == 0) return;
+		if (this.length === 0) { return; }
 		var self = this[0], result = this.css(styleName);
 		result = result || ($.browser.msie ? self.currentStyle[styleName]: document.defaultView.getComputedStyle(self, null)[styleName]);
 		return result;
@@ -118,11 +118,11 @@ showSelectionPopup: function(popup, offsetCalculator) {
 	var callback = function() {
 		var selected = showPopup(self, popup, offsetCalculator);
 		if (!selected) {
-			self.unbind("scroll.popup").unbind("mouseup.popup");
+			self.unbind('scroll.popup').unbind('mouseup.popup');
 		}
 	};
-	self.bind("scroll.popup", callback);
-	self.bind("mouseup.popup",  callback.delay(1));
+	self.bind('scroll.popup', callback);
+	self.bind('mouseup.popup', callback.delay(1));
 	callback();
 }
 });
