@@ -475,16 +475,16 @@ Spontaneous.MetaView.UserAdmin = (function($, S){
 			var back = dom.div(".back");
 			edit.append(back, viewInstance.view());
 			edit.css({ left: "100%", opacity: 0 }).show();
-			list.animate({ opacity: 0.2 }, animationDuration);
-			edit.animate({ left: "48px", opacity: 1 }, animationDuration, "swing")
+			list.velocity({ opacity: 0.2 }, animationDuration);
+			edit.velocity({ left: "48px", opacity: 1 }, animationDuration, "swing")
 			viewInstance.activate();
 		},
 		closeUser: function() {
 			var animationDuration = this.animationDuration;
 			var edit = this.editContainer.empty();
 			var list = this.contentsContainer;
-			list.animate({ opacity: 1 }, animationDuration);
-			edit.animate({ left: "100%", opacity: 0 }, animationDuration, function() {
+			list.velocity({ opacity: 1 }, animationDuration);
+			edit.velocity({ left: "100%", opacity: 0 }, animationDuration, function() {
 				edit.empty().hide();
 			});
 		},

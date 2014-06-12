@@ -26,7 +26,7 @@ Spontaneous.Services = (function($, S) {
 		},
 		display: function(url) {
 			var iframe = this.iframe;
-			iframe.fadeIn(200);
+			iframe.velocity('fadeIn', 200);
 			// iframe.bind('ready.services', function() {
 			// 	iframe.fadeIn(200);
 			// });

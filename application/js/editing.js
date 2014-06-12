@@ -17,7 +17,7 @@ Spontaneous.Editing = (function($, S) {
 		},
 		goto_page: function(page) {
 			if (!page) { return; }
-			this.container.show().fadeOut(0)
+			this.container.show().velocity('fadeOut', 0);
 			S.Ajax.get(["/page", page.id].join("/"), this.page_loaded.bind(this));
 			this.set('location', page);
 		},
@@ -57,7 +57,7 @@ Spontaneous.Editing = (function($, S) {
 			this.container.show();
 		},
 		showLoading: function() {
-			this.container.animate({'opacity': 0}, 100);
+			this.container.velocity({'opacity': 0}, 100);
 		},
 		hideLoading: function() {
 			// let the page_loaded function deal with actually showing the new page

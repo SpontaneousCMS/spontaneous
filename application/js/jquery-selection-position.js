@@ -94,9 +94,9 @@ var showPopup = function(textarea, popup, offsetCalculator) {
 		popup.css({
 			left: place.left,
 			top: place.top
-		}).fadeIn(100)
+		}).velocity('fadeIn', 100)
 	} else {
-		popup.fadeOut(100);
+		popup.velocity('fadeOut', 100);
 	}
 	return true;
 }

@@ -84,7 +84,7 @@ Spontaneous.ContentArea = (function($, S) {
 		},
 		scroll_to_bottom: function(duration, delay) {
 
-			this.inner.delay(delay || 0).animate({ scrollTop:this.inner[0].scrollHeight }, (duration || 1000));
+			this.inner.delay(delay || 0).velocity({ scrollTop:this.inner[0].scrollHeight }, (duration || 1000));
 		},
 		showService: function(service) {
 			if (!this.modeBeforeService) {
@@ -102,11 +102,11 @@ Spontaneous.ContentArea = (function($, S) {
 			if (this.metaView === view) { return; }
 			this.metaView = view;
 			var outer = this.metaWrap.hide();
-			this.inner.animate({top: "100%"}, 300, function() {
+			this.inner.velocity({top: "100%"}, 300, function() {
 				if (view && typeof view.show === "function") {
 					view.show(outer);
 				}
-				outer.fadeIn(300);
+				outer.velocity('fadeIn', 300);
 			});
 		},
 		exitMeta: function() {
@@ -116,10 +116,10 @@ Spontaneous.ContentArea = (function($, S) {
 			}
 			this.metaView = null;
 			var inner = this.inner, outer = this.metaWrap;
-			inner.animate({top: "0%"}, 300, function() {
+			inner.velocity({top: "0%"}, 300, function() {
 				outer.empty().hide();
 			});
-			outer.fadeOut(300);
+			outer.velocity('fadeOut', 300);
 		}
 	});
 	return ContentArea;

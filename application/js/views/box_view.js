@@ -1,6 +1,7 @@
 // console.log('Loading BoxView...')
 
 Spontaneous.Views.BoxView = (function($, S) {
+	"use strict";
 	var dom = S.Dom;
 
 	var BoxView = new JS.Class(Spontaneous.Views.View, {
@@ -110,11 +111,11 @@ Spontaneous.Views.BoxView = (function($, S) {
 			var _view = this, _panel = this._panel;
 			if (_view.box.entries().length === 0) {
 				_panel.addClass('empty');
-				// _view._bottom_add_bar.fadeOut($.fn.appear.height_change_duration/2, function() {
+				// _view._bottom_add_bar.velocity('fadeOut', $.fn.appear.height_change_duration/2, function() {
 				// })
 			} else {
 				_panel.removeClass('empty');
-				// _view._bottom_add_bar.fadeIn(function() {
+				// _view._bottom_add_bar.velocity('fadeIn', function() {
 				// })
 			}
 		},
@@ -230,7 +231,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			if (entry.is_page()) {
 				view_class = S.Views.PagePieceView;
 			}
-			view = new view_class(entry, this);
+			view = new view_class(entry, this); // jshint ignore:line
 			return view;
 		},
 		claim_entry: function(entry) {
@@ -320,12 +321,12 @@ Spontaneous.Views.BoxView = (function($, S) {
 				}
 				var newHeight = bar.find('.addable-inner').outerHeight() + 11, currentHeight = entry_spacer.outerHeight();
 				newHeight = Math.max(newHeight, currentHeight);
-				entry_spacer.animate({height:newHeight}, 200);
+				entry_spacer.velocity({height:newHeight}, 200);
 			}
 		},
 		hide_add_after: function(entry, entry_spacer) {
 			entry_spacer.empty();
-			entry_spacer.removeClass('add-entry').animate({height: entry_spacer.data("auto-height")}, 200);
+			entry_spacer.removeClass('add-entry').velocity({height: entry_spacer.data("auto-height")}, 200);
 		}
 	});
 

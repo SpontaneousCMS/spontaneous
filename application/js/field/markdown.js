@@ -610,7 +610,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 				var text_height = input[0].scrollHeight, max_height = 500, resize_height = Math.min(text_height, max_height);
 				// console.log(resize_height, h)
 				if (Math.abs(resize_height - h) > 20) {
-					// input.animate({'height':resize_height});
+					// input.velocity({'height':resize_height});
 					this.expanded = true;
 				}
 			}
@@ -619,7 +619,7 @@ Spontaneous.Field.Markdown = (function($, S) {
 		on_blur: function() {
 			if (this.expanded) {
 				var input = this.input();
-				// input.animate({ 'height':input.data('original-height') });
+				// input.velocity({ 'height':input.data('original-height') });
 				this.expanded = false;
 			}
 			this.callSuper();

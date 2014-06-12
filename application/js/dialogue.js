@@ -104,7 +104,7 @@ Spontaneous.Dialogue = (function($, S) {
 			this._instance = instance;
 			instance.manager = this;
 			$('body').css("overflow", "hidden");
-			this.overlay().fadeIn(200);
+			this.overlay().velocity('fadeIn', {duration: 200});
 			var c = this.container(), a = this._actions, b;
 			var buttons = instance.buttons(), button_map = {};
 			a.empty().append(dom.div('.spacer'));
@@ -139,7 +139,7 @@ Spontaneous.Dialogue = (function($, S) {
 			this.button_map = button_map;
 			this._body.empty().append(instance.body());
 
-			c.fadeIn(200);
+			c.velocity('fadeIn', {duration: 200});
 			this._open = true;
 		},
 
@@ -149,7 +149,7 @@ Spontaneous.Dialogue = (function($, S) {
 			, el = this._frame;
 			dialogueHeight = Math.max(dialogueHeight, 100);
 			if (contentsHeight && dialogueHeight <  this._originalHeight) {
-				el.animate({'height': dialogueHeight}, 400);
+				el.velocity({'height': dialogueHeight}, 400);
 			}
 		},
 		disable_button: function(button_name) {
@@ -160,7 +160,7 @@ Spontaneous.Dialogue = (function($, S) {
 			if (!this._instance || !this._open) { return; }
 			this._instance.cleanup();
 			this.container().remove();
-			this.overlay().fadeOut(200, function() {
+			this.overlay().velocity('fadeOut', 200, function() {
 				$('body').css("overflow", "auto");
 			});
 			this._instance = this._container = this._open = false;

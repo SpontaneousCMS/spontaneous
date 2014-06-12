@@ -118,7 +118,7 @@ Spontaneous.Publishing = (function($, S) {
 				this.spinnerWrap.remove();
 				w.empty();
 				w.append(changed_wrap, publish_wrap)
-				changed_wrap.add(publish_wrap).animate({opacity: 1});
+				changed_wrap.add(publish_wrap).velocity({opacity: 1});
 				self.changed_entries = changed_entries;
 				self.publish_entries = publish_entries;
 				this.spinner = this.spinnerWrap = null;
@@ -290,7 +290,7 @@ Spontaneous.Publishing = (function($, S) {
 				info.append(lockState);
 				page_list.append(info);
 				add.hover(function() {
-					info.show().animate({"width": "100%"}, 150);
+					info.show().velocity({"width": "100%"}, 150);
 				}, function() {
 					info.hide().css("width", 0);
 				});

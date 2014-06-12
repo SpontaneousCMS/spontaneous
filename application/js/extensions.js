@@ -81,7 +81,7 @@ function $A(iterable) {
 
 	$.fn.appear = function(callback) {
 		var $this = this, siblings = $this.siblings(), fade_in = function() {
-			$this.animate({'opacity':1}, {
+			$this.velocity({'opacity':1}, {
 				duration: opacity_change_duration,
 				complete: callback
 			});
@@ -106,7 +106,7 @@ function $A(iterable) {
 
 	$.fn.disappear = function(callback) {
 		var $this = this;
-		this.animate({'opacity':0}, {
+		this.velocity({'opacity':0}, {
 			duration: opacity_change_duration,
 			complete: function() {
 				$this.animate({'height':'hide'}, {

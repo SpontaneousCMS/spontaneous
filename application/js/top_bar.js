@@ -342,7 +342,7 @@ Spontaneous.TopBar = (function($, S) {
 		user_loaded: function(user) {
 			if (user.can_publish()) {
 				this.disabled = false;
-				this.button().removeClass("disabled").fadeIn();
+				this.button().removeClass("disabled").velocity('fadeIn');
 			}
 		},
 		update_status: function(status) {

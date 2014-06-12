@@ -41,7 +41,7 @@ Spontaneous.EditPanel = (function($, S) {
 				field_data.append(v.name, v.value);
 				size += (v.name.length + v.value.length);
 			});
-			$('> *', this.form).animate({'opacity': 0.3}, 400);
+			$('> *', this.form).velocity({'opacity': 0.3}, 400);
 			if (values.length > 0) {
 				Spontaneous.UploadManager.form(this, field_data, size);
 			} else {

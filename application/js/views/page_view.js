@@ -83,7 +83,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			this.unavailable = u;
 		},
 		open_uid_editor: function() {
-			this.panel.animate({'height': '+=14'}, 200, function() {
+			this.panel.velocity({'height': '+=14'}, 200, function() {
 				var view = $('h3', this.panel), edit = $('.edit', this.panel);
 				view.hide();
 				edit.hide().empty();
@@ -118,7 +118,7 @@ Spontaneous.Views.PageView = (function($, S) {
 				}.bind(this)).keydown(function(event) {
 					if (event.keyCode === 27) { this.close(); }
 				}.bind(this));
-				edit.fadeIn(200);
+				edit.velocity('fadeIn', 200);
 			}.bind(this));
 		},
 		save_uid: function(uid) {
@@ -137,7 +137,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			this.unavailable = false;
 			this.url_editor_open = true;
 			Spontaneous.Ajax.get(['/page', this.page.id(), 'slug/unavailable'].join('/'), this.unavailable_loaded.bind(this));
-			this.panel.animate({'height': '+=14'}, 200, function() {
+			this.panel.velocity({'height': '+=14'}, 200, function() {
 				var view = $('h3', this.panel), edit = $('.edit', this.panel);
 				view.hide();
 				edit.hide().empty();
@@ -208,7 +208,7 @@ Spontaneous.Views.PageView = (function($, S) {
 					if (event.keyCode === 27) { close(); }
 				}.bind(this));
 
-				edit.fadeIn(200, function() {
+				edit.velocity('fadeIn', 200, function() {
 					input.focus();
 				});
 				this.input = input;
@@ -217,11 +217,11 @@ Spontaneous.Views.PageView = (function($, S) {
 		},
 		show_path_error: function(error_text) {
 			error_text = (error_text || "Duplicate URL");
-			this.error.text(error_text).fadeIn(100);
+			this.error.text(error_text).velocity('fadeIn', 100);
 			this.input.addClass('error');
 		},
 		hide_path_error: function(error_text) {
-			if (this.error) { this.error.fadeOut(100); }
+			if (this.error) { this.error.velocity('fadeOut', 100); }
 
 			if (this.input && this.input.hasClass('error')) { this.input.removeClass('error'); }
 		},
@@ -255,7 +255,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			var view = $('h3', this.panel), edit = $('.edit', this.panel);
 			view.show();
 			edit.hide();
-			this.panel.animate({'height': '-=14'}, 200)
+			this.panel.velocity({'height': '-=14'}, 200)
 		}
 	};
 	var PageView = new JS.Class(Spontaneous.Views.View, {
