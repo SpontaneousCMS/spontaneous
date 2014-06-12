@@ -22,18 +22,22 @@ Spontaneous.Editing = (function($, S) {
 			this.set('location', page);
 		},
 		page_loaded: function(page_data) {
-			var page = this.get('page');
-			var view = this.get('view');
+			var self = this
+			, page = self.get('page')
+			, view = self.get('view')
+			, panel = self.container;
 			if (page) { page.unload(); }
 			if (view) { view.unload(); }
 			page = new Page(page_data);
-			page.watch('path', this.path_updated.bind(this));
+			page.watch('path', self.path_updated.bind(self));
 			view = new S.Views.PageView(page);
-			this.container.empty();
-			this.container.append(view.panel());
-			this.set('page', page);
-			this.set('view', view);
-			this.container.fadeIn(300);
+			panel.animate({opacity: 0}, 0, function() {
+				panel.empty().show();
+				panel.append(view.panel());
+				self.set('page', page);
+				self.set('view', view);
+				panel.velocity({opacity: 1}, 200);
+			});
 		},
 		path_updated: function(path) {
 			this.set('path', path);
@@ -53,10 +57,10 @@ Spontaneous.Editing = (function($, S) {
 			this.container.show();
 		},
 		showLoading: function() {
-			this.container.animate({'opacity': 0}, 150);
+			this.container.animate({'opacity': 0}, 100);
 		},
 		hideLoading: function() {
-			this.container.animate({'opacity': 1}, 150);
+			// let the page_loaded function deal with actually showing the new page
 		}
 	});
 	return Editing;
