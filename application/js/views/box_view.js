@@ -325,8 +325,10 @@ Spontaneous.Views.BoxView = (function($, S) {
 			}
 		},
 		hide_add_after: function(entry, entry_spacer) {
-			entry_spacer.empty();
-			entry_spacer.removeClass('add-entry').velocity({height: entry_spacer.data('auto-height')}, 200);
+			if (entry_spacer.data('auto-height')) {
+				entry_spacer.empty();
+				entry_spacer.removeClass('add-entry').velocity({height: entry_spacer.data('auto-height')}, 200);
+			}
 		}
 	});
 
