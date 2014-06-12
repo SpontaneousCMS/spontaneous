@@ -82,7 +82,7 @@ Spontaneous.Views.PageView = (function($, S) {
 			this.unavailable = u;
 		},
 		open_uid_editor: function() {
-			this.panel.velocity({'height': '+=14'}, 200, function() {
+			this.panel.velocity({'height': '+=14'}, { duration: 200, complete: function() {
 				var view = $('h3', this.panel), edit = $('.edit', this.panel);
 				view.hide();
 				edit.hide().empty();
@@ -118,7 +118,7 @@ Spontaneous.Views.PageView = (function($, S) {
 					if (event.keyCode === 27) { this.close(); }
 				}.bind(this));
 				edit.velocity('fadeIn', 200);
-			}.bind(this));
+			}.bind(this)});
 		},
 		save_uid: function(uid) {
 			Spontaneous.Ajax.put(['/page',this.page.id(), 'uid'].join('/'), {'uid':uid}, this.uid_save_complete.bind(this));
@@ -136,9 +136,9 @@ Spontaneous.Views.PageView = (function($, S) {
 			this.unavailable = false;
 			this.url_editor_open = true;
 			Spontaneous.Ajax.get(['/page', this.page.id(), 'slug/unavailable'].join('/'), this.unavailable_loaded.bind(this));
-			this.panel.velocity({'height': '+=14'}, 200, function() {
-				var view = $('h3', this.panel), edit = $('.edit', this.panel);
-				view.hide();
+			this.panel.velocity({'height': '+=14'}, {duration: 200, complete: function() {
+				var view = $('h3', this.panel), edit = $('.edit', this.panel), spacer = $('.path-spacer', this.panel);
+				spacer.add(view).hide();
 				edit.hide().empty();
 				var path = [''], parts = this.page.get('path').split('/'), slug = parts.pop();
 				parts.shift(); // remove empty entry caused by leading '/'
@@ -208,12 +208,12 @@ Spontaneous.Views.PageView = (function($, S) {
 					if (event.keyCode === 27) { close(); }
 				}.bind(this));
 
-				edit.velocity('fadeIn', 200, function() {
+				edit.velocity({opacity: 1}, {duration: 200, display: 'flex', complete: function() {
 					input.focus();
-				});
+				}});
 				this.input = input;
 				this.error = error;
-			}.bind(this));
+			}.bind(this)});
 		},
 		show_path_error: function(error_text) {
 			error_text = (error_text || 'Duplicate URL');
@@ -252,8 +252,8 @@ Spontaneous.Views.PageView = (function($, S) {
 		},
 		close: function() {
 			this.url_editor_open = false;
-			var view = $('h3', this.panel), edit = $('.edit', this.panel);
-			view.show();
+			var view = $('h3', this.panel), edit = $('.edit', this.panel), spacer = $('.path-spacer', this.panel);
+			view.add(spacer).show();
 			edit.hide();
 			this.panel.velocity({'height': '-=14'}, 200);
 		}
