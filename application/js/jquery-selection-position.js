@@ -89,12 +89,12 @@ var showPopup = function(textarea, popup, offsetCalculator) {
 	// it needs to be visible in the dom.
 	popup.css('visibility', 'hidden').show();
 	var place = offsetCalculator(pos);
-	popup.hide().css('visibility', 'visible');
+	popup.css({opacity: 0}).css('visibility', 'visible');
 	if (top >= position.top && top < bottom) {
 		popup.css({
 			left: place.left,
 			top: place.top
-		}).velocity('fadeIn', 100);
+		}).velocity({opacity: 1}, {duration: 100});
 	} else {
 		popup.velocity('fadeOut', 100);
 	}
