@@ -60,24 +60,22 @@ Spontaneous.ContentArea = (function($, S) {
 			this.current().display(S.Location.location());
 		},
 		current: function() {
-			this.exitMeta();
-			// YUK
-			if (this.mode === 'preview') {
-				this.editing.hide();
-				this.service.hide();
-				this.preview.show();
-				return this.preview;
-			} else if (this.mode === 'edit') {
-				this.preview.hide();
-				this.service.hide();
-				this.editing.show();
-				return this.editing;
-			} else if (this.mode === 'service') {
-				this.preview.hide();
-				this.editing.hide();
-				this.service.show();
-				return this.service;
+			var self = this, hide = [], active, editing = self.editing, service = self.service, preview = self.preview;
+			self.exitMeta();
+
+			if (self.mode === 'preview') {
+				hide = [editing, service];
+				active = preview;
+			} else if (self.mode === 'edit') {
+				hide = [preview, service];
+				active = editing;
+			} else if (self.mode === 'service') {
+				hide = [preview, editing];
+				active = service;
 			}
+			hide.forEach(function(el) { el.hide(); });
+			active.show();
+			return active;
 		},
 		goto_page: function(page) {
 			this.current().goto_page(page);
