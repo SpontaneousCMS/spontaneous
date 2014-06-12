@@ -46,7 +46,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			this.container_view = container_view;
 		},
 		panel: function() {
-			var wrapper = dom.div(['entry-wrap', this.depth_class(), this.visibility_class(), this.boxes_class()]);
+			var wrapper = dom.div(['entry-wrap', this.fields_class(), this.alias_class(), this.depth_class(), this.visibility_class(), this.boxes_class()]);
 			var contents = dom.div('.entry-contents');
 			var inside = dom.div('.entry-inner');
 			var outline = dom.div('.white-bg').
@@ -95,6 +95,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			return entry_spacer;
 		},
 		edit: function(focus_field) {
+			if (!this.content.has_fields()) { return; }
 			this.wrapper.addClass('editing');
 			this.callSuper(focus_field);
 		},
@@ -127,7 +128,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			if (!this._title_bar) {
 				var label = user.is_developer() ? dom.a('.developer.source').attr('href', this.content.developer_edit_url()).text(this.content.developer_description()) : (this.content.type().title);
 				var action_buttons = dom.div('.title-bar');//.append(label);
-				var actions = dom.div('.actions', {'xstyle':'display: none'});
+				var actions = dom.div('.actions');
 				var destroy = dom.a('.delete');
 				var visibility = dom.a('.visibility');
 				actions.append(destroy);
@@ -164,6 +165,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			}
 		},
 		mouseover: function() {
+			if (!this.content.has_fields()) { return; }
 			this.outline.addClass('active');
 			if (this.fields_preview) {
 				this.fields_preview.addClass('hover');

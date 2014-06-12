@@ -898,10 +898,17 @@ img.missing {
 		.entry-inner {
 			@extend .clearfix;
 			@include rounded;
+			// @include box-sizing;
 			// background-color: gray;
 			// padding: $unit;
 			position: relative;
       padding-bottom: $unit;
+			min-height: $container-padding;
+		}
+		&.alias {
+			.entry-inner {
+				min-height: $container-padding / 2;
+			}
 		}
 		.title-bar {
 			// @include vertical-gradient(gray + #111111, gray);
@@ -932,28 +939,46 @@ img.missing {
 				@include display-box;
 				@include box-orient(column);
 				@include rounded-bottom;
-				top: $unit/2;
+				position: relative;
+				top: $unit/4;
+				$action-button-size: $container-padding / 2;
 				a {
 					display: inline-block;
           position: absolute;
-					width: 15px;
-					height: 15px;
+					width: $action-button-size;
+					height: $action-button-size;
 					position: relative;
 					cursor: pointer;
-          color: $entry-background-colour - #111;
-          font-size: 14px;
+					// border-width: 1px 1px 1px 1px;
+					// border-radius: $radius $radius 0 0;
+     //      border-color: #111; //$entry-background-colour - #111;
+		      border: solid 1px $entry-background-colour;
+		      border-width: 1px 1px 1px 0;
+          color: #aaa;
+          font-size: 16px;
+          line-height: $action-button-size;
+          // outline: solid 1px red;
 				}
         a:before {
-          @include awesome-icon("\f057");
+          @include awesome-icon("\f00d");
           position: absolute;
-          left: 3px;
-          top: 2px;
+          text-align: center;
+          left: 0px;
+          right: 1px;
+          top: 0px;
         }
         a:hover {
           color: $highlight;
         }
-				.delete:before {
+        a + a {
+        	border-top-width: 0;
+        }
+				.delete {
           font-size: 18px;
+          border-top-right-radius: $radius;
+				}
+				.visibility {
+          border-bottom-right-radius: $radius;
 				}
 				// .delete:hover {
 					// background-position: -61px -20px;
@@ -1209,9 +1234,11 @@ img.missing {
 			@include rounded-top;
       position: relative;
 			padding: $unit/2;
+			padding-right: 100px;
 			background-color: #444;
 			color: white;
 			font-size: $target-name-size;
+			line-height: 18px;
 			font-style: italic;
       cursor: pointer;
 			&.no-fields {
@@ -1226,6 +1253,7 @@ img.missing {
         right: $unit;
         top: 5px;
         font-style: normal;
+        line-height: 18px;
         color: rgba(255, 255, 255, 0.4);
         &:hover {
           color: rgba(255, 255, 255, 0.8);
@@ -1292,13 +1320,15 @@ img.missing {
 			background-color: #444;
 			padding: $unit/2;
       cursor: pointer;
+      padding-right: 100px;
+
 			a {
 				cursor: pointer;
 				font-family: $headline-font-family;
 				font-weight: 100;
 				color: #fff;
 				font-size: 16px;
-				line-height: normal;
+				line-height: 20px;
 			}
       &:hover a, a:hover {
         color: $highlight;

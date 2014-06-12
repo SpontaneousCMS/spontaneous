@@ -8,7 +8,7 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 		// will eventually overwrite panel()
 		panel: function() {
 			var self = this;
-			var wrapper = dom.div(['entry-wrap page no-boxes', self.depth_class(), self.visibility_class()]);
+			var wrapper = dom.div(['entry-wrap page no-boxes', self.alias_class(), self.fields_class(), self.depth_class(), self.visibility_class()]);
 			var contents = dom.div('.entry-contents');
 			var inside = dom.div('.entry-inner');
 			var outline = dom.div('.white-bg').mouseover(self.mouseover.bind(self)).mouseout(self.mouseout.bind(self)).click(self.edit.bind(self));

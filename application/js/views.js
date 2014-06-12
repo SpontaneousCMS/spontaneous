@@ -39,6 +39,12 @@ Spontaneous.Views = (function($, S) {
 		visibility_class: function() {
 			return this.content.hidden() ? 'hidden' : 'visible';
 		},
+		alias_class: function() {
+			return this.content.type().is_alias() ? 'alias' : 'not-alias';
+		},
+		fields_class: function() {
+			return this.content.has_fields() ? 'fields' : 'no-fields';
+		},
 		boxes_class: function() {
 			return this.content.has_boxes() ? 'boxes' : 'no-boxes';
 		},
@@ -70,7 +76,7 @@ Spontaneous.Views = (function($, S) {
 		},
 		create_edit_wrapper: function(read_content) {
 			var s = {'style':'position: relative; overflow: hidden;'};
-			var outer = dom.div(s);
+			var outer = dom.div('.edit-wrapper-outer', s);
 			var write = dom.div({'style':'position: absolute; height: 0; overflow: hidden;'});
 			var write_inner = dom.div();
 			var read = dom.div(s);
