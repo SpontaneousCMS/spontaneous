@@ -884,6 +884,7 @@ img.missing {
 			@include rounded;
 			background-color: $entry-background-colour;
 			padding: 2px;
+			position: relative;
 			// padding-top: $title-bar-height + 4px;
 		}
 		.entry-spacer {
@@ -1108,7 +1109,8 @@ img.missing {
 					color: #666666;
 					// color: #f2f2f2;
 				}
-				li:first-child:before {
+				li:first-child:before,
+				li:last-child:after {
 					// @include rounded-top-left;
 					// padding-left: 0;
 					display: none;
@@ -1153,8 +1155,8 @@ img.missing {
 				a {
 					@include button(#6b6b6b);
 					// background-color: #6b6b6b;
-					padding-left: 16px;
-					padding-right: 8px;
+					padding-left: 2*$unit;
+					padding-right: $unit;
 					& + a {
 						margin-left: $unit;
 					}
@@ -1170,14 +1172,14 @@ img.missing {
 				}
 			}
 			.slot-entries {
-				padding-top: 8px;
-				padding-bottom: 8px;
+				padding-top: $unit;
+				padding-bottom: $unit;
 			}
 			.entry-wrap.depth-2 {
 				// padding-top: $title-bar-height + ($unit/2);
 				margin-left: $unit;
-				margin-right: 20px;
-				margin-bottom: $unit;
+				margin-right: $container-padding / 2;
+				margin-bottom: 0;
 				.white-bg {
 					@include rounded($radius - 1);
 					width: auto;
@@ -1191,11 +1193,20 @@ img.missing {
 					padding: 0;
 				}
 				.entry-spacer {
-					height: $unit;
+					height: $unit * 2;
 				}
-				&:last-child .entry-spacer {
-					outline: solid 1px red;
-					display: none;
+				$content-type-offset: 12px;
+				.content-type {
+					bottom: $content-type-offset;
+					font-size: 8px;
+				}
+				&:last-child  {
+					.entry-spacer {
+						display: none;
+					}
+					.content-type {
+						bottom: $content-type-offset;
+					}
 				}
 				.entry {
 					@include rounded;
@@ -1645,7 +1656,7 @@ img.missing {
   overflow: visible;
   position: absolute;
   top: auto;
-  bottom: $entry-gap + ($unit * 2);
+  bottom: ($unit * 2);
   right: $unit;
   left: auto;
   color: rgba(0, 0, 0, 0.3);

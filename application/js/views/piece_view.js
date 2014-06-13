@@ -61,7 +61,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			}
 
 			if (!this.content.type().is_alias()) {
-				wrapper.append(this.content_type_info());
+				contents.append(this.content_type_info());
 			}
 			contents.append(this.action_buttons(contents));
 			if (this.content.type().is_alias()) {
