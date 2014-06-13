@@ -595,7 +595,7 @@ img.missing {
 	.filename {
 		@include box-flex(2);
 		word-wrap: break-word;
-		font-style: italic;
+		// font-style: italic;
 		// max-width: 90%;
 		overflow: auto;
 		height: auto;
