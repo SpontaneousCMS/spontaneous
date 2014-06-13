@@ -1666,6 +1666,11 @@ img.missing {
   }
 }
 
+@media all and (max-width: 1000px) {
+  .fields-preview-text li {
+	  flex-direction: column;
+  }
+}
 @import "top.css.scss";
 @import "dialogue.css.scss";
 @import "popover.css.scss";
@@ -1674,4 +1679,5 @@ img.missing {
 @import "developer.css.scss";
 @import "meta.css.scss";
 @import "jquery-ui-1.8.21.custom/ui-lightness.css.scss";
+
 
