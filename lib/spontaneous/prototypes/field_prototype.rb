@@ -129,13 +129,17 @@ module Spontaneous::Prototypes
       instance_class
     end
 
-    def default(_instance = nil)
-      case default = @options[:default]
+    def default(instance = nil)
+      case (default = @options[:default])
       when Proc
-        default[_instance]
+        default[instance]
       else
         default
       end
+    end
+
+    def dynamic_default?
+      @options[:default].is_a?(Proc)
     end
 
     def comment
@@ -183,7 +187,6 @@ module Spontaneous::Prototypes
 
     def inherit_schema_id(schema_id)
       @_inherited_schema_id = schema_id.to_s
-      # instance_class.schema_id = schema_id
     end
 
     def merge(subclass_owner, field_type, subclass_options, &subclass_block)

@@ -73,6 +73,11 @@ module Spontaneous::Model::Core
 
     # InstanceMethods
 
+    def before_create
+      serialize_fields(fields.with_dynamic_default_values)
+      super
+    end
+
     def after_save
       super
       fields.saved

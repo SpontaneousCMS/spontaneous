@@ -27,6 +27,14 @@ module Spontaneous::Collections
       self.each { |field| field.mark_unmodified }
     end
 
+    def with_dynamic_default_values
+      select { |field| field.prototype.dynamic_default? }
+    end
+
+    def prototypes
+      map(&:prototype)
+    end
+
     # Lazily load fields by name
     def named(name)
       super || load_field(owner.field_prototypes[name.to_sym])

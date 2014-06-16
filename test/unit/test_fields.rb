@@ -167,6 +167,24 @@ describe "Fields" do
         assert content_class.field_prototypes[:date].field_class < Spontaneous::Field::Date
         assert content_class.field_prototypes[:chunky].field_class < Spontaneous::Field::String
       end
+
+      it "assigns the value of the field if the default is a proc" do
+        n = 0
+        f = @content_class.field :dynamic, :default => proc { (n += 1) }
+        f.dynamic_default?.must_equal true
+        instance1 = @content_class.create
+        instance1.dynamic.value.must_equal "1"
+        instance1.reload
+        instance1.dynamic.value.must_equal "1"
+      end
+
+      it "uses a dynamic default value to set the page slug" do
+        n = 0
+        page_class = Class.new(::Page)
+        page_class.field :title, default: proc { (n += 1) }
+        page = page_class.create
+        page.slug.must_equal "1"
+      end
     end
 
     describe "Field titles" do
