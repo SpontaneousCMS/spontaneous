@@ -26,7 +26,10 @@ Spontaneous.TopBar = (function($, S) {
 		width: function() { return 300; },
 		title: function() { return 'Choose Root'; },
 		view: function() {
-			var self = this, w = dom.div('#navigation-page-browser.pop-root-browser'), list = dom.div('.pages'), roots = this.roots.roots;
+			var self = this
+			, w = dom.div('#navigation-page-browser.pop-root-browser')
+			, list = dom.div('.pages')
+			, roots = this.roots.roots;
 			var click = function(page_id) {
 				return function() { self.close(); S.Location.load_id(page_id); };
 			};
@@ -36,7 +39,7 @@ Spontaneous.TopBar = (function($, S) {
 					list.append(r);
 				}
 			}
-			frame.append(list);
+			w.append(list);
 			this.wrapper = w;
 			return w;
 		}
