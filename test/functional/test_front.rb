@@ -44,10 +44,12 @@ describe "Front" do
     end
 
     class ::DynamicRequestParams < ::Page
+      singleton
       layout(:html) { "{{ params[:horse] }}*{{ equine }}" }
     end
 
     class ::DynamicRenderParams < ::Page
+      singleton
       add_output :mobile
       add_output :session
       add_output :params
@@ -273,7 +275,7 @@ describe "Front" do
           get { render "caterpillars" }
         end
         get '/dynamic-render-params'
-        assert last_response.status == 404
+        assert last_response.status == 404, "Expected 404 but got #{last_response.status}"
       end
 
       it "return the right status code" do
@@ -327,7 +329,7 @@ describe "Front" do
 
       it "allows setting status code and passing parameters to the show call" do
         DynamicRenderParams.controller do
-          get { render "$dynamic_render_params", 401, :teeth => "white" }
+          get { render DynamicRenderParams, 401, :teeth => "white" }
         end
         get '/dynamic-render-params'
         assert last_response.status == 401
@@ -336,7 +338,7 @@ describe "Front" do
 
       it "allows passing parameters to the render call" do
         DynamicRenderParams.controller do
-          get { render "$dynamic_render_params", :teeth => "white" }
+          get { render DynamicRenderParams, :teeth => "white" }
         end
         get '/dynamic-render-params'
         assert last_response.status == 200

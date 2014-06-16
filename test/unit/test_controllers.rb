@@ -119,19 +119,33 @@ describe "Controllers" do
   end
 
   describe "PageController" do
-    let(:owner) { SubPage.new(uid: "owner") }
-    let(:other) { SubPage.new(uid: "other") }
+    let(:owner) { OwnerPage.create(uid: "the_owner") }
+    let(:other) { OtherPage.create(uid: "the_other") }
     let(:ctrl)  { Spontaneous::Rack::PageController.new!(@site, owner, :html) }
     let(:env)   { {Spontaneous::Rack::RENDERER => Spontaneous::Output.published_renderer(@site) } }
 
     before do
+      class ::OwnerPage < SubPage
+        singleton :owner
+      end
+      class ::OtherPage < SubPage
+        singleton :other
+      end
       ctrl.env = env
       ctrl.request = Rack::Request.new(env)
       ctrl.response = Rack::Response.new
-      SubPage.layout { "${uid}:{{success}}" }
-      SubPage.add_output :xml
-      @site.stubs(:by_uid).with('other').returns(other)
-      @site.stubs(:by_uid).with(:other).returns(other)
+      [OwnerPage, OtherPage].each do |type|
+        type.layout { "${uid}:{{success}}" }
+        type.add_output :xml
+      end
+      @site.stubs(:other).returns(other)
+    end
+
+    after do
+      owner.destroy
+      other.destroy
+      Object.send :remove_const, :OwnerPage rescue nil
+      Object.send :remove_const, :OtherPage rescue nil
     end
 
     it "allows setting the output format" do
@@ -143,7 +157,7 @@ describe "Controllers" do
     it "allows changing the rendered page" do
       ctrl.page(other)
       ctrl.render
-      ctrl.body.must_equal "other:"
+      ctrl.body.must_equal "the_other:"
     end
 
     # show allows changing the page, output, status & locals without calling #render
@@ -161,54 +175,68 @@ describe "Controllers" do
         ctrl.output.must_equal :xml
         ctrl.body.must_equal []
         ctrl.render success: "yes"
-        ctrl.body.must_equal "other:yes"
+        ctrl.body.must_equal "the_other:yes"
         ctrl.content_type.must_equal "application/xml;charset=utf-8"
       end
 
       it "allows render to overwrite the settings" do
         ctrl.show(other, :xml, 403)
         ctrl.render owner, success: "no"
-        ctrl.body.must_equal "owner:no"
+        ctrl.body.must_equal "the_owner:no"
         ctrl.content_type.must_equal "application/xml;charset=utf-8"
       end
 
-      it "accepts uid (string), format, status" do
+      it "accepts singleton name (symbol), format, status" do
         ctrl.show('other', :xml, 403)
         ctrl.status.must_equal 403
         ctrl.output.must_equal :xml
         ctrl.body.must_equal []
       end
 
-      it "accepts uid (symbol), format, status" do
-        ctrl.show(:other, :xml, 403)
+      it "accepts singleton class, format, status" do
+        ctrl.show(OtherPage, :xml, 403)
         ctrl.status.must_equal 403
         ctrl.output.must_equal :xml
         ctrl.body.must_equal []
       end
 
-      it "accepts uid (string), status" do
+      it "accepts singleton name (string), status" do
         ctrl.show('other', 403)
         ctrl.status.must_equal 403
         ctrl.output.must_equal :html
         ctrl.body.must_equal []
       end
 
-      it "accepts uid (symbol), status" do
+      it "accepts singleton name (symbol), status" do
         ctrl.show(:other, 403)
         ctrl.status.must_equal 403
         ctrl.output.must_equal :html
         ctrl.body.must_equal []
       end
 
-      it "accepts uid (string)" do
+      it "accepts singleton class, status" do
+        ctrl.show(OtherPage, 410)
+        ctrl.status.must_equal 410
+        ctrl.output.must_equal :html
+        ctrl.body.must_equal []
+      end
+
+      it "accepts singleton name" do
         ctrl.show('other')
         ctrl.status.must_equal 200
         ctrl.output.must_equal :html
         ctrl.body.must_equal []
       end
 
-      it "accepts uid (symbol)" do
+      it "accepts singleton name" do
         ctrl.show(:other)
+        ctrl.status.must_equal 200
+        ctrl.output.must_equal :html
+        ctrl.body.must_equal []
+      end
+
+      it "accepts singleton class" do
+        ctrl.show(OtherPage)
         ctrl.status.must_equal 200
         ctrl.output.must_equal :html
         ctrl.body.must_equal []
@@ -217,20 +245,6 @@ describe "Controllers" do
       it "accepts instance (Content)" do
         ctrl.show(other)
         ctrl.status.must_equal 200
-        ctrl.output.must_equal :html
-        ctrl.body.must_equal []
-      end
-
-      it "accepts uid (string), status" do
-        ctrl.show('other', 409)
-        ctrl.status.must_equal 409
-        ctrl.output.must_equal :html
-        ctrl.body.must_equal []
-      end
-
-      it "accepts uid (symbol), status" do
-        ctrl.show(:other, 410)
-        ctrl.status.must_equal 410
         ctrl.output.must_equal :html
         ctrl.body.must_equal []
       end
@@ -255,119 +269,140 @@ describe "Controllers" do
         ctrl.render
         ctrl.status.must_equal 200
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "owner:"
+        ctrl.body.must_equal "the_owner:"
       end
 
       it "accepts instance, format, status, locals" do
         ctrl.render(other, :xml, 403, success: "yes")
         ctrl.status.must_equal 403
         ctrl.output.must_equal :xml
-        ctrl.body.must_equal "other:yes"
+        ctrl.body.must_equal "the_other:yes"
       end
 
-      it "accepts uid (string), format, status, locals" do
+      it "accepts singleton name (string), format, status, locals" do
         ctrl.render('other', :xml, 403, success: "yes")
         ctrl.status.must_equal 403
         ctrl.output.must_equal :xml
-        ctrl.body.must_equal "other:yes"
+        ctrl.body.must_equal "the_other:yes"
       end
 
-      it "accepts uid (symbol), format, status, locals" do
+      it "accepts singleton name (symbol), format, status, locals" do
         ctrl.render(:other, :xml, 403, success: "yes")
         ctrl.status.must_equal 403
         ctrl.output.must_equal :xml
-        ctrl.body.must_equal "other:yes"
+        ctrl.body.must_equal "the_other:yes"
       end
 
-      it "accepts uid (string), status, locals" do
+      it "accepts singleton class, format, status, locals" do
+        ctrl.render(OtherPage, :xml, 403, success: "yes")
+        ctrl.status.must_equal 403
+        ctrl.output.must_equal :xml
+        ctrl.body.must_equal "the_other:yes"
+      end
+
+      it "accepts singleton name (string), status, locals" do
         ctrl.render('other', 403, success: "yes")
         ctrl.status.must_equal 403
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "other:yes"
+        ctrl.body.must_equal "the_other:yes"
       end
 
-      it "accepts uid (symbol), status, locals" do
+      it "accepts singleton name (symbol), status, locals" do
         ctrl.render(:other, 403, success: "yes")
         ctrl.status.must_equal 403
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "other:yes"
+        ctrl.body.must_equal "the_other:yes"
       end
 
-      it "accepts uid (string)" do
+      it "accepts singleton class, status, locals" do
+        ctrl.render(OtherPage, 403, success: "yes")
+        ctrl.status.must_equal 403
+        ctrl.output.must_equal :html
+        ctrl.body.must_equal "the_other:yes"
+      end
+
+      it "accepts singleton name (string)" do
         ctrl.render('other')
         ctrl.status.must_equal 200
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "other:"
+        ctrl.body.must_equal "the_other:"
       end
 
-      it "accepts uid (symbol)" do
+      it "accepts singleton name (symbol)" do
         ctrl.render(:other)
         ctrl.status.must_equal 200
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "other:"
+        ctrl.body.must_equal "the_other:"
+      end
+
+      it "accepts singleton class" do
+        ctrl.render(OtherPage)
+        ctrl.status.must_equal 200
+        ctrl.output.must_equal :html
+        ctrl.body.must_equal "the_other:"
+      end
+
+      it "accepts singleton name (string), status" do
+        ctrl.render('other', 409)
+        ctrl.status.must_equal 409
+        ctrl.output.must_equal :html
+        ctrl.body.must_equal "the_other:"
+      end
+
+      it "accepts singleton name (symbol), status" do
+        ctrl.render(:other, 410)
+        ctrl.status.must_equal 410
+        ctrl.output.must_equal :html
+        ctrl.body.must_equal "the_other:"
+      end
+
+      it "accepts singleton class, status" do
+        ctrl.render(OtherPage, 410)
+        ctrl.status.must_equal 410
+        ctrl.output.must_equal :html
+        ctrl.body.must_equal "the_other:"
       end
 
       it "accepts instance (Content)" do
         ctrl.render(other)
         ctrl.status.must_equal 200
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "other:"
-      end
-
-      it "accepts uid (string), status" do
-        ctrl.render('other', 409)
-        ctrl.status.must_equal 409
-        ctrl.output.must_equal :html
-        ctrl.body.must_equal "other:"
-      end
-
-      it "accepts uid (symbol), status" do
-        ctrl.render(:other, 410)
-        ctrl.status.must_equal 410
-        ctrl.output.must_equal :html
-        ctrl.body.must_equal "other:"
+        ctrl.body.must_equal "the_other:"
       end
 
       it "accepts instance (Content), status" do
         ctrl.render(other, 411)
         ctrl.status.must_equal 411
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "other:"
+        ctrl.body.must_equal "the_other:"
       end
 
       it "accepts locals" do
         ctrl.render(success: "yes")
         ctrl.status.must_equal 200
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "owner:yes"
+        ctrl.body.must_equal "the_owner:yes"
       end
 
-      it "accepts uid (string), locals" do
-        ctrl.render('$other', success: "yes")
-        ctrl.status.must_equal 200
-        ctrl.output.must_equal :html
-        ctrl.body.must_equal "other:yes"
-      end
-
-      it "accepts uid (symbol), locals" do
+      it "accepts singleton name (symbol), locals" do
         ctrl.render(:other, success: "yes")
         ctrl.status.must_equal 200
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "other:yes"
+        ctrl.body.must_equal "the_other:yes"
       end
 
       it "accepts status" do
         ctrl.render(403)
         ctrl.status.must_equal 403
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "owner:"
+        ctrl.body.must_equal "the_owner:"
       end
 
       it "accepts status, locals" do
         ctrl.render(403, success: "no")
         ctrl.status.must_equal 403
         ctrl.output.must_equal :html
-        ctrl.body.must_equal "owner:no"
+        ctrl.body.must_equal "the_owner:no"
       end
     end
   end

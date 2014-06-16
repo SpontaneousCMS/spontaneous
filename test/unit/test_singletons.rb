@@ -73,6 +73,11 @@ describe "Singletons" do
       @site.malcom.must_equal @page
     end
 
+    it "allows for testing if a singleton exists" do
+      @site.singleton?(:singleton_page).must_equal true
+      @site.singleton?(:not_singleton_page).must_equal false
+    end
+
     it "uses a cache within a mapper scope" do
       instance1 = instance2 = instance3 = nil
       Content.scope do

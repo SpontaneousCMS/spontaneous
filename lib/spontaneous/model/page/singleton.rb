@@ -5,8 +5,17 @@ module Spontaneous::Model::Page
     extend Spontaneous::Concern
 
     module SiteMethods
+      def singletons
+        @singletons ||= {}
+      end
+
+      def singleton?(label)
+        singletons.key?(label.to_s)
+      end
+
       def add_singleton_class(type, labels)
         ([type.name.demodulize.underscore] + labels).map(&:to_sym).each do |label|
+          singletons[label.to_s] = true
           define_singleton_method(label) { type.instance }
         end
       end

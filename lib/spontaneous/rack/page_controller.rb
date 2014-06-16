@@ -50,14 +50,14 @@ module Spontaneous::Rack
     end
 
     # render [instance (Content), output (Symbol), status (Fixnum), locals (Hash)]
-    # render [uid (Symbol), status (Fixnum), locals (Hash)] => [instance, output, status, locals]
-    # render [uid (Symbol)]       => [uid, output, 200, {}]
+    # render [singleton name (Symbol), status (Fixnum), locals (Hash)] => [instance, output, status, locals]
+    # render [singleton name (Symbol)]       => [singleton name, output, 200, {}]
     # render [instance (Content)] => [instance, output, 200, {}]
     # render [locals (Hash)] => [page, output, 200, locals]
     # render [status (Fixnum)] => [page, output, status, {}]
-    # render(:home, :xml, 200, {logged_in: true}) # => :home => uid, :xml => output
-    # render(:home, 200, {logged_in: true}) # => :home => uid
-    # render(:home, {logged_in: true}) # => :home => uid
+    # render(:home, :xml, 200, {logged_in: true}) # => :home => singleton name, :xml => output
+    # render(:home, 200, {logged_in: true}) # => :home => singleton name
+    # render(:home, {logged_in: true}) # => :home => singleton name
     # render(:xml, 200, {logged_in: true}) # NOT ALLOWED: if you want to specify the output then you must also specify the page
     # render(403, {logged_in: false})
     #
@@ -140,9 +140,24 @@ module Spontaneous::Rack
       env[Spontaneous::Rack::RENDERER]
     end
 
-    def fetch_page(page)
-      return @site[page] if (String === page) || (Symbol === page)
-      page
+    def fetch_page(locator)
+      case locator
+      when Class # (singleton) type classes
+        locator.first
+      when Symbol, String
+        fetch_singleton(locator) || fetch_path(locator)
+      else # probably an instance
+        locator
+      end
+    end
+
+    def fetch_path(path)
+      @site[path]
+    end
+
+    def fetch_singleton(page)
+      return @site.send(page) if @site.singleton?(page)
+      nil
     end
 
     def render_body
