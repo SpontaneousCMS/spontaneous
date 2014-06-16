@@ -7,7 +7,7 @@ module Spontaneous::Model::Page
     extend Spontaneous::Concern
 
     def before_save_field(field)
-      mark_site_modified if ((field.name == title_field) && field.modified?)
+      mark_site_modified if ((field.name == title_field_name) && field.modified?)
       super
     end
 
@@ -19,7 +19,7 @@ module Spontaneous::Model::Page
     end
 
     def after_update
-      mark_site_modified if field?(title_field) && fields[title_field].modified?
+      mark_site_modified if field?(title_field_name) && fields[title_field_name].modified?
       super
     end
 

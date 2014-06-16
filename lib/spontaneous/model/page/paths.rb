@@ -70,7 +70,7 @@ module Spontaneous::Model::Page
     # default value.
     def before_save
       unless new?
-        if (title = self.fields[title_field])
+        if (title = self.fields[title_field_name])
           set_slug_from_title(title)
         end
       end
@@ -82,7 +82,7 @@ module Spontaneous::Model::Page
     # update mechanism works differently from the more direct, console version.
     # This is called by the field updater before re-serializing each modified field.
     def before_save_field(field)
-      set_slug_from_title(field) if (field.name == title_field)
+      set_slug_from_title(field) if (field.name == title_field_name)
       super
     end
 
