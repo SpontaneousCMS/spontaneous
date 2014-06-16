@@ -16,9 +16,10 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 			contents.append(self.action_buttons(contents));
 			if (self.content.type().is_alias()) {
 				contents.append(self.alias_target_panel());
+			} else {
+				contents.append(self.page_title_panel());
 			}
 
-			contents.append(self.page_title_panel());
 			var entry = dom.div('.entry');
 			var fields = new Spontaneous.FieldPreview(self, '', true);
 			var fields_panel = fields.panel();
