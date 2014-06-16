@@ -39,6 +39,7 @@ module Spontaneous::Model::Page
 
     def before_create
       place_in_page_tree
+      set_slug_from_dynamic_value
       super
     end
 
@@ -69,13 +70,17 @@ module Spontaneous::Model::Page
     # because otherwise the slug would always take on the title fields
     # default value.
     def before_save
-      unless new?
-        if (title = self.fields[title_field_name])
-          set_slug_from_title(title)
-        end
+      if !new? && (title = fields[title_field_name])
+        set_slug_from_title(title)
       end
       fix_generated_slug_conflicts
       super
+    end
+
+    def set_slug_from_dynamic_value
+      if (title = fields[title_field_name]) && title.prototype.dynamic_default?
+        set_slug_from_title!(title)
+      end
     end
 
     # Syncing the slug with the title is made more difficult because the field
@@ -88,8 +93,12 @@ module Spontaneous::Model::Page
 
     def set_slug_from_title(title)
       if title.modified? and !title.blank? and has_generated_slug?
-        self.slug = title.value
+        set_slug_from_title!(title)
       end
+    end
+
+    def set_slug_from_title!(title)
+      self.slug = title.value
     end
 
     def sync_slug_to_title
