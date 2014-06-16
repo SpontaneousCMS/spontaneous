@@ -23,7 +23,11 @@ Sequel.migration do
 
     [revision_table, archive_table].each do |table|
       drop_table?(table)
-      run %(CREATE TABLE #{literal(table)} AS SELECT * FROM #{literal(content_table)} LIMIT 1;)
+      begin
+        run %(CREATE TABLE #{literal(table)} AS (SELECT * FROM #{literal(content_table)} LIMIT 1);)
+      rescue
+        run %(CREATE TABLE #{literal(table)} AS SELECT * FROM #{literal(content_table)} LIMIT 1;)
+      end
     end
 
 
