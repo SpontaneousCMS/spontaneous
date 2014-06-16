@@ -43,7 +43,7 @@ module Spontaneous
       self
     end
 
-    def export(user)
+    def export(user = nil)
       target.shallow_export(user).merge(export_styles).merge({
         :depth => self.depth
       })

@@ -477,6 +477,18 @@ describe "Alias" do
       bl.path.must_equal "/aliases/newb/newb"
     end
 
+    it "include target values in serialisation" do
+      al = BAlias.create(:target => b)
+      al.export[:target].must_equal b.shallow_export(nil)
+    end
+
+    it "include target values in entry serialisation" do
+      al = BAlias.create(:target => b)
+      aliases.box1 << al
+      aliases.save
+      al.entry.export[:target].must_equal b.shallow_export(nil)
+    end
+
     it "update their path if their parent's path changes" do
       al = BAlias.create(:target => b, :slug => "balias")
       bl = BAlias.create(:target => b, :slug => "balias")
