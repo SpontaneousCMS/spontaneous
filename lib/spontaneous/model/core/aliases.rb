@@ -146,7 +146,6 @@ module Spontaneous::Model::Core
         end
       end
 
-
       def find_named_style(style_name)
         super or target.find_named_style(style_name)
       end
@@ -161,7 +160,7 @@ module Spontaneous::Model::Core
         @styles ||= Spontaneous::Collections::PrototypeSet.new(target, :styles)
       end
 
-      def export(user = nil)
+      def shallow_export(user = nil)
         super.merge(:target => exported_target(user), :alias_title => target.alias_title, :alias_icon => target.exported_alias_icon)
       end
 
