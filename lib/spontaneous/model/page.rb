@@ -40,10 +40,10 @@ module Spontaneous::Model
       end
 
       def export(user = nil)
-        super(user).merge(title_field: self.title_field.to_s)
+        super(user).merge(title_field: self.title_field_name.to_s)
       end
 
-      def title_field
+      def title_field_name
         :title
       end
     end
@@ -121,13 +121,13 @@ module Spontaneous::Model
     end
 
     def page_title
-      if field = self.fields[title_field]
+      if field = self.fields[title_field_name]
         field.value
       end
     end
 
-    def title_field
-      self.class.title_field
+    def title_field_name
+      self.class.title_field_name
     end
 
     def shallow_export(user)
