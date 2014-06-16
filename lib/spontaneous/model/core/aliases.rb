@@ -120,6 +120,10 @@ module Spontaneous::Model::Core
         __target
       end
 
+      def fields
+        @field_set ||= Spontaneous::Collections::FieldSet.new(self, field_store, target, :fields)
+      end
+
       def field?(field_name)
         super || target.class.field?(field_name)
       end

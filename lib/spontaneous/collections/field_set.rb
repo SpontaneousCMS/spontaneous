@@ -5,8 +5,8 @@ module Spontaneous::Collections
 
     attr_reader :owner
 
-    def initialize(owner, initial_values)
-      super()
+    def initialize(owner, initial_values, superobject = nil, superset_name = nil)
+      super(superobject, superset_name)
       @owner = owner
       @field_data = initial_values
       initialize_from_prototypes

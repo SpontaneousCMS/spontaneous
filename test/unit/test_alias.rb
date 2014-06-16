@@ -321,9 +321,6 @@ describe "Alias" do
       end
 
 
-      # TODO
-      it "reference the aliases fields before the targets"
-
       it "present their target's fields as their own" do
         assert @a_alias.field?(:a_field1)
         @a_alias.a_field1.value.must_equal a.a_field1.value
@@ -331,6 +328,14 @@ describe "Alias" do
 
       it "have access to their target's fields" do
         @a_alias.target.a_field1.value.must_equal a.a_field1.value
+      end
+
+      it "provide transparent access target's fields" do
+        @a_alias.a_field1.value.must_equal a.a_field1.value
+      end
+
+      it "provide transparent access target's fields with hash notation" do
+        @a_alias.fields[:a_field1].value.must_equal a.a_field1.value
       end
 
       it "have their own styles" do
