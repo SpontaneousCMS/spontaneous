@@ -153,7 +153,15 @@ Spontaneous.Content = (function($, S) {
 		},
 
 		title_field: function() {
-			return this.fields()[this.type().title_field_name];
+			var self = this, title_field = self.fields()[self.type().title_field_name];
+			// if we're aliasing a page with a page then it's likely that the alias type
+			// won't have a title field (falling back to its target's value instead)
+			// so we need to fall back to the target's title field in that base
+			if (!title_field && self.type().is_alias()) {
+				var target = new Content(self.target());
+				title_field = target.title_field();
+			}
+			return title_field;
 		},
 
 		hidden: function() {
