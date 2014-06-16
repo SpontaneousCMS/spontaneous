@@ -39,6 +39,10 @@ Spontaneous.Box = (function($, S) {
 			return 'box';
 		},
 
+		isWritable: function() {
+			return this.type().data.writable;
+		},
+
 		mouseover: function() {
 			if (this.fields_preview) {
 				this.fields_preview.addClass('hover');
