@@ -53,6 +53,9 @@ Spontaneous.Types = (function($, S) {
 				this.box_prototypes[b.id] = new BoxPrototype(b);
 			}
 		},
+		isWritable: function() {
+			return this.data.writable;
+		},
 		box_prototype: function(box_id) {
 			return this.box_prototypes[box_id];
 		},

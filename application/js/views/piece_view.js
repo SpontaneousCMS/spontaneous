@@ -127,26 +127,28 @@ Spontaneous.Views.PieceView = (function($, S) {
 			return type;
 		},
 		action_buttons: function(wrapper) {
-			if (!this._title_bar) {
-				var label = user.is_developer() ? dom.a('.developer.source').attr('href', this.content.developer_edit_url()).text(this.content.developer_description()) : (this.content.type().title);
-				var action_buttons = dom.div('.title-bar');//.append(label);
-				var actions = dom.div('.actions');
-				var destroy = dom.a('.delete');
-				var visibility = dom.a('.visibility');
-				actions.append(destroy);
-				actions.append(visibility);
-				action_buttons.append(actions);
-				var _hide_pause;
-				// wrapper.mouseenter(function() {
-				// 	if (_hide_pause) { window.clearTimeout(_hide_pause); }
-				// 	actions.slideDown(50);
-				// }).mouseleave(function() {
-				// 	_hide_pause = window.setTimeout(function() { actions.slideUp(100) }, 200);
-				// });
-				destroy.click(this.confirm_destroy.bind(this));
-				this.content.watch('hidden', this.visibility_changed.bind(this));
-				visibility.click(this.toggle_visibility.bind(this));
-				this._action_buttons = action_buttons;
+			if (!this._action_buttons) {
+				if (this.content.container.isWritable()) {
+					// var label = user.is_developer() ? dom.a('.developer.source').attr('href', this.content.developer_edit_url()).text(this.content.developer_description()) : (this.content.type().title);
+					var action_buttons = dom.div('.title-bar');//.append(label);
+					var actions = dom.div('.actions');
+					var destroy = dom.a('.delete');
+					var visibility = dom.a('.visibility');
+					actions.append(destroy);
+					actions.append(visibility);
+					action_buttons.append(actions);
+					var _hide_pause;
+					// wrapper.mouseenter(function() {
+					// 	if (_hide_pause) { window.clearTimeout(_hide_pause); }
+					// 	actions.slideDown(50);
+					// }).mouseleave(function() {
+					// 	_hide_pause = window.setTimeout(function() { actions.slideUp(100) }, 200);
+					// });
+					destroy.click(this.confirm_destroy.bind(this));
+					this.content.watch('hidden', this.visibility_changed.bind(this));
+					visibility.click(this.toggle_visibility.bind(this));
+					this._action_buttons = action_buttons;
+				}
 			}
 			return this._action_buttons;
 		},
