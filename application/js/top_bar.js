@@ -159,7 +159,7 @@ Spontaneous.TopBar = (function($, S) {
 			return S.site_domain;
 		},
 		element: function() {
-			var self = this, li = dom.li('.root');
+			var self = this, li = dom.li('.root-node');
 			var link = dom.a({'href': this.url}).text(this.title).data('page', this.page);
 			if (Object.keys(this.roots.roots).length === 1) {
 				li.addClass('singluar');
@@ -169,11 +169,16 @@ Spontaneous.TopBar = (function($, S) {
 					Spontaneous.Popover.open(event, browser);
 				});
 			}
-			link.click(function() {
-				var page = $(this).data('page');
-				S.Location.load_id(page.id);
-				return false;
-			});
+			var loaded = S.Location.get('location')
+			, active = (loaded.id == this.page.id) // active == true represents the state where the currently shown page is this node
+			;
+			if (!active) {
+				link.click(function() {
+					var page = $(this).data('page');
+					S.Location.load_id(page.id);
+					return false;
+				});
+			}
 			disableParent(link);
 			li.append(link);
 			this.link = link;
