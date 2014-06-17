@@ -109,7 +109,7 @@ describe "Context" do
       result.must_equal [["/area1-page1", false], ["/area1-page2", true]]
     end
 
-    it "allows for limiting the navigation to a particular box" do
+    it "allows for excluding a particular box" do
       @target = Page.new
       @area1_page2.area2 << @target
       @target.save.reload
