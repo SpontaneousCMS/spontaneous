@@ -3,13 +3,13 @@ source "https://rubygems.org"
 # You can either fix the version of Spontaneous that this site uses
 gem 'spontaneous', '~> <%= Spontaneous::VERSION %>'
 # Or point it at a git repository to use the cutting edge or your custom version
-# gem 'spontaneous', :git => "https://github.com/SpontaneousCMS/spontaneous.git"
+# gem 'spontaneous', git: 'https://github.com/SpontaneousCMS/spontaneous.git'
 
 gem '<%= @database[:gem].name %>', '<%= @database[:gem].requirement %>'<%
   if (requires = @database[:gem].autorequire) && (requires.length > 0)
     requires = requires.first if requires.length == 1 -%>
 , require: '<%= requires %>'
-<%- end -%>
+<%- end %>
 
 # Your favorite ExecJS compatible engine
 gem 'therubyracer',    '~> 0.11.1'
@@ -20,7 +20,7 @@ gem 'capistrano', '~> 2.9'
 # If you want to enable the built in search functionality then you must un-comment
 # the xapian-ruby dependency below. It is not included by default
 # because the xapian library takes a very long time to build.
-#gem 'xapian-ruby', "~> 1.2.12"
+#gem 'xapian-ruby', '~> 1.2.12'
 
 # group :production do
 #   gem 'thin',    '~> 1.3.1'

@@ -7,8 +7,9 @@ module Spontaneous
     class Site < Thor::Group
       def self.available_dbs
         postgres = { :gem => "sequel_pg", :adapter => "postgres", :user => ENV["USER"] }
-        { "mysql"  => { :gem => "mysql2", :adapter => "mysql2", :user => "root" },
-          "pg" => postgres,  "postgresql" =>  postgres, "postgres"   =>  postgres }
+        { "sqlite" => { gem: "sqlite3", adapter: "sqlite3" },
+          "mysql"  => { gem: "mysql2", adapter: "mysql2", user: "root" },
+          "pg" => postgres, "postgresql" => postgres, "postgres" =>  postgres }
       end
 
       def self.source_root; File.expand_path(File.dirname(__FILE__) + "/site"); end
@@ -19,7 +20,7 @@ module Spontaneous
       argument :domain, :type => :string, :desc => "The domain name of the site to generate"
 
       class_option :root,     :desc => "The root destination", :aliases => '-r', :default => ".",   :type => :string
-      class_option :database, :desc => "The database to use ('postgres' (default) or 'mysql')", :aliases => %w(-d --db), :default => "postgres",   :type => :string
+      class_option :database, :desc => "The database to use ('sqlite' (default), 'postgres' or 'mysql')", :aliases => %w(-d --db), :default => "sqlite", :type => :string
       class_option :user,     :desc => "The database account to use", :aliases => '-u', :type => :string
       class_option :password, :desc => "The password for the database user", :aliases => %w(-p), :default => "",   :type => :string
       class_option :host,     :desc => "The database host", :aliases => %w(-h),   :type => :string
@@ -59,6 +60,7 @@ module Spontaneous
         template "Gemfile.tt", "Gemfile"
         template "Capfile.tt", "Capfile"
         template "Rakefile.tt", "Rakefile"
+        template "db/#{@database[:adapter]}.yml.tt", "config/database.yml"
         # template "lib/site.rb.tt", "lib/site.rb"
         # empty_directory "lib/tasks"
         empty_directory "log"

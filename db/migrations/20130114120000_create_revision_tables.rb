@@ -2,6 +2,7 @@
 require 'logger'
 require 'spontaneous'
 require 'benchmark'
+require 'spontaneous/publishing/revision'
 
 Sequel.migration do
   ::ContentTable = S::DataMapper::ContentTable unless defined?(::ContentTable)
@@ -23,7 +24,7 @@ Sequel.migration do
 
     [revision_table, archive_table].each do |table|
       drop_table?(table)
-      run %(CREATE TABLE #{literal(table)} AS SELECT * FROM #{literal(content_table)} LIMIT 1;)
+      Spontaneous::Publishing.create_content_table(self, content_table, table)
     end
 
 

@@ -26,7 +26,7 @@ Sequel.extension :migration
 # The scissors plugin adds class methods for update, delete, and destroy
 Sequel::Model.plugin :scissors
 
-ENV["SPOT_ADAPTER"] ||= "postgres"
+ENV["SPOT_ADAPTER"] ||= "sqlite"
 
 jruby = case RUBY_PLATFORM
 when "java"
@@ -57,8 +57,6 @@ when "mysql"
     "mysql2://root@localhost/spontaneous2_test"
   end
 when "sqlite"
-  puts "SQLite is currently not supported"
-  exit 1
   if jruby
     require 'jdbc/sqlite3'
     Jdbc::SQLite3.load_driver

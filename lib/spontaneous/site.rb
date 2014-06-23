@@ -92,9 +92,11 @@ module Spontaneous
     end
 
     def db_settings
-      config_dir = paths.expanded(:config).first
-      @db_settings = YAML.load_file(File.join(config_dir, "database.yml"))
-      self.config.db = @db_settings[environment]
+      self.config.db = db_config[environment]
+    end
+
+    def db_config
+      @db_config ||= YAML.load_file(File.join(paths.expanded(:config).first, "database.yml"))
     end
 
     def config

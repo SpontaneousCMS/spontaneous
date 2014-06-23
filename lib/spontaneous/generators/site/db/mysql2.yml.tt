@@ -1,12 +1,16 @@
 ---
-:development: &defaults
-  :adapter:    <%= @database[:adapter] %>
-  :database:   <%= @site_name %>
+:defaults: &defaults
+  :adapter:    mysql2
+  :encoding:   UTF-8
   :user:       <%= @database[:user] %>
   :password:   <%= @database[:password] %>
 <% unless (host = @database[:host]).blank? -%>
   :host:       <%= host %>
 <% end %>
+
+:development:
+  <<:         *defaults
+  :database:   <%= @site_name %>
 
 :test:
   <<:         *defaults
@@ -17,8 +21,5 @@
   :database:  <%= @site_name %>
   :user:      <%= @site_name %>
   :password:   <%= @database[:password] %>
-
-:rake:
-  <<:         *defaults
 
 

@@ -1,6 +1,31 @@
 # encoding: UTF-8
 
 module Spontaneous::Publishing
+  def self.create_content_table(db, source_table, dest_table_name)
+    # sqlite doesn't like it if you create a table with no columns
+    # so hard-code the id column (but don't make it a pk because the
+    # unique constraint isn't useful at this stage)
+    schema = db.schema(source_table).dup.delete_if { |col, opts| col == :id }
+    db.create_table(dest_table_name) do
+      integer :id
+    end
+    db.alter_table(dest_table_name) do
+      schema.each do |column, column_opts|
+        opts = column_opts.dup
+        type = opts.delete(:db_type)
+        case column
+        when :id
+          opts.delete(:default)
+        end
+        add_column column, type#, opts
+      end
+    end
+    nil
+  rescue => e
+    db.drop_table(dest_table_name) rescue nil
+    raise
+  end
+
   class Revision
     class InvalidRevision < Spontaneous::Error; end
 
@@ -39,7 +64,8 @@ module Spontaneous::Publishing
       protected
 
       def create_revision
-        db.create_table(@revision.table, as: source_dataset)
+        Spontaneous::Publishing.create_content_table(db, source_dataset.first_source, @revision.table)
+        @revision.copy_dataset(source_dataset, @revision.table)
       end
 
       def source_dataset

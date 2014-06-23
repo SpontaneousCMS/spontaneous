@@ -190,6 +190,36 @@ describe "Generators" do
       end
     end
 
+    describe "configured for a sqlite database" do
+      let(:args) { ["example.com", "--root=#{@tmp}", "--database=sqlite"] }
+      before do
+        @site_root = File.join(@tmp, 'example_com')
+        generate(:site, *args)
+      end
+
+
+      it "define the correct adapter" do
+        config = database_config("example_com")
+        [:development, :test, :production].each do |environment|
+          config[environment][:adapter].must_equal "sqlite3"
+        end
+      end
+
+      it "configure the correct gem" do
+        gemfile = File.read(File.join(@site_root, "Gemfile"))
+        gemfile.must_match /^gem 'sqlite3'/
+      end
+
+      it "setup the right db parameters" do
+        config = database_config("example_com")
+        [:development, :test].each do |environment|
+          config[environment][:database].must_match "db/#{environment}.sqlite3"
+          refute config[environment].key?(:user)
+          refute config[environment].key?(:host)
+        end
+      end
+    end
+
 
     it "include specified connection params in the generated database config" do
       site_root = File.join(@tmp, 'example_com')

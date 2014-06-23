@@ -1,0 +1,25 @@
+---
+:defaults: &defaults
+  :adapter:    postgres
+  :encoding:   UTF-8
+  :user:       <%= @database[:user] %>
+  :password:   <%= @database[:password] %>
+<% unless (host = @database[:host]).blank? -%>
+  :host:       <%= host %>
+<% end %>
+
+:development:
+  <<:         *defaults
+  :database:   <%= @site_name %>
+
+:test:
+  <<:         *defaults
+  :database:   <%= @site_name %>_test
+
+:production:
+  <<:         *defaults
+  :database:  <%= @site_name %>
+  :user:      <%= @site_name %>
+  :password:   <%= @database[:password] %>
+
+
