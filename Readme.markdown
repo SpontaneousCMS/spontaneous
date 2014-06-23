@@ -223,16 +223,16 @@ This will generate the following interface for the site editors:
 
 Spontaneous needs ruby >= 1.9.3 and Ruby >= 2.0 is preferred
 
-		rvm install 2.1.1
+		rvm install 2.1.2
 
 **Install Spontaneous**
 
-		gem install spontaneous
+		gem install spontaneous --pre
 
 Now generate your site. Replace example.com with the domain of your site.
 
-		spot create example.com
-		cd example.com
+		spot generate example.com
+		cd example_com
 		bundle install
 		spot init
 		spot server
