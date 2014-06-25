@@ -58,6 +58,14 @@ module Spontaneous
           end
         end
 
+        # Using prepared statements for associations within sqlite causes
+        # problems with multiprocess access as preparing the ps within a
+        # transaction locks the content table and prevents the field update &
+        # publishing processes from updating it
+        def associations_use_prepared_statements?
+          mapper.db.database_type != :sqlite
+        end
+
         def has_many_content(name, opts = {})
           opts[:association]    = :one_to_many
           opts[:dataset_method] = "#{name}_dataset"
@@ -70,11 +78,16 @@ module Spontaneous
             mapper.where!([[mapper.qualify_column(opts[:key]), var]])
           end
           mod = opts[:module] ||= association_method_module
-
-          define_association_method(mod, opts[:load_ps_method]) {
-            ps = self.send(opts[:ps_method])
-            ps.call(id: id)
-          }
+          if associations_use_prepared_statements?
+            define_association_method(mod, opts[:load_ps_method]) {
+              ps = self.send(opts[:ps_method])
+              ps.call(id: id)
+            }
+          else
+            define_association_method(mod, opts[:load_ps_method]) {
+              opts[:dataset].call(id).all
+            }
+          end
           define_association_method(mod, opts[:ps_method]) {
             mapper.prepare(:select, opts[:ps_name]) { opts[:dataset].call(:$id) }
           }
@@ -106,12 +119,20 @@ module Spontaneous
           end
           mod = opts[:module] ||= association_method_module
 
-          define_association_method(mod, opts[:load_ps_method]) {
-            id = send(opts[:key])
-            return nil if id.nil?
-            ps = self.send(opts[:ps_method])
-            ps.call(id: id)
-          }
+          if associations_use_prepared_statements?
+            define_association_method(mod, opts[:load_ps_method]) {
+              id = send(opts[:key])
+              return nil if id.nil?
+              ps = self.send(opts[:ps_method])
+              ps.call(id: id)
+            }
+          else
+            define_association_method(mod, opts[:load_ps_method]) {
+              id = send(opts[:key])
+              return nil if id.nil?
+              opts[:dataset].call(id).first
+            }
+          end
           define_association_method(mod, opts[:ps_method]) {
             mapper.prepare(:first, opts[:ps_name]) { opts[:dataset].call(:$id) }
           }
