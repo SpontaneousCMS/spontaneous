@@ -77,6 +77,12 @@ module Spontaneous::Field
       end
 
       def run
+        @site.transaction do
+          run!
+        end
+      end
+
+      def run!
         @fields.each do |field|
           field.process_pending_value(@site)
         end
