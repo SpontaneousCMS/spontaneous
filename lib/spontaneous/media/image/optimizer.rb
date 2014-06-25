@@ -22,7 +22,7 @@ module Spontaneous::Media::Image
 
     def run
       format = Spontaneous::Media::Image.format(@image)
-      if respond_to?(format)
+      if format && respond_to?(format)
         send(format)
       end
     end
