@@ -99,6 +99,10 @@ module Spontaneous
       @db_config ||= YAML.load_file(File.join(paths.expanded(:config).first, "database.yml"))
     end
 
+    def transaction(&block)
+      model.db.transaction(&block)
+    end
+
     def config
       @config ||= Spontaneous::Config.new(environment, mode)
     end

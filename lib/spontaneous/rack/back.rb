@@ -49,6 +49,7 @@ module Spontaneous
       def self.editing_app(site)
         ::Rack::Builder.app do
           use Scope::Edit, site
+          use Transaction, site
           use ApplicationAssets
           use UnsupportedBrowser
           use Authenticate::Init, site

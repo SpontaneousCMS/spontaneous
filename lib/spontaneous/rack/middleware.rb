@@ -1,6 +1,9 @@
+
 module Spontaneous::Rack::Middleware
-  autoload :Authenticate, "spontaneous/rack/middleware/authenticate"
-  autoload :CSRF,         "spontaneous/rack/middleware/csrf"
-  autoload :Reloader,     "spontaneous/rack/middleware/reloader"
-  autoload :Scope,        "spontaneous/rack/middleware/scope"
 end
+
+require "spontaneous/rack/middleware/authenticate"
+require "spontaneous/rack/middleware/csrf"
+require "spontaneous/rack/middleware/reloader"
+require "spontaneous/rack/middleware/scope"
+require "spontaneous/rack/middleware/transaction"
