@@ -201,7 +201,7 @@ describe "Generators" do
       it "define the correct adapter" do
         config = database_config("example_com")
         [:development, :test, :production].each do |environment|
-          config[environment][:adapter].must_equal "sqlite3"
+          config[environment][:adapter].must_equal "sqlite"
         end
       end
 
