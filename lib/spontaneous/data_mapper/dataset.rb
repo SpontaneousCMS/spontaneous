@@ -144,7 +144,8 @@ module Spontaneous
       end
 
       class PreparedStatement
-        def initialize(ds, ps)
+        def initialize(name, ds, ps)
+          @name = name
           @ds = ds
           @ps = ps
         end
@@ -162,7 +163,11 @@ module Spontaneous
 
       def prepare(type, name, *values)
         ps = @dataset.prepare(type, name, *values)
-        PreparedStatement.new(self, ps)
+        PreparedStatement.new(name, self, ps)
+      end
+
+      def db
+        @dataset.db
       end
 
       def qualify_to_first_source
