@@ -19,7 +19,7 @@ module Spontaneous
         end
       end
 
-      def self.application(site)
+      def self.application(site = ::Spontaneous.instance)
         app = ::Rack::Builder.new do
           use Spontaneous::Rack::Static, root: Spontaneous.revision_dir / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
 

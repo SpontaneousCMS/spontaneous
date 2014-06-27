@@ -75,6 +75,7 @@ module Spontaneous
         ::Rack::Builder.app do
           use ::Rack::Lint if Spontaneous.development?
           use Scope::Preview, site
+          use Transaction, site
           use Authenticate::Init, site
           # Preview authentication redirects to /@spontaneous rather than
           # showing a login screen. This way if you go to the root of the site
@@ -100,7 +101,7 @@ module Spontaneous
         end
       end
 
-      def self.application(site)
+      def self.application(site = ::Spontaneous.instance)
         app = ::Rack::Builder.new do
           site.back_controllers.each do |namespace, controller|
             map(namespace) do
