@@ -25,7 +25,7 @@ Capistrano::Configuration.instance(:must_exist).load do
     # Capistrano automatically creates a tmp directory - I don't like that
     # and would prefer to share tmp between instances
     task :symlink_tmpdir do
-      run "cd #{release_path} && rmdir tmp ; ln -nfs #{deploy_to}/shared/tmp ."
+      run "cd #{release_path} && rm -r tmp ; ln -nfs #{deploy_to}/shared/tmp ."
     end
 
     task :bundle_assets do
