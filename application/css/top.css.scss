@@ -220,6 +220,9 @@ $navigation-color: #555;
 		.page:hover {
 			color: $action;
 		}
+		.page.current {
+			color: $highlight;
+		}
 		.box {
 			margin-top: 8px;
 		}
