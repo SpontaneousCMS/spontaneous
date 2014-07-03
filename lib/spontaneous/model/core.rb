@@ -111,6 +111,10 @@ module Spontaneous::Model
       content_model::Page.root
     end
 
+    def visibility_path_ids
+      (self[:visibility_path] || "").split(ANCESTOR_SEP).map { |id| id.to_i }
+    end
+
     def content_instance
       self
     end

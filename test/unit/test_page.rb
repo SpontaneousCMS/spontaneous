@@ -91,6 +91,46 @@ describe "Page" do
       Page.root.must_equal nil
       @site["#error"].must_equal root.reload
     end
+
+    it "gives children of invisible roots the correct root page" do
+      root = ErrorPage.create_root "error"
+      child = ::Page.new
+      root.pages << child
+      root.save
+      child.save
+      child.tree_root.must_equal root
+    end
+
+    it "allows you to test if the page is an invisible root" do
+      @root.is_invisible_root?.must_equal false
+      child = ::Page.new
+      @root.sub << child
+      child.save
+      child.is_invisible_root?.must_equal false
+      invisible_root = ErrorPage.create_root "error"
+      invisible_root.is_invisible_root?.must_equal true
+      child = ::Page.new
+      invisible_root.pages << child
+      invisible_root.save
+      child.save
+      child.is_invisible_root?.must_equal false
+    end
+
+    it "allows you to test if a page belongs to an invisible sub-tree" do
+      @root.in_invisible_tree?.must_equal false
+      child = ::Page.new
+      @root.sub << child
+      child.save
+      child.in_invisible_tree?.must_equal false
+
+      invisible_root = ErrorPage.create_root "error"
+      invisible_root.in_invisible_tree?.must_equal true
+      child = ::Page.new
+      invisible_root.pages << child
+      invisible_root.save
+      child.save
+      child.in_invisible_tree?.must_equal true
+    end
   end
 
   describe "Slugs" do

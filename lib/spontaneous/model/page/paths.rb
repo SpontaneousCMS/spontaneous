@@ -20,8 +20,6 @@ module Spontaneous::Model::Page
 
     # InstanceMethods
 
-    ANCESTOR_SEP = "."
-
     def __create_hidden_root=(state)
       @__is_hidden_root = state
     end
@@ -148,7 +146,7 @@ module Spontaneous::Model::Page
     end
 
     def ancestor_path
-      (self[:ancestor_path] || "").split(ANCESTOR_SEP).map { |id| id.to_i }
+      (self[:ancestor_path] || "").split(Spontaneous::Model::ANCESTOR_SEP).map { |id| id.to_i }
     end
 
     def root?
@@ -157,11 +155,30 @@ module Spontaneous::Model::Page
 
     alias_method :is_root?, :root?
 
+    # Returns the root of the tree this page belongs to, which in the case
+    # of pages in an invisible tree will not be the same as the site's
+    # root/home page
+    def tree_root
+      content_model::Page.get(visibility_path_ids.first)
+    end
+
+    def is_invisible_root?
+      return false unless parent_id.nil?
+      return false if root?
+      path[0] == '#'
+    end
+
+    def in_invisible_tree?
+      tree_root = self.tree_root
+      return is_invisible_root? if tree_root.nil?
+      tree_root.is_invisible_root?
+    end
+
 
     def update_path
       self.path = calculate_path
       if parent
-        self[:ancestor_path] = parent.ancestor_path.push(parent.id).join(ANCESTOR_SEP)
+        self[:ancestor_path] = parent.ancestor_path.push(parent.id).join(Spontaneous::Model::ANCESTOR_SEP)
       end
     end
 

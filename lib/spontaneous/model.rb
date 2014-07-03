@@ -2,6 +2,8 @@
 module Spontaneous
 
   module Model
+    ANCESTOR_SEP = "."
+
     autoload :Core,   "spontaneous/model/core"
     autoload :Page,   "spontaneous/model/page"
     autoload :Piece,  "spontaneous/model/piece"
