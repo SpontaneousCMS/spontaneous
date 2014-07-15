@@ -69,6 +69,16 @@ describe "Output store" do
       ::File.read(::File.join(revision_path, 'dynamic', 'one.html')).must_equal "*template*"
     end
 
+    it "puts private roots in files starting with '#'" do
+      store.store_static(revision, "#one.html", "*template*")
+      ::File.read(::File.join(revision_path, 'static', '#one.html')).must_equal "*template*"
+    end
+
+    it "puts private files in directories starting with '#'" do
+      store.store_static(revision, "#private-tree/one.html", "*template*")
+      ::File.read(::File.join(revision_path, 'static', '#private-tree', 'one.html')).must_equal "*template*"
+    end
+
     it "enables the retrieval of available revisions" do
       store.store_static(1, "/one.html", "*template*")
       store.store_protected(2, "/one.html", "*template*")
