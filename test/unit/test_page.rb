@@ -271,6 +271,10 @@ describe "Page" do
       @t = Page[@t.id]
     end
 
+    it "knows its rootiness" do
+      assert @p.is_public_root?
+    end
+
     it "be able to find a reference to their inline entry" do
       @q.entry.class.must_equal Spontaneous::PagePiece
     end

@@ -149,11 +149,12 @@ module Spontaneous::Model::Page
       (self[:ancestor_path] || "").split(Spontaneous::Model::ANCESTOR_SEP).map { |id| id.to_i }
     end
 
-    def root?
+    def is_public_root?
       path == Spontaneous::SLASH
     end
 
-    alias_method :is_root?, :root?
+    alias_method :root?,    :is_public_root?
+    alias_method :is_root?, :is_public_root?
 
     # Returns the root of the tree this page belongs to, which in the case
     # of pages in an private tree will not be the same as the site's

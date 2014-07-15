@@ -50,9 +50,11 @@ module Spontaneous::Model
         !supertype.nil?
       end
 
-      def root
+      def public_root
         content_model::Page.root
       end
+
+      alias_method :root, :public_root
 
       def log_sql(io = $stdout)
         mapper.logger = ::Logger.new(io)
@@ -107,9 +109,16 @@ module Spontaneous::Model
       false
     end
 
-    def root
-      content_model::Page.root
+    # Provide a default implementation of this that is later over-ridden by the page methods
+    def is_public_root?
+      false
     end
+
+    def public_root
+      is_public_root? ? self : content_model::Page.root
+    end
+
+    alias_method :root, :public_root
 
     def visibility_path_ids
       (self[:visibility_path] || "").split(ANCESTOR_SEP).map { |id| id.to_i }
