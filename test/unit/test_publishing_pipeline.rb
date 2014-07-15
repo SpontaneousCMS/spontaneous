@@ -237,6 +237,38 @@ describe "Publishing Pipeline" do
       run_step
     end
 
+    describe "private trees" do
+      let(:next_revision) { revision + 1 }
+      let(:progress) { Spontaneous::Publishing::Progress::Silent.new }
+      before do
+        class ::HiddenRootPage < Page
+          layout(:html) { "=${title}.html" }
+          layout(:xml) { "=${title}.xml" }
+          box :underneath
+        end
+        @private_root = HiddenRootPage.create_root('private-root', title: "Private Root")
+        @private_page = HiddenRootPage.create(title: "Private Page", slug: "private-page")
+        @private_root.underneath << @private_page
+        @private_root.save
+        @private_page.save
+
+        @site.model.publish_all(next_revision)
+      end
+
+      it "renders pages in private trees" do
+        store = @output_store.revision(revision).store
+        (@pages + [[@private_root, @private_root.title.value], [@private_page, @private_page.title.value]]).each do |page, title|
+          page.outputs.each do |output|
+            key = store.output_key(output, false)
+            store.expects(:store_static).with(next_revision, key, "=#{title}.#{output.name}", instance_of(Spontaneous::Output::Store::Transaction))
+          end
+        end
+        @site.model.scope(next_revision, true) do
+          step.call(@site, next_revision, nil, )
+        end
+      end
+    end
+
     it "returns the correct number of steps" do
       @site.model.scope(revision, true) do
         step.count(@site, revision, nil).must_equal (@pages.length * 2)

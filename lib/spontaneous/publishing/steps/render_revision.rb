@@ -18,7 +18,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def count
-      @site.pages.map { |page| page.outputs.length }.inject(0, :+)
+      renderable_pages.map { |page| page.outputs.length }.inject(0, :+)
     end
 
     def rollback
@@ -27,7 +27,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def render_pages
-      @site.pages.each do |page|
+      renderable_pages.each do |page|
         render_page(page)
       end
     end
@@ -60,6 +60,10 @@ module Spontaneous::Publishing::Steps
 
     def template_revision
       @template_revision ||= @site.output_store.revision(@revision)
+    end
+
+    def renderable_pages
+      @site.pages
     end
   end
 end
