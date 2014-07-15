@@ -13,22 +13,22 @@ module Spontaneous::Model::Page
         /^page-\d{8}-\d{6}$/ === slug
       end
 
-      def create_root(slug)
-        create(slug: slug, :__create_hidden_root =>  true)
+      def create_root(slug, values = {})
+        create(values.merge(slug: slug, :__create_private_root =>  true))
       end
     end
 
     # InstanceMethods
 
-    def __create_hidden_root=(state)
-      @__is_hidden_root = state
+    def __create_private_root=(state)
+      @__is_private_root = state
     end
 
-    def __create_hidden_root?
-      @__is_hidden_root || false
+    def __create_private_root?
+      @__is_private_root || false
     end
 
-    private :__create_hidden_root=, :__create_hidden_root?
+    private :__create_private_root=, :__create_private_root?
 
     def after_initialize
       super
@@ -123,8 +123,8 @@ module Spontaneous::Model::Page
 
     def place_in_page_tree
       if parent_id.nil?
-        if __create_hidden_root? || content_model.has_root?
-          make_hidden_root
+        if __create_private_root? || content_model.has_root?
+          make_private_root
         else
           make_root
         end
@@ -139,7 +139,7 @@ module Spontaneous::Model::Page
       self[:ancestor_path] = ""
     end
 
-    def make_hidden_root
+    def make_private_root
       raise Spontaneous::AnonymousRootException.new if slug.blank?
       self[:path] = "##{slug}"
       self[:ancestor_path] = ""
@@ -156,22 +156,22 @@ module Spontaneous::Model::Page
     alias_method :is_root?, :root?
 
     # Returns the root of the tree this page belongs to, which in the case
-    # of pages in an invisible tree will not be the same as the site's
+    # of pages in an private tree will not be the same as the site's
     # root/home page
     def tree_root
       content_model::Page.get(visibility_path_ids.first)
     end
 
-    def is_invisible_root?
+    def is_private_root?
       return false unless parent_id.nil?
       return false if root?
       path[0] == '#'
     end
 
-    def in_invisible_tree?
+    def in_private_tree?
       tree_root = self.tree_root
-      return is_invisible_root? if tree_root.nil?
-      tree_root.is_invisible_root?
+      return is_private_root? if tree_root.nil?
+      tree_root.is_private_root?
     end
 
 

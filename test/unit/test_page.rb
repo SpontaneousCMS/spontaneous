@@ -36,7 +36,7 @@ describe "Page" do
     end
   end
 
-  describe "invisible roots" do
+  describe "private roots" do
     before do
       @root = Page.create
       assert @root.root?
@@ -102,34 +102,34 @@ describe "Page" do
     end
 
     it "allows you to test if the page is an invisible root" do
-      @root.is_invisible_root?.must_equal false
+      @root.is_private_root?.must_equal false
       child = ::Page.new
       @root.sub << child
       child.save
-      child.is_invisible_root?.must_equal false
+      child.is_private_root?.must_equal false
       invisible_root = ErrorPage.create_root "error"
-      invisible_root.is_invisible_root?.must_equal true
+      invisible_root.is_private_root?.must_equal true
       child = ::Page.new
       invisible_root.pages << child
       invisible_root.save
       child.save
-      child.is_invisible_root?.must_equal false
+      child.is_private_root?.must_equal false
     end
 
     it "allows you to test if a page belongs to an invisible sub-tree" do
-      @root.in_invisible_tree?.must_equal false
+      @root.in_private_tree?.must_equal false
       child = ::Page.new
       @root.sub << child
       child.save
-      child.in_invisible_tree?.must_equal false
+      child.in_private_tree?.must_equal false
 
       invisible_root = ErrorPage.create_root "error"
-      invisible_root.in_invisible_tree?.must_equal true
+      invisible_root.in_private_tree?.must_equal true
       child = ::Page.new
       invisible_root.pages << child
       invisible_root.save
       child.save
-      child.in_invisible_tree?.must_equal true
+      child.in_private_tree?.must_equal true
     end
   end
 
