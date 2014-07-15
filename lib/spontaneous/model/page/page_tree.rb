@@ -15,8 +15,10 @@ module Spontaneous::Model::Page
     end
 
     # Returns a list of all the pages at a certain depth in the page tree for any page
+    # In the case of pages rooted in a private tree the calculation is done starting from
+    # the public root rather than the root of the tree the page belongs to
     def at_depth(depth, opts = {})
-      return root_at_depth(depth) if is_root?
+      return root_at_depth(depth) if is_public_root? || is_private_root?
       parent_depth = [0, depth - 1].max
       parent       = ancestor(parent_depth)
       # This is made more complex because the #children method is unordered
@@ -69,11 +71,12 @@ module Spontaneous::Model::Page
     end
 
     def root_at_depth(depth)
+      root = public_root
       case depth
       when 0
-        self
+        root
       when 1
-        self.children
+        root.children
       else
         raise ArgumentError.new("Cannot calculate descendents of root beyond a depth of 1")
       end

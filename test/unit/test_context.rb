@@ -135,5 +135,12 @@ describe "Context" do
       result = @context.navigation(exclude: Page).map { |p, a| [p.path, a]}
       result.must_equal [["/area1-page2", true], ["/area2-page2", false]]
     end
+
+    it "uses the public root when rendering a private page" do
+      @target = Page.create_root "error"
+      @context = @context_class.new(@target)
+      result = @context.navigation.map { |p, a| [p.path, a]}
+      result.must_equal [["/area1-page1", false], ["/area1-page2", false], ["/area2-page1", false], ["/area2-page2", false]]
+    end
   end
 end
