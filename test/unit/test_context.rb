@@ -136,11 +136,31 @@ describe "Context" do
       result.must_equal [["/area1-page2", true], ["/area2-page2", false]]
     end
 
-    it "uses the public root when rendering a private page" do
+    it "shows children of the public root when rendering a private root" do
       @target = Page.create_root "error"
       @context = @context_class.new(@target)
       result = @context.navigation.map { |p, a| [p.path, a]}
       result.must_equal [["/area1-page1", false], ["/area1-page2", false], ["/area2-page1", false], ["/area2-page2", false]]
+    end
+
+    it "shows children of the public root when rendering a private page" do
+      root = Page.create_root "error"
+      @target = Page.new
+      root.area2 << @target
+      @target.save.reload
+      @context = @context_class.new(@target)
+      result = @context.navigation.map { |p, a| [p.path, a]}
+      result.must_equal [["/area1-page1", false], ["/area1-page2", false], ["/area2-page1", false], ["/area2-page2", false]]
+    end
+
+    it "doesn't throw errors when attempting to render from a non-existant parent" do
+      root = Page.create_root "error"
+      @target = Page.new
+      root.area2 << @target
+      @target.save.reload
+      @context = @context_class.new(@target)
+      result = @context.navigation(depth: 2).map { |p, a| [p.path, a]}
+      result.must_equal []
     end
   end
 end

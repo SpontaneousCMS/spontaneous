@@ -20,7 +20,16 @@ module Spontaneous::Model::Page
     def at_depth(depth, opts = {})
       return root_at_depth(depth) if is_public_root? || is_private_root?
       parent_depth = [0, depth - 1].max
-      parent       = ancestor(parent_depth)
+      parent = if (parent_depth == 0)
+        public_root
+      else
+        ancestor(parent_depth)
+      end
+
+      # in the case of page aliases & private roots it's possible for a template
+      # to ask for an ancestor that doesn't exist.
+      return [] if parent.nil?
+
       # This is made more complex because the #children method is unordered
       # whereas the actual page order must come from the boxes
       return parent.children if parent.boxes.empty?
