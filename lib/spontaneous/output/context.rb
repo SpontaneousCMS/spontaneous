@@ -107,6 +107,7 @@ module Spontaneous::Output::Context
       __loader.template(template_path).convert(Spontaneous::Output::Template::RequestSyntax)
     end
 
+    # 'defer' is a useful semantic way of calling 'template'
     alias_method :defer, :template
 
     def __format
