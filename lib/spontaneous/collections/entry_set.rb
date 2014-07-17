@@ -9,8 +9,19 @@ module Spontaneous::Collections
 
     def initialize(owner, piece_store = [])
       @owner = owner
-      @store = Hash.new { |hash, key| hash[key] = [] }
-      (piece_store || []).each do |data|
+      @loaded = false
+      @piece_store = piece_store || []
+    end
+
+    def store
+      @store ||= initialize_store
+    end
+
+    # Lazily load the entries as it's not unlikely that we'll be loading instances
+    # without ever wanting to access their contents
+    def initialize_store
+      store = Hash.new { |hash, key| hash[key] = [] }
+      @piece_store.each do |data|
         id = data[0]
         entry = if (content = @owner._pieces.detect { |piece| piece.id == id })
           content.page? ? Spontaneous::PagePiece.new(@owner, content, data[1]) : content
@@ -19,9 +30,35 @@ module Spontaneous::Collections
         # then we just want to silently skip it
         if entry
           box_id =  entry.box_sid.to_s
-          @store[box_id] << entry
+          store[box_id] << entry
         end
       end
+      @loaded = true
+      store
+    end
+
+    def wrap_page(page)
+      case @loaded
+      when true
+        find { |e| e.id == page.id }
+      else
+        quick_wrap_page(page)
+      end
+    end
+
+    # Wrap a page with an entry without loading the owning item's content
+    # association see Page#render_inline for a use case.
+    #
+    # We might be loading an individual page using its id and then trying to
+    # render it immediately, in which case having to load the entire '_pieces'
+    # association just to render a single page entry would be insane.
+    #
+    def quick_wrap_page(page)
+      data = @piece_store.detect { |data|
+        data[0] == page.id
+      }
+      return nil if data.nil?
+      Spontaneous::PagePiece.new(@owner, page, data[1])
     end
 
     def each(&block)
@@ -94,8 +131,10 @@ module Spontaneous::Collections
     end
 
     def freeze
-      super
+      # freeze the entries first in order to ensure that we've loaded our entries
+      # before freezing ourself
       store.values.each { |entries| entries.freeze }
+      super
       self
     end
 

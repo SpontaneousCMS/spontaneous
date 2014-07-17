@@ -19,7 +19,7 @@ module Spontaneous::Output::Template
 
     def render(output, params = {}, parent_context = nil)
       output.model.with_visible do
-        engine.render(output.content, context(output, params, parent_context), output.name)
+        engine.render(output.renderable_content, context(output, params, parent_context), output.name)
       end
     end
 
@@ -30,7 +30,7 @@ module Spontaneous::Output::Template
     end
 
     def context(output, params, parent)
-      context_class(output).new(Spontaneous::Output::Renderable.new(output.content), params, parent).tap do |context|
+      context_class(output).new(Spontaneous::Output::Renderable.new(output.renderable_content), params, parent).tap do |context|
         context.site = @site
         context._renderer = renderer_for_context
       end

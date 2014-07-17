@@ -27,6 +27,11 @@ module Spontaneous
       owner.page
     end
 
+    # This is used to unwrap pages from their entries within boxes
+    def to_page
+      target
+    end
+
     def id
       target.id
     end
@@ -75,6 +80,24 @@ module Spontaneous
 
     def template(format = :html, renderer = Spontaneous::Output.default_renderer)
       style.template(format, renderer)
+    end
+
+    def inspect
+      %(#<PagePiece target=#{target.inspect}>)
+    end
+
+    def renderable
+      self
+    end
+
+    # Ensure that we map #render* to #render_inline* as this version of a page
+    # has no non-inline version
+    def render(format = :html, params = {}, parent_context = nil)
+      render_inline(format, params, parent_context)
+    end
+
+    def render_using(renderer, format = :html, params = {}, parent_context = nil)
+      render_inline_using(renderer, format, params, parent_context)
     end
   end
 end

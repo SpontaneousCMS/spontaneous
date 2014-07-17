@@ -333,9 +333,13 @@ module Spontaneous
         value(format)
       end
 
+      alias_method :render_inline, :render
+
       def render_using(renderer, format = :html, locals = {}, *args)
         render(format, locals)
       end
+
+      alias_method :render_inline_using, :render_using
 
       def to_html(locals = {})
         value(:html)

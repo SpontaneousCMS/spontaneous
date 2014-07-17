@@ -12,6 +12,8 @@ module Spontaneous::Media::Image
       end
     end
 
+    alias_method :render_inline, :render
+
     def to_html(attr={})
       default_attr = {
         :src => src,

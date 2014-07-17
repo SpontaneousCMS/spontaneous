@@ -80,6 +80,24 @@ module Spontaneous
       @owner.model
     end
 
+    # All renderable objects must implement #target to enable aliases & content objects
+    # to be treated identically
+    def target
+      self
+    end
+
+    def renderable
+      self
+    end
+
+    def render(format = :html, params = {}, parent_context = nil)
+      render_inline(format, params, parent_context)
+    end
+
+    def render_using(renderer, format = :html, params = {}, parent_context = nil)
+      render_inline_using(renderer, format, params, parent_context)
+    end
+
     def page?
       false
     end
@@ -216,6 +234,8 @@ module Spontaneous
     def page
       owner.page
     end
+
+    alias_method :to_page, :page
 
     def depth
       owner.content_depth

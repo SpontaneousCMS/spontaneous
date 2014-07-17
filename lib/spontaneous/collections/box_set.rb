@@ -48,6 +48,9 @@ module Spontaneous::Collections
       map { |box| box.render_using(renderer, format, locals, parent_context) }.join("\n")
     end
 
+    alias_method :render_inline, :render
+    alias_method :render_inline_using, :render_using
+
     protected
 
     def get_single(index)

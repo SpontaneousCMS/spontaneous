@@ -80,8 +80,20 @@ module Spontaneous::Output
       @target.render_using(renderer, format, __render_locals__(locals), parent_context)
     end
 
+    def render_inline(format = :html, locals = {}, parent_context = nil)
+      @target.render_inline(format, __render_locals__(locals), parent_context)
+    end
+
+    def render_inline_using(renderer, format = :html, locals = {}, parent_context = nil)
+      @target.render_inline_using(renderer, format, __render_locals__(locals), parent_context)
+    end
+
     def to_ary
       @target.to_ary
+    end
+
+    def renderable
+      ::Spontaneous::Output::Renderable(@target.renderable, locals)
     end
 
     private

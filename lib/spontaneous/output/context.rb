@@ -121,13 +121,19 @@ module Spontaneous::Output::Context
       param.to_s
     end
 
+    RENDER_METHODS = [:render_inline_using, :render_using, :render_inline, :render].freeze
+
     # Has to be routed through the top-level renderer so as to make
     # use of shared caches that are held by it.
     def __render_content(content)
-      if content.respond_to?(:render_using)
-        content.render_using(_renderer, __format, {}, self)
-      else
-        content.render(__format, {}, self)
+      case (method = RENDER_METHODS.detect { |m| content.respond_to?(m) })
+      # use #__send__ to ensure that the method goes to any Renderable proxy object directly
+      when :render_inline_using, :render_using
+        content.__send__(method, _renderer, __format, {}, self)
+      when :render_inline, :render
+        content.__send__(method, __format, {}, self)
+      else # fallback to showing nothing
+        ""
       end
     end
   end

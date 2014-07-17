@@ -127,13 +127,18 @@ module Spontaneous::Output
       content.model
     end
 
+    # Hook into Pages' ability to re-define the object that they render as
+    def renderable_content
+      content.renderable
+    end
+
     def render(params = {}, parent_context = nil)
       render_using(default_renderer, params, parent_context)
     end
 
     def render_using(renderer, params = {}, parent_context = nil)
       before_render
-      output = render_page(renderer, params, parent_context)
+      output = render_content(renderer, params, parent_context)
       output = postprocess(output)
       after_render(output)
       output
@@ -156,7 +161,7 @@ module Spontaneous::Output
       output
     end
 
-    def render_page(renderer, params = {}, parent_context = nil)
+    def render_content(renderer, params = {}, parent_context = nil)
       renderer.render(self, params, parent_context)
     end
 

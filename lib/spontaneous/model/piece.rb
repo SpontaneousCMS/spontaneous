@@ -32,5 +32,15 @@ module Spontaneous::Model
         })
       end
     end
+
+    # Ensure that we map #render* to #render_inline* as this version of a page
+    # has no non-inline version
+    def render(format = :html, params = {}, parent_context = nil)
+      render_inline(format, params, parent_context)
+    end
+
+    def render_using(renderer, format = :html, params = {}, parent_context = nil)
+      render_inline_using(renderer, format, params, parent_context)
+    end
   end
 end

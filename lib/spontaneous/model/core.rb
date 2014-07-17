@@ -135,11 +135,25 @@ module Spontaneous::Model
       self
     end
 
+    # Returns a version of this object as a page.
+    # This is used by the rendering system to guarantee that the object
+    # it is recieving is a page & not a PagePiece proxy. See PagePiece#to_page
+    def to_page
+      page
+    end
+
     def page?
       false
     end
 
     alias_method :is_page?, :page?
+
+    # Do not overwrite this method directly.
+    # If you want a page to render the content of another configure
+    # the type using Content::render
+    def renderable
+      self
+    end
 
     def start_inline_edit_marker
       "spontaneous:previewedit:start:content id:#{id}"

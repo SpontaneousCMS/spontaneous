@@ -147,6 +147,25 @@ describe "Render" do
       @content.render(:epub).must_equal "<EPUB><title>The Title</title><body>The Description</body></EPUB>\n"
     end
 
+    it "can specify an alternate object as the content source" do
+      class Page
+        layout(:html) { "=${title}"}
+      end
+      class DivertedPage < Page
+        layout(:html) { "!${title}"}
+        renders { sections1.first }
+      end
+      parent = DivertedPage.create(title: "parent")
+      child = Page.create(title: "child")
+      @root.sections1 << parent
+      @root.save
+      parent.sections1 << child
+      parent.save
+      child.save
+      expected = child.render(:html)
+      parent.render(:html).must_equal expected
+    end
+
     describe "piece trees" do
       before do
         @page = ::Page.create
@@ -411,6 +430,12 @@ describe "Render" do
         @parent.contents.first.render.must_equal "Child\n"
         @parent.things.render.must_equal "Child\n"
         @parent.render.must_equal "<html>Child\n</html>\n"
+      end
+
+      it "renders using the inline style when loaded directly" do
+        id = @page.id
+        PageClass.layout(:html) { "=${::PageClass.get(#{id})}" }
+        @parent.render.must_equal "=Child\n"
       end
     end
 

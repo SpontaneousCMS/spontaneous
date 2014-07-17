@@ -46,6 +46,16 @@ module Spontaneous::Model
       def title_field_name
         :title
       end
+
+      # Use this to cause instances of the class to render as another content object.
+      # Useful if you want say a section to render its first child rather than itself
+      # This method calls #to_page on the result of the block to ensure that the value
+      # returned is a page & not an inline object.
+      def renders(&block)
+        define_method(:renderable) do
+          instance_eval(&block).try(:to_page)
+        end
+      end
     end
 
     def page?
@@ -110,7 +120,7 @@ module Spontaneous::Model
     end
 
     def resolve_entry
-      owner.all_contents.find { |e| e.id == self.id }
+      owner.all_contents.wrap_page(self)
     end
 
     def page=(page)
@@ -154,6 +164,18 @@ module Spontaneous::Model
     # that Pages are == to a PagePiece that encloses them
     def eql?(obj)
       super || (Spontaneous::PagePiece === obj && obj.target.eql?(self))
+    end
+
+    # Ensure that the *_inline versions of these methods render the entry
+    # (i.e. a PagePiece) not the page instance itself. This avoids a
+    # 'page within page' moment when you try to load a page and then
+    # render it directly within a template.
+    def render_inline(format = :html, params = {}, parent_context = nil)
+      entry.render_inline(format, params, parent_context)
+    end
+
+    def render_inline_using(renderer, format = :html, params = {}, parent_context = nil)
+      entry.render_inline_using(renderer, format, params, parent_context)
     end
   end
 end

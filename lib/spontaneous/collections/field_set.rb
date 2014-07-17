@@ -48,9 +48,13 @@ module Spontaneous::Collections
       map { |field| wrap_field_value(field, field.render(format, locals), format) }.join("\n")
     end
 
+    alias_method :render_inline, :render
+
     def render_using(renderer, format = :html, locals = {}, parent_context = nil)
       map { |field| wrap_field_value(field, field.render_using(renderer, format, locals), format) }.join("\n")
     end
+
+    alias_method :render_inline_using, :render_using
 
     protected
 

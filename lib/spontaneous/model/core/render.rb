@@ -17,5 +17,8 @@ module Spontaneous::Model::Core
     def render_using(renderer, format = :html, params = {}, parent_context = nil)
       output(format).render_using(renderer, params, parent_context)
     end
+
+    alias_method :render_inline, :render
+    alias_method :render_inline_using, :render_using
   end
 end
