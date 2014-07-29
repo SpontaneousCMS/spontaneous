@@ -36,6 +36,7 @@
 - Piece aliases now link using the id of the owning page of the target, rather than the id of the target itself
 - Rendering a private root no longer crashes in the `navigation` helper
 - Directly rendering a page instance within a tenplate no longer results in a page-within-page situation (context instances now call a separate #render_inline method which passes the call onto a page's containing entry)
+- Previewing of private pages has been disabled (fixing issue #36)
 
 ## 0.2.0.beta5, released 2014-03-18
 

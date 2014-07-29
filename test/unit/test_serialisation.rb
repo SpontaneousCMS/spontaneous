@@ -97,7 +97,7 @@ describe "Serialisation" do
     end
   end
 
-  describe "pieces" do
+  describe "pages" do
     before do
 
       date = "2011-07-07"
@@ -159,6 +159,11 @@ describe "Serialisation" do
         puts; pp @root_hash; puts "="*60; pp @root.export
       end
       assert_hashes_equal(@root_hash, @root.export)
+    end
+
+    it "exports the private root state" do
+      page = SerialisedPage.create_root('#private')
+      page.export[:private].must_equal true
     end
 
     it "serialise to JSON" do

@@ -72,13 +72,13 @@ Spontaneous.Publishing = (function($, S) {
 
 		change_list_loaded: function(outstanding) {
 			var change_list = outstanding.changes
-, w = this.wrapper
-, self = this
-, changed_wrap = dom.div('#changes.change-list').css('opacity', 0)
+			, w = this.wrapper
+			, self = this
+			, changed_wrap = dom.div('#changes.change-list').css('opacity', 0)
 			, publish_wrap = dom.div('#to-publish.change-list').css('opacity', 0)
 			, must_publish_all = outstanding.first_publish || outstanding.must_publish_all
-, spinner = this.spinner
-, append_to;
+			, spinner = this.spinner
+			, append_to;
 			if (must_publish_all) {
 				w.addClass('first-publish');
 			}
@@ -199,7 +199,7 @@ Spontaneous.Publishing = (function($, S) {
 
 		panel: function() {
 			var self = this
-, pageTitle = dom.span('.page-title').html(this.title)
+			, pageTitle = dom.span('.page-title').html(this.title)
 			, classes = '.title' + (this.isDependent() ? '.dependent' : '')
 			, modificationDate = dom.div('.modification-date').html(this.modifiedAt())
 			, publicationDate = dom.div('.publication-date').html(this.publishedAt())
