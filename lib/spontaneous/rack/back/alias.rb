@@ -28,15 +28,16 @@ module Spontaneous::Rack::Back
         type = content_model.schema.to_class(params[:alias_id])
         position = (params[:position] || 0).to_i
         if box.writable?(user, type)
-          instance = type.for_target(params[:target_id])
-          if instance
-            box.insert(position, instance)
-            content.save
-            json({
-              :position => position,
-              :entry => instance.entry.export(user)
-            })
+          additions = []
+          Array(params[:target_ids]).each_with_index do |target_id, offset|
+            instance = type.for_target(target_id)
+            if instance
+              box.insert(position+offset, instance)
+              content.save
+              additions << { position: position+offset, entry: instance.entry.export(user) }
+            end
           end
+          json(additions)
         else
           forbidden!
         end

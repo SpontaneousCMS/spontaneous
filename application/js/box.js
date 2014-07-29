@@ -88,15 +88,22 @@ Spontaneous.Box = (function($, S) {
 			Spontaneous.Ajax.post(['/content', this.id(), type.schema_id].join('/'), {position: position}, this.entry_added.bind(this));
 		},
 
-		add_alias: function(alias_target_id, type, position) {
-			S.Ajax.post(['/alias', this.id()].join('/'), {'alias_id':type.schema_id, 'target_id':alias_target_id, 'position':position}, this.entry_added.bind(this));
+		add_alias: function(alias_target_ids, type, position) {
+			S.Ajax.post(['/alias', this.id()].join('/'), {'alias_id':type.schema_id, 'target_ids':alias_target_ids, 'position':position}, this.entries_added.bind(this));
+		},
+
+		entries_added: function(result) {
+			var self = this;
+			result.forEach(function(entry) {
+				self.entry_added(entry);
+			});
 		},
 
 		entry_added: function(result) {
 			var box = this
-,position = result.position
-, e = result.entry
-, entry = this.wrap_entry(e);
+			, position = result.position
+			, e = result.entry
+			, entry = this.wrap_entry(e);
 
 			entry.bind('destroyed', function(entry) {
 				box.entry_removed(entry);
