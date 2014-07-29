@@ -36,20 +36,21 @@ Capistrano::Configuration.instance(:must_exist).load do
 
       desc "Sync the local database to the server version"
       task :down do
-        puts "syncing database DOWN"
-        dumpfilename = ENV['dumpfile'] || "#{Time.now.to_i}.mysql.gz"
+        puts "  * Syncing database DOWN"
+        dumper = Spontaneous::Utils::Database.dumper_for_database
+        dumpfilename = ENV['dumpfile'] || dumper.dumpfilename
         run %(cd #{current_path} && ./bin/rake db:dump dumpfile=#{dumpfilename} )
-        dump_file = "tmp/#{dumpfilename}"
+        dump_file = File.join("tmp", dumpfilename)
         top.download(File.join(current_path, dump_file), dump_file)
         system "bundle exec rake db:load dumpfile=#{dump_file}"
       end
 
       desc "Sync the server's version of the database to the local one"
       task :up do
-        puts "syncing database UP"
-        dumpfilename = ENV['dumpfile'] || "#{Time.now.to_i}.mysql.gz"
-        dump_file = "tmp/#{dumpfilename}"
-        dumper = ::Spontaneous::Utils::Database.dumper_for_database
+        puts "  * Syncing database UP"
+        dumper = Spontaneous::Utils::Database.dumper_for_database
+        dumpfilename = ENV['dumpfile'] || dumper.dumpfilename
+        dump_file = File.join("tmp", dumpfilename)
         dumper.dump(dump_file)
         remote_dump_file = File.join(deploy_to, dumpfilename)
         top.upload(dump_file, remote_dump_file)

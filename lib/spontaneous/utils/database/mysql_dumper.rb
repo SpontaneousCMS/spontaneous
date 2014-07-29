@@ -72,6 +72,10 @@ module Spontaneous
           [database_name, revision_archive_table].join(".")
         end
 
+        def dumpfilename(time = Time.now)
+          "#{time.strftime('%Y%m%d%H%M%S')}.#{name}.gz"
+        end
+
         # The whole point of this table's existance is to reduce the
         # size of the db dump for syncing
         def revision_archive_table
