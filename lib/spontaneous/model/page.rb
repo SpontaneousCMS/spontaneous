@@ -145,6 +145,7 @@ module Spontaneous::Model
         :path => path,
         :title => page_title,
         :slug => slug,
+        :private => in_private_tree?,
         :uid => uid
       })
       hash.delete(:label)

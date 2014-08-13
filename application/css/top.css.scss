@@ -151,6 +151,10 @@ $navigation-color: #555;
 		@include box-align(center);
 		margin: 0;
 		width: 70px;
+		&.disabled {
+			opacity: 0.5;
+			@include button-color(#666);
+		}
 	}
 	#open-publish {
 		position: relative;

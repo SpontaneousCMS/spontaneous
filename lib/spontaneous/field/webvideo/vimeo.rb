@@ -33,6 +33,11 @@ module Spontaneous::Field
         metadata = (metadata || [{}]).first || {}
       end
 
+      # TODO: define what's a sensible fallback response
+      def fallback_response
+        {}
+      end
+
       def to_html(options = {})
         params = player_attributes(options)
         attributes = hash_to_attributes(params[:attr])

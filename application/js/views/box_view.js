@@ -257,8 +257,8 @@ Spontaneous.Views.BoxView = (function($, S) {
 			this.box.add_entry(content_type, position);
 		},
 
-		add_alias: function(target_id, type, position) {
-			this.box.add_alias(target_id, type, position);
+		add_alias: function(target_ids, type, position) {
+			this.box.add_alias(target_ids, type, position);
 		},
 
 		insert_entry: function(entry, position) {

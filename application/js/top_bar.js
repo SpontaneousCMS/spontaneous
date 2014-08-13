@@ -438,8 +438,8 @@ Spontaneous.TopBar = (function($, S) {
 	});
 
 	var CMSNavigationView = new JS.Class({
-		initialize: function() {
-
+		initialize: function(topBar) {
+			this.topBar = topBar;
 		},
 		panel: function() {
 			var self = this;
@@ -449,7 +449,7 @@ Spontaneous.TopBar = (function($, S) {
 				self.mode_switch = dom.a('#switch-mode').
 					text(S.TopBar.opposite_mode(S.ContentArea.mode)).
 					click(function() {
-						S.TopBar.toggle_modes();
+						S.TopBar.toggle_modes(self.previewModeDisabled);
 					});
 
 				self.publish_button = new PublishButton();
@@ -468,6 +468,22 @@ Spontaneous.TopBar = (function($, S) {
 			var children_node = new ChildrenNode(location);
 			self.location.append(children_node.element());
 			self.children_node = children_node;
+			self.updateModeCompatibility(location);
+		},
+		updateModeCompatibility: function(location) {
+			var self = this;
+			if (location.private) {
+				self.previewModeDisabled = true;
+				self.mode_switch.addClass('disabled');
+			} else {
+				self.previewModeDisabled = false;
+				self.mode_switch.removeClass('disabled');
+			}
+			if (self.previewModeDisabled) {
+				this.topBar.set_mode('edit');
+			} else {
+
+			}
 		},
 		page_loaded: function(page) {
 			var self = this, children_node = self.children_node;
@@ -568,7 +584,7 @@ Spontaneous.TopBar = (function($, S) {
 			// this.icon = dom.div('#spontaneous-root');
 			this.icon = this.rootMenu();
 			this.holder = dom.div('#service-outer');
-			this.navigationView = new CMSNavigationView();
+			this.navigationView = new CMSNavigationView(this);
 			this.serviceStation = dom.div('#service-inner');
 			this.holder.append(this.navigationView.panel(), this.serviceStation);
 			this.wrap.append(this.icon, this.holder);
@@ -613,8 +629,12 @@ Spontaneous.TopBar = (function($, S) {
 			this.page_loaded = function(page) {
 			};
 		},
-		toggle_modes: function() {
-			this.set_mode(this.opposite_mode(this.get('mode')));
+		toggle_modes: function(previewModeDisabled) {
+			var newMode = this.opposite_mode(this.get('mode'));
+			if (previewModeDisabled && newMode === 'preview') {
+				return;
+			}
+			this.set_mode(newMode);
 		},
 		opposite_mode: function(to_mode) {
 			if (to_mode === 'preview') {

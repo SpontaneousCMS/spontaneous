@@ -896,7 +896,7 @@ describe "Back" do
 
       it "adds an alias to a box" do
         home.featured_jobs.contents.length.must_equal 0
-        auth_post "/@spontaneous/alias/#{home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 0
+        auth_post "/@spontaneous/alias/#{home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_ids' => Job.first.id, "position" => 0
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.must_equal "application/json;charset=utf-8"
         home.reload
@@ -908,7 +908,25 @@ describe "Back" do
           :position => 0,
           :entry => home.featured_jobs.contents.first.export(user)
         }
-        Spot::JSON.parse(last_response.body).must_equal required_response
+        Spot::JSON.parse(last_response.body).first.must_equal required_response
+      end
+
+      it "allows for adding multiple aliases to a box" do
+        home.featured_jobs.contents.length.must_equal 0
+        jobs = Job.all[0..1]
+        auth_post "/@spontaneous/alias/#{home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_ids' => jobs.map(&:id), "position" => 0
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        home.reload
+        home.featured_jobs.contents.length.must_equal 2
+        home.featured_jobs.each_with_index do |a, i|
+          assert a.alias?
+          a.target.must_equal jobs[i]
+        end
+        response = Spot::JSON.parse(last_response.body)
+        response[0][:position].must_equal 0
+        response[1][:position].must_equal 1
+        response[0][:entry].must_equal home.featured_jobs[0].export(user)
+        response[1][:entry].must_equal home.featured_jobs[1].export(user)
       end
 
       it "adds an alias to a box at any position" do
@@ -917,7 +935,7 @@ describe "Back" do
         home.featured_jobs << Job.new
         home.save.reload
         home.featured_jobs.contents.length.must_equal 3
-        auth_post "/@spontaneous/alias/#{home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_id' => Job.first.id, "position" => 2
+        auth_post "/@spontaneous/alias/#{home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_ids' => Job.first.id, "position" => 2
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         last_response.content_type.must_equal "application/json;charset=utf-8"
         home.reload
@@ -929,7 +947,7 @@ describe "Back" do
           :position => 2,
           :entry => home.featured_jobs[2].export(user)
         }
-        Spot::JSON.parse(last_response.body).must_equal required_response
+        Spot::JSON.parse(last_response.body).first.must_equal required_response
       end
 
 
@@ -951,7 +969,7 @@ describe "Back" do
           end
           box = home.boxes[:featured_jobs]
           box._prototype.allow LinkedSomething
-          auth_post "/@spontaneous/alias/#{home.id}/#{box.schema_id.to_s}", 'alias_id' => LinkedSomething.schema_id.to_s, 'target_id' => @target_id, "position" => 0
+          auth_post "/@spontaneous/alias/#{home.id}/#{box.schema_id.to_s}", 'alias_id' => LinkedSomething.schema_id.to_s, 'target_ids' => @target_id, "position" => 0
           assert last_response.status == 200, "Expected a 200 but got #{last_response.status}"
           home.reload
           a = home.featured_jobs[0]

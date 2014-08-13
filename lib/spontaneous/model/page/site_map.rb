@@ -35,7 +35,8 @@ module Spontaneous::Model::Page
         :type => self.class.ui_class,
         :type_id => self.class.schema_id,
         :children => self.children.length,
-        :depth => depth
+        :depth => depth,
+        :private => in_private_tree?
       }
     end
   end

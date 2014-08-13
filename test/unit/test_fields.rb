@@ -970,7 +970,8 @@ describe "Fields" do
       @content_class.fields.location.export(nil)[:type].must_equal "Spontaneous.Field.String"
     end
 
-    it "successfullt geolocate an address" do
+    it "successfully geolocate an address" do
+      # TODO: use mocking to avoid an external API request to googles geolocation service
       @field.value = "Cambridge, England"
       @field.value(:lat).must_equal 52.2053370
       @field.value(:lng).must_equal 0.1218170

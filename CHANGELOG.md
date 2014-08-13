@@ -2,8 +2,14 @@
 
 #### New Features
 
+- Spontaneous now requires Ruby 2
+- SQLite 3 support added and set as default db for new sites
 - Startup now requires each file in the `config/initializers` directory after intializing and configuring the site instance. This allows for Rails-style extensions to the site state & functionality.
 - Publishing is now managed by a configurable pipeline declared in `config/initializers/publishing.rb`. This greatly clarifies the publishing process and also allows for the insertion of custom actions that will run on each publish.
+- The modification state of pages is now calculated using the actual state of the page's content, rather than just comparing the modification date with the date of the last publish. This means that making & then undoing a change won't result in the page appearing in the modified list.
+- UIDs have been replaced by the concept of 'singleton' classes which return a single instance based on the type name or a set of labels. This removes the last bit of developer-controlled content from the database & hence resolves issues around publishing pages purely for developer originated UID changes.
+- Page types can now be configured to render the content of another page as their own using the Page::renders method.
+- You can now add multiple aliases at once, selecting individually or by drag-selecting or shift-selecting ranges & groups of items.
 
 #### Misc
 
@@ -13,10 +19,24 @@
 - Made bundler version dependency more explicit (as instructed)
 - Removed warning about declaring task 'generate_site'
 - Add some documentation about templating into the generated layout
+- Replaced outdated flexible box CSS properties with new style ones (`display: box` => `display: flex`)
+- Add index to `content.target_id` to improve performance of searches for aliases
+- Content associations now use prepared statements which significantly speeds up page load & site render
+- Slug change propagation and modification tracking no longer rely on mystery instance variable flags
+- The editing interface now has some feedback/a loading animation when navigating between pages
+- Publishing re-uses compiled assets if they exist. Assets are compiled once per deploy rather than once per publish. This cuts a significant amount of time off the publishing step (especially for small sites)
+- The contents of boxes now render in batches as you scroll, rather than rendering every single entry at page load. This speeds up the display of pages with a lot of content.
+- Using Velocity.js for animation where possible for smoother transitions
+- Better support for private roots
+
 
 #### Fixes
 
 - Fix broken publish command
+- Piece aliases now link using the id of the owning page of the target, rather than the id of the target itself
+- Rendering a private root no longer crashes in the `navigation` helper
+- Directly rendering a page instance within a tenplate no longer results in a page-within-page situation (context instances now call a separate #render_inline method which passes the call onto a page's containing entry)
+- Previewing of private pages has been disabled (fixing issue #36)
 
 ## 0.2.0.beta5, released 2014-03-18
 
