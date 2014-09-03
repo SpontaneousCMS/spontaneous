@@ -115,6 +115,7 @@ $target-name-size: 14px;
   // display: -webkit-box;
   // display: -moz-box;
   display: flex;
+  display: -webkit-flex;
 }
 @mixin box-sizing($model: border-box) {
   -webkit-box-sizing: $model;
@@ -124,15 +125,19 @@ $target-name-size: 14px;
 
 @mixin box-orient($direction: row) {
   flex-direction: $direction;
+  -webkit-flex-direction: $direction;
 }
 @mixin box-pack($packing: center) {
   justify-content: $packing;
+  -webkit-justify-content: $packing;
 }
 @mixin box-align($aligning: start) {
   align-items: $aligning;
+  -webkit-align-items: $aligning;
 }
 @mixin box-flex($flex: 1) {
-	flex-grow: $flex;
+  flex-grow: $flex;
+	-webkit-flex-grow: $flex;
 }
 
 @mixin no-select {
