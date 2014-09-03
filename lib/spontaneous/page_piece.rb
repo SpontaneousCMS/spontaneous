@@ -32,6 +32,12 @@ module Spontaneous
       target
     end
 
+    # Used by Spontaneous::Model::Core::=== to look inside PagePiece objects
+    # and test against the class of the target, not of the proxy
+    def content_class
+      target.class
+    end
+
     def id
       target.id
     end

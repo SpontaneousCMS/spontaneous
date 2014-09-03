@@ -344,5 +344,15 @@ describe "Content" do
     it "provides a to_proc method that makes filtering by class easy" do
       @instances.select(&C).map(&:class).must_equal [C, C]
     end
+
+    it "can filter pagepieces that point to an object of the given type" do
+      pps = @instances.map { |i| Spontaneous::PagePiece.new(nil, i, nil)}
+      pps.select(&P).map { |i| i.to_page.class }.must_equal [P, P]
+    end
+
+    it "can filter content instances out a list POROs" do
+      pps = [Object.new, Object.new, @instances.first]
+      pps.select(&P).map { |i| i.to_page.class }.must_equal [P]
+    end
   end
 end

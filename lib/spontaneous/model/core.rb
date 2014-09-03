@@ -70,7 +70,14 @@ module Spontaneous::Model
       #   => [#<ContentClass...>, #<ContentClass...>]
       #
       def to_proc
-        Proc.new { |obj| self === obj }
+        Proc.new { |obj| self.===(obj) }
+      end
+
+      # Expands type testing to include peeking inside PagePiece instances
+      def ===(other)
+        return true if super
+        return (self == other.content_class) if other.respond_to?(:content_class)
+        false
       end
     end
 
@@ -147,6 +154,10 @@ module Spontaneous::Model
     end
 
     alias_method :is_page?, :page?
+
+    def content_class
+      self
+    end
 
     # Do not overwrite this method directly.
     # If you want a page to render the content of another configure
