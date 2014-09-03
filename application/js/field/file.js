@@ -4,6 +4,10 @@ Spontaneous.Field.File = (function($, S) {
 	var FileField = new JS.Class(Spontaneous.Field.String, {
 		selected_files: false,
 
+		initialize: function(dialogue, conflict) {
+			this.blobs = [];
+			this.callSuper();
+		},
 		currentValue: function() {
 			var pending, v = this.get('value');
 			if ((pending = v.__pending__)) {
@@ -111,10 +115,16 @@ Spontaneous.Field.File = (function($, S) {
 			dialogue.open();
 		},
 		unload: function() {
-			this.callSuper();
 			this.input = null;
 			this._progress_bar = null;
+			this.freeBlobs();
 			Spontaneous.UploadManager.unregister(this);
+			this.callSuper();
+		},
+		freeBlobs: function() {
+			this.blobs.forEach(function(url) {
+				window.URL.revokeObjectURL(url);
+			});
 		},
 		upload_complete: function(values) {
 			this.set('value', values.processed_value);
@@ -146,6 +156,12 @@ Spontaneous.Field.File = (function($, S) {
 			return true;
 		},
 
+		createObjectURL: function(file) {
+			var url = window.URL.createObjectURL(file);
+			this.blobs.push(url);
+			return url;
+		},
+
 		edit: function() {
 			var self = this;
 			var wrap = dom.div('.file-field', {'style':'position:relative;'});
@@ -164,10 +180,9 @@ Spontaneous.Field.File = (function($, S) {
 
 			var files_selected = function(files) {
 				if (files.length > 0) {
-					var file = files[0], url = window.URL.createObjectURL(file);
+					var file = files[0], url = this.createObjectURL(file);
 					this.selected_files = files;
 					this._edited_value = url;
-					window.URL.revokeObjectURL(url);
 					set_info(File.filename(file), file.fileSize);
 				}
 			}.bind(this);

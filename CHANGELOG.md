@@ -3,6 +3,7 @@
 #### Fixes
 
 - Include `-webkit` prefixed versions of all flexbox properties to fix display in Safari
+- Fix image drag & drop in Chrome -- revoking blob URLs immediately now results in a broken image
 
 ## 0.2.0.beta7, released 2014-09-03
 

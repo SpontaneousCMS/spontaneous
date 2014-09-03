@@ -160,7 +160,7 @@ Spontaneous.Field.Image = (function($, S) {
 				if (files.length > 0) {
 					this.select_files(files);
 					var file = files[0],
-					url = window.URL.createObjectURL(file)
+					url = this.createObjectURL(file)
 					, image = this.image;
 					this._edited_value = url;
 					image.__start_upload = true;
@@ -177,8 +177,6 @@ Spontaneous.Field.Image = (function($, S) {
 						}
 					}.bind(this));
 					image.attr('src', url);
-					// see http://www.htmlfivewow.com/slide25
-					window.URL.revokeObjectURL(url);
 				}
 				return false;
 			}.bind(this);
@@ -306,13 +304,12 @@ Spontaneous.Field.Image = (function($, S) {
 
 			var files_selected = function(files) {
 				if (files.length > 0) {
-					var file = files[0], url = window.URL.createObjectURL(file);
+					var file = files[0], url = this.createObjectURL(file);
 					img.attr('src', url).removeClass('empty');
 					this.select_files(files);
 					img.attr('src', url);
 					this._edited_value = url;
 					this.image.attr('src', url);
-					window.URL.revokeObjectURL(url);
 					set_info(File.filename(file), file.fileSize, null, null);
 				}
 			}.bind(this);
