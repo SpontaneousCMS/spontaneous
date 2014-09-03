@@ -1,4 +1,10 @@
-## 0.2.0.beta6, released 2014-xx-xx
+## 0.2.0.beta7, released 2014-09-03
+
+#### Fixes
+
+- Bring Rake dependency up-to-date
+
+## 0.2.0.beta6, released 2014-08-06
 
 #### New Features
 
