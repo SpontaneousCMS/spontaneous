@@ -139,13 +139,13 @@ describe "Assets" do
     it "includes all js dependencies" do
       result = context.scripts('js/all', 'js/m', 'js/c', 'x')
       result.must_equal [
-        '<script type="text/javascript" src="/assets/js/a.js?body=1"></script>',
-        '<script type="text/javascript" src="/assets/js/b.js?body=1"></script>',
-        '<script type="text/javascript" src="/assets/js/n.js?body=1"></script>',
-        '<script type="text/javascript" src="/assets/js/all.js?body=1"></script>',
-        '<script type="text/javascript" src="/assets/js/m.js?body=1"></script>',
-        '<script type="text/javascript" src="/assets/js/c.js?body=1"></script>',
-        '<script type="text/javascript" src="/assets/x.js?body=1"></script>'
+        '<script type="text/javascript" src="/assets/js/a.js?body=1&8c8a3c155eee08b49f619404f181e088"></script>',
+        '<script type="text/javascript" src="/assets/js/b.js?body=1&d1bd4e47458f578f4df8393ac13623dd"></script>',
+        '<script type="text/javascript" src="/assets/js/n.js?body=1&b00eff86316ed0c46f07620b1c3908d1"></script>',
+        '<script type="text/javascript" src="/assets/js/all.js?body=1&c902c4018118281c5c6731a8e1abba56"></script>',
+        '<script type="text/javascript" src="/assets/js/m.js?body=1&646ee897b50eeff36033a61b7a6e6a0e"></script>',
+        '<script type="text/javascript" src="/assets/js/c.js?body=1&7566940c84c4ad111f70a76fc95ab1c8"></script>',
+        '<script type="text/javascript" src="/assets/x.js?body=1&001e2e17bae292060ac5d910850d42da"></script>'
       ].join("\n")
     end
 
@@ -158,11 +158,11 @@ describe "Assets" do
     it "includes all css dependencies" do
       result = context.stylesheets('css/all', 'css/c', 'x')
       result.must_equal [
-        '<link rel="stylesheet" href="/assets/css/b.css?body=1" />',
-        '<link rel="stylesheet" href="/assets/css/a.css?body=1" />',
-        '<link rel="stylesheet" href="/assets/css/all.css?body=1" />',
-        '<link rel="stylesheet" href="/assets/css/c.css?body=1" />',
-        '<link rel="stylesheet" href="/assets/x.css?body=1" />'
+        '<link rel="stylesheet" href="/assets/css/b.css?body=1&8b1dcd402fd70b49569c0f48d8dfe162" />',
+        '<link rel="stylesheet" href="/assets/css/a.css?body=1&7de11661bb9097a6cad45d690ad6f22e" />',
+        '<link rel="stylesheet" href="/assets/css/all.css?body=1&84ec2debb1298e4807d2873984e17167" />',
+        '<link rel="stylesheet" href="/assets/css/c.css?body=1&d6338308e8da723af93f8030f5bd412c" />',
+        '<link rel="stylesheet" href="/assets/x.css?body=1&ae3ee1dc79a34d24e28456118c1b9623" />'
       ].join("\n")
     end
 
@@ -184,13 +184,13 @@ describe "Assets" do
     let(:context) { preview_context }
 
     describe "javascript" do
-      it "include scripts as separate files" do
+      it "include scripts as separate files with finger prints" do
         result = context.scripts('js/all', 'js/m.js', 'js/c.js', 'x')
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all.js"></script>',
-          '<script type="text/javascript" src="/assets/js/m.js"></script>',
-          '<script type="text/javascript" src="/assets/js/c.js"></script>',
-          '<script type="text/javascript" src="/assets/x.js"></script>'
+          '<script type="text/javascript" src="/assets/js/all.js?473bab00d74fa508c5d51a882ad24d09"></script>',
+          '<script type="text/javascript" src="/assets/js/m.js?646ee897b50eeff36033a61b7a6e6a0e"></script>',
+          '<script type="text/javascript" src="/assets/js/c.js?7566940c84c4ad111f70a76fc95ab1c8"></script>',
+          '<script type="text/javascript" src="/assets/x.js?001e2e17bae292060ac5d910850d42da"></script>'
         ].join("\n")
       end
 
@@ -199,15 +199,15 @@ describe "Assets" do
       it "handles urls passed as an array" do
         result = context.scripts(['js/all', 'js/m.js'])
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all.js"></script>',
-          '<script type="text/javascript" src="/assets/js/m.js"></script>'
+          '<script type="text/javascript" src="/assets/js/all.js?473bab00d74fa508c5d51a882ad24d09"></script>',
+          '<script type="text/javascript" src="/assets/js/m.js?646ee897b50eeff36033a61b7a6e6a0e"></script>'
         ].join("\n")
       end
 
       it "should ignore missing files" do
         result = context.scripts('js/all', 'js/missing')
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all.js"></script>',
+          '<script type="text/javascript" src="/assets/js/all.js?473bab00d74fa508c5d51a882ad24d09"></script>',
           '<script type="text/javascript" src="js/missing.js"></script>'
         ].join("\n")
       end
@@ -244,7 +244,7 @@ describe "Assets" do
         context = preview_context
         result = context.scripts('js/all', '//use.typekit.com/abcde', 'http://cdn.google.com/jquery.js', 'https://cdn.google.com/jquery.js')
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all.js"></script>',
+          '<script type="text/javascript" src="/assets/js/all.js?473bab00d74fa508c5d51a882ad24d09"></script>',
           '<script type="text/javascript" src="//use.typekit.com/abcde"></script>',
           '<script type="text/javascript" src="http://cdn.google.com/jquery.js"></script>',
           '<script type="text/javascript" src="https://cdn.google.com/jquery.js"></script>'
@@ -256,18 +256,18 @@ describe "Assets" do
       it "include css files as separate links" do
         result = context.stylesheets('css/all', 'css/c', 'x')
         result.must_equal [
-          '<link rel="stylesheet" href="/assets/css/all.css" />',
-          '<link rel="stylesheet" href="/assets/css/c.css" />',
-          '<link rel="stylesheet" href="/assets/x.css" />'
+          '<link rel="stylesheet" href="/assets/css/all.css?872d571d490a756a1e52cae1cee4933b" />',
+          '<link rel="stylesheet" href="/assets/css/c.css?d6338308e8da723af93f8030f5bd412c" />',
+          '<link rel="stylesheet" href="/assets/x.css?ae3ee1dc79a34d24e28456118c1b9623" />'
         ].join("\n")
       end
 
       it "allows passing scripts as an array" do
         result = context.stylesheets(['css/all', 'css/c', 'x'])
         result.must_equal [
-          '<link rel="stylesheet" href="/assets/css/all.css" />',
-          '<link rel="stylesheet" href="/assets/css/c.css" />',
-          '<link rel="stylesheet" href="/assets/x.css" />'
+          '<link rel="stylesheet" href="/assets/css/all.css?872d571d490a756a1e52cae1cee4933b" />',
+          '<link rel="stylesheet" href="/assets/css/c.css?d6338308e8da723af93f8030f5bd412c" />',
+          '<link rel="stylesheet" href="/assets/x.css?ae3ee1dc79a34d24e28456118c1b9623" />'
         ].join("\n")
       end
 
@@ -327,11 +327,11 @@ describe "Assets" do
 
       it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
-        result.must_equal "/assets/i/y.png"
+        result.must_equal "/assets/i/y.png?e2b6a69468b467c7414ae0e12124a66e"
       end
       it "should allow for embedding asset urls into templates" do
         result = renderer.render_string("${ asset_url 'i/y.png' }", @page.output(:html))
-        result.must_equal "url(/assets/i/y.png)"
+        result.must_equal "url(/assets/i/y.png?e2b6a69468b467c7414ae0e12124a66e)"
       end
     end
   end

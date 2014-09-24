@@ -125,9 +125,17 @@ module Spontaneous::Asset
 
       def to_url(asset, body = false)
         return asset if asset.is_a?(String)
+        query = {}
+        query['body'] = 1 if body
+        query[asset.digest] = nil if dynamic_fingerprint?
         path = asset.logical_path
-        path = "#{path}?body=1" if body
+        path = "#{path}?#{Rack::Utils.build_query(query)}" unless query.empty?
         "/" << asset_mount_point << "/" << path
+      end
+
+      # include the asset fingerprint as a query param for cache busting
+      def dynamic_fingerprint?
+        true
       end
 
       def asset_mount_point
@@ -173,6 +181,11 @@ module Spontaneous::Asset
 
       def development?
         @development || false
+      end
+
+      # include the asset fingerprint as a query param for cache busting
+      def dynamic_fingerprint?
+        false
       end
 
       # A proxy to the sprockets manifest that compiles assets on the first run
