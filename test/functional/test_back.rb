@@ -1110,7 +1110,7 @@ describe "Back" do
     it "render SASS templates" do
       get "/assets/css/sass_template.css"
       assert last_response.ok?, "Should return 200 but got #{last_response.status}"
-      last_response.body.must_match /color: #ffeeff/
+      last_response.body.must_match /color: #fef/
     end
 
     it "compile CoffeeScript" do

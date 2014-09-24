@@ -53,10 +53,10 @@ describe "AssetBundler" do
       compiled_css_path = Dir["#{@site.root}/public/@spontaneous/assets/*.css"].first
       css = File.read(compiled_css_path)
       css.must_match /\.simple \{\s+color: #aaa/
-      css.must_match /\.basic \{\s+color: #aabbcc/
-      css.must_match /\.complex \{\s+color: #ddeeff;\s*width: #{Date.today.day}px/
+      css.must_match /\.basic \{\s+color: #abc/
+      css.must_match /\.complex \{\s+color: #def;\s*width: #{Date.today.day}px/
       css.must_match /\.subdir\.simple \{\s+color: #000;/
-      css.must_match /\.subdir\.complex \{\s+color: #aaaaaa;\s+height: #{Date.today.day}px/
+      css.must_match /\.subdir\.complex \{\s+color: #aaa;\s+height: #{Date.today.day}px/
     end
 
     it "produce compressed CSS by default" do
@@ -65,10 +65,10 @@ describe "AssetBundler" do
       compiled_css_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.css"].first
       css = File.read(compiled_css_path)
       css.must_match /\.simple\{color:#aaa\}/
-      css.must_match /\.basic\{color:#aabbcc\}/
-      css.must_match /\.complex\{color:#ddeeff;width:#{Date.today.day}px\}/
+      css.must_match /\.basic\{color:#abc\}/
+      css.must_match /\.complex\{color:#def;width:#{Date.today.day}px\}/
       css.must_match /\.subdir\.simple\{color:#000\}/
-      css.must_match /\.subdir\.complex\{color:#aaaaaa;height:#{Date.today.day}px\}/
+      css.must_match /\.subdir\.complex\{color:#aaa;height:#{Date.today.day}px\}/
     end
   end
 
