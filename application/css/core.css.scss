@@ -659,17 +659,17 @@
 	height: 100%;
 
 	.slot-tabs {
+		@include display-box;
+		@include box-orient(row);
 		min-height: 32px;
 		vertical-align: top;
 		@include vertical-gradient(#666666, #4d4d4d);
 		padding-left: $container-padding;
 		padding-right: $container-padding;
-		display: flex;
-		flex-direction: row;
 		li {
 			@include box-sizing;
 			@include interface;
-			flex: 1 1 auto;
+			@include box-flex(1);
 			font-size: 11px;
 			color: #dddddd;
 			display: block;
@@ -1669,7 +1669,7 @@
 
 @media all and (max-width: 1000px) {
   .fields-preview-text li {
-	  flex-direction: column;
+  	@include box-orient(column);
   }
 }
 @import "top.css.scss";
