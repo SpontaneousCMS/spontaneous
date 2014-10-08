@@ -174,7 +174,7 @@ module Spontaneous::Model::Page
     end
 
     def initialized_slug
-      return slug unless slug.blank?
+      return slug unless slug.nil?
       self.slug = generate_default_slug
     end
 
