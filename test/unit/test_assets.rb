@@ -59,6 +59,13 @@ describe "Assets" do
     end
   end
 
+  def asset_digest(asset_relative_path)
+    digest = context.asset_environment.environment.digest
+    digest.update(File.read(File.join(fixture_root, asset_relative_path)))
+    digest.hexdigest
+  end
+
+  let(:y_png_digest) { asset_digest('public2/i/y.png') }
 
   start do
     fixture_root = File.expand_path("../../fixtures/assets", __FILE__)
@@ -136,16 +143,32 @@ describe "Assets" do
   describe "development" do
     let(:context) { development_context }
 
+    let(:a_js_digest) { asset_digest('public1/js/a.js') }
+    let(:b_js_digest) { asset_digest('public2/js/b.js') }
+    let(:c_js_digest) { asset_digest('public2/js/c.js') }
+    let(:x_js_digest) { asset_digest('public1/x.js') }
+    # these are compiled so fairly complex to calculate their digests
+    # not impossible, but annoying
+    let(:n_js_digest) { '74f175e03a4bdc8c807aba4ae0314938' }
+    let(:m_js_digest) { 'dd35b142dc75b6ec15b2138e9e91c0c3' }
+    let(:all_js_digest) { 'd406fc3c21d90828a2f0a718c89e8d99' }
+
+    let(:a_css_digest) { '7b04d295476986c24d8c77245943e5b9' }
+    let(:b_css_digest) { '266643993e14da14f2473d45f003bd2c' }
+    let(:c_css_digest) { 'fc8ba0d0aae64081dc00b8444a198fb8' }
+    let(:x_css_digest) { '2560aec2891794825eba770bf84823fb' }
+    let(:all_css_digest) { 'cf61c624b91b9ea126804291ac55bd5d' }
+
     it "includes all js dependencies" do
       result = context.scripts('js/all', 'js/m', 'js/c', 'x')
       result.must_equal [
-        '<script type="text/javascript" src="/assets/js/a.js?body=1&8c8a3c155eee08b49f619404f181e088"></script>',
-        '<script type="text/javascript" src="/assets/js/b.js?body=1&d1bd4e47458f578f4df8393ac13623dd"></script>',
-        '<script type="text/javascript" src="/assets/js/n.js?body=1&b00eff86316ed0c46f07620b1c3908d1"></script>',
-        '<script type="text/javascript" src="/assets/js/all.js?body=1&c902c4018118281c5c6731a8e1abba56"></script>',
-        '<script type="text/javascript" src="/assets/js/m.js?body=1&646ee897b50eeff36033a61b7a6e6a0e"></script>',
-        '<script type="text/javascript" src="/assets/js/c.js?body=1&7566940c84c4ad111f70a76fc95ab1c8"></script>',
-        '<script type="text/javascript" src="/assets/x.js?body=1&001e2e17bae292060ac5d910850d42da"></script>'
+        %|<script type="text/javascript" src="/assets/js/a.js?body=1&#{a_js_digest}"></script>|,
+        %|<script type="text/javascript" src="/assets/js/b.js?body=1&#{b_js_digest}"></script>|,
+        %|<script type="text/javascript" src="/assets/js/n.js?body=1&#{n_js_digest}"></script>|,
+        %|<script type="text/javascript" src="/assets/js/all.js?body=1&#{all_js_digest}"></script>|,
+        %|<script type="text/javascript" src="/assets/js/m.js?body=1&#{m_js_digest}"></script>|,
+        %|<script type="text/javascript" src="/assets/js/c.js?body=1&#{c_js_digest}"></script>|,
+        %|<script type="text/javascript" src="/assets/x.js?body=1&#{x_js_digest}"></script>|
       ].join("\n")
     end
 
@@ -158,11 +181,11 @@ describe "Assets" do
     it "includes all css dependencies" do
       result = context.stylesheets('css/all', 'css/c', 'x')
       result.must_equal [
-        '<link rel="stylesheet" href="/assets/css/b.css?body=1&8b1dcd402fd70b49569c0f48d8dfe162" />',
-        '<link rel="stylesheet" href="/assets/css/a.css?body=1&7de11661bb9097a6cad45d690ad6f22e" />',
-        '<link rel="stylesheet" href="/assets/css/all.css?body=1&84ec2debb1298e4807d2873984e17167" />',
-        '<link rel="stylesheet" href="/assets/css/c.css?body=1&d6338308e8da723af93f8030f5bd412c" />',
-        '<link rel="stylesheet" href="/assets/x.css?body=1&ae3ee1dc79a34d24e28456118c1b9623" />'
+        %|<link rel="stylesheet" href="/assets/css/b.css?body=1&#{b_css_digest}" />|,
+        %|<link rel="stylesheet" href="/assets/css/a.css?body=1&#{a_css_digest}" />|,
+        %|<link rel="stylesheet" href="/assets/css/all.css?body=1&#{all_css_digest}" />|,
+        %|<link rel="stylesheet" href="/assets/css/c.css?body=1&#{c_css_digest}" />|,
+        %|<link rel="stylesheet" href="/assets/x.css?body=1&#{x_css_digest}" />|
       ].join("\n")
     end
 
@@ -183,14 +206,24 @@ describe "Assets" do
     let(:app) { Spontaneous::Rack::Back.application(site) }
     let(:context) { preview_context }
 
+    let(:c_js_digest) { 'f669550dd7e10e9646ad781f44756950' }
+    let(:x_js_digest) { '6b4c9176b2838a4949a18284543fc19c' }
+    let(:n_js_digest) { '74f175e03a4bdc8c807aba4ae0314938' }
+    let(:m_js_digest) { 'dd35b142dc75b6ec15b2138e9e91c0c3' }
+    let(:all_js_digest) { 'cd1f681752f5038421be0bc5ea0e855d' }
+
+    let(:c_css_digest) { 'fc8ba0d0aae64081dc00b8444a198fb8' }
+    let(:x_css_digest) { '2560aec2891794825eba770bf84823fb' }
+    let(:all_css_digest) { 'bb2c289a27b3d5d4467dde6d60722fd3' }
+
     describe "javascript" do
       it "include scripts as separate files with finger prints" do
         result = context.scripts('js/all', 'js/m.js', 'js/c.js', 'x')
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all.js?473bab00d74fa508c5d51a882ad24d09"></script>',
-          '<script type="text/javascript" src="/assets/js/m.js?646ee897b50eeff36033a61b7a6e6a0e"></script>',
-          '<script type="text/javascript" src="/assets/js/c.js?7566940c84c4ad111f70a76fc95ab1c8"></script>',
-          '<script type="text/javascript" src="/assets/x.js?001e2e17bae292060ac5d910850d42da"></script>'
+          %|<script type="text/javascript" src="/assets/js/all.js?#{all_js_digest}"></script>|,
+          %|<script type="text/javascript" src="/assets/js/m.js?#{m_js_digest}"></script>|,
+          %|<script type="text/javascript" src="/assets/js/c.js?#{c_js_digest}"></script>|,
+          %|<script type="text/javascript" src="/assets/x.js?#{x_js_digest}"></script>|
         ].join("\n")
       end
 
@@ -199,15 +232,15 @@ describe "Assets" do
       it "handles urls passed as an array" do
         result = context.scripts(['js/all', 'js/m.js'])
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all.js?473bab00d74fa508c5d51a882ad24d09"></script>',
-          '<script type="text/javascript" src="/assets/js/m.js?646ee897b50eeff36033a61b7a6e6a0e"></script>'
+          %|<script type="text/javascript" src="/assets/js/all.js?#{all_js_digest}"></script>|,
+          %|<script type="text/javascript" src="/assets/js/m.js?#{m_js_digest}"></script>|
         ].join("\n")
       end
 
       it "should ignore missing files" do
         result = context.scripts('js/all', 'js/missing')
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all.js?473bab00d74fa508c5d51a882ad24d09"></script>',
+          %|<script type="text/javascript" src="/assets/js/all.js?#{all_js_digest}"></script>|,
           '<script type="text/javascript" src="js/missing.js"></script>'
         ].join("\n")
       end
@@ -244,7 +277,7 @@ describe "Assets" do
         context = preview_context
         result = context.scripts('js/all', '//use.typekit.com/abcde', 'http://cdn.google.com/jquery.js', 'https://cdn.google.com/jquery.js')
         result.must_equal [
-          '<script type="text/javascript" src="/assets/js/all.js?473bab00d74fa508c5d51a882ad24d09"></script>',
+          %|<script type="text/javascript" src="/assets/js/all.js?#{all_js_digest}"></script>|,
           '<script type="text/javascript" src="//use.typekit.com/abcde"></script>',
           '<script type="text/javascript" src="http://cdn.google.com/jquery.js"></script>',
           '<script type="text/javascript" src="https://cdn.google.com/jquery.js"></script>'
@@ -256,18 +289,18 @@ describe "Assets" do
       it "include css files as separate links" do
         result = context.stylesheets('css/all', 'css/c', 'x')
         result.must_equal [
-          '<link rel="stylesheet" href="/assets/css/all.css?872d571d490a756a1e52cae1cee4933b" />',
-          '<link rel="stylesheet" href="/assets/css/c.css?d6338308e8da723af93f8030f5bd412c" />',
-          '<link rel="stylesheet" href="/assets/x.css?ae3ee1dc79a34d24e28456118c1b9623" />'
+          %|<link rel="stylesheet" href="/assets/css/all.css?#{all_css_digest}" />|,
+          %|<link rel="stylesheet" href="/assets/css/c.css?#{c_css_digest}" />|,
+          %|<link rel="stylesheet" href="/assets/x.css?#{x_css_digest}" />|
         ].join("\n")
       end
 
       it "allows passing scripts as an array" do
         result = context.stylesheets(['css/all', 'css/c', 'x'])
         result.must_equal [
-          '<link rel="stylesheet" href="/assets/css/all.css?872d571d490a756a1e52cae1cee4933b" />',
-          '<link rel="stylesheet" href="/assets/css/c.css?d6338308e8da723af93f8030f5bd412c" />',
-          '<link rel="stylesheet" href="/assets/x.css?ae3ee1dc79a34d24e28456118c1b9623" />'
+          %|<link rel="stylesheet" href="/assets/css/all.css?#{all_css_digest}" />|,
+          %|<link rel="stylesheet" href="/assets/css/c.css?#{c_css_digest}" />|,
+          %|<link rel="stylesheet" href="/assets/x.css?#{x_css_digest}" />|
         ].join("\n")
       end
 
@@ -327,11 +360,11 @@ describe "Assets" do
 
       it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
-        result.must_equal "/assets/i/y.png?e2b6a69468b467c7414ae0e12124a66e"
+        result.must_equal "/assets/i/y.png?#{y_png_digest}"
       end
       it "should allow for embedding asset urls into templates" do
         result = renderer.render_string("${ asset_url 'i/y.png' }", @page.output(:html))
-        result.must_equal "url(/assets/i/y.png?e2b6a69468b467c7414ae0e12124a66e)"
+        result.must_equal "url(/assets/i/y.png?#{y_png_digest})"
       end
     end
   end
@@ -352,14 +385,14 @@ describe "Assets" do
     end
 
     describe "javascript" do
-      let(:all_sha) { "b1d3d85feff4d68e16d2b4da97717aa0" }
-      let(:x_sha) { "cf638f60cff3ce84f156cb4621a914b4" }
+      let(:all_sha) { "ed62549e8edc1f61a1e27136602f01d9" }
+      let(:x_sha) { "66e92be1e412458f6ff02f4c5dd9beb1" }
       it "bundles & fingerprints local scripts" do
         result = context.scripts('js/all', 'js/m.js', 'js/c.js', 'x')
         result.must_equal [
           %(<script type="text/javascript" src="/assets/js/all-#{all_sha}.js"></script>),
-          '<script type="text/javascript" src="/assets/js/m-424bd92768589875beac31e333399631.js"></script>',
-          '<script type="text/javascript" src="/assets/js/c-ac0d40982cc84fc656234ef2a57e09e8.js"></script>',
+          '<script type="text/javascript" src="/assets/js/m-a5be7324bc314d5cf470a59c3732ef10.js"></script>',
+          '<script type="text/javascript" src="/assets/js/c-c24bcbb4f9647b078cc919746aa7fc3a.js"></script>',
           %(<script type="text/javascript" src="/assets/x-#{x_sha}.js"></script>)
         ].join("\n")
       end
@@ -426,14 +459,14 @@ describe "Assets" do
     end
 
     describe "css" do
-      let(:all_sha) { "2468ffc5102b6bfcaf69a4fc8db59fdd" }
-      let(:x_sha)   { "ae3ee1dc79a34d24e28456118c1b9623" }
+      let(:all_sha) { "2e17f25ddeba996223a6cd1e28e7a319" }
+      let(:x_sha)   { "2560aec2891794825eba770bf84823fb" }
 
       it "bundles & fingerprints local stylesheets" do
         result = context.stylesheets('css/all', 'css/a.css', 'x')
         result.must_equal [
           %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
-          '<link rel="stylesheet" href="/assets/css/a-35b26d0cd9c7ebff494c8627e0d4ed14.css" />',
+          '<link rel="stylesheet" href="/assets/css/a-0164c6d5b696ec2f2c5e70cade040da8.css" />',
           %(<link rel="stylesheet" href="/assets/x-#{x_sha}.css" />)
         ].join("\n")
       end
@@ -499,17 +532,15 @@ describe "Assets" do
       end
     end
 
-    let(:y_sha) { "e2b6a69468b467c7414ae0e12124a66e" }
-
     describe "images" do
       it "bundles images and links using fingerprinted asset url" do
         path = context.stylesheet_urls('css/image1').first
         get path
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match %r{background:url\(/assets/i/y-#{y_sha}\.png\)}
+        result.must_match %r{background:url\(/assets/i/y-#{y_png_digest}\.png\)}
 
-        asset_path = revision.path("/assets/i/y-#{y_sha}.png")
+        asset_path = revision.path("/assets/i/y-#{y_png_digest}.png")
         assert asset_path.exist?
       end
 
@@ -526,8 +557,8 @@ describe "Assets" do
         get path
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
-        result.must_match %r{background:url\(/assets/i/y-#{y_sha}\.png\?query=true#hash\)}
-        asset_path = revision.path("/assets/i/y-#{y_sha}.png")
+        result.must_match %r{background:url\(/assets/i/y-#{y_png_digest}\.png\?query=true#hash\)}
+        asset_path = revision.path("/assets/i/y-#{y_png_digest}.png")
         assert asset_path.exist?
       end
     end
@@ -537,11 +568,11 @@ describe "Assets" do
 
       it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
-        result.must_equal "/assets/i/y-#{y_sha}.png"
+        result.must_equal "/assets/i/y-#{y_png_digest}.png"
       end
       it "should allow for embedding asset urls into templates" do
         result = renderer.render_string("${ asset_url 'i/y.png' }", @page.output(:html))
-        result.must_equal "url(/assets/i/y-#{y_sha}.png)"
+        result.must_equal "url(/assets/i/y-#{y_png_digest}.png)"
       end
     end
   end
