@@ -30,11 +30,6 @@ module Spontaneous::Model::Page
 
     private :__create_private_root=, :__create_private_root?
 
-    def after_initialize
-      super
-      set_generated_slug
-    end
-
     def before_create
       place_in_page_tree
       set_slug_from_dynamic_value
@@ -44,11 +39,6 @@ module Spontaneous::Model::Page
     def after_insertion
       super
       fix_generated_slug_conflicts
-    end
-
-    def set_generated_slug
-      return unless slug.nil?
-      self.slug = generate_default_slug
     end
 
     def fix_generated_slug_conflicts
@@ -183,9 +173,13 @@ module Spontaneous::Model::Page
       end
     end
 
+    def initialized_slug
+      return slug unless slug.nil?
+      self.slug = generate_default_slug
+    end
 
     def calculate_path
-      calculate_path_with_slug(slug)
+      calculate_path_with_slug(initialized_slug)
     end
 
     def calculate_path_with_slug(slug)
