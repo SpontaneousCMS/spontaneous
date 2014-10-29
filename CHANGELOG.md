@@ -1,4 +1,4 @@
-## 0.2.0.beta8, released 2014-XX-XX
+## 0.2.0.beta8, released 2014-10-29
 
 #### Fixes
 
