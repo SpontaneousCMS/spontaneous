@@ -413,6 +413,7 @@ $dialogue-title-height: 32px;
 			background-color: rgba(33, 33, 33, 0.9);
 			color: #aaaaaa;
 			font-size: 0.7em;
+			z-index: 1;
 			.lock-state {
 				overflow: auto;
 				padding: $unit/2;
