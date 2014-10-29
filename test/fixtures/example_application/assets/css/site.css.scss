@@ -1,0 +1,6 @@
+$width: 23px;
+
+.something {
+  width: $width;
+  background-image: asset_url('i/sine_waves.png');
+}

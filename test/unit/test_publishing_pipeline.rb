@@ -469,6 +469,80 @@ describe "Publishing Pipeline" do
     end
   end
 
+  describe "CopyAssets" do
+    let(:step) { Spontaneous::Publishing::Steps::CopyAssets }
+    let(:application_path) { Pathname.new(File.expand_path("../../fixtures/example_application", __FILE__)) }
+    let(:fixtures_path) { application_path + "assets" }
+    let(:revision_root) { @site.revision_dir(revision) }
+    let(:environment)   { Spontaneous::Asset::Environment.publishing(@site, revision, false) }
+    let(:manifest)      { environment.manifest }
+    let(:assets)        { environment.manifest.assets }
+
+    def assert_assets(revision)
+      revision_root = @site.revision_dir(revision)
+      assets.length.must_equal 3
+      assets.each do |logical_path, asset|
+        assert File.exist?(File.join(revision_root, 'assets', asset)), "asset '#{asset}' does not exist"
+      end
+    end
+
+    before do
+      FileUtils.cp_r(fixtures_path, @site.root)
+      File.exist?(@site.root / 'assets/css/site.css.scss').must_equal true
+      manifest.compile!('css/site.css', 'i/xes.png')
+    end
+
+    it "has the right shortcut name" do
+      step.to_sym.must_equal :copy_assets
+    end
+
+    it "sets the progress stage to 'copying files'" do
+      progress = mock
+      progress.stubs(:step)
+      progress.expects(:stage).with("copying assets").once
+      run_step(progress)
+    end
+
+    it "steps the progress once" do
+      progress = mock
+      progress.stubs(:stage)
+      progress.expects(:step).with(1, instance_of(String)).times(3)
+      run_step(progress)
+    end
+
+    it "gives its step count as the number of facets" do
+      step.count(@site, revision, nil).must_equal 3
+    end
+
+    it "copies compiled assets to the revision's asset dir" do
+      run_step
+      assert_assets(revision)
+    end
+
+    it "copies compressed assets to the revision's asset dir" do
+      asset = assets.values.first
+      compressed = asset + '.gz'
+      FileUtils.cp(manifest.asset_compilation_dir + asset, manifest.asset_compilation_dir + compressed)
+      run_step
+      assert File.exist?(File.join(revision_root, 'assets', compressed)), "#{compressed} should exist"
+    end
+
+    it "deletes the copied files on rollback" do
+      instance = run_step
+      instance.rollback
+      refute File.exist?(File.join(revision_root, "assets"))
+    end
+
+    it "runs rollback after throwing an exception" do
+      instance = mock
+      step.expects(:new).returns(instance)
+      instance.expects(:call).raises(Exception)
+      instance.expects(:rollback)
+      lambda{ run_step }.must_raise(Exception)
+    end
+
+  end
+
   describe "GenerateRackupFile" do
     let(:step) { Spontaneous::Publishing::Steps::GenerateRackupFile }
     let(:rackup_path) { @site.revision_dir(revision) / "config.ru" }

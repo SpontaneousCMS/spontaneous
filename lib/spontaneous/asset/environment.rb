@@ -5,10 +5,14 @@ module Spontaneous::Asset
   module Environment
     def self.new(context)
       if context.publishing?
-        Publish.new(context.site, context.revision, context.development?)
+        publishing(context.site, context.revision, context.development?)
       else
-        Preview.new(context.site)
+        preview(context.site)
       end
+    end
+
+    def self.publishing(site, revision, development)
+      Publish.new(site, revision, development)
     end
 
     def self.preview(site = Spontaneous::Site.instance)
@@ -215,29 +219,10 @@ module Spontaneous::Asset
           unless (args.all? { |key| assets.key?(key) })
             compile!(*args)
           end
-          copy_assets_to_revision(args)
         end
 
         def compile!(*args)
           @manifest.compile(*args)
-          copy_assets_to_revision(args)
-        end
-
-        def copy_assets_to_revision(logical_paths)
-          assets = @manifest.assets
-          paths = logical_paths.map { |a| assets[a] }.compact
-          source, dest = shared_asset_dir, revision_asset_dir
-          paths.each do |asset|
-            copy_asset_to_revision(source, dest, asset)
-          end
-        end
-
-        def copy_asset_to_revision(source, dest, asset)
-          to = dest + asset
-          return if to.exist?
-          from = source + asset
-          to.dirname.mkpath
-          FileUtils.cp(from, to)
         end
 
         def asset_compilation_dir

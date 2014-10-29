@@ -132,6 +132,7 @@ module Spontaneous::Publishing
       :create_revision_directory,
       :render_revision,
       :generate_search_indexes,
+      :copy_assets,
       :copy_static_files,
       :generate_rackup_file,
       :activate_revision,
@@ -148,6 +149,7 @@ require 'spontaneous/publishing/steps/create_revision_directory'
 require 'spontaneous/publishing/steps/render_revision'
 require 'spontaneous/publishing/steps/generate_search_indexes'
 require 'spontaneous/publishing/steps/copy_static_files'
+require 'spontaneous/publishing/steps/copy_assets'
 require 'spontaneous/publishing/steps/generate_rackup_file'
 require 'spontaneous/publishing/steps/activate_revision'
 require 'spontaneous/publishing/steps/write_revision_file'
