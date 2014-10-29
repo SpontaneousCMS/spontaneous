@@ -6,9 +6,7 @@ require 'ostruct'
 describe "Assets" do
   include RackTestMethods
 
-  def app
-    Spontaneous::Rack::Back.application(site)
-  end
+  let(:app) {Spontaneous::Rack::Back.application(site)}
 
   module LiveSimulation
     # simulate a production + publishing environment
@@ -373,11 +371,17 @@ describe "Assets" do
     let(:app) { Spontaneous::Rack::Front.application(site) }
     let(:context) { live_context }
     let(:revision) { site.revision(context.revision) }
+    let(:progress) { Spontaneous::Publishing::Progress::Silent.new }
+
+    def publish_assets(revision)
+      context.asset_environment.manifest.compile!
+      Spontaneous::Publishing::Steps::CopyAssets.new(site, revision, [], progress).call
+    end
 
     before do
       FileUtils.rm_f(Spontaneous.revision_dir) if File.exist?(Spontaneous.revision_dir)
       system "ln -nfs #{revision.root} #{Spontaneous.revision_dir}"
-      # FileUtils.ln_s(revision.root, Spontaneous.revision_dir)
+      publish_assets(context.revision)
     end
 
     after do
@@ -446,6 +450,7 @@ describe "Assets" do
           context = live_context
           def context.revision; 100 end
           revision = site.revision(context.revision)
+          publish_assets(context.revision)
           manifest = Spontaneous::JSON.parse File.read(site.path("assets/tmp") + "manifest.json")
           compiled = manifest[:assets][:"js/all.js"]
           ::File.open(site.path("assets/tmp")+compiled, 'w') do |file|
@@ -490,7 +495,7 @@ describe "Assets" do
         ].join("\n")
       end
 
-      it "makes bundled scripts available under /assets" do
+      it "makes bundled stylesheets available under /assets" do
         path = context.stylesheet_urls('css/all').first
         get path
         asset_path = revision.path(path)
