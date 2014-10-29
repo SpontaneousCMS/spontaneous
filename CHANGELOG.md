@@ -6,6 +6,7 @@
 - Fix image drag & drop in Chrome -- revoking blob URLs immediately now results in a broken image
 - Remove all references to `Page#path` in initialization to avoid trying to resolve the full path before the pages' parents have been assigned
 - Explicitly copy compiled assets to the new published revision using a new core publish step rather than hijack the asset compilation/resolution step. This ensures that dependencies are copied on a second publish.
+- Fix layout of box tabs by using appropriate mixins to apply `-webkit` prefixed styles
 
 ## 0.2.0.beta7, released 2014-09-03
 
