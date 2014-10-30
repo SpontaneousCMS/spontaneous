@@ -474,7 +474,8 @@ describe "Publishing Pipeline" do
     let(:application_path) { Pathname.new(File.expand_path("../../fixtures/example_application", __FILE__)) }
     let(:fixtures_path) { application_path + "assets" }
     let(:revision_root) { @site.revision_dir(revision) }
-    let(:environment)   { Spontaneous::Asset::Environment.publishing(@site, revision, false) }
+    let(:development)   { false }
+    let(:environment)   { Spontaneous::Asset::Environment.publishing(@site, revision, development) }
     let(:manifest)      { environment.manifest }
     let(:assets)        { environment.manifest.assets }
 
@@ -510,7 +511,7 @@ describe "Publishing Pipeline" do
       run_step(progress)
     end
 
-    it "gives its step count as the number of facets" do
+    it "gives its step count as the number of assets" do
       step.count(@site, revision, nil).must_equal 3
     end
 
@@ -539,6 +540,25 @@ describe "Publishing Pipeline" do
       instance.expects(:call).raises(Exception)
       instance.expects(:rollback)
       lambda{ run_step }.must_raise(Exception)
+    end
+
+    describe 'development' do
+      let(:development) { true }
+
+      before do
+        Spontaneous.stubs(:development?).returns(true)
+      end
+
+      it "gives its step count as zero" do
+        step.count(@site, revision, nil).must_equal 0
+      end
+
+      it "never steps the progress" do
+        progress = mock
+        progress.stubs(:stage)
+        progress.expects(:step).with(1, instance_of(String)).never
+        run_step(progress)
+      end
     end
 
   end

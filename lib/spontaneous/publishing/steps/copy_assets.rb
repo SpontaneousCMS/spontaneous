@@ -2,10 +2,26 @@ module Spontaneous::Publishing::Steps
   class CopyAssets < BaseStep
 
     def count
+      return 0 if development?
       assets.length
     end
 
     def call
+      case development?
+      when true
+        development_mode
+      when false
+        production_mode
+      end
+    end
+
+    def development_mode
+      # In development the asset manifest isn't cached and the compilation
+      # done by the asset environment is sufficient to copy all the assets into
+      # place
+    end
+
+    def production_mode
       @progress.stage("copying assets")
       ensure_asset_dir
       assets.each do |logical_path, asset|

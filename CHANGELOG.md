@@ -1,3 +1,9 @@
+## 0.2.0.beta9, released 2014-10-30
+
+#### Fixes
+
+- Revert some changes to the asset compilation step to fix publishing in development mode.
+
 ## 0.2.0.beta8, released 2014-10-29
 
 #### Fixes
