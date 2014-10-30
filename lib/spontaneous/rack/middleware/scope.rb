@@ -41,7 +41,7 @@ module Spontaneous::Rack::Middleware
     end
 
     POWERED_BY = {
-      "X-Powered-By" => "Spontaneous CMS v#{Spontaneous::VERSION}"
+      "X-Powered-By" => "Spontaneous v#{Spontaneous::VERSION} <http://spontaneous.io>"
     }
 
     class Front < Base
