@@ -49,17 +49,29 @@ module Spontaneous::Rack::Middleware
 
       def initialize(app, site, options = {})
         super
-        @renderer = Spontaneous::Output.published_renderer(@site)
       end
 
       def call!(env)
         status = headers = body = nil
-        env[RENDERER] = @renderer
-        env[REVISION] = @site.published_revision
+        env[RENDERER] = renderer
+        env[REVISION] = revision = @site.published_revision
         @site.model.with_published(@site) do
           status, headers, body = @app.call(env)
         end
         [status, headers.merge(POWERED_BY), body]
+      end
+
+      def renderer
+        return renderer_for_revision if development?
+        @renderer ||= renderer_for_revision
+      end
+
+      def renderer_for_revision
+        Spontaneous::Output.published_renderer(@site)
+      end
+
+      def development?
+        Spontaneous.development?
       end
     end
   end

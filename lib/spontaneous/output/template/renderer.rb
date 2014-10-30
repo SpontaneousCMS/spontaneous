@@ -127,6 +127,8 @@ module Spontaneous::Output::Template
   end
 
   class PublishedRenderer < Renderer
+    attr_reader :revision
+
     def initialize(site, revision, cache = Spontaneous::Output.cache_templates?)
       super(site, cache)
       @revision = revision
