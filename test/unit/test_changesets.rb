@@ -276,7 +276,7 @@ describe "Change" do
     page1.reload
 
     later = @now + 10
-    Timecop.travel(later)
+    Timecop.freeze(later)
     page1.hide!
 
 
