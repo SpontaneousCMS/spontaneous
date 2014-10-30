@@ -3,13 +3,14 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'spontaneous/version'
 
 Gem::Specification.new do |s|
-  s.required_ruby_version = '>= 2.0.0'
-
   s.name          = 'spontaneous'
   s.version       = Spontaneous::VERSION
+  s.license       = "MIT"
 
-  s.summary       = "Spontaneous is a next-generation Ruby CMS"
-  s.description   = "Spontaneous is a next-generation Ruby CMS"
+  s.required_ruby_version = '>= 2.0.0'
+
+  s.summary       = "Next-generation Ruby CMS and web framework."
+  s.description   = "Spontaneous is a content management framework that allows the easy development of sophisticated & beautiful websites with powerful developer tools & an elegant editing interface."
 
   s.authors       = ['Garry Hill']
   s.email         = 'garry@spontaneous.io'
@@ -19,12 +20,6 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files`.split($/)
   s.test_files    = s.files.grep(%r{^test/})
   s.require_paths = %w[lib]
-
-  s.rdoc_options  = ['--charset=UTF-8']
-  s.extra_rdoc_files = %w[LICENSE]
-
-  # s.signing_key   = '/Volumes/Keys/rubygems-garry-magnetised-net-private_key.pem'
-  # s.cert_chain    = ['gem-public_cert.pem']
 
   s.add_dependency('activesupport',   ['~> 4.0'])
   s.add_dependency('coffee-script',   ['~> 2.2'])
