@@ -829,8 +829,8 @@ describe "Publishing Pipeline" do
       end
     }
 
-    def run_steps(steps = steps, progress = progress)
-      Spontaneous::Publishing::Pipeline.new(steps).run(@site, revision, pages, progress)
+    def run_steps(_steps = steps, _progress = progress)
+      Spontaneous::Publishing::Pipeline.new(_steps).run(@site, revision, pages, _progress)
     end
 
     def modify_some_pages

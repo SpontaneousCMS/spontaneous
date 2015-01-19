@@ -16,9 +16,9 @@ describe "CLI" do
     end
   end
 
-  def set_expectation(method, cmd = cmd)
+  def set_expectation(method, _cmd = cmd)
     quietly do
-      cmd.any_instance.expects(method)
+      _cmd.any_instance.expects(method)
     end
   end
 
