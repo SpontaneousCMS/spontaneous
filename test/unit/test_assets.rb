@@ -147,15 +147,15 @@ describe "Assets" do
     let(:x_js_digest) { asset_digest('public1/x.js') }
     # these are compiled so fairly complex to calculate their digests
     # not impossible, but annoying
-    let(:n_js_digest) { '74f175e03a4bdc8c807aba4ae0314938' }
-    let(:m_js_digest) { 'dd35b142dc75b6ec15b2138e9e91c0c3' }
-    let(:all_js_digest) { 'd406fc3c21d90828a2f0a718c89e8d99' }
+    let(:n_js_digest) { 'a5c86b004242d16e0dbf818068bbb248' }
+    let(:m_js_digest) { 'c0f2e1c2a7d1cc9666ccb48cc9fd610e' }
+    let(:all_js_digest) { '9759f54463d069b39d9c04c3e1d63745' }
 
-    let(:a_css_digest) { '7b04d295476986c24d8c77245943e5b9' }
-    let(:b_css_digest) { '266643993e14da14f2473d45f003bd2c' }
-    let(:c_css_digest) { 'fc8ba0d0aae64081dc00b8444a198fb8' }
-    let(:x_css_digest) { '2560aec2891794825eba770bf84823fb' }
-    let(:all_css_digest) { 'cf61c624b91b9ea126804291ac55bd5d' }
+    let(:a_css_digest) { 'b4ec507466566b839328b924893e80fb' }
+    let(:b_css_digest) { '97b252913f48c160b1eed120f7544203' }
+    let(:c_css_digest) { '3fcc1da2378a42e97cbd11cb85b8115a' }
+    let(:x_css_digest) { '88b3052bb5d7723b6a6a8b628fbee34e' }
+    let(:all_css_digest) { '9bac5a609f816594005b07a3a8aa2368' }
 
     it "includes all js dependencies" do
       result = context.scripts('js/all', 'js/m', 'js/c', 'x')
@@ -204,15 +204,15 @@ describe "Assets" do
     let(:app) { Spontaneous::Rack::Back.application(site) }
     let(:context) { preview_context }
 
-    let(:c_js_digest) { 'f669550dd7e10e9646ad781f44756950' }
-    let(:x_js_digest) { '6b4c9176b2838a4949a18284543fc19c' }
+    let(:c_js_digest) { '3ab39368d6e128169ac2401bc49fcdb2' }
+    let(:x_js_digest) { 'e755ffcead8090406c04b2813b9bdce9' }
     let(:n_js_digest) { '74f175e03a4bdc8c807aba4ae0314938' }
-    let(:m_js_digest) { 'dd35b142dc75b6ec15b2138e9e91c0c3' }
-    let(:all_js_digest) { 'cd1f681752f5038421be0bc5ea0e855d' }
+    let(:m_js_digest) { 'c0f2e1c2a7d1cc9666ccb48cc9fd610e' }
+    let(:all_js_digest) { 'd782ef6abb69b1eb3e4c503478a660db' }
 
-    let(:c_css_digest) { 'fc8ba0d0aae64081dc00b8444a198fb8' }
-    let(:x_css_digest) { '2560aec2891794825eba770bf84823fb' }
-    let(:all_css_digest) { 'bb2c289a27b3d5d4467dde6d60722fd3' }
+    let(:c_css_digest) { '3fcc1da2378a42e97cbd11cb85b8115a' }
+    let(:x_css_digest) { '88b3052bb5d7723b6a6a8b628fbee34e' }
+    let(:all_css_digest) { '4b837b285d3a1998c48e1811e62292d8' }
 
     describe "javascript" do
       it "include scripts as separate files with finger prints" do
@@ -382,14 +382,14 @@ describe "Assets" do
     end
 
     describe "javascript" do
-      let(:all_sha) { "ed62549e8edc1f61a1e27136602f01d9" }
-      let(:x_sha) { "66e92be1e412458f6ff02f4c5dd9beb1" }
+      let(:all_sha) { "29ced6e75f651ea6963bd2f2ffdd745e" }
+      let(:x_sha) { "2b8678f6d71dc1fc0e44ad9f6a5811b3" }
       it "bundles & fingerprints local scripts" do
         result = context.scripts('js/all', 'js/m.js', 'js/c.js', 'x')
         result.must_equal [
           %(<script type="text/javascript" src="/assets/js/all-#{all_sha}.js"></script>),
-          '<script type="text/javascript" src="/assets/js/m-a5be7324bc314d5cf470a59c3732ef10.js"></script>',
-          '<script type="text/javascript" src="/assets/js/c-c24bcbb4f9647b078cc919746aa7fc3a.js"></script>',
+          '<script type="text/javascript" src="/assets/js/m-66885c19e856373c6b9dab3a41885dbf.js"></script>',
+          '<script type="text/javascript" src="/assets/js/c-0201f986795c0d9b4fb850236496359f.js"></script>',
           %(<script type="text/javascript" src="/assets/x-#{x_sha}.js"></script>)
         ].join("\n")
       end
@@ -456,14 +456,14 @@ describe "Assets" do
     end
 
     describe "css" do
-      let(:all_sha) { "2e17f25ddeba996223a6cd1e28e7a319" }
-      let(:x_sha)   { "2560aec2891794825eba770bf84823fb" }
+      let(:all_sha) { "a72e3c2850e95f5c89930cae40a66c29" }
+      let(:x_sha)   { "88b3052bb5d7723b6a6a8b628fbee34e" }
 
       it "bundles & fingerprints local stylesheets" do
         result = context.stylesheets('css/all', 'css/a.css', 'x')
         result.must_equal [
           %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
-          '<link rel="stylesheet" href="/assets/css/a-0164c6d5b696ec2f2c5e70cade040da8.css" />',
+          '<link rel="stylesheet" href="/assets/css/a-46541ee6e70fb12c030698e0addc2c79.css" />',
           %(<link rel="stylesheet" href="/assets/x-#{x_sha}.css" />)
         ].join("\n")
       end
