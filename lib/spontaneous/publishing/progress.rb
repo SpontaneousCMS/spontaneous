@@ -136,8 +136,8 @@ module Spontaneous::Publishing
         send_event
       end
 
-      def send_event(stage = current_stage, percentage = percentage)
-        ::Simultaneous.send_event('publish_progress', {:state => stage, :progress => percentage}.to_json)
+      def send_event(stage = current_stage, _percentage = percentage)
+        ::Simultaneous.send_event('publish_progress', {:state => stage, :progress => _percentage}.to_json)
       rescue Errno::ECONNREFUSED
       rescue Errno::ENOENT
       end
