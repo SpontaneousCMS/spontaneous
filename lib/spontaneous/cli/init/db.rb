@@ -87,7 +87,12 @@ module Spontaneous::Cli
       end
 
       def environments
-        [:development, :test]
+        case Spontaneous.env
+        when :development
+          [:development, :test]
+        else
+          [Spontaneous.env]
+        end
       end
     end
   end
