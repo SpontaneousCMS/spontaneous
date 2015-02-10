@@ -78,6 +78,7 @@ describe "Change" do
   it "not list new pieces as available for publish" do
     root = Page.create(:title => "root")
     Content.publish(@revision)
+    root.reload
     root.things << Piece.new
     root.save.reload
     result = outstanding_changes[:changes]

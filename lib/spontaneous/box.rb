@@ -235,6 +235,42 @@ module Spontaneous
       owner.page
     end
 
+    # A convenience method to return the root of the page tree
+    def root
+      page.root
+    end
+
+    # Used to determine the page to use to define the path of any
+    # contained pages.
+    #
+    # Overwrite this to set up custom paths for pages:
+    #
+    #     Page.box :sections
+    #
+    #     Page.box :custom do
+    #       def path_origin
+    #         root
+    #       end
+    #     end
+    #
+    #     home = Page.create # set up a new site homepage
+    #     section = Page.create(slug: 'a-section')
+    #     home.sections << section # add section page to the root
+    #     section.custom.path_origin.path #=> "/"
+    #
+    #     child = Page.create(slug: 'child')
+    #     section.custom << child
+    #     child.path #=> "/child" # this would normally be "/a-section/child"
+    #
+    def path_origin
+      page
+    end
+
+    # This is used by new pages to generate the path component of the container.
+    def path!
+      path_origin.path!
+    end
+
     alias_method :to_page, :page
 
     def depth

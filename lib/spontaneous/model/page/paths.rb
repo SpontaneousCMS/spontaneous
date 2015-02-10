@@ -165,6 +165,13 @@ module Spontaneous::Model::Page
       tree_root.is_private_root?
     end
 
+    # Loads the current calculated path of this page from the database.
+    # Used by Box#path! (which is itself used by #calculate_path_with_slug below)
+    # It's necessary to grab this from the db because there are too many cached
+    # values between the box & the up-to-date value
+    def path!
+      model.dataset.select(:path).get_unfiltered_raw(id).try(:[], :path)
+    end
 
     def update_path
       self.path = calculate_path
@@ -186,7 +193,7 @@ module Spontaneous::Model::Page
       if parent.nil?
         root? ? Spontaneous::SLASH : "##{slug}"
       else
-        File.join(parent.path, slug)
+        File.join(container.path!, slug)
       end
     end
 

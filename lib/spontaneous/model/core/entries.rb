@@ -108,25 +108,43 @@ module Spontaneous::Model::Core
     end
 
 
+    # TODO: This insert process is too fragile & requires too many intermediate #saves
+    # Perhaps some unified insertion process would simplify the requirements
+    #
+    # e.g. page.box.create(OtherPage, slug: 'something')
+    #      page.box.build(OtherPage, slug: 'something')
+    #
+    # A lot of the problems come from the child's potential lack of an id
+    # because it's a new record. If I wrap the process then I do two things:
+    #
+    #   1. prevent the creation of pages without a containing box
+    #   2. control the 'new' state of the added instance so I don't have to
+    #      manage two pathways
+    #
+    # This would entail making Content::new private or something.
+    #
     def insert_page(index, child_page, box)
-      child_page.owner = self
-      if page
-        child_page.depth = page.depth + 1
-        page.unordered_children << child_page
-        child_page.parent = page
-        child_page.update_path
+      insert_with_style(:page, index, child_page, box) do
+        child_page.owner = self
+        if page
+          child_page.depth = page.depth + 1
+          page.unordered_children << child_page
+          child_page.parent = page
+          child_page.update_path
+        end
       end
-      insert_with_style(:page, index, child_page, box)
     end
 
     def insert_piece(index, piece, box)
-      piece.owner = self
-      piece.page = page if page
-      piece.depth = (content_depth || 0) + 1
-      insert_with_style(:piece, index, piece, box)
+      insert_with_style(:piece, index, piece, box) do
+        piece.owner = self
+        piece.page = page if page
+        piece.depth = (content_depth || 0) + 1
+        piece.save
+      end
     end
 
-    def insert_with_style(type, index, content, box)
+    def insert_with_style(type, index, content, box, &block)
       self.pieces << content
       entry_style = style_for_content(content, box)
       content.box_sid = box.schema_id if box
@@ -149,6 +167,8 @@ module Spontaneous::Model::Core
         logger.error { "Attempting to modify visible only pieces" }
         raise e
       end
+      yield if block_given?
+      content.save
 
       entry
     end

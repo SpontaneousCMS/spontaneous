@@ -477,6 +477,28 @@ describe "Page" do
       @p.at_depth(1).must_equal [@q]
       lambda { @p.at_depth(2) }.must_raise(ArgumentError)
     end
+
+    describe 'custom path roots' do
+      before do
+        Page.box :custom do
+          def path_origin
+            root
+          end
+        end
+        Page.box :sections
+        @parent = @p
+        @child = Page.create(slug: 'child')
+        @parent.sections << @child
+        @child.path.must_equal '/child'
+      end
+
+      it "defines child paths according to the custom path root" do
+        page = Page.create(slug: 'balloon')
+        @child.custom << page
+        page.save.reload
+        page.path.must_equal '/balloon'
+      end
+    end
   end
 
   describe "page pieces" do
