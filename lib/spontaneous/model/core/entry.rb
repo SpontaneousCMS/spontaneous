@@ -24,7 +24,9 @@ module Spontaneous::Model::Core
       owner.boxes.sid(box_sid) if owner
     end
 
-    alias_method :container,  :box
+    def container
+      box
+    end
 
     def first?
       container.contents.first == self
