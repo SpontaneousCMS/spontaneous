@@ -223,6 +223,8 @@ module Spontaneous
       resolve_style(self)
     end
 
+    # Container represents the object one level up from us,
+    # which in this case is the parent Content instance.
     def container
       owner
     end
@@ -231,6 +233,8 @@ module Spontaneous
       owner
     end
 
+    # A pointer to the containing page. This may not be the same as the
+    # `owner` of the box in the case where the box is owned by a Piece.
     def page
       owner.page
     end
