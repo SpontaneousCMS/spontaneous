@@ -566,14 +566,14 @@ describe "Boxes" do
       @b = ::B.new
       @c = ::C.new
       [@a, @b, @c].each do |instance|
-        instance.boxes[:a].stubs(:render).with(anything).returns("[a]")
-        instance.boxes[:b].stubs(:render).with(anything).returns("[b]")
-        instance.boxes[:c].stubs(:render).with(anything).returns("[c]")
-        instance.boxes[:d].stubs(:render).with(anything).returns("[d]")
+        instance.boxes[:a].stubs(:render_inline).with(anything).returns("[a]")
+        instance.boxes[:b].stubs(:render_inline).with(anything).returns("[b]")
+        instance.boxes[:c].stubs(:render_inline).with(anything).returns("[c]")
+        instance.boxes[:d].stubs(:render_inline).with(anything).returns("[d]")
       end
-      @b.boxes[:e].stubs(:render).with(anything).returns("[e]")
-      @c.boxes[:e].stubs(:render).with(anything).returns("[e]")
-      @c.boxes[:f].stubs(:render).with(anything).returns("[f]")
+      @b.boxes[:e].stubs(:render_inline).with(anything).returns("[e]")
+      @c.boxes[:e].stubs(:render_inline).with(anything).returns("[e]")
+      @c.boxes[:f].stubs(:render_inline).with(anything).returns("[f]")
     end
 
     after do

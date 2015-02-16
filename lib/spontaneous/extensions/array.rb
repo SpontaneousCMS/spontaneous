@@ -5,7 +5,9 @@ module Spontaneous
     module Array
       def render_using(renderer, *args)
         self.map { |e|
-          if e.respond_to?(:render_using)
+          if e.respond_to?(:render_inline_using)
+            e.render_inline_using(renderer, *args)
+          elsif e.respond_to?(:render_using)
             e.render_using(renderer, *args)
           elsif e.respond_to?(:render)
             e.render(*args)
@@ -16,7 +18,15 @@ module Spontaneous
       end
 
       def render(*args)
-        self.map { |e| e.respond_to?(:render) ? e.render(*args) : e }.join
+        self.map { |e|
+          if e.respond_to?(:render_inline)
+            e.render_inline(*args)
+          elsif e.respond_to?(:render)
+            e.render(*args)
+          else
+            e
+          end
+          }.join
       end
     end
   end

@@ -42,5 +42,22 @@ describe "Extensions" do
       result.must_equal [["js"], ["coffee", "coffee"], ["js"], ["coffee"]]
     end
   end
+
+  describe "Array" do
+    it 'responds to #render by calling #render_inline on the contents' do
+      array = 3.times.map { mock }
+      array.each do |m|
+        m.expects(:render_inline).returns("x")
+      end
+      array.render.must_equal 'xxx'
+    end
+    it 'responds to #render_using by calling #render_inline_using on the contents' do
+      array = 3.times.map { mock }
+      array.each do |m|
+        m.expects(:render_inline_using).returns("x")
+      end
+      array.render_using(mock).must_equal 'xxx'
+    end
+  end
 end
 
