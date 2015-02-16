@@ -181,7 +181,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 				this.fields_preview.removeClass('hover');
 			}
 		},
-		confirm_destroy: function() {
+		confirm_destroy: function(event) {
 			if (this._dialogue && !this._dialogue.is_open) { this.close_destroy_dialogue(); }
 			if (!this._dialogue) {
 				this._dialogue = Spontaneous.Popover.open(event, new ConfirmDeletePopup(this));
