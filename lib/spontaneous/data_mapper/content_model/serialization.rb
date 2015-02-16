@@ -38,7 +38,7 @@ module Spontaneous::DataMapper
       end
 
       def _deserialize_value(value)
-        Yajl::Parser.new(:symbolize_keys => true).parse(value || "null")
+        Spontaneous::parse_json(value || "null")
       end
 
       def _serialize_column(column, value)
@@ -47,7 +47,7 @@ module Spontaneous::DataMapper
       end
 
       def _serialize_value(value)
-        Yajl::Encoder.new.encode(value)
+        Spontaneous::encode_json(value)
       end
     end
   end

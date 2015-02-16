@@ -48,7 +48,7 @@ Gem::Specification.new do |s|
   s.add_dependency('thor',            ['~> 0.16'])
   s.add_dependency('uglifier',        ['~> 1.3'])
   s.add_dependency('xapian-fu',       ['~> 1.5'])
-  s.add_dependency('yajl-ruby',       ['~> 1.1'])
+  s.add_dependency('oj',              ['~> 2.11'])
 
   s.add_development_dependency('minitest',  ['~> 4.7.0'])
   s.add_development_dependency('minitest-colorize', ['~> 0.0.5'])

@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
-require 'yajl'
+# require 'yajl'
+require 'oj'
 
 Oj.default_options = { mode: :compat } if defined?(Oj)
 
@@ -23,7 +24,7 @@ module Spontaneous
     if defined?(::Yajl)
       module YajlParser
         def parser
-          Yajl::Parser.new(:symbolize_keys => true)
+          Yajl::Parser.new(symbolize_keys: true)
         end
         def encoder
           Yajl::Encoder.new
