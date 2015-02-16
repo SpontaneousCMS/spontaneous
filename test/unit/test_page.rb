@@ -142,6 +142,19 @@ describe "Page" do
       p.reload.slug.wont_equal ""
     end
 
+    it 'can be given a type specific root' do
+      class Page
+        def default_slug_root
+          'fishies'
+        end
+      end
+      o = Page.create
+      p = Page.create
+      p.save
+      p.slug.must_match /^fishies/
+      p.has_generated_slug?.must_equal true
+    end
+
     it "be made URL safe" do
       o = Page.create
       p = Page.create

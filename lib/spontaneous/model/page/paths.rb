@@ -5,12 +5,12 @@ module Spontaneous::Model::Page
     extend Spontaneous::Concern
 
     module ClassMethods
-      def generate_default_slug
-        "page-#{Time.now.strftime('%Y%m%d-%H%M%S')}"
+      def generate_default_slug(root = 'page')
+        "#{root}-#{Time.now.strftime('%Y%m%d-%H%M%S')}"
       end
 
-      def is_default_slug?(slug)
-        /^page-\d{8}-\d{6}$/ === slug
+      def is_default_slug?(slug, root = 'page')
+        /^#{root}-\d{8}-\d{6}$/ === slug
       end
 
       def create_root(slug, values = {})
@@ -94,11 +94,15 @@ module Spontaneous::Model::Page
     end
 
     def has_generated_slug?
-      self.class.is_default_slug?(slug)
+      self.class.is_default_slug?(slug, default_slug_root)
     end
 
     def generate_default_slug
-      self.class.generate_default_slug
+      self.class.generate_default_slug(default_slug_root)
+    end
+
+    def default_slug_root
+      'page'
     end
 
     def is_conflicting_slug?(slug)
