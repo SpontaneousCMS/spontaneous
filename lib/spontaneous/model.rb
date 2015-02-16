@@ -99,5 +99,8 @@ module Spontaneous
     def content_model
       model.content_model
     end
+    def site
+      content_model.schema.site
+    end
   end
 end
