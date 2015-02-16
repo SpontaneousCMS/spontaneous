@@ -82,12 +82,23 @@ module Spontaneous::Collections
       store[sid]
     end
 
+    # TODO: replace this with optimized version that can return a list of
+    # ids for a particular box without loading the box's content
+    def ids(box)
+      for_box(box).map(&:id)
+    end
+
     def insert(index, box, entry)
       box_id = box.schema_id.to_s
       store[box_id].insert(index, entry)
       owner.entry_modified!(entry)
     end
 
+    # Called after the modification of box contents to keep the
+    # raw data in-sync with the owner's structure
+    def update(piece_store)
+      @piece_store = piece_store
+    end
 
     def destroy!
       self.destroy

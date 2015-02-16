@@ -370,6 +370,17 @@ describe "Boxes" do
       instance.box3.contents.map { |e| e.label }.must_equal ["0", "1", "c", "2", "3"]
     end
 
+    it 'should be available as a list of ids' do
+      BlankContent.box :box3
+      instance = BlankContent.new
+      contents = 3.times.map { instance.words << StyledContent.new }
+      3.times.map { instance.images << StyledContent.new }
+      instance.save
+      contents.each(&:save)
+      ids = contents.map(&:id)
+      instance.words.ids.must_equal ids
+    end
+
   end
 
   describe "Allowed types" do

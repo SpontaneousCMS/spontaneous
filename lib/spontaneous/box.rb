@@ -325,6 +325,14 @@ module Spontaneous
       @modified
     end
 
+    # Returns a list of the ids of the content within the box
+    #
+    # This is designed to be fast by not requiring the actual
+    # loading of the box contents.
+    def ids
+      owner.contents.ids(self)
+    end
+
     def contents
       owner.contents.for_box(self)
     end

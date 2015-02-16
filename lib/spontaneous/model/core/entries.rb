@@ -57,7 +57,8 @@ module Spontaneous::Model::Core
     end
 
     def entry_modified!(modified_entry)
-      self.entry_store = all_contents.serialize_db
+      self.entry_store = store = all_contents.serialize_db
+      all_contents.update(store)
     end
 
     def contents
