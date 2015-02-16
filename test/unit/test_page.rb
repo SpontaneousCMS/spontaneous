@@ -498,6 +498,11 @@ describe "Page" do
             root
           end
         end
+        Page.box :custom_string do
+          def path_origin
+            "/"
+          end
+        end
         Page.box :sections
         @parent = @p
         @child = Page.create(slug: 'child')
@@ -508,6 +513,13 @@ describe "Page" do
       it "defines child paths according to the custom path root" do
         page = Page.create(slug: 'balloon')
         @child.custom << page
+        page.save.reload
+        page.path.must_equal '/balloon'
+      end
+
+      it "allows for string based path origins" do
+        page = Page.create(slug: 'balloon')
+        @child.custom_string << page
         page.save.reload
         page.path.must_equal '/balloon'
       end

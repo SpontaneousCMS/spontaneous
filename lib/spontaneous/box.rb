@@ -247,7 +247,12 @@ module Spontaneous
     # Used to determine the page to use to define the path of any
     # contained pages.
     #
-    # Overwrite this to set up custom paths for pages:
+    # Overwrite this to set up custom paths for pages.
+    #
+    # It can either return a page instance (in which case
+    # child pages will be based on the #path of the returned
+    # instance) or a string (which will form the root of the
+    # generated paths:
     #
     #     Page.box :sections
     #
@@ -272,7 +277,12 @@ module Spontaneous
 
     # This is used by new pages to generate the path component of the container.
     def path!
-      path_origin.path!
+      case (origin = path_origin)
+      when @owner.content_model
+        origin.path!
+      else
+        origin.to_s
+      end
     end
 
     alias_method :to_page, :page
