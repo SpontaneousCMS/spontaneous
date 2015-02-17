@@ -18,7 +18,8 @@ module Spontaneous
           options = [
             "psql",
             "--quiet",
-            option(:password),
+            option(:host),
+            option(:port),
             option(:username),
             database_name
           ]
@@ -42,7 +43,8 @@ module Spontaneous
             "--clean",
             "--no-owner",
             "--no-privileges",
-            option(:password),
+            option(:host),
+            option(:port),
             option(:username),
             option(:encoding),
             option(:exclude_table),
@@ -69,12 +71,31 @@ module Spontaneous
           @database.opts[:password]
         end
 
+        def host
+          @database.opts[:host]
+        end
+
+        def port
+          @database.opts[:port]
+        end
+
         def encoding
           "UTF8"
         end
 
         def exclude_table
           revision_archive_table
+        end
+
+        def system(cmd)
+          begin
+            if (pass = password)
+              ENV['PGPASSWORD'] = pass
+            end
+            super
+          ensure
+            ENV.delete('PGPASSWORD')
+          end
         end
       end
     end
