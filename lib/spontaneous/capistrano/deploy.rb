@@ -12,6 +12,9 @@ Capistrano::Configuration.instance(:must_exist).load do
   set :revision_dir, lambda { "#{deploy_to}/revisions" }
   set :upload_dir, lambda { "#{deploy_to}/uploadcache" }
 
+  set :spot, lambda { "./bin/spot" }
+  set :rake, lambda { "./bin/rake" }
+
   namespace :spot do
     task :symlink_cache do
       cache_dir = File.join(latest_release, 'cache')
@@ -29,24 +32,24 @@ Capistrano::Configuration.instance(:must_exist).load do
     end
 
     task :bundle_assets do
-      run "cd #{release_path} && ./bin/spot assets compile --destination=#{release_path}"
+      run "cd #{release_path} && #{fetch(:spot)} assets compile --destination=#{release_path}"
     end
 
     task :migrate, :roles => :db do
       spot_env = fetch(:spot_env, "production")
-      run "cd #{release_path} && SPOT_ENV=#{spot_env} ./bin/spot migrate"
+      run "cd #{release_path} && SPOT_ENV=#{spot_env} #{fetch(:spot)} migrate"
     end
 
     task :content_clean, :roles => :db do
       spot_env = fetch(:spot_env, "production")
-      run "cd #{release_path} && SPOT_ENV=#{spot_env} ./bin/spot content clean"
+      run "cd #{release_path} && SPOT_ENV=#{spot_env} #{fetch(:spot)} content clean"
     end
   end
 
   namespace :deploy do
     task :migrate, :roles => :db do
       spot_env = fetch(:spot_env, "production")
-      run "cd #{latest_release} && SPOT_ENV=#{spot_env} ./bin/spot migrate"
+      run "cd #{latest_release} && SPOT_ENV=#{spot_env} #{fetch(:spot)} migrate"
     end
   end
 

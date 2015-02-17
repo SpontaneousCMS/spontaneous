@@ -39,7 +39,7 @@ Capistrano::Configuration.instance(:must_exist).load do
         puts "  * Syncing database DOWN"
         dumper = Spontaneous::Utils::Database.dumper_for_database
         dumpfilename = ENV['dumpfile'] || dumper.dumpfilename
-        run %(cd #{current_path} && ./bin/rake db:dump dumpfile=#{dumpfilename} )
+        run %(cd #{current_path} && #{fetch(:rake)} db:dump dumpfile=#{dumpfilename} )
         dump_file = File.join("tmp", dumpfilename)
         top.download(File.join(current_path, dump_file), dump_file)
         system "bundle exec rake db:load dumpfile=#{dump_file}"
@@ -54,7 +54,7 @@ Capistrano::Configuration.instance(:must_exist).load do
         dumper.dump(dump_file)
         remote_dump_file = File.join(deploy_to, dumpfilename)
         top.upload(dump_file, remote_dump_file)
-        run %(cd #{current_path} && #{fetch(:bundle_cmd, 'bundle')} exec rake db:load dumpfile=#{remote_dump_file} )
+        run %(cd #{current_path} && #{fetch(:bundle_cmd, 'bundle')} exec #{fetch(:rake)} db:load dumpfile=#{remote_dump_file} )
       end
     end
 
