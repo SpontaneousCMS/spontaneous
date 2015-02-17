@@ -196,4 +196,19 @@ describe "Application" do
       Spontaneous::Rack.port.must_equal 3002
     end
   end
+
+  describe 'ENV["DATABASE_URL"]' do
+    before do
+      ENV['DATABASE_URL'] = 'sqlite:///production.db'
+      @site = Spontaneous.init(:root => site_root, :mode => :front, :environment => :production)
+    end
+
+    after do
+      ENV.delete('DATABASE_URL')
+    end
+
+    it 'should override settings in database.yml' do
+      @site.config.db.must_equal 'sqlite:///production.db'
+    end
+  end
 end

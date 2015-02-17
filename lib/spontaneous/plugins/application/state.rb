@@ -69,10 +69,6 @@ module Spontaneous::Plugins::Application
         instance.config
       end
 
-      def db_settings
-        YAML.load_file(root /  "config/database.yml")[environment]
-      end
-
       def database
         Spontaneous::Site.instance.database
       end

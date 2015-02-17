@@ -56,8 +56,9 @@ module Spontaneous::Cli
     end
 
     def get_database_initializer
-      connection_params = @site.db_config
-      classname = case connection_params[:development][:adapter]
+      # Sequel doesn't try to connect to the db by default so this is a very light-weight op
+      connection_params = @site.database_instance.opts
+      classname = case connection_params[:adapter]
       when /mysql/
         'MySQL'
       when /postgres/

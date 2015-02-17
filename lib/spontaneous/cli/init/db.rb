@@ -78,7 +78,7 @@ module Spontaneous::Cli
       end
 
       def config_for_environment(env)
-        site_config = @connection[env].dup
+        site_config = @connection.dup
         admin_config = site_config.dup
         admin_config.delete(:database)
         admin_config[:user] = @cli.options.user unless @cli.options.user.blank?

@@ -84,19 +84,31 @@ module Spontaneous
 
 
     def connect_to_database!
-      db = Sequel.connect(db_settings)
-      db.logger = logger if config.log_queries
-      # Improve performance for postgres
-      db.optimize_model_load = true if db.respond_to?(:optimize_model_load)
-      self.database = db
+      self.database = database_instance(db_settings).tap do |db|
+        db.logger = logger if config.log_queries
+        # Improve performance for postgres
+        db.optimize_model_load = true if db.respond_to?(:optimize_model_load)
+      end
+    end
+
+    def database_instance
+      Sequel.connect(db_settings)
     end
 
     def db_settings
-      self.config.db = db_config[environment]
+      self.config.db ||= db_connection_options
     end
 
-    def db_config
-      @db_config ||= YAML.load_file(File.join(paths.expanded(:config).first, "database.yml"))
+    def db_connection_options
+      @db_connection_options ||= db_config_env || db_config_file[environment]
+    end
+
+    def db_config_env
+      ENV['DATABASE_URL']
+    end
+
+    def db_config_file
+      YAML.load_file(File.join(paths.expanded(:config).first, "database.yml"))
     end
 
     def transaction(&block)
