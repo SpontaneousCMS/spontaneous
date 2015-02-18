@@ -435,6 +435,12 @@ module Spontaneous
       mapper.clear_cache(scope_cache_key)
     end
 
+    def clear!
+      contents.dup.each do |entry|
+        entry.destroy
+      end
+    end
+
     def empty?
       contents.empty?
     end
