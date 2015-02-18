@@ -355,6 +355,12 @@ module Spontaneous
       end
     end
 
+    def clear!
+      contents.dup.each do |entry|
+        entry.destroy
+      end
+    end
+
     def empty?
       contents.count == 0
     end

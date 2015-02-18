@@ -381,6 +381,16 @@ describe "Boxes" do
       instance.words.ids.must_equal ids
     end
 
+    it 'should be clearable' do
+      instance = BlankContent.create
+      box = instance.images
+      count = 4
+      count.times { |n| box << StyledContent.new(:label => n)}
+      instance.save
+      instance.images.clear!
+      instance.reload.images.length.must_equal 0
+    end
+
   end
 
   describe "Allowed types" do
