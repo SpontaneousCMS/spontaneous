@@ -50,6 +50,10 @@ module Spontaneous::Field
       true
     end
 
+    def blank?
+      original.blank?
+    end
+
     def sizes
       @sizes ||= Hash.new { |hash, key| hash[key] = S::Media::Image::Attributes.new(processed_values[key]) }
     end

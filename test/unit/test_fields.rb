@@ -1046,6 +1046,12 @@ describe "Fields" do
       assert @field.is_a?(Spontaneous::Field::File), "Field should be an instance of FileField but instead has the following ancestors #{ @prototype.instance_class.ancestors }"
     end
 
+    it "gives the right value for #blank?" do
+      @field.blank?.must_equal true
+      @field.value = 'http://example.com/image.jpg'
+      @field.blank?.must_equal false
+    end
+
     it "copy files to the media folder" do
       File.open(path, 'rb') do |file|
         @field.value = {

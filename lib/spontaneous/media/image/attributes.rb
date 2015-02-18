@@ -19,7 +19,39 @@ module Spontaneous::Media
       end
 
       def blank?
-        src.blank?
+        @params[:src].blank?
+      end
+
+      alias_method :empty?, :blank?
+
+      def src
+        storage.to_url(@params[:src])
+      end
+
+      alias_method :url, :src
+
+      def storage_name
+        @params[:storage_name]
+      end
+
+      def width
+        @params[:width]
+      end
+
+      def height
+        @params[:height]
+      end
+
+      def filesize
+        @params[:filesize]
+      end
+
+      def dimensions
+        @params[:dimensions]
+      end
+
+      def filepath
+        @params[:path]
       end
 
       # Will only work for files in local storage

@@ -284,6 +284,73 @@ describe "Images" do
     end
   end
 
+  describe '#blank?' do
+    before do
+      class ::ContentWithImage < ::Content::Piece
+        field :photo, :image do
+          size :smaller do
+            fit width: 100, height: 100
+          end
+        end
+      end
+
+      @instance = ContentWithImage.new
+
+      # @content_id = 234
+      # @instance.stubs(:id).returns(@content_id)
+      @field = @instance.photo
+    end
+
+    after do
+      Object.send(:remove_const, :ContentWithImage) rescue nil
+    end
+
+    it 'returns true for empty images' do
+      @field.blank?.must_equal true
+      @field.original.blank?.must_equal true
+      @field.smaller.blank?.must_equal true
+    end
+
+    it 'returns false for images with values' do
+      path = File.expand_path("../../../../fixtures/images/rose.jpg", __FILE__)
+      @field.value = path
+      @instance.save
+      @field.blank?.must_equal false
+      @field.original.blank?.must_equal false
+      @field.smaller.blank?.must_equal false
+    end
+
+    describe 'with cloud storage' do
+      before do
+        @bucket_name = "media.example.com"
+        @aws_credentials = {
+          :provider=>"AWS",
+          :aws_secret_access_key=>"SECRET_ACCESS_KEY",
+          :aws_access_key_id=>"ACCESS_KEY_ID",
+          :public_host => "http://media.example.com"
+        }
+        ::Fog.mock!
+        @storage = Spontaneous::Media::Store::Cloud.new("S3", @aws_credentials, 'media.example.com')
+        @storage.backend.directories.create(:key => @bucket_name)
+        @site.storage_backends.unshift(@storage)
+      end
+
+      it 'returns true for empty images' do
+        @field.blank?.must_equal true
+        @field.original.blank?.must_equal true
+        @field.smaller.blank?.must_equal true
+      end
+      it 'returns false for images with values' do
+        path = File.expand_path("../../../../fixtures/images/rose.jpg", __FILE__)
+        @field.value = path
+        @instance.save
+        @field.blank?.must_equal false
+        @field.original.blank?.must_equal false
+        @field.smaller.blank?.must_equal false
+      end
+    end
+  end
+
   describe "clearing" do
     def assert_image_field_empty
       @field.value.must_equal ''
