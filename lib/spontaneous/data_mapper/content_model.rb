@@ -85,6 +85,8 @@ module Spontaneous
         mapper.get(id)
       end
 
+      # Allows for Page/123 => #<Page id=123...>
+      alias_method :/, :get
       alias_method :[], :get
 
       def primary_key_lookup(id)
