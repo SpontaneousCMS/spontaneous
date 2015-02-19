@@ -90,14 +90,6 @@ module Spontaneous::Output::Context
       content.last
     end
 
-    def first?
-      __target.owner.pieces.first == self
-    end
-
-    def last?
-      __target.owner.pieces.last == self
-    end
-
     # template takes an existing first-pass template, converts it to a second pass template
     # and then returns the result for inclusion.
     # This lets you share templates between the publish step and the request step.
