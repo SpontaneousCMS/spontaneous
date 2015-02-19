@@ -42,7 +42,7 @@ Capistrano::Configuration.instance(:must_exist).load do
         run %(cd #{current_path} && #{fetch(:rake)} db:dump dumpfile=#{dumpfilename} )
         dump_file = File.join("tmp", dumpfilename)
         top.download(File.join(current_path, dump_file), dump_file)
-        system "bundle exec #{fetch(:rake)} db:load dumpfile=#{dump_file}"
+        system "bundle exec rake db:load dumpfile=#{dump_file}"
       end
 
       desc "Sync the server's version of the database to the local one"
