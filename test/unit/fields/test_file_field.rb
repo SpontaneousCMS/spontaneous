@@ -110,6 +110,7 @@ describe "File Fields" do
     @field.original_filename.must_equal "/images/nosuchfile.rtf"
   end
 
+<<<<<<< HEAD
   it "sets the storage name if given an uploaded file" do
     @field.value = path
     @field.storage_name.must_equal "default"
@@ -135,6 +136,8 @@ describe "File Fields" do
     @field.url.must_match %r{^http://media.example.com/media/.+/vimlogo.pdf$}
   end
 
+=======
+>>>>>>> b0d488f... Split field types into separate test files
   describe "clearing" do
     def assert_file_field_empty
       @field.value.must_equal ''

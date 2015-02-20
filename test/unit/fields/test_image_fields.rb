@@ -1,10 +1,10 @@
 # encoding: UTF-8
 
 
-require File.expand_path('../../test_helper', __FILE__)
+require File.expand_path('../../../test_helper', __FILE__)
 require 'fog'
 
-describe "Images" do
+describe "Image Fields" do
 
   before do
     @site = setup_site
@@ -52,7 +52,7 @@ describe "Images" do
       @revision = 10
       @site.stubs(:working_revision).returns(@revision)
 
-      @src_image =  Pathname.new(File.join(File.dirname(__FILE__), "../fixtures/images/rose.jpg")).realpath
+      @src_image =  Pathname.new(File.join(File.dirname(__FILE__), "../../fixtures/images/rose.jpg")).realpath
       @origin_image = @upload_dir + "rose.jpg"
       FileUtils.cp(@src_image.to_s, @origin_image.to_s)
       @origin_image = @origin_image.realpath.to_s
@@ -373,7 +373,7 @@ describe "Images" do
       @content_id = 234
       @instance.stubs(:id).returns(@content_id)
       @field = @instance.photo
-      path = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+      path = File.expand_path("../../../../fixtures/images/rose.jpg", __FILE__)
       @field.value = path
     end
 
