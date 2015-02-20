@@ -21,7 +21,7 @@ module Spontaneous::Field
     end
 
     def outputs
-      [:html, :path, :filesize, :filename]
+      [:html, :path, :filesize, :filename, :storage_name]
     end
 
     def set_pending_value(value, site)
@@ -121,6 +121,17 @@ module Spontaneous::Field
       generate_path(input, site)
     end
 
+    def generate_storage_name(input, site)
+      if (storage = input.try(:storage))
+        return storage.name
+      end
+      nil
+    end
+
+    def storage
+      site.storage(storage_name)
+    end
+
     def export(user = nil)
       super(user).merge({
         :processed_value => processed_values
@@ -139,8 +150,21 @@ module Spontaneous::Field
       @file_info ||= Spontaneous::JSON.parse(unprocessed_value)
     end
 
+    def value(format = :html)
+      case format
+      when :html, "html"
+        path
+      else
+        super
+      end
+    end
+
     def path
-      value(:html)
+      storage.to_url(super)
+    end
+
+    def url
+      path
     end
 
     self.register

@@ -34,6 +34,30 @@ describe "Media Store" do
     it "provide a list of local storage backends" do
       @site.local_storage.must_equal [@storage]
     end
+
+    it "allows for configuring a custom url mapper" do
+      require 'zlib'
+      mapper = Class.new do
+        def initialize(pattern, servers)
+          @pattern = pattern
+          @servers = servers
+          @n = 0
+        end
+
+        def server(path)
+          @servers[Zlib.crc32(path) % @servers.length]
+        end
+
+        def call(path)
+          @pattern % [server(path), path]
+        end
+      end
+      @storage.url_mapper = mapper.new("http://%s.cdn.example.com%s", %w(m1 m2 m3 m4))
+      @storage.to_url('/image.jpg').must_equal "http://m3.cdn.example.com/image.jpg"
+      @storage.to_url('/image.jpg').must_equal "http://m3.cdn.example.com/image.jpg"
+      @storage.to_url('/image2.jpg').must_equal "http://m4.cdn.example.com/image2.jpg"
+      @storage.to_url('/image2.jpg').must_equal "http://m4.cdn.example.com/image2.jpg"
+    end
   end
 
   describe "cloud" do
@@ -104,19 +128,34 @@ describe "Media Store" do
       before do
         existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
         @media_path = %w(0003 0567 rose.jpg)
+        @path = "/" << @media_path.join("/")
         @storage.copy(existing_file, @media_path, { content_type: "image/jpeg" })
       end
 
       it "have the correct base url" do
-        @storage.public_url(@media_path).must_equal "https://media.example.com.s3.amazonaws.com/0003/0567/rose.jpg"
+        @storage.to_url(@path).must_equal "https://media.example.com.s3.amazonaws.com/0003/0567/rose.jpg"
       end
 
 
       it "use custom urls if configured" do
-        storage = Spontaneous::Media::Store::Cloud.new(@aws_credentials.merge({
+        storage = Spontaneous::Media::Store::Cloud.new("s3", @aws_credentials.merge({
           :public_host => "http://media.example.com",
         }), @bucket_name)
-        storage.public_url(@media_path).must_equal "http://media.example.com/0003/0567/rose.jpg"
+        storage.to_url(@path).must_equal "http://media.example.com/0003/0567/rose.jpg"
+      end
+
+      it 'gives valid s3 urls for different regions' do
+        storage = Spontaneous::Media::Store::Cloud.new("s3", @aws_credentials.merge({
+          region: "eu-west-1"
+        }), @bucket_name)
+        storage.to_url(@path).must_equal "https://media.example.com.s3-eu-west-1.amazonaws.com/0003/0567/rose.jpg"
+      end
+
+      it 'allows for providing a direct URL mapper proc' do
+        storage = Spontaneous::Media::Store::Cloud.new("s3", @aws_credentials.merge({
+          url_mapper: proc { |path| "http://wallowig.com#{path}" }
+        }), @bucket_name)
+        storage.to_url(@path).must_equal "http://wallowig.com/0003/0567/rose.jpg"
       end
     end
   end

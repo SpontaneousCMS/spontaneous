@@ -8,14 +8,14 @@ module Spontaneous::Media
 
     extend self
 
-    def create(config)
+    def create(name, config)
       case config[:provider]
       when "Local", "local"
-        Local.new(config[:local_root], config[:url], config[:accepts])
+        Local.new(name, config[:local_root], config[:url], config[:accepts])
       else
         bucket =  config.delete(:bucket)
         accepts = config.delete(:accepts)
-        Cloud.new(config, bucket, accepts)
+        Cloud.new(name, config, bucket, accepts)
       end
     end
   end

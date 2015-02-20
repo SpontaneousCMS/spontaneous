@@ -244,6 +244,10 @@ module Spontaneous
       page.root
     end
 
+    def site
+      owner.site
+    end
+
     # Used to determine the page to use to define the path of any
     # contained pages.
     #

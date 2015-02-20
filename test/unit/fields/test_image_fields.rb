@@ -16,9 +16,14 @@ describe "Image Fields" do
 
   describe "Image fields set using absolute values" do
     before do
+      class ::Piece < ::Content::Piece
+      end
+      @owner = Piece.create
       @image = S::Field::Image.new(:name => "image")
+      @image.owner = @owner
       @image.prototype = Spontaneous::Prototypes::FieldPrototype.new(@site.model, :image, :image)
     end
+
     it "accept and not alter URL values" do
       url =  "http://example.com/image.png"
       @image.value = url
@@ -257,7 +262,7 @@ describe "Image Fields" do
 
     end
 
-    describe "cloud storage yyy" do
+    describe "cloud storage" do
       before do
         @bucket_name = "media.example.com"
         @aws_credentials = {
@@ -267,9 +272,9 @@ describe "Image Fields" do
           :public_host => "http://media.example.com"
         }
         ::Fog.mock!
-        @storage = Spontaneous::Media::Store::Cloud.new(@aws_credentials, 'media.example.com')
+        @storage = Spontaneous::Media::Store::Cloud.new("S3", @aws_credentials, 'media.example.com')
         @storage.backend.directories.create(:key => @bucket_name)
-        @site.stubs(:storage).with(anything).returns(@storage)
+        @site.storage_backends.unshift(@storage)
         @image.value = @origin_image.to_s
       end
 
@@ -280,6 +285,12 @@ describe "Image Fields" do
       it "have full urls for all the src attributes" do
         @image.original.src.must_equal "http://media.example.com/00234/0010/rose.jpg"
         @image.thumbnail.src.must_equal "http://media.example.com/00234/0010/rose.thumbnail.jpg"
+      end
+
+      it "allows for reconfiguring the media urls" do
+        @storage.url_mapper = proc { |path| "http://cdn.example.com#{path}" }
+        @image.original.src.must_equal "http://cdn.example.com/00234/0010/rose.jpg"
+        @image.thumbnail.src.must_equal "http://cdn.example.com/00234/0010/rose.thumbnail.jpg"
       end
     end
   end

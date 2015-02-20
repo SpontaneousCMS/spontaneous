@@ -41,9 +41,15 @@ module Spontaneous::Media::Store
     # Don't verify my ssl certs when uploading images
     ::Excon.defaults[:ssl_verify_peer] = false
 
-    def initialize(config, bucket_name, accepts = nil)
+    def initialize(name, config, bucket_name, accepts = nil)
+      super(name)
       @config, @bucket_name, @accepts = config, bucket_name, accepts
-      @public_host = @config.delete(:public_host)
+      if (host = @config.delete(:public_host))
+        self.public_host = host
+      end
+      if (mapper = @config.delete(:url_mapper))
+        self.url_mapper = mapper
+      end
     end
 
     def open(relative_path, headers, mode, &block)
@@ -100,28 +106,62 @@ module Spontaneous::Media::Store
       @bucket ||= backend.directories.get(@bucket_name)
     end
 
-    def public_url(path)
-      if @public_host
-        "#{@public_host}/#{join_path(path)}"
-      else
+    def url_path(path)
+      "/" << join_path(path)
+    end
+
+    def default_url_mapper
+      Proc.new { |path|
         if @config[:provider] == "AWS"
-          public_url_aws(path)
+          aws_to_url(path)
         else
-          bucket.files.new(:key => join_path(path)).public_url
+          bucket.files.new(key: path).public_url
         end
-      end
+      }
     end
 
     # AWS Redirects to the bucketname.s3.amazonaws.com style of public URL
     # if you use the s3.amazonaws.com/bucketname/ style so to avoid a lot of
     # slow redirects when loading a page's media we use the fastest available
     # version
-    def public_url_aws(path)
+    def aws_to_url(path)
       if bucket_name =~ AWS_BUCKET_SUBDOMAIN_RESTRICTON_REGEX
-        "https://#{bucket_name}.s3.amazonaws.com/#{join_path(path)}"
+        "https://#{bucket_name}.#{aws_s3_endpoint}#{path}"
       else
-        "https://s3.amazonaws.com/#{bucket_name}/#{join_path(path)}"
+        "https://#{aws_s3_endpoint}/#{bucket_name}#{path}"
       end
+    end
+
+    def aws_s3_endpoint
+      case (region = @config[:region])
+      when nil, "", "us-east-1"
+        "s3.amazonaws.com"
+      else
+        "s3-#{region}.amazonaws.com"
+      end
+    end
+
+    def public_host=(host)
+      @public_host = host
+      unless host.blank?
+        self.url_mapper = host_url_mapper(host)
+      end
+    end
+
+    def host_url_mapper(host)
+      uri = URI.parse(host)
+      lambda { |path|
+        return path if path.blank?
+        begin
+          path_uri = URI.parse(path)
+          return path if path_uri.absolute?
+          url = uri.clone
+          url.path = path
+          url.to_s
+        rescue => e
+          path
+        end
+      }
     end
 
     def root

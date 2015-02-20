@@ -395,21 +395,21 @@ describe "Boxes" do
 
   describe "Allowed types" do
     before do
-      class ::Allowed1 < Content
+      class ::Allowed1 < Piece
         style :frank
         style :freddy
       end
-      class ::Allowed2 < Content
+      class ::Allowed2 < Piece
         style :john
         style :paul
         style :ringo
         style :george
       end
-      class ::Allowed3 < Content
+      class ::Allowed3 < Piece
         style :arthur
         style :lancelot
       end
-      class ::Allowed4 < Content; end
+      class ::Allowed4 < Piece; end
 
       class ::Allowed11 < ::Allowed1; end
       class ::Allowed111 < ::Allowed1; end
@@ -423,7 +423,7 @@ describe "Boxes" do
       class ::ChildClass < ::Parent
       end
 
-      class ::Allowable < Content
+      class ::Allowable < Piece
         box :parents, :type => :Parent
       end
 

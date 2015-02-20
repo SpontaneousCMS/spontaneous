@@ -4,8 +4,9 @@ module Spontaneous::Media::Store
   class Local < Backend
     attr_reader :root
 
-    def initialize(root_directory, url_path, accepts = nil)
-      @root, @url_path, @accepts = ::File.expand_path(root_directory), url_path, accepts
+    def initialize(name, root_directory, url_path_root, accepts = nil)
+      super(name)
+      @root, @url_path_root, @accepts = ::File.expand_path(root_directory), url_path_root, accepts
     end
 
     def copy(existing_file, media_path, headers = {})
@@ -54,8 +55,10 @@ module Spontaneous::Media::Store
     end
 
     def public_url(path)
-      File.join(@url_path, join_path(path))
+      File.join(@url_path_root, join_path(path))
     end
+
+    alias_method :url_path, :public_url
 
     def local?
       true

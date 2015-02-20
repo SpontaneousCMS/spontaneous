@@ -784,6 +784,7 @@ describe "Fields" do
           :version => 1,
           :value => {
             :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
+            :storage_name=>"default",
             :type=>"image/gif", :format => "gif",
             :tempfile=>"#{@site.root}/cache/media/tmp/#{field.media_id}/something.gif",
           :filename=>"something.gif",
@@ -810,6 +811,7 @@ describe "Fields" do
           :version => 1,
           :value => {
             :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
+            :storage_name=>"default",
             :type=>"image/gif", :format => "gif",
             :tempfile=>"#{@site.root}/cache/media/tmp/#{field.media_id}/something.gif",
           :filename=>"something.gif",
@@ -855,6 +857,7 @@ describe "Fields" do
           :version => 1,
           :value => {
             :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
+            :storage_name=>"default",
             :type=>"image/gif", :format => "gif",
             :tempfile=>"#{@site.root}/cache/media/tmp/#{field.media_id}/something.gif",
           :filename=>"something.gif",
@@ -879,6 +882,7 @@ describe "Fields" do
           :version => 1,
           :value => {
             :width=>50, :height=>67, :dimensions => [50,67], :filesize=>3951,
+            :storage_name=>"default",
             :type=>"image/gif", :format => "gif",
             :tempfile=>"#{@site.root}/cache/media/tmp/#{field.media_id}/something.gif",
           :filename=>"something.gif",
@@ -961,6 +965,22 @@ describe "Fields" do
         Spontaneous::Field.set(@site, @instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
         @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
         @instance.image.pending_value.must_be_nil
+      end
+    end
+
+    it "includes a local temp url for fields with pending values" do
+      field = @instance.image
+      Spontaneous::Simultaneous.expects(:fire).with(:update_fields, {
+        "fields" => [field.id]
+      })
+      File.open(@image, "r") do |file|
+        field.pending_version.must_equal 0
+        Spontaneous::Field.set(@site, field, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
+        export = field.export
+        values = export[:processed_value]
+        assert values.key?(:__pending__)
+        pending = values[:__pending__][:value]
+        pending[:src].must_match %r{^/media/}
       end
     end
 

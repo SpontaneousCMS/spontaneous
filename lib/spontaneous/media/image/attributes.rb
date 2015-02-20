@@ -3,15 +3,19 @@ module Spontaneous::Media
     class Attributes
       include Renderable
 
-      attr_reader  :src, :width, :height, :filesize, :filepath
+      attr_reader  :storage, :filepath, :storage
 
-      def initialize(params={})
-        params ||= {}
-        @src, @width, @height, @filesize, @filepath = params.values_at(:src, :width, :height, :filesize, :path)
+      def initialize(site, params={})
+        @params = params.try(:dup) || {}
+        @storage = site.storage(storage_name)
       end
 
       def serialize
-        { :src => src, :width => width, :height => height, :filesize => filesize }
+        { src: src, width: width, height: height, dimensions: dimensions, filesize: filesize, storage_name: storage_name }
+      end
+
+      def export(user = nil)
+        serialize.delete_if { |k, v| v.nil? }
       end
 
       def inspect
@@ -23,6 +27,36 @@ module Spontaneous::Media
       end
 
       alias_method :empty?, :blank?
+
+      def src
+        storage.to_url(@params[:src])
+      end
+
+      alias_method :url, :src
+
+      def storage_name
+        @params[:storage_name]
+      end
+
+      def width
+        @params[:width]
+      end
+
+      def height
+        @params[:height]
+      end
+
+      def filesize
+        @params[:filesize]
+      end
+
+      def dimensions
+        @params[:dimensions]
+      end
+
+      def filepath
+        @params[:path]
+      end
 
       def src
         storage.to_url(@params[:src])

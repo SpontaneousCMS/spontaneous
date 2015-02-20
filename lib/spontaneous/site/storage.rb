@@ -20,8 +20,11 @@ class Spontaneous::Site
   module Storage
     extend Spontaneous::Concern
 
-    def storage(mimetype = nil)
-      storage_for_mimetype(mimetype)
+    DEFAULT_STORAGE_NAME = 'default'.freeze
+
+    def storage(name = nil)
+      return storage_backends.first if name.nil?
+      storage_backends.detect { |storage| storage.name == name } || default_storage
     end
 
     def storage_for_mimetype(mimetype)
@@ -40,14 +43,14 @@ class Spontaneous::Site
       storage_backends = []
       storage_settings = config[:storage] || []
       storage_settings.each do |name, config|
-        backend = Spontaneous::Media::Store.create(config)
+        backend = Spontaneous::Media::Store.create(name.to_s, config)
         storage_backends << backend
       end
       storage_backends << default_storage
     end
 
     def default_storage
-      @default_storage ||= Spontaneous::Media::Store::Local.new(Spontaneous.media_dir, '/media', accepts=nil)
+      @default_storage ||= Spontaneous::Media::Store::Local.new(DEFAULT_STORAGE_NAME, Spontaneous.media_dir, '/media', accepts=nil)
     end
 
     def file(owner, filename, headers = {})

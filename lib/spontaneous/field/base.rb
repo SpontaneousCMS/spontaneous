@@ -380,6 +380,10 @@ module Spontaneous
         self.prototype.owner
       end
 
+      def site
+        owner.try(:site)
+      end
+
       def owner_sid
         schema_owner.schema_id
       end

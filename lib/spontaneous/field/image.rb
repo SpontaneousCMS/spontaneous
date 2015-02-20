@@ -55,7 +55,9 @@ module Spontaneous::Field
     end
 
     def sizes
-      @sizes ||= Hash.new { |hash, key| hash[key] = S::Media::Image::Attributes.new(processed_values[key]) }
+      @sizes ||= Hash.new { |hash, key|
+        hash[key] = S::Media::Image::Attributes.new(site, processed_values[key])
+      }
     end
 
     # value used to show conflicts between the current value and the value they're attempting to enter
@@ -97,6 +99,10 @@ module Spontaneous::Field
       original.src
     end
 
+    def url
+      original.url
+    end
+
     def filepath
       unprocessed_value
     end
@@ -126,8 +132,12 @@ module Spontaneous::Field
 
 
     def export(user = nil)
+      processed = Hash[outputs.map { |size|
+        [size, sizes[size].export(user)]
+      }]
+      processed.update(__pending__: pending_value) if has_pending_value?
       super(user).merge({
-        :processed_value => processed_values
+        processed_value: processed
       })
     end
 

@@ -2,6 +2,7 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 require 'erb'
+require 'fog'
 
 describe "Serialisation" do
   before do
@@ -169,6 +170,42 @@ describe "Serialisation" do
     it "serialise to JSON" do
       # hard to test this as the serialisation order appears to change
       Spot.deserialise_http(@root.serialise_http).must_equal @root.export
+    end
+
+    describe 'cloud storage' do
+      before do
+        Fog.mock!
+        @bucket_name = "media.example.com"
+        @aws_credentials = {
+          :provider=>"AWS",
+          :aws_secret_access_key=>"SECRET_ACCESS_KEY",
+          :aws_access_key_id=>"ACCESS_KEY_ID",
+          :public_host => "http://media.example.com"
+        }
+        @storage = Spontaneous::Media::Store::Cloud.new("S3", @aws_credentials, 'media.example.com')
+        @storage.backend.directories.create(:key => @bucket_name)
+        @site.storage_backends.unshift(@storage)
+
+        existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+        assert ::File.exist?(existing_file)
+        class ::SimplePiece < ::Piece
+          field :image
+        end
+        @instance = SimplePiece.create
+        @instance.image = existing_file
+        @instance.save
+      end
+
+      after do
+        Object.send(:remove_const, :SimplePiece)
+      end
+
+      it 'generates full urls when using cloud storage' do
+        export = @instance.export
+        image = export[:fields].detect { |f| f[:name] == "image" }
+        original = image[:processed_value][:original][:src]
+        original.must_match %r{^http://media.example.com}
+      end
     end
   end
 end

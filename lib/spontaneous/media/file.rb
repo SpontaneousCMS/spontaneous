@@ -41,7 +41,7 @@ module Spontaneous::Media
     end
 
     def url
-      storage.public_url(storage_path)
+      storage.url_path(storage_path)
     end
 
     def mimetype
@@ -59,7 +59,7 @@ module Spontaneous::Media
     end
 
     def storage
-      @storage ||= @site.storage(mimetype)
+      @storage ||= @site.storage_for_mimetype(mimetype)
     end
 
     def padded_id
@@ -95,7 +95,7 @@ module Spontaneous::Media
     end
 
     def serialize
-      { :url => url, :type => mimetype, :filename => filename }
+      { url: url, type: mimetype, filename: filename, storage_name: storage.name }
     end
   end
 end

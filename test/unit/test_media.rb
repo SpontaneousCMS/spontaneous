@@ -50,9 +50,9 @@ describe "Media" do
         :aws_access_key_id=>"ACCESS_KEY_ID",
         :public_host => "http://media.example.com"
       }
-      @storage = Spontaneous::Media::Store::Cloud.new(@aws_credentials, 'media.example.com')
+      @storage = Spontaneous::Media::Store::Cloud.new("S3", @aws_credentials, 'media.example.com')
       @storage.backend.directories.create(:key => @bucket_name)
-      @site.stubs(:storage).with(anything).returns(@storage)
+      @site.storage_backends.unshift(@storage)
       @content = ::Piece.create
       @content.stubs(:id).returns(99)
       Spontaneous::State.stubs(:revision).returns(853)
@@ -60,7 +60,7 @@ describe "Media" do
 
     it "return an absolute path for the url" do
       file = file(@content, "file name.txt")
-      file.url.must_equal "http://media.example.com/00099/0853/file-name.txt"
+      file.url.must_equal "/00099/0853/file-name.txt"
     end
 
     it "create a new instance with a different name" do
@@ -68,7 +68,7 @@ describe "Media" do
       file2 = file1.rename("another.jpg")
       file2.owner.must_equal file1.owner
       file2.mimetype.must_equal "image/jpeg"
-      file2.url.must_equal "http://media.example.com/00099/0853/another.jpg"
+      file2.url.must_equal "/00099/0853/another.jpg"
     end
 
     it "be able to copy a file into place if passed the path of an existing file" do
@@ -115,8 +115,8 @@ describe "Media" do
   describe "Local media files" do
     before do
       @media_dir = Dir.mktmpdir
-      @storage = Spontaneous::Media::Store::Local.new(@media_dir, '/media')
-      @site.stubs(:storage).with(anything).returns(@storage)
+      @storage = Spontaneous::Media::Store::Local.new("local", @media_dir, '/media')
+      @site.stubs(:storage_for_mimetype).with(anything).returns(@storage)
       @content = ::Piece.create
       @content.stubs(:id).returns(99)
       Spontaneous::State.stubs(:revision).returns(853)
@@ -188,11 +188,11 @@ describe "Media" do
         :aws_access_key_id=>"ACCESS_KEY_ID",
         :public_host => "http://media.example.com"
       }
-      cloud = Spontaneous::Media::Store::Cloud.new(@aws_credentials, 'media.example.com')
+      cloud = Spontaneous::Media::Store::Cloud.new("S3", @aws_credentials, 'media.example.com')
       cloud.backend.directories.create(:key => @bucket_name)
-      @site.stubs(:storage).with(anything).returns(cloud)
+      @site.stubs(:storage_for_mimetype).with(anything).returns(cloud)
       @media_dir = Dir.mktmpdir
-      @storage = Spontaneous::Media::Store::Local.new(@media_dir, '/media')
+      @storage = Spontaneous::Media::Store::Local.new("local", @media_dir, '/media')
       @site.stubs(:local_storage).with(anything).returns(@storage)
       @site.stubs(:default_storage).with(anything).returns(@storage)
       @content = ::Piece.create
