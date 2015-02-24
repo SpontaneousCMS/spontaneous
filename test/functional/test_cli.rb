@@ -24,9 +24,115 @@ describe "CLI" do
 
   describe "Init" do
     let(:cmd) { cli::Init }
+
+    after do
+      teardown_site
+    end
+
     it "maps 'spot init' to Init#init" do
-      set_expectation(:initialize_size)
+      set_expectation(:initialize_site)
       run_command(["init"])
+    end
+
+    describe 'DatabaseInitializer' do
+      let(:site) { setup_site }
+      let(:create_user) { false }
+      let(:env) { :development }
+      let(:cli) { mock }
+
+      def yaml_config(adapter)
+        { production: {adapter: adapter, database: 'spontaneous_db_production'}, development: {adapter: adapter, database: 'spontaneous_db'}, test: {adapter: adapter, database: 'spontaneous_db_test'} }
+      end
+
+      def with_yaml_config(adapter)
+        begin
+          site.stubs(:db_config_file).returns(yaml_config(adapter))
+          yield
+        ensure
+          site.unstub(:db_config_file)
+        end
+      end
+
+      def with_db_url(url)
+        begin
+          ENV['DATABASE_URL'] = url
+          yield
+        ensure
+          ENV.delete 'DATABASE_URL'
+        end
+      end
+
+      def init
+        Spontaneous::Cli::Init::DatabaseInitializer.new(cli, site)
+      end
+
+      it "runs a database initializer for development & test environments in development mode" do
+        init.database_environments(:development).must_equal [:development, :test]
+      end
+
+      it "runs a database initializer for only production in production mode" do
+        init.database_environments(:production).must_equal [:production]
+      end
+
+      describe 'DATABASE_URL' do
+        it "gets the db config from the ENV" do
+          with_db_url('mysql://localhost/something') do
+            init.database_config(:development).must_equal('mysql://localhost/something')
+            init.database_config(:test).must_equal('mysql://localhost/something')
+          end
+        end
+
+        it 'uses the right db initialization class for the adapter' do
+          with_db_url('mysql2://localhost/something') do
+            init.database_initializer(:development).must_be_instance_of Spontaneous::Cli::Init::MySQL
+          end
+          with_db_url('postgres://localhost/something') do
+            init.database_initializer(:development).must_be_instance_of Spontaneous::Cli::Init::Postgresql
+          end
+          with_db_url('sqlite://localhost/something') do
+            init.database_initializer(:development).must_be_instance_of Spontaneous::Cli::Init::Sqlite
+          end
+        end
+
+        it 'instantiates & calls #run on a db initializer for each env' do
+          with_db_url('sqlite://localhost/something') do
+            db_initializer = mock
+            db_initializer.expects(:run).once
+            Spontaneous::Cli::Init::Sqlite.expects(:new).with(cli, instance_of(Sequel::SQLite::Database)).returns(db_initializer).once
+            init.run(:development)
+          end
+        end
+      end
+
+      describe 'YAML' do
+        it "gets db settings from a config file if no ENV setting" do
+          with_yaml_config('postgres') do
+            init.database_config(:development).must_equal({adapter: 'postgres', database: 'spontaneous_db'})
+            init.database_config(:test).must_equal({adapter: 'postgres', database: 'spontaneous_db_test'})
+          end
+        end
+
+        it 'uses the right db initialization class for the adapter' do
+          with_yaml_config('mysql2') do
+            init.database_initializer(:development).must_be_instance_of Spontaneous::Cli::Init::MySQL
+          end
+          with_yaml_config('postgres') do
+            init.database_initializer(:development).must_be_instance_of Spontaneous::Cli::Init::Postgresql
+          end
+          with_yaml_config('sqlite') do
+            init.database_initializer(:development).must_be_instance_of Spontaneous::Cli::Init::Sqlite
+          end
+        end
+
+        it 'instantiates & calls #run on a db initializer for each env' do
+          with_yaml_config('mysql2') do
+            db_initializer = mock
+            db_initializer.expects(:run).once
+            Spontaneous::Cli::Init::MySQL.expects(:new).with(cli, instance_of(Sequel::Mysql2::Database)).returns(db_initializer).once
+            init.run(:production)
+          end
+        end
+      end
     end
   end
 

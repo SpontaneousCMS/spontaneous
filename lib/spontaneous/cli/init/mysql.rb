@@ -4,11 +4,11 @@ module Spontaneous::Cli
   class Init
     class MySQL < Db
 
-      def create_database_commands(config)
-        host = config[:host].blank? ? "" : "@#{config[:host]}"
-        cmds = [ ["CREATE DATABASE `#{config[:database]}` CHARACTER SET UTF8", true] ]
-        unless config[:user] == "root"
-          cmds << ["GRANT ALL ON `#{config[:database]}`.* TO `#{config[:user]}`#{host} IDENTIFIED BY '#{config[:password]}'", false]
+      def create_database_commands(opts)
+        host = opts[:host].blank? ? "" : "@#{opts[:host]}"
+        cmds = [ ["CREATE DATABASE `#{opts[:database]}` CHARACTER SET UTF8", true] ]
+        unless opts[:user] == "root"
+          cmds << ["GRANT ALL ON `#{opts[:database]}`.* TO `#{opts[:user]}`#{host} IDENTIFIED BY '#{opts[:password]}'", false]
         end
         cmds
       end

@@ -4,10 +4,9 @@ module Spontaneous::Cli
   class Init
     class Postgresql < Db
 
-      def config_for_environment(env)
-        site_config, admin_config = super
-        admin_config[:database] = "postgres"
-        [site_config, admin_config]
+      def admin_connection_params
+        config = super
+        config.merge(database: 'postgres')
       end
 
       # On some machines the db creation fails due to incompabilities between the UTF8 encoding
@@ -19,12 +18,12 @@ module Spontaneous::Cli
       #
       # but I don't know a good/the best way to determine the most appropriate UTF-8 locale
       # C.UTF-8 doesn't exist on OS X.
-      def create_database_commands(config)
-        create_cmd = %(CREATE DATABASE "#{config[:database]}" WITH TEMPLATE=template0 ENCODING='UTF8')
+      def create_database_commands(opts)
+        create_cmd = %(CREATE DATABASE "#{opts[:database]}" WITH TEMPLATE=template0 ENCODING='UTF8')
         cmds = []
-        unless config[:user].blank?
-          create_cmd << %( OWNER="#{config[:user]}")
-          cmds << [%(CREATE ROLE "#{config[:user]}" LOGIN PASSWORD '#{config[:password]}'), false]
+        unless opts[:user].blank?
+          create_cmd << %( OWNER="#{opts[:user]}")
+          cmds << [%(CREATE ROLE "#{opts[:user]}" LOGIN PASSWORD '#{opts[:password]}'), false]
         end
         cmds << [create_cmd, true]
       end

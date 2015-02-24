@@ -19,23 +19,85 @@ module Spontaneous::Cli
     method_option :create_user, :type => :boolean, :default => true, :desc => "Enable creation of a root user"
 
     def init
-      initialize_size
+      initialize_site
     end
 
     protected
 
-    def initialize_size
+    def initialize_site
       prepare :init
 
       @site = ::Spontaneous::Site.instantiate(Dir.pwd, options.environment, :console)
       Sequel.extension :migration
 
-      database_initializer.run
+      site_initializer.run(@site.environment)
 
       boot!
 
       # Add a root user if this is a new site
       insert_root_user if (options.create_user && ::Spontaneous::Permissions::User.count == 0)
+    end
+
+    class DatabaseInitializer
+      def initialize(cli, site)
+        @cli, @site = cli, site
+      end
+
+      def run(environment)
+        initialize_databases(environment)
+      end
+
+      def initialize_databases(environment)
+        database_initializers(environment).each do |initializer|
+          initializer.run
+        end
+      end
+
+      # Returns a list of initializers for the given env.
+      #
+      # This de-dupes the initializers according to the config so that only
+      # one call is made in the case where different envs return the same db
+      # config.
+      def database_initializers(environment)
+        dbs = database_environments(environment).map { |env|
+          database_instance(env)
+        }.uniq { |db| db.opts }
+        dbs.map { |db| initializer_for_db(db) }
+      end
+
+      def database_initializer(env)
+        initializer_for_db(database_instance(env))
+      end
+
+      def initializer_for_db(db)
+        initializer_class = case db.opts[:adapter]
+        when /mysql/
+          'MySQL'
+        when /postgres/
+          'Postgresql'
+        when /sqlite/
+          'Sqlite'
+        end
+        klass = Spontaneous::Cli::Init.const_get(initializer_class)
+        klass.new(@cli, db)
+      end
+
+      def database_instance(env)
+        @site.database_instance(database_config(env))
+      end
+
+      def database_config(env)
+        @site.db_connection_options(env)
+      end
+
+      def database_environments(environment)
+        case environment
+        when :development
+          [:development, :test]
+        else
+          [environment]
+        end
+      end
     end
 
     def insert_root_user
@@ -51,23 +113,8 @@ module Spontaneous::Cli
       end
     end
 
-    def database_initializer
-      @database_initializer ||= get_database_initializer
-    end
-
-    def get_database_initializer
-      # Sequel doesn't try to connect to the db by default so this is a very light-weight op
-      connection_params = @site.database_instance.opts
-      classname = case connection_params[:adapter]
-      when /mysql/
-        'MySQL'
-      when /postgres/
-        'Postgresql'
-      when /sqlite/
-        'Sqlite'
-      end
-      klass = Spontaneous::Cli::Init.const_get(classname)
-      klass.new(connection_params, self)
+    def site_initializer
+      @site_initializer ||= DatabaseInitializer.new(self, @site)
     end
   end # Init
 end # Spontaneous::Cli

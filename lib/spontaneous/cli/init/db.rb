@@ -4,50 +4,43 @@ module Spontaneous::Cli
   class Init
     class Db
 
-      attr_reader :site_connection_params, :admin_connection_params, :database, :config
+      attr_reader :database, :config
 
-      def initialize(connection, cli)
+      def initialize(cli, database)
         @cli = cli
-        @connection = connection
-        # setup_connection_params(connection_settings, @cli.options)
-        # @admin_connection_params[:database] = "postgres"
+        @database = database
       end
 
       def run
-        databases.each do |site_connection_params, admin_connection_params|
-          # config = site_connection_params.merge(:database => db)
-          create(admin_connection_params, site_connection_params)
-          migrate(site_connection_params)
-        end
+        create
+        migrate
       end
 
-      def create(admin_config, site_config)
-        Sequel.connect(admin_config) do |connection|
+      def create
+        Sequel.connect(admin_connection_params) do |connection|
           begin
-            @cli.say "  >> Creating database `#{site_config[:database]}`", :green
-            create_database(connection, site_config)
+            @cli.say "  >> Creating database `#{database.opts[:database]}`", :green
+            create_database(connection)
           rescue => e
-            @cli.say " >>> Unable to create #{admin_config[:adapter]} database `#{site_config[:database]}`:\n   > #{e}", :red
+            @cli.say " >>> Unable to create #{connection.opts[:adapter]} database `#{database.opts[:database]}`:\n   > #{e}", :red
           end
         end
       end
 
-      def migrate(site_config)
-        Sequel.connect(site_config) do |connection|
-          begin
-            connection.logger = nil
-            @cli.say "  >> Running migrations..."
-            Sequel::Migrator.apply(connection, ::Spontaneous.gem_dir('db/migrations'))
-            @cli.say "  >> Done"
-          rescue => e
-            @cli.say " >>> Error running migrations on database `#{site_config[:database]}`:\n   > #{e}", :red
-            raise e
-          end
+      def migrate
+        begin
+          database.logger = nil
+          @cli.say "  >> Running migrations..."
+          Sequel::Migrator.apply(database, ::Spontaneous.gem_dir('db/migrations'))
+          @cli.say "  >> Done"
+        rescue => e
+          @cli.say " >>> Error running migrations on database `#{site_config[:database]}`:\n   > #{e}", :red
+          raise e
         end
       end
 
-      def create_database(connection, config)
-        commands = create_database_commands(config)
+      def create_database(connection)
+        commands = create_database_commands(database.opts)
         commands.each do |command, raise_error|
           begin
             connection.run(command)
@@ -57,42 +50,23 @@ module Spontaneous::Cli
         end
       end
 
-      def create_database_commands(config)
+      # connect to the database as a super/root user in order to create
+      # the database
+      def admin_connection_params
+        config = @database.opts.dup
+        config.delete(:database)
+        config[:user] = options.user unless options.user.blank?
+        config[:password] = options.password unless options.password.blank?
+        config
+      end
+
+      # Override in db specific sub-classes
+      def create_database_commands(opts)
         [["", false]]
       end
 
-      def setup_connection_params(connection_settings, options)
-        @options = options
-        @site_connection_params = connection_settings
-        @admin_connection_params = @site_connection_params.dup
-        @admin_connection_params[:user] = @options.user unless @options.user.blank?
-        @admin_connection_params[:password] = @options.password unless @options.password.blank?
-
-        # @database = @admin_connection_params.delete(:database)
-      end
-
-      def databases
-        environments.map { |env|
-          config_for_environment(env)
-        }
-      end
-
-      def config_for_environment(env)
-        site_config = @connection.dup
-        admin_config = site_config.dup
-        admin_config.delete(:database)
-        admin_config[:user] = @cli.options.user unless @cli.options.user.blank?
-        admin_config[:password] = @cli.options.password unless @cli.options.password.blank?
-        [site_config, admin_config]
-      end
-
-      def environments
-        case Spontaneous.env
-        when :development
-          [:development, :test]
-        else
-          [Spontaneous.env]
-        end
+      def options
+        @cli.options
       end
     end
   end

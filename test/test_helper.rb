@@ -35,6 +35,9 @@ else
   false
 end
 
+require 'mysql2'
+require 'pg'
+require 'sqlite3'
 
 connection_string = \
 case ENV["SPOT_ADAPTER"]
@@ -44,7 +47,6 @@ when "postgres"
     Jdbc::Postgres.load_driver
     "jdbc:postgresql:///spontaneous2_test"
   else
-    require 'pg'
     "postgres:///spontaneous2_test"
   end
 when "mysql"
@@ -53,7 +55,6 @@ when "mysql"
     Jdbc::MySQL.load_driver
     "jdbc:mysql://localhost/spontaneous2_test?user=root"
   else
-    require 'mysql2'
     "mysql2://root@localhost/spontaneous2_test"
   end
 when "sqlite"
@@ -62,7 +63,6 @@ when "sqlite"
     Jdbc::SQLite3.load_driver
     "jdbc:sqlite::memory:"
   else
-    require 'sqlite3'
     "sqlite:/" # in-memory
   end
 end
