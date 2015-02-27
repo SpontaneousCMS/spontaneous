@@ -32,6 +32,9 @@ module Spontaneous::Cli
 
       site_initializer.run(@site.environment)
 
+      empty_directory "tmp" unless ::File.directory?("tmp")
+      empty_directory "log" unless ::File.directory?("log")
+
       boot!
 
       # Add a root user if this is a new site
