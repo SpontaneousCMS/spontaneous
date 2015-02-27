@@ -173,5 +173,9 @@ module Spontaneous
       return cache_root if path.empty?
       File.join(cache_root, *path)
     end
+
+    def inspect
+      %[#<Site @root="#@root" @schema=#{@schema.inspect} @paths=#{@paths.inspect} @environment=#{@environment.inspect} @mode=#{@mode.inspect}>]
+    end
   end
 end
