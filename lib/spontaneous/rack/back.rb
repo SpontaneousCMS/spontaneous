@@ -84,7 +84,6 @@ module Spontaneous
           # the preview site.
           use Authenticate::Preview
           use CSRF::Header
-          map("/assets") { run SiteAssets.new }
           use Spontaneous::Rack::Static, root: Spontaneous.root / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
           use Reloader, site
           # inject the front controllers into the preview so that this is a
@@ -127,6 +126,8 @@ module Spontaneous
               run ::Rack::File.new(root)
             end
           end if site
+
+          map("/assets") { run SiteAssets.new }
 
           map "/media" do
             use ::Rack::Lint
