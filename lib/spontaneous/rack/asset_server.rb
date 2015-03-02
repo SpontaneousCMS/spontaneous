@@ -3,6 +3,8 @@ module Spontaneous::Rack
   # header. This wrapper class proxies all requests to a Sprockets enviroment
   # and adds in a charset setting to the content-type header of all responses
   class AssetServer
+    CONTENT_TYPE = "Content-Type".freeze
+
     def initialize(environment, charset = "UTF-8")
       @environment, @charset = environment, charset
     end
@@ -12,8 +14,9 @@ module Spontaneous::Rack
     end
 
     def force_encoding(status, headers, body)
-      content_type = headers["Content-Type"]
-      headers.update("Content-Type" => "#{content_type}; charset=#{@charset}")
+      if (content_type = headers[CONTENT_TYPE])
+        headers.update(CONTENT_TYPE => "#{content_type}; charset=#{@charset}")
+      end
       [status, headers, body]
     end
   end
