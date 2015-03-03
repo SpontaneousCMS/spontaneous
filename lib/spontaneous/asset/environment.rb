@@ -45,6 +45,16 @@ module Spontaneous::Asset
 
     ::Sass::Script::Functions.send :include, SassFunctions
 
+    module RailsCompatibilityShim
+      # actually more a sprockets-less compatibility shim
+      def compute_public_path(path, root = nil)
+        asset_path(path)
+      end
+
+      def asset_paths
+        self
+      end
+    end
 
     class Preview
       attr_reader :environment, :site
@@ -83,6 +93,8 @@ module Spontaneous::Asset
             return path if asset.nil?
             Spontaneous::Asset::Environment.join_asset_path(make_absolute(asset.logical_path), query, fragment)
           end
+
+          include RailsCompatibilityShim
 
           def make_absolute(logical)
             "/" << self.class.asset_mount_point << "/" << logical
@@ -294,6 +306,8 @@ module Spontaneous::Asset
             return path if asset.nil?
             Spontaneous::Asset::Environment.join_asset_path(make_absolute(asset), query, fragment)
           end
+
+          include RailsCompatibilityShim
 
           def make_absolute(logical)
             "/" << self.class.asset_mount_point << "/" << logical
