@@ -205,6 +205,12 @@ describe "File Fields" do
         @field.value = path
         @field.blank?.must_equal false
       end
+
+      it 'falls back to the site’s default if initialized before storage_name output was defined' do
+        @field.value = path
+        @field.stubs(:storage_name).returns('[]')
+        @field.url.must_match %r[^/0000#{@instance.id}/0001/vimlogo.pdf$]
+      end
     end
   end
 end
