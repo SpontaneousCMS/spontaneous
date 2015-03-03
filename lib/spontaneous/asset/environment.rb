@@ -38,7 +38,8 @@ module Spontaneous::Asset
 
     module SassFunctions
       def asset_data_uri(path)
-        Sass::Script::String.new(sprockets_context.asset_data_uri(path.value))
+        uri = sprockets_context.asset_data_uri(path.value)
+        Sass::Script::String.new("url(#{uri})")
       end
     end
 
