@@ -468,22 +468,6 @@ Spontaneous.TopBar = (function($, S) {
 			var children_node = new ChildrenNode(location);
 			self.location.append(children_node.element());
 			self.children_node = children_node;
-			self.updateModeCompatibility(location);
-		},
-		updateModeCompatibility: function(location) {
-			var self = this;
-			if (location.private) {
-				self.previewModeDisabled = true;
-				self.mode_switch.addClass('disabled');
-			} else {
-				self.previewModeDisabled = false;
-				self.mode_switch.removeClass('disabled');
-			}
-			if (self.previewModeDisabled) {
-				this.topBar.set_mode('edit');
-			} else {
-
-			}
 		},
 		page_loaded: function(page) {
 			var self = this, children_node = self.children_node;

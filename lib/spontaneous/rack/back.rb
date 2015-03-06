@@ -18,6 +18,7 @@ module Spontaneous
       autoload :Map,                'spontaneous/rack/back/map'
       autoload :Page,               'spontaneous/rack/back/page'
       autoload :Preview,            'spontaneous/rack/back/preview'
+      autoload :Private,            'spontaneous/rack/back/private'
       autoload :Schema,             'spontaneous/rack/back/schema'
       autoload :Site,               'spontaneous/rack/back/site'
       autoload :SiteAssets,         'spontaneous/rack/back/site_assets'
@@ -62,6 +63,10 @@ module Spontaneous
           map("/schema")  { run Schema }
           use Reloader, site
           use Index
+          map("/private") {
+            use Scope::Preview, site
+            run Private
+          }
           use CSRF::Verification # Everything after this middleware requires a valid CSRF token
           Back.api_handlers.each do |path, app|
             map(path) { run app }

@@ -1,7 +1,7 @@
 // console.log('Loading Preview...');
 
 Spontaneous.Preview = (function($, S, $window) {
-	var dom = S.Dom, goto_id = 0;
+	var dom = S.Dom, goto_id = 0, Ajax = S.Ajax;
 	var click_param = function() {
 		return '?__click='+(++goto_id);
 	};
@@ -31,13 +31,16 @@ Spontaneous.Preview = (function($, S, $window) {
 				if (currentLocation !== location) {
 					location = currentLocation;
 					S.Preview.set({
-						'title': iframe.contentWindow.document.title,
-						'path': iframe.contentWindow.location.pathname
+						'title': icw.document.title,
+						'path': icw.location.pathname
 					});
 					$(icw).bind('unload', function(e) {
 						// trigger a progress indicator here
 					});
-					S.Location.load_path(iframe.contentWindow.location.pathname);
+					// don't load the page details into the top-bar if we're viewing a private page
+					if (preview.pathIsPublic(icw.location.pathname)) {
+						S.Location.load_path(icw.location.pathname);
+					}
 				}
 			};
 
@@ -48,18 +51,36 @@ Spontaneous.Preview = (function($, S, $window) {
 					preview.previewPathMonitor = $window.setInterval(monitor, monitorInterval);
 				}
 			});
-			this.goto_path(path);
+			this._goto_page(page, path)
+		},
+		pathIsPublic: function(path) {
+			return (path.indexOf([Ajax.namespace, 'private'].join('/')) === -1)
 		},
 		goto_path: function(path) {
 			if (path) {
 				// path += click_param();
-				this.iframe[0].contentWindow.location.href = path;
+				this.load_url(path);
 			}
+		},
+		goto_private: function(page) {
+			if (page) {
+				this.load_url([Ajax.namespace, 'private', page.id].join('/'));
+			}
+		},
+		load_url: function(url) {
+				this.iframe[0].contentWindow.location.href = url;
 		},
 		goto_page: function(page) {
 			var current = this.get('path');
 			if (!current || (page && (page.path !== current))) {
-				this.goto_path(page.path);
+				this._goto_page(page, page.path)
+			}
+		},
+		_goto_page: function(page, path) {
+			if (page && page.private) {
+				this.goto_private(page);
+			} else {
+				this.goto_path(path);
 			}
 		},
 		hide: function() {

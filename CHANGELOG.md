@@ -1,5 +1,9 @@
 ## 0.2.0.beta10, released 2014-XX-XX
 
+#### New Features
+
+- Enabled previewing of private pages
+
 #### Fixes
 
 - Front server no longer needs restarting to pick up a new revision in development mode (https://github.com/SpontaneousCMS/spontaneous/issues/47)
