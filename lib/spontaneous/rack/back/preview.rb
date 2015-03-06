@@ -4,10 +4,8 @@ module Spontaneous::Rack::Back
 
     # In preview mode we want to find pages even if they're
     # invisible.
-    def find_page_by_path(path)
-      site.model.scope do
-        site.by_path(path)
-      end
+    def with_scope(&block)
+      site.model.scope(&block)
     end
 
     # Redirect to the edit UI if a preview page is being accessed directly

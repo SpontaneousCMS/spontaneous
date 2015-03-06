@@ -15,6 +15,8 @@ module Spontaneous
       HTTP_LAST_MODIFIED = "Last-Modified".freeze
       HTTP_NO_CACHE = "max-age=0, must-revalidate, no-cache, no-store".freeze
 
+      SLASH = Spontaneous::Constants::SLASH
+
       NAMESPACE      = "/@spontaneous".freeze
       AUTH_COOKIE    = "spontaneous_api_key".freeze
       SESSION_LIFETIME = 1.year

@@ -15,6 +15,17 @@ describe "Front" do
     Spontaneous::Output.write_compiled_scripts = true
 
 
+    class ::PageController < S::Rack::PageController
+      # Define a per-site base controller for all controller classes here so
+      # that we can test it's use later on.
+      # If I define it only in the test where it's used then it's too late as
+      # the controller hierarchy will have already been built upon some other
+      # base class.
+      #
+      # (Another argument for replacing these [start..finish] blocks with
+      # [before..after] ones)
+    end
+
     site = setup_site(site_root)
     let(:site) { site  }
     S::State.delete
@@ -75,6 +86,11 @@ describe "Front" do
       layout { "${ path }.${ __format }" }
     end
 
+    class ::TakeItPage < ::Page
+      layout(:html) { "take it ${id} {{ splat }}" }
+      box :pages
+    end
+
     root = ::SitePage.create
     about = ::SitePage.create(:slug => "about", :uid => "about")
     feed = ::FeedPage.create(:slug => "feed", :uid => "feed")
@@ -83,6 +99,8 @@ describe "Front" do
     dynamic_request_params = ::DynamicRequestParams.create(slug: "dynamic-request-params", uid: "dynamic_request_params")
     dynamic_render_params = ::DynamicRenderParams.create(slug: "dynamic-render-params", uid: "dynamic_render_params")
     commentable = ::CommentablePage.create(slug:"commentable", uid: "commentable")
+    take_it =  TakeItPage.create(slug: 'takeit', uid: 'takeit')
+    take_it_again =  TakeItPage.create(slug: 'again', uid: 'again')
     root.pages << about
     root.pages << feed
     root.pages << news
@@ -90,12 +108,17 @@ describe "Front" do
     root.pages << dynamic_render_params
     root.pages << static
     root.pages << commentable
+    root.pages << take_it
+    take_it.pages << take_it_again
     root.save
+    take_it.save
 
     let(:root_id) { root.id }
     let(:about_id) { about.id }
     let(:feed_id) { feed.id }
     let(:news_id) { news.id }
+    let(:take_it_id) { take_it.id }
+    let(:take_it_again_id) { take_it_again.id }
     let(:dynamic_request_params_id) { dynamic_request_params.id }
     let(:dynamic_render_params_id) { dynamic_render_params.id }
     let(:static_id) { static.id }
@@ -111,7 +134,7 @@ describe "Front" do
   end
 
   finish do
-    [:SitePage, :StaticPage, :DynamicRequestParams, :DynamicRenderParams, :CommentablePage, :FeedPage].each do |const|
+    [:SitePage, :StaticPage, :DynamicRequestParams, :DynamicRenderParams, :CommentablePage, :FeedPage, :TakeItPage, :PageController].each do |const|
       Object.send(:remove_const, const) rescue nil
     end
     if defined?(Content)
@@ -128,6 +151,8 @@ describe "Front" do
   let(:about) { Content[about_id] }
   let(:feed) { Content[feed_id] }
   let(:news) { Content[news_id] }
+  let(:take_it) { Content[take_it_id] }
+  let(:take_it_again) { Content[take_it_again_id] }
   let(:dynamic_request_params) { Content[dynamic_request_params_id] }
   let(:dynamic_render_params) { Content[dynamic_render_params_id] }
   let(:static) { Content[static_id] }
@@ -596,7 +621,7 @@ describe "Front" do
 
       after do
         Object.send(:remove_const, :SubPage) rescue nil
-        CommentablePage.instance_variable_set(:@request_blocks, {})
+        CommentablePage.instance_variable_set(:@controllers, nil)
         CommentablePage.send(:remove_const, :StatusController) rescue nil
         CommentablePage.send(:remove_const, :TestController) rescue nil
         CommentablePage.send(:remove_const, :Test2Controller) rescue nil
@@ -711,10 +736,8 @@ describe "Front" do
 
       describe "overriding base controller class" do
         before do
-          class ::PageController < S::Rack::PageController
-            get '/nothing' do
-              'Something'
-            end
+          ::PageController.get '/nothing' do
+            'Something'
           end
 
           CommentablePage.controller :drummer do
@@ -724,15 +747,90 @@ describe "Front" do
           end
         end
 
-        after do
-          Object.send(:remove_const, :PageController)
-        end
-
         it "affect all controller actions" do
           get "/commentable/@drummer/nothing"
           assert last_response.ok?, "Expected 200 got #{last_response.status}"
           last_response.body.must_equal "Something"
         end
+      end
+    end
+
+    describe 'wildcard paths' do
+      let(:page) { take_it }
+      let(:again) { take_it_again }
+
+      after do
+        root.class.instance_variable_set(:@controllers, nil)
+        TakeItPage.instance_variable_set(:@controllers, nil)
+      end
+
+      it 'renders a url that resolves to a page accepting the path' do
+        TakeItPage.controller do
+          get '*' do
+            render splat: params[:splat].first
+          end
+        end
+        [
+          ["/something", page],
+          ["/something/else", page],
+          ["/really/something/else/entirely", page],
+          ["/something/else/entirely", again]
+        ].each do |path, expected|
+          get "#{expected.path}#{path}"
+          assert last_response.ok?, "Expected 200 got #{last_response.status}"
+          last_response.body.must_equal "take it #{expected.id} #{path}"
+        end
+      end
+
+      it 'returns 404 if the requested path doesn’t match the controller’s route' do
+        TakeItPage.controller do
+          get '/womble/?:where?' do
+            render splat: params[:where]
+          end
+        end
+        get "#{page.path}/womble/around"
+        assert last_response.ok?, "Expected 200 got #{last_response.status}"
+        last_response.body.must_equal "take it #{page.id} around"
+
+        get "#{page.path}/womble"
+        assert last_response.ok?, "Expected 200 got #{last_response.status}"
+        last_response.body.must_equal "take it #{page.id} "
+
+        get "#{page.path}/wimble/around"
+        assert last_response.status == 404
+      end
+
+      it 'returns 404 if the controller is only configured to match the root' do
+        TakeItPage.controller do
+          get do
+            render splat: 'root'
+          end
+        end
+        get page.path
+        assert last_response.ok?, "Expected 200 got #{last_response.status}"
+        last_response.body.must_equal "take it #{page.id} root"
+
+        get "#{page.path}/womble"
+        assert last_response.status == 404, "Expected 404 but got #{last_response.status}"
+      end
+
+      it 'can fall back to controllers defined on the site homepage' do
+        root.class.controller do
+          get '/' do
+            "ow"
+          end
+          get '/slimy/:who' do
+            "<#{params[:who]}>"
+          end
+        end
+
+        get '/slimy/monster'
+        assert last_response.ok?, "Expected 200 got #{last_response.status}"
+        last_response.body.must_equal "<monster>"
+
+        get '/'
+        assert last_response.ok?, "Expected 200 got #{last_response.status}"
+        last_response.body.must_equal "ow"
       end
     end
 

@@ -12,6 +12,7 @@ module Spontaneous::Model::Page
       end
 
       def default_controller_base_class
+        return ::PageController if defined?(::PageController)
         Spontaneous::Rack::PageController
       end
 
@@ -20,7 +21,6 @@ module Spontaneous::Model::Page
       # namespace
       def controller_superclass(namespace, base_class)
         return base_class unless base_class.nil?
-        return ::PageController if defined?(::PageController)
         search = ancestors.select { |klass| klass.respond_to?(:controllers) }
         controller_superclass = [namespace, :__nil__].uniq.flat_map { |n|
           search.map { |type| type.controllers[n] }
@@ -69,7 +69,6 @@ module Spontaneous::Model::Page
     end
 
     def process_root_action(site, env, format)
-      env[S::Constants::PATH_INFO] = S::Constants::SLASH
       run_controller(site, :__nil__, env, format)
     end
 
