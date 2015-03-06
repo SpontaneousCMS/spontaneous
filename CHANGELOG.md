@@ -147,6 +147,10 @@ Is it wise to release a new version during a solar eclipse?
 - Video fields now have an `aspect_ratio` method
 - `spot site rerender` is an alias for `spot site render`
 
+#### New Features
+
+- Enabled previewing of private pages
+
 #### Fixes
 
 - Front server no longer needs restarting to pick up a new revision in
