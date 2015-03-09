@@ -53,6 +53,12 @@ module Spontaneous
         def export(user)
           {}
         end
+
+        # Allows for field type classes to map a human readable default value
+        # to the correct serialized value
+        def make_default_value(instance, value)
+          value
+        end
       end
 
       extend ClassMethods
