@@ -211,6 +211,12 @@ describe "File Fields" do
         @field.stubs(:storage_name).returns('[]')
         @field.url.must_match %r[^/0000#{@instance.id}/0001/vimlogo.pdf$]
       end
+
+      it "gives the right value for #blank?" do
+        @field.blank?.must_equal true
+        @field.value = path
+        @field.blank?.must_equal false
+      end
     end
   end
 end
