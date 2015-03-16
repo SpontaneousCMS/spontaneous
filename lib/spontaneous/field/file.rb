@@ -11,6 +11,8 @@ module Spontaneous::Field
       values[:path].blank?
     end
 
+    alias_method :empty?, :blank?
+
     # In the case of clearing the field we will have been given a pending_value of ""
     # we don't want that to run asynchronously
     def asynchronous?
