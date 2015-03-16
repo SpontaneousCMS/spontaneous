@@ -4,6 +4,7 @@ module Spontaneous::Rack
       helpers  Helpers
 
       set :views, Proc.new { Spontaneous.application_dir + '/views' }
+      set :show_exceptions, false
 
       def content_model
         site.model

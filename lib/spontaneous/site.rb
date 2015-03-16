@@ -174,6 +174,10 @@ module Spontaneous
       File.join(cache_root, *path)
     end
 
+    def development?
+      Spontaneous.development?
+    end
+
     def inspect
       %[#<Site @root="#@root" @schema=#{@schema.inspect} @paths=#{@paths.inspect} @environment=#{@environment.inspect} @mode=#{@mode.inspect}>]
     end

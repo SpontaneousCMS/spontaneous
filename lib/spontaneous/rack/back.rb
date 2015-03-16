@@ -49,6 +49,7 @@ module Spontaneous
 
       def self.editing_app(site)
         ::Rack::Builder.app do
+          use ::Rack::ShowExceptions if site.development?
           use Scope::Edit, site
           use Transaction, site
           use ApplicationAssets
@@ -78,6 +79,7 @@ module Spontaneous
 
       def self.preview_app(site)
         ::Rack::Builder.app do
+          use ::Rack::ShowExceptions if site.development?
           use ::Rack::Lint if Spontaneous.development?
           use Scope::Preview, site
           use Transaction, site
