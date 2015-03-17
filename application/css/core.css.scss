@@ -1203,7 +1203,7 @@
 				}
 				&:last-child  {
 					.entry-spacer {
-						display: none;
+						// display: none;
 					}
 					.content-type {
 						bottom: $content-type-offset;
