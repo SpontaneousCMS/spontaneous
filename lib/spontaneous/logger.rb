@@ -136,8 +136,8 @@ module Spontaneous
     # Setup a new logger with options
     #
     def self.setup(options = {})
-      config_level = (SPOT_LOG_LEVEL || Spontaneous.env || :test).to_sym # need this for SPOT_LOG_LEVEL
-      config = Config[config_level]
+      config_level = (SPOT_LOG_LEVEL || Spontaneous.env || :production).to_sym # need this for SPOT_LOG_LEVEL
+      config = Config[config_level] || Config[:production]                     # default to a production level
       stream = \
         if logfile = options[:logfile]
           FileUtils.mkdir_p(File.dirname(logfile)) unless File.directory?(File.dirname(logfile))
