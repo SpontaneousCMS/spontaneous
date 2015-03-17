@@ -75,6 +75,10 @@ module Spontaneous::Field
           hash[k] = 0 if v == false
         }
       end
+
+      def name
+        self.class.id
+      end
     end
 
     def self.providers
@@ -149,6 +153,10 @@ module Spontaneous::Field
     def ui_preview_value
       # render(:html, :width => 480, :height => 270)
       src
+    end
+
+    def aspect_ratio
+      values.fetch(:width, 1).to_f / values.fetch(:height, 1).to_f
     end
 
     self.register(:webvideo)
