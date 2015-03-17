@@ -2,6 +2,8 @@ module Spontaneous::Rack::Back
   class Preview < Base
     include Spontaneous::Rack::Public
 
+    set :show_exceptions, proc { Spontaneous.development? || Spontaneous.test? }
+
     # In preview mode we want to find pages even if they're
     # invisible.
     def with_scope(&block)
