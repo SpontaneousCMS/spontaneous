@@ -126,6 +126,10 @@ module Spontaneous
         render_site
       end
 
+      no_commands do
+        alias_method :rerender, :render
+      end
+
       desc "revision", "Shows the site status"
       def revision(*args)
         show_site_revision
