@@ -84,7 +84,12 @@ Spontaneous.Publishing = (function($, S) {
 			, publish_wrap = dom.div('#to-publish.change-list').css('opacity', 0)
 			, must_publish_all = outstanding.first_publish || outstanding.must_publish_all
 			, spinner = this.spinner
-			, append_to;
+			, spinnerWrap = this.spinnerWrap
+			, append_to
+			, stop_spinner = function() {
+				spinner.stop();
+				spinnerWrap.remove();
+			};
 			if (must_publish_all) {
 				w.addClass('first-publish');
 			}
@@ -92,6 +97,7 @@ Spontaneous.Publishing = (function($, S) {
 				var summary = dom.p('.publish-up-to-date').text('The site is up to date');
 				w.append(summary);
 				self.disable_button('Publish');
+				stop_spinner();
 			} else {
 				var publish_all = dom.a('.button').text('Publish All').click(function() {
 					self.set_publish_all(true);
@@ -120,8 +126,7 @@ Spontaneous.Publishing = (function($, S) {
 				if (!must_publish_all) {
 					publish_entries.append(dom.div('.instructions').text('Add pages to publish from the list on the left'));
 				}
-				spinner.stop();
-				this.spinnerWrap.remove();
+				stop_spinner();
 				w.empty();
 				w.append(changed_wrap, publish_wrap);
 				changed_wrap.add(publish_wrap).velocity({opacity: 1});

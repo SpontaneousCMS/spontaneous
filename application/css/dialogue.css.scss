@@ -84,7 +84,7 @@ $dialogue-title-height: 32px;
 						float: right;
 					}
 					.disabled, .disabled:hover {
-						background-color: #333333 !important;
+						@include button-color(#333, #333);
 						color: #6b6b6b !important;
 					}
 				}
@@ -142,6 +142,12 @@ $dialogue-title-height: 32px;
 #dialogue-wrap #dialogue-outer.publishing {
 	left: 5%;
 	right: 5%;
+	.dialogue-actions {
+		.button.rerender {
+			position: absolute;
+			left: 0;
+		}
+	}
 }
 
 #publishing-dialogue {
@@ -251,25 +257,7 @@ $dialogue-title-height: 32px;
 		font-size: 24px;
 		padding-top: 24px;
 		color: #fff;
-		// margin: $container-padding / 2;
-		// margin-top: 0;
-		// .publish-all {
-			// 	@include button(#666);
-			// 	@include interface;
-			// 	width: 128px;
-			// 	float: right;
-			// 	text-align: left;
-			// 	// background-color: #666666;
-			// 	input {
-				// 		margin: 1px 8px 0 8px;
-				// 		padding: 0;
-				// 		vertical-align: top;
-				// 		position: relative;
-			// 	}
-		// }
-		// .publish-all.checked {
-			// 	background-color: $action;
-		// }
+		max-height: 55px;
 	}
 	.change-set {
 		cursor: pointer;
