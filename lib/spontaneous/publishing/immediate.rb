@@ -28,10 +28,5 @@ module Spontaneous::Publishing
     def rerender
       Rerender.new(@site, @revision, @steps).rerender
     end
-
-    def rerender_revision
-      logger.info {  "Re-rendering revision #{@revision}"}
-      render_revision
-    end
   end
 end

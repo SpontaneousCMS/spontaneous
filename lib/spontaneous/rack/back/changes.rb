@@ -15,5 +15,10 @@ module Spontaneous::Rack::Back
       site.publish_pages(pages)
       json({})
     end
+
+    post '/rerender' do
+      site.rerender
+      json({})
+    end
   end
 end

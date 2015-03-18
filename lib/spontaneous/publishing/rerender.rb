@@ -8,10 +8,7 @@ module Spontaneous::Publishing
       model.scope(revision, true) do
         pipeline.run(site, revision, [], progress)
       end
-    end
-
-    def progress
-      @progress ||= Progress::Stdout.new
+      progress.done
     end
   end
 end

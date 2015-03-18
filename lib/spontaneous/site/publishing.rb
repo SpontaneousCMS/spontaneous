@@ -43,7 +43,7 @@ class Spontaneous::Site
     end
 
     def rerender_steps
-      Spontaneous::Publishing::Steps.rerender
+      Spontaneous::Publishing::Steps.rerender(publish_steps)
     end
 
     def publishing_method

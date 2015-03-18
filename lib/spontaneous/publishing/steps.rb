@@ -22,9 +22,11 @@ module Spontaneous::Publishing
       end
     end
 
-    def self.rerender
-      new do
-        run :render_revision
+    def self.rerender(publishing_steps)
+      new([], publishing_steps.progress) do
+        RERENDER_STEPS.each do |step|
+          run step
+        end
       end
     end
 
@@ -138,6 +140,13 @@ module Spontaneous::Publishing
       :activate_revision,
       :write_revision_file,
       :archive_old_revisions
+    ].freeze
+
+    RERENDER_STEPS = [
+      :render_revision,
+      :copy_assets,
+      :copy_static_files,
+      :generate_rackup_file
     ].freeze
 
     CORE_PROGRESS = [:browser, :stdout].freeze

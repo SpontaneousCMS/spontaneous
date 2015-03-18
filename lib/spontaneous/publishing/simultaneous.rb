@@ -5,24 +5,26 @@ module Spontaneous
   module Publishing
     class Simultaneous
 
-      def self.task_name
-        # TODO: add site name to this to make it unique on a server
-        :publish
+      def self.publish_task
+        [:publish, "site publish"]
       end
 
-      def self.register_task
-        task = "site publish"
+      def self.rerender_task
+        [:rerender, "site render"]
+      end
+
+      def self.register_tasks
         niceness = Spontaneous::Site.config.publish_niceness || 15
-        logfile =  "log/publish.log"
         task_options = {
-          :niceness => niceness,
-          :logfile  => logfile
+          niceness: niceness,
+          logfile: "log/publish.log"
         }
-        task_params = {}
-        Spontaneous::Simultaneous.register(task_name, task, task_options, task_params)
+        [publish_task, rerender_task].each do |task_name, task_cmd|
+          Spontaneous::Simultaneous.register(task_name, task_cmd, task_options, task_params = {})
+        end
       end
 
-      register_task
+      register_tasks
 
       attr_reader :revision
 
@@ -30,16 +32,16 @@ module Spontaneous
         @revision, @content_model = revision, content_model
       end
 
-      def task_name
-        self.class.task_name
-      end
-
       def publish_pages(page_list)
-        Spontaneous::Simultaneous.fire(task_name, {"pages" => page_list})
+        Spontaneous::Simultaneous.fire(:publish, {"pages" => page_list})
       end
 
       def publish_all
-        Spontaneous::Simultaneous.fire(task_name)
+        Spontaneous::Simultaneous.fire(:publish)
+      end
+
+      def rerender
+        Spontaneous::Simultaneous.fire(:rerender)
       end
     end # Simultaneous
   end # Publishing

@@ -1,7 +1,7 @@
 // console.log('Loading Publishing...')
 
 Spontaneous.Publishing = (function($, S) {
-	var dom = S.Dom, Dialogue = Spontaneous.Dialogue;
+	var dom = S.Dom, Dialogue = Spontaneous.Dialogue, User = S.User;
 
 	var PublishingDialogue = new JS.Class(Dialogue, {
 		initialize: function(content) {
@@ -50,6 +50,9 @@ Spontaneous.Publishing = (function($, S) {
 		},
 		buttons: function() {
 			btns = {};
+			if (User.is_developer()) {
+				btns['Rerender'] = this.rerender.bind(this);
+			}
 			btns['Publish'] = this.publish.bind(this);
 			return btns;
 		},
@@ -64,6 +67,9 @@ Spontaneous.Publishing = (function($, S) {
 			}
 		},
 
+		rerender: function() {
+			Spontaneous.Ajax.post('/changes/rerender', {}, this.publish_requested.bind(this));
+		},
 
 		publish_requested: function() {
 			Spontaneous.TopBar.publishing_started();
