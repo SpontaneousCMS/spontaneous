@@ -130,8 +130,33 @@ describe "Image Fields" do
 
       describe "in templates" do
 
+        after do
+          Spontaneous::Field::Image.default_attributes = {}
+        end
+
         it "render an <img/> tag in HTML format" do
-          assert_has_elements @image.to_html.split(' '), %(<img src="#{@image.src}" width="400" height="533" alt="" />).split(" ")
+          assert_has_elements @image.to_html.split(' '), %(<img src="#{@image.src}" alt="" />).split(" ")
+        end
+
+        it 'will fill in the image’s size if told to do so' do
+          expected = %(<img src="#{@image.src}" width="400" height="533" alt="" />).split(" ")
+          assert_has_elements @image.to_html(size: true).split(' '), expected
+          assert_has_elements @image.to_html(size: :auto).split(' '), expected
+          assert_has_elements @image.to_html(size: 'auto').split(' '), expected
+        end
+
+        it 'will fill in the image’s width with natural value if given a size of auto' do
+          expected = %(<img src="#{@image.src}" width="400" alt="" />).split(" ")
+          assert_has_elements @image.to_html(width: :auto).split(' '), expected
+          assert_has_elements @image.to_html(width: true).split(' '), expected
+          assert_has_elements @image.to_html(width: 'auto').split(' '), expected
+        end
+
+        it 'will fill in the image’s height with natural value if given a size of auto' do
+          expected = %(<img src="#{@image.src}" height="533" alt="" />).split(" ")
+          assert_has_elements @image.to_html(height: true).split(' '), expected
+          assert_has_elements @image.to_html(height: :auto).split(' '), expected
+          assert_has_elements @image.to_html(height: 'auto').split(' '), expected
         end
 
         it "use passed hash to overwrite tag attributes" do
@@ -141,21 +166,21 @@ describe "Image Fields" do
             :rel => "lightbox",
             :random => "present"
           }
-          assert_has_elements @image.to_html(attr).split(" "), %(<img src="#{@image.src}" width="400" height="533" alt="Magic" class="magic" rel="lightbox" random="present" />).split(" ")
+          assert_has_elements @image.to_html(attr).split(" "), %(<img src="#{@image.src}" alt="Magic" class="magic" rel="lightbox" random="present" />).split(" ")
         end
 
         it "be intelligent about setting width & height" do
-          @image.to_html({ :width => 100 }).split(" ").must_have_elements %(<img src="#{@image.src}" width="100" alt="" />).split(" ")
-          assert_has_elements @image.to_html({ :height => 100 }).split(" "), %(<img src="#{@image.src}" height="100" alt="" />).split(" ")
-          assert_has_elements @image.to_html({ :width => 100, :height => 100 }).split(" "), %(<img src="#{@image.src}" width="100" height="100" alt="" />).split(" ")
+          @image.to_html({ width: 100 }).split(" ").must_have_elements %(<img src="#{@image.src}" width="100" alt="" />).split(" ")
+          assert_has_elements @image.to_html({ height: 100 }).split(" "), %(<img src="#{@image.src}" height="100" alt="" />).split(" ")
+          assert_has_elements @image.to_html({ width: 100, height: 100 }).split(" "), %(<img src="#{@image.src}" width="100" height="100" alt="" />).split(" ")
         end
 
-        it "turn off setting with & height if either is passed as false" do
+        it "turn off setting width & height if either is passed as false" do
           assert_has_elements @image.to_html({ :width => false }).split(" "), %(<img src="#{@image.src}" alt="" />).split(" ")
         end
 
         it "escape values in params" do
-          assert_has_elements @image.to_html({ :alt => "<danger\">" }).split(" "), %(<img src="#{@image.src}" width="400" height="533" alt="&lt;danger&quot;&gt;" />).split(" ")
+          assert_has_elements @image.to_html({ :alt => "<danger\">" }).split(" "), %(<img src="#{@image.src}" alt="&lt;danger&quot;&gt;" />).split(" ")
         end
 
         it "not include size parameters unless known" do
@@ -165,7 +190,22 @@ describe "Image Fields" do
         end
 
         it "output image tags for its sizes too" do
-          assert_has_elements @image.thumbnail.to_html(:alt => "Thumb").split(' '), %(<img src="#{@image.thumbnail.src}" width="38" height="50" alt="Thumb" />).split(" ")
+          assert_has_elements @image.thumbnail.to_html(alt: "Thumb", size: true).split(' '), %(<img src="#{@image.thumbnail.src}" width="38" height="50" alt="Thumb" />).split(" ")
+        end
+
+        it 'allows for setting site-wide options' do
+          Spontaneous::Field::Image.default_attributes = { width: :auto, alt: 'Banana'}
+          assert_has_elements @image.to_html().split(' '), %(<img src="#{@image.src}" width="400" alt="Banana" />).split(" ")
+          assert_has_elements @image.to_html(width: false, alt: 'Other').split(' '), %(<img src="#{@image.src}" alt="Other" />).split(" ")
+        end
+
+        it 'allows for setting values with a proc' do
+          Spontaneous::Field::Image.default_attributes = { something: proc { |field| field.name }}
+          assert_has_elements @image.to_html().split(' '), %(<img src="#{@image.src}" alt="" something="photo" />).split(" ")
+        end
+
+        it 'allows for setting data-* values with a hash' do
+          assert_has_elements @image.to_html(data: {name: proc { |field| field.name }, id: proc { |field| field.owner.id }}).split(' '), %(<img src="#{@image.src}" alt="" data-name="photo" data-id="#{@content_id}" />).split(" ")
         end
       end
       describe "defined by classes" do

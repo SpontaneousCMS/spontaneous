@@ -46,6 +46,14 @@ module Spontaneous::Field
       [ {}, proc { width 300 } ]
     end
 
+    def self.default_attributes
+      @default_attributes ||= {}
+    end
+
+    def self.default_attributes=(default_attributes = {})
+      @default_attributes = default_attributes
+    end
+
     def image?
       true
     end
