@@ -180,7 +180,7 @@ module Spontaneous::Model
 
     def inspect
       values = inspection_values.map { |(name, value)| "#{name}=#{value.inspect}" }.join(" ")
-      %(#<#{self.class.name} #{values}>)
+      %(#<#{self.class.name}:0x#{self.object_id.to_s(16)} #{values}>)
     end
 
     def inspection_values

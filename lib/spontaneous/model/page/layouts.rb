@@ -25,7 +25,7 @@ module Spontaneous::Model::Page
       alias_method :layouts, :layout_prototypes
 
       def resolve_layout(layout_sid)
-        if layout_sid.nil? #layout_name.blank?
+        if layout_sid.blank?
           default_layout
         else
           find_layout(layout_sid)
@@ -55,15 +55,15 @@ module Spontaneous::Model::Page
     # InstanceMethods
 
     def layout
-      resolve_layout(self.style_sid)
+      resolve_layout(layout_sid)
     end
 
-    def resolve_layout(style_sid)
-      self.class.resolve_layout(style_sid)
+    def resolve_layout(layout_sid)
+      self.class.resolve_layout(layout_sid)
     end
 
     def layout=(layout)
-      self.style_sid = layout_to_schema_id(layout)
+      self.layout_sid = layout_to_schema_id(layout)
     end
 
     def layout_to_schema_id(layout)

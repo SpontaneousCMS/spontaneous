@@ -327,12 +327,12 @@ describe "Boxes" do
       child1.save
       @parent = Content[@parent.id]
       child1.reload; child2.reload; child3.reload
-      @parent.images.contents.must_equal [child1]
-      @parent.images.contents.must_equal [child1]
-      @parent.words.contents.must_equal [child2]
-      @parent.words.contents.must_equal [child2]
+      @parent.images.contents.to_a.must_equal [child1]
+      @parent.images.contents.to_a.must_equal [child1]
+      @parent.words.contents.to_a.must_equal [child2]
+      @parent.words.contents.to_a.must_equal [child2]
       @parent.contents.to_a.must_equal [child1, child2]
-      child1.images.contents.must_equal [child3]
+      child1.images.contents.to_a.must_equal [child3]
       child1.contents.to_a.must_equal [child3]
 
       @parent.images.contents.first.box.must_equal @parent.images
@@ -391,6 +391,60 @@ describe "Boxes" do
       instance.reload.images.length.must_equal 0
     end
 
+    it 'should be movable down' do
+      instance = BlankContent.create
+      box = instance.images
+      entries = 3.times.map { |n| box << StyledContent.new(:label => n)}
+      original_ids = entries.map(&:id)
+      instance.save
+      entries.first.set_position(2)
+      instance.save.reload
+      instance.images.ids.must_equal [original_ids[1], original_ids[2], original_ids[0]]
+      instance.images.map(&:box_position).must_equal [0, 1, 2]
+    end
+
+    it 'should be movable up' do
+      instance = BlankContent.create
+      box = instance.images
+      entries = 3.times.map { |n| box << StyledContent.new(:label => n)}
+      original_ids = entries.map(&:id)
+      instance.save
+      entries.last.set_position(0)
+      instance.save.reload
+      instance.images.ids.must_equal [original_ids[2], original_ids[0], original_ids[1]]
+      instance.images.map(&:box_position).must_equal [0, 1, 2]
+    end
+
+    it 'should be sample-able' do
+      instance = BlankContent.create
+      box = instance.images
+      entries = 5.times.map { |n| box << StyledContent.new(:label => n)}
+      sample = box.sample(3)
+      sample.map(&:id).wont_equal entries.map(&:id)
+      sample = box.contents.sample(3)
+      sample.map(&:id).wont_equal entries.map(&:id)
+    end
+
+    it 'should return the single entry if sampling a box of length 1' do
+      instance = BlankContent.create
+      box = instance.images
+      entry = instance.images << StyledContent.new(:label => 'only')
+      entry.save
+      instance.save
+      instance.images.sample!.must_equal entry
+    end
+
+    it 'should provide a sample! method that doesn’t load the box contents' do
+      instance = BlankContent.create
+      box = instance.images
+      entries = 10.times.map { |n| box << StyledContent.new(:label => n)}
+      box.contents.expects(:load_contents).never
+      log_sql do
+      sample1 = [box.sample!, box.sample!, box.sample!, box.sample!]
+      sample2 = [box.sample!, box.sample!, box.sample!, box.sample!]
+      sample1.wont_equal sample2
+    end
+    end
   end
 
   describe "Allowed types" do

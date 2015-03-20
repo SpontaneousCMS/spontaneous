@@ -12,6 +12,12 @@ module Spontaneous::Collections
       initialize_from_prototypes
     end
 
+    def reload
+      values.each do |box|
+        box.reload_box
+      end
+    end
+
     def initialize_from_prototypes
       owner.class.boxes.each do |box_prototype|
         box = box_prototype.get_instance(owner)
@@ -30,11 +36,11 @@ module Spontaneous::Collections
     end
 
     def export
-      self.map { |item| item.export }
+      map { |item| item.export }
     end
 
     def group(group_name)
-      self.select { |box| box._prototype.group == group_name }
+      select { |box| box._prototype.group == group_name }
     end
 
     # A call to ${ content } within a layout template will call
@@ -50,6 +56,10 @@ module Spontaneous::Collections
 
     alias_method :render_inline, :render
     alias_method :render_inline_using, :render_using
+
+    def destroy(origin)
+      each { |box| box.destroy(origin) }
+    end
 
     protected
 

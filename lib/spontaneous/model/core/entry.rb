@@ -12,6 +12,12 @@ module Spontaneous::Model::Core
       self
     end
 
+    # Used by boxes to place this item in the content hierarchy
+    def to_entry(container, position)
+      @box, @position = container, position
+      self
+    end
+
     def box_sid
       @box_sid ||= mapper.schema_uid(self[:box_sid])
     end
@@ -21,7 +27,7 @@ module Spontaneous::Model::Core
     end
 
     def box
-      owner.boxes.sid(box_sid) if owner
+      @box ||= owner.try { |o| o.boxes.sid(box_sid) }
     end
 
     def container
@@ -49,21 +55,15 @@ module Spontaneous::Model::Core
     alias_method :prev, :previous
 
     def set_position(new_position)
-      if box
-        box.set_position(self, new_position)
-      else
-        owner.pieces.set_position(self, new_position)
-      end
+      box.set_position(self, new_position)
+      @position = new_position
+      save
     end
 
     def position
-      return box.index(self) if box
+      return @position unless @position.nil?
       return 0 if owner.nil? # special case for root
-      owner.pieces.index(self)
-    end
-
-    def serialize_db
-      [self.id]
+      @position ||= container.index(self)
     end
   end # Entry
 end # Spontaneous::Plugins

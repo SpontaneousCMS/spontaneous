@@ -74,7 +74,6 @@ module Spontaneous::Model::Core
       # Only recalculate the content hash if we're in the editable dataset, otherwise
       # the published data can end up with a different content hash even after being published
       recalculate_content_hash if modification_tracking_enabled?
-      enable_modification_tracking
       super
       true
     end
@@ -84,11 +83,11 @@ module Spontaneous::Model::Core
       set(attrs) if changed
     end
 
-    # Update the instances content hash by writing direct to the db & without triggering any futher cascading changes
-    # Without the #reload call existing cached versions of the
-    # content tree may be used and changes will not propagate
+    # Update the instances content hash by writing direct to the db & without
+    # triggering any futher cascading changes. Without the #reload call
+    # existing cached versions of the content tree may be used and changes
+    # will not propagate
     def recalculate_content_hash!
-      reload unless modified?
       attrs, changed = content_hash_attributes
       model.where(id: id).update(attrs) if changed
     end
@@ -100,20 +99,7 @@ module Spontaneous::Model::Core
     end
 
     def modification_tracking_enabled?
-      mapper.editable? && !@modification_tracking_disabled
-    end
-
-    def disable_modification_tracking!
-      @modification_tracking_disabled = true
-    end
-
-    def enable_modification_tracking
-      @modification_tracking_disabled = false
-    end
-
-    def insert_page(index, child_page, box)
-      page.disable_modification_tracking! unless page.nil?
-      super
+      mapper.editable? #&& !@modification_tracking_disabled
     end
 
     module PageMethods
@@ -162,6 +148,7 @@ module Spontaneous::Model::Core
       # of pages inside boxes only depend on the id (so the box hash does change
       # when the page is added, moved or deleted)
       def content_hash
+        return nil if target.never_published?
         Spontaneous::Model::Core::ContentHash.calculate(id)
       end
       alias_method :calculate_content_hash,  :content_hash

@@ -119,8 +119,15 @@ module Spontaneous::Model
       @entry ||= resolve_entry
     end
 
+    # Used by boxes to place this item in the content hierarchy
+    def to_entry(container, position)
+      super
+      Spontaneous::PagePiece.new(container.try(:owner), self, position)
+    end
+
     def resolve_entry
-      owner.all_contents.wrap_page(self)
+      return container.wrap_page(self) if container
+      to_entry(nil, 0)
     end
 
     def page=(page)
@@ -151,10 +158,6 @@ module Spontaneous::Model
       hash.delete(:label)
       hash.delete(:name)
       hash
-    end
-
-    def serialize_db
-      [target.id, @style_id]
     end
 
     def inspecttion_values

@@ -21,7 +21,7 @@ module Spontaneous
 
   def self.Model!(table_name, database, schema)
     model = Spontaneous::DataMapper::Model(table_name, database, schema) do
-      serialize_columns :field_store, :entry_store, :box_store, :serialized_modifications
+      serialize_columns :field_store, :box_store, :serialized_modifications
       include_all_types
     end
     model.class_eval do

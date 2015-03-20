@@ -289,6 +289,7 @@ describe "Back" do
         box = job1.images
         field = box.fields.title
         field.version = 3
+        field.modified!
         job1.save.reload
         box = job1.images
         field = box.fields.title
@@ -300,7 +301,7 @@ describe "Back" do
         last_response.content_type.must_equal "application/json;charset=utf-8"
         result = Spontaneous.deserialise_http(last_response.body)
         result.must_equal({
-          sid.to_sym => [ field.version, field.value ]
+          sid.to_sym => [ 3, field.value ]
         })
       end
 

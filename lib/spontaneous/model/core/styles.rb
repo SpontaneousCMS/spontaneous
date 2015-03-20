@@ -64,11 +64,7 @@ module Spontaneous::Model::Core
     # InstanceMethods
 
     def style=(style)
-      self[:style_sid] = style_to_schema_id(style).to_s
-    end
-
-    def style_sid
-      self[:style_sid]
+      self.style_sid = style_to_schema_id(style).to_s
     end
 
     # converts a symbol or string into a Schema::UID instance
@@ -93,7 +89,7 @@ module Spontaneous::Model::Core
     end
 
     def style
-      resolve_style(self.style_sid)
+      resolve_style(style_sid)
     end
 
     def default_style

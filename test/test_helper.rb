@@ -148,7 +148,7 @@ class MiniTest::Spec
   end
 
   def assert_content_equal(result, compare, *ignore_columns)
-    serialised_columns = [:field_store, :entry_store]
+    serialised_columns = [:field_store]
     columns = Content.columns - serialised_columns - ignore_columns
     columns.each do |col|
       assert_equal(result[col], compare[col], "Column '#{col}' should be equal")
@@ -159,7 +159,7 @@ class MiniTest::Spec
   end
 
   def assert_content_unequal(result, compare, *ignore_columns)
-    serialised_columns = [:field_store, :entry_store]
+    serialised_columns = [:field_store]
     columns = Content.columns - serialised_columns - ignore_columns
     columns.each do |col|
       return true unless result[col] == compare[col]
@@ -171,12 +171,16 @@ class MiniTest::Spec
   end
 
 
-  def log_sql(&block)
+  def self.log_sql(&block)
     logger = ::Content.mapper.logger
     ::Content.mapper.logger = ::Logger.new($stdout)
     yield
   ensure
     ::Content.mapper.logger = logger
+  end
+
+  def log_sql(&block)
+    self.class.log_sql(&block)
   end
 
   def setup_site(root = nil, define_models = true)

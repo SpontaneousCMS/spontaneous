@@ -82,7 +82,7 @@ module Spontaneous::Schema
     end
 
     def get_id(reference)
-      self.find { |uid| uid.reference == reference }
+      find { |uid| uid.reference == reference }
     end
 
     def each

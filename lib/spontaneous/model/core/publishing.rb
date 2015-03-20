@@ -124,7 +124,7 @@ module Spontaneous::Model::Core
 
     def modified!(caller_is_page)
       unless caller_is_page
-        self.model.where(:id => self.id).update(:modified_at => Sequel.datetime_class.now)
+        model.where(id: self.id).update(modified_at: Sequel.datetime_class.now)
       end
     end
 
@@ -151,45 +151,45 @@ module Spontaneous::Model::Core
       # 'publish' is a lock to make sure the duplication doesn't cross
       # page boundaries unless that's necessary (such as in the case
       # of a page addition)
-      publish = origin || !self.page?
+      publish = origin || !page?
       first_publish = false
 
       with_revision(revision) do
-        published_copy = content_model.get(self.id)
+        published_copy = content_model.get(id)
         if published_copy
-          if publish and published_copy.entry_store
-            pieces_to_delete = published_copy.entry_store - self.entry_store
-            pieces_to_delete.each do |entry|
-              if c = content_model.get(entry[0])
+          if publish
+            pieces_to_delete = published_copy.content_ids - with_editable { content_ids }
+            pieces_to_delete.each do |content_id|
+              if c = content_model.get(content_id)
                 c.destroy(false) rescue ::Sequel::NoExistingObject
               end
             end
           end
         else # missing content (so force a publish)
-          content_model.insert({:id => self.id, :type_sid => attributes[:type_sid]})
+          content_model.insert({id: id, type_sid: attributes[:type_sid]})
           publish = true
           first_publish = true
         end
 
         if publish
-          self.before_publish(revision)
+          before_publish(revision)
           with_editable do
-            self.pieces.each do |entry|
+            pieces.each do |entry|
               entry.sync_to_revision(revision, false)
             end
           end
 
-          if self.page?
+          if page?
             sync_children_to_revision(revision)
           end
 
-          content_model.where(:id => self.id).update(attributes)
+          content_model.where(id: id).update(attributes)
 
           published_values = {}
           # ancestors can have un-published changes to their paths so we can't just directly publish the current path.
           # Instead we re-calculate our path using the published version of the ancestor's path & our (potentially) updated slug.
-          if self.page?
-            published = self.class.get(self.id)
+          if page?
+            published = self.class.get(id)
             published_values[:path] = published.calculate_path_with_slug(attributes[:slug])
           end
 
@@ -200,23 +200,19 @@ module Spontaneous::Model::Core
           # if hidden_origin is empty (which means we have a separately calculated visibility) we want
           # to take visibility from our own value.
 
-          published_values[:hidden] = self.recalculated_hidden unless self.hidden_origin.blank?
+          published_values[:hidden] = recalculated_hidden unless hidden_origin.blank?
 
           unless published_values.empty?
-            content_model.where(:id => self.id).update(published_values)
+            content_model.where(id: id).update(published_values)
           end
 
-          # Pages that haven't been published before can be published independently of their parents.
-          # In that case we need to insert an entry for them. We can't guarantee that the published
-          # parent has the same entries
-          insert_entry_for_new_page(revision) if first_publish && page?
-          self.after_publish(revision)
+          after_publish(revision)
         end
       end
     end
 
     def sync_children_to_revision(revision)
-      published_children = with_revision(revision) { content_model.filter(:parent_id => self.id) }
+      published_children = with_revision(revision) { content_model.filter(parent_id: self.id) }
       published_children.each do |child_page|
         deleted = with_editable { content_model.select(:id).get(child_page.id).nil? }
         if deleted
@@ -230,26 +226,26 @@ module Spontaneous::Model::Core
     # Finds an entry in the parent page and duplicates it to the parent
     # of the newly published page. Positions are not exact as other child pages might not have
     # been published.
-    def insert_entry_for_new_page(revision)
-      return if parent_id.nil?
-      this = self.id
-      detect_entry = proc { |e| e[0] == this }
+    # def insert_entry_for_new_page(revision)
+    #   return if parent_id.nil?
+    #   _id = self.id
+    #   detect_entry = proc { |content_id| content_id == _id }
 
-      parent_entry_store = with_editable {
-        content_model[self.parent_id].entry_store.dup
-      }
-      entry = parent_entry_store.find(&detect_entry)
-      index = parent_entry_store.index(&detect_entry)
-      published_parent = content_model.get(parent_id)
+    #   parent_content_ids = with_editable {
+    #     content_model[self.parent_id].content_ids
+    #   }
+    #   entry = parent_content_ids.find(&detect_entry)
+    #   index = parent_content_ids.index(&detect_entry)
+    #   published_parent = content_model.get(parent_id)
 
-      store = published_parent.entry_store || []
+    #   # store = published_parent.entry_store || []
 
-      unless store.find(&detect_entry)
-        store.insert(index, entry).compact!
-        published_parent.entry_store = store
-      end
+    #   # unless store.find(&detect_entry)
+    #     # store.insert(index, entry).compact!
+    #     # published_parent.entry_store = store
+    #   # end
 
-      published_parent.save
-    end
+    #   published_parent.save
+    # end
   end
 end

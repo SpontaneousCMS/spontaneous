@@ -93,6 +93,14 @@ module Spontaneous
         self
       end
 
+      def map(column = nil, &block)
+        if column
+          @dataset.map(column)
+        else
+          super(&block)
+        end
+      end
+
       def all
         load_instances @dataset.all
       end
@@ -130,6 +138,11 @@ module Spontaneous
 
       def limit(l, o = (no_offset = true; nil))
         @dataset.limit!(l, o)
+        self
+      end
+
+      def offset(o)
+        @dataset.offset!(o)
         self
       end
 
@@ -185,6 +198,10 @@ module Spontaneous
 
       def unfiltered
         @dataset.unfiltered
+      end
+
+      def ds
+        @dataset
       end
 
       alias_method :sql, :to_sql

@@ -248,7 +248,7 @@ describe "Change" do
     page1.reload
 
     later = @now + 10
-    Timecop.travel(later)
+    Timecop.freeze(later)
     old_slug = page1.slug
     page1.slug = "changed"
     page1.save.reload

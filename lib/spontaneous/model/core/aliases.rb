@@ -28,7 +28,7 @@ module Spontaneous::Model::Core
         @alias_classes.each do |source|
           case source
           when Proc
-            targets.concat(source[*proc_args])
+            targets.concat(Array(source[*proc_args]))
           else
             type = source.to_s.constantize
             classes.push(type)
@@ -199,10 +199,10 @@ module Spontaneous::Model::Core
       def layout
         # if this alias class has no layouts defined, then just use the one set on the target
         if self.class.layouts.empty?
-          target.resolve_layout(self.style_sid)
+          target.resolve_layout(layout_sid)
         else
           # but if it does have layouts defined, use them
-          self.resolve_layout(self.style_sid) or target.resolve_layout(self.style_sid)
+          resolve_layout(layout_sid) or target.resolve_layout(layout_sid)
         end
       end
 

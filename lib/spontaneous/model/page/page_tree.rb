@@ -56,9 +56,9 @@ module Spontaneous::Model::Page
       filter_proc = filter_list = nil
 
       if (filter_list = opts.delete(:include))
-        filter_proc = proc { |p| filter_list.include?(p.class) }
+        filter_proc = proc { |p| filter_list.include?(p.content_class) }
       elsif (filter_list = opts.delete(:exclude))
-        filter_proc = proc { |p| !filter_list.include?(p.class) }
+        filter_proc = proc { |p| !filter_list.include?(p.content_class) }
       end
 
       if filter_list && filter_proc
@@ -69,14 +69,7 @@ module Spontaneous::Model::Page
     end
 
     def ordered_pages(boxes)
-      unordered_pages = self.children
-      ordered_pages   = []
-      boxes.each do |box|
-        box_id = box.schema_id.to_s
-        in_box, unordered_pages = unordered_pages.partition { |p| p.box_sid == box_id }
-        ordered_pages.concat in_box.sort { |a, b| a.position <=> b.position }
-      end
-      ordered_pages
+      boxes.flat_map { |box| box.select(&:page?) }
     end
 
     def root_at_depth(depth)

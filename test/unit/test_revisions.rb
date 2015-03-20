@@ -384,7 +384,7 @@ describe "Revisions" do
           published1 = Content[editable1.id]
           published2 = Content[new_page.id]
           assert_content_equal(published2, new_page, :revision)
-          editable1.entry_store.must_equal published1.entry_store
+          editable1.boxes.flat_map(&:ids).must_equal published1.boxes.flat_map(&:ids)
         end
       end
 
@@ -407,7 +407,7 @@ describe "Revisions" do
           published3 = Content[new_page2.id]
           published2.must_be_nil
           assert_content_equal(published3, new_page2, :revision)
-          editable1.entry_store.reject { |e| e[0] == new_page1.id }.must_equal published1.entry_store
+          editable1.boxes.flat_map(&:ids).reject{ |e| e == new_page1.id }.must_equal published1.boxes.flat_map(&:ids)
         end
       end
 

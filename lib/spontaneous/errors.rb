@@ -73,4 +73,10 @@ module Spontaneous
     def_delegators :@modification, :added_styles,  :removed_styles
     def_delegators :@modification, :added_layouts, :removed_layouts
   end
+
+  class ReadOnlyScopeModificationError < Error
+    def initialize(box)
+      super("Attempt to modify the contents of box #{box.inspect} within a read-only scope")
+    end
+  end
 end

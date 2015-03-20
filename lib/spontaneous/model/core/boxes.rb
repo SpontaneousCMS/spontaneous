@@ -70,7 +70,7 @@ module Spontaneous::Model::Core
     # InstanceMethods
 
     def reload
-      @boxes = nil
+      boxes.reload
       super
     end
 

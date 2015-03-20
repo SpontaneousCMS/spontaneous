@@ -8,11 +8,10 @@ module Spontaneous
     include Spontaneous::Model::Core::ContentHash::PagePieceMethods
 
     attr_accessor :owner
-    attr_reader   :style_id
 
-    def initialize(owner, target, style_id)
+    def initialize(owner, target, position = nil)
       super(target)
-      @owner, @style_id = owner, style_id
+      @owner, @position = owner, position
     end
 
     alias_method :target, :__getobj__
@@ -24,7 +23,7 @@ module Spontaneous
     #
     # Returns: the owning Page object
     def page
-      owner.page
+      owner.try(:page)
     end
 
     # This is used to unwrap pages from their entries within boxes
@@ -46,8 +45,12 @@ module Spontaneous
       owner.content_depth + 1
     end
 
-    def style(format = :html)
-      target.class.resolve_style(style_name, format)
+    def style
+     target.style
+    end
+
+    def style=(style)
+      target.style=(style)
     end
 
     def entry
@@ -56,36 +59,13 @@ module Spontaneous
 
     def export(user = nil)
       target.shallow_export(user).merge(export_styles).merge({
-        :depth => self.depth
+        depth: self.depth
       })
     end
 
     def export_styles
-      { :style => style_id.to_s,
-        :styles => owner.available_styles(target).map { |s| s.schema_id.to_s } }
-    end
-
-    def serialize_db
-      [target.id, @style_id]
-    end
-
-    def style=(style)
-      @style_id = style_to_schema_id(style)
-      # because it's not obvious that a change to an entry
-      # will affect the fields of the owner piece
-      # make sure that the owner is saved using an instance hook
-      target.after_save_hook do
-        owner.save
-      end
-      owner.entry_modified!(self)
-    end
-
-    def style
-      target.resolve_style(style_id)
-    end
-
-    def template(format = :html, renderer = Spontaneous::Output.default_renderer)
-      style.template(format, renderer)
+      { style: target.style_sid.to_s,
+        styles: owner.available_styles(target).map { |s| s.schema_id.to_s } }
     end
 
     def inspect
@@ -94,6 +74,10 @@ module Spontaneous
 
     def renderable
       self
+    end
+
+    def template(format = :html, renderer = Spontaneous::Output.default_renderer)
+      style.template(format, renderer)
     end
 
     # Ensure that we map #render* to #render_inline* as this version of a page

@@ -125,7 +125,10 @@ describe "Content Hash" do
 
     describe "PagePiece" do
       let(:box) { piece.box1 }
-      let(:new_page) { page_class.create }
+
+      def new_page
+        page_class.create
+      end
 
       before do
         root
@@ -139,18 +142,23 @@ describe "Content Hash" do
         piece.calculate_content_hash.must_equal piece.calculate_content_hash!
       end
 
-      it "should update the boxes content hash if a page is added" do
-        box << new_page
-        hashes << box.calculate_content_hash
-        hashes.uniq.length.must_equal 2
-      end
+      # Actually it shouldn't -- we currently model pages that haven't been published
+      # as invisible (returning '' as their `content_hash`) until they are published.
+      # This may need to be re-visited at some point though.
+      #
+      # it "should update the boxes content hash if a page is added" do
+      #   box << new_page
+      #   hashes << box.calculate_content_hash
+      #   hashes.uniq.length.must_equal 2
+      # end
 
       it "should not change the box content hash if the page is updated" do
         box << new_page
         hashes << box.calculate_content_hash
         new_page.update(title: "something different")
         hashes << box.calculate_content_hash
-        hashes.uniq.length.must_equal 2
+        # 1 because adding a new page doesn't change the box's content_hash -- see above
+        hashes.uniq.length.must_equal 1
       end
 
     end
@@ -378,9 +386,11 @@ describe "Content Hash" do
 
     it "doesn't update the parent page hash when a child page is added" do
       hashes << middle[:content_hash]
-      middle.box1 << page_class.create(slug: "added", title: "added")
+      new_page = page_class.new(slug: "added", title: "added")
+      middle.box1 << new_page
       middle.save
-      hashes << middle.reload[:content_hash]
+      middle.reload
+      hashes << middle[:content_hash]
       assert_uniq_hashes 1
     end
 
@@ -426,8 +436,26 @@ describe "Content Hash" do
       hashes.uniq.length.must_equal 1
     end
 
-    it "updates the parent page hash if child pages are re-ordered" do
+    it "doesn't update the parent page hash if unpublished child pages are re-ordered" do
       page2 = page_class.new(slug: 'page3', title: 'page2')
+      middle.box1 << page2
+      middle.save
+      page2.save
+      page2.reload
+      middle.reload
+      hashes << middle.content_hash
+      page2.update_position(0)
+      hashes << middle.reload[:content_hash]
+      hashes.length.must_equal 2
+      hashes.uniq.length.must_equal 1
+    end
+
+    it "updates the parent page hash if child pages are re-ordered" do
+      # we need other pages to appear as published otherwise our  single
+      # 'published' page will be the only one generating a content hash so the
+      # order is irrelevant.
+      middle.box1.first.update(first_published_at: Time.now)
+      page2 = page_class.new(slug: 'page3', title: 'page2', first_published_at: Time.now)
       middle.box1 << page2
       middle.save
       page2.save

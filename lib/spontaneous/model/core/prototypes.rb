@@ -55,8 +55,8 @@ module Spontaneous::Model::Core
     # InstanceMethods
 
     def after_create
-      super
       apply_prototype
+      super
     end
 
     # Add in an empty default prototype method for subclasses to override
@@ -76,6 +76,7 @@ module Spontaneous::Model::Core
           "Invalid prototype name '#{_prototype}' being passed to class #{self.class}."
         }
       end
+      save
     end
 
     def _prototype=(prototype)

@@ -75,8 +75,7 @@ describe "Render" do
       @root.sections1 << @section2
       @root.sections2 << @section3
       @root.sections2 << @section4
-
-      @root.sections2.entries.last.set_position(0)
+      @root.sections2.last.set_position(0)
       @root.save.reload
       @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
     end
@@ -179,7 +178,7 @@ describe "Render" do
         @child.title = "Child Title"
         @child.description = "Child Description"
         @content.bits << @child
-        @content.contents.first.style = TemplateClass.get_style(:this_template)
+        @content.contents.first.update(style: TemplateClass.get_style(:this_template))
       end
 
       after do
@@ -268,7 +267,8 @@ describe "Render" do
         @child.title = "Child Title"
         @child.description = "Child Description"
         @content.images << @child
-        @content.images.first.style = TemplateClass.get_style(:this_template)
+        @content.images.first.update(style: TemplateClass.get_style(:this_template))
+        @content.save
       end
 
       it "render box sets as a joined list of each box's output" do
@@ -539,6 +539,7 @@ describe "Render" do
         @page.images << @second
         @page.images << @third
         @page.save
+        @page.reload
       end
       it "be available to templates" do
         @page.render.must_equal "0>first\n1second\n2<third\n0:first\n1:second\n2:third\nfirst.second.third\n"
@@ -653,7 +654,8 @@ describe "Render" do
         @page.layout = :variables
         @first = PreviewRender.new(:title => "first")
         @page.images << @first
-        @page.images.first.style = :variables
+        @page.images.first.update(style: :variables)
+        @page.save
       end
 
       it "be passed to page content" do

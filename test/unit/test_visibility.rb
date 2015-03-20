@@ -258,10 +258,8 @@ describe "Visibility" do
     it "stop modification of pieces" do
       page = Content.first(:uid => "1")
       Content.with_visible do
-        # would like to make sure we're raising a predictable error
-        # but 1.9 changes the typeerror to a runtime error
         p = Piece.new
-        lambda { page.things << p }.must_raise(TypeError, RuntimeError)
+        lambda { page.things << p }.must_raise(Spontaneous::ReadOnlyScopeModificationError)
         p.destroy
       end
     end

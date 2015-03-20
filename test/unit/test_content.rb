@@ -51,6 +51,7 @@ describe "Content" do
     it "accept addition of child content" do
       e = C.new
       @instance.things << e
+      @instance.save.reload
       @instance.contents.length.must_equal 1
       @instance.things.contents.length.must_equal 1
       @instance.contents.first.must_equal e
@@ -66,6 +67,7 @@ describe "Content" do
       f = C.new
       @instance.things << e
       @instance.things << f
+      @instance.save.reload
       @instance.contents.length.must_equal 2
       @instance.things.contents.length.must_equal 2
       @instance.contents.first.must_equal e

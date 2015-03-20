@@ -341,6 +341,12 @@ module Spontaneous
         end
 
         def eql?(obj)
+          return false if obj.nil?
+          # p [:eql?]
+          # p obj
+          # @attributes.each do |k, v|
+          #   p [k, v == obj.attributes[k]]
+          # end
           (obj.class == model) && (obj.attributes == @attributes)
         end
 

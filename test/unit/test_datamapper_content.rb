@@ -42,7 +42,7 @@ describe "DataMapperContent" do
     end
 
     it  "serialize the correct columns" do
-      ::Content.serialized_columns.must_equal [:field_store, :entry_store, :box_store, :serialized_modifications]
+      ::Content.serialized_columns.must_equal [:field_store, :box_store, :serialized_modifications]
     end
 
     it "has a dataset that doesnt filter by type" do

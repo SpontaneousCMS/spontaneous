@@ -50,6 +50,14 @@ module Spontaneous::Model::Core
       hidden? && hidden_origin.blank?
     end
 
+
+    # When we're placed into the content tree we want to inherit our
+    # visibility from our new owner
+    def owner=(owner)
+      set_visible(owner.visible?, owner.id)
+      super
+    end
+
     def visible=(visible)
       protect_root_visibility!
       set_visible(visible)

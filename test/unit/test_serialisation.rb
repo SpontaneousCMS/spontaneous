@@ -139,10 +139,9 @@ describe "Serialisation" do
       @child.uid = "about"
 
       [@child, @piece1, @piece2, @piece3].each { |c| c.save; c.reload }
-      @root.insides[0].style = :freezing
-      @root.insides[0].visible = false
-      @root.insides[1].style = :boiling
-      @root.insides.first.first.style = :sitting
+      @root.insides[0].update(style: :freezing, visible: false)
+      @root.insides[1].update(style: :boiling)
+      @root.insides.first.first.update(style: :sitting)
 
       @child.path.must_equal "/about"
 
