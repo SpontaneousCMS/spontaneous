@@ -1,12 +1,63 @@
-## 0.2.0.beta10, released 2014-XX-XX
+## 0.2.0.beta10, released 2015-03-20
+
+Is it wise to release a new version during a solar eclipse?
 
 #### New Features
 
-- Enabled previewing of private pages
+- Enabled previewing of private pages within the CMS. Previously this would
+  invoke some Inception-like preview-within-preview loop
+
+- Boxes can now define a `path_origin` function that returns a `Content::Page` instance or a string which sets the root path for all pages added to it. This allows for your content & path hierarchies to differ (e.g. having child pages of the `/bands` page, e.g. `/bands/the-beatles` appear publicly at the root of the site i.e. `/the-beatles`).
+
+- Page types can set a custom default slug root so that instead of being added as `page-YMD-HMS` they can be configured to default to `something-YMD-HMS` by overriding the value returned by `Content::Page#default_slug_root`.
+
+- You can now get a list of content ids for a box using the `Box#ids` method
+
+- The db connection can now be set using a `DATABASE_URL` env setting
+
+- File and Image fields now generate their URLs dynamically. In the case of cloud hosted media this means you can change the way you address the media without having to regenerate the values e.g. in the case that you move from a direct S3 bucket to a CDN. You can also use any object that responds to `#call(path)` to generate the URLs which opens the door to splitting your media across multiple asset hosts.
+
+- Pages can now declare 'wildcard' routes without namespaces which makes them more like standard controllers. E.g. declaring 
+    
+        controller do
+          get '/wibble/:id' do ... end
+        end
+
+    will allow a page mounted at `/womble` to accept requests to `/womble/wibble/23` etc.
+
+- The publish dialogue now has a `Rerender` button that allows developers to re-render the site without publishing any content in the case of a template/asset change. Great if you need to push a fix but don't want to wait for or force the editors to publish something.
+
+- You can now configure some default options for rendering image fields (and the default output for `${ image }` no longer includes the width & height by default (we’re responsive now, right?)).
+
+#### Misc
+
+- JSON de/en-coding is now handled by [Oj](https://github.com/ohler55/oj) not [Yajl](https://lloyd.github.io/yajl/) after some informal testing showed a ~50% speed improvement.
+- The site initialization has been re-written to improve clarity & reliability
+- Capistrano tasks can now be configured to use a custom binary for `rake` and `spot` commands
+- Boxes now have a `#clear!` method to remove all their contents
+- `Content#/` is an alias for `#get` by id
+- The db timezone is set to UTC which results in some improved performance
+- `Site#inspect` output is less mad
+- The asset serving in preview mode has been moved before the authentication checks so we aren't running hundreds of db calls just to return some JS and images.
+- The sprockets context has been given some Rails-compatible methods to help with using 3rd party sprockets plugins, e.g. `sprockets-less`.
+- Select fields can now have a default value set
+- Video fields now have an `aspect_ratio` method
+- `spot site rerender` is an alias for `spot site render`
 
 #### Fixes
 
 - Front server no longer needs restarting to pick up a new revision in development mode (https://github.com/SpontaneousCMS/spontaneous/issues/47)
+- Fixed entry deletion confirmation popup
+- `Array#render` now calls `render_inline` rather than `render` so that rendering an array of pages doesn’t do mad things.
+- The postgres database dumper/loader now works with custom hosts and ports and correctly authenticates itself when password authentication is in place
+- File & image fields `#blank?` methods now work correctly (and are aliased as `#empty?`)
+- Removed broken render context implementations of `#first?` and `#last?`
+- `spot site init` ensures that the `log` & `tmp` directories exist
+- Don't try to set encoding values when there's no content-type header returned
+- `asset-data-uri` is now correctly wrapping the result in a `url()` declaration.
+- Displaying exceptions in development preview now works
+- Second level boxes now correctly show an 'add' toolbar below the last entry
+- The 'no changes' message is now a more pleasing size & the spinner goes away
 
 ## 0.2.0.beta9, released 2014-10-30
 
