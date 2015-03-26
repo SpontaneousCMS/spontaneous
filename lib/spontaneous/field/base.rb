@@ -269,7 +269,7 @@ module Spontaneous
         pending_value[:version]
       end
 
-      def matches_version?(v)
+      def conflicts_version?(v)
         (version != v) && (pending_version != v)
       end
 

@@ -20,7 +20,7 @@ module Spontaneous::Rack::Back
       conflicts = []
       field_versions.each do |schema_id, version|
         field = content.fields.sid(schema_id)
-        if field.matches_version?(version.to_i)
+        if field.conflicts_version?(version.to_i)
           conflicts << field
         end
       end
