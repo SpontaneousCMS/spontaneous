@@ -5,8 +5,8 @@ ENV["SPOT_ENV"] = "test"
 
 require "rubygems"
 require "bundler"
-gem 'minitest'
 Bundler.setup(:default, :development)
+gem 'minitest'
 
 Bundler.require
 
