@@ -1,3 +1,9 @@
+## 0.2.0.beta11, released 2015-XX-XX
+
+#### New features
+
+- The previous 'entry_store' based method of recording box contents has been replaced with a more natural many-to-one SQL relation.
+
 ## 0.2.0.beta10, released 2015-03-20
 
 Is it wise to release a new version during a solar eclipse?
