@@ -439,11 +439,17 @@ describe "Boxes" do
       box = instance.images
       entries = 10.times.map { |n| box << StyledContent.new(:label => n)}
       box.contents.expects(:load_contents).never
-      log_sql do
       sample1 = [box.sample!, box.sample!, box.sample!, box.sample!]
       sample2 = [box.sample!, box.sample!, box.sample!, box.sample!]
       sample1.wont_equal sample2
     end
+
+    it 'supports any array methods by proxying onto the backing store' do
+      instance = BlankContent.create
+      box = instance.images
+      entries = 4.times.map { |n| box << StyledContent.new(:label => n)}
+      result = box.in_groups_of(2)
+      result.length.must_equal 2
     end
   end
 

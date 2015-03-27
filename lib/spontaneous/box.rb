@@ -471,5 +471,24 @@ module Spontaneous
     def to_a
       contents.to_a
     end
+
+    # It would seem obvious to return the same value as #to_a here but if we
+    # do that then any list of boxes that is then flattened will transform
+    # into a list of box contents, which isn't really what you’d expect
+    def to_ary
+      nil
+    end
+
+    def respond_to_missing?(method_name, include_private = false)
+      contents.store.respond_to?(method_name, include_private)
+    end
+
+    def method_missing(method_name, *args)
+      if block_given?
+        contents.store.send(method_name, *args, &Proc.new)
+      else
+        contents.store.send(method_name, *args)
+      end
+    end
   end
 end
