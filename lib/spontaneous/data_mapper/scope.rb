@@ -160,6 +160,10 @@ module Spontaneous
         end
       end
 
+      def clear_cache(key)
+        @identity_map.delete(key)
+      end
+
       def pk
         @dataset.db.primary_key(@dataset.first_source).to_sym
       end

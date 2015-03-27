@@ -49,7 +49,7 @@ module Spontaneous
         :for_update, :select,
         :columns, :table_name,
         :qualify_column, :quote_identifier,
-        :with_cache,
+        :with_cache, :clear_cache,
         :sql, :to_sql,
         :logger=, :logger
 

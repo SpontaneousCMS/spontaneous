@@ -45,7 +45,7 @@ module Spontaneous
       end
 
       def store
-        box.model.mapper.with_cache(scope_cache_key) { load_contents }
+        mapper.with_cache(scope_cache_key) { load_contents }
       end
 
       def readonly?
@@ -209,8 +209,12 @@ module Spontaneous
       private
 
       def reset
-        # clear scope cache
+        mapper.clear_cache(scope_cache_key)
         @count = nil
+      end
+
+      def mapper
+        box.model.mapper
       end
     end
   end

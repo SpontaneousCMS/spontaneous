@@ -1534,6 +1534,22 @@ describe "DataMapper" do
       ]
     end
 
+    it "allows for clearing specific scope cache keys" do
+      @database.fetch = [
+        { id: 20, type_sid:"MockContent", parent_id: 7 }
+      ]
+      a = b = nil
+      @mapper.scope(20, false) do
+        a = @mapper.with_cache("key") { @mapper.filter(nil, label: "frog").first }
+        @mapper.clear_cache("key")
+        b = @mapper.with_cache("key") { @mapper.filter(nil, label: "frog").first }
+      end
+      @database.sqls.must_equal [
+        "SELECT * FROM __r00020_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (label = 'frog')) LIMIT 1",
+        "SELECT * FROM __r00020_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (label = 'frog')) LIMIT 1"
+      ]
+    end
+
     it "allow for forcing the creation of a new scope to bypass the cache" do
       @database.fetch = [
         { id: 7, type_sid:"MockContent", parent_id: 7 }
