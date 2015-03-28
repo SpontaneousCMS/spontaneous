@@ -85,15 +85,15 @@ class Spontaneous::Site
     end
 
     def with_published(&block)
-      Spontaneous::Content.scope(published_revision, true, &block)
+      model.scope(published_revision, true, &block)
     end
 
     def with_editable(&block)
-      Spontaneous::Content.scope(nil, false, &block)
+      model.scope(nil, false, &block)
     end
 
     def with_preview(&block)
-      Spontaneous::Content.scope(nil, true, &block)
+      model.scope(nil, true, &block)
     end
 
     protected
