@@ -15,7 +15,7 @@ Sequel.migration do
       alter_table(table) do
         add_column :box_position, :integer
         add_column :layout_sid,   :varchar
-        add_index [:box_sid, :box_position]
+        add_index [:box_sid, :box_position] if table == :content
       end
 
       # self.logger = Logger.new $stdout
@@ -38,9 +38,9 @@ Sequel.migration do
             end
           end
         end
-        print " #{table} => % #{total.to_s.length}d/%#{total.to_s.length}d complete\r" % [position+=1, total] if Spontaneous.mode == :console
+        print "    #{table} => % #{total.to_s.length}d/%#{total.to_s.length}d complete\r" % [position+=1, total] if Spontaneous.mode == :console
       end
-      puts "\n#{table} Done" if Spontaneous.mode == :console
+      puts "\n    #{table} Done" if Spontaneous.mode == :console
 
       alter_table(table) do
         drop_column :entry_store rescue nil
@@ -68,7 +68,7 @@ Sequel.migration do
       end
       puts "MUST GO BACK"
       alter_table(table) do
-        drop_index [:box_sid, :box_position]
+        drop_index [:box_sid, :box_position] if table == :content
         drop_column :box_position
         drop_column :layout_sid
       end
