@@ -22,81 +22,30 @@ module Spontaneous::Publishing
       @registered ||= {}
     end
 
+    def self.retrieve(name)
+      case (klass = registered[name])
+      when nil
+        nil
+      when Class
+        klass
+      when Symbol, String
+        const_get(klass)
+      end
+    end
+
+    def self.register(klass, *names)
+      names.each do |name|
+        registered[name] = klass
+      end
+    end
+
     class Progress
-      def self.register(klass, *names)
-        names.each do |name|
-          Spontaneous::Publishing::Progress.registered[name] = klass
-        end
-      end
     end
 
-    class Silent < Progress
-      attr_reader :total, :stage
-
-      register self, :silent, :none
-
-      def initialize
-        @total = 0
-        @position  = 0
-        @stage = ""
-        @start = Time.now
-      end
-
-      def start(total_steps)
-        @total = total_steps
-      end
-
-      def stage(name)
-        @stage = name
-      end
-
-      def current_stage
-        @stage
-      end
-
-      def step(n = 1, msg = "")
-        @position += n
-      end
-
-      def log(message)
-      end
-
-      def error(exception)
-      end
-
-      def done
-      end
-
-      def percentage
-        ((@position.to_f / @total.to_f) * 100).round(2)
-      end
-
-      def position
-        @position
-      end
-
-      def duration
-        Duration.new(Time.now - @start)
-      end
-    end
-
-    class Log < Silent
-      register self, :log
-
-      def initialize(io = $stdout, label = "Publish")
-        super()
-        # don't call close on stdout or stderr
-        @closable = !((io == STDOUT) || (io == STDERR))
-        @logger = Logger.new(io, File::APPEND)
-        @logger.formatter = proc do |severity, datetime, progname, msg|
-          pct = ("%03.2f" % [percentage]).rjust(6, " ")
-          "#{label}:#{severity}: [#{datetime.strftime('%Y-%m-%d %H:%M:%S.%3N')}] #{duration} #{pct}% #{current_stage} #{msg}\n"
-        end
-      end
-
+    module LoggerOutput
       def log(message)
         super
-        logger.info(message)
+        @logger.info(message)
       end
 
       def step(n = 1, msg = "")
@@ -109,78 +58,19 @@ module Spontaneous::Publishing
         msg = [exception.to_s].concat(exception.backtrace).join("\n")
         @logger.error(msg)
       end
-
-      def done
-        @logger.close if @closable
-      end
     end
 
-    class Stdout < Log
-      register self, :stdout
+    autoload :Log, 'spontaneous/publishing/progress/log'
+    autoload :Multi, 'spontaneous/publishing/progress/multi'
+    autoload :Silent, 'spontaneous/publishing/progress/silent'
+    autoload :Simultaneous, 'spontaneous/publishing/progress/simultaneous'
+    autoload :Stdout, 'spontaneous/publishing/progress/stdout'
+    autoload :Syslog, 'spontaneous/publishing/progress/syslog'
 
-      def initialize
-        super($stdout)
-      end
-    end
-
-    class Simultaneous < Silent
-      register self, :simultaneous, :browser
-
-      def stage(name)
-        super
-        send_event
-      end
-
-      def step(n = 1, msg = "")
-        super
-        send_event
-      end
-
-      def send_event(stage = current_stage, _percentage = percentage)
-        ::Simultaneous.send_event('publish_progress', {:state => stage, :progress => _percentage}.to_json)
-      rescue Errno::ECONNREFUSED
-      rescue Errno::ENOENT
-      end
-
-      def error(exception)
-        super
-        send_event("aborting", "*")
-      end
-
-      def done
-        super
-        send_event("complete", "*")
-      end
-    end
-
-    class Multi < Progress
-      def initialize(*outputs)
-        @outputs = outputs
-      end
-
-      def log(message)
-        @outputs.each { |progress| progress.log(message) }
-      end
-
-      def start(total_steps)
-        @outputs.each { |progress| progress.start(total_steps) }
-      end
-
-      def stage(name)
-        @outputs.each { |progress| progress.stage(name) }
-      end
-
-      def step(n = 1, msg = "")
-        @outputs.each { |progress| progress.step(n, msg) }
-      end
-
-      def error(exception)
-        @outputs.each { |progress| progress.error(exception) }
-      end
-
-      def done
-        @outputs.each { |progress| progress.done }
-      end
-    end
+    register :Log, :log
+    register :Silent, :silent, :none
+    register :Simultaneous, :simultaneous, :browser
+    register :Stdout, :stdout
+    register :Syslog, :syslog
   end
 end

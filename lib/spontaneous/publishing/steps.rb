@@ -79,7 +79,7 @@ module Spontaneous::Publishing
         return progress if is_progress?(progress)
         progress_class = case progress
         when Symbol
-          Spontaneous::Publishing::Progress.registered[progress]
+          Spontaneous::Publishing::Progress.retrieve(progress)
         else
           raise InvalidProgressException.new(progress)
         end
