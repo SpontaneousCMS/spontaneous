@@ -260,7 +260,7 @@ describe "Visibility" do
       Content.with_visible do
         p = Piece.new
         lambda { page.things << p }.must_raise(Spontaneous::ReadOnlyScopeModificationError)
-        p.destroy
+        lambda { p.destroy }.must_raise(Spontaneous::ReadOnlyScopeModificationError)
       end
     end
 

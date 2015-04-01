@@ -4,27 +4,35 @@ require 'forwardable'
 
 module Spontaneous
   module Collections
-    class BoxContents
-      include Enumerable
-      extend Forwardable
-
-      def_delegators :store, :+, :[]
+    # Provides an Array-like list of the contents of a box.
+    #
+    # This is coordinated from each box instance, which is responsible for
+    # caching instances of these on a per-scope basis.
+    #
+    # The contents of the underlying array are loaded from the database on
+    # initialization and any modifications to the contents of the array are
+    # passed onto the underlying db table.
+    class BoxContents < ::Array
 
       attr_reader :box, :schema_id
 
-
       def initialize(box)
-        @box = box
-        @schema_id = box.schema_id
-        reset
+        super()
+        @box, @schema_id = box, box.schema_id
+        load_contents
       end
 
       def ids
-        store.map(&:id)
+        map(&:id)
       end
 
+      alias_method :insert_array, :insert
+
+      # Over-rides the Array#insert method in order to write any changes to
+      # the db. The special casing of the position is to allow for
+      # optimizations/simplifications to the DB insertion methodology
+      # depending on where the new item is being inserted
       def insert(index, content)
-        raise ReadOnlyScopeModificationError.new(box) if readonly?
         case index
         when 0
           insert_at_beginning(content)
@@ -40,48 +48,19 @@ module Spontaneous
         insert(position, content)
       end
 
-      def index(content)
-        store.index(content)
-      end
-
-      def store
-        mapper.with_cache(scope_cache_key) { load_contents }
-      end
-
-      def readonly?
-        box.model.visible_only?
-      end
-
-      def scope_cache_key
-        @scope_cache_key ||= ['box', owner.id, box.schema_id.to_s].join(':').freeze
-      end
-
       def load_contents
+        replace(load_contents!)
+      end
+
+      def load_contents!
         @count = 0
         box.dataset.map { |content|
           content.to_entry(box, (@count += 1) - 1)
         }
       end
 
-      def each
-        return enum_for(:each) unless block_given?
-        store.each(&Proc.new)
-      end
-
-      def length
-        store.length
-      end
-
-      def empty?
-        store.empty?
-      end
-
-      def last
-        store.last
-      end
-
-      def sample(n = 1)
-        store.sample(n)
+      def readonly?
+        box.model.visible_only?
       end
 
       # An implementation of the Array#sample method that doesn't load the
@@ -97,16 +76,23 @@ module Spontaneous
         @count ||= box.unordered_dataset.count
       end
 
-      def clear!
-        destroy
+      def wrap_page(content)
+        find { |e| e.id == content.id }
       end
 
-      def destroy(origin = nil)
-        store.each do |content|
-          content.destroy(false, origin)
-        end
-        reset
+      def to_ary
+        dup
       end
+
+      def to_a
+        dup
+      end
+
+      def content_destroyed(content)
+        remove_content(content)
+      end
+
+      private
 
       def insert_at_beginning(content)
         box.unordered_dataset.update(box_position: (Sequel.expr(:box_position) + 1))
@@ -125,18 +111,10 @@ module Spontaneous
       def claim_content(content, position)
         entry = content.to_entry(box, position)
         content.set(content_attributes(content, position))
-        store.insert(position, entry)
+        insert_array(position, entry)
         @count += 1
         content.save
         content
-      end
-
-      def wrap_page(content)
-        find { |e| e.id == content.id }
-      end
-
-      def page_entry(content)
-        Spontaneous::PagePiece.new(owner, content)
       end
 
       def content_attributes(content, position)
@@ -157,29 +135,20 @@ module Spontaneous
       end
 
       def page_attributes(content)
-        if page
-          content.parent = page
-          content.update_path
-          return {
-            depth: page.depth + 1,
-            parent_id: page.id
-          }
-        end
-        {}
+        return {} if page.nil?
+        content.parent = page
+        content.update_path
+        { depth: page.depth + 1, parent_id: page.id }
       end
 
       def piece_attributes(content)
         { depth: box.owner.content_depth, page: page }
       end
 
-      def content_destroyed(content)
-        remove_content(content)
-      end
-
       def remove_content(content)
         @count -= 1 unless @count.nil?
         box.unordered_dataset.where { box_position >= content.box_position }.update(box_position: (Sequel.expr(:box_position) - 1))
-        store.delete_if { |c| c.id == content.id }
+        delete_if { |c| c.id == content.id }
       end
 
       def owner
@@ -196,25 +165,6 @@ module Spontaneous
 
       def prototype_for_content(content)
         box.prototype_for_content(content)
-      end
-
-      def to_ary
-        store.dup
-      end
-
-      def to_a
-        store.dup
-      end
-
-      private
-
-      def reset
-        mapper.clear_cache(scope_cache_key)
-        @count = nil
-      end
-
-      def mapper
-        box.model.mapper
       end
     end
   end

@@ -73,7 +73,6 @@ module Spontaneous
 
     def initialize(name, prototype, owner)
       @_name, @_prototype, @owner = name.to_sym, prototype, owner
-      @contents = nil
       @field_initialization = false
     end
 
@@ -144,7 +143,7 @@ module Spontaneous
     end
 
     def media_id
-      "#{owner.padded_id}/#{schema_id}"
+      "#{owner.padded_id}/#{schema_id}".freeze
     end
 
     def position
@@ -164,14 +163,14 @@ module Spontaneous
     end
 
     def reload_box
-      @field_store = @contents = nil
+      mapper.clear_cache(scope_cache_key)
+      @field_store = nil
     end
 
     # needed by Render::Context
     def box?(box_name)
       false
     end
-
 
     def field_store
       @field_store ||= (owner.box_field_store(self) || initialize_fields)
@@ -330,12 +329,12 @@ module Spontaneous
       content.after_insertion
       owner.save_after_insertion(content)
       inserted
+    rescue RuntimeError => e
+      raise Spontaneous::ReadOnlyScopeModificationError.new(self)
     end
 
     def set_position(content, new_position)
       @modified = true
-      # piece = contents[new_position]
-      # new_position = owner.pieces.index(piece)
       contents.set_position(content, new_position)
     end
 
@@ -352,7 +351,26 @@ module Spontaneous
     end
 
     def contents
-      @contents ||= Spontaneous::Collections::BoxContents.new(self)
+      mapper.with_cache(scope_cache_key) { read_only(contents!) }
+    end
+
+    def read_only(contents)
+      contents.freeze if model.visible_only?
+      contents
+    end
+
+    # If you want to over-ride a box with a custom contents array then
+    # re-define this method, not #contents above.
+    def contents!
+      Spontaneous::Collections::BoxContents.new(self)
+    end
+
+    def scope_cache_key
+      @scope_cache_key ||= ['box', owner.id, schema_id.to_s].join(':').freeze
+    end
+
+    def mapper
+      model.mapper
     end
 
     def pieces
@@ -376,12 +394,22 @@ module Spontaneous
       contents.each(&Proc.new)
     end
 
+    def clear
+      clear!
+    end
+
     def clear!
-      contents.clear!
+      contents.each do |content|
+        content.destroy(false)
+      end
+      contents.clear
     end
 
     def destroy(origin)
-      contents.destroy(origin)
+      each do |content|
+        content.destroy(false, origin)
+      end
+      mapper.clear_cache(scope_cache_key)
     end
 
     def empty?
@@ -415,6 +443,8 @@ module Spontaneous
 
     def content_destroyed(content)
       contents.content_destroyed(content)
+    rescue RuntimeError => e
+      raise Spontaneous::ReadOnlyScopeModificationError.new(self)
     end
 
     def export(user = nil)
@@ -469,7 +499,7 @@ module Spontaneous
     end
 
     def to_a
-      contents.to_a
+      contents.dup
     end
 
     # It would seem obvious to return the same value as #to_a here but if we
@@ -480,14 +510,14 @@ module Spontaneous
     end
 
     def respond_to_missing?(method_name, include_private = false)
-      contents.store.respond_to?(method_name, include_private)
+      contents.respond_to?(method_name, include_private)
     end
 
     def method_missing(method_name, *args)
       if block_given?
-        contents.store.send(method_name, *args, &Proc.new)
+        contents.send(method_name, *args, &Proc.new)
       else
-        contents.store.send(method_name, *args)
+        contents.send(method_name, *args)
       end
     end
   end
