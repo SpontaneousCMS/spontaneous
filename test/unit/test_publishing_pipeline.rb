@@ -656,6 +656,12 @@ describe "Publishing Pipeline" do
       state.revision.must_equal revision + 1
     end
 
+    it "activates the output store revision" do
+      @output_store.current_revision.must_equal nil
+      run_step
+      @output_store.current_revision.must_equal revision
+    end
+
     it "rollback sets the site state back to how it was" do
       instance = run_step
       instance.rollback
@@ -684,15 +690,10 @@ describe "Publishing Pipeline" do
         FileUtils.ln_s(previous_revision_dir, @site.revision_dir)
       end
 
-      it "symlinks the new revision to 'current'" do
-        run_step
-        File.read(File.join(@site.revision_dir, 'REVISION')).must_equal revision.to_s
-      end
-
       it "rollback re-points the 'current' symlink to the previous directory" do
         instance = run_step
         instance.rollback
-        File.read(File.join(@site.revision_dir, 'REVISION')).must_equal (revision - 1).to_s
+        @output_store.current_revision.must_equal revision - 1
       end
     end
 
@@ -702,11 +703,6 @@ describe "Publishing Pipeline" do
       before do
         FileUtils.mkdir_p(new_revision_dir)
         File.open(File.join(new_revision_dir, 'REVISION'), 'w') { |file| file.write(revision) }
-      end
-
-      it "symlinks the new revision to 'current'" do
-        run_step
-        File.read(File.join(@site.revision_dir, 'REVISION')).must_equal revision.to_s
       end
 
       it "rollback deletes the 'current' symlink" do
@@ -734,51 +730,8 @@ describe "Publishing Pipeline" do
       step.to_sym.must_equal :write_revision_file
     end
 
-    it "reports a step count of 1" do
-      step.count(@site, revision, nil).must_equal 1
-    end
-
-    it "sets the stage to 'writing revision file'" do
-      progress = mock
-      progress.stubs(:step)
-      progress.expects(:stage).with("writing revision file").once
-      run_step(progress)
-    end
-
-    it "increments the progress step by 1" do
-      progress = mock
-      progress.stubs(:stage)
-      progress.expects(:step).with(1, instance_of(String)).once
-      run_step(progress)
-    end
-
-    it "writes a REVISION file with the current revision dirname" do
-      run_step
-      assert File.exist?(path)
-      r = File.read(path)
-      r.must_equal "00003"
-    end
-
-    it "deletes the file on rollback if none existed" do
-      instance = run_step
-      instance.rollback
-      refute File.exist?(path)
-    end
-
-    it "reverts the file on rollback" do
-      File.open(path, 'w') { |file| file.write("PREVIOUS") }
-      instance = run_step
-      instance.rollback
-      assert File.exist?(path)
-      File.read(path).must_equal "PREVIOUS"
-    end
-
-    it "runs rollback after throwing an exception" do
-      instance = mock
-      step.expects(:new).returns(instance)
-      instance.expects(:call).raises(Exception)
-      instance.expects(:rollback)
-      lambda{ run_step }.must_raise(Exception)
+    it "reports a step count of 0" do
+      step.count(@site, revision, nil).must_equal 0
     end
   end
 

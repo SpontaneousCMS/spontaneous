@@ -11,5 +11,9 @@ module Spontaneous::Output::Store
     def revisions
       @backing.revisions
     end
+
+    def current_revision
+      @backing.current_revision
+    end
   end
 end

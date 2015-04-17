@@ -52,12 +52,25 @@ module Spontaneous::Output::Store
       end if keys
     end
 
+    def activate_revision(revision)
+      return remove_active_revision if revision.nil?
+      @backend.store(current_revision_key, revision)
+    end
+
+    def current_revision
+      @backend.load(current_revision_key)
+    end
+
     def revision_key(revision)
       ":revision:#{revision}"
     end
 
+    def current_revision_key
+      ":revision:".freeze
+    end
+
     def revisions_key
-      ":revisions:"
+      ":revisions:".freeze
     end
 
     protected
@@ -92,6 +105,10 @@ module Spontaneous::Output::Store
         return Template.new(template, path_for(revision, partition, path))
       end
       nil
+    end
+
+    def remove_active_revision
+      @backend.delete(current_revision_key)
     end
 
     def key_for(revision, partition, path)
