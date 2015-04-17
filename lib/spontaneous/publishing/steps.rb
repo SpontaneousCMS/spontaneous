@@ -138,7 +138,6 @@ module Spontaneous::Publishing
       :copy_static_files,
       :generate_rackup_file,
       :activate_revision,
-      :write_revision_file,
       :archive_old_revisions
     ].freeze
 

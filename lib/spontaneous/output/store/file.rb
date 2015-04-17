@@ -8,6 +8,7 @@ module Spontaneous::Output::Store
   # at the `static` area and (in theory) protected templates could
   # be served using a "sendfile" header.
   class File < Backend
+    F = ::File unless defined? F
 
     def initialize(root)
       @root = root
@@ -26,6 +27,19 @@ module Spontaneous::Output::Store
       if (dir = revision_path(revision)) && ::File.exist?(dir)
         ::FileUtils.rm_r(dir)
       end
+    end
+
+    def activate_revision(revision, keys = nil)
+      return remove_active_revision if revision.blank?
+      if (dir = revision_path(revision)) && F.exist?(dir)
+        system("ln -nsf #{dir} #{current_path}")
+        F.open(revision_file_path, 'w') { |f| f.write(Spontaneous::Paths.pad_revision_number(revision)) }
+      end
+    end
+
+    def current_revision
+      return nil unless F.exist?(revision_file_path)
+      Integer(F.read(revision_file_path), 10)
     end
 
     protected
@@ -58,6 +72,19 @@ module Spontaneous::Output::Store
 
     def revision_path(revision)
       ::File.join(@root, pad_revision(revision))
+    end
+
+    def current_path
+      F.join(@root, 'current')
+    end
+
+    def revision_file_path
+      F.join(@root, 'REVISION')
+    end
+
+    def remove_active_revision
+      FileUtils.rm_f(current_path)
+      FileUtils.rm_f(revision_file_path)
     end
 
     def ensure_path(path)

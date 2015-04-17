@@ -9,16 +9,13 @@ module Spontaneous::Publishing::Steps
       save_state
       @progress.stage("activating revision")
       set_published_revision
-      symlink_revision(revision)
+      activate_revision(revision)
     end
 
     def rollback
-      @site.send(:set_published_revision, @state.published_revision)
-      if @linked
-        symlink_path(@linked)
-      else
-        FileUtils.rm(@site.revision_dir) if File.exist?(@site.revision_dir)
-      end
+      previous_revision = @state.published_revision
+      @site.send(:set_published_revision, previous_revision)
+      output_store.revision(previous_revision).activate
     end
 
     def set_published_revision
@@ -26,10 +23,9 @@ module Spontaneous::Publishing::Steps
       @progress.step(1, "published revision => #{revision}")
     end
 
-    def symlink_revision(r)
-      path = @site.revision_dir(r)
-      symlink_path(path)
-      @progress.step(1, %(symlinking "revisions/current" => "#{path}"))
+    def activate_revision(r)
+      @progress.step(1, %(activating revision #{r}))
+      output_store.revision(r).activate
     end
 
     def symlink_path(path)
@@ -38,8 +34,10 @@ module Spontaneous::Publishing::Steps
 
     def save_state
       @state = @site.state
-      link = Pathname.new(@site.revision_dir)
-      @linked = link.realpath.to_s if link.exist?
+    end
+
+    def output_store
+      @site.output_store
     end
   end
 end

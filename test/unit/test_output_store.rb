@@ -8,6 +8,7 @@ require File.expand_path('../../test_helper', __FILE__)
 # Revision#static_template(output) #=> (String or nil)
 # Revision#dynamic_template(output, request_method = "GET") #=> (String or nil)
 # Revision#transaction #=> Transaction
+# Revision#activate
 # Revision#delete
 # Transaction#write(output, template)
 # Transaction#commit
@@ -133,6 +134,49 @@ describe "Output store" do
       store.revisions.must_equal [100, 101]
     end
 
+    it "symlinks the revision path when the revision is activated" do
+      current = ::File.join(root, 'current')
+      refute ::File.exist?(current)
+      store.store_static(100, "/one.html", "*template*")
+      store.activate_revision(100)
+      assert ::File.exist?(current)
+      assert ::File.symlink?(current)
+      Pathname.new(current).realpath.to_s.must_equal Pathname.new(revision_path).realpath.to_s
+    end
+
+    it "writes the current revision into REVISION when the revision is activated" do
+      revision_path = ::File.join(root, 'REVISION')
+      refute ::File.exist?(revision_path)
+      store.store_static(100, "/one.html", "*template*")
+      store.activate_revision(100)
+      assert ::File.exist?(revision_path)
+      ::File.read(revision_path).must_equal Spontaneous::Paths.pad_revision_number(100)
+    end
+
+    it "returns a current revision of nil if none has been activated" do
+      store.current_revision.must_equal nil
+    end
+
+    it "allows us to retrieve the current active revision" do
+      store.store_static(100, "/one.html", "*template*")
+      store.activate_revision(100)
+      store.current_revision.must_equal 100
+    end
+
+    it "deletes the active revision if passed a value of nil" do
+      current = ::File.join(root, 'current')
+      revision_path = ::File.join(root, 'REVISION')
+      store.store_static(100, "/one.html", "*template*")
+      store.activate_revision(100)
+      assert ::File.exist?(current)
+      assert ::File.exist?(revision_path)
+
+      store.activate_revision(nil)
+      store.current_revision.must_equal nil
+      refute ::File.exist?(current)
+      refute ::File.exist?(revision_path)
+    end
+
     it "allows for the deletion of a revision" do
       store.store_static(100, "/one.html", "*template*")
       store.store_static(100, "/another/two.html", "*template*")
@@ -193,6 +237,20 @@ describe "Output store" do
       store.add_revision(100, ["100:static:/one.html", "100:static:/two.html", "100:static:/three.html"])
       store.add_revision(101, ["101:static:/one.html", "101:static:/two.html", "101:static:/three.html"])
       store.revisions.must_equal [100, 101]
+    end
+
+    it "returns a current revision of nil if none has been activated" do
+      store.current_revision.must_equal nil
+    end
+
+    it "allows us to retrieve the current active revision" do
+      store.activate_revision(100)
+      store.current_revision.must_equal 100
+    end
+
+    it "deletes the active revision if passed a value of nil" do
+      store.activate_revision(nil)
+      store.current_revision.must_equal nil
     end
 
     it "enables removal of a revision" do
@@ -320,6 +378,11 @@ describe "Output store" do
     it "doesn't return a dynamic template as a static one" do
       template = revision.static_template(output_xml)
       template.must_equal nil
+    end
+
+    it "allows for the activation of the revision" do
+      store.expects(:activate_revision).with(r)
+      revision.activate
     end
 
     it "allows for deletion of the revision" do
