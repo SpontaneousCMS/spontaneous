@@ -67,7 +67,7 @@ module Spontaneous::Model::Core
     end
 
     def content_hash_columns
-      [schema_id, hidden?, target_id]
+      [schema_id, hidden?, target_id, owner_id]
     end
 
     def before_save

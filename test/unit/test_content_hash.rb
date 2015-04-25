@@ -211,6 +211,20 @@ describe "Content Hash" do
       hashes << piece.calculate_content_hash
       hashes.uniq.length.must_equal 2
     end
+
+    it "updates the hash for any ownership change" do
+      page_class.box :box1
+      new_page = page_class.new
+      root.box1 << new_page
+      new_page.save
+      new_page.box1 << piece
+      piece.save
+      hashes.clear
+      hashes << piece.calculate_content_hash
+      root.box1.adopt(piece)
+      hashes << piece.calculate_content_hash
+      hashes.uniq.length.must_equal 2
+    end
   end
 
   describe "Page" do
