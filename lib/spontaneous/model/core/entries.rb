@@ -103,8 +103,36 @@ module Spontaneous::Model::Core
       set_visibility_path
     end
 
+    class OwnerChange
+      def initialize(origin, old_value, new_value)
+        @origin, @old_value, @new_value = origin, old_value, new_value
+      end
+
+      def propagate
+        return if @old_value == @new_value
+        @origin.contents.each do |child|
+          child.set_visibility_path_from!(@origin.visibility_path)
+        end
+      end
+    end
+
+    included do
+      cascading_change :visibility_path do |origin, old_value, new_value|
+        OwnerChange.new(origin, old_value, new_value)
+      end
+    end
+
     def set_visibility_path
-      self[:visibility_path] = [owner.visibility_path, owner.id].compact.join(Spontaneous::VISIBILITY_PATH_SEP)
+      set_visibility_path_from(owner.visibility_path)
+    end
+
+    def set_visibility_path_from!(visibility_path)
+      set_visibility_path_from(visibility_path)
+      save
+    end
+
+    def set_visibility_path_from(visibility_path)
+      self.visibility_path = [visibility_path, owner.id].compact.join(Spontaneous::VISIBILITY_PATH_SEP)
     end
 
     def set_visibility_path!

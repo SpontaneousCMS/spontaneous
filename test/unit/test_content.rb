@@ -328,8 +328,21 @@ describe "Content" do
       @b.visibility_path.must_equal @r.id.to_s
     end
 
-    it "ensure that child pages have their visibility paths updated" do
-      skip "Implement this"
+    it "ensure that children have their visibility paths updated" do
+      paths = []
+      root = @b
+      3.times do |n|
+        c = C.new(:label => "child-#{n}")
+        root.things << c
+        root.save
+        c.save
+        paths << c
+        root = c
+      end
+      original_root_visibility_path = @b.visibility_path
+      new_visibility_paths = paths.map(&:visibility_path).map { |vp| vp.gsub(original_root_visibility_path, @r.id.to_s) }
+      @r.things.adopt(@b)
+      paths.each(&:reload).map(&:visibility_path).must_equal new_visibility_paths
     end
   end
 
