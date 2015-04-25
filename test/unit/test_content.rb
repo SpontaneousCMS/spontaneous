@@ -10,6 +10,7 @@ describe "Content" do
     class P < ::Page; end
 
     C.box :things
+    P.box :things
     P.box :box1
     P.box :box2
   end
@@ -274,7 +275,7 @@ describe "Content" do
   describe "Moving" do
     before do
       C.delete
-      @r = C.new(:label => 'r')
+      @r = P.new(:label => 'r')
       @a = C.new(:label => 'a')
       @b = C.new(:label => 'b')
       @c = C.new(:label => 'c')
@@ -343,6 +344,32 @@ describe "Content" do
       new_visibility_paths = paths.map(&:visibility_path).map { |vp| vp.gsub(original_root_visibility_path, @r.id.to_s) }
       @r.things.adopt(@b)
       paths.each(&:reload).map(&:visibility_path).must_equal new_visibility_paths
+    end
+
+    it "ensure that child pages have their ancestor paths updated" do
+      pages = []
+      page = P.new(label: 'new-root')
+      @b.things << page
+      page.save
+      root = page
+      classes = [P, C]
+      use_class, next_class = classes
+      5.times do |n|
+        c = use_class.new(:label => "child-#{n}")
+        root.things << c
+        c.save
+        pages << c if use_class == P
+        root = c
+        use_class, next_class = next_class, use_class
+      end
+      page = pages.first
+      original_root_ancestor_path = page.ancestor_path_ids
+      new_ancestor_paths = pages.map(&:ancestor_path_ids).map { |ap|
+        ap.gsub(original_root_ancestor_path, @r.id.to_s)
+      }
+      @r.things.adopt(page)
+      pages.each(&:reload).map(&:ancestor_path_ids).must_equal new_ancestor_paths
+      page.parent_id.must_equal @r.id
     end
   end
 

@@ -143,6 +143,10 @@ module Spontaneous::Model::Page
       (self[:ancestor_path] || "").split(Spontaneous::Model::ANCESTOR_SEP).map { |id| id.to_i }
     end
 
+    def ancestor_path_ids
+      self[:ancestor_path]
+    end
+
     def is_public_root?
       path == Spontaneous::SLASH
     end
