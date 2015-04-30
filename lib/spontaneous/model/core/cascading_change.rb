@@ -5,6 +5,14 @@ module Spontaneous::Model::Core
     extend Spontaneous::Concern
 
     module ClassMethods
+      def split_materialised_path(mp, sep = Spontaneous::Model::ANCESTOR_SEP)
+        mp.split(sep).map { |id| id.to_i }
+      end
+
+      def join_materialised_path(parts, sep = Spontaneous::Model::ANCESTOR_SEP)
+        parts.reject(&:blank?).join(sep)
+      end
+
       def cascading_change(attr_name, &block)
         define_method "#{attr_name}=" do |value|
           append_cascading_change(attr_name, self[attr_name], value, &block)
