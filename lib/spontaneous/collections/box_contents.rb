@@ -122,7 +122,8 @@ module Spontaneous
           box_sid: schema_id,
           owner: owner,
           style: style_for_content(content),
-          _prototype: prototype_for_content(content)
+          _prototype: prototype_for_content(content),
+          depth: content.content_tree_depth(owner)
         }.merge(content_type_attributes(content))
       end
 
@@ -138,11 +139,11 @@ module Spontaneous
         return {} if page.nil?
         content.parent = page
         content.update_path
-        { depth: page.depth + 1, parent_id: page.id }
+        {}
       end
 
       def piece_attributes(content)
-        { depth: box.owner.content_depth, page: page }
+        { page: page }
       end
 
       def remove_content(content)

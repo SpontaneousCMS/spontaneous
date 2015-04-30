@@ -22,6 +22,12 @@ module Spontaneous::Model::Core
       super || 0
     end
 
+    # Used to work out a new value for the content item's depth value
+    # based on the depth of its owner.
+    def content_tree_depth(owner)
+      owner.content_depth + 1
+    end
+
     def destroy(remove_owner_entry=true, origin = nil)
       is_origin = origin.nil?
       origin ||= owner

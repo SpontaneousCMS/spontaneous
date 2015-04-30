@@ -137,6 +137,11 @@ module Spontaneous::Model
       0
     end
 
+    def content_tree_depth(owner)
+      return nil if owner.nil? || owner.page.nil?
+      owner.page.depth + 1
+    end
+
     def page_title
       if field = self.fields[title_field_name]
         field.value
