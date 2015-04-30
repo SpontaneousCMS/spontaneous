@@ -96,6 +96,39 @@ module Spontaneous::Model::Core
       end
     end
 
+    class OwnerModification < SlugModification
+      def self.type
+        :owner
+      end
+
+      def initialize(owner, user, created_at, old_visibility_path, new_owner_id, new_box_sid)
+        super(owner, user, created_at, old_visibility_path, new_owner_id)
+        @new_box_sid = new_box_sid
+      end
+
+      def new_owner_id
+        @new_value
+      end
+
+      def apply(revision)
+        owner.with_revision(revision) do
+          new_owner = owner.content_model.get(new_owner_id)
+          published = owner.content_model.get(owner.id)
+          new_owner.boxes.sid(@new_box_sid).adopt(published)
+          published.save
+        end
+      end
+
+      def dataset
+        path_like = Sequel.like(:visibility_path, "#{owner.visibility_path}.#{owner.id}%")
+        owner.content_model.filter(path_like)
+      end
+
+      def serialize
+        super << @new_box_sid
+      end
+    end
+
     def current_editor
       @current_editor
     end
@@ -127,7 +160,7 @@ module Spontaneous::Model::Core
     end
 
     def generate_modification_list
-      serialize_pending_modifications if [create_slug_modifications, create_visibility_modifications].any? { |result| result }
+      serialize_pending_modifications if [create_slug_modifications, create_visibility_modifications, create_ownership_modifications].any? { |result| result }
     end
 
     def child_page_deleted!
@@ -178,6 +211,24 @@ module Spontaneous::Model::Core
       true
     end
 
+    def create_ownership_modifications
+      change = changes_to_cascade[:visibility_path]
+      return false if change.nil?
+      old_value, new_value = change.old_value, change.new_value
+      return false if old_value.nil?
+      return false if old_value == new_value
+      if (previous_modification = local_modifications.detect { |mod| mod.type == :owner })
+        if previous_modification.old_value == change.new_visibility_path
+          remove_modification(:owner)
+        else
+          previous_modification.new_value = new_value
+        end
+      else
+        append_modification OwnerModification.new(self, current_editor, Time.now, change.old_visibility_path, new_value, self[:box_sid])
+      end
+      true
+    end
+
     def remove_modification(type)
       local_modifications.delete_if { |mod| mod.type == type }
     end
@@ -224,7 +275,7 @@ module Spontaneous::Model::Core
     end
 
     def modification_class_map
-      Hash[[SlugModification, HiddenModification, DeletionModification].map { |mod_class| [mod_class.type, mod_class] }]
+      Hash[[SlugModification, HiddenModification, DeletionModification, OwnerModification].map { |mod_class| [mod_class.type, mod_class] }]
     end
   end
 end

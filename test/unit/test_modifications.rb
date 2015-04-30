@@ -207,6 +207,70 @@ describe "Modifications" do
     end
   end
 
+  it "adds an entry to the list of side effects for an ownership change" do
+    Timecop.freeze(@now+3600) do
+      new_owner = Page.first uid: "1"
+      page = Page.first uid: "1.1.1"
+      old_owner_id = page.visibility_path
+      new_owner.things.adopt(page)
+      page.save
+      page.reload
+      page.pending_modifications.length.must_equal 1
+      mods = page.pending_modifications(:owner)
+      mods.length.must_equal 1
+      mod = mods.first
+      mod.must_be_instance_of Spontaneous::Model::Core::Modifications::OwnerModification
+      mod.old_value.must_equal old_owner_id
+      mod.new_value.must_equal new_owner.id
+      mod.created_at.to_i.must_equal @now.to_i + 3600
+    end
+  end
+
+  it "only adds a single ownership modification entry" do
+    Timecop.freeze(@now+3600) do
+      new_owner = Page.first uid: "1"
+      page = Page.first uid: "1.1.1"
+      old_owner_id = page.visibility_path
+      new_owner.things.adopt(page)
+      @root.things.adopt(page)
+      page.save
+      page.reload
+      page.pending_modifications.length.must_equal 1
+      mods = page.pending_modifications(:owner)
+      mods.length.must_equal 1
+      mod = mods.first
+      mod.must_be_instance_of Spontaneous::Model::Core::Modifications::OwnerModification
+      mod.old_value.must_equal old_owner_id
+      mod.new_value.must_equal @root.id
+      mod.created_at.to_i.must_equal @now.to_i + 3600
+    end
+  end
+
+  it "removes ownership changes if the ownership reverts" do
+    Timecop.freeze(@now+3600) do
+      new_owner = Page.first uid: "1"
+      page = Page.first uid: "1.1.1"
+      old_owner = page.owner
+      new_owner.things.adopt(page)
+      old_owner.things.adopt(page)
+      page.save
+      page.reload
+      page.pending_modifications.length.must_equal 0
+    end
+  end
+
+  it "show the number of affected content entries in the case of an ownership change" do
+    Timecop.freeze(@now+3600) do
+      new_owner = Page.first uid: "root"
+      page = Piece.first uid: "1.1"
+      new_owner.things.adopt(page)
+      page.save
+      page.reload
+      mod = page.pending_modifications(:owner).first
+      mod.count.must_equal 2
+    end
+  end
+
   it "serialize page modifications" do
     Timecop.freeze(@now+3600) do
       page = Page.first :uid => "1"
@@ -359,7 +423,6 @@ describe "Modifications" do
 
     it "act on path change modifications" do
       page = Page.first :uid => "1"
-      old_slug = page.slug
       page.slug = "changed"
       page.save
       ::Content.publish(@final_revision, [page.id])
@@ -387,7 +450,6 @@ describe "Modifications" do
       old_slug = child_page.slug
       child_page.slug = "changed-too"
       child_page.save
-
       ::Content.publish(@final_revision, [page.id])
       ::Content.with_revision(@final_revision) do
         published = Page.first :uid => "1.0.0"
@@ -559,6 +621,18 @@ describe "Modifications" do
       end
     end
 
+    it 'relocates dependent content after an ownership change' do
+      new_owner = Page.first uid: "root"
+      piece = Piece.first uid: "1.1"
+      new_owner.things.adopt(piece)
+      expected_visibility_paths = piece.reload.contents.map(&:visibility_path)
+      piece.save
+      ::Content.publish(@final_revision, [piece.id])
+      ::Content.with_revision(@final_revision) do
+        published_piece = ::Content.first(id: piece.id)
+        published_piece.contents.map(&:visibility_path).must_equal expected_visibility_paths
+      end
+    end
 
     it "act on multiple modifications" do
       page = Page.first :uid => "1"

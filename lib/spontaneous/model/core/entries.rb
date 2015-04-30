@@ -117,8 +117,26 @@ module Spontaneous::Model::Core
       def propagate
         return if @old_value == @new_value
         @origin.contents.each do |child|
-          child.set_visibility_path_from!(@origin.visibility_path)
+          child.set_visibility_path_from!(@origin)
         end
+      end
+
+      def new_value
+        return nil if @new_value.blank?
+        @origin.model.split_materialised_path(@new_value).last
+      end
+
+      def old_value
+        return nil if @old_value.blank?
+        @origin.model.split_materialised_path(@old_value).last
+      end
+
+      def new_visibility_path
+        @new_value
+      end
+
+      def old_visibility_path
+        @old_value
       end
     end
 
@@ -129,16 +147,16 @@ module Spontaneous::Model::Core
     end
 
     def set_visibility_path
-      set_visibility_path_from(owner.visibility_path)
+      set_visibility_path_from(owner)
     end
 
-    def set_visibility_path_from!(visibility_path)
-      set_visibility_path_from(visibility_path)
+    def set_visibility_path_from!(source)
+      set_visibility_path_from(source)
       save
     end
 
-    def set_visibility_path_from(visibility_path)
-      self.visibility_path = [visibility_path, owner.id].compact.join(Spontaneous::VISIBILITY_PATH_SEP)
+    def set_visibility_path_from(source)
+      set(visibility_path: model.join_materialised_path([source.visibility_path, owner.id]), depth: content_tree_depth(source))
     end
 
     def set_visibility_path!

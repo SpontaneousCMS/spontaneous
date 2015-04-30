@@ -329,6 +329,12 @@ describe "Content" do
       @b.visibility_path.must_equal @r.id.to_s
     end
 
+    it "updates the item's depth" do
+      @r.things.adopt(@b)
+      @b.reload
+      @b.depth.must_equal 1
+    end
+
     it "ensure that children have their visibility paths updated" do
       paths = []
       root = @b
@@ -346,7 +352,7 @@ describe "Content" do
       paths.each(&:reload).map(&:visibility_path).must_equal new_visibility_paths
     end
 
-    it "ensure that child pages have their ancestor paths updated" do
+    it "ensures that child pages have their ancestor paths updated" do
       pages = []
       page = P.new(label: 'new-root')
       @b.things << page
@@ -370,6 +376,29 @@ describe "Content" do
       @r.things.adopt(page)
       pages.each(&:reload).map(&:ancestor_path_ids).must_equal new_ancestor_paths
       page.parent_id.must_equal @r.id
+    end
+
+    it "ensures that child pages have their depths updated" do
+      pages = []
+      page = P.new(label: 'new-root')
+      @b.things << page
+      page.save
+      root = page
+      classes = [P, C]
+      use_class, next_class = classes
+      5.times do |n|
+        c = use_class.new(:label => "child-#{n}")
+        root.things << c
+        c.save
+        pages << c if use_class == P
+        root = c
+        use_class, next_class = next_class, use_class
+      end
+      page = pages.first
+      original_depths = pages.map(&:depth)
+      @r.things.adopt(page)
+      new_depths = pages.map { |p| p.reload.depth }
+      new_depths.must_equal original_depths.map { |d| d - 1 }
     end
   end
 
