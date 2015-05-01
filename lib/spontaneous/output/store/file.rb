@@ -24,8 +24,8 @@ module Spontaneous::Output::Store
     end
 
     def delete_revision(revision, keys = nil)
-      if (dir = revision_path(revision)) && ::File.exist?(dir)
-        ::FileUtils.rm_r(dir)
+      if (dir = revision_path(revision)) && F.exist?(dir)
+        FileUtils.rm_r(dir)
       end
     end
 
@@ -45,7 +45,7 @@ module Spontaneous::Output::Store
     protected
 
     def store(revision, partition, key, template, transaction)
-      ::File.open(path!(revision, partition, key, transaction), 'wb') { |f| f.write(template) }
+      F.open(path!(revision, partition, key, transaction), 'wb') { |f| f.write(template) }
     end
 
     def load(revision, partition, key)
@@ -53,8 +53,8 @@ module Spontaneous::Output::Store
     end
 
     def read(path)
-      return nil unless ::File.exist?(path)
-      ::File.open(path, 'r:UTF-8')
+      return nil unless F.exist?(path)
+      F.open(path, 'r:UTF-8')
     end
 
     def pad_revision(revision)
@@ -67,11 +67,11 @@ module Spontaneous::Output::Store
 
     def path(revision, partition, path, transaction = nil)
       transaction.push(key(revision, partition, path)) if transaction
-      ::File.join(revision_path(revision), partition, path)
+      F.join(revision_path(revision), partition, path)
     end
 
     def revision_path(revision)
-      ::File.join(@root, pad_revision(revision))
+      F.join(@root, pad_revision(revision))
     end
 
     def current_path
@@ -88,17 +88,17 @@ module Spontaneous::Output::Store
     end
 
     def ensure_path(path)
-      ensure_dir ::File.dirname(path)
+      ensure_dir F.dirname(path)
       path
     end
 
     def ensure_dir(dir)
-      FileUtils.mkdir_p(dir) unless ::File.exist?(dir)
+      FileUtils.mkdir_p(dir) unless F.exist?(dir)
       dir
     end
 
     def key(revision, partition, path)
-      ::File.join(pad_revision(revision), partition, path)
+      F.join(pad_revision(revision), partition, path)
     end
   end
 end
