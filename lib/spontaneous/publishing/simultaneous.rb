@@ -13,13 +13,17 @@ module Spontaneous
         [:rerender, "site render"]
       end
 
+      def self.reindex_task
+        [:reindex, "site index"]
+      end
+
       def self.register_tasks
         niceness = Spontaneous::Site.config.publish_niceness || 15
         task_options = {
           niceness: niceness,
           logfile: "log/publish.log"
         }
-        [publish_task, rerender_task].each do |task_name, task_cmd|
+        [publish_task, rerender_task, reindex_task].each do |task_name, task_cmd|
           Spontaneous::Simultaneous.register(task_name, task_cmd, task_options, task_params = {})
         end
       end
@@ -42,6 +46,10 @@ module Spontaneous
 
       def rerender
         Spontaneous::Simultaneous.fire(:rerender)
+      end
+
+      def rerender
+        Spontaneous::Simultaneous.fire(:reindex)
       end
     end # Simultaneous
   end # Publishing

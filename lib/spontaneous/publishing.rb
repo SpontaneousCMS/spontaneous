@@ -11,6 +11,7 @@ module Spontaneous
     autoload :Progress,     "spontaneous/publishing/progress"
     autoload :Pipeline,     "spontaneous/publishing/pipeline"
     autoload :Publish,      "spontaneous/publishing/publish"
+    autoload :Reindex,      "spontaneous/publishing/reindex"
     autoload :Rerender,     "spontaneous/publishing/rerender"
   end # Publishing
 end # Spontaneous

@@ -28,5 +28,9 @@ module Spontaneous::Publishing
     def rerender
       Rerender.new(@site, @revision, @steps).rerender
     end
+
+    def reindex
+      Reindex.new(@site, @revision, @steps).reindex
+    end
   end
 end
