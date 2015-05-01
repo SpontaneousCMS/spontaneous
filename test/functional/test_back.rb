@@ -521,6 +521,18 @@ describe "Back" do
         page.in_progress.contents.first.id.must_equal job2.id
       end
 
+      it "sets the position of pages" do
+
+        auth_patch "/@spontaneous/content/#{project3.id}/position/0"
+        assert last_response.ok?
+        last_response.content_type.must_equal "application/json;charset=utf-8"
+        home.reload
+        home.projects.contents.first.id.must_equal project3.id
+
+        page = Content[home.id]
+        page.projects.contents.first.id.must_equal project3.id
+      end
+
       it "records the currently logged in user" do
         page = home.in_progress.last
         auth_patch "/@spontaneous/content/#{page.id}/toggle"
