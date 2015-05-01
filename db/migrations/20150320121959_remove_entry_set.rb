@@ -58,13 +58,14 @@ Sequel.migration do
     end
     # recreate the published table from the history rather than run the
     # migration again on it.
-    require 'spontaneous/publishing/revision.rb'
-    published_revision = self[:spontaneous_state].get(:published_revision)
-    published_revision_table = Content.revision_table(published_revision)
-    drop_table(published_revision_table)
-    Spontaneous::Publishing.create_content_table(self, :content, published_revision_table)
-    source_ds = self[:spontaneous_content_history].where(revision: published_revision)
-    run("INSERT INTO #{literal(published_revision_table)} #{source_ds.select_sql}")
+    if (published_revision = self[:spontaneous_state].get(:published_revision))
+      require 'spontaneous/publishing/revision.rb'
+      published_revision_table = Spontaneous::DataMapper::ContentTable.revision_table(:content, published_revision)
+      drop_table(published_revision_table)
+      Spontaneous::Publishing.create_content_table(self, :content, published_revision_table)
+      source_ds = self[:spontaneous_content_history].where(revision: published_revision)
+      run("INSERT INTO #{literal(published_revision_table)} #{source_ds.select_sql}")
+    end
 
     # drop all the indexes on the archive because we don't need them
     table = :spontaneous_content_archive
