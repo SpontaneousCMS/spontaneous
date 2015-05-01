@@ -247,6 +247,10 @@ module Spontaneous
           @identity_map[instance.id] = instance
         end
       end
+
+      def inspect
+        %(#<Spontaneous::DataMapper::Dataset:#{object_id.to_s(16)} dataset=#{@dataset.sql}>)
+      end
     end
   end
 end
