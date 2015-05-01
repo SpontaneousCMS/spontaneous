@@ -358,6 +358,7 @@ describe "Image Fields" do
 
     it 'returns true for empty images' do
       @field.blank?.must_equal true
+      @field.empty?.must_equal true
       @field.original.blank?.must_equal true
       @field.smaller.blank?.must_equal true
     end
@@ -369,6 +370,9 @@ describe "Image Fields" do
       @field.blank?.must_equal false
       @field.original.blank?.must_equal false
       @field.smaller.blank?.must_equal false
+      @field.empty?.must_equal false
+      @field.original.empty?.must_equal false
+      @field.smaller.empty?.must_equal false
     end
 
     describe 'with cloud storage' do
@@ -390,6 +394,9 @@ describe "Image Fields" do
         @field.blank?.must_equal true
         @field.original.blank?.must_equal true
         @field.smaller.blank?.must_equal true
+        @field.empty?.must_equal true
+        @field.original.empty?.must_equal true
+        @field.smaller.empty?.must_equal true
       end
       it 'returns false for images with values' do
         path = File.expand_path("../../../../fixtures/images/rose.jpg", __FILE__)
@@ -398,6 +405,9 @@ describe "Image Fields" do
         @field.blank?.must_equal false
         @field.original.blank?.must_equal false
         @field.smaller.blank?.must_equal false
+        @field.empty?.must_equal false
+        @field.original.empty?.must_equal false
+        @field.smaller.empty?.must_equal false
       end
     end
   end

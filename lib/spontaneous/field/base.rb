@@ -427,8 +427,9 @@ module Spontaneous
         unprocessed_value.blank?
       end
 
-      alias_method :empty?, :blank?
-
+      def empty?
+        blank?
+      end
 
       def or(field)
         return field if self.blank?
