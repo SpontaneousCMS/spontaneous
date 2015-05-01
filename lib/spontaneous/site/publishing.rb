@@ -46,6 +46,10 @@ class Spontaneous::Site
       Spontaneous::Publishing::Steps.rerender(publish_steps)
     end
 
+    def reindex_steps
+      Spontaneous::Publishing::Steps.reindex(publish_steps)
+    end
+
     def publishing_method
       resolve_background_mode(Spontaneous::Publishing)
     end
@@ -69,6 +73,10 @@ class Spontaneous::Site
 
     def rerender
       publishing_method.new(self, published_revision, rerender_steps).rerender
+    end
+
+    def reindex
+      publishing_method.new(self, published_revision, reindex_steps).reindex
     end
 
     def publishing_status

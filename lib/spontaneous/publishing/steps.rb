@@ -30,6 +30,14 @@ module Spontaneous::Publishing
       end
     end
 
+    def self.reindex(publishing_steps)
+      new([], publishing_steps.progress) do
+        REINDEX_STEPS.each do |step|
+          run step
+        end
+      end
+    end
+
     def self.default
       new do
         CORE_STEPS.each do |step|
@@ -146,6 +154,10 @@ module Spontaneous::Publishing
       :copy_assets,
       :copy_static_files,
       :generate_rackup_file
+    ].freeze
+
+    REINDEX_STEPS = [
+      :generate_search_indexes,
     ].freeze
 
     CORE_PROGRESS = [:browser, :stdout].freeze
