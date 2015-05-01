@@ -24,6 +24,10 @@ module Spontaneous::Output::Store
       end
     end
 
+    def asset(key, asset)
+      @store.store_asset(@revision, key, asset, self)
+    end
+
     # Stores call this method to register the keys
     # they write to their backends. This is necessary
     # because we don't want to limit our backends to those
