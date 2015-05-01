@@ -121,6 +121,7 @@ module Spontaneous
       end
 
       def each
+        return enum_for(:each) unless block_given?
         @dataset.each do |r|
           yield load_instance(r)
         end

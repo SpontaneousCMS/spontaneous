@@ -101,6 +101,22 @@ module Spontaneous
         mapper.dataset(types)
       end
 
+      # Allow for iterating over all instances of a type using:
+      #
+      #    Type.each { |instance| ... }
+      #
+      def each(&block)
+        dataset.each(&block)
+      end
+
+      # Allow for mapping all instances of a type using:
+      #
+      #    Type.map { |instance| ... }
+      #
+      def map(&block)
+        dataset.map(&block)
+      end
+
       def all
         mapper.all(*types)
       end
