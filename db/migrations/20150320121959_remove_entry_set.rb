@@ -6,12 +6,22 @@ Sequel.migration do
   up do
 
     [:spontaneous_content_history, :spontaneous_content_archive].each do |table|
+      indexes = self.indexes(table)
+      if indexes.values.map { |index| index[:columns] }.any? { |cols| cols == [:id, :revision] }
+        puts "Skipping id, revision index on table #{table}..."
+        next
+      end
       alter_table(table) do
         add_index [:id, :revision], ignore_errors: true
       end
     end
 
     [:content, :spontaneous_content_history, :spontaneous_content_archive].each do |table|
+      existing_columns = self[table].columns
+      if (existing_columns & [:box_position, :layout_sid]).length > 0
+        puts "Skipping migration for table #{table}..."
+        next
+      end
       alter_table(table) do
         add_column :box_position, :integer
         add_column :layout_sid,   :varchar
@@ -46,6 +56,25 @@ Sequel.migration do
         drop_column :entry_store rescue nil
       end
     end
+    # recreate the published table from the history rather than run the
+    # migration again on it.
+    require 'spontaneous/publishing/revision.rb'
+    published_revision = self[:spontaneous_state].get(:published_revision)
+    published_revision_table = Content.revision_table(published_revision)
+    drop_table(published_revision_table)
+    Spontaneous::Publishing.create_content_table(self, :content, published_revision_table)
+    source_ds = self[:spontaneous_content_history].where(revision: published_revision)
+    run("INSERT INTO #{literal(published_revision_table)} #{source_ds.select_sql}")
+
+    # drop all the indexes on the archive because we don't need them
+    table = :spontaneous_content_archive
+    indexes(table).each do |index_name, index|
+      alter_table(table) do
+        drop_index index[:columns], name: index_name
+      end
+    end
+    # force a full publish
+    self[:spontaneous_state].update(must_publish_all: true)
   end
 
   down do
