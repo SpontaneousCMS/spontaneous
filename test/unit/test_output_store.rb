@@ -80,6 +80,16 @@ describe "Output store" do
       ::File.read(::File.join(revision_path, 'static', '#private-tree', 'one.html')).must_equal "*template*"
     end
 
+    it "puts asset files under 'assets'" do
+      store.store_asset(revision, "/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css", "body{background:red;}")
+      ::File.read(::File.join(revision_path, 'assets', '/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css')).must_equal "body{background:red;}"
+    end
+
+    it "supports any number of asset sub-directories" do
+      store.store_asset(revision, "/css/modules/vendor/site-de4e312eb1deac7c937dc181b1ac8ab3.css", "body{background:red;}")
+      ::File.read(::File.join(revision_path, 'assets', '/css/modules/vendor/site-de4e312eb1deac7c937dc181b1ac8ab3.css')).must_equal "body{background:red;}"
+    end
+
     it "enables the retrieval of available revisions" do
       store.store_static(1, "/one.html", "*template*")
       store.store_protected(2, "/one.html", "*template*")
@@ -124,13 +134,21 @@ describe "Output store" do
       store.store_static(revision, "/one.html", "*template*", transaction)
       store.store_protected(revision, "/one.html", "*template*", transaction)
       store.store_dynamic(revision, "/one.html", "*template*", transaction)
-      transaction.length.must_equal 3
-      transaction.must_equal ["00100/static/one.html", "00100/protected/one.html", "00100/dynamic/one.html"]
+      store.store_asset(revision, "/css/site.css", "body{}", transaction)
+      transaction.length.must_equal 4
+      transaction.must_equal ["00100/static/one.html", "00100/protected/one.html", "00100/dynamic/one.html", "00100/assets/css/site.css"]
     end
 
     it "enables registration of a revision" do
       store.add_revision(100, ["100/one.html", "100/two.html", "100/three.html"])
       store.add_revision(101, ["101/one.html", "101/two.html", "101/three.html"])
+      store.revisions.must_equal [100, 101]
+    end
+
+    it "prevents duplicate revisions in the revision list" do
+      store.add_revision(100, ["100/one.html", "100/two.html", "100/three.html"])
+      store.add_revision(101, ["101/one.html", "101/two.html", "101/three.html"])
+      store.add_revision(100, ["100/one.html", "100/two.html", "100/three.html"])
       store.revisions.must_equal [100, 101]
     end
 
@@ -224,18 +242,36 @@ describe "Output store" do
       result.path.must_equal "/#{r}/dynamic/one.html"
     end
 
+    it "allows the storage & retrieval of assets" do
+      store.store_asset(r, "/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css", "body{color:red;}")
+      result = store.load_asset(r, "/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css")
+      result.respond_to?(:read).must_equal true
+      result.read.must_equal "body{color:red;}"
+      result.respond_to?(:path).must_equal true
+      result.respond_to?(:to_path).must_equal false
+      result.path.must_equal "/#{r}/assets/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css"
+    end
+
     it "puts all written keys into a transaction if given" do
       transaction = []
       store.store_static(r, "/one.html", "*template*", transaction)
       store.store_protected(r, "/two.html", "*template*", transaction)
       store.store_dynamic(r, "/three.html", "*template*", transaction)
-      transaction.length.must_equal 3
-      transaction.must_equal ["100:static:/one.html", "100:protected:/two.html", "100:dynamic:/three.html"]
+      store.store_asset(r, "/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css", "body{color:red;}", transaction)
+      transaction.length.must_equal 4
+      transaction.must_equal ["100:static:/one.html", "100:protected:/two.html", "100:dynamic:/three.html", "100:assets:/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css"]
     end
 
     it "enables registration of a revision" do
       store.add_revision(100, ["100:static:/one.html", "100:static:/two.html", "100:static:/three.html"])
       store.add_revision(101, ["101:static:/one.html", "101:static:/two.html", "101:static:/three.html"])
+      store.revisions.must_equal [100, 101]
+    end
+
+    it "prevents duplicate revisions in the revision list" do
+      store.add_revision(100, ["100/one.html", "100/two.html", "100/three.html"])
+      store.add_revision(101, ["101/one.html", "101/two.html", "101/three.html"])
+      store.add_revision(100, ["100/one.html", "100/two.html", "100/three.html"])
       store.revisions.must_equal [100, 101]
     end
 
@@ -357,6 +393,7 @@ describe "Output store" do
       transaction = revision.transaction
       transaction.store(output_html, false, "HTML")
       transaction.store(output_xml, false, "XML")
+      transaction.asset("/css/site.css", "CSS")
       transaction.commit
     end
 
@@ -373,6 +410,11 @@ describe "Output store" do
     it "allows for reading a dynamic template" do
       template = revision.dynamic_template(output_xml)
       template.read.must_equal "XML"
+    end
+
+    it "allows for reading an asset" do
+      template = revision.asset("/css/site.css")
+      template.read.must_equal "CSS"
     end
 
     it "doesn't return a dynamic template as a static one" do

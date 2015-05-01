@@ -29,7 +29,7 @@ module Spontaneous::Output::Store
     end
 
     def add_revision(revision, keys)
-      save_revisions(revisions.push(revision))
+      save_revisions(revisions.push(revision).uniq.sort)
       @backend.store(revision_key(revision), serialize(keys))
     end
 

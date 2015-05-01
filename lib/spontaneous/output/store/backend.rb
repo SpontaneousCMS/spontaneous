@@ -1,7 +1,7 @@
 module Spontaneous::Output::Store
   class Backend
     unless defined?(STATIC_PATH)
-      STATIC_PATH, PROTECTED_PATH, DYNAMIC_PATH = %w(static protected dynamic).map(&:freeze)
+      STATIC_PATH, PROTECTED_PATH, DYNAMIC_PATH, ASSET_PATH = %w(static protected dynamic assets).map(&:freeze)
     end
 
     def store_static(revision, key, template, transaction = nil)
@@ -16,6 +16,10 @@ module Spontaneous::Output::Store
       store(revision, DYNAMIC_PATH, key, template, transaction)
     end
 
+    def store_asset(revision, key, template, transaction = nil)
+      store(revision, ASSET_PATH, key, template, transaction)
+    end
+
     def load_static(revision, key)
       load(revision, STATIC_PATH, key)
     end
@@ -26,6 +30,10 @@ module Spontaneous::Output::Store
 
     def load_dynamic(revision, key)
       load(revision, DYNAMIC_PATH, key)
+    end
+
+    def load_asset(revision, key)
+      load(revision, ASSET_PATH, key)
     end
 
     def output_key(output, dynamic = false)
