@@ -2,7 +2,28 @@
 
 #### New features
 
-- The previous 'entry_store' based method of recording box contents has been replaced with a more natural many-to-one SQL relation.
+- The previous 'entry_store' based method of recording box contents has been
+  replaced with a more natural many-to-one SQL relation.
+
+- There's a new `spot site index` command that can re-generate the search
+  indexes based on the currently published content.
+
+- Model classes now have `::each` and `::map` methods for iterating through all
+  instances of a type.
+
+- The output store is now responsible for marking a revision as active, which is
+  how it should have been all along.
+
+#### Fixes
+
+- `Box#adopt` now cascades changes to the content path through all the adopted
+  contents children. This paves the way for moving content around in the UI... A
+  side-effect of this is that an item's `owner_id` is now included in the
+  calculation of the current content hash, so there'll be some bad behaviour
+  around modification status until this beds in.
+
+- File and image fields now return consistent values for `#blank?` and
+  `#empty?`.
 
 ## 0.2.0.beta10, released 2015-03-20
 
