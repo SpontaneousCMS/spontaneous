@@ -96,7 +96,7 @@ module Spontaneous
           # inject the front controllers into the preview so that this is a
           # full duplicate of the live site
           site.front.middleware.each do |args, block|
-            use *args, &block
+            use(*args, &block)
           end
           site.front_controllers.each do |namespace, controller_class|
             map namespace do
@@ -108,7 +108,7 @@ module Spontaneous
       end
 
       def self.application(site = ::Spontaneous.instance)
-        app = ::Rack::Builder.new do
+        ::Rack::Builder.new do
           site.back_controllers.each do |namespace, controller|
             map(namespace) do
               use Scope::Edit, site

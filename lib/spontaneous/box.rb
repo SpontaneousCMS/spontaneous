@@ -329,7 +329,7 @@ module Spontaneous
       content.after_insertion
       owner.save_after_insertion(content)
       inserted
-    rescue RuntimeError => e
+    rescue RuntimeError
       raise Spontaneous::ReadOnlyScopeModificationError.new(self)
     end
 
