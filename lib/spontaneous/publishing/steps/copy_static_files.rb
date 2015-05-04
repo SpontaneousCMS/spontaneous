@@ -7,19 +7,10 @@ module Spontaneous::Publishing::Steps
 
     def call
       progress.stage("copying files")
-      ensure_public_dir
       facets.each do |facet|
         copy_facet(facet)
         progress.step(1, "from #{facet.name.inspect}")
       end
-    end
-
-    def rollback
-      FileUtils.rm_r(revision_public) if File.exists?(revision_public)
-    end
-
-    def ensure_public_dir
-      dir = revision_public
     end
 
     def copy_facet(facet)
@@ -34,21 +25,14 @@ module Spontaneous::Publishing::Steps
       end
     end
 
+    # TODO: Pass an IO object rather than do a File::read
     def copy_file(facet, source, path)
-      dest = File.join([revision_public, facet.file_namespace, path].compact)
-      dir = File.dirname(dest)
-      FileUtils.mkdir_p(dir) unless File.exist?(dir)
-      link_file(source, dest)
+      key = File.join([facet.file_namespace, path].compact)
+      render_transaction.static(make_absolute(key), ::File.read(source))
     end
 
-    def link_file(source, dest)
-      src_dev = File::stat(source).dev
-      dst_dev = File::stat(File.dirname(dest)).dev
-      if (src_dev == dst_dev)
-        FileUtils.ln(source, dest, :force => true)
-      else
-        FileUtils.cp(source, dest)
-      end
+    def make_absolute(key)
+      ::File.join('/', key)
     end
 
     def files(dir)
@@ -57,18 +41,16 @@ module Spontaneous::Publishing::Steps
       .map { |path| [path, Pathname.new(path).relative_path_from(dir).to_s] }
     end
 
-    def revision_public
-      @public_dest ||= Pathname.new(Spontaneous.revision_dir(revision) / 'public').tap do |path|
-        FileUtils.mkdir_p(path) unless File.exists?(path)
-      end
-    end
-
     def facets
       site.facets
     end
 
     def sources(facet)
       facet.paths.expanded(:public).map { |dir| Pathname.new(dir) }.select(&:exist?).map(&:realpath)
+    end
+
+    def render_transaction
+      transaction.render_transaction
     end
   end
 end
