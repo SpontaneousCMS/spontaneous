@@ -42,10 +42,6 @@ module Spontaneous
             end
           end
 
-          map "/rev" do
-            run Spontaneous::Rack::CacheableFile.new(Spontaneous.revision_dir / "rev")
-          end
-
           map "/assets" do
             run Spontaneous::Rack::CacheableFile.new(Spontaneous.revision_dir / "assets")
           end
