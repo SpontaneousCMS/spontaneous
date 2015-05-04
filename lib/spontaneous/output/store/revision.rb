@@ -8,6 +8,10 @@ module Spontaneous::Output::Store
     end
 
     def transaction
+      @transaction ||= transaction!
+    end
+
+    def transaction!
       Transaction.new(@revision, @store)
     end
 

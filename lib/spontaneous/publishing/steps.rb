@@ -123,13 +123,13 @@ module Spontaneous::Publishing
         steps << step
       end
 
-      def run(site, revision, pages, progress)
+      def run(transaction)
         @steps.each do |step|
-          progress.add(step.count(site, revision)) if step.respond_to?(:count)
+          progress.add(step.count(transaction)) if step.respond_to?(:count)
         end
 
         @steps.each do |step|
-          step.call(site, revision, pages, progress)
+          step.call(transaction)
         end
       end
 

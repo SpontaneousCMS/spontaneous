@@ -13,6 +13,6 @@ module Spontaneous
     autoload :Publish,      "spontaneous/publishing/publish"
     autoload :Reindex,      "spontaneous/publishing/reindex"
     autoload :Rerender,     "spontaneous/publishing/rerender"
+    autoload :Transaction,  "spontaneous/publishing/transaction"
   end # Publishing
 end # Spontaneous
-

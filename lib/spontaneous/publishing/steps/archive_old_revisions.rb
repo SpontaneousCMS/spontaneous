@@ -7,16 +7,16 @@ module Spontaneous::Publishing::Steps
     end
 
     def call
-      @progress.stage("archiving old revisions")
-      @site.model.cleanup_revisions(revision, keep_revisions)
-      @progress.step(1)
+      progress.stage("archiving old revisions")
+      site.model.cleanup_revisions(revision, keep_revisions)
+      progress.step(1)
     end
 
     def rollback
     end
 
     def keep_revisions
-      @site.config.keep_revisions || KEEP_REVISIONS
+      site.config.keep_revisions || KEEP_REVISIONS
     end
   end
 end

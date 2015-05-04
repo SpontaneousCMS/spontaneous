@@ -5,13 +5,13 @@ module Spontaneous::Publishing::Steps
       name.demodulize.underscore.to_sym
     end
 
-    def self.count(site, revision, pages, progress = Spontaneous::Publishing::Progress::Silent.new)
-      new(site, revision, pages, progress).count
+    def self.count(transaction)
+      new(transaction).count
     end
 
     # create, run & return an instance that does the actual work
-    def self.call(site, revision, pages, progress = Spontaneous::Publishing::Progress::Silent.new)
-      new(site, revision, pages, progress).tap do |instance|
+    def self.call(transaction)
+      new(transaction).tap do |instance|
         begin
           instance.call
         rescue Exception => e
@@ -25,10 +25,22 @@ module Spontaneous::Publishing::Steps
       Spontaneous::Publishing::Steps.register_step(subclass)
     end
 
-    attr_reader :revision, :site, :progress
+    attr_reader :transaction
 
-    def initialize(site, revision, pages, progress)
-      @site, @revision, @pages, @progress = site, revision, pages, progress
+    def initialize(transaction)
+      @transaction = transaction
+    end
+
+    def revision
+      @transaction.revision
+    end
+
+    def site
+      @transaction.site
+    end
+
+    def progress
+      @transaction.progress
     end
 
     # Does the actual work
