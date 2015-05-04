@@ -20,10 +20,6 @@ module Spontaneous::Publishing
       @render_transaction ||= template_revision.transaction
     end
 
-    def render_transaction?
-      !@render_transaction.nil?
-    end
-
     def template_revision
       @template_revision ||= @site.output_store.revision(@revision)
     end
