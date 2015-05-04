@@ -218,6 +218,14 @@ describe "Publishing Pipeline" do
       refute File.exist?(path)
     end
 
+    it "rolls back the output store transaction" do
+      t = transaction
+      rt = t.render_transaction
+      rt.expects(:rollback).once
+      instance = run_step_with_transaction(t)
+      instance.rollback
+    end
+
     it "runs rollback after throwing an exception" do
       instance = mock
       step.expects(:new).returns(instance)
@@ -299,14 +307,6 @@ describe "Publishing Pipeline" do
 
     it "returns an instance from #call" do
       run_step.must_be_instance_of step
-    end
-
-    it "deletes the rendered files on rollback" do
-      instance = run_step
-      store = @output_store.revision(revision).store
-      store.expects(:delete_revision).with(revision, instance_of(Array))
-      store.expects(:delete_revision).with(revision)
-      instance.rollback
     end
 
     it "runs rollback after throwing an exception" do
@@ -549,12 +549,6 @@ describe "Publishing Pipeline" do
       FileUtils.cp(manifest.asset_compilation_dir + asset, manifest.asset_compilation_dir + compressed)
       run_step
       assert File.exist?(File.join(revision_root, 'assets', compressed)), "#{compressed} should exist"
-    end
-
-    it "deletes the copied files on rollback" do
-      instance = run_step
-      instance.rollback
-      refute File.exist?(File.join(revision_root, "assets"))
     end
 
     it "runs rollback after throwing an exception" do
