@@ -31,10 +31,6 @@ module Spontaneous::Output::Store
       @store.load_dynamic(@revision, key)
     end
 
-    def asset(key)
-      @store.load_asset(@revision, key)
-    end
-
     def activate
       @store.activate_revision(@revision)
     end

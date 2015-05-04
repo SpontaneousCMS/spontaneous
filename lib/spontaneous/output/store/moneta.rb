@@ -23,6 +23,7 @@ module Spontaneous::Output::Store
     attr_reader :backend
 
     def initialize(name, options = {})
+      super(options)
       @backend = ::Moneta.build do
         adapter name, options
       end
