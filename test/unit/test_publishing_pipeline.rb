@@ -394,12 +394,19 @@ describe "Publishing Pipeline" do
     let(:fixtures_path) { application_path + "public" }
     let(:revision_root) { @site.revision_dir(revision) }
 
-    def assert_static_files(namespace = nil)
-      Dir["#{fixtures_path}/**/*"].each do |fixture|
+    def static_file_paths(namespace = nil)
+      Dir["#{fixtures_path}/**/*"].map do |fixture|
         path = Pathname.new(fixture)
+        next unless path.file?
         relative = path.relative_path_from(fixtures_path).to_s
-        revision_file = File.join([revision_root, "public", namespace, relative].compact)
-        File.exist?(revision_file).must_equal true
+        [File.join("/", [namespace, relative].compact), path.to_s]
+      end.compact
+    end
+
+    def assert_static_files(namespace = nil)
+      store = @output_store.revision(revision).store
+      static_file_paths(namespace).each do |relative_path, file_path|
+        store.expects(:store_static).with(revision, relative_path, ::File.read(file_path), instance_of(Spontaneous::Output::Store::Transaction))
       end
     end
 
@@ -430,9 +437,9 @@ describe "Publishing Pipeline" do
       step.count(transaction).must_equal 1
     end
 
-    it "copies files in the site's public dir" do
-      run_step
+    it "copies files in the site's public dir into the output store" do
       assert_static_files
+      run_step
     end
 
     it "deletes the copied files on rollback" do
@@ -455,9 +462,9 @@ describe "Publishing Pipeline" do
       end
 
       it "copies plugin files under their namespace" do
-        run_step
         assert_static_files
         assert_static_files('example_application')
+        run_step
       end
 
       it "gives its step count as the number of facets" do
