@@ -82,12 +82,18 @@ describe "Output store" do
 
     it "puts asset files under 'assets'" do
       store.store_asset(revision, "/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css", "body{background:red;}")
-      ::File.read(::File.join(revision_path, 'assets', '/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css')).must_equal "body{background:red;}"
+      ::File.read(::File.join(revision_path, 'static', 'assets/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css')).must_equal "body{background:red;}"
     end
 
     it "supports any number of asset sub-directories" do
       store.store_asset(revision, "/css/modules/vendor/site-de4e312eb1deac7c937dc181b1ac8ab3.css", "body{background:red;}")
-      ::File.read(::File.join(revision_path, 'assets', '/css/modules/vendor/site-de4e312eb1deac7c937dc181b1ac8ab3.css')).must_equal "body{background:red;}"
+      ::File.read(::File.join(revision_path, 'static', 'assets/css/modules/vendor/site-de4e312eb1deac7c937dc181b1ac8ab3.css')).must_equal "body{background:red;}"
+    end
+
+    it "supports a custom asset prefix" do
+      store = Spontaneous::Output::Store::File.new(root, assets_prefix: 'something')
+      store.store_asset(revision, "/css/modules/vendor/site-de4e312eb1deac7c937dc181b1ac8ab3.css", "body{background:red;}")
+      ::File.read(::File.join(revision_path, 'static', 'something/css/modules/vendor/site-de4e312eb1deac7c937dc181b1ac8ab3.css')).must_equal "body{background:red;}"
     end
 
     it "enables the retrieval of available revisions" do
@@ -136,7 +142,7 @@ describe "Output store" do
       store.store_dynamic(revision, "/one.html", "*template*", transaction)
       store.store_asset(revision, "/css/site.css", "body{}", transaction)
       transaction.length.must_equal 4
-      transaction.must_equal ["00100/static/one.html", "00100/protected/one.html", "00100/dynamic/one.html", "00100/assets/css/site.css"]
+      transaction.must_equal ["00100/static/one.html", "00100/protected/one.html", "00100/dynamic/one.html", "00100/static/assets/css/site.css"]
     end
 
     it "enables registration of a revision" do
@@ -244,12 +250,20 @@ describe "Output store" do
 
     it "allows the storage & retrieval of assets" do
       store.store_asset(r, "/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css", "body{color:red;}")
-      result = store.load_asset(r, "/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css")
+      result = store.load_static(r, "/assets/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css")
       result.respond_to?(:read).must_equal true
       result.read.must_equal "body{color:red;}"
       result.respond_to?(:path).must_equal true
       result.respond_to?(:to_path).must_equal false
-      result.path.must_equal "/#{r}/assets/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css"
+      result.path.must_equal "/#{r}/static/assets/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css"
+    end
+
+    it "allows for the setting of a custom assets root path" do
+      store = Spontaneous::Output::Store::Moneta.new(:Memory, assets_prefix: 'something')
+      store.store_asset(r, "/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css", "body{color:red;}")
+      result = store.load_static(r, "/something/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css")
+      result.wont_equal nil
+      result.read.must_equal "body{color:red;}"
     end
 
     it "puts all written keys into a transaction if given" do
@@ -259,7 +273,7 @@ describe "Output store" do
       store.store_dynamic(r, "/three.html", "*template*", transaction)
       store.store_asset(r, "/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css", "body{color:red;}", transaction)
       transaction.length.must_equal 4
-      transaction.must_equal ["100:static:/one.html", "100:protected:/two.html", "100:dynamic:/three.html", "100:assets:/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css"]
+      transaction.must_equal ["100:static:/one.html", "100:protected:/two.html", "100:dynamic:/three.html", "100:static:/assets/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css"]
     end
 
     it "enables registration of a revision" do
@@ -410,11 +424,6 @@ describe "Output store" do
     it "allows for reading a dynamic template" do
       template = revision.dynamic_template(output_xml)
       template.read.must_equal "XML"
-    end
-
-    it "allows for reading an asset" do
-      template = revision.asset("/css/site.css")
-      template.read.must_equal "CSS"
     end
 
     it "doesn't return a dynamic template as a static one" do

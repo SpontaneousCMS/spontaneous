@@ -10,7 +10,8 @@ module Spontaneous::Output::Store
   class File < Backend
     F = ::File unless defined? F
 
-    def initialize(root)
+    def initialize(root, config = {})
+      super(config)
       @root = root
     end
 
