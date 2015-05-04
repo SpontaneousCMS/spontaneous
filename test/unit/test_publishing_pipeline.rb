@@ -171,9 +171,13 @@ describe "Publishing Pipeline" do
   end
 
   def run_step(progress = Spontaneous::Publishing::Progress::Silent.new)
+    run_step_with_transaction(transaction(revision, nil, progress))
+  end
+
+  def run_step_with_transaction(transaction)
     # the overall publish coordinator will ensure that every step runs within the right scope
-    @site.model.scope(revision, true) do
-      step.call(transaction(revision, nil, progress))
+    @site.model.scope(transaction.revision, true) do
+      step.call(transaction)
     end
   end
 
@@ -241,6 +245,13 @@ describe "Publishing Pipeline" do
       run_step
     end
 
+    it "doesn't call #commit on the output store transaction" do
+      t = transaction
+      rt = t.render_transaction
+      rt.expects(:commit).never
+      run_step_with_transaction(t)
+    end
+
     describe "private trees" do
       let(:next_revision) { revision + 1 }
       let(:progress) { Spontaneous::Publishing::Progress::Silent.new }
@@ -293,6 +304,7 @@ describe "Publishing Pipeline" do
     it "deletes the rendered files on rollback" do
       instance = run_step
       store = @output_store.revision(revision).store
+      store.expects(:delete_revision).with(revision, instance_of(Array))
       store.expects(:delete_revision).with(revision)
       instance.rollback
     end
@@ -638,8 +650,8 @@ describe "Publishing Pipeline" do
       step.to_sym.must_equal :activate_revision
     end
 
-    it "reports a step count of 1" do
-      step.count(transaction).must_equal 2
+    it "reports a step count of 3" do
+      step.count(transaction).must_equal 3
     end
 
     it "sets the stage to 'activating revision'" do
@@ -649,10 +661,10 @@ describe "Publishing Pipeline" do
       run_step(progress)
     end
 
-    it "increments the progress step by 2" do
+    it "increments the progress step by 3" do
       progress = mock
       progress.stubs(:stage)
-      progress.expects(:step).with(1, instance_of(String)).times(2)
+      progress.expects(:step).with(1, instance_of(String)).times(3)
       run_step(progress)
     end
 
@@ -665,6 +677,13 @@ describe "Publishing Pipeline" do
       state.reload
       state.published_revision.must_equal revision
       state.revision.must_equal revision + 1
+    end
+
+    it "commits the output store transaction" do
+      t = transaction
+      rt = t.render_transaction
+      rt.expects(:commit).once
+      run_step_with_transaction(t)
     end
 
     it "activates the output store revision" do

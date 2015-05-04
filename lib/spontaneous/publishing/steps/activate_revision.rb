@@ -2,14 +2,20 @@ module Spontaneous::Publishing::Steps
   class ActivateRevision < BaseStep
 
     def count
-      2
+      3
     end
 
     def call
       save_state
       progress.stage("activating revision")
+      commit_transaction
       set_published_revision
       activate_revision(revision)
+    end
+
+    def commit_transaction
+      transaction.commit
+      progress.step(1, "commiting rendered site => #{revision}")
     end
 
     def rollback

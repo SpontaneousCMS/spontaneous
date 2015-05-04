@@ -14,7 +14,6 @@ module Spontaneous::Publishing::Steps
     def call
       progress.stage('rendering')
       render_pages
-      commit
     end
 
     def count
@@ -30,10 +29,6 @@ module Spontaneous::Publishing::Steps
       renderable_pages.each do |page|
         render_page(page)
       end
-    end
-
-    def commit
-      transaction.commit
     end
 
     def render_page(page)
