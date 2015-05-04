@@ -46,11 +46,15 @@ module Spontaneous::Publishing
 
     def run_pipeline!(pages)
       pages ||= all_unpublished_pages
-      pipeline.run(site, revision, pages, progress)
+      pipeline.run(transaction(pages))
     end
 
     def pipeline
       @pipeline ||= Pipeline.new(actions.steps)
+    end
+
+    def transaction(pages)
+      Transaction.new(site, revision, pages, progress)
     end
 
     def start_publish

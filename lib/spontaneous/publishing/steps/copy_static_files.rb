@@ -6,11 +6,11 @@ module Spontaneous::Publishing::Steps
     end
 
     def call
-      @progress.stage("copying files")
+      progress.stage("copying files")
       ensure_public_dir
       facets.each do |facet|
         copy_facet(facet)
-        @progress.step(1, "from #{facet.name.inspect}")
+        progress.step(1, "from #{facet.name.inspect}")
       end
     end
 
@@ -64,7 +64,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def facets
-      @site.facets
+      site.facets
     end
 
     def sources(facet)

@@ -3,9 +3,9 @@ module Spontaneous::Publishing::Steps
   class CreateRevisionDirectory < BaseStep
 
     def call
-      @progress.stage("creating revision directory")
+      progress.stage("creating revision directory")
       FileUtils.mkdir_p(path / "tmp")
-      @progress.step(count, path)
+      progress.step(count, path)
     end
 
     def count
@@ -18,7 +18,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def path
-      @site.revision_dir(revision)
+      site.revision_dir(revision)
     end
   end
 end

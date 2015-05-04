@@ -7,37 +7,37 @@ module Spontaneous::Publishing
       @completed = []
     end
 
-    def run(site, revision, pages, progress)
-      calculate_step_count(site, revision, pages, progress)
-      run_steps(site, revision, pages, progress)
+    def run(transaction)
+      calculate_step_count(transaction)
+      run_steps(transaction)
     end
 
-    def run_steps(site, revision, pages, progress)
+    def run_steps(transaction)
       begin
-        run_steps!(site, revision, pages, progress)
+        run_steps!(transaction)
       rescue Exception => e
-        rollback_steps!(site, revision, pages, progress)
+        rollback_steps!(transaction)
         raise
       end
     end
 
-    def run_steps!(site, revision, pages, progress)
+    def run_steps!(transaction)
       steps.each do |step|
-        @completed << step.call(site, revision, pages, progress)
+        @completed << step.call(transaction)
       end
     end
 
-    def rollback_steps!(site, revision, pages, progress)
+    def rollback_steps!(transaction)
       @completed.each do |step|
         step.rollback if step && step.respond_to?(:rollback)
       end
     end
 
-    def calculate_step_count(site, revision, pages, progress)
+    def calculate_step_count(transaction)
       count = steps.map { |step|
-        step.respond_to?(:count) ? step.count(site, revision, pages, progress) : 0
+        step.respond_to?(:count) ? step.count(transaction) : 0
       }.inject(0, :+)
-      progress.start(count)
+      transaction.progress.start(count)
     end
   end
 end

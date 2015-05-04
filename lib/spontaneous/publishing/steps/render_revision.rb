@@ -12,7 +12,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def call
-      @progress.stage("rendering")
+      progress.stage('rendering')
       render_pages
       commit
     end
@@ -22,7 +22,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def rollback
-      render_transaction.rollback if @render_transaction
+      transaction.rollback
       template_revision.delete
     end
 
@@ -33,8 +33,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def commit
-      render_transaction.commit
-      @render_transaction = nil
+      transaction.commit
     end
 
     def render_page(page)
@@ -45,25 +44,25 @@ module Spontaneous::Publishing::Steps
 
     def render_output(output)
       output.publish_page(renderer, revision, render_transaction)
-      @progress.step(1, output.url_path.inspect)
+      progress.step(1, output.url_path.inspect)
     rescue => e
       raise RenderException.new(output, e)
     end
 
     def renderer
-      @renderer ||= Spontaneous::Output::Template::PublishRenderer.new(@site, true)
+      @renderer ||= Spontaneous::Output::Template::PublishRenderer.new(site, true)
     end
 
     def render_transaction
-      @render_transaction ||= template_revision.transaction
+      transaction.render_transaction
     end
 
     def template_revision
-      @template_revision ||= @site.output_store.revision(@revision)
+      transaction.template_revision
     end
 
     def renderable_pages
-      @site.pages
+      site.pages
     end
   end
 end

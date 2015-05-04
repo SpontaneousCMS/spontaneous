@@ -2,11 +2,11 @@ module Spontaneous::Publishing::Steps
   class GenerateRackupFile < BaseStep
 
     def call
-      @progress.stage("create server config")
+      progress.stage("create server config")
       File.open(config_path, "w:UTF-8") do |file|
         file.write(config)
       end
-      @progress.step(count, config_path.inspect)
+      progress.step(count, config_path.inspect)
     end
 
     def count
@@ -18,14 +18,14 @@ module Spontaneous::Publishing::Steps
     end
 
     def config_path
-      (@site.revision_dir(revision) / "config.ru").tap do |path|
+      (site.revision_dir(revision) / "config.ru").tap do |path|
         dir = File.dirname(path)
         FileUtils.mkdir_p(dir) unless File.directory?(dir)
       end
     end
 
     def path
-      @path ||= Pathname.new(@site.root).realpath.to_s
+      @path ||= Pathname.new(site.root).realpath.to_s
     end
 
     def config

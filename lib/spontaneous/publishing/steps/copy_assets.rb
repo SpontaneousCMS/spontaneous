@@ -22,11 +22,11 @@ module Spontaneous::Publishing::Steps
     end
 
     def production_mode
-      @progress.stage("copying assets")
+      progress.stage("copying assets")
       ensure_asset_dir
       assets.each do |logical_path, asset|
         copy_asset(asset)
-        @progress.step(1, "'#{logical_path}' => '#{asset}'")
+        progress.step(1, "'#{logical_path}' => '#{asset}'")
       end
     end
 

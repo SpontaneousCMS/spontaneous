@@ -166,10 +166,14 @@ describe "Publishing Pipeline" do
     end
   end
 
+  def transaction(_revision = revision, pages = nil, progress = Spontaneous::Publishing::Progress::Silent.new)
+    Spontaneous::Publishing::Transaction.new(@site, _revision, pages, progress)
+  end
+
   def run_step(progress = Spontaneous::Publishing::Progress::Silent.new)
     # the overall publish coordinator will ensure that every step runs within the right scope
     @site.model.scope(revision, true) do
-      step.call(@site, revision, nil, progress)
+      step.call(transaction(revision, nil, progress))
     end
   end
 
@@ -194,7 +198,7 @@ describe "Publishing Pipeline" do
     end
 
     it "returns a step count of 1" do
-      step.count(@site, revision, nil).must_equal 1
+      step.count(transaction).must_equal 1
     end
 
     it "updates the progress object" do
@@ -264,14 +268,14 @@ describe "Publishing Pipeline" do
           end
         end
         @site.model.scope(next_revision, true) do
-          step.call(@site, next_revision, nil, )
+          step.call(transaction(next_revision))
         end
       end
     end
 
     it "returns the correct number of steps" do
       @site.model.scope(revision, true) do
-        step.count(@site, revision, nil).must_equal (@pages.length * 2)
+        step.count(transaction).must_equal (@pages.length * 2)
       end
     end
 
@@ -319,7 +323,7 @@ describe "Publishing Pipeline" do
 
     it "returns the correct number of steps when there are no search indexes" do
       @site.model.scope(revision, true) do
-        step.count(@site, revision, nil).must_equal 0
+        step.count(transaction).must_equal 0
       end
     end
 
@@ -339,7 +343,7 @@ describe "Publishing Pipeline" do
 
       it "returns the correct number of steps" do
         @site.model.scope(revision, true) do
-          step.count(@site, revision, nil).must_equal (@pages.length)
+          step.count(transaction).must_equal (@pages.length)
         end
       end
 
@@ -423,7 +427,7 @@ describe "Publishing Pipeline" do
     end
 
     it "gives its step count as the number of facets" do
-      step.count(@site, revision, nil).must_equal 1
+      step.count(transaction).must_equal 1
     end
 
     it "copies files in the site's public dir" do
@@ -457,7 +461,7 @@ describe "Publishing Pipeline" do
       end
 
       it "gives its step count as the number of facets" do
-        step.count(@site, revision, nil).must_equal 2
+        step.count(transaction).must_equal 2
       end
 
       it "steps the progress once for each facet" do
@@ -512,7 +516,7 @@ describe "Publishing Pipeline" do
     end
 
     it "gives its step count as the number of assets" do
-      step.count(@site, revision, nil).must_equal 3
+      step.count(transaction).must_equal 3
     end
 
     it "copies compiled assets to the revision's asset dir" do
@@ -550,7 +554,7 @@ describe "Publishing Pipeline" do
       end
 
       it "gives its step count as zero" do
-        step.count(@site, revision, nil).must_equal 0
+        step.count(transaction).must_equal 0
       end
 
       it "never steps the progress" do
@@ -572,7 +576,7 @@ describe "Publishing Pipeline" do
     end
 
     it "reports a step count of 1" do
-      step.count(@site, revision, nil).must_equal 1
+      step.count(transaction).must_equal 1
     end
 
     it "sets the stage to 'create server config'" do
@@ -628,7 +632,7 @@ describe "Publishing Pipeline" do
     end
 
     it "reports a step count of 1" do
-      step.count(@site, revision, nil).must_equal 2
+      step.count(transaction).must_equal 2
     end
 
     it "sets the stage to 'activating revision'" do
@@ -731,7 +735,7 @@ describe "Publishing Pipeline" do
     end
 
     it "reports a step count of 0" do
-      step.count(@site, revision, nil).must_equal 0
+      step.count(transaction).must_equal 0
     end
   end
 
@@ -743,7 +747,7 @@ describe "Publishing Pipeline" do
     end
 
     it "reports a step count of 1" do
-      step.count(@site, revision, nil).must_equal 1
+      step.count(transaction).must_equal 1
     end
 
     it "sets the stage to 'archiving old revisions'" do
@@ -783,7 +787,7 @@ describe "Publishing Pipeline" do
     }
 
     def run_steps(_steps = steps, _progress = progress)
-      Spontaneous::Publishing::Pipeline.new(_steps).run(@site, revision, pages, _progress)
+      Spontaneous::Publishing::Pipeline.new(_steps).run(transaction(revision, pages, _progress))
     end
 
     def modify_some_pages
@@ -799,7 +803,7 @@ describe "Publishing Pipeline" do
       steps = [mock, mock]
       steps.each do |step|
         step.stubs(:count).returns(10)
-        step.expects(:call).with(site, revision, pages, progress)
+        step.expects(:call).with(instance_of(Spontaneous::Publishing::Transaction))
       end
       run_steps(steps)
     end
@@ -808,7 +812,7 @@ describe "Publishing Pipeline" do
       steps = [mock, mock]
       steps.each do |step|
         step.stubs(:call)
-        step.expects(:count).with(site, revision, pages, progress).returns(12)
+        step.expects(:count).with(instance_of(Spontaneous::Publishing::Transaction)).returns(12)
       end
       progress.expects(:start).with(24)
       run_steps(steps)
@@ -893,7 +897,7 @@ describe "Publishing Pipeline" do
     it "runs all steps" do
       pages_matcher = all_of(*@modified_pages.map { |page| PageMatcher.new(page)})
       steps.each do |step|
-        step.expects(:call).with(site, revision, pages_matcher, instance_of(mprogress::Multi))
+        step.expects(:call).with(instance_of(Spontaneous::Publishing::Transaction))
       end
       publish.publish_pages(@modified_pages)
     end
@@ -917,8 +921,23 @@ describe "Publishing Pipeline" do
       end
 
       def matches?(available_parameters)
-        parameter = available_parameters.shift
-        parameter.any? { |param| param.class == @page.class && param.id == @page.id }
+        # p [@page, :params, available_parameters]
+        page = available_parameters.shift
+        # p [:page, page]
+        # page.class == @page.class && page.id == @page.id
+        page.any? { |param| param.class == @page.class && param.id == @page.id }
+      end
+    end
+    class TransactionPagesMatcher < Mocha::ParameterMatchers::Base
+      def initialize(modified_pages)
+        @modified_pages = modified_pages
+      end
+
+      def matches?(available_parameters)
+        transaction = available_parameters.shift
+        transaction.pages.all? { |page |
+          @modified_pages.include?(page)
+        }
       end
     end
 
@@ -930,9 +949,8 @@ describe "Publishing Pipeline" do
     # so a publish all should convert the nil used internally into a list of all
     # the modified pages for use by the steps
     it "passes the list of modified pages to the publish steps" do
-      pages_matcher = all_of(*@modified_pages.map { |page| PageMatcher.new(page)})
       steps.each do |step|
-        step.expects(:call).with(site, revision, pages_matcher, instance_of(mprogress::Multi))
+        step.expects(:call).with(TransactionPagesMatcher.new(@modified_pages))
       end
       publish.publish_all
     end
@@ -1039,7 +1057,7 @@ describe "Publishing Pipeline" do
 
       it "passes all configured steps onto the publish system" do
         steps.each do |step|
-          step.expects(:call).with(site, revision, anything, anything)
+          step.expects(:call).with(instance_of(Spontaneous::Publishing::Transaction))
         end
         @site.publish do
           run FakeStep
