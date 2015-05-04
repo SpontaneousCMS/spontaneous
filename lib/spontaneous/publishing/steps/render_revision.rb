@@ -21,7 +21,6 @@ module Spontaneous::Publishing::Steps
     end
 
     def rollback
-      transaction.rollback
       template_revision.delete
     end
 
