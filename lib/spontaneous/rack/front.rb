@@ -20,11 +20,11 @@ module Spontaneous
       end
 
       def self.application(site = ::Spontaneous.instance)
-        app = ::Rack::Builder.new do
+        ::Rack::Builder.new do
           use Spontaneous::Rack::Static, root: Spontaneous.revision_dir / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
 
           Spontaneous.instance.front.middleware.each do |args, block|
-            use *args, &block
+            use(*args, &block)
           end
 
           Spontaneous.instance.front_controllers.each do |namespace, controller_class|
