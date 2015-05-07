@@ -50,7 +50,7 @@ module Spontaneous
     end
 
     def self.set(site, field, value, user, asynchronous = false)
-      Update.perform(site, {field: value}, user, asynchronous)
+      Update.perform(site, {field => value}, user, asynchronous)
     end
 
     def self.set_asynchronously(site, field, value, user)
