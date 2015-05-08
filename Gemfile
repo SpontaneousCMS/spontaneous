@@ -7,6 +7,9 @@ gem 'mocha', :require => false
 
 gem 'therubyracer',    '~> 0.11'
 
+gem 'pry'
+gem 'pry-doc'
+
 # group :development do
 #   # gem 'Selenium', '~> 1.1.14'
 # end
