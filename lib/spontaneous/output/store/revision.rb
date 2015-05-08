@@ -22,13 +22,30 @@ module Spontaneous::Output::Store
     # render step
     def static_template(output)
       key = @store.output_key(output)
-      @store.load_protected(@revision, key) || @store.load_static(@revision, key)
+      @store.load_static(@revision, key)
+    end
+
+    def protected_template(output)
+      key = @store.output_key(output)
+      @store.load_protected(@revision, key)
     end
 
     # Return a template for the given output
     def dynamic_template(output, request = nil)
       key = @store.output_key(output, true)
       @store.load_dynamic(@revision, key)
+    end
+
+    def static_asset(key)
+      @store.load_asset(@revision, key)
+    end
+
+    def static_file(key)
+      @store.load_static(@revision, key)
+    end
+
+    def load(namespace, key, static:)
+      @store.load(@revision, namespace, key, static: static)
     end
 
     def activate

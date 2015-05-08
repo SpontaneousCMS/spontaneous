@@ -10,10 +10,12 @@ module Spontaneous
       METHOD_POST = "POST".freeze
       METHOD_HEAD = "HEAD".freeze
       HTTP_CONTENT_LENGTH = "Content-Length".freeze
+      HTTP_CONTENT_TYPE = "Content-Type".freeze
       HTTP_EXPIRES = "Expires".freeze
       HTTP_CACHE_CONTROL = "Cache-Control".freeze
       HTTP_LAST_MODIFIED = "Last-Modified".freeze
       HTTP_NO_CACHE = "max-age=0, must-revalidate, no-cache, no-store".freeze
+      PATH_INFO = Spontaneous::Constants::PATH_INFO
 
       SLASH = Spontaneous::Constants::SLASH
 
@@ -26,6 +28,7 @@ module Spontaneous
       SITE           = "spot.site".freeze
       RENDERER       = "spot.renderer".freeze
       REVISION       = "spot.revision".freeze
+      OUTPUT_STORE   = "spot.output_store".freeze
       CSRF_VALID     = "spot.csrf_valid".freeze
       CSRF_TOKEN     = "spot.csrf_token".freeze
 
@@ -80,7 +83,8 @@ module Spontaneous
     autoload :Front,                'spontaneous/rack/front'
     autoload :JS,                   'spontaneous/rack/js'
     autoload :Middleware,           'spontaneous/rack/middleware'
-    autoload :PageController,       "spontaneous/rack/page_controller"
+    autoload :OutputStore,          'spontaneous/rack/output_store'
+    autoload :PageController,       'spontaneous/rack/page_controller'
     autoload :Public,               'spontaneous/rack/public'
     autoload :SSE,                  'spontaneous/rack/sse'
     autoload :Static,               'spontaneous/rack/static'

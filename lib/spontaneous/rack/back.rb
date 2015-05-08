@@ -34,17 +34,17 @@ module Spontaneous
       end
 
       def self.api_handlers
-        [["/events", Events],
-         ["/users", UserAdmin],
-         ["/site", Site],
-         ["/map", Map],
-         ["/field", Field],
-         ["/page", Page],
-         ["/content", Content],
-         ["/alias", Alias],
-         ["/changes", Changes],
-         ["/file", File::Simple],
-         ["/shard", File::Sharded]]
+        [['/events', Events],
+         ['/users', UserAdmin],
+         ['/site', Site],
+         ['/map', Map],
+         ['/field', Field],
+         ['/page', Page],
+         ['/content', Content],
+         ['/alias', Alias],
+         ['/changes', Changes],
+         ['/file', File::Simple],
+         ['/shard', File::Sharded]]
       end
 
       def self.editing_app(site)
@@ -61,10 +61,10 @@ module Spontaneous
           # Schema has to come before Reloader because we need to be able to
           # present the conflict resolution interface without running through
           # the schema validation step
-          map("/schema")  { run Schema }
+          map('/schema')  { run Schema }
           use Reloader, site
           use Index
-          map("/private") {
+          map('/private') {
             use Scope::Preview, site
             run Private
           }
@@ -72,7 +72,7 @@ module Spontaneous
           Back.api_handlers.each do |path, app|
             map(path) { run app }
           end
-          run lambda { |env| [ 404, {}, ["Not Found"] ] }
+          run lambda { |env| [ 404, {}, ['Not Found'] ] }
         end
       end
 
@@ -91,7 +91,7 @@ module Spontaneous
           # the preview site.
           use Authenticate::Preview
           use CSRF::Header
-          use Spontaneous::Rack::Static, root: Spontaneous.root / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
+          use Spontaneous::Rack::Static, root: Spontaneous.root / 'public', urls: %w[/], try: ['.html', 'index.html', '/index.html']
           use Reloader, site
           # inject the front controllers into the preview so that this is a
           # full duplicate of the live site
@@ -134,15 +134,17 @@ module Spontaneous
             end
           end if site
 
-          map("/assets") { run SiteAssets.new }
+          map('/assets') { run SiteAssets.new }
 
-          map "/media" do
+          map '/media' do
             use ::Rack::Lint
-            run Spontaneous::Rack::CacheableFile.new(Spontaneous.media_dir)
+            use Spontaneous::Rack::CacheableFile
+            run ::Rack::File.new(Spontaneous.media_dir)
           end
 
           map(NAMESPACE) { run Spontaneous::Rack::Back.editing_app(site) }
-          map("/")       { run Spontaneous::Rack::Back.preview_app(site) }
+
+          run Spontaneous::Rack::Back.preview_app(site)
         end
       end
     end

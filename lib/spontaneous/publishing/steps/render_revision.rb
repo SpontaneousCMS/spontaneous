@@ -44,7 +44,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def renderer
-      @renderer ||= Spontaneous::Output::Template::PublishRenderer.new(site, true)
+      @renderer ||= Spontaneous::Output::Template::PublishRenderer.new(transaction, true)
     end
 
     def render_transaction

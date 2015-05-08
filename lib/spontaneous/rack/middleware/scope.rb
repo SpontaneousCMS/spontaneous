@@ -55,6 +55,7 @@ module Spontaneous::Rack::Middleware
         status = headers = body = nil
         env[RENDERER] = renderer
         env[REVISION] = revision = @site.published_revision
+        env[OUTPUT_STORE] = @site.output_store.revision(revision)
         @site.model.with_published(@site) do
           status, headers, body = @app.call(env)
         end

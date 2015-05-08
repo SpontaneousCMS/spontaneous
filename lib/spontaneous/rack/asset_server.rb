@@ -15,7 +15,7 @@ module Spontaneous::Rack
 
     def force_encoding(status, headers, body)
       if (content_type = headers[CONTENT_TYPE])
-        headers.update(CONTENT_TYPE => "#{content_type}; charset=#{@charset}")
+        headers.update(CONTENT_TYPE => "#{content_type};charset=#{@charset}")
       end
       [status, headers, body]
     end

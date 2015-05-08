@@ -1,7 +1,7 @@
 module Spontaneous::Publishing
   class Transaction
 
-    attr_reader :site, :revision, :pages, :progress
+    attr_reader :site, :revision, :pages, :progress, :asset_environment
 
     def initialize(site, revision, pages, progress = Spontaneous::Publishing::Progress::Silent.new)
       @site, @revision, @pages, @progress = site, revision, pages, progress
@@ -22,6 +22,18 @@ module Spontaneous::Publishing
 
     def template_revision
       @template_revision ||= @site.output_store.revision(@revision)
+    end
+
+    def asset_environment
+      @asset_environment ||= Spontaneous::Asset::Environment.new(self)
+    end
+
+    def publishing?
+      true
+    end
+
+    def development?
+      Spontaneous.development?
     end
   end
 end

@@ -34,14 +34,16 @@ module Spontaneous::Output::Context
       site.home
     end
 
-    def asset_environment
-      _with_render_cache('asset.environment') do
-        Spontaneous::Asset::Environment.new(self)
-      end
+    def _asset_environment
+      _renderer.asset_environment
+    end
+
+    def _asset_environment=(environment)
+      @_asset_environment = environment
     end
 
     def asset_path(path, options = {})
-      asset_environment.find(path, options).try(:first)
+      _asset_environment.find(path, options).try(:first)
     end
 
     def asset_url(path, options = {})

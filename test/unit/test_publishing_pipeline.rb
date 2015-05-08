@@ -503,10 +503,10 @@ describe "Publishing Pipeline" do
     let(:assets)        { environment.manifest.assets }
 
     def assert_assets(revision)
-      revision_root = @site.revision_dir(revision)
       assets.length.must_equal 3
+      output = @output_store.revision(revision)
       assets.each do |logical_path, asset|
-        assert File.exist?(File.join(revision_root, 'assets', asset)), "asset '#{asset}' does not exist"
+        assert output.static_asset(File.join('/', asset)), "Asset '#{asset}' missing"
       end
     end
 
@@ -543,13 +543,14 @@ describe "Publishing Pipeline" do
       assert_assets(revision)
     end
 
-    it "copies compressed assets to the revision's asset dir" do
-      asset = assets.values.first
-      compressed = asset + '.gz'
-      FileUtils.cp(manifest.asset_compilation_dir + asset, manifest.asset_compilation_dir + compressed)
-      run_step
-      assert File.exist?(File.join(revision_root, 'assets', compressed)), "#{compressed} should exist"
-    end
+    # TODO: Implement compression on File backed assets
+    # it "copies compressed assets to the revision's asset dir" do
+    #   asset = assets.values.first
+    #   compressed = asset + '.gz'
+    #   FileUtils.cp(manifest.asset_compilation_dir + asset, manifest.asset_compilation_dir + compressed)
+    #   run_step
+    #   assert File.exist?(File.join(revision_root, 'assets', compressed)), "#{compressed} should exist"
+    # end
 
     it "runs rollback after throwing an exception" do
       instance = mock
@@ -558,26 +559,6 @@ describe "Publishing Pipeline" do
       instance.expects(:rollback)
       lambda{ run_step }.must_raise(Exception)
     end
-
-    describe 'development' do
-      let(:development) { true }
-
-      before do
-        Spontaneous.stubs(:development?).returns(true)
-      end
-
-      it "gives its step count as zero" do
-        step.count(transaction).must_equal 0
-      end
-
-      it "never steps the progress" do
-        progress = mock
-        progress.stubs(:stage)
-        progress.expects(:step).with(1, instance_of(String)).never
-        run_step(progress)
-      end
-    end
-
   end
 
   describe "GenerateRackupFile" do

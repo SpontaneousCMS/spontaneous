@@ -131,6 +131,15 @@ describe "Outputs" do
       FPage.output(:rss).mimetype.must_equal "application/xhtml+xml"
     end
 
+    it "knows if the configured mimetype is different from that inferred from the extension" do
+      output = FPage.add_output :html, :format => :html, :mimetype => "text/html"
+      output.custom_mimetype?.must_equal false
+      output = FPage.add_output :rss
+      output.custom_mimetype?.must_equal false
+      output = FPage.add_output :rss, :format => :html, :mimetype => "application/xhtml+xml"
+      output.custom_mimetype?.must_equal true
+    end
+
     it "allow for marking an output as 'private'" do
       FPage.add_output :rss, :private => true
       refute FPage.output(:rss).public?
@@ -395,7 +404,8 @@ describe "Outputs" do
 
   describe "publishing" do
     let(:revision) { 2 }
-    let(:renderer) { Spontaneous::Output::Template::PublishRenderer.new(@site, false) }
+    let(:publish_transaction) { Spontaneous::Publishing::Transaction.new(@site, revision, nil) }
+    let(:renderer) { Spontaneous::Output::Template::PublishRenderer.new(publish_transaction, false) }
     let(:transaction) { mock }
     let(:page) { P.new(title: "Godot") }
     let(:output) { page.output(:html) }
@@ -411,13 +421,13 @@ describe "Outputs" do
 
     it "renders static layouts for static pages" do
       P.layout { "'${ title }'" }
-      transaction.expects(:store).with(output, false, "'Godot'")
+      transaction.expects(:store_output).with(output, false, "'Godot'")
       output.publish_page(renderer, revision, transaction)
     end
 
     it "renders dynamic layouts for static pages" do
       P.layout { "'${ title }' {{Time.now.to_i}}" }
-      transaction.expects(:store).with(output, true, "'Godot' {{Time.now.to_i}}")
+      transaction.expects(:store_output).with(output, true, "'Godot' {{Time.now.to_i}}")
       output.publish_page(renderer, revision, transaction)
     end
 
@@ -426,7 +436,7 @@ describe "Outputs" do
         get { "Hello" }
       end
       P.layout { "'${ title }'" }
-      transaction.expects(:store).with(output, false, "'Godot'")
+      transaction.expects(:store_output).with(output, false, "'Godot'")
       output.publish_page(renderer, revision, transaction)
     end
 
@@ -435,7 +445,7 @@ describe "Outputs" do
         get { "Hello" }
       end
       P.layout { "'${ title }' {{Time.now.to_i}}" }
-      transaction.expects(:store).with(output, true, "'Godot' {{Time.now.to_i}}")
+      transaction.expects(:store_output).with(output, true, "'Godot' {{Time.now.to_i}}")
       output.publish_page(renderer, revision, transaction)
     end
   end

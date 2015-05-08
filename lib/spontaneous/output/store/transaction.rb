@@ -12,23 +12,23 @@ module Spontaneous::Output::Store
       @committed = false
     end
 
-    def store(output, dynamic, template)
+    def store_output(output, dynamic, template)
       key = @store.output_key(output, dynamic)
       case
-      when dynamic || output.dynamic? # dynamic
+      when dynamic || output.dynamic?
         @store.store_dynamic(@revision, key, template, self)
-      when output.page.dynamic? # protected
+      when output.private? || output.custom_mimetype? || output.page.dynamic?
         @store.store_protected(@revision, key, template, self)
-      else # static
+      else
         @store.store_static(@revision, key, template, self)
       end
     end
 
-    def asset(key, asset)
+    def store_asset(key, asset)
       @store.store_asset(@revision, key, asset, self)
     end
 
-    def static(key, file)
+    def store_static(key, file)
       @store.store_static(@revision, key, file, self)
     end
 

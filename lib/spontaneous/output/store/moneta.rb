@@ -74,7 +74,22 @@ module Spontaneous::Output::Store
       ":revisions:".freeze
     end
 
+    def load(revision, partition, path, static:)
+      if (template = @backend.load(key_for(revision, partition, path)))
+        return wrap_read(template, static, path_for(revision, partition, path))
+      end
+      nil
+    end
+
     protected
+
+    def wrap_read(data, static, path)
+      if static
+        StringIO.new(data)
+      else
+        Template.new(data, path)
+      end
+    end
 
     # The Template class wraps a String template response with IO characteristics
     # based on StringIO & also supplies File-like characteristics by
@@ -99,13 +114,6 @@ module Spontaneous::Output::Store
       key = key_for(revision, partition, path)
       transaction.push(key) if transaction
       @backend.store(key, template)
-    end
-
-    def load(revision, partition, path)
-      if (template = @backend.load(key_for(revision, partition, path)))
-        return Template.new(template, path_for(revision, partition, path))
-      end
-      nil
     end
 
     def remove_active_revision

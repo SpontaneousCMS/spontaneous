@@ -4,10 +4,13 @@ module Spontaneous::Rack::Back
   class ApplicationAssets < Base
     def initialize(app, charset = "UTF-8")
       css, js = %w(css js).map { |d| build_asset_handler(d, charset) }
-      assets = Spontaneous::Rack::CacheableFile.new(Spontaneous.root / "public/@spontaneous/assets")
+      assets = ::Rack::File.new(Spontaneous.root / "public/@spontaneous/assets")
       @app = ::Rack::Builder.app do
         use Spontaneous::Rack::Static, :root => Spontaneous.application_dir, :urls => %W(/static)
-        map("/assets") { run assets }
+        map("/assets") {
+          use Spontaneous::Rack::CacheableFile
+          run assets
+        }
         map("/css")    { run css }
         map("/js")     { run js }
         run app
