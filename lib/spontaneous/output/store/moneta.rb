@@ -125,7 +125,7 @@ module Spontaneous::Output::Store
     end
 
     def path_for(revision, partition, path)
-      ::File.join(Spontaneous::SLASH, revision.to_s, partition, path)
+      ::File.join(Spontaneous::SLASH, revision.to_s, partition.to_s, path)
     end
 
     def serialize(obj)

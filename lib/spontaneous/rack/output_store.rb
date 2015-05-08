@@ -5,15 +5,11 @@ module Spontaneous::Rack
     include Spontaneous::Rack::Constants
 
     def self.assets(site)
-      new(nil, site, Spontaneous::Output::Store::Backend::ASSET_PATH)
+      new(nil, site, :assets)
     end
 
-    def initialize(app, site, namespace = static_namespace)
+    def initialize(app, site, namespace = :static)
       @app, @site, @namespace = app, site, namespace
-    end
-
-    def static_namespace
-      Spontaneous::Output::Store::Backend::STATIC_PATH
     end
 
     def call(env)
