@@ -7,23 +7,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def call
-      case development?
-      when true
-        development_mode
-      when false
-        production_mode
-      end
-    end
-
-    def development_mode
-      # In development the asset manifest isn't cached and the compilation
-      # done by the asset environment is sufficient to copy all the assets into
-      # place
-    end
-
-    def production_mode
       progress.stage("copying assets")
-      ensure_asset_dir
       assets.each do |logical_path, asset|
         copy_asset(asset)
         progress.step(1, "'#{logical_path}' => '#{asset}'")
@@ -31,47 +15,25 @@ module Spontaneous::Publishing::Steps
     end
 
     def rollback
-      FileUtils.rm_r(revision_asset) if File.exists?(revision_asset)
-    end
-
-    def ensure_asset_dir
-      dir = revision_asset
     end
 
     def copy_asset(asset)
-      ['', '.gz'].each do |suffix|
-        copy_asset_file(asset + suffix)
-      end
-    end
-
-    def copy_asset_file(asset)
       source = File.join(manifest.asset_compilation_dir, asset)
-      if File.exist?(source)
-        dest = ensure_dir File.join(revision_asset, asset)
-        link_file(source, dest)
-      end
+      copy_asset_file(source, asset)
     end
 
-    def link_file(source, dest)
-      src_dev = File::stat(source).dev
-      dst_dev = File::stat(File.dirname(dest)).dev
-      if (src_dev == dst_dev)
-        FileUtils.ln(source, dest, :force => true)
-      else
-        FileUtils.cp(source, dest)
-      end
+    def copy_asset_file(source, asset)
+      return unless File.exist?(source)
+      render_transaction.store_asset(make_absolute(asset), ::File.binread(source))
     end
 
-    def revision_asset
-      @asset_dest ||= Pathname.new(Spontaneous.revision_dir(revision) / 'assets').tap do |path|
-        FileUtils.mkdir_p(path) unless File.exists?(path)
-      end
+    def make_absolute(path)
+      ::File.join('/', path)
     end
 
-    def ensure_dir(path)
-      dir = File.dirname(path)
-      FileUtils.mkdir_p(dir) unless File.exist?(dir)
-      path
+
+    def render_transaction
+      transaction.render_transaction
     end
 
     def assets
@@ -83,7 +45,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def environment
-      @environment ||= Spontaneous::Asset::Environment.publishing(site, revision, development?)
+      transaction.asset_environment
     end
 
     def development?

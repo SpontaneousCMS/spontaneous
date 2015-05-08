@@ -28,11 +28,11 @@ module Spontaneous::Publishing::Steps
     # TODO: Pass an IO object rather than do a File::read
     def copy_file(facet, source, path)
       key = File.join([facet.file_namespace, path].compact)
-      render_transaction.static(make_absolute(key), ::File.read(source))
+      render_transaction.store_static(make_absolute(key), ::File.binread(source))
     end
 
-    def make_absolute(key)
-      ::File.join('/', key)
+    def make_absolute(path)
+      ::File.join('/', path)
     end
 
     def files(dir)

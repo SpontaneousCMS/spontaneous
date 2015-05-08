@@ -2,11 +2,13 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 require 'ostruct'
+require 'nokogiri'
 
 describe "Assets" do
   include RackTestMethods
 
   let(:app) {Spontaneous::Rack::Back.application(site)}
+  let(:transaction) { Spontaneous::Publishing::Transaction.new(site, 99,  nil) }
 
   module LiveSimulation
     # simulate a production + publishing environment
@@ -22,19 +24,20 @@ describe "Assets" do
 
   def new_context(live, content = @page, format = :html, params = {})
     renderer = if live
-                 Spontaneous::Output::Template::PublishRenderer.new(site)
+                 Spontaneous::Output::Template::PublishRenderer.new(transaction)
                else
                  Spontaneous::Output::Template::PreviewRenderer.new(site)
                end
     output = content.output(format)
     context = renderer.context(output, params, nil)
     context.extend LiveSimulation if live
-    context.class_eval do
-      # Force us into production environment
-      # which is where most of the magic has to happen
-      def development?
-        false
-      end
+    # Force us into production environment
+    # which is where most of the magic has to happen
+    def context.development?
+      false
+    end
+    def transaction.development?
+      false
     end
     context
   end
@@ -49,16 +52,14 @@ describe "Assets" do
 
   def development_context(content = @page, format = :html, params = {})
     new_context(false, content, format, params).tap do |context|
-      context.class_eval do
-        def development?
-          true
-        end
+      def context.development?
+        true
       end
     end
   end
 
   def asset_digest(asset_relative_path)
-    digest = context.asset_environment.environment.digest
+    digest = context._asset_environment.environment.digest
     digest.update(File.read(File.join(fixture_root, asset_relative_path)))
     digest.hexdigest
   end
@@ -371,14 +372,23 @@ describe "Assets" do
     let(:app) { Spontaneous::Rack::Front.application(site) }
     let(:context) { live_context }
     let(:revision) { site.revision(context.revision) }
+    let(:store) { site.output_store }
+    let(:output_revision) { store.revision(revision.to_i) }
 
     before do
-      FileUtils.rm_f(Spontaneous.revision_dir) if File.exist?(Spontaneous.revision_dir)
-      system "ln -nfs #{revision.root} #{Spontaneous.revision_dir}"
+      site.stubs(:published_revision).returns(99)
     end
 
-    after do
-      revision.path("assets").rmtree if revision.path("assets").exist?
+    def read_script_asset(output)
+      asset = Nokogiri::XML(output).at('script')['src']
+      asset.gsub!(/^\/assets/, '')
+      [asset, output_revision.static_asset(asset)]
+    end
+
+    def assert_script_asset(output)
+      asset, value = read_script_asset(output)
+      assert value, "Asset '#{asset}' missing"
+      [asset, value.read]
     end
 
     describe "javascript" do
@@ -394,16 +404,16 @@ describe "Assets" do
         ].join("\n")
       end
 
-      it "writes bundled assets to the revision directory" do
+      it "writes bundled assets to the output store" do
         result = context.scripts('js/all')
-        asset_path = revision.path("assets/js/all-#{all_sha}.js")
-        assert asset_path.exist?
+        run_copy_asset_step
+        assert_script_asset(result)
       end
 
       it "compresses local scripts" do
         result = context.scripts('js/all')
-        asset_path = revision.path("assets/js/all-#{all_sha}.js")
-        js = asset_path.read
+        run_copy_asset_step
+        js = assert_script_asset(result)
         js.index("\n").must_be_nil
       end
 
@@ -419,21 +429,20 @@ describe "Assets" do
 
       it "makes bundled scripts available under /assets" do
         context.scripts('js/all')
+        run_copy_asset_step
+        path = "/assets/js/all-#{all_sha}.js"
         get "/assets/js/all-#{all_sha}.js"
-        asset_path = revision.path("assets/js/all-#{all_sha}.js")
-        last_response.body.must_equal asset_path.read
+        last_response.body.must_equal read_compiled_asset(path)
       end
 
-      it "only bundles & compresses once" do
-        context.scripts('js/all')
-        asset_path = revision.path("assets/js/all-#{all_sha}.js")
-        assert asset_path.exist?
-        asset_path.open("w") do |file|
-          file.write("var cached = true;")
-        end
-        context.scripts('js/all')
-        asset_path.read.must_equal "var cached = true;"
+      it 'returns the correct content type for js' do
+        html = context.scripts('js/all')
+        run_copy_asset_step
+        path, js = assert_script_asset(html)
+        get "/assets#{path}"
+        last_response.headers['Content-type'].must_equal 'application/javascript;charset=utf-8'
       end
+
       describe "re-use" do
         before do
           @result = context.scripts('js/all', 'x')
@@ -449,10 +458,25 @@ describe "Assets" do
             file.write("var reused = true;")
           end
           result = context.scripts('js/all', 'x')
+          run_copy_asset_step
           rev = revision.path("assets") + compiled
-          File.read(rev).must_equal "var reused = true;"
+          path, js = assert_script_asset(result)
+          js.must_equal "var reused = true;"
         end
       end
+    end
+
+    def run_copy_asset_step
+      transaction = context._renderer.transaction
+      step = Spontaneous::Publishing::Steps::CopyAssets.new(transaction)
+      step.call
+    end
+
+    def read_compiled_asset(path)
+      transaction = context._renderer.transaction
+      dir =  transaction.asset_environment.manifest.asset_compilation_dir
+      read_path = File.expand_path File.join(dir, path.gsub(/^\/assets/, ''))
+      ::File.read(read_path)
     end
 
     describe "css" do
@@ -489,31 +513,35 @@ describe "Assets" do
 
       it "makes bundled stylesheets available under /assets" do
         path = context.stylesheet_urls('css/all').first
+        run_copy_asset_step
         get path
         asset_path = revision.path(path)
-        last_response.body.must_equal asset_path.read
+        last_response.body.must_equal read_compiled_asset(path)
       end
 
       it "compresses local styles" do
         path = context.stylesheet_urls('css/all').first
-        asset_path = revision.path(path)
-        css = asset_path.read
+        run_copy_asset_step
+        get path
+        css = last_response.body
         css.index(" ").must_be_nil
       end
 
-      it "only bundles & compresses once" do
-        path = context.stylesheet_urls('css/all').first
-        asset_path = revision.path(path)
-        assert asset_path.exist?
-        asset_path.open("w") do |file|
-          file.write(".cached { }")
-        end
-        context.stylesheets('css/all')
-        asset_path.read.must_equal ".cached { }"
-      end
+      # it "only bundles & compresses once" do
+      #   path = context.stylesheet_urls('css/all').first
+      #   run_copy_asset_step
+      #   asset_path = revision.path(path)
+      #   assert asset_path.exist?
+      #   asset_path.open("w") do |file|
+      #     file.write(".cached { }")
+      #   end
+      #   context.stylesheets('css/all')
+      #   asset_path.read.must_equal ".cached { }"
+      # end
 
       it "passes through non-existant images" do
         path = context.stylesheet_urls('css/missing.css').first
+        run_copy_asset_step
         get path
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
@@ -522,6 +550,7 @@ describe "Assets" do
 
       it "can include other assets" do
         path = context.stylesheet_urls('css/import').first
+        run_copy_asset_step
         get path
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
@@ -532,17 +561,16 @@ describe "Assets" do
     describe "images" do
       it "bundles images and links using fingerprinted asset url" do
         path = context.stylesheet_urls('css/image1').first
+        run_copy_asset_step
         get path
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
         result.must_match %r{background:url\(/assets/i/y-#{y_png_digest}\.png\)}
-
-        asset_path = revision.path("/assets/i/y-#{y_png_digest}.png")
-        assert asset_path.exist?
       end
 
       it "can insert data urls for assets" do
         path = context.stylesheet_urls('css/data').first
+        run_copy_asset_step
         get path
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
@@ -551,17 +579,16 @@ describe "Assets" do
 
       it "can understand urls with hashes" do
         path = context.stylesheet_urls('css/urlhash').first
+        run_copy_asset_step
         get path
         assert last_response.ok?, "Recieved #{last_response.status} not 200"
         result = last_response.body
         result.must_match %r{background:url\(/assets/i/y-#{y_png_digest}\.png\?query=true#hash\)}
-        asset_path = revision.path("/assets/i/y-#{y_png_digest}.png")
-        assert asset_path.exist?
       end
     end
 
     describe "templates" do
-      let(:renderer)  { Spontaneous::Output::Template::PublishRenderer.new(site) }
+      let(:renderer)  { Spontaneous::Output::Template::PublishRenderer.new(transaction) }
 
       it "should allow for embedding asset images into templates" do
         result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))

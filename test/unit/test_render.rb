@@ -77,7 +77,8 @@ describe "Render" do
       @root.sections2 << @section4
       @root.sections2.last.set_position(0)
       @root.save.reload
-      @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
+      @transaction = Spontaneous::Publishing::Transaction.new(@site, 99, nil)
+      @renderer = Spontaneous::Output::Template::PublishRenderer.new(@transaction)
     end
 
     after do
@@ -120,13 +121,13 @@ describe "Render" do
       b = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.wont_equal b
 
-      renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
+      renderer = Spontaneous::Output::Template::PublishRenderer.new(@transaction)
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
       a = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       b = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.must_equal b
 
-      renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
+      renderer = Spontaneous::Output::Template::PublishRenderer.new(@transaction)
       template = '%{ navigation do |section, active| }${section.object_id} %{ end }'
       c = renderer.render_string(template, ::Content[@section1.id].output(:html), {}).strip
       a.wont_equal c
@@ -554,7 +555,8 @@ describe "Render" do
         FileUtils.mkdir_p(@temp_template_root / "layouts")
         @site.paths.add(:templates, @temp_template_root)
 
-        @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site, true)
+        @transaction = Spontaneous::Publishing::Transaction.new(@site, 99, nil)
+        @renderer = Spontaneous::Output::Template::PublishRenderer.new(@transaction, true)
 
         @template_path = @temp_template_root / "layouts/standard.html.cut"
         @compiled_path = @temp_template_root / "layouts/standard.html.rb"
@@ -646,7 +648,8 @@ describe "Render" do
 
     describe "variables in render command" do
       before do
-        @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
+        @transaction = Spontaneous::Publishing::Transaction.new(@site, 99, nil)
+        @renderer = Spontaneous::Output::Template::PublishRenderer.new(@transaction)
 
         PreviewRender.layout :variables
         PreviewRender.style :variables

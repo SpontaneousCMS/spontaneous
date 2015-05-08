@@ -1011,7 +1011,7 @@ describe "Back" do
       it "return scripts from js dir" do
         get '/@spontaneous/js/test.js'
         assert last_response.ok?, "Expected a 200 but received a #{last_response.status}"
-        last_response.content_type.must_equal "application/javascript; charset=UTF-8"
+        last_response.content_type.must_equal "application/javascript;charset=UTF-8"
         # Sprockets appends sone newlines and a semicolon onto our test file
         assert_equal File.read(@app_dir / 'js/test.js') + "\n;\n", last_response.body
       end
@@ -1143,7 +1143,7 @@ describe "Back" do
       get "/assets/js/coffeescript.js"
       assert last_response.ok?, "Should return 200 but got #{last_response.status}"
       last_response.body.must_match /square = function/
-      last_response.content_type.must_equal "application/javascript; charset=UTF-8"
+      last_response.content_type.must_equal "application/javascript;charset=UTF-8"
     end
 
     it "accept POST requests" do
@@ -1254,5 +1254,3 @@ describe "Back" do
       it "redirects back to original page"
     end
 end
-
-

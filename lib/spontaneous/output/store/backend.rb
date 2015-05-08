@@ -1,7 +1,7 @@
 module Spontaneous::Output::Store
   class Backend
     unless defined?(STATIC_PATH)
-      STATIC_PATH, PROTECTED_PATH, DYNAMIC_PATH = %w(static protected dynamic).map(&:freeze)
+      STATIC_PATH, PROTECTED_PATH, DYNAMIC_PATH, ASSET_PATH = %w(static protected dynamic assets).map(&:freeze)
     end
 
     def initialize(options = {})
@@ -20,25 +20,24 @@ module Spontaneous::Output::Store
       store(revision, DYNAMIC_PATH, key, template, transaction)
     end
 
-    # Assets are a special class for writing, but not for reading.
-    #
-    # For writing we want each specific backend implementation to be able to
-    # handle them separately for adding of far-future expiry headers for
-    # example, but for reading assets should behave exactly as static files.
     def store_asset(revision, key, template, transaction = nil)
-      store(revision, STATIC_PATH, prefix_asset(key), template, transaction)
+      store(revision, ASSET_PATH, key, template, transaction)
     end
 
     def load_static(revision, key)
-      load(revision, STATIC_PATH, key)
+      load(revision, STATIC_PATH, key, static: true)
     end
 
     def load_protected(revision, key)
-      load(revision, PROTECTED_PATH, key)
+      load(revision, PROTECTED_PATH, key, static: false)
     end
 
     def load_dynamic(revision, key)
-      load(revision, DYNAMIC_PATH, key)
+      load(revision, DYNAMIC_PATH, key, static: false)
+    end
+
+    def load_asset(revision, key)
+      load(revision, ASSET_PATH, key, static: true)
     end
 
     def output_key(output, dynamic = false)

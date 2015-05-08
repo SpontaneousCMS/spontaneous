@@ -43,19 +43,19 @@ module Spontaneous::Output::Store
       Integer(F.read(revision_file_path), 10)
     end
 
+    def load(revision, partition, key, static:)
+      read(path(revision, partition, key))
+    end
+
     protected
 
     def store(revision, partition, key, template, transaction)
       F.open(path!(revision, partition, key, transaction), 'wb') { |f| f.write(template) }
     end
 
-    def load(revision, partition, key)
-      read(path(revision, partition, key))
-    end
-
     def read(path)
       return nil unless F.exist?(path)
-      F.open(path, 'r:UTF-8')
+      F.open(path, 'rb:UTF-8')
     end
 
     def pad_revision(revision)

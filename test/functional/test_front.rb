@@ -842,9 +842,10 @@ describe "Front" do
 
       it "should be sourced from the published revision directory" do
         test_string = "#{Time.now}\n"
-        test_file = "#{Time.now.to_i}.txt"
-        File.open(@public_dir / test_file, 'w') { |f| f.write(test_string) }
-        get "/#{test_file}"
+        test_file_path = "/#{Time.now.to_i}.txt"
+        test_file_url = test_file_path
+        site.output_store.revision(1).transaction.store_static(test_file_path, test_string)
+        get test_file_url
         assert last_response.ok?
         last_response.body.must_equal test_string
       end
@@ -859,20 +860,19 @@ describe "Front" do
         assert last_response.ok?
         last_response.body.must_equal test_string
         expiry = DateTime.parse last_response.headers["Expires"]
-        expiry.year.must_equal (Date.today.year) + 10
+        expiry.year.must_equal (Date.today.year) + 1
       end
 
       it "pass far-future expires headers for compiled assets" do
         test_string = "#{Time.now}\n"
-        test_file_url = "/rev/#{Time.now.to_i}.txt"
-        test_file = @revision_dir / test_file_url
-        FileUtils.mkdir_p(File.dirname(test_file))
-        File.open(test_file, 'w') { |f| f.write(test_string) }
+        test_file_path = "/#{Time.now.to_i}.txt"
+        test_file_url = "/assets#{test_file_path}"
+        site.output_store.revision(1).transaction.store_asset(test_file_path, test_string)
         get test_file_url
         assert last_response.ok?
         last_response.body.must_equal test_string
         expiry = DateTime.parse last_response.headers["Expires"]
-        expiry.year.must_equal (Date.today.year) + 10
+        expiry.year.must_equal (Date.today.year) + 1
       end
     end
   end
