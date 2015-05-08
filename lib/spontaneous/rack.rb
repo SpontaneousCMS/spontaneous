@@ -16,6 +16,7 @@ module Spontaneous
       HTTP_LAST_MODIFIED = "Last-Modified".freeze
       HTTP_NO_CACHE = "max-age=0, must-revalidate, no-cache, no-store".freeze
       PATH_INFO = Spontaneous::Constants::PATH_INFO
+      REQUEST_METHOD = Spontaneous::Constants::REQUEST_METHOD
 
       SLASH = Spontaneous::Constants::SLASH
 
