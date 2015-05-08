@@ -68,7 +68,7 @@ module Spontaneous::Output::Store
 
     def path(revision, partition, path, transaction = nil)
       transaction.push(key(revision, partition, path)) if transaction
-      F.join(revision_path(revision), partition, path)
+      F.join(revision_path(revision), partition.to_s, path)
     end
 
     def revision_path(revision)
@@ -99,7 +99,7 @@ module Spontaneous::Output::Store
     end
 
     def key(revision, partition, path)
-      F.join(pad_revision(revision), partition, path)
+      F.join(pad_revision(revision), partition.to_s, path)
     end
   end
 end
