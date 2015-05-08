@@ -4,7 +4,7 @@ module Spontaneous::Rack
     include Constants
 
     YEARS   = 1
-    SECONDS = YEARS * 365.25*24*3600
+    SECONDS = (YEARS * 365.25*24*3600).ceil
     MAX_AGE = "max-age=#{SECONDS}, public".freeze
 
     def initialize(app)
@@ -25,8 +25,12 @@ module Spontaneous::Rack
     def caching_headers(headers)
       headers.update({
         HTTP_CACHE_CONTROL => MAX_AGE,
-        HTTP_EXPIRES => (Time.now.advance(years: YEARS)).httpdate
+        HTTP_EXPIRES => in_one_year.httpdate
       })
+    end
+
+    def in_one_year
+      (Time.now + SECONDS)
     end
   end
 end
