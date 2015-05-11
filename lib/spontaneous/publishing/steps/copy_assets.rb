@@ -24,16 +24,11 @@ module Spontaneous::Publishing::Steps
 
     def copy_asset_file(source, asset)
       return unless File.exist?(source)
-      render_transaction.store_asset(make_absolute(asset), ::File.binread(source))
+      transaction.store_asset(make_absolute(asset), ::File.binread(source))
     end
 
     def make_absolute(path)
       ::File.join('/', path)
-    end
-
-
-    def render_transaction
-      transaction.render_transaction
     end
 
     def assets

@@ -4,6 +4,7 @@ module Spontaneous::Publishing::Steps
 
     def call
       progress.stage("creating revision directory")
+      transaction.validate_output_store
       FileUtils.mkdir_p(path / "tmp")
       progress.step(count, path)
     end

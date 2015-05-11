@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require File.expand_path('../../test_helper', __FILE__)
+require 'fog'
 
 # Store.new(backend_class, options) #=> Store
 # Store#revision(revision_number)   #=> Revision
@@ -50,7 +51,7 @@ describe 'Output store' do
 
   describe 'File' do
     let(:root)  { Dir.mktmpdir }
-    let(:store) { Spontaneous::Output::Store::File.new(root) }
+    let(:store) { Spontaneous::Output::Store::File.new(root: root) }
     let(:revision) { 100 }
     let(:revision_path) { ::File.join(root, '00100') }
 
@@ -214,7 +215,7 @@ describe 'Output store' do
   end
 
   describe 'Moneta' do
-    let(:store) { Spontaneous::Output::Store::Moneta.new(:Memory) }
+    let(:store) { Spontaneous::Output::Store::Moneta.new(adapter: :Memory) }
     let(:r) { 100 }
     let(:revision) { Spontaneous::Output::Store::Revision.new(r, store) }
     let(:transaction) { revision.transaction }
@@ -313,7 +314,7 @@ describe 'Output store' do
       keys.each do |key|
         store.backend.key?(key).must_equal true
       end
-      store.add_revision(101, ['101:static:/one.html', '101:protected:/two.html', '101:dynamic:/three.html'])
+      store.add_revision(101, ['101/static:/one.html', '101/protected:/two.html', '101/dynamic:/three.html'])
       store.revisions.must_equal [100, 101]
       store.delete_revision(100)
       store.revisions.must_equal [101]
@@ -323,17 +324,230 @@ describe 'Output store' do
       end
       hash.key?(store.revision_key(100)).must_equal false
     end
+  end
 
+  describe 'Fog' do
+    let(:bucket_name) { 'www.example.com' }
+    let(:access_key_id) { 'ACCESS_KEY_ID' }
+    let(:secret_access_key) { 'SECRET_ACCESS_KEY' }
+    let(:fog_credentials) {
+      {provider: "AWS",
+       aws_secret_access_key: "SECRET_ACCESS_KEY",
+       aws_access_key_id: "ACCESS_KEY_ID"}
+    }
+    let(:store_config) { {connection: fog_credentials, bucket: bucket_name} }
+    let(:store) { Spontaneous::Output::Store::Fog.new(store_config) }
+    let(:r) { 100 }
+    let(:revision) { Spontaneous::Output::Store::Revision.new(r, store) }
+    let(:transaction) { revision.transaction }
 
+    let(:fog) { Fog::Storage.new(fog_credentials) }
+    let(:bucket) { fog.directories.get(bucket_name) }
+    let(:files) { bucket.files }
+
+    before do
+      Fog.mock!
+      fog.directories.create(key: bucket_name)
+    end
+
+    after do
+      Fog::Mock.reset
+    end
+
+    it 'checks the validity of the given access credentials by creating a file' do
+      file = mock()
+      file.expects(:destroy)
+      files = mock()
+      files.expects(:create).returns(file)
+      bucket = store.send :bucket
+      bucket.expects(:files).returns(files)
+      store.start_revision(r)
+    end
+
+    it 'allows the storage of static templates' do
+      store.store_static(r, '/one.html', '*template*')
+      store.join
+      keys = files.map { |f| f.key }
+      keys.must_equal [':revision/00100/static:/one.html']
+    end
+
+    it 'allows the storage of dynamic templates' do
+      store.store_dynamic(r, '/one.html', '*template*')
+      store.store_dynamic(r, '/two.html', '*template*')
+      store.join
+      keys = files.map { |f| f.key }
+      keys.must_equal [':revision/00100/dynamic:/one.html', ':revision/00100/dynamic:/two.html']
+    end
+
+    it 'allows the storage of protected templates' do
+      store.store_protected(r, '/one.html', '*template*')
+      store.store_protected(r, '/two.html', '*template*')
+      store.join
+      keys = files.map { |f| f.key }
+      keys.must_equal [':revision/00100/protected:/one.html', ':revision/00100/protected:/two.html']
+    end
+
+    it 'allows the storage of protected templates' do
+      store.store_protected(r, '/one.html', '*template*')
+      store.store_protected(r, '/two.html', '*template*')
+      store.join
+      keys = files.map { |f| f.key }
+      keys.must_equal [':revision/00100/protected:/one.html', ':revision/00100/protected:/two.html']
+    end
+
+    it 'allows the storage of assets' do
+      store.store_asset(r, '/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css', 'body{color:red;}')
+      store.join
+      keys = files.map { |f| f.key }
+      keys.must_equal [':revision/00100/assets:/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css']
+    end
+
+    it 'allows the storage of static files' do
+      store.store_static(r, '/robots.txt', 'allow *')
+      store.join
+      keys = files.map { |f| f.key }
+      keys.must_equal [':revision/00100/static:/robots.txt']
+    end
+
+    it 'puts all written keys into a transaction if given' do
+      transaction = []
+      store.store_static(r, '/one.html', '*template*', transaction)
+      store.store_protected(r, '/two.html', '*template*', transaction)
+      store.store_dynamic(r, '/three.html', '*template*', transaction)
+      store.store_asset(r, '/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css', 'body{color:red;}', transaction)
+      store.join
+      transaction.length.must_equal 4
+      transaction.must_equal([
+                              ":revision/00100/static:/one.html",
+                              ":revision/00100/protected:/two.html",
+                              ":revision/00100/dynamic:/three.html",
+                              ":revision/00100/assets:/css/site-de4e312eb1deac7c937dc181b1ac8ab3.css"
+                             ])
+    end
+
+    it 'enables registration of a revision' do
+      store.add_revision(100, [":revision/00100/static:/one.html", ":revision/00100/protected:/two.html", ":revision/00100/dynamic:/three.html"])
+      store.add_revision(101, [":revision/00101/static:/one.html", ":revision/00101/protected:/two.html", ":revision/00101/dynamic:/three.html"])
+      store.revisions.must_equal [100, 101]
+    end
+
+    it 'enables the retrieval of all keys for a revision' do
+      store.add_revision(100, [":revision/00100/static:/one.html", ":revision/00100/protected:/two.html", ":revision/00100/dynamic:/three.html"])
+      store.revision(100).must_equal [':revision/00100/static:/one.html', ':revision/00100/protected:/two.html', ':revision/00100/dynamic:/three.html']
+    end
+
+    it 'prevents duplicate revisions in the revision list' do
+      store.add_revision(100, [":revision/00100/static:/one.html", ":revision/00100/protected:/two.html", ":revision/00100/dynamic:/three.html"])
+      store.add_revision(101, [":revision/00101/static:/one.html", ":revision/00101/protected:/two.html", ":revision/00101/dynamic:/three.html"])
+      store.add_revision(100, [":revision/00100/static:/one.html", ":revision/00100/protected:/two.html", ":revision/00100/dynamic:/three.html"])
+      store.revisions.must_equal [100, 101]
+    end
+
+    it 'returns a current revision of nil if none has been activated' do
+      store.current_revision.must_equal nil
+    end
+
+    it 'allows us to retrieve the current active revision' do
+      store.activate_revision(100)
+      store.current_revision.must_equal 100
+    end
+
+    it 'deletes the active revision if passed a value of nil' do
+      store.activate_revision(nil)
+      store.current_revision.must_equal nil
+    end
+
+    it 'enables removal of a revision' do
+      keys = []
+      store.store_static(r, '/one.html', '*template*', keys)
+      store.store_protected(r, '/two.html', '*template*', keys)
+      store.store_dynamic(r, '/three.html', '*template*', keys)
+      store.add_revision(100, keys)
+      store.add_revision(101, [":revision/00101/static:/one.html", ":revision/00101/protected:/two.html", ":revision/00101/dynamic:/three.html"])
+      store.revisions.must_equal [100, 101]
+      keys = store.revision(100)
+      store.delete_revision(100)
+      store.revisions.must_equal [101]
+      keys.each do |key|
+        files.get(key).must_equal nil
+      end
+      store.revision(100).must_equal nil
+    end
+
+    describe 'activation' do
+      def store_and_activate(static = [], asset = [], protected = [], dynamic = [])
+        keys = []
+        static.each do |f|
+          store.store_static(r, f, "static #{f}", keys)
+        end
+        asset.each do |f|
+          store.store_asset(r, f, "asset #{f}", keys)
+        end
+        protected.each do |f|
+          store.store_protected(r, f, "protected #{f}", keys)
+        end
+        dynamic.each do |f|
+          store.store_dynamic(r, f, "dynamic #{f}", keys)
+        end
+        store.add_revision(r, keys)
+        store.activate_revision(r)
+      end
+
+      it 'activates the homepage as /index.html' do
+        store_and_activate(['/'])
+        files.get('index.html').wont_equal nil
+      end
+
+      it 'activates the revision by copying the static files to the top-level namespace' do
+        store_and_activate(['/one.html'], ['/css/site.css'])
+        files.get('one').wont_equal nil
+        files.get('assets/css/site.css').wont_equal nil
+      end
+
+      it 'only copies static & asset files to the root' do
+        store_and_activate([], [], ['/protected.html'], ['/dynamic.erb'])
+        files.get('protected').must_equal nil
+        files.get('dynamic.erb').must_equal nil
+      end
+
+      it 'adds a far-future expiry to asset files' do
+        store_and_activate([], ['/css/site.css'])
+        css = files.get('assets/css/site.css')
+        css.cache_control.must_equal 'public, max-age=31557600'
+      end
+
+      it 'adds a 1 minute expiry to static files' do
+        store_and_activate(['/robots.txt'], [])
+        file = files.get('robots.txt')
+        file.cache_control.must_equal 'public, max-age=60'
+      end
+
+      it 'makes the files public' do
+        store_and_activate(['/one.html'], ['/css/site.css'])
+        ['one', 'assets/css/site.css'].each do |key|
+          files.get(key).public?.must_equal true
+        end
+      end
+
+      it 'sets a content type of text/html for files with a .html extension' do
+        store_and_activate(['/one.html'])
+        files.get('one').content_type.must_equal 'text/html;charset=utf-8'
+      end
+    end
   end
 
   describe 'Transaction' do
-    let(:store) { Spontaneous::Output::Store::Moneta.new(:Memory) }
+    let(:store) { Spontaneous::Output::Store::Moneta.new(adapter: :Memory) }
     let(:r) { 100 }
     let(:transaction) { Spontaneous::Output::Store::Transaction.new(r, store) }
     let(:output_html) { page.output(:html) }
     let(:output_xml) { page.output(:xml) }
     let(:output_json) { page.output(:json) }
+
+    it 'calls start_revision on the backing store' do
+      store.expects(:start_revision).with(r)
+      transaction
+    end
 
     it 'tracks all keys written to it' do
       transaction.store_output(output_html, true, '*template*')
@@ -405,12 +619,18 @@ describe 'Output store' do
         store.expects(:store_protected).with(r, '/one.html', '*template*', transaction)
         transaction.store_output(output_html, false, '*template*')
       end
+
+      it 'writes pages in private roots to the protected partition' do
+        output_html.page.expects(:in_private_tree?).returns(true)
+        store.expects(:store_protected).with(r, '/one.html', '*template*', transaction)
+        transaction.store_output(output_html, false, '*template*')
+      end
     end
   end
 
   describe 'Revision' do
     let(:r) { 100 }
-    let(:store) { Spontaneous::Output::Store::Moneta.new(:Memory) }
+    let(:store) { Spontaneous::Output::Store::Moneta.new(adapter: :Memory) }
     let(:revision) { Spontaneous::Output::Store::Revision.new(r, store) }
     let(:output_html) { page.output(:html) }
     let(:output_json) { page.output(:json) }
@@ -497,6 +717,23 @@ describe 'Output store' do
 
     it 'can provide a list of revisions' do
       store.revisions.must_equal [20]
+    end
+
+    it 'maps File output stores to the right class' do
+      store = Spontaneous::Output::Store.backing_class(:File)
+      store.must_equal Spontaneous::Output::Store::File
+    end
+    it 'maps Fog output stores to the right class' do
+      store = Spontaneous::Output::Store.backing_class(:Fog)
+      store.must_equal Spontaneous::Output::Store::Fog
+    end
+    it 'maps Memcache output stores to the right class' do
+      store = Spontaneous::Output::Store.backing_class(:Memcached)
+      store.must_equal Spontaneous::Output::Store::Moneta
+    end
+    it 'maps Redis output stores to the right class' do
+      store = Spontaneous::Output::Store.backing_class(:Redis)
+      store.must_equal Spontaneous::Output::Store::Moneta
     end
   end
 end

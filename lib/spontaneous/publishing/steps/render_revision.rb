@@ -21,7 +21,6 @@ module Spontaneous::Publishing::Steps
     end
 
     def rollback
-      template_revision.delete
     end
 
     def render_pages
@@ -37,7 +36,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def render_output(output)
-      output.publish_page(renderer, revision, render_transaction)
+      output.publish_page(renderer, revision, transaction)
       progress.step(1, output.url_path.inspect)
     rescue => e
       raise RenderException.new(output, e)
@@ -45,14 +44,6 @@ module Spontaneous::Publishing::Steps
 
     def renderer
       @renderer ||= Spontaneous::Output::Template::PublishRenderer.new(transaction, true)
-    end
-
-    def render_transaction
-      transaction.render_transaction
-    end
-
-    def template_revision
-      transaction.template_revision
     end
 
     def renderable_pages

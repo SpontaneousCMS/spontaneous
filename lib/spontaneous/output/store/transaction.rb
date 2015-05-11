@@ -10,6 +10,7 @@ module Spontaneous::Output::Store
       @revision, @store = revision, store
       @index = []
       @committed = false
+      @store.start_revision(@revision)
     end
 
     def store_output(output, dynamic, template)
@@ -17,7 +18,7 @@ module Spontaneous::Output::Store
       case
       when dynamic || output.dynamic?
         @store.store_dynamic(@revision, key, template, self)
-      when output.private? || output.custom_mimetype? || output.page.dynamic?
+      when output.protected?
         @store.store_protected(@revision, key, template, self)
       else
         @store.store_static(@revision, key, template, self)
@@ -32,8 +33,8 @@ module Spontaneous::Output::Store
       @store.store_static(@revision, key, file, self)
     end
 
-    # Stores call this method to register the keys
-    # they write to their backends. This is necessary
+    # stores call this method to register the keys
+    # they write to their backends. this is necessary
     # because we don't want to limit our backends to those
     # that are able to return keys based on a glob
     def push(key)

@@ -106,6 +106,7 @@ module Spontaneous::Output
         @options[:dynamic]
       end
 
+
       def postprocess
         @options[:postprocess]
       end
@@ -182,7 +183,6 @@ module Spontaneous::Output
     end
 
     def output_path(revision, render)
-      ext = nil
       template_dynamic = Spontaneous::Output::Template.is_dynamic?(render)
       path = Spontaneous::Output.output_path(revision, self, template_dynamic)
 
@@ -207,6 +207,14 @@ module Spontaneous::Output
       path = page.path
       path = "/index" if path == "/"
       [path, name].join(".")
+    end
+
+    def output_protected?
+      private? || custom_mimetype?
+    end
+
+    def protected?
+      output_protected? || page.dynamic? || page.in_private_tree?
     end
   end
 end

@@ -10,9 +10,9 @@ module Spontaneous::Output::Store
   class File < Backend
     F = ::File unless defined? F
 
-    def initialize(root, config = {})
+    def initialize(config = {})
       super(config)
-      @root = root
+      @root = config[:root] || config[:dir]
     end
 
     def add_revision(revision, keys)
@@ -47,11 +47,11 @@ module Spontaneous::Output::Store
       read(path(revision, partition, key))
     end
 
-    protected
-
     def store(revision, partition, key, template, transaction)
       F.open(path!(revision, partition, key, transaction), 'wb') { |f| f.write(template) }
     end
+
+    protected
 
     def read(path)
       return nil unless F.exist?(path)

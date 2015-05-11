@@ -212,6 +212,13 @@ describe "Publishing Pipeline" do
       run_step(progress)
     end
 
+    it "raises an exception if the output store fails its validation test" do
+      t = transaction
+      t.expects(:validate_output_store).once.raises(Exception)
+      t.expects(:rollback).once
+      lambda{ run_step_with_transaction(t) }.must_raise(Exception)
+    end
+
     it "deletes the path on rollback" do
       instance = run_step
       instance.rollback
@@ -220,7 +227,7 @@ describe "Publishing Pipeline" do
 
     it "rolls back the output store transaction" do
       t = transaction
-      rt = t.render_transaction
+      rt = t.send :render_transaction
       rt.expects(:rollback).once
       instance = run_step_with_transaction(t)
       instance.rollback
@@ -255,7 +262,7 @@ describe "Publishing Pipeline" do
 
     it "doesn't call #commit on the output store transaction" do
       t = transaction
-      rt = t.render_transaction
+      rt = t.send :render_transaction
       rt.expects(:commit).never
       run_step_with_transaction(t)
     end
@@ -656,7 +663,7 @@ describe "Publishing Pipeline" do
 
     it "commits the output store transaction" do
       t = transaction
-      rt = t.render_transaction
+      rt = t.send :render_transaction
       rt.expects(:commit).once
       run_step_with_transaction(t)
     end

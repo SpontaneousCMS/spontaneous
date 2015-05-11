@@ -2,23 +2,24 @@ module Spontaneous::Output
   module Store
     autoload :Backend,     'spontaneous/output/store/backend'
     autoload :File,        'spontaneous/output/store/file'
+    autoload :Fog,         'spontaneous/output/store/fog'
     autoload :Moneta,      'spontaneous/output/store/moneta'
     autoload :Revision,    'spontaneous/output/store/revision'
     autoload :Store,       'spontaneous/output/store/store'
     autoload :Transaction, 'spontaneous/output/store/transaction'
 
-    # Initializes a new store with the provided options
-    # Uses moneta as a unified interface to  except in the special case of the :File
-    # store which needs to work in a way compatible with the use of
-    # an frontend HTTP proxy, e.g. Nginx
-    def self.new(backend_class, options = {})
-      backend = case backend_class
-      when :File
-        File.new(options[:root] || options[:dir])
-      else
-        Moneta.new(backend_class, options)
-      end
+    # Initializes a new store with the provided options. Uses Moneta as a
+    # unified interface to key value stores but also provides specialized
+    # backing store implementations suitable for use behind a standard
+    # file-based HTTP server (such as Nginx or Apache) or cloud storage.
+    def self.new(adapter, options = {})
+      backend = backing_class(adapter).new(options.merge(adapter: adapter))
       Store.new(backend)
+    end
+
+    def self.backing_class(adapter)
+      return Moneta unless const_defined?(adapter)
+      const_get(adapter)
     end
   end
 end

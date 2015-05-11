@@ -28,7 +28,7 @@ module Spontaneous::Publishing::Steps
     # TODO: Pass an IO object rather than do a File::read
     def copy_file(facet, source, path)
       key = File.join([facet.file_namespace, path].compact)
-      render_transaction.store_static(make_absolute(key), ::File.binread(source))
+      transaction.store_static(make_absolute(key), ::File.binread(source))
     end
 
     def make_absolute(path)
@@ -47,10 +47,6 @@ module Spontaneous::Publishing::Steps
 
     def sources(facet)
       facet.paths.expanded(:public).map { |dir| Pathname.new(dir) }.select(&:exist?).map(&:realpath)
-    end
-
-    def render_transaction
-      transaction.render_transaction
     end
   end
 end

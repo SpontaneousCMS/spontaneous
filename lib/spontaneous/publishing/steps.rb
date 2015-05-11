@@ -153,7 +153,8 @@ module Spontaneous::Publishing
       :render_revision,
       :copy_assets,
       :copy_static_files,
-      :generate_rackup_file
+      :generate_rackup_file,
+      :activate_revision
     ].freeze
 
     REINDEX_STEPS = [

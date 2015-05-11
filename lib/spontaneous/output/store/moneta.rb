@@ -22,10 +22,11 @@ module Spontaneous::Output::Store
 
     attr_reader :backend
 
-    def initialize(name, options = {})
+    def initialize(options = {})
       super(options)
+      adapter_name = options.delete(:adapter)
       @backend = ::Moneta.build do
-        adapter name, options
+        adapter adapter_name, options
       end
     end
 
