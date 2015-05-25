@@ -470,6 +470,10 @@ describe "Page" do
       @t.ancestor(-2).must_equal @q
     end
 
+    it "returns itself as an ancestor when given its own depth" do
+      @r.ancestor(2).must_equal @r
+    end
+
     it "test for ancestry" do
       assert @t.ancestor?(@s)
       assert @t.ancestor?(@q)
@@ -488,6 +492,7 @@ describe "Page" do
     it "provide a list of pages at any depth" do
       @t.at_depth(2).must_equal [@r, @s]
       @p.at_depth(1).must_equal [@q]
+      @q.at_depth(2).must_equal [@r, @s]
       lambda { @p.at_depth(2) }.must_raise(ArgumentError)
     end
 

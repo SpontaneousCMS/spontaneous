@@ -10,8 +10,9 @@ module Spontaneous::Model::Page
       @ancestors ||= ancestor_path.map { |id| content_model[id] }
     end
 
-    def ancestor(depth)
-      ancestors[depth]
+    def ancestor(at_depth)
+      return self if at_depth == depth
+      ancestors[at_depth]
     end
 
     # Returns a list of all the pages at a certain depth in the page tree for any page
