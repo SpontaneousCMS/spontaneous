@@ -42,8 +42,10 @@ module Spontaneous::Model::Page
       filter_proc = filter_list = nil
 
       if (filter_list = (opts.delete(:only) || opts.delete(:box) || opts.delete(:boxes)))
+        filter_list = Array(filter_list)
         filter_proc = proc { |box| filter_list.include?(box._name) }
       elsif (filter_list = opts.delete(:except))
+        filter_list = Array(filter_list)
         filter_proc = proc { |box| !filter_list.include?(box._name) }
       end
 
