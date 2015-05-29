@@ -1,16 +1,30 @@
 # encoding: UTF-8
 
-require 'logger'
-
 Sequel.migration do
-  # Somehow hidden state & hidden origin have become out of sync
-  # some visibility changes have not propagated, so children with a
-  # non-nil hidden_origin have a different visibility to that of the
-  # item pointed to by hidden_origin...
+  # New aliases weren't inheriting their visibility from their target properly.
+  # This migration fixes the mess left by that bug by correctly setting both the
+  # visibility and the visibility_origin for aliases of hidden targets and
+  # clearing the visibility origin for visible aliases of visible targets.
   up do
-    content = self[:content]
-    invalid_rows = content.from(:content, :content___hc).select(:content__id).where(content__hidden_origin: nil).invert.where(hc__id: :content__hidden_origin, hc__hidden: false).flat_map(&:values)
-    content.where(id: invalid_rows).update(hidden: false, hidden_origin: nil)
+    # Don't run unless we're in a full Spontaneous instance i.e. not in a
+    # testing environment
+    if defined?(Content)
+      aliases = Content.exclude(target: nil)
+      aliases.each do |a|
+        target = a.target
+        if target.hidden?
+          a.set_visible!(false, target.id)
+        else
+          # The bug set the hidden origin to the id of the parent, not the target
+          # so we want to clear that unless the alias was actually hidden directly
+          # i.e. has a hidden_origin == nil
+          unless a.hidden_origin.nil?
+            a.apply_set_visible(true, nil)
+            a.save
+          end
+        end
+      end
+    end
   end
 
   down do

@@ -82,10 +82,14 @@ module Spontaneous::Model::Core
       protect_root_visibility!
       if self.visible? != visible
         raise Spontaneous::NotShowable.new(self, hidden_origin) if hidden? && visible && !showable?
-        self[:hidden] = !visible
-        self[:hidden_origin] = hidden_origin
-        force_visibility_cascade
+        apply_set_visible(visible, hidden_origin)
       end
+    end
+
+    def apply_set_visible(visible, hidden_origin)
+      self[:hidden] = !visible
+      self[:hidden_origin] = hidden_origin
+      force_visibility_cascade
     end
 
     def force_visibility_cascade
