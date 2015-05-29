@@ -14,6 +14,13 @@
 - The output store is now responsible for marking a revision as active, which is
   how it should have been all along.
 
+- Assets and static files are now published into the output store, along with templates.
+
+#### Misc
+
+- There's now a cli task to re-index the site
+- A legacy '/rev' route has been removed from the front Rack app
+
 #### Fixes
 
 - `Box#adopt` now cascades changes to the content path through all the adopted
@@ -24,6 +31,8 @@
 
 - File and image fields now return consistent values for `#blank?` and
   `#empty?`.
+
+- Adding an alias of an invisible target no longer sets creates a bad visibility state on the created alias (#57)
 
 ## 0.2.0.beta10, released 2015-03-20
 
@@ -44,8 +53,8 @@ Is it wise to release a new version during a solar eclipse?
 
 - File and Image fields now generate their URLs dynamically. In the case of cloud hosted media this means you can change the way you address the media without having to regenerate the values e.g. in the case that you move from a direct S3 bucket to a CDN. You can also use any object that responds to `#call(path)` to generate the URLs which opens the door to splitting your media across multiple asset hosts.
 
-- Pages can now declare 'wildcard' routes without namespaces which makes them more like standard controllers. E.g. declaring 
-    
+- Pages can now declare 'wildcard' routes without namespaces which makes them more like standard controllers. E.g. declaring
+
         controller do
           get '/wibble/:id' do ... end
         end
