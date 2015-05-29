@@ -31,6 +31,15 @@ module Spontaneous
         filter(nil, *cond, &block)
       end
 
+      def exclude(types, *cond, &block)
+        dataset(types).exclude(*cond, &block)
+      end
+
+      # A type free version of #filter
+      def exclude!(*cond, &block)
+        exclude(nil, *cond, &block)
+      end
+
       def where(types, *cond, &block)
         dataset(types).where(*cond, &block)
       end

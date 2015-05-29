@@ -141,6 +141,14 @@ module Spontaneous
         mapper.filter!(*cond, &block)
       end
 
+      def exclude(*cond, &block)
+        mapper.exclude(types, *cond, &block)
+      end
+
+      def exclude!(*cond, &block)
+        mapper.exclude!(*cond, &block)
+      end
+
       def where(*cond, &block)
         mapper.where(types, *cond, &block)
       end

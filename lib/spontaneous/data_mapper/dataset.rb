@@ -88,6 +88,11 @@ module Spontaneous
         self
       end
 
+      def exclude(*cond, &block)
+        @dataset.exclude!(*cond, &block)
+        self
+      end
+
       def where(*cond, &block)
         @dataset.where!(*cond, &block)
         self

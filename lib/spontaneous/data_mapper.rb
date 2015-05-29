@@ -33,8 +33,9 @@ module Spontaneous
 
       def_delegators :active_scope,
         :dataset,
-        :filter, :where,
-        :filter!, :where!,
+        :filter, :filter!,
+        :where, :where!,
+        :exclude, :exclude!,
         :untyped,
         :count, :count!,
         :order, :limit,

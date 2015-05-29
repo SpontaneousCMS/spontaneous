@@ -260,6 +260,15 @@ describe "DataMapper" do
       ]
     end
 
+    it "supports the exclude method" do
+      @mapper.exclude([MockContent2], label: "this").all
+      @mapper.exclude!(label: "this").all
+      @database.sqls.must_equal [
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2')) AND (label != 'this'))",
+        "SELECT * FROM content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (label != 'this'))"
+      ]
+    end
+
     it "support filtering using virtual rows" do
       @database.fetch = [
         { id:1, label:"column1", type_sid:"MockContent2" },
