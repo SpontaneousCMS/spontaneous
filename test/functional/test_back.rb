@@ -963,6 +963,19 @@ describe "Back" do
         Spot::JSON.parse(last_response.body).first.must_equal required_response
       end
 
+      it 'adds a hidden alias if the target is hidden' do
+        home.featured_jobs.contents.length.must_equal 0
+        job = Job.first
+        job.hide!
+        auth_post "/@spontaneous/alias/#{home.id}/#{HomePage.boxes[:featured_jobs].schema_id.to_s}", 'alias_id' => LinkedJob.schema_id.to_s, 'target_ids' => job.id, "position" => 0
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        last_response.content_type.must_equal "application/json;charset=utf-8"
+        home.reload
+        home.featured_jobs.contents.length.must_equal 1
+        a = home.featured_jobs.first
+        assert a.hidden?
+      end
+
 
       it "interfaces with lists of non-content targets" do
         begin

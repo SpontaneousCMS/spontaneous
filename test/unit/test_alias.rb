@@ -383,6 +383,7 @@ describe "Alias" do
       @target = target = mock()
       @target.stubs(:id).returns(@target_id)
       @target.stubs(:title).returns("custom object")
+      @target.stubs(:hidden?).returns(false)
 
       @custom_alias_class = Class.new(::Page) do
         alias_of proc { [target] }, :lookup => lambda { |id|
@@ -551,12 +552,27 @@ describe "Alias" do
   end
 
   describe "visibility" do
+    after do
+      b.show!
+    end
+
     it "be linked to the target's visibility" do
       a = BAlias.create(:target => b, :slug => "balias")
       b.hide!
       b.reload
       a.reload
       refute a.visible?
+      refute a[:visible]
+    end
+
+    it 'is adopted from the target when added' do
+      b.hide!
+      a = BAlias.new(:target => b, :slug => "balias")
+      root.box1 << a
+      a.save
+      attrs = a.attributes
+      assert attrs[:hidden]
+      attrs[:hidden_origin].must_equal b.id
     end
   end
 end

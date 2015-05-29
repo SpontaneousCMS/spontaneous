@@ -88,7 +88,7 @@ module Spontaneous::Model::Core
 
     module ClassAliasMethods
       def for_target(target_id)
-        self.create(:target_id => target_id)
+        new(target_id: target_id)
       end
 
       def alias?
@@ -111,6 +111,13 @@ module Spontaneous::Model::Core
 
     # included only in instances that are aliases
     module AliasMethods
+      # If we're being created as an alias to a hidden target then we should be
+      # born hidden and have our visibility linked to our target.
+      def before_create
+        set_visible(false, target.id) if target.try(:hidden?)
+        super
+      end
+
       def alias?
         true
       end
@@ -178,7 +185,7 @@ module Spontaneous::Model::Core
       end
 
       def hidden?
-        super || target.nil? || (target.respond_to?(:hidden?) && target.hidden?)
+        super || target.nil?
       end
     end
 
