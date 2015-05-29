@@ -77,7 +77,6 @@ module Spontaneous::Model::Core
       end
 
       def target_class(class_definition)
-
       end
 
       def alias?
@@ -97,7 +96,7 @@ module Spontaneous::Model::Core
 
       def use_configured_generator(generator_name, *args)
         return nil unless @alias_options.key?(generator_name)
-        (generator = @alias_options[generator_name]).call(*args)
+        (_generator = @alias_options[generator_name]).call(*args)
       end
 
       def lookup_target(target_id)
