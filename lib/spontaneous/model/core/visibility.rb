@@ -129,13 +129,6 @@ module Spontaneous::Model::Core
       dataset.each do |content|
         content.aliases.update(:hidden => !visible, :hidden_origin => origin)
       end
-
-      ## I'm saving these for posterity: I worked out some Sequel magic and I don't want to lose it
-      #
-      # Spontaneous::Content.from(:content___p).filter(path_like).update(:visible => visible, :hidden_origin => origin)
-      # Spontaneous::Content.filter(:page_id => self.id).set(:visible => visible, :hidden_origin => origin)
-      ## Update with join:
-      # Spontaneous::Content.from(:content___n, :content___p).filter(path_like).filter(:n__page_id => :p__id).set(:n__visible => visible, :n__hidden_origin => origin)
     end
 
     def visibility_ancestors
