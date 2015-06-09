@@ -293,7 +293,6 @@ describe "Visibility" do
 
     it "be initalized as invisible if their target is invisible" do
       target = E.create(:uid => "X")
-      target.destroy
       target.hide!
       al = MyAlias.create(:target => target)
       refute al.visible?
