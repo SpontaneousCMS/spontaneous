@@ -69,65 +69,11 @@ module Spontaneous::Model::Core
       self
     end
 
-    # Private: Used by visibility modifications to force a cascade of visibility
-    # state during the publish process.
-    def set_visible_with_cascade!(state)
-      set_visible(state)
-      force_visibility_cascade
-      self.save
-      self
-    end
-
-    def set_visible(visible, hidden_origin = nil)
+    def set_visible(visible, origin = nil)
       protect_root_visibility!
       if self.visible? != visible
         raise Spontaneous::NotShowable.new(self, hidden_origin) if hidden? && visible && !showable?
-        apply_set_visible(visible, hidden_origin)
-      end
-    end
-
-    def apply_set_visible(visible, hidden_origin)
-      self[:hidden] = !visible
-      self[:hidden_origin] = hidden_origin
-      force_visibility_cascade
-    end
-
-    def force_visibility_cascade
-      @_visibility_modified = true
-    end
-
-    def after_save
-      super
-      if @_visibility_modified
-        propagate_visibility_state
-        @_visibility_modified = false
-      end
-    end
-
-    def propagate_visibility_state
-      hide_descendents(self.visible?)
-      hide_aliases(self.visible?)
-    end
-
-    def hide_aliases(visible)
-      dataset = content_model.filter(:target_id => self.id)
-      origin = visible ? nil : self.id
-      dataset.update(:hidden => !visible, :hidden_origin => origin)
-    end
-
-    def hide_descendents(visible)
-      path_like = Sequel.like(:visibility_path, "#{self[:visibility_path]}.#{self.id}%")
-      origin = visible ? nil : self.id
-      dataset = content_model.filter(path_like).filter(:hidden => visible)
-      # if a child item has been made invisible *before* its parent then it exists
-      # with hidden = true and hidden_origin = nil
-      if visible
-        dataset = dataset.filter(:hidden_origin => self.id)
-      end
-      dataset.update(:hidden => !visible, :hidden_origin => origin)
-
-      dataset.each do |content|
-        content.aliases.update(:hidden => !visible, :hidden_origin => origin)
+        apply_set_visible(visible, origin)
       end
     end
 
@@ -138,6 +84,66 @@ module Spontaneous::Model::Core
     def visibility_ancestor_ids
       return [] if visibility_path.blank?
       visibility_path.split(Spontaneous::VISIBILITY_PATH_SEP).map(&:to_i)
+    end
+
+    protected
+
+    # Private: Used by visibility modifications to force a cascade of visibility
+    # state during the publish process.
+    def set_visible_with_cascade!(state)
+      set_visible(state)
+      force_visibility_cascade(id)
+      self.save
+      self
+    end
+
+    def apply_set_visible(visible, origin)
+      self[:hidden] = !visible
+      self[:hidden_origin] = origin
+      force_visibility_cascade(origin || id)
+    end
+
+    def force_visibility_cascade(origin)
+      @_visibility_modified = origin
+    end
+
+    def after_save
+      super
+      if (origin = @_visibility_modified)
+        propagate_visibility_state(origin)
+        @_visibility_modified = false
+      end
+    end
+
+    def propagate_visibility_state(origin)
+      affected = []
+      affected.concat hide_descendents(visible?, origin)
+      affected.concat hide_aliases(visible?, origin)
+    end
+
+    def hide_aliases(visible, origin)
+      dataset = content_model.filter(target_id: id)
+      apply_visibility_to_dataset(dataset, visible, origin)
+    end
+
+    def hide_descendents(visible, origin)
+      hidden = !visible
+      path_like = Sequel.like(:visibility_path, "#{self[:visibility_path]}.#{self.id}%")
+      dataset = content_model.filter(path_like).exclude(hidden: hidden)
+
+      # if a child item has been made invisible *before* its parent then it exists
+      # with hidden = true and hidden_origin = nil
+      dataset = dataset.filter(hidden_origin: origin) if visible
+      apply_visibility_to_dataset(dataset, visible, origin)
+    end
+
+    def apply_visibility_to_dataset(dataset, visible, origin)
+      origin = nil if visible
+      dataset.map do |content|
+        content.apply_set_visible(visible, origin)
+        content.save
+        content
+      end
     end
 
     def recalculated_hidden

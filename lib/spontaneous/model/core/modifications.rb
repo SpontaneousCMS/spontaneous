@@ -71,7 +71,7 @@ module Spontaneous::Model::Core
       def apply(revision)
         owner.with_revision(revision) do
           published = owner.content_model.get(owner.id)
-          published.set_visible_with_cascade!(!new_value)
+          published.send(:set_visible_with_cascade!, !new_value)
         end
       end
 

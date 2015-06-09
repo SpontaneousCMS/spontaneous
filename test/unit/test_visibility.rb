@@ -338,5 +338,57 @@ describe "Visibility" do
       refute al1.reload.visible?
       target.destroy
     end
+
+    # Given the following structure, where 'a means "alias of a" etc
+    # then hiding a should also hide 'a, b, c, 'c, d, e and 'e
+    #   ┌───┐
+    #   │ a │
+    #   └───┘
+    #     ▲
+    #     │
+    #   ┌───┐┌───┐┌───┐
+    #   │'a ││ b ││ c │
+    #   └───┘└───┘└───┘
+    #               ▲
+    #     ──────────┘
+    #   ┌───┐┌───┐┌───┐
+    #   │'c ││ d ││ e │
+    #   └───┘└───┘└───┘
+    #               ▲
+    #     ──────────┘
+    #   ┌───┐
+    #   │'e │
+    #   └───┘
+    it 'should cascade visibility across alias trees' do
+      P.box :pages
+      class PageAlias < ::Page
+        alias_of ::P
+        box :pages
+      end
+      a = P.new(slug: 'A')
+      @root.pages << a
+
+      _a = PageAlias.new(target: a)
+
+      @root.pages << _a
+      b = P.new(slug: 'B')
+      _a.pages << b
+      c = P.new(slug: 'C')
+      b.pages << c
+
+      _c = PageAlias.new(target: c)
+      @root.pages << _c
+      d = P.new(slug: 'D')
+      _c.pages << d
+      e = P.new(slug: 'E')
+      d.pages << e
+      _e = PageAlias.new(target: e)
+      @root.pages << _e
+      a.hide!
+      [_a, b, c, _c, d, e, _e].each do |page|
+        assert page.reload.hidden?, "Page #{page.class}#{page.path} should be hidden"
+        assert page.hidden_origin == a.id, "Hidden origin should be #{a.id}, but is #{page.hidden_origin}"
+      end
+    end
   end
 end
