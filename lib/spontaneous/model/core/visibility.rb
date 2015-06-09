@@ -128,12 +128,11 @@ module Spontaneous::Model::Core
 
     def hide_descendents(visible, origin)
       hidden = !visible
-      path_like = Sequel.like(:visibility_path, "#{self[:visibility_path]}.#{self.id}%")
-      dataset = content_model.filter(path_like).exclude(hidden: hidden)
+      dataset = contents.reject { |child| child.hidden? == hidden  }
 
       # if a child item has been made invisible *before* its parent then it exists
       # with hidden = true and hidden_origin = nil
-      dataset = dataset.filter(hidden_origin: origin) if visible
+      dataset = dataset.reject { |child| child.hidden_origin.nil? } if visible
       apply_visibility_to_dataset(dataset, visible, origin)
     end
 
