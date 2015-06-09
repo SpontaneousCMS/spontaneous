@@ -142,7 +142,7 @@ module Spontaneous
         self
       end
 
-      def limit(l, o = (no_offset = true; nil))
+      def limit(l, o = (_no_offset = true; nil))
         @dataset.limit!(l, o)
         self
       end
