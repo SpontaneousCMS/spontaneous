@@ -135,17 +135,15 @@ module Spontaneous::Model::Core
       end
 
       def respond_to_missing?(name, include_private = false)
-        return true if target && target.respond_to?(name)
-        super
+        (target && target.respond_to?(name, include_private)) || super
       end
 
       def respond_to?(name, include_private = false)
-        return true if target && target.respond_to?(name)
-        super
+        super || respond_to_missing?(name, include_private)
       end
 
       def method_missing(method, *args)
-        if target && target.respond_to?(method)
+        if respond_to_missing?(method)
           if block_given?
             target.__send__(method, *args, &Proc.new)
           else
