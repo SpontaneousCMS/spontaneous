@@ -9,6 +9,7 @@ Spontaneous.Content = (function($, S) {
 
 		initialize: function(content) {
 			this.content = content;
+      this.set('hidden', content.hidden);
 		},
 
 		uid: function() {
@@ -165,7 +166,7 @@ Spontaneous.Content = (function($, S) {
 		},
 
 		hidden: function() {
-			return this.content.hidden;
+			return this.get('hidden');
 		},
 
 		entries: function() {

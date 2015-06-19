@@ -157,15 +157,14 @@ Spontaneous.Views.PieceView = (function($, S) {
 			this.content.reposition(position);
 		},
 		toggle_visibility: function() {
+      this.visibility_changed(!this.content.get('hidden'));
 			this.content.toggle_visibility();
 		},
 		visibility_changed: function(hidden) {
-			var duration = 200;
-			this.wrapper.removeClass('visible hidden');
 			if (hidden) {
-				this.wrapper.switchClass('visible', 'hidden', duration);
+        this.wrapper.addClass('hidden');
 			} else {
-				this.wrapper.switchClass('hidden', 'visible', duration);
+        this.wrapper.removeClass('hidden');
 			}
 		},
 		mouseover: function() {
