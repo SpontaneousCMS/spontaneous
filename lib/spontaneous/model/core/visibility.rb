@@ -64,17 +64,16 @@ module Spontaneous::Model::Core
     end
 
     def set_visible!(state)
-      self.set_visible(state)
-      self.save
-      self
+      affected = set_visible(state)
+      save
+      affected
     end
 
     def set_visible(visible, origin = nil)
       protect_root_visibility!
-      if self.visible? != visible
-        raise Spontaneous::NotShowable.new(self, hidden_origin) if hidden? && visible && !showable?
-        apply_set_visible(visible, origin)
-      end
+      return [] unless visible? != visible
+      raise Spontaneous::NotShowable.new(self, hidden_origin) if hidden? && visible && !showable?
+      apply_set_visible(visible, origin)
     end
 
     def visibility_ancestors
@@ -92,57 +91,69 @@ module Spontaneous::Model::Core
     # state during the publish process.
     def set_visible_with_cascade!(state)
       set_visible(state)
-      force_visibility_cascade(id)
-      self.save
+      save
       self
     end
 
     def apply_set_visible(visible, origin)
       self[:hidden] = !visible
       self[:hidden_origin] = origin
-      force_visibility_cascade(origin || id)
+      propagate_visibility_state(origin || id)
     end
 
-    def force_visibility_cascade(origin)
-      @_visibility_modified = origin
-    end
-
-    def after_save
-      super
-      if (origin = @_visibility_modified)
-        propagate_visibility_state(origin)
-        @_visibility_modified = false
-      end
-    end
 
     def propagate_visibility_state(origin)
-      affected = []
-      affected.concat hide_descendents(visible?, origin)
-      affected.concat hide_aliases(visible?, origin)
+      hide_descendents(visible?, origin)
     end
 
-    def hide_aliases(visible, origin)
-      dataset = content_model.filter(target_id: id)
-      apply_visibility_to_dataset(dataset, visible, origin)
+    def descendents_path
+      sep   = Spontaneous::VISIBILITY_PATH_SEP
+      child = Sequel.expr(visibility_path: [visibility_path, "#{id}"].join(sep))
+      deep  = Sequel.like(:visibility_path, [visibility_path, id, "%"].join(sep))
+      (child | deep)
     end
 
     def hide_descendents(visible, origin)
-      hidden = !visible
-      dataset = contents.reject { |child| child.hidden? == hidden  }
-
-      # if a child item has been made invisible *before* its parent then it exists
-      # with hidden = true and hidden_origin = nil
-      dataset = dataset.reject { |child| child.hidden_origin.nil? } if visible
-      apply_visibility_to_dataset(dataset, visible, origin)
+      descendents = find_descendents(visible)
+      origin = nil if visible
+      content_model.where(id: descendents.map(&:id)).update(hidden: !visible, hidden_origin: origin)
+      descendents
     end
 
-    def apply_visibility_to_dataset(dataset, visible, origin)
-      origin = nil if visible
-      dataset.map do |content|
-        content.apply_set_visible(visible, origin)
-        content.save
-        content
+    # find descendents
+    # then all the aliases of descendents
+    # then loop back to repeat the process starting from the aliases
+    def find_descendents(visible)
+      affected = []
+      descendents = [self].concat(visibility_descendents(self, visible))
+      loop do
+        affected.concat(descendents)
+        aliases = content_aliases(descendents, visible)
+        # no need to continue if the descendents tree has no aliases to it
+        break if aliases.empty?
+        affected.concat(aliases)
+        descendents = aliases.flat_map { |a| visibility_descendents(a, visible) }
       end
+      # don't return self
+      affected[1..-1]
+    end
+
+    def content_aliases(targets, visible)
+      dataset = filter_for_visibility(content_model.filter(target_id: targets.map(&:id)), visible)
+      dataset.all
+    end
+
+    def visibility_descendents(content, visible)
+      dataset = filter_for_visibility(content_model.filter(content.descendents_path), visible)
+      dataset.all
+    end
+
+    def filter_for_visibility(ds, visible)
+      ds = ds.exclude(hidden: !visible)
+      # if a child item has been made invisible *before* its parent then it exists
+      # with hidden = true and hidden_origin = nil
+      ds = ds.filter(hidden_origin: id) if visible
+      ds
     end
 
     def recalculated_hidden

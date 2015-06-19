@@ -384,11 +384,24 @@ describe "Visibility" do
       d.pages << e
       _e = PageAlias.new(target: e)
       @root.pages << _e
-      a.hide!
+
+      affected = a.hide!
+
       [_a, b, c, _c, d, e, _e].each do |page|
         assert page.reload.hidden?, "Page #{page.class}#{page.path} should be hidden"
         assert page.hidden_origin == a.id, "Hidden origin should be #{a.id}, but is #{page.hidden_origin}"
       end
+
+      affected.map(&:id).must_equal [_a, b, c, _c, d, e, _e].map(&:id)
+
+      affected = a.show!
+
+      [_a, b, c, _c, d, e, _e].each do |page|
+        refute page.reload.hidden?, "Page #{page.class}#{page.path} should be visible"
+        assert page.hidden_origin.nil?, "Hidden origin should be nil, but is #{page.hidden_origin}"
+      end
+
+      affected.map(&:id).must_equal [_a, b, c, _c, d, e, _e].map(&:id)
     end
   end
 end
