@@ -33,7 +33,7 @@ module Spontaneous::Output::Store
     def activate_revision(revision, keys = nil)
       return remove_active_revision if revision.blank?
       if (dir = revision_path(revision)) && F.exist?(dir)
-        system("ln -nsf #{dir} #{current_path}")
+        symlink_revision(revision, dir)
         F.open(revision_file_path, 'w') { |f| f.write(Spontaneous::Paths.pad_revision_number(revision)) }
       end
     end
@@ -86,6 +86,19 @@ module Spontaneous::Output::Store
     def remove_active_revision
       FileUtils.rm_f(current_path)
       FileUtils.rm_f(revision_file_path)
+    end
+
+    def symlink_revision(revision, revision_dir)
+      temp_link = "#{current_path}_#{revision}_#{Time.now.strftime('%Y%m%d%H%M%S')}"
+      F.symlink revision_dir, temp_link
+      begin
+        F.rename temp_link, current_path
+      rescue SystemCallError
+        F.unlink current_path
+        F.rename temp_link, current_path
+      end
+    ensure
+      F.unlink(temp_link) if F.exist?(temp_link)
     end
 
     def ensure_path(path)
