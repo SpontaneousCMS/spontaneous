@@ -122,7 +122,7 @@ module Spontaneous::Model::Core
 
     def descendents_path
       sep   = Spontaneous::VISIBILITY_PATH_SEP
-      child = Sequel.expr(visibility_path: [visibility_path, "#{id}"].join(sep))
+      child = Sequel.expr(visibility_path: [visibility_path, id].join(sep))
       deep  = Sequel.like(:visibility_path, [visibility_path, id, "%"].join(sep))
       (child | deep)
     end
