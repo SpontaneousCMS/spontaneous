@@ -34,6 +34,13 @@
 
 - Adding an alias of an invisible target no longer sets creates a bad visibility state on the created alias (#57)
 
+- Changing the visibility of the parent of an item with aliases now correctly
+  updates the visibility of the aliases.
+
+- Incremental loading of box entries in the UI now works according to the
+  height of the box contents, rather than arbitrary counts. This improves the
+  behaviour of long lists of entries.
+
 ## 0.2.0.beta10, released 2015-03-20
 
 Is it wise to release a new version during a solar eclipse?
