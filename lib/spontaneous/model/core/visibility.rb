@@ -26,6 +26,15 @@ module Spontaneous::Model::Core
       self.hidden || false
     end
 
+    def visibility_ancestors
+      visibility_ancestor_ids.map { |id| content_model[id] }
+    end
+
+    def visibility_ancestor_ids
+      return [] if visibility_path.blank?
+      visibility_path.split(Spontaneous::VISIBILITY_PATH_SEP).map(&:to_i)
+    end
+
     def hide!
       set_visible!(false)
     end
@@ -42,14 +51,12 @@ module Spontaneous::Model::Core
       end
     end
 
-    ##
     # Is true when the current object is hidden independently of its ancestors
     # and false when hidden because one of its ancestors is hidden (so to show
     # this you need to show that ancestor)
     def showable?
       hidden? && hidden_origin.blank?
     end
-
 
     # When we're placed into the content tree we want to inherit our
     # visibility from our new owner
@@ -59,51 +66,58 @@ module Spontaneous::Model::Core
     end
 
     def visible=(visible)
-      protect_root_visibility!
       set_visible(visible)
-    end
-
-    def set_visible!(state)
-      affected = set_visible(state)
-      save
-      affected
-    end
-
-    def set_visible(visible, origin = nil)
-      protect_root_visibility!
-      return [] unless visible? != visible
-      raise Spontaneous::NotShowable.new(self, hidden_origin) if hidden? && visible && !showable?
-      apply_set_visible(visible, origin)
-    end
-
-    def visibility_ancestors
-      visibility_ancestor_ids.map { |id| content_model[id] }
-    end
-
-    def visibility_ancestor_ids
-      return [] if visibility_path.blank?
-      visibility_path.split(Spontaneous::VISIBILITY_PATH_SEP).map(&:to_i)
     end
 
     protected
 
+    def set_visible(visible, origin = nil)
+      return [] unless visible? != visible
+      apply_set_visible(visible, origin)
+      schedule_visibility_cascade(visible, origin || id)
+    end
+
+    def set_visible!(state)
+      set_visible_with_cascade!(state)
+    end
+
+    def after_save
+      super
+      if (args = @_visibility_requires_cascade)
+        @_visibility_requires_cascade = nil
+        cascade_visibility(*args)
+      end
+    end
+
+    def schedule_visibility_cascade(visible, origin)
+      @_visibility_requires_cascade = [visible, origin]
+    end
+
+    def verify_visibility_change!(show)
+      protect_root_visibility!
+      return if !show || visible?
+      raise Spontaneous::NotShowable.new(self, hidden_origin) unless showable?
+    end
+
     # Private: Used by visibility modifications to force a cascade of visibility
     # state during the publish process.
     def set_visible_with_cascade!(state)
-      set_visible(state)
+      apply_set_visible(state, nil)
       save
-      self
+      cascade_visibility(state, id)
     end
 
     def apply_set_visible(visible, origin)
+      verify_visibility_change!(visible)
       self[:hidden] = !visible
       self[:hidden_origin] = origin
-      propagate_visibility_state(origin || id)
     end
 
-
-    def propagate_visibility_state(origin)
-      hide_descendents(visible?, origin)
+    def cascade_visibility(visible, origin)
+      descendents = find_descendents(visible)
+      origin = nil if visible
+      content_model.where(id: descendents.map(&:id)).update(hidden: !visible, hidden_origin: origin)
+      descendents
     end
 
     def descendents_path
@@ -111,13 +125,6 @@ module Spontaneous::Model::Core
       child = Sequel.expr(visibility_path: [visibility_path, "#{id}"].join(sep))
       deep  = Sequel.like(:visibility_path, [visibility_path, id, "%"].join(sep))
       (child | deep)
-    end
-
-    def hide_descendents(visible, origin)
-      descendents = find_descendents(visible)
-      origin = nil if visible
-      content_model.where(id: descendents.map(&:id)).update(hidden: !visible, hidden_origin: origin)
-      descendents
     end
 
     # find descendents
@@ -161,9 +168,7 @@ module Spontaneous::Model::Core
     end
 
     def protect_root_visibility!
-      if self.is_page? && self.is_root?
-        raise "Root page is not hidable"
-      end
+      raise "Root page is not hidable" if (is_page? && is_root?)
     end
   end
 end

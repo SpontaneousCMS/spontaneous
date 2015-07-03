@@ -132,11 +132,10 @@ describe "Visibility" do
     Content.all.each do |c|
       if c.uid =~ /^0\.0/
         assert c.hidden?
+        refute c.visible?
         if c.uid == "0.0"
-          refute c.visible?
           c.hidden_origin.must_be_nil
         else
-          refute c.visible?
           c.hidden_origin.must_equal piece.id
         end
       else
@@ -278,7 +277,7 @@ describe "Visibility" do
       @root.pages.first.hide!
       @root.reload
       Content.with_visible do
-        pieces = @root.pages.contents.map { |p| p }
+        _pieces = @root.pages.contents.map { |p| p }
       end
     end
   end
@@ -320,7 +319,7 @@ describe "Visibility" do
       al2.reload
       target.reload
       sort = proc { |e1, e2| e1.id <=> e2.id }
-      al = target.aliases.sort(&sort)
+      _al = target.aliases.sort(&sort)
       Set.new(target.aliases).must_equal Set.new([al1, al2])
       target.reload
       Content.with_visible do
@@ -339,69 +338,101 @@ describe "Visibility" do
       target.destroy
     end
 
-    # Given the following structure, where 'a means "alias of a" etc
-    # then hiding a should also hide 'a, b, c, 'c, d, e and 'e
-    #   ┌───┐
-    #   │ a │
-    #   └───┘
-    #     ▲
-    #     │
-    #   ┌───┐┌───┐┌───┐
-    #   │'a ││ b ││ c │
-    #   └───┘└───┘└───┘
-    #               ▲
-    #     ──────────┘
-    #   ┌───┐┌───┐┌───┐
-    #   │'c ││ d ││ e │
-    #   └───┘└───┘└───┘
-    #               ▲
-    #     ──────────┘
-    #   ┌───┐
-    #   │'e │
-    #   └───┘
-    it 'should cascade visibility across alias trees' do
-      P.box :pages
-      class PageAlias < ::Page
-        alias_of ::P
-        box :pages
-      end
-      a = P.new(slug: 'A')
-      @root.pages << a
+    describe 'nested visibility' do
 
-      _a = PageAlias.new(target: a)
+      # Given the following structure, where 'a means "alias of a" etc
+      # then hiding a should also hide 'a, b, c, 'c, d, e and 'e
+      #   ┌───┐
+      #   │ a │
+      #   └───┘
+      #     ▲
+      #     │
+      #   ┌───┐┌───┐┌───┐
+      #   │'a ││ b ││ c │
+      #   └───┘└───┘└───┘
+      #               ▲
+      #     ──────────┘
+      #   ┌───┐┌───┐┌───┐
+      #   │'c ││ d ││ e │
+      #   └───┘└───┘└───┘
+      #               ▲
+      #     ──────────┘
+      #   ┌───┐
+      #   │'e │
+      #   └───┘
+      before do
+        P.box :pages
+        class PageAlias < ::Page
+          alias_of ::P
+          box :pages
+        end
+        a = P.new(slug: 'A')
+        @root.pages << a
 
-      @root.pages << _a
-      b = P.new(slug: 'B')
-      _a.pages << b
-      c = P.new(slug: 'C')
-      b.pages << c
+        _a = PageAlias.new(target: a)
 
-      _c = PageAlias.new(target: c)
-      @root.pages << _c
-      d = P.new(slug: 'D')
-      _c.pages << d
-      e = P.new(slug: 'E')
-      d.pages << e
-      _e = PageAlias.new(target: e)
-      @root.pages << _e
+        @root.pages << _a
+        b = P.new(slug: 'B')
+        _a.pages << b
+        c = P.new(slug: 'C')
+        b.pages << c
 
-      affected = a.hide!
-
-      [_a, b, c, _c, d, e, _e].each do |page|
-        assert page.reload.hidden?, "Page #{page.class}#{page.path} should be hidden"
-        assert page.hidden_origin == a.id, "Hidden origin should be #{a.id}, but is #{page.hidden_origin}"
+        _c = PageAlias.new(target: c)
+        @root.pages << _c
+        d = P.new(slug: 'D')
+        _c.pages << d
+        e = P.new(slug: 'E')
+        d.pages << e
+        _e = PageAlias.new(target: e)
+        @root.pages << _e
+        @hierarchy = [a, _a, b, c, _c, d, e, _e]
       end
 
-      affected.map(&:id).must_equal [_a, b, c, _c, d, e, _e].map(&:id)
+      it 'should cascade visibility across alias trees' do
+        a, _a, b, c, _c, d, e, _e = @hierarchy
 
-      affected = a.show!
+        affected = a.hide!
 
-      [_a, b, c, _c, d, e, _e].each do |page|
-        refute page.reload.hidden?, "Page #{page.class}#{page.path} should be visible"
-        assert page.hidden_origin.nil?, "Hidden origin should be nil, but is #{page.hidden_origin}"
+        [_a, b, c, _c, d, e, _e].each do |page|
+          assert page.reload.hidden?, "Page #{page.class}#{page.path} should be hidden"
+          assert page.hidden_origin == a.id, "Hidden origin should be #{a.id}, but is #{page.hidden_origin}"
+        end
+
+        affected.map(&:id).must_equal [_a, b, c, _c, d, e, _e].map(&:id)
+
+        affected = a.show!
+
+        [_a, b, c, _c, d, e, _e].each do |page|
+          refute page.reload.hidden?, "Page #{page.class}#{page.path} should be visible"
+          assert page.hidden_origin.nil?, "Hidden origin should be nil, but is #{page.hidden_origin}"
+        end
+
+        affected.map(&:id).must_equal [_a, b, c, _c, d, e, _e].map(&:id)
       end
 
-      affected.map(&:id).must_equal [_a, b, c, _c, d, e, _e].map(&:id)
+      it 'should cascade visibility changes only after saving' do
+        a, _a, b, c, _c, d, e, _e = @hierarchy
+        a.visible = false
+        [_a, b, c, _c, d, e, _e].each do |page|
+          refute page.reload.hidden?, "Page #{page.class}#{page.path} should be visible"
+          assert page.hidden_origin.nil?, "Hidden origin should be nil, but is #{page.hidden_origin}"
+        end
+        a.save
+        [_a, b, c, _c, d, e, _e].each do |page|
+          assert page.reload.hidden?, "Page #{page.class}#{page.path} should be hidden"
+          assert page.hidden_origin == a.id, "Hidden origin should be #{a.id}, but is #{page.hidden_origin}"
+        end
+        a.visible = true
+        [_a, b, c, _c, d, e, _e].each do |page|
+          assert page.reload.hidden?, "Page #{page.class}#{page.path} should be hidden"
+          assert page.hidden_origin == a.id, "Hidden origin should be #{a.id}, but is #{page.hidden_origin}"
+        end
+        a.save
+        [_a, b, c, _c, d, e, _e].each do |page|
+          refute page.reload.hidden?, "Page #{page.class}#{page.path} should be visible"
+          assert page.hidden_origin.nil?, "Hidden origin should be nil, but is #{page.hidden_origin}"
+        end
+      end
     end
   end
 end
