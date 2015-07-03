@@ -30,6 +30,14 @@ module Spontaneous::Publishing
       end
     end
 
+    def self.reindex(publishing_steps)
+      new([], publishing_steps.progress) do
+        REINDEX_STEPS.each do |step|
+          run step
+        end
+      end
+    end
+
     def self.default
       new do
         CORE_STEPS.each do |step|
@@ -115,13 +123,13 @@ module Spontaneous::Publishing
         steps << step
       end
 
-      def run(site, revision, pages, progress)
+      def run(transaction)
         @steps.each do |step|
-          progress.add(step.count(site, revision)) if step.respond_to?(:count)
+          progress.add(step.count(transaction)) if step.respond_to?(:count)
         end
 
         @steps.each do |step|
-          step.call(site, revision, pages, progress)
+          step.call(transaction)
         end
       end
 
@@ -138,7 +146,6 @@ module Spontaneous::Publishing
       :copy_static_files,
       :generate_rackup_file,
       :activate_revision,
-      :write_revision_file,
       :archive_old_revisions
     ].freeze
 
@@ -147,6 +154,10 @@ module Spontaneous::Publishing
       :copy_assets,
       :copy_static_files,
       :generate_rackup_file
+    ].freeze
+
+    REINDEX_STEPS = [
+      :generate_search_indexes,
     ].freeze
 
     CORE_PROGRESS = [:browser, :stdout].freeze

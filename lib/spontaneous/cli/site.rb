@@ -135,6 +135,11 @@ module Spontaneous
         show_site_revision
       end
 
+      desc "index", "Re-generates the search indexes for the published content"
+      def index(*args)
+        index_site
+      end
+
       desc "browse", "Launches a browser pointing to the current development CMS"
       def browse(*args)
         browse_site
@@ -172,6 +177,12 @@ module Spontaneous
         site = prepare! :render
         site.background_mode = :immediate
         site.rerender
+      end
+
+      def index_site
+        site = prepare! :index
+        site.background_mode = :immediate
+        site.reindex
       end
 
       def show_site_revision

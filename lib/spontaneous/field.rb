@@ -6,16 +6,18 @@ module Spontaneous
     autoload :FieldVersion, "spontaneous/field/field_version"
     autoload :Update,       "spontaneous/field/update"
 
-    @@type_map = {}
+    def self.type_map
+      @type_map ||= {}
+    end
 
     def self.register(klass, *labels)
       labels.each do |label|
-        @@type_map[label.to_sym] = klass
+        type_map[label.to_sym] = klass
       end
     end
 
     def self.[](label)
-      @@type_map[label.to_sym] || String
+      type_map[label.to_sym] || String
     end
 
     def self.serialize_field(field)
@@ -23,12 +25,10 @@ module Spontaneous
     end
 
     def self.deserialize_field(serialized_field)
-      {
-        :id => serialized_field[0],
-        :version => serialized_field[1],
-        :unprocessed_value => serialized_field[2],
-        :processed_values => serialized_field[3]
-      }
+      {id: serialized_field[0],
+       version: serialized_field[1],
+       unprocessed_value: serialized_field[2],
+       processed_values: serialized_field[3]}
     end
 
     # Used to test for the validity of asynchronous updates.

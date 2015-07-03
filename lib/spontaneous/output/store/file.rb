@@ -8,8 +8,10 @@ module Spontaneous::Output::Store
   # at the `static` area and (in theory) protected templates could
   # be served using a "sendfile" header.
   class File < Backend
+    F = ::File unless defined? F
 
-    def initialize(root)
+    def initialize(root, config = {})
+      super(config)
       @root = root
     end
 
@@ -23,24 +25,37 @@ module Spontaneous::Output::Store
     end
 
     def delete_revision(revision, keys = nil)
-      if (dir = revision_path(revision)) && ::File.exist?(dir)
-        ::FileUtils.rm_r(dir)
+      if (dir = revision_path(revision)) && F.exist?(dir)
+        FileUtils.rm_r(dir)
       end
+    end
+
+    def activate_revision(revision, keys = nil)
+      return remove_active_revision if revision.blank?
+      if (dir = revision_path(revision)) && F.exist?(dir)
+        system("ln -nsf #{dir} #{current_path}")
+        F.open(revision_file_path, 'w') { |f| f.write(Spontaneous::Paths.pad_revision_number(revision)) }
+      end
+    end
+
+    def current_revision
+      return nil unless F.exist?(revision_file_path)
+      Integer(F.read(revision_file_path), 10)
+    end
+
+    def load(revision, partition, key, static:)
+      read(path(revision, partition, key))
     end
 
     protected
 
     def store(revision, partition, key, template, transaction)
-      ::File.open(path!(revision, partition, key, transaction), 'wb') { |f| f.write(template) }
-    end
-
-    def load(revision, partition, key)
-      read(path(revision, partition, key))
+      F.open(path!(revision, partition, key, transaction), 'wb') { |f| f.write(template) }
     end
 
     def read(path)
-      return nil unless ::File.exist?(path)
-      ::File.open(path, 'r:UTF-8')
+      return nil unless F.exist?(path)
+      F.open(path, 'rb:UTF-8')
     end
 
     def pad_revision(revision)
@@ -53,25 +68,38 @@ module Spontaneous::Output::Store
 
     def path(revision, partition, path, transaction = nil)
       transaction.push(key(revision, partition, path)) if transaction
-      ::File.join(revision_path(revision), partition, path)
+      F.join(revision_path(revision), partition.to_s, path)
     end
 
     def revision_path(revision)
-      ::File.join(@root, pad_revision(revision))
+      F.join(@root, pad_revision(revision))
+    end
+
+    def current_path
+      F.join(@root, 'current')
+    end
+
+    def revision_file_path
+      F.join(@root, 'REVISION')
+    end
+
+    def remove_active_revision
+      FileUtils.rm_f(current_path)
+      FileUtils.rm_f(revision_file_path)
     end
 
     def ensure_path(path)
-      ensure_dir ::File.dirname(path)
+      ensure_dir F.dirname(path)
       path
     end
 
     def ensure_dir(dir)
-      FileUtils.mkdir_p(dir) unless ::File.exist?(dir)
+      FileUtils.mkdir_p(dir) unless F.exist?(dir)
       dir
     end
 
     def key(revision, partition, path)
-      ::File.join(pad_revision(revision), partition, path)
+      F.join(pad_revision(revision), partition.to_s, path)
     end
   end
 end

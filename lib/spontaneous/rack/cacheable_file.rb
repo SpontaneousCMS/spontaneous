@@ -3,16 +3,21 @@ module Spontaneous::Rack
   class CacheableFile < ::Rack::File
     include Constants
 
-    TEN_YEARS = 10*365.25*24*3600
-    MAX_AGE =  "max-age=#{TEN_YEARS}, public".freeze
+    YEARS   = 1
+    SECONDS = (YEARS * 365.25*24*3600).ceil
+    MAX_AGE = "max-age=#{SECONDS}, public".freeze
 
-    def initialize(file_root)
-      super(file_root)
+    def initialize(app)
+      @app = app
     end
 
     def call(env)
-      status, headers, body = super
-      [status, caching_headers(headers), body]
+      status, headers, body = @app.call(env)
+      if (status >= 200) && (status < 400)
+        [status, caching_headers(headers), body]
+      else
+        [status, headers, body]
+      end
     end
 
     # Send a far future Expires header and make sure that
@@ -20,8 +25,12 @@ module Spontaneous::Rack
     def caching_headers(headers)
       headers.update({
         HTTP_CACHE_CONTROL => MAX_AGE,
-        HTTP_EXPIRES => (Time.now.advance(:years => 10)).httpdate
+        HTTP_EXPIRES => in_one_year.httpdate
       })
+    end
+
+    def in_one_year
+      (Time.now + SECONDS)
     end
   end
 end

@@ -166,10 +166,18 @@ describe "Publishing Pipeline" do
     end
   end
 
+  def transaction(_revision = revision, pages = nil, progress = Spontaneous::Publishing::Progress::Silent.new)
+    Spontaneous::Publishing::Transaction.new(@site, _revision, pages, progress)
+  end
+
   def run_step(progress = Spontaneous::Publishing::Progress::Silent.new)
+    run_step_with_transaction(transaction(revision, nil, progress))
+  end
+
+  def run_step_with_transaction(transaction)
     # the overall publish coordinator will ensure that every step runs within the right scope
-    @site.model.scope(revision, true) do
-      step.call(@site, revision, nil, progress)
+    @site.model.scope(transaction.revision, true) do
+      step.call(transaction)
     end
   end
 
@@ -194,7 +202,7 @@ describe "Publishing Pipeline" do
     end
 
     it "returns a step count of 1" do
-      step.count(@site, revision, nil).must_equal 1
+      step.count(transaction).must_equal 1
     end
 
     it "updates the progress object" do
@@ -208,6 +216,14 @@ describe "Publishing Pipeline" do
       instance = run_step
       instance.rollback
       refute File.exist?(path)
+    end
+
+    it "rolls back the output store transaction" do
+      t = transaction
+      rt = t.render_transaction
+      rt.expects(:rollback).once
+      instance = run_step_with_transaction(t)
+      instance.rollback
     end
 
     it "runs rollback after throwing an exception" do
@@ -237,6 +253,13 @@ describe "Publishing Pipeline" do
       run_step
     end
 
+    it "doesn't call #commit on the output store transaction" do
+      t = transaction
+      rt = t.render_transaction
+      rt.expects(:commit).never
+      run_step_with_transaction(t)
+    end
+
     describe "private trees" do
       let(:next_revision) { revision + 1 }
       let(:progress) { Spontaneous::Publishing::Progress::Silent.new }
@@ -264,14 +287,14 @@ describe "Publishing Pipeline" do
           end
         end
         @site.model.scope(next_revision, true) do
-          step.call(@site, next_revision, nil, )
+          step.call(transaction(next_revision))
         end
       end
     end
 
     it "returns the correct number of steps" do
       @site.model.scope(revision, true) do
-        step.count(@site, revision, nil).must_equal (@pages.length * 2)
+        step.count(transaction).must_equal (@pages.length * 2)
       end
     end
 
@@ -284,13 +307,6 @@ describe "Publishing Pipeline" do
 
     it "returns an instance from #call" do
       run_step.must_be_instance_of step
-    end
-
-    it "deletes the rendered files on rollback" do
-      instance = run_step
-      store = @output_store.revision(revision).store
-      store.expects(:delete_revision).with(revision)
-      instance.rollback
     end
 
     it "runs rollback after throwing an exception" do
@@ -319,7 +335,7 @@ describe "Publishing Pipeline" do
 
     it "returns the correct number of steps when there are no search indexes" do
       @site.model.scope(revision, true) do
-        step.count(@site, revision, nil).must_equal 0
+        step.count(transaction).must_equal 0
       end
     end
 
@@ -339,7 +355,7 @@ describe "Publishing Pipeline" do
 
       it "returns the correct number of steps" do
         @site.model.scope(revision, true) do
-          step.count(@site, revision, nil).must_equal (@pages.length)
+          step.count(transaction).must_equal (@pages.length)
         end
       end
 
@@ -390,12 +406,19 @@ describe "Publishing Pipeline" do
     let(:fixtures_path) { application_path + "public" }
     let(:revision_root) { @site.revision_dir(revision) }
 
-    def assert_static_files(namespace = nil)
-      Dir["#{fixtures_path}/**/*"].each do |fixture|
+    def static_file_paths(namespace = nil)
+      Dir["#{fixtures_path}/**/*"].map do |fixture|
         path = Pathname.new(fixture)
+        next unless path.file?
         relative = path.relative_path_from(fixtures_path).to_s
-        revision_file = File.join([revision_root, "public", namespace, relative].compact)
-        File.exist?(revision_file).must_equal true
+        [File.join("/", [namespace, relative].compact), path.to_s]
+      end.compact
+    end
+
+    def assert_static_files(namespace = nil)
+      store = @output_store.revision(revision).store
+      static_file_paths(namespace).each do |relative_path, file_path|
+        store.expects(:store_static).with(revision, relative_path, ::File.read(file_path), instance_of(Spontaneous::Output::Store::Transaction))
       end
     end
 
@@ -423,12 +446,12 @@ describe "Publishing Pipeline" do
     end
 
     it "gives its step count as the number of facets" do
-      step.count(@site, revision, nil).must_equal 1
+      step.count(transaction).must_equal 1
     end
 
-    it "copies files in the site's public dir" do
-      run_step
+    it "copies files in the site's public dir into the output store" do
       assert_static_files
+      run_step
     end
 
     it "deletes the copied files on rollback" do
@@ -451,13 +474,13 @@ describe "Publishing Pipeline" do
       end
 
       it "copies plugin files under their namespace" do
-        run_step
         assert_static_files
         assert_static_files('example_application')
+        run_step
       end
 
       it "gives its step count as the number of facets" do
-        step.count(@site, revision, nil).must_equal 2
+        step.count(transaction).must_equal 2
       end
 
       it "steps the progress once for each facet" do
@@ -480,10 +503,10 @@ describe "Publishing Pipeline" do
     let(:assets)        { environment.manifest.assets }
 
     def assert_assets(revision)
-      revision_root = @site.revision_dir(revision)
       assets.length.must_equal 3
+      output = @output_store.revision(revision)
       assets.each do |logical_path, asset|
-        assert File.exist?(File.join(revision_root, 'assets', asset)), "asset '#{asset}' does not exist"
+        assert output.static_asset(File.join('/', asset)), "Asset '#{asset}' missing"
       end
     end
 
@@ -512,7 +535,7 @@ describe "Publishing Pipeline" do
     end
 
     it "gives its step count as the number of assets" do
-      step.count(@site, revision, nil).must_equal 3
+      step.count(transaction).must_equal 3
     end
 
     it "copies compiled assets to the revision's asset dir" do
@@ -520,19 +543,14 @@ describe "Publishing Pipeline" do
       assert_assets(revision)
     end
 
-    it "copies compressed assets to the revision's asset dir" do
-      asset = assets.values.first
-      compressed = asset + '.gz'
-      FileUtils.cp(manifest.asset_compilation_dir + asset, manifest.asset_compilation_dir + compressed)
-      run_step
-      assert File.exist?(File.join(revision_root, 'assets', compressed)), "#{compressed} should exist"
-    end
-
-    it "deletes the copied files on rollback" do
-      instance = run_step
-      instance.rollback
-      refute File.exist?(File.join(revision_root, "assets"))
-    end
+    # TODO: Implement compression on File backed assets
+    # it "copies compressed assets to the revision's asset dir" do
+    #   asset = assets.values.first
+    #   compressed = asset + '.gz'
+    #   FileUtils.cp(manifest.asset_compilation_dir + asset, manifest.asset_compilation_dir + compressed)
+    #   run_step
+    #   assert File.exist?(File.join(revision_root, 'assets', compressed)), "#{compressed} should exist"
+    # end
 
     it "runs rollback after throwing an exception" do
       instance = mock
@@ -541,26 +559,6 @@ describe "Publishing Pipeline" do
       instance.expects(:rollback)
       lambda{ run_step }.must_raise(Exception)
     end
-
-    describe 'development' do
-      let(:development) { true }
-
-      before do
-        Spontaneous.stubs(:development?).returns(true)
-      end
-
-      it "gives its step count as zero" do
-        step.count(@site, revision, nil).must_equal 0
-      end
-
-      it "never steps the progress" do
-        progress = mock
-        progress.stubs(:stage)
-        progress.expects(:step).with(1, instance_of(String)).never
-        run_step(progress)
-      end
-    end
-
   end
 
   describe "GenerateRackupFile" do
@@ -572,7 +570,7 @@ describe "Publishing Pipeline" do
     end
 
     it "reports a step count of 1" do
-      step.count(@site, revision, nil).must_equal 1
+      step.count(transaction).must_equal 1
     end
 
     it "sets the stage to 'create server config'" do
@@ -627,8 +625,8 @@ describe "Publishing Pipeline" do
       step.to_sym.must_equal :activate_revision
     end
 
-    it "reports a step count of 1" do
-      step.count(@site, revision, nil).must_equal 2
+    it "reports a step count of 3" do
+      step.count(transaction).must_equal 3
     end
 
     it "sets the stage to 'activating revision'" do
@@ -638,10 +636,10 @@ describe "Publishing Pipeline" do
       run_step(progress)
     end
 
-    it "increments the progress step by 2" do
+    it "increments the progress step by 3" do
       progress = mock
       progress.stubs(:stage)
-      progress.expects(:step).with(1, instance_of(String)).times(2)
+      progress.expects(:step).with(1, instance_of(String)).times(3)
       run_step(progress)
     end
 
@@ -654,6 +652,19 @@ describe "Publishing Pipeline" do
       state.reload
       state.published_revision.must_equal revision
       state.revision.must_equal revision + 1
+    end
+
+    it "commits the output store transaction" do
+      t = transaction
+      rt = t.render_transaction
+      rt.expects(:commit).once
+      run_step_with_transaction(t)
+    end
+
+    it "activates the output store revision" do
+      @output_store.current_revision.must_equal nil
+      run_step
+      @output_store.current_revision.must_equal revision
     end
 
     it "rollback sets the site state back to how it was" do
@@ -684,15 +695,10 @@ describe "Publishing Pipeline" do
         FileUtils.ln_s(previous_revision_dir, @site.revision_dir)
       end
 
-      it "symlinks the new revision to 'current'" do
-        run_step
-        File.read(File.join(@site.revision_dir, 'REVISION')).must_equal revision.to_s
-      end
-
       it "rollback re-points the 'current' symlink to the previous directory" do
         instance = run_step
         instance.rollback
-        File.read(File.join(@site.revision_dir, 'REVISION')).must_equal (revision - 1).to_s
+        @output_store.current_revision.must_equal revision - 1
       end
     end
 
@@ -702,11 +708,6 @@ describe "Publishing Pipeline" do
       before do
         FileUtils.mkdir_p(new_revision_dir)
         File.open(File.join(new_revision_dir, 'REVISION'), 'w') { |file| file.write(revision) }
-      end
-
-      it "symlinks the new revision to 'current'" do
-        run_step
-        File.read(File.join(@site.revision_dir, 'REVISION')).must_equal revision.to_s
       end
 
       it "rollback deletes the 'current' symlink" do
@@ -734,51 +735,8 @@ describe "Publishing Pipeline" do
       step.to_sym.must_equal :write_revision_file
     end
 
-    it "reports a step count of 1" do
-      step.count(@site, revision, nil).must_equal 1
-    end
-
-    it "sets the stage to 'writing revision file'" do
-      progress = mock
-      progress.stubs(:step)
-      progress.expects(:stage).with("writing revision file").once
-      run_step(progress)
-    end
-
-    it "increments the progress step by 1" do
-      progress = mock
-      progress.stubs(:stage)
-      progress.expects(:step).with(1, instance_of(String)).once
-      run_step(progress)
-    end
-
-    it "writes a REVISION file with the current revision dirname" do
-      run_step
-      assert File.exist?(path)
-      r = File.read(path)
-      r.must_equal "00003"
-    end
-
-    it "deletes the file on rollback if none existed" do
-      instance = run_step
-      instance.rollback
-      refute File.exist?(path)
-    end
-
-    it "reverts the file on rollback" do
-      File.open(path, 'w') { |file| file.write("PREVIOUS") }
-      instance = run_step
-      instance.rollback
-      assert File.exist?(path)
-      File.read(path).must_equal "PREVIOUS"
-    end
-
-    it "runs rollback after throwing an exception" do
-      instance = mock
-      step.expects(:new).returns(instance)
-      instance.expects(:call).raises(Exception)
-      instance.expects(:rollback)
-      lambda{ run_step }.must_raise(Exception)
+    it "reports a step count of 0" do
+      step.count(transaction).must_equal 0
     end
   end
 
@@ -790,7 +748,7 @@ describe "Publishing Pipeline" do
     end
 
     it "reports a step count of 1" do
-      step.count(@site, revision, nil).must_equal 1
+      step.count(transaction).must_equal 1
     end
 
     it "sets the stage to 'archiving old revisions'" do
@@ -830,7 +788,7 @@ describe "Publishing Pipeline" do
     }
 
     def run_steps(_steps = steps, _progress = progress)
-      Spontaneous::Publishing::Pipeline.new(_steps).run(@site, revision, pages, _progress)
+      Spontaneous::Publishing::Pipeline.new(_steps).run(transaction(revision, pages, _progress))
     end
 
     def modify_some_pages
@@ -846,7 +804,7 @@ describe "Publishing Pipeline" do
       steps = [mock, mock]
       steps.each do |step|
         step.stubs(:count).returns(10)
-        step.expects(:call).with(site, revision, pages, progress)
+        step.expects(:call).with(instance_of(Spontaneous::Publishing::Transaction))
       end
       run_steps(steps)
     end
@@ -855,7 +813,7 @@ describe "Publishing Pipeline" do
       steps = [mock, mock]
       steps.each do |step|
         step.stubs(:call)
-        step.expects(:count).with(site, revision, pages, progress).returns(12)
+        step.expects(:count).with(instance_of(Spontaneous::Publishing::Transaction)).returns(12)
       end
       progress.expects(:start).with(24)
       run_steps(steps)
@@ -940,7 +898,7 @@ describe "Publishing Pipeline" do
     it "runs all steps" do
       pages_matcher = all_of(*@modified_pages.map { |page| PageMatcher.new(page)})
       steps.each do |step|
-        step.expects(:call).with(site, revision, pages_matcher, instance_of(mprogress::Multi))
+        step.expects(:call).with(instance_of(Spontaneous::Publishing::Transaction))
       end
       publish.publish_pages(@modified_pages)
     end
@@ -964,8 +922,23 @@ describe "Publishing Pipeline" do
       end
 
       def matches?(available_parameters)
-        parameter = available_parameters.shift
-        parameter.any? { |param| param.class == @page.class && param.id == @page.id }
+        # p [@page, :params, available_parameters]
+        page = available_parameters.shift
+        # p [:page, page]
+        # page.class == @page.class && page.id == @page.id
+        page.any? { |param| param.class == @page.class && param.id == @page.id }
+      end
+    end
+    class TransactionPagesMatcher < Mocha::ParameterMatchers::Base
+      def initialize(modified_pages)
+        @modified_pages = modified_pages
+      end
+
+      def matches?(available_parameters)
+        transaction = available_parameters.shift
+        transaction.pages.all? { |page |
+          @modified_pages.include?(page)
+        }
       end
     end
 
@@ -977,9 +950,8 @@ describe "Publishing Pipeline" do
     # so a publish all should convert the nil used internally into a list of all
     # the modified pages for use by the steps
     it "passes the list of modified pages to the publish steps" do
-      pages_matcher = all_of(*@modified_pages.map { |page| PageMatcher.new(page)})
       steps.each do |step|
-        step.expects(:call).with(site, revision, pages_matcher, instance_of(mprogress::Multi))
+        step.expects(:call).with(TransactionPagesMatcher.new(@modified_pages))
       end
       publish.publish_all
     end
@@ -1086,7 +1058,7 @@ describe "Publishing Pipeline" do
 
       it "passes all configured steps onto the publish system" do
         steps.each do |step|
-          step.expects(:call).with(site, revision, anything, anything)
+          step.expects(:call).with(instance_of(Spontaneous::Publishing::Transaction))
         end
         @site.publish do
           run FakeStep

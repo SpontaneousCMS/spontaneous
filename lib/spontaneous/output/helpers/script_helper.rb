@@ -23,7 +23,7 @@ module Spontaneous::Output::Helpers
       end
       options = args.extract_options!
       options.update(:development => development?)
-      asset_environment.js(args.flatten, options)
+      _asset_environment.js(args.flatten, options)
     end
 
     alias_method :script, :scripts

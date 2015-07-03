@@ -13,18 +13,18 @@ module Spontaneous
 
       def self.front_app(site)
         ::Rack::Builder.app do
-          use Scope::Front, site
           use Reloader, site if Spontaneous.development?
           run Server.new
         end
       end
 
       def self.application(site = ::Spontaneous.instance)
-        app = ::Rack::Builder.new do
-          use Spontaneous::Rack::Static, root: Spontaneous.revision_dir / "public", urls: %w[/], try: ['.html', 'index.html', '/index.html']
+        ::Rack::Builder.new do
+          use Scope::Front, site
+          use Spontaneous::Rack::Static, root: Spontaneous.revision_dir / 'public', urls: %w[/], try: ['.html', 'index.html', '/index.html']
 
           Spontaneous.instance.front.middleware.each do |args, block|
-            use *args, &block
+            use(*args, &block)
           end
 
           Spontaneous.instance.front_controllers.each do |namespace, controller_class|
@@ -42,21 +42,19 @@ module Spontaneous
             end
           end
 
-          map "/rev" do
-            run Spontaneous::Rack::CacheableFile.new(Spontaneous.revision_dir / "rev")
+          map '/assets' do
+            use Spontaneous::Rack::CacheableFile
+            run Spontaneous::Rack::OutputStore.assets(site)
           end
 
-          map "/assets" do
-            run Spontaneous::Rack::CacheableFile.new(Spontaneous.revision_dir / "assets")
+          map '/media' do
+            use Spontaneous::Rack::CacheableFile
+            run ::Rack::File.new(Spontaneous.media_dir)
           end
 
-          map "/media" do
-            run Spontaneous::Rack::CacheableFile.new(Spontaneous.media_dir)
-          end
+          use Spontaneous::Rack::OutputStore, site
 
-          map "/" do
-            run Spontaneous::Rack::Front.front_app(site)
-          end
+          run Spontaneous::Rack::Front.front_app(site)
         end
       end
 

@@ -23,13 +23,14 @@ module Spontaneous::Output::Store
     attr_reader :backend
 
     def initialize(name, options = {})
+      super(options)
       @backend = ::Moneta.build do
         adapter name, options
       end
     end
 
     def add_revision(revision, keys)
-      save_revisions(revisions.push(revision))
+      save_revisions(revisions.push(revision).uniq.sort)
       @backend.store(revision_key(revision), serialize(keys))
     end
 
@@ -52,15 +53,43 @@ module Spontaneous::Output::Store
       end if keys
     end
 
+    def activate_revision(revision)
+      return remove_active_revision if revision.nil?
+      @backend.store(current_revision_key, revision)
+    end
+
+    def current_revision
+      @backend.load(current_revision_key)
+    end
+
     def revision_key(revision)
       ":revision:#{revision}"
     end
 
+    def current_revision_key
+      ":revision:".freeze
+    end
+
     def revisions_key
-      ":revisions:"
+      ":revisions:".freeze
+    end
+
+    def load(revision, partition, path, static:)
+      if (template = @backend.load(key_for(revision, partition, path)))
+        return wrap_read(template, static, path_for(revision, partition, path))
+      end
+      nil
     end
 
     protected
+
+    def wrap_read(data, static, path)
+      if static
+        StringIO.new(data)
+      else
+        Template.new(data, path)
+      end
+    end
 
     # The Template class wraps a String template response with IO characteristics
     # based on StringIO & also supplies File-like characteristics by
@@ -87,11 +116,8 @@ module Spontaneous::Output::Store
       @backend.store(key, template)
     end
 
-    def load(revision, partition, path)
-      if (template = @backend.load(key_for(revision, partition, path)))
-        return Template.new(template, path_for(revision, partition, path))
-      end
-      nil
+    def remove_active_revision
+      @backend.delete(current_revision_key)
     end
 
     def key_for(revision, partition, path)
@@ -99,7 +125,7 @@ module Spontaneous::Output::Store
     end
 
     def path_for(revision, partition, path)
-      ::File.join(Spontaneous::SLASH, revision.to_s, partition, path)
+      ::File.join(Spontaneous::SLASH, revision.to_s, partition.to_s, path)
     end
 
     def serialize(obj)

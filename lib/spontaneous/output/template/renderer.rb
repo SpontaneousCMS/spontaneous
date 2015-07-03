@@ -11,6 +11,22 @@ module Spontaneous::Output::Template
   # these should be shared between requests/renders so that the
   # caching can be effective
 
+  class PreviewTransaction
+    attr_reader :site
+
+    def initialize(site)
+      @site = site
+    end
+
+    def publishing?
+      false
+    end
+
+    def asset_environment
+      @asset_environment ||= Spontaneous::Asset::Environment.new(self)
+    end
+  end
+
   class Renderer
     def initialize(site, cache = Spontaneous::Output.cache_templates?)
       @site  = site
@@ -30,10 +46,15 @@ module Spontaneous::Output::Template
     end
 
     def context(output, params, parent)
-      context_class(output).new(Spontaneous::Output::Renderable.new(output.renderable_content), params, parent).tap do |context|
+      renderable = Spontaneous::Output::Renderable.new(output.renderable_content)
+      context_class(output).new(renderable, params, parent).tap do |context|
         context.site = @site
         context._renderer = renderer_for_context
       end
+    end
+
+    def asset_environment
+      @asset_environment ||= Spontaneous::Asset::Environment::Preview.new(@site)
     end
 
     def renderer_for_context
@@ -101,9 +122,16 @@ module Spontaneous::Output::Template
   end
 
   class PublishRenderer < Renderer
-    def initialize(site, cache = Spontaneous::Output.cache_templates?)
-      super
+    attr_reader :transaction
+
+    def initialize(transaction, cache = Spontaneous::Output.cache_templates?)
+      super(transaction.site, cache)
+      @transaction = transaction
       Thread.current[:_render_cache] = {}
+    end
+
+    def asset_environment
+      transaction.asset_environment
     end
 
     def render_cache
@@ -137,7 +165,7 @@ module Spontaneous::Output::Template
 
     def render(output, params = {}, parent_context = nil)
       render!(output, params, parent_context)
-    rescue Cutaneous::UnknownTemplateError => e
+    rescue Cutaneous::UnknownTemplateError => _e
       render_on_demand(output, params, parent_context)
     end
 
@@ -163,7 +191,11 @@ module Spontaneous::Output::Template
     end
 
     def publish_renderer
-      @publish_renderer ||= PublishRenderer.new(@site)
+      @publish_renderer ||= PublishRenderer.new(publish_transaction)
+    end
+
+    def publish_transaction
+      Spontaneous::Publishing::Transaction.new(@site, revision, nil)
     end
 
     def revision_root
@@ -182,8 +214,12 @@ module Spontaneous::Output::Template
       request_renderer.render_string(rendered, output, params, parent_context)
     end
 
+    def publish_transaction
+      PreviewTransaction.new(@site)
+    end
+
     def renderer_for_context
-      @renderer_for_context ||= PublishRenderer.new(@site, @cache)
+      @renderer_for_context ||= PublishRenderer.new(publish_transaction, @cache)
     end
 
     def request_renderer
