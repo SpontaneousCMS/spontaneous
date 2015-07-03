@@ -882,8 +882,8 @@
 	}
 	.entry-wrap {
 		@extend .clearfix;
-    transition: opacity 0.2s;
-    -webkit-transition: opacity 0.2s;
+		transition: opacity 0.2s;
+		-webkit-transition: opacity 0.2s;
 		position: relative;
 		margin-left: $container-padding - 6;
 		margin-right: $container-padding;

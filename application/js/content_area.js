@@ -34,7 +34,7 @@ Spontaneous.ContentArea = (function($, S) {
 					// this should ideally be context sensitive, so that the trigger for short containers
 					// loads a bit earlier. This would mean that the first load of additional content would
 					// happen more promptly than later ones. Currently it's the inverse of that.
-, margin = 0.95
+					, margin = 0.95
 					, bottom = ((st + ih) >= (sh * margin));
 					if (bottom) {
 						contentArea.set('scroll_bottom', (++count));
