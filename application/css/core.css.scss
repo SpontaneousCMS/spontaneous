@@ -868,13 +868,17 @@
 
 #page-slots.slots .slot-entries {
 	padding-top: 32px;
-	padding-bottom: 25%;
 	position: relative;
 	.fields-preview {
 		@include rounded;
 		padding: 4px;
 		background: none;
 		background-color: white;
+	}
+	// added when a box is showing all its entries to give the last one some
+	// breathing room in the page
+	&.entries-loaded {
+		padding-bottom: 200px;
 	}
 	.entry-wrap {
 		@extend .clearfix;

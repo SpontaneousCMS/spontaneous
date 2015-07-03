@@ -42,6 +42,9 @@ Spontaneous.ContentArea = (function($, S) {
 				};
 			}(this, inner));
 		},
+		height: function() {
+			return this.inner.height();
+		},
 		location_loading: function(destination) {
 			if (destination) {
 				this.wrap.addClass('loading');

@@ -13,6 +13,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 			this.dom_container = dom_container;
 			this.box.bind('entry_added', this.insert_entry.bind(this));
 			this.box.bind('entry_removed', this.remove_entry.bind(this));
+			this._isAttached = false;
 		},
 
 		name: function() {
@@ -59,25 +60,12 @@ Spontaneous.Views.BoxView = (function($, S) {
 
 				panel.append(this.add_allowed_types_bar('top', 0));
 				var entries = dom.div('.slot-entries');
+				panel.append(entries);
+				this.dom_container.append(panel);
 				var instructions = dom.div('.slot-instructions').text('Add items using the buttons above');
 				entries.append(instructions);
-				var entry_total = this.entries().length, preload = Math.min(entry_total, 6);
-				if (preload < entry_total) {
-					var scrollLoad = function(view, loadedCount, entries, container) {
-						var position = loadedCount, increment = 3, total = entries.length;
-						return function() {
-							if (position >= total) { return; }
-							for (var i = position, ii = Math.min(position + increment, total); i < ii; i++) {
-								container.append(view.claim_entry(entries[i]));
-							}
-							position += increment;
-						};
-					}(this, preload, this.entries(), entries);
-					this.watchOther(S.ContentArea, 'scroll_bottom', scrollLoad);
-				}
-				for (var i = 0, ee = this.entries(), ii = preload;i < ii; i++) {
-					var entry = ee[i];
-					entries.append(this.claim_entry(entry));
+				if (this._isAttached) {
+					this.appendEntries(entries);
 				}
 				entries.sortable({
 					items:'> .'+this.entry_class(),
@@ -94,18 +82,60 @@ Spontaneous.Views.BoxView = (function($, S) {
 						this.re_sort(ui.item);
 					}.bind(this)
 				});
-				panel.append(entries);
-			// this.floating_add_bar = this.add_allowed_types_bar('floating', -1).hide();
-			// var _bottom_add_bar = this.add_allowed_types_bar('bottom', -1).hide();
-			// panel.append(_bottom_add_bar);
-			panel.hide();
-			this.dom_container.append(panel);
-			this._panel = panel;
+				panel.hide();
+				this._panel = panel;
 				this._entry_container = entries;
 				// this._bottom_add_bar = _bottom_add_bar;
 			}
 			this.check_if_empty();
 			return this._panel;
+		},
+		// relies on this view being attached to the dom
+		// fills the box until all the entries have been added or the last entry
+		// is at the bottom of the screen, whichever comes first.
+		appendEntries: function(entries) {
+			var entry_total = this.entries().length, attached = 0;
+			var availableHeight = S.ContentArea.height() - entries.position().top;
+			for (var i = 0, ee = this.entries(), ii = entry_total;i < ii; i++) {
+				var entry = ee[i];
+				entries.append(this.claim_entry(entry));
+				attached++;
+				var contentHeight = entries.height(), gap = availableHeight - contentHeight;
+				if (gap < 0) { // wait until there's an overlap so we see a scrollbar
+					break;
+				}
+			}
+			if (attached < entry_total) {
+				var scrollLoad = function(view, loadedCount, entries, container) {
+					var position = loadedCount, increment = 3, total = entries.length;
+					return function() {
+						if (position >= total) { return; }
+						var availableHeight = S.ContentArea.height() - container.position().top;
+						var added = 0;
+						for (var i = position, ii = total; i < ii; i++) {
+							container.append(view.claim_entry(entries[i]));
+							added++;
+							var contentHeight = container.height(), gap = availableHeight - contentHeight;
+							if (gap < 0) { // wait until there's an overlap so we see a scrollbar
+								break;
+							}
+						}
+						position += added;
+						if (position >= total) {
+							container.addClass('entries-loaded');
+						}
+					};
+				}(this, attached, this.entries(), entries);
+				this.watchOther(S.ContentArea, 'scroll_bottom', scrollLoad);
+			} else {
+				entries.addClass('entries-loaded');
+			}
+		},
+		attachView: function() {
+			this._isAttached = true;
+			var entries = this._entry_container;
+			if (!entries) { return; }
+			this.appendEntries(entries);
 		},
 		check_if_empty: function() {
 			var _view = this, _panel = this._panel;

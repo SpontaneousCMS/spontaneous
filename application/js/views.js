@@ -15,6 +15,17 @@ Spontaneous.Views = (function($, S) {
 		unloadView: function() {
 			// cleanup
 		},
+		onDOMAttach: function() {
+			this.attachView();
+			for (var i = 0, ii = this._subviews.length; i < ii; i++) {
+				var v = this._subviews[i];
+				if (v.onDOMAttach) {
+					v.onDOMAttach();
+				}
+			}
+		},
+		attachView: function() {
+		},
 		unloadChildren: function() {
 			for (var i = 0, c = this._subviews, ii = c.length; i < ii; i++) {
 				if (typeof c[i].unload === 'function') {

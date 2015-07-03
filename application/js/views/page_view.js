@@ -57,6 +57,8 @@ Spontaneous.Views.PageView = (function($, S) {
 		unload: function() {
 			// fit with the view prototype
 		},
+		onDOMAttach: function() {
+		},
 		set_title: function(title) {
 			var self = this;
 			title = title || this.page.title();

@@ -34,6 +34,7 @@ Spontaneous.Editing = (function($, S) {
 			panel.animate({opacity: 0}, 0, function() {
 				panel.empty().show();
 				panel.append(view.panel());
+				view.onDOMAttach();
 				self.set('page', page);
 				self.set('view', view);
 				panel.velocity({opacity: 1}, 200);
