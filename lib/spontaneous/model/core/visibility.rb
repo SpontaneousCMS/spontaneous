@@ -135,14 +135,14 @@ module Spontaneous::Model::Core
     # then loop back to repeat the process starting from the aliases
     def find_descendents(visible)
       affected = []
-      descendents = [self].concat(visibility_descendents(self, visible))
+      descendents = [self].concat(visibility_descendents([self], visible))
       loop do
         affected.concat(descendents)
         aliases = content_aliases(descendents, visible)
         # no need to continue if the descendents tree has no aliases to it
         break if aliases.empty?
         affected.concat(aliases)
-        descendents = aliases.flat_map { |a| visibility_descendents(a, visible) }
+        descendents = visibility_descendents(aliases, visible)
       end
       # don't return self
       affected[1..-1]
@@ -153,8 +153,9 @@ module Spontaneous::Model::Core
       dataset.all
     end
 
-    def visibility_descendents(content, visible)
-      dataset = filter_for_visibility(content_model.filter(content.descendents_path), visible)
+    def visibility_descendents(aliases, visible)
+      expr = aliases[1..-1].inject(aliases[0].descendents_path) { |q, a| q | a.descendents_path }
+      dataset = filter_for_visibility(content_model.filter(expr), visible)
       dataset.all
     end
 

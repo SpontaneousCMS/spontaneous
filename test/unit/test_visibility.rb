@@ -410,6 +410,23 @@ describe "Visibility" do
         affected.map(&:id).must_equal [_a, b, c, _c, d, e, _e].map(&:id)
       end
 
+      it 'should cascade visibility when an item has multiple aliases' do
+        a, _a, b, c, _c, _, _, _e = @hierarchy
+        __c = PageAlias.new(target: c)
+        b.pages << __c
+        f = P.new(slug: 'F')
+        __c.pages << f
+        g = P.new(slug: 'G')
+        f.pages << g
+        a.hide!
+        assert __c.reload.hidden?
+        assert __c.hidden_origin == a.id
+        assert f.reload.hidden?
+        assert f.hidden_origin == a.id
+        assert g.reload.hidden?
+        assert g.hidden_origin == a.id
+      end
+
       it 'should cascade visibility changes only after saving' do
         a, _a, b, c, _c, d, e, _e = @hierarchy
         a.visible = false
