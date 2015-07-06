@@ -38,8 +38,8 @@ module Spontaneous::Rack::Back
     patch '/:id/toggle' do
       content_for_request(true) do |content|
         forbidden! unless content.box && content.box.writable?(user)
-        content.toggle_visibility!
-        json({:id => content.id, :hidden => (content.hidden? ? true : false) })
+        affected = content.toggle_visibility!
+        json(affected.map { |a| {id: a.id, hidden: a.hidden?}})
       end
     end
 

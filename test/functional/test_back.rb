@@ -502,12 +502,29 @@ describe "Back" do
         auth_patch "/@spontaneous/content/#{job1.id}/toggle"
         assert last_response.ok?
         last_response.content_type.must_equal "application/json;charset=utf-8"
-        Spot::JSON.parse(last_response.body).must_equal({:id => job1.id, :hidden => true})
+        Spot::JSON.parse(last_response.body).must_equal([{id: job1.id, hidden: true}, {id: image1.id, hidden: true}])
         job1.reload.visible?.must_equal false
         auth_patch "/@spontaneous/content/#{job1.id}/toggle"
         assert last_response.ok?, "Expected status 200 but recieved #{last_response.status}"
         job1.reload.visible?.must_equal true
-        Spot::JSON.parse(last_response.body).must_equal({:id => job1.id, :hidden => false})
+        Spot::JSON.parse(last_response.body).must_equal([{id: job1.id, hidden: false}, {id: image1.id, hidden: false}])
+      end
+
+      it "returns the list of affected items when toggling visibility" do
+        job1.reload.visible?.must_equal true
+        job1_alias = LinkedJob.new(target: job1)
+        home.featured_jobs << job1_alias
+        job1_alias.save
+        auth_patch "/@spontaneous/content/#{job1.id}/toggle"
+        assert last_response.ok?
+        last_response.content_type.must_equal "application/json;charset=utf-8"
+        Spot::JSON.parse(last_response.body).must_equal([{id: job1.id, hidden: true}, {id: image1.id, hidden: true}, {id: job1_alias.id, hidden: true}])
+        job1.reload.visible?.must_equal false
+        job1_alias.reload.visible?.must_equal false
+        auth_patch "/@spontaneous/content/#{job1.id}/toggle"
+        assert last_response.ok?, "Expected status 200 but recieved #{last_response.status}"
+        job1.reload.visible?.must_equal true
+        Spot::JSON.parse(last_response.body).must_equal([{id: job1.id, hidden: false}, {id: image1.id, hidden: false}, {id: job1_alias.id, hidden: false}])
       end
 
       it "sets the position of pieces" do
