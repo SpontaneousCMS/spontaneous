@@ -109,15 +109,21 @@ module Spontaneous::Model::Core
 
     def apply_set_visible(visible, origin)
       verify_visibility_change!(visible)
+      apply_set_visible!(visible, origin)
+    end
+
+    def apply_set_visible!(visible, origin)
       self[:hidden] = !visible
       self[:hidden_origin] = origin
     end
 
     def cascade_visibility(visible, origin)
-      descendents = find_descendents(visible)
+      affected = find_descendents(visible)
+      descendents = affected[1..-1]
       origin = nil if visible
       content_model.where(id: descendents.map(&:id)).update(hidden: !visible, hidden_origin: origin)
-      descendents
+      descendents.each { |d| d.apply_set_visible!(visible, origin) }
+      affected
     end
 
     def descendents_path
@@ -144,8 +150,7 @@ module Spontaneous::Model::Core
         affected.concat(aliases)
         descendents = visibility_descendents(aliases, visible)
       end
-      # don't return self
-      affected[1..-1]
+      affected
     end
 
     def content_aliases(targets, visible)

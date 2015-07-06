@@ -398,7 +398,7 @@ describe "Visibility" do
           assert page.hidden_origin == a.id, "Hidden origin should be #{a.id}, but is #{page.hidden_origin}"
         end
 
-        affected.map(&:id).must_equal [_a, b, c, _c, d, e, _e].map(&:id)
+        affected.map(&:id).must_equal [a, _a, b, c, _c, d, e, _e].map(&:id)
 
         affected = a.show!
 
@@ -407,7 +407,23 @@ describe "Visibility" do
           assert page.hidden_origin.nil?, "Hidden origin should be nil, but is #{page.hidden_origin}"
         end
 
-        affected.map(&:id).must_equal [_a, b, c, _c, d, e, _e].map(&:id)
+        affected.map(&:id).must_equal [a, _a, b, c, _c, d, e, _e].map(&:id)
+      end
+
+      it 'should return a list of affected content with the updated visibility state' do
+        a, _a, b, c, _c, d, e, _e = @hierarchy
+
+        affected = a.hide!
+
+        affected.each do |a|
+          assert a.hidden?
+        end
+
+        affected = a.show!
+
+        affected.each do |a|
+          assert a.visible?
+        end
       end
 
       it 'should cascade visibility when an item has multiple aliases' do
