@@ -137,6 +137,12 @@ Spontaneous.Box = (function($, S) {
 		// },
 		entry_wrappers: function() {
 			return this._entry_container.find('> .'+this.entry_class());
+		},
+
+		contentVisibilityToggle: function(affected) {
+			this.entries().forEach(function(entry) {
+				entry.contentVisibilityToggle(affected);
+			});
 		}
 	});
 

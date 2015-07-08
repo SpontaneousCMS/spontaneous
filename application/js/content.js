@@ -218,8 +218,17 @@ Spontaneous.Content = (function($, S) {
 			Spontaneous.Ajax.patch(['/content', this.content.id, 'toggle'].join('/'), {}, this.visibility_toggled.bind(this));
 		},
 		visibility_toggled: function(result) {
-			this.set('hidden', result.hidden);
-			// this.trigger('visibility_toggled', result);
+			var affected = {};
+			result.forEach(function(a) {
+				affected[a.id] = a.hidden;
+			});
+			S.page().contentVisibilityToggle(affected);
+		},
+		contentVisibilityToggle: function(affected) {
+			var id = this.id();
+			if (affected.hasOwnProperty(id)) {
+				this.set('hidden', !!affected[id]);
+			}
 		},
 		destroyed: function() {
 			var page = S.Editing.get('page');

@@ -42,6 +42,12 @@ Spontaneous.Page = (function($, S) {
 				}
 			}
 			return _children;
+		},
+
+		contentVisibilityToggle: function(affected) {
+			this.boxes().forEach(function(box) {
+				box.contentVisibilityToggle(affected);
+			});
 		}
 
 	});

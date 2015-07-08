@@ -39,6 +39,9 @@
 - Changing the visibility of the parent of an item with aliases now correctly
   updates the visibility of the aliases.
 
+- The UI correctly reflects the status of all items in the current page
+  affected by a visibility change, even if they're in another box.
+
 - Incremental loading of box entries in the UI now works according to the
   height of the box contents, rather than arbitrary counts. This improves the
   behaviour of long lists of entries.
