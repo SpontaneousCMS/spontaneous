@@ -113,7 +113,7 @@ module Spontaneous::Model::Core
       # If we're being created as an alias to a hidden target then we should be
       # born hidden and have our visibility linked to our target.
       def before_create
-        set_visible(false, target.id) if target.try(:hidden?)
+        set_visible(false, target.hidden_origin || target.id) if target && target.hidden?
         super
       end
 

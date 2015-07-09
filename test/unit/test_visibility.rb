@@ -297,6 +297,16 @@ describe "Visibility" do
       refute al.visible?
     end
 
+    it "be initalized as invisible with their target's hidden origin if their target is invisible" do
+      parent = P.first(uid: '1')
+      target = E.first(uid: '1.1')
+      parent.hide!
+      target.reload.hidden_origin.must_equal parent.id
+      a = MyAlias.create(target: target)
+      refute a.visible?
+      a.hidden_origin.must_equal parent.id
+    end
+
 
     it "be made visible along with their target if added when target is hidden" do
       target = E.first(:uid => "1.1")
