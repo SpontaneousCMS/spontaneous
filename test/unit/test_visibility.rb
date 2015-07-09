@@ -18,18 +18,18 @@ describe "Visibility" do
 
     Content.delete
 
-    @root = R.new(:uid => 'root')
+    @root = R.new(uid: 'root')
     2.times do |i|
-      c = P.new(:uid => i, :slug => "#{i}")
+      c = P.new(uid: i, slug: "#{i}")
       @root.pages << c
       4.times do |j|
-        d = E.new(:uid => "#{i}.#{j}")
+        d = E.new(uid: "#{i}.#{j}")
         c.things << d
         2.times do |k|
-          e = P.new(:uid => "#{i}.#{j}.#{k}", :slug => "#{i}-#{j}-#{k}")
+          e = P.new(uid: "#{i}.#{j}.#{k}", slug: "#{i}-#{j}-#{k}")
           d.pages << e
           2.times do |l|
-            e.things << E.new(:uid => "#{i}.#{j}.#{k}.#{l}")
+            e.things << E.new(uid: "#{i}.#{j}.#{k}.#{l}")
           end
           e.save
         end
@@ -60,7 +60,7 @@ describe "Visibility" do
   end
 
   after do
-    Content.update(:hidden => false, :hidden_origin => nil)
+    Content.update(hidden: false, hidden_origin: nil)
     teardown_site(false, false)
   end
 
@@ -122,8 +122,8 @@ describe "Visibility" do
   end
 
   it "hide all descendents of page content" do
-    piece = Content.first(:uid => "0.0")
-    f = E.new(:uid => "0.0.X")
+    piece = Content.first(uid: "0.0")
+    f = E.new(uid: "0.0.X")
     piece.pages << f
     piece.save
     piece.reload
@@ -147,7 +147,7 @@ describe "Visibility" do
   end
 
   it "re-show all descendents of page content" do
-    piece = Content.first(:uid => "0.0")
+    piece = Content.first(uid: "0.0")
     piece.hide!
     piece.show!
     Content.all.each do |c|
@@ -157,27 +157,27 @@ describe "Visibility" do
   end
 
   it "know if something is hidden because its ancestor is hidden" do
-    piece = Content.first(:uid => "0.0")
+    piece = Content.first(uid: "0.0")
     piece.hide!
     assert piece.showable?
-    child = Content.first(:uid => "0.0.0.0")
+    child = Content.first(uid: "0.0.0.0")
     refute child.visible?
     refute child.showable?
   end
 
   # showing something that is hidden because its ancestor is hidden shouldn't be possible
   it "stop hidden child content from being hidden" do
-    piece = Content.first(:uid => "0.0")
+    piece = Content.first(uid: "0.0")
     piece.hide!
-    child = Content.first(:uid => "0.0.0.0")
+    child = Content.first(uid: "0.0.0.0")
     refute child.visible?
     lambda { child.show! }.must_raise(Spontaneous::NotShowable)
   end
 
   it "not reveal child content that was hidden before its parent" do
-    piece1 = Content.first(:uid => "0.0.0.0")
-    piece2 = Content.first(:uid => "0.0.0.1")
-    parent = Content.first(:uid => "0.0.0")
+    piece1 = Content.first(uid: "0.0.0.0")
+    piece2 = Content.first(uid: "0.0.0.1")
+    parent = Content.first(uid: "0.0.0")
     piece1.owner.must_equal parent
     piece2.owner.must_equal parent
     piece1.container.must_equal parent.things
@@ -241,7 +241,7 @@ describe "Visibility" do
     end
 
     it "only show visible pieces" do
-      page = Content.first(:uid => "1")
+      page = Content.first(uid: "1")
       page.contents.length.must_equal 4
       page.things.contents.length.must_equal 4
       page.things.count.must_equal 4
@@ -255,7 +255,7 @@ describe "Visibility" do
     end
 
     it "stop modification of pieces" do
-      page = Content.first(:uid => "1")
+      page = Content.first(uid: "1")
       Content.with_visible do
         p = Piece.new
         lambda { page.things << p }.must_raise(Spontaneous::ReadOnlyScopeModificationError)
@@ -283,17 +283,14 @@ describe "Visibility" do
   end
 
   describe "aliases" do
-    before do
-    end
-
     after do
       MyAlias.delete
     end
 
     it "be initalized as invisible if their target is invisible" do
-      target = E.create(:uid => "X")
+      target = E.create(uid: 'X')
       target.hide!
-      al = MyAlias.create(:target => target)
+      al = MyAlias.create(target: target)
       refute al.visible?
     end
 
@@ -309,20 +306,20 @@ describe "Visibility" do
 
 
     it "be made visible along with their target if added when target is hidden" do
-      target = E.first(:uid => "1.1")
+      target = E.first(uid: '1.1')
       target.hide!
-      al = MyAlias.create(:target => target)
+      al = MyAlias.create(target: target)
       refute al.reload.visible?
       target.show!
       assert al.reload.visible?
     end
 
     it "be filtered by visibility when doing reverse lookup" do
-      page = P.first(:uid => "1")
-      target = E.first(:uid => "1.1")
-      al1 = MyAlias.create(:target => target)
+      page = P.first(uid: '1')
+      target = E.first(uid: '1.1')
+      al1 = MyAlias.create(target: target)
       page.things << al1
-      al2 = MyAlias.create(:target => target).reload
+      al2 = MyAlias.create(target: target).reload
       page.things << al2
       al1.hide!
       al1.reload
@@ -338,12 +335,12 @@ describe "Visibility" do
     end
 
     it "show as 'hidden' if their target is deleted" do
-      parent = E.first(:uid => "1.1")
+      parent = E.first(uid: "1.1")
       target = P.new
       parent.pages << target
       parent.save
-      al1 = MyAlias.create(:target => target)
-      P.filter(:id => target.id).delete
+      al1 = MyAlias.create(target: target)
+      P.filter(id: target.id).delete
       refute al1.reload.visible?
       target.destroy
     end
@@ -421,18 +418,18 @@ describe "Visibility" do
       end
 
       it 'should return a list of affected content with the updated visibility state' do
-        a, _a, b, c, _c, d, e, _e = @hierarchy
+        a, * = @hierarchy
 
         affected = a.hide!
 
-        affected.each do |a|
-          assert a.hidden?
+        affected.each do |x|
+          assert x.hidden?
         end
 
         affected = a.show!
 
-        affected.each do |a|
-          assert a.visible?
+        affected.each do |x|
+          assert x.visible?
         end
       end
 

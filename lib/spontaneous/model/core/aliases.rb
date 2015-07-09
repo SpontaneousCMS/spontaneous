@@ -36,7 +36,7 @@ module Spontaneous::Model::Core
           end
         end
 
-        query = content_model.filter(:type_sid => classes.map { |c| c.schema_id })
+        query = content_model.filter(type_sid: classes.map { |c| c.schema_id })
 
         if (container_procs = @alias_options[:container])
           containers = [container_procs].flatten.map { |p| p[*proc_args] }.flatten
@@ -169,7 +169,7 @@ module Spontaneous::Model::Core
       end
 
       def shallow_export(user = nil)
-        super.merge(:target => exported_target(user), :alias_title => target.alias_title, :alias_icon => target.exported_alias_icon)
+        super.merge(target: exported_target(user), alias_title: target.alias_title, alias_icon: target.exported_alias_icon)
       end
 
       def exported_target(user = nil)
