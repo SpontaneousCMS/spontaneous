@@ -287,10 +287,16 @@ describe "Publishing Pipeline" do
 
       it "renders pages in private trees" do
         store = @output_store.revision(revision).store
-        (@pages + [[@private_root, @private_root.title.value], [@private_page, @private_page.title.value]]).each do |page, title|
+        @pages.each do |page, title|
           page.outputs.each do |output|
             key = store.output_key(output, false)
             store.expects(:store_static).with(next_revision, key, "=#{title}.#{output.name}", instance_of(Spontaneous::Output::Store::Transaction))
+          end
+        end
+        [[@private_root, @private_root.title.value], [@private_page, @private_page.title.value]].each do |page, title|
+          page.outputs.each do |output|
+            key = store.output_key(output, false)
+            store.expects(:store_protected).with(next_revision, key, "=#{title}.#{output.name}", instance_of(Spontaneous::Output::Store::Transaction))
           end
         end
         @site.model.scope(next_revision, true) do
