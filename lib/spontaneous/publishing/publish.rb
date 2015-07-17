@@ -73,7 +73,7 @@ module Spontaneous::Publishing
     end
 
     def abort_publish(e)
-      S::PublishedRevision.filter(:revision => revision).delete
+      S::PublishedRevision.filter(revision: revision).delete
       site.send(:pending_revision=, nil)
       progress.error(e)
     end

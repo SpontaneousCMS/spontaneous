@@ -6,26 +6,26 @@ module Spontaneous::Permissions
 
     plugin :timestamps
 
-    one_to_one   :group,        :class => :'Spontaneous::Permissions::AccessGroup'
-    many_to_many :groups,       :class => :'Spontaneous::Permissions::AccessGroup', :join_table => :spontaneous_groups_users
-    one_to_many  :access_keys,  :class => :'Spontaneous::Permissions::AccessKey', :reciprocal => :user
+    one_to_one   :group,        class: :'Spontaneous::Permissions::AccessGroup'
+    many_to_many :groups,       class: :'Spontaneous::Permissions::AccessGroup', join_table: :spontaneous_groups_users
+    one_to_many  :access_keys,  class: :'Spontaneous::Permissions::AccessKey', reciprocal: :user
 
     set_allowed_columns(:name, :login, :email, :disabled, :password, :level)
 
     def_delegators :group, :level, :access_selector
 
     def self.login(login)
-      login_dataset.call(:login => login).first
+      login_dataset.call(login: login).first
     end
 
     def self.login_dataset
-      @login_dataset ||= self.where(:login => :$login).
+      @login_dataset ||= self.where(login: :$login).
         eager_graph(:access_keys).
         prepare(:select, :select_user_by_login)
     end
 
     def self.authenticate(login, clear_password, ip_address = nil)
-      if (user = self[:login => login, :disabled => false])
+      if (user = self[login: login, disabled: false])
         authenticator = Spontaneous::Crypt.new(clear_password, user.crypted_password)
         if authenticator.valid?
           user.upgrade_authentication(authenticator) if authenticator.outdated?
@@ -39,7 +39,7 @@ module Spontaneous::Permissions
     def self.create(attributes = {})
       level = attributes.delete(:level) || attributes.delete("level")
       user =  super
-      user.update(:level => Spontaneous::Permissions[level]) if level && user
+      user.update(level: Spontaneous::Permissions[level]) if level && user
       user
     end
 
@@ -52,22 +52,22 @@ module Spontaneous::Permissions
       }
       base_level = user.nil? ? nil : user.level
       exported[:levels] = UserLevel.all(base_level).map { |level|
-        { :level => level.to_s, :can_publish => level.can_publish?, :is_admin => level.admin? }
+        { level: level.to_s, can_publish: level.can_publish?, is_admin: level.admin? }
       }
       exported
     end
 
     def self.export_user(u)
       keys = u.access_keys.map { |key|
-        {:last_access_at => key.last_access_at.httpdate, :last_access_ip => key.last_access_ip}
+        {last_access_at: key.last_access_at.httpdate, last_access_ip: key.last_access_ip}
       }
-      { :id    => u.id,
-        :name  => u.name,
-        :email => u.email,
-        :login => u.login,
-        :level => u.level.to_s,
-        :disabled => u.disabled?,
-        :keys  => keys }
+      { id: u.id,
+        name: u.name,
+        email: u.email,
+        login: u.login,
+        level: u.level.to_s,
+        disabled: u.disabled?,
+        keys: keys }
     end
 
     attr_accessor :password
@@ -91,7 +91,7 @@ module Spontaneous::Permissions
     end
 
     def generate_access_key(ip_address)
-      key = AccessKey.new(:last_access_ip => ip_address)
+      key = AccessKey.new(last_access_ip: ip_address)
       self.add_access_key(key)
       self.save
       key
@@ -102,7 +102,7 @@ module Spontaneous::Permissions
     end
 
     def upgrade_authentication(auth)
-      update_all :crypted_password => auth.upgrade
+      update_all crypted_password: auth.upgrade
     end
 
     def before_save
@@ -167,12 +167,12 @@ module Spontaneous::Permissions
 
     def export
       {
-        :name => name,
-        :email => email,
-        :login => login,
-        :can_publish => can_publish?,
-        :developer => developer?,
-        :admin => admin?
+        name: name,
+        email: email,
+        login: login,
+        can_publish: can_publish?,
+        developer: developer?,
+        admin: admin?
       }
     end
 
@@ -200,7 +200,7 @@ module Spontaneous::Permissions
     end
 
     def validate_login_uniqueness
-      if (u = User[:login => login]) && (u.id != id)
+      if (u = User[login: login]) && (u.id != id)
         errors.add(:login, "must be unique, login '#{login}' already exists")
       end
     end
@@ -226,7 +226,7 @@ module Spontaneous::Permissions
 
     def ensure_group!
       if group.nil?
-        self.group = AccessGroup.create(:user_id => id, :name => "_#{name}_", :level_name => UserLevel.none.to_s)
+        self.group = AccessGroup.create(user_id: id, name: "_#{name}_", level_name: UserLevel.none.to_s)
       end
     end
   end

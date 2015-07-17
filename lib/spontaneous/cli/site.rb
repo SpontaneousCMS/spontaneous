@@ -201,7 +201,7 @@ module Spontaneous
       end
 
       def send_error_notification(error)
-        simultaneous_event('publish_progress', {:state => "error", :progress => error}.to_json)
+        simultaneous_event('publish_progress', {state: "error", progress: error}.to_json)
       end
     end
   end
