@@ -2,6 +2,10 @@
 
 #### New features
 
+- **Publish to S3.** If you create a bucket in S3 and configure it for 'website
+  hosting' then you can publish to it directly and serve your (static) site
+  directly from there with no need for a public web server on your CMS host.
+
 - The previous 'entry_store' based method of recording box contents has been
   replaced with a more natural many-to-one SQL relation.
 

@@ -1,4 +1,5 @@
-# Configure the template filesystem.
+# Configure the template filesystem
+# =================================
 #
 # Spontaneous accepts any Moneta[1] compatible key-value store as a
 # template destination. The arguments to #output_store should be
@@ -11,7 +12,30 @@
 
 Site.output_store(:File, dir: Site.revision_root)
 
+# Publishing to S3
+# ----------------
+#
+# If you would like to serve a static site directly from S3 then follow the
+# instructions here to create and configure a suitable S3 bucket[1][2] and then
+# configure Spontaneous to publish directly to it:
+#
+#   Site.output_store :Fog, {
+#     bucket: 'bucket.name.com',
+#     # this is a standard Fog connection hash
+#     connection: {
+#       provider: "AWS",
+#       aws_secret_access_key: ENV["S3_SECRET_ACCESS_KEY"],
+#       aws_access_key_id: ENV["S3_ACCESS_KEY_ID"]
+#     }
+#   }
+#
+# [1]: http://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteHosting.html
+# [2]: http://docs.aws.amazon.com/AmazonS3/latest/dev/HowDoIWebsiteConfiguration.html
+
+
+
 # Configure the site publishing pipeline
+# ======================================
 #
 # `run` inserts a step in the publishing pipeline.
 
