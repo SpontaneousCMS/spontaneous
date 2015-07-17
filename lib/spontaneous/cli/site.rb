@@ -112,8 +112,9 @@ module Spontaneous
       end
 
       desc "publish", "Publishes the site"
-      method_option :pages, :type => :array, :desc => "List of pages to publish"
-      method_option :logfile, :type => :string, :desc => "Location of logfile"
+      method_option :pages, type: :array, desc: "List of pages to publish"
+      method_option :user, type: :numeric, desc: "Id of user launching publish"
+      method_option :logfile, type: :string, desc: "Location of logfile"
       def publish(*args)
         publish_site
       rescue => e
@@ -161,14 +162,16 @@ module Spontaneous
       def publish_site
         site = prepare! :publish
         site.background_mode = :immediate
-        ::Spontaneous::Logger.setup(:logfile => options.logfile) if options.logfile
+        ::Spontaneous::Logger.setup(logfile: options.logfile) if options.logfile
         say "Creating revision #{site.working_revision}", :green, true
+        user = nil
+        user = ::Spontaneous::Permissions::User.first(id: options.user) if options.user
         if options.pages
           say ">  Publishing pages #{options.pages.inspect}", :green, true
-          site.publish_pages(options.pages)
+          site.publish_pages(options.pages, user)
         else
           say ">  Publishing all", :green, true
-          site.publish_all
+          site.publish_all(user)
         end
         # Rescue all errors to feed back to the UI
       end

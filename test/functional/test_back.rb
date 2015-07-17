@@ -871,7 +871,7 @@ describe "Back" do
       end
 
       it "be able to start a publish with a set of change sets" do
-        site.expects(:publish_pages).with([project1.id])
+        site.expects(:publish_pages).with([project1.id], instance_of(Spontaneous::Permissions::User))
         auth_post "/@spontaneous/changes", :page_ids => [project1.id]
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end
@@ -886,7 +886,13 @@ describe "Back" do
       end
 
       it "recognise when the list of changes is complete" do
-        site.expects(:publish_pages).with([home.id, project1.id])
+        site.expects(:publish_pages).with([home.id, project1.id], instance_of(Spontaneous::Permissions::User))
+        auth_post "/@spontaneous/changes", :page_ids => [home.id, project1.id]
+        assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
+      end
+
+      it "passes the logged in user to the publish process" do
+        site.expects(:publish_pages).with([home.id, project1.id], user)
         auth_post "/@spontaneous/changes", :page_ids => [home.id, project1.id]
         assert last_response.ok?, "Expected 200 recieved #{last_response.status}"
       end

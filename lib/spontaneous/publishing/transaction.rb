@@ -1,10 +1,10 @@
 module Spontaneous::Publishing
   class Transaction
 
-    attr_reader :site, :revision, :pages, :progress, :asset_environment
+    attr_reader :site, :revision, :pages, :progress, :user
 
-    def initialize(site, revision, pages, progress = Spontaneous::Publishing::Progress::Silent.new)
-      @site, @revision, @pages, @progress = site, revision, pages, progress
+    def initialize(site, revision, pages, progress = Spontaneous::Publishing::Progress::Silent.new, user = nil)
+      @site, @revision, @pages, @progress, @user = site, revision, pages, progress, user
     end
 
     def rollback

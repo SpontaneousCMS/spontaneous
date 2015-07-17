@@ -13,12 +13,12 @@ module Spontaneous::Publishing
       @site, @revision, @steps = site, revision, steps
     end
 
-    def publish_pages(pages)
-      publish.publish_pages(pages)
+    def publish_pages(pages, user = nil)
+      publish.publish_pages(pages, user)
     end
 
-    def publish_all
-      publish.publish_all
+    def publish_all(user = nil)
+      publish.publish_all(user)
     end
 
     def publish

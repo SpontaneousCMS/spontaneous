@@ -63,12 +63,12 @@ class Spontaneous::Site
       @output_store ||= Spontaneous::Output::Store.new(:File, root: revision_root)
     end
 
-    def publish_pages(page_list=nil)
-      publishing_method.new(self, working_revision, publish_steps).publish_pages(page_list)
+    def publish_pages(page_list=nil, user = nil)
+      publishing_method.new(self, working_revision, publish_steps).publish_pages(page_list, user)
     end
 
-    def publish_all
-      publishing_method.new(self, working_revision, publish_steps).publish_all
+    def publish_all(user = nil)
+      publishing_method.new(self, working_revision, publish_steps).publish_all(user)
     end
 
     def rerender

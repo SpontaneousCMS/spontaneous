@@ -927,6 +927,10 @@ describe "Publishing Pipeline" do
       end
     end
 
+    let(:user) {
+      Spontaneous::Permissions::User.create(email: 'bob@example.com', level: :editor, name: 'Bob', login: 'bob', password: 'adfoijasdfoij97')
+    }
+
     # Need a custom matcher because a simple #== doesn't work as the
     # test is running within the scope of our new revision
     class PageMatcher < Mocha::ParameterMatchers::Base
@@ -935,10 +939,7 @@ describe "Publishing Pipeline" do
       end
 
       def matches?(available_parameters)
-        # p [@page, :params, available_parameters]
         page = available_parameters.shift
-        # p [:page, page]
-        # page.class == @page.class && page.id == @page.id
         page.any? { |param| param.class == @page.class && param.id == @page.id }
       end
     end
@@ -955,6 +956,17 @@ describe "Publishing Pipeline" do
       end
     end
 
+    class TransactionUserMatcher < Mocha::ParameterMatchers::Base
+      def initialize(user)
+        @user = user
+      end
+
+      def matches?(available_parameters)
+        transaction = available_parameters.shift
+        transaction.user == @user
+      end
+    end
+
     # badly worded. a "publish all" usually works with 'nil' as the modified
     # page list (bad decision I guess). The current core publish steps
     # don't actually use the list of pages that are being published
@@ -967,6 +979,13 @@ describe "Publishing Pipeline" do
         step.expects(:call).with(TransactionPagesMatcher.new(@modified_pages))
       end
       publish.publish_all
+    end
+
+    it "passes the given user to the transaction" do
+      steps.each do |step|
+        step.expects(:call).with(TransactionUserMatcher.new(user))
+      end
+      publish.publish_all(user)
     end
 
     it "sets the site pending revision" do
@@ -985,6 +1004,11 @@ describe "Publishing Pipeline" do
       it "creates a new PublishedRevision entry" do
         S::PublishedRevision.expects(:create).with(all_of(has_entry(revision: revision), has_entry(published_at: instance_of(Time))))
         publish.publish_all
+      end
+
+      it "links the revision to the given user" do
+        S::PublishedRevision.expects(:create).with(all_of(has_entry(revision: revision), has_entry(published_at: instance_of(Time)), has_entry(user: user)))
+        publish.publish_all(user)
       end
 
       it "calls #done on the progress object" do

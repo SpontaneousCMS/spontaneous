@@ -36,12 +36,12 @@ module Spontaneous
         @revision, @content_model = revision, content_model
       end
 
-      def publish_pages(page_list)
-        Spontaneous::Simultaneous.fire(:publish, {"pages" => page_list})
+      def publish_pages(page_list, user = nil)
+        Spontaneous::Simultaneous.fire(:publish, {"pages" => page_list, "user" => user.try(:id)})
       end
 
-      def publish_all
-        Spontaneous::Simultaneous.fire(:publish)
+      def publish_all(user = nil)
+        Spontaneous::Simultaneous.fire(:publish, {"user" => user.try(:id)})
       end
 
       def rerender

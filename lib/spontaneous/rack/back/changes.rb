@@ -12,7 +12,7 @@ module Spontaneous::Rack::Back
       ids = params[:page_ids]
       halt 400 if ids.blank? || ids.empty?
       pages = ids.map(&:to_i)
-      site.publish_pages(pages)
+      site.publish_pages(pages, user)
       json({})
     end
 
