@@ -283,6 +283,13 @@ describe "Content Hash" do
       hashes << page.calculate_content_hash
       hashes.uniq.length.must_equal 1
     end
+
+    it "updatess the hash when the touched_at timestamp changes" do
+      now = Time.now.to_i
+      page.update(touched_at: now.to_s)
+      hashes << page.calculate_content_hash
+      hashes.uniq.length.must_equal 2
+    end
   end
 
   describe "Alias" do
