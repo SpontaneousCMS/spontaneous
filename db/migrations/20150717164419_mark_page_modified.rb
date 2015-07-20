@@ -3,6 +3,7 @@
 Sequel.migration do
   up do
     [:content, :spontaneous_content_history, :spontaneous_content_archive].each do |table|
+      next if self[table].columns.include?(:touched_at)
       add_column  table, :touched_at, :varchar, default: nil
     end
   end

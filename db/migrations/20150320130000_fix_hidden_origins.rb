@@ -13,14 +13,14 @@ Sequel.migration do
       aliases.each do |a|
         target = a.target
         if target.hidden?
-          a.send :apply_set_visible, false, target.id
+          a.send :apply_set_visible!, false, target.id
           a.save
         else
           # The bug set the hidden origin to the id of the parent, not the target
           # so we want to clear that unless the alias was actually hidden directly
           # i.e. has a hidden_origin == nil
           unless a.hidden_origin.nil?
-            a.send :apply_set_visible, true, nil
+            a.send :apply_set_visible!, true, nil
             a.save
           end
         end
