@@ -42,5 +42,14 @@ module Spontaneous::Rack::Back
         json({:uid => content.uid })
       end
     end
+
+    put '/:id/touch' do
+      forbidden! unless user.developer?
+      content_for_request(true) do |content|
+        timestamp = DateTime.now.to_i.to_s
+        content.update(touched_at: timestamp)
+        json({ timestamp: timestamp })
+      end
+    end
   end
 end

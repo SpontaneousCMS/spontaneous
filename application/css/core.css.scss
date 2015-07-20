@@ -1,4 +1,5 @@
 @import "definitions.css.scss";
+@import "animations.css.scss";
 @import "font.css.scss";
 
 
@@ -132,6 +133,32 @@
 			padding-bottom: 30px;
 			span {
 				color: #888888;
+			}
+		}
+		.page-buttons {
+			position:absolute;
+			right: $container-padding;
+			top: 10px;
+			button {
+				@include interface;
+				@include button(#222);
+				@include transition(opacity 0.2s);
+				color: #aaa !important;
+				background-image:none;
+				min-width: 131px;
+			}
+
+			button.request-running {
+				&:before {
+					@include animation(spin 0.6s infinite linear);
+					@include awesome-icon("\f1ce");
+					position: absolute;
+					left: 6px;
+				}
+			}
+			button[disabled],
+			button[disabled]:hover {
+				opacity: 0.5;
 			}
 		}
 		.path, .path h3, .path h3.developer a {

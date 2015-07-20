@@ -1,0 +1,42 @@
+@mixin transition($spec...) {
+  transition: $spec;
+  -webkit-transition: $spec;
+  -ms-transition: $spec;
+}
+
+@mixin transform($spec...) {
+  transform: $spec;
+  -webkit-transform: $spec;
+  -ms-transform: $spec;
+}
+
+@mixin animation($spec...) {
+  animation: $spec;
+  -webkit-animation: $spec;
+  -ms-animation: $spec;
+}
+
+@mixin keyframes($name) {
+  @-webkit-keyframes #{$name} {
+    @content;
+  }
+  @-moz-keyframes #{$name} {
+    @content;
+  }
+  @-ms-keyframes #{$name} {
+    @content;
+  }
+  @keyframes #{$name} {
+    @content;
+  }
+}
+
+@include keyframes(spin) {
+	0% {
+		@include transform(rotate(0deg));
+	}
+	100% {
+		@include transform(rotate(359deg));
+	}
+}
+

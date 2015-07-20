@@ -1,7 +1,7 @@
 // console.log('Loading Page...')
 
 Spontaneous.Views.PageView = (function($, S) {
-	var dom = S.Dom, user = S.User;
+	var dom = S.Dom, user = S.User, ajax = S.Ajax;
 
 	var FunctionBar = function(page) {
 		this.page = page;
@@ -29,7 +29,7 @@ Spontaneous.Views.PageView = (function($, S) {
 
 			if (!self.page.is_root()) {
 				var resync = dom.a({ 'title':'Sync the path to the page title'}).click(function() {
-					Spontaneous.Ajax.put(['/page', self.page.id(), 'slug/sync'].join('/'), {}, self.save_complete.bind(self));
+					ajax.put(['/page', self.page.id(), 'slug/sync'].join('/'), {}, self.save_complete.bind(self));
 				});
 				path_wrap.append(dom.h3('.titlesync').append(resync));
 			}
@@ -42,6 +42,10 @@ Spontaneous.Views.PageView = (function($, S) {
 				// }.bind(this));
 				var dev_desc = dom.h3('.developer').append(dom.a().attr('href', this.page.developer_edit_url()).text(this.page.developer_description()));
 				path_wrap.append(dev_desc);
+
+        var mark_modified = this.touch_page.bind(this);
+        var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark modified').click(mark_modified));
+        this.panel.append(buttons);
 			}
 
 			path_wrap.append(dom.div('.edit'));
@@ -122,6 +126,13 @@ Spontaneous.Views.PageView = (function($, S) {
 				edit.velocity('fadeIn', 200);
 			}.bind(this)});
 		},
+    touch_page: function(event) {
+      var $btn = $(event.target).addClass('request-running').attr('disabled', true);
+      Spontaneous.Ajax.put(['/page',this.page.id(), 'touch'].join('/'), {}, this.touch_page_complete.bind(this, $btn));
+    },
+    touch_page_complete: function($btn, response, status, xhr) {
+      $btn.removeClass('request-running').attr('disabled', false);
+    },
 		save_uid: function(uid) {
 			Spontaneous.Ajax.put(['/page',this.page.id(), 'uid'].join('/'), {'uid':uid}, this.uid_save_complete.bind(this));
 		},
