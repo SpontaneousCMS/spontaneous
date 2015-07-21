@@ -194,6 +194,7 @@ module Spontaneous::Model::Core
 
     module PageAliasMethods
       def slug
+        return super if target.nil?
         unless target.respond_to?(:slug)
           slug = self.class.target_slug(target) and return slug
         end
@@ -202,16 +203,16 @@ module Spontaneous::Model::Core
 
       def layout
         # if this alias class has no layouts defined, then just use the one set on the target
-        if self.class.layouts.empty?
+        if self.class.layouts.empty? && !target.nil?
           target.resolve_layout(layout_sid)
         else
           # but if it does have layouts defined, use them
-          resolve_layout(layout_sid) or target.resolve_layout(layout_sid)
+          resolve_layout(layout_sid) or target.try(:resolve_layout, layout_sid)
         end
       end
 
       def find_named_layout(layout_name)
-        super or target.find_named_layout(layout_name)
+        super or target.try(:find_named_layout, layout_name)
       end
     end
 
