@@ -131,7 +131,7 @@ module Spontaneous::Model::Core
       end
 
       def field?(field_name)
-        super || target.class.field?(field_name)
+        super || (target && target.class.field?(field_name))
       end
 
       def respond_to_missing?(name, include_private = false)
@@ -143,7 +143,7 @@ module Spontaneous::Model::Core
       end
 
       def method_missing(method, *args)
-        if respond_to_missing?(method)
+        if target && respond_to_missing?(method)
           if block_given?
             target.__send__(method, *args, &Proc.new)
           else
@@ -155,7 +155,7 @@ module Spontaneous::Model::Core
       end
 
       def find_named_style(style_name)
-        super or target.find_named_style(style_name)
+        super or (target && target.find_named_style(style_name))
       end
 
       # Aliases are unique in that their style depends on the instance as well
