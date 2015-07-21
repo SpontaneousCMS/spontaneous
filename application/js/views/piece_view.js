@@ -111,7 +111,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			wrap = dom.div('.alias-target').click(click),
 			icon = content.alias_icon,
 			type = dom.span('.content-type').text(content.type().display_title(content));
-			title = dom.a().html(content.content.alias_title);
+			title = dom.a('.alias-target-title').html(content.content.alias_title);
 
 			if (!content.has_fields()) { wrap.addClass('no-fields'); }
 
