@@ -44,7 +44,27 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 			this.content.title_field().watch('value', function(t) { title.html(t); }.bind(this));
 			wrapper.append(title, type);
 			return wrapper;
-		}
+		},
+		// shows both a link to the alias and a link to the alias target
+		alias_target_panel: function() {
+			var content = this.content;
+			var click = function() { S.Location.load_id(content.id()); };
+			var alias_click = function() { S.Location.load_id(content.target().page_id); };
+			var wrap = dom.div('.alias-target');//.click(click);
+			var icon = content.alias_icon;
+			var type = dom.span('.content-type').text(content.type().display_title(content));
+			var title = dom.a('.alias-title').html(content.content.title).click(click);
+			var alias_title = dom.a('.alias-target-title').html(content.content.alias_title).click(alias_click);
+
+			if (!content.has_fields()) { wrap.addClass('no-fields'); }
+
+			if (icon) {
+				var img = new Spontaneous.Image(icon);
+				wrap.append(img.icon(60, 60).click(click));
+			}
+
+			return wrap.append(title, alias_title, type);
+		},
 	});
 	return PagePieceView;
 }(jQuery, Spontaneous));

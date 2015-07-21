@@ -1284,13 +1284,30 @@
 			color: white;
 			font-size: $target-name-size;
 			line-height: 18px;
-			font-style: italic;
-      cursor: pointer;
+			.alias-target-title,
+			.alias-title {
+				&:hover {
+					color: $highlight;
+				}
+				cursor: pointer;
+			}
+			.alias-target-title {
+				font-style: italic;
+				&:before {
+					@include awesome-icon("\f0a9");
+					padding-right: $unit;
+					// color: $slot-addable-colour;
+					color: rgba(255, 255, 255, 0.4);
+				}
+				&:hover:before {
+					color: $highlight;
+				}
+			}
+			.alias-title + .alias-target-title {
+				margin-left: 2*$unit;
+			}
 			&.no-fields {
 				@include rounded;
-			}
-			&:hover {
-				color: $highlight;
 			}
       .content-type {
         @include interface;
