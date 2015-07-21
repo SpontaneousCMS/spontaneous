@@ -42,19 +42,21 @@ Site.output_store(:File, dir: Site.revision_root)
 # The core steps can be referenced by a symbol that is mapped to
 # the corresponding step class.
 #
-# Custom steps *must* respond to `call` with four parameters:
+# Custom steps *must* respond to `call` with one parameter `transaction`.
+# The passed transaction object has five useful methods:
 #
-# site: the current site instance
-# revision: the revision that is being created
-# pages: the list of pages that are being published
-# progress: a progress object
+#   site:     the current site instance
+#   revision: the revision that is being created
+#   user:     the user that launched the current publish
+#   pages:    the list of pages that are being published
+#   progress: a publishing progress object
 #
 # `call` can optionally return an object that responds to #rollback
 # which should undo any actions made by the #call method.
 #
 # They can also, optionally, respond to:
 #
-# #count(site, revision, pages, progress): returns the number of
+# #count(transaction): returns the number of
 #     discrete actions that this step comprises. During the #call
 #     the step *must* call progress#step exactly the number of times
 #     returned by this call
@@ -62,7 +64,7 @@ Site.output_store(:File, dir: Site.revision_root)
 # Examples:
 #
 # Run a proc as part of the publishing process:
-#     run proc { |site, revision, pages, progress| puts "Publishing revision #revision}" }
+#     run proc { |transaction| puts "Publishing revision #{transaction.revision}" }
 #
 # Run a custom publishing step:
 #
@@ -70,11 +72,15 @@ Site.output_store(:File, dir: Site.revision_root)
 #       def initialize(options)
 #         @options = options
 #       end
-#       def count(site, revision, pages, progress)
+#       def count(transaction)
 #         1
 #       end
-#       def call(site, revision, pages, progress)
-#         # send me a tweet when the site publishes...
+#       def call(transaction)
+#         # Send me a tweet when the site publishes...
+#         #
+#         # Don't forget to call transaction.step(1) to ensure that
+#         # progress is updated with the same number of steps as returned
+#         # from #count above.
 #       end
 #     end
 #
@@ -85,6 +91,7 @@ Site.output_store(:File, dir: Site.revision_root)
 
 # NOTE: Do not remove or re-order the core steps declared below
 # unless you are really sure of what you're doing
+
 Site.publish do
   # List of notification targets.
   # If you remove the :browser target then publishing progress will not
