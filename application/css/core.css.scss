@@ -77,7 +77,7 @@
 		}
 		#content-loading:before {
       @include awesome-icon("\f1ce");
-      @include animation(spin, 1s, infinite, linear);
+      @include animation(spin 1s infinite linear);
       display: inline-block;
       position: relative;
       left: -4px;
