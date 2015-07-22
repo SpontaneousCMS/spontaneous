@@ -131,6 +131,20 @@ Spontaneous.Views.PageView = (function($, S, document) {
 			});
 			return $wrap;
 		},
+		aliasTargetLink: function() {
+			var self = this;
+			if (!self.page.type().is_alias()) {
+				return '';
+			}
+			var target = self.page.content.target;
+			var viewAlias = function(e) {
+				e.stopPropagation();
+				S.Location.load_id(target.page_id);
+			};
+			var $targetTitle = dom.span('.page-alias-link--title').text(target.title);
+			var $targetPath = dom.span('.page-alias-link--path').text(target.path);
+			return dom.div('.page-alias-link').append($targetTitle, $targetPath).click(viewAlias);
+		},
 		pageAliasesPanel: function() {
 			var $wrap = dom.div('.page-aliases');
 			var aliases = this.page.content.aliases;
