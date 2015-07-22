@@ -6,7 +6,7 @@ module Spontaneous::Publishing
 
     def reindex
       model.scope(revision, true) do
-        pipeline.run(site, revision, [], progress)
+        pipeline.run(transaction([], nil))
       end
       progress.done
     end
