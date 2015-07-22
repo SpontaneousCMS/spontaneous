@@ -462,7 +462,7 @@ module Spontaneous
     end
 
     def alias_export(user)
-      { name: _prototype.name.to_s, id: _prototype.schema_id.to_s }
+      { name: _prototype.name.to_s, type:self.class.ui_class, type_id: _prototype.schema_id.to_s }
     end
 
     # only called directly after saving a boxes fields so

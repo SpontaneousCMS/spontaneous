@@ -90,8 +90,14 @@ Spontaneous.Types = (function($, S) {
 		type: function(id) {
 			return this.get('types')[id];
 		},
-		box_prototype: function() {
-
+		box_prototype: function(box) {
+    },
+		boxPrototype: function(box) {
+			var names = box.type.split('.');
+			var boxTypeName = names.pop();
+			var contentTypeName = names.join('.');
+			var contentType = this.type(contentTypeName);
+			return contentType.box_prototypes[box.type_id];
 		}
 	});
 	return Types;
