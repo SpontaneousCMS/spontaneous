@@ -139,6 +139,7 @@ Spontaneous.Views.PageView = (function($, S, document) {
 			}
 			var showAlias = function(alias) {
 				return function(event) {
+					event.stopPropagation();
 					S.Location.load_id(alias.page_id);
 				};
 			};
@@ -147,8 +148,10 @@ Spontaneous.Views.PageView = (function($, S, document) {
 			var $list = dom.div('.page-aliases--list');
 			$wrap.append($label, $list);
 			aliases.forEach(function(a) {
+				var boxType = Types.boxPrototype(a.box);
 				var $title = dom.div('.page-alias--title').text(a.title);
-				var $path = dom.div('.page-alias--path').text(a.path);
+				var path = a.path + ' [' + boxType.title + ']';
+				var $path = dom.div('.page-alias--path').text(path);
 				var $el =  dom.div('.page-alias').append($title, $path).click(showAlias(a));
 				$list.append($el);
 			});
