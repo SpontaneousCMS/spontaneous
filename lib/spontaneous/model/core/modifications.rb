@@ -21,7 +21,7 @@ module Spontaneous::Model::Core
       # separately
       def apply(revision)
         owner.with_revision(revision) do
-          owner.force_path_changes
+          owner.force_path_changes_with_history(old_value, new_value)
         end
       end
 

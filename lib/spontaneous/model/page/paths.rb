@@ -182,6 +182,20 @@ module Spontaneous::Model::Page
     end
 
     def update_path
+      if (r = mapper.current_revision )
+        update_path_with_history(r)
+      else
+        update_path_without_history
+      end
+    end
+
+    def update_path_with_history(revision)
+      old_path = path
+      update_path_without_history
+      save_path_history(old_path, path, revision)
+    end
+
+    def update_path_without_history
       self.path = calculate_path
       if parent
         self[:ancestor_path] = parent.ancestor_path.push(parent.id).join(Spontaneous::Model::ANCESTOR_SEP)
@@ -242,6 +256,12 @@ module Spontaneous::Model::Page
     end
 
     protected :fit_slug_to_length
+
+    def force_path_changes_with_history(old_slug, new_slug)
+      old_path = calculate_path_with_slug(old_slug)
+      save_path_history(old_path, path, mapper.current_revision)
+      force_path_changes
+    end
 
     def force_path_changes
       children.each do |child|
