@@ -53,6 +53,10 @@ describe "Serialisation" do
       end
     end
 
+    class SerialisedAlias < ::Piece
+      alias_of :SerialisedPage
+    end
+
 
     @dancing_style = SerialisedPage.style_prototypes[:dancing].schema_id
     @sitting_style = SerialisedPage.style_prototypes[:sitting].schema_id
@@ -72,6 +76,7 @@ describe "Serialisation" do
   after do
     Object.send(:remove_const, :SerialisedPiece)
     Object.send(:remove_const, :SerialisedPage)
+    Object.send(:remove_const, :SerialisedAlias)
     teardown_site
   end
 
@@ -106,11 +111,15 @@ describe "Serialisation" do
       @piece1 = SerialisedPiece.new
       @piece2 = SerialisedPiece.new
       @piece3 = SerialisedPiece.new
-      @child = SerialisedPage.new(:slug=> "about")
+      @child = SerialisedPage.new(slug: "about")
+
       @root.insides << @piece1
       @root.insides << @piece2
+
       @piece1.things << @child
       @child.insides << @piece3
+
+
 
       @piece1.things.title = "Things title"
       @root.title = "Home"
@@ -169,6 +178,16 @@ describe "Serialisation" do
     it "serialise to JSON" do
       # hard to test this as the serialisation order appears to change
       Spot.deserialise_http(@root.serialise_http).must_equal @root.export
+    end
+
+    it 'includes the list of aliases' do
+      @alias = SerialisedAlias.new(target: @child)
+      @root.insides << @alias
+      export = @child.export
+      aliases = export[:aliases]
+      aliases.must_be_instance_of(Array)
+      aliases.length.must_equal 1
+      aliases.first.must_equal @alias.shallow_export
     end
 
     describe 'cloud storage' do

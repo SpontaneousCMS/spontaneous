@@ -53,7 +53,8 @@ module Spontaneous::Model::Core
 
     def export(user = nil)
       shallow_export(user).merge({
-        :boxes => self.class.readable_boxes(user).map { |box| boxes[box.name].export(user) }
+        aliases: aliases.map(&:shallow_export),
+        boxes: self.class.readable_boxes(user).map { |box| boxes[box.name].export(user) }
       })
     end
 
