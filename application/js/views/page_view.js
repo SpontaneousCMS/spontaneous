@@ -41,11 +41,11 @@ Spontaneous.Views.PageView = (function($, S, document) {
 				// 	this.open_uid_editor();
 				// }.bind(this));
 
-        var mark_modified = this.touch_page.bind(this);
-        var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark modified').click(mark_modified));
+				var mark_modified = this.touch_page.bind(this);
+				var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark modified').click(mark_modified));
 				var dev_desc = dom.a('.developer.type-information', {href:this.page.developer_edit_url()}).text(this.page.developer_description());
-        buttons.prepend(dev_desc);
-        this.panel.append(buttons);
+				buttons.prepend(dev_desc);
+				this.panel.append(buttons);
 			}
 			var page_aliases = this.pageAliasesPanel();
 			this.panel.append(page_aliases);
@@ -165,13 +165,13 @@ Spontaneous.Views.PageView = (function($, S, document) {
 				edit.velocity('fadeIn', 200);
 			}.bind(this)});
 		},
-    touch_page: function(event) {
-      var $btn = $(event.target).addClass('request-running').attr('disabled', true);
-      Spontaneous.Ajax.put(['/page',this.page.id(), 'touch'].join('/'), {}, this.touch_page_complete.bind(this, $btn));
-    },
-    touch_page_complete: function($btn, response, status, xhr) {
-      $btn.removeClass('request-running').attr('disabled', false);
-    },
+		touch_page: function(event) {
+			var $btn = $(event.target).addClass('request-running').attr('disabled', true);
+			Spontaneous.Ajax.put(['/page',this.page.id(), 'touch'].join('/'), {}, this.touch_page_complete.bind(this, $btn));
+		},
+		touch_page_complete: function($btn, response, status, xhr) {
+			$btn.removeClass('request-running').attr('disabled', false);
+		},
 		save_uid: function(uid) {
 			Spontaneous.Ajax.put(['/page',this.page.id(), 'uid'].join('/'), {'uid':uid}, this.uid_save_complete.bind(this));
 		},
@@ -285,9 +285,9 @@ Spontaneous.Views.PageView = (function($, S, document) {
 			if (status === 'success') {
 				if (this.url_editor_open) {
 
-				this.hide_path_error();
-				var view = $('h3.path', this.panel), edit = $('.edit', this.panel);
-				this.close();
+					this.hide_path_error();
+					var view = $('h3.path', this.panel), edit = $('.edit', this.panel);
+					this.close();
 				}
 				this.page.set('path', response.path);
 				this.page.set('slug', response.slug);
