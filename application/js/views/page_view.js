@@ -131,6 +131,40 @@ Spontaneous.Views.PageView = (function($, S, document) {
 			});
 			return $wrap;
 		},
+		pageAliasesPanel: function() {
+			var $wrap = dom.div('.page-aliases');
+			var aliases = this.page.content.aliases;
+			if (aliases.length === 0) {
+				return $wrap;
+			}
+			var showAlias = function(alias) {
+				return function(event) {
+					S.Location.load_id(alias.page_id);
+				};
+			};
+
+			var $label = dom.div('.page-aliases--label').text(aliases.length + ' alias' + (aliases.length > 1 ? 'es' : ''))
+			var $list = dom.div('.page-aliases--list');
+			$wrap.append($label, $list);
+			aliases.forEach(function(a) {
+				var $title = dom.div('.page-alias--title').text(a.title);
+				var $path = dom.div('.page-alias--path').text(a.path);
+				var $el =  dom.div('.page-alias').append($title, $path).click(showAlias(a));
+				$list.append($el);
+			});
+			var eventName = 'click.alias_list_off';
+			var hide = function() { $wrap.removeClass('visible'); };
+			$wrap.click(function(e) {
+				$wrap.toggleClass('visible');
+				e.stopPropagation();
+				if ($wrap.hasClass('visible')) {
+					$(document).one(eventName, hide);
+				} else {
+					$(document).off(eventName);
+				}
+			});
+			return $wrap;
+		},
 		unload: function() {
 			// fit with the view prototype
 		},
