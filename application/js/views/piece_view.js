@@ -78,6 +78,7 @@ Spontaneous.Views.PieceView = (function($, S) {
 			}
 			var box_container = new Spontaneous.BoxContainer(this.content);
 			inside.append(entry);
+			this._subviews.push(box_container);
 			inside.append(box_container.panel());
 			var preview_area = this.create_edit_wrapper(inside);
 			contents.append(preview_area);

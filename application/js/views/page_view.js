@@ -1,7 +1,7 @@
 // console.log('Loading Page...')
 
-Spontaneous.Views.PageView = (function($, S) {
-	var dom = S.Dom, user = S.User, ajax = S.Ajax;
+Spontaneous.Views.PageView = (function($, S, document) {
+	var dom = S.Dom, user = S.User, ajax = S.Ajax, Types = S.Types;
 
 	var FunctionBar = function(page) {
 		this.page = page;
@@ -10,9 +10,15 @@ Spontaneous.Views.PageView = (function($, S) {
 		panel: function() {
 			var self = this;
 			this.panel = dom.div('#page-info');
-			this.title = $('<h1/>');
+			if (self.page.type().is_alias()) {
+				this.panel.addClass('page-info-alias-type');
+			}
+			var h1 = $('<h1/>');
+			this.title = dom.span();
+			h1.append(this.title);
 			this.set_title();
-			this.panel.append(this.title);
+			this.panel.append(h1);
+			this.panel.append(this.aliasTargetLink());
 			var path_wrap = dom.div('.path');
 
 			this.page.title_field().watch('value', function(t) {
@@ -34,19 +40,21 @@ Spontaneous.Views.PageView = (function($, S) {
 				path_wrap.append(dom.h3('.titlesync').append(resync));
 			}
 
-			path_wrap.append(dom.div('.path-spacer'));
+			// path_wrap.append(dom.div('.path-spacer'));
 
 			if (user.is_developer()) {
 				// var uid_text = dom.h3('.developer.uid' + (!this.page.content.uid ? '.missing' : '')).text('#' + (this.page.content.uid || "----")).click(function() {
 				// 	this.open_uid_editor();
 				// }.bind(this));
-				var dev_desc = dom.h3('.developer').append(dom.a().attr('href', this.page.developer_edit_url()).text(this.page.developer_description()));
-				path_wrap.append(dev_desc);
 
-        var mark_modified = this.touch_page.bind(this);
-        var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark modified').click(mark_modified));
-        this.panel.append(buttons);
+				var mark_modified = this.touch_page.bind(this);
+				var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark modified').click(mark_modified));
+				var dev_desc = dom.a('.developer.type-information', {href:this.page.developer_edit_url()}).text(this.page.developer_description());
+				buttons.prepend(dev_desc);
+				this.panel.append(buttons);
 			}
+			var page_aliases = this.pageAliasesPanel();
+			this.panel.append(page_aliases);
 
 			path_wrap.append(dom.div('.edit'));
 
@@ -58,6 +66,57 @@ Spontaneous.Views.PageView = (function($, S) {
 			this.path_wrap = path_wrap;
 			return this.panel;
 		},
+		aliasTargetLink: function() {
+			var self = this;
+			if (!self.page.type().is_alias()) {
+				return '';
+			}
+			var target = self.page.content.target;
+			var viewAlias = function(e) {
+				e.stopPropagation();
+				S.Location.load_id(target.page_id);
+			};
+			var $targetTitle = dom.span('.page-alias-link--title').text(target.title);
+			var $targetPath = dom.span('.page-alias-link--path').text(target.path);
+			return dom.div('.page-alias-link').append($targetTitle, $targetPath).click(viewAlias);
+		},
+		pageAliasesPanel: function() {
+			var $wrap = dom.div('.page-aliases');
+			var aliases = this.page.content.aliases;
+			if (aliases.length === 0) {
+				return $wrap;
+			}
+			var showAlias = function(alias) {
+				return function(event) {
+					event.stopPropagation();
+					S.Location.load_id(alias.page_id);
+				};
+			};
+
+			var $label = dom.div('.page-aliases--label').text(aliases.length + ' alias' + (aliases.length > 1 ? 'es' : ''))
+			var $list = dom.div('.page-aliases--list');
+			$wrap.append($label, $list);
+			aliases.forEach(function(a) {
+				var boxType = Types.boxPrototype(a.box);
+				var $title = dom.div('.page-alias--title').text(a.title);
+				var path = a.path + ' [' + boxType.title + ']';
+				var $path = dom.div('.page-alias--path').text(path);
+				var $el =  dom.div('.page-alias').append($title, $path).click(showAlias(a));
+				$list.append($el);
+			});
+			var eventName = 'click.alias_list_off';
+			var hide = function() { $wrap.removeClass('visible'); };
+			$wrap.click(function(e) {
+				$wrap.toggleClass('visible');
+				e.stopPropagation();
+				if ($wrap.hasClass('visible')) {
+					$(document).one(eventName, hide);
+				} else {
+					$(document).off(eventName);
+				}
+			});
+			return $wrap;
+		},
 		unload: function() {
 			// fit with the view prototype
 		},
@@ -68,13 +127,13 @@ Spontaneous.Views.PageView = (function($, S) {
 			title = title || this.page.title();
 			this.title.html(title);
 			if (this.page.content.hidden) {
-				self.title.append(dom.span().text(' (hidden)'));
+				self.title.append(dom.span('.page-is-hidden').text(' (hidden)'));
 			}
 			var maxHeight = 36;
 			window.setTimeout(function()  {
-				var t = self.title
-        , height = function() { return t.height(); }
-				, fs = window.parseInt(t.css('font-size'), 10);
+				var t = self.title.parent()
+					, height = function() { return t.height(); }
+					, fs = window.parseInt(t.css('font-size'), 10);
 				while (height() > maxHeight && fs > 10) {
 					t.css('font-size', --fs);
 				}
@@ -126,13 +185,13 @@ Spontaneous.Views.PageView = (function($, S) {
 				edit.velocity('fadeIn', 200);
 			}.bind(this)});
 		},
-    touch_page: function(event) {
-      var $btn = $(event.target).addClass('request-running').attr('disabled', true);
-      Spontaneous.Ajax.put(['/page',this.page.id(), 'touch'].join('/'), {}, this.touch_page_complete.bind(this, $btn));
-    },
-    touch_page_complete: function($btn, response, status, xhr) {
-      $btn.removeClass('request-running').attr('disabled', false);
-    },
+		touch_page: function(event) {
+			var $btn = $(event.target).addClass('request-running').attr('disabled', true);
+			Spontaneous.Ajax.put(['/page',this.page.id(), 'touch'].join('/'), {}, this.touch_page_complete.bind(this, $btn));
+		},
+		touch_page_complete: function($btn, response, status, xhr) {
+			$btn.removeClass('request-running').attr('disabled', false);
+		},
 		save_uid: function(uid) {
 			Spontaneous.Ajax.put(['/page',this.page.id(), 'uid'].join('/'), {'uid':uid}, this.uid_save_complete.bind(this));
 		},
@@ -246,9 +305,9 @@ Spontaneous.Views.PageView = (function($, S) {
 			if (status === 'success') {
 				if (this.url_editor_open) {
 
-				this.hide_path_error();
-				var view = $('h3.path', this.panel), edit = $('.edit', this.panel);
-				this.close();
+					this.hide_path_error();
+					var view = $('h3.path', this.panel), edit = $('.edit', this.panel);
+					this.close();
 				}
 				this.page.set('path', response.path);
 				this.page.set('slug', response.slug);
@@ -319,4 +378,4 @@ Spontaneous.Views.PageView = (function($, S) {
 	});
 
 	return PageView;
-}(jQuery, Spontaneous));
+}(jQuery, Spontaneous, document));

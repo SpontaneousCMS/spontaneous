@@ -7,3 +7,15 @@ a.developer.source {
 		color: rgba(255, 255, 255, 1);
 	}
 }
+
+.developer.type-information {
+	@include interface;
+	text-transform: none;
+	color: #aaa;
+	display: inline-block;
+	font-size: 11px;
+	margin-right: $unit;
+	&:hover {
+		color: $highlight;
+	}
+}

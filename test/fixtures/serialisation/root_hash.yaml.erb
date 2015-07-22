@@ -11,6 +11,7 @@
 :page_id: <%= @root.id %>
 :slug: ""
 :type_id: <%= SerialisedPage.schema_id.to_s %>
+:aliases: []
 :fields:
 - :unprocessed_value: Home
   :processed_value: Home
@@ -48,6 +49,7 @@
     - <%= @tepid_style.to_s %>
     - <%= @freezing_style.to_s %>
     - <%= @boiling_style.to_s %>
+    :aliases: []
     :fields:
     - :unprocessed_value: Piece 1
       :name: title
@@ -148,6 +150,7 @@
     - <%= @tepid_style.to_s %>
     - <%= @freezing_style.to_s %>
     - <%= @boiling_style.to_s %>
+    :aliases: []
     :fields:
     - :unprocessed_value: Piece 2
       :processed_value: Piece 2
