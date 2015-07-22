@@ -6,7 +6,7 @@ module Spontaneous::Publishing
 
     def rerender
       model.scope(revision, true) do
-        pipeline.run(transaction([]))
+        pipeline.run(transaction([], nil))
       end
       progress.done
     end

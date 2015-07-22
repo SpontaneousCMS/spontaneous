@@ -48,7 +48,7 @@ module Spontaneous
         Spontaneous::Simultaneous.fire(:rerender)
       end
 
-      def rerender
+      def reindex
         Spontaneous::Simultaneous.fire(:reindex)
       end
     end # Simultaneous
