@@ -1,6 +1,6 @@
 // console.log('Loading Page...')
 
-Spontaneous.Views.PageView = (function($, S) {
+Spontaneous.Views.PageView = (function($, S, document) {
 	var dom = S.Dom, user = S.User, ajax = S.Ajax;
 
 	var FunctionBar = function(page) {
@@ -34,19 +34,21 @@ Spontaneous.Views.PageView = (function($, S) {
 				path_wrap.append(dom.h3('.titlesync').append(resync));
 			}
 
-			path_wrap.append(dom.div('.path-spacer'));
+			// path_wrap.append(dom.div('.path-spacer'));
 
 			if (user.is_developer()) {
 				// var uid_text = dom.h3('.developer.uid' + (!this.page.content.uid ? '.missing' : '')).text('#' + (this.page.content.uid || "----")).click(function() {
 				// 	this.open_uid_editor();
 				// }.bind(this));
-				var dev_desc = dom.h3('.developer').append(dom.a().attr('href', this.page.developer_edit_url()).text(this.page.developer_description()));
-				path_wrap.append(dev_desc);
 
         var mark_modified = this.touch_page.bind(this);
         var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark modified').click(mark_modified));
+				var dev_desc = dom.a('.developer.type-information', {href:this.page.developer_edit_url()}).text(this.page.developer_description());
+        buttons.prepend(dev_desc);
         this.panel.append(buttons);
 			}
+			var page_aliases = this.pageAliasesPanel();
+			this.panel.append(page_aliases);
 
 			path_wrap.append(dom.div('.edit'));
 
@@ -57,6 +59,40 @@ Spontaneous.Views.PageView = (function($, S) {
 			this.panel.append(path_wrap);
 			this.path_wrap = path_wrap;
 			return this.panel;
+		},
+		pageAliasesPanel: function() {
+			var $wrap = dom.div('.page-aliases');
+			var aliases = this.page.content.aliases;
+			if (aliases.length === 0) {
+				return $wrap;
+			}
+			var showAlias = function(alias) {
+				return function(event) {
+					S.Location.load_id(alias.page_id);
+				};
+			};
+
+			var $label = dom.div('.page-aliases--label').text(aliases.length + ' alias' + (aliases.length > 1 ? 'es' : ''))
+			var $list = dom.div('.page-aliases--list');
+			$wrap.append($label, $list);
+			aliases.forEach(function(a) {
+				var $title = dom.div('.page-alias--title').text(a.title);
+				var $path = dom.div('.page-alias--path').text(a.path);
+				var $el =  dom.div('.page-alias').append($title, $path).click(showAlias(a));
+				$list.append($el);
+			});
+			var eventName = 'click.alias_list_off';
+			var hide = function() { $wrap.removeClass('visible'); };
+			$wrap.click(function(e) {
+				$wrap.toggleClass('visible');
+				e.stopPropagation();
+				if ($wrap.hasClass('visible')) {
+					$(document).one(eventName, hide);
+				} else {
+					$(document).off(eventName);
+				}
+			});
+			return $wrap;
 		},
 		unload: function() {
 			// fit with the view prototype
@@ -319,4 +355,4 @@ Spontaneous.Views.PageView = (function($, S) {
 	});
 
 	return PageView;
-}(jQuery, Spontaneous));
+}(jQuery, Spontaneous, document));

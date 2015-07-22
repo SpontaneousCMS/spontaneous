@@ -161,7 +161,79 @@
 				opacity: 0.5;
 			}
 		}
-		.path, .path h3, .path h3.developer a {
+		.page-aliases {
+			@include interface;
+			min-width: 262px;
+			position:absolute;
+			right: $container-padding;
+			bottom: 10px;
+			font-size: 11px;
+			z-index: 100; // lift above path editing stuff
+			cursor: pointer;
+		}
+		.page-alias {
+			cursor: pointer;
+			text-transform: none;
+			padding: $unit;
+		}
+		.page-alias + .page-alias {
+			border-top: solid 1px #666;
+		}
+		.page-aliases--label {
+			@include rounded;
+			padding: $unit/2 $unit;
+			line-height: 11px;
+			border: solid 1px rgba(0, 0, 0, 0.4);
+			text-transform: lowercase;
+			&:before {
+				@include awesome-icon("\f0a8");
+				display: inline-block;
+				width: 2*$unit;
+			}
+			&:after {
+				@include awesome-icon("\f0d7");
+				position: absolute;
+				right: $unit;
+				top: ($unit/2)+1;
+				color: #aaa;
+			}
+		}
+		.page-aliases--label:hover,
+		.page-aliases--label:hover:after {
+			color: $highlight;
+		}
+		.page-aliases--list {
+			@include rounded-bottom;
+			display: none;
+			position: absolute;
+			left: 0;
+			right: 0;
+			background: #222;
+
+		}
+		.page-aliases.visible {
+			.page-aliases--list {
+				display: block;
+			}
+		}
+		.page-alias--title {
+			&:before {
+				@include awesome-icon("\f0a8");
+				display: inline-block;
+				width: 2*$unit;
+			}
+		}
+		.page-alias--path {
+			padding-left: 2*$unit;
+			color: #aaa;
+		}
+		.page-alias:hover {
+			.page-alias--title {
+				color: $highlight;
+			}
+		}
+		.page
+		.path, .path h3 {
 			@include interface;
 			cursor: pointer;
 			color: #c1c1c1;
@@ -169,7 +241,7 @@
 			line-height: 12px;
 			text-transform: none;
 		}
-		.path .uid, .path .developer {
+		.path .uid {
 			// @include rounded;
 			// background-color: rgba(0, 0, 0, 0.4);
 			// padding: $unit/2;
