@@ -39,7 +39,7 @@ module Spontaneous::Model::Core
 
     # InstanceMethods
 
-    def shallow_export(user)
+    def core_shallow_export(user)
       { id: id,
         type: model.ui_class,
         type_id: model.schema_id.to_s,
@@ -51,9 +51,23 @@ module Spontaneous::Model::Core
         label: label }
     end
 
+    def shallow_export(user)
+      core_shallow_export(user)
+    end
+
+    # Defines the values that are exported to the interface when this content
+    # item is being referenced as an alias to the item being viewed.
+    def alias_export(user)
+      core_shallow_export(user).merge({
+        title: title,
+        path: page.path,
+        box: box.alias_export(user)
+      })
+    end
+
     def export(user = nil)
       shallow_export(user).merge({
-        aliases: aliases.map(&:shallow_export),
+        aliases: aliases.map { |a| a.alias_export(user) },
         boxes: self.class.readable_boxes(user).map { |box| boxes[box.name].export(user) }
       })
     end

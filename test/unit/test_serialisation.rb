@@ -187,7 +187,11 @@ describe "Serialisation" do
       aliases = export[:aliases]
       aliases.must_be_instance_of(Array)
       aliases.length.must_equal 1
-      aliases.first.must_equal @alias.shallow_export
+      aliases.first.must_equal @alias.alias_export(nil)
+      export = aliases.first
+      export[:path].must_equal @root.path
+      export[:box].must_be_instance_of Hash
+      export[:box][:name].must_equal 'insides'
     end
 
     describe 'cloud storage' do

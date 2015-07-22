@@ -169,7 +169,11 @@ module Spontaneous::Model::Core
       end
 
       def shallow_export(user = nil)
-        super.merge(target: exported_target(user), alias_title: target.alias_title, alias_icon: target.exported_alias_icon)
+        super.merge({
+          target: exported_target(user),
+          alias_title: target.alias_title,
+          alias_icon: target.exported_alias_icon
+        })
       end
 
       def exported_target(user = nil)
