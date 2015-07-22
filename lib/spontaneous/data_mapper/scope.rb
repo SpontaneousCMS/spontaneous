@@ -208,10 +208,8 @@ module Spontaneous
         return naked_dataset.filter(conditions)
         ds = nil
         unless (ds = cached_datasets[conditions])
-          p [:new_dataset, conditions]
           cached_datasets[conditions] = ds = naked_dataset.filter(conditions)
         end
-        p [:ds, ds]
         ds
       end
 

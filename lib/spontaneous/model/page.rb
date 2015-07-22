@@ -4,6 +4,7 @@ require "spontaneous/model/page/controllers"
 require "spontaneous/model/page/formats"
 require "spontaneous/model/page/layouts"
 require "spontaneous/model/page/locks"
+require "spontaneous/model/page/path_history"
 require "spontaneous/model/page/page_tree"
 require "spontaneous/model/page/paths"
 require "spontaneous/model/page/site_map"
@@ -24,6 +25,7 @@ module Spontaneous::Model
     include SiteTimestamps
     include Locks
     include Singleton
+    include PathHistory
     include Spontaneous::Model::Core::ContentHash::PageMethods
 
     included do

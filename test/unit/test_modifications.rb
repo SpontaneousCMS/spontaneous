@@ -677,6 +677,76 @@ describe "Modifications" do
       page = Page.first :id => page.id
       page.pending_modifications.length.must_equal 0
     end
+
+    describe 'path history' do
+      after do
+        Spontaneous::PagePathHistory.delete
+      end
+
+      it "doesn't insert a path history entry in edit mode" do
+        page = Page.first uid: "1"
+        old_path = page.path
+        page.slug = "changed"
+        page.save
+        history = page.reload.path_history
+        history.length.must_equal 0
+      end
+
+      it 'inserts a path history entry when page path changes' do
+        page = Page.first uid: "1"
+        old_path = page.path
+        page.slug = "changed"
+        page.save
+        ::Content.publish(@final_revision, [page.id])
+        history = page.reload.path_history
+        history.length.must_equal 1
+        path = history.first
+        path.path.must_equal old_path
+        path.revision.must_equal @final_revision
+      end
+
+      it 'inserts a path history entry for every affected child page' do
+        page = Page.first uid: "1"
+        old_path = page.path
+        page.slug = "changed"
+        page.save
+        ::Content.publish(@final_revision, [page.id])
+        page.children.each do |child|
+          history = child.reload.path_history
+          history.length.must_equal 1
+          path = history.first
+          path.path.must_match %r(^#{old_path})
+          path.revision.must_equal @final_revision
+        end
+      end
+
+      it 'only inserts a single history entry for multiple changes in a single publish' do
+        first = Page.first uid: '1'
+        middle = Page.first uid: '1.1.1'
+        last = middle.things << Page.new(uid: '1.1.1.1', slug: 'p-1-1-1-1')
+        ::Content.publish(@final_revision, [last.id])
+
+        history = last.reload.path_history
+        history.length.must_equal 0
+
+        revision = @final_revision + 1
+
+        old_path = last.reload.path
+
+        first.slug = 'first'
+        first.save
+        middle.slug = 'middle'
+        middle.save
+
+        ::Content.publish(revision, [first.id, middle.id])
+        history = last.reload.path_history
+        last.path.must_equal '/first/middle/p-1-1-1-1'
+        history.length.must_equal 1
+        path = history.first
+        path.path.must_equal old_path
+        path.revision.must_equal revision
+      end
+    end
   end
 
   describe "with assigned editor" do

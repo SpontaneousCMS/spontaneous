@@ -62,6 +62,7 @@ module Spontaneous
   autoload :Permissions,        "spontaneous/permissions"
   autoload :PublishedRevision,  "spontaneous/published_revision"
   autoload :Publishing,         "spontaneous/publishing"
+  autoload :PagePathHistory,    "spontaneous/page_path_history"
   autoload :Rack,               "spontaneous/rack"
   autoload :Revision,           "spontaneous/revision"
   autoload :Schema,             "spontaneous/schema"
