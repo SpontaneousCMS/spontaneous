@@ -131,9 +131,44 @@
 			font-size: 24px;
 			line-height: 100%;
 			padding-bottom: 30px;
-			span {
+			margin-right: 300px;
+			.page-is-hidden {
 				color: #888888;
 			}
+		}
+		&.page-info-alias-type {
+			h1 {
+				padding-bottom: 40px;
+			}
+		}
+		.page-alias-link {
+			@include no-select;
+			font-size: 14px;
+			line-height: 14px;
+			color: #888;
+			font-style: italic;
+			font-weight: 500;
+			top: -30px;
+			position: relative;
+			cursor: pointer;
+			&:before {
+				@include awesome-icon("\f0a9");
+				font-size: 11px;
+				margin-right: $unit;
+			}
+			&:hover {
+				color: $highlight;
+				.page-alias-link--path {
+					color: $highlight;
+				}
+			}
+		}
+		.page-alias-link--path {
+			@include interface;
+			margin-left: $unit;
+			color: #666;
+			text-transform: none;
+			font-size: 12px;
 		}
 		.page-buttons {
 			position:absolute;
@@ -168,7 +203,7 @@
 			right: $container-padding;
 			bottom: 10px;
 			font-size: 11px;
-			z-index: 100; // lift above path editing stuff
+			z-index: 200; // lift above path editing stuff
 			cursor: pointer;
 		}
 		.page-alias {

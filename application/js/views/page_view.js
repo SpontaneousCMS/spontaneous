@@ -10,9 +10,15 @@ Spontaneous.Views.PageView = (function($, S, document) {
 		panel: function() {
 			var self = this;
 			this.panel = dom.div('#page-info');
-			this.title = $('<h1/>');
+			if (self.page.type().is_alias()) {
+				this.panel.addClass('page-info-alias-type');
+			}
+			var h1 = $('<h1/>');
+			this.title = dom.span();
+			h1.append(this.title);
 			this.set_title();
-			this.panel.append(this.title);
+			this.panel.append(h1);
+			this.panel.append(this.aliasTargetLink());
 			var path_wrap = dom.div('.path');
 
 			this.page.title_field().watch('value', function(t) {
@@ -59,6 +65,20 @@ Spontaneous.Views.PageView = (function($, S, document) {
 			this.panel.append(path_wrap);
 			this.path_wrap = path_wrap;
 			return this.panel;
+		},
+		aliasTargetLink: function() {
+			var self = this;
+			if (!self.page.type().is_alias()) {
+				return '';
+			}
+			var target = self.page.content.target;
+			var viewAlias = function(e) {
+				e.stopPropagation();
+				S.Location.load_id(target.page_id);
+			};
+			var $targetTitle = dom.span('.page-alias-link--title').text(target.title);
+			var $targetPath = dom.span('.page-alias-link--path').text(target.path);
+			return dom.div('.page-alias-link').append($targetTitle, $targetPath).click(viewAlias);
 		},
 		pageAliasesPanel: function() {
 			var $wrap = dom.div('.page-aliases');
@@ -107,13 +127,13 @@ Spontaneous.Views.PageView = (function($, S, document) {
 			title = title || this.page.title();
 			this.title.html(title);
 			if (this.page.content.hidden) {
-				self.title.append(dom.span().text(' (hidden)'));
+				self.title.append(dom.span('.page-is-hidden').text(' (hidden)'));
 			}
 			var maxHeight = 36;
 			window.setTimeout(function()  {
-				var t = self.title
-        , height = function() { return t.height(); }
-				, fs = window.parseInt(t.css('font-size'), 10);
+				var t = self.title.parent()
+					, height = function() { return t.height(); }
+					, fs = window.parseInt(t.css('font-size'), 10);
 				while (height() > maxHeight && fs > 10) {
 					t.css('font-size', --fs);
 				}
