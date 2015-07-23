@@ -133,7 +133,7 @@ Spontaneous.Views.PageView = (function($, S, document) {
 		},
 		aliasTargetLink: function() {
 			var self = this;
-			if (!self.page.type().is_alias()) {
+			if (!self.isAlias()) {
 				return '';
 			}
 			var target = self.page.content.target;
