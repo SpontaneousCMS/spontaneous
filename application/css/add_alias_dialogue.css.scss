@@ -53,6 +53,17 @@
 		bottom: 0;
 		overflow: auto;
 	}
+	.alias-dialogue-empty-targets {
+		color: #666;
+		text-align: center;
+		margin-top: 20%;
+		button {
+			@include button(#999);
+			display: block;
+			width: 150px;
+			margin: 2*$unit auto 0 auto;
+		}
+	}
 	.type {
 		@include disable-text-select;
 		@include display-box;

@@ -172,6 +172,12 @@ Spontaneous.AddAliasDialogue = (function($, S, window) {
 		targets_loaded: function(results) {
 			var outer = this._outer, wrap, self = this, targets = self.sort_targets(results.targets);
 			window.setTimeout(function() { self.spinner.stop(); }, 300);
+			if (targets.length === 0) {
+				var $msg = dom.div('.alias-dialogue-empty-targets').text('No targets available...');
+				var $btn = dom.button().text('Close').click(Dialogue.close.bind(Dialogue));
+				outer.append($msg.append($btn));
+				return;
+			}
 			self.targets = [];
 			outer.empty();
 			wrap = dom.div();
