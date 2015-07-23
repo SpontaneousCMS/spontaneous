@@ -300,6 +300,24 @@
 			left: $container-padding;
 			right: $container-padding;
 		}
+		.path.path-read-only {
+			position: relative;
+			&:after {
+				content: "\f071 Edit alias target to change path";
+				display: none;
+				position: relative;
+				left: 2*$unit;
+				color: #666;
+				font-style:italic;
+			}
+		}
+		.path.path-read-only:hover {
+			color: #c1c1c1;
+			cursor: default;
+			&:after {
+				display: inline-block;
+			}
+		}
     .path .titlesync {
       margin-left: $unit;
       margin-right: 10 *$unit;

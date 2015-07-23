@@ -9,31 +9,35 @@ Spontaneous.Views.PageView = (function($, S, document) {
 	FunctionBar.prototype = {
 		panel: function() {
 			var self = this;
+			var isAlias = self.isAlias();
 			this.panel = dom.div('#page-info');
-			if (self.page.type().is_alias()) {
-				this.panel.addClass('page-info-alias-type');
+			if (isAlias) {
+				self.panel.addClass('page-info-alias-type');
 			}
 			var h1 = $('<h1/>');
-			this.title = dom.span();
-			h1.append(this.title);
-			this.set_title();
-			this.panel.append(h1);
-			this.panel.append(this.aliasTargetLink());
+			self.title = dom.span();
+			h1.append(self.title);
+			self.set_title();
+			self.panel.append(h1);
+			self.panel.append(self.aliasTargetLink());
 			var path_wrap = dom.div('.path');
 
-			this.page.title_field().watch('value', function(t) {
-				this.set_title(t);
-			}.bind(this));
+			self.page.title_field().watch('value', function(t) {
+				self.set_title(t);
+			});
 
-			var path_text = dom.h3('.path').text(this.page.get('path')).click(function() {
-				if (this.page.get('path') !== '/') {
-					this.open_url_editor();
-				}
-			}.bind(this));
+			var path_text = dom.h3('.path').text(self.page.get('path'));
 
+			if (isAlias) {
+				path_text.addClass('path-read-only');
+			}
 			path_wrap.append(path_text);
 
-			if (!self.page.is_root()) {
+			if (!isAlias && !self.page.is_root()) {
+				path_text.click(function() {
+					self.open_url_editor();
+				});
+
 				var resync = dom.a({ 'title':'Sync the path to the page title'}).click(function() {
 					ajax.put(['/page', self.page.id(), 'slug/sync'].join('/'), {}, self.save_complete.bind(self));
 				});
@@ -43,32 +47,35 @@ Spontaneous.Views.PageView = (function($, S, document) {
 			// path_wrap.append(dom.div('.path-spacer'));
 
 			if (user.is_developer()) {
-				// var uid_text = dom.h3('.developer.uid' + (!this.page.content.uid ? '.missing' : '')).text('#' + (this.page.content.uid || "----")).click(function() {
-				// 	this.open_uid_editor();
-				// }.bind(this));
+				// var uid_text = dom.h3('.developer.uid' + (!self.page.content.uid ? '.missing' : '')).text('#' + (self.page.content.uid || "----")).click(function() {
+				// 	self.open_uid_editor();
+				// }.bind(self));
 
-				var mark_modified = this.touch_page.bind(this);
+				var mark_modified = self.touch_page.bind(self);
 				var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark modified').click(mark_modified));
-				var dev_desc = dom.a('.developer.type-information', {href:this.page.developer_edit_url()}).text(this.page.developer_description());
+				var dev_desc = dom.a('.developer.type-information', {href:self.page.developer_edit_url()}).text(self.page.developer_description());
 				buttons.prepend(dev_desc);
-				this.panel.append(buttons);
+				self.panel.append(buttons);
 			}
-			var page_aliases = this.pageAliasesPanel();
-			this.panel.append(page_aliases);
+			var page_aliases = self.pageAliasesPanel();
+			self.panel.append(page_aliases);
 
 			path_wrap.append(dom.div('.edit'));
 
-			this.page.watch('path', function(path) {
+			self.page.watch('path', function(path) {
 				path_text.text(path);
-			}.bind(this));
+			});
 
-			this.panel.append(path_wrap);
-			this.path_wrap = path_wrap;
-			return this.panel;
+			self.panel.append(path_wrap);
+			self.path_wrap = path_wrap;
+			return self.panel;
+		},
+		isAlias: function() {
+			return this.page.type().is_alias();
 		},
 		aliasTargetLink: function() {
 			var self = this;
-			if (!self.page.type().is_alias()) {
+			if (!self.isAlias()) {
 				return '';
 			}
 			var target = self.page.content.target;
