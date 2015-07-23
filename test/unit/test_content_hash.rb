@@ -136,10 +136,23 @@ describe "Content Hash" do
         box << new_page
       end
 
+      after do
+        Object.send(:remove_const, :PageAlias) rescue nil
+      end
+
       it "should give identical values for #calculate_content_hash! and #calculate_content_hash" do
         piece = box.first
         piece.calculate_content_hash.must_equal piece.content_hash
         piece.calculate_content_hash.must_equal piece.calculate_content_hash!
+      end
+
+      it "should cope with aliases without targets" do
+        ::PageAlias = Class.new(Page) do
+          alias_of :Page
+        end
+        box << PageAlias.new
+        page_piece = box.last
+        page_piece.update(title: "working")
       end
 
       # Actually it shouldn't -- we currently model pages that haven't been published

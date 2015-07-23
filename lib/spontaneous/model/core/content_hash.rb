@@ -148,7 +148,7 @@ module Spontaneous::Model::Core
       # of pages inside boxes only depend on the id (so the box hash does change
       # when the page is added, moved or deleted)
       def content_hash
-        return nil if target.never_published?
+        return nil if page_target.never_published?
         Spontaneous::Model::Core::ContentHash.calculate(id)
       end
       alias_method :calculate_content_hash,  :content_hash
