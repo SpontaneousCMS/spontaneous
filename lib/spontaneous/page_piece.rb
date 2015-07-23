@@ -9,12 +9,12 @@ module Spontaneous
 
     attr_accessor :owner
 
-    def initialize(owner, target, position = nil)
-      super(target)
+    def initialize(owner, page_target, position = nil)
+      super(page_target)
       @owner, @position = owner, position
     end
 
-    alias_method :target, :__getobj__
+    alias_method :page_target, :__getobj__
     alias_method :parent, :owner
 
     # Public: when accessed as inner content, pages return
@@ -28,17 +28,17 @@ module Spontaneous
 
     # This is used to unwrap pages from their entries within boxes
     def to_page
-      target
+      page_target
     end
 
     # Used by Spontaneous::Model::Core::=== to look inside PagePiece objects
     # and test against the class of the target, not of the proxy
     def content_class
-      target.class
+      page_target.class
     end
 
     def id
-      target.id
+      page_target.id
     end
 
     def depth
@@ -46,11 +46,11 @@ module Spontaneous
     end
 
     def style
-     target.style
+     page_target.style
     end
 
     def style=(style)
-      target.style=(style)
+      page_target.style=(style)
     end
 
     def entry
@@ -58,18 +58,18 @@ module Spontaneous
     end
 
     def export(user = nil)
-      target.shallow_export(user).merge(export_styles).merge({
+      page_target.shallow_export(user).merge(export_styles).merge({
         depth: self.depth
       })
     end
 
     def export_styles
-      { style: target.style_sid.to_s,
-        styles: owner.available_styles(target).map { |s| s.schema_id.to_s } }
+      { style: page_target.style_sid.to_s,
+        styles: owner.available_styles(page_target).map { |s| s.schema_id.to_s } }
     end
 
     def inspect
-      %(#<PagePiece target=#{target.inspect}>)
+      %(#<PagePiece page_target=#{page_target.inspect}>)
     end
 
     def renderable
