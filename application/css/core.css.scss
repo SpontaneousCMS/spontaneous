@@ -151,7 +151,7 @@
 			top: -30px;
 			position: relative;
 			cursor: pointer;
-			display: block;
+			display: inline-block;
 			&:before {
 				@include awesome-icon("\f0a9");
 				font-size: 11px;
