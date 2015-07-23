@@ -39,7 +39,21 @@ module Spontaneous::Rack
     end
 
     def headers(env, path, body)
-      {HTTP_CONTENT_TYPE => mime_type(path), HTTP_CONTENT_LENGTH => body.length.to_s}
+      content_length(body, {HTTP_CONTENT_TYPE => mime_type(path)})
+    end
+
+    def content_length(body, headers)
+      size = case body
+      when String, StringIO
+        body.length
+      when ::File
+        body.size
+      else
+        nil
+      end
+
+      return headers if size.nil?
+      headers.update(HTTP_CONTENT_LENGTH => size.to_s)
     end
 
     def mime_type(path)

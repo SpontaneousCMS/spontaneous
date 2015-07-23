@@ -875,5 +875,42 @@ describe "Front" do
         expiry.year.must_equal (Date.today.year) + 1
       end
     end
+
+    describe 'output store' do
+      let(:output_store) { mock }
+      let(:middleware)   { Spontaneous::Rack::OutputStore.new(nil, site, :assets) }
+
+      it 'returns the right content length when given a string' do
+        c = Spontaneous::Rack::Constants
+        output_store.expects(:load).with(:assets, '/css/something.css', static: true).returns("body{ }")
+        response = middleware.call(c::REQUEST_METHOD => "GET", c::PATH_INFO => '/css/something.css', c::OUTPUT_STORE => output_store)
+        status, headers, body = response
+        body.must_equal "body{ }"
+        status.must_equal 200
+        headers.must_equal({"Content-Type"=>"text/css;charset=utf-8", "Content-Length"=>"7"})
+      end
+
+      it 'returns the right content length when given a stringio object' do
+        c = Spontaneous::Rack::Constants
+        output_store.expects(:load).with(:assets, '/css/something.css', static: true).returns(StringIO.new("body{ }"))
+        response = middleware.call(c::REQUEST_METHOD => "GET", c::PATH_INFO => '/css/something.css', c::OUTPUT_STORE => output_store)
+        status, headers, body = response
+        body.read.must_equal "body{ }"
+        status.must_equal 200
+        headers.must_equal({"Content-Type"=>"text/css;charset=utf-8", "Content-Length"=>"7"})
+      end
+
+      it 'returns the right response when given a File/IO object' do
+        c = Spontaneous::Rack::Constants
+        path = File.expand_path('../../fixtures/assets/public2/css/c.css', __FILE__)
+        size = File.size(path)
+        File.open(path, 'r') do |f|
+          output_store.expects(:load).with(:assets, '/css/something.css', static: true).returns(f)
+          response = middleware.call(c::REQUEST_METHOD => "GET", c::PATH_INFO => '/css/something.css', c::OUTPUT_STORE => output_store)
+          status, headers, body = response
+          headers.must_equal({"Content-Type"=>"text/css;charset=utf-8", "Content-Length"=>size.to_s})
+        end
+      end
+    end
   end
 end
