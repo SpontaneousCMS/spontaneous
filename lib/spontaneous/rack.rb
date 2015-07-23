@@ -20,8 +20,6 @@ module Spontaneous
 
       SLASH = Spontaneous::Constants::SLASH
 
-      SLASH = Spontaneous::Constants::SLASH
-
       NAMESPACE      = "/@spontaneous".freeze
       AUTH_COOKIE    = "spontaneous_api_key".freeze
       SESSION_LIFETIME = 1.year
