@@ -975,6 +975,10 @@
 		}
 		.alias {
 			font-style: italic;
+			& span:before {
+				@include awesome-icon("\f0a9");
+				padding-right: $unit/4;
+			}
 		}
 		.down {
 			@include down-arrow("/@spontaneous/static/slot-down-arrow-59ad5f5ee5b52a7ebd00bca4b3104194.png", 18px);

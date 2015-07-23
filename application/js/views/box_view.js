@@ -199,7 +199,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 
 			$.each(allowed, function(i, allow) {
 				var type = allow.type, as = allow.as || type.title;
-				var a = dom.a().text(as), add_allowed;
+				var a = dom.a().append(dom.span().text(as)), add_allowed;
 				if (type.is_alias()) {
 					a.addClass('alias');
 					add_allowed = function(type) {
