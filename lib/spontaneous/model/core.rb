@@ -203,7 +203,7 @@ module Spontaneous::Model
         return str if str.length <= len
         str[0...len] + "…"
       }
-      Hash[fields.map { |field| [field.name, crop[field.unprocessed_value]]}]
+      Hash[fields.map { |field| [field.name, crop[field.unprocessed_value.to_s]]}]
     end
 
     def each
