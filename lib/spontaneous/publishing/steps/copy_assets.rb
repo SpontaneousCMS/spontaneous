@@ -2,7 +2,7 @@ module Spontaneous::Publishing::Steps
   class CopyAssets < BaseStep
 
     def count
-      return 0 if development?
+      # return 0 if development?
       assets.length
     end
 
