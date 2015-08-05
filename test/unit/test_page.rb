@@ -528,6 +528,26 @@ describe "Page" do
         page.save.reload
         page.path.must_equal '/balloon'
       end
+
+      it "correctly identifies slug conflicts" do
+        Page.box :fishes do
+          def path_origin; ::File.join(super.path, 'fishes'); end
+        end
+        Page.box :mammals do
+          def path_origin; ::File.join(super.path, 'mammals'); end
+        end
+        page = @parent.sections << Page.new(slug: 'animals')
+        fish = page.fishes << Page.create(slug: 'a')
+        mammal = page.mammals << Page.create(slug: 'b')
+        fish.path.must_equal '/animals/fishes/a'
+        mammal.path.must_equal '/animals/mammals/b'
+
+        fish.is_conflicting_slug?('b').must_equal false
+
+        fish.slug = 'b'
+        fish.save
+        fish.path.must_equal '/animals/fishes/b'
+      end
     end
   end
 

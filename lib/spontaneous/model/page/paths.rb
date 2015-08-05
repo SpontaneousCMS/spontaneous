@@ -31,8 +31,9 @@ module Spontaneous::Model::Page
     private :__create_private_root=, :__create_private_root?
 
     def before_create
-      place_in_page_tree
       set_slug_from_dynamic_value
+      fix_generated_slug_conflicts
+      place_in_page_tree
       super
     end
 
@@ -61,7 +62,7 @@ module Spontaneous::Model::Page
       if !new? && (title = fields[title_field_name])
         set_slug_from_title(title)
       end
-      fix_generated_slug_conflicts
+      fix_generated_slug_conflicts if changed_columns.include?(:slug)
       super
     end
 
@@ -106,7 +107,10 @@ module Spontaneous::Model::Page
     end
 
     def is_conflicting_slug?(slug)
-      siblings(true).reject { |s| s.root? }.compact.map(&:slug).include?(slug)
+      # find new path from slug then compare full paths not slugs because paths
+      # can be overridden by boxes
+      new_path = calculate_path_with_slug(slug)
+      siblings(true).reject { |s| s.root? }.compact.map(&:path).include?(new_path)
     end
 
     def parent=(parent)
