@@ -31,7 +31,7 @@ describe "Page" do
     it "be a singleton" do
       p = Page.create
       assert p.root?
-      q = Page.create
+      q = Page.create(slug: 'something')
       refute q.root?
     end
   end
@@ -134,9 +134,14 @@ describe "Page" do
   end
 
   describe "Slugs" do
+    before do
+      Page.box :subs
+      @root = Page.create
+      assert @root.root?
+    end
+
     it "be generated if missing" do
-      o = Page.create
-      p = Page.create
+      p = @root.subs << Page.new
       p.slug.wont_equal ""
       p.save
       p.reload.slug.wont_equal ""
@@ -148,16 +153,16 @@ describe "Page" do
           'fishies'
         end
       end
-      o = Page.create
-      p = Page.create
+      p = @root.subs << Page.new
       p.save
       p.slug.must_match /^fishies/
       p.has_generated_slug?.must_equal true
     end
 
     it "be made URL safe" do
-      o = Page.create
-      p = Page.create
+      p = @root.subs << Page.new
+      # o = Page.create
+      # p = Page.create
       p.slug = " something's illegal and ugly!!"
       p.slug.must_equal "somethings-illegal-and-ugly"
       p.save
@@ -165,14 +170,13 @@ describe "Page" do
     end
 
     it "be set from title if using generated slug" do
-      r = Page.create
+      r = @root.subs << Page.new
       slug = Page.generate_default_slug
       Page.stubs(:generate_default_slug).returns(slug)
-      o = Page.create(:title => "New Page")
-      p = Page.create(:title => "New Page")
-      o.slug.must_equal slug
+      o = Page.new(title: "New Page")
+      p = Page.new(title: "New Page")
       r.sub << o
-      o.save
+      o.slug.must_equal slug
       o = Page[o.id]
       o.slug.must_equal slug
       o.sub << p
@@ -190,12 +194,12 @@ describe "Page" do
     end
 
     it "doesn't set a conflicting url on creation" do
-      r = Page.create
-      o = Page.create(:title => "New Page")
+      r = @root.subs << Page.new
+      o = Page.new(title: "New Page")
       r.sub << o
       o.save
 
-      p = Page.create(:title => "New Page")
+      p = Page.new(title: "New Page")
       r.sub << p
       p.save
       slug_o = o.slug
@@ -204,38 +208,39 @@ describe "Page" do
     end
 
     it "fixes conflicting slugs automatically" do
-      r = Page.create
-      o = Page.create(:title => "New Page", :slug => "my-slug")
+      r = @root.subs << Page.new(slug: 'section')
+      o = Page.new(title: "New Page", slug: "my-slug")
       r.sub << o
       o.save
 
-      page = Page.create(:title => "New Page")
+      page = Page.new(title: "New Page")
       r.sub << page
       page.save
       page.slug = "my-slug"
       page.save
       o.slug.wont_equal page.slug
-      page.path.must_equal "/my-slug-01"
+      page.path.must_equal "/section/my-slug-01"
     end
 
     it "fixes conflicting slugs created from titles automatically" do
-      r = Page.create
-      o = Page.create(:title => "New Page", :slug => "my-slug")
+      r = @root.subs << Page.new(slug: 'section')
+      o = Page.new(title: "New Page", slug: "my-slug")
       r.sub << o
       o.save
 
-      p = Page.create(:title => "New Page")
+      p = Page.new(title: "New Page")
       r.sub << p
       p.save
       p.title = "My Slug"
       p.save
       p.slug.must_equal "my-slug-01"
       o.slug.wont_equal p.slug
-      p.path.must_equal "/my-slug-01"
+      p.path.must_equal "/section/my-slug-01"
     end
 
     it "not be longer than 64 chars" do
-      o = Page.create
+      o = @root.subs << Page.new
+      # o = Page.create
       long_slug = (["bang"]*100)
       o.slug = long_slug.join(' ')
       o.slug.length.must_equal 64
@@ -243,7 +248,8 @@ describe "Page" do
     end
 
     it "should crop titles at word boundaries" do
-      o = Page.create
+      # o = Page.create
+      o = @root.subs << Page.new
       long_slug = (["bangor"]*100)
       expected = %w(bangor bangor bangor bangor bangor bangor bangor bangor bangor).join('-')
       o.slug = long_slug.join(' ')
@@ -252,7 +258,8 @@ describe "Page" do
     end
 
     it "should just crop a very long word to the max length" do
-      o = Page.create
+      # o = Page.create
+      o = @root.subs << Page.new
       o.slug = "a"*100
       o.slug.length.must_equal 64
     end
@@ -354,7 +361,7 @@ describe "Page" do
     it "have the correct page hierarchy" do
       Page.box :things1
       Page.box :things2
-      a = Page.new
+      a = @p.sub << Page.new
       c = Page.new
       d = Page.new
       e = Page.new
@@ -381,7 +388,7 @@ describe "Page" do
     it "have the correct page hierarchy for pages within pieces" do
       Page.box :things
       Piece.box :pages
-      a = Page.new
+      a = @p.sub << Page.new
       b = Piece.new
       a.things << b
       c = Page.new
@@ -527,6 +534,26 @@ describe "Page" do
         @child.custom_string << page
         page.save.reload
         page.path.must_equal '/balloon'
+      end
+
+      it "correctly identifies slug conflicts" do
+        Page.box :fishes do
+          def path_origin; ::File.join(super.path, 'fishes'); end
+        end
+        Page.box :mammals do
+          def path_origin; ::File.join(super.path, 'mammals'); end
+        end
+        page = @parent.sections << Page.new(slug: 'animals')
+        fish = page.fishes << Page.create(slug: 'a')
+        mammal = page.mammals << Page.create(slug: 'b')
+        fish.path.must_equal '/animals/fishes/a'
+        mammal.path.must_equal '/animals/mammals/b'
+
+        fish.is_conflicting_slug?('b').must_equal false
+
+        fish.slug = 'b'
+        fish.save
+        fish.path.must_equal '/animals/fishes/b'
       end
     end
   end

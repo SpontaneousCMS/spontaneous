@@ -57,8 +57,22 @@ describe "Render" do
         style :another_template
       end
 
-      @root = ::Page.create(:title => "Home")
-      @page = ::Page.create(:title => "Page Title")
+      @root = ::Page.create(title: "Home")
+
+
+      @section1 = ::Page.new(title: "Section 1", uid: "section1")
+      @section2 = ::Page.new(title: "Section 2")
+      @section3 = ::Page.new(title: "Section 3")
+      @section4 = ::Page.new(title: "Section 4")
+
+      @page = @section1
+
+      @root.sections1 << @section1
+      @root.sections1 << @section2
+      @root.sections2 << @section3
+      @root.sections2 << @section4
+      @root.sections2.last.set_position(0)
+      @root.save.reload
 
       @content = TemplateClass.new
       @content.style.must_equal TemplateClass.default_style
@@ -67,16 +81,6 @@ describe "Render" do
 
       @page.sections1 << @content
 
-      @section1 = ::Page.new(:title => "Section 1", :uid => "section1")
-      @section2 = ::Page.new(:title => "Section 2")
-      @section3 = ::Page.new(:title => "Section 3")
-      @section4 = ::Page.new(:title => "Section 4")
-      @root.sections1 << @section1
-      @root.sections1 << @section2
-      @root.sections2 << @section3
-      @root.sections2 << @section4
-      @root.sections2.last.set_position(0)
-      @root.save.reload
       @transaction = Spontaneous::Publishing::Transaction.new(@site, 99, nil)
       @renderer = Spontaneous::Output::Template::PublishRenderer.new(@transaction)
     end
@@ -87,7 +91,7 @@ describe "Render" do
     end
 
     it "render strings correctly" do
-      @renderer.render_string('${title} {{ Time.now }}', @page.output(:html), {}).must_equal "Page Title {{ Time.now }}"
+      @renderer.render_string('${title} {{ Time.now }}', @page.output(:html), {}).must_equal "Section 1 {{ Time.now }}"
     end
 
     it "use a cache for the site root" do
@@ -155,8 +159,8 @@ describe "Render" do
         layout(:html) { "!${title}"}
         renders { sections1.first }
       end
-      parent = DivertedPage.create(title: "parent")
-      child = Page.create(title: "child")
+      parent = DivertedPage.new(title: "parent")
+      child = Page.new(title: "child")
       @root.sections1 << parent
       @root.save
       parent.sections1 << child
@@ -168,7 +172,6 @@ describe "Render" do
 
     describe "piece trees" do
       before do
-        @page = ::Page.create
         TemplateClass.style :complex_template, :default => true
         TemplateClass.box :bits
         @content = TemplateClass.new
@@ -259,7 +262,6 @@ describe "Render" do
       before do
         TemplateClass.style :slots_template, :default => true
         TemplateClass.box :images
-        @page = ::Page.new
         @content = TemplateClass.new
         @content.title = "The Title"
         @content.description = "The Description"
@@ -307,7 +309,6 @@ describe "Render" do
         AnImage.field :title
         AnImage.template '<img>#{title}</img>'
 
-        @page = ::Page.new
         @root = TemplateClass.new
         @page.sections1 << @root
         @root.images.introduction = "Images below:"
@@ -340,7 +341,6 @@ describe "Render" do
         AnImage.field :title
         AnImage.template '<img>#{title}</img>'
 
-        @page = ::Page.create
         @root = TemplateClass.new
         @page.sections1 << @root
         @root.images_with_template.introduction = "Images below:"
@@ -396,7 +396,7 @@ describe "Render" do
         PageClass.box :things
         PageClass.layout :page_style
         PageClass.style :inline_style
-        @parent = PageClass.new
+        @parent = @root.sections1 << PageClass.new
         @parent.title = "Parent"
         @page = PageClass.new
         @page.title = "Child"
@@ -547,53 +547,54 @@ describe "Render" do
       end
     end
 
-    describe "Publishing renderer" do
-      before do
-        Spontaneous::Output.write_compiled_scripts = true
-        @temp_template_root = @site.root / "templates"
-        FileUtils.mkdir_p(@temp_template_root)
-        FileUtils.mkdir_p(@temp_template_root / "layouts")
-        @site.paths.add(:templates, @temp_template_root)
-
-        @transaction = Spontaneous::Publishing::Transaction.new(@site, 99, nil)
-        @renderer = Spontaneous::Output::Template::PublishRenderer.new(@transaction, true)
-
-        @template_path = @temp_template_root / "layouts/standard.html.cut"
-        @compiled_path = @temp_template_root / "layouts/standard.html.rb"
-        File.open(@template_path, "w") do |t|
-          t.write("template")
-        end
-        File.open(@compiled_path, "w") do |t|
-          t.write("@__buf << 'compiled'")
-        end
-        later = Time.now + 10
-        File.utime(later, later, @compiled_path)
-        template_mtime = File.mtime(@template_path)
-        compiled_mtime = File.mtime(@compiled_path)
-        assert compiled_mtime > template_mtime, "Compiled file should register as newer"
-        @first = PreviewRender.new(:title => "first")
-        @first.save
-      end
-
-      # Disabled pending decision about the best way to optimize templates
-      # in the case of this example, where we are optimizing the first render
-      # of a site template (not a rendered page) I'm not sure that it's worth it
-      # at all...
-      it "ignore compiled template file if it is older than the template"
-      #   @first.render_using(@renderer).must_equal "compiled"
-      #   File.open(@temp_template_root / "layouts/standard.html.cut", "w") do |t|
-      #     t.write("updated template")
-      #   end
-      #   later = Time.now + 1000
-      #   File.utime(later, later, @template_path)
-      #   template_mtime = File.mtime(@template_path)
-      #   compiled_mtime = File.mtime(@compiled_path)
-      #   assert template_mtime > compiled_mtime, "Template file should register as newer"
-      #   # Need to use a new renderer because the existing one will have cached the compiled template
-      #   @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
-      #   @first.render.must_equal "updated template"
-      # end
-    end
+    # describe "Publishing renderer" do
+    #   before do
+    #     Spontaneous::Output.write_compiled_scripts = true
+    #     @temp_template_root = @site.root / "templates"
+    #     FileUtils.mkdir_p(@temp_template_root)
+    #     FileUtils.mkdir_p(@temp_template_root / "layouts")
+    #     @site.paths.add(:templates, @temp_template_root)
+    #
+    #     @transaction = Spontaneous::Publishing::Transaction.new(@site, 99, nil)
+    #     @renderer = Spontaneous::Output::Template::PublishRenderer.new(@transaction, true)
+    #
+    #     @template_path = @temp_template_root / "layouts/standard.html.cut"
+    #     @compiled_path = @temp_template_root / "layouts/standard.html.rb"
+    #     File.open(@template_path, "w") do |t|
+    #       t.write("template")
+    #     end
+    #     File.open(@compiled_path, "w") do |t|
+    #       t.write("@__buf << 'compiled'")
+    #     end
+    #     later = Time.now + 10
+    #     File.utime(later, later, @compiled_path)
+    #     template_mtime = File.mtime(@template_path)
+    #     compiled_mtime = File.mtime(@compiled_path)
+    #     assert compiled_mtime > template_mtime, "Compiled file should register as newer"
+    #     p @site.home
+    #     @first = @site.home PreviewRender.new(:title => "first")
+    #     @first.save
+    #   end
+    #
+    #   # Disabled pending decision about the best way to optimize templates
+    #   # in the case of this example, where we are optimizing the first render
+    #   # of a site template (not a rendered page) I'm not sure that it's worth it
+    #   # at all...
+    #   it "ignore compiled template file if it is older than the template"
+    #   #   @first.render_using(@renderer).must_equal "compiled"
+    #   #   File.open(@temp_template_root / "layouts/standard.html.cut", "w") do |t|
+    #   #     t.write("updated template")
+    #   #   end
+    #   #   later = Time.now + 1000
+    #   #   File.utime(later, later, @template_path)
+    #   #   template_mtime = File.mtime(@template_path)
+    #   #   compiled_mtime = File.mtime(@compiled_path)
+    #   #   assert template_mtime > compiled_mtime, "Template file should register as newer"
+    #   #   # Need to use a new renderer because the existing one will have cached the compiled template
+    #   #   @renderer = Spontaneous::Output::Template::PublishRenderer.new(@site)
+    #   #   @first.render.must_equal "updated template"
+    #   # end
+    # end
 
     describe "PublishedRenderer" do
       before do
