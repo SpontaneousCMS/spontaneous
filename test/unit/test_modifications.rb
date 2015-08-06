@@ -746,6 +746,17 @@ describe "Modifications" do
         path.path.must_equal old_path
         path.revision.must_equal revision
       end
+
+      it 'doesn’t insert a history item on first publish for updated slugs' do
+        first = Page.first uid: '1'
+        middle = Page.first uid: '1.1.1'
+        last = middle.things << Page.new
+        last.slug = 'something-sluggy'
+        last.save
+        ::Content.publish(@final_revision, [last.id])
+        history = last.reload.path_history
+        history.length.must_equal 0
+      end
     end
   end
 

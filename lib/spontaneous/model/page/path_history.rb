@@ -14,7 +14,13 @@ module Spontaneous::Model::Page
 
     # Create a new path history entry unless the given paths are identical.
     def save_path_history(old_path, current_path, revision)
-      update_path_history(old_path, revision) if old_path != current_path
+      update_path_history(old_path, revision) if should_save_path_history?(old_path, current_path)
+    end
+
+    # Only save a path history entry if the path has been changed and the page
+    # has been published at least once.
+    def should_save_path_history?(old_path, current_path)
+      (old_path != current_path) && !never_published?
     end
 
     # Creates a new path history entry for the given path & revision unless an
