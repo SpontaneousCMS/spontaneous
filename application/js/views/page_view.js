@@ -44,7 +44,7 @@ Spontaneous.Views.PageView = (function($, S) {
 				path_wrap.append(dev_desc);
 
         var mark_modified = this.touch_page.bind(this);
-        var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark modified').click(mark_modified));
+        var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark unpublished').click(mark_modified));
         this.panel.append(buttons);
 			}
 
