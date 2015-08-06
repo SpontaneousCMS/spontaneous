@@ -180,8 +180,8 @@
 				@include button(#222);
 				@include transition(opacity 0.2s);
 				color: #aaa !important;
-				background-image:none;
 				min-width: 131px;
+				position: relative;
 			}
 
 			button.request-running {

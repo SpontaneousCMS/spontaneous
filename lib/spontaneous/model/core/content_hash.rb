@@ -48,6 +48,8 @@ module Spontaneous::Model::Core
       content_hash_changed
     end
 
+    alias_method :has_unpublished_changes?, :content_hash_changed?
+
     def content_hash
       super || calculate_content_hash
     end

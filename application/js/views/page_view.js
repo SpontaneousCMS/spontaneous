@@ -52,7 +52,7 @@ Spontaneous.Views.PageView = (function($, S, document) {
 				// }.bind(self));
 
 				var mark_modified = self.touch_page.bind(self);
-				var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark modified').click(mark_modified));
+				var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark unpublished').click(mark_modified));
 				var dev_desc = dom.a('.developer.type-information', {href:self.page.developer_edit_url()}).text(self.page.developer_description());
 				buttons.prepend(dev_desc);
 				self.panel.append(buttons);
