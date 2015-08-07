@@ -169,8 +169,19 @@ module Spontaneous::Output::Template
       render_on_demand(output, params, parent_context)
     end
 
+    # There is no truly best way to order these attempts to find an existing
+    # template.
+    #
+    # If we're running behind a reverse proxy then it's most likely
+    # that it will be handling the static templates and this method will never
+    # be called in that case. But, if we're running without a reverse proxy
+    # (e.g. as it would be on Heroku) then this method has to handle every
+    # request and in that case it's more likely that nearly all the requests
+    # will be for static pages...
+    #
+    # I've written the below assuming that the most usual case is to be running
+    # behind a reverse proxy.
     def render!(output, params, parent_context)
-      # Attempt to render a published template
       if (template = @output_store.protected_template(output))
         return template
       end
