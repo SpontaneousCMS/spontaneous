@@ -61,6 +61,10 @@ module Spontaneous::Collections
       each { |box| box.destroy(origin) }
     end
 
+    def schema_ids
+      @schema_ids ||= map { |box| box.schema_id.to_s }
+    end
+
     protected
 
     def get_single(index)
