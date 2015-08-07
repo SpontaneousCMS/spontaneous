@@ -57,8 +57,8 @@ Spontaneous.Views.BoxView = (function($, S) {
 					panel.append(w);
 					this.fields_preview = fields_preview;
 				}
-
-				panel.append(this.add_allowed_types_bar('top', 0));
+				var firstPosition = function() { return 0; };
+				panel.append(this.add_allowed_types_bar('top', firstPosition));
 				var entries = dom.div('.slot-entries');
 				panel.append(entries);
 				this.dom_container.append(panel);
@@ -167,7 +167,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 				event.preventDefault();
 				var files = event.dataTransfer.files;
 				if (files.length > 0) {
-					S.UploadManager.wrap(this, files, insert_at);
+					S.UploadManager.wrap(this, files, insert_at());
 				}
 				return false;
 			}.bind(this)
@@ -203,12 +203,12 @@ Spontaneous.Views.BoxView = (function($, S) {
 				if (type.is_alias()) {
 					a.addClass('alias');
 					add_allowed = function(type) {
-						var d = new Spontaneous.AddAliasDialogue(_box, type, insert_at);
+						var d = new Spontaneous.AddAliasDialogue(_box, type, insert_at());
 						d.open();
 					}.bind(_box, type);
 				} else {
 					add_allowed = function(type) {
-						this.add_content(type, insert_at);
+						this.add_content(type, insert_at());
 					}.bind(_box, type);
 				}
 				a.click(add_allowed);
@@ -335,15 +335,21 @@ Spontaneous.Views.BoxView = (function($, S) {
 		entry_wrappers: function() {
 			return this._entry_container.find('> .'+this.entry_class());
 		},
-		show_add_after: function(entry, entry_spacer) {
-			var bar, position = 0;
+		currentEntryPosition: function(entry) {
 			for (var i = 0, entries = this.entries(), ii = entries.length; i < ii; i++) {
 				if (entries[i] === entry) {
-					position = i;
-					break;
+					return i;
 				}
 			}
-			bar = this.add_allowed_types_bar('floating', position + 1);
+			return false;
+		},
+		show_add_after: function(entry, entry_spacer) {
+			var bar, entryPosition = this.currentEntryPosition.bind(this);
+			var position = function() {
+				return entryPosition(entry) + 1;
+			};
+
+			bar = this.add_allowed_types_bar('floating', position);
 			if (bar && bar.data('allowed-count') > 0) {
 				entry_spacer.addClass('add-entry').append(bar.show());
 				if (!entry_spacer.data('auto-height')) {
