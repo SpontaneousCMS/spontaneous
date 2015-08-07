@@ -31,7 +31,6 @@ module Spontaneous::Model::Page
     private :__create_private_root=, :__create_private_root?
 
     def before_create
-      set_slug_from_dynamic_value
       fix_generated_slug_conflicts
       place_in_page_tree
       super
@@ -64,12 +63,6 @@ module Spontaneous::Model::Page
       end
       fix_generated_slug_conflicts if changed_columns.include?(:slug)
       super
-    end
-
-    def set_slug_from_dynamic_value
-      if (title = fields[title_field_name]) && title.prototype.dynamic_default?
-        set_slug_from_title!(title)
-      end
     end
 
     # Syncing the slug with the title is made more difficult because the field
