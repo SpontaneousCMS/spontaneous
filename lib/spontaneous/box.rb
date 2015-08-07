@@ -351,6 +351,7 @@ module Spontaneous
     end
 
     def contents
+      return [] if owner.new?
       mapper.with_cache(scope_cache_key) { read_only(contents!) }
     end
 
