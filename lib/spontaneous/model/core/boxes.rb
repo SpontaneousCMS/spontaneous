@@ -138,25 +138,35 @@ module Spontaneous::Model::Core
 
     def ungrouped_box_content
       if mapper.use_prepared_statements?
-        box_contents_prepared_statement.call(owner_id: id)
+        box_contents_prepared_statement.call(box_sid_params.update(owner_id: id))
       else
-        box_dataset(id).all
+        box_dataset(id, boxes.schema_ids).all
       end
     end
 
-    # This prepared statement isn't re-used by all content instances because I
-    # can't figure out the correct way to prepare/call a prepared statement
-    # with an array value.
+    def box_sid_params
+      Hash[boxes.each_with_index.map { |box, n|
+        [:"box_sid_#{n}", box.schema_id.to_s]
+      }]
+    end
+
+    # Hard to create a prepared statement that will handle an 'IN' clause so
+    # instead create a PS for every number of configured boxes and then pass
+    # the box schema ids as separate parameters to that PS. This is marginally
+    # (~10%) faster than creating a separate PS for every content type.
     def box_contents_prepared_statement
-      mapper.prepare(:select, :"load_box_contents_#{schema_id}") { box_dataset(:$owner_id) }
+      mapper.prepare(:select, :"load_box_contents_#{boxes.length}") {
+        box_sid_params = boxes.length.times.map { |n| :"$box_sid_#{n}" }
+        box_dataset(:$owner_id, box_sid_params)
+      }
     end
 
-    def box_dataset(id)
-      unordered_box_dataset(id).order(Sequel.asc(:box_sid), Sequel.asc(:box_position))
+    def box_dataset(id, sids)
+      unordered_box_dataset(id, sids).order(Sequel.asc(:box_sid), Sequel.asc(:box_position))
     end
 
-    def unordered_box_dataset(id)
-      model.where!(owner_id: id, box_sid: boxes.schema_ids)
+    def unordered_box_dataset(id, sids)
+      model.where!(owner_id: id, box_sid: sids)
     end
   end
 end
