@@ -180,9 +180,9 @@ describe "Change" do
     Content.publish(@revision)
 
     root.reload
-    page1 = Page.new(:title => "Page 1")
+    page1 = Page.new
     root.things << page1
-    new_child1  = Page.new(:title => "New Child 1")
+    new_child1  = Page.new
     page1.things << new_child1
     root.save
 
@@ -237,9 +237,9 @@ describe "Change" do
 
 
     root.reload
-    page1 = Page.new(:title => "Page 1")
+    page1 = Page.new
     root.things << page1
-    new_child1  = Page.new(:title => "New Child 1")
+    new_child1  = Page.new
     page1.things << new_child1
     root.save
     new_child1.save
@@ -263,13 +263,13 @@ describe "Change" do
   end
 
   it "provide information on side effects of publishing page with visibility changes" do
-    root = Page.create(:title => "root")
+    root = Page.create(title: "root")
 
 
     root.reload
-    page1 = Page.new(:title => "Page 1")
+    page1 = Page.new
     root.things << page1
-    new_child1  = Page.new(:title => "New Child 1")
+    new_child1  = Page.new
     page1.things << new_child1
     root.save
 

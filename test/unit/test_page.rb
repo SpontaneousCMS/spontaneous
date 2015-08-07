@@ -173,8 +173,8 @@ describe "Page" do
       r = @root.subs << Page.new
       slug = Page.generate_default_slug
       Page.stubs(:generate_default_slug).returns(slug)
-      o = Page.new(title: "New Page")
-      p = Page.new(title: "New Page")
+      o = Page.new
+      p = Page.new
       r.sub << o
       o.slug.must_equal slug
       o = Page[o.id]
@@ -228,7 +228,7 @@ describe "Page" do
       r.sub << o
       o.save
 
-      p = Page.new(title: "New Page")
+      p = Page.new
       r.sub << p
       p.save
       p.title = "My Slug"
