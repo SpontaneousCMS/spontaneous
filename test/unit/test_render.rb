@@ -612,16 +612,22 @@ describe "Render" do
         class ::StaticPage < Page
           layout(:html) { "${ path }.${ __format }"}
         end
+        class ::ProtectedPage < Page
+          add_output :html, private: true
+          layout(:html) { "${ path }.${ __format }"}
+        end
 
         @root = Page.create
         assert @root.is_root?
 
         @dynamic = DynamicPage.new(slug: "dynamic", uid: "dynamic")
         @static = StaticPage.new(slug: "static", uid: "static")
+        @protected = ProtectedPage.new(slug: "protected", uid: "protected")
         @root.other << @dynamic
         @root.other << @static
+        @root.other << @protected
 
-        [@root, @dynamic, @static].each(&:save)
+        [@root, @dynamic, @static, @protected].each(&:save)
 
         @site.publish do
           run :render_revision
@@ -633,15 +639,24 @@ describe "Render" do
       after do
         Object.send :remove_const, :StaticPage
         Object.send :remove_const, :DynamicPage
+        Object.send :remove_const, :ProtectedPage
         ::Content.delete
       end
 
-      it "should render dynamic pages from the template store xxx" do
+      it "should render dynamic pages from the template store" do
         result = @renderer.render!(@dynamic.output(:html), { something: "something here" }, nil)
         result.must_equal "/dynamic.html:something here"
       end
 
-      it "should render static pages from the template store xxx" do
+      it "should render protected outputs from the store" do
+        # change the layout to make sure that the output is being pulled from the
+        # store, not re-rendered on the fly.
+        ProtectedPage.layout(:html) { "wrong!" }
+        result = @renderer.render!(@protected.output(:html), {}, nil)
+        result.read.must_equal "/protected.html"
+      end
+
+      it "should render static pages from the template store" do
         result = @renderer.render!(@static.output(:html), { something: "something here" }, nil)
         result.read.must_equal "/static.html"
       end

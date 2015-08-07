@@ -170,12 +170,15 @@ module Spontaneous::Output::Template
     end
 
     def render!(output, params, parent_context)
-      if (template = @output_store.static_template(output))
+      # Attempt to render a published template
+      if (template = @output_store.protected_template(output))
         return template
       end
-      # Attempt to render a published template
       if (template = @output_store.dynamic_template(output))
         return engine.render_template(template, context(output, params, parent_context), output.name)
+      end
+      if (template = @output_store.static_template(output))
+        return template
       end
       logger.warn("missing template for #{output}")
       render_on_demand(output, params, parent_context)
