@@ -555,11 +555,10 @@ describe "Fields" do
       @user = Spontaneous::Permissions::User.create(:email => "user@example.com", :login => "user", :name => "user", :password => "rootpass")
       @user.reload
 
-      class ::Piece
-        field :title
-      end
-      # @content_class.stubs(:name).returns("ContentClass")
-      @instance = ::Piece.create
+      ::Page.box :things
+      ::Piece.field :title
+      @page = Page.create
+      @instance = @page.things << Piece.new()
     end
 
     after do
@@ -571,6 +570,13 @@ describe "Fields" do
 
     it "start out as empty" do
       assert @instance.title.versions.empty?, "Field version list should be empty"
+    end
+
+    it "isn't created with a null content_id" do
+      piece = Piece.new(title: 'one')
+      @page.things << piece
+      versions = S::Field::FieldVersion.all
+      refute versions.any? { |v| v.content_id.nil? }
     end
 
     it "be created every time a field is modified" do

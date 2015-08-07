@@ -84,7 +84,7 @@ module Spontaneous::Model::Core
     end
 
     def before_save
-      save_field_versions
+      save_field_versions unless new?
       super
     end
 
