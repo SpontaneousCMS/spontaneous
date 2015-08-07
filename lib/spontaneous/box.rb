@@ -365,6 +365,12 @@ module Spontaneous
       Spontaneous::Collections::BoxContents.new(self)
     end
 
+    # Called by BoxContents instances to actually load the box contents. This
+    # allows for a single request to load the contents of all an item's boxes.
+    def load_contents
+      owner.box_contents(self)
+    end
+
     def scope_cache_key
       @scope_cache_key ||= ['box', owner.id, schema_id.to_s].join(':').freeze
     end

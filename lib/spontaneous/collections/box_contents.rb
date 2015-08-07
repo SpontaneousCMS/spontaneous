@@ -54,7 +54,7 @@ module Spontaneous
 
       def load_contents!
         @count = 0
-        box.dataset.map { |content|
+        box.load_contents.map { |content|
           content.to_entry(box, (@count += 1) - 1)
         }
       end

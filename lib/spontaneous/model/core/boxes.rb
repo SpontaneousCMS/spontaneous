@@ -118,5 +118,30 @@ module Spontaneous::Model::Core
     def box_style_id(box_name)
       nil
     end
+
+    def box_contents(box)
+      return [] if id.nil?
+      all_box_contents.fetch(box.schema_id, [])
+    end
+
+    def all_box_contents
+      mapper.with_cache(box_contents_scope_cache_key) { all_box_contents! }
+    end
+
+    def all_box_contents!
+      box_dataset.all.group_by { |content| content.box_sid }
+    end
+
+    def box_contents_scope_cache_key
+      @box_contents_scope_cache_key ||= ['boxes', id].join(':').freeze
+    end
+
+    def box_dataset
+      unordered_box_dataset.order(Sequel.asc(:box_sid), Sequel.asc(:box_position))
+    end
+
+    def unordered_box_dataset
+      model.where!(owner_id: id, box_sid: boxes.map(&:schema_id))
+    end
   end
 end
