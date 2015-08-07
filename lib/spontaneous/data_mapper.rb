@@ -172,6 +172,10 @@ module Spontaneous
         @schema.uids[id_string]
       end
 
+      def use_prepared_statements?
+        db.database_type != :sqlite
+      end
+
       private
 
       def configured_scope_or_dataset(dataset = nil)

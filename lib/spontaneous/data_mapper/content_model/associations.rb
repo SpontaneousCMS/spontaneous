@@ -63,7 +63,7 @@ module Spontaneous
         # transaction locks the content table and prevents the field update &
         # publishing processes from updating it
         def associations_use_prepared_statements?
-          mapper.db.database_type != :sqlite
+          mapper.use_prepared_statements?
         end
 
         def has_many_content(name, opts = {})
