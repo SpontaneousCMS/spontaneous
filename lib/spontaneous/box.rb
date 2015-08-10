@@ -333,6 +333,21 @@ module Spontaneous
       raise Spontaneous::ReadOnlyScopeModificationError.new(self)
     end
 
+    def insert_after(entry, content)
+      entry_id = case entry
+                 when Fixnum
+                   entry
+                 when String
+                   Integer(entry)
+                 when model.content_model, entry.respond_to?(:id)
+                   entry.id
+                 else
+                   entry.to_i
+                 end
+      index = contents.index { |e| e.id == entry_id }
+      insert(index + 1, content)
+    end
+
     def set_position(content, new_position)
       @modified = true
       contents.set_position(content, new_position)

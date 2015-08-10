@@ -603,6 +603,26 @@ describe "Back" do
         Spot::JSON.parse(last_response.body).must_equal required_response
       end
 
+
+      it "allows adding of new entries after an existing entry" do
+        current_count = home.in_progress.contents.length
+        box = home.in_progress
+        existing = box[box.length - 1]
+        auth_post "/@spontaneous/content/#{home.id}/#{home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", after_id: existing.id
+        assert last_response.ok?, "Recieved #{last_response.status} not 200"
+        last_response.content_type.must_equal "application/json;charset=utf-8"
+        home.reload
+        box = home.in_progress
+        box.length.must_equal current_count+1
+        box[box.length - 1].class.name.must_equal "Image"
+        added = box[box.length - 1]
+        required_response = {
+          :position => box.length - 1,
+          :entry => added.export
+        }
+        Spot::JSON.parse(last_response.body).must_equal required_response
+      end
+
       it "creates entries with the owner set to the logged in user" do
         auth_post "/@spontaneous/content/#{home.id}/#{home.in_progress.schema_id.to_s}/#{Image.schema_id.to_s}", :position => 0
         assert last_response.ok?, "Recieved #{last_response.status} not 200"

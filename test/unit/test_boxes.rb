@@ -370,6 +370,25 @@ describe "Boxes" do
       instance.box3.contents.map { |e| e.label }.must_equal ["0", "1", "c", "2", "3"]
     end
 
+    it 'should be insertable after any given item' do
+      BlankContent.box :box3
+      instance = BlankContent.new
+      count = 4
+      box = instance.box3
+      entries = count.times.map { |n| box << StyledContent.new(:label => n)}
+      entry = entries[2]
+      add = BlankContent.new(uid: 'add-1')
+      box.insert_after(entry, add)
+      added = box[3]
+      added.uid.must_equal 'add-1'
+
+      add = BlankContent.new(uid: 'add-2')
+      entry = box[-1]
+      box.insert_after(entry.id, add)
+      added = box[-1]
+      added.uid.must_equal 'add-2'
+    end
+
     it 'should be available as a list of ids' do
       BlankContent.box :box3
       instance = BlankContent.new
