@@ -4,6 +4,8 @@ module Spontaneous::Model::Page
   module Paths
     extend Spontaneous::Concern
 
+    PRIVATE_TREE_PREFIX = '#'.freeze
+
     module ClassMethods
       def generate_default_slug(root = 'page')
         "#{root}-#{Time.now.strftime('%Y%m%d-%H%M%S')}"
@@ -132,7 +134,7 @@ module Spontaneous::Model::Page
 
     def make_private_root
       raise Spontaneous::AnonymousRootException.new if slug.blank?
-      self[:path] = "##{slug}"
+      self[:path] = "#{PRIVATE_TREE_PREFIX}#{slug}"
       self[:ancestor_path] = ""
     end
 
@@ -161,7 +163,7 @@ module Spontaneous::Model::Page
     def is_private_root?
       return false unless parent_id.nil?
       return false if root?
-      path[0] == '#'
+      path[0] == PRIVATE_TREE_PREFIX
     end
 
     def in_private_tree?
@@ -210,7 +212,7 @@ module Spontaneous::Model::Page
 
     def calculate_path_with_slug(slug)
       if parent.nil?
-        root? ? Spontaneous::SLASH : "##{slug}"
+        root? ? Spontaneous::SLASH : "#{PRIVATE_TREE_PREFIX}#{slug}"
       else
         File.join(container.path!, slug)
       end
