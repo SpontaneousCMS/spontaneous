@@ -157,7 +157,10 @@ module Spontaneous::Model::Page
     # of pages in an private tree will not be the same as the site's
     # root/home page
     def tree_root
-      content_model::Page.get(visibility_path_ids.first)
+      if (root_id = visibility_path_ids.first)
+        return content_model::Page.get(root_id)
+      end
+      nil
     end
 
     def is_private_root?
