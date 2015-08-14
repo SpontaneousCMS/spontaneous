@@ -170,9 +170,7 @@ module Spontaneous::Model::Page
     end
 
     def in_private_tree?
-      tree_root = self.tree_root
-      return is_private_root? if tree_root.nil?
-      tree_root.is_private_root?
+      path[0] == PRIVATE_TREE_PREFIX
     end
 
     # Loads the current calculated path of this page from the database.
