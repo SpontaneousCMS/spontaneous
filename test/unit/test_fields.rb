@@ -177,14 +177,6 @@ describe "Fields" do
         instance1.reload
         instance1.dynamic.value.must_equal "1"
       end
-
-      it "uses a dynamic default value to set the page slug" do
-        n = 0
-        page_class = Class.new(::Page)
-        page_class.field :title, default: proc { (n += 1) }
-        page = page_class.create
-        page.slug.must_equal "1"
-      end
     end
 
     describe "Field titles" do
