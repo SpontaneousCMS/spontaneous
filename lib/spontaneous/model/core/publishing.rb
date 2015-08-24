@@ -205,8 +205,6 @@ module Spontaneous::Model::Core
           unless published_values.empty?
             content_model.where(id: id).update(published_values)
           end
-
-          after_publish(revision)
         end
       end
     end

@@ -624,13 +624,21 @@ describe "Modifications" do
     it 'relocates dependent content after an ownership change' do
       new_owner = Page.first uid: "root"
       piece = Piece.first uid: "1.1"
+      deep = Content.first uid: '1.1.1'
+      child = deep.things << Piece.new(uid: '1.1.1.0')
       new_owner.things.adopt(piece)
+      ::Content.publish(@final_revision, [deep.id])
       expected_visibility_paths = piece.reload.contents.map(&:visibility_path)
+      ids = piece.contents.map(&:id)
       piece.save
-      ::Content.publish(@final_revision, [piece.id])
-      ::Content.with_revision(@final_revision) do
+
+      child_visibility_path = child.reload.visibility_path
+      ::Content.publish(@final_revision+1, [piece.id])
+      ::Content.with_revision(@final_revision+1) do
         published_piece = ::Content.first(id: piece.id)
         published_piece.contents.map(&:visibility_path).must_equal expected_visibility_paths
+        published_child = ::Content.first(id: child.id)
+        published_child.visibility_path.must_equal child_visibility_path
       end
     end
 
@@ -678,6 +686,15 @@ describe "Modifications" do
       page.pending_modifications.length.must_equal 0
     end
 
+    it "clear modifications after publish all" do
+      page = Page.first uid: "1"
+      page.slug = "changed"
+      page.hide!
+      ::Content.publish(@final_revision, nil)
+      page = Page.first id: page.id
+      page.pending_modifications.length.must_equal 0
+    end
+
     describe 'path history' do
       after do
         Spontaneous::PagePathHistory.delete
@@ -698,6 +715,19 @@ describe "Modifications" do
         page.slug = "changed"
         page.save
         ::Content.publish(@final_revision, [page.id])
+        history = page.reload.path_history
+        history.length.must_equal 1
+        path = history.first
+        path.path.must_equal old_path
+        path.revision.must_equal @final_revision
+      end
+
+      it 'inserts a path history entry when publishing all changes' do
+        page = Page.first uid: "1"
+        old_path = page.path
+        page.slug = "changed"
+        page.save
+        ::Content.publish(@final_revision, nil)
         history = page.reload.path_history
         history.length.must_equal 1
         path = history.first

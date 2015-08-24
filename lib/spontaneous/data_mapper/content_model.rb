@@ -81,6 +81,10 @@ module Spontaneous
         mapper.schema
       end
 
+      def site
+        mapper.schema.site
+      end
+
       def get(id)
         mapper.get(id)
       end

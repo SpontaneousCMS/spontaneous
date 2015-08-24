@@ -30,9 +30,12 @@ module Spontaneous::Publishing
     class InvalidRevision < Spontaneous::Error; end
 
     class Generator
+      attr_reader :modified_pages
+
       # Both revision & source_revision should be instances of Revision
       def initialize(revision)
         @revision = revision
+        @modified_pages = ::Spontaneous::Change.unpublished_pages(@revision.model.site)
       end
 
       def run
@@ -46,6 +49,7 @@ module Spontaneous::Publishing
           create_revision
           copy_indexes
           sync_revision
+          after_publish
           set_revision_timestamps
           set_revision_version
           set_revision_content_hash
@@ -84,6 +88,12 @@ module Spontaneous::Publishing
 
       def sync_revision
         # To be overwritten in Patch subclass
+      end
+
+      def after_publish
+        modified_pages.each do |m|
+          m.after_publish(revision)
+        end
       end
 
       def set_source_content_hash
@@ -156,7 +166,7 @@ module Spontaneous::Publishing
         # pages should be published in depth order because it's
         # possible to be publishing a child of
         # a page that's never been published
-        @modified = modified.sort { |m1, m2| m1.depth <=> m2.depth }
+        @modified_pages = modified.sort { |m1, m2| m1.depth <=> m2.depth }
       end
 
       def source_dataset
@@ -164,13 +174,13 @@ module Spontaneous::Publishing
       end
 
       def sync_revision
-        @modified.each do |m|
+        modified_pages.each do |m|
           m.sync_to_revision(revision, true)
         end
       end
 
       def filter_dataset(ds)
-        ds.filter(:id => @modified.map(&:id))
+        ds.filter(:id => modified_pages.map(&:id))
       end
     end
 

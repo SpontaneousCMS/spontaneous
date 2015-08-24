@@ -114,7 +114,9 @@ module Spontaneous::Model::Core
         owner.with_revision(revision) do
           new_owner = owner.content_model.get(new_owner_id)
           published = owner.content_model.get(owner.id)
-          new_owner.boxes.sid(@new_box_sid).adopt(published)
+          published.contents.each do |content|
+            content.set_visibility_path_from!(published)
+          end
           published.save
         end
       end
