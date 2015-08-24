@@ -83,26 +83,28 @@ describe "Alias" do
       alias_of proc { Content.root.children }
     end
 
-    root = ::Page.create
-    aliases = ::Page.create(:slug => "aliases").reload
-    root.box1 << aliases
-    box = aliases.box1
-    a = box.push A.new(:a_field1 => "@a.a_field1")
-    aa = box.push AA.new
-    aaa1 = box.push AAA.new(:aaa_field1 => "aaa1")
-    aaa2 = box.push AAA.new
-    b = root.box1.push B.new(:slug => "b")
-    bb = root.box1.push BB.new(:slug => "bb", :bb_field1 => "BB")
-    root.save.reload
+    Content.scope(nil, false) do
+      root = ::Page.create
+      aliases = ::Page.create(:slug => "aliases").reload
+      root.box1 << aliases
+      box = aliases.box1
+      a = box.push A.new(:a_field1 => "@a.a_field1")
+      aa = box.push AA.new
+      aaa1 = box.push AAA.new(:aaa_field1 => "aaa1")
+      aaa2 = box.push AAA.new
+      b = root.box1.push B.new(:slug => "b")
+      bb = root.box1.push BB.new(:slug => "bb", :bb_field1 => "BB")
+      root.save.reload
 
-    let(:root) { root }
-    let(:aliases) { aliases }
-    let(:a) { a }
-    let(:aa) { aa }
-    let(:aaa1) { aaa1 }
-    let(:aaa2) { aaa2 }
-    let(:b) { b }
-    let(:bb) { bb }
+      let(:root) { root }
+      let(:aliases) { aliases }
+      let(:a) { a }
+      let(:aa) { aa }
+      let(:aaa1) { aaa1 }
+      let(:aaa2) { aaa2 }
+      let(:b) { b }
+      let(:bb) { bb }
+    end
   end
 
   finish do
@@ -167,14 +169,16 @@ describe "Alias" do
 
       describe "with container options" do
         before do
-          @page = root.box1 << ::Page.new(uid: "thepage")
-          4.times { |n|
-            @page.box1 << A.new
-            @page.box1 << AA.new
-            @page.box2 << A.new
-            @page.box2 << AA.new
-          }
-          @page = @page.save.reload
+          Content.scope(nil, false) do
+            @page = root.box1 << ::Page.new(uid: "thepage")
+            4.times { |n|
+              @page.box1 << A.new
+              @page.box1 << AA.new
+              @page.box2 << A.new
+              @page.box2 << AA.new
+            }
+            @page = @page.save.reload
+          end
         end
 
         after do

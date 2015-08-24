@@ -251,7 +251,7 @@ module Spontaneous::Model::Core
 
     def clear_pending_modifications!
       self.serialized_modifications = nil
-      self.class.filter(:id => self.id).update(:serialized_modifications => "[]")
+      self.class.filter(id: self.id).update(serialized_modifications: "[]")
       @local_modifications = nil
       pieces.each do |piece|
         piece.clear_pending_modifications!

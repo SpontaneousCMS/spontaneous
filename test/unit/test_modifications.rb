@@ -13,30 +13,32 @@ describe "Modifications" do
     Content.delete
 
     class ::Page
-      field :title, :string, :default => "New Page"
+      field :title, :string, default: "New Page"
       box :things
     end
     class ::Piece
       box :things
     end
 
-    @root = Page.create(:uid => "root")
-    count = 0
-    2.times do |i|
-      c = Page.new(:uid => i, :slug => "p-#{i}")
-      @root.things << c
-      count += 1
-      2.times do |j|
-        d = Piece.new(:uid => "#{i}.#{j}", :slug => "p-#{i}-#{j}")
-        c.things << d
+    Content.scope(nil, false) do
+      @root = Page.create(uid: "root")
+      count = 0
+      2.times do |i|
+        c = Page.new(uid: i, slug: "p-#{i}")
+        @root.things << c
         count += 1
-        2.times do |k|
-          d.things << Page.new(:uid => "#{i}.#{j}.#{k}", :slug => "p-#{i}-#{j}-#{k}")
-          d.save
+        2.times do |j|
+          d = Piece.new(uid: "#{i}.#{j}", slug: "p-#{i}-#{j}")
+          c.things << d
           count += 1
+          2.times do |k|
+            d.things << Page.new(uid: "#{i}.#{j}.#{k}", slug: "p-#{i}-#{j}-#{k}")
+            d.save
+            count += 1
+          end
         end
+        c.save
       end
-      c.save
     end
     @root.save
   end
@@ -82,7 +84,7 @@ describe "Modifications" do
     end
 
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "0"
+      page = Page.first uid: "0"
       (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
       page.with_fields.title.value = "updated"
       page.save.reload
@@ -92,7 +94,7 @@ describe "Modifications" do
 
   it "update page timestamps on modification of a piece" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "0"
+      page = Page.first uid: "0"
       (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
       content = page.contents.first
       content.page.must_equal page
@@ -108,7 +110,7 @@ describe "Modifications" do
       field :title
     end
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "0"
+      page = Page.first uid: "0"
       (page.modified_at.to_i - @now.to_i).abs.must_be :<=, 1
       content = page.contents.first
 
@@ -121,7 +123,7 @@ describe "Modifications" do
 
   it "update page timestamp on addition of piece" do
     Timecop.freeze(@now + 3600) do
-      page = Page.first :uid => "0"
+      page = Page.first uid: "0"
       content = Content[page.contents.first.id]
       content.things << Piece.new
       content.save
@@ -132,11 +134,11 @@ describe "Modifications" do
   end
 
   it "update the parent page's modification time if child pages are re-ordered" do
-    page = Page.first :uid => "0.0.0"
-    page.things << Page.new(:uid => "0.0.0.0")
-    page.things << Page.new(:uid => "0.0.0.1")
+    page = Page.first uid: "0.0.0"
+    page.things << Page.new(uid: "0.0.0.0")
+    page.things << Page.new(uid: "0.0.0.1")
     page.save
-    page = Page.first :uid => "0.0.0"
+    page = Page.first uid: "0.0.0"
     Timecop.freeze(@now + 1000) do
       child = page.things.first
       child.update_position(1)
@@ -146,7 +148,7 @@ describe "Modifications" do
 
   it "update a page's timestamp on modification of its slug" do
     Timecop.freeze(@now + 1000) do
-      page = Page.first :uid => "0"
+      page = Page.first uid: "0"
       page.slug = "changed"
       page.save.reload
       page.modified_at.to_i.must_equal @now.to_i + 1000
@@ -155,7 +157,7 @@ describe "Modifications" do
 
   it "update the pages timestamp if a boxes order is changed" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "0"
+      page = Page.first uid: "0"
       content = Content[page.contents.first.id]
       content.update_position(1)
       page.reload.modified_at.to_i.must_equal @now.to_i + 3600
@@ -164,7 +166,7 @@ describe "Modifications" do
 
   it "update the parent page's modification time if the contents of a piece's box are re-ordered" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "0"
+      page = Page.first uid: "0"
       content = page.things.first.things.first
       content.update_position(1)
       page.reload.modified_at.to_i.must_equal @now.to_i + 3600
@@ -173,7 +175,7 @@ describe "Modifications" do
 
   it "update the parent page's modification date if a piece is deleted" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "0"
+      page = Page.first uid: "0"
       content = Content[page.contents.first.id]
       content.destroy
       page.reload.modified_at.to_i.must_equal @now.to_i + 3600
@@ -182,7 +184,7 @@ describe "Modifications" do
 
   it "update the parent page's modification date if a page is deleted" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "0"
+      page = Page.first uid: "0"
       content = Content[page.things.first.things.first.id]
       content.destroy
       page.reload.modified_at.to_i.must_equal @now.to_i + 3600
@@ -191,7 +193,7 @@ describe "Modifications" do
 
   it "add entry to the list of side effects for a visibility change" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       old_slug = page.slug
       page.slug = "changed"
       page.save
@@ -273,12 +275,12 @@ describe "Modifications" do
 
   it "serialize page modifications" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.slug = "changed"
       page.save
       page.pending_modifications.length.must_equal 1
       mod = page.pending_modifications(:slug).first
-      page = Page.first :id => page.id
+      page = Page.first id: page.id
       page.pending_modifications.length.must_equal 1
       page.pending_modifications(:slug).first.must_equal mod
       page.pending_modifications(:slug).first.created_at.to_i.must_equal @now.to_i + 3600
@@ -287,7 +289,7 @@ describe "Modifications" do
 
   it "concatenate multiple slug modifications together" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       old_slug = page.slug
       page.slug = "changed"
       page.save
@@ -302,7 +304,7 @@ describe "Modifications" do
 
   it "know the number of pages affected by slug modification" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.slug = "changed"
       page.save
       mod = page.pending_modifications(:slug).first
@@ -312,7 +314,7 @@ describe "Modifications" do
 
   it "show the number of pages whose visibility is affected in the case of a visibility change" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.hide!
       page.reload
       mods = page.pending_modifications(:visibility)
@@ -325,7 +327,7 @@ describe "Modifications" do
 
   it "record visibility changes that originate from a content piece" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.things.first.hide!
       page.reload
       mods = page.pending_modifications(:visibility)
@@ -338,10 +340,10 @@ describe "Modifications" do
 
   it "show number of pages that are to be deleted in the case of a deletion" do
     Timecop.freeze(@now+3600) do
-      page = Page.first(:uid => "1")
+      page = Page.first(uid: "1")
       owner = page.owner
       page.destroy
-      page = Page.first(:uid => "root")
+      page = Page.first(uid: "root")
       mods = page.pending_modifications(:deletion)
       mod = mods.first
       # count is number of children of deleted page + 1 (for deleted page)
@@ -352,11 +354,11 @@ describe "Modifications" do
 
   it "show number of pages deleted if piece with pages is deleted" do
     Timecop.freeze(@now+3600) do
-      page = Page.first(:uid => "1")
+      page = Page.first(uid: "1")
       piece = page.things.first
       owner = piece.owner
       piece.destroy
-      page = Page.first(:uid => "1")
+      page = Page.first(uid: "1")
       mods = page.pending_modifications(:deletion)
       mod = mods.first
       mod.count.must_equal 2
@@ -366,11 +368,11 @@ describe "Modifications" do
 
   it "show number of pages deleted if page belonging to piece is deleted" do
     Timecop.freeze(@now+3600) do
-      page = Page.first(:uid => "1")
+      page = Page.first(uid: "1")
       child = page.things.first.things.first
       owner = child.owner
       child.destroy
-      page = Page.first(:uid => "1")
+      page = Page.first(uid: "1")
       mods = page.pending_modifications(:deletion)
       mod = mods.first
       mod.count.must_equal 1
@@ -380,7 +382,7 @@ describe "Modifications" do
 
   it "have an empty modification if the slug has been reverted to original value" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       old_slug = page.slug
       page.slug = "changed"
       page.save
@@ -396,7 +398,7 @@ describe "Modifications" do
 
   it "have an empty modification if the visibility has been reverted to original value" do
     Timecop.freeze(@now+3600) do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.things.first.hide!
       page.reload
       page.things.first.show!
@@ -422,15 +424,15 @@ describe "Modifications" do
     end
 
     it "act on path change modifications" do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.slug = "changed"
       page.save
       ::Content.publish(@final_revision, [page.id])
       ::Content.with_revision(@final_revision) do
         %w(1 1.1.1).each do |uid|
-          published_page = Page.first :uid => uid
+          published_page = Page.first uid: uid
           ::Content.with_editable do
-            editable_page = Page.first :uid => uid
+            editable_page = Page.first uid: uid
             published_page.path.must_equal editable_page.path
           end
         end
@@ -442,17 +444,17 @@ describe "Modifications" do
       #/bands -> /bands-changed
       # publish(bands)
       # with_published { beatles.path.must_equal /bands-changed/beatles }
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.slug = "changed"
       page.save
 
-      child_page = Page.first :uid => "1.0.0"
+      child_page = Page.first uid: "1.0.0"
       old_slug = child_page.slug
       child_page.slug = "changed-too"
       child_page.save
       ::Content.publish(@final_revision, [page.id])
       ::Content.with_revision(@final_revision) do
-        published = Page.first :uid => "1.0.0"
+        published = Page.first uid: "1.0.0"
         published.path.must_equal "/changed/#{old_slug}"
       end
     end
@@ -462,32 +464,32 @@ describe "Modifications" do
       # /bands -> /bands-changed
       # publish(beatles)
       # with_published { beatles.path.must_equal /bands/beatles }
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       old_slug = page.slug
       page.slug = "changed"
       page.save
 
-      child_page = Page.first :uid => "1.0.0"
+      child_page = Page.first uid: "1.0.0"
       child_page.slug = "changed-too"
       child_page.save
 
       ::Content.publish(@final_revision, [child_page.id])
       ::Content.with_revision(@final_revision) do
-        published = Page.first :uid => "1.0.0"
+        published = Page.first uid: "1.0.0"
         published.path.must_equal "/#{old_slug}/changed-too"
       end
     end
 
 
     it "act on visibility modifications" do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.hide!
       ::Content.publish(@final_revision, [page.id])
       ::Content.with_revision(@final_revision) do
         %w(1 1.1.1).each do |uid|
-          published_page = Page.first :uid => uid
+          published_page = Page.first uid: uid
           ::Content.with_editable do
-            editable_page = Page.first :uid => uid
+            editable_page = Page.first uid: uid
             published_page.hidden?.must_equal editable_page.hidden?
           end
         end
@@ -495,35 +497,35 @@ describe "Modifications" do
     end
 
     it "publish the correct visibility for new child pages with un-published up-tree visibility changes" do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.hide!
 
-      child_page = Page.new :uid => "child"
+      child_page = Page.new uid: "child"
       page.things << child_page
       page.save
 
       ::Content.publish(@final_revision, [child_page.id])
 
       ::Content.with_revision(@final_revision) do
-        published = Page.first :uid => "1.0.0"
+        published = Page.first uid: "1.0.0"
         assert published.visible?
-        published = Page.first :uid => "child"
+        published = Page.first uid: "child"
         assert published.visible?
       end
     end
 
     it "publish the correct visibility for new child pages with published up-tree visibility changes" do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.hide!
 
-      child_page = Page.new :uid => "child"
+      child_page = Page.new uid: "child"
       page.things << child_page
       page.save
 
       ::Content.publish(@final_revision, [page.id, child_page.id])
 
       ::Content.with_revision(@final_revision) do
-        published = Page.first :uid => "child"
+        published = Page.first uid: "child"
         refute published.visible?
       end
     end
@@ -531,25 +533,25 @@ describe "Modifications" do
     it "publish the correct visibility for child pages with un-published parent visibility changes" do
       # if we publish changes to a child page whose parent page is hidden but that visibility change
       # hasn't been published then the child page it be visible until the parent is published
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.hide!
 
-      child_page = Page.first :uid => "1.0.0"
+      child_page = Page.first uid: "1.0.0"
       child_page.slug = "changed-too"
       child_page.save
 
       ::Content.publish(@final_revision, [child_page.id])
 
       ::Content.with_revision(@final_revision) do
-        published = Page.first :uid => "1.0.0"
+        published = Page.first uid: "1.0.0"
         assert published.visible?
       end
     end
 
     it "publish the correct visibility for immediate child pages with published parent visibility changes" do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
 
-      child_page = Page.new :uid => "newpage"
+      child_page = Page.new uid: "newpage"
       page.things << child_page
       page.save
 
@@ -564,14 +566,14 @@ describe "Modifications" do
       ::Content.publish(@final_revision + 1, [page.id])
 
       ::Content.with_revision(@final_revision + 1) do
-        published = Page.first :uid => "newpage"
+        published = Page.first uid: "newpage"
         refute published.visible?
       end
     end
 
     it "publish the correct visibility for child pages with published parent visibility changes" do
-      page = Page.first :uid => "1"
-      child_page = Page.first :uid => "1.0.0"
+      page = Page.first uid: "1"
+      child_page = Page.first uid: "1.0.0"
       refute child_page.hidden?
 
       page.hide!
@@ -581,42 +583,42 @@ describe "Modifications" do
       ::Content.publish(@final_revision, [page.id])
 
       ::Content.with_revision(@final_revision) do
-        published = Page.first :uid => "1.0.0"
+        published = Page.first uid: "1.0.0"
         refute published.visible?
       end
     end
 
     it "maintain correct published visibility for pieces" do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       piece = page.things.first
       piece.hide!
       ::Content.publish(@final_revision, [page.id])
       ::Content.with_revision(@final_revision) do
-        piece = Page.first(:uid => "1").things.first
+        piece = Page.first(uid: "1").things.first
         refute piece.visible?
       end
 
       ::Content.publish(@final_revision+1, [page.id])
 
       ::Content.with_revision(@final_revision+1) do
-        piece = Page.first(:uid => "1").things.first
+        piece = Page.first(uid: "1").things.first
         refute piece.visible?
       end
     end
 
     it "maintain correct published visibility for pages" do
-      page = Page.first :uid => "1.1.1"
+      page = Page.first uid: "1.1.1"
       page.hide!
       ::Content.publish(@final_revision, [page.id])
       ::Content.with_revision(@final_revision) do
-        page = Page.first(:uid => "1.1.1")
+        page = Page.first(uid: "1.1.1")
         refute page.visible?
       end
 
       ::Content.publish(@final_revision+1, [page.id])
 
       ::Content.with_revision(@final_revision+1) do
-        page = Page.first(:uid => "1.1.1")
+        page = Page.first(uid: "1.1.1")
         refute page.visible?
       end
     end
@@ -643,7 +645,7 @@ describe "Modifications" do
     end
 
     it "act on multiple modifications" do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.slug = "changed"
       page.slug = "changed-again"
       page.hide!
@@ -651,9 +653,9 @@ describe "Modifications" do
       ::Content.publish(@final_revision, [page.id])
       ::Content.with_revision(@final_revision) do
         %w(1 1.1.1).each do |uid|
-          published_page = Page.first :uid => uid
+          published_page = Page.first uid: uid
           ::Content.with_editable do
-            editable_page = Page.first :uid => uid
+            editable_page = Page.first uid: uid
             published_page.hidden?.must_equal editable_page.hidden?
             published_page.slug.must_equal editable_page.slug
             published_page.path.must_equal editable_page.path
@@ -663,26 +665,26 @@ describe "Modifications" do
     end
 
     it "ignore deletion modifications" do
-      page = Page.first(:uid => "1")
+      page = Page.first(uid: "1")
       page.destroy
-      page = Page.first(:uid => "root")
+      page = Page.first(uid: "root")
       ::Content.publish(@final_revision, [page.id])
       ::Content.with_revision(@final_revision) do
         %w(1 1.1.1).each do |uid|
-          published_page = Page.first :uid => uid
+          published_page = Page.first uid: uid
           published_page.must_be_nil
         end
-        published_page = Page.first :uid => "0"
+        published_page = Page.first uid: "0"
         published_page.wont_be_nil
       end
     end
 
     it "clear modifications after publish" do
-      page = Page.first :uid => "1"
+      page = Page.first uid: "1"
       page.slug = "changed"
       page.hide!
       ::Content.publish(@final_revision, [page.id])
-      page = Page.first :id => page.id
+      page = Page.first id: page.id
       page.pending_modifications.length.must_equal 0
     end
 
@@ -793,7 +795,7 @@ describe "Modifications" do
   describe "with assigned editor" do
     before do
       Spontaneous::Permissions::User.delete
-      @user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root", :password => "rootpass")
+      @user = Spontaneous::Permissions::User.create(email: "root@example.com", login: "root", name: "root", password: "rootpass")
     end
 
     after do
@@ -802,7 +804,7 @@ describe "Modifications" do
 
     it "add the editor to any modifications" do
       Timecop.freeze(@now+3600) do
-        page = Page.first :uid => "1"
+        page = Page.first uid: "1"
         page.current_editor = @user
         page.slug = "changed"
         page.save
@@ -813,11 +815,11 @@ describe "Modifications" do
 
     it "persist the user" do
       Timecop.freeze(@now+3600) do
-        page = Page.first :uid => "1"
+        page = Page.first uid: "1"
         page.current_editor = @user
         page.slug = "changed"
         page.save
-        page = Page.first :uid => "1"
+        page = Page.first uid: "1"
         mod = page.pending_modifications(:slug).first
         mod.user.must_equal @user
       end
