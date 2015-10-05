@@ -50,6 +50,22 @@ describe "Singletons" do
     SingletonPage.export[:is_singleton].must_equal true
   end
 
+  it "prevents the over-writing of existing methods on site" do
+    site_root = @site.root
+    p site_root
+    SingletonPage.singleton :root
+    @site.root.must_equal site_root
+  end
+
+  it "namespaces modules" do
+    module ::N
+      class SingletonPage < ::Page; end
+    end
+    ::N::SingletonPage.singleton
+    page = ::N::SingletonPage.create
+    @site.n_singleton_page.must_equal page
+  end
+
   describe "instances" do
     before do
       @page = SingletonPage.create

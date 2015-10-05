@@ -14,10 +14,22 @@ module Spontaneous::Model::Page
       end
 
       def add_singleton_class(type, labels)
-        ([type.name.demodulize.underscore] + labels).map(&:to_sym).each do |label|
+        ([default_type_label(type)] + labels).map(&:to_sym).each do |label|
           singletons[label.to_s] = true
-          define_singleton_method(label) { type.instance }
+          unless respond_to?(label)
+            define_singleton_method(label) { type.instance }
+          end
         end
+      end
+
+      # Provide a default singleton label e.g.
+      #
+      #   Something::Else     => :something_else
+      #   Something::ThenElse => :something_then_else
+      #   ThenElse            => :then_else
+      #
+      def default_type_label(type)
+        type.name.gsub(/::/, '_').underscore
       end
     end
 
