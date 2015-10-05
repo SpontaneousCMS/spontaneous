@@ -10,7 +10,7 @@ module Spontaneous::Model::Core
       end
 
       def schema_name
-        "type//#{self.name}"
+        Spontaneous::Schema.schema_name('type', nil, name)
       end
 
       def schema_owner

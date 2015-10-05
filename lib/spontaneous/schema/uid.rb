@@ -20,6 +20,7 @@ module Spontaneous
         @reference = reference
         @category, @owner_sid, @name = reference.split(REFERENCE_SEP)
         @category = @category.to_sym
+        @name = Spontaneous::Schema.decode_schema_name(@name)
       end
 
       def destroy

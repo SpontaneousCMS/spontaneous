@@ -103,6 +103,25 @@ module Spontaneous
       Schema.new(site, root, schema_loader_class)
     end
 
+    def self.schema_name(type, parent, name)
+      [type, parent, encode_schema_name(name)].join(Spontaneous::SLASH)
+    end
+
+    def self.transform_maintaining_type(name)
+      return name if name.blank?
+      transformed = yield(name.to_s)
+      return transformed.to_sym if Symbol === name
+      transformed
+    end
+
+    def self.encode_schema_name(name)
+      transform_maintaining_type(name) { |s| s.gsub(/\//, '%2F') }
+    end
+
+    def self.decode_schema_name(name)
+      transform_maintaining_type(name) { |s| s.gsub(/%2F/, '/') }
+    end
+
     class Schema
       attr_accessor :schema_loader_class
       attr_reader   :uids

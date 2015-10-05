@@ -87,7 +87,7 @@ module Spontaneous::Prototypes
         marked_as_generated = generated?
         instance_class.instance_eval do
           singleton_class.__send__(:define_method, :schema_name) do
-            "box/#{box_owner.schema_id}/#{box_name}"
+            Spontaneous::Schema.schema_name('box', box_owner.schema_id, box_name)
           end
           singleton_class.__send__(:define_method, :schema_owner) do
             box_owner

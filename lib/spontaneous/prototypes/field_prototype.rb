@@ -67,7 +67,7 @@ module Spontaneous::Prototypes
     end
 
     def schema_name
-      "field/#{owner.schema_id}/#{name}"
+      Spontaneous::Schema.schema_name('field', owner.schema_id, name)
     end
 
     def schema_id

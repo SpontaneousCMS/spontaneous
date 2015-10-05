@@ -3,7 +3,7 @@
 module Spontaneous::Prototypes
   class LayoutPrototype < StylePrototype
     def schema_name
-      "layout/#{owner.schema_id}/#{name}"
+      Spontaneous::Schema.schema_name('layout', owner.schema_id, name)
     end
 
     def layout(owner)

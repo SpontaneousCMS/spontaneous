@@ -143,6 +143,13 @@ describe "Layouts" do
     page.render(:rss).must_equal  "rss"
   end
 
+  it "allows for using layouts in a subfolder" do
+    LayoutPage.layout 'sub/custom1'
+    page = SubPage.new
+    assert_correct_template(page, @template_root / 'layouts/sub/custom1', renderer)
+    LayoutPage.layout_prototypes[:'sub/custom1'].schema_name.split('/').last.must_equal "sub%2Fcustom1"
+  end
+
   # it "raise error when setting unknown layout" do
   #   LayoutPage.layout :custom1
   #   LayoutPage.layout :custom2

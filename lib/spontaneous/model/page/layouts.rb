@@ -6,6 +6,7 @@ module Spontaneous::Model::Page
 
     module ClassMethods
       def layout(name = nil, options = {}, &block)
+        name = name.to_sym unless name.blank?
         if block_given?
           layout_procs[name] = block
         else

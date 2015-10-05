@@ -52,7 +52,7 @@ module Spontaneous
     # This is overridden by anonymous classes defined by box prototypes
     # See BoxPrototype#create_instance_class
     def self.schema_name
-      "type//#{self.name}"
+      Spontaneous::Schema.schema_name('type', nil, name)
     end
 
     def self.supertype
