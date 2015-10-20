@@ -16,7 +16,7 @@ module Spontaneous::Output::Store
     end
 
     def add_revision(revision, keys)
-      ensure_dir revision_path(revision)
+      ensure_dir(revision_path(revision)) unless keys.empty?
     end
 
     def revisions
