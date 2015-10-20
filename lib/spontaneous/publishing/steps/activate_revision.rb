@@ -34,10 +34,6 @@ module Spontaneous::Publishing::Steps
       output_store.revision(r).activate
     end
 
-    def symlink_path(path)
-      system("ln -nsf #{path} #{site.revision_dir}")
-    end
-
     def save_state
       @state = site.state
     end
