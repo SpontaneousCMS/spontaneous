@@ -90,6 +90,7 @@ module Spontaneous
 
       def content_destroyed(content)
         remove_content(content)
+        guarantee_box_ordering
       end
 
       private
@@ -114,7 +115,32 @@ module Spontaneous
         insert_array(position, entry)
         @count += 1
         content.save
+        guarantee_box_ordering
         content
+      end
+
+      # update content
+      # set box_position = ordering.row_number
+      # from (
+      #   select
+      #     id,
+      #     (row_number()  over(order by box_position) - 1) as row_number
+      #   from content
+      #   where
+      #     ("owner_id" = 4115) AND ("box_sid" = 'boza1m6i002')
+      #   ) ordering
+      # where
+      #   ordering.id = content.id;
+      #
+      # Updates the ordering of box content so that it is always 0-n with no
+      # duplicates
+      def guarantee_box_ordering
+        ds = box.unordered_dataset.ds
+        # TODO: a version of this for dbs that don't support window functions...
+        if ds.supports_window_functions?
+          sub = ds.select { [:id, Sequel.as(row_number.function.over(order: Sequel.asc(:box_position)) - 1, :row_number)] }
+          ds.unfiltered.from(:content, Sequel.as(sub, :ordering)).where(content__id: :ordering__id).update(box_position: :ordering__row_number)
+        end
       end
 
       def content_attributes(content, position)
