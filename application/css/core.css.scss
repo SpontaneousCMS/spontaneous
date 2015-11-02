@@ -948,24 +948,32 @@
 		border-top: solid 1px #cccccc;
 		text-align: center;
 		height: auto;
-		padding-top: 8px;
-		padding-bottom: 8px;
+		padding-top: 4px;
+		padding-bottom: 6px;
 		position: relative;
-		a {
-      $add-pad: $unit * 1.5;
-			@include button;
-      padding-left: $add-pad + $unit;
-			padding-right: $add-pad;
-			margin-right: 4px;
-			margin-left: 4px;
-      position: relative;
-      min-width: 84px;
-      &:before {
-        @include awesome-icon("\f063");
-        position: absolute;
-        left: $unit/2;
-        // width: $unit*2;
-      }
+		.addable-inner {
+			@include display-flex;
+			@include flex-direction(row);
+			@include flex-wrap(wrap);
+			@include justify-content(center);
+			@include align-content(space-between);
+			a {
+				$add-pad: $unit * 1.5;
+				@include button;
+				display: block;
+				padding-left: $add-pad + $unit;
+				padding-right: $add-pad;
+				margin: 2px 4px;
+				// margin-left: 4px;
+				position: relative;
+				min-width: 84px;
+				&:before {
+					@include awesome-icon("\f063");
+					position: absolute;
+					left: $unit/2;
+					// width: $unit*2;
+				}
+			}
 		}
 		// a:hover {
 			//   background-color: $highlight;
@@ -1321,16 +1329,11 @@
 				// background-color: #565656;
 				// background-color: (darken($entry-background-colour, 10%));
 				background-color: $slot-addable-colour;
-				height: 33px;
-				padding: $unit 8px 0 8px;
+				padding: 2px 8px;
 				a {
-					@include button(#6b6b6b);
-					// background-color: #6b6b6b;
+					@include button-color(#6b6b6b);
 					padding-left: 2*$unit;
 					padding-right: $unit;
-					& + a {
-						margin-left: $unit;
-					}
 				}
 				.alias {
 					font-style: italic;
