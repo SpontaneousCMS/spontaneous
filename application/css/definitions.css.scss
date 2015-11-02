@@ -111,33 +111,55 @@ $target-name-size: 14px;
   background-image: -moz-linear-gradient(top, $start-color, $end-color);
 }
 
-@mixin display-box {
-  // display: -webkit-box;
-  // display: -moz-box;
-  display: flex;
-  display: -webkit-flex;
-}
 @mixin box-sizing($model: border-box) {
   -webkit-box-sizing: $model;
   -moz-box-sizing: $model;
   box-sizing: $model;
 }
 
-@mixin box-orient($direction: row) {
+@mixin display-flex {
+  display: flex;
+  display: -webkit-flex;
+}
+@mixin flex-direction($direction: row) {
   flex-direction: $direction;
   -webkit-flex-direction: $direction;
 }
-@mixin box-pack($packing: center) {
+@mixin flex-grow($flex: 1) {
+  flex-grow: $flex;
+	-webkit-flex-grow: $flex;
+}
+@mixin justify-content($packing: center) {
   justify-content: $packing;
   -webkit-justify-content: $packing;
 }
-@mixin box-align($aligning: start) {
+@mixin align-items($aligning: start) {
   align-items: $aligning;
   -webkit-align-items: $aligning;
 }
+@mixin align-content($aligning: stretch) {
+  align-content: $aligning;
+  -webkit-align-content: $aligning;
+}
+@mixin flex-wrap($wrap: wrap) {
+	flex-wrap: $wrap;
+	-webkit-flex-wrap: $wrap;
+}
+
+@mixin display-box {
+	@include display-flex;
+}
+@mixin box-orient($direction: row) {
+	@include flex-direction($direction);
+}
+@mixin box-pack($packing: center) {
+	@include justify-content($packing);
+}
+@mixin box-align($aligning: start) {
+  @include align-items($aligning);
+}
 @mixin box-flex($flex: 1) {
-  flex-grow: $flex;
-	-webkit-flex-grow: $flex;
+  @include flex-grow($flex);
 }
 
 @mixin no-select {
