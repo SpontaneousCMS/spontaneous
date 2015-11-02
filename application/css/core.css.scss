@@ -1411,6 +1411,26 @@
 				}
 			}
 		}
+		&.no-fields.boxes {
+			.white-bg {
+				display: none;
+			}
+			.grey-bg {
+				left: 0;
+				width: auto;
+			}
+			.slots {
+				width: 100%;
+			}
+		}
+		&.no-fields.no-boxes {
+			.white-bg {
+				display: block;
+			}
+			.grey-bg {
+				display: none;
+			}
+		}
 		.alias-target {
 			@include rounded-top;
       position: relative;
