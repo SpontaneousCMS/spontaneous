@@ -1257,8 +1257,9 @@
 				@extend .clearfix;
 				@include rounded-top;
 				@include box-sizing;
+				@include display-box;
+				@include box-orient(row);
 				height: 24px;
-				display: block;
 				margin-right: 1px;
 				width: 100%;
 				background: none;
@@ -1267,9 +1268,8 @@
 				li {
 					@include box-sizing;
 					@include interface;
-					float: left;
-					width: 25%;
-					height: 100%;
+					@include box-flex(1);
+					height: 34px;
 					display: block;
 					padding-left: 8px;
 					padding-top: 6px;
@@ -1277,6 +1277,7 @@
 					border-right: solid 1px darken($slot-addable-colour, 15%);
 					background-color: darken($slot-addable-colour, 10%);
 					color: #666666;
+					line-height: 22px;
 					// color: #f2f2f2;
 				}
 				li:first-child:before,
