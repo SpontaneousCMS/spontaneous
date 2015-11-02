@@ -19,6 +19,10 @@ Spontaneous.Views.BoxView = (function($, S) {
 		name: function() {
 			return this.box.name();
 		},
+
+		level: function() {
+			return this.box.level();
+		},
 		schema_id: function() {
 			return this.box.schema_id();
 		},
@@ -26,6 +30,7 @@ Spontaneous.Views.BoxView = (function($, S) {
 		activate: function() {
 			$('> .slot-content', this.dom_container).hide();
 			this.panel().show();
+			this.attachView();
 		},
 
 
@@ -94,15 +99,23 @@ Spontaneous.Views.BoxView = (function($, S) {
 		// fills the box until all the entries have been added or the last entry
 		// is at the bottom of the screen, whichever comes first.
 		appendEntries: function(entries) {
+			// only use dynamic loading for page boxes
 			var entry_total = this.entries().length, attached = 0;
-			var availableHeight = S.ContentArea.height() - entries.position().top;
-			for (var i = 0, ee = this.entries(), ii = entry_total;i < ii; i++) {
-				var entry = ee[i];
-				entries.append(this.claim_entry(entry));
-				attached++;
-				var contentHeight = entries.height(), gap = availableHeight - contentHeight;
-				if (gap < 0) { // wait until there's an overlap so we see a scrollbar
-					break;
+			if (this.level() === 0) {
+				var availableHeight = S.ContentArea.height() - entries.position().top;
+				for (var i = 0, ee = this.entries(), ii = entry_total;i < ii; i++) {
+					var entry = ee[i];
+					entries.append(this.claim_entry(entry));
+					attached++;
+					var contentHeight = entries.height(), gap = availableHeight - contentHeight;
+					if (gap < 0) { // wait until there's an overlap so we see a scrollbar
+						break;
+					}
+				}
+			} else {
+				for (var i = 0, ee = this.entries(), ii = entry_total;i < ii; i++) {
+					entries.append(this.claim_entry(ee[i]));
+					attached++;
 				}
 			}
 			if (attached < entry_total) {
@@ -132,6 +145,9 @@ Spontaneous.Views.BoxView = (function($, S) {
 			}
 		},
 		attachView: function() {
+			if (this._isAttached) {
+				return;
+			}
 			this._isAttached = true;
 			var entries = this._entry_container;
 			if (!entries) { return; }

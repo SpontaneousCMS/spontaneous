@@ -39,6 +39,11 @@ Spontaneous.Box = (function($, S) {
 			return 'box';
 		},
 
+		// i've used `depth` for something else there
+		level: function() {
+			return this.container.depth();
+		},
+
 		isWritable: function() {
 			return this.type().data.writable;
 		},
