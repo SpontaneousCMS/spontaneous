@@ -1286,7 +1286,7 @@
 					background-color: darken($slot-addable-colour, 10%);
 					color: #666666;
 					line-height: 22px;
-					// color: #f2f2f2;
+					min-width: 100px;
 				}
 				li:first-child:before,
 				li:last-child:after {
