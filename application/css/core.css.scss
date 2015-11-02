@@ -829,16 +829,14 @@
 			@include box-sizing;
 			@include interface;
 			@include box-flex(1);
+			@include display-flex;
+			@include align-items(center);
 			font-size: 11px;
 			color: #dddddd;
-			display: block;
-			// float: left;
 			height: 32px;
 			padding-left: 16px;
 			padding-right: 16px;
 			min-width: 130px;
-			// max-width: 160px;
-			padding-top: 9px;
 			cursor: pointer;
 			border-left: solid 1px transparent;
 			border-right: solid 1px #494949;
@@ -1277,15 +1275,16 @@
 					@include box-sizing;
 					@include interface;
 					@include box-flex(1);
+					@include display-flex;
+					@include align-items(center);
 					height: 34px;
-					display: block;
 					padding-left: 8px;
-					padding-top: 6px;
+					padding-top: 0;
 					cursor: pointer;
 					border-right: solid 1px darken($slot-addable-colour, 15%);
 					background-color: darken($slot-addable-colour, 10%);
 					color: #666666;
-					line-height: 22px;
+					line-height: 1em;
 					min-width: 100px;
 				}
 				li:first-child:before,
