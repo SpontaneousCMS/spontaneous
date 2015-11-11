@@ -212,10 +212,14 @@ module Spontaneous::Model::Core
     def sync_children_to_revision(revision)
       published_children = with_revision(revision) { content_model.filter(parent_id: self.id) }
       published_children.each do |child_page|
-        deleted = with_editable { content_model.select(:id).get(child_page.id).nil? }
-        if deleted
-          with_revision(revision) do
+        editable = with_editable { content_model.select(:id, :box_position).get(child_page.id) }
+        deleted  = editable.nil?
+        moved    = child_page.box_position != editable[:box_position]
+        with_revision(revision) do
+          if deleted
             child_page.destroy
+          elsif moved
+            child_page.model.dataset.unfiltered.filter(id: child_page.id).update(box_position: editable[:box_position])
           end
         end
       end

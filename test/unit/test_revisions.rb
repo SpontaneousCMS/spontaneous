@@ -450,6 +450,17 @@ describe "Revisions" do
           published_page.must_be_nil
         end
       end
+
+      it "publishes changes to the order of pages in a box" do
+        page = root
+        a, b = page.things.to_a
+        b.update_position(0)
+        Revision.patch(Content, @final_revision, [page.id])
+        Content.with_revision(@final_revision) do
+          parent = Content[page.id]
+          parent.things.map(&:id).must_equal [b.id, a.id]
+        end
+      end
     end
   end
 
