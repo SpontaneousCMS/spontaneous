@@ -158,7 +158,7 @@ module Spontaneous::Model::Box
 
       def configured_styles(content)
         if (styles = style_options)
-          styles.map { |s| content.class.find_named_style(s) }
+          return styles.map { |s| content.class.find_named_style(s) }.compact
         end
       end
 

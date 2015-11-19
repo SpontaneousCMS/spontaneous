@@ -584,6 +584,13 @@ describe "Schema" do
       styles.first.name.must_equal :fish
     end
 
+    it "ignores suggested styles if they don't exist for the type" do
+      c = C.new
+      a = A.new
+      styles =  c.bgroup.available_styles(a)
+      styles.length.must_equal 0
+    end
+
     it "reload correctly" do
       FileUtils.mkdir(@site.root / "config")
       @site.schema.write_schema
