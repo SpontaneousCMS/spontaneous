@@ -39,7 +39,7 @@ Gem::Specification.new do |s|
   s.add_dependency('public_suffix',   ['~> 1.0'])
   s.add_dependency('rack',            ['~> 1.5'])
   s.add_dependency('rake',            ['~> 10.0'])
-  s.add_dependency('sass',            ['~> 3.2'])
+  s.add_dependency('sassc',           ['~> 1.8'])
   s.add_dependency('sequel',          ['~> 4.8'])
   s.add_dependency('simultaneous',    ['~> 0.5.0'])
   s.add_dependency('sinatra',         ['~> 1.3'])

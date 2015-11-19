@@ -30,7 +30,7 @@ module Spontaneous::Rack
 
     def render_sass_template(template)
       load_paths = [Spontaneous.css_dir, File.dirname(template), File.join(File.dirname(template), "sass")]
-      engine = Sass::Engine.for_file(template, {
+      engine = SassC::Engine.for_file(template, {
         :load_paths => load_paths,
         :filename => template,
         :cache => false,
