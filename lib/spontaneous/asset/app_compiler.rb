@@ -26,7 +26,7 @@ module Spontaneous::Asset
         @environment.register_bundle_processor "text/css", :sass_compressor do |context, css|
           # By this point the SCSS has already been compiled, so SASS is merely a CSS compressor
           # and I can ignore crap around loadpaths or filenames.
-          engine = ::SassC::Engine.new(css, :style => :compressed, :syntax => :scss, :quiet => true, :custom => { :resolver => self })
+          engine = ::Sass::Engine.new(css, :style => :compressed, :syntax => :scss, :quiet => true, :custom => { :resolver => self })
           engine.render
         end
       end
