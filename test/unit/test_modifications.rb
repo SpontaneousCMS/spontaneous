@@ -439,6 +439,20 @@ describe "Modifications" do
       end
     end
 
+    it "publishes slug changes" do
+      page = Page.first uid: "1"
+
+      child_page = Page.first uid: "1.0.0"
+      old_slug = child_page.slug
+      child_page.slug = "changed-too"
+      child_page.save
+      ::Content.publish(@final_revision, [child_page.id])
+      ::Content.with_revision(@final_revision) do
+        published = Page.first uid: "1.0.0"
+        published.path.must_equal "/#{page.slug}/changed-too"
+      end
+    end
+
     it "not publish slug changes on pages other than the one being published" do
       #/bands/beatles -> /bands/beatles-changed
       #/bands -> /bands-changed

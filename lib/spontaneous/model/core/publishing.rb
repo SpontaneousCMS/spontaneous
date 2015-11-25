@@ -190,7 +190,7 @@ module Spontaneous::Model::Core
           # Instead we re-calculate our path using the published version of the ancestor's path & our (potentially) updated slug.
           if page?
             published = self.class.get(id)
-            published_values[:path] = published.calculate_path
+            published_values[:path] = published.calculate_path_with_slug(slug)
           end
 
           # need to calculate the correct visibility for published items. I can't just take this from the editable
