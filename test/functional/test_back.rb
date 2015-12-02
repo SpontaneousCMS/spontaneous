@@ -50,7 +50,11 @@ describe "Back" do
 
     Page.field :title
 
-    class ::Project < Page; end
+    class ::Project < Page
+      box :sub_projects do
+        allow :Project
+      end
+    end
     class ::Image < Piece
       field :image, :image
     end
@@ -1139,6 +1143,20 @@ describe "Back" do
       assert last_response.ok?
       last_response.content_type.must_equal "text/html;charset=utf-8"
       assert_equal @renderer.render(project1.output(:html)), last_response.body
+    end
+
+    it "strips any trailing slashes" do
+      get_preview "/project1/"
+      assert last_response.ok?
+    end
+
+    it "strips any double slashes" do
+      sub_project = Project.new(title: "Sub Project 1", :slug => "sub-project1")
+      project1.sub_projects << sub_project
+      get_preview "/project1/sub-project1"
+      assert last_response.ok?
+      get_preview "/project1//sub-project1"
+      assert last_response.ok?
     end
 
     it "return alternate formats" do

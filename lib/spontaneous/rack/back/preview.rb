@@ -29,7 +29,7 @@ module Spontaneous::Rack::Back
 
     # Forward all GETs to the page resolution method
     get '*' do
-      path = params[:splat][0]
+      path = strip_trailing_slash(params[:splat][0])
       ensure_edit_preview(path) && render_path(path)
     end
 
@@ -45,6 +45,11 @@ module Spontaneous::Rack::Back
       response.headers[HTTP_LAST_MODIFIED] = now
       response.headers[HTTP_CACHE_CONTROL] = HTTP_NO_CACHE
       super
+    end
+
+    def strip_trailing_slash(path)
+      return path if path == Spontaneous::SLASH
+      path.sub(/\/+$/, '')
     end
   end # Preview
 end
