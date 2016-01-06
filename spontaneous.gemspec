@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
   s.add_dependency('foreman',         ['~> 0.60'])
   s.add_dependency('kramdown',        ['~> 0.14'])
   s.add_dependency('launchy',         ['~> 2.1'])
+  s.add_dependency('mime-types',      ['~> 3.0'])
   s.add_dependency('moneta',          ['~> 0.7'])
   s.add_dependency('nokogiri',        ['~> 1.5'])
   s.add_dependency('posix-spawn',     ['~> 0.3.6'])
