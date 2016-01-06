@@ -30,8 +30,20 @@ module Spontaneous::Model::Core
         owner.content_model.filter(path_like)
       end
 
+      def prepared_statement
+        path_like = Sequel.like(:ancestor_path, :$path)
+        owner.content_model.mapper.prepare(:count, :like_ancestor_path) {
+          owner.content_model.select(Sequel::Dataset::COUNT_OF_ALL_AS_COUNT).filter(path_like)
+        }
+      end
+
       def count
-        dataset.count
+        result = prepared_statement.call(path: search_path)
+        result.first[:count]
+      end
+
+      def search_path
+        "#{owner[:ancestor_path]}.#{owner.id}%"
       end
 
       def serialize
@@ -75,9 +87,15 @@ module Spontaneous::Model::Core
         end
       end
 
-      def dataset
-        path_like = Sequel.like(:visibility_path, "#{owner[:visibility_path]}.#{owner.id}%")
-        owner.content_model::Page.filter(path_like)
+      def prepared_statement
+        path_like = Sequel.like(:visibility_path, :$path)
+        owner.content_model::Page.mapper.prepare(:count, :like_visibility_path) {
+          owner.content_model::Page.select(Sequel::Dataset::COUNT_OF_ALL_AS_COUNT).filter(path_like)
+        }
+      end
+
+      def search_path
+        "#{owner[:visibility_path]}.#{owner.id}%"
       end
     end
 
@@ -121,9 +139,15 @@ module Spontaneous::Model::Core
         end
       end
 
-      def dataset
-        path_like = Sequel.like(:visibility_path, "#{owner.visibility_path}.#{owner.id}%")
-        owner.content_model.filter(path_like)
+      def prepared_statement
+        path_like = Sequel.like(:visibility_path, :$path)
+        owner.content_model::Page.mapper.prepare(:count, :like_visibility_path) {
+          owner.content_model::Page.select(Sequel::Dataset::COUNT_OF_ALL_AS_COUNT).filter(path_like)
+        }
+      end
+
+      def search_path
+        "#{owner[:visibility_path]}.#{owner.id}%"
       end
 
       def serialize
