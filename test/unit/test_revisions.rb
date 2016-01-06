@@ -8,6 +8,7 @@ describe "Revisions" do
   Revision = Spontaneous::Publishing::Revision
 
   start do
+    now = Time.now
     site = setup_site
     let(:site) { site }
 
@@ -21,31 +22,35 @@ describe "Revisions" do
       box :things
     end
 
-    root = Page.create(:uid => "root")
-    count = 0
-    2.times do |i|
-      c = Page.new(:uid => i)
-      root.things << c
-      count += 1
-      2.times do |j|
-        d = Piece.new(:uid => "#{i}.#{j}")
-        c.things << d
+    root = nil
+    Timecop.freeze(now) do
+      root = Page.create(:uid => "root")
+      count = 0
+      2.times do |i|
+        c = Page.new(:uid => i)
+        root.things << c
         count += 1
-        2.times do |k|
-          d.things << Page.new(:uid => "#{i}.#{j}.#{k}")
-          d.save
+        2.times do |j|
+          d = Piece.new(:uid => "#{i}.#{j}")
+          c.things << d
           count += 1
+          2.times do |k|
+            d.things << Page.new(:uid => "#{i}.#{j}.#{k}")
+            d.save
+            count += 1
+          end
         end
+        c.save
       end
-      c.save
+      root.save
     end
-    root.save
 
     Revision.history_dataset(Content).delete
     Revision.archive_dataset(Content).delete
     Revision.delete_all(Content)
 
     let(:root) { root }
+    let(:now) { now }
   end
 
   finish do
@@ -56,8 +61,7 @@ describe "Revisions" do
   end
 
   before do
-    @now = Time.now
-    stub_time(@now)
+    stub_time(now)
   end
 
   after do
@@ -573,17 +577,17 @@ describe "Revisions" do
       first.reload.first_published_at.must_be_nil
       first.reload.last_published_at.must_be_nil
       Revision.create(Content, @revision)
-      first.reload.first_published_at.to_i.must_equal @now.to_i
-      first.reload.last_published_at.to_i.must_equal @now.to_i
+      first.reload.first_published_at.to_i.must_equal now.to_i
+      first.reload.last_published_at.to_i.must_equal now.to_i
       first.reload.first_published_revision.must_equal @revision
       Content.with_editable do
-        first.reload.first_published_at.to_i.must_equal @now.to_i
-        first.reload.last_published_at.to_i.must_equal @now.to_i
+        first.reload.first_published_at.to_i.must_equal now.to_i
+        first.reload.last_published_at.to_i.must_equal now.to_i
         first.reload.first_published_revision.must_equal @revision
       end
       Content.with_revision(@revision) do
-        first.reload.first_published_at.to_i.must_equal @now.to_i
-        first.reload.last_published_at.to_i.must_equal @now.to_i
+        first.reload.first_published_at.to_i.must_equal now.to_i
+        first.reload.last_published_at.to_i.must_equal now.to_i
         first.reload.first_published_revision.must_equal @revision
       end
     end
@@ -592,20 +596,20 @@ describe "Revisions" do
       first = Content.first
       first.first_published_at.must_be_nil
       Revision.create(Content, @revision)
-      first.reload.first_published_at.to_i.must_equal @now.to_i
+      first.reload.first_published_at.to_i.must_equal now.to_i
       c = Page.create
       c.first_published_at.must_be_nil
-      stub_time(@now + 100)
+      stub_time(now + 100)
       Revision.create(Content, @revision+1)
-      first.reload.first_published_at.to_i.must_equal @now.to_i
-      first.reload.last_published_at.to_i.must_equal @now.to_i + 100
+      first.reload.first_published_at.to_i.must_equal now.to_i
+      first.reload.last_published_at.to_i.must_equal now.to_i + 100
       Content.with_editable do
         c = Content.first :id => c.id
-        c.first_published_at.to_i.must_equal @now.to_i + 100
+        c.first_published_at.to_i.must_equal now.to_i + 100
       end
       Content.with_revision(@revision+1) do
         c = Content.first :id => c.id
-        c.first_published_at.to_i.must_equal @now.to_i + 100
+        c.first_published_at.to_i.must_equal now.to_i + 100
       end
     end
 
@@ -617,7 +621,7 @@ describe "Revisions" do
       added = Content.create
       added.first_published_at.must_be_nil
       Revision.patch(Content, @revision+1, [page])
-      page.first_published_at.to_i.must_equal @now.to_i
+      page.first_published_at.to_i.must_equal now.to_i
       added.first_published_at.must_be_nil
       added.last_published_at.must_be_nil
     end
