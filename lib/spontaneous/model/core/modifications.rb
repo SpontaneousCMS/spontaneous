@@ -301,7 +301,12 @@ module Spontaneous::Model::Core
     end
 
     def modification_class_map
-      Hash[[SlugModification, HiddenModification, DeletionModification, OwnerModification].map { |mod_class| [mod_class.type, mod_class] }]
+      Hash[[
+        SlugModification,
+        HiddenModification,
+        DeletionModification,
+        OwnerModification
+      ].map { |mod_class| [mod_class.type, mod_class] }]
     end
   end
 end
