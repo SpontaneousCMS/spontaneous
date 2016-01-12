@@ -30,7 +30,12 @@ module Spontaneous
       def after_destroy(site)
         case @category
         when :box
-          site.model.filter(:box_sid  => @id).delete
+          ds = site.model.filter(box_sid: @id).ds
+          ids = ds.map { |row| row[:id] }
+          # TODO: all dependent relations should be configurable on the model
+          # so that this step is automated somehow
+          Spontaneous::PageLock.filter(content_id: ids).delete
+          ds.delete
         end
       end
 

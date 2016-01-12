@@ -884,6 +884,40 @@ describe "Schema" do
         Content[instance.id].must_equal instance
       end
 
+      it "removes associated page locks when deleting removed box content" do
+        instance = A.new
+        piece1 = B.new
+        piece2 = B.new
+        instance.posts << piece1
+        instance.posts << piece2
+        instance.save
+        instance = Content[instance.id]
+        instance.posts.contents.length.must_equal 2
+        Content.count.must_equal 3
+        uid = A.boxes[:posts].schema_id.to_s
+        A.stubs(:box_prototypes).returns(S::Collections::PrototypeSet.new)
+        S.schema.stubs(:classes).returns([A, B])
+        S.schema.reload!
+
+        lock = Spontaneous::PageLock.create(page_id: instance.page.id, content_id: instance.id, field_id: instance.title.id, description: "Update Lock")
+        lock2 = Spontaneous::PageLock.create(page_id: piece2.page.id, content_id: piece2.id, field_id: piece2.location.id, description: "Update Lock")
+        lock2 = Spontaneous::PageLock.create(page_id: piece2.page.id, content_id: piece2.id, field_id: piece2.location.id, description: "Update Lock")
+
+        Spontaneous::PageLock.count.must_equal 3
+
+        begin
+          S.schema.validate!
+          flunk("Validation should raise error when adding & deleting fields")
+        rescue Spontaneous::SchemaModificationError => e
+          @modification = e.modification
+        end
+        action = @modification.actions.first
+        S.schema.apply(action)
+        Content.count.must_equal 1
+        Content[instance.id].must_equal instance
+        Spontaneous::PageLock.count.must_equal 1
+      end
+
       it "deletes type instances when a type is removed" do
         Spontaneous::State.instance.update(must_publish_all: false)
         @site.must_publish_all?.must_equal false
@@ -926,6 +960,62 @@ describe "Schema" do
         content.length.must_equal 2
         content.map { |c| c[:type_sid] }.must_equal [A.schema_id.to_s, A.schema_id.to_s]
         @site.must_publish_all?.must_equal true
+      end
+
+      it "deletes dependent page locks type when a type is removed" do
+        Spontaneous::State.instance.update(must_publish_all: false)
+        @site.must_publish_all?.must_equal false
+        B.box :pages
+        A.box :pages
+        # a1
+        #  |- b2
+        #      |- a3
+        #  |- a2
+        #
+        # b1
+        #  |- a4
+        a1, a2, a3, a4 = A.create, A.new, A.new, A.new
+        b1, b2, b3     = B.create, B.new, B.new
+        a1.pages << b2
+        a1.pages << a2
+        b2.pages << a3
+        b1.pages << a4
+        [a1, a2, a3, a4, b1, b2, b3].each(&:save)
+
+        lock_a1 = Spontaneous::PageLock.create(content_id: a1.id)
+        lock_a3 = Spontaneous::PageLock.create(content_id: a3.id)
+        lock_a4 = Spontaneous::PageLock.create(content_id: a4.id)
+        lock_b1 = Spontaneous::PageLock.create(content_id: b1.id)
+        lock_b2 = Spontaneous::PageLock.create(content_id: b2.id)
+        lock_b3 = Spontaneous::PageLock.create(content_id: b3.id)
+
+        Spontaneous::PageLock.count.must_equal 6
+
+        Content.count.must_equal 7
+        uid = B.schema_id.to_s
+        Object.send(:remove_const, :B)
+        S.schema.stubs(:classes).returns([::A])
+        S.schema.reload!
+        begin
+          S.schema.validate!
+          flunk("Validation should raise error when adding & deleting fields")
+        rescue Spontaneous::SchemaModificationError => e
+          @modification = e.modification
+        end
+        action = @modification.actions.first
+        S.schema.apply(action)
+        # The type filtering automatically filters out any instances belonging to the deleted type
+        # only a1 & a2 should be left
+        Content.count.must_equal 2
+        all = Content.order(:id).all
+        all.map(&:class).must_equal [A, A]
+        # to check that they're gone from the db i have to go a bit lower
+        content = S.database[:content].all
+        content.length.must_equal 2
+        content.map { |c| c[:type_sid] }.must_equal [A.schema_id.to_s, A.schema_id.to_s]
+        @site.must_publish_all?.must_equal true
+        Spontaneous::PageLock.count.must_equal 1
+        Spontaneous::PageLock.first(content_id: a1.id).wont_be_nil
       end
 
       it "doesn't mark the site as 'dirty' if no instances are deleted by the change in the schema" do

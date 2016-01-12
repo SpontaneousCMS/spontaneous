@@ -42,9 +42,20 @@ module Spontaneous::Model::Action
     # Delete all instances whose schema id is invalid
     def delete_invalid_type_instances
       invalid = mapper.filter(nil).invert
-      count   = invalid.delete
+      count   = delete(invalid)
       @dirty ||= (count > 0)
       count
+    end
+
+    def delete(ds)
+      # TODO: as for UID#after_destroy the list of associations should be
+      # automatically generated, rather than hand-crafted
+      associations = [[Spontaneous::PageLock, :content_id]]
+      ids = ds.ds.map { |row| row[:id] }
+      associations.each do |model, column|
+        model.filter(column => ids).delete
+      end
+      ds.delete
     end
 
     # Delete all orphaned content items i.e. entries that have an ancestor
