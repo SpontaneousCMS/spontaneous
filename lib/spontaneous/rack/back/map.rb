@@ -15,10 +15,14 @@ module Spontaneous::Rack::Back
       if content_model::Page.count == 0
         406
       else
-        path = params[:splat].first
+        path = remove_trailing_slashes(params[:splat].first)
         page = site[path]
         json site.map(page.id)
       end
+    end
+
+    def remove_trailing_slashes(path)
+      path.gsub(/\/+$/, '')
     end
   end
 end
