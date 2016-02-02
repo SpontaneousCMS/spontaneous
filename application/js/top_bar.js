@@ -498,6 +498,10 @@ Spontaneous.TopBar = (function($, S) {
 			var nodes = [];
 			// var location = this.get('location');
 			var $location_bar = this.location;
+			if (typeof location.ancestors === 'undefined') {
+				console.warn('Invalid location', location);
+				return;
+			}
 			var ancestors = location.ancestors.slice(0);
 			var i, node, root, is_root = false, root_node, children_node, current_node;
 			if (ancestors.length === 0) {
