@@ -212,7 +212,10 @@ module Spontaneous::Output::Template
       if (template = @output_store.static_template(output))
         return template
       end
-      logger.warn("missing template for #{output}")
+      if (template = @output_store.protected_template(output))
+        return template
+      end
+      logger.warn("missing template for #{output.page.path}#{output.extension(false)}")
       render_on_demand(output, params, parent_context)
     end
 
