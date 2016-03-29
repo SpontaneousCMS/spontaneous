@@ -50,6 +50,10 @@
   height of the box contents, rather than arbitrary counts. This improves the
   behaviour of long lists of entries.
 
+- File-based fields now include the file MD5 digest in their generated media
+  URLs by default to avoid problems with CDN caching (this is how it should
+  have worked from the start TBH)
+
 ## 0.2.0.beta10, released 2015-03-20
 
 Is it wise to release a new version during a solar eclipse?

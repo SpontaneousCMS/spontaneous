@@ -53,12 +53,12 @@ class Spontaneous::Site
       @default_storage ||= Spontaneous::Media::Store::Local.new(DEFAULT_STORAGE_NAME, Spontaneous.media_dir, '/media', accepts=nil)
     end
 
-    def file(owner, filename, headers = {})
-      Spontaneous::Media::File.new(self, owner, filename, headers)
+    def file(owner, filename, digest, headers = {})
+      Spontaneous::Media::File.new(self, owner, filename, digest, headers)
     end
 
-    def tempfile(owner, filename, headers = {})
-      Spontaneous::Media::TempFile.new(self, owner, filename, headers)
+    def tempfile(owner, filename, digest, headers = {})
+      Spontaneous::Media::TempFile.new(self, owner, filename, digest, headers)
     end
   end
 end

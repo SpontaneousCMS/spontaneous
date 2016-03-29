@@ -216,13 +216,13 @@ describe "Image Fields" do
         end
 
         it "have image dimension and filesize information" do
-          @image.src.must_equal "/media/00234/0010/rose.jpg"
+          @image.src.must_equal "/media/00234/00010/dd8167/rose.jpg"
           @image.width.must_equal 400
           @image.height.must_equal 533
         end
 
         it "have access to the original uploaded file through field.original yyy" do
-          @image.src.must_equal "/media/00234/0010/rose.jpg"
+          @image.src.must_equal "/media/00234/00010/dd8167/rose.jpg"
           @image.original.width.must_equal @image.width
           @image.original.height.must_equal @image.height
           md5 = Digest::MD5.file(@src_image).hexdigest
@@ -238,7 +238,7 @@ describe "Image Fields" do
           serialised = S::Field.deserialize_field(@image.serialize_db)[:processed_values]
           [:preview, :thumbnail, :icon, :tall].each do |size|
             assert serialised.key?(size)
-            serialised[size][:src].must_equal "/media/00234/0010/rose.#{size}.jpg"
+            serialised[size][:src].must_equal "/media/00234/00010/dd8167/rose.#{size}.jpg"
           end
           serialised[:preview][:width].must_equal 200
           serialised[:tall][:height].must_equal 200
@@ -251,8 +251,8 @@ describe "Image Fields" do
         it "persist attributes" do
           @instance.save
           @instance = ContentWithImage[@instance[:id]]
-          @instance.photo.thumbnail.src.must_equal "/media/00234/0010/rose.thumbnail.jpg"
-          @instance.photo.original.src.must_equal "/media/00234/0010/rose.jpg"
+          @instance.photo.thumbnail.src.must_equal "/media/00234/00010/dd8167/rose.thumbnail.jpg"
+          @instance.photo.original.src.must_equal "/media/00234/00010/dd8167/rose.jpg"
         end
 
         it "not throw errors when accessing size before value has been assigned" do
@@ -264,7 +264,7 @@ describe "Image Fields" do
 
       describe "defined anonymously" do
         it "have image dimension and filesize information" do
-          @image.src.must_equal "/media/00234/0010/rose.jpg"
+          @image.src.must_equal "/media/00234/00010/dd8167/rose.jpg"
           @image.width.must_equal 400
           @image.height.must_equal 533
         end
@@ -282,7 +282,7 @@ describe "Image Fields" do
           serialised = S::Field.deserialize_field(@image.serialize_db)[:processed_values]
           [:preview, :thumbnail, :icon, :tall].each do |size|
             assert serialised.key?(size)
-            serialised[size][:src].must_equal "/media/00234/0010/rose.#{size}.jpg"
+            serialised[size][:src].must_equal "/media/00234/00010/dd8167/rose.#{size}.jpg"
           end
           serialised[:preview][:width].must_equal 200
           serialised[:tall][:height].must_equal 200
@@ -295,8 +295,8 @@ describe "Image Fields" do
         it "persist attributes" do
           @instance.save
           @instance = ContentWithImage[@instance[:id]]
-          @instance.photo.thumbnail.src.must_equal "/media/00234/0010/rose.thumbnail.jpg"
-          @instance.photo.original.src.must_equal "/media/00234/0010/rose.jpg"
+          @instance.photo.thumbnail.src.must_equal "/media/00234/00010/dd8167/rose.thumbnail.jpg"
+          @instance.photo.original.src.must_equal "/media/00234/00010/dd8167/rose.jpg"
         end
       end
 
@@ -323,14 +323,14 @@ describe "Image Fields" do
       end
 
       it "have full urls for all the src attributes" do
-        @image.original.src.must_equal "http://media.example.com/00234/0010/rose.jpg"
-        @image.thumbnail.src.must_equal "http://media.example.com/00234/0010/rose.thumbnail.jpg"
+        @image.original.src.must_equal "http://media.example.com/00234/00010/dd8167/rose.jpg"
+        @image.thumbnail.src.must_equal "http://media.example.com/00234/00010/dd8167/rose.thumbnail.jpg"
       end
 
       it "allows for reconfiguring the media urls" do
         @storage.url_mapper = proc { |path| "http://cdn.example.com#{path}" }
-        @image.original.src.must_equal "http://cdn.example.com/00234/0010/rose.jpg"
-        @image.thumbnail.src.must_equal "http://cdn.example.com/00234/0010/rose.thumbnail.jpg"
+        @image.original.src.must_equal "http://cdn.example.com/00234/00010/dd8167/rose.jpg"
+        @image.thumbnail.src.must_equal "http://cdn.example.com/00234/00010/dd8167/rose.thumbnail.jpg"
       end
     end
   end
@@ -448,4 +448,43 @@ describe "Image Fields" do
     end
   end
 
+  describe "updating" do
+    before do
+      class ::ContentWithImage < ::Content::Piece
+        field :photo, :image
+      end
+
+      @instance = ContentWithImage.create
+      @field = @instance.photo
+    end
+
+    after do
+      Object.send(:remove_const, :ContentWithImage) rescue nil
+    end
+
+    it "updates an image that is different but has the exact same filename" do
+      Dir.mktmpdir { |dir|
+        original1 = File.expand_path("../../../fixtures/images/rose.jpg", __FILE__)
+        original2 = File.expand_path("../../../fixtures/images/rose.greyscale.jpg", __FILE__)
+        assert File.exist?(original1)
+        assert File.exist?(original2)
+        copy = File.join(dir, "image.jpg")
+        FileUtils.cp(original1, copy)
+        @instance.photo.value = copy
+        @instance.save.reload
+        filename, digest = @instance.photo.file_info
+
+        filename.must_equal "image.jpg"
+        digest.must_equal "dd816716b01deff0fcdf5ad138057977"
+
+        FileUtils.cp(original2, copy)
+        @instance.photo.value = copy
+        @instance.save.reload
+        filename, digest = @instance.photo.file_info
+
+        filename.must_equal "image.jpg"
+        digest.must_equal "8c27127baca9e16e1570003a9f996530"
+      }
+    end
+  end
 end

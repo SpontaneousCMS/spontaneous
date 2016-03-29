@@ -54,7 +54,8 @@ module Spontaneous::Field
     def process_upload(value, site)
       return nil if value.blank?
       file, filename, mimetype = fileinfo(value)
-      media_file = site.tempfile(self, filename, storage_headers(mimetype, filename))
+      digest = file_digest(file)
+      media_file = site.tempfile(self, filename, digest, storage_headers(mimetype, filename))
       media_file.copy(file)
       media_file
     end
@@ -69,9 +70,10 @@ module Spontaneous::Field
         set_unprocessed_value([file, ""].to_json)
         return file
       end
-      set_unprocessed_value([filename, file_digest(file)].to_json)
+      digest = file_digest(file)
+      set_unprocessed_value([filename, digest].to_json)
 
-      media_file = site.file(owner, filename, storage_headers(mimetype, filename))
+      media_file = site.file(owner, filename, digest, storage_headers(mimetype, filename))
       media_file.copy(file)
       media_file
     end

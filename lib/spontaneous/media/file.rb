@@ -6,12 +6,15 @@ module Spontaneous::Media
   class File
     F = ::File
 
-    attr_reader :filename, :owner, :source
+    attr_reader :filename, :owner, :source, :digest
 
-    def initialize(site, owner, filename, headers = {})
+    def initialize(site, owner, filename, digest, headers = {})
       headers = { content_type: headers } if headers.is_a?(String)
-      headers ||= {}
-      @site, @owner, @filename, @headers = site, owner, Spontaneous::Media.to_filename(filename), headers
+      @site     = site
+      @owner    = owner
+      @filename = Spontaneous::Media.to_filename(filename)
+      @digest   = digest
+      @headers  = headers || {}
     end
 
     # Create a new File instance with a new name.
@@ -21,7 +24,7 @@ module Spontaneous::Media
     def rename(new_filename)
       headers = storage_headers
       headers.delete(:content_type)
-      self.class.new(@site, owner, new_filename, headers)
+      self.class.new(@site, owner, new_filename, digest, headers)
     end
 
     def open(mode = 'wb', &block)
@@ -79,7 +82,7 @@ module Spontaneous::Media
     end
 
     def storage_path
-      [padded_id, padded_revision, filename]
+      Spontaneous::Media.url(owner.media_id, revision, digest, filename)
     end
 
     def relative_path

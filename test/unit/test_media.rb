@@ -30,11 +30,11 @@ describe "Media" do
 
   describe "All media files" do
     it "know their mimetype" do
-      file = file(@content, "file name.txt")
+      file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       file.mimetype.must_equal "text/plain"
-      file = file(@content, "file name.jpg")
+      file = file(@content, "file name.jpg", "658c4b077d3699b960d98dabc7a34356")
       file.mimetype.must_equal "image/jpeg"
-      file = file(@content, "file name.jpg", "text/html")
+      file = file(@content, "file name.jpg", "658c4b077d3699b960d98dabc7a34356", "text/html")
       file.mimetype.must_equal "text/html"
     end
 
@@ -59,39 +59,39 @@ describe "Media" do
     end
 
     it "return an absolute path for the url" do
-      file = file(@content, "file name.txt")
-      file.url.must_equal "/00099/0853/file-name.txt"
+      file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
+      file.url.must_equal "/00099/00853/658c4b/file-name.txt"
     end
 
     it "create a new instance with a different name" do
-      file1 = file(@content, "file name.txt")
+      file1 = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       file2 = file1.rename("another.jpg")
       file2.owner.must_equal file1.owner
       file2.mimetype.must_equal "image/jpeg"
-      file2.url.must_equal "/00099/0853/another.jpg"
+      file2.url.must_equal "/00099/00853/658c4b/another.jpg"
     end
 
     it "be able to copy a file into place if passed the path of an existing file" do
       @storage.bucket.files.expects(:create).with{ |args|
-        args[:key] == "00099/0853/file-name.txt" &&
+        args[:key] == "00099/00853/658c4b/file-name.txt" &&
           args[:body].is_a?(File) &&
           args[:public] == true
       }
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
       assert ::File.exist?(existing_file)
-      file = file(@content, "file name.txt")
+      file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       file.copy(existing_file)
     end
 
     it "be able to copy a file into place if passed the file handle of an existing file" do
       @storage.bucket.files.expects(:create).with{ |args|
-        args[:key] == "00099/0853/file-name.txt" &&
+        args[:key] == "00099/00853/658c4b/file-name.txt" &&
           args[:body].is_a?(File) &&
           args[:public] == true
       }
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
       assert ::File.exist?(existing_file)
-      file = file(@content, "file name.txt")
+      file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       File.open(existing_file, 'rb') do |f|
         file.copy(f)
       end
@@ -99,12 +99,12 @@ describe "Media" do
 
     it "provide an open method that writes files to the correct location" do
       @storage.bucket.files.expects(:create).with() { |args|
-        args[:key] == "00099/0853/file-name.txt" &&
+        args[:key] == "00099/00853/658c4b/file-name.txt" &&
           (args[:body].is_a?(File) || args[:body].is_a?(Tempfile)) &&
           args[:public] == true
       }
 
-      file = file(@content, "file name.txt")
+      file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       content_string = "Hello"
       file.open do |f|
         f.write(content_string)
@@ -123,40 +123,40 @@ describe "Media" do
     end
 
     it "return an absolute path for the url" do
-      file = file(@content, "file name.txt")
-      file.url.must_equal "/media/00099/0853/file-name.txt"
+      file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
+      file.url.must_equal "/media/00099/00853/658c4b/file-name.txt"
     end
 
     it "place files into its configured root" do
-      file = file(@content, "file name.txt")
-      file.path.must_equal File.join(@media_dir, "/00099/0853/file-name.txt")
+      file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
+      file.path.must_equal File.join(@media_dir, "/00099/00853/658c4b/file-name.txt")
     end
 
     it "create a new instance with a different name" do
-      file1 = file(@content, "file name.txt")
+      file1 = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       file2 = file1.rename("another.jpg")
       file2.owner.must_equal file1.owner
       file2.mimetype.must_equal "image/jpeg"
-      file2.url.must_equal "/media/00099/0853/another.jpg"
+      file2.url.must_equal "/media/00099/00853/658c4b/another.jpg"
     end
 
     it "be able to copy a file into place if passed the path of an existing file" do
-      file_path = File.join(@media_dir, "/00099/0853/file-name.txt")
+      file_path = File.join(@media_dir, "/00099/00853/658c4b/file-name.txt")
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
       refute ::File.exist?(file_path)
       assert ::File.exist?(existing_file)
-      file = file(@content, "file name.txt")
+      file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       file.copy(existing_file)
       assert ::File.exist?(file_path)
       file.source.must_equal existing_file
     end
 
     it "be able to copy a file into place if passed the handle of an existing file" do
-      file_path = File.join(@media_dir, "/00099/0853/file-name.txt")
+      file_path = File.join(@media_dir, "/00099/00853/658c4b/file-name.txt")
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
       refute ::File.exist?(file_path)
       assert ::File.exist?(existing_file)
-      file = file(@content, "file name.txt")
+      file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       File.open(existing_file, 'rb') do |f|
         file.copy(f)
       end
@@ -165,9 +165,9 @@ describe "Media" do
     end
 
     it "provide an open method that writes files to the correct location" do
-      file_path = File.join(@media_dir, "/00099/0853/file-name.txt")
+      file_path = File.join(@media_dir, "/00099/00853/658c4b/file-name.txt")
       refute ::File.exist?(file_path)
-      file = file(@content, "file name.txt")
+      file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       content_string = "Hello"
       file.open do |f|
         f.write(content_string)
@@ -200,12 +200,12 @@ describe "Media" do
     end
 
     it "return an absolute path for the url" do
-      file = tempfile(@content, "file name.txt")
+      file = tempfile(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       file.url.must_equal "/media/tmp/00099/file-name.txt"
     end
 
     it "place files into its configured root" do
-      file = tempfile(@content, "file name.txt")
+      file = tempfile(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       file.path.must_equal File.join(@media_dir, "/tmp/00099/file-name.txt")
     end
 
@@ -214,7 +214,7 @@ describe "Media" do
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
       refute ::File.exist?(file_path)
       assert ::File.exist?(existing_file)
-      file = tempfile(@content, "file name.txt")
+      file = tempfile(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       file.copy(existing_file)
       assert ::File.exist?(file_path)
       file.source.must_equal existing_file
@@ -225,7 +225,7 @@ describe "Media" do
       existing_file = File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
       refute ::File.exist?(file_path)
       assert ::File.exist?(existing_file)
-      file = tempfile(@content, "file name.txt")
+      file = tempfile(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       File.open(existing_file, 'rb') do |f|
         file.copy(f)
       end
@@ -236,7 +236,7 @@ describe "Media" do
     it "provide an open method that writes files to the correct location" do
       file_path = File.join(@media_dir, "/tmp/00099/file-name.txt")
       refute ::File.exist?(file_path)
-      file = tempfile(@content, "file name.txt")
+      file = tempfile(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       content_string = "Hello"
       file.open do |f|
         f.write(content_string)

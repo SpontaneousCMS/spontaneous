@@ -754,7 +754,7 @@ describe "Fields" do
         @instance.reload
         @instance.title.value.must_equal "Updated title"
         @instance.description.value.must_equal "<p>Updated description</p>\n"
-        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/00001/8fb6c7/something.gif"
       end
     end
 
@@ -790,7 +790,7 @@ describe "Fields" do
           }
         })
         field.process_pending_value
-        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/00001/8fb6c7/something.gif"
         field.pending_value.must_be_nil
       end
     end
@@ -818,7 +818,7 @@ describe "Fields" do
         })
         field.pending_version.must_equal 1
         field.process_pending_value
-        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/00001/8fb6c7/something.gif"
       end
     end
 
@@ -831,7 +831,7 @@ describe "Fields" do
         }
         Spontaneous::Field.update(@site, box, fields, nil, false)
         box.title.value.must_equal "Updated title"
-        box.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/0001/something.gif"
+        box.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/#{box.schema_id}/00001/8fb6c7/something.gif"
         box.image.pending_version.must_equal 1
       end
     end
@@ -890,7 +890,7 @@ describe "Fields" do
         field.pending_version.must_equal 1
         assert ::File.exist?(tempfile)
         field.process_pending_value
-        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/00001/8fb6c7/something.gif"
       end
       refute ::File.exist?(tempfile)
     end
@@ -904,7 +904,7 @@ describe "Fields" do
         }
         Spontaneous::Simultaneous.expects(:fire).never
         Spontaneous::Field.update(@site, @instance, fields, nil, true)
-        @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/00001/8fb6c7/something.gif"
       end
     end
 
@@ -918,7 +918,7 @@ describe "Fields" do
         Spontaneous::Field.update(@site, @instance, fields, nil, false)
         @instance.reload
         field = @instance.image
-        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        field.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/00001/8fb6c7/something.gif"
         field.pending_value.must_be_nil
       end
       fields = {field.schema_id.to_s => ""}
@@ -961,7 +961,7 @@ describe "Fields" do
     it "revert to immediate updating if connection to simultaneous fails" do
       File.open(@image, "r") do |file|
         Spontaneous::Field.set(@site, @instance.image, {:tempfile => file, :filename => "something.gif", :type => "image/gif"}, nil, true)
-        @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        @instance.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/00001/8fb6c7/something.gif"
         @instance.image.pending_value.must_be_nil
       end
     end
@@ -1093,7 +1093,7 @@ describe "Fields" do
           # so calling update_pending_value on the field
           # won't clear any locks
           Spontaneous::Field::Update::Immediate.process(@site, [@page.image])
-          @page.image.value.must_equal "/media/#{@page.id.to_s.rjust(5, "0")}/0001/something.gif"
+          @page.image.value.must_equal "/media/#{@page.id.to_s.rjust(5, "0")}/00001/8fb6c7/something.gif"
           refute @page.reload.locked_for_update?
         end
       end
@@ -1172,7 +1172,7 @@ describe "Fields" do
 
         content = ::Content.get(@instance.id)
         content.title.value.must_equal "Updated Title"
-        content.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/0001/something.gif"
+        content.image.value.must_equal "/media/#{S::Media.pad_id(@instance.id)}/00001/8fb6c7/something.gif"
       end
 
       it "merge async updates to box fields with synchronous ones affected during processing" do
@@ -1198,7 +1198,7 @@ describe "Fields" do
 
         content = ::Content.get(@page.id)
         content.instances.title.value.must_equal "Updated Title"
-        content.instances.image.value.must_equal "/media/#{S::Media.pad_id(@page.id)}/#{@page.instances.schema_id}/0001/something.gif"
+        content.instances.image.value.must_equal "/media/#{S::Media.pad_id(@page.id)}/#{@page.instances.schema_id}/00001/8fb6c7/something.gif"
       end
 
       it "removes temporary files after processing" do
