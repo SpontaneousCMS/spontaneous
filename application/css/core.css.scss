@@ -1587,6 +1587,19 @@
         }
       }
 		}
+		.page-path {
+			@include interface;
+			background-color: #4f4f4f;
+			color: #bbb;
+			font-size: 11px;
+			line-height: 16px;
+			text-transform: none;
+			padding: 2px 4px;
+			cursor: pointer;
+			&:hover {
+        color: $highlight;
+			}
+		}
 	}
 	.entry-wrap.ui-sortable-helper > .entry-contents {
 		@extend .shadow;

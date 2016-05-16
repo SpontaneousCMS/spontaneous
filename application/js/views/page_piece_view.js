@@ -34,23 +34,28 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 			return wrapper;
 		},
 		page_title_panel: function() {
-			var wrapper = dom.div('.page-title').click(function() {
+			var self = this;
+			var content = self.content;
+			var wrapper = dom.div();
+			var load = function() {
 				S.Location.load_id(self.id());
-			}),
-			self = this,
-			content = self.content,
-			title = dom.a().html(this.content.title()),
-			type = dom.span('.content-type').text(content.type().display_title(content));
-			this.content.title_field().watch('value', function(t) { title.html(t); }.bind(this));
-			wrapper.append(title, type);
+			}
+			var header = dom.div('.page-title').click(load);
+			var path = dom.div('.page-path').text(content.content.path).click(load);
+			var title = dom.a().html(content.title());
+			var type = dom.span('.content-type').text(content.type().display_title(content));
+			content.title_field().watch('value', function(t) { title.html(t); }.bind(this));
+			header.append(title, type);
+			wrapper.append(header, path);
 			return wrapper;
 		},
 		// shows both a link to the alias and a link to the alias target
 		alias_target_panel: function() {
 			var content = this.content;
+			var wrapper = dom.div();
 			var click = function() { S.Location.load_id(content.id()); };
 			var alias_click = function() { S.Location.load_id(content.target().page_id); };
-			var wrap = dom.div('.alias-target');//.click(click);
+			var target = dom.div('.alias-target');//.click(click);
 			var icon = content.alias_icon;
 			var type = dom.span('.content-type').text(content.type().display_title(content));
 			var title = dom.a('.alias-title').html(content.content.title).click(click);
@@ -60,10 +65,12 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 
 			if (icon) {
 				var img = new Spontaneous.Image(icon);
-				wrap.append(img.icon(60, 60).click(click));
+				target.append(img.icon(60, 60).click(click));
 			}
+			var path = dom.div('.page-path').text(content.content.path).click(click);
 
-			return wrap.append(title, alias_title, type);
+			target.append(title, alias_title, type);
+			return wrapper.append(target, path);
 		},
 	});
 	return PagePieceView;
