@@ -232,7 +232,7 @@ module Spontaneous
       end
 
       def all_types_condition
-        type_condition(@schema_types)
+        @all_types_condition ||= type_condition(@schema_types)
       end
 
       def type_condition(types)
