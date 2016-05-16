@@ -2,7 +2,8 @@
 
 module Spontaneous::Model
   module Box
-    autoload :AllowedTypes,     "spontaneous/model/box/allowed_types"
+    autoload :AllowedTypes, "spontaneous/model/box/allowed_types"
+    autoload :Comment,      "spontaneous/model/box/comment"
 
     extend Spontaneous::Concern
 

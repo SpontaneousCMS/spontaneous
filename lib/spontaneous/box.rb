@@ -9,6 +9,7 @@ module Spontaneous
     include Spontaneous::Model::Core::Styles
     include Spontaneous::Model::Core::Serialisation
     include Spontaneous::Model::Core::Render
+    include Spontaneous::Model::Box::Comment
     include Spontaneous::Model::Box::AllowedTypes
     include Spontaneous::Model::Core::Permissions
     include Spontaneous::Model::Core::Media

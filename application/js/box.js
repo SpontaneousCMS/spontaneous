@@ -48,6 +48,14 @@ Spontaneous.Box = (function($, S) {
 			return this.type().data.writable;
 		},
 
+		hasComment: function() {
+			return this.type().data.comment !== '';
+		},
+
+		commentHTML: function() {
+			return this.type().data.comment;
+		},
+
 		mouseover: function() {
 			if (this.fields_preview) {
 				this.fields_preview.addClass('hover');

@@ -47,10 +47,15 @@ Spontaneous.Views.BoxView = (function($, S) {
 
 		panel: function() {
 			if (!this._panel) {
-				// var panel = $(dom.div, {'class': 'slot-content'});
+				var box = this.box;
 				var panel = dom.div('.slot-content');
 				panel.addClass('empty');
-				if (this.box.has_fields()) {
+				if (box.hasComment()) {
+					var comment = dom.div('.box-comment');
+					comment.html(box.commentHTML());
+					panel.append(comment);
+				}
+				if (box.has_fields()) {
 					var w = dom.div('.box-fields');
 					var fields = new Spontaneous.FieldPreview(this, '');
 					this._subviews.push(fields);

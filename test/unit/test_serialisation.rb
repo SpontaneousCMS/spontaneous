@@ -48,6 +48,12 @@ describe "Serialisation" do
       style :boiling
 
       box :things, :title => "My Things" do
+        comment <<-COMMENT
+          You shouldn't use this
+
+              or this
+        COMMENT
+
         allow :SerialisedPage, :styles => [:sitting, :kneeling]
         field :title, :string
       end

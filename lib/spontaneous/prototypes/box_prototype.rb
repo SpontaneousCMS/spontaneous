@@ -197,17 +197,22 @@ module Spontaneous::Prototypes
       instance_class.allowed.select { |a| a.readable?(user) }
     end
 
+    def comment
+      instance_class.schema_comment
+    end
+
     private :_allowed
 
     def export(user)
       allowed = _allowed(user).flat_map { |a| a.export }
       {
-        :name => name.to_s,
-        :id => schema_id.to_s,
-        :title => title,
-        :writable => writable?(user),
-        :allowed_types => allowed,
-        :fields => readable_fields(user).map { |name| instance_class.field_prototypes[name].export(user) },
+        name: name.to_s,
+        id: schema_id.to_s,
+        title: title,
+        writable: writable?(user),
+        allowed_types: allowed,
+        comment: comment,
+        fields: readable_fields(user).map { |name| instance_class.field_prototypes[name].export(user) },
       }
     end
   end

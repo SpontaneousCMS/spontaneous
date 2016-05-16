@@ -901,9 +901,10 @@
 	}
 	.fields-preview.depth-box {
 		@extend .container-padding;
-		@include vertical-gradient(#eeeeee, #dddddd);
+		// @include vertical-gradient(#eeeeee, #dddddd);
+		background: url("/@spontaneous/static/dot-texture-9eea29e4ac7ad9a772285252078ec127.png");
 		@include display-box;
-		border-top: solid 1px #CCC;
+		border-top: solid 1px #e9e9e9;
 		position:relative;
 		padding-top: 12px;
 		padding-bottom: 5px;
@@ -943,7 +944,7 @@
 		@include box-sizing;
 		// @include vertical-gradient($slot-addable-colour, $entry-background-colour);
 		background: url("/@spontaneous/static/dot-texture-9eea29e4ac7ad9a772285252078ec127.png");
-		border-top: solid 1px #cccccc;
+		border-top: solid 1px #e9e9e9;
 		text-align: center;
 		height: auto;
 		padding-top: 4px;
@@ -1034,6 +1035,22 @@
 	}
 }
 
+.box-comment {
+	font-size: 11px;
+	text-align: center;
+	color: #666;
+	padding: 10px 0;
+	background: url("/@spontaneous/static/dot-texture-9eea29e4ac7ad9a772285252078ec127.png");
+	p {
+		margin: 0.5em;
+	}
+	p:first-child {
+		margin-top: 0;
+	}
+	p:last-child {
+		margin-bottom: 0;
+	}
+}
 
 #page-slots.slots .slot-entries {
 	padding-top: 32px;
@@ -1320,6 +1337,11 @@
 					display: none;
 				}
 			}
+			.box-comment {
+				background: $slot-addable-colour;
+				padding: 8px;
+				border-bottom: solid 1px rgba(0, 0, 0, 0.05);
+			}
 			.slot-addable {
 				@include interface;
 				@include box-sizing;
@@ -1436,7 +1458,7 @@
 		}
 		.alias-target {
 			@include rounded-top;
-      position: relative;
+			position: relative;
 			padding: $unit/2;
 			padding-right: 100px;
 			background-color: #444;
