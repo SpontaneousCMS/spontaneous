@@ -39,7 +39,7 @@ module Spontaneous::Schema
           # this ensures that UIDs are not created before their owners
           # have uids
           if instance.valid?
-            @instances[id] = instance
+            modify! { @instances[id] = instance }
           else
             instance = nil
           end
@@ -66,13 +66,13 @@ module Spontaneous::Schema
 
     def destroy(uid)
       @instance_lock.synchronize do
-        @instances.delete(uid.to_s)
+        modify! { @instances.delete(uid.to_s) }
         uid.after_destroy(@site)
       end
     end
 
     def clear!
-      @instances = {}
+      modify! { @instances = {} }
     end
 
     def [](id)
@@ -82,11 +82,10 @@ module Spontaneous::Schema
     end
 
     def get_id(reference)
-      find { |uid| uid.reference == reference }
+      references[reference]
     end
 
     def each
-      uids = @instances.map { |id, instance| instance }
       if block_given?
         uids.each { |instance| yield(instance) }
       else
@@ -94,6 +93,18 @@ module Spontaneous::Schema
       end
     end
 
+    def modify!
+      @uids = @references = nil
+      yield
+    end
+
+    def uids
+      @uids ||= @instances.map { |id, instance| instance }
+    end
+
+    def references
+      @references ||= Hash[map { |uid| [uid.reference, uid] }]
+    end
 
     def export
       Hash[ @instances.map { |id, ref| [id, ref.reference] } ]
