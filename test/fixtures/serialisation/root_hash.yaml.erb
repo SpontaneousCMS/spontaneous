@@ -12,6 +12,10 @@
 :slug: ""
 :type_id: <%= SerialisedPage.schema_id.to_s %>
 :aliases: []
+:content_hash: <%= @root.content_hash %>
+:content_hash_changed_at: <%= @root.content_hash_changed_at.utc.httpdate %>
+:published_content_hash: <%= @root.published_content_hash %>
+:has_unpublished_changes: <%= @root.has_unpublished_changes? %>
 :fields:
 - :unprocessed_value: Home
   :processed_value: Home
@@ -45,11 +49,18 @@
     :type_id: <%= SerialisedPiece.schema_id.to_s %>
     :label: label1
     :depth: 1
+    :is_page: false
+    :id: <%= @piece1.id %>
+    :page_id: <%= @root.id %>
     :styles:
     - <%= @tepid_style.to_s %>
     - <%= @freezing_style.to_s %>
     - <%= @boiling_style.to_s %>
     :aliases: []
+    :content_hash: <%= @piece1.content_hash %>
+    :content_hash_changed_at: <%= @piece1.content_hash_changed_at.utc.httpdate %>
+    :published_content_hash: <%= @piece1.published_content_hash %>
+    :has_unpublished_changes: <%= @piece1.has_unpublished_changes? %>
     :fields:
     - :unprocessed_value: Piece 1
       :name: title
@@ -116,6 +127,10 @@
         - <%= @dancing_style.to_s%>
         - <%= @sitting_style.to_s%>
         - <%= @kneeling_style.to_s %>
+        :content_hash: <%= @child.content_hash %>
+        :content_hash_changed_at: <%= @child.content_hash_changed_at.utc.httpdate %>
+        :published_content_hash: <%= @child.published_content_hash %>
+        :has_unpublished_changes: <%= @child.has_unpublished_changes? %>
         :fields:
         - :unprocessed_value: Child Page
           :processed_value: Child Page
@@ -139,18 +154,24 @@
             :__ui__:
               :src: /images/thumb.jpg
 
-    :is_page: false
-    :id: <%= @piece1.id %>
-    :page_id: <%= @root.id %>
   - :type: SerialisedPiece
     :type_id: <%= SerialisedPiece.schema_id.to_s %>
     :label: label2
     :depth: 1
+    :style: <%= @boiling_style.to_s %>
+    :hidden: false
+    :is_page: false
+    :id: <%= @piece2.id %>
+    :page_id: <%= @root.id %>
     :styles:
     - <%= @tepid_style.to_s %>
     - <%= @freezing_style.to_s %>
     - <%= @boiling_style.to_s %>
     :aliases: []
+    :content_hash: <%= @piece2.content_hash %>
+    :content_hash_changed_at: <%= @piece2.content_hash_changed_at.utc.httpdate %>
+    :published_content_hash: <%= @piece2.published_content_hash %>
+    :has_unpublished_changes: <%= @piece2.has_unpublished_changes? %>
     :fields:
     - :unprocessed_value: Piece 2
       :processed_value: Piece 2
@@ -187,11 +208,6 @@
       :version: 0
       :id: <%= SerialisedPiece.field_prototypes[:another].schema_id.to_s %>
 
-    :style: <%= @boiling_style.to_s %>
-    :hidden: false
-    :is_page: false
-    :id: <%= @piece2.id %>
-    :page_id: <%= @root.id %>
     :boxes:
     - :entries: []
 

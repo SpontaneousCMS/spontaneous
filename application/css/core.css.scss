@@ -110,7 +110,44 @@
 
 }
 
+.content--unpublished {
+	@include display-flex;
+	// @include vertical-gradient($highlight, darken($highlight, 1));
+	@include interface;
+	padding: $unit/4 $unit/2;
+	// background-color: transparentize($highlight, 0.2);
+	background-color: darken($editing, 5);
+	color: rgba(0, 0, 0, 0.6);
+	&:before {
+		@include awesome-icon("\f071");
+		margin-right: $unit/2;
+		color: rgba(0, 0, 0, 0.4) !important;
+	}
+}
+
+.content--unpublished-label {
+	@include flex-grow(1);
+}
+.content--unpublished-date {
+	color: rgba(0, 0, 0, 0.4);
+	padding-left: $unit;
+}
+
+.entry-contents > .content--unpublished {
+	@include rounded-top;
+	// padding-top: 1px;
+	// padding-bottom: 1px;
+	// font-size: 9px;
+	// line-height: 11px;
+}
 #page-content {
+	& > .content--unpublished {
+		@extend .container-padding;
+		background-color: $editing;
+		.content--unpublished-label {
+			color: #fff;
+		}
+	}
 	#page-info {
 		@extend .container-padding;
 		@include vertical-gradient(#3a3a3a, #222222);

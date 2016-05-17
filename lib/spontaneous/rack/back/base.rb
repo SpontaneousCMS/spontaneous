@@ -13,7 +13,7 @@ module Spontaneous::Rack
       def update_fields(content, field_data)
         return unless field_data
         Spontaneous::Field.update_asynchronously(site, content, field_data, user)
-        json(content)
+        json(content.reload)
       end
 
       def content_for_request(lock = false)

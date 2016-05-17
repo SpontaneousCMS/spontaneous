@@ -9,7 +9,12 @@ Spontaneous.Content = (function($, S) {
 
 		initialize: function(content) {
 			this.content = content;
-      this.set('hidden', content.hidden);
+			this.update(content);
+		},
+
+		update: function(content) {
+			this.set('hidden', content.hidden);
+			this.set('has_unpublished_changes', content.has_unpublished_changes);
 		},
 
 		uid: function() {
@@ -137,6 +142,7 @@ Spontaneous.Content = (function($, S) {
 
 		save_complete: function(response) {
 			if (response) {
+				this.update(response);
 				var fields = response.fields;
 				for (var i = 0, ii = fields.length; i < ii; i++) {
 					var values = fields[i], field = this.field(values.name);
@@ -167,6 +173,15 @@ Spontaneous.Content = (function($, S) {
 
 		hidden: function() {
 			return this.get('hidden');
+		},
+
+		hasUnpublishedChanges: function() {
+			return this.content.has_unpublished_changes;
+		},
+
+		contentHashChangedAt: function() {
+			// return Date.parse(this.content.content_hash_changed_at);
+			return this.content.content_hash_changed_at;
 		},
 
 		entries: function() {

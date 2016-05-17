@@ -9,17 +9,21 @@ Spontaneous.Views.PageView = (function($, S, document) {
 	FunctionBar.prototype = {
 		panel: function() {
 			var self = this;
+			if (self._panel) {
+				return self._panel;
+			}
 			var isAlias = self.isAlias();
-			this.panel = dom.div('#page-info');
+			var outer = dom.div('.page-header');
+			var panel = dom.div('#page-info');
 			if (isAlias) {
-				self.panel.addClass('page-info-alias-type');
+				panel.addClass('page-info-alias-type');
 			}
 			var h1 = $('<h1/>');
 			self.title = dom.span();
 			h1.append(self.title);
 			self.set_title();
-			self.panel.append(h1);
-			self.panel.append(self.aliasTargetLink());
+			panel.append(h1);
+			panel.append(self.aliasTargetLink());
 			var path_wrap = dom.div('.path');
 
 			self.page.title_field().watch('value', function(t) {
@@ -55,10 +59,10 @@ Spontaneous.Views.PageView = (function($, S, document) {
 				var buttons = dom.div('.page-buttons.developer').append(dom.button().text('Mark unpublished').click(mark_modified));
 				var dev_desc = dom.a('.developer.type-information', {href:self.page.developer_edit_url()}).text(self.page.developer_description());
 				buttons.prepend(dev_desc);
-				self.panel.append(buttons);
+				panel.append(buttons);
 			}
 			var page_aliases = self.pageAliasesPanel();
-			self.panel.append(page_aliases);
+			panel.append(page_aliases);
 
 			path_wrap.append(dom.div('.edit'));
 
@@ -66,9 +70,12 @@ Spontaneous.Views.PageView = (function($, S, document) {
 				path_text.text(path);
 			});
 
-			self.panel.append(path_wrap);
+			panel.append(path_wrap);
 			self.path_wrap = path_wrap;
-			return self.panel;
+
+			outer.append(panel)
+			self._panel = outer;
+			return outer;
 		},
 		isAlias: function() {
 			return this.page.type().is_alias();
@@ -344,13 +351,22 @@ Spontaneous.Views.PageView = (function($, S, document) {
 		},
 
 		panel: function() {
-			this.panel = dom.div('#page-content');
-			if (this.page.hidden()) {
-				this.panel.addClass('hidden');
+			if (this._panel) {
+				return this._panel;
 			}
+			var panel = dom.div('#page-content');
+			if (this.page.hidden()) {
+				panel.addClass('hidden');
+			}
+
+			var modification = new S.ModificationStatusPanel(this.page);
+			this._subviews.push(modification);
+			var modificationPanel = modification.panel('This page has unpublished changes');
+			panel.append(modificationPanel);
+
 			var functionbar = new FunctionBar(this.page);
 			this._subviews.push(functionbar);
-			this.panel.append(functionbar.panel());
+			panel.append(functionbar.panel());
 
 			var fields = dom.div('#page-fields');
 			var fp = new Spontaneous.FieldPreview(this, '');
@@ -360,13 +376,15 @@ Spontaneous.Views.PageView = (function($, S, document) {
 
 			var preview_area = this.create_edit_wrapper(p);
 			fields.append(preview_area);
-			this.panel.append(fields);
+			panel.append(fields);
 			var boxes = new Spontaneous.BoxContainer(this.page, 'page-slots');
 			this._subviews.push(boxes);
-			this.panel.append(boxes.panel());
+			panel.append(boxes.panel());
 			this.fields_preview = p;
-			return this.panel;
+			this._panel = panel;
+			return panel;
 		},
+
 		mouseover: function() {
 			if (this.fields_preview) {
 				this.fields_preview.addClass('hover');

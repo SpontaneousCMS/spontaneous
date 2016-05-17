@@ -153,14 +153,15 @@ describe "Serialisation" do
       @child.direction = "N"
       @child.uid = "about"
 
-      [@child, @piece1, @piece2, @piece3].each { |c| c.save; c.reload }
       @root.insides[0].update(style: :freezing, visible: false)
       @root.insides[1].update(style: :boiling)
       @root.insides.first.first.update(style: :sitting)
 
       @child.path.must_equal "/about"
 
-      @root.save
+      # @root.save
+      [@root, @child, @piece1, @piece2, @piece3].each { |c| c.save }
+      [@root, @child, @piece1, @piece2, @piece3].each { |c| c.reload }
 
       template = ERB.new(File.read(File.expand_path('../../fixtures/serialisation/root_hash.yaml.erb', __FILE__)))
       @root_hash = YAML.load(template.result(binding))

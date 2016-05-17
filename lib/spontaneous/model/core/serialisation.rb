@@ -48,6 +48,10 @@ module Spontaneous::Model::Core
         hidden: (hidden? ? true : false),
         depth: content_depth,
         fields: fields.export(user),
+        content_hash: content_hash,
+        content_hash_changed_at: content_hash_changed_at.try { |d| d.utc.httpdate },
+        published_content_hash: published_content_hash,
+        has_unpublished_changes: has_unpublished_changes?,
         label: label }
     end
 

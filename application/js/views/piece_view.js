@@ -50,6 +50,12 @@ Spontaneous.Views.PieceView = (function($, S) {
 		panel: function() {
 			var wrapper = dom.div(['entry-wrap', this.fields_class(), this.alias_class(), this.depth_class(), this.visibility_class(), this.boxes_class()]);
 			var contents = dom.div('.entry-contents');
+
+			var modification = new S.ModificationStatusPanel(this.content);
+			this._subviews.push(modification);
+			var modificationPanel = modification.panel();
+			contents.append(modificationPanel);
+
 			var inside = dom.div('.entry-inner');
 			var outline = dom.div('.white-bg').
 				mouseover(this.mouseover.bind(this)).

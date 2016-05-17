@@ -20,6 +20,11 @@ Spontaneous.Views.PagePieceView = (function($, S) {
 				contents.append(self.page_title_panel());
 			}
 
+			var modification = new S.ModificationStatusPanel(self.content);
+			this._subviews.push(modification);
+			var modificationPanel = modification.panel();
+			contents.append(modificationPanel);
+
 			var entry = dom.div('.entry');
 			var fields = new Spontaneous.FieldPreview(self, '', true);
 			var fields_panel = fields.panel();

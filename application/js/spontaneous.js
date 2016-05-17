@@ -46,6 +46,7 @@
 //= require location
 //= require state
 //= require panel/root_menu
+//= require panel/modification_status
 //= require top_bar
 //= require field_preview
 //= require box_container
