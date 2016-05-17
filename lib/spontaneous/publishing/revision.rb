@@ -123,11 +123,11 @@ module Spontaneous::Publishing
 
       def set_timestamps(ds)
         published_dataset(ds).update({
-          :last_published_at => Sequel.datetime_class.now
+          last_published_at: Sequel.datetime_class.now
         })
         first_published_dataset(ds).update({
-          :first_published_at => Sequel.datetime_class.now,
-          :first_published_revision => revision
+          first_published_at: Sequel.datetime_class.now,
+          first_published_revision: revision
         })
       end
 
@@ -136,11 +136,11 @@ module Spontaneous::Publishing
       end
 
       def first_published_dataset(ds)
-        filter_dataset(ds.filter(:first_published_at => nil))
+        filter_dataset(ds.filter(first_published_at: nil))
       end
 
       def set_revision_version
-        @revision.dataset.update(:revision => revision)
+        @revision.dataset.update(revision: revision)
       end
 
       def mapper
@@ -184,7 +184,7 @@ module Spontaneous::Publishing
       end
 
       def filter_dataset(ds)
-        ds.filter(:id => modified_pages.map(&:id))
+        ds.filter(id: modified_pages.map(&:id))
       end
 
       def content_hash_dataset(ds)
@@ -239,7 +239,7 @@ module Spontaneous::Publishing
 
     def self._filter_dataset(ds, revision, &block)
       return ds.filter(&block) if revision.nil?
-      ds.filter(:revision => revision, &block)
+      ds.filter(revision: revision, &block)
     end
 
     def self.for_table(model, table)
@@ -405,7 +405,7 @@ module Spontaneous::Publishing
     end
 
     def _dataset(table, &block)
-      db[table].filter(:revision => @revision, &block)
+      db[table].filter(revision: @revision, &block)
     end
   end
 end
