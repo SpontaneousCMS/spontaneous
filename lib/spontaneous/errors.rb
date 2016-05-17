@@ -20,8 +20,19 @@ module Spontaneous
   # raised when trying to show something that is not showable due to
   # ancestor being hidden
   class NotShowable < Error
+    attr_reader :content, :hidden_ancestor_id
+
     def initialize(content, hidden_ancestor_id)
       @content, @hidden_ancestor_id = content, hidden_ancestor_id
+      super("#{content_description(@content)} is not showable as it is hidden by the ancestor #{content_description(hidden_ancestor)}")
+    end
+
+    def content_description(content)
+      %[#{ content.class } id #{content.id} (#{content.page.path})]
+    end
+
+    def hidden_ancestor
+      @content.content_model.get(@hidden_ancestor_id)
     end
   end
 
