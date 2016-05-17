@@ -12,19 +12,19 @@ module Spontaneous::Publishing::Progress
     end
 
     def send_event(stage = current_stage, _percentage = percentage)
-      ::Simultaneous.send_event('publish_progress', {:state => stage, :progress => _percentage}.to_json)
+      ::Simultaneous.send_event('publish_progress', {state: stage, progress: _percentage}.to_json)
     rescue Errno::ECONNREFUSED
     rescue Errno::ENOENT
     end
 
     def error(exception)
       super
-      send_event("aborting", "*")
+      send_event('error', exception)
     end
 
     def done
       super
-      send_event("complete", "*")
+      send_event('complete', '*')
     end
   end
 end

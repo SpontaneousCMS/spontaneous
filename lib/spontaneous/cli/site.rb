@@ -119,7 +119,6 @@ module Spontaneous
         publish_site
       rescue => e
         $stderr.puts(e.message)
-        send_error_notification(e)
       end
 
       desc "render", "Re-renders the current content"
@@ -198,10 +197,6 @@ module Spontaneous
         require 'launchy'
         boot!
         ::Launchy.open("http://localhost:#{site.config.port}/@spontaneous")
-      end
-
-      def send_error_notification(error)
-        simultaneous_event('publish_progress', {state: "error", progress: error}.to_json)
       end
     end
   end

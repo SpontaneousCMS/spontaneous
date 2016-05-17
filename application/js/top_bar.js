@@ -335,6 +335,8 @@ Spontaneous.TopBar = (function($, S) {
 		}
 	};
 
+	var __lastEventID = -1;
+
 	var PublishButton = new JS.Class({
 		rapid_check: 2000,
 		normal_check: 10000,
@@ -344,7 +346,10 @@ Spontaneous.TopBar = (function($, S) {
 			this.set_interval(this.normal_check);
 			var update_status = this.update_status.bind(this);
 			S.EventSource.addEventListener('publish_progress', function(event) {
-				update_status($.parseJSON(event.data));
+				if (event.lastEventId !== __lastEventID) {
+					__lastEventID = event.lastEventId;
+					update_status($.parseJSON(event.data));
+				}
 			});
 		},
 		user_loaded: function(user) {
