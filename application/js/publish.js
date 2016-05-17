@@ -106,7 +106,28 @@ Spontaneous.Publishing = (function($, S) {
 					self.set_publish_all(false);
 				}.bind(self));
 
-				var changed_toolbar = dom.div('.actions').append(dom.div().text('Modified pages')).append(publish_all);
+        var search_input = dom.input({type: 'search', placeholder: 'Search...'}).on('click keyup blur search', function(e) {
+          var val = $(this).val();
+          if (!val) {
+            self.change_sets.forEach(function(cs) {
+              cs.show();
+            });
+          }
+          var query = new RegExp(RegExp.escape(val), 'i')
+          self.change_sets.forEach(function(cs) {
+            if (cs.matchesSearch(query)) {
+              cs.show();
+            } else {
+              cs.hide();
+            }
+          });
+        });
+
+        var changed_toolbar = dom.div('.actions')
+          .append(dom.div()
+          .text('Modified pages'))
+          .append(search_input)
+          .append(publish_all);
 				var publish_toolbar = dom.div('.actions').append(dom.div().text('Publish pages'));
 				if (!must_publish_all) {
 					publish_toolbar.append(clear_all);
@@ -272,6 +293,23 @@ Spontaneous.Publishing = (function($, S) {
 			}
 			return this._panel;
 		},
+
+    title: function() {
+      return this.page().title;
+    },
+
+    matchesSearch: function(re) {
+      return re.test(this.title());
+    },
+
+    hide: function() {
+      this._panel.hide();
+    },
+
+    show: function() {
+      this._panel.show();
+    },
+
 		createPanel: function() {
 			var w = dom.div('.change-set')
 			, inner = dom.div('.inner')

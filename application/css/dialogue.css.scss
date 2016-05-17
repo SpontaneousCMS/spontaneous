@@ -180,6 +180,15 @@ $dialogue-title-height: 32px;
 			}
 		}
 	}
+  input[type="search"] {
+    @include rounded;
+    border: solid 1px #e0e0e0;
+    outline: none;
+    margin-right: $unit;
+    &:focus {
+      border: solid 1px $highlight;
+    }
+  }
 	.change-list {
 		@include box-flex;
 		position: absolute;

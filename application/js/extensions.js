@@ -31,6 +31,12 @@ function $A(iterable) {
 	return results;
 }
 
+if (typeof RegExp.escape !== 'function') {
+  RegExp.escape= function(s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  };
+}
+
 (function($) {
 
 	// Cope with changing File API
