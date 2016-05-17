@@ -1,4 +1,4 @@
-## 0.2.0.beta11, released 2015-XX-XX
+## 0.2.0.beta11, released 2016-XX-XX
 
 #### New features
 
@@ -21,10 +21,19 @@
 - Assets and static files are now published into the output store, along with
   templates.
 
+- Media URLs now include the MD5 of the content to prevent caching problems
+  when using a CDN.
+
+- Boxes can now have user-visible comments added.
+
+- A massive performance improvement when working with large schemas.
+
 #### Misc
 
 - There's now a cli task to re-index the site
 - A legacy '/rev' route has been removed from the front Rack app
+- Box tabs now display better (the power of Flexbox)
+- Sprockets-Sass is now used to improve import behaviour
 
 #### Fixes
 
@@ -53,6 +62,20 @@
 - File-based fields now include the file MD5 digest in their generated media
   URLs by default to avoid problems with CDN caching (this is how it should
   have worked from the start TBH)
+
+- Modified page slugs are actually published.
+
+- Changes to target page slugs are published to any page aliases
+
+- Fixes to box ordering
+
+- Strip trailing slashes when looking up preview paths
+
+- Add an index to improve publishing times
+
+- Remove associated page locks when cleaning up after schema changes
+
+- Page order changes are now correcly published
 
 ## 0.2.0.beta10, released 2015-03-20
 
