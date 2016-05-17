@@ -105,7 +105,7 @@ module Spontaneous::Publishing
       end
 
       def set_content_hash(dataset)
-        filter_dataset(dataset).update(published_content_hash: :content_hash, content_hash_changed: false)
+        content_hash_dataset(dataset).update(published_content_hash: :content_hash, content_hash_changed: false)
       end
 
       def set_revision_timestamps
@@ -155,6 +155,10 @@ module Spontaneous::Publishing
         @revision.revision
       end
 
+      def content_hash_dataset(ds)
+        filter_dataset(ds)
+      end
+
       def filter_dataset(ds)
         ds
       end
@@ -181,6 +185,10 @@ module Spontaneous::Publishing
 
       def filter_dataset(ds)
         ds.filter(:id => modified_pages.map(&:id))
+      end
+
+      def content_hash_dataset(ds)
+        filter_dataset(ds).or(page_id: modified_pages.map(&:id))
       end
     end
 

@@ -19,6 +19,7 @@ describe "Revisions" do
       box :things
     end
     class Piece
+      field :title
       box :things
     end
 
@@ -563,6 +564,38 @@ describe "Revisions" do
         end
       rescue Exception; end
       Content.first.published_content_hash.must_be_nil
+    end
+
+    it "full publish marks all pieces as published" do
+      Revision.create(Content, @revision)
+      page = Page.first(uid: '0')
+      other_page = Page.first(uid: '1')
+      pieces = Content.where(page_id: page.id).all
+      other_pieces = Content.where(page_id: other_page.id).all
+      (pieces + other_pieces).each do |piece|
+        piece.update(title: "What?")
+      end
+      pieces.map(&:reload).map(&:content_hash_changed?).must_equal [true, true]
+      other_pieces.map(&:reload).map(&:content_hash_changed?).must_equal [true, true]
+      Revision.create(Content, @revision+1)
+      pieces.map(&:reload).map(&:content_hash_changed?).must_equal [false, false]
+      other_pieces.map(&:reload).map(&:content_hash_changed?).must_equal [false, false]
+    end
+
+    it "partial publish marks all child pieces as published" do
+      Revision.create(Content, @revision)
+      page = Page.first(uid: '0')
+      other_page = Page.first(uid: '1')
+      pieces = Content.where(page_id: page.id).all
+      other_pieces = Content.where(page_id: other_page.id).all
+      (pieces + other_pieces).each do |piece|
+        piece.update(title: "What?")
+      end
+      pieces.map(&:reload).map(&:content_hash_changed?).must_equal [true, true]
+      other_pieces.map(&:reload).map(&:content_hash_changed?).must_equal [true, true]
+      Revision.patch(Content, @revision+1, [page])
+      pieces.map(&:reload).map(&:content_hash_changed?).must_equal [false, false]
+      other_pieces.map(&:reload).map(&:content_hash_changed?).must_equal [true, true]
     end
   end
 
