@@ -302,8 +302,7 @@ $dialogue-title-height: 32px;
 			.url, .dates {
 				margin-top: 4px;
 				font-size: 10px;
-				color: #aaaaaa;
-				// color: transparent;
+				color: #888;
 			}
 			.dates {
 				color: transparent;
@@ -338,6 +337,8 @@ $dialogue-title-height: 32px;
 			@include no-select;
 			@include box-pack(center);
 			@include box-align(center);
+			min-width: $container-padding;
+			max-width: $container-padding;
 			width: $container-padding;
 			background-color: #f2f2f2;
 			position: relative;
@@ -370,17 +371,15 @@ $dialogue-title-height: 32px;
 			}
 		}
 		&.unpublished {
-			.title .page-title {
-				&:after {
-					// \00a0 is a nbsp
-					@include awesome-icon("\f005\00a0new");
-					font-size: 10px;
-					line-height: 10px;
-					text-transform: uppercase;
-					color: $highlight;
-					position: relative;
-					top: -1px;
-					margin-left: $unit/2;
+			.page-title__unpublished {
+				@include interface;
+				line-height: 10px;
+				color: $highlight;
+				margin-left: $unit/2;
+				font-weight: 100;
+				&:before {
+					@include awesome-icon("\f005");
+					margin-right: 2px;
 				}
 			}
 			.title.dependent .page-title {

@@ -238,6 +238,7 @@ Spontaneous.Publishing = (function($, S) {
 			, metadata = dom.div('.dates').append(modificationDate, publicationDate);
 			if (this.isUnpublished()) {
 				pageTitle.attr('title', 'This page is new and has never been published');
+				pageTitle.append(dom.span('.page-title__unpublished').text('new'))
 			}
 			return dom.div(classes).append(pageTitle, dom.div('.url').text(this.url)).append(metadata).click(function() {
 				S.Dialogue.close();
