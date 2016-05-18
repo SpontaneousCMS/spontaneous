@@ -32,7 +32,7 @@ module Spontaneous::Rack::Back
             content.save
             json({
               :position => position,
-              :entry => instance.entry.export(user)
+              :entry => instance.entry.reload.export(user)
             })
           end
         end
@@ -88,7 +88,7 @@ module Spontaneous::Rack::Back
             end
             json({
               :position => position,
-              :entry => instance.entry.export(user)
+              :entry => instance.entry.reload.export(user)
             })
           end
         end
