@@ -345,10 +345,10 @@ describe "Content Hash" do
   end
 
   describe "Content Tree" do
-    let(:middle) { page_class.create(slug: 'middle', title: 'middle') }
-    let(:page) { page_class.create(slug: 'page', title: 'original') }
-    let(:child) { piece_class.create(field1: 'child') }
-    let(:grand_child) { piece_class.create(field1: 'grand child') }
+    let(:middle) { root.box1 << page_class.new(slug: 'middle', title: 'middle') }
+    let(:page) { middle.box1 << page_class.new(slug: 'page', title: 'original') }
+    let(:child) { page.box1 << piece_class.new(field1: 'child') }
+    let(:grand_child) { child.box1 << piece_class.new(field1: 'grand child') }
 
     before do
       page_class.box :box1 do
@@ -358,10 +358,6 @@ describe "Content Hash" do
         field :field1
       end
       piece_class.field :field1
-      root.box1 << middle
-      middle.box1 << page
-      page.box1 << child
-      child.box1 << grand_child
       [root, middle, page, child, grand_child].each do |content|
         content.save ; content.reload
       end
@@ -389,8 +385,11 @@ describe "Content Hash" do
 
     it "updates the owning page hash when child pieces are updated" do
       hashes << page[:content_hash]
-      child.field1 = "different"
-      child.save
+      child.model.scope do
+        child.owner.boxes.map(&:contents)
+        child.field1 = "different"
+        child.save
+      end
       hashes << page.reload[:content_hash]
       assert_uniq_hashes 2
     end

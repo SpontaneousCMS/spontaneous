@@ -21,11 +21,15 @@ module Spontaneous::Model::Core
       end
 
       def propagate
+        return if owner.nil?
         content = owner
-        while propagate_to?(content)# && content.modification_tracking_enabled?
-          content.recalculate_content_hash!# if propagate_to_owner?
-          break if content == @origin.page
-          content = content.owner
+
+        content.mapper.clean_scope! do
+          while propagate_to?(content)
+            content.recalculate_content_hash!
+            break if content == @origin.page
+            content = content.owner
+          end
         end
       end
 
