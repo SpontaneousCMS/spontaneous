@@ -20,10 +20,5 @@ module Spontaneous::Rack::Back
       site.rerender
       json({})
     end
-
-    post '/rerender' do
-      site.rerender
-      json({})
-    end
   end
 end
