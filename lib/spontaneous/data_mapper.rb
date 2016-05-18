@@ -108,6 +108,14 @@ module Spontaneous
         scope!(nil, false, dataset, &block)
       end
 
+      def clean_scope!(&block)
+        if cached_scope?
+          scope!(current_revision, visible_only?, &block)
+        else
+          yield
+        end
+      end
+
       def scope(revision, visible, &block)
         if use_current_scope?(revision, visible)
           if block_given?

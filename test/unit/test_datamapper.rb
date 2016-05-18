@@ -1578,6 +1578,24 @@ describe "DataMapper" do
       assert a.object_id != c.object_id
     end
 
+    it "allows for duplicating the current scope but with a blank cache" do
+      @database.fetch = [
+        { id: 7, type_sid:"MockContent", parent_id: 7 }
+      ]
+      a = b = c = nil
+      @mapper.scope(20, false) do
+        a = @mapper.get(7)
+        @mapper.clean_scope! do
+          b = @mapper.get(7)
+          c = @mapper.get(7)
+        end
+      end
+      @database.sqls.must_equal [
+        "SELECT * FROM __r00020_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 7)) LIMIT 1",
+        "SELECT * FROM __r00020_content WHERE ((type_sid IN ('MockContent2', 'MockContent3')) AND (id = 7)) LIMIT 1"
+      ]
+    end
+
     it "update the instance cache with updated values after a reload" do
       @database.fetch = [
         [{ id: 7, type_sid:"MockContent", parent_id: 7, label: "a" }],
