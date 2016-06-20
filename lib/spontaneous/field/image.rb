@@ -117,7 +117,7 @@ module Spontaneous::Field
 
     # formats are irrelevant to image/file fields
     def outputs
-      [:original, :__ui__].concat(self.class.size_definitions.map { |name, process| name })
+      self.class.size_definitions.map { |name, process| name }
     end
 
     def value(format=:html, *args)
