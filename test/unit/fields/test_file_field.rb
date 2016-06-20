@@ -107,7 +107,7 @@ describe "File Fields" do
 
   it "sets the original filename of a file that can't be found" do
     @field.value = "/images/nosuchfile.rtf"
-    @field.original_filename.must_equal "/images/nosuchfile.rtf"
+    @field.original_filename.must_equal "nosuchfile.rtf"
   end
 
   it "sets the storage name if given an uploaded file" do

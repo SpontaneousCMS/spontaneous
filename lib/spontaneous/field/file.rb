@@ -141,7 +141,7 @@ module Spontaneous::Field
     end
 
     def original_filename
-      file_info[0]
+      ::File.basename(file_info[0])
     end
 
     def file_hash
