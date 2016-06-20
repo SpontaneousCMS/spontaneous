@@ -8,7 +8,7 @@ module Spontaneous
       namespace :fields
 
       desc "update", "Performs asynchronous updates on provided fields"
-      method_option :fields, :type => :array, :desc => "List of field IDs to update"
+      method_option :fields, type: :array, desc: "List of field IDs to update"
       def update(*args)
         update_fields
       end

@@ -13,9 +13,9 @@ module Spontaneous::Cli
 
     desc "site [DOMAIN]", "Generates a site skeleton. Usage: spot generate <site domain name>"
 
-    method_option :database, :type => :string, :default => "mysql", :aliases => "-d", :desc => "Database adapter"
-    method_option :user, :type => :string, :default => "root", :aliases => "-u", :desc => "Database admin user"
-    method_option :password, :type => :string, :default => "", :aliases => "-p", :desc => "Database admin user"
+    method_option :database, type: :string, default: "mysql", aliases: "-d", desc: "Database adapter"
+    method_option :user, type: :string, default: "root", aliases: "-u", desc: "Database admin user"
+    method_option :password, type: :string, default: "", aliases: "-p", desc: "Database admin user"
 
     def site(*args)
       generate_site(args)

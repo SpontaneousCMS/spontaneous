@@ -35,7 +35,7 @@ module Spontaneous::Field
     end
 
     def self.default_size_definitions
-      { :original => original_size, :__ui__ => ui_preview_size }
+      { original: original_size, __ui__: ui_preview_size }
     end
 
     def self.original_size
@@ -132,7 +132,7 @@ module Spontaneous::Field
     end
 
     def generate(name, media_file, site)
-      return { :src => media_file } if media_file.is_a?(::String)
+      return { src: media_file } if media_file.is_a?(::String)
       options, process = self.class.size_definitions[name]
       size = Size.new(media_file, name, options, process)
       size.generate

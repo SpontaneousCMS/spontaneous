@@ -13,10 +13,10 @@ module Spontaneous::Cli
 
     desc :init, "Creates databases and initialises a new Spontaneous site"
 
-    method_option :user, :type => :string, :default => nil, :aliases => "-u", :desc => "Database admin user"
-    method_option :password, :type => :string, :default => "", :aliases => "-p", :desc => "Database admin password"
-    method_option :account, :type => :hash, :default => {}, :aliases => "-a", :desc => "Details of the root login"
-    method_option :create_user, :type => :boolean, :default => true, :desc => "Enable creation of a root user"
+    method_option :user, type: :string, default: nil, aliases: "-u", desc: "Database admin user"
+    method_option :password, type: :string, default: "", aliases: "-p", desc: "Database admin password"
+    method_option :account, type: :hash, default: {}, aliases: "-a", desc: "Details of the root login"
+    method_option :create_user, type: :boolean, default: true, desc: "Enable creation of a root user"
 
     def init
       initialize_site

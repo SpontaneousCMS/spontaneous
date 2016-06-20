@@ -30,7 +30,7 @@ module Spontaneous::Field
         when nil
           ""
         when String
-          { :tempfile => file }
+          { tempfile: file }
         else
           serialize_pending_file(file)
         end
@@ -42,7 +42,7 @@ module Spontaneous::Field
     end
 
     def serialize_pending_file(file)
-      { :tempfile => file.path, :type => file.mimetype, :filename => file.filename, :filesize => file.filesize, :src => file.url }
+      { tempfile: file.path, type: file.mimetype, filename: file.filename, filesize: file.filesize, src: file.url }
     end
 
     def storage_headers(content_type, filename)
@@ -136,7 +136,7 @@ module Spontaneous::Field
 
     def export(user = nil)
       super(user).merge({
-        :processed_value => processed_values
+        processed_value: processed_values
       })
     end
 

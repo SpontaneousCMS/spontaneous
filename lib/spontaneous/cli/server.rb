@@ -12,7 +12,7 @@ module Spontaneous
       namespace    :server
       default_task :start
 
-      class_option :no_browser, :type => :boolean, :default => false, :aliases => "-b", :desc => "Don't launch browser"
+      class_option :no_browser, type: :boolean, default: false, aliases: "-b", desc: "Don't launch browser"
 
       desc "start", "Starts Spontaneous in development mode"
       def start
@@ -20,23 +20,23 @@ module Spontaneous
       end
 
       desc "front", "Starts Spontaneous in front/public mode"
-      # method_option :adapter, :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
-      method_option :host, :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
-      method_option :port, :type => :numeric, :aliases => "-p", :desc => "Use PORT"
+      # method_option :adapter, type: :string,  aliases: "-a", desc: "Rack Handler (default: autodetect)"
+      method_option :host, type: :string,  aliases: "-h", desc: "Bind to HOST address"
+      method_option :port, type: :numeric, aliases: "-p", desc: "Use PORT"
       def front(*args)
         start_server(:front)
       end
 
       desc "back", "Starts Spontaneous in back/CMS mode"
-      # method_option :adapter, :type => :string,  :aliases => "-a", :desc => "Rack Handler (default: autodetect)"
-      method_option :host, :type => :string,  :aliases => "-h", :desc => "Bind to HOST address"
-      method_option :port, :type => :numeric, :aliases => "-p", :desc => "Use PORT"
+      # method_option :adapter, type: :string,  aliases: "-a", desc: "Rack Handler (default: autodetect)"
+      method_option :host, type: :string,  aliases: "-h", desc: "Bind to HOST address"
+      method_option :port, type: :numeric, aliases: "-p", desc: "Use PORT"
       def back(*args)
         start_server(:back)
       end
 
       desc "simultaneous", "Launches the Simultaneous server"
-      method_option :connection, :type => :string, :aliases => "-c", :desc => "Use CONNECTION"
+      method_option :connection, type: :string, aliases: "-c", desc: "Use CONNECTION"
       def simultaneous(*args)
         start_simultaneous
       end

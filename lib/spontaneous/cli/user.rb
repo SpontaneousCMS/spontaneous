@@ -9,16 +9,16 @@ module ::Spontaneous
 
       desc "add", "Add a new user"
 
-      method_option :login,  :type => :string, :aliases => "-l",
-        :desc => "The user's login -- must be unique"
-      method_option :name,   :type => :string, :aliases => "-n",
-        :desc => "The user's name"
-      method_option :email,  :type => :string, :aliases => "-e",
-        :desc => "The user's email address"
-      method_option :password, :type => :string, :aliases => ["-p", "--passwd"],
-        :desc => "The user's password"
-      method_option :level, :type => :string, :aliases => "-a",
-        :desc => "The user's access level"
+      method_option :login,  type: :string, aliases: "-l",
+        desc: "The user's login -- must be unique"
+      method_option :name,   type: :string, aliases: "-n",
+        desc: "The user's name"
+      method_option :email,  type: :string, aliases: "-e",
+        desc: "The user's email address"
+      method_option :password, type: :string, aliases: ["-p", "--passwd"],
+        desc: "The user's password"
+      method_option :level, type: :string, aliases: "-a",
+        desc: "The user's access level"
 
       def add(*args)
         add_user
@@ -26,16 +26,16 @@ module ::Spontaneous
 
 
       desc "list", "List the current users"
-      method_option :bare, :type => :boolean, :default => false, :aliases => %w(-b),
-        :desc => "Remove descriptive text from result"
+      method_option :bare, type: :boolean, default: false, aliases: %w(-b),
+        desc: "Remove descriptive text from result"
       def list(*args)
         list_users
       end
 
 
       desc "authenticate LOGIN PASSWORD", "Test a user/password combination"
-      method_option :bare, :type => :boolean, :default => false, :aliases => %w(-b),
-        :desc => "Remove descriptive text from result"
+      method_option :bare, type: :boolean, default: false, aliases: %w(-b),
+        desc: "Remove descriptive text from result"
 
       def authenticate(*args)
         args.shift if args.first == "authenticate"
@@ -59,7 +59,7 @@ module ::Spontaneous
         user = ::Spontaneous::Permissions::User.new(attrs)
 
         if user.save
-          user.update(:level => level)
+          user.update(level: level)
           say("\nUser '#{user.login}' created with level '#{user.level}'", :green)
         else
           errors = user.errors.map do | a, e |

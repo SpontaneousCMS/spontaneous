@@ -63,11 +63,11 @@ module Spontaneous::Media::Store
 
     def copy(existing_file, media_path, headers = {})
       params = {
-        :key => join_path(media_path),
-        :idempotent => false,
-        :body => existing_file,
-        :public => true,
-        :cache_control => "max-age=#{1.year.to_i}, public",
+        key: join_path(media_path),
+        idempotent: false,
+        body: existing_file,
+        public: true,
+        cache_control: "max-age=#{1.year.to_i}, public",
       }.merge(headers)
       # Reopen file handles to catch updated contents
       src_path = existing_file.respond_to?(:read) ? existing_file.path : existing_file

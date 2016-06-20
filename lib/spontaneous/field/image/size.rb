@@ -7,7 +7,7 @@ module Spontaneous::Field
 
       def initialize(input, name, options, process)
         @input, @name, @process = input, name, process
-        @options = {:optimize => true}.merge(options)
+        @options = {optimize: true}.merge(options)
       end
 
       def generate
@@ -24,7 +24,7 @@ module Spontaneous::Field
         path = values.delete(:path)
         src  = values.delete(:url)
         image = Spontaneous::Media::Image.new(file.source)
-        values.update(image.attributes).update(:src => src)
+        values.update(image.attributes).update(src: src)
       end
 
       def convert(tempfile)

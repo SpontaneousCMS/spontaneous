@@ -9,7 +9,7 @@ module Spontaneous
 
       desc "compile", "Compiles assets for the Spontaneous UI"
 
-      method_option :destination, :type => :string, :aliases => "-d", :required => true, :desc => "Compile assets into DESTINATION"
+      method_option :destination, type: :string, aliases: "-d", required: true, desc: "Compile assets into DESTINATION"
 
       def compile(*args)
         compile_assets
