@@ -169,6 +169,10 @@ module Spontaneous::Field
       path
     end
 
+    def mimetype
+      MIME::Types.type_for(original_filename).first
+    end
+
     self.register
   end
 end
