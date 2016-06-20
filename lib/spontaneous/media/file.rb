@@ -39,6 +39,7 @@ module Spontaneous::Media
 
     def clone(existing_file)
       @source = existing_file.respond_to?(:path) ? existing_file.path : existing_file
+      self
     end
 
     def storage_headers
