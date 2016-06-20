@@ -32,9 +32,13 @@ module Spontaneous::Media
     end
 
     def copy(existing_file)
-      @source = existing_file.respond_to?(:path) ? existing_file.path : existing_file
+      clone(existing_file)
       storage.copy(existing_file, storage_path, storage_headers)
       self
+    end
+
+    def clone(existing_file)
+      @source = existing_file.respond_to?(:path) ? existing_file.path : existing_file
     end
 
     def storage_headers
