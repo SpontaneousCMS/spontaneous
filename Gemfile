@@ -10,6 +10,8 @@ gem 'execjs', '~> 2.4'
 gem 'pry'
 gem 'pry-doc'
 
+gem 'fog-aws'
+
 # group :development do
 #   # gem 'Selenium', '~> 1.1.14'
 # end

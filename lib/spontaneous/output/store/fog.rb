@@ -1,5 +1,5 @@
 
-require 'fog'
+require 'fog/core'
 require 'thread'
 
 module Spontaneous::Output::Store

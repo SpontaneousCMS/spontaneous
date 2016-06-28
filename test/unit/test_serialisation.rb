@@ -2,7 +2,7 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 require 'erb'
-require 'fog'
+require 'fog/core'
 
 describe "Serialisation" do
   before do

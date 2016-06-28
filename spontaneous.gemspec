@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
   s.add_dependency('cutaneous',       ['~> 0.2'])
   s.add_dependency('erubis',          ['~> 2.6'])
   s.add_dependency('fast_blank',      ['~> 1.0'])
-  s.add_dependency('fog',             ['~> 1.17'])
+  s.add_dependency('fog-core',        ['~> 1.40'])
   s.add_dependency('foreman',         ['~> 0.60'])
   s.add_dependency('kramdown',        ['~> 0.14'])
   s.add_dependency('launchy',         ['~> 2.1'])

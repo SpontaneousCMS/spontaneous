@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-require 'fog'
+require 'fog/core'
 require 'tempfile'
 
 module Spontaneous::Media::Store

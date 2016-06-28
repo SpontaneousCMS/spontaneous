@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 require File.expand_path('../../../test_helper', __FILE__)
-require 'fog'
+require 'fog/core'
 
 describe "File Fields" do
   let(:path) { File.expand_path("../../../fixtures/images/vimlogo.pdf", __FILE__) }
