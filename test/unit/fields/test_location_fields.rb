@@ -28,7 +28,7 @@ describe "Location fields" do
     @field.value(:lat).must_equal 52.2053370
     @field.value(:lng).must_equal 0.1218170
     @field.value(:country).must_equal "United Kingdom"
-    @field.value(:formatted_address).must_equal "Cambridge, Cambridge, UK"
+    @field.value(:formatted_address).must_equal "Cambridge, UK"
 
     @field.latitude.must_equal 52.2053370
     @field.longitude.must_equal 0.1218170
@@ -36,6 +36,6 @@ describe "Location fields" do
     @field.lng.must_equal 0.1218170
 
     @field.country.must_equal "United Kingdom"
-    @field.formatted_address.must_equal "Cambridge, Cambridge, UK"
+    @field.formatted_address.must_equal "Cambridge, UK"
   end
 end
