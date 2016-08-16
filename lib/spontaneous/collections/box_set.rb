@@ -39,8 +39,12 @@ module Spontaneous::Collections
       map { |item| item.export }
     end
 
+    class BoxGroup < Array
+      include Spontaneous::Extensions::Array
+    end
+
     def group(group_name)
-      select { |box| box._prototype.group == group_name }
+      BoxGroup.new(select { |box| box._prototype.group == group_name })
     end
 
     # A call to ${ content } within a layout template will call

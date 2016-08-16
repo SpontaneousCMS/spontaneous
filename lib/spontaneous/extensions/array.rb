@@ -26,7 +26,7 @@ module Spontaneous
           else
             e
           end
-          }.join
+        }.join
       end
     end
   end
@@ -34,7 +34,6 @@ end
 
 
 class Array
-  include Spontaneous::Extensions::Array
+  # include Spontaneous::Extensions::Array
 end
-
 
