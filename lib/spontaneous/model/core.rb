@@ -213,7 +213,7 @@ module Spontaneous::Model
     end
 
     def formats
-      return page.formats if page
+      return page.formats if page && page != self
       [:html]
     end
 
