@@ -61,14 +61,14 @@ module Spontaneous
         return if url.blank?
         puts " --> original: #{ url }"
         open(url) do |original|
-          filename, digest = field.file_info
+          filename, _ = field.file_info
           Tempfile.open(["#{content.id}-#{field_name}", ::File.extname(filename)]) do |file|
             # Copy to new tempfile to get control over name & path of local tempfile
             IO.copy_stream(original, file)
             reprocess_field_original(content, field, file, site)
           end
         end
-      rescue Errno::ENOENT => e
+      rescue Errno::ENOENT
         puts "Failed to download #{content.type} id #{content.id}: #{ url }"
       end
 
