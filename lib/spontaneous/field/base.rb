@@ -351,10 +351,6 @@ module Spontaneous
         value(:html)
       end
 
-      def to_pdf(*args)
-        render(:pdf, *args)
-      end
-
       def value=(value)
         self.set_value value, true
       end

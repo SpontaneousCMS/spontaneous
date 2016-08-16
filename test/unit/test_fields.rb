@@ -497,7 +497,6 @@ describe "Fields" do
       f = S::Field::Base.new
       f.value = "Value"
       f.to_html.must_equal "Value"
-      f.to_pdf.must_equal "Value"
     end
   end
 
