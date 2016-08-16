@@ -36,14 +36,20 @@ module Spontaneous::Publishing::Steps
     end
 
     def render_output(output)
-      output.publish_page(renderer, revision, transaction)
+      output.publish_page(renderer(output), revision, transaction)
       progress.step(1, output.url_path.inspect)
     rescue => e
       raise RenderException.new(output, e)
     end
 
-    def renderer
-      @renderer ||= Spontaneous::Output::Template::PublishRenderer.new(transaction, true)
+    def renderer(output)
+      format = output.format
+      return renderer_cache[format] if renderer_cache.key?(format)
+      renderer_cache[format] = output.publish_renderer(transaction)
+    end
+
+    def renderer_cache
+      @renderer_cache ||= Hash.new
     end
 
     def renderable_pages
