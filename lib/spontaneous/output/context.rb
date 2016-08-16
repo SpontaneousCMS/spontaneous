@@ -113,7 +113,7 @@ module Spontaneous::Output::Context
       if param.respond_to?(:render)
         param = __render_content(param) #render(param, param.template)
       end
-      param.to_s
+      param
     end
 
     RENDER_METHODS = [:render_inline_using, :render_using, :render_inline, :render].freeze
