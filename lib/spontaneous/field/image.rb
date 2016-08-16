@@ -111,6 +111,10 @@ module Spontaneous::Field
       original.url
     end
 
+    def storage_name
+      original.storage_name
+    end
+
     def filepath
       unprocessed_value
     end
