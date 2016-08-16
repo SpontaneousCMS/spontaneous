@@ -27,8 +27,8 @@ module Spontaneous::Media
       self.class.new(@site, owner, new_filename, digest, headers)
     end
 
-    def open(mode = 'wb', &block)
-      storage.open(storage_path, storage_headers, mode, &block)
+    def write(&block)
+      storage.write(storage_path, storage_headers, &block)
     end
 
     def copy(existing_file)

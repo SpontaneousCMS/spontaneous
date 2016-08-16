@@ -34,9 +34,18 @@ module Spontaneous::Media::Store
       end
     end
 
-    def open(relative_path, headers, mode, &block)
+    def read(media_path)
+      absolute_path = convert_url_to_absolute(media_path)
+      if block_given?
+        File.open(absolute_path, 'rb', &Proc.new)
+      else
+        File.open(absolute_path, 'rb')
+      end
+    end
+
+    def write(relative_path, headers, &block)
       dest_path = create_absolute_path(relative_path)
-      File.open(dest_path, mode) do |f|
+      File.open(dest_path, 'wb') do |f|
         f.binmode
         block.call(f)
       end
@@ -59,6 +68,13 @@ module Spontaneous::Media::Store
     end
 
     alias_method :url_path, :public_url
+
+    def convert_url_to_absolute(url)
+      if url.start_with?(@url_path_root)
+        return url.sub(%r{^#{@url_path_root}}, root)
+      end
+      url
+    end
 
     def local?
       true

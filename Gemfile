@@ -12,6 +12,7 @@ gem 'pry-doc'
 
 gem 'fog-aws'
 
+gem 'webmock'
 # group :development do
 #   # gem 'Selenium', '~> 1.1.14'
 # end

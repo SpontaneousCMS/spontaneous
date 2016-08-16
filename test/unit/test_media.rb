@@ -106,7 +106,7 @@ describe "Media" do
 
       file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       content_string = "Hello"
-      file.open do |f|
+      file.write do |f|
         f.write(content_string)
       end
     end
@@ -169,7 +169,7 @@ describe "Media" do
       refute ::File.exist?(file_path)
       file = file(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       content_string = "Hello"
-      file.open do |f|
+      file.write do |f|
         f.write(content_string)
       end
       File.read(file_path).must_equal content_string
@@ -238,7 +238,7 @@ describe "Media" do
       refute ::File.exist?(file_path)
       file = tempfile(@content, "file name.txt", "658c4b077d3699b960d98dabc7a34356")
       content_string = "Hello"
-      file.open do |f|
+      file.write do |f|
         f.write(content_string)
       end
       File.read(file_path).must_equal content_string

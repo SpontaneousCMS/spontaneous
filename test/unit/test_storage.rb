@@ -2,6 +2,7 @@
 
 require File.expand_path('../../test_helper', __FILE__)
 require 'fog/core'
+require 'webmock/minitest'
 
 describe "Media Store" do
   before do
@@ -57,6 +58,19 @@ describe "Media Store" do
       @storage.to_url('/image.jpg').must_equal "http://m3.cdn.example.com/image.jpg"
       @storage.to_url('/image2.jpg').must_equal "http://m4.cdn.example.com/image2.jpg"
       @storage.to_url('/image2.jpg').must_equal "http://m4.cdn.example.com/image2.jpg"
+    end
+
+    it "allows a media file to be opened for reading" do
+      dir = Dir.mktmpdir
+      storage = Spontaneous::Media::Store::Local.new(:test, dir, "/media")
+      file = ::File.expand_path("../../fixtures/images/rose.jpg", __FILE__)
+      media_path = ["a", "b", "c", "rose.jpg"]
+      path = storage.copy(file, media_path)
+      url = storage.public_url(media_path)
+      image = storage.read(url) do |f|
+        ::IO.read(f)
+      end
+      assert image == ::File.read(file)
     end
   end
 
@@ -121,6 +135,19 @@ describe "Media Store" do
       it "sets any additional headers passed to the copy method" do
         file = @storage.copy(@existing_file, @media_path, { content_type: "image/jpeg", content_disposition: "attachment; filename='something.jpg'" })
         file.content_disposition.must_equal "attachment; filename='something.jpg'"
+      end
+
+      it "allows a media file to be opened for reading" do
+        file = @storage.copy(@existing_file, @media_path, { content_type: "image/jpeg" })
+        path = "/" << @media_path.join("/")
+        url = @storage.to_url(path)
+        existing = ::File.read(@existing_file)
+        req = stub_request(:get, "https://media.example.com.s3.amazonaws.com/0003/0567/rose.jpg").to_return(status: 200, body: existing, headers: {})
+        image = @storage.read(url) do |f|
+          ::IO.read(f)
+        end
+        assert image == existing
+        assert_requested req
       end
     end
 

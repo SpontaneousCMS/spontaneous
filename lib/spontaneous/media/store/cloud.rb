@@ -2,6 +2,7 @@
 
 require 'fog/core'
 require 'tempfile'
+require 'open-uri'
 
 module Spontaneous::Media::Store
   class Cloud < Backend
@@ -25,7 +26,15 @@ module Spontaneous::Media::Store
       end
     end
 
-    def open(relative_path, headers, mode, &block)
+    def read(media_url, opts = {})
+      if block_given?
+        open(media_url, 'rb', &Proc.new)
+      else
+        open(media_url, 'rb')
+      end
+    end
+
+    def write(relative_path, headers, &block)
       Tempfile.open("spontaneous-cloud") do |tempfile|
         tempfile.binmode
         block.call(tempfile)
