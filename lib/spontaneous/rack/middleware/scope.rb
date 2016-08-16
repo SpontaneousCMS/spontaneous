@@ -53,8 +53,8 @@ module Spontaneous::Rack::Middleware
 
       def call!(env)
         status = headers = body = nil
-        env[RENDERER] = renderer
         env[REVISION] = revision = @site.published_revision
+        env[RENDERER] = renderer(revision)
         env[OUTPUT_STORE] = @site.output_store.revision(revision)
         @site.model.with_published(@site) do
           status, headers, body = @app.call(env)
@@ -62,13 +62,13 @@ module Spontaneous::Rack::Middleware
         [status, headers.merge(POWERED_BY), body]
       end
 
-      def renderer
-        return renderer_for_revision if development?
-        @renderer ||= renderer_for_revision
+      def renderer(revision)
+        return renderer_for_revision(revision) if development?
+        @renderer ||= renderer_for_revision(revision)
       end
 
-      def renderer_for_revision
-        Spontaneous::Output.published_renderer(@site)
+      def renderer_for_revision(revision)
+        Spontaneous::Output.published_renderer(:html, @site, revision)
       end
 
       def development?

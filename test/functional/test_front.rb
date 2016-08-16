@@ -133,6 +133,8 @@ describe "Front" do
     }
   end
 
+  let(:revision) { 1 }
+
   finish do
     [:SitePage, :StaticPage, :DynamicRequestParams, :DynamicRenderParams, :CommentablePage, :FeedPage, :TakeItPage, :PageController].each do |const|
       Object.send(:remove_const, const) rescue nil
@@ -497,7 +499,7 @@ describe "Front" do
     describe "Templates" do
       before do
         Spontaneous::Output.cache_templates = true
-        @cache_file = "#{Spontaneous.revision_dir(1)}/dynamic/dynamic.html.rb"
+        @cache_file = "#{Spontaneous.revision_dir(revision)}/dynamic/dynamic.html.rb"
         FileUtils.rm(@cache_file) if File.exist?(@cache_file)
         Spontaneous::Output.write_compiled_scripts = true
       end
@@ -616,7 +618,7 @@ describe "Front" do
         Content.stubs(:path).with("/").returns(root)
         Content.stubs(:path).with("/commentable").returns(commentable)
         Content.stubs(:path).with("/commentable/now").returns(@subpage)
-        @renderer = Spontaneous::Output.published_renderer(site)
+        @renderer = Spontaneous::Output.published_renderer(:html, site, revision)
       end
 
       after do
@@ -836,7 +838,7 @@ describe "Front" do
 
     describe "Static files" do
       before do
-        @revision_dir = Spontaneous.instance.revision_dir(1)
+        @revision_dir = Spontaneous.instance.revision_dir(revision)
         @public_dir = @revision_dir / "public"
       end
 
@@ -844,7 +846,7 @@ describe "Front" do
         test_string = "#{Time.now}\n"
         test_file_path = "/#{Time.now.to_i}.txt"
         test_file_url = test_file_path
-        site.output_store.revision(1).transaction.store_static(test_file_path, test_string)
+        site.output_store.revision(revision).transaction.store_static(test_file_path, test_string)
         get test_file_url
         assert last_response.ok?
         last_response.body.must_equal test_string
@@ -867,7 +869,7 @@ describe "Front" do
         test_string = "#{Time.now}\n"
         test_file_path = "/#{Time.now.to_i}.txt"
         test_file_url = "/assets#{test_file_path}"
-        site.output_store.revision(1).transaction.store_asset(test_file_path, test_string)
+        site.output_store.revision(revision).transaction.store_asset(test_file_path, test_string)
         get test_file_url
         assert last_response.ok?
         last_response.body.must_equal test_string

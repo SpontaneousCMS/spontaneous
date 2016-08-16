@@ -118,6 +118,14 @@ module Spontaneous::Output
       def context(site = Spontaneous.instance)
         site.context (helper_formats + [name]).uniq.compact
       end
+
+      def default_renderer(site)
+        Spontaneous::Output::Template::Renderer.new(site)
+      end
+
+      def published_renderer(site, revision)
+        Spontaneous::Output::Template::PublishedRenderer.new(site, revision)
+      end
     end
 
     extend ClassMethods
@@ -157,7 +165,11 @@ module Spontaneous::Output
     end
 
     def default_renderer
-      Spontaneous::Output.default_renderer
+      self.class.default_renderer(@page.site)
+    end
+
+    def publish_renderer(transaction)
+      Spontaneous::Output::Template::PublishRenderer.new(transaction, true)
     end
 
     def before_render

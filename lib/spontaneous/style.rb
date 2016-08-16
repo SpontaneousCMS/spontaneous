@@ -13,7 +13,8 @@ module Spontaneous
       self.prototype.schema_id
     end
 
-    def template(format = :html, renderer = default_renderer)
+    def template(format = :html, renderer = nil)
+      renderer ||= Spontaneous::Output.default_renderer(format, @owner.site)
       inline_template(format) || external_template(format, renderer)
     end
 
@@ -32,14 +33,15 @@ module Spontaneous
     # Tests to see if a template file exists for the specified format.
     # If one doesn't exist then the style would fall back to an
     # 'anonymous' template.
-    def template?(format = :html, renderer = default_renderer)
+    def template?(format = :html, renderer = nil)
+      # renderer ||= renderer_for_format(format)
       !(inline_template(format) || file_template(format, renderer)).nil?
     end
 
     alias_method :path, :template
 
     def local_template(format, renderer)
-      template_path = try_template_paths.map { |path|
+      try_template_paths.map { |path|
         renderer.template_location(path, format)
       }.detect { |path| !path.nil? }
     end
@@ -121,10 +123,6 @@ module Spontaneous
       other.class == self.class && other.prototype == self.prototype && other.owner == self.owner
     end
 
-    def default_renderer
-      Spontaneous::Output.default_renderer
-    end
-
     class Default < Style
       def name
         "<default>"
@@ -144,7 +142,7 @@ module Spontaneous
         @template_code = template_code
       end
 
-      def template(format = :html, renderer = Spontaneous::Output.default_renderer)
+      def template(format = :html, renderer = nil)
         Proc.new { @template_code }
       end
 
@@ -166,7 +164,8 @@ module Spontaneous
         @instance = instance
       end
 
-      def template(format = :html, renderer = Spontaneous::Output.default_renderer)
+      def template(format = :html, renderer = nil)
+        renderer ||= @instance.page.output(format).default_renderer
         target_is_content = @instance.target.respond_to?(:resolve_style)
         if (style = @instance.resolve_style(@instance.style_sid))
           return style.template(format, renderer) if !target_is_content || style.template?(format, renderer)

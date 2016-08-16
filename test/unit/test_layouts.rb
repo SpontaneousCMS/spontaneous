@@ -24,7 +24,7 @@ describe "Layouts" do
     teardown_site
   end
 
-  let(:renderer) { Spontaneous::Output.default_renderer(@site) }
+  let(:renderer) { Spontaneous::Output.default_renderer(:html, @site) }
 
   it "default to layouts/standard.html... if nothing defined" do
     page = LayoutPage.new

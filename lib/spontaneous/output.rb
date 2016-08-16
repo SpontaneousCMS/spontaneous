@@ -92,12 +92,12 @@ module Spontaneous
     # Used in the console or any other place where we want to render
     # content outside of the Rack applications or publishing
     # system
-    def self.default_renderer(site = Spontaneous::Site.instance)
-      Template::Renderer.new(site)
+    def self.default_renderer(format, site = Spontaneous::Site.instance)
+      format_class_map[format.to_sym].default_renderer(site)
     end
 
-    def self.published_renderer(site, revision = Spontaneous::State.published_revision)
-      Template::PublishedRenderer.new(site, revision)
+    def self.published_renderer(format, site, revision)
+      format_class_map[format.to_sym].published_renderer(site, revision)
     end
 
     def self.preview_renderer(site)

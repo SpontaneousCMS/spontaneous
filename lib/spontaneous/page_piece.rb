@@ -76,7 +76,7 @@ module Spontaneous
       self
     end
 
-    def template(format = :html, renderer = Spontaneous::Output.default_renderer)
+    def template(format = :html, renderer = nil)
       style.template(format, renderer)
     end
 
