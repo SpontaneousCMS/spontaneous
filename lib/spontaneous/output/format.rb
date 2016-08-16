@@ -23,10 +23,10 @@ module Spontaneous::Output
         language  = options[:language]
         mimetype  = options[:mimetype] || options[:mime_type] || calculate_mimetype(format)
         options.update({
-          :format => format.to_sym,
-          :mimetype => mimetype,
-          :extension => extension,
-          :language => language
+          format: format.to_sym,
+          mimetype: mimetype,
+          extension: extension,
+          language: language
         })
         @name    = output_name.to_sym
         @options = default_options.merge(options)
@@ -41,8 +41,8 @@ module Spontaneous::Output
       end
 
       def default_options
-        { :private => false,
-          :dynamic => false }
+        { private: false,
+          dynamic: false }
       end
 
       def inherited_mimetype
