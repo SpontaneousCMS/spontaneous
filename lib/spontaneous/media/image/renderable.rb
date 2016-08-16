@@ -4,9 +4,9 @@ module Spontaneous::Media::Image
     attr_accessor :template_params
 
     def render(format=:html, params = {}, parent_context = nil)
-      case format
-      when "html", :html
-        to_html(params)
+      method = :"to_#{format}"
+      if respond_to?(method)
+        __send__(method, params)
       else
         value
       end
