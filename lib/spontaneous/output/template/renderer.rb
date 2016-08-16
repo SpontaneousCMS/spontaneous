@@ -35,15 +35,25 @@ module Spontaneous::Output::Template
 
     def render(output, params = {}, parent_context = nil)
       output.model.with_visible do
-        engine.render(output.renderable_content, context(output, params, parent_context), output.name)
+        _render(output.renderable_content, context(output, params, parent_context), output.name)
       end
     end
 
     def render_string(template_string, output, params = {}, parent_context = nil)
       output.model.with_visible do
-        engine.render_string(template_string, context(output, params, parent_context), output.name)
+        _render_string(template_string, context(output, params, parent_context), output.name)
       end
     end
+
+    def _render(content, context, format)
+      engine.render(content, context, format)
+    end
+
+    def _render_string(template_string, context, format)
+      engine.render_string(template_string, context, format)
+    end
+
+    protected :_render, :_render_string
 
     def context(output, params, parent)
       renderable = Spontaneous::Output::Renderable.new(output.renderable_content)
