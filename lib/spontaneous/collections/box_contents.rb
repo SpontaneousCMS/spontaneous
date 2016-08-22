@@ -12,7 +12,7 @@ module Spontaneous
     # The contents of the underlying array are loaded from the database on
     # initialization and any modifications to the contents of the array are
     # passed onto the underlying db table.
-    class BoxContents < ::Array
+    class BoxContents < Spontaneous::Output::RenderableArray
 
       attr_reader :box, :schema_id
 

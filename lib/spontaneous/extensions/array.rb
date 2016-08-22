@@ -2,7 +2,13 @@
 
 module Spontaneous
   module Extensions
-    module Array
+    module Renderable
+      def to_renderable
+        Spontaneous::Output::RenderableArray.new(self)
+      end
+    end
+
+    module RenderableArray
       def render_using(renderer, *args)
         self.map { |e|
           if e.respond_to?(:render_inline_using)
@@ -28,12 +34,17 @@ module Spontaneous
           end
         }.join
       end
+
+      def to_renderable
+        nil
+      end
     end
   end
 end
 
 
 class Array
-  # include Spontaneous::Extensions::Array
+  # include Spontaneous::Extensions::RenderableArray
+  include Spontaneous::Extensions::Renderable
 end
 

@@ -101,6 +101,7 @@ module Spontaneous
     autoload :Helpers,    "spontaneous/output/helpers"
     autoload :Renderable, "spontaneous/output/renderable"
     autoload :Store,      "spontaneous/output/store"
+    autoload :RenderableArray, "spontaneous/output/renderable_array"
   end
 end
 
