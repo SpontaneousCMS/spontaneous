@@ -7,7 +7,7 @@ module Spontaneous::Output::Context
     include RenderCache
     include Navigation
 
-    attr_accessor :_renderer, :site
+    attr_accessor :__output, :_renderer, :site
 
 
     def page

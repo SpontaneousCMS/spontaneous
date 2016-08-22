@@ -59,6 +59,7 @@ module Spontaneous::Output::Template
       renderable = Spontaneous::Output::Renderable.new(output.renderable_content)
       context_class(output).new(renderable, params, parent).tap do |context|
         context.site = @site
+        context.__output = output
         context._renderer = renderer_for_context
       end
     end
