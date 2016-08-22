@@ -85,15 +85,15 @@ describe "Alias" do
 
     Content.scope(nil, false) do
       root = ::Page.create
-      aliases = ::Page.create(:slug => "aliases").reload
+      aliases = ::Page.create(slug: "aliases").reload
       root.box1 << aliases
       box = aliases.box1
-      a = box.push A.new(:a_field1 => "@a.a_field1")
+      a = box.push A.new(a_field1: "@a.a_field1")
       aa = box.push AA.new
-      aaa1 = box.push AAA.new(:aaa_field1 => "aaa1")
+      aaa1 = box.push AAA.new(aaa_field1: "aaa1")
       aaa2 = box.push AAA.new
-      b = root.box1.push B.new(:slug => "b")
-      bb = root.box1.push BB.new(:slug => "bb", :bb_field1 => "BB")
+      b = root.box1.push B.new(slug: "b")
+      bb = root.box1.push BB.new(slug: "bb", bb_field1: "BB")
       root.save.reload
 
       let(:root) { root }
@@ -143,7 +143,7 @@ describe "Alias" do
 
       it "use the first available string field as the alias title" do
         Piece.field :something
-        target = Piece.new(:something => "something")
+        target = Piece.new(something: "something")
         target.alias_title.must_equal "something"
       end
 
@@ -152,14 +152,14 @@ describe "Alias" do
       end
 
       it "be creatable with a target" do
-        instance = AAlias.create(:target => a).reload
+        instance = AAlias.create(target: a).reload
         instance.target.must_equal a
         a.reload.aliases.must_equal [instance]
       end
 
       it "have a back link in the target" do
-        instance1 = AAlias.create(:target => a).reload
-        instance2 = AAlias.create(:target => a).reload
+        instance1 = AAlias.create(target: a).reload
+        instance2 = AAlias.create(target: a).reload
         assert_same_content a.reload.aliases, [instance1, instance2]
       end
 
@@ -190,10 +190,10 @@ describe "Alias" do
         it "allow for selecting only content from within one box" do
           container_proc = Proc.new { site['$thepage'].box1 }
           ::X = Class.new(::Piece) do
-            alias_of :A, :container => container_proc
+            alias_of :A, container: container_proc
           end
           ::XX = Class.new(::Piece) do
-            alias_of :AA, :container => container_proc
+            alias_of :AA, container: container_proc
           end
           targets = lambda { |a, target|
             [(a.targets), @page.box1.select { |p| target === p }].map { |a| Set.new(a) }
@@ -207,10 +207,10 @@ describe "Alias" do
         it "allow for selecting only content from a range of boxes" do
           container_proc = Proc.new { [site['$thepage'].box1, site['$thepage'].box2] }
           ::X = Class.new(::Piece) do
-            alias_of :A, :container => container_proc
+            alias_of :A, container: container_proc
           end
           ::XX = Class.new(::Piece) do
-            alias_of :AA, :container => container_proc
+            alias_of :AA, container: container_proc
           end
           assert_same_content X.targets, @page.box1.select { |p| A === p } + @page.box2.select { |p| A === p }
           assert_same_content XX.targets, @page.box1.select { |p| AA === p } + @page.box2.select { |p| AA === p }
@@ -219,17 +219,17 @@ describe "Alias" do
         it "allow for selecting only content from within one page" do
           container_proc = Proc.new { site['$thepage'] }
           ::X = Class.new(::Piece) do
-            alias_of :A, :container => container_proc
+            alias_of :A, container: container_proc
           end
           ::XX = Class.new(::Piece) do
-            alias_of :AA, :container => container_proc
+            alias_of :AA, container: container_proc
           end
           assert_same_content X.targets, @page.content.select { |p| A === p }
           assert_same_content XX.targets, @page.content.select { |p| AA === p }
         end
 
         it "allow for selecting only content from a range of pages & boxes" do
-          page2 = ::Page.new(:uid => "thepage2")
+          page2 = ::Page.new(uid: "thepage2")
           4.times { |n|
             page2.box1 << A.new
             page2.box1 << AA.new
@@ -239,11 +239,11 @@ describe "Alias" do
           page2.reload
           container_proc = Proc.new { [site['$thepage'].box1, site['$thepage2']] }
           ::X = Class.new(::Piece) do
-            alias_of :A, :AA, :container => container_proc
+            alias_of :A, :AA, container: container_proc
           end
           container_proc = Proc.new { [site['$thepage'], site['$thepage2'].box2] }
           ::XX = Class.new(::Piece) do
-            alias_of :AA, :container => container_proc
+            alias_of :AA, container: container_proc
           end
           assert_same_content X.targets(@page, @page.box1), @page.box1.contents + page2.content
           assert_same_content XX.targets, @page.content.select { |p| AA === p } + page2.box2.select { |p| AA === p }
@@ -257,7 +257,7 @@ describe "Alias" do
             alias_of proc { |owner, box| box.contents }
           end
           class ::XXX < ::Piece
-            alias_of :A, :container => proc { |owner, box| box }
+            alias_of :A, container: proc { |owner, box| box }
           end
           assert_same_content X.targets(@page), @page.box1.contents
           assert_same_content XX.targets(@page, @page.box1), @page.box1.contents
@@ -271,7 +271,7 @@ describe "Alias" do
             pieces.map(&:id).include?(c.id)
           }
           ::X  = Class.new(::Piece) do
-            alias_of :A, :filter => _filter
+            alias_of :A, filter: _filter
           end
           assert_same_content pieces, X.targets
         end
@@ -282,7 +282,7 @@ describe "Alias" do
           @page.save.reload
           allowable = AAA.all - @page.box1.contents.to_a
           ::X  = Class.new(::Piece) do
-            alias_of :AAA, :filter => proc { |choice, page, box| !box.include?(choice) }
+            alias_of :AAA, filter: proc { |choice, page, box| !box.include?(choice) }
           end
           assert_same_content allowable, X.targets(@page, @page.box1)
         end
@@ -290,7 +290,7 @@ describe "Alias" do
         it "allow for ensuring the uniqueness of the entries" do
           aaa = AAA.all
           ::X  = Class.new(::Piece) do
-            alias_of :AAA, :unique => true
+            alias_of :AAA, unique: true
           end
           @page.box1 << aaa.first
           @page.save.reload
@@ -324,9 +324,10 @@ describe "Alias" do
 
     describe "instances" do
       before do
-        @a_alias = AAlias.create(:target => a).reload
-        @aa_alias = AAAlias.create(:target => aa).reload
-        @aaa_alias = AAAAlias.create(:target => aaa1).reload
+        @alias_page = Page.create
+        @a_alias = @alias_page.box1 << AAlias.new(target: a)
+        @aa_alias = @alias_page.box1 << AAAlias.new(target: aa)
+        @aaa_alias = @alias_page.box1 << AAAAlias.new(target: aaa1)
       end
 
       it "have their own fields" do
@@ -404,10 +405,10 @@ describe "Alias" do
       @target.stubs(:hidden?).returns(false)
 
       @custom_alias_class = Class.new(::Page) do
-        alias_of proc { [target] }, :lookup => lambda { |id|
+        alias_of proc { [target] }, lookup: lambda { |id|
           return target if id == target_id
           nil
-        }, :slug => lambda { |target| target.title.to_url }
+        }, slug: lambda { |target| target.title.to_url }
       end
     end
     it "be creatable using a custom initializer" do
@@ -432,19 +433,19 @@ describe "Alias" do
 
   describe "Piece aliases" do
     it "be allowed to target pages" do
-      a = BBAlias.create(:target => bb)
+      a = BBAlias.create(target: bb)
       a.bb_field1.value.must_equal "BB"
     end
 
     it "not be loadable via their compound path when linked to a page" do
-      a = BBAlias.create(:target => bb)
+      a = BBAlias.create(target: bb)
       aliases.box1 << a
       aliases.save
       site["/aliases/bb"].must_be_nil
     end
 
     it "have their target's path attribute if they alias to a page type" do
-      a = BBAlias.create(:target => bb)
+      a = BBAlias.create(target: bb)
       a.path.must_equal bb.path
     end
   end
@@ -461,17 +462,17 @@ describe "Alias" do
         layout :c_alias
       end
 
-      c = CAlias.new(:target => aaa1)
+      c = CAlias.new(target: aaa1)
       c.render.must_equal "aaa1\n"
     end
 
     it "respond as a page" do
-      a = BAlias.create(:target => b, :slug => "balias")
+      a = BAlias.create(target: b, slug: "balias")
       assert a.page?
     end
 
     it "be discoverable via their compound path" do
-      a = BAlias.create(:target => b, :slug => "balias")
+      a = BAlias.create(target: b, slug: "balias")
       aliases.box1 << a
       aliases.save
       a.save
@@ -482,8 +483,8 @@ describe "Alias" do
     end
 
     it "update their path if their target's slug changes" do
-      al = BAlias.create(:target => b, :slug => "balias")
-      bl = BAlias.create(:target => b, :slug => "balias")
+      al = BAlias.create(target: b, slug: "balias")
+      bl = BAlias.create(target: b, slug: "balias")
       aliases.box1 << al
       al.box1 << bl
       aliases.save
@@ -501,22 +502,19 @@ describe "Alias" do
     end
 
     it "include target values in serialisation" do
-      al = BAlias.create(:target => b)
+      al = aliases.box1 << BAlias.new(target: b)
       al.export[:target].must_equal b.shallow_export(nil)
     end
 
     it "include target values in entry serialisation" do
-      al = BAlias.create(:target => b)
-      aliases.box1 << al
+      al = aliases.box1 << BAlias.new(target: b)
       aliases.save
       al.entry.export[:target].must_equal b.shallow_export(nil)
     end
 
     it "update their path if their parent's path changes" do
-      al = BAlias.create(:target => b, :slug => "balias")
-      bl = BAlias.create(:target => b, :slug => "balias")
-      aliases.box1 << al
-      al.box1 << bl
+      al = aliases.box1 << BAlias.new(target: b, slug: "balias")
+      bl = al.box1 << BAlias.new(target: b, slug: "balias")
       aliases.save
       al.save
       al.reload
@@ -531,8 +529,7 @@ describe "Alias" do
     end
 
     it "show in the parent's list of children" do
-      al = BAlias.create(:target => b, :slug => "balias")
-      aliases.box1 << al
+      al = aliases.box1 << BAlias.new(target: b, slug: "balias")
       aliases.save
       al.save
       al.reload
@@ -542,8 +539,7 @@ describe "Alias" do
     end
 
     it "render the using target's layout when accessed via the path and no local layouts defined" do
-      al = BAlias.create(:target => b, :slug => "balias")
-      aliases.box1 << al
+      al = aliases.box1 << BAlias.new(target: b, slug: "balias")
       aliases.save
       al.reload
       al.render.must_equal b.render
@@ -551,8 +547,7 @@ describe "Alias" do
 
     it "render with locally defined style when available" do
       BAlias.layout :b_alias
-      al = BAlias.new(:target => b, :slug => "balias")
-      aliases.box1 << al
+      al = aliases.box1 << BAlias.new(target: b, slug: "balias")
       aliases.save
       al.reload
       al.render.must_equal "alternate\n"
@@ -560,8 +555,7 @@ describe "Alias" do
 
     it "have access to their target's page styles" do
       BAlias.layout :b_alias
-      a = BAlias.create(:target => b, :slug => "balias")
-      aliases.box1 << a
+      a = aliases.box1 << BAlias.new(target: b, slug: "balias")
       aliases.save
       a.reload
       a.layout = :b
@@ -575,7 +569,7 @@ describe "Alias" do
     end
 
     it "be linked to the target's visibility" do
-      a = BAlias.create(:target => b, :slug => "balias")
+      a = BAlias.create(target: b, slug: "balias")
       b.hide!
       b.reload
       a.reload
@@ -585,7 +579,7 @@ describe "Alias" do
 
     it 'is adopted from the target when added' do
       b.hide!
-      a = BAlias.new(:target => b, :slug => "balias")
+      a = BAlias.new(target: b, slug: "balias")
       root.box1 << a
       a.save
       attrs = a.attributes
