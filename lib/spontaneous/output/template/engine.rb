@@ -45,12 +45,24 @@ module Spontaneous::Output::Template
       @engine.template_location(template, format)
     end
 
-    def template_engine_class(cache)
-      ::Spontaneous::Output.template_engine_class(cache)
-    end
-
     def dynamic_template?(template_string)
       @engine.dynamic_template?(template_string)
+    end
+
+    def template_engine_class(cache)
+      if cache
+        cached_engine_class
+      else
+        uncached_engine_class
+      end
+    end
+
+    def cached_engine_class
+      Cutaneous::CachingEngine
+    end
+
+    def uncached_engine_class
+      Cutaneous::Engine
     end
   end
 

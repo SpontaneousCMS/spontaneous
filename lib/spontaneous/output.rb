@@ -73,22 +73,6 @@ module Spontaneous
       @write_compiled_scripts
     end
 
-    def self.template_engine_class(cache = cache_templates?)
-      if cache
-        cached_engine_class
-      else
-        uncached_engine_class
-      end
-    end
-
-    def self.cached_engine_class
-      Cutaneous::CachingEngine
-    end
-
-    def self.uncached_engine_class
-      Cutaneous::Engine
-    end
-
     # Used in the console or any other place where we want to render
     # content outside of the Rack applications or publishing
     # system
