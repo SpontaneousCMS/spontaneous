@@ -122,7 +122,11 @@ describe "Controllers" do
     let(:owner) { OwnerPage.create(uid: "the_owner") }
     let(:other) { OtherPage.create(uid: "the_other") }
     let(:ctrl)  { Spontaneous::Rack::PageController.new!(@site, owner, :html) }
-    let(:env)   { {Spontaneous::Rack::RENDERER => Spontaneous::Output.published_renderer(:html, @site, @site.published_revision) } }
+    let(:env)   {
+      {
+        Spontaneous::Rack::RENDERER => proc { |_output| Spontaneous::Output.published_renderer(:html, @site, @site.published_revision) }
+      }
+    }
 
     before do
       class ::OwnerPage < SubPage

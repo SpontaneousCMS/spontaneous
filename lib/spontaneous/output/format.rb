@@ -123,6 +123,10 @@ module Spontaneous::Output
         Spontaneous::Output::Template::Renderer.new(site)
       end
 
+      def preview_renderer(site)
+        Spontaneous::Output::Template::PreviewRenderer.new(site)
+      end
+
       def published_renderer(site, revision)
         Spontaneous::Output::Template::PublishedRenderer.new(site, revision)
       end

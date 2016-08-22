@@ -27,7 +27,7 @@ module Spontaneous::Rack::Middleware
 
       def initialize(app, site, options = {})
         super
-        @renderer = Spontaneous::Output.preview_renderer(@site)
+        @renderer = proc { |output| Spontaneous::Output.preview_renderer(output.format, @site) }
       end
 
       def call!(env)
@@ -63,12 +63,22 @@ module Spontaneous::Rack::Middleware
       end
 
       def renderer(revision)
-        return renderer_for_revision(revision) if development?
-        @renderer ||= renderer_for_revision(revision)
+        return uncached_renderer_for_revision(revision) if development?
+        cached_renderer_for_revision(revision)
       end
 
-      def renderer_for_revision(revision)
-        Spontaneous::Output.published_renderer(:html, @site, revision)
+      def cached_renderer_for_revision(revision)
+        renderer_cache[revision]
+      end
+
+      def renderer_cache
+        @renderer_cache ||= Hash.new { |h, revision|
+          h[revision] = uncached_renderer_for_revision(revision)
+        }
+      end
+
+      def uncached_renderer_for_revision(revision)
+        proc { |output| Spontaneous::Output.published_renderer(output.format, @site, revision) }
       end
 
       def development?

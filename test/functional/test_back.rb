@@ -1107,7 +1107,7 @@ describe "Back" do
 
   describe "/" do
     before do
-      @renderer = Spontaneous::Output.preview_renderer(site)
+      @renderer = Spontaneous::Output.preview_renderer(:html, site)
     end
 
     def get_preview(path, params = {}, env = {})

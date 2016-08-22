@@ -136,8 +136,8 @@ module Spontaneous::Rack
 
     private
 
-    def renderer
-      env[Spontaneous::Rack::RENDERER]
+    def renderer(output)
+      env[Spontaneous::Rack::RENDERER].call(output)
     end
 
     def fetch_page(locator)
@@ -187,7 +187,7 @@ module Spontaneous::Rack
         session: request.session,
         env: request.env
       })
-      output.render_using(renderer, locals)
+      output.render_using(renderer(output), locals)
     end
 
     def not_found_body

@@ -100,8 +100,8 @@ module Spontaneous
       format_class_map[format.to_sym].published_renderer(site, revision)
     end
 
-    def self.preview_renderer(site)
-      Template::PreviewRenderer.new(site)
+    def self.preview_renderer(format, site)
+      format_class_map[format.to_sym].preview_renderer(site)
     end
 
     def self.asset_url(file = nil)

@@ -213,12 +213,12 @@ module Spontaneous
         end
       end
 
-      def renderer
-        env[Rack::RENDERER]
+      def renderer(output)
+        env[Rack::RENDERER].call(output)
       end
 
       def render_page(page, output, local_params = {})
-        response.body = output.render_using(renderer, local_params.merge({
+        response.body = output.render_using(renderer(output), local_params.merge({
           :params  => params, # use sinatras indifferent params
           :request => request,
           :session => request.session
