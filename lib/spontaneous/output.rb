@@ -3,7 +3,7 @@ module Spontaneous
   module Output
     def self.create(output_name, options = {})
       options[:format] ||= generate_format(output_name)
-      c = (output_class(output_name, options)).tap do |klass|
+      (output_class(output_name, options)).tap do |klass|
         klass.configure(output_name, options)
       end
     end
@@ -22,7 +22,7 @@ module Spontaneous
         output_class = create_output_class(format_class_map[:plain], format)
         format_class_map[format] = output_class
       end
-      c = Class.new(output_class)
+      Class.new(output_class)
     end
 
     def self.real_format?(format)
