@@ -108,8 +108,14 @@ module Spontaneous::Output::Context
       __loader.format
     end
 
-    def __decode_params(param)
+    def __decode_params(param, coerce = true)
       return param if param.is_a?(String)
+      # The `to_renderable` interface allows for plain arrays to upgrade
+      # themselves to something 'renderable' but this is dangerous so we
+      # allow for it to be turned off.
+      if coerce && param.respond_to?(:to_renderable) && (renderable = param.to_renderable)
+        return __decode_params(renderable)
+      end
       if param.respond_to?(:render)
         param = __render_content(param) #render(param, param.template)
       end
