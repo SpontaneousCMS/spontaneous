@@ -61,13 +61,16 @@ module Spontaneous::Asset
       #
       # Returns a list of URLs
       def find(sources, options)
-        paths   = normalise_sources(sources, options)
+        find_assets(sources, options).map { |asset| to_url(asset, options[:development]) }
+      end
+
+      def find_assets(sources, options)
+        paths = normalise_sources(sources, options)
         if options[:development]
-          assets = paths.flat_map { |path| a = environment[path, bundle: true].to_a ; a.empty? ? [path] : a }
+          paths.flat_map { |path| a = environment[path, bundle: true].to_a ; a.empty? ? [path] : a }
         else
-          assets = paths.map { |path| environment[path] || path }
+          paths.map { |path| environment[path] || path }
         end
-        assets.map { |asset| to_url(asset, options[:development]) }
       end
 
       def normalise_sources(sources, options)
