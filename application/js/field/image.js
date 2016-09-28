@@ -145,6 +145,7 @@ Spontaneous.Field.Image = (function($, S) {
 			outer.append(img);
 			outer.append(waiting);
 			outer.append(dropper);
+			// outer.append(download);
 
 			dropper.append(this.progress_bar().parent());
 			this.waiting = waiting;
@@ -306,6 +307,7 @@ Spontaneous.Field.Image = (function($, S) {
 				if (files.length > 0) {
 					var file = files[0], url = this.createObjectURL(file);
 					img.attr('src', url).removeClass('empty');
+					info.removeClass('empty')
 					this.select_files(files);
 					img.attr('src', url);
 					this._edited_value = url;
@@ -325,17 +327,32 @@ Spontaneous.Field.Image = (function($, S) {
 				return false;
 			};
 
-			if (src === '') { img.addClass('empty'); }
+			if (src === '') {
+				img.addClass('empty');
+				info.addClass('empty');
+			}
 
 			var dropper = dom.div('.image-drop').click(onclick);
 
 			var actions = dom.div('.actions');
-			var clear = dom.a('.button.clear').text('Clear').click(function() {
-				img.css({width: dom.px(img.width()), height: dom.px(img.height())}).attr('src', '/@spontaneous/static/px.gif');
-				set_info('', 0, null, null);
-				this.clear_file();
-			}.bind(this));
-			actions.append(input, clear);
+			var value = this.get('value');
+			var original_src = function() {
+				if (value.original) {
+					return value.original.path
+				}
+			}();
+
+			actions.append(input);
+
+			if (original_src !== '') {
+				var clear = dom.a('.button.clear').text('Clear').click(function() {
+					img.css({width: dom.px(img.width()), height: dom.px(img.height())}).attr('src', '/@spontaneous/static/px.gif');
+					set_info('', 0, null, null);
+					this.clear_file();
+				}.bind(this));
+				var download = dom.a('.button.image-download-original', {href: original_src, download: true}).text('Download');
+				actions.append(clear, download);
+			}
 			drop_wrap.append(dropper);
 
 

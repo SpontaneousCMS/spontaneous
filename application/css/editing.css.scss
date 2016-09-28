@@ -207,8 +207,8 @@ $text-edit-width: 621px;
 			min-height: 70px;
 			text-align: center;
 			img {
-				// max-height: 300px;
-        max-width: 200px;
+				display: block;
+				max-width: 200px;
 				@extend .shadow;
 				cursor: pointer;
 			}
@@ -216,8 +216,18 @@ $text-edit-width: 621px;
 				outline: solid 1px $action;
 			}
 			img.empty {
-				width: 50%;
+				width: 100%;
 				height: 100px;
+				color: #ddd;
+				position: relative;
+				&:before {
+					position: absolute;
+					left: 0;
+					right: 0;
+					text-align: center;
+					line-height: 100px;
+					@include awesome-icon("\f03e");
+				}
 			}
 			.image-drop {
 				// @include rounded;
@@ -239,11 +249,23 @@ $text-edit-width: 621px;
 				.button {
 					display: block;
 				}
+				.button + .button {
+					margin-top: $unit / 2;
+				}
 				.button.clear {
 					@include button-color($highlight, $action);
-					// color: #5b5b5b;
-					// background-color: #d1d1d1;
 					width: 100%;
+					&:before {
+						@include awesome-icon("\f05e");
+						margin-right: $unit / 2;
+					}
+				}
+				.button.image-download-original {
+					@include button-color(#999);
+					&:before {
+						@include awesome-icon("\f019");
+						margin-right: $unit / 2;
+					}
 				}
 			}
 			.info {
@@ -266,6 +288,9 @@ $text-edit-width: 621px;
 					@include box-orient(row);
 					@include box-pack(space-between);
 				}
+			}
+			.info.empty {
+				display: none;
 			}
 			.landscape {
 				img {
