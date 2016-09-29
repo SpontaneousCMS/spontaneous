@@ -34,7 +34,7 @@ Gem::Specification.new do |s|
   s.add_dependency('launchy',         ['~> 2.1'])
   s.add_dependency('mime-types',      ['~> 3.0'])
   s.add_dependency('moneta',          ['~> 0.7'])
-  s.add_dependency('nokogiri',        ['~> 1.5'])
+  s.add_dependency('nokogiri',        ['~> 1.6'])
   s.add_dependency('posix-spawn',     ['~> 0.3.6'])
   s.add_dependency('public_suffix',   ['~> 1.0'])
   s.add_dependency('rack',            ['~> 1.5'])
