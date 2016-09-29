@@ -5,7 +5,7 @@ gemspec
 gem 'selenium-client', '~> 1.2', :platforms => [:mri_18]
 gem 'mocha', :require => false
 
-gem 'therubyracer',    '~> 0.11'
+gem 'execjs', '~> 2.4'
 
 gem 'pry'
 gem 'pry-doc'
