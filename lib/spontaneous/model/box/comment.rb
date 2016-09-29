@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'kramdown'
+
 module Spontaneous::Model::Box
   module Comment
     extend Spontaneous::Concern
@@ -11,7 +13,7 @@ module Spontaneous::Model::Box
 
       def schema_comment
         begin
-          Kramdown::Document.new(unindented_comment).to_html.strip
+          ::Kramdown::Document.new(unindented_comment).to_html.strip
         rescue => e
           puts "Error converting schema comment for #{self.class}:\n#{e}"
           ''
