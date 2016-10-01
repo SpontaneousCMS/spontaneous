@@ -69,7 +69,7 @@ module Spontaneous
           end
         end
       rescue Errno::ENOENT
-        puts "Failed to download #{content.type} id #{content.id}: #{ url }"
+        puts "Failed to download #{content.class.name} id #{content.id}: #{ url }"
       end
 
       def reprocess_field_original(content, field, original, site)
