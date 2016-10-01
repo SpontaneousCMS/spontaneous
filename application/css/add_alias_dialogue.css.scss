@@ -66,7 +66,8 @@
 	}
 	.type {
 		@include disable-text-select;
-		@include display-box;
+		@include display-flex;
+		@include align-items(center);
 		cursor: pointer;
     padding: $unit/2 $unit;
 		background-color: #fbfbfb;
@@ -86,5 +87,34 @@
 	}
 	.type + .type {
 		border-top: solid 1px #f2f2f2;
+	}
+	.alias-icon {
+		border: solid 1px #ddd;
+		width: 80px;
+		display: block;
+		img {
+			max-width: 100%;
+			display: block;
+		}
+	}
+	.alias-icon-blank {
+		img {
+			display: none;
+		}
+		border: solid 1px #ddd;
+		height: 45px;
+		position: relative;
+		color: #ddd;
+		&:before {
+			position: absolute;
+			left: 0;
+			right: 0;
+			text-align: center;
+			line-height: 45px;
+			@include awesome-icon("\f03e");
+		}
+	}
+	.alias-icon + .alias-title {
+		margin-left: $unit;
 	}
 }

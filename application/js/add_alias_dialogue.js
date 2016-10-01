@@ -188,7 +188,19 @@ Spontaneous.AddAliasDialogue = (function($, S, window) {
 				};
 			};
 			$.each(targets, function(i, targetData) {
-				var d = dom.div('.type').html(targetData.title), target = new Target(targetData, d);
+				var d = dom.div('.type');
+				if (targetData.icon && targetData.icon.processed_value && targetData.icon.processed_value.__ui__) {
+					var src = targetData.icon.processed_value.__ui__.src;
+					var iconClasses = '.alias-icon'
+					if (!src) {
+						iconClasses += '.alias-icon-blank';
+					}
+					var i = dom.div(iconClasses).append(dom.img({src: src}));
+					d.append(i)
+				}
+				var t = dom.div('.alias-title').html(targetData.title);
+				d.append(t)
+				var	target = new Target(targetData, d);
 				d.mouseup(function(e) {
 					if (!self.dragSelect) {
 						_select(target, i)(false);
