@@ -134,7 +134,7 @@ module Spontaneous
             end
           end if site
 
-          map('/assets') { run SiteAssets.new }
+          map(site.asset_mount_path) { run SiteAssets.new(site) }
 
           map '/media' do
             use ::Rack::Lint

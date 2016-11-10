@@ -36,8 +36,8 @@ module Spontaneous::Publishing
       @index.push(key)
     end
 
-    def asset_environment
-      @asset_environment ||= Spontaneous::Asset::Environment.new(self)
+    def asset_manifests
+      site.asset_manifests
     end
 
     # Called at the start of the publishing process to allow output stores to

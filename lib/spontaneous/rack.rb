@@ -76,6 +76,7 @@ module Spontaneous
     end
 
     autoload :Assets,               'spontaneous/rack/assets'
+    autoload :ApplicationAssetServer, 'spontaneous/rack/application_asset_server'
     autoload :AssetServer,          'spontaneous/rack/asset_server'
     autoload :Back,                 'spontaneous/rack/back'
     autoload :CSS,                  'spontaneous/rack/css'

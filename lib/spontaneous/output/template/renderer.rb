@@ -22,8 +22,8 @@ module Spontaneous::Output::Template
       false
     end
 
-    def asset_environment
-      @asset_environment ||= Spontaneous::Asset::Environment.new(self)
+    def asset_manifests
+      site.asset_manifests
     end
   end
 
@@ -62,10 +62,6 @@ module Spontaneous::Output::Template
         context.__output = output
         context._renderer = renderer_for_context
       end
-    end
-
-    def asset_environment
-      @asset_environment ||= Spontaneous::Asset::Environment::Preview.new(@site)
     end
 
     def renderer_for_context
@@ -139,10 +135,6 @@ module Spontaneous::Output::Template
       super(transaction.site, cache)
       @transaction = transaction
       Thread.current[:_render_cache] = {}
-    end
-
-    def asset_environment
-      transaction.asset_environment
     end
 
     def render_cache

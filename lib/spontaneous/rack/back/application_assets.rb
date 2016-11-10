@@ -25,7 +25,7 @@ module Spontaneous::Rack::Back
       environment = ::Sprockets::Environment.new(Spontaneous.application_dir ) do |env|
         env.append_path("#{dir}")
       end
-      Spontaneous::Rack::AssetServer.new(environment, charset)
+      Spontaneous::Rack::ApplicationAssetServer.new(environment, charset)
     end
   end
 end
