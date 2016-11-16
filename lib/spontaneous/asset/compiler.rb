@@ -18,12 +18,12 @@ module Spontaneous::Asset
       @manifest_filename = manifest_filename
     end
 
-    def run(fingerprinter = default_fingerprinter)
-      @compiled_manifest ||= compile_manifest(fingerprinter)
+    def run(fingerprinter = default_fingerprinter, progress = nil)
+      @compiled_manifest ||= compile_manifest(fingerprinter || default_fingerprinter, progress)
     end
 
-    def compile_manifest(fingerprinter)
-      write_manifest(copy_files(fingerprinter))
+    def compile_manifest(fingerprinter, progress)
+      write_manifest(copy_files(fingerprinter, progress))
     end
 
     def write_manifest(compiled_manifest)
@@ -37,15 +37,15 @@ module Spontaneous::Asset
       proc { |basename, md5, ext| "#{basename}-#{md5}#{ext}" }
     end
 
-    def copy_files(fingerprinter)
+    def copy_files(fingerprinter, progress)
       m = {}
       included = manifest.invert
       src_files.each do |src|
         if (logical = included[src])
-          copy_without_fingerprint(src)
+          copy_without_fingerprint(src, progress)
           m[logical] = src
         else
-          m[src] = copy_with_fingerprint(src, fingerprinter)
+          m[src] = copy_with_fingerprint(src, fingerprinter, progress)
         end
       end
       m
@@ -61,7 +61,7 @@ module Spontaneous::Asset
       path[(src_dir.length + 1)..-1]
     end
 
-    def copy_with_fingerprint(file, fingerprinter)
+    def copy_with_fingerprint(file, fingerprinter, progress)
       src = src_path(file)
       md5 = Digest::MD5.file(src).hexdigest
       dir = ::File.dirname(file)
@@ -69,12 +69,14 @@ module Spontaneous::Asset
       ext = ::File.extname(file)
       name = fingerprinter.call(::File.basename(file, ext), md5, ext)
       asset = ::File.join([dir, name].reject(&:empty?))
+      progress.call(file, asset) unless progress.nil?
       dst = dst_path(asset)
       copy(src, dst)
       asset
     end
 
-    def copy_without_fingerprint(file)
+    def copy_without_fingerprint(file, progress)
+      progress.call(file, file) unless progress.nil?
       src = src_path(file)
       dst = dst_path(file)
       copy(src, dst)

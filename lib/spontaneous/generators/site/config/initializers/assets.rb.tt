@@ -1,0 +1,44 @@
+# Configure our asset handling
+#
+# Add any commands that should be run as part of the development cycle below,
+# i.e. any asset pipeline watchers or helpers
+# This should be a hash of "command name" => proc where the proc takes one
+# argument which is the directory to build to and returns a string which is the
+# shell command to run.
+
+# Important: your command is not run through a shell, so:
+#
+# - all paths should be absolute
+# - avoid any variable interpolation
+
+Site.development_watchers = {
+  # webpack: proc { |output_dir|
+  #   yarn_bin = `yarn bin`.chomp
+  #   webpack_config = ::File.expand_path('../../../webpack.config.js', __FILE__)
+  #   "#{yarn_bin}/webpack --config '#{webpack_config}' --progress --watch --output-path='#{output_dir}'"
+  # },
+}
+
+# During deployment your assets will be pre-compiled and uploaded to the remote
+# server so that in there are no asset-compilation steps run on the production
+# server.
+
+# Add any asset compilation commands here.
+
+# Note: the output_dir value will be some temp dir during this stage, so it's
+# **essential** that your compilation process respects this value.
+
+Site.deploy_asset_compilation = {
+  # webpack: proc { |output_dir|
+  #   yarn_bin = `yarn bin`.chomp
+  #   webpack_config = ::File.expand_path('../../../webpack.config.js', __FILE__)
+  #   "#{yarn_bin}/webpack --config '#{webpack_config}' --progress --output-path='#{output_dir}' -p"
+  # },
+}
+
+# Optionally override the proc called during asset fingerprinting
+
+# Site.deploy_asset_fingerprint = proc { |base, md5, ext|
+#   "#{base}-#{md5}#{ext}"
+# }
+

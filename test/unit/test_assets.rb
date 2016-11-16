@@ -370,6 +370,21 @@ describe "Assets" do
       end
     end
 
+    it "should use the default fingerprinter if passed nil" do
+      manifest = compiler.run(nil)
+      compiled = {
+        "css/a.css" => "css/a-798ae4b63.css",
+        "css/b.css" => "css/b-63ab5f068.css",
+        "css/not_in_manifest.css" => "css/not_in_manifest-e27639ec152498da599e15630f1b1f41.css",
+        "js/a.js" => "js/a-5e2f65f63.js",
+        "js/b.js" => "js/b-8ae4b63fa.js",
+        "js/not_in_manifest.js" => "js/not_in_manifest-736b54bd070158b8a7e84b73217fac36.js",
+        "img/y.png" => "y-28ce8c9b9.png",
+        "not_in_manifest.png" => "not_in_manifest-9e7a728b7e18f1e236af7ffe97beaa03.png",
+      }
+      manifest.must_equal compiled
+    end
+
     it "should allow for defining a custom fingerprint naming proc" do
       manifest = compiler.run(proc { |base, md5, ext| "#{md5[0..5]}_#{base}#{ext}" })
       compiled = {
