@@ -10,7 +10,7 @@ class Spontaneous::Site
     end
 
     def asset_manifests
-      @asset_manifests ||= Spontaneous::Asset::Manifests.new(paths(:compiled_assets), asset_mount_path)
+      Spontaneous::Asset::Manifests.new(paths(:compiled_assets), asset_mount_path)
     end
   end
 end

@@ -7,7 +7,7 @@ module Spontaneous::Output::Helpers
     extend self
 
     def stylesheet_helper
-      @stylesheet_helper ||= Spontaneous::Asset::TagHelper.new(site, site.asset_manifests, '.css')
+      @stylesheet_helper ||= Spontaneous::Asset::TagHelper.new(site, asset_manifests, '.css')
     end
 
     def stylesheets(*args)

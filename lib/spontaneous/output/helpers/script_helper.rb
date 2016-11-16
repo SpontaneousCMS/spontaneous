@@ -9,7 +9,7 @@ module Spontaneous::Output::Helpers
     extend self
 
     def script_helper
-      @script_helper ||= Spontaneous::Asset::TagHelper.new(site, site.asset_manifests, '.js')
+      @script_helper ||= Spontaneous::Asset::TagHelper.new(site, asset_manifests, '.js')
     end
 
     def scripts(*args)
