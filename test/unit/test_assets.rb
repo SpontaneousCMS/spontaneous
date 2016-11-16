@@ -317,4 +317,91 @@ describe "Assets" do
       ::File.read(read_path)
     end
   end
+
+  describe "deployment compiler" do
+    let(:src) { File.expand_path("../../fixtures/assets/private", __FILE__) }
+    let(:dest) { Dir.mktmpdir }
+    let(:compiler) { Spontaneous::Asset::Compiler.new(src, dest) }
+    let(:manifest_file) { File.join(src, 'manifest.json') }
+    let(:manifest_json) { File.read(manifest_file) }
+    let(:manifest) { JSON.parse(manifest_json) }
+
+    after do
+      FileUtils.rm_r(dest)
+    end
+
+    it "should raise an error if src dir doesn't exist" do
+      assert_raises(RuntimeError) { Spontaneous::Asset::Compiler.new("/watchtadoing/now", dest) }
+    end
+
+    it "should copy any files in the manifest" do
+      compiler.run
+      manifest.values.each do |asset|
+        assert File.exist?(File.join(dest, asset)), "#{asset} does not exist"
+      end
+    end
+
+    it "should copy & fingerprint any files not in the manifest" do
+      compiler.run
+      [
+        "css/not_in_manifest-e27639ec152498da599e15630f1b1f41.css",
+        "js/not_in_manifest-736b54bd070158b8a7e84b73217fac36.js",
+        "not_in_manifest-9e7a728b7e18f1e236af7ffe97beaa03.png",
+      ].each do |asset|
+        assert File.exist?(File.join(dest, asset)), "#{asset} does not exist"
+      end
+    end
+
+    it "should generate a manifest that includes all files" do
+      manifest = compiler.run
+      compiled = {
+        "css/a.css" => "css/a-798ae4b63.css",
+        "css/b.css" => "css/b-63ab5f068.css",
+        "css/not_in_manifest.css" => "css/not_in_manifest-e27639ec152498da599e15630f1b1f41.css",
+        "js/a.js" => "js/a-5e2f65f63.js",
+        "js/b.js" => "js/b-8ae4b63fa.js",
+        "js/not_in_manifest.js" => "js/not_in_manifest-736b54bd070158b8a7e84b73217fac36.js",
+        "img/y.png" => "y-28ce8c9b9.png",
+        "not_in_manifest.png" => "not_in_manifest-9e7a728b7e18f1e236af7ffe97beaa03.png",
+      }
+      manifest.must_equal compiled
+      compiled.values.each do |asset|
+        assert File.exist?(File.join(dest, asset)), "#{asset} does not exist"
+      end
+    end
+
+    it "should allow for defining a custom fingerprint naming proc" do
+      manifest = compiler.run(proc { |base, md5, ext| "#{md5[0..5]}_#{base}#{ext}" })
+      compiled = {
+        "css/a.css" => "css/a-798ae4b63.css",
+        "css/b.css" => "css/b-63ab5f068.css",
+        "css/not_in_manifest.css" => "css/e27639_not_in_manifest.css",
+        "js/a.js" => "js/a-5e2f65f63.js",
+        "js/b.js" => "js/b-8ae4b63fa.js",
+        "js/not_in_manifest.js" => "js/736b54_not_in_manifest.js",
+        "img/y.png" => "y-28ce8c9b9.png",
+        "not_in_manifest.png" => "9e7a72_not_in_manifest.png",
+      }
+      manifest.must_equal compiled
+      compiled.values.each do |asset|
+        assert File.exist?(File.join(dest, asset)), "#{asset} does not exist"
+      end
+    end
+
+    it "should write the manifest to the destination dir" do
+      compiler.run
+      compiled = {
+        "css/a.css" => "css/a-798ae4b63.css",
+        "css/b.css" => "css/b-63ab5f068.css",
+        "css/not_in_manifest.css" => "css/not_in_manifest-e27639ec152498da599e15630f1b1f41.css",
+        "js/a.js" => "js/a-5e2f65f63.js",
+        "js/b.js" => "js/b-8ae4b63fa.js",
+        "js/not_in_manifest.js" => "js/not_in_manifest-736b54bd070158b8a7e84b73217fac36.js",
+        "img/y.png" => "y-28ce8c9b9.png",
+        "not_in_manifest.png" => "not_in_manifest-9e7a728b7e18f1e236af7ffe97beaa03.png",
+      }
+      m = JSON.parse(::File.read(::File.join(dest, 'manifest.json')))
+      m.must_equal compiled
+    end
+  end
 end
