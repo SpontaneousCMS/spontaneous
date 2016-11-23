@@ -30,9 +30,11 @@ module Spontaneous::Rack::Middleware
       @active && @cooldown && (Time.now > (@last + @cooldown))
     end
 
+    RELOAD_MUTEX = Mutex.new
+
     def reload
       if Thread.list.size > 1
-        Thread.exclusive{ reload! }
+        RELOAD_MUTEX.synchronize { reload! }
       else
         reload!
       end
