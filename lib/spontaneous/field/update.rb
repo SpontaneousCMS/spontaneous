@@ -46,7 +46,7 @@ module Spontaneous::Field
     end
 
     def writable_fields
-      @fields.reject { |f, v| !f.writable?(@user)}
+      @fields.reject { |f, v| f.nil? || !f.writable?(@user) }
     end
 
     def launch_asynchronous_update(fields)
