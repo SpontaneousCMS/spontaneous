@@ -516,7 +516,7 @@ describe "Publishing Pipeline" do
     let(:assets)        { manifest.assets }
 
     def assert_assets(revision)
-      assets.length.must_equal 7
+      assets.length.must_equal 8
       output = @output_store.revision(revision)
       assets.each do |logical_path, abs_path|
         assert output.static_asset(logical_path), "Asset '#{logical_path}' missing"
@@ -541,12 +541,12 @@ describe "Publishing Pipeline" do
     it "steps the progress once" do
       progress = mock
       progress.stubs(:stage)
-      progress.expects(:step).with(1, instance_of(String)).times(7)
+      progress.expects(:step).with(1, instance_of(String)).times(8)
       run_step(progress)
     end
 
     it "gives its step count as the number of assets" do
-      step.count(transaction).must_equal 7
+      step.count(transaction).must_equal 8
     end
 
     it "copies compiled assets to the revision's asset dir" do
