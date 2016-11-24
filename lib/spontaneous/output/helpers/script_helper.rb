@@ -1,6 +1,5 @@
 # encoding: UTF-8
 
-require 'coffee-script'
 require 'simultaneous'
 
 module Spontaneous::Output::Helpers

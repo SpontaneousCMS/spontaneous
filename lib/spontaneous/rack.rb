@@ -83,7 +83,6 @@ module Spontaneous
     autoload :CacheableFile,        'spontaneous/rack/cacheable_file'
     autoload :EventSource,          'spontaneous/rack/event_source'
     autoload :Front,                'spontaneous/rack/front'
-    autoload :JS,                   'spontaneous/rack/js'
     autoload :Middleware,           'spontaneous/rack/middleware'
     autoload :OutputStore,          'spontaneous/rack/output_store'
     autoload :PageController,       'spontaneous/rack/page_controller'

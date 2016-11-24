@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
   s.require_paths = %w[lib]
 
   s.add_dependency('activesupport',   ['~> 4.0'])
-  s.add_dependency('coffee-script',   ['~> 2.2'])
   s.add_dependency('bcrypt',          ['~> 3.1'])
   s.add_dependency('bundler',         ['~> 1.5'])
   s.add_dependency('cutaneous',       ['~> 0.3'])
@@ -45,7 +44,6 @@ Gem::Specification.new do |s|
   s.add_dependency('sinatra',         ['~> 1.3'])
   s.add_dependency('skeptick',        ['~> 0.1.1'])
   s.add_dependency('sprockets',       ['~> 2.9'])
-  s.add_dependency('sprockets-sass',  ['~> 1.3'])
   s.add_dependency('stringex',        ['=  1.3'])
   s.add_dependency('thin',            ['~> 1.2'])
   s.add_dependency('thor',            ['~> 0.16'])

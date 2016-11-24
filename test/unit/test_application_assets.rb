@@ -28,12 +28,7 @@ describe "AssetBundler" do
       compiled_js_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.js"].first
       js = File.read(compiled_js_path)
       js.must_match /var simple = "yes";/
-      js.must_match /var basic/
-      js.must_match /var complex/
-      js.must_match /complex = "#{Date.today.day}"/
       js.must_match /var simple_subdir = "yes";/
-      js.must_match /var complex_subdir;/
-      js.must_match /complex_subdir = "subdir\/#{Date.today.day}";/
     end
 
     it "produce compressed Javascript on demand" do
@@ -42,9 +37,7 @@ describe "AssetBundler" do
       compiled_js_path = Dir["#{@site.root}/public/@spontaneous/assets/spontaneous*.js"].first
       js = File.read(compiled_js_path)
       # hard to test because we don't know exactly what the uglifier is going to do
-      js.must_match /var (\w);\1="yes"/
-      js.must_match /var (\w);\1="#{Date.today.day}"/
-      js.must_match /var (\w);\1="subdir\/#{Date.today.day}"/
+      js.must_match /var simple="yes",simple_subdir="yes"/
     end
 
     it "compile CSS into any destination directory" do

@@ -1203,13 +1203,6 @@ describe "Back" do
       last_response.body.must_match /color: #aaa/
     end
 
-    it "compile CoffeeScript" do
-      get "/assets/js/not_in_manifest.js"
-      assert last_response.ok?, "Should return 200 but got #{last_response.status}"
-      last_response.body.must_match /function not_in_manifest/
-      last_response.content_type.must_equal "application/javascript"
-    end
-
     it "accept POST requests" do
       Project.expects(:posted!).with(project1)
       Project.controller do
