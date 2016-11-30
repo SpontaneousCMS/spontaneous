@@ -15,6 +15,12 @@ module Spontaneous::Asset
       manifest[path]
     end
 
+    def path(path)
+      return path unless manifest.key?(path)
+      logical = manifest[path]
+      ::File.join(root, logical)
+    end
+
     def assets
       Hash[manifest.values.map { |asset| [asset, absolute_path(asset)] }]
     end

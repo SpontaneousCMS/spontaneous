@@ -143,6 +143,17 @@ describe "Assets" do
     )
   }
 
+  describe "manifests" do
+    let(:manifests) { Spontaneous::Asset::Manifests.new([asset_root], '/assets') }
+
+    it "can return an absolute path to an asset file" do
+      manifests.path('js/a.js').must_equal ::File.join(asset_root, 'js/a-5e2f65f63.js')
+    end
+    it "can return an absolute path to an asset file not in the manifest" do
+      manifests.path('js/not_in_manifest.js').must_equal ::File.join(asset_root, 'js/not_in_manifest.js')
+    end
+  end
+
   describe "development" do
     let(:app) { Spontaneous::Rack::Back.application(site) }
     let(:context) { preview_context }

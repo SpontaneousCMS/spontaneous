@@ -16,6 +16,10 @@ module Spontaneous::Asset
       path
     end
 
+    def path(path)
+      ::File.join(root, path)
+    end
+
     def assets
       Hash[paths.map { |abs_path| [relative_path(abs_path), abs_path] }]
     end

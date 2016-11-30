@@ -29,6 +29,13 @@ module Spontaneous::Asset
       path
     end
 
+    def path(path)
+      manifest = manifests.detect { |m| m.match?(path) }
+      if manifest && (file = manifest.path(path))
+        return file
+      end
+    end
+
     # A list of all our asset files
     def assets
       uniq = {}
