@@ -32,6 +32,14 @@ module Spontaneous
         end
       end
 
+      def box_ids
+        category_ids(:box)
+      end
+
+      def category_ids(category)
+        uids.select { |uid| uid.category == category }
+      end
+
       def load_map
         if exists? && (map = parse_map)
           map.each do | uid, reference |
@@ -84,6 +92,10 @@ module Spontaneous
         else
           uids.create(obj.schema_name)
         end
+      end
+
+      def box_ids
+        []
       end
 
       def orphaned_ids
@@ -409,6 +421,10 @@ module Spontaneous
 
       def groups
         @groups ||= Hash.new { |h, k| h[k] = [] }
+      end
+
+      def box_ids
+        map.box_ids
       end
 
       def add_group_member(schema_class, group_names)

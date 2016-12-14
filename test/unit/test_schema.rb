@@ -164,6 +164,9 @@ describe "Schema" do
         it "return layouts" do
           @site.schema.to_class("llllllllllll").must_equal SchemaClass.layout_prototypes[:clean]
         end
+        it "can return a list of all box schema ids" do
+          @site.schema.box_ids.must_equal  [@uids["bbbbbbbbbbbb"]]
+        end
       end
 
     end
