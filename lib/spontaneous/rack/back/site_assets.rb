@@ -6,20 +6,22 @@ module Spontaneous::Rack::Back
     end
 
     def call(env)
-      app.call(env)
-    end
-
-    def app
-      @app ||= build_app(@roots)
-    end
-
-    def build_app(roots)
-      Rack::Builder.new do
-        roots.each do |root|
-          use ::Rack::Static, urls: ['/'], root: root
-        end
-        run lambda { |env| [404, {'Content-Type' => 'text/plain'}, ['Not found']] }
+      if (resp = find(env))
+        return resp
       end
+      [404, {'Content-Type' => 'text/plain'}, ['Not found']]
+    end
+
+    def find(env)
+      apps.map { |app| app.call(env) }.detect { |code, headers, body| code == 200 }
+    end
+
+    def apps
+      @apps ||= build_apps(@roots)
+    end
+
+    def build_apps(roots)
+      roots.map { |root| ::Rack::Static.new(nil, urls: ['/'], root: root) }
     end
   end
 end
