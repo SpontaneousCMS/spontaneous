@@ -18,21 +18,37 @@ module Spontaneous
     end
 
     def add(category, *paths)
+      options = paths.extract_options!
       self[category].concat(paths)
+      ensure_paths(paths) if options[:ensure]
     end
 
     def expanded(category)
       self[category].map do |path, glob|
-        path = Pathname.new(path)
-        path = Pathname.new(@root) + path unless (path.absolute? && path.exist?)
-        if path.exist?
-          path = path.cleanpath
-          path += glob if glob
-          path.to_s
+        abs_path = expand_path(path)
+        if abs_path.exist?
+          abs_path += glob if glob
+          abs_path.to_s
         else
           nil
         end
       end.compact
+    end
+
+    def ensure_paths(paths)
+      paths.each do |path|
+        expand_path(path).mkpath
+      end
+    end
+
+    def expand_path(path)
+      p = Pathname.new(path)
+      p = Pathname.new(@root).join(p) unless (p.absolute? && p.exist?)
+      if p.exist?
+        p.cleanpath
+      else
+        p
+      end
     end
   end # Paths
 end # Spontaneous
