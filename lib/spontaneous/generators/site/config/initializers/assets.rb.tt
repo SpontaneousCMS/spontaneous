@@ -11,12 +11,18 @@
 # - all paths should be absolute
 # - avoid any variable interpolation
 
+# A convenience method to provide a default webpack command
+def webpack_base(output_dir)
+  yarn_bin = `yarn bin`.chomp
+  webpack_config = ::File.expand_path('./webpack.config.js')
+
+  "#{yarn_bin}/webpack --config '#{webpack_config}' --progress --color --output-path='#{output_dir}'"
+end
+
 Site.development_watchers = {
   # webpack: proc { |output_dir|
-  #   yarn_bin = `yarn bin`.chomp
-  #   webpack_config = ::File.expand_path('../../../webpack.config.js', __FILE__)
-  #   "#{yarn_bin}/webpack --config '#{webpack_config}' --progress --watch --output-path='#{output_dir}'"
-  # },
+  #   "#{webpack_base(output_dir)} --watch"
+  # }
 }
 
 # During deployment your assets will be pre-compiled and uploaded to the remote
@@ -29,11 +35,10 @@ Site.development_watchers = {
 # **essential** that your compilation process respects this value.
 
 Site.deploy_asset_compilation = {
-  # webpack: proc { |output_dir|
-  #   yarn_bin = `yarn bin`.chomp
-  #   webpack_config = ::File.expand_path('../../../webpack.config.js', __FILE__)
-  #   "#{yarn_bin}/webpack --config '#{webpack_config}' --progress --output-path='#{output_dir}' -p"
-  # },
+  webpack: proc { |output_dir|
+    # -p means minify
+    "#{webpack_base(output_dir)} -p"
+  }
 }
 
 # Optionally override the proc called during asset fingerprinting
