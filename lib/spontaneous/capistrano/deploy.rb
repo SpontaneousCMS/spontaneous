@@ -23,7 +23,7 @@ Capistrano::Configuration.instance(:must_exist).load do
       tgz_file = "assets-#{release_name}.tar.gz"
       system "tar cz -f #{base_dir}/#{tgz_file} -C #{base_dir} --exclude=#{tgz_file} ."
       upload("#{base_dir}/#{tgz_file}", File.join(latest_release, tgz_file))
-      run "tar xz -C #{latest_release} -f #{File.join(latest_release, tgz_file)} && rm #{File.join(latest_release, tgz_file)}"
+      run "tar xz -C #{latest_release} -f #{File.join(latest_release, tgz_file)} && chmod 0755 #{latest_release} && rm #{File.join(latest_release, tgz_file)}"
     end
 
     task :symlink_cache do
