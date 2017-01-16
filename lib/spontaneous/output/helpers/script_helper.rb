@@ -1,29 +1,20 @@
 # encoding: UTF-8
 
-require 'coffee-script'
 require 'simultaneous'
 
 module Spontaneous::Output::Helpers
   module ScriptHelper
+
     extend self
 
-    def scripts(*args)
-      script_urls(*args).map { |script|
-        script_tag(script)
-      }.join("\n")
+    def script_helper
+      @script_helper ||= Spontaneous::Asset::TagHelper.new(site, asset_manifests, '.js')
     end
 
-    def script_urls(*args)
-      unless site.model.mapper.editable?
-        begin
-          ::Simultaneous.send_event('publish_progress', {:state => "compiling assets", :progress => "*"}.to_json)
-        rescue Errno::ECONNREFUSED
-        rescue Errno::ENOENT
-        end
-      end
-      options = args.extract_options!
-      options.update(:development => development?)
-      _asset_environment.js(args.flatten, options)
+    def scripts(*args)
+      script_helper.urls(*args).map { |script|
+        script_tag(script)
+      }.join("\n")
     end
 
     alias_method :script, :scripts

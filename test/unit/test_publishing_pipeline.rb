@@ -506,27 +506,25 @@ describe "Publishing Pipeline" do
   end
 
   describe "CopyAssets" do
+    let(:asset_root) { File.expand_path("../../fixtures/assets/private", __FILE__) }
     let(:step) { Spontaneous::Publishing::Steps::CopyAssets }
     let(:application_path) { Pathname.new(File.expand_path("../../fixtures/example_application", __FILE__)) }
     let(:fixtures_path) { application_path + "assets" }
     let(:revision_root) { @site.revision_dir(revision) }
     let(:development)   { false }
-    let(:environment)   { Spontaneous::Asset::Environment.publishing(@site, revision, development) }
-    let(:manifest)      { environment.manifest }
-    let(:assets)        { environment.manifest.assets }
+    let(:manifest)      { site.asset_manifests }
+    let(:assets)        { manifest.assets }
 
     def assert_assets(revision)
-      assets.length.must_equal 3
+      assets.length.must_equal 8
       output = @output_store.revision(revision)
-      assets.each do |logical_path, asset|
-        assert output.static_asset(File.join('/', asset)), "Asset '#{asset}' missing"
+      assets.each do |logical_path, abs_path|
+        assert output.static_asset(logical_path), "Asset '#{logical_path}' missing"
       end
     end
 
     before do
-      FileUtils.cp_r(fixtures_path, @site.root)
-      File.exist?(@site.root / 'assets/css/site.css.scss').must_equal true
-      manifest.compile!('css/site.css', 'i/xes.png')
+      site.paths.add :compiled_assets, asset_root
     end
 
     it "has the right shortcut name" do
@@ -543,12 +541,12 @@ describe "Publishing Pipeline" do
     it "steps the progress once" do
       progress = mock
       progress.stubs(:stage)
-      progress.expects(:step).with(1, instance_of(String)).times(3)
+      progress.expects(:step).with(1, instance_of(String)).times(8)
       run_step(progress)
     end
 
     it "gives its step count as the number of assets" do
-      step.count(transaction).must_equal 3
+      step.count(transaction).must_equal 8
     end
 
     it "copies compiled assets to the revision's asset dir" do

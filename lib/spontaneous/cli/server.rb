@@ -54,6 +54,12 @@ module Spontaneous
         processes.each do |process|
           engine.register(process, "#{binary} server #{process} --root=#{root}")
         end
+        site = prepare! :start
+
+        output_dir = site.paths(:compiled_assets).first
+        site.development_watchers.each do |name, cmd|
+          engine.register(name, p(cmd.call(output_dir)))
+        end
 
         engine.start
       end

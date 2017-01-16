@@ -6,23 +6,14 @@ module Spontaneous::Output::Helpers
   module StylesheetHelper
     extend self
 
-    def stylesheets(*args)
-      stylesheet_urls(*args).map { |stylesheet|
-        stylesheet_tag(stylesheet)
-      }.join("\n")
+    def stylesheet_helper
+      @stylesheet_helper ||= Spontaneous::Asset::TagHelper.new(site, asset_manifests, '.css')
     end
 
-    def stylesheet_urls(*args)
-      unless site.model.mapper.editable?
-        begin
-          ::Simultaneous.send_event('publish_progress', {:state => "compiling assets", :progress => "*"}.to_json)
-        rescue Errno::ECONNREFUSED
-        rescue Errno::ENOENT
-        end
-      end
-      options = args.extract_options!
-      options.update(:development => development?)
-      _asset_environment.css(args.flatten, options)
+    def stylesheets(*args)
+      stylesheet_helper.urls(*args).map { |stylesheet|
+        stylesheet_tag(stylesheet)
+      }.join("\n")
     end
 
     alias_method :stylesheet, :stylesheets

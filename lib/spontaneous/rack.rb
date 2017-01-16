@@ -76,13 +76,13 @@ module Spontaneous
     end
 
     autoload :Assets,               'spontaneous/rack/assets'
+    autoload :ApplicationAssetServer, 'spontaneous/rack/application_asset_server'
     autoload :AssetServer,          'spontaneous/rack/asset_server'
     autoload :Back,                 'spontaneous/rack/back'
     autoload :CSS,                  'spontaneous/rack/css'
     autoload :CacheableFile,        'spontaneous/rack/cacheable_file'
     autoload :EventSource,          'spontaneous/rack/event_source'
     autoload :Front,                'spontaneous/rack/front'
-    autoload :JS,                   'spontaneous/rack/js'
     autoload :Middleware,           'spontaneous/rack/middleware'
     autoload :OutputStore,          'spontaneous/rack/output_store'
     autoload :PageController,       'spontaneous/rack/page_controller'

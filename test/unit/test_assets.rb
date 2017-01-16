@@ -58,34 +58,26 @@ describe "Assets" do
     end
   end
 
-  def asset_digest(asset_relative_path)
-    digest = context._asset_environment.environment.digest
-    digest.update(File.read(File.join(fixture_root, asset_relative_path)))
-    digest.hexdigest
-  end
-
-  let(:y_png_digest) { asset_digest('public2/i/y.png') }
-
   start do
-    fixture_root = File.expand_path("../../fixtures/assets", __FILE__)
+    asset_root = File.expand_path("../../fixtures/assets/private", __FILE__)
     site = setup_site
-    site.paths.add :assets, fixture_root / "public1", fixture_root / "public2"
+    site.paths.add :compiled_assets, asset_root
     site.config.tap do |c|
       c.auto_login = 'root'
     end
     site.output_store(:Memory)
     Spontaneous::Permissions::User.delete
-    user = Spontaneous::Permissions::User.create(:email => "root@example.com", :login => "root", :name => "root name", :password => "rootpass")
-    user.update(:level => Spontaneous::Permissions[:editor])
+    user = Spontaneous::Permissions::User.create(email: "root@example.com", login: "root", name: "root name", password: "rootpass")
+    user.update(level: Spontaneous::Permissions[:editor])
     user.save.reload
     key = user.generate_access_key("127.0.0.1")
 
-    Spontaneous::Permissions::User.stubs(:[]).with(:login => 'root').returns(user)
+    Spontaneous::Permissions::User.stubs(:[]).with(login: 'root').returns(user)
     Spontaneous::Permissions::User.stubs(:[]).with(user.id).returns(user)
     Spontaneous::Permissions::AccessKey.stubs(:authenticate).with(key.key_id).returns(key)
 
     let(:site) { site }
-    let(:fixture_root) { fixture_root }
+    let(:asset_root) { asset_root }
     let(:user) { user }
     let(:key) { key }
   end
@@ -139,59 +131,87 @@ describe "Assets" do
     end
   end
 
+  let(:assets) {
+    %w(
+      js/a-5e2f65f63.js
+      js/b-8ae4b63fa.js
+      css/a-798ae4b63.css
+      css/b-63ab5f068.css
+      css/not_in_manifest.css
+      js/not_in_manifest.js
+      y-28ce8c9b9.png
+    )
+  }
+
+  describe "manifests" do
+    let(:manifests) { Spontaneous::Asset::Manifests.new([asset_root], '/assets') }
+
+    it "can return an absolute path to an asset file" do
+      manifests.path('js/a.js').must_equal ::File.join(asset_root, 'js/a-5e2f65f63.js')
+    end
+    it "can return an absolute path to an asset file not in the manifest" do
+      manifests.path('js/not_in_manifest.js').must_equal ::File.join(asset_root, 'js/not_in_manifest.js')
+    end
+  end
+
   describe "development" do
-    let(:context) { development_context }
+    let(:app) { Spontaneous::Rack::Back.application(site) }
+    let(:context) { preview_context }
 
-    let(:a_js_digest) { asset_digest('public1/js/a.js') }
-    let(:b_js_digest) { asset_digest('public2/js/b.js') }
-    let(:c_js_digest) { asset_digest('public2/js/c.js') }
-    let(:x_js_digest) { asset_digest('public1/x.js') }
-    # these are compiled so fairly complex to calculate their digests
-    # not impossible, but annoying
-    let(:n_js_digest) { 'a5c86b004242d16e0dbf818068bbb248' }
-    let(:m_js_digest) { 'c0f2e1c2a7d1cc9666ccb48cc9fd610e' }
-    let(:all_js_digest) { '9759f54463d069b39d9c04c3e1d63745' }
-
-    let(:a_css_digest) { 'b4ec507466566b839328b924893e80fb' }
-    let(:b_css_digest) { '97b252913f48c160b1eed120f7544203' }
-    let(:c_css_digest) { '3fcc1da2378a42e97cbd11cb85b8115a' }
-    let(:x_css_digest) { '88b3052bb5d7723b6a6a8b628fbee34e' }
-    let(:all_css_digest) { '9bac5a609f816594005b07a3a8aa2368' }
-
-    it "includes all js dependencies" do
-      result = context.scripts('js/all', 'js/m', 'js/c', 'x')
+    it "handles scripts passed as an array" do
+      result = context.scripts(['js/a', 'js/b'])
       result.must_equal [
-        %|<script type="text/javascript" src="/assets/js/a.js?body=1&#{a_js_digest}"></script>|,
-        %|<script type="text/javascript" src="/assets/js/b.js?body=1&#{b_js_digest}"></script>|,
-        %|<script type="text/javascript" src="/assets/js/n.js?body=1&#{n_js_digest}"></script>|,
-        %|<script type="text/javascript" src="/assets/js/all.js?body=1&#{all_js_digest}"></script>|,
-        %|<script type="text/javascript" src="/assets/js/m.js?body=1&#{m_js_digest}"></script>|,
-        %|<script type="text/javascript" src="/assets/js/c.js?body=1&#{c_js_digest}"></script>|,
-        %|<script type="text/javascript" src="/assets/x.js?body=1&#{x_js_digest}"></script>|
+        %|<script type="text/javascript" src="/assets/js/a-5e2f65f63.js"></script>|,
+        %|<script type="text/javascript" src="/assets/js/b-8ae4b63fa.js"></script>|,
       ].join("\n")
     end
 
-    it "doesn't bundle js files" do
-      get "/assets/js/all.js?body=1"
-      result = last_response.body
-      result.wont_match /elvis/
-    end
-
-    it "includes all css dependencies" do
-      result = context.stylesheets('css/all', 'css/c', 'x')
+    it "includes all script dependencies" do
+      result = context.scripts('js/a', 'js/b')
       result.must_equal [
-        %|<link rel="stylesheet" href="/assets/css/b.css?body=1&#{b_css_digest}" />|,
-        %|<link rel="stylesheet" href="/assets/css/a.css?body=1&#{a_css_digest}" />|,
-        %|<link rel="stylesheet" href="/assets/css/all.css?body=1&#{all_css_digest}" />|,
-        %|<link rel="stylesheet" href="/assets/css/c.css?body=1&#{c_css_digest}" />|,
-        %|<link rel="stylesheet" href="/assets/x.css?body=1&#{x_css_digest}" />|
+        %|<script type="text/javascript" src="/assets/js/a-5e2f65f63.js"></script>|,
+        %|<script type="text/javascript" src="/assets/js/b-8ae4b63fa.js"></script>|,
       ].join("\n")
     end
 
-    it "doesn't bundle js files" do
-      get "/assets/css/all.css?body=1"
-      result = last_response.body
-      result.must_match %r(/\*\s+\*/)
+    it "ignores/accepts extensions" do
+      result = context.scripts('js/a.js', 'js/b.js')
+      result.must_equal [
+        %|<script type="text/javascript" src="/assets/js/a-5e2f65f63.js"></script>|,
+        %|<script type="text/javascript" src="/assets/js/b-8ae4b63fa.js"></script>|,
+      ].join("\n")
+    end
+
+    it "finds js files on disk but not in manifest" do
+      result = context.scripts('js/a', 'js/b', 'js/not_in_manifest')
+      result.must_equal [
+        %|<script type="text/javascript" src="/assets/js/a-5e2f65f63.js"></script>|,
+        %|<script type="text/javascript" src="/assets/js/b-8ae4b63fa.js"></script>|,
+        %|<script type="text/javascript" src="/assets/js/not_in_manifest.js"></script>|,
+      ].join("\n")
+    end
+
+    it "includes all stylesheets dependencies" do
+      result = context.stylesheets('css/a', 'css/b')
+      result.must_equal [
+        %|<link rel="stylesheet" href="/assets/css/a-798ae4b63.css" />|,
+        %|<link rel="stylesheet" href="/assets/css/b-63ab5f068.css" />|,
+      ].join("\n")
+    end
+
+    it "includes all stylesheets dependencies passed as an array" do
+      result = context.stylesheets(['css/a', 'css/b'])
+      result.must_equal [
+        %|<link rel="stylesheet" href="/assets/css/a-798ae4b63.css" />|,
+        %|<link rel="stylesheet" href="/assets/css/b-63ab5f068.css" />|,
+      ].join("\n")
+    end
+
+    it "resolves asset files" do
+      assets.each do |a|
+        get "/assets/#{a}"
+        last_response.body.must_equal ::File.binread(asset_root / a)
+      end
     end
 
     it "allows for protocol agnostic absolute script urls" do
@@ -199,171 +219,57 @@ describe "Assets" do
       result.must_equal '<script type="text/javascript" src="//use.typekit.com/abcde"></script>'
     end
 
+    it "should ignore missing js files" do
+      result = context.scripts('js/a', 'js/missing')
+      result.must_equal [
+        %|<script type="text/javascript" src="/assets/js/a-5e2f65f63.js"></script>|,
+        %|<script type="text/javascript" src="js/missing"></script>|
+      ].join("\n")
+    end
+
+    it "should ignore missing css files" do
+      result = context.stylesheets('css/a', 'css/missing')
+      result.must_equal [
+        %|<link rel="stylesheet" href="/assets/css/a-798ae4b63.css" />|,
+        %|<link rel="stylesheet" href="css/missing" />|,
+      ].join("\n")
+    end
+
+    it "should use absolute script URLs when encountered" do
+      result = context.scripts('js/a', '//use.typekit.com/abcde', 'http://cdn.google.com/jquery.js', 'https://cdn.google.com/jquery.js')
+      result.must_equal [
+        %|<script type="text/javascript" src="/assets/js/a-5e2f65f63.js"></script>|,
+        '<script type="text/javascript" src="//use.typekit.com/abcde"></script>',
+        '<script type="text/javascript" src="http://cdn.google.com/jquery.js"></script>',
+        '<script type="text/javascript" src="https://cdn.google.com/jquery.js"></script>'
+      ].join("\n")
+    end
+
+    it "should use absolute stylesheet URLs when encountered" do
+      result = context.stylesheets('css/a', '//use.typekit.com/abcde.css', 'http://cdn.google.com/jquery.css', 'https://cdn.google.com/jquery.css')
+      result.must_equal [
+        %|<link rel="stylesheet" href="/assets/css/a-798ae4b63.css" />|,
+        '<link rel="stylesheet" href="//use.typekit.com/abcde.css" />',
+        '<link rel="stylesheet" href="http://cdn.google.com/jquery.css" />',
+        '<link rel="stylesheet" href="https://cdn.google.com/jquery.css" />'
+      ].join("\n")
+    end
   end
 
   describe "preview" do
     let(:app) { Spontaneous::Rack::Back.application(site) }
     let(:context) { preview_context }
 
-    let(:c_js_digest) { '3ab39368d6e128169ac2401bc49fcdb2' }
-    let(:x_js_digest) { 'e755ffcead8090406c04b2813b9bdce9' }
-    let(:n_js_digest) { '74f175e03a4bdc8c807aba4ae0314938' }
-    let(:m_js_digest) { 'c0f2e1c2a7d1cc9666ccb48cc9fd610e' }
-    let(:all_js_digest) { 'd782ef6abb69b1eb3e4c503478a660db' }
-
-    let(:c_css_digest) { '3fcc1da2378a42e97cbd11cb85b8115a' }
-    let(:x_css_digest) { '88b3052bb5d7723b6a6a8b628fbee34e' }
-    let(:all_css_digest) { '4b837b285d3a1998c48e1811e62292d8' }
-
-    describe "javascript" do
-      it "include scripts as separate files with finger prints" do
-        result = context.scripts('js/all', 'js/m.js', 'js/c.js', 'x')
-        result.must_equal [
-          %|<script type="text/javascript" src="/assets/js/all.js?#{all_js_digest}"></script>|,
-          %|<script type="text/javascript" src="/assets/js/m.js?#{m_js_digest}"></script>|,
-          %|<script type="text/javascript" src="/assets/js/c.js?#{c_js_digest}"></script>|,
-          %|<script type="text/javascript" src="/assets/x.js?#{x_js_digest}"></script>|
-        ].join("\n")
-      end
-
-
-
-      it "handles urls passed as an array" do
-        result = context.scripts(['js/all', 'js/m.js'])
-        result.must_equal [
-          %|<script type="text/javascript" src="/assets/js/all.js?#{all_js_digest}"></script>|,
-          %|<script type="text/javascript" src="/assets/js/m.js?#{m_js_digest}"></script>|
-        ].join("\n")
-      end
-
-      it "should ignore missing files" do
-        result = context.scripts('js/all', 'js/missing')
-        result.must_equal [
-          %|<script type="text/javascript" src="/assets/js/all.js?#{all_js_digest}"></script>|,
-          '<script type="text/javascript" src="js/missing.js"></script>'
-        ].join("\n")
-      end
-
-      it "should pass through absolute urls" do
-        result = context.scripts('/js/all.js')
-        result.must_equal '<script type="text/javascript" src="/js/all.js"></script>'
-      end
-
-      it "should bundle assets" do
-        get "/assets/js/all.js"
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match /var a = 1/
-        result.must_match /var b = 2/
-        result.must_match %r{alert\("I knew it!"\);}
-      end
-
-      it "should preprocess coffeescript" do
-        get "/assets/js/m.js"
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match /square = function\(x\)/
-      end
-
-      it "should allow access to straight js" do
-        get "/assets/x.js"
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{var x = 1;}
-      end
-
-      it "should use absolute URLs when encountered" do
-        context = preview_context
-        result = context.scripts('js/all', '//use.typekit.com/abcde', 'http://cdn.google.com/jquery.js', 'https://cdn.google.com/jquery.js')
-        result.must_equal [
-          %|<script type="text/javascript" src="/assets/js/all.js?#{all_js_digest}"></script>|,
-          '<script type="text/javascript" src="//use.typekit.com/abcde"></script>',
-          '<script type="text/javascript" src="http://cdn.google.com/jquery.js"></script>',
-          '<script type="text/javascript" src="https://cdn.google.com/jquery.js"></script>'
-        ].join("\n")
-      end
-    end
-
-    describe "css" do
-      it "include css files as separate links" do
-        result = context.stylesheets('css/all', 'css/c', 'x')
-        result.must_equal [
-          %|<link rel="stylesheet" href="/assets/css/all.css?#{all_css_digest}" />|,
-          %|<link rel="stylesheet" href="/assets/css/c.css?#{c_css_digest}" />|,
-          %|<link rel="stylesheet" href="/assets/x.css?#{x_css_digest}" />|
-        ].join("\n")
-      end
-
-      it "allows passing scripts as an array" do
-        result = context.stylesheets(['css/all', 'css/c', 'x'])
-        result.must_equal [
-          %|<link rel="stylesheet" href="/assets/css/all.css?#{all_css_digest}" />|,
-          %|<link rel="stylesheet" href="/assets/css/c.css?#{c_css_digest}" />|,
-          %|<link rel="stylesheet" href="/assets/x.css?#{x_css_digest}" />|
-        ].join("\n")
-      end
-
-      it "should bundle dependencies" do
-        get "/assets/css/all.css"
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{height: 42px;}
-        result.must_match %r{width: 8px;}
-      end
-
-      it "should compile sass" do
-        get "/assets/css/b.css"
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{height: 42px;}
-      end
-
-      it "links to images" do
-        get "/assets/css/image1.css"
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{background: url\(/assets/i/y\.png\)}
-      end
-
-      it "passes through non-existant images" do
-        get "/assets/css/missing.css"
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{background: url\(i\/missing\.png\)}
-      end
-
-      it "can understand urls with hashes" do
-        get "/assets/css/urlhash.css"
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{background: url\(/assets/i/y\.png\?query=true#hash\)}
-      end
-
-      it "embeds image data" do
-        get "/assets/css/data.css"
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{background-image: url\(data:image\/png;base64,}
-      end
-
-      it "can include other assets" do
-        get "/assets/css/import.css"
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{width: 8px;}
-      end
-    end
-
     describe "templates" do
       let(:renderer)  { Spontaneous::Output::Template::PreviewRenderer.new(site) }
 
       it "should allow for embedding asset images into templates" do
-        result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
-        result.must_equal "/assets/i/y.png?#{y_png_digest}"
+        result = renderer.render_string("${ asset_path 'img/y.png' }", @page.output(:html))
+        result.must_equal "/assets/y-28ce8c9b9.png"
       end
       it "should allow for embedding asset urls into templates" do
-        result = renderer.render_string("${ asset_url 'i/y.png' }", @page.output(:html))
-        result.must_equal "url(/assets/i/y.png?#{y_png_digest})"
+        result = renderer.render_string("${ asset_url 'img/y.png' }", @page.output(:html))
+        result.must_equal "url(/assets/y-28ce8c9b9.png)"
       end
     end
   end
@@ -379,91 +285,34 @@ describe "Assets" do
       site.stubs(:published_revision).returns(99)
     end
 
-    def read_script_asset(output)
-      asset = Nokogiri::XML(output).at('script')['src']
-      asset.gsub!(/^\/assets/, '')
-      [asset, output_revision.static_asset(asset)]
+    describe "templates" do
+      let(:renderer)  { Spontaneous::Output::Template::PublishRenderer.new(transaction) }
+
+      it "should allow for embedding asset images into templates" do
+        result = renderer.render_string("${ asset_path 'img/y.png' }", @page.output(:html))
+        result.must_equal "/assets/y-28ce8c9b9.png"
+      end
+      it "should allow for embedding asset urls into templates" do
+        result = renderer.render_string("${ asset_url 'img/y.png' }", @page.output(:html))
+        result.must_equal "url(/assets/y-28ce8c9b9.png)"
+      end
     end
 
-    def assert_script_asset(output)
-      asset, value = read_script_asset(output)
-      assert value, "Asset '#{asset}' missing"
-      [asset, value.read]
+    def assert_script_asset(path)
+      value = output_revision.static_asset(path)
+      assert value.read.force_encoding("ASCII-8BIT") == ::File.binread(asset_root / path)
     end
 
-    describe "javascript" do
-      let(:all_sha) { "29ced6e75f651ea6963bd2f2ffdd745e" }
-      let(:x_sha) { "2b8678f6d71dc1fc0e44ad9f6a5811b3" }
-      it "bundles & fingerprints local scripts" do
-        result = context.scripts('js/all', 'js/m.js', 'js/c.js', 'x')
-        result.must_equal [
-          %(<script type="text/javascript" src="/assets/js/all-#{all_sha}.js"></script>),
-          '<script type="text/javascript" src="/assets/js/m-66885c19e856373c6b9dab3a41885dbf.js"></script>',
-          '<script type="text/javascript" src="/assets/js/c-0201f986795c0d9b4fb850236496359f.js"></script>',
-          %(<script type="text/javascript" src="/assets/x-#{x_sha}.js"></script>)
-        ].join("\n")
+    it "writes bundled assets to the output store" do
+      run_copy_asset_step
+      assets.each do |a|
+        assert_script_asset(a)
       end
+    end
 
-      it "writes bundled assets to the output store" do
-        result = context.scripts('js/all')
-        run_copy_asset_step
-        assert_script_asset(result)
-      end
-
-      it "compresses local scripts" do
-        result = context.scripts('js/all')
-        run_copy_asset_step
-        js = assert_script_asset(result)
-        js.index("\n").must_be_nil
-      end
-
-      it "bundles locals scripts and includes remote ones" do
-        result = context.scripts('js/all', '//use.typekit.com/abcde', 'http://cdn.google.com/jquery.js', 'x')
-        result.must_equal [
-          %(<script type="text/javascript" src="/assets/js/all-#{all_sha}.js"></script>),
-          '<script type="text/javascript" src="//use.typekit.com/abcde"></script>',
-          '<script type="text/javascript" src="http://cdn.google.com/jquery.js"></script>',
-          %(<script type="text/javascript" src="/assets/x-#{x_sha}.js"></script>)
-        ].join("\n")
-      end
-
-      it "makes bundled scripts available under /assets" do
-        context.scripts('js/all')
-        run_copy_asset_step
-        path = "/assets/js/all-#{all_sha}.js"
-        get "/assets/js/all-#{all_sha}.js"
-        last_response.body.must_equal read_compiled_asset(path)
-      end
-
-      it 'returns the correct content type for js' do
-        html = context.scripts('js/all')
-        run_copy_asset_step
-        path, js = assert_script_asset(html)
-        get "/assets#{path}"
-        last_response.headers['Content-type'].must_equal 'application/javascript;charset=utf-8'
-      end
-
-      describe "re-use" do
-        before do
-          @result = context.scripts('js/all', 'x')
-        end
-
-        it "uses assets from a previous publish if present" do
-          context = live_context
-          def context.revision; 100 end
-          revision = site.revision(context.revision)
-          manifest = Spontaneous::JSON.parse File.read(site.path("assets/tmp") + "manifest.json")
-          compiled = manifest[:assets][:"js/all.js"]
-          ::File.open(site.path("assets/tmp")+compiled, 'w') do |file|
-            file.write("var reused = true;")
-          end
-          result = context.scripts('js/all', 'x')
-          run_copy_asset_step
-          rev = revision.path("assets") + compiled
-          path, js = assert_script_asset(result)
-          js.must_equal "var reused = true;"
-        end
-      end
+    it "doesn't copy asset manifests to the output store" do
+      value = output_revision.static_asset(site.asset_mount_path / 'manifest.json')
+      assert value.nil?
     end
 
     def run_copy_asset_step
@@ -478,126 +327,107 @@ describe "Assets" do
       read_path = File.expand_path File.join(dir, path.gsub(/^\/assets/, ''))
       ::File.read(read_path)
     end
+  end
 
-    describe "css" do
-      let(:all_sha) { "a72e3c2850e95f5c89930cae40a66c29" }
-      let(:x_sha)   { "88b3052bb5d7723b6a6a8b628fbee34e" }
+  describe "deployment compiler" do
+    let(:src) { File.expand_path("../../fixtures/assets/private", __FILE__) }
+    let(:dest) { Dir.mktmpdir }
+    let(:compiler) { Spontaneous::Asset::Compiler.new(src, dest) }
+    let(:manifest_file) { File.join(src, 'manifest.json') }
+    let(:manifest_json) { File.read(manifest_file) }
+    let(:manifest) { JSON.parse(manifest_json) }
 
-      it "bundles & fingerprints local stylesheets" do
-        result = context.stylesheets('css/all', 'css/a.css', 'x')
-        result.must_equal [
-          %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
-          '<link rel="stylesheet" href="/assets/css/a-46541ee6e70fb12c030698e0addc2c79.css" />',
-          %(<link rel="stylesheet" href="/assets/x-#{x_sha}.css" />)
-        ].join("\n")
-      end
+    after do
+      FileUtils.rm_r(dest)
+    end
 
-      it "ignores missing stylesheets" do
-        result = context.stylesheets('css/all', '/css/notfound', 'css/notfound')
-        result.must_equal [
-          %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
-          '<link rel="stylesheet" href="/css/notfound" />',
-          '<link rel="stylesheet" href="css/notfound" />'
-        ].join("\n")
-      end
+    it "should raise an error if src dir doesn't exist" do
+      assert_raises(RuntimeError) { Spontaneous::Asset::Compiler.new("/watchtadoing/now", dest) }
+    end
 
-      it "bundles locals scripts and includes remote ones" do
-        result = context.stylesheets('css/all.css', '//stylesheet.com/responsive', 'http://cdn.google.com/normalize.css', 'x')
-        result.must_equal [
-          %(<link rel="stylesheet" href="/assets/css/all-#{all_sha}.css" />),
-          '<link rel="stylesheet" href="//stylesheet.com/responsive" />',
-          '<link rel="stylesheet" href="http://cdn.google.com/normalize.css" />',
-          %(<link rel="stylesheet" href="/assets/x-#{x_sha}.css" />)
-        ].join("\n")
-      end
-
-      it "makes bundled stylesheets available under /assets" do
-        path = context.stylesheet_urls('css/all').first
-        run_copy_asset_step
-        get path
-        asset_path = revision.path(path)
-        last_response.body.must_equal read_compiled_asset(path)
-      end
-
-      it "compresses local styles" do
-        path = context.stylesheet_urls('css/all').first
-        run_copy_asset_step
-        get path
-        css = last_response.body
-        css.index(" ").must_be_nil
-      end
-
-      # it "only bundles & compresses once" do
-      #   path = context.stylesheet_urls('css/all').first
-      #   run_copy_asset_step
-      #   asset_path = revision.path(path)
-      #   assert asset_path.exist?
-      #   asset_path.open("w") do |file|
-      #     file.write(".cached { }")
-      #   end
-      #   context.stylesheets('css/all')
-      #   asset_path.read.must_equal ".cached { }"
-      # end
-
-      it "passes through non-existant images" do
-        path = context.stylesheet_urls('css/missing.css').first
-        run_copy_asset_step
-        get path
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match /background:url\(i\/missing\.png\)/
-      end
-
-      it "can include other assets" do
-        path = context.stylesheet_urls('css/import').first
-        run_copy_asset_step
-        get path
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match /width:8px/
+    it "should copy any files in the manifest" do
+      compiler.run
+      manifest.values.each do |asset|
+        assert File.exist?(File.join(dest, asset)), "#{asset} does not exist"
       end
     end
 
-    describe "images" do
-      it "bundles images and links using fingerprinted asset url" do
-        path = context.stylesheet_urls('css/image1').first
-        run_copy_asset_step
-        get path
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{background:url\(/assets/i/y-#{y_png_digest}\.png\)}
-      end
-
-      it "can insert data urls for assets" do
-        path = context.stylesheet_urls('css/data').first
-        run_copy_asset_step
-        get path
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{background-image:url\(data:image/png;base64}
-      end
-
-      it "can understand urls with hashes" do
-        path = context.stylesheet_urls('css/urlhash').first
-        run_copy_asset_step
-        get path
-        assert last_response.ok?, "Recieved #{last_response.status} not 200"
-        result = last_response.body
-        result.must_match %r{background:url\(/assets/i/y-#{y_png_digest}\.png\?query=true#hash\)}
+    it "should copy & fingerprint any files not in the manifest" do
+      compiler.run
+      [
+        "css/not_in_manifest-e27639ec152498da599e15630f1b1f41.css",
+        "js/not_in_manifest-736b54bd070158b8a7e84b73217fac36.js",
+        "not_in_manifest-9e7a728b7e18f1e236af7ffe97beaa03.png",
+      ].each do |asset|
+        assert File.exist?(File.join(dest, asset)), "#{asset} does not exist"
       end
     end
 
-    describe "templates" do
-      let(:renderer)  { Spontaneous::Output::Template::PublishRenderer.new(transaction) }
+    it "should generate a manifest that includes all files" do
+      manifest = compiler.run
+      compiled = {
+        "css/a.css" => "css/a-798ae4b63.css",
+        "css/b.css" => "css/b-63ab5f068.css",
+        "css/not_in_manifest.css" => "css/not_in_manifest-e27639ec152498da599e15630f1b1f41.css",
+        "js/a.js" => "js/a-5e2f65f63.js",
+        "js/b.js" => "js/b-8ae4b63fa.js",
+        "js/not_in_manifest.js" => "js/not_in_manifest-736b54bd070158b8a7e84b73217fac36.js",
+        "img/y.png" => "y-28ce8c9b9.png",
+        "not_in_manifest.png" => "not_in_manifest-9e7a728b7e18f1e236af7ffe97beaa03.png",
+      }
+      manifest.must_equal compiled
+      compiled.values.each do |asset|
+        assert File.exist?(File.join(dest, asset)), "#{asset} does not exist"
+      end
+    end
 
-      it "should allow for embedding asset images into templates" do
-        result = renderer.render_string("${ asset_path 'i/y.png' }", @page.output(:html))
-        result.must_equal "/assets/i/y-#{y_png_digest}.png"
+    it "should use the default fingerprinter if passed nil" do
+      manifest = compiler.run(nil)
+      compiled = {
+        "css/a.css" => "css/a-798ae4b63.css",
+        "css/b.css" => "css/b-63ab5f068.css",
+        "css/not_in_manifest.css" => "css/not_in_manifest-e27639ec152498da599e15630f1b1f41.css",
+        "js/a.js" => "js/a-5e2f65f63.js",
+        "js/b.js" => "js/b-8ae4b63fa.js",
+        "js/not_in_manifest.js" => "js/not_in_manifest-736b54bd070158b8a7e84b73217fac36.js",
+        "img/y.png" => "y-28ce8c9b9.png",
+        "not_in_manifest.png" => "not_in_manifest-9e7a728b7e18f1e236af7ffe97beaa03.png",
+      }
+      manifest.must_equal compiled
+    end
+
+    it "should allow for defining a custom fingerprint naming proc" do
+      manifest = compiler.run(proc { |base, md5, ext| "#{md5[0..5]}_#{base}#{ext}" })
+      compiled = {
+        "css/a.css" => "css/a-798ae4b63.css",
+        "css/b.css" => "css/b-63ab5f068.css",
+        "css/not_in_manifest.css" => "css/e27639_not_in_manifest.css",
+        "js/a.js" => "js/a-5e2f65f63.js",
+        "js/b.js" => "js/b-8ae4b63fa.js",
+        "js/not_in_manifest.js" => "js/736b54_not_in_manifest.js",
+        "img/y.png" => "y-28ce8c9b9.png",
+        "not_in_manifest.png" => "9e7a72_not_in_manifest.png",
+      }
+      manifest.must_equal compiled
+      compiled.values.each do |asset|
+        assert File.exist?(File.join(dest, asset)), "#{asset} does not exist"
       end
-      it "should allow for embedding asset urls into templates" do
-        result = renderer.render_string("${ asset_url 'i/y.png' }", @page.output(:html))
-        result.must_equal "url(/assets/i/y-#{y_png_digest}.png)"
-      end
+    end
+
+    it "should write the manifest to the destination dir" do
+      compiler.run
+      compiled = {
+        "css/a.css" => "css/a-798ae4b63.css",
+        "css/b.css" => "css/b-63ab5f068.css",
+        "css/not_in_manifest.css" => "css/not_in_manifest-e27639ec152498da599e15630f1b1f41.css",
+        "js/a.js" => "js/a-5e2f65f63.js",
+        "js/b.js" => "js/b-8ae4b63fa.js",
+        "js/not_in_manifest.js" => "js/not_in_manifest-736b54bd070158b8a7e84b73217fac36.js",
+        "img/y.png" => "y-28ce8c9b9.png",
+        "not_in_manifest.png" => "not_in_manifest-9e7a728b7e18f1e236af7ffe97beaa03.png",
+      }
+      m = JSON.parse(::File.read(::File.join(dest, 'manifest.json')))
+      m.must_equal compiled
     end
   end
 end

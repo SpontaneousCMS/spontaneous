@@ -2,10 +2,12 @@
 module Spontaneous::Output::Context
   autoload :RenderCache, 'spontaneous/output/context/render_cache'
   autoload :Navigation,  'spontaneous/output/context/navigation'
+  autoload :Assets,      'spontaneous/output/context/assets'
 
   module ContextCore
     include RenderCache
     include Navigation
+    include Assets
 
     attr_accessor :__output, :_renderer, :site
 
@@ -32,22 +34,6 @@ module Spontaneous::Output::Context
 
     def home
       site.home
-    end
-
-    def _asset_environment
-      _renderer.asset_environment
-    end
-
-    def _asset_environment=(environment)
-      @_asset_environment = environment
-    end
-
-    def asset_path(path, options = {})
-      _asset_environment.find(path, options).try(:first)
-    end
-
-    def asset_url(path, options = {})
-      "url(#{asset_path(path, options)})"
     end
 
     def publishing?

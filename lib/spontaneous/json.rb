@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
-# require 'yajl'
-require 'oj'
+require 'yajl'
+# require 'oj'
 
 Oj.default_options = { mode: :compat } if defined?(Oj)
 

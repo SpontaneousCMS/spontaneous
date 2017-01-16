@@ -42,7 +42,7 @@ module Spontaneous
             end
           end
 
-          map '/assets' do
+          map site.asset_mount_path do
             use Spontaneous::Rack::CacheableFile
             run Spontaneous::Rack::OutputStore.assets(site)
           end

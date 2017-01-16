@@ -2,29 +2,23 @@ module Spontaneous::Publishing::Steps
   class CopyAssets < BaseStep
 
     def count
-      # return 0 if development?
       assets.length
     end
 
     def call
       progress.stage("copying assets")
-      assets.each do |logical_path, asset|
-        copy_asset(asset)
-        progress.step(1, "'#{logical_path}' => '#{asset}'")
+      assets.each do |logical_path, absolute_path|
+        copy_asset(logical_path, absolute_path)
+        progress.step(1, "'#{logical_path}'")
       end
     end
 
     def rollback
     end
 
-    def copy_asset(asset)
-      source = File.join(manifest.asset_compilation_dir, asset)
-      copy_asset_file(source, asset)
-    end
-
-    def copy_asset_file(source, asset)
-      return unless File.exist?(source)
-      transaction.store_asset(make_absolute(asset), ::File.binread(source))
+    def copy_asset(logical_path, absolute_path)
+      return unless File.exist?(absolute_path)
+      transaction.store_asset(logical_path, ::File.binread(absolute_path))
     end
 
     def make_absolute(path)
@@ -36,11 +30,7 @@ module Spontaneous::Publishing::Steps
     end
 
     def manifest
-      environment.manifest
-    end
-
-    def environment
-      transaction.asset_environment
+      transaction.asset_manifests
     end
 
     def development?

@@ -28,6 +28,9 @@
 
 - A massive performance improvement when working with large schemas.
 
+- Move to an external asset pipeline. Bye-bye sprockets! See `docs/assets.md`
+  for an overview.
+
 #### Misc
 
 - There's now a cli task to re-index the site

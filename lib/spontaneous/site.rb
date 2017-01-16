@@ -4,6 +4,7 @@
 module Spontaneous
 
   class Site < Spontaneous::Facet
+    require "spontaneous/site/assets"
     require "spontaneous/site/features"
     require "spontaneous/site/helpers"
     require "spontaneous/site/hooks"
@@ -19,6 +20,7 @@ module Spontaneous
     require "spontaneous/site/storage"
     require "spontaneous/site/url"
 
+    include Assets
     include Features
     include Helpers
     include Hooks

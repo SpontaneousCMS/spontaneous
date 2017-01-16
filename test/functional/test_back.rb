@@ -9,6 +9,7 @@ describe "Back" do
 
   start do
     root = Dir.mktmpdir
+    asset_root = File.expand_path("../../fixtures/assets/private", __FILE__)
     app_root = File.expand_path('../../fixtures/back', __FILE__)
     FileUtils.cp_r(app_root, root)
     root += "/back"
@@ -43,6 +44,8 @@ describe "Back" do
       c.site_domain = 'example.org'
       c.site_id = 'example_org'
     end
+
+    site.paths.add :compiled_assets, asset_root
 
     let(:site) { site }
 
@@ -1195,16 +1198,9 @@ describe "Back" do
     end
 
     it "render SASS templates" do
-      get "/assets/css/sass_template.css"
+      get "/assets/css/a-798ae4b63.css"
       assert last_response.ok?, "Should return 200 but got #{last_response.status}"
-      last_response.body.must_match /color: #fef/
-    end
-
-    it "compile CoffeeScript" do
-      get "/assets/js/coffeescript.js"
-      assert last_response.ok?, "Should return 200 but got #{last_response.status}"
-      last_response.body.must_match /square = function/
-      last_response.content_type.must_equal "application/javascript;charset=UTF-8"
+      last_response.body.must_match /color: #aaa/
     end
 
     it "accept POST requests" do
