@@ -13,7 +13,7 @@ module Spontaneous::Rack::Back
     end
 
     def find(env)
-      apps.map { |app| app.call(env) }.detect { |code, headers, body| code == 200 }
+      apps.map { |app| app.call(env) }.detect { |code, headers, body| code < 400 }
     end
 
     def apps
