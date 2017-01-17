@@ -23,8 +23,10 @@ module Spontaneous::Field
       response = open(url).read rescue "{}"
       data = Spontaneous.parse_json(response) rescue {}
       return {} unless data[:results]
+      # bad/unknown addresses return `{:results=>[], :status=>"ZERO_RESULTS"}`
       values = {}
       result = data[:results].first
+      return {} if result.nil?
       values[:formatted_address] = result[:formatted_address]
       geometry = result[:geometry]
       values[:lat] = geometry[:location][:lat]
