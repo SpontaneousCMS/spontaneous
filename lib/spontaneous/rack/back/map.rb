@@ -22,6 +22,7 @@ module Spontaneous::Rack::Back
     end
 
     def remove_trailing_slashes(path)
+      return path if path == Spontaneous::SLASH
       path.gsub(/\/+$/, '')
     end
   end
