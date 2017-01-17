@@ -210,6 +210,13 @@ describe "Back" do
         assert_equal site.map(home.id).to_json, last_response.body
       end
 
+      it "returns the site home page when passed '/'" do
+        auth_get "/@spontaneous/map/path/"
+        assert last_response.ok?
+        last_response.content_type.must_equal "application/json;charset=utf-8"
+        assert_equal site.map(home.id).to_json, last_response.body
+      end
+
       it "return a site map for any url" do
         page = project1
         auth_get "/@spontaneous/map/path#{project1.path}"
