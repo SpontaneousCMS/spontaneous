@@ -34,6 +34,7 @@ module Spontaneous::Model::Action
       @model.db.transaction do
         stats[:invalid] = delete_invalid_type_instances
         stats[:orphans] = delete_orphans
+        stats[:unlinked] = delete_unlinked
         stats[:publish] = configure_force_publish
       end
       stats
@@ -69,6 +70,18 @@ module Spontaneous::Model::Action
         end
       end
       @dirty ||= (count > 0)
+      count
+    end
+
+    # Delete any content items with an invalid box schema id
+    def delete_unlinked
+      ids = @site.schema.box_ids.map(&:to_s)
+      count = 0
+      mapper.dataset.exclude(owner_id: nil).exclude(box_sid: ids).each do |unlinked|
+        unlinked.destroy
+        count += 1
+      end
+      # @dirty ||= (count > 0)
       count
     end
 

@@ -24,6 +24,9 @@ module Spontaneous
         say "----> Deleted ", :bold
         say "#{result[:orphans]} ", [:red, :bold]
         say "orphaned entries"
+        say "----> Deleted ", :bold
+        say "#{result[:unlinked]} ", [:red, :bold]
+        say "unlinked content (belonging to non-existant box)"
         say ""
         if result[:publish]
           say("====> Site is configured to force a full publish", [:red, :bold])
