@@ -1,25 +1,25 @@
 <!DOCTYPE HTML>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>Spontaneous CMS: Unsupported Browser</title>
-		<link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
-	<link rel="stylesheet" href="/@spontaneous/css/unsupported.css" type="text/css" media="screen" charset="utf-8" />
-
-</head>
-<body>
-	<div id="outer">
-	<h1>Sorry!</h1>
-	<h2>You are using an unsupported browser...</h2>
-  <div class="error">
-    <p class="feature"><%= params[:msg] %></p>
-    <p class="user-agent">Browser: <%= params[:useragent] %></p>
-  </div>
-	<p>In order to provide the best editing experience Spontaneous uses features only found in the latest browsers.</p>
-	<p>Please download and install <a href="http://www.google.com/chrome">Google Chrome</a> or <a href="http://www.google.com/chromeframe">Chrome Frame</a> in order to use this CMS as well as enjoy the best of the internet.  You won&rsquo;t regret it...</p>
-  <p class="chrome"><a href="http://www.google.com/chrome">
-    <img src="/@spontaneous/static/chromelogo-200x52-45c7cbc93be080bea342df5fcda2ef8b.png" alt="" />
-  </a></p>
-	</div>
-</body>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex" />
+    <title>Spontaneous CMS: Unsupported Browser</title>
+    <link REL="SHORTCUT ICON" HREF="/@spontaneous/static/favicon.ico" />
+    <link rel="stylesheet" href="/@spontaneous/css/unsupported.css" type="text/css" media="screen" charset="utf-8" />
+  </head>
+  <body>
+    <div id="outer">
+      <h1>Sorry!</h1>
+      <h2>You are using an unsupported browser...</h2>
+      <div class="error">
+        <p class="feature"><%= params[:msg] %></p>
+        <p class="user-agent">Browser: <%= params[:useragent] %></p>
+      </div>
+      <p>In order to provide the best editing experience Spontaneous uses features only found in the latest browsers.</p>
+      <p>Please download and install <a href="http://www.google.com/chrome">Google Chrome</a> or <a href="http://www.google.com/chromeframe">Chrome Frame</a> in order to use this CMS as well as enjoy the best of the internet.  You won&rsquo;t regret it...</p>
+      <p class="chrome"><a href="http://www.google.com/chrome">
+        <img src="/@spontaneous/static/chromelogo-200x52-45c7cbc93be080bea342df5fcda2ef8b.png" alt="" />
+      </a></p>
+    </div>
+  </body>
 </html>
