@@ -747,11 +747,22 @@
 	@include display-box;
 	@include box-pack(center);
 
+  $clear-file-button-width: 80px;
+
+  .button.clear {
+			@include button-color($highlight, $action);
+      width: $clear-file-button-width;
+			&:before {
+					@include awesome-icon("\f05e");
+					margin-right: $unit / 2;
+			}
+  }
 	.file-drop {
+
 
 		position: absolute;
 		left: 0;
-		right: 0;
+    right: $clear-file-button-width;
 		top: 0;
 		bottom: 0;
 		border: solid 1px transparent;
@@ -826,6 +837,9 @@
 		.file-drop:hover {
 			// border-color: $action;
 		}
+		.file-drop:hover ~ .choose {
+			  @include button;
+		}
 		.filename, .filesize {
 			margin-top: 3px;
 		}
@@ -844,9 +858,6 @@
 		.choose + .filename,
 		.choose + .filename + .filesize {
 			position:relative;
-		}
-		&:hover .choose {
-			@include button;
 		}
 	}
 }

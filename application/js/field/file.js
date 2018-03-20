@@ -169,13 +169,16 @@ Spontaneous.Field.File = (function($, S) {
 			var input = this.input();
 			var filename_info = dom.div('.filename');
 			var filesize_info = dom.div('.filesize');
+      var actions = dom.div('.file-field-actions');
 			var choose_files = dom.a('.choose').text('Choose file...');
 
 			var set_info = function(filename, filesize) {
 				filename_info.text(filename);
 				if (filesize) {
 					filesize_info.text(parseFloat(filesize, 10).to_filesize());
-				}
+				} else {
+          filesize_info.text('')
+        }
 			};
 
 			var files_selected = function(files) {
@@ -246,6 +249,14 @@ Spontaneous.Field.File = (function($, S) {
 			}
 			wrap.append(input, choose_files, filename_info, filesize_info);
 
+			if (value && value.filesize > 0) {
+        var clearButton = dom.a('.button.clear').text('Clear').click(function() {
+          set_info('', 0);
+          this.clear_file();
+        }.bind(this));
+        actions.append(clearButton);
+        wrap.append(actions);
+      }
 
 			return wrap;
 		},
@@ -308,4 +319,3 @@ Spontaneous.Field.File = (function($, S) {
 	});
 	return FileField;
 })(jQuery, Spontaneous);
-
